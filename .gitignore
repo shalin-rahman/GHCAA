@@ -408,3 +408,4 @@ build_output/
 # project-management handouts). Third-party copyrighted PDFs — read them, never redistribute them,
 # and never commit them.
 docs/materials/
+docs/book/build/tracker.html

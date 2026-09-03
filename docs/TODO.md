@@ -244,7 +244,7 @@ risk on the same basis.
 ## WORK PACKAGE 6: CAREER & OPPORTUNITIES
 
 6.1  [DONE] Professional Hub: Alumni directory LinkedIn-style filters
-6.2  [TODO] Alumni referral system for jobs and internships
+6.2 [TODO] **Priority: P3.** Alumni referral system for jobs and internships
 
 ## WORK PACKAGE 7: SECURITY, INFRASTRUCTURE & HARDENING
 
@@ -276,18 +276,18 @@ unverified. Angular: `StepUpService` + `app-step-up-dialog` (mounted once at app
 backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/335 pass.
 7.14 [DONE 2026-08-22] Security: Biometric Authentication (FaceID/Fingerprint) VERIFIED 2026-08-22 — this was already implemented and mis-tracked. `local_auth ^2.2.0` is in `pubspec.yaml`; `lib/core/services/biometric_service.dart` exposes `isBiometricsAvailable()`, `getAvailableBiometrics()`, `authenticate({reason})` with a graceful Flutter-Web false; `auth_service.login(..., enableBiometric)` stores credentials only on opt-in; `app_home_screen.dart` gates the fast-login affordance on `_checkBiometrics()`.
 7.15 [DONE] Security: Social Auth (OAuth2) - LinkedIn/Google
-7.16 [TODO] Hardening: SSL Pinning and Binary Obfuscation
+7.16 [TODO] **Priority: P3.** Hardening: SSL Pinning and Binary Obfuscation
 
 ## WORK PACKAGE 8: MOBILE ENGINEERING (TIER-1 STANDARDS)
 
 8.1  [DONE] UI: Enforce 8pt grid and standard design tokens globally
 8.2  [DONE] Nav: Adaptive layout for Tablets/Pads (Sidebar architecture)
-8.3  [TODO] Perf: Cursor-based pagination for Alumni Registry
-8.4  [TODO] Perf: Isolated background threading for JSON/Encryption processing
-8.5  [TODO] Persistence: Switch to High-Performance Local DB (Isar/Drift)
-8.6  [TODO] Networking: Exponential backoff and connectivity banners
-8.7  [TODO] State: Riverpod State Hydration (Local local persistence)
-8.8  [TODO] i18n: Unified Localization (English + Bengali)
+8.3 [TODO] **Priority: P2.** Perf: Cursor-based pagination for Alumni Registry
+8.4 [TODO] **Priority: P3.** Perf: Isolated background threading for JSON/Encryption processing
+8.5 [TODO] **Priority: P4.** Persistence: Switch to High-Performance Local DB (Isar/Drift)
+8.6 [TODO] **Priority: P2.** Networking: Exponential backoff and connectivity banners
+8.7 [TODO] **Priority: P3.** State: Riverpod State Hydration (Local local persistence)
+8.8 [TODO] **Priority: P2.** i18n: Unified Localization (English + Bengali)
 8.9  [DONE] CI/CD: Fastlane + GitHub Actions Deployment Pipeline
 8.10 [DONE] Quality: Global Error Boundary and Sentry/Firebase tracing
 8.11 [DONE] CI/CD: Operationalize multi-environment pipelines (Preprod/Standard)
@@ -331,12 +331,12 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 
 ## WORK PACKAGE 12: PROCESS & ENGINEERING STANDARDS
 
-12.1 [TODO] PROCESS: On every API endpoint change, add verification checklist task for Web + Mobile parity
-12.2 [TODO] PROCESS: Implement API Contract Registry (changelog of all endpoint changes + which clients updated)
-12.3 [TODO] Mobile: Implement in-app log capture (rotating file log) for all API errors and app events
-12.4 [TODO] Mobile: Add "Report a Problem" / "Share Logs" feature so users can email/share captured logs to admin
-12.5 [TODO] Mobile: On any unhandled error, show option to "Send Report to Administrator" with log attachment
-12.6 [TODO] PROCESS: A task can only be marked as [DONE] after its tests have been successfully executed and passed.
+12.1 [TODO] **Priority: P2.** PROCESS: On every API endpoint change, add verification checklist task for Web + Mobile parity
+12.2 [TODO] **Priority: P3.** PROCESS: Implement API Contract Registry (changelog of all endpoint changes + which clients updated)
+12.3 [TODO] **Priority: P2.** Mobile: Implement in-app log capture (rotating file log) for all API errors and app events
+12.4 [TODO] **Priority: P3.** Mobile: Add "Report a Problem" / "Share Logs" feature so users can email/share captured logs to admin
+12.5 [TODO] **Priority: P3.** Mobile: On any unhandled error, show option to "Send Report to Administrator" with log attachment
+12.6 [TODO] **Priority: P2.** PROCESS: A task can only be marked as [DONE] after its tests have been successfully executed and passed.
 
 ## WORK PACKAGE 13: VISUAL TESTING & QUALITY FREEZE
 
@@ -600,7 +600,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 27.5  [DONE 2026-08-22] Write unit tests for Domain Validators (FluentValidation) VERIFIED 2026-08-22: `GHCAA.Tests/Validators/MemberRegistrationValidatorTests.cs` and `VerifyEmailValidatorTests.cs`.
 27.6  [DONE 2026-08-22] Write repository integration tests with in‑memory SQLite VERIFIED 2026-08-22: `Microsoft.EntityFrameworkCore.Sqlite 9.0.1` + `.InMemory 9.0.1` referenced, with `GHCAA.Tests/Repositories/FileUploadRepositoryTests.cs` and SQLite-backed service tests.
 27.7  [DONE 2026-08-22] Write utility class tests (DateFormatConverter, etc.) **CLOSED 2026-08-22:** `GHCAA.Tests/Utils/DateFormatConverterTests.cs` added — 20 tests, all passing; full backend suite now **350 passed / 0 failed** (was 330). Pins the 29F.3 contract in both directions: ISO-8601 on write (incl. time preserved and the `.fff` shape), dd-MM-yyyy accepted on read with ISO as fallback, day-first precedence for ambiguous input like `02-03-2026`, empty/whitespace → `default` on the non-nullable converter but → `null` on the nullable one, and malformed/impossible dates throwing `FormatException` rather than silently yielding `01-01-0001`. Prior note, now historical:  **PARTIAL, confirmed 2026-08-22:** the named example is still untested — `DateFormatConverter` / `NullableDateFormatConverter` live in `GHCAA.API/Utils/DateFormatConverter.cs` and are registered in `Program.cs` (lines ~137-138), but no test file references them. Given these two converters govern **every** DateTime on the wire (see the ISO-8601 switch), they are the highest-value gap in Work Package 27.
-27.8  [TODO] Run coverage and enforce ≥ 80 % per file (Still genuinely open, confirmed 2026-08-22: `coverlet.collector 6.0.2` is referenced so coverage *can* be collected locally, but no threshold is enforced anywhere and README explicitly declines to claim a figure. Enforcing >=80%/file would fail today.)
+27.8 [TODO] **Priority: P2.** Run coverage and enforce ≥ 80 % per file (Still genuinely open, confirmed 2026-08-22: `coverlet.collector 6.0.2` is referenced so coverage *can* be collected locally, but no threshold is enforced anywhere and README explicitly declines to claim a figure. Enforcing >=80%/file would fail today.)
 27.9  [DONE 2026-08-22] Update README with test & coverage instructions VERIFIED 2026-08-22: README line ~299 documents `dotnet test` / `npm test` / `flutter test`, and line ~301 explains the coverage position and the local `coverlet.collector` command.
 
 ## WORK PACKAGE 28: CONFIGURATION-DRIVEN FRAMEWORK
@@ -1156,9 +1156,9 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 > the smallest item in the Area and needs no new UI shell). 37.7–37.10 are independent and may be
 > scheduled at any point after 37.0.
 
-37.0 [TODO] **Prerequisite: a real migration path.** Every remaining item in this Area adds tables, and none of them can reach preprod under `EnsureCreated()`. Replace the startup call with `await context.Database.MigrateAsync()` guarded by a config flag (`Database:ApplyMigrationsOnStartup`, default `true` for Development/Preprod), and add the baseline migration that reconciles the existing preprod schema so the first `MigrateAsync` on a populated database is a no-op rather than a failed `CREATE TABLE`. Keep `ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))` — the pending-model warning here is non-deterministic seed churn, not schema drift (`gotcha_pending_model_changes_seed`). `ConstitutionSeeder` stays as-is: it syncs *content*, which is a different job from schema. Document the new boot sequence in `docs/ARCHITECTURE.md` and `docs/PROJECT_MAP.md`. **Acceptance: a schema change committed on `preprod` is visible on the Render deployment without a manual database step.**
+37.0 [TODO] **Priority: P2.** **Prerequisite: a real migration path.** Every remaining item in this Area adds tables, and none of them can reach preprod under `EnsureCreated()`. Replace the startup call with `await context.Database.MigrateAsync()` guarded by a config flag (`Database:ApplyMigrationsOnStartup`, default `true` for Development/Preprod), and add the baseline migration that reconciles the existing preprod schema so the first `MigrateAsync` on a populated database is a no-op rather than a failed `CREATE TABLE`. Keep `ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))` — the pending-model warning here is non-deterministic seed churn, not schema drift (`gotcha_pending_model_changes_seed`). `ConstitutionSeeder` stays as-is: it syncs *content*, which is a different job from schema. Document the new boot sequence in `docs/ARCHITECTURE.md` and `docs/PROJECT_MAP.md`. **Acceptance: a schema change committed on `preprod` is visible on the Render deployment without a manual database step.**
 
-37.1 [TODO] **Election engine** — turn the Work Package 36 documents into a running process. This is the largest item; implement it in the five phases below, each independently shippable behind the flag. New enums in `GHCAA.Domain/Enums.cs`: `ElectionPhase { Announced, Nomination, Scrutiny, Withdrawal, CandidateList, Campaign, Polling, Counting, Declared, Archived }`, `NominationStatus { Submitted, UnderScrutiny, Accepted, Rejected, Withdrawn }`, `ElectionRole { ReturningOfficer, AssistantReturningOfficer, PollingOfficer, Scrutineer }`.
+37.1 [TODO] **Priority: P3.** **Election engine** — turn the Work Package 36 documents into a running process. This is the largest item; implement it in the five phases below, each independently shippable behind the flag. New enums in `GHCAA.Domain/Enums.cs`: `ElectionPhase { Announced, Nomination, Scrutiny, Withdrawal, CandidateList, Campaign, Polling, Counting, Declared, Archived }`, `NominationStatus { Submitted, UnderScrutiny, Accepted, Rejected, Withdrawn }`, `ElectionRole { ReturningOfficer, AssistantReturningOfficer, PollingOfficer, Scrutineer }`.
   - **37.1a Election + roll.** `Election` (`Id`, `Title`, `ECPeriodId`, `Phase`, `AnnouncedOn`, `NominationOpensOn`, `NominationClosesOn`, `ScrutinyOn`, `WithdrawalClosesOn`, `PollingOpensOn`, `PollingClosesOn`, `DeclaredOn?`, `IsActive`, `CreatedBy`), `ElectionSeat` (`Id`, `ElectionId`, `ECPosition Position`, `SeatCount`), `ElectionOfficer` (`Id`, `ElectionId`, `MemberId`, `ElectionRole Role`), and `VoterRoll` (`Id`, `ElectionId`, `MemberId`, `IsEligible`, `IneligibilityReason?`, `FrozenAt`, `VotedAt?`). The roll is **frozen by snapshot**, not computed at poll time: eligibility is the same Article III Section K rule already enforced in `GovernanceService.VoteOnConstitutionAsync` (`MembershipType` of `Founding`, `Executive` or `General`), plus dues-current per `MembershipDue`. Freezing is what makes a disputed result auditable.
   - **37.1b Nomination.** `Nomination` (`Id`, `ElectionId`, `ElectionSeatId`, `CandidateMemberId`, `ProposerMemberId`, `SeconderMemberId`, `Statement`, `PhotoPath?`, `Status`, `SubmittedAt`, `WithdrawnAt?`), `ScrutinyDecision` (`Id`, `NominationId`, `OfficerMemberId`, `Accepted`, `Reason`, `DecidedAt`). Proposer and seconder must both be on the frozen roll and must not be the candidate; enforce in the service, not only the UI.
   - **37.1c Ballot and poll.** `Ballot` (`Id`, `ElectionId`, `ElectionSeatId`, `SerialNumber`, `IssuedAt`, `IsSpoiled`) and `BallotVote` (`Id`, `BallotId`, `NominationId`, `CastAt`) kept in **separate tables with no member foreign key on the vote side** — the roll records *that* a member voted (`VoterRoll.VotedAt`), the ballot records *what* was voted, and nothing joins the two. That separation is the secret ballot, and it is the one design decision here that cannot be retrofitted. A unique index on `(ElectionId, MemberId)` in the roll prevents double voting.
@@ -1168,7 +1168,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
   - **UI.** Flag `enableElections`. The existing public `/elections` page gains a live banner when an election is not `Archived`. Member `portal/elections` — nominate, withdraw, view candidates, cast. Admin `admin/elections` — create, appoint officers, freeze roll, scrutinise, advance phase, count, declare, download ER PDFs. New `API_ENDPOINTS.ELECTIONS` block.
   - **Tests.** NUnit: roll freeze excludes Associate/Honorary/Advisory; proposer ≠ candidate; double vote rejected; cast outside `Polling` rejected; declaration writes `ECMember`; **a ballot row cannot be joined back to a member**. Vitest: phase-driven UI state, closed-nomination guard.
 
-37.2 [TODO] **Scholarship & student-aid programme** — fund → open call → application → blind review → award → disbursement. New enums: `ScholarshipApplicationStatus { Draft, Submitted, UnderReview, Shortlisted, Awarded, Rejected, Withdrawn }`, `DisbursementStatus { Pending, Approved, Paid, Cancelled }`.
+37.2 [TODO] **Priority: P4.** **Scholarship & student-aid programme** — fund → open call → application → blind review → award → disbursement. New enums: `ScholarshipApplicationStatus { Draft, Submitted, UnderReview, Shortlisted, Awarded, Rejected, Withdrawn }`, `DisbursementStatus { Pending, Approved, Paid, Cancelled }`.
   - **Models.** `ScholarshipFund` (`Id`, `Name`, `Description`, `NamedAfter?` — the endowment-in-memory case that links to 37.5, `TargetAmount`, `IsActive`, `CreatedAt`); `ScholarshipCall` (`Id`, `ScholarshipFundId`, `AcademicYear`, `OpensOn`, `ClosesOn`, `SlotCount`, `AwardAmount`, `EligibilityCriteria`, `IsActive`); `ScholarshipApplication` (`Id`, `ScholarshipCallId`, `ApplicantName`, `ApplicantEmail`, `ApplicantPhone`, `InstitutionName`, `Class`, `GuardianName`, `HouseholdIncome`, `NeedStatement`, `MeritStatement`, `Status`, `SubmittedAt`, `ReferenceCode`); `ScholarshipDocument` (`Id`, `ScholarshipApplicationId`, `FileUploadId`, `DocumentType`) reusing the existing `FileUpload` + `IFileValidationService` path — **no new upload plumbing**; `ScholarshipReview` (`Id`, `ScholarshipApplicationId`, `ReviewerMemberId`, `NeedScore`, `MeritScore`, `Comments`, `ReviewedAt`); `ScholarshipAward` (`Id`, `ScholarshipApplicationId`, `Amount`, `AwardedOn`, `DisbursementStatus`, `FinancialRecordId?`).
   - **Blind review is a query rule, not a UI rule.** `GetApplicationForReviewAsync` must project a DTO that omits `ApplicantName`, `ApplicantEmail`, `ApplicantPhone` and `GuardianName`, exposing only `ReferenceCode`. Reviewers must not be able to obtain identity from the API at all; hiding it in the template is not acceptance.
   - **Applicants are not members.** The public application form is `[AllowAnonymous]` and identified by `ReferenceCode` + email; **do not create `Member`/`User` rows for schoolchildren.** Status lookup is `GET api/scholarships/status/{referenceCode}`, also anonymous, rate-limited by the existing `LoginRateLimitMiddleware` pattern.
@@ -1176,57 +1176,57 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
   - **Service/API/UI.** `IScholarshipService` + `ScholarshipService`; `ScholarshipsController` at `api/scholarships`. Flag `enableScholarships`. Public `/scholarships` (call listing + apply + status check), member `portal/scholarships` (reviewer queue for panel members), admin `admin/scholarships` (funds, calls, shortlist, award, disburse). New `API_ENDPOINTS.SCHOLARSHIPS` block.
   - **Tests.** NUnit: review DTO carries no identifying field; application rejected outside the `OpensOn`–`ClosesOn` window; award → paid writes exactly one `Grant` `FinancialRecord` and is idempotent on repeat. Vitest: apply-form validation, status lookup with an unknown code.
 
-37.3 [TODO] **Fundraising campaigns + donor honour roll** — the shortest path from "the ledger has a `Donation` category" to "the association can actually raise money". New enum: `PledgeStatus { Pledged, PartiallyPaid, Paid, Lapsed, Cancelled }`.
+37.3 [TODO] **Priority: P3.** **Fundraising campaigns + donor honour roll** — the shortest path from "the ledger has a `Donation` category" to "the association can actually raise money". New enum: `PledgeStatus { Pledged, PartiallyPaid, Paid, Lapsed, Cancelled }`.
   - **Models.** `Campaign` (`Id`, `Title`, `Slug`, `Story`, `CoverImagePath?`, `TargetAmount`, `StartsOn`, `EndsOn?`, `IsActive`, `IsArchived`, `CreatedBy`); `CampaignPledge` (`Id`, `CampaignId`, `MemberId?` — nullable so non-alumni can give, `DonorName`, `DonorEmail?`, `DonorPhone?`, `Amount`, `AmountReceived`, `Status`, `IsAnonymous`, `Message?`, `PledgedAt`, `FinancialRecordId?`); `DonorRecognitionTier` (`Id`, `Name`, `MinimumAmount`, `Description`) — admin-configurable so tier names are not compiled in.
   - **No payment gateway.** The repo operates under a **no-gateway-keys rule** (`session_area29_shipblockers_payments`): a pledge is recorded, the existing display-only wallet/bank instructions are shown, and an admin confirms receipt. Confirming receipt writes a `FinancialRecord` (`RecordType = Income`, `FinancialCategory = Donation`) and back-links `FinancialRecordId`, mirroring 37.2 exactly. **Do not introduce a gateway integration here.**
   - **Honour roll.** Public, derived, never hand-maintained: group confirmed pledges by `DonorRecognitionTier`, render `IsAnonymous` rows as "Anonymous", and show a live progress bar of `SUM(AmountReceived) / TargetAmount`. Anonymity must be enforced in the projection, not the template.
   - **Service/API/UI.** `ICampaignService` + `CampaignService`; `CampaignsController` at `api/campaigns` with `GET api/campaigns/public`, `GET api/campaigns/{slug}` and `GET api/campaigns/{slug}/honour-roll` as `[AllowAnonymous]`; pledging allowed anonymously. Flag `enableFundraising`. Public `/campaigns` + `/campaigns/:slug`, member `portal/giving` (my pledges, my giving history), admin `admin/campaigns` (create, confirm receipts, tiers). New `API_ENDPOINTS.CAMPAIGNS` block.
   - **Tests.** NUnit: an anonymous pledge never leaks `DonorName` through the honour-roll projection; confirming receipt is idempotent and writes one `Donation` record; progress excludes unconfirmed pledges. Vitest: progress-bar arithmetic, anonymous-checkbox behaviour.
 
-37.4 [TODO] **Batch cohorts and reunions as first-class objects.** Today a batch exists only as `AcademicRecord.PassingYear` — there is no cohort page, no cohort representative and no reunion.
+37.4 [TODO] **Priority: P3.** **Batch cohorts and reunions as first-class objects.** Today a batch exists only as `AcademicRecord.PassingYear` — there is no cohort page, no cohort representative and no reunion.
   - **Models.** `BatchCohort` (`Id`, `PassingYear`, `Title`, `Story?`, `CoverImagePath?`, `RepresentativeMemberId?`, `IsActive`); `Reunion` (`Id`, `BatchCohortId?` — null means an all-alumni reunion, `AlumniEventId`, `Theme`, `SouvenirUrl?`) built **on top of** the existing `AlumniEvent` + `EventRegistration` + `EventBudget` stack rather than beside it — a reunion is an event with cohort identity, and duplicating registration logic would be the mistake here.
   - **Membership is derived, not stored.** Cohort membership = `AcademicRecord` rows with `IsGHC == true` and the matching `PassingYear`. Do not add a `BatchYear` column to `Member`; it would immediately disagree with `AcademicRecord` for anyone holding two GHC records.
   - **Ledger tie-in.** Reunion fees collected through `EventRegistration` post as `FinancialCategory.ReunionFee`, finally giving that enum value a producer.
   - **Service/API/UI.** `IBatchService` + `BatchService`; `BatchesController` at `api/batches` with `GET api/batches/public` and `GET api/batches/{year}` `[AllowAnonymous]`. Flag `enableReunions`. Public `/batches` (year grid) + `/batches/:year`, member `portal/my-batch`, admin `admin/batches`. New `API_ENDPOINTS.BATCHES` block.
   - **Tests.** NUnit: a member with two GHC `AcademicRecord` rows appears in both cohorts; non-GHC records excluded. Vitest: year-grid grouping, empty-cohort `EmptyStateWidget` path.
 
-37.5 [TODO] **In Memoriam register.** A new `MembershipType` value is **not** the mechanism — membership tier is admin-assigned and orthogonal (`feedback_membership_type_admin_only`). Instead: `MemorialEntry` (`Id`, `MemberId?` — nullable so a pre-digital alumnus can be honoured, `FullName`, `PassingYear?`, `DateOfBirth?`, `DateOfDeath`, `PhotoPath?`, `Tribute`, `IsPublished`, `SubmittedByMemberId?`, `SubmissionStatus Status`, `CreatedAt`) reusing the existing `SubmissionStatus { Draft, Pending, Approved, Rejected }` enum, and `Condolence` (`Id`, `MemorialEntryId`, `MemberId`, `Message`, `PostedAt`, `IsApproved`).
+37.5 [TODO] **Priority: P3.** **In Memoriam register.** A new `MembershipType` value is **not** the mechanism — membership tier is admin-assigned and orthogonal (`feedback_membership_type_admin_only`). Instead: `MemorialEntry` (`Id`, `MemberId?` — nullable so a pre-digital alumnus can be honoured, `FullName`, `PassingYear?`, `DateOfBirth?`, `DateOfDeath`, `PhotoPath?`, `Tribute`, `IsPublished`, `SubmittedByMemberId?`, `SubmissionStatus Status`, `CreatedAt`) reusing the existing `SubmissionStatus { Draft, Pending, Approved, Rejected }` enum, and `Condolence` (`Id`, `MemorialEntryId`, `MemberId`, `Message`, `PostedAt`, `IsApproved`).
   - **Moderation is mandatory.** Nothing publishes without admin approval, and every condolence goes through the existing `HtmlSanitizer` path before storage. This is the single highest-sensitivity surface in the Area; an unmoderated tribute wall on a memorial page is a reputational incident.
   - **Setting `MemorialEntry.MemberId` must deactivate the linked `Member`** — and suppress them from the public directory and from any 37.1 voter roll — in the same transaction. A deceased member appearing on an election roll is the failure mode this clause exists to prevent.
   - **Service/API/UI.** Extend `IMemberService` **only if** the memorial logic stays under ~5 methods; otherwise `IMemorialService` + `MemorialService`. `MemorialController` at `api/memorial`, `GET api/memorial/public` `[AllowAnonymous]`. Flag `enableMemorial`. Public `/in-memoriam`, member submission form under `portal/`, admin moderation queue. New `API_ENDPOINTS.MEMORIAL` block.
   - **Tests.** NUnit: an unapproved entry is absent from the public projection; linking a `Member` deactivates them and removes them from directory results; condolence HTML is sanitised. Vitest: moderation-queue actions, published/unpublished rendering.
 
-37.6 [TODO] **Oral-history / legacy archive** — recorded memories from senior alumni, which is the one asset an alumni association can create that nobody else can. `ArchiveCollection` (`Id`, `Title`, `Description`, `IsPublished`, `SortOrder`) and `ArchiveItem` (`Id`, `ArchiveCollectionId`, `Title`, `NarratorName`, `NarratorMemberId?`, `RecordedOn?`, `Summary`, `Transcript?`, `MediaFileUploadId?`, `ExternalMediaUrl?`, `PhotoPath?`, `DecadeTag`, `IsPublished`, `SubmissionStatus Status`).
+37.6 [TODO] **Priority: P4.** **Oral-history / legacy archive** — recorded memories from senior alumni, which is the one asset an alumni association can create that nobody else can. `ArchiveCollection` (`Id`, `Title`, `Description`, `IsPublished`, `SortOrder`) and `ArchiveItem` (`Id`, `ArchiveCollectionId`, `Title`, `NarratorName`, `NarratorMemberId?`, `RecordedOn?`, `Summary`, `Transcript?`, `MediaFileUploadId?`, `ExternalMediaUrl?`, `PhotoPath?`, `DecadeTag`, `IsPublished`, `SubmissionStatus Status`).
   - **Storage decision, settled before building:** `MediaFileUploadId` reuses `FileUpload` + `IFileStorageService`; `ExternalMediaUrl` covers a link to already-hosted audio/video. **Both fields exist deliberately** — audio is heavy and the Render deployment has no object store configured, so the external-link path is the default and the upload path is opt-in behind the existing size limits in `IFileValidationService`.
   - **The transcript is the product**, not the audio: it is searchable, printable, quotable in 37.10, and readable on a bad connection. Treat a missing transcript as an incomplete item in the admin queue, not merely an empty field.
   - **Service/API/UI.** `IArchiveService` + `ArchiveService`; `ArchiveController` at `api/archive`, `GET api/archive/public` and `GET api/archive/items/{id}` `[AllowAnonymous]`. Flag `enableLegacyArchive`. Public `/legacy` (collections → item with transcript) reusing the Work Package 36 `.doc-hero` / `.doc-prose` shell rather than new page chrome; member submission; admin curation. New `API_ENDPOINTS.ARCHIVE` block.
   - **Tests.** NUnit: unpublished items excluded from public reads; an item with none of `MediaFileUploadId`, `ExternalMediaUrl` or `Transcript` is rejected. Vitest: decade filter, transcript rendering and print styles.
 
-37.7 [TODO] **Bengali/English bilingual UI.** The association's constituency is Bengali-speaking and every string in the app is currently a hardcoded English literal in a template. **Do not install `@angular/localize` or `ngx-translate`** — `feedback_keep_lightweight` applies, and the requirement here is a single flat key → string lookup with a live runtime toggle, which `@angular/localize` (build-time, one bundle per locale) does not even satisfy.
+37.7 [TODO] **Priority: P2.** **Bengali/English bilingual UI.** The association's constituency is Bengali-speaking and every string in the app is currently a hardcoded English literal in a template. **Do not install `@angular/localize` or `ngx-translate`** — `feedback_keep_lightweight` applies, and the requirement here is a single flat key → string lookup with a live runtime toggle, which `@angular/localize` (build-time, one bundle per locale) does not even satisfy.
   - **Mechanism.** `core/services/i18n.service.ts` holding a `signal<'en' | 'bn'>` persisted to `localStorage`; two dictionaries under `core/i18n/en.ts` and `core/i18n/bn.ts` typed as `Record<string, string>` with `en` as the key source of truth; and a pure `TranslatePipe` (`{{ 'nav.constitution' | t }}`) falling back to the English string, then to the key itself, when a Bengali value is missing. Update `<html lang>` on toggle. Ship the toggle next to the existing `<app-theme-toggle>` so it inherits placement and styling.
   - **Scope explicitly, and state it in the item when it lands:** public site + member portal nav, buttons, labels and validation messages. **Admin stays English-only** — it is staff-facing, and translating it doubles the surface for no constituency benefit. Server-stored content (constitution text, election documents, news) is not translated by this mechanism; it is authored content and belongs to whichever language it was written in.
   - **Font.** Bengali glyphs need a webfont with Bengali coverage. Production `ng build` inlines Google Fonts over the network and this environment cannot reach it — self-host the face under `public/assets/fonts/` and reference it from `styles.scss`, so the build stays offline-safe.
   - **Tests.** Vitest: the pipe returns the Bengali value, falls back to English on a missing key, and falls back to the key when both are missing; the toggle persists across a service re-instantiation; **every key present in `en.ts` resolves through the pipe** (guards against key drift).
 
-37.8 [TODO] **Public credential verification.** `IIDCardService` already issues ID cards and certificates as PDFs, but nothing on the outside can confirm one is genuine — an employer holding a printed membership certificate has no check available.
+37.8 [TODO] **Priority: P3.** **Public credential verification.** `IIDCardService` already issues ID cards and certificates as PDFs, but nothing on the outside can confirm one is genuine — an employer holding a printed membership certificate has no check available.
   - **Models.** `IssuedCredential` (`Id`, `MemberId`, `CredentialType` — new enum `CredentialType { MembershipCertificate, IdCard, ElectionDocument }`, `ShortCode` — a 10-character unambiguous-alphabet code with a unique index, `IssuedOn`, `ExpiresOn?`, `IsRevoked`, `RevokedReason?`, `RevokedOn?`).
   - **Mechanism.** Extend `IIDCardService` (do not create a parallel service) so every generated document records an `IssuedCredential` and embeds a QR — via the existing `QRCoder` `GetQrDataUri` helper — pointing at `/verify/{shortCode}`. `GET api/verify/{shortCode}` is `[AllowAnonymous]` and returns **only** `{ valid, memberName, membershipType, issuedOn, status }`. It must never return an email, phone, address or member id: this endpoint is publicly enumerable by design, so the short code must be high-entropy and the response minimal. Rate-limit it with the existing `LoginRateLimitMiddleware` pattern.
   - **UI.** Flag `enableCredentialVerification`. Public `/verify/:code` plus a code-entry form at `/verify`, rendering a single valid / revoked / unknown verdict card; admin revocation action on the member detail page. New `API_ENDPOINTS.VERIFY` block.
   - **Tests.** NUnit: a revoked code returns `valid: false`; the response DTO exposes no contact field; short codes are unique across 10k generations. Vitest: the three verdict states, unknown-code path.
 
-37.9 [TODO] **Geographic chapters.** `Chapter` (`Id`, `Name`, `Region`, `Country`, `City`, `Description`, `CoordinatorMemberId?`, `ContactEmail?`, `IsActive`, `CreatedAt`) and `ChapterMembership` (`Id`, `ChapterId`, `MemberId`, `JoinedAt`, `IsCoordinator`) with a unique index on `(ChapterId, MemberId)`.
+37.9 [TODO] **Priority: P4.** **Geographic chapters.** `Chapter` (`Id`, `Name`, `Region`, `Country`, `City`, `Description`, `CoordinatorMemberId?`, `ContactEmail?`, `IsActive`, `CreatedAt`) and `ChapterMembership` (`Id`, `ChapterId`, `MemberId`, `JoinedAt`, `IsCoordinator`) with a unique index on `(ChapterId, MemberId)`.
   - **Reuse, do not rebuild.** A chapter event is an `AlumniEvent` with a `ChapterId` — add the nullable column to `AlumniEvent` rather than creating a `ChapterEvent` table. Chapter announcements reuse `INotificationService.CreateNotificationAsync` fanned over the chapter's members; there is no new messaging surface in this item.
   - **Service/API/UI.** `IChapterService` + `ChapterService`; `ChaptersController` at `api/chapters`, `GET api/chapters/public` `[AllowAnonymous]`. Flag `enableChapters`. Public `/chapters` (list + detail with coordinator contact), member `portal/chapters` (join/leave, my chapter feed), admin `admin/chapters`. New `API_ENDPOINTS.CHAPTERS` block.
   - **Tests.** NUnit: joining twice does not duplicate; a chapter event appears only in that chapter's feed; coordinator contact is hidden from the anonymous projection unless `ContactEmail` is set. Vitest: join/leave state, empty-chapter state.
 
-37.10 [TODO] **Annual impact report generated from the ledger** — the accountability artifact that closes the loop on 37.2, 37.3 and 37.4, and the reason those three back-link `FinancialRecordId`.
+37.10 [TODO] **Priority: P3.** **Annual impact report generated from the ledger** — the accountability artifact that closes the loop on 37.2, 37.3 and 37.4, and the reason those three back-link `FinancialRecordId`.
   - **Nothing in this item is hand-typed.** For a given year it aggregates: total income and expense by `FinancialCategory` from `FinancialRecord`; scholarships awarded and disbursed from `ScholarshipAward`; campaign totals and donor counts from `CampaignPledge`; events and attendance from `AlumniEvent` + `EventRegistration`; new members from `Member.CreatedAt` / `MembershipHistory`; reunions from 37.4. The only authored fields are a president's foreword and a cover image, stored in the existing `SiteContent` CMS from Work Package 34 — **do not add a table for two strings.**
   - **Output.** Server-side PDF via **QuestPDF**, following the `IDCardService.GenerateIDCardPdfAsync` pattern, plus an on-site HTML view reusing the Work Package 36 `.doc-hero` / `.doc-prose` shell. Extend `IFinancialLedgerService` with `Task<ImpactReportDto?> GetImpactReportAsync(int year, CancellationToken cancellationToken = default)`, and put the PDF method on the existing document-generation surface rather than inventing a third document service.
   - **Guard.** The report must degrade rather than throw when a source feature is not yet built or its flag is off — a year with no campaigns renders without that section. This item is therefore safe to build *before* 37.2/37.3/37.4 land, and must read every source through a null-tolerant projection.
   - **API/UI.** `GET api/financials/impact/{year}` and `GET api/financials/impact/{year}/pdf`, both `[AllowAnonymous]` (publishing it is the point). Flag `enableImpactReport`. Public `/impact/:year` with a year selector; admin action to set the foreword and publish. Additions to the existing `API_ENDPOINTS.FINANCIALS` block.
   - **Tests.** NUnit: a year with zero records returns a report with zeroed sections rather than null; category totals match a hand-summed fixture; the disbursed-scholarship total equals the sum of the linked `Grant` `FinancialRecord` rows. Vitest: year selector, empty-section rendering.
 
-37.11 [TODO] Per 12.6, nothing in Work Package 37 is `[DONE]` until `dotnet test`, `npx vitest run`, `npm run type-check` and `npx ng build` all pass. Baselines to beat at the start of this Area: **351 NUnit tests** and **64 vitest files / 306 tests**. Additionally, every item that adds a table must be verified against the 37.0 migration path on a **non-empty** database — a passing suite against a fresh SQLite file proves nothing about preprod (`gotcha_ensurecreated_no_op_existing_db`). Update `docs/FEATURES.md`, `docs/PROJECT_MAP.md`, `docs/SRS.md` and `docs/ARCHITECTURE.md` as each item lands, per `feedback_docs_update_scope`.
+37.11 [TODO] **Priority: P2.** Per 12.6, nothing in Work Package 37 is `[DONE]` until `dotnet test`, `npx vitest run`, `npm run type-check` and `npx ng build` all pass. Baselines to beat at the start of this Area: **351 NUnit tests** and **64 vitest files / 306 tests**. Additionally, every item that adds a table must be verified against the 37.0 migration path on a **non-empty** database — a passing suite against a fresh SQLite file proves nothing about preprod (`gotcha_ensurecreated_no_op_existing_db`). Update `docs/FEATURES.md`, `docs/PROJECT_MAP.md`, `docs/SRS.md` and `docs/ARCHITECTURE.md` as each item lands, per `feedback_docs_update_scope`.
 
 ---
 
@@ -1521,17 +1521,17 @@ warnings/errors.
 
 Today election forms/docs shown at the public `/elections` route are static/seeded ([[session_election_form_pad]], [[session_area36_constitution_seeder_voting]]). User wants admin to manage (create/edit/replace) the election forms, documents, and other information currently shown in the public/portal elections pages, from the admin portal — analogous to the existing SiteContent CMS pattern ([[session_area34_sitecontent_notices]]).
 
-42.1 [TODO] Explore/plan (Plan Mode required — multi-file, touches Domain/Application/Infra/API/Web
+42.1 [TODO] **Priority: P3.** Explore/plan (Plan Mode required — multi-file, touches Domain/Application/Infra/API/Web
 admin+public/Mobile): inventory exactly what's static today under the elections feature (entities,
 seeders, controllers, public/portal components) before designing the admin-editable model — do not
 assume it mirrors SiteContent without checking field/document shape differences (forms likely need
 file/PDF attachments, not just rich text).
-42.2 [TODO] Design admin CRUD screens + API for whatever the inventory in 42.1 finds (forms list,
+42.2 [TODO] **Priority: P3.** Design admin CRUD screens + API for whatever the inventory in 42.1 finds (forms list,
 per-form fields/attachment, publish state) following `ghcaa-design` conventions.
-42.3 [TODO] Web public/portal elections pages read from the new admin-managed source instead of the
+42.3 [TODO] **Priority: P3.** Web public/portal elections pages read from the new admin-managed source instead of the
 seeder/static content.
-42.4 [TODO] Mobile: sync if elections content is surfaced there.
-42.5 [TODO] Tests + docs update per usual closing convention.
+42.4 [TODO] **Priority: P3.** Mobile: sync if elections content is surfaced there.
+42.5 [TODO] **Priority: P3.** Tests + docs update per usual closing convention.
 
 ---
 
@@ -1563,7 +1563,7 @@ matches this codebase's existing lightweight-logging convention ([[feedback_keep
 `flutter analyze` clean (no issues); `flutter test` 66 passing tests unaffected — the 26 failures are all
 pre-existing stale golden pixel-compares in `comprehensive_visual_freeze_test.dart`
 ([[session_mobile_ci_golden_fix]], [[session_mobile_login_fixes]]), not caused by this change.
-43.4 [TODO] Live/manual verification: trigger a genuine unhandled error in each app (backend 500,
+43.4 [TODO] **Priority: P2.** Live/manual verification: trigger a genuine unhandled error in each app (backend 500,
 Angular runtime error, Flutter uncaught exception) against a running instance to confirm the new
 handlers actually fire and log as expected — not yet done this session.
 Committed as `fc06894`.
@@ -1725,7 +1725,7 @@ in the log text, since there are 3 unrelated classes named `FamilyService` in th
 updated: `gateway_service`'s failure-wrapper test asserted the old raw-exception passthrough, now
 asserts the generic message and that the raw text is absent).
 
-44.16 [TODO] Not fixed — deliberately out of scope for a logging sweep: 3 classes are all named
+44.16 [TODO] **Priority: P3.** Not fixed — deliberately out of scope for a logging sweep: 3 classes are all named
 `FamilyService` (`features/family/family_service.dart`, `features/networking/family_service.dart`,
 `features/support/support_service.dart`). Renaming is a real refactor (import aliasing, provider
 naming, call-site updates) with regression risk disproportionate to a naming/debugging-clarity issue
@@ -1806,34 +1806,34 @@ is persisted queryably, so there is nothing for an admin UI to read from yet. Pe
 sink, not a logging framework (Serilog/ELK/Seq) — this app has deliberately avoided that class of
 dependency so far.
 
-45.1 [TODO] Explore/plan (Plan Mode required — spans Domain/Infrastructure/API/Web): decide the
+45.1 [TODO] **Priority: P2.** Explore/plan (Plan Mode required — spans Domain/Infrastructure/API/Web): decide the
 capture point(s). Candidates to reconcile: a custom `ILoggerProvider` registered in `Program.cs`
 alongside the console provider (captures every `ILogger` call app-wide, broadest coverage, more
 plumbing); vs. writing directly from `ExceptionMiddleware` only (captures unhandled exceptions —
 matches this request's literal wording, "application error logs" — much simpler, but misses
 `LogWarning`/handled-but-logged errors from the Work Package 43/44 sweep). Confirm which with the user before
 building either.
-45.2 [TODO] Domain + migration: new `ErrorLog` entity — at minimum `Id`, `OccurredAt` (UTC,
+45.2 [TODO] **Priority: P2.** Domain + migration: new `ErrorLog` entity — at minimum `Id`, `OccurredAt` (UTC,
 indexed), `Level` (Error/Warning), `Message`, `ExceptionType`, `StackTrace`, `Source` (controller/
 middleware/class name), `RequestPath`, `RequestMethod`, `UserId`/`Username` (nullable — many errors
 are pre-auth or background). Raw SQL migration per the idempotent-migration convention established
 in 41.9/44.2 ([[gotcha_migrationbootstrapper_fixed_offset]]).
-45.3 [TODO] Infrastructure: the capture sink decided in 45.1, writing rows via a scoped/background
+45.3 [TODO] **Priority: P2.** Infrastructure: the capture sink decided in 45.1, writing rows via a scoped/background
 write (never let logging itself throw or block the request it's logging) — batch or fire-and-forget
 inserts so a logging-table write can't become a new source of request latency or failure.
-45.4 [TODO] API: `GET /api/admin/error-logs` (`[Authorize(Policy = "SuperAdminOnly")]`, matching the
+45.4 [TODO] **Priority: P2.** API: `GET /api/admin/error-logs` (`[Authorize(Policy = "SuperAdminOnly")]`, matching the
 existing policy convention in `ServiceExtensions.cs`) with query params for date range, free-text
 search (message/exception-type/stack-trace substring), level, and pagination — push filtering to the
 DB query, not an in-memory scan, since this table will grow unbounded without a retention policy
 (see 45.6).
-45.5 [TODO] Web admin: new `admin/error-logs/` screen (list + filters: date range picker, text search,
+45.5 [TODO] **Priority: P2.** Web admin: new `admin/error-logs/` screen (list + filters: date range picker, text search,
 level dropdown; row expansion for full stack trace) — follow `ghcaa-design` conventions and the
 existing admin list-page pattern (search bar + filters component already used elsewhere, e.g.
 `admin-news.ts`/`admin-members.ts` — reuse `SearchBarComponent`/`PageHeaderComponent`, don't rebuild).
-45.6 [TODO] Retention/cleanup: decide and implement a bound (e.g. delete rows older than N days, or
+45.6 [TODO] **Priority: P3.** Retention/cleanup: decide and implement a bound (e.g. delete rows older than N days, or
 cap total row count) — an error-log table with no retention policy will grow forever and eventually
 degrade the very queries meant to search it.
-45.7 [TODO] Tests + docs update per usual closing convention (`dotnet test`, `npx vitest run`,
+45.7 [TODO] **Priority: P2.** Tests + docs update per usual closing convention (`dotnet test`, `npx vitest run`,
 `npx tsc --noEmit`, live verification that a genuine error actually appears in the new admin screen).
 
 ---
@@ -1900,7 +1900,7 @@ account). Confirmed `paymentStatus`/`tShirtSize` display quirks on the new membe
 identical to the pre-existing baseline behavior on an original 584-batch member (id 781) — not a
 regression, a pre-existing DTO-mapping gap unrelated to this import, not chased further.
 
-46.5 [TODO] Not touched: the org-wide Financial Ledger (`FinancialRecord`/`financial_records.json`)
+46.5 [TODO] **Priority: P3.** Not touched: the org-wide Financial Ledger (`FinancialRecord`/`financial_records.json`)
 has zero rows — the existing 584-member bulk import never populated it either, so the new 47
 members' ৳47,000 in membership fees is correctly reflected in `PaymentHistories` (per-member ledger)
 but not in the aggregate income/expense ledger view. This is a pre-existing gap in how seeded/bulk
@@ -1978,7 +1978,7 @@ protected destructive deletes with zero prior coverage (`GHCAA.Tests/Controllers
 refresh, logout, the step-up request/verify endpoints this session added, reset-password — and
 `LookupsController`'s full CRUD) is still open; report exists but no further remediation started.
 
-47.10 [TODO] Still open, explicitly deferred: `docs/deploy_connection.txt` committed live-credentials
+47.10 [TODO] **Priority: P0.** Still open, explicitly deferred: `docs/deploy_connection.txt` committed live-credentials
 file (flagged, not rotated); `docs/BUSINESS_REVIEW_PLAN.md:79` has a real password in
 plain text (flagged, not scrubbed); member profile photos are genuinely missing for most of the 631
 bulk-imported alumni (not a bug — no photo was ever supplied at import time).
@@ -2002,7 +2002,7 @@ and confirmed `date.util.spec.ts` (`formatPeriodRange`) was updated when its beh
 "ongoing" language, single period only; no second historical 2015-2017 period was added — real
 dates for that were never confirmed).
 
-47.13 [TODO] **Mutation (POST/PUT/DELETE) coverage remediation — task breakdown.** 47.9 closed the top
+47.13 [TODO] **Priority: P2.** **Mutation (POST/PUT/DELETE) coverage remediation — task breakdown.** 47.9 closed the top
 2 items (`RolesController.DeleteUser`, `AdminGovernanceController.DeleteECMember`). Remaining ~35%,
 broken into independently-completable tasks below. Common approach for all of them: one new
 `GHCAA.Tests/Controllers/*Tests.cs` file per controller, mocking the underlying service interface
@@ -2053,7 +2053,7 @@ ungated, while sibling fields were correctly privacy-gated. Fixed: stripped thes
 `CertificatePath`) from `NetworkingService.MapToDto` — that DTO only backs the public directory
 profile; the authenticated owner/admin profile is a separate build in `MemberService.GetProfileAsync`.
 
-48.2 [TODO] **CRITICAL — committed secrets, live JWT signing key included.**
+48.2 [TODO] **Priority: P0.** **CRITICAL — committed secrets, live JWT signing key included.**
 `docs/deploy_connection.txt` (still tracked) contains the production `Jwt__Key` and the Render
 deploy-hook URL, not just DB credentials as previously known. Also newly found with live secrets:
 `.env.remote`, `build_output/appsettings.Production.json`, `build_output/appsettings.json` (Gmail
@@ -2118,7 +2118,7 @@ invalidates any OTP issued before this deploy** (they expire in ~10 minutes anyw
 validation (`ServiceExtensions.cs`) — the default 5-minute skew silently extended every ~60-minute
 access token to ~65 minutes.
 
-48.12 [TODO] **LOW — remaining minor findings not yet fixed** (lower value/effort ratio than 48.1-48.11,
+48.12 [TODO] **Priority: P3.** **LOW — remaining minor findings not yet fixed** (lower value/effort ratio than 48.1-48.11,
 picked up opportunistically): `MessagingController.MarkAsRead` has no ownership check (any
 authenticated user can mark any message ID read — integrity only, no read access);
 `FinancialsController.RecordPayment` keeps a client-supplied `MemberId` when the caller's claim is
@@ -2129,7 +2129,7 @@ skips `IFileValidationService` unlike every other upload endpoint (admin-only, s
 `MemberService.cs:~1350` substitutes user-controlled `FullName` raw into an HTML email body
 (HTML-encode template variables).
 
-48.13 [TODO] Known, still-open: `docs/deploy_connection.txt` (see 48.2) still tracked with the live
+48.13 [TODO] **Priority: P1.** Known, still-open: `docs/deploy_connection.txt` (see 48.2) still tracked with the live
 JWT key. `docs/BUSINESS_REVIEW_PLAN.md`'s plaintext password table (committed since
 2026-07-03) was **upgraded from a docs-hygiene item to a confirmed active exposure on 2026-08-29**:
 its `shalin` / `Shalin@2024!` row was the exact live preprod SuperAdmin credential this session set
@@ -2180,7 +2180,7 @@ ERESOLVE peer-dependency conflicts against the stale lockfile). This brought `np
 `xlsx@0.18.5` issue (48.9), which is unfixable via npm registry and deferred deliberately, not by
 oversight.
 
-48.18 [TODO] **A06/Medium — all Microsoft/EF Core/Npgsql NuGet packages pinned to exactly `9.0.0`
+48.18 [TODO] **Priority: P2.** **A06/Medium — all Microsoft/EF Core/Npgsql NuGet packages pinned to exactly `9.0.0`
 (the .NET 9 GA release), no servicing patches since.** Not fixed this round (needs care — a batch
 EF Core bump should be verified against the full migration suite before landing). Bump
 `Microsoft.EntityFrameworkCore*`, `Npgsql.EntityFrameworkCore.PostgreSQL`,
@@ -2189,7 +2189,7 @@ EF Core bump should be verified against the full migration suite before landing)
 (mitigated — Swagger is dev-gated) and `AutoMapper.Extensions.Microsoft.DependencyInjection 12.0.0`
 (behind the 13+/14+ line).
 
-48.19 [TODO] **A08/Medium — CI Actions pinned to mutable tags; no NuGet lockfile.** Every GitHub
+48.19 [TODO] **Priority: P2.** **A08/Medium — CI Actions pinned to mutable tags; no NuGet lockfile.** Every GitHub
 Action in `ghcaa-ci-preprod.yml` is pinned by floating major tag (`actions/checkout@v5`, etc.,
 including third-party `subosito/flutter-action@v2`) with access to `RENDER_DEPLOY_HOOK_URL` in the
 same workflow — a repointed tag executes with deploy-to-production access. Base images in
@@ -2226,7 +2226,7 @@ below is built yet unless marked `[DONE]`.
 **Every item below is written as an ordered, mechanical checklist — no design decisions should be
 needed at implementation time except where a step is explicitly flagged "DECISION NEEDED."**
 
-49.1 [TODO] **Custom roles have no actual permission scope.** `RolesController.CreateRole`
+49.1 [TODO] **Priority: P1.** **Custom roles have no actual permission scope.** `RolesController.CreateRole`
 (`RolesController.cs:77-82`) inserts any free-text role name and `AssignRole` attaches it to a user,
 but every endpoint in the app authorizes against exactly 3 hardcoded ASP.NET policies
 (`SuperAdminOnly`/`AdminOnly`/`MemberOnly` — `ServiceExtensions.cs:77-79`, each a compile-time
@@ -2263,7 +2263,7 @@ attribute, so assigning one grants zero additional access.
        with permission-scoped policies where department-level admins are wanted — do this
        incrementally, not all at once, and add tests per controller touched.
 
-49.2 [TODO] **User disable/enable — system admins (new) and members (UI gap only).**
+49.2 [TODO] **Priority: P2.** **User disable/enable — system admins (new) and members (UI gap only).**
   - **49.2.A — System admin accounts (new backend + UI):**
     1. `GHCAA.Application/Interfaces/IUserService.cs`: add
        `Task<bool> SetUserActiveAsync(int userId, bool isActive, CancellationToken cancellationToken = default);`
@@ -2306,7 +2306,7 @@ attribute, so assigning one grants zero additional access.
        user; do not silently pick one. If kept, this becomes its own follow-up item — do not scope-creep
        it into this task.
 
-49.3 [TODO] **Admin-initiated password reset — system admins (new) and members (security fix).**
+49.3 [TODO] **Priority: P1.** **Admin-initiated password reset — system admins (new) and members (security fix).**
   - **49.3.A — System admin accounts (new backend + UI):**
     1. `GHCAA.Application/Interfaces/IUserService.cs`: add
        `Task<(bool Success, string? ResetUrl)> SendAdminPasswordResetLinkAsync(int userId, CancellationToken cancellationToken = default);`
@@ -2348,7 +2348,7 @@ attribute, so assigning one grants zero additional access.
     4. Add/extend a test in `GHCAA.Tests/Controllers/AdminControllerTests.cs` (or `MemberServiceTests.cs`)
        asserting `RevokeAllRefreshTokensAsync` is now called during this flow.
 
-49.4 [TODO] **Grid/row-control design consistency fixes** (mechanical, per [[ghcaa-design]]):
+49.4 [TODO] **Priority: P3.** **Grid/row-control design consistency fixes** (mechanical, per [[ghcaa-design]]):
   1. `GHCAA.Web/src/app/admin/events/admin-events.html` line 322: rename the `.admin-table` class to
      `.data-table`. Then `grep -rn "admin-table" GHCAA.Web/src` to confirm no other file references it
      as a CSS selector; if the SCSS for `.admin-table` is now dead, delete that SCSS block.
@@ -2366,7 +2366,7 @@ attribute, so assigning one grants zero additional access.
      one of the four, add it as a new lettered sub-item here (49.4.E, .F, ...) with the exact line
      number found, rather than fixing silently in the same pass — keeps this checklist auditable.
 
-49.5 [TODO] **Test coverage for all new/changed endpoints above.** Add or extend
+49.5 [TODO] **Priority: P2.** **Test coverage for all new/changed endpoints above.** Add or extend
 `GHCAA.Tests/Controllers/RolesControllerTests.cs` (new file if it doesn't exist yet) covering:
 `DisableUser`, `EnableUser`, `ResetPasswordAdmin` (system-admin version) from 49.2.A/49.3.A, plus the
 still-open pre-existing gap from 47.13.3 (`CreateAdmin`, `CreateRole`, `AssignRole`, `RemoveRole`) so
@@ -2447,14 +2447,14 @@ pixel-exact, forgery/legal-fidelity risk). The existing try/catch already falls 
 decode failure, so a non-image file mistakenly tagged with a compressible type degrades safely. The
 output extension is only forced to `.jpg` for the three compressible types (`willCompress` flag),
 never for the excluded types.
-51.2 [TODO] Add a real hard-cap enforcement step: after the existing quality-drop (85%→70%) still
+51.2 [TODO] **Priority: P2.** Add a real hard-cap enforcement step: after the existing quality-drop (85%→70%) still
 exceeds the target, downscale image dimensions (e.g. `Mutate(x => x.Resize(...))`, stepping the max
 dimension down, not just quality) and re-encode, looping until under the cap or a sane minimum
 dimension floor is hit — so "512kb max" is an actual guarantee, not best-effort. Introduce a distinct
 hard-cap constant (`Constants.Defaults`: e.g. `MaxImageSizeKB = 512`) separate from the existing
 "aim for good quality" `TargetImageSizeKB` (currently 350, keep as the first-pass target below the
 hard cap).
-51.3 [TODO] File naming: give saved files a type-prefixed name (per user's explicit ask — "event_",
+51.3 [TODO] **Priority: P2.** File naming: give saved files a type-prefixed name (per user's explicit ask — "event_",
 "album_", "member_" or similarly descriptive, not an opaque GUID) instead of today's
 `{Guid}_{originalFileName}` in `SaveFileAsync`'s `uniqueName` — e.g. `photo_`, `galleryphoto_`,
 `newsimage_` prefixes keyed off `uploadType`, still GUID-suffixed for uniqueness.
@@ -2462,13 +2462,13 @@ Note: this is about the live upload pipeline going forward; the 6 gallery albums
 from `GHC\images\albums\` this session already use a hand-applied `album_<slug>_NN.ext` convention
 under `GHCAA.Web/public/assets/gallery/` (bundled web assets, not this upload pipeline) and don't need
 touching for this.
-51.4 [TODO] Tests: extend `LocalFileStorageService` coverage (`LocalFileStorageServiceTests.cs` exists
+51.4 [TODO] **Priority: P2.** Tests: extend `LocalFileStorageService` coverage (`LocalFileStorageServiceTests.cs` exists
 today but only ever exercises `FileUploadType.Photo` with compression disabled) for: compression
 actually firing on `GalleryPhoto`/`NewsImage`, confirming it still does NOT fire on
 `PaymentProof`/`Certificate`/`Signature`/`NoticeDocument`, the hard-cap resize loop (51.2) actually
 converging under 512KB on a large fixture image, graceful fallback on a non-image input tagged with a
 compressible type, and the new filename prefix per type (51.3).
-51.5 [TODO] Admin-configurable file storage settings — today `ImageCompressionEnabled` /
+51.5 [TODO] **Priority: P3.** Admin-configurable file storage settings — today `ImageCompressionEnabled` /
 `ImageCompressionQuality` / `ImageCompressionFallbackQuality` / `ImageCompressionTargetSizeKB` /
 `MaxFileSizeBytes` only live in `appsettings.json` (`Constants.ConfigKeys`), so tuning them needs a
 redeploy. Move them into the existing admin-editable `OrganizationConfig` row (single-row
@@ -2510,7 +2510,7 @@ new methods (required to keep implementing the interface) and added a plain `tes
 icons render for an admin role and that tapping them calls through to the service. The existing
 `member_gallery` golden is unaffected — it renders as role `'Member'`, and the new controls are
 admin-only.
-52.5 [TODO] Not addressed here (out of scope): mobile's `admin_modules.dart` has a separate, simpler
+52.5 [TODO] **Priority: P3.** Not addressed here (out of scope): mobile's `admin_modules.dart` has a separate, simpler
 "quick create gallery" dialog (posts straight to `/gallery/admin` with `isFeatured` hardcoded
 `false`) — a duplicate, lighter-weight creation shortcut on the admin dashboard tile grid, distinct
 from `gallery_screen.dart`'s own create flow. Left as-is; consolidating the two creation entry points
@@ -4680,25 +4680,36 @@ acceptance testing) for the ASVS report, and §2.5.1 cited §8.14 and §6.13 whe
 correct. All three passed `--strict`, because the checker verifies that figures and tables are named
 and does not verify that a section reference resolves.
 
-78.8 [TODO] **Priority: P2. Depends on 78.7.** Add a section-reference check to `lint.py`: every `§n.m`
-occurring in the text must resolve to a heading that exists in the manuscript. Add a `--refs` listing
-mode to the same check that prints every reference with its surrounding clause, so that the SR-5 pass
-in 78.13 can be worked through mechanically rather than by re-reading each chapter.
-**Acceptance:** the check fails the build when given any of the three references corrected in 78.7,
-and `build.py --strict` remains clean against the current tree.
+78.8 [DONE 2026-09-03] **Priority: P1.** `docs/book/build/prose.py` written, stdlib only, two modes.
 
-78.13 [TODO] **Priority: P2. Depends on 78.8.** Apply SR-5 to the drafted chapters. The manuscript
-carries 357 section references, of which roughly 178 name a number with no indication of what is at
-the other end. Each one that leaves the reader unable to continue without turning back gains a short
-clause naming its subject; a reference whose sentence already says what is there is left alone.
-Work chapter by chapter rather than by search and replace, since the right clause depends on what the
-sentence has already established.
-**Acceptance:** no reference in chapters 1 to 6 reads as a bare number where the destination is not
-already named in the sentence; `build.py --pdf --strict` clean; and the chapters written after this
-date follow SR-5 as they are drafted, so the pass is not repeated.
+`prose.py refs` builds an index of all 271 section headings and reports three things: references that
+resolve to no section, references in prose that carry no clause naming the destination (SR-5), and
+references inside table cells and the figure appendix, where a bare number is correct and the rule
+does not apply. Table references are still listed under `--tables`, with the destination title, so a
+wrong target inside a table cannot hide behind the exemption. Printing the destination title beside
+every reference is what makes a wrong target visible without opening the chapter, and it is how all
+nine above were found.
 
-  This session's own edits already follow SR-5 and are the worked example: the outline's §3.10 entry,
-  the three reduction disclosures in §4.5, and contribution 1 in the front matter.
+`prose.py prose` flags sentences likely to need a second reading: over sixty words, or over
+forty-five with four or more commas, or matching one of fourteen construction patterns. It is a
+filter and not a judge. Across the six drafted chapters it flags 59 sentences, of which 11 were
+worth changing; the rest are long because they carry a signposted list, and length alone is not the
+fault the rule names.
+
+**Acceptance met.** Nothing is silently excluded, and the two false-positive classes found while
+running it were fixed rather than tolerated: content words are stemmed to six characters so
+"architecture" in a sentence counts as naming a section titled "Architectural", and the sentence
+splitter accepts a sentence opening with a code span, which had been merging two sentences into one
+and inflating a 147-word false alarm.
+
+**Not yet wired into `build.py --strict`.** Deliberate: 167 bare references remain across the book,
+most of them in the seven unwritten chapters, so a gate today would fail every run for reasons the
+author cannot yet fix. Wire it in when Chapter 12 is drafted, and only then.
+
+78.13 [DONE 2026-09-03] **Priority: P2.** SR-5 applied to the drafted chapters, in the same reading
+as the plain-language sweep, because reading a chapter twice for two rules wastes the second pass.
+Closed under 79.7, which records the per-chapter counts and the nine references that resolved to the
+wrong section.
 
 78.9 [TODO] **Priority: P1. Depends on 78.4.** Administer the evaluation sessions: ordinary members
 plus the three office holders, at least half of the member sessions on a handset, against the
@@ -4747,23 +4758,9 @@ severity guidance and the session README's instruction not to help. These files 
 mid-session with a participant waiting, which makes them the least acceptable place for an elegant
 sentence.
 
-79.2 [TODO] **Priority: P1.** Sweep the six drafted chapters and the front matter, 4,883 lines.
-Checked continuously against the banned-word list, never read against plain construction. Do it in
-the same pass as the SR-5 cross-reference work in 78.13, since both require reading each chapter once
-with a pen and reading it twice wastes the effort.
-**Acceptance:** each chapter read end to end; every sentence that needs a second reading either
-simplified or left with a note saying why the longer form is required; `build.py --pdf --strict`
-clean afterwards.
-
-  Progress: Chapter 1 done 2026-09-03 as the pilot, both rules applied in one reading. Twelve edits
-  stand: five sentences simplified, seven references given their subject. Most of Chapter 1 was left
-  alone, which is the expected result for prose that was already written to the narrow rule; a sweep
-  that rewrites every paragraph has misunderstood the instruction.
-
-  One edit was reverted during the pass and is recorded because it generalises. Adding "the account of
-  current practice" after a reference to §1.2 restated what the sentence had already said two clauses
-  earlier. A clause that repeats the sentence is worse than the bare number, so SR-5 is satisfied by
-  the sentence naming the destination, wherever the naming happens to sit.
+79.2 [DONE 2026-09-03] **Priority: P1.** Chapters 2 to 6 and the front matter swept. Closed under
+79.7, which records the counts, and under 78.8, the checker written so the sweep did not mean reading
+4,475 lines by eye.
 
 79.3 [TODO] **Priority: P2.** Sweep `docs/*.md`, 55 files and about 10,885 lines, and the three
 root-level markdown files (`README.md`, `CLAUDE.md`, `GEMINI.md`). Priority goes to the documents a
@@ -4843,32 +4840,6 @@ patterns instead of §6.14 on design verification, and Table 2.3 sent the versio
 §7.9 on real-time features instead of §7.12 on the constitution pipeline. A reader following any of
 these would have found a section on an unrelated subject.
 
-78.8 [DONE 2026-09-03] **Priority: P1.** `docs/book/build/prose.py` written, stdlib only, two modes.
-
-`prose.py refs` builds an index of all 271 section headings and reports three things: references that
-resolve to no section, references in prose that carry no clause naming the destination (SR-5), and
-references inside table cells and the figure appendix, where a bare number is correct and the rule
-does not apply. Table references are still listed under `--tables`, with the destination title, so a
-wrong target inside a table cannot hide behind the exemption. Printing the destination title beside
-every reference is what makes a wrong target visible without opening the chapter, and it is how all
-nine above were found.
-
-`prose.py prose` flags sentences likely to need a second reading: over sixty words, or over
-forty-five with four or more commas, or matching one of fourteen construction patterns. It is a
-filter and not a judge. Across the six drafted chapters it flags 59 sentences, of which 11 were
-worth changing; the rest are long because they carry a signposted list, and length alone is not the
-fault the rule names.
-
-**Acceptance met.** Nothing is silently excluded, and the two false-positive classes found while
-running it were fixed rather than tolerated: content words are stemmed to six characters so
-"architecture" in a sentence counts as naming a section titled "Architectural", and the sentence
-splitter accepts a sentence opening with a code span, which had been merging two sentences into one
-and inflating a 147-word false alarm.
-
-**Not yet wired into `build.py --strict`.** Deliberate: 167 bare references remain across the book,
-most of them in the seven unwritten chapters, so a gate today would fail every run for reasons the
-author cannot yet fix. Wire it in when Chapter 12 is drafted, and only then.
-
 79.8 [DONE 2026-09-03] **Priority: P2.** Tracker terminology renamed from Area to Work Package
 throughout, headings and contents together, and every reference outside the tracker moved with it.
 188 replacements across 19 files: 77 headings and 144 occurrences in this file, plus the three book
@@ -4891,3 +4862,44 @@ would otherwise have sent a future session to a path that no longer exists, and 
 the class map wrongly placed it at the repository root when it has always been under `docs/`.
 
 `build.py --pdf --strict` clean, 104 pages, 264 folios; `wbs.py --check` exit 0.
+
+79.9 [DONE 2026-09-03] **Priority: P2.** Every open item now carries a priority. The 59 that never
+had one were written before the P-level discipline and were being estimated at a flat two hours each,
+whatever they actually involved, which made the still-to-do figure a guess dressed as arithmetic.
+
+Two are P0, and they are the same fact recorded twice: `docs/deploy_connection.txt` is still a tracked
+file holding live credentials including the JWT signing key (48.2, and 47.10 for the rotation that
+has not happened). Three are P1 on an exploit path rather than on inconvenience: a custom role can be
+created that scopes nothing (49.1), admin-initiated password reset carries a security fix (49.3), and
+48.13 tracks the same credentials file from the audit side.
+
+The rest went P2 where the work is wanted and scheduled, P3 where it is wanted and unscheduled, and
+P4 for the large speculative items: the Isar/Drift local database rewrite (8.5), the oral-history
+archive (37.6), geographic chapters (37.9) and the scholarship programme (37.2). Each call is a
+judgement and the reasoning sits in `triage.py`'s comments beside the level, so a reader can disagree
+with one item rather than with the pass.
+
+37.0 was given P2 rather than closed. It states that nothing in Work Package 37 can reach preprod
+under `EnsureCreated()`, and `MigrationBootstrapper` replaced that call on 2026-08-27, so the item is
+probably already satisfied. Probably is not good enough to mark something done, and verifying it is
+its own task.
+
+79.10 [DONE 2026-09-03] **Priority: P1.** Two defects in the effort model, both found by doing 79.9
+rather than by reading the script.
+
+`PRIORITY` in `wbs.py` matched `P[0-3]`, so every P4 item fell through to the untriaged bucket and was
+costed at two hours instead of one, and the still-to-do table had no P4 row to print it in. Eight
+items were already mis-costed that way before this session added more. Both fixed; the table now
+carries P0 through P4 and the untriaged row disappears when nothing is untriaged, which is now.
+
+`SOURCE` counted C#, TypeScript, SCSS, Dart and tests, so the eight build scripts under
+`docs/book/build/` were sized nowhere, while their commit days were already inside the measured
+figure because C17's path filter is `docs`. The evidenced figure and the reuse-adjusted figure were
+therefore covering different scopes, and part of the ratio Chapter 11 reports between them was that
+mismatch rather than the unrecorded reading and debugging the chapter attributes it to. `INSTRUMENT`
+now counts them, 3,551 lines, reported on their own line and folded into nothing: they are research
+instrumentation, not the system the Association received, and no reduction factor is applied because
+framework scaffolding and prior reuse have no meaning for a stdlib-only script.
+
+Effect on the figures: still to do 73 days to 69, at completion 351 days to 347. The system size is
+unchanged at 105,618 lines and 703 nominal days, which is the point of reporting the scripts apart.

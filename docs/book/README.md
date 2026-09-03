@@ -40,6 +40,7 @@ into the book by accident.
 | `python docs/book/build/renumber.py --apply` | renumbers figures and tables into bound order and rebuilds the contents and the front-matter lists |
 | `python docs/book/build/prose.py refs` | checks every section reference: none broken, and each names what is at the destination. Prints the destination title beside every reference, which is how a reference that resolves to the wrong section is caught |
 | `python docs/book/build/prose.py prose 03` | lists the sentences in a chapter likely to need a second reading. A filter for a human pass, not a gate |
+| `python docs/book/build/tracker_page.py` | writes `tracker.html`, a filterable view of every open item in `docs/TODO.md`. Generated, git-ignored, republish after a tracker change |
 | `python docs/book/build/wbs.py` | regenerates Chapter 11 evidence from git and `docs/TODO.md`: component durations, the critical path, task counts, and how the work arrived. `--check` fails if a component has no commits or no tracker areas; `--sync` writes a `<!-- wbs: ... -->` marker into any tracker area that has none, so a newly added area maps itself |
 
 Python 3 only — no pandoc, no Node packages, no `node_modules`. The PDF step additionally needs

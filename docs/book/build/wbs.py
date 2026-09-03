@@ -280,6 +280,16 @@ SOURCE = [
     ("Automated tests", 20, [("GHCAA.Tests", ".cs")]),
 ]
 
+# The build scripts are hand-written and their commit days are already measured,
+# C17's path filter being `docs`, but their lines are not part of the delivered
+# system: nobody in the Association runs them. They are reported on their own so
+# the size figure and the commit-day figure cover the same scope, which they did
+# not until 2026-09-03. The reduction factors are not applied to them; framework
+# scaffolding and prior reuse have no meaning for a stdlib-only script.
+INSTRUMENT = [
+    ("Dissertation build scripts, Python", [("docs/book/build", ".py")]),
+]
+
 # Multiplicative reductions against the nominal figure. Each is a judgement and
 # is stated as one; a reader who disagrees can change the factor and redo the
 # sum. They multiply rather than add because they compound: a screen built from
@@ -317,7 +327,7 @@ REUSE = [
 # the tree, not estimated in prose: the sections come from the placeholders the
 # book build reports, and the tracker items from the open entries in TODO.md.
 # The rates are judgements and are printed with the arithmetic.
-REMAINING_RATES = {"P0": 4.0, "P1": 4.0, "P2": 2.0, "P3": 1.0, "none": 2.0}
+REMAINING_RATES = {"P0": 4.0, "P1": 4.0, "P2": 2.0, "P3": 1.0, "P4": 1.0, "none": 2.0}
 SECTION_HOURS = 1.5      # writing one unwritten section of a chapter
 ARTEFACT_HOURS = 0.5     # drawing one figure or building one table
 
@@ -357,7 +367,7 @@ HOURS_PER_WORKDAY = 8
 PLACEHOLDER = re.compile(r"^\s*\*\[", re.M)
 OPEN_ITEM = re.compile(
     r"^\s*\d+\.\d+[a-z]?\s*\[TODO\][^\n]*(?:\n(?!\s*\d+\.\d+[a-z]?\s*\[)[^\n]*)*", re.M)
-PRIORITY = re.compile(r"\*\*Priority: (P[0-3])")
+PRIORITY = re.compile(r"\*\*Priority: (P[0-4])")
 
 
 def remaining():
@@ -414,6 +424,26 @@ def carried():
     for label, paths in CARRIED:
         rows.append((label, sum(_count(folder, suffix) for folder, suffix in paths)))
     return rows, sum(count for _label, count in rows)
+
+
+def instrument_size():
+    """(label, lines) for research instrumentation, counted the same way."""
+    out = []
+    for label, roots in INSTRUMENT:
+        lines = 0
+        for folder, suffix in roots:
+            base = os.path.join(REPO, folder)
+            for here, dirs, files in os.walk(base):
+                # `_to_delete` holds superseded drafts, kept for reference only.
+                dirs[:] = [d for d in dirs if not d.startswith("_")]
+                for name in files:
+                    if not name.endswith(suffix):
+                        continue
+                    with io.open(os.path.join(here, name), encoding="utf-8",
+                                 errors="replace") as fh:
+                        lines += sum(1 for _ in fh)
+        out.append((label, lines))
+    return out
 
 
 def source_size():
@@ -682,6 +712,16 @@ def report(markdown=False):
     nominal = hours / HOURS_PER_WORKDAY
     print("\nnominal, built conventionally : %.0f hours, %.0f working days" % (hours, nominal))
 
+    print("\nWritten for the research, counted apart from the system:\n")
+    if markdown:
+        print("| Instrumentation | Lines |")
+        print("|---|---|")
+    for label, lines in instrument_size():
+        print(bar + sep.join([label, str(lines)]) + end)
+    print("\nThese lines are not in the figure above and no reduction factor is applied to\n"
+          "them. Their commit days are already inside the measured figure, C17's path\n"
+          "filter being `docs`, so counting the lines again would count the same work twice.")
+
     print("\nCarried over from the author's own 2024 projects, measured from the tree:\n")
     if markdown:
         print("| Module | Lines |")
@@ -729,7 +769,7 @@ def report(markdown=False):
         hours_left += count * rate
         print(bar + sep.join([label, str(count), "%.1f h each" % rate,
                               "%.0f" % (count * rate)]) + end)
-    for priority in ("P0", "P1", "P2", "P3", "none"):
+    for priority in ("P0", "P1", "P2", "P3", "P4", "none"):
         count = open_items.get(priority, 0)
         if not count:
             continue
@@ -853,8 +893,8 @@ def main(argv=None):
             if not sum(tasks[a] for a in area_list):
                 problems.append("%s (%s) has no tracker items; check its work packages" % (key, label))
         mapped = {a for _k, _l, al, _p, _pr in CODE for a in al}
-        # An area may name its own component in a wbs marker instead of being
-        # listed in CODE, which is how areas written from now on are mapped.
+        # A work package may name its own component in a wbs marker instead of
+        # being listed in CODE, which is how packages written from now on are mapped.
         mapped |= {a for a, fields in stated.items() if fields.get("component")}
         loose = sorted(set(tasks) - mapped, key=int)
         if loose:
