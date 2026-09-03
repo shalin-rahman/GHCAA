@@ -1,4 +1,4 @@
-# Low Coverage Report (Generated on 2026-05-26)
+# Test coverage snapshot, 26 May 2026
 
 > ## STALE — do not quote these numbers (reviewed 2026-08-22)
 >
@@ -14,7 +14,7 @@
 > 335 tests**. Two previously-zero-coverage classes not listed below were closed out this session
 > (identified by a targeted gap analysis, not a coverage-report regeneration): `MemberImportService`
 > (639 lines, the largest untested backend unit — bulk CSV import, reflection-based mapping) and
-> `GalleryService` (Area 40 approval workflow). New files: `GHCAA.Tests/Services/MemberImportServiceTests.cs`
+> `GalleryService` (Work Package 40 approval workflow). New files: `GHCAA.Tests/Services/MemberImportServiceTests.cs`
 > (13 tests), `GHCAA.Tests/Services/GalleryServiceTests.cs` (17 tests). Frontend:
 > `org-config.service.spec.ts` added for the highest-fan-in Angular service (18 consumers), which
 > also had zero coverage. `FinancialService`/`IDCardService` rows below are still not independently
@@ -34,7 +34,7 @@
 >
 > **What was still true (before that fix):** `DateFormatConverter` / `NullableDateFormatConverter` remained at **0.00 /
 > 0.00** — genuinely untested as of 2026-08-22, not just stale data. That was tracked as **TODO 27.7**
-> and is the highest-value remaining gap in Area 27, because those two converters sit in the global
+> and is the highest-value remaining gap in Work Package 27, because those two converters sit in the global
 > `JsonSerializerOptions` (`GHCAA.API/Program.cs`, ~lines 137–138) and therefore govern the
 > serialization of **every** `DateTime` crossing the wire, in both directions, for every endpoint.
 > A silent regression there re-breaks the ISO-8601 contract settled in 29F.3 across the whole API at
@@ -80,7 +80,7 @@
 
 ### Still outstanding (2026-08-22)
 
-5. **`DateFormatConverter` + `NullableDateFormatConverter` have zero tests** — `GHCAA.API/Utils/DateFormatConverter.cs`, registered globally in `GHCAA.API/Program.cs` (~137–138). Highest-priority gap in Area 27: they mediate every `DateTime` on every request and response, so an untested change there breaks the whole API's date contract silently. Tracked as **TODO 27.7**.
+5. **`DateFormatConverter` + `NullableDateFormatConverter` have zero tests** — `GHCAA.API/Utils/DateFormatConverter.cs`, registered globally in `GHCAA.API/Program.cs` (~137–138). Highest-priority gap in Work Package 27: they mediate every `DateTime` on every request and response, so an untested change there breaks the whole API's date contract silently. Tracked as **TODO 27.7**.
 6. **No coverage threshold is enforced** in CI (**TODO 27.8**). `coverlet.collector 6.0.2` is referenced, so coverage can be collected locally, but nothing fails a build on regression. A per-file ≥80% gate would fail today.
 
 Once additional tests are written, re‑run the coverage generation and update this report.

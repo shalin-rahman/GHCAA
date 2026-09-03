@@ -8,12 +8,12 @@ A digital platform for the Govt. Haraganga College Alumni Association (GHCAA), c
 | --- | --- |
 | [Software Requirements Specification](docs/SRS.md) | Full functional and non-functional specification |
 | [Feature Catalog](docs/FEATURES.md) | Module-by-module features with screens, endpoints, and rules |
-| [Architecture & Data Flow](docs/architecture_data_flow.md) | System diagrams and data-flow blueprints |
+| [Architecture & Data Flow](docs/ARCHITECTURE.md) | System diagrams and data-flow blueprints |
 | [Payment Workflow](docs/PAYMENT_GATEWAY_WORKFLOW.md) | Manual and gateway payment handling |
 | [Config-Driven Framework](docs/CONFIG_DRIVEN_FRAMEWORK.md) | Runtime organization configuration model |
 | [Render Deployment](docs/RENDER_DEPLOYMENT.md) | Combined API + web deployment guide |
 | [Task Backlog](docs/TODO.md) | Delivered and planned work, tracked by area |
-| [Execution Plans](docs/PLAN.md) | Phased implementation plans |
+| [Execution Plans](docs/FORUM_PLAN_2026-05.md) | Phased implementation plans |
 
 ---
 
@@ -331,7 +331,7 @@ Additional workflows handle release and infrastructure: `main.yml` (build/packag
 Delivered and planned work is tracked in the repository:
 
 - **[Task Backlog](docs/TODO.md)** — the master tracker. Completed areas are marked done; open items capture the remaining full-stack review findings and enhancements.
-- **[Execution Plans](docs/PLAN.md)** — phased implementation plans mapping backlog items to concrete steps.
+- **[Execution Plans](docs/FORUM_PLAN_2026-05.md)** — phased implementation plans mapping backlog items to concrete steps.
 
 At a glance:
 

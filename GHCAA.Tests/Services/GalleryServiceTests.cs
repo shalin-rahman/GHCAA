@@ -10,8 +10,8 @@ using NUnit.Framework;
 
 namespace GHCAA.Tests.Services;
 
-// Coverage for the Area 40 member-album approval workflow (previously zero test coverage
-// despite the migration/bootstrap issues that shipped alongside it — see Area 41 postmortems).
+// Coverage for the Work Package 40 member-album approval workflow (previously zero test coverage
+// despite the migration/bootstrap issues that shipped alongside it — see Work Package 41 postmortems).
 [TestFixture]
 public class GalleryServiceTests : TestBase
 {

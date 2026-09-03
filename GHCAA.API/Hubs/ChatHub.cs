@@ -13,7 +13,7 @@ namespace GHCAA.API.Hubs
         private readonly IChatService _chatService;
         // Tracks userId → connectionId for presence; ConcurrentDictionary is safe under concurrent
         // OnConnectedAsync / OnDisconnectedAsync calls. Note: last-write-wins for multi-device sessions —
-        // see TODO 24.6 in Area 24 for full multi-device tracking if needed.
+        // see TODO 24.6 in Work Package 24 for full multi-device tracking if needed.
         private static readonly ConcurrentDictionary<string, string> _connections = new();
 
         public ChatHub(IChatService chatService)

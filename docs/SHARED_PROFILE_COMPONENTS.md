@@ -1,4 +1,4 @@
-# Design: Shared Member-Data Sub-Components (TODO 33.12)
+# Shared member-data sub-components — design for TODO 33.12
 
 Status: **Design only — not implemented.** This document proposes an approach for a future
 implementation task; no code changes are included in this pass.
@@ -9,7 +9,7 @@ implementation task; no code changes are included in this pass.
 modal in `admin/members/admin-members.html` (opened via `openDetail()` in `admin-members.ts`)
 both render the same underlying `Member` entity — EC/governance history, academic history,
 professional history, emergency contact, address — but each view is a fully independent
-template. Whenever one is edited (as in Area 33's 33.5–33.10 fixes), the other silently drifts
+template. Whenever one is edited (as in Work Package 33's 33.5–33.10 fixes), the other silently drifts
 out of sync in section order, labels, and visual treatment (raised as findings in 33.1 and
 33.2, triaged as 33.12).
 

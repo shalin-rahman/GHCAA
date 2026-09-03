@@ -16,6 +16,16 @@ cadence, no heading-banner comments. A comment earns its place by explaining a g
 assumption a caller has to know. Where a file already has a comment style, match it rather than
 imposing this one on lines nobody touched.
 
+Restated and widened 2026-09-03: write everything in plain, simple words. This is not only about
+avoiding the words a model reaches for. It rules out the elegant sentence as well: the clever
+construction, the abstract noun where a verb would do, the phrase that sounds considered but takes
+two readings. If a shorter, more ordinary sentence says the same thing, it is the correct sentence.
+A reader should never have to work out what a line means before they can act on it.
+
+This holds for the dissertation too, where a plain sentence is not a lesser academic register but a
+clearer one. It holds for the instruments in `docs/book/instruments/`, which somebody has to follow
+while running a session, and for anything else the project produces.
+
 The rule is enforced where it can be and by attention where it cannot. `docs/book/build/lint.py`
 carries the banned-vocabulary list and fails `build.py --strict` for the dissertation; the root
 `CLAUDE.md` states the same rule for code and docs, and it is checked by review. If a check ever has
@@ -36,6 +46,33 @@ Two consequences follow. Anything an item quotes from elsewhere is a pointer, no
 records what is true, including where the work was wrong: an entry that reads better than what
 happened is a defect in the record, and the record is the only project-management evidence this
 project has.
+
+**SR-4 — Entries are written by an analyst for a developer.** Set 2026-09-03. Every item, open or
+closed, reads as an analyst, architect or QA engineer specifying work for a developer to carry out.
+It never reads as somebody's private note to self, and it never narrates whoever wrote it. No first
+person, no reasoning aloud, no self-assessment.
+
+An open item states the work required and carries an **Acceptance:** line saying how completion will
+be judged, which is what makes it an assignment rather than an intention. A closed item records what
+was delivered and what verified it, being a clean strict build, a test, or a command that can be
+re-run. Findings are raised rather than confessed: a defect is raised against a section, its impact is
+stated, and work ruled out is recorded as out of scope with the reason.
+
+The unit of work is a **work package**, not an "area". The word was changed on 2026-09-03 because a
+work package is the standard breakdown unit, which is what `docs/book/build/wbs.py` computes from
+these headings and what Chapter 11 calls them. Both heading forms parse while the rename runs.
+Work Package 78 is the pattern to follow.
+
+**SR-5 — A cross-reference carries its subject, not only its number.** Set 2026-09-03. Applies to the
+dissertation, the outline and every document in `docs/`. Write "§12.8, where the research questions
+are answered", not "§12.8". The number stays, so the reader can still turn to it; the phrase is there
+so that they do not have to. One clause is enough, and it names what is at the destination rather than
+repeating what the sentence already said.
+
+The reason is that a reference the reader has to resolve is a reference most readers skip, and a
+dissertation that only makes sense to somebody willing to page back and forth does not survive an
+examiner reading it once, straight through. The same rule covers a reference to a figure, a table, a
+requirement identifier or a domain constraint.
 
 **SR-2 — Every area carries its schedule facts inline.** Set 2026-09-03. Each area heading is
 followed by a metadata line so that the activity list, the durations and the dependency network can be
@@ -91,10 +128,10 @@ risk on the same basis.
   `build_output/appsettings*.json`, `docs/RENDER_DEPLOYMENT.md`. Needs the user to rotate every
   credential via the relevant dashboards, then `git rm --cached` + `.gitignore` + a history purge
   (`git filter-repo`). No coding-session action can close this.
-- **48.13** — The live SuperAdmin password sat in git history (`docs/BUSINESS_FUNCTIONALITY_REVIEW_PLAN.md`)
+- **48.13** — The live SuperAdmin password sat in git history (`docs/BUSINESS_REVIEW_PLAN.md`)
   since before it was even set as the live password. Doc text is redacted, but the password itself
   still needs an independent rotation — redacting the doc doesn't undo the history exposure.
-- **48.12** — Remaining unfixed Low findings from the Area 48 security audit: `MessagingController.MarkAsRead`
+- **48.12** — Remaining unfixed Low findings from the Work Package 48 security audit: `MessagingController.MarkAsRead`
   missing ownership check; `FinancialsController.RecordPayment` trusts a client-supplied `MemberId`;
   refresh-token replay isn't detected/revoked; `MemberImportController` upload skips file validation;
   raw `FullName` interpolated into an HTML email body (XSS-adjacent).
@@ -108,7 +145,7 @@ risk on the same basis.
   secret in the same workflow; no NuGet lockfile; no Docker base-image digest pin.
 - **49.1–49.3** — Custom roles grant zero actual permissions (label-only — misleads admins); no
   disable/enable for system-admin accounts; no admin-initiated password reset for system admins. Each
-  has a "DECISION NEEDED" gate before work starts (see Area 49 for the actual questions).
+  has a "DECISION NEEDED" gate before work starts (see Work Package 49 for the actual questions).
 - **46.5** — Org-wide Financial Ledger has zero rows post-import; aggregate income/expense view doesn't
   reflect the ~৳47,000 in per-member fees that ARE recorded correctly.
 - **34.D10** — Likely already superseded by `MigrationBootstrapper` (see `gotcha_ensurecreated_no_op_existing_db`)
@@ -121,7 +158,7 @@ risk on the same basis.
 - **51.2–51.5** — File-storage hardening: no real hard-cap on image size, opaque filenames, missing
   tests, compression settings not admin-configurable yet.
 - **47.10** — Missing profile photos for most of the 631 bulk-imported alumni (data gap, not a bug).
-- **43.4** — Live/manual verification that the Area 43 exception-handling/logging sweep actually fires.
+- **43.4** — Live/manual verification that the Work Package 43 exception-handling/logging sweep actually fires.
 - **27.8** — No enforced ≥80%/file coverage threshold (would fail today if enforced).
 - **28.32 / 28.33 / 8.8** — i18n (English+Bengali): dependencies present, extraction not started.
 - **34.D7** — 21 stale mobile golden baselines need regenerating (unrelated housekeeping).
@@ -133,12 +170,12 @@ risk on the same basis.
   refactor pass, run module-by-module via graphify rather than one blind full-repo sweep.
 
 ### P3 — LOW / PLAN-ONLY (large unbuilt features, no current pressure)
-- **Area 37** (37.2–37.10) — scholarships, fundraising, cohorts/reunions, oral-history archive,
+- **Work Package 37** (37.2–37.10) — scholarships, fundraising, cohorts/reunions, oral-history archive,
   bilingual UI, credential verification, geographic chapters, annual impact report.
 - **6.2** — Alumni referral system for jobs/internships.
 - **61.3** — Drop the `Summary:`-style comment banner in `GHCAA.Tools/db_diag.cs` next time that file is touched.
 
-## AREA 1: MOBILE PLATFORM STABILITY & PARITY
+## WORK PACKAGE 1: MOBILE PLATFORM STABILITY & PARITY
 
 1.1  [DONE] Fix AdminLedgerScreen class name mismatch in app_router.dart
 1.2  [DONE] Audit/Match Registration Wizard labels to Web equivalents
@@ -165,7 +202,7 @@ risk on the same basis.
 1.23 [DONE] Fix: Gatekeeper QR scanner overlay rendering
 1.24 [DONE] Integrated skeleton/shimmer screens for all async loading states
 
-## AREA 2: CORE ALUMNI MANAGEMENT & REGISTRY
+## WORK PACKAGE 2: CORE ALUMNI MANAGEMENT & REGISTRY
 
 2.1  [DONE] Member Academic/Professional record migration and mapping
 2.2  [DONE] Public Directory Enhancements (Batch/Type/Category visibility)
@@ -176,7 +213,7 @@ risk on the same basis.
 2.7  [DONE] Profile UI refinement (Education/Professional record edit buttons)
 2.8  [DONE] Create offline data collection templates (Google Forms) for manual member & event migration matching DB validations
 
-## AREA 3: COMMUNICATION & SOCIAL
+## WORK PACKAGE 3: COMMUNICATION & SOCIAL
 
 3.1  [DONE] Real-time Communication Bridge (SignalR Admin Alerts)
 3.2  [DONE] Member Chat/Noticeboard Framework & Services
@@ -186,7 +223,7 @@ risk on the same basis.
 3.6  [DONE] Networking: Mentorship request flow in Job Hub
 3.7  [DONE] Discussion forums and community groups
 
-## AREA 4: EVENTS & GATHERINGS
+## WORK PACKAGE 4: EVENTS & GATHERINGS
 
 4.1  [DONE] Automated registration closing for past/due events
 4.2  [DONE] Landing Page: Featured event display with last closed history
@@ -195,7 +232,7 @@ risk on the same basis.
 4.5  [DONE] My Participations: Payment gateway integration
 4.6  [DONE] Advanced: Waitlist management and QR Attendance scanning
 
-## AREA 5: FINANCIAL & ADMIN GOVERNANCE
+## WORK PACKAGE 5: FINANCIAL & ADMIN GOVERNANCE
 
 5.1  [DONE] Smart Payment Gateway Automation (Webhooks for bKash/Nagad/SSL)
 5.2  [DONE] EC Management: Term configuration and role propagation
@@ -204,12 +241,12 @@ risk on the same basis.
 5.5  [DONE] Claims-based Auth: PermissionsMatrixScreen for role management
 5.6  [DONE] Governance Registry: Admin assignment UI
 
-## AREA 6: CAREER & OPPORTUNITIES
+## WORK PACKAGE 6: CAREER & OPPORTUNITIES
 
 6.1  [DONE] Professional Hub: Alumni directory LinkedIn-style filters
 6.2  [TODO] Alumni referral system for jobs and internships
 
-## AREA 7: SECURITY, INFRASTRUCTURE & HARDENING
+## WORK PACKAGE 7: SECURITY, INFRASTRUCTURE & HARDENING
 
 7.1  [DONE] API: Fix Member Login with NID (401 resolution)
 7.2  [DONE] API: Fix Password Reset timeout logic
@@ -241,7 +278,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 7.15 [DONE] Security: Social Auth (OAuth2) - LinkedIn/Google
 7.16 [TODO] Hardening: SSL Pinning and Binary Obfuscation
 
-## AREA 8: MOBILE ENGINEERING (TIER-1 STANDARDS)
+## WORK PACKAGE 8: MOBILE ENGINEERING (TIER-1 STANDARDS)
 
 8.1  [DONE] UI: Enforce 8pt grid and standard design tokens globally
 8.2  [DONE] Nav: Adaptive layout for Tablets/Pads (Sidebar architecture)
@@ -255,7 +292,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 8.10 [DONE] Quality: Global Error Boundary and Sentry/Firebase tracing
 8.11 [DONE] CI/CD: Operationalize multi-environment pipelines (Preprod/Standard)
 
-## AREA 9: INSTITUTIONAL GOVERNANCE & QUALITY
+## WORK PACKAGE 9: INSTITUTIONAL GOVERNANCE & QUALITY
 
 9.1  [DONE] Digital Constitution: Versioned legal repository
 9.2  [DONE] Amendment Voting: Secure participation for verified alumni
@@ -266,7 +303,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 9.7  [DONE] Quality: GitHub PR Template + Sequential CI (API -> UI -> MOBILE)
 9.8  [DONE] Quality: Comprehensive Testing suite integration
 
-## AREA 10: USER FEEDBACK & RECENT ISSUES (PHASE 2)
+## WORK PACKAGE 10: USER FEEDBACK & RECENT ISSUES (PHASE 2)
 
 10.1 [DONE] Unify Profile Completeness Logic: Sync Backend (10 fields) with Mobile (11 fields)
 10.2 [DONE] Fix Web/Mobile 404s: Alias News/Pending, Networking/Directory, Financial/Ledger, Governance/Current, Governance/Constitution, Notification (case sensitivity)
@@ -280,7 +317,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 10.10 [DONE] Role Management: Fix session leakage where a member sees the Admin Dashboard/Badge after login
 10.11 [DONE] Data Display: Fix "Batch: N/A" for members (ensure PassingYear is correctly mapped and rendered)
 
-## AREA 11: API PARITY AUDIT & FIX LIST
+## WORK PACKAGE 11: API PARITY AUDIT & FIX LIST
 
 11.1 [DONE] Fix: api/governance/ec/current -> 404 (Controller route verified correct; path was correct)
 11.2 [DONE] Fix: api/governance/constitution -> 404 (Controller route verified correct)
@@ -292,7 +329,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 11.8 [DONE] Fix: auth role leakage - clear session completely before saving new login role
 11.9 [DONE] Fix: Mobile biometric (local_auth) crash on Flutter Web; guard with kIsWeb check
 
-## AREA 12: PROCESS & ENGINEERING STANDARDS
+## WORK PACKAGE 12: PROCESS & ENGINEERING STANDARDS
 
 12.1 [TODO] PROCESS: On every API endpoint change, add verification checklist task for Web + Mobile parity
 12.2 [TODO] PROCESS: Implement API Contract Registry (changelog of all endpoint changes + which clients updated)
@@ -301,7 +338,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 12.5 [TODO] Mobile: On any unhandled error, show option to "Send Report to Administrator" with log attachment
 12.6 [TODO] PROCESS: A task can only be marked as [DONE] after its tests have been successfully executed and passed.
 
-## AREA 13: VISUAL TESTING & QUALITY FREEZE
+## WORK PACKAGE 13: VISUAL TESTING & QUALITY FREEZE
 
 13.1 [DONE] API: Implement 'Seed Data' profile for visual tests (migration-safe, Visual env-gated)
 13.2 [DONE] Infra: Define Visual Test Storage (Baseline/Failure/Diff) — ARCH.md created
@@ -328,7 +365,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
      - [DONE] Auth: Login & Register screens           — goldens
 13.5 [DONE] Runner upgraded: -VisualOnly, -E2EOnly, -Suite, -UpdateBaselines, colored summary
 
-## AREA 14: FUNCTIONAL E2E (END-USER TESTING)
+## WORK PACKAGE 14: FUNCTIONAL E2E (END-USER TESTING)
 
 14.1 [DONE] Web: Playwright member journey (Login -> Dashboard -> ID Card -> Logout)
 14.2 [DONE] Mobile: Integration test journey (Login -> Dashboard -> ID Card -> Logout)
@@ -336,7 +373,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 14.4 [DONE] Mobile: Financial ledger verification E2E
 14.5 [DONE] Cross-Platform: Article contribution & editorial approval E2E (Web + Mobile)
 
-## AREA 15: SOCIAL AUTH & ONBOARDING
+## WORK PACKAGE 15: SOCIAL AUTH & ONBOARDING
 
 15.1 [DONE] API: Add GoogleId and FacebookId to User entity
 15.2 [DONE] API: Add IsProfileComplete to Member entity
@@ -346,7 +383,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 15.6 [DONE] Cross-Platform: Implementation of Onboarding Flow (Profile Setup -> Payment -> Approval)
 15.7 [DONE] Backend: Unit tests for Social Auth and Onboarding logic
 
-## AREA 16: POLLS & VOTING
+## WORK PACKAGE 16: POLLS & VOTING
 
 16.1 [DONE] Domain: Create Poll, PollOption, and PollVote models
 16.2 [DONE] API: IPollService and PollService implementation
@@ -356,7 +393,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 16.6 [DONE] Mobile: Member UI for Poll Voting & Results
 16.7 [DONE] Backend: Unit tests for Polls and Voting logic
 
-## AREA 17: REGRESSION & STABILITY
+## WORK PACKAGE 17: REGRESSION & STABILITY
 
 17.1 [DONE] API: Verify existing Auth flows (NID/Password) remain functional
 17.2 [DONE] API: Verify Member Registration and Approval workflows remain functional
@@ -364,7 +401,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 17.4 [DONE] Mobile: Verify full member lifecycle (Login -> Profile -> Dashboard)
 17.5 [DONE] Cross-Platform: Run all existing Playwright and Flutter integration tests
 
-## AREA 18: GENERAL MAINTENANCE & STABILITY
+## WORK PACKAGE 18: GENERAL MAINTENANCE & STABILITY
 
 18.1 [DONE] Mobile: Fix unused import in registration_visual_test.dart
 18.2 [DONE] Mobile: Upgrade Governance UI (Fonts, GlassContainer, Image resolution)
@@ -376,18 +413,18 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 18.8 [DONE] Backend: Update PostgreSQL password in appsettings.Development.json if SyncMembersForReal test fails locally
 18.9 [DONE] UI Audit: Review all SCSS files for hardcoded #fff or #000 that break theme accessibility
 
-## AREA 19: PAYMENT VERIFICATION & POLICY
+## WORK PACKAGE 19: PAYMENT VERIFICATION & POLICY
 
 19.1 [DONE] Payments: Verify Registration Fee configuration in Admin Portal
 19.2 [DONE] Payments: Verify Registration Fee status on Member Dashboard (Profile Completion Wizard)
 19.3 [DONE] Payments: Ensure Registration Fee is mandatory for all members as per latest policy
 
-## AREA 20: COMPREHENSIVE E2E COVERAGE (ALL FEATURES)
+## WORK PACKAGE 20: COMPREHENSIVE E2E COVERAGE (ALL FEATURES)
 
 20.1 [DONE] Web: Expand Playwright E2E suite to cover all core portal features (Messaging, Job Hub, Alumni Directory, Events, Gallery, Governance, My Articles, My Profile)
 20.2 [DONE] Mobile: Expand Flutter integration/visual tests to cover all core mobile features (Messaging, Job Hub, Alumni Directory, Events, Gallery, Governance, My Articles, My Profile, Admin Modules)
 
-## AREA 21: TEST DATA MANAGEMENT & VISUAL AUTOMATION
+## WORK PACKAGE 21: TEST DATA MANAGEMENT & VISUAL AUTOMATION
 
 21.1 [DONE] Quality: Create 'test-dataset.json' with comprehensive edge cases (Large names, missing photos, various membership tiers)
 21.2 [DONE] Quality: Implement 'scripts/setup-test-data.ps1' to inject test dataset into active environment (separate from seed)
@@ -395,7 +432,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 21.4 [DONE] Quality: Implement 'scripts/run-visual-tests.ps1' to execute all visual regressions with the test dataset
 21.5 [DONE] Quality: Integrate visual test report generation (HTML) for local review
 
-## AREA 22: PORTAL FEATURE HARDENING (E2E)
+## WORK PACKAGE 22: PORTAL FEATURE HARDENING (E2E)
 
 22.1 [DONE] E2E: Verify Messaging flow (Member <-> Admin) with real-time checks
 22.2 [DONE] E2E: Verify Job Hub (Post -> Review -> View) workflow
@@ -403,7 +440,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 22.4 [DONE] E2E: Verify Event Registration and QR generation flow
 22.5 [DONE] E2E: Verify Gallery upload and album organization (Admin side)
 
-## AREA 23: ECOSYSTEM-WIDE DATE STANDARDIZATION (dd-MM-yyyy)
+## WORK PACKAGE 23: ECOSYSTEM-WIDE DATE STANDARDIZATION (dd-MM-yyyy)
 
 > **HEADING SUPERSEDED — read 29F.3 first (noted 2026-08-22).** The `(dd-MM-yyyy)` in this
 > heading described the original intent, before **29F.3 [DONE]** settled the contract:
@@ -414,7 +451,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 > The contract is enforced entirely by `DateFormatConverter` / `NullableDateFormatConverter`
 > (`GHCAA.API/Utils/DateFormatConverter.cs`, registered globally in `Program.cs` ~137-138), and
 > **those two types have zero tests** — so nothing would fail if the format regressed back to the
-> heading's wording. Tracked as **27.7**; also flagged in `docs/low_coverage_report.md`.
+> heading's wording. Tracked as **27.7**; also flagged in `docs/COVERAGE_SNAPSHOT_2026-05-26.md`.
 
 23.1 [DONE] API: Implement DateFormatConverter for unified dd-MM-yyyy/ISO parsing
 23.2 [DONE] Web: Standardize all Angular date inputs to dd-mm-yyyy (Registration, Profile, Events, Admin)
@@ -423,7 +460,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 23.5 [DONE] Mobile: Update all screens (Registration, Profile, Events, Jobs, Gallery) to use standardized dates
 23.6 [DONE] E2E: Update Playwright test suite to use dd-mm-yyyy for all automated date entries
 
-## AREA 24: SECURITY HARDENING (from full-stack code review — 2026-05-02)
+## WORK PACKAGE 24: SECURITY HARDENING (from full-stack code review — 2026-05-02)
 
 ### 24-A: CRITICAL — Authentication & Token Backdoors
 
@@ -528,7 +565,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 - TEST_MEMBER: demo_user / DemoPass123!
 - Mobile: If not connected with net, show error on mobile app
 
-## AREA 25: DGePAY PAYMENT GATEWAY INTEGRATION
+## WORK PACKAGE 25: DGePAY PAYMENT GATEWAY INTEGRATION
 
 - [X] 25.1 API: Implement DGePayGateway service (AES-128-ECB + HMAC-SHA256, Database-driven)
 - [X] 25.2 API: Register DGePayGateway in DependencyInjection.cs and PaymentGatewayFactory
@@ -538,7 +575,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 - [X] 25.6 Update Mobile UI (Flutter) — gateway enum synced, selection bottom-sheet, PaymentWebPage integration
 - [X] 25.7 E2E Payment Flow Verification
 
-## AREA 26: VISUAL REGRESSION LAYOUT HARDENING
+## WORK PACKAGE 26: VISUAL REGRESSION LAYOUT HARDENING
 
 26.1 [DONE] Mobile: Fix RenderFlex overflows — AppScaffold title/breadcrumb (maxLines + ellipsis)
 26.2 [DONE] Mobile: Fix RenderFlex overflows — DirectoryScreen member designation badges (Flexible + ellipsis)
@@ -554,7 +591,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 26.12 [DONE] Test: Fix registration_visual_test.dart — Added setStep() helper to RegisterWizardNotifier for direct rendering
 26.13 [DONE] Mobile: Fix RenderFlex overflow in login_screen.dart (Flexible + FittedBox)
 
-## AREA 27: TEST COVERAGE IMPROVEMENT
+## WORK PACKAGE 27: TEST COVERAGE IMPROVEMENT
 
 27.1  [IN-PROGRESS] Generate low‑coverage report (parse coverage.cobertura.xml)
 27.2  [DONE 2026-08-22] Add test project references for API, Application, Domain, Infrastructure VERIFIED 2026-08-22: `GHCAA.Tests.csproj` references all four projects (Application, Infrastructure, Domain, API).
@@ -562,17 +599,17 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 27.4  [DONE 2026-08-22] Write unit tests for Handlers/Services (Moq) VERIFIED 2026-08-22: ~20 service test classes under `GHCAA.Tests/Services/`, with `Moq 4.20.72` + `FluentAssertions 6.12.2` referenced.
 27.5  [DONE 2026-08-22] Write unit tests for Domain Validators (FluentValidation) VERIFIED 2026-08-22: `GHCAA.Tests/Validators/MemberRegistrationValidatorTests.cs` and `VerifyEmailValidatorTests.cs`.
 27.6  [DONE 2026-08-22] Write repository integration tests with in‑memory SQLite VERIFIED 2026-08-22: `Microsoft.EntityFrameworkCore.Sqlite 9.0.1` + `.InMemory 9.0.1` referenced, with `GHCAA.Tests/Repositories/FileUploadRepositoryTests.cs` and SQLite-backed service tests.
-27.7  [DONE 2026-08-22] Write utility class tests (DateFormatConverter, etc.) **CLOSED 2026-08-22:** `GHCAA.Tests/Utils/DateFormatConverterTests.cs` added — 20 tests, all passing; full backend suite now **350 passed / 0 failed** (was 330). Pins the 29F.3 contract in both directions: ISO-8601 on write (incl. time preserved and the `.fff` shape), dd-MM-yyyy accepted on read with ISO as fallback, day-first precedence for ambiguous input like `02-03-2026`, empty/whitespace → `default` on the non-nullable converter but → `null` on the nullable one, and malformed/impossible dates throwing `FormatException` rather than silently yielding `01-01-0001`. Prior note, now historical:  **PARTIAL, confirmed 2026-08-22:** the named example is still untested — `DateFormatConverter` / `NullableDateFormatConverter` live in `GHCAA.API/Utils/DateFormatConverter.cs` and are registered in `Program.cs` (lines ~137-138), but no test file references them. Given these two converters govern **every** DateTime on the wire (see the ISO-8601 switch), they are the highest-value gap in Area 27.
+27.7  [DONE 2026-08-22] Write utility class tests (DateFormatConverter, etc.) **CLOSED 2026-08-22:** `GHCAA.Tests/Utils/DateFormatConverterTests.cs` added — 20 tests, all passing; full backend suite now **350 passed / 0 failed** (was 330). Pins the 29F.3 contract in both directions: ISO-8601 on write (incl. time preserved and the `.fff` shape), dd-MM-yyyy accepted on read with ISO as fallback, day-first precedence for ambiguous input like `02-03-2026`, empty/whitespace → `default` on the non-nullable converter but → `null` on the nullable one, and malformed/impossible dates throwing `FormatException` rather than silently yielding `01-01-0001`. Prior note, now historical:  **PARTIAL, confirmed 2026-08-22:** the named example is still untested — `DateFormatConverter` / `NullableDateFormatConverter` live in `GHCAA.API/Utils/DateFormatConverter.cs` and are registered in `Program.cs` (lines ~137-138), but no test file references them. Given these two converters govern **every** DateTime on the wire (see the ISO-8601 switch), they are the highest-value gap in Work Package 27.
 27.8  [TODO] Run coverage and enforce ≥ 80 % per file (Still genuinely open, confirmed 2026-08-22: `coverlet.collector 6.0.2` is referenced so coverage *can* be collected locally, but no threshold is enforced anywhere and README explicitly declines to claim a figure. Enforcing >=80%/file would fail today.)
 27.9  [DONE 2026-08-22] Update README with test & coverage instructions VERIFIED 2026-08-22: README line ~299 documents `dotnet test` / `npm test` / `flutter test`, and line ~301 explains the coverage position and the local `coverlet.collector` command.
 
-## AREA 28: CONFIGURATION-DRIVEN FRAMEWORK
+## WORK PACKAGE 28: CONFIGURATION-DRIVEN FRAMEWORK
 
 > Reference doc: docs/CONFIG_DRIVEN_FRAMEWORK.md
 > DRY/SOLID review completed by Claude Opus on 2026-05-30.
 >
 > **STATUS AUDIT 2026-08-22.** This area's checkboxes had drifted badly: 21 of its 34 items were
-> still marked `[TODO]` while the code had in fact shipped, which made Area 28 look like the
+> still marked `[TODO]` while the code had in fact shipped, which made Work Package 28 look like the
 > project's largest open block when it is very nearly closed. Every item was re-verified against
 > the tree (file existence + symbol grep + `dotnet test`), not against this file. Phases 1, 2, 3, 4
 > and the test phase are **done**; 28.29/28.30 are **not applicable** (the `Constants.Branding` /
@@ -594,7 +631,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
               Step 1: dotnet ef database update --project GHCAA.Infrastructure --startup-project GHCAA.API
               Step 2: dotnet ef migrations add AddOrganizationConfig --project GHCAA.Infrastructure --startup-project GHCAA.API --output-dir Data/Migrations/PgSql
               Step 3: dotnet ef database update --project GHCAA.Infrastructure --startup-project GHCAA.API
-              DEPENDS ON: PhaseB_S5S8 + AddRefreshTokens migrations from Area 24 applied first
+              DEPENDS ON: PhaseB_S5S8 + AddRefreshTokens migrations from Work Package 24 applied first
 
 ### PRIORITY 1 - PHASE 1 BACKEND (DONE - verify before merge)
 
@@ -626,7 +663,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 > 28.15 [DONE 2026-08-22] Angular: Replace APP_CONFIG.* references in components with orgConfigService.config()?.branding.* VERIFIED 2026-08-22: the migration is complete — `grep -rn "APP_CONFIG" GHCAA.Web/src/app` returns **zero** hits across both `.ts` and `.html`.
 > Grep target: grep -r "APP_CONFIG\." src/app --include="*.ts" --include="*.html" -l
 > DEPENDS ON: 28.12, 28.13
-> 28.16 [DONE 2026-08-22] Angular: Create feature guard (GHCAA.Web/src/app/core/guards/feature.guard.ts) VERIFIED 2026-08-22: `core/guards/feature.guard.ts` exports a `featureGuard(featureKey, fallbackUrl='/')` factory returning `true` or `router.parseUrl(fallback)`. Applied at **8 route sites** in `app.routes.ts` covering `enableGallery` (x2), `enableEvents` (x2), `enableJobHub` (x2), `enableForum` (x2). Note the plan named `/portal/polls` as a target and **polls is not guarded** — decide whether that is an intentional omission or a gap before closing Area 28.
+> 28.16 [DONE 2026-08-22] Angular: Create feature guard (GHCAA.Web/src/app/core/guards/feature.guard.ts) VERIFIED 2026-08-22: `core/guards/feature.guard.ts` exports a `featureGuard(featureKey, fallbackUrl='/')` factory returning `true` or `router.parseUrl(fallback)`. Applied at **8 route sites** in `app.routes.ts` covering `enableGallery` (x2), `enableEvents` (x2), `enableJobHub` (x2), `enableForum` (x2). Note the plan named `/portal/polls` as a target and **polls is not guarded** — decide whether that is an intentional omission or a gap before closing Work Package 28.
 > Apply to /portal/forum, /portal/jobs, /portal/polls routes in app.routes.ts
 > DEPENDS ON: 28.12
 
@@ -703,20 +740,20 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 > 28.33 [TODO] Mobile: Add Flutter intl + .arb files for UI-layer strings **PARTIAL, confirmed 2026-08-22:** `intl: ^0.20.2` and `flutter_localizations` are already in `pubspec.yaml`, but there is **no `lib/l10n/` directory and no `.arb` files** — the dependency is in place and the extraction work is not started.
 > RELATES TO: 8.8 [TODO] i18n: Unified Localization (English + Bengali)
 
-## AREA 29: FULL-STACK REVIEW FINDINGS (2026-07-24)
+## WORK PACKAGE 29: FULL-STACK REVIEW FINDINGS (2026-07-24)
 
 > Source: whole-project review (backend correctness + security, Angular web, Flutter mobile, payment audit).
 > Cross-referenced against docs/BUSINESS_FINDINGS.md and .antigravity/skills standards.
 > Type-check + flutter analyze both pass clean — all items below are runtime/logic/UX, not compile errors.
 > Fix order: 29-A blockers first, then 29-F.1 (audit-trail) + 29-B.2 (amount bypass), then 29-F sweep, then 29-G, then 29-C.
 >
-> **DOC-DRIFT WARNING 2026-08-22:** Area 29 is 100% DONE here, but `docs/PLAN.md` still carries an
+> **DOC-DRIFT WARNING 2026-08-22:** Work Package 29 is 100% DONE here, but `docs/FORUM_PLAN_2026-05.md` still carries an
 > unticked mirror of the same work — its Phase 2 (2.1-2.3) and Phase 3 (3.1-3.6) checkboxes are all
-> `[ ]` even though the matching 29B/29F items below are `[DONE 2026-07-25]`. `PLAN.md` line 86
+> `[ ]` even though the matching 29B/29F items below are `[DONE 2026-07-25]`. `FORUM_PLAN_2026-05.md` line 86
 > ("3.1 Facebook token app_id verification") is the clearest example: 29B.1 below records that
 > verification shipped via `graph.facebook.com/debug_token`. **TODO.md is the single source of
-> truth for status**; PLAN.md is a historical sequencing doc and its checkboxes should not be read
-> as open work. Either tick PLAN.md's Phase 2/3 through or add a pointer header to it.
+> truth for status**; FORUM_PLAN_2026-05.md is a historical sequencing doc and its checkboxes should not be read
+> as open work. Either tick FORUM_PLAN_2026-05.md's Phase 2/3 through or add a pointer header to it.
 
 ### 29-A: CRITICAL — SHIP-BLOCKERS
 
@@ -778,9 +815,9 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 29G.3 [DONE 2026-07-25] Web+Mobile: dead Stripe tile removed (mobile sheet is now config-driven, no hardcoded gateways). Admin payment-config create form gained a Payment Method Type dropdown (methodOptions incl. CashOnHand) so any method is creatable — was hardcoding method:'ManualReceipt'. (Note: the web gateway dropdown's SSLCommerz/BkashGateway/NagadGateway all have registered implementations — not dead — so left intact.) (web tests 9/9)
 29G.4 [DONE 2026-07-25] API: GatewaysController.GatewayWebhook now wraps _gatewayFactory.GetGateway in try/catch(NotSupportedException) → returns 404 {status:"unsupported_gateway"} instead of an unhandled 500 for unregistered gateways.
 
-## AREA 30: UI/UX REMEDIATION (2026-07-30)
+## WORK PACKAGE 30: UI/UX REMEDIATION (2026-07-30)
 
-> Full plan with root-cause analysis and file:line targets: **docs/UI_UX_REMEDIATION_PLAN.md**
+> Full plan with root-cause analysis and file:line targets: **docs/UI_FIX_PLAN.md**
 > Source: ~30-symptom UI/UX defect list (admin panel + member portal + public landing), traced to 8 shared-layer root causes.
 > RULE: anything specified for one panel applies to BOTH admin and member portal.
 > RULE: fix centrally (styles.scss tokens / shared classes / shared components) — never per-component.
@@ -840,23 +877,23 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 30.35 [DONE 2026-08-01] Mobile: ran `flutter test` full suite after 30.33/30.34 — `widget_test.dart` (branding/button assertions) passes; `flutter analyze` clean on both edited files. Pre-existing golden pixel-diff failures in `comprehensive_visual_freeze_test.dart`/`full_app_visual_freeze_test.dart` remain (expected — goldens are known-stale per `session_mobile_ci_golden_fix.md`, CI skips the pixel-compare, `test/failures` is untracked); the `floatingLabelBehavior`/padding change in `app_theme.dart` will shift these goldens further on any screen with text fields — regenerate goldens in a follow-up pass if/when the golden baseline is refreshed, not part of this fix.
 30.36 [DONE 2026-08-02] REVIEW (raised by user 2026-08-01): redirect logic confirmed already correct (web `login.ts navigateAfterLogin()` routes Admin/SuperAdmin to `/admin/approvals`; mobile routes staff-admin roles to `/admin_dashboard`) — no regression found. DISCOVERABILITY half implemented additively: `common/user-menu/user-menu.ts` gained an optional `@Input() isAdmin`, `user-menu.html` renders a conditional "Admin Panel" link (icon + label) when true, `user-menu.scss` adds a scoped `.admin-panel-link` rule; `layouts/portal-layout/portal-layout.html` wires `[isAdmin]="nav.isAdmin()"` into the existing `<app-user-menu>` (sidebar link untouched). `admin-layout.html`'s own `<app-user-menu>` usage doesn't pass `isAdmin`, so it correctly stays `false` there (no duplicate link inside the admin panel itself).
 
-## AREA 31: DATABASE MIGRATIONS (merged from .claude/memory/outstanding_todos.md)
+## WORK PACKAGE 31: DATABASE MIGRATIONS (merged from .claude/memory/outstanding_todos.md)
 
 > This section supersedes `.claude/memory/outstanding_todos.md`, which was stale and is no longer maintained.
 
 31.1 [DONE] DB: `PhaseB_S5S8_OtpHmac_PaymentIdempotency_Indexes` applied (User.FailedLoginAttempts/LockoutUntil, PaymentHistory.GatewayPaymentId + unique partial index, Otp.Code widened to varchar(64) for HMAC-SHA256 hex, Member(Status,IsArchived), User(MemberId), User(ResetToken) partial, User(GoogleId), User(FacebookId), Otp(Email,ExpiryAt)).
 31.2 [DONE] DB: RefreshTokens table shipped — folded into the `AddDiscussionForums` migration rather than a standalone `AddRefreshTokens`. Table: RefreshTokens(Id, UserId FK→Users, TokenHash varchar(64) UNIQUE, ExpiresAt, CreatedAt, IsRevoked); indexes TokenHash (unique) + (UserId, IsRevoked).
-31.3 [NOTE] DB: There are NO pending migrations — the dev database is up to date. Area 28.0's "DEPENDS ON PhaseB_S5S8 + AddRefreshTokens applied first" precondition is therefore already satisfied.
+31.3 [NOTE] DB: There are NO pending migrations — the dev database is up to date. Work Package 28.0's "DEPENDS ON PhaseB_S5S8 + AddRefreshTokens applied first" precondition is therefore already satisfied.
 31.4 [NOTE] DB: EF reporting "pending model changes" on PgSql is spurious, non-deterministic seed churn — NOT schema drift. Never scaffold or apply a migration for it.
 31.5 [DONE] Mobile: JWT refresh flow complete — `/auth/refresh` + `/auth/refresh-mobile` with dedicated rate-limit policies, and the Flutter `api_client.dart` interceptor performs the refresh (no longer forces re-login every 60 min).
 
-## AREA 32: PROFILE DATA INTEGRITY (raised by user 2026-08-01)
+## WORK PACKAGE 32: PROFILE DATA INTEGRITY (raised by user 2026-08-01)
 
 32.1 [DONE 2026-08-02] INVESTIGATED and confirmed: (b) mapping/DTO bug — but in the **Angular frontend**, not the backend (opposite layer from 30.27's EC fix). `GHCAA.Infrastructure/Services/MemberService.cs` `GetProfileAsync` already correctly `.Include()`s AcademicHistory/ProfessionalHistory and maps every field (PassingYear/Degree/Subject/Designation/OrganizationName/ProfessionalSector/Location) into the DTO — the backend/DB layer is not the problem. The actual bug: `GHCAA.Web/src/app/member/profile/profile.ts`'s `applyProfileResponse()` built the client-side `profile` object from a hardcoded ~30-field whitelist (added under a "29D.8" comment for case normalization); any backend DTO field NOT in that fixed list — `designation`, `organizationName`, `professionalSector`, `location`, `profileCompletionPercentage`, `categoryBadge`, etc. — was silently dropped and rendered blank. Education History itself displayed fine (its array was copied unconditionally); "Professional Info" fields were the ones actually missing, matching the user's report. ORIGINAL: Member profile page is missing/showing incorrect values for fields that were previously populated and displayed correctly (user specifically flagged Educational Info and Professional Info sections). Compare, per member: (a) what's in `Seed/*.json` (or whichever seed source is authoritative), (b) what's actually in the live DB tables (per [[gotcha_seed_json_vs_live_db.md]] — editing Seed JSON alone does NOT update an already-created SQLite DB, so seed and live DB can and do diverge; check the live DB directly, not just the seed files), and (c) what the profile API response / `profile.html` actually renders. Identify whether this is a data-loss bug (values never made it into the DB), a mapping/DTO bug (values exist in DB but aren't returned/rendered), or a stale-seed bug (DB was seeded before a field was added/renamed and never re-seeded).
-32.2 [DONE 2026-08-02] AUDITED: user's suspicion confirmed — the same hardcoded-whitelist mapping bug existed in 2 more places, both in the admin panel (grep for the whitelist pattern across `GHCAA.Web/src` found exactly 3 hits total, all now fixed): `admin/members/admin-members.ts`'s `openDetail()` (the admin member-detail modal — same entity as the member's own profile page, was missing designation/organizationName/professionalSector/location/profileCompletionPercentage etc., i.e. the exact modal flagged separately in Area 33's 33.1/33.2 findings) and its `loadMembers()` list mapping (narrower field set, same fragile pattern). `admin/member-approval/member-approval.ts`'s pending-approval list mapping had the same pattern too (smaller field set, lower risk since it only surfaces id/name/email/mobile/membershipNumber/status/photo/category, none of which were affected, but fixed for consistency). Member Directory, EC/Governance cards (30.27), and Digital ID do NOT use this whitelist pattern — confirmed via grep, no further instances found; 30.27's EC fix was a genuinely separate backend DTO-population bug, unrelated to this one.
-32.3 [DONE 2026-08-02] FIXED centrally in all 3 files identified by 32.2, replacing each hardcoded field whitelist with a generic case-insensitive key-normalization pass over every own-enumerable key of the raw response (so any current or future flat DTO field survives automatically instead of requiring manual whitelist maintenance): `member/profile/profile.ts` `applyProfileResponse()`, `admin/members/admin-members.ts` (`openDetail()` + `loadMembers()`), `admin/member-approval/member-approval.ts` `loadMembers()`. No backend/DTO/DB changes were needed (32.1 confirmed the backend was already correct). Added `member/profile/profile.spec.ts` regression tests (2 new cases: flat DTO fields outside the old whitelist now surface; PascalCase/NID key normalization still works) — vitest baseline now 59 files/238 tests (was 236, +2). `npm run type-check` clean, `npm run build` not required (no template/API changes). `dotnet test` unchanged at 317/0 (confirms no backend regression from this fix). No other `docs/` file required correction — `docs/architecture_data_flow.md`/`docs/BUSINESS_FINDINGS.md` already describe the backend DTO/mapping layer, which was already correct; the bug was purely in Angular-side response normalization, not in documented data flow.
+32.2 [DONE 2026-08-02] AUDITED: user's suspicion confirmed — the same hardcoded-whitelist mapping bug existed in 2 more places, both in the admin panel (grep for the whitelist pattern across `GHCAA.Web/src` found exactly 3 hits total, all now fixed): `admin/members/admin-members.ts`'s `openDetail()` (the admin member-detail modal — same entity as the member's own profile page, was missing designation/organizationName/professionalSector/location/profileCompletionPercentage etc., i.e. the exact modal flagged separately in Work Package 33's 33.1/33.2 findings) and its `loadMembers()` list mapping (narrower field set, same fragile pattern). `admin/member-approval/member-approval.ts`'s pending-approval list mapping had the same pattern too (smaller field set, lower risk since it only surfaces id/name/email/mobile/membershipNumber/status/photo/category, none of which were affected, but fixed for consistency). Member Directory, EC/Governance cards (30.27), and Digital ID do NOT use this whitelist pattern — confirmed via grep, no further instances found; 30.27's EC fix was a genuinely separate backend DTO-population bug, unrelated to this one.
+32.3 [DONE 2026-08-02] FIXED centrally in all 3 files identified by 32.2, replacing each hardcoded field whitelist with a generic case-insensitive key-normalization pass over every own-enumerable key of the raw response (so any current or future flat DTO field survives automatically instead of requiring manual whitelist maintenance): `member/profile/profile.ts` `applyProfileResponse()`, `admin/members/admin-members.ts` (`openDetail()` + `loadMembers()`), `admin/member-approval/member-approval.ts` `loadMembers()`. No backend/DTO/DB changes were needed (32.1 confirmed the backend was already correct). Added `member/profile/profile.spec.ts` regression tests (2 new cases: flat DTO fields outside the old whitelist now surface; PascalCase/NID key normalization still works) — vitest baseline now 59 files/238 tests (was 236, +2). `npm run type-check` clean, `npm run build` not required (no template/API changes). `dotnet test` unchanged at 317/0 (confirms no backend regression from this fix). No other `docs/` file required correction — `docs/ARCHITECTURE.md`/`docs/BUSINESS_FINDINGS.md` already describe the backend DTO/mapping layer, which was already correct; the bug was purely in Angular-side response normalization, not in documented data flow.
 
-## AREA 33: OVERALL DESIGN/LAYOUT & UX REVIEW (raised by user 2026-08-02; PROFILE PAGES ARE PRIORITY #1 within this area, per user 2026-08-02 clarification)
+## WORK PACKAGE 33: OVERALL DESIGN/LAYOUT & UX REVIEW (raised by user 2026-08-02; PROFILE PAGES ARE PRIORITY #1 within this area, per user 2026-08-02 clarification)
 
 33.1 [DONE 2026-08-02] REVIEW: Design/layout consistency, profile pages first. Punch list: **(1)** `member/profile/profile.html` and `admin/members/admin-members.html`'s detail modal render the *same* Member entity with divergent visual treatment for identical data (member profile: `.history-row` timeline rows with `.badge-info`; admin modal: plain label/value `.view-value` pairs) — no shared sub-component, so any future field addition must be hand-duplicated in two different markup styles. **(2)** Emoji icons (wastebasket, camera, pen, floppy-disk, multiply, rocket, check-mark and hourglass glyphs) are still used directly in `profile.html` and the admin member-detail modal, bypassing the `app-icon` SVG system rolled out app-wide in 30.3 — these two forms were missed because 30.3 targeted nav items and named action buttons, not ad-hoc buttons inside large forms. **(3)** `profile.html`'s `.remove-photo-btn` is a hand-rolled 28×28px round button, not the shared `.btn-icon`/`.icon-btn` (36px) taxonomy from 30.2 — inconsistent size and no reuse of the danger-color/hover rules already centralized there. **(4)** Empty-state inconsistency confirmed: the read-only "history" sections at the top of `profile.html` (EC History L96, Academic L130, Professional L175) still use bare `.empty-placeholder` (large icon, full height), while the edit-form's own duplicate empty states further down (L386, L477) use `.empty-placeholder dark compact` — i.e. 30.22's "empty states given `.empty-state.compact`" note only reached one of the two duplicate empty-state instances per section, not both, so the top of the page still reserves full height for members with no history. **(5)** `profile.scss`'s `.status-grid` is hardcoded `grid-template-columns: repeat(3, 1fr)` but the template (30.28) now renders 4 grid-items (Profile Health/Associated Batch/Highest Degree/Member Since) inside a `md:grid-cols-4` Tailwind utility class applied directly in the HTML — the component SCSS and the inline utility disagree on column count, so `.status-grid`'s own CSS is dead/overridden weight, a latent trap for the next person who edits `profile.scss` expecting it to control layout. Rest-of-app spacing/token usage (glass-card, form-group, btn*) was otherwise found consistent post-Area-30; no further divergent pages found in admin/portal/public sampling.
 33.2 [DONE 2026-08-02] REVIEW: Content/nav order. **(1)** `profile.html` section order is Membership card → EC History (read-only) → Education History (read-only) → Career History (read-only) → Photo → Signature → edit form (Identity → Academic-edit → Professional-edit → Emergency → Address → Privacy → Notifications). For a brand-new member (the most common first-time case) this means three empty-state cards render *before* the member ever reaches an editable field — the actual "fill in your profile" task is buried below content that, for a new user, is empty. **(2)** The admin member-detail modal orders the *same fields* oppositely: Photo/Signature → Personal Details → Address → Emergency → Privacy → Notifications → Admin (verification/points) → Academic → Professional → EC History (Academic/Professional/EC pushed to the very bottom, opposite of the member's own page). Neither order is wrong in isolation, but the two views of one entity disagree, which will read as "different apps" to an admin who's also a member and costs orientation time when cross-referencing a support ticket against a member's own profile. **(3)** `public/landing.html` order is Banner → Purpose → **Jobs-preview** → Membership → Events → News → Gallery → EC-preview (leadership) → CTA-banner. Two placements read as awkward for a first-time visitor: Jobs-preview appears before the Membership/join section, i.e. a job board teaser is shown before the visitor is even told how to become a member; and EC-preview (the leadership/trust-building section) is second-to-last, after Gallery — for an alumni association, "who runs this" is normally a trust signal that belongs nearer the top, not buried after photo galleries. **(4)** Dashboard widget order (profile-completion wizard → stats row → news/events/notifications → recently-joined) and nav section grouping (Overview/Community/Directory/Career/My Account, and admin's Overview/Membership/Content/Finance & Tools) were already reordered/grouped correctly in 30.13/30.23 — no further issues found there.
@@ -870,10 +907,10 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 33.9 [DONE 2026-08-02] Reconciled `profile.scss`'s dead `.status-grid { grid-template-columns: repeat(3, 1fr) }` with the template's actual `md:grid-cols-4` utility class (33.1 finding 5) by stripping `display`/`grid-template-columns` from the SCSS rule, leaving only `gap`/`padding-top`/`border-top` — the template's Tailwind utility classes are now sole source of truth for the grid layout.
 33.10 [DONE 2026-08-02] Reordered `member/profile/profile.html`: Membership Status Card → Photo Upload → Signature Upload → main editable form (Personal/Academic/Professional/Emergency/Address/Privacy/Notifications) → read-only EC/Academic/Professional history recaps (moved to the bottom). Pure block-move, no internal markup changes; confirmed no order-dependent selectors in `profile.scss` (`.section-block:first-of-type` is scoped inside the form) or assertions in `profile.spec.ts`. A new member now reaches an actionable field immediately after the status card instead of three empty-state cards.
 33.11 [DONE 2026-08-02] Reordered `public/landing.html`: `landing-ec-preview` moved to directly after `landing-purpose` (leadership/trust signal surfaces early); `landing-jobs` moved to after `landing-membership` (join-CTA/credibility now precede the job-board teaser). Pure line reorder, no markup changes.
-33.12 [DONE 2026-08-02] Added `docs/PROFILE_SHARED_COMPONENT_DESIGN.md` — design-only doc (no code) proposing 5 shared presentational components (`app-academic-history-editor`, `app-professional-history-editor`, `app-ec-history-view`, `app-emergency-contact-form`, `app-address-form`) driven by `@Input()`/`@Output()` off the same underlying `Member` fields both `profile.html` and the admin member-detail modal already bind to. Documents the section-order/label/duplication differences that must be reconciled before extraction and flags implementation as a separate future TODO once reviewed.
+33.12 [DONE 2026-08-02] Added `docs/SHARED_PROFILE_COMPONENTS.md` — design-only doc (no code) proposing 5 shared presentational components (`app-academic-history-editor`, `app-professional-history-editor`, `app-ec-history-view`, `app-emergency-contact-form`, `app-address-form`) driven by `@Input()`/`@Output()` off the same underlying `Member` fields both `profile.html` and the admin member-detail modal already bind to. Documents the section-order/label/duplication differences that must be reconciled before extraction and flags implementation as a separate future TODO once reviewed.
 33.13 [DONE 2026-08-02] Live-browser Playwright walkthrough (dev servers started manually — `dotnet run` on the API + `ng serve` on Angular, since the `webapp-testing` skill's documented `with_server.py` helper does not exist in this installation). Verified: (1) landing page renders the new 33.11 section order exactly (`landing-banner, landing-purpose, landing-ec-preview, landing-membership, landing-jobs, landing-events, landing-news, landing-gallery-preview, landing-cta-banner`); (2) member login (`demo_user`/`DemoPass123!`) succeeds and lands on `/portal/dashboard`; (3) `/portal/profile` renders the new 33.10 order exactly (Membership Status → Photo → Signature → main form → Association Governance History → Educational Timeline → Professional Experience), with no visual breakage scrolling through the form (address/privacy/notification sections render normally). Not verified: the admin member-detail modal — both `shalin`/`Shalin@2024!` and `superadmin`/`SuperAdminPassword123!` logged in as ordinary alumni members (no admin role), so `/admin/members` redirected to `/portal/dashboard` via `adminGuard`; this is a local seed/role mismatch (per the known live-DB-vs-seed-JSON gotcha), not a regression from this session's changes, and 33.12 made no code changes to `admin-members.html` to verify.
 
-## AREA 34: ADMIN-MANAGED SITE CONTENT + MERGED NEWS & NOTICE BOARD (raised by user 2026-08-02)
+## WORK PACKAGE 34: ADMIN-MANAGED SITE CONTENT + MERGED NEWS & NOTICE BOARD (raised by user 2026-08-02)
 
 > User instruction set: (1) update About Us with college + association information, (2) add an On Campus Address to Contact Us, (3) make both manageable from admin, (4) merge News and Notice management, notices may carry PDF documents. Standing constraints: **notices are admin-post-only**; About content is sourced from the GHCAA Constitution text and facts already in the repo **only** (no web research, no invented college facts); web + mobile parity; OrgConfig additions must be industry-standard and configurable; nothing may break.
 
@@ -916,7 +953,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 34.D6 [DONE 2026-08-02] Mobile tests: `flutter analyze` clean after updating the two `FakeNewsService` overrides in `test/comprehensive_visual_freeze_test.dart` and `test/full_app_visual_freeze_test.dart` for the new `{String? postType}` parameter; `flutter test` — 70 non-golden tests pass. The 21 failing goldens (auth_login, auth_register, registration_*, directory/member_*, news_portal, events/financial) are the **pre-existing stale baseline** from the earlier app-wide `app_theme.dart` floating-label change, span screens this area never touched, and are skipped on CI per the existing `flutter_test_config` golden guard.
 34.D7 [TODO] Regenerate the 21 stale mobile goldens (`flutter test --update-goldens`) as a standalone housekeeping task, so a genuinely new mobile regression is not masked by the existing baseline drift. Deliberately kept out of this area — it is unrelated binary churn from a prior session's theme fix.
 34.D8 [TODO] Live-browser verification of this area: public `/about` (seeded CMS blocks + hardcoded fallback), `/contact` (campus address, phones, map guard), `/news?type=Notice`; admin CMS block edit round-trip; admin notice creation with a PDF and a working public download link; and a **member account confirming it cannot create a Notice** (34.C3). **Blocked by the same local seed/role mismatch as 33.13** — `shalin` and `superadmin` resolve to ordinary alumni members in the local DB, so `adminGuard` bounces `/admin/*`; the local role assignment must be fixed before the admin-side steps can run.
-34.D9 [DONE 2026-08-03] Preprod schema catch-up script `docs/sql/preprod_area34_sitecontent.sql` — idempotent SQL mirroring migration `20260802163432_AddSiteContentAndNoticeFields` (three `NewsPosts` columns + `SiteContents` table, unique `Key` index, the five seed blocks, and an identity-sequence `setval` so the first admin-created block does not collide on `Id = 1`). Needed because Area 34 shipped to preprod but the content never appeared: the runtime builds schema with `EnsureCreated()` (`GHCAA.API/Program.cs:290`), which is a **no-op on a database that already has tables**, so the new table and columns were never created and `/about` fell back to its static markup. **Applied to preprod/Neon 2026-08-03 and verified**: the three `NewsPosts` columns exist, the five blocks are present, the identity sequence sits at 5, `GET /api/news` returns 200 (was a 500 — `42703: column n.AttachmentFileName does not exist`) and `GET /api/site-content?group=about` returns the four About blocks.
+34.D9 [DONE 2026-08-03] Preprod schema catch-up script `docs/sql/preprod_area34_sitecontent.sql` — idempotent SQL mirroring migration `20260802163432_AddSiteContentAndNoticeFields` (three `NewsPosts` columns + `SiteContents` table, unique `Key` index, the five seed blocks, and an identity-sequence `setval` so the first admin-created block does not collide on `Id = 1`). Needed because Work Package 34 shipped to preprod but the content never appeared: the runtime builds schema with `EnsureCreated()` (`GHCAA.API/Program.cs:290`), which is a **no-op on a database that already has tables**, so the new table and columns were never created and `/about` fell back to its static markup. **Applied to preprod/Neon 2026-08-03 and verified**: the three `NewsPosts` columns exist, the five blocks are present, the identity sequence sits at 5, `GET /api/news` returns 200 (was a 500 — `42703: column n.AttachmentFileName does not exist`) and `GET /api/site-content?group=about` returns the four About blocks.
 34.D10 [TODO] **Durable fix for the above**: the app has a real migration tree but nothing runs it at startup, so every future schema change will hit the same silent no-op on any non-empty environment. Switch the non-Visual startup path from `Database.EnsureCreated()` to `Database.Migrate()`. Non-trivial because the preprod/Neon database was originally built by `EnsureCreated` and therefore has **no `__EFMigrationsHistory` table** — it must first be baselined (create the history table and insert every existing migration id as already-applied) or `Migrate()` will try to re-create tables that exist and fail. Plan: baseline preprod → switch the call → confirm a no-op `Migrate()` on an already-current DB → confirm a fresh empty DB still builds end-to-end. Also decide what happens to the `HasData` seed rows, which `EnsureCreated` and `Migrate` apply by different routes. Keep SQLite/local dev working throughout (it relies on `EnsureCreated` and has no SQLite migration tree — see 34.D4).
 34.D11 [DONE 2026-08-03] Seeded SiteContent titles contained HTML entities (`Logo &amp; Flag`, `Purpose &amp; Objectives`), but `about.html` renders the title with `{{ }}` interpolation (which escapes) while only the body uses `[innerHTML]` — so the headings showed a literal `&amp;`. Corrected in all four places that carry the value: `Seed/site_content.json`, the migration's `InsertData`, `docs/sql/preprod_area34_sitecontent.sql`, and the live Neon rows (`UPDATE ... replace("Title",'&amp;','&')`). Body HTML entities (`&ndash;`, `&ldquo;`) are correct as-is — that field *is* parsed as HTML.
 34.D12 [DONE 2026-08-03] Public nav fixes raised by user: (a) the association full name never rendered under the logo — `public-layout.html` carried `class="hidden xl:block"`, but this project has **no Tailwind**, so `hidden` matched the real global `.hidden { display: none }` utility in `styles.scss` while `xl:block` matched nothing; both classes removed, leaving `.hide-mobile` and the existing `≤600px` rule to do the responsive hiding. (b) The public site could get stuck on a white background: the theme choice is persisted globally by `ThemeService`, but the switch lived only in `<app-user-menu>` (portal/admin), so a visitor who once chose light mode had no way back. Extracted the button into a shared `common/theme-toggle/` component (per the "try common changes as reusable" constraint) and placed it in both the user menu and the public nav. `npx vitest run` **60 files / 244 tests** green; `ng build` clean.
@@ -929,7 +966,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 
 34.D16 [DONE 2026-08-21] Fixed: `portal-layout.ts` now injects `OrgConfigService` (exposed as `orgConfig`) and both portal logos bind `[src]="orgConfig.config()?.branding?.logoUrl || '/assets/logo.png'"` + `[alt]="...shortName || 'Logo'"` with `appImgFallback="/assets/logo.png"`, mirroring `admin-layout.html` exactly. Two adjacent hardcodes in the same branding-opt-out class were fixed with it: the top-bar text `GHCAA Member Portal` and the `document.title` suffix now use `branding.shortName` (fallback `'GHCAA'`). The sidebar wordmark `HARAGANGIAN` was **left hardcoded on purpose** — it is the member nickname styled as a wordmark, and swapping it to `shortName` would visibly change the portal's sidebar text, which is beyond this item. Verified: `ng build` clean, vitest 60 files / 244 tests pass. Original finding follows. `portal-layout.html` hardcoded `src="/assets/logo.png"` in two places (the sidebar mini-logo and the collapsed-rail logo) instead of binding `orgConfigService.config()?.branding?.logoUrl` the way admin-layout and the public footer do — `portal-layout.ts` does not inject `OrgConfigService` at all. Harmless today because the configured default *is* `/assets/logo.png`, but it silently opts the portal out of org-config branding, so a tenant that sets a custom logo gets it everywhere except the member portal.
 
-## AREA 35: WEB MEMBERSHIP-TYPE PARITY (raised by "check mobile implementation compared to web", 2026-08-22)
+## WORK PACKAGE 35: WEB MEMBERSHIP-TYPE PARITY (raised by "check mobile implementation compared to web", 2026-08-22)
 
 > Origin: a mobile-vs-web audit of the membership-type implementation. **Counter-intuitive result: mobile is the cleaner side.** `screens/member/dashboard_screen.dart:209` does `profile?['membershipType']?.toString()` — it renders whatever string the API sent, so a new enum value needs no mobile change, and the word `'Life'` appears nowhere in `GHCAA.Mobile/lib`. The web app instead keeps **three divergent copies** of the type list: one correct (`core/constants/app.constants.ts`) and two wrong ones that hardcode `6: 'Life'` — a value that does not exist in `GHCAA.Domain/Enums.cs`, where index 6 is `Guest`. So an approved Guest member is labelled "Life" on the web. These four items are the web-side follow-ups; they also absorb the still-open half of **28.21**.
 >
@@ -941,7 +978,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 
 35.3 [DONE 2026-08-22] `common/directory/directory.html:62-67` hardcodes the membership-type `<option>` list in the template, ending at `<option value="Advisory">Advisory Member</option>` — **no Guest option, so the web directory filter hides Guest members**, the exact defect already fixed on mobile in 28.21. `MEMBERSHIP_TYPE_OPTIONS` exists and is correct but is not used here. Replace the literal options with an `@for (m of membershipTypeOptions; track m.value)` loop, as `public/register/register.html:137` already does.
 
-35.4 [DONE 2026-08-22] `core/models/business.models.ts:2` — the `MembershipType` TS union stops at `'Advisory'` and is missing `'Guest'`, so any code assigning the real value fails type-check and gets worked around. Add `'Guest'`. **Also reconciles a doc line:** `docs/project_map.md:986` was updated on 2026-08-22 to show `'Guest'` in this union, which currently documents *intended* rather than actual state — that line becomes accurate only once this item lands.
+35.4 [DONE 2026-08-22] `core/models/business.models.ts:2` — the `MembershipType` TS union stops at `'Advisory'` and is missing `'Guest'`, so any code assigning the real value fails type-check and gets worked around. Add `'Guest'`. **Also reconciles a doc line:** `docs/PROJECT_MAP.md:986` was updated on 2026-08-22 to show `'Guest'` in this union, which currently documents *intended* rather than actual state — that line becomes accurate only once this item lands.
 
 35.5 [DONE 2026-08-22] **Closes the remaining half of 28.21.** **Product decision (user, 2026-08-22, verbatim): "Guest - membership will be updated by admin, infact any membershiptypes only can be updated by admin."** So the answer is admin-assign-only for *every* tier, not just Guest — and the previous behaviour was a **privilege-escalation hole**, not merely a client inconsistency: `MemberRegistrationDto.MembershipType` flowed straight into `Member.MembershipType`, so a public self-registration could grant itself `Founding` or `Executive`.
 >
@@ -957,9 +994,9 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 >
 > Original finding follows. Decide and align whether an applicant may self-select `Guest` at registration. Evidence gathered: the **web** registration form has been offering Guest all along (`register.ts:53` binds `MEMBERSHIP_TYPE_OPTIONS`, whose last entry is Guest), while **mobile** `core/constants/registration_constants.dart` `MembershipConstants.typeOptions` stops at `Advisory`. So this is a **client-to-client inconsistency, not an admin-assign-only policy** — one of the two forms is wrong whichever way the decision goes. Either add `Guest` to the Dart list (mobile matches web) or remove it from `MEMBERSHIP_TYPE_OPTIONS`' registration usage and keep it admin-assign-only (web matches mobile) — note the latter must **not** remove Guest from the admin/directory/label paths, which legitimately need it. Direction is a product call.
 
-35.6 [DONE 2026-08-22] Once 35.1-35.4 land: add a web unit test that asserts the rendered label for the highest `MembershipType` index equals the domain enum's last member (i.e. a Guest member is not labelled "Life"), so this class of drift fails the suite rather than shipping. Also extend the sync checklist in `docs/CONFIG_DRIVEN_FRAMEWORK.md` §8 — it currently tracks Backend / Angular-constants / Config / Flutter / DB / Tests and has **no rows** for the directory template, the two component-local label maps, or the TS union, which is why all four drifted unnoticed. Per 12.6, nothing in Area 35 is `[DONE]` until `npx vitest run` and `ng build` pass.
+35.6 [DONE 2026-08-22] Once 35.1-35.4 land: add a web unit test that asserts the rendered label for the highest `MembershipType` index equals the domain enum's last member (i.e. a Guest member is not labelled "Life"), so this class of drift fails the suite rather than shipping. Also extend the sync checklist in `docs/CONFIG_DRIVEN_FRAMEWORK.md` §8 — it currently tracks Backend / Angular-constants / Config / Flutter / DB / Tests and has **no rows** for the directory template, the two component-local label maps, or the TS union, which is why all four drifted unnoticed. Per 12.6, nothing in Work Package 35 is `[DONE]` until `npx vitest run` and `ng build` pass.
 
-> **AREA 35 IMPLEMENTATION NOTE (2026-08-22).** Area 35 is now **fully closed** — 35.1-35.4 and
+> **WORK PACKAGE 35 IMPLEMENTATION NOTE (2026-08-22).** Work Package 35 is now **fully closed** — 35.1-35.4 and
 > 35.6 shipped first, and 35.5 landed later the same day once the product decision arrived (see
 > the 35.5 entry above; it also closed 28.21). What actually changed, and two things that were not in the
 > original plan:
@@ -985,13 +1022,13 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 >
 > Verified: `npx vitest run` **61 files / 258 tests passed** (baseline was 60/244 — +1 file, +14
 > tests) and `npx ng build` succeeded with only the pre-existing `canvg`/`jspdf` CommonJS warnings.
-> `docs/project_map.md:986` is now accurate — the union it documents really does carry `'Guest'`.
+> `docs/PROJECT_MAP.md:986` is now accurate — the union it documents really does carry `'Guest'`.
 
-## AREA 36: PUBLIC CONSTITUTION & ELECTION DOCUMENT HUB (raised by "did we show full constitution in public portal and Election processes, forms view and download", 2026-08-23)
+## WORK PACKAGE 36: PUBLIC CONSTITUTION & ELECTION DOCUMENT HUB (raised by "did we show full constitution in public portal and Election processes, forms view and download", 2026-08-23)
 
 > Origin: a direct check of whether the public site surfaces (a) the full constitution and (b) the
 > election processes/forms with view + download. **It surfaces neither.** Both are
-> backend/content-complete and frontend-missing, which is why nothing in Areas 1-35 flagged them —
+> backend/content-complete and frontend-missing, which is why nothing in Work Packages 1-35 flagged them —
 > `9.1 Digital Constitution: Versioned legal repository` and `18.4 Backend: Seed Constitution data`
 > are both marked `[DONE]`, and they genuinely are, on the server. The UI step was never scoped.
 >
@@ -1043,13 +1080,13 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 
 36.9 [DONE] Amendment-voting UI for `POST /api/governance/constitution/{id}/vote` — the endpoint reads the `MemberId` claim, enforces one vote per member via the unique `(ConstitutionId, MemberId)` index, and has **no caller**. Member-portal only (it is the one governance endpoint that is *not* `[AllowAnonymous]`). Completes SRS §3.6.2's "with member voting capabilities". **(Shipped — ratification card on the member `/governance` page: `constitution()` / `voteComments()` / `pendingChoice()` / `voteOutcome()` signals in `common/governance/governance.ts`, `castVote(isFor)` calling the existing `ConstitutionService.vote()`, per-button busy state, and a one-shot guard so a recorded vote cannot be resubmitted. Styling appended to `governance.scss` using tokens only. Server-side gap also closed: `GovernanceService.VoteOnConstitutionAsync` had **no membership-tier check**, so Associate/Honorary/Advisory members — explicitly non-voting under Article III Section K — could ratify amendments; it now returns false unless the member is Founding, Executive or General. 3 new specs in `governance.spec.ts`.)**
 
-36.10 [DONE] Per 12.6, nothing in Area 36 is `[DONE]` until `npx vitest run` and `npx ng build` pass. Add unit tests for the markdown renderer (table + nested-list + escaping cases) and for the 36.1 fallback path (404 from the endpoint must still render the PDF action). **(Done for what shipped — `npx vitest run` 64 files / 286 tests green, `npx ng build` green, emitted `styles-*.css` contains `.doc-hero`/`.doc-prose`/`.md-blank` and the seven assets land in `dist/.../assets/elections/`. New specs: `markdown.util.spec.ts`, `constitution.spec.ts`, `election-docs.spec.ts` (25 tests).)**
+36.10 [DONE] Per 12.6, nothing in Work Package 36 is `[DONE]` until `npx vitest run` and `npx ng build` pass. Add unit tests for the markdown renderer (table + nested-list + escaping cases) and for the 36.1 fallback path (404 from the endpoint must still render the PDF action). **(Done for what shipped — `npx vitest run` 64 files / 286 tests green, `npx ng build` green, emitted `styles-*.css` contains `.doc-hero`/`.doc-prose`/`.md-blank` and the seven assets land in `dist/.../assets/elections/`. New specs: `markdown.util.spec.ts`, `constitution.spec.ts`, `election-docs.spec.ts` (25 tests).)**
 
-## AREA 37: ALUMNI-ASSOCIATION DEPTH — ELECTION ENGINE, SCHOLARSHIPS, PHILANTHROPY, MEMORY (raised by "what outstanding/extra ordinary matters can be incorporated on this project", 2026-08-23)
+## WORK PACKAGE 37: ALUMNI-ASSOCIATION DEPTH — ELECTION ENGINE, SCHOLARSHIPS, PHILANTHROPY, MEMORY (raised by "what outstanding/extra ordinary matters can be incorporated on this project", 2026-08-23)
 
 > Origin: a deliberate look at what a mature college alumni association does that this codebase
-> does not yet model. Area 36 published the *documents* of governance and the *categories* of
-> money; Area 37 builds the *machinery* behind them. Every item below is scoped against what the
+> does not yet model. Work Package 36 published the *documents* of governance and the *categories* of
+> money; Work Package 37 builds the *machinery* behind them. Every item below is scoped against what the
 > repository actually contains today, and — per `feedback_keep_lightweight` — **none of the ten
 > requires a new npm or NuGet dependency.**
 >
@@ -1061,7 +1098,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 > scholarship, no reunion and no grant application anywhere in the 45 files under
 > `GHCAA.Domain/Models/`. The ledger can *record* philanthropy; the product cannot *conduct* it.
 >
-> **Evidence, elections.** Area 36 shipped seven election documents as read-only markdown and 18
+> **Evidence, elections.** Work Package 36 shipped seven election documents as read-only markdown and 18
 > blank ER-forms split out of the handbook. The only election-adjacent tables are `ECPeriod`
 > (`Title`/`StartDate`/`EndDate`/`IsActive`) and `ECMember` (`MemberId`/`ECPeriodId`/`Position`/
 > `StartDate`/`EndDate`/`ChangeReason`) — i.e. **the result of an election, recorded by hand after
@@ -1109,7 +1146,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 > **Seed/deploy constraint — applies to all ten.** Runtime uses `Database.EnsureCreated()`, which
 > is a **no-op on a non-empty database**, and migrations are not run at startup
 > (`gotcha_ensurecreated_no_op_existing_db`). A new table therefore does **not** appear on preprod
-> just because the model compiles, and `HasData` seed edits never reach it. Area 36 solved this
+> just because the model compiles, and `HasData` seed edits never reach it. Work Package 36 solved this
 > once with `GHCAA.Infrastructure/Data/ConstitutionSeeder.SyncAsync(context, logger, ct)` — an
 > idempotent boot-time syncer called from `Program.cs` behind a `CanConnectAsync()`/`LogWarning`
 > guard. **Copying that pattern per feature is the fallback, not the plan.** 37.0 makes the real
@@ -1119,9 +1156,9 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 > the smallest item in the Area and needs no new UI shell). 37.7–37.10 are independent and may be
 > scheduled at any point after 37.0.
 
-37.0 [TODO] **Prerequisite: a real migration path.** Every remaining item in this Area adds tables, and none of them can reach preprod under `EnsureCreated()`. Replace the startup call with `await context.Database.MigrateAsync()` guarded by a config flag (`Database:ApplyMigrationsOnStartup`, default `true` for Development/Preprod), and add the baseline migration that reconciles the existing preprod schema so the first `MigrateAsync` on a populated database is a no-op rather than a failed `CREATE TABLE`. Keep `ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))` — the pending-model warning here is non-deterministic seed churn, not schema drift (`gotcha_pending_model_changes_seed`). `ConstitutionSeeder` stays as-is: it syncs *content*, which is a different job from schema. Document the new boot sequence in `docs/architecture_data_flow.md` and `docs/project_map.md`. **Acceptance: a schema change committed on `preprod` is visible on the Render deployment without a manual database step.**
+37.0 [TODO] **Prerequisite: a real migration path.** Every remaining item in this Area adds tables, and none of them can reach preprod under `EnsureCreated()`. Replace the startup call with `await context.Database.MigrateAsync()` guarded by a config flag (`Database:ApplyMigrationsOnStartup`, default `true` for Development/Preprod), and add the baseline migration that reconciles the existing preprod schema so the first `MigrateAsync` on a populated database is a no-op rather than a failed `CREATE TABLE`. Keep `ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))` — the pending-model warning here is non-deterministic seed churn, not schema drift (`gotcha_pending_model_changes_seed`). `ConstitutionSeeder` stays as-is: it syncs *content*, which is a different job from schema. Document the new boot sequence in `docs/ARCHITECTURE.md` and `docs/PROJECT_MAP.md`. **Acceptance: a schema change committed on `preprod` is visible on the Render deployment without a manual database step.**
 
-37.1 [TODO] **Election engine** — turn the Area 36 documents into a running process. This is the largest item; implement it in the five phases below, each independently shippable behind the flag. New enums in `GHCAA.Domain/Enums.cs`: `ElectionPhase { Announced, Nomination, Scrutiny, Withdrawal, CandidateList, Campaign, Polling, Counting, Declared, Archived }`, `NominationStatus { Submitted, UnderScrutiny, Accepted, Rejected, Withdrawn }`, `ElectionRole { ReturningOfficer, AssistantReturningOfficer, PollingOfficer, Scrutineer }`.
+37.1 [TODO] **Election engine** — turn the Work Package 36 documents into a running process. This is the largest item; implement it in the five phases below, each independently shippable behind the flag. New enums in `GHCAA.Domain/Enums.cs`: `ElectionPhase { Announced, Nomination, Scrutiny, Withdrawal, CandidateList, Campaign, Polling, Counting, Declared, Archived }`, `NominationStatus { Submitted, UnderScrutiny, Accepted, Rejected, Withdrawn }`, `ElectionRole { ReturningOfficer, AssistantReturningOfficer, PollingOfficer, Scrutineer }`.
   - **37.1a Election + roll.** `Election` (`Id`, `Title`, `ECPeriodId`, `Phase`, `AnnouncedOn`, `NominationOpensOn`, `NominationClosesOn`, `ScrutinyOn`, `WithdrawalClosesOn`, `PollingOpensOn`, `PollingClosesOn`, `DeclaredOn?`, `IsActive`, `CreatedBy`), `ElectionSeat` (`Id`, `ElectionId`, `ECPosition Position`, `SeatCount`), `ElectionOfficer` (`Id`, `ElectionId`, `MemberId`, `ElectionRole Role`), and `VoterRoll` (`Id`, `ElectionId`, `MemberId`, `IsEligible`, `IneligibilityReason?`, `FrozenAt`, `VotedAt?`). The roll is **frozen by snapshot**, not computed at poll time: eligibility is the same Article III Section K rule already enforced in `GovernanceService.VoteOnConstitutionAsync` (`MembershipType` of `Founding`, `Executive` or `General`), plus dues-current per `MembershipDue`. Freezing is what makes a disputed result auditable.
   - **37.1b Nomination.** `Nomination` (`Id`, `ElectionId`, `ElectionSeatId`, `CandidateMemberId`, `ProposerMemberId`, `SeconderMemberId`, `Statement`, `PhotoPath?`, `Status`, `SubmittedAt`, `WithdrawnAt?`), `ScrutinyDecision` (`Id`, `NominationId`, `OfficerMemberId`, `Accepted`, `Reason`, `DecidedAt`). Proposer and seconder must both be on the frozen roll and must not be the candidate; enforce in the service, not only the UI.
   - **37.1c Ballot and poll.** `Ballot` (`Id`, `ElectionId`, `ElectionSeatId`, `SerialNumber`, `IssuedAt`, `IsSpoiled`) and `BallotVote` (`Id`, `BallotId`, `NominationId`, `CastAt`) kept in **separate tables with no member foreign key on the vote side** — the roll records *that* a member voted (`VoterRoll.VotedAt`), the ballot records *what* was voted, and nothing joins the two. That separation is the secret ballot, and it is the one design decision here that cannot be retrofitted. A unique index on `(ElectionId, MemberId)` in the roll prevents double voting.
@@ -1162,7 +1199,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 37.6 [TODO] **Oral-history / legacy archive** — recorded memories from senior alumni, which is the one asset an alumni association can create that nobody else can. `ArchiveCollection` (`Id`, `Title`, `Description`, `IsPublished`, `SortOrder`) and `ArchiveItem` (`Id`, `ArchiveCollectionId`, `Title`, `NarratorName`, `NarratorMemberId?`, `RecordedOn?`, `Summary`, `Transcript?`, `MediaFileUploadId?`, `ExternalMediaUrl?`, `PhotoPath?`, `DecadeTag`, `IsPublished`, `SubmissionStatus Status`).
   - **Storage decision, settled before building:** `MediaFileUploadId` reuses `FileUpload` + `IFileStorageService`; `ExternalMediaUrl` covers a link to already-hosted audio/video. **Both fields exist deliberately** — audio is heavy and the Render deployment has no object store configured, so the external-link path is the default and the upload path is opt-in behind the existing size limits in `IFileValidationService`.
   - **The transcript is the product**, not the audio: it is searchable, printable, quotable in 37.10, and readable on a bad connection. Treat a missing transcript as an incomplete item in the admin queue, not merely an empty field.
-  - **Service/API/UI.** `IArchiveService` + `ArchiveService`; `ArchiveController` at `api/archive`, `GET api/archive/public` and `GET api/archive/items/{id}` `[AllowAnonymous]`. Flag `enableLegacyArchive`. Public `/legacy` (collections → item with transcript) reusing the Area 36 `.doc-hero` / `.doc-prose` shell rather than new page chrome; member submission; admin curation. New `API_ENDPOINTS.ARCHIVE` block.
+  - **Service/API/UI.** `IArchiveService` + `ArchiveService`; `ArchiveController` at `api/archive`, `GET api/archive/public` and `GET api/archive/items/{id}` `[AllowAnonymous]`. Flag `enableLegacyArchive`. Public `/legacy` (collections → item with transcript) reusing the Work Package 36 `.doc-hero` / `.doc-prose` shell rather than new page chrome; member submission; admin curation. New `API_ENDPOINTS.ARCHIVE` block.
   - **Tests.** NUnit: unpublished items excluded from public reads; an item with none of `MediaFileUploadId`, `ExternalMediaUrl` or `Transcript` is rejected. Vitest: decade filter, transcript rendering and print styles.
 
 37.7 [TODO] **Bengali/English bilingual UI.** The association's constituency is Bengali-speaking and every string in the app is currently a hardcoded English literal in a template. **Do not install `@angular/localize` or `ngx-translate`** — `feedback_keep_lightweight` applies, and the requirement here is a single flat key → string lookup with a live runtime toggle, which `@angular/localize` (build-time, one bundle per locale) does not even satisfy.
@@ -1183,17 +1220,17 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
   - **Tests.** NUnit: joining twice does not duplicate; a chapter event appears only in that chapter's feed; coordinator contact is hidden from the anonymous projection unless `ContactEmail` is set. Vitest: join/leave state, empty-chapter state.
 
 37.10 [TODO] **Annual impact report generated from the ledger** — the accountability artifact that closes the loop on 37.2, 37.3 and 37.4, and the reason those three back-link `FinancialRecordId`.
-  - **Nothing in this item is hand-typed.** For a given year it aggregates: total income and expense by `FinancialCategory` from `FinancialRecord`; scholarships awarded and disbursed from `ScholarshipAward`; campaign totals and donor counts from `CampaignPledge`; events and attendance from `AlumniEvent` + `EventRegistration`; new members from `Member.CreatedAt` / `MembershipHistory`; reunions from 37.4. The only authored fields are a president's foreword and a cover image, stored in the existing `SiteContent` CMS from Area 34 — **do not add a table for two strings.**
-  - **Output.** Server-side PDF via **QuestPDF**, following the `IDCardService.GenerateIDCardPdfAsync` pattern, plus an on-site HTML view reusing the Area 36 `.doc-hero` / `.doc-prose` shell. Extend `IFinancialLedgerService` with `Task<ImpactReportDto?> GetImpactReportAsync(int year, CancellationToken cancellationToken = default)`, and put the PDF method on the existing document-generation surface rather than inventing a third document service.
+  - **Nothing in this item is hand-typed.** For a given year it aggregates: total income and expense by `FinancialCategory` from `FinancialRecord`; scholarships awarded and disbursed from `ScholarshipAward`; campaign totals and donor counts from `CampaignPledge`; events and attendance from `AlumniEvent` + `EventRegistration`; new members from `Member.CreatedAt` / `MembershipHistory`; reunions from 37.4. The only authored fields are a president's foreword and a cover image, stored in the existing `SiteContent` CMS from Work Package 34 — **do not add a table for two strings.**
+  - **Output.** Server-side PDF via **QuestPDF**, following the `IDCardService.GenerateIDCardPdfAsync` pattern, plus an on-site HTML view reusing the Work Package 36 `.doc-hero` / `.doc-prose` shell. Extend `IFinancialLedgerService` with `Task<ImpactReportDto?> GetImpactReportAsync(int year, CancellationToken cancellationToken = default)`, and put the PDF method on the existing document-generation surface rather than inventing a third document service.
   - **Guard.** The report must degrade rather than throw when a source feature is not yet built or its flag is off — a year with no campaigns renders without that section. This item is therefore safe to build *before* 37.2/37.3/37.4 land, and must read every source through a null-tolerant projection.
   - **API/UI.** `GET api/financials/impact/{year}` and `GET api/financials/impact/{year}/pdf`, both `[AllowAnonymous]` (publishing it is the point). Flag `enableImpactReport`. Public `/impact/:year` with a year selector; admin action to set the foreword and publish. Additions to the existing `API_ENDPOINTS.FINANCIALS` block.
   - **Tests.** NUnit: a year with zero records returns a report with zeroed sections rather than null; category totals match a hand-summed fixture; the disbursed-scholarship total equals the sum of the linked `Grant` `FinancialRecord` rows. Vitest: year selector, empty-section rendering.
 
-37.11 [TODO] Per 12.6, nothing in Area 37 is `[DONE]` until `dotnet test`, `npx vitest run`, `npm run type-check` and `npx ng build` all pass. Baselines to beat at the start of this Area: **351 NUnit tests** and **64 vitest files / 306 tests**. Additionally, every item that adds a table must be verified against the 37.0 migration path on a **non-empty** database — a passing suite against a fresh SQLite file proves nothing about preprod (`gotcha_ensurecreated_no_op_existing_db`). Update `docs/FEATURES.md`, `docs/project_map.md`, `docs/SRS.md` and `docs/architecture_data_flow.md` as each item lands, per `feedback_docs_update_scope`.
+37.11 [TODO] Per 12.6, nothing in Work Package 37 is `[DONE]` until `dotnet test`, `npx vitest run`, `npm run type-check` and `npx ng build` all pass. Baselines to beat at the start of this Area: **351 NUnit tests** and **64 vitest files / 306 tests**. Additionally, every item that adds a table must be verified against the 37.0 migration path on a **non-empty** database — a passing suite against a fresh SQLite file proves nothing about preprod (`gotcha_ensurecreated_no_op_existing_db`). Update `docs/FEATURES.md`, `docs/PROJECT_MAP.md`, `docs/SRS.md` and `docs/ARCHITECTURE.md` as each item lands, per `feedback_docs_update_scope`.
 
 ---
 
-# Area 38 — Constitution v4.2 & the "always latest" rule
+# Work Package 38 — Constitution v4.2 & the "always latest" rule
 
 **Standing rule (2026-08-25): whenever a newer constitution is ratified, every surface must follow
 it automatically.** No page, component, document or link may pin a version. Publication is one
@@ -1234,12 +1271,12 @@ Before the next formal re-publish, fix item 6 in the source document itself and 
 otherwise regenerating from the current PDF will silently reintroduce the defect.
 
 38.5 [DONE] Docs updated per `feedback_docs_update_scope`: new `docs/CONSTITUTION_PUBLISHING.md`;
-`FEATURES.md` §5.1a, `SRS.md` §3.6.2, `architecture_data_flow.md` §2.D and `project_map.md`
+`FEATURES.md` §5.1a, `SRS.md` §3.6.2, `ARCHITECTURE.md` §2.D and `PROJECT_MAP.md`
 (build-time tool entry) all carry the always-latest rule.
 
 ---
 
-# Area 39 — Election forms as operative documents
+# Work Package 39 — Election forms as operative documents
 
 **Standing rule (2026-08-26): every change must work in BOTH themes and be implemented
 CENTRALLY** — tokens and shared classes in the single global `GHCAA.Web/src/styles.scss`, never a
@@ -1301,13 +1338,13 @@ code defect; re-run when the network allows and re-grep the emitted `styles-*.cs
 
 ---
 
-# Area 40 — Member albums with admin approval, job-posting approval, events without registration (raised by user 2026-08-26)
+# Work Package 40 — Member albums with admin approval, job-posting approval, events without registration (raised by user 2026-08-26)
 
 Plan: `C:\Users\HabiburRahmanShalin\.claude\plans\piped-sniffing-lollipop.md`. `EventGallery`/`EventPhoto`
 extended in place for member ownership (no new `Album` table); admin = `Admin`/`SuperAdmin` role;
 legacy dead `POST api/gallery` "submit a memory" endpoint fixed separately from the new album flow.
 
-> **STATUS: Area 40 is COMPLETE (backend + web + mobile).** 40.1-40.10 below are the original
+> **STATUS: Work Package 40 is COMPLETE (backend + web + mobile).** 40.1-40.10 below are the original
 > plan items; each was superseded by the 40.11-40.14 delivery entries at the end of this Area and
 > re-marked accordingly on 2026-08-28. They were left as stale `[TODO]` for two days, which made
 > shipped work read as outstanding — verify against the tree before trusting a marker
@@ -1371,11 +1408,11 @@ sibling screens off the dashboard (not tabs, matching the `article_approval_scre
 `requiresRegistration===false`. `flutter analyze` clean, `flutter test` 28/28 passed (goldens skipped
 per existing CI convention). No admin events-registration screen exists on mobile (confirmed, N/A).
 
-40.14 [DONE] Area 40 fully complete end-to-end (backend + web + mobile).
+40.14 [DONE] Work Package 40 fully complete end-to-end (backend + web + mobile).
 
 ---
 
-# Area 41 — Live-site bug fixes (raised by user 2026-08-26, fix before continuing Area 40 web/mobile)
+# Work Package 41 — Live-site bug fixes (raised by user 2026-08-26, fix before continuing Work Package 40 web/mobile)
 
 41.1 [DONE] `POST /api/news` 400 fixed — root cause was `[Url]` validation on `CreateNewsDto.ImageUrl`
 rejecting the relative paths the app's own image-upload endpoint returns; replaced with a
@@ -1400,13 +1437,13 @@ change the logo of an already-unpublished event. `EventServiceTests` extended (3
 for events where `RequiresRegistration == false` — web (`common/events/`) fully removes the
 Register/Closed button + participant-count pill, mobile (`event_details_screen.dart`,
 `events_screen.dart`) fully hides the FAB/badge, in both cases rather than merely disabling them.
-Shipped as part of Area 40 (40.12/40.13).
+Shipped as part of Work Package 40 (40.12/40.13).
 
 41.6 [DONE] `dotnet test` 378/378 passed, `npx vitest run` 306/306 passed (64 files) after all four
-bug fixes; final combined state after Area 40 frontend work: `npx vitest run` 315/315 (66 files),
+bug fixes; final combined state after Work Package 40 frontend work: `npx vitest run` 315/315 (66 files),
 `flutter test` 28/28 passed.
 
-41.7 [DONE 2026-08-27] Live `GET /api/jobs` and `GET /api/gallery` 500s after the Area 40 deploy —
+41.7 [DONE 2026-08-27] Live `GET /api/jobs` and `GET /api/gallery` 500s after the Work Package 40 deploy —
 root cause was `MigrationBootstrapper.cs` (introduced same day, commit `5c08b99`): on a legacy
 `EnsureCreated()`-built database it wrongly assumed only the single newest migration was pending and
 baselined every earlier one as already-applied without running it, so `AddApprovalWorkflowToGalleryAndJobs`
@@ -1480,7 +1517,7 @@ warnings/errors.
 
 ---
 
-# Area 42 — Elections forms/docs manageable from admin portal (raised by user 2026-08-26, plan only, not yet built)
+# Work Package 42 — Elections forms/docs manageable from admin portal (raised by user 2026-08-26, plan only, not yet built)
 
 Today election forms/docs shown at the public `/elections` route are static/seeded ([[session_election_form_pad]], [[session_area36_constitution_seeder_voting]]). User wants admin to manage (create/edit/replace) the election forms, documents, and other information currently shown in the public/portal elections pages, from the admin portal — analogous to the existing SiteContent CMS pattern ([[session_area34_sitecontent_notices]]).
 
@@ -1498,7 +1535,7 @@ seeder/static content.
 
 ---
 
-# Area 43 — Application-wide exception handling & logging audit (raised by user 2026-08-27: "make sure entire application have propers exception handling with logging. best error management")
+# Work Package 43 — Application-wide exception handling & logging audit (raised by user 2026-08-27: "make sure entire application have propers exception handling with logging. best error management")
 
 43.1 [DONE 2026-08-27] Backend: audited `ExceptionMiddleware.cs` and controller-level try/catch blocks
 across `AdminController`, `NotificationController`, `RolesController` for swallowed exceptions and
@@ -1533,10 +1570,10 @@ Committed as `fc06894`.
 
 ---
 
-# Area 44 — Full-app review of the last 2 days' fixes (raised by user 2026-08-28: "review entire
+# Work Package 44 — Full-app review of the last 2 days' fixes (raised by user 2026-08-28: "review entire
 application. make sure all issues are taken cared")
 
-Three parallel code-reviewer passes (backend, web, mobile) audited every fix from Areas 40–43 plus
+Three parallel code-reviewer passes (backend, web, mobile) audited every fix from Work Packages 40–43 plus
 41.10 for correctness, not just superficial patching. Real, verified bugs were found in all three
 layers — several of today's own "fixes" were themselves incomplete. All findings below were fixed
 this session (not merely logged) and re-verified: `dotnet test` 382/382, `npx vitest run` 66 files /
@@ -1758,12 +1795,12 @@ unchanged, no regression.
 
 ---
 
-# Area 45 — SuperAdmin error-log viewer (raised by user 2026-08-28: "super admin role should able to
+# Work Package 45 — SuperAdmin error-log viewer (raised by user 2026-08-28: "super admin role should able to
 view application error logs from UI, able to search, by date or error details or part"), plan only,
 not yet built
 
 Today errors only reach `stdout` (`ExceptionMiddleware`'s `ILogger.LogError`, plus every
-`ILogger<T>.LogError`/`LogWarning` call added across Areas 43/44) and Render's log stream — nothing
+`ILogger<T>.LogError`/`LogWarning` call added across Work Packages 43/44) and Render's log stream — nothing
 is persisted queryably, so there is nothing for an admin UI to read from yet. Per
 [[feedback_keep_lightweight]], the right shape here is a dedicated small table + a thin capture
 sink, not a logging framework (Serilog/ELK/Seq) — this app has deliberately avoided that class of
@@ -1774,7 +1811,7 @@ capture point(s). Candidates to reconcile: a custom `ILoggerProvider` registered
 alongside the console provider (captures every `ILogger` call app-wide, broadest coverage, more
 plumbing); vs. writing directly from `ExceptionMiddleware` only (captures unhandled exceptions —
 matches this request's literal wording, "application error logs" — much simpler, but misses
-`LogWarning`/handled-but-logged errors from the Area 43/44 sweep). Confirm which with the user before
+`LogWarning`/handled-but-logged errors from the Work Package 43/44 sweep). Confirm which with the user before
 building either.
 45.2 [TODO] Domain + migration: new `ErrorLog` entity — at minimum `Id`, `OccurredAt` (UTC,
 indexed), `Level` (Error/Warning), `Message`, `ExceptionType`, `StackTrace`, `Source` (controller/
@@ -1801,7 +1838,7 @@ degrade the very queries meant to search it.
 
 ---
 
-# Area 46 — May 2026 alumni registration batch import (raised by user 2026-08-28: import
+# Work Package 46 — May 2026 alumni registration batch import (raised by user 2026-08-28: import
 `GHCAA.Tools/HRAGANGIAN Alumni Registration May 2026 02.csv` into seed)
 
 46.1 [DONE] Imported 47 new members from the Google-Form CSV export into the seed JSON
@@ -1870,7 +1907,7 @@ but not in the aggregate income/expense ledger view. This is a pre-existing gap 
 member data relates to the org ledger, not something this import introduced — flagging for whoever
 next needs the aggregate ledger to reflect bulk-imported history.
 
-# Area 47 — Live preprod triage: seed-data integrity, dashboard accuracy, landing polish (2026-08-29)
+# Work Package 47 — Live preprod triage: seed-data integrity, dashboard accuracy, landing polish (2026-08-29)
 
 47.1 [DONE] **Seed-data integrity regression suite.** New `GHCAA.Tests/Data/SeedDataIntegrityTests.cs`
 reflects every `LoadSeed<T>("*.json")` call in `ApplicationDbContext` and asserts every JSON key in
@@ -1891,7 +1928,7 @@ only summed `FinancialRecords` (the manually-entered org ledger) — confirmed *
 live preprod — while `PaymentHistories` (real member registration/membership/event payments) held
 1213 completed transactions totaling ৳1,796,000, entirely excluded from the balance shown to
 SuperAdmins. Fixed: balance now = ledger income + completed `PaymentHistories` − ledger expense.
-Matches the gap already flagged in Area 46's May-2026-import note above.
+Matches the gap already flagged in Work Package 46's May-2026-import note above.
 
 47.3 [DONE] **Admin dashboard KPI-tile inconsistency.** "Active Members" was the only stat-card with a
 progress-bar/rate treatment ("X% of total") the sibling cards didn't have — visually flagged as
@@ -1942,7 +1979,7 @@ refresh, logout, the step-up request/verify endpoints this session added, reset-
 `LookupsController`'s full CRUD) is still open; report exists but no further remediation started.
 
 47.10 [TODO] Still open, explicitly deferred: `docs/deploy_connection.txt` committed live-credentials
-file (flagged, not rotated); `docs/BUSINESS_FUNCTIONALITY_REVIEW_PLAN.md:79` has a real password in
+file (flagged, not rotated); `docs/BUSINESS_REVIEW_PLAN.md:79` has a real password in
 plain text (flagged, not scrubbed); member profile photos are genuinely missing for most of the 631
 bulk-imported alumni (not a bug — no photo was ever supplied at import time).
 
@@ -2002,10 +2039,10 @@ template CRUD (`CreateTemplate`/`UpdateTemplate`/`DeleteTemplate`), `FamilyContr
 (grep every `[HttpPost]/[HttpPut]/[HttpPatch]/[HttpDelete]` action, cross-reference against test
 files) to confirm the gap is actually closed rather than assuming from this list.
 
-# Area 48 — Full security audit (raised by user 2026-08-29: "plan for vulnurability check, check for
+# Work Package 48 — Full security audit (raised by user 2026-08-29: "plan for vulnurability check, check for
 web security best paractices")
 
-A `security-reviewer` subagent audit of the whole app (verifying prior S1-S9/Area 24 hardening is
+A `security-reviewer` subagent audit of the whole app (verifying prior S1-S9/Work Package 24 hardening is
 still genuinely wired, and hunting for anything new) found 2 Critical, 4 High, 4 Medium, and several
 Low findings. All code-fixable items below are done (511/511 backend tests green, `ng build` clean);
 the two Critical items include work the user must do outside this codebase (external secret rotation).
@@ -2093,7 +2130,7 @@ skips `IFileValidationService` unlike every other upload endpoint (admin-only, s
 (HTML-encode template variables).
 
 48.13 [TODO] Known, still-open: `docs/deploy_connection.txt` (see 48.2) still tracked with the live
-JWT key. `docs/BUSINESS_FUNCTIONALITY_REVIEW_PLAN.md`'s plaintext password table (committed since
+JWT key. `docs/BUSINESS_REVIEW_PLAN.md`'s plaintext password table (committed since
 2026-07-03) was **upgraded from a docs-hygiene item to a confirmed active exposure on 2026-08-29**:
 its `shalin` / `Shalin@2024!` row was the exact live preprod SuperAdmin credential this session set
 via direct DB access — meaning that password has been sitting in git history, publicly committed,
@@ -2178,7 +2215,7 @@ repo-wide); **A10 SSRF** (every outbound HTTP call's target URL traced to `IConf
 hardcoded literal — the admin-editable `PaymentConfiguration.GatewayCallbackUrl` is confirmed never
 used as an actual request target, per the existing S4.3 design).
 
-# Area 49 — Admin user/role management review (raised by user 2026-08-29: "from admin- how new role
+# Work Package 49 — Admin user/role management review (raised by user 2026-08-29: "from admin- how new role
 can be created, how to disable, reset user passwords, review user and roles implementation and
 design, are all grids designs including row controls same and following centralised designs")
 
@@ -2338,7 +2375,7 @@ controller. Also extend `GHCAA.Tests/Services/MemberServiceTests.cs` or
 `GHCAA.Tests/Controllers/AdminControllerTests.cs` per 49.3.B.4 for the refresh-token-revocation
 regression test.
 
-# Area 50 — Admin-configurable email/SMS template bodies (raised by user 2026-08-29/30: "need to
+# Work Package 50 — Admin-configurable email/SMS template bodies (raised by user 2026-08-29/30: "need to
 manage emails body to be confurable with all relevant informations, this also for sms (if used) by
 admin") [DONE 2026-08-30]
 
@@ -2389,7 +2426,7 @@ in the codebase.
 
 ---
 
-# Area 51 — Universal photo-upload compression hard-cap (raised by user 2026-08-30: "photo_name should
+# Work Package 51 — Universal photo-upload compression hard-cap (raised by user 2026-08-30: "photo_name should
 be compressed by size with maximum quality not more than 512 kb, by internal compressed functionalities,
 lightweight, error free, 100% workable" — server-side, applies to all photo uploads, resize+fixed-quality
 strategy)
@@ -2445,7 +2482,7 @@ instead of `IConfiguration` directly, so a change takes effect immediately witho
 
 ---
 
-# Area 52 — Public landing gallery carousel (web-only) + mobile admin gallery active/featured/edit
+# Work Package 52 — Public landing gallery carousel (web-only) + mobile admin gallery active/featured/edit
 parity (raised by user 2026-08-30: audit gallery work already on web, close the mobile gap, add
 missing tests)
 
@@ -2481,7 +2518,7 @@ was not part of this ask and is a separate cleanup decision.
 
 ---
 
-# Area 53 — Favicon / browser tab icon review (raised by user 2026-08-30)
+# Work Package 53 — Favicon / browser tab icon review (raised by user 2026-08-30)
 
 53.1 [DONE] **Priority: P3 | Depends on: none.** Reviewed the favicon: `index.html` already pointed
 at `assets/logo.png` (the correct transparent-branding asset, confirmed 1024x1024 RGBA with real
@@ -2494,7 +2531,7 @@ confirmed the 32px version stays legible (crest shape + color quadrants read cle
 
 ---
 
-# Area 54 — Live-site issues raised by user 2026-08-30 (console log + admin comm + ledger)
+# Work Package 54 — Live-site issues raised by user 2026-08-30 (console log + admin comm + ledger)
 
 54.1 [DONE] **Priority: P2 | Depends on: none.** Admin Gallery now defaults to a `.data-table` view
 (matching News/Events/Roles), with a Table/Grid toggle (`viewMode` signal, defaults `'table'`) to
@@ -2619,7 +2656,7 @@ defined centrally in `styles.scss` rather than inventing new colors. Verified vi
 
 ---
 
-# Area 55 — Landing page spacing + preview-section seed coverage (raised by user 2026-08-31)
+# Work Package 55 — Landing page spacing + preview-section seed coverage (raised by user 2026-08-31)
 
 55.1 [DONE] **Priority: P3 | Depends on: none.** Reduce the large empty gaps on the public landing
 page between each section's header (title + subtitle + gold underline) and its content below —
@@ -2714,7 +2751,7 @@ genuinely different design languages, not just a minor styling drift:
 
 ---
 
-# Area 56 — Retroactive log: earlier same-session fixes not yet recorded (per user 2026-08-31: "make
+# Work Package 56 — Retroactive log: earlier same-session fixes not yet recorded (per user 2026-08-31: "make
 sure you added tasks with status for all changes you done so far")
 
 These landed before this session started tracking work as numbered TODO items; recording them now
@@ -2750,7 +2787,7 @@ saving, can't modify date"):
 
 ---
 
-# Area 57 — Test coverage audit + a new live-site report to investigate (2026-08-31)
+# Work Package 57 — Test coverage audit + a new live-site report to investigate (2026-08-31)
 
 57.1 [TODO] **Priority: P1 | Depends on: none.** User asked: does the test suite actually verify
 that create/update actions persist **every field** correctly, for **every entity** — not just a
@@ -2788,7 +2825,7 @@ reopened.
 
 ---
 
-# Area 58 — Admin-without-member access, card/table-view audit, poll voting-window check (2026-08-31)
+# Work Package 58 — Admin-without-member access, card/table-view audit, poll voting-window check (2026-08-31)
 
 58.1 [DONE] **Priority: P1 | Depends on: none.** Bug: an Admin/SuperAdmin account with no linked
 Member record (e.g. `ProtectedSuperAdminSeeder`-created accounts) could reach every `/portal/*`
@@ -2941,7 +2978,7 @@ after deploy; the fix itself is unambiguous (a real click target is now visible 
 
 ---
 
-# Area 59 — Association flag on the public About page (raised by user 2026-08-31, referencing
+# Work Package 59 — Association flag on the public About page (raised by user 2026-08-31, referencing
 https://ghcaa-ryl6.onrender.com/about)
 
 59.1 [DONE] **Priority: P4 | Depends on: none.** Add an "About The Association" section to the
@@ -3030,7 +3067,7 @@ What We Do) + governance/pillars banner = 6, as requested. Verified via `dotnet 
 
 ---
 
-# Area 60 — Mobile parity plan for this session's portal changes (raised by user 2026-08-31: "plan
+# Work Package 60 — Mobile parity plan for this session's portal changes (raised by user 2026-08-31: "plan
 for mobile tasks that have in portal but missed and needed")
 
 A codebase-wide comparison (member portal `GHCAA.Web/src/app/member/`+`common/` vs. `GHCAA.Mobile/lib/`)
@@ -3074,7 +3111,7 @@ mobile's split model doesn't (e.g. direct 1:1 alumni messaging vs. threaded foru
 needs a closer read of both the web and mobile networking/messaging services before concluding
 anything is actually missing; flagged as needs-verification, not a confirmed gap.
 
-## AREA 61: CODE COMMENT/DOC TONE + REFACTOR SWEEP (raised by "prepare a plan for human-toned comments/docs/TODOs, refactor review, token usage", 2026-09-01)
+## WORK PACKAGE 61: CODE COMMENT/DOC TONE + REFACTOR SWEEP (raised by "prepare a plan for human-toned comments/docs/TODOs, refactor review, token usage", 2026-09-01)
 
 A repo-wide `git diff` came back empty (working tree clean, no unmerged upstream commits), so there
 was nothing to run a bug-hunting diff review against this session. Scope was refactor/tone/plan work
@@ -3119,10 +3156,10 @@ guessing at it.
 Root `CLAUDE.md`'s tone rule is now retroactive (applies whenever a file is touched, not just new
 edits), per this session's explicit ask.
 
-> **2026-09-01 UPDATE: 61.1, 61.2 and 61.3 are now executed inside Area 62, not separately.** Area 62
+> **2026-09-01 UPDATE: 61.1, 61.2 and 61.3 are now executed inside Work Package 62, not separately.** Work Package 62
 > (white-label/genericization) edits most of the same files, so running these as standalone sweeps
 > means reading the whole repo twice. They are re-scoped as per-phase obligations there and tracked in
-> 62.46-62.49. Do not start a separate pass for them; if Area 62 is cancelled or deferred, re-open
+> 62.46-62.49. Do not start a separate pass for them; if Work Package 62 is cancelled or deferred, re-open
 > them here as originally written.
 
 61.1 [TODO → tracked in 62.47] **Priority: P3 | Depends on: none.** No dedicated dynamic/runtime code-analysis pass has
@@ -3138,9 +3175,9 @@ refactor pass (remove or consolidate) — deferred until 61.1 gives real targets
 touched and drop the `Summary:`-style banner comment for a plain one-line comment, matching the new
 tone rule. Not worth a standalone edit today — it's a diagnostic script, not shipped app code.
 
-## AREA 62: INSTITUTION-AGNOSTIC / WHITE-LABEL PLATFORM (raised by "make this application generic rather than GHC ... will work with GHC or any other institution with minimal configuration changes", 2026-09-01)
+## WORK PACKAGE 62: INSTITUTION-AGNOSTIC / WHITE-LABEL PLATFORM (raised by "make this application generic rather than GHC ... will work with GHC or any other institution with minimal configuration changes", 2026-09-01)
 
-> Reference doc: docs/GENERICIZATION_PLAN.md (architecture decisions, full hardcode audit,
+> Reference doc: docs/WHITE_LABEL_PLAN.md (architecture decisions, full hardcode audit,
 > non-breaking guarantees, verification strategy). Read it before picking up any item here.
 >
 > Scope in one line: one institution profile pack (`profiles/<name>/` JSON + assets) plus a few env
@@ -3151,8 +3188,8 @@ tone rule. Not worth a standalone edit today — it's a diagnostic script, not s
 > editable) stays separate from boot plane (favicon, bundle id, SEO); MembershipType stays an enum
 > and gains a config-driven label/policy layer; a `brand-lint` CI check prevents re-branding drift.
 >
-> Area 28 already shipped the runtime plumbing (OrganizationConfig entity, /api/config, Angular
-> APP_INITIALIZER, Flutter Riverpod, feature guards, SiteContent CMS). Area 62 is NOT a rebuild of
+> Work Package 28 already shipped the runtime plumbing (OrganizationConfig entity, /api/config, Angular
+> APP_INITIALIZER, Flutter Riverpod, feature guards, SiteContent CMS). Work Package 62 is NOT a rebuild of
 > that. It replaces the three hardcoded GHC default blocks feeding it, and closes the long tail of
 > literals that never went through the config path.
 >
@@ -3161,7 +3198,7 @@ tone rule. Not worth a standalone edit today — it's a diagnostic script, not s
 > membership numbers, mobile bundle id, enum int values, live URLs, localization self-heal, seed path
 > vs migration bootstrapper).
 >
-> **AREA 61 IS FOLDED INTO THIS AREA, NOT RUN BESIDE IT.** Area 62 touches most of the files Area 61
+> **WORK PACKAGE 61 IS FOLDED INTO THIS AREA, NOT RUN BESIDE IT.** Work Package 62 touches most of the files Work Package 61
 > still has open work on, so doing them separately means reading the same files twice. Three standing
 > rules apply to every 62.x item, and they are not optional extras:
 >
@@ -3365,7 +3402,7 @@ another institution has different offices and counts.
 62.35 [TODO] **Priority: P3 | Depends on: 62.1.** Payments: make the gateway set a profile-keyed
 registry. Current config assumes Bangladesh providers (SSLCommerz, bKash, Nagad, Rocket, DGePay). An
 institution outside BD must be able to enable none of them and run the manual-payment path only,
-which the app already supports (no-gateway-keys model, Area 29). Do NOT add gateway keys to the repo.
+which the app already supports (no-gateway-keys model, Work Package 29). Do NOT add gateway keys to the repo.
 
 62.36 [TODO] **Priority: P3 | Depends on: 62.1.** Lookups: confirm `lookups.json` (808 lines of
 dropdown data: departments, districts, batches) is fully profile-sourced and contains nothing
@@ -3407,24 +3444,24 @@ rather than markup, which makes it the right harness for this.
 since this is the regression baseline for any future institution.
 
 62.45 [TODO] **Priority: P4 | Depends on: 62.41.** Docs sweep per the project's "update all relevant
-docs" rule: architecture_data_flow, BUSINESS_FINDINGS, FEATURES, PLAN, project_map, SRS, README, and
-CONFIG_DRIVEN_FRAMEWORK.md (which documents Area 28 and now has a successor). Also decide whether to
+docs" rule: ARCHITECTURE, BUSINESS_FINDINGS, FEATURES, FORUM_PLAN_2026-05, PROJECT_MAP, SRS, README, and
+CONFIG_DRIVEN_FRAMEWORK.md (which documents Work Package 28 and now has a successor). Also decide whether to
 rename the solution/projects off the `GHCAA.` prefix; recommendation is NO, because the rename churn
 and its deploy risk buy nothing a profile pack does not already deliver, but record the decision
 rather than leaving it implicit.
 
-### PHASE G: AREA 61 CARRY-OVER (runs inside phases A-F, not after them)
+### PHASE G: WORK PACKAGE 61 CARRY-OVER (runs inside phases A-F, not after them)
 
-> These four items are the mechanism that folds Area 61 into Area 62. They are not a separate pass at
+> These four items are the mechanism that folds Work Package 61 into Work Package 62. They are not a separate pass at
 > the end. Each one is checked off per phase, and the phase is not done until its slice is done.
 
 62.46 [TODO] **Priority: P2 | Depends on: none (applies to every 62.x item).** Tone rule, retroactive.
-Every file an Area 62 item edits gets its AI-sounding comments/docs cleaned in the same commit, per
+Every file an Work Package 62 item edits gets its AI-sounding comments/docs cleaned in the same commit, per
 the root CLAUDE.md "Comment, Doc & TODO Tone" section: plain short sentences, no filler openers, no em
 dashes, no `// ===== SECTION =====` banners, no restating the obvious, TODOs name the real gap and why
-it is not done. This applies equally to the NEW code Area 62 adds (`IInstitutionProfileProvider`,
+it is not done. This applies equally to the NEW code Work Package 62 adds (`IInstitutionProfileProvider`,
 brand-lint, `apply-brand.mjs`, `new-institution.mjs`) and to the new docs
-(GENERICIZATION_PLAN.md, INSTITUTION_ONBOARDING.md). Match the file's existing comment style first;
+(WHITE_LABEL_PLAN.md, INSTITUTION_ONBOARDING.md). Match the file's existing comment style first;
 do not rewrite untouched comments purely to align tone. Absorbs 61.3 (`GHCAA.Tools/db_diag.cs`
 `Summary:` banner) whenever that file is next touched.
 
@@ -3443,8 +3480,8 @@ actually orphaned. Do NOT open a general refactor, and do not introduce a new ab
 that the change does not concretely need (project rule: no abstraction without a real duplication or
 coupling problem in front of you). This closes 61.2.
 
-62.49 [TODO] **Priority: P4 | Depends on: 62.46, 62.48.** Close-out audit for the Area 61 half: after
-Phase F, confirm no AI-tell comments were introduced by Area 62 itself (re-run the 61.4 grep patterns:
+62.49 [TODO] **Priority: P4 | Depends on: 62.46, 62.48.** Close-out audit for the Work Package 61 half: after
+Phase F, confirm no AI-tell comments were introduced by Work Package 62 itself (re-run the 61.4 grep patterns:
 filler openers, `Summary:`/`Purpose:`/`Overview:` headers, banner comments, vague `TODO: improve
 this`), and confirm the removals in 62.48 left no dangling references (`dotnet build`, `vitest`,
 `dart analyze` all clean). Record the file counts here the way 61.4 did, so the sweep is provable
@@ -3452,7 +3489,7 @@ rather than asserted.
 
 ---
 
-# Area 63 — Documentation book: implementation alignment, A4-safe figures, automated PDF
+# Work Package 63 — Documentation book: implementation alignment, A4-safe figures, automated PDF
 
 Raised by user 2026-09-01: "I want docs books contents to be aligned with latest implementation, IEEE
 styled, all drawing, diagrams are designed and formatted thus nothing breaks on a4 sized paper print,
@@ -3558,7 +3595,7 @@ then `renumber.py --apply`. The fix order is in `docs/book/README.md` under "Fit
 figure to a chapter without a sentence in the body that names it, or the build will fail.
 
 63.12 [DONE 2026-09-01] **Priority: P3.** FR-54's source attribution closed from the repository instead
-of being left to the author: its provenance is the dated request at `docs/TODO.md` Area 40 ("raised by
+of being left to the author: its provenance is the dated request at `docs/TODO.md` Work Package 40 ("raised by
 user 2026-08-26"), which is also FR-53's origin. Both now carry a new Source code R, defined in §3.3 as
 a stakeholder request recorded in the tracker after the elicitation of §3.1 closed, which is a weaker
 record than an interview and is marked as such rather than dressed up as one.
@@ -3669,7 +3706,7 @@ exists. Check this again if the appendix set changes.
 
 ---
 
-# Area 64 — Chapter 11 evidence: activity list, durations, and how the work actually arrived
+# Work Package 64 — Chapter 11 evidence: activity list, durations, and how the work actually arrived
 
 Raised by user 2026-09-02 while checking `docs/materials/` for content the book should cover. The
 three assignment PDFs there are the author's own group submissions for MITM 301, and they are for the
@@ -3739,7 +3776,7 @@ delivered system: 276 endpoint attributes as EI/EO/EQ, 49 `DbSet` properties as 
 email, SMS and social identity as EIF. COCOMO II's five scale factors and seventeen effort multipliers
 cannot be justified for a single-maintainer project, and an indefensible model adds no evidence.
 
-# Area 65 — Chapter and content sequence revision
+# Work Package 65 — Chapter and content sequence revision
 
 Raised by user 2026-09-02: "revise chapters and content sequences".
 
@@ -3810,7 +3847,7 @@ more fundamental than the specific designs that apply them, so the conventional 
 first. Not done: reordering sections inside a written chapter renumbers a large share of the 84 §6
 references for a modest gain. Worth doing only if the chapter is revised for another reason anyway.
 
-# Area 66 — Print legibility: overprinted and clipped diagram labels
+# Work Package 66 — Print legibility: overprinted and clipped diagram labels
 
 Raised by user 2026-09-02 from two screenshots of the printed PDF: risk-matrix labels stacked on top
 of each other, and DFD edge labels overlapping. A third arrived while the first two were being fixed:
@@ -3859,18 +3896,18 @@ section sign, "§4.1 Research Paradigm". The section sign marks a cross-referenc
 list carries the bare number. `renumber.py` no longer writes it and `folios.py` treats it as optional
 so a hand-written row still matches.
 
-# Area 67 — The remaining chapters: nothing of Areas 63 to 66 reaches a reader yet
+# Work Package 67 — The remaining chapters: nothing of Work Packages 63 to 66 reaches a reader yet
 
-Raised by user 2026-09-02, on being told Area 64 was complete: "doesn't those going in book? where?"
+Raised by user 2026-09-02, on being told Work Package 64 was complete: "doesn't those going in book? where?"
 A fair question, and the answer is that it does not, yet.
 
 67.1 [TODO] **Priority: P0.** `docs/book/` holds chapters 1 to 6 and the references. Chapters 7 to 13
 do not exist as files, so the 85-page PDF the build produces stops at the architecture chapter. Every
-piece of Area 64 evidence — the activity list with predecessors, the critical path, the float
+piece of Work Package 64 evidence — the activity list with predecessors, the critical path, the float
 distribution, the two estimates compared, the arrival profile — lives in exactly two places, neither
 of them the book: the Chapter 11 specification in `docs/DOCUMENTATION_BOOK_OUTLINE.md`, and
 `docs/book/build/wbs.py`, which regenerates the numbers on demand. The same is true of the security
-model (Area 65's Chapter 8) and everything the diagram inventory lists from row 45 on.
+model (Work Package 65's Chapter 8) and everything the diagram inventory lists from row 45 on.
 
   Files to create, with the page budget 63.28 fixed: `07-implementation.md` (12), `08-security.md`
   (14), `09-verification.md` (11), `10-deployment.md` (9), `11-project-management.md` (9),
@@ -3881,12 +3918,12 @@ model (Area 65's Chapter 8) and everything the diagram inventory lists from row 
 because it comes first. It is the only unwritten chapter whose evidence is already computed and
 checkable: `wbs.py` prints the activity table, the critical path and the arrival profile from git and
 this file, so the chapter is a matter of writing prose around generated numbers rather than gathering
-anything. Writing it also exercises the claim in Area 64 that the numbers are reproducible; if the
+anything. Writing it also exercises the claim in Work Package 64 that the numbers are reproducible; if the
 chapter cannot be written from the script's output, the script is not producing what a reader needs.
 
 67.3 [TODO] **Priority: P2 | Depends on: 67.2.** Seventeen per-component activity diagrams (64.9)
 plus the six chapter-level charts. They cannot be drawn before the chapter exists to hold them, and
-under Area 66 every one of them has to survive the overprint and clipping checks, which the two
+under Work Package 66 every one of them has to survive the overprint and clipping checks, which the two
 quadrant charts and the DFD did not.
 
 67.4 [TODO] **Priority: P2.** The reference list carries seventeen entries no written chapter cites
@@ -3913,7 +3950,7 @@ and now matches the tree:
 appendix policy question) and one closed (the page budget the user decided, which answered it). The
 closed one is renumbered 63.28.
 
-# Area 68 — Chapter files for 7 to 13, and the outline kept in step by the build
+# Work Package 68 — Chapter files for 7 to 13, and the outline kept in step by the build
 
 <!-- wbs: component=C17 start=2026-09-02 end=2026-09-02 after=65,67 -->
 
@@ -3952,7 +3989,7 @@ stdout and stderr are now reconfigured to UTF-8. And the placeholder list printe
 build, burying the real findings above it; it now prints one summary line per file and the full list
 only under `--no-placeholders`, which is when it is the thing being closed.
 
-# Area 69 — Review of the seven book build scripts
+# Work Package 69 — Review of the seven book build scripts
 
 <!-- wbs: component=C17 start=2026-09-02 end=2026-09-03 after=63 -->
 
@@ -4058,7 +4095,7 @@ reporting that `docs/TODO.md` no longer parses.
 schedule order, correct only while `CODE` happens to be topologically sorted, and `critical_path`
 raises `KeyError` on a predecessor id that is not a component instead of naming the typo.
 
-# Area 70 — Architecture diagram: the real-time path
+# Work Package 70 — Architecture diagram: the real-time path
 
 <!-- wbs: component=C17 start=2026-09-03 end=2026-09-03 after=63 -->
 
@@ -4077,7 +4114,7 @@ because it needs `IHubContext<T>`, a hosting type. Verified in the tree:
 the mobile client connecting to `/hubs/notifications` in
 `GHCAA.Mobile/lib/core/real_time/notification_hub_service.dart`.
 
-# Area 71 — Supervisor-style review of the book: verify each suggestion, act where justified
+# Work Package 71 — Supervisor-style review of the book: verify each suggestion, act where justified
 
 <!-- wbs: component=C17 start=2026-09-03 end=2026-09-03 after=65,68 -->
 
@@ -4110,7 +4147,7 @@ enforced, and §10.4.2, security in the pipeline and what is not automated, with
 kind of error in this document.
 
 71.4 [DONE 2026-09-03] **Priority: P2.** The user asked for both to be added, targeting preprod, on
-the reasoning that the project needs them after delivery anyway. Done in Area 72.
+the reasoning that the project needs them after delivery anyway. Done in Work Package 72.
 
 71.5 [DONE 2026-09-03] **Priority: P3.** Vendor lock-in named. Criterion C5 in §2.10 already measured
 it as "data sovereignty and exit" and the comparison table already carries per-vendor licence cost
@@ -4139,7 +4176,7 @@ methodology: its specification says only the parts with evidence are written, an
 was not used it reports what was done instead. Neither Agile nor Scrum is defined anywhere in the
 book.
 
-# Area 72 — Dependency and static-analysis scanning in CI
+# Work Package 72 — Dependency and static-analysis scanning in CI
 
 <!-- wbs: component=C16 start=2026-09-03 end=2026-09-03 after=71 -->
 
@@ -4176,7 +4213,7 @@ turning Dependabot off.
 free and 72.2 is worth revisiting; §10.4.2 would then need rewriting, since it currently states cost
 as the reason static analysis is absent.
 
-# Area 73 — Traceability and constitutional alignment: what is true, and what was claimed
+# Work Package 73 — Traceability and constitutional alignment: what is true, and what was claimed
 
 <!-- wbs: component=C17 start=2026-09-03 end=2026-09-03 after=71 -->
 
@@ -4248,7 +4285,7 @@ has, and it is not specified separately. Adding a quality-attribute scenario for
 concurrency figure, which means a measurement rather than a guess, so it is recorded rather than
 invented.
 
-# Area 74 — Standing rules, and schedule facts the tracker carries itself
+# Work Package 74 — Standing rules, and schedule facts the tracker carries itself
 
 <!-- wbs: component=C17 start=2026-09-03 end=2026-09-03 after=73 -->
 
@@ -4258,7 +4295,7 @@ the dates and dependencies an activity list needs.
 
 74.1 [DONE 2026-09-03] **Priority: P1.** SR-1 written at the top of `docs/TODO.md`, above the priority
 index, under a STANDING RULES heading that says these are not tasks and never close. It was scattered
-before — a note inside Area 62, another inside Area 63, and the root `CLAUDE.md` — so nothing stated
+before — a note inside Work Package 62, another inside Work Package 63, and the root `CLAUDE.md` — so nothing stated
 it as a rule in its own right. The two carve-outs the user asked for are stated with it: requirement
 statements keep the 29148 "shall" form, and generated tables keep whatever shape the script produces.
 Also written to memory so it survives the session.
@@ -4272,9 +4309,9 @@ failing `--check` every time an area is added; `start` and `end` are for work gi
 is the fourth evidence class of Chapter 11; `after` records what the area waited on. The dates are
 omitted where commits already carry them, so the marker adds evidence rather than duplicating it.
 `--check` now also fails on a marker naming a component that does not exist, or an area that
-followed an area with no items. Six markers written for Areas 68 to 73.
+followed an area with no items. Six markers written for Work Packages 68 to 73.
 
-74.3 [TODO] **Priority: P3.** Backfill markers for Areas 1 to 67. Not done in bulk: a marker asserting
+74.3 [TODO] **Priority: P3.** Backfill markers for Work Packages 1 to 67. Not done in bulk: a marker asserting
 a start date is a claim about when work happened, and for most of those areas the honest source is the
 commit record `wbs.py` already reads. Worth doing only where an area's real dates differ from its
 commit dates, which is the case for the research and review work of U1 to U5.
@@ -4294,7 +4331,7 @@ names, by count. `--sync --dry-run` prints what it would write and changes nothi
   two `[DONE]` stamps produced `component=C13 start=2026-09-04 end=2026-09-05`. Against the real file
   it reports that every area is already mapped.
 
-# Area 75 — Realistic durations, and the work that came before the first commit
+# Work Package 75 — Realistic durations, and the work that came before the first commit
 
 <!-- wbs: component=C17 start=2026-09-03 end=2026-09-03 after=74 -->
 
@@ -4343,7 +4380,7 @@ script's. Ten days for the governing-document study and eight for requirements a
 worth challenging: they set the pre-development total and therefore the person-month figure the
 dissertation prints. Confirm or correct them the way 64.7 asks for the assumption rates.
 
-# Area 76 — Sizing the delivered system, and the reuse that paid for it
+# Work Package 76 — Sizing the delivered system, and the reuse that paid for it
 
 <!-- wbs: component=C17 start=2026-09-03 end=2026-09-03 after=75 -->
 
@@ -4451,7 +4488,7 @@ contents page pointing at the wrong pages and still reported itself clean. Fixed
 `renumber.py --lists --apply` and a reprint; 264 of 264 folios now verified. The lesson for the next
 renumber is in the order: shift the numbers, rebuild the lists, then print.
 
-# Area 77 — Twenty years of prior work as a project parameter
+# Work Package 77 — Twenty years of prior work as a project parameter
 
 <!-- wbs: component=C17 start=2026-09-03 end=2026-09-03 after=76 -->
 
@@ -4549,15 +4586,15 @@ isolate. One block can still be named as evidence, the generated interface and D
 names it. An examiner is entitled to press on the judged factor; the chapter's answer is to show which
 of the two is which, not to hide the difference.
 
-77.9 [DONE 2026-09-03] **Priority: P2.** Docs and memory swept for the changes of Areas 74 to 77.
-`docs/project_map.md`: the build-tool table now describes what `wbs.py`, `lint.py` and `printer.py`
+77.9 [DONE 2026-09-03] **Priority: P2.** Docs and memory swept for the changes of Work Packages 74 to 77.
+`docs/PROJECT_MAP.md`: the build-tool table now describes what `wbs.py`, `lint.py` and `printer.py`
 actually do, and gains the two rows it never had for `folios.py` and `devtools.py`. `CLAUDE.md` and
 `docs/book/README.md` were updated when the rules landed. Memory gained
 `session_ch11_effort_model.md`, which records the four quantities and which factor is measured rather
 than judged, and `feedback_todo_tracking_discipline.md` now carries SR-3.
 
   Checked and left alone, because nothing in them changed: `SRS.md`, `FEATURES.md`,
-  `architecture_data_flow.md`, `BUSINESS_FINDINGS.md`, `PLAN.md`. Recording that they were checked is
+  `ARCHITECTURE.md`, `BUSINESS_FINDINGS.md`, `FORUM_PLAN_2026-05.md`. Recording that they were checked is
   the point — "update all relevant docs" is only answerable if the irrelevant ones are named too.
 
 77.10 [DONE 2026-09-03] **Priority: P1.** **SR-3** added to the standing rules: this file is the only
@@ -4567,3 +4604,290 @@ than none, because the two disagree and nobody can tell which is current. Two co
 it: anything an item quotes from elsewhere is a pointer rather than a copy, and an item records what
 actually happened, including where the work was wrong, since the record is the only
 project-management evidence this project has.
+
+---
+
+# Work Package 78 — Dissertation audit: methodology commitments against available evidence
+
+<!-- wbs: component=C17 start=2026-09-03 end=2026-09-03 after=77 -->
+
+Origin: user instruction, 2026-09-03, to review the book as an incomplete Design Science Research
+dissertation rather than as software documentation, and to justify each change before applying it.
+
+78.1 [DONE 2026-09-03] **Priority: P1.** Manuscript status established before any edit was made.
+Chapters 1 to 6 carry no open placeholder and are fully drafted; chapters 7 to 13 are heading-only
+stubs. The boundary is clean, so no rescue work is required on 1 to 6 and the remaining effort is
+entirely new writing. The proposal to reposition the work from a documentation book to a dissertation
+supported by an artefact was assessed and closed with no action: the title, the abstract and Chapter 4
+already state that framing.
+
+78.2 [DONE 2026-09-03] **Priority: P0.** Defect raised against §4.5. The section commits in advance to
+eight evaluation instruments, and four of them have no evidence behind them: load testing, the
+usability study, the ASVS assessment and mutation testing. Coverage data and the review findings log
+already exist, and the static metrics need only a tool run. Impact: Table 4.3 invites an examiner to
+check Chapter 12 against it row by row, so each unmet row is a commitment broken against the standard
+the chapter sets for itself, which is a worse position than never having made the commitment.
+
+78.3 [DONE 2026-09-03] **Priority: P0. Closes 78.2.** §4.5 amended to commit only to evidence that
+will exist, with each reduction disclosed in place. Performance is now a single-client latency
+measurement, with the reason recorded: the pre-production tier is shared, so a concurrency figure
+taken from it would measure the hosting plan. The ASVS claim is stated as conformance assessed by the
+author rather than verified. Mutation testing is recorded as planned and not run. Table 4.1 rows were
+brought into line, and a new paragraph states the three reductions together and why the section was
+not simply rewritten to promise what was achieved.
+
+  Out of scope, deliberately: NFR-P1, NFR-P2 and NFR-P5 keep their concurrency targets. A requirement
+  states the target; the limits of the evidence belong in §9.11 and §12.11. Weakening a requirement to
+  match what could be measured would repeat the error corrected in 77.7.
+
+  Verified by `build.py --pdf --strict`, clean.
+
+78.4 [DONE 2026-09-03] **Priority: P0.** Evaluation instruments produced under `docs/book/instruments/`
+so that the usability and stakeholder study can be executed: briefing and verbal-consent script, four
+task scripts (ordinary member, Treasurer, General Secretary, President) derived from each office's
+actual duties rather than from the platform's menus, the SUS form with its scoring rule, open role
+questions per office, an observation checklist, a heuristic walkthrough sheet for the flows the
+sessions do not reach, and a per-participant response log. `responses/` is empty by design and must
+stay empty until sessions have run.
+
+  Design note for whoever administers them: the scripts are built to surface defects, not to produce a
+  favourable score. The member payment task tests whether paying outside the platform reads as a
+  limitation or as a fraud risk; the Treasurer script asks directly whether any screen would allow a
+  payment to be recorded that was never received; the President script asks whether the ballot
+  boundary of DC-15 is the correct line. The README states the study's limits: no control condition,
+  no comparison system, and sessions administered by the maintainer known to every participant.
+
+78.5 [DONE 2026-09-03] **Priority: P1.** Table 3.6 extended with a Class column classifying all sixteen
+domain constraints as deterministic, state, evidence, procedural or authority, and §3.10 extended to
+define the five classes and their purpose: the boundary between what software may decide and what it
+must leave alone becomes a property of the rule, readable from the constitution before code exists.
+DC-04 and DC-05 are set out as the pair that demonstrates the classes are distinct kinds rather than
+degrees, and a new note covers DC-12 and DC-15 as the only two in the authority class.
+
+  Contribution 1 in the front matter and §1.9 both restated to name the scheme, since a contribution
+  documented only inside a requirements chapter will not be found. `DOCUMENTATION_BOOK_OUTLINE.md`
+  updated in the same edit for §3.10, §4.5.3, §4.5.4, §4.5.5 and §12.8, per SR-1's outline rule.
+
+78.6 [DONE 2026-09-03] **Priority: P1.** Scope statements added to the seven unwritten chapters, each
+naming what the chapter owns and what it must not repeat: Chapter 6 rationale, Chapter 7 construction,
+Chapter 8 threat and control, Chapter 9 verification method, Chapter 12 results and nowhere else,
+Chapter 13 no new evidence. Without this, security would have been documented in four chapters,
+testing in four and deployment in four. Enforcement is by review, not by the build.
+
+78.7 [DONE 2026-09-03] **Priority: P2.** Three incorrect section cross-references found during the
+audit and corrected: NFR-U2 cited §12.5 (security) for a usability criterion, §4.5.4 cited §9.13 (user
+acceptance testing) for the ASVS report, and §2.5.1 cited §8.14 and §6.13 where §9.14 and §6.11.12 are
+correct. All three passed `--strict`, because the checker verifies that figures and tables are named
+and does not verify that a section reference resolves.
+
+78.8 [TODO] **Priority: P2. Depends on 78.7.** Add a section-reference check to `lint.py`: every `§n.m`
+occurring in the text must resolve to a heading that exists in the manuscript. Add a `--refs` listing
+mode to the same check that prints every reference with its surrounding clause, so that the SR-5 pass
+in 78.13 can be worked through mechanically rather than by re-reading each chapter.
+**Acceptance:** the check fails the build when given any of the three references corrected in 78.7,
+and `build.py --strict` remains clean against the current tree.
+
+78.13 [TODO] **Priority: P2. Depends on 78.8.** Apply SR-5 to the drafted chapters. The manuscript
+carries 357 section references, of which roughly 178 name a number with no indication of what is at
+the other end. Each one that leaves the reader unable to continue without turning back gains a short
+clause naming its subject; a reference whose sentence already says what is there is left alone.
+Work chapter by chapter rather than by search and replace, since the right clause depends on what the
+sentence has already established.
+**Acceptance:** no reference in chapters 1 to 6 reads as a bare number where the destination is not
+already named in the sentence; `build.py --pdf --strict` clean; and the chapters written after this
+date follow SR-5 as they are drafted, so the pass is not repeated.
+
+  This session's own edits already follow SR-5 and are the worked example: the outline's §3.10 entry,
+  the three reduction disclosures in §4.5, and contribution 1 in the front matter.
+
+78.9 [TODO] **Priority: P1. Depends on 78.4.** Administer the evaluation sessions: ordinary members
+plus the three office holders, at least half of the member sessions on a handset, against the
+pre-production deployment, one response log per participant.
+**Acceptance:** a completed response log per participant in `docs/book/instruments/responses/`, no
+participant name anywhere in the folder, and no session written up into §12.6 or §12.7 until every
+session is complete. Partial write-up produces a chapter that argues for whoever was interviewed
+first.
+
+78.10 [TODO] **Priority: P1.** Produce the evidence that requires no participant: summarise the
+coverage data already in `GHCAA.Tests/TestResults/`, run static analysis for complexity, coupling and
+maintainability index, take the latency measurements defined in §4.5.3, and complete the ASVS 4.0.3
+walkthrough control by control for §8.13.
+**Acceptance:** each figure traceable to a command that can be re-run against the tree, with the date
+of the run recorded, per the repository-numbers rule in `CLAUDE.md`.
+
+78.11 [TODO] **Priority: P1. Depends on 73.4, 73.5.** Tag automated tests with the FR and DC
+identifiers they exercise, and generate Table 3.4 from a test run rather than maintaining it by hand.
+**Acceptance:** every Must-priority requirement either resolves to a named passing test or is reported
+uncovered; the matrix is regenerated by a command, not edited.
+
+78.12 [TODO] **Priority: P2.** Chapter completion order, recorded so it is not re-argued: Chapter 11
+first, being the only chapter whose figures `wbs.py` already computes and which is blocked on nothing;
+then 9; then the evidence of 78.9 and 78.10; then 12, 7, 8, 10, 13, the abstract, and a final
+consistency pass. This departs from the review brief, which scheduled 11 near the end.
+
+---
+
+# Work Package 79 — Plain-language sweep against the widened SR-1
+
+<!-- wbs: component=C17 start=2026-09-03 end=2026-09-03 after=78 -->
+
+Origin: user instruction, 2026-09-03, widening SR-1 from "nothing may read as machine-written" to
+"write everything in plain, simple words", and asking whether the existing content already complies.
+It does not. This work package records what has been swept, what has not, and what each remaining
+sweep requires.
+
+The distinction that matters: `lint.py` enforces a list of 47 banned words and phrases and fails
+`build.py --strict` on any of them. The widened rule is about sentence construction, which no
+automated check catches. A clean strict build is therefore not evidence of compliance, and must not
+be quoted as if it were.
+
+79.1 [DONE 2026-09-03] **Priority: P2.** `docs/book/instruments/`, 11 files, swept against the
+widened rule. Rewrites made where a sentence needed two readings, including the walkthrough sheet's
+severity guidance and the session README's instruction not to help. These files are read by somebody
+mid-session with a participant waiting, which makes them the least acceptable place for an elegant
+sentence.
+
+79.2 [TODO] **Priority: P1.** Sweep the six drafted chapters and the front matter, 4,883 lines.
+Checked continuously against the banned-word list, never read against plain construction. Do it in
+the same pass as the SR-5 cross-reference work in 78.13, since both require reading each chapter once
+with a pen and reading it twice wastes the effort.
+**Acceptance:** each chapter read end to end; every sentence that needs a second reading either
+simplified or left with a note saying why the longer form is required; `build.py --pdf --strict`
+clean afterwards.
+
+  Progress: Chapter 1 done 2026-09-03 as the pilot, both rules applied in one reading. Twelve edits
+  stand: five sentences simplified, seven references given their subject. Most of Chapter 1 was left
+  alone, which is the expected result for prose that was already written to the narrow rule; a sweep
+  that rewrites every paragraph has misunderstood the instruction.
+
+  One edit was reverted during the pass and is recorded because it generalises. Adding "the account of
+  current practice" after a reference to §1.2 restated what the sentence had already said two clauses
+  earlier. A clause that repeats the sentence is worse than the bare number, so SR-5 is satisfied by
+  the sentence naming the destination, wherever the naming happens to sit.
+
+79.3 [TODO] **Priority: P2.** Sweep `docs/*.md`, 55 files and about 10,885 lines, and the three
+root-level markdown files (`README.md`, `CLAUDE.md`, `GEMINI.md`). Priority goes to the documents a
+person outside the project reads first: `README.md`, `SRS.md`, `FEATURES.md`, `RENDER_DEPLOYMENT.md`.
+The internal planning documents can follow.
+**Acceptance:** the four named documents swept and the rest triaged into swept or deliberately left,
+with the decision recorded here rather than assumed.
+
+79.4 [TODO] **Priority: P2. Depends on 62.49.** Code comments, roughly 3,684 lines carrying `//`
+across the backend, web and mobile sources. The retroactive tone rule already applies to any file a
+change touches, and the standing sweep is folded into Work Package 62 rather than run beside it, so
+this item is a widening of scope rather than new work: 62's close-out audit checks for the old
+AI-tells and must now also check construction.
+**Acceptance:** 62.49's recorded file counts include the widened rule, so the sweep stays provable
+rather than asserted.
+
+79.5 [TODO] **Priority: P3.** User-facing strings in the web and mobile clients: labels, validation
+messages, empty states, confirmation dialogs and error text. Never swept against any tone rule. These
+are the only content in this list that members read, which argues for a higher priority than the
+internal documents, but they are also the highest-risk edit, since a reworded validation message can
+break a test that asserts on its text.
+**Acceptance:** strings swept per client; `dotnet test`, `vitest` and `flutter test` all clean, with
+any test asserting on message text updated in the same change rather than after it.
+
+79.6 [DONE 2026-09-03] **Priority: P2.** Document filenames swept against the widened SR-1, on the
+instruction that a filename is content too. Nine files renamed with `git mv` and every inbound
+reference rewritten in the same change; `wbs.py --check` and `build.py --strict` both clean
+afterwards.
+
+Three names were misleading rather than merely clumsy, which is why they went first. `PLAN.md` read
+as the plan for the project and was a stale mobile forum plan from an old phase. `PHASE4_FINAL_REVIEW`
+named a phase number no longer in use and called itself final, which it was not. `low_coverage_report`
+carried a STALE banner inside a name that gave the reader no reason to open it and check. All three
+now carry their date, so the next reader cannot quote them as current by accident.
+
+| Was | Is |
+|---|---|
+| `PLAN.md` | `FORUM_PLAN_2026-05.md` |
+| `PHASE4_FINAL_REVIEW.md` | `BACKEND_REVIEW_2026-07-03.md` |
+| `low_coverage_report.md` | `COVERAGE_SNAPSHOT_2026-05-26.md` |
+| `GENERICIZATION_PLAN.md` | `WHITE_LABEL_PLAN.md` |
+| `UI_UX_REMEDIATION_PLAN.md` | `UI_FIX_PLAN.md` |
+| `BUSINESS_FUNCTIONALITY_REVIEW_PLAN.md` | `BUSINESS_REVIEW_PLAN.md` |
+| `PROFILE_SHARED_COMPONENT_DESIGN.md` | `SHARED_PROFILE_COMPONENTS.md` |
+| `architecture_data_flow.md` | `ARCHITECTURE.md` |
+| `project_map.md` | `PROJECT_MAP.md` |
+
+Each renamed file's H1 was rewritten to match, since a title saying "Genericization Plan" under a
+filename saying white-label defeats the point. Casing is now one rule, UPPER_SNAKE for every document
+under `docs/`, which is what the last two renames buy.
+
+One reference was deliberately left alone: `GEMINI.md` tells the reader to create a `PLAN.md` as
+generic advice and does not point at this repository's file, so the rename script skips that line.
+
+`docs/TODO.md` was considered and left. The name contradicts SR-4, since the file is an analyst's
+backlog written for a developer rather than anybody's to-do list, but it carries 91 references across
+25 files including `CLAUDE.md`, three book chapters, `wbs.py` and a C# integration test. Recorded here
+so the decision is on the record rather than an oversight; revisit only if the tracker is restructured
+for another reason.
+
+79.7 [DONE 2026-09-03] **Priority: P1.** Chapters 2 to 6 and the front matter swept, both rules in
+one reading, using `docs/book/build/prose.py` rather than reading 4,475 lines by eye. Twenty-eight
+edits stand. `build.py --pdf --strict` clean afterwards, 104 pages, 264 folios.
+
+Per chapter: Ch2 eighteen edits, Ch3 six, Ch4 one, Ch5 none, Ch6 three, front matter none. Chapter 5
+needing nothing and the front matter needing nothing is the expected result, not a skipped pass.
+
+The finding that matters is in the references. Five in Chapter 2 and four in Chapter 3 resolved to a
+real section that was the wrong one, and every one of them passed `--strict`. The security chapter
+took most of them: the masking protocol was sent to §8.7 on transport security instead of §8.11 on
+personal data, twice, in two chapters; the JWT hazard and the stateless token design were both sent
+to §8.5 on input validation instead of §8.3 on authentication; the governance argument was sent to
+§9.10 on security testing instead of §8.10 on governance integrity; the ASVS control mapping was sent
+to §9.4 on unit testing instead of §8.13. Chapter 3 also sent the definition of done to §11.7 on team
+structure instead of §11.10 on quality assurance, the quality-attribute scenarios to §6.12 on design
+patterns instead of §6.14 on design verification, and Table 2.3 sent the versioned-instrument row to
+§7.9 on real-time features instead of §7.12 on the constitution pipeline. A reader following any of
+these would have found a section on an unrelated subject.
+
+78.8 [DONE 2026-09-03] **Priority: P1.** `docs/book/build/prose.py` written, stdlib only, two modes.
+
+`prose.py refs` builds an index of all 271 section headings and reports three things: references that
+resolve to no section, references in prose that carry no clause naming the destination (SR-5), and
+references inside table cells and the figure appendix, where a bare number is correct and the rule
+does not apply. Table references are still listed under `--tables`, with the destination title, so a
+wrong target inside a table cannot hide behind the exemption. Printing the destination title beside
+every reference is what makes a wrong target visible without opening the chapter, and it is how all
+nine above were found.
+
+`prose.py prose` flags sentences likely to need a second reading: over sixty words, or over
+forty-five with four or more commas, or matching one of fourteen construction patterns. It is a
+filter and not a judge. Across the six drafted chapters it flags 59 sentences, of which 11 were
+worth changing; the rest are long because they carry a signposted list, and length alone is not the
+fault the rule names.
+
+**Acceptance met.** Nothing is silently excluded, and the two false-positive classes found while
+running it were fixed rather than tolerated: content words are stemmed to six characters so
+"architecture" in a sentence counts as naming a section titled "Architectural", and the sentence
+splitter accepts a sentence opening with a code span, which had been merging two sentences into one
+and inflating a 147-word false alarm.
+
+**Not yet wired into `build.py --strict`.** Deliberate: 167 bare references remain across the book,
+most of them in the seven unwritten chapters, so a gate today would fail every run for reasons the
+author cannot yet fix. Wire it in when Chapter 12 is drafted, and only then.
+
+79.8 [DONE 2026-09-03] **Priority: P2.** Tracker terminology renamed from Area to Work Package
+throughout, headings and contents together, and every reference outside the tracker moved with it.
+188 replacements across 19 files: 77 headings and 144 occurrences in this file, plus the three book
+chapters that cite the tracker, six planning documents, and five source files whose comments name a
+tracker unit (`ChatHub.cs`, `app_theme.dart`, `app.constants.ts`, `app.constants.spec.ts`,
+`SpaStaticFileFallbackTests.cs`, `GalleryServiceTests.cs`) and one SQL catch-up script.
+
+`wbs.py` was already parsing both forms, so the rename could not break the build mid-way. Its report
+headings, its `--check` messages and its doc comments now say work package as well; the local
+variable named `area` was left alone, because renaming it changes nothing a reader of the report
+sees. Chapter 4's "sixty-two numbered work areas" and Chapter 11's "the dated areas" were prose uses
+of the old term and were changed in the same pass, since the chapter and the generated table have to
+agree.
+
+Two lowercase uses of "areas" were checked and deliberately left: §2.9.1 on the capability areas of
+commercial products, and `printer.py`'s A4 print area. Neither means a tracker unit.
+
+Memory was updated in the same change. Nine of the renamed documents were named in memory files that
+would otherwise have sent a future session to a path that no longer exists, and the memory note about
+the class map wrongly placed it at the repository root when it has always been under `docs/`.
+
+`build.py --pdf --strict` clean, 104 pages, 264 folios; `wbs.py --check` exit 0.

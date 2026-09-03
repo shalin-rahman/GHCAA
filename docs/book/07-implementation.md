@@ -4,6 +4,14 @@
 
 *[Chapter not written. The headings below are generated from `docs/DOCUMENTATION_BOOK_OUTLINE.md` and are kept in step with it: `build.py --strict` fails if a section exists in one and not the other.]*
 
+**What this chapter owns.** How the artefact was built: the mechanisms that were difficult, the
+alternatives weighed while writing them, and what the code does that the design did not anticipate.
+
+**What it must not repeat.** Why the architecture is shaped this way, which is Chapter 6. Threats and
+controls, which are Chapter 8. How anything was tested, which is Chapter 9. Any measured result,
+which is Chapter 12. No section here is a walk through the source tree, and no listing appears unless
+the surrounding argument fails without it.
+
 ## 7.1 Development Environment, Toolchain and Reproducibility
 
 *[Not written.]*

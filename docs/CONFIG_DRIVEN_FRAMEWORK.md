@@ -209,7 +209,7 @@ A new `Guest` value was added to `MembershipType` enum. All three platforms must
 
 > **Status corrected 2026-08-22.** The single "Flutter: add Guest to any hardcoded type list" row
 > above was expanded into five, because it was both **stale** (three of the five sites were already
-> done) and **mis-referenced** — it pointed at "Area 28.12" and the Tests row at "Area 28.11", but
+> done) and **mis-referenced** — it pointed at "Work Package 28.12" and the Tests row at "Work Package 28.11", but
 > those are the Angular model/service items. The Guest sync item is **28.21** and the test item is
 > **28.22**.
 >
@@ -234,7 +234,7 @@ A new `Guest` value was added to `MembershipType` enum. All three platforms must
 > Dart list was therefore **deleted rather than completed with `Guest`**. Admin, directory, label
 > and fee-config paths keep every tier, and members still see their own tier read-only.
 >
-> **Table extended 2026-08-22 (Area 35).** The checklist tracked Backend / Angular-constants /
+> **Table extended 2026-08-22 (Work Package 35).** The checklist tracked Backend / Angular-constants /
 > Config / Flutter / DB / Tests and had **no rows at all** for the Angular *consumers* — the
 > directory template, the two component-local label maps, or the TS union. That blind spot is
 > exactly why all four drifted unnoticed while the constants file was correct: the web app kept
@@ -268,7 +268,7 @@ Create `OrgConfigService` Angular service that:
 4. Falls back to `GHCAA_DEFAULT_CONFIG` if API call fails
 5. Exposes `isEnabled(feature)` for feature-gate guards
 
-See `Area 28` tasks 28.1–28.9 in TODO.md.
+See `Work Package 28` tasks 28.1–28.9 in TODO.md.
 
 ---
 
@@ -280,7 +280,7 @@ Create `OrgConfigService` Dart service that:
 3. Exposes `pack` accessor returning locale-appropriate `LocalePack`
 4. Updates `app_drawer.dart` hardcoded strings to read from `pack.nav.*`
 
-See `Area 28` tasks 28.10–28.14 in TODO.md.
+See `Work Package 28` tasks 28.10–28.14 in TODO.md.
 
 ---
 

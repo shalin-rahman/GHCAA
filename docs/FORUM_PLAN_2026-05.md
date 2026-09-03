@@ -1,10 +1,10 @@
-# PLAN.md: 3.7 Discussion Forums and Community Groups (Mobile UI)
+# Discussion forums and community groups, mobile UI — plan of May 2026
 
 > **Status here is historical sequencing, not truth (audited 2026-08-22).** `docs/TODO.md` is the
 > single source of truth for what is done. The unchecked boxes in this file's later phases mostly
-> reflect work that has since shipped — Area 29 is 100% complete — and were never re-ticked. Two
+> reflect work that has since shipped — Work Package 29 is 100% complete — and were never re-ticked. Two
 > checkboxes were corrected in this pass (3.1, 6.2); the rest of Phases 2-5 should be read against
-> TODO Area 29 rather than trusted as open. See also `MEMORY.md` → `gotcha_todo_status_drift`.
+> TODO Work Package 29 rather than trusted as open. See also `MEMORY.md` → `gotcha_todo_status_drift`.
 
 ## Objective
 Implement a high-fidelity Discussion Forums and Community Groups module in the Flutter application (`GHCAA.Mobile`) that communicates with the recently finished C# backend endpoints.
@@ -55,7 +55,7 @@ Implement a high-fidelity Discussion Forums and Community Groups module in the F
 
 - [ ] **Step 6: Verify and Document**
   - Verify that the app builds and runs without errors.
-  - Update `project_map.md` and check off items in `task.md`.
+  - Update `PROJECT_MAP.md` and check off items in `task.md`.
   - Generate the `walkthrough.md` artifact.
 
 ---
@@ -63,7 +63,7 @@ Implement a high-fidelity Discussion Forums and Community Groups module in the F
 # PLAN: Full-Stack Review Remediation (2026-07-24)
 
 ## Objective
-Fix the ship-blockers and high-severity findings from the whole-project review (tracked in `docs/TODO.md` AREA 29). Sequenced so the highest-risk, lowest-effort integrity fixes land first. Each phase ends with the relevant test/type-check gate; a task is only `[DONE]` once its check passes (per Area 12.6).
+Fix the ship-blockers and high-severity findings from the whole-project review (tracked in `docs/TODO.md` WORK PACKAGE 29). Sequenced so the highest-risk, lowest-effort integrity fixes land first. Each phase ends with the relevant test/type-check gate; a task is only `[DONE]` once its check passes (per Work Package 12.6).
 
 ## Phase 1 — Critical Ship-Blockers (TODO 29-A)
 - [ ] **1.1 Web change-password route (29A.1)**
@@ -115,7 +115,7 @@ Fix the ship-blockers and high-severity findings from the whole-project review (
 ## Phase 6 — Cross-Cutting Cleanup (TODO 29-F.2/3/4)
 - [ ] **6.1** Silent-failure sweep — add error handlers to next-only subscribes (web) and error-swallowing try/catch (mobile) (29F.2).
 - [x] **6.2** Settle the date contract (29F.3) — **SETTLED, as recommended.** ISO-8601 is the canonical wire format; `dd-MM-yyyy` is display/input only. `DateFormatConverter` and the client parsers were reconciled to that; TODO 23's `(dd-MM-yyyy)` heading is annotated as superseded. The contract is now also **test-pinned** in `GHCAA.Tests/Utils/DateFormatConverterTests.cs` (20 tests), so a regression back to `dd-MM-yyyy` on the write side fails the build — TODO 27.7, done 2026-08-22.
-- [ ] **6.3** Finish white-labeling wiring (29F.4) — folds into Area 28 OrgConfigService consumer work.
+- [ ] **6.3** Finish white-labeling wiring (29F.4) — folds into Work Package 28 OrgConfigService consumer work.
 
 ## Verification standard (all phases)
-Per TODO Area 12.6: no task marked `[DONE]` until its test passes. Run the full suite (`dotnet test`, `flutter test`, Playwright) before closing each phase; update `project_map.md` and check off the matching `AREA 29` items.
+Per TODO Work Package 12.6: no task marked `[DONE]` until its test passes. Run the full suite (`dotnet test`, `flutter test`, Playwright) before closing each phase; update `PROJECT_MAP.md` and check off the matching `WORK PACKAGE 29` items.

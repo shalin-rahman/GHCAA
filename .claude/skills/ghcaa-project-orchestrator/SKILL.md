@@ -10,7 +10,7 @@ This skill implements "Agent-First Development" for the GHCAA ecosystem. It ensu
 ## 1. Project Initialization Workflow
 Whenever a new task starts, you MUST:
 1. **Activate `ghcaa-core-master`**: Load the architectural blueprint and terminology.
-2. **Scan Context**: Check `project_map.md` for affected layers and `TODO.md` for related tasks.
+2. **Scan Context**: Check `PROJECT_MAP.md` for affected layers and `TODO.md` for related tasks.
 3. **Verify Standards**: If the task involves dates, activate `ghcaa-date-standard`.
 
 ## 2. Standard Enforcement

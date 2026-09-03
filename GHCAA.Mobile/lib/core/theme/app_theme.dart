@@ -20,7 +20,7 @@ class AppTheme {
   static const Color dangerColor = Color(0xFFD63031);
 
   // 30.31: mirrors web's dark-theme `--border-color: rgba(255, 255, 255, 0.18)` (bumped up
-  // from a dimmer hairline during the Area 30 remediation so form/card borders stay visible
+  // from a dimmer hairline during the Work Package 30 remediation so form/card borders stay visible
   // on dark surfaces). This is a distinct, neutral-white token from `glassBorder` (which is
   // intentionally gold-tinted for the brand chrome) — use this where a plain, brighter
   // neutral border is called for instead of the gold accent border.
@@ -60,7 +60,7 @@ class AppTheme {
   static const double radiusXL = 24.0;
 
   // 30.31: sizing tokens mirrored from web styles.scss so Flutter chrome matches the same
-  // touch-target/hit-area conventions established during the Area 30 remediation.
+  // touch-target/hit-area conventions established during the Work Package 30 remediation.
   /// Mirrors web `.icon-btn` (36x36px) — the canonical compact icon-button size.
   static const double iconButtonSize = 36.0;
   /// Mirrors web modal `.close-btn` (40x40px, circular).

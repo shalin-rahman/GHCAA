@@ -1,6 +1,6 @@
 # GHCAA Feature Catalog
 
-A granular, module-by-module breakdown of the platform's features — including the primary screens, API endpoints, validation rules, and dependencies for each. For the formal specification, see the [Software Requirements Specification](SRS.md); for architecture diagrams, see [Architecture & Data Flow](architecture_data_flow.md).
+A granular, module-by-module breakdown of the platform's features — including the primary screens, API endpoints, validation rules, and dependencies for each. For the formal specification, see the [Software Requirements Specification](SRS.md); for architecture diagrams, see [Architecture & Data Flow](ARCHITECTURE.md).
 
 ---
 

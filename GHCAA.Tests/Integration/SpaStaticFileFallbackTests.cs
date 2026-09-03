@@ -12,7 +12,7 @@ namespace GHCAA.Tests.Integration
     // endpoint routing, which runs before UseStaticFiles gets a turn. StaticFileMiddleware backs off
     // whenever an endpoint is already matched, so ALL static files (main.js, styles.css, even
     // index.html itself) silently 404'd in production while working fine locally via `ng serve`.
-    // See docs/TODO.md Area 44 / GHCAA.API/Program.cs for the fix: :nonfile restored on the SPA
+    // See docs/TODO.md Work Package 44 / GHCAA.API/Program.cs for the fix: :nonfile restored on the SPA
     // fallback route, with the "missing file -> 404 not 401" case moved to plain middleware instead
     // of a routed endpoint.
     [TestFixture]

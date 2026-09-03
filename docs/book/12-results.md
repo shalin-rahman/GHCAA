@@ -4,6 +4,14 @@
 
 *[Chapter not written. The headings below are generated from `docs/DOCUMENTATION_BOOK_OUTLINE.md` and are kept in step with it: `build.py --strict` fails if a section exists in one and not the other.]*
 
+**What this chapter owns.** What the evidence showed, and what it means. Every result in the
+dissertation is reported here and only here.
+
+**What it must not repeat.** How anything was tested or measured, which is Chapter 9, and what was
+promised, which is §4.5. This chapter is read against Table 4.3 row by row, including the three
+commitments §4.5 records as reduced or not run. §12.8 answers the four research questions directly;
+RQ3's answer applies the five-class scheme of §3.10 to the delivered system.
+
 ## 12.1 Overview of the Delivered Artefact
 
 *[Not written.]*

@@ -233,6 +233,13 @@ def replace_list_sections(front_text, blocks):
 
 
 def main(argv=None):
+    # A Windows console defaults to cp1252 and cannot encode the section signs
+    # and en dashes this output quotes from the tracker. Same fix as build.py.
+    for handle in (sys.stdout, sys.stderr):
+        try:
+            handle.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--apply", action="store_true", help="write the changes")
     ap.add_argument("--lists", action="store_true",

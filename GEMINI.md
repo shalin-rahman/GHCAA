@@ -45,7 +45,7 @@ GHCAA (Grand Hall Community Association App) is a full-stack platform:
 |---|---|
 | `SRS.md` | Software Requirements Specification |
 | `TODO.md` | Active task list (authoritative) |
-| `project_map.md` | Full codebase map |
+| `PROJECT_MAP.md` | Full codebase map |
 | `README.md` | Developer setup guide |
 | `GHCAA.Infrastructure/Data/` | EF Core configurations |
 | `GHCAA.Web/src/app/` | Angular app root |
@@ -60,4 +60,4 @@ GHCAA (Grand Hall Community Association App) is a full-stack platform:
 1. Check `TODO.md` for current priorities before starting any new task.
 2. For multi-step tasks, create a `PLAN.md` at project root before writing code.
 3. Run analysis tools (`dart analyze`, `dotnet build`) before declaring a task done.
-4. Update `TODO.md` and `project_map.md` when significant changes are made.
+4. Update `TODO.md` and `PROJECT_MAP.md` when significant changes are made.

@@ -2,6 +2,13 @@
 
 *[Chapter not written. The headings below are generated from `docs/DOCUMENTATION_BOOK_OUTLINE.md` and are kept in step with it: `build.py --strict` fails if a section exists in one and not the other.]*
 
+**What this chapter owns.** How the system was verified: levels, techniques, test design, tooling,
+what was measured and what the measurements cannot show.
+
+**What it must not repeat.** Results and their interpretation, which are Chapter 12 and appear
+nowhere here. This chapter says what was run and why that method was chosen; the chapter that says
+what came out of it is Chapter 12. The separation is the reason both chapters exist.
+
 ## 9.1 Verification and Validation Strategy and Test Levels
 
 *[Not written.]*

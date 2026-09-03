@@ -316,11 +316,11 @@ Independent workstream: full dependency loop after Phases 2–3 parallel changes
 | P4-CONFIG | Org config | `GET /api/config` | 200 + org JSON | **Pass** — `orgId=ghcaa` | API | — | Verified | BUG-001 fix holds |
 | P4-FORUM | Forum smoke | Login `demo_user` → `GET /api/forum/categories` | 200 + categories | **Pass** — 1 category | API | — | Verified | |
 | P4-SIGNALR | SignalR hubs | `HashGen --signalr-test` | Chat + Notification connect | **Pass** | API | — | Verified | BUG-002 fix holds |
-| P4-REGRESS | Test delta | Compare to Phase 2 baseline (305) | No broken tests | **No regressions** | API | — | Verified | See `docs/PHASE4_FINAL_REVIEW.md` |
+| P4-REGRESS | Test delta | Compare to Phase 2 baseline (305) | No broken tests | **No regressions** | API | — | Verified | See `docs/BACKEND_REVIEW_2026-07-03.md` |
 
 ### Phase 4 consolidation summary
 
 - **Regression:** None — all 308 API tests pass; smoke endpoints healthy.
 - **New tests since Phase 2:** `ForumServiceTests` (2), `AuthServiceTests` lockout (1).
 - **Uncommitted fixes validated:** BUG-001 (RowVersion migration), BUG-002 (SignalR JWT path), HashGen `--apply` / `--signalr-test`, `nuget.config`, Web proxy/playwright (parallel workstream — not re-run in P4).
-- **Docs:** `docs/PHASE4_FINAL_REVIEW.md` — executive summary + recommended commit grouping.
+- **Docs:** `docs/BACKEND_REVIEW_2026-07-03.md` — executive summary + recommended commit grouping.

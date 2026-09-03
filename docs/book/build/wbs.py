@@ -19,8 +19,8 @@ Four things are reported, and they answer different questions:
                This is Gantt material, not network material — the components
                overlapped almost completely, and a serial pass over their spans
                sums to five times the calendar the project actually ran in.
-  tasks        numbered items in docs/TODO.md, by the area they belong to.
-  arrival      whether an area was planned, or arrived as stakeholder feedback,
+  tasks        numbered items in docs/TODO.md, by the work package they belong to.
+  arrival      whether a work package was planned, or arrived as stakeholder feedback,
                a defect, or a review finding.
 
 Work that came before the first commit is in PRE and is stated, not measured:
@@ -53,8 +53,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 TODO = os.path.join(REPO, "docs", "TODO.md")
 
-# (id, activity, tracker areas, paths, predecessors). Paths decide the
-# duration; areas tie the activity to the tracker; predecessors are the
+# (id, activity, tracker work packages, paths, predecessors). Paths decide
+# the duration; the packages tie the activity to the tracker; predecessors are the
 # author's reading of what had to exist first, not derived from git.
 CODE = [
     ("C1", "Persistence and migrations", ["31", "47"],
@@ -134,21 +134,21 @@ CODE = [
 DOCS = [
     ("D1", "Requirements specification",
      ["docs/SRS.md", "docs/FEATURES.md", "docs/BUSINESS_FINDINGS.md",
-      "docs/BUSINESS_FUNCTIONALITY_REVIEW_PLAN.md"]),
+      "docs/BUSINESS_REVIEW_PLAN.md"]),
     ("D2", "Governing-document set",
      ["docs/Elections", "docs/CONSTITUTION_PUBLISHING.md"]),
     ("D3", "Design description",
-     ["docs/architecture_data_flow.md", "docs/project_map.md",
-      "docs/PROFILE_SHARED_COMPONENT_DESIGN.md", "docs/CONFIG_DRIVEN_FRAMEWORK.md",
-      "docs/PAYMENT_GATEWAY_WORKFLOW.md", "docs/UI_UX_REMEDIATION_PLAN.md"]),
-    ("D4", "Project plan and change log", ["docs/TODO.md", "docs/PLAN.md"]),
+     ["docs/ARCHITECTURE.md", "docs/PROJECT_MAP.md",
+      "docs/SHARED_PROFILE_COMPONENTS.md", "docs/CONFIG_DRIVEN_FRAMEWORK.md",
+      "docs/PAYMENT_GATEWAY_WORKFLOW.md", "docs/UI_FIX_PLAN.md"]),
+    ("D4", "Project plan and change log", ["docs/TODO.md", "docs/FORUM_PLAN_2026-05.md"]),
     ("D5", "Test and validation plan",
-     ["docs/BUSINESS_TEST_CHECKLIST.md", "docs/low_coverage_report.md",
-      "docs/PHASE4_FINAL_REVIEW.md"]),
+     ["docs/BUSINESS_TEST_CHECKLIST.md", "docs/COVERAGE_SNAPSHOT_2026-05-26.md",
+      "docs/BACKEND_REVIEW_2026-07-03.md"]),
     ("D6", "Deployment runbook",
      ["docs/RENDER_DEPLOYMENT.md", "docs/appsettings.txt", "docs/deploy_connection.txt"]),
     ("D7", "Dissertation", ["docs/book", "docs/DOCUMENTATION_BOOK_OUTLINE.md"]),
-    ("D8", "White-label plan", ["docs/GENERICIZATION_PLAN.md"]),
+    ("D8", "White-label plan", ["docs/WHITE_LABEL_PLAN.md"]),
 ]
 
 # Work that left no commit of its own and runs alongside development rather
@@ -168,7 +168,7 @@ ASSUMED = [
      "the 5 specification defects of Table 3.8",
      10.0, True),
     ("U4", "Stakeholder discussion",
-     "18 feedback areas x 30 min of discussion; triage into tracker items is excluded, being "
+     "18 feedback work packages x 30 min of discussion; triage into tracker items is excluded, being "
      "already counted under D4",
      9.0, True),
     ("U5", "Deployment incident response",
@@ -181,9 +181,11 @@ ASSUMED = [
 HOURS_PER_DAY = 8.0
 
 ITEM = re.compile(r"^\s*(\d+)\.(\d+[a-zA-Z]?)\s*\[([^\]]*)\]", re.M)
-AREA_HEAD = re.compile(r"^#+ *(?:AREA|Area) (\d+)[^\n]*", re.M)
+# Headings were "Area N" until 2026-09-03 and are being renamed to "Work Package N".
+# Both forms parse while the rename runs.
+AREA_HEAD = re.compile(r"^#+ *(?:AREA|Area|WORK PACKAGE|Work Package) (\d+)[^\n]*", re.M)
 
-# SR-2 in docs/TODO.md: an area may state its own schedule facts, which is the
+# SR-2 in docs/TODO.md: a work package may state its own schedule facts, which is the
 # only evidence available for work that left no commit for git to date.
 #     <!-- wbs: component=C17 start=2026-09-02 end=2026-09-03 after=64,65 -->
 MARKER = re.compile(r"<!--\s*wbs:\s*([^>]*?)-->")
@@ -472,10 +474,10 @@ def apportion(groups):
 
 
 def tracker():
-    """(tasks, done, arrival, stated) keyed by area number, read from docs/TODO.md.
+    """(tasks, done, arrival, stated) keyed by work package number, read from docs/TODO.md.
 
-    `stated` holds whatever an area declared in its own wbs marker: the component
-    it belongs to, and for work that produced no commit, the dates and the areas
+    `stated` holds whatever a work package declared in its own wbs marker: the
+    component it belongs to, and for work that produced no commit, the dates and the packages
     it waited on.
     """
     text = io.open(TODO, encoding="utf-8").read()
@@ -587,7 +589,7 @@ def report(markdown=False):
     print("\n## Code components: effort, observed span, and the effort network\n")
     if markdown:
         print("| ID | Activity | Effort | First | Last | Span | ES | EF | LS | LF | "
-              "Float | Pred | Tasks | Done | Areas |")
+              "Float | Pred | Tasks | Done | Packages |")
         print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     for key, _n, _a, _p, _pr in sorted(CODE, key=lambda c: schedule[c[0]][0]):
         es, ef, ls, lf, float_ = schedule[key]
@@ -624,21 +626,21 @@ def report(markdown=False):
         task_counts[kind] += tasks[area]
     total_a, total_t = sum(counts.values()), sum(task_counts.values())
     if markdown:
-        print("| Arrival | Areas | Share | Tasks | Share |")
+        print("| Arrival | Packages | Share | Tasks | Share |")
         print("|---|---|---|---|---|")
     for kind in ("planned", "feedback", "defect", "review"):
         print(bar + sep.join([kind, str(counts[kind]), "%.0f%%" % (100.0 * counts[kind] / total_a),
                               str(task_counts[kind]), "%.0f%%" % (100.0 * task_counts[kind] / total_t)]) + end)
     reactive = total_a - counts["planned"]
     reactive_t = total_t - task_counts["planned"]
-    print("\nreactive: %d of %d areas (%.0f%%), %d of %d tasks (%.0f%%)"
+    print("\nreactive: %d of %d work packages (%.0f%%), %d of %d tasks (%.0f%%)"
           % (reactive, total_a, 100.0 * reactive / total_a,
              reactive_t, total_t, 100.0 * reactive_t / total_t))
 
     if stated:
-        print("\n## Schedule facts stated by the area itself (SR-2 markers)\n")
+        print("\n## Schedule facts stated by the work package itself (SR-2 markers)\n")
         if markdown:
-            print("| Area | Component | Start | End | Follows |")
+            print("| Package | Component | Start | End | Follows |")
             print("|---|---|---|---|---|")
         for area, fields in sorted(stated.items(), key=lambda kv: int(kv[0])):
             print(bar + sep.join([area, fields.get("component", "-"),
@@ -802,10 +804,17 @@ def sync(write=False):
 
 
 def main(argv=None):
+    # A Windows console defaults to cp1252 and cannot encode the section signs
+    # and en dashes this output quotes from the tracker. Same fix as build.py.
+    for handle in (sys.stdout, sys.stderr):
+        try:
+            handle.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--markdown", action="store_true", help="emit Markdown tables")
     ap.add_argument("--check", action="store_true",
-                    help="exit non-zero if a component has no commits or no tracker areas")
+                    help="exit non-zero if a component has no commits or no tracker work packages")
     ap.add_argument("--sync", action="store_true",
                     help="write a wbs marker into every area that has none, from its own "
                          "[DONE] dates and the paths it names")
@@ -842,14 +851,14 @@ def main(argv=None):
             if not commit_days(paths):
                 problems.append("%s (%s) matched no commits; check its paths" % (key, label))
             if not sum(tasks[a] for a in area_list):
-                problems.append("%s (%s) has no tracker items; check its areas" % (key, label))
+                problems.append("%s (%s) has no tracker items; check its work packages" % (key, label))
         mapped = {a for _k, _l, al, _p, _pr in CODE for a in al}
         # An area may name its own component in a wbs marker instead of being
         # listed in CODE, which is how areas written from now on are mapped.
         mapped |= {a for a, fields in stated.items() if fields.get("component")}
         loose = sorted(set(tasks) - mapped, key=int)
         if loose:
-            problems.append("tracker areas not assigned to any component: %s" % ", ".join(loose))
+            problems.append("tracker work packages not assigned to any component: %s" % ", ".join(loose))
         for line in problems:
             sys.stderr.write("  %s\n" % line)
         return 1 if problems else 0

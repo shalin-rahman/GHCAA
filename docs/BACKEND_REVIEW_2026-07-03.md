@@ -1,4 +1,4 @@
-# Phase 4 — Backend Regression & Consolidation Review
+# Backend regression review, 3 July 2026
 
 **Date:** 2026-07-03  
 **Scope:** Full backend regression after Phases 2–3 parallel workstreams (API, Web, Mobile). All changes uncommitted — review before commit.
@@ -112,8 +112,8 @@ Split uncommitted work into **6 logical commits** to keep review focused:
 ### Commit 7 — `docs: business review findings and Phase 4 summary`
 - `docs/BUSINESS_FINDINGS.md`
 - `docs/BUSINESS_TEST_CHECKLIST.md`
-- `docs/PHASE4_FINAL_REVIEW.md`
-- `docs/BUSINESS_FUNCTIONALITY_REVIEW_PLAN.md`
+- `docs/BACKEND_REVIEW_2026-07-03.md`
+- `docs/BUSINESS_REVIEW_PLAN.md`
 
 **Exclude from all commits:** `build_current.txt`, upload stubs under `wwwroot/uploads/members/`, visual diff PNGs under `GHCAA.Mobile/test/failures/`.
 

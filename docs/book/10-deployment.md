@@ -2,6 +2,14 @@
 
 *[Chapter not written. The headings below are generated from `docs/DOCUMENTATION_BOOK_OUTLINE.md` and are kept in step with it: `build.py --strict` fails if a section exists in one and not the other.]*
 
+**What this chapter owns.** Whether the Association can run and keep running this platform after
+the project ends: deployment, pipeline, migration, secrets, observability, backup, cost and handover.
+
+**What it must not repeat.** Architectural rationale (Chapter 6), the build of the pipeline as
+implementation narrative (§7.14), or measured operational results (Chapter 12). §10.10 is the
+chapter's centre because it carries the RQ2 evidence; containerisation is support, not subject, and
+no section here explains a tool to a reader who could read its manual.
+
 ## 10.1 Deployment Architecture
 
 *[Not written.]*

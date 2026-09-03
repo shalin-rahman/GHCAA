@@ -1,5 +1,5 @@
 -- ============================================================================
--- Area 34 schema + seed catch-up for an EXISTING PostgreSQL database
+-- Work Package 34 schema + seed catch-up for an EXISTING PostgreSQL database
 -- Mirrors migration: 20260802163432_AddSiteContentAndNoticeFields
 --
 -- WHY THIS FILE EXISTS

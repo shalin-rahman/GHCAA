@@ -2,6 +2,14 @@
 
 *[Chapter not written. The headings below are generated from `docs/DOCUMENTATION_BOOK_OUTLINE.md` and are kept in step with it: `build.py --strict` fails if a section exists in one and not the other.]*
 
+**What this chapter owns.** The threat model, the controls that answer each threat, where each
+control is enforced in the code, and the risk left over.
+
+**What it must not repeat.** The security architecture's rationale, which is §6.7. The
+implementation narrative of the security code, which is §7.10. The execution of security tests,
+which is §9.10. Every control here names the threat it mitigates; a control that names no threat does
+not belong in the chapter.
+
 ## 8.1 Security Objectives and Assumptions
 
 *[Not written.]*

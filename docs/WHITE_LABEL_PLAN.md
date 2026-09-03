@@ -1,9 +1,9 @@
-# Genericization Plan: One Codebase, Any Institution
+# White-label plan: one codebase, any institution
 
 Status: PLAN (nothing implemented yet)
 Raised: 2026-09-01, "make this application generic rather than GHC ... will work with GHC or any
 other institution with minimal configuration changes"
-Tracked as: docs/TODO.md Area 62
+Tracked as: docs/TODO.md Work Package 62
 
 ## 1. Goal and non-goals
 
@@ -21,7 +21,7 @@ Non-goals for this plan:
 
 ## 2. Where the project already stands
 
-This is not a from-scratch job. Area 28 already built most of the runtime plumbing:
+This is not a from-scratch job. Work Package 28 already built most of the runtime plumbing:
 
 - `OrganizationConfig` entity + `OrgConfigDto` (Branding, Contact, Currency, 17 FeatureToggles,
   Workflow, bilingual Localization) served from `GET /api/config`, edited at `PUT /api/config`
@@ -29,7 +29,7 @@ This is not a from-scratch job. Area 28 already built most of the runtime plumbi
 - Angular `OrgConfigService` loads it in `APP_INITIALIZER` and pushes `primaryColor`/`accentColor`
   into CSS custom properties. Flutter mirrors it via Riverpod `orgConfigProvider` with a
   SharedPreferences offline cache.
-- `SiteContent` CMS (Area 34) already makes About/Contact prose admin-editable.
+- `SiteContent` CMS (Work Package 34) already makes About/Contact prose admin-editable.
 - Feature guards already hide whole modules per institution (`featureGuard` on 8 routes).
 - Most seed data already lives in `GHCAA.Infrastructure/Data/Seed/*.json`, not in C#.
 
@@ -292,14 +292,14 @@ ships:
 
 The `default` profile must never contain real personal data under any circumstance.
 
-## 10. Area 61 is folded in, not run beside this
+## 10. Work Package 61 is folded in, not run beside this
 
-Area 61 (comment/doc tone, dead-code detection, refactor sweep) has three open items that would
+Work Package 61 (comment/doc tone, dead-code detection, refactor sweep) has three open items that would
 otherwise read the same files this work already opens. Running them separately means touching the
 whole repo twice, so they become standing obligations on every phase above. Tracked as 62.46-62.49.
 
 - **Tone (retroactive).** The root CLAUDE.md rule already says a file touched for any reason gets its
-  AI-sounding comments cleaned up, not just the changed lines. Area 62 touches most of the codebase,
+  AI-sounding comments cleaned up, not just the changed lines. Work Package 62 touches most of the codebase,
   so this is where that rule actually gets paid off. It binds the new code too: the profile loader,
   brand-lint, the build scripts, and the onboarding doc all have to read like a person wrote them.
 - **Dead code (61.1).** Deleting three large default blocks, the brand fields in `Constants.Defaults`,
@@ -311,7 +311,7 @@ whole repo twice, so they become standing obligations on every phase above. Trac
   nothing more. This is explicitly not a licence for a general refactor, and the project's
   no-abstraction-without-a-concrete-problem rule still applies.
 
-If Area 62 is deferred or cancelled, 61.1 and 61.2 go back to being standalone items.
+If Work Package 62 is deferred or cancelled, 61.1 and 61.2 go back to being standalone items.
 
 ## 11. Sequencing and risk
 

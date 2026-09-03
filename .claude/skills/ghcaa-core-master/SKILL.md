@@ -25,7 +25,7 @@ This skill encodes the master engineering standards for the Govt. Haraganga Coll
 
 ## Cross-Platform Parity (Web & Mobile)
 - Any change to an API endpoint MUST be verified in both `GHCAA.Web` and `GHCAA.Mobile`.
-- UI labels and terminology must match the `project_map.md` and `SRS.md` definitions.
+- UI labels and terminology must match the `PROJECT_MAP.md` and `SRS.md` definitions.
 
 ## Coding Conventions
 - **C#**: PascalCase for members, camelCase for parameters/locals. Use Primary Constructors where applicable.
@@ -34,5 +34,5 @@ This skill encodes the master engineering standards for the Govt. Haraganga Coll
 
 ## Decision Tree
 - **Adding a new Model?** Add to `Domain`, update `Application` DTOs, then implement in `Infrastructure`.
-- **Changing a UI field?** Check `project_map.md` first to see which other layers are affected.
+- **Changing a UI field?** Check `PROJECT_MAP.md` first to see which other layers are affected.
 - **Encountering a Date?** Always format as `dd-mm-yyyy`.

@@ -12,7 +12,7 @@ a criterion fixed here.
 The work sits in the pragmatist tradition rather than the positivist or interpretivist ones. The
 question that drove it was not "what is universally true of alumni platforms" but "what artefact,
 built and evaluated in this setting, resolves the problem stated in §1.3, and what does building it
-teach". Pragmatism treats an idea's worth by what it lets you do, which is the right test for a
+teach". Pragmatism measures an idea's worth by what it lets you do, which is the right test for a
 piece of software: a requirement, an architectural choice or a business rule is warranted here if it
 produces a working, checkable consequence, not because it follows from a prior theory of alumni
 engagement.
@@ -65,13 +65,13 @@ document.
 | --- | --- | --- |
 | Problem identification and motivation | Observation of the paper-based application, cash-and-ledger collection and Facebook-circulated constitution described in §1.2 | §1.2, §1.3 |
 | Definition of objectives for a solution | The eight objectives of §1.6, each traced to a research question | §1.6 |
-| Design and development | Sixty-two numbered work areas recorded as they were opened, most of them triggered by a stakeholder request rather than by the author's own plan; forty-nine mapped entities, thirty-seven API controllers and two client applications delivered across them | `docs/TODO.md`; Chs. 5–7 |
+| Design and development | Sixty-two numbered work packages recorded as they were opened, most of them triggered by a stakeholder request rather than by the author's own plan; forty-nine mapped entities, thirty-seven API controllers and two client applications delivered across them | `docs/TODO.md`; Chs. 5–7 |
 | Demonstration | The artefact running against a seeded database, exercised in the formal technical review sessions of §3.12 and deployed to the pre-production environment of Chapter 10 | §3.12, Ch. 10 |
 | Evaluation | Executed against the plan declared in §4.5 | Ch. 9, Ch. 12 |
 | Communication | This dissertation, and the documentation corpus in `docs/` that a successor maintainer would read first | Whole document |
 
 The "design and development" row understates nothing by omission and nothing by exaggeration: the
-forty-six areas are `docs/TODO.md`'s own numbering, several of them opened explicitly "raised by
+forty-six work packages are `docs/TODO.md`'s own numbering, several of them opened explicitly "raised by
 user" on a dated request, which is the clearest documentary evidence available that the relevance
 cycle kept running throughout construction rather than only at the requirements stage.
 
@@ -104,10 +104,10 @@ change in response to what the working software reveals [53], [54].
 
 What was actually followed is incremental and evolutionary delivery in the sense Lehman describes
 software's continuing growth and increasing complexity as inherent to a live system rather than as a
-process failure [55]: forty-six work areas, opened as problems were found or requested, each closed
+process failure [55]: forty-six work packages, opened as problems were found or requested, each closed
 against a gate rather than against a date. The gate is stated plainly in `docs/TODO.md`'s own
 verification standard: "no task marked done until its test passes", and the phased remediation plans
-in `docs/PLAN.md` end each phase with an explicit gate line, for example `dotnet test` (API),
+in `docs/FORUM_PLAN_2026-05.md` end each phase with an explicit gate line, for example `dotnet test` (API),
 `flutter analyze` and `ng build` all green before Phase 1 of the July 2026 review remediation could be
 considered closed. That is a borrowed piece of the V-model, verification tied to the unit of work
 that produced the thing being verified, grafted onto an otherwise incremental lifecycle. Figure 4.4
@@ -124,6 +124,16 @@ This is the point of the chapter. Everything below is a commitment made before a
 Chapters 8 and 12 was taken, so that a result reported later can be checked against what was promised
 here rather than against a criterion chosen to fit the result. Table 4.3 collects the commitments in
 one place: instrument, what it measures, and where the result is reported.
+
+Two of those commitments were later reduced, and the reduction is recorded here rather than removed.
+The performance commitment was written as a concurrent-load measurement and is delivered as a
+single-client latency measurement, for the reason given in §4.5.3 below, which is the shared pre-production tier. The security commitment was
+written as conformance against OWASP ASVS and is delivered as a self-assessment against it, for the
+reason given in §4.5.4 below, which is that no independent assessor was available. A third, mutation testing, was planned and is reported as not run in §9.14.5, the
+test-adequacy section.
+Editing this section to promise only what was achieved would have made the chapter tidier and would
+have destroyed the property that makes it worth writing, which is that a reader can hold the plan
+against the outcome. The gap between them is a result and is discussed in §12.11, threats to validity.
 
 ### 4.5.1 Functional evaluation
 
@@ -143,10 +153,17 @@ domain-versus-presentation distinction the risk-weighted coverage targets of §4
 
 The workload model is the one implied by the quality-attribute scenarios QAS-01 and QAS-02 of §3.5:
 concurrent reads against the directory and event listings, and a cold page load on a mid-range
-handset profile. Measurement is taken against the pre-production deployment described in Chapter 10,
-which runs the same container image as production on a smaller instance tier; the instrument used to
-generate concurrent load, and the results, are recorded in §9.11, since naming a tool here before it
-has been run would commit this section to a choice that has not yet been tested for suitability.
+handset profile. What is measured against that model is less than the model describes, and the
+reduction is stated here rather than left for the reader to notice in Chapter 12.
+
+Latency is measured from a single client against the pre-production deployment described in
+Chapter 10, which runs the same container image as production on a smaller instance tier, and is
+reported per endpoint at the ninety-fifth percentile over a fixed count of sequential requests.
+That is a latency measurement and not a load test. It cannot show how the platform behaves under the
+concurrent use QAS-01 assumes, §9.11, the performance-testing section, reports it under that limit, and §12.11,
+threats to validity, carries what follows from it. The reason is the deployment rather than the instrument: the pre-production
+tier is a shared instance whose throughput is set by the hosting plan, so a concurrency figure taken
+from it would be a measurement of the plan.
 
 ### 4.5.4 Security evaluation
 
@@ -155,18 +172,36 @@ STRIDE walk-through of the data-flow diagrams of §5.2, gives coverage of *attac
 OWASP ASVS level 2 checklist [7] gives coverage of *control families*. The edition used is 4.0.3 of
 2021, which is the edition the security work of Chapter 8 was carried out against; ASVS 5.0.0 was
 released in May 2025 [75] and restructures the standard into seventeen chapters, so a conformance
-claim under 4.0.3 does not transfer to it and is not presented as though it did. Section 9.13 reports both, and
-a control is scored conformant only where a specific code location or configuration enforces it, in
-the same style as the design-principle evidence table of §6.11.
+claim under 4.0.3 does not transfer to it and is not presented as though it did. Section 9.10 reports
+the testing and §8.13 the control-by-control assessment, and a control is scored conformant only
+where a specific code location or configuration enforces it, in the same style as the
+design-principle evidence table of §6.11.
+
+The assessment is the author's own, carried out against the checklist by the person who wrote the
+code. It is not an audit, no independent assessor saw it, and no penetration test was commissioned.
+Self-assessment is weakest exactly where it matters most, on the controls whose absence the author
+never considered, so the claim made in §8.13 is conformance as assessed rather than conformance
+verified, and §12.11, threats to validity, records the difference.
 
 ### 4.5.5 Usability evaluation
 
-Three instruments: task-based testing of the registration and payment-declaration flows against the
-completion criterion of NFR-U2, the System Usability Scale against the published benchmark of 68
-[33] per NFR-U3, and a heuristic walkthrough against Nielsen's heuristics [35] for the flows the
-task-based test does not reach. The instruments themselves, being the task script and the SUS
-questionnaire, are delivered beside this dissertation so that the criterion can be checked against what
-participants actually saw.
+Three instruments: task-based testing against the completion criterion of NFR-U2, the System
+Usability Scale against the published benchmark of 68 [33] per NFR-U3, and a heuristic walkthrough
+against Nielsen's heuristics [35] for the flows the task sessions do not reach.
+
+The task script is not one script. The Association's work divides by office, so there are four: one
+for ordinary members covering registration, profile, payment declaration, event registration, the
+directory and the constitution; and one each for the Treasurer, the General Secretary and the
+President, built from what those offices actually do rather than from the platform's menus. Each
+session ends with the same SUS form and a set of open questions for the office, which is where the
+stakeholder evidence of §12.7 comes from. The instruments are delivered beside this dissertation, in
+`docs/book/instruments/`, so that the criterion can be checked against what participants saw.
+
+Two properties of the design are stated here because they bound what Chapter 12 may claim. Sessions
+are run by the author, who is known to every participant and is the platform's sole maintainer, which
+is an acquiescence pressure the procedure reduces but does not remove. There is no control condition
+and no comparison system, so the study can report whether people completed a task and what obstructed
+them, and cannot report that the platform is better than any alternative.
 
 ### 4.5.6 Expert and stakeholder evaluation
 
@@ -187,13 +222,13 @@ numbers.
 | Metric | Formula / method | Tool | Target |
 | --- | --- | --- | --- |
 | Statement and branch coverage | Lines and branches exercised ÷ total, per test run | `coverlet.collector` 6.0.2 via `dotnet test`, per NUnit 4.2.2 project | Risk-weighted by module criticality; see §9.14.5 |
-| Mutation score | Mutants killed ÷ mutants generated | Recorded where run; §9.14.5 states where it was not | Corrective measure against coverage alone |
+| Mutation score | Mutants killed ÷ mutants generated | Planned, not run; §9.14.5 states why | Not reported |
 | Cyclomatic complexity | McCabe's independent-path count per method [57] | Static analysis over the solution | Flagged above 10 per method |
 | Coupling between objects (CBO), afferent/efferent coupling, instability | Chidamber and Kemerer's suite [56]; instability = efferent ÷ (afferent + efferent) | Static analysis over the solution | Plotted against Martin's main sequence, §9.14.3 |
 | Maintainability index | Oman and Hagemeister's composite of volume, complexity and comment ratio [58] | Static analysis over the solution | No fixed target; trended across the increments recorded in `docs/TODO.md` |
-| Response latency | Wall-clock time from request to first byte, 95th percentile | Concurrent-request harness against pre-production; instrument named in §9.11 | Per NFR-P1, NFR-P2, NFR-P5 |
-| System Usability Scale | Ten-item questionnaire, Brooke's scoring [33] | Paper or digital form, delivered with the evaluation instruments | ≥ 68 |
-| ASVS conformance | Control satisfied / not satisfied / not applicable, by control family | Manual checklist against ASVS 4.0.3 [7] | Full level 2 coverage of applicable families |
+| Response latency | Wall-clock time from request to first byte, 95th percentile | Sequential requests from one client against pre-production, §9.11; not a load test | Per NFR-P1, NFR-P2, NFR-P5 |
+| System Usability Scale | Ten-item questionnaire, Brooke's scoring [33] | Form in `docs/book/instruments/`, one per participant after their tasks | ≥ 68 |
+| ASVS conformance | Control satisfied / not satisfied / not applicable, by control family | Author's self-assessment against ASVS 4.0.3 [7]; not an audit | Full level 2 coverage of applicable families |
 | Requirement coverage | Requirements traced to a passing test ÷ total Must requirements | Traceability matrix, Table 3.4 | 100% of Must |
 
 ## 4.7 Data Collection and Analysis Procedures
@@ -306,11 +341,11 @@ data, are also the two that went on to happen.
 
 | Risk | Category | Probability | Impact | Mitigation | Monitoring signal | Outcome |
 | --- | --- | --- | --- | --- | --- | --- |
-| Single maintainer unavailable for an extended period | Project | Medium | High | Documentation corpus (`project_map.md`, `TODO.md`, `architecture_data_flow.md`) written to let a successor start without the author present | Elapsed time since last commit | Open; mitigated, not eliminated |
+| Single maintainer unavailable for an extended period | Project | Medium | High | Documentation corpus (`PROJECT_MAP.md`, `TODO.md`, `ARCHITECTURE.md`) written to let a successor start without the author present | Elapsed time since last commit | Open; mitigated, not eliminated |
 | Payment amount not verified against the originating record before crediting membership (TODO 29-B.2) | Technical, security | Medium | High | Removed the `amount > 0` short-circuit; callback amount always compared to the originating `PaymentHistory` amount | Payment and approval integration tests | Closed, Phase 2 of the July 2026 remediation |
 | Administrative action attributed to a hardcoded admin identifier rather than the acting user (TODO 29-F.1) | Technical, audit integrity | Medium | High | Acting admin read from the JWT `MemberId` claim on every approval and rejection path | Code review; audit-log spot check | Closed, Phase 2 |
 | Event capacity exceeded under concurrent registration (TODO 29-A.4) | Technical | Medium | Medium | Occupying-status count corrected to include all statuses that hold a place, cap enforced even when waitlisting is off, insert guarded against concurrent overfill | Concurrent-registration test | Closed, Phase 1 |
-| Date format inconsistency between `dd-MM-yyyy` display and ISO-8601 wire format risking silent data corruption across clients (TODO Area 23, 29-F.3) | Technical | High (had already caused defects) | High | ISO-8601 fixed as the canonical wire format; `DateFormatConverter` and client parsers reconciled to it | `DateFormatConverterTests.cs`, 20 pinning tests | Closed and test-pinned, 2026-08-22 |
+| Date format inconsistency between `dd-MM-yyyy` display and ISO-8601 wire format risking silent data corruption across clients (TODO Work Package 23, 29-F.3) | Technical | High (had already caused defects) | High | ISO-8601 fixed as the canonical wire format; `DateFormatConverter` and client parsers reconciled to it | `DateFormatConverterTests.cs`, 20 pinning tests | Closed and test-pinned, 2026-08-22 |
 | `Database.EnsureCreated()` no-op on a non-empty database leaving seeded data, and later the schema itself, stale after a change | Technical | High | High | Two mechanisms, added a year apart: `ConstitutionSeeder.SyncAsync` at boot for revisable data, and `MigrationBootstrapper.EnsureMigratedAsync` for the schema once the same no-op was found to have withheld twenty-one migrations from preprod | Boot log; constitution version shown in the public reader; HTTP 500 rate on newly shipped endpoints | Closed twice, §6.5.6. The impact rating was raised from Medium to High after 27 August 2026, when the schema half surfaced as 500s from `/api/jobs` and `/api/gallery` |
 | Manual payment verification backlog exceeding officer capacity as membership grows | Operational | Medium | Medium | Administrative queue ordered by age with a thirty-day flag (FR-23, DC-08); workload quantified rather than assumed away | Age of oldest unverified item in the queue | Open; monitored, not solved, §12.6 |
 | Volunteer officer turnover losing institutional knowledge of platform operation | Organisational | Medium | Medium | Administration console designed to be operable without developer involvement (NFR-M4); documentation corpus | Handover interval, three-year committee term (DC-09) | Open; structural mitigation only |
@@ -382,7 +417,7 @@ the argument of §12.13 about what transfers, not an assumption that it transfer
 ## 4.11 Summary
 
 The method is design science research, run as Hevner's three cycles and Peffers' six activities,
-delivered through forty-six incrementally opened work areas gated by an automated test rather than by
+delivered through forty-six incrementally opened work packages gated by an automated test rather than by
 a calendar date. The evaluation plan is fixed in this chapter across six dimensions, each with a
 named metric, tool and threshold, before Chapter 9 measures anything. Risk was managed through the
 same gated work-item mechanism as everything else, and the RMMM table of §4.8 is built from the
@@ -463,7 +498,7 @@ flowchart TB
     D --> C[Construct and<br/>self-test]
     C --> G{{Definition of done:<br/>§3.7 checklist}}
     G -->|fails| C
-    G -->|passes| M[Merge, update<br/>project_map.md]
+    G -->|passes| M[Merge, update<br/>PROJECT_MAP.md]
     M --> R[Deploy to<br/>pre-production, Ch. 10]
     R --> N([Next work item])
     N -.-> S

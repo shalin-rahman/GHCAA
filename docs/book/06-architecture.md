@@ -172,17 +172,17 @@ and does prevent the same gateway transaction being credited twice.
 
 ### 6.5.4 Multi-provider portability
 
-`ApplicationDbContext` is abstract in the sense that three concrete subclasses, `PgSqlApplicationDbContext`,
+`ApplicationDbContext` is abstract: three concrete subclasses, `PgSqlApplicationDbContext`,
 `MySqlApplicationDbContext` and `SqliteApplicationDbContext`, are pooled behind it, selected at
-startup by a `DatabaseProvider` configuration value read in `GHCAA.Infrastructure.DependencyInjection`.
-Production runs PostgreSQL; the test suite runs against the SQLite provider and, for unit-level
-service tests, against EF Core's in-memory provider instead. The cost of this portability is recorded
-in the source itself: the migrations assembly must be told which provider-specific shim type a
-migration is attributed to, and the DI registration comment explains, in the maintainer's own words,
-why pooling the base `ApplicationDbContext` type rather than the shim silently broke migration
-detection on every environment until it was found. That comment is treated in this dissertation as
-primary evidence, not paraphrased away, because it is a more honest record of the cost than a tidy
-retrospective claim would be.
+startup by a `DatabaseProvider` configuration value read in
+`GHCAA.Infrastructure.DependencyInjection`. Production runs PostgreSQL; the test suite runs against
+the SQLite provider and, for unit-level service tests, against EF Core's in-memory provider instead.
+The cost of this portability is recorded in the source itself: the migrations assembly must be told
+which provider-specific shim type a migration is attributed to, and the DI registration comment
+explains, in the maintainer's own words, why pooling the base `ApplicationDbContext` type rather
+than the shim silently broke migration detection on every environment until it was found. That
+comment is treated in this dissertation as primary evidence, not paraphrased away, because it is a
+more honest record of the cost than a tidy retrospective claim would be.
 
 ### 6.5.5 Data dictionary
 
@@ -299,7 +299,7 @@ the eighty components that declare one. §6.12.7 records what this decision cost
 Some presentation is genuinely shared: `PaginationComponent`, `ToastComponent`, `FooterComponent`
 and similar are each written once under `src/app/common/` and used from every route tree that needs
 them. Member-specific record editing is not yet shared to the same degree, and this is recorded
-honestly rather than smoothed over. `docs/PROFILE_SHARED_COMPONENT_DESIGN.md` is a design document,
+honestly rather than smoothed over. `docs/SHARED_PROFILE_COMPONENTS.md` is a design document,
 explicitly marked "design only — not implemented", written because the member-facing profile page and
 the admin member-detail modal render the same `Member` fields, being academic history, professional
 history, EC history, emergency contact and address, through two independent templates that had
@@ -342,20 +342,20 @@ connections §1.7 assumes.
 Feature flags and organisation identity are design elements, not afterthoughts, because §1.7's
 delimitation to one association does not mean the code should hardcode that association's name.
 `OrganizationConfig.ConfigJson`, read through `IOrgConfigService` with a ten-minute in-memory cache
-and a fallback chain of cache, then database, then a built-in default so that a missing configuration
-row cannot crash the application, holds branding, contact details, currency, feature toggles such as
-`enableForum` and `enableMentorship`, and workflow settings such as the membership approval mode.
-`GET /api/config` is public and `PUT /api/config` is SuperAdmin-only, which is the interface design
-principle of §6.6 applied to configuration itself. One field group is a deliberate exception to the
-"database wins" rule: `Localization` (UI copy strings, e.g. per-locale tagline text) is always
-overlaid from the built-in defaults on every read, regardless of what a stored config row holds,
-because no admin screen edits it directly — a stored row only carries it forward incidentally
-(`UpdateConfigAsync` round-trips the whole DTO on any Branding/Workflow save), so trusting a stale
-copy there would let a source-code text fix never actually reach production (found and fixed
-2026-08-31, a corrected Bengali tagline that had been serving a pre-fix value from an old row). At
-the time of writing the Angular and Flutter
-clients' consumption of this configuration is only partially complete, which `docs/CONFIG_DRIVEN_FRAMEWORK.md`
-itself records as Phase 2 and Phase 3, "TODO"; §13.6.2 carries the remaining wiring forward.
+and a fallback chain of cache, then database, then a built-in default so that a missing
+configuration row cannot crash the application, holds branding, contact details, currency, feature
+toggles such as `enableForum` and `enableMentorship`, and workflow settings such as the membership
+approval mode. `GET /api/config` is public and `PUT /api/config` is SuperAdmin-only, which is the
+interface design principle of §6.6 applied to configuration itself. One field group is a deliberate
+exception to the "database wins" rule. `Localization`, the UI copy strings such as the per-locale
+tagline, is overlaid from the built-in defaults on every read, whatever the stored config row holds.
+No admin screen edits it, so a stored row only carries it forward by accident: `UpdateConfigAsync`
+round-trips the whole DTO on any Branding or Workflow save. Trusting that stale copy would mean a
+text fix in the source never reaching production, which is what happened on 2026-08-31, when a
+corrected Bengali tagline kept serving the pre-fix value from an old row. At the time of writing the
+Angular and Flutter clients' consumption of this configuration is only partially complete, which
+`docs/CONFIG_DRIVEN_FRAMEWORK.md` itself records as Phase 2 and Phase 3, "TODO"; §13.6.2 carries the
+remaining wiring forward.
 
 ## 6.11 Design Principles: Claim, Mechanism and Evidence
 
@@ -553,7 +553,7 @@ against but not yet built, and one is accepted as it stands with the reason give
 
 **God service, avoided by decomposition rather than discovered as a defect.** Splitting
 `FinancialService` from `FinancialLedgerService`, and `IFamilyLinkService` from `IFamilyService`
-(project_map.md records both as separate registrations), kept two services from growing into one
+(PROJECT_MAP.md records both as separate registrations), kept two services from growing into one
 that owned both a business workflow and its append-only record of consequence.
 
 **Anaemic domain drift, noticed and knowingly not corrected.** §5.3.1 and §6.12.4 both record this:
@@ -566,8 +566,8 @@ where the anti-pattern is named, designed against, and still present in the ship
 
 ## 6.13 Architecture Decision Records
 
-Table 6.1 indexes the six decisions this chapter treats as architectural, in the sense that reversing
-one would change the shape of the system rather than the contents of a file.
+Table 6.1 indexes the six decisions this chapter treats as architectural, meaning that reversing one
+would change the shape of the system rather than the contents of a file.
 
 ### Table 6.1 — ADR index
 

@@ -20,7 +20,7 @@ actually print at.
 Nothing of chapters 7 to 13 exists as a file. `docs/book/` holds `01` to `06` and the references, so
 the printed PDF stops at the architecture chapter. Where the evidence for an unwritten chapter has
 already been gathered, this outline says where it is kept, so that it is written up rather than
-derived a second time. Tracked as Area 67 in `docs/TODO.md`.
+derived a second time. Tracked as Work Package 67 in `docs/TODO.md`.
 
 | Part | State | Pages |
 |---|---|---|
@@ -191,7 +191,7 @@ followed is stated in §2.2.
 - **3.7** User Stories, Acceptance Criteria and the Definition of Done
 - **3.8** Requirements Prioritisation (MoSCoW), with the negotiation outcome recorded
 - **3.9** Requirements Traceability — the chain from constitutional clause to requirement to rule to test, and the direction it does not yet run in: no test carries a requirement or constraint identifier, so the matrix is maintained by hand and could drift from the suite without failing
-- **3.10** Domain Constraints — constitutional and electoral rules the software must not violate
+- **3.10** Domain Constraints — constitutional and electoral rules the software must not violate, each classified as deterministic, state, evidence, procedural or authority, which fixes what the software is permitted to do with it and supplies the answer to RQ3 in §12.8, where the research questions are answered
 - **3.11** Feasibility Analysis — technical, economic, operational, schedule, legal and ethical
 - **3.12** Requirements Validation and Formal Technical Review
 - **3.13** Summary
@@ -223,9 +223,9 @@ followed is stated in §2.2.
 - **4.5** Evaluation Strategy — what is measured, with which instrument, against which baseline, and what result counts as failure; defined here, before Chapter 12 reports it
   - **4.5.1** Functional evaluation — requirement coverage and traceability closure
   - **4.5.2** Quality evaluation — static product metrics and test adequacy
-  - **4.5.3** Performance evaluation — workload model, endpoints measured, environment
-  - **4.5.4** Security evaluation — ASVS-level checklist and threat-model coverage
-  - **4.5.5** Usability evaluation — task-based testing, System Usability Scale, heuristic walkthrough
+  - **4.5.3** Performance evaluation — workload model, endpoints measured, environment, and the reduction from a concurrent-load measurement to a single-client latency measurement, with the reason
+  - **4.5.4** Security evaluation — ASVS-level checklist and threat-model coverage, carried out as the author's self-assessment and labelled as one
+  - **4.5.5** Usability evaluation — four task scripts, one for ordinary members and one for each of the three offices, the System Usability Scale, and a heuristic walkthrough for the flows the sessions do not reach; instruments delivered in `docs/book/instruments/`
   - **4.5.6** Expert and stakeholder evaluation — protocol and participants
 - **4.6** Metrics Definition — formula, tool and interpretation threshold for each metric, stated in advance of measurement
 - **4.7** Data Collection and Analysis Procedures
@@ -582,7 +582,7 @@ matters more than the numbers themselves:
 | Class | Covers | What it can support |
 |---|---|---|
 | Git-dated | 17 code components, 8 documentation deliverables | dated and verifiable; a commit-day is a *lower bound* on effort, since reading, debugging and thinking leave no commit |
-| Tracker-dated | 73 areas, 664 tasks, the arrival profile | dated in `docs/TODO.md`, and from Area 68 onwards each area states its own component and dates in a `wbs:` marker |
+| Tracker-dated | 73 areas, 664 tasks, the arrival profile | dated in `docs/TODO.md`, and from Work Package 68 onwards each area states its own component and dates in a `wbs:` marker |
 | Back-scheduled | P1 to P5, the research, specification and design that preceded the first commit | placed in the order the work had to happen, ending as the first commit lands on 9 February 2026. A reconstruction, and labelled as one wherever it appears |
 | Not yet written | installation, user and administrator manuals | future effort under the page budget, not completed work |
 | Calculated assumption | elicitation, interviews, review sessions, stakeholder discussion, incident response | **no commits exist**, so the duration is calculated from a stated rate and a measured quantity, and the arithmetic is printed with it. A reader who rejects the rate can redo the sum. These are labelled as assumptions everywhere they appear and are never presented as measurements |
@@ -717,7 +717,7 @@ defined there.
 - **12.5** Security Evaluation Results
 - **12.6** Usability and Accessibility Evaluation Results
 - **12.7** Stakeholder and Expert Evaluation
-- **12.8** Answering the Research Questions — RQ1 through RQ4 answered explicitly, each with the evidence supporting the answer and the confidence that evidence warrants
+- **12.8** Answering the Research Questions — RQ1 through RQ4 answered explicitly, each with the evidence supporting the answer and the confidence that evidence warrants; RQ3's answer is the five-class scheme of §3.10, the domain-constraint classification, applied to the delivered system rather than discussed
 - **12.9** Discussion — interpretation, and comparison against the literature of Chapter 2: where this work agrees with prior findings and where it diverges
 - **12.10** Comparison against the Existing Manual System
 - **12.11** Threats to Validity — construct, internal, external and conclusion validity, each with the mitigation applied and the residual limitation acknowledged. The heaviest threat to external validity is named here rather than left implicit: the platform was affordable because the maintainer brought a personal library of his own 2024 projects on the same technology generation, and an association without such a person faces the licence cost Chapter 2 quotes, not the build cost §11.5 computes. The conclusion transfers to the class of institution that has one; it does not transfer to every institution
@@ -916,15 +916,15 @@ evaluation data and literature are the material that must be produced.
 
 | Chapter / diagram group | Derived from |
 | --- | --- |
-| Architecture, layering, middleware, data flows | `docs/architecture_data_flow.md`, `docs/project_map.md` |
-| Class diagrams, ER model, data dictionary, API catalogue | `docs/project_map.md`, `GHCAA.Infrastructure/Data/ApplicationDbContext.cs`, the API controllers |
+| Architecture, layering, middleware, data flows | `docs/ARCHITECTURE.md`, `docs/PROJECT_MAP.md` |
+| Class diagrams, ER model, data dictionary, API catalogue | `docs/PROJECT_MAP.md`, `GHCAA.Infrastructure/Data/ApplicationDbContext.cs`, the API controllers |
 | Use cases, functional requirements, traceability | `docs/SRS.md`, `docs/FEATURES.md` |
 | Business rules, state machines, payment flow | `docs/BUSINESS_FINDINGS.md`, `docs/PAYMENT_GATEWAY_WORKFLOW.md` |
 | Configuration-driven design and feature flags | `docs/CONFIG_DRIVEN_FRAMEWORK.md` |
 | Deployment, CI/CD, environments, cost model | `docs/RENDER_DEPLOYMENT.md`, `Dockerfile`, the workflow files |
-| Test strategy, coverage, defect analysis | `docs/BUSINESS_TEST_CHECKLIST.md`, `docs/low_coverage_report.md`, the test projects |
-| User-interface design, tokens, shared controls | `docs/UI_UX_REMEDIATION_PLAN.md`, `docs/PROFILE_SHARED_COMPONENT_DESIGN.md`, `GHCAA.Web/src/styles.scss` |
+| Test strategy, coverage, defect analysis | `docs/BUSINESS_TEST_CHECKLIST.md`, `docs/COVERAGE_SNAPSHOT_2026-05-26.md`, the test projects |
+| User-interface design, tokens, shared controls | `docs/UI_FIX_PLAN.md`, `docs/SHARED_PROFILE_COMPONENTS.md`, `GHCAA.Web/src/styles.scss` |
 | Governance, constitution and election processes | `docs/CONSTITUTION_PUBLISHING.md`, `docs/Elections/`, the ratified constitution |
-| Schedule, work breakdown, change log, decision records | `docs/TODO.md`, `docs/PLAN.md`, the version-control history |
+| Schedule, work breakdown, change log, decision records | `docs/TODO.md`, `docs/FORUM_PLAN_2026-05.md`, the version-control history |
 | Product metrics — complexity, coupling, size | Static analysis over the solution, generated for §9.14 |
 | Literature, evaluation data, validity analysis | Produced during the research; not present in the repository |

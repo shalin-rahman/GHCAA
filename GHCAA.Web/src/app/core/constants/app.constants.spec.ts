@@ -1,7 +1,7 @@
 import { MEMBERSHIP_TYPES, MEMBERSHIP_TYPE_OPTIONS, getMembershipTypeLabel } from './app.constants';
 
 /**
- * Area 35. These two lists and the helper below are the single source of truth for rendering a
+ * Work Package 35. These two lists and the helper below are the single source of truth for rendering a
  * MembershipType on the web, and they must stay in lockstep with the enum in
  * GHCAA.Domain/Enums.cs:
  *
@@ -11,7 +11,7 @@ import { MEMBERSHIP_TYPES, MEMBERSHIP_TYPE_OPTIONS, getMembershipTypeLabel } fro
  * 'Life' (a value the enum has never had) and one omitted Guest entirely, hiding real members.
  * These tests fail the suite if the lists drift again.
  */
-describe('MembershipType constants (Area 35)', () => {
+describe('MembershipType constants (Work Package 35)', () => {
     // Mirrors GHCAA.Domain/Enums.cs. Update this only when the C# enum itself changes.
     const DOMAIN_ENUM = ['Founding', 'Executive', 'General', 'Associate', 'Honorary', 'Advisory', 'Guest'];
 

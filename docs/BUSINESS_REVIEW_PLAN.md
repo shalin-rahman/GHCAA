@@ -1,4 +1,4 @@
-# GHCAA Business Functionality Review Plan
+# GHCAA business review plan
 
 Beyond code/build/tests, this plan validates **whether the product behaves correctly for alumni, admins, and the association's business rules**.
 
@@ -54,7 +54,7 @@ Beyond code/build/tests, this plan validates **whether the product behaves corre
 dotnet ef database update --project GHCAA.Infrastructure --startup-project GHCAA.API
 ```
 
-Pending migrations include Area 28.0 (`AddOrganizationConfig`) and Area 24 migrations per coordinator notes.
+Pending migrations include Work Package 28.0 (`AddOrganizationConfig`) and Work Package 24 migrations per coordinator notes.
 
 ### API startup
 
@@ -317,7 +317,7 @@ From `TODO.md` — not blockers unless user prioritizes:
 | Cursor pagination (directory) | 8.3 | Performance |
 | i18n EN + Bengali | 8.8 | Localization |
 | OrgConfig Angular consumer | 28.11+ | Config-driven white-label |
-| DB migrations (Area 28.0) | 28.0 | Blocking for org-config feature |
+| DB migrations (Work Package 28.0) | 28.0 | Blocking for org-config feature |
 
 ---
 

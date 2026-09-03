@@ -38,6 +38,8 @@ into the book by accident.
 | `python docs/book/build/build.py` | builds the HTML and runs every source check |
 | `python docs/book/build/build.py --pdf` | the same, then measures A4 fit, prints the PDF with page numbers, and fills the Page columns from it |
 | `python docs/book/build/renumber.py --apply` | renumbers figures and tables into bound order and rebuilds the contents and the front-matter lists |
+| `python docs/book/build/prose.py refs` | checks every section reference: none broken, and each names what is at the destination. Prints the destination title beside every reference, which is how a reference that resolves to the wrong section is caught |
+| `python docs/book/build/prose.py prose 03` | lists the sentences in a chapter likely to need a second reading. A filter for a human pass, not a gate |
 | `python docs/book/build/wbs.py` | regenerates Chapter 11 evidence from git and `docs/TODO.md`: component durations, the critical path, task counts, and how the work arrived. `--check` fails if a component has no commits or no tracker areas; `--sync` writes a `<!-- wbs: ... -->` marker into any tracker area that has none, so a newly added area maps itself |
 
 Python 3 only — no pandoc, no Node packages, no `node_modules`. The PDF step additionally needs
@@ -274,7 +276,7 @@ states what the code does, and where the two disagree the code is right.
 ones in the book now were taken on 1 September 2026: 276 endpoint attributes across 37 controllers,
 49 `DbSet` properties, 28 enumerations, 40 service interfaces with 37 implementations, 21 migrations,
 517 passing backend tests, 381 passing web tests, 3,366 lines of `styles.scss`. Re-take them before
-submission with the commands in `docs/project_map.md` and the two test suites, and correct the
+submission with the commands in `docs/PROJECT_MAP.md` and the two test suites, and correct the
 sentences that carry them.
 
 ## Before submission

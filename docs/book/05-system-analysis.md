@@ -157,7 +157,7 @@ cannot use to find the code is not doing the job the honesty rule in the front m
 | BR-12 | Every mutating request is attributed to the acting user, not to a default identifier | Audit integrity, TODO 29-F.1 | Acting admin id read from the JWT `MemberId` claim in every approval and rejection path |
 | BR-13 | A payment declaration is not credited until the callback or officer-verified amount matches the originating record | Financial integrity, TODO 29-B.2 | Amount comparison against the originating `PaymentHistory` row before crediting |
 | BR-14 | Advisory members are excluded from the Executive Committee quorum computation | Art. IV, Art. III | Formal-technical-review finding, §3.12; enforcement recorded against `GovernanceService`'s committee-membership query |
-| BR-15 | Wire-format dates are ISO-8601; `dd-MM-yyyy` is display and input only | Data-integrity finding, TODO Area 23 | `DateFormatConverter`; pinned by twenty tests in `DateFormatConverterTests.cs` |
+| BR-15 | Wire-format dates are ISO-8601; `dd-MM-yyyy` is display and input only | Data-integrity finding, TODO Work Package 23 | `DateFormatConverter`; pinned by twenty tests in `DateFormatConverterTests.cs` |
 | BR-16 | The Association's name, crest and motto are used only as the constitution prescribes | Art. I §5 | Public site content sourced from `OrgConfig.branding`, not hardcoded per environment |
 
 One rule in this table is enforced less completely than its source requirement states, and it is

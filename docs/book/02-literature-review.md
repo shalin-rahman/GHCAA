@@ -7,14 +7,14 @@ about web architecture. It exists to establish four things that the rest of the 
 on, and to stop when it has established them.
 
 - **RvQ1.** What does the institutional literature say alumni engagement actually consists of, and
-  what does that imply for the data a platform must keep? (Feeds RQ1 and §3.3.1.)
+  what does that imply for the data a platform must keep? (Feeds RQ1 and §3.3.1, the membership and profile requirements.)
 - **RvQ2.** What evidence supports layered and clean architecture, and what does the critical
-  literature say it costs? (Feeds RQ2 and §6.2.)
+  literature say it costs? (Feeds RQ2 and §6.2, where the architecture is chosen.)
 - **RvQ3.** What does the digital-governance and electronic-voting literature establish about the
   conditions under which software may legitimately mediate a collective decision? (Feeds RQ3, and is
-  the reason for the boundary drawn in §2.7 and defended in §8.10.)
+  the reason for the boundary drawn in §2.7 and defended in §8.10, on governance integrity.)
 - **RvQ4.** Which existing systems address the Association's problem, on what terms, and what
-  remains uncovered? (Feeds RQ1, RQ2 and §2.11.)
+  remains uncovered? (Feeds RQ1, RQ2 and §2.11, the research gap.)
 
 The review is structured rather than systematic. Kitchenham and Charters set out the full protocol
 for a systematic review in software engineering, including independent double screening and quality
@@ -78,8 +78,8 @@ The institutional literature on alumni relations is dominated by the advancement
 what makes graduates give. Monks, using data on young graduates of selective institutions, found
 that giving relates to satisfaction with the undergraduate experience and to continuing contact,
 rather than simply to the graduate's income [8]. That result has been repeatedly qualified but its
-shape holds: the antecedent of the gift is the relationship, and the relationship is maintained or
-lost in the years when the institution has the least reason to pay attention.
+shape holds: the gift follows from the relationship, and the relationship is kept or lost in the
+years when the institution has the least reason to pay attention.
 
 Weerts and Ronco separated three kinds of supportive alumnus, the donor, the volunteer, and the
 person who does both, and showed that they are predicted by different characteristics [9]. This is
@@ -101,11 +101,11 @@ by the institution. For that, one has to look outside the education literature e
 
 Academic work on membership and community platforms tends to approach them either as socio-technical
 communities or as CRM instances, and the two treatments do not meet. The community strand is
-concerned with participation, identity and moderation, and its practical yield for a builder is a
-set of design commitments: make membership status visible, make contribution legible, and make the
-cost of participation low. The CRM strand supplies the pipeline vocabulary, meaning stages,
-segments, campaigns and lifecycle states, which maps cleanly onto the Association's application and
-approval workflow and very poorly onto its tier structure.
+concerned with participation, identity and moderation, and what it gives a builder is a set of
+design commitments: make membership status visible, make contribution legible, and make the cost of
+participation low. The CRM strand supplies the pipeline vocabulary, meaning stages, segments,
+campaigns and lifecycle states, which maps cleanly onto the Association's application and approval
+workflow and very poorly onto its tier structure.
 
 The gap in this strand is governance. A community platform models a moderator; a CRM models an
 account owner. Neither models an officer who holds an elected position for a fixed term under a
@@ -120,8 +120,8 @@ constitution because the literature does not supply it.
 Bass, Clements and Kazman give the discipline its working definition of architecture as the set of
 structures needed to reason about a system, comprising elements, their relations and their
 properties, and its central methodological claim that architecture is the earliest artefact against
-which quality attributes can be evaluated [13]. That claim is what licenses Chapter 6 to argue about
-maintainability before any measurement of it exists.
+which quality attributes can be evaluated [13]. That claim is what allows Chapter 6 to argue about
+maintainability before there is any measurement of it.
 
 The specific family this project sits in begins with Cockburn's hexagonal architecture, which frames
 the problem as isolating application logic from every actor that drives it or that it drives, so that
@@ -140,9 +140,9 @@ small systems that structure may never pay for itself. It multiplies artefacts, 
 added to an entity can require edits in the domain model, the data transfer object, the mapping, the
 service interface, the implementation and the client model. And it invites the appearance of
 layering without the substance, where an interface exists for every service but has exactly one
-implementation and no test double, so the indirection buys nothing. Section 8.14 measures the first
-two objections in this codebase rather than dismissing them, and §6.13 records where the pattern was
-deliberately not applied.
+implementation and no test double, so the indirection buys nothing. Section 9.14 measures the first
+two objections in this codebase rather than dismissing them, and §6.11.12 records where the pattern
+was deliberately not applied.
 
 ### 2.5.2 Monolith versus microservices for small-team systems
 
@@ -241,8 +241,8 @@ process most needs and least reliably has. It publishes the constitution, the am
 the committee record. It runs constitutional amendment voting and non-binding member polls, where
 the constitution itself sets the threshold and the outcome is a recorded expression of the
 membership rather than the transfer of an office. It does not seal a ballot, count votes for office,
-or declare a winner. Section 9.10 gives the full argument, and §12.8 revisits whether the line was
-drawn in the right place.
+or declare a winner. Section 8.10, on governance integrity, gives the full argument, and §12.8
+revisits whether the line was drawn in the right place.
 
 The distinction is worth naming precisely, because it is the substance of this work's answer to RQ3:
 software can encode *eligibility* and *record*, which are matters of fact traceable to a written
@@ -263,34 +263,34 @@ imagination.
 For verification requirements the project uses the OWASP Application Security Verification Standard
 as its requirement catalogue and the OWASP Top Ten as a coverage cross-check [7], [25]. Both have
 since been revised, ASVS to version 5.0.0 in May 2025 [75] and the Top Ten to its 2025 edition [76];
-the work reported here was carried out against the editions cited, and §4.5 states why a conformance
-claim is not carried across a revision. ASVS is used
-at level 2, on the grounds that the system holds identity documents and financial evidence but is
-not itself a payment processor. Section 9.4 gives the level-2 control mapping and, more usefully,
-records the requirements the project does not meet.
+the work reported here was carried out against the editions cited, and §4.5.4, the
+security-evaluation strategy, states why a conformance claim is not carried across a revision. ASVS
+is used at level 2, on the grounds that the system holds identity documents and financial evidence
+but is not itself a payment processor. Section 8.13, the conformance assessment against ASVS, gives
+the level-2 control mapping and, more usefully, records the requirements the project does not meet.
 
 For the cryptographic primitives the choices follow published specifications rather than invention:
 bcrypt for password storage, with its adaptive cost parameter [49]; JSON Web Tokens as specified in
 RFC 7519 for bearer authentication [50], with the caveat that the specification's flexibility is
-itself a hazard, addressed in §8.5; OAuth 2.0 as specified in RFC 6749 for federated sign-in [51];
-and time-based one-time passwords per RFC 6238 as the model for the verification codes described in
-§3.3.2 [52].
+itself a hazard, addressed in §8.3, on authentication and session security; OAuth 2.0 as specified
+in RFC 6749 for federated sign-in [51]; and time-based one-time passwords per RFC 6238 as the model
+for the verification codes described in §3.3.2 [52].
 
 For privacy the operative principle is Cavoukian's privacy by design, in particular default
 protection and end-to-end lifecycle management [41]. Its concrete expression in this system is the
-per-field visibility control of FR-03 and the masking protocol in §8.7, under which the directory
-returns a masked projection unless the owning member has opted otherwise. Bangladesh's data
-protection framework was still in draft at the time of writing, so the project treats the principles
-of purpose limitation, minimisation and retention as design obligations rather than as compliance
-with a specific statute, and §8.11 states that position explicitly rather than implying a compliance
-claim it cannot support.
+per-field visibility control of FR-03 and the masking protocol in §8.11, on personal data, under
+which the directory returns a masked projection unless the owning member has opted otherwise.
+Bangladesh's data protection framework was still in draft at the time of writing, so the project
+treats the principles of purpose limitation, minimisation and retention as design obligations rather
+than as compliance with a specific statute, and §8.11 states that position explicitly rather than
+implying a compliance claim it cannot support.
 
 ## 2.9 Survey of Existing Systems and Products
 
 A note on evidence before the survey, because cost is one of the two criteria that decide the
-outcome in §2.10 and it would be easy to assert rather than check. The prices below were read from
-the vendors' own pages on 1 September 2026. They divide into three kinds, and the C3 row of Table 2.2
-reports the kind as well as the band.
+comparison in §2.10 and it would be easy to assert rather than check. The prices below were read
+from the vendors' own pages on 1 September 2026. They divide into three kinds, and the C3 row of
+Table 2.2 reports the kind as well as the band.
 
 Published, so quotable. Hivebrite lists a Core plan from US$895 per month billed annually and a Flex
 plan from US$1,995 per month, with its two upper tiers by quotation [69]; the entry plan is therefore
@@ -310,7 +310,7 @@ figures appear on their own pages [70]. Secondary listings circulate a figure of
 year for Almabase, which is recorded here as secondary reporting and is not relied on. Where a price
 could not be sourced from the vendor, the band in Table 2.2 says so instead of estimating.
 
-The argument of §2.11 does not turn on the exact figure. It turns on the comparison between the
+The gap argued in §2.11 does not turn on the exact figure. It turns on the comparison between the
 Association's annual income and the cheapest published entry price in the dedicated-platform class,
 and Hivebrite's own page settles that comparison without a quotation being needed.
 
@@ -320,13 +320,13 @@ Dedicated alumni engagement platforms, of which Hivebrite, Almabase, Graduway an
 representative, and institutional advancement suites such as Anthology's Encompass, are the closest
 functional match to the requirement. They provide directories, event management, giving campaigns,
 email, mentoring and mobile access, generally at a standard well above what this project achieves in
-those areas. Three properties make them unsuitable here. They are sold on annual subscription at a price which, where it is
-published at all, exceeds the Association's entire annual income; they assume a payment gateway and a
-merchant relationship for the giving module, which the Association cannot obtain; and their data
-model is the institutional advancement model, with constituents, gift records and campaigns, in
-which a five-tier constitutional membership with different voting rights, a fifteen-position
-committee with fixed terms, and an amendment vote have no representation. They can be approximated
-with custom fields, which is precisely the approximation §2.10 scores as insufficient.
+those areas. Three properties make them unsuitable here. They are sold on annual subscription at a
+price which, where it is published at all, exceeds the Association's entire annual income; they
+assume a payment gateway and a merchant relationship for the giving module, which the Association
+cannot obtain; and their data model is the institutional advancement model, with constituents, gift
+records and campaigns, in which a five-tier constitutional membership with different voting rights,
+a fifteen-position committee with fixed terms, and an amendment vote have no representation. They
+can be approximated with custom fields, and §2.10 scores that approximation as insufficient.
 
 ### 2.9.2 Open-source community and membership systems
 
@@ -335,27 +335,28 @@ constituent relationship management system built for non-profits, with genuine m
 renewal handling, contribution records, event registration and a permission model, and its licence
 cost is zero. Its difficulties in this setting are operational and structural rather than
 functional. It requires a host CMS, typically Drupal or WordPress, so the maintenance surface is two
-applications and their plugin ecosystems rather than one; its extension model is PHP hook-based,
-which is a competent choice but not one this maintainer can support; its membership model expresses
+applications and their plugin ecosystems rather than one. Its extension model is PHP hook-based,
+which is a competent choice but not one this maintainer can support. Its membership model expresses
 tiers as pricing and duration rather than as rights, so the constitutional rule that Associate
-members may not vote is expressible only as an access-control convention layered on top; and its
-contribution processing assumes a gateway, with offline contributions supported but secondary. A
-WordPress installation with a membership plugin such as Paid Memberships Pro shares the last two
-problems in sharper form and adds a plugin-update treadmill. Discourse and similar community
-software solve discussion well and membership governance not at all.
+members may not vote can only be added on top as an access-control convention. Its contribution
+processing assumes a gateway, with offline contributions supported but secondary. A WordPress
+installation with a membership plugin such as Paid Memberships Pro shares the last two problems in
+sharper form and adds a plugin-update treadmill. Discourse and similar community software solve
+discussion well and membership governance not at all.
 
 ### 2.9.3 General-purpose CRM adapted to alumni use
 
 Salesforce with the Nonprofit Success Pack, Zoho CRM and HubSpot represent this class. They offer
 strong configurability, workflow automation and reporting, and Salesforce in particular is available
-to eligible non-profits at reduced or zero licence cost for a limited number of seats. The inversion
-is that everything the Association needs specifically must be built, and everything it does not need
-arrives configured. Membership tiers become picklists, constitutional eligibility becomes validation
-rules, and the committee record becomes a custom object, all of which is achievable and none of
-which is traceable to Article III in any way a reviewer could audit. The deeper objection is
-sustainability of a different kind: the configuration knowledge lives in a platform the Association
-does not control and cannot export as source, and the three-year committee turnover that motivated
-this project in the first place applies equally to whoever holds the administrator seat.
+to eligible non-profits at reduced or zero licence cost for a limited number of seats. The trade
+runs the wrong way. Everything the Association needs specifically must be built, and everything it
+does not need arrives already configured. Membership tiers become picklists, constitutional
+eligibility becomes validation rules, and the committee record becomes a custom object, all of which
+is achievable and none of which is traceable to Article III in any way a reviewer could audit. The
+deeper objection is sustainability of a different kind: the configuration knowledge lives in a
+platform the Association does not control and cannot export as source, and the three-year committee
+turnover that motivated this project in the first place applies equally to whoever holds the
+administrator seat.
 
 ## 2.10 Comparative Analysis and Evaluation Criteria
 
@@ -561,7 +562,7 @@ better than the artefact produced here, and the comparison would be dishonest wi
 | --- | --- | --- | --- |
 | Membership tiers with differentiated constitutional rights | CiviCRM (as priced membership types) | Tiers model price and duration, not rights; the non-voting rule for Associate members is an access convention, not a modelled property | §3.3.1, §5.6 |
 | Fixed-term officer positions with succession | Salesforce NPSP (custom object) | No term, quorum or ex-officio semantics; no institutional record independent of user accounts | §3.3.6, §5.4 |
-| Versioned governing instrument with an always-current reader | None | No product treats the governing document as versioned data with an effective date | §3.3.6, §7.9 |
+| Versioned governing instrument with an always-current reader | None | No product treats the governing document as versioned data with an effective date | §3.3.6, §7.12 |
 | Amendment voting at a constitutional threshold | None | Poll features exist; the two-thirds-at-AGM rule and eligibility gate do not | §3.3.6, §5.6 |
 | Payment without a gateway, evidenced and officer-verified | CiviCRM (offline contributions) | Secondary path; no proof-upload and verification workflow with an audit trail | §3.3.4, §8.9 |
 | Auditable trace from enforced rule to constitutional clause | None | Configuration produces behaviour, not a trace a reviewer can follow | §3.10, Table 3.4 |

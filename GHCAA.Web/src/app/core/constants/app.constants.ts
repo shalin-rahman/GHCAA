@@ -278,7 +278,7 @@ export function getPaymentStatusClass(status: string | number | null | undefined
     return '';
 }
 
-// Area 35: the single source for rendering a MembershipType. Accepts either the numeric
+// Work Package 35: the single source for rendering a MembershipType. Accepts either the numeric
 // enum ordinal or the enum name, because the API sends both shapes depending on endpoint.
 // Never inline a copy of this list in a component — that is exactly how index 6 came to be
 // labelled 'Life' in two places while the enum's real member 6 is Guest (see TODO 35.1/35.2).

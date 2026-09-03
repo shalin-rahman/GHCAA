@@ -1,4 +1,4 @@
-# GHCAA Platform: System Architecture & Data Flow
+# GHCAA architecture and data flow
 
 This document outlines the architectural blueprint and data interaction patterns of the GHCAA (Govt. Haraganga College Alumni Association) platform.
 

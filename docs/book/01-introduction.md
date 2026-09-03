@@ -59,8 +59,8 @@ Four consequences of that arrangement drove the project.
 
 **The roll is unknowable.** Nobody could state how many members the Association had, because
 membership was defined by a payment recorded in one place and an application recorded in another.
-Any question of the form "who is entitled to vote" therefore had no answerable form, which is a
-serious problem for a body whose constitution ties voting to good standing.
+So the question "who is entitled to vote" had no answer, in a body whose constitution ties the right
+to vote to good standing.
 
 **Money and trust are coupled.** Cash collection through officers' personal wallets is workable
 among people who know each other and corrosive at any larger scale. There was no receipt a member
@@ -93,14 +93,14 @@ systems assume a payment gateway and treat governance as a plugin concern at bes
 CRM adapted to alumni use inverts the problem, offering configurable pipelines while providing
 nothing for constitutional tiers, committee terms or amendment voting. The gap is not a missing
 feature. It is a missing combination: deep domain governance at close to zero operating cost, with
-manual payment as a first-class design position rather than a degraded fallback.
+manual payment treated as a deliberate design choice rather than a fallback.
 
 ## 1.4 Conceptual Framework
 
 The problem statement above names four needs; the chapters that follow answer them in pieces. This
 section states the whole in one view, so that a reader can see what the work takes in, what it
-produces and how the two are judged against each other before meeting any of it in detail. Figure 1.3
-draws it.
+produces and how the two are judged against each other before meeting any of it in detail. Figure
+1.3 draws it.
 
 Three kinds of input govern the work, and they are not interchangeable. The first is the
 Association's own rule set: the constitution at version 4.2 and the seven documents of the election
@@ -113,11 +113,11 @@ mobile data. The first input constrains what the artefact may do, the second wha
 and the third what it can afford to be.
 
 The artefact sits between them. It is a running platform rather than a model of one, built and
-revised over increments, and the design-science position of Chapter 4 is what licenses treating its
-construction as research: each increment is a designed response to a stated problem, and each is
-evaluated before the next is specified. The rules do not merely inform the design; they are encoded
-in it and are traceable back to the clause they came from, which is the property §3.9 and Table 9.9
-exist to demonstrate.
+revised over increments, and the design-science position of Chapter 4 is what allows its
+construction to count as research: each increment answers a stated problem, and each is evaluated
+before the next is specified. The rules do not just inform the design. They are encoded in it, and
+each one traces back to the clause it came from, which is what the traceability matrix of §3.9 and
+the constitutional test table, Table 9.9, exist to demonstrate.
 
 The outputs are of two kinds, and keeping them apart matters. The artefact itself is one
 contribution, deployed and in use by real members with real records. The evidence about it is the
@@ -126,11 +126,11 @@ advance in §4.6, the operating cost of §10.10, and the comparison against the 
 replaced in §12.10. The thresholds are declared before measurement, in Chapter 4, precisely so that
 the evaluation cannot be written to fit whatever the system turned out to do.
 
-The feedback path is the part that a static diagram most easily loses. Evaluation did not happen once
-at the end. Findings from use, from review and from deployment failures re-entered the work as new
-requirements, and §11.1 reports how much of the delivered work arrived that way rather than from the
-original specification. That loop is the design cycle of §4.2, and it is drawn in Figure 1.3 as a
-return edge rather than left implicit.
+A static diagram loses the feedback path most easily, so it is worth stating. Evaluation did not
+happen once at the end. Findings from use, from review and from deployment failures re-entered the
+work as new requirements, and §11.1 reports how much of the delivered work arrived that way rather
+than from the original specification. That loop is the design cycle of §4.2, and it is drawn in
+Figure 1.3 as a return edge rather than left implicit.
 
 ## 1.5 Research Questions
 
@@ -140,8 +140,8 @@ in Figure 1.4.
 **RQ1.** What functional and quality requirements characterise an alumni-management platform for a
 resource-constrained institution in a low-bandwidth, mobile-first, cash-and-manual-payment context?
 
-*Answered by:* the requirements engineering of Chapter 3, validated in §3.12 and closed against the
-delivered artefact in §12.2.
+*Answered by:* the requirements engineering of Chapter 3, validated in the formal technical review of §3.12 and
+closed against the delivered artefact in §12.2, the functional evaluation.
 
 **RQ2.** Which architectural approach best satisfies those requirements under a single-maintainer,
 low-budget sustainability constraint, and at what cost?
@@ -159,11 +159,12 @@ actually settled on.
 **RQ4.** What measurable quality is achieved by the resulting artefact against ISO/IEC 25010
 characteristics, and what does that reveal about the approach?
 
-*Answered by:* the evaluation plan declared in §4.5 and executed in §§12.3 to 12.7.
+*Answered by:* the evaluation strategy declared in §4.5 and executed in §§12.3 to 12.7, the
+evaluation results.
 
-RQ3 is the question of genuine interest. RQ1 and RQ2 are the questions that must be answered first
-in order to have an artefact against which RQ3 can be asked, and RQ4 is what makes the answers
-defensible rather than anecdotal.
+RQ3 is the question of genuine interest. RQ1 and RQ2 have to be answered first, because without an
+artefact there is nothing to ask RQ3 about, and RQ4 is what makes the answers defensible rather than
+anecdotal.
 
 ## 1.6 Aims and Objectives
 
@@ -197,14 +198,14 @@ public web site, a member portal and admin console in the same Angular applicati
 mobile application for members.
 
 **Out of scope, by decision.** Live payment gateway integration is present in the codebase but
-deliberately unconfigured; §8.9 gives the reasoning. Statutory accounting and audit filing are not
-attempted; the ledger is a record, not an accounting package. The platform does not run binding
-Executive Committee elections. It supports the process around them, including the voter roll,
-candidate information and result publication, but the ballot itself remains under the election
-documents, and §8.10 explains why that separation is deliberate rather than an omission. There is
-no offline-first mobile synchronisation, no native desktop client, no machine-learning
-recommendation, and no external large language model; the in-app assistant is a rule-based intent
-classifier over the Association's own data.
+deliberately unconfigured; §8.9, on payment risk, gives the reasoning. Statutory accounting and
+audit filing are not attempted; the ledger is a record, not an accounting package. The platform does
+not run binding Executive Committee elections. It supports the process around them, including the
+voter roll, candidate information and result publication, but the ballot itself remains under the
+election documents, and §8.10, on governance integrity, explains why that separation is deliberate
+rather than an omission. There is no offline-first mobile synchronisation, no native desktop client,
+no machine-learning recommendation, and no external large language model; the in-app assistant is a
+rule-based intent classifier over the Association's own data.
 
 **Delimitations.** The study concerns one association. Chapter 12 argues what transfers to
 comparable institutions and what does not, but the evaluation is a single case in the sense of
@@ -226,18 +227,21 @@ security and quality literature of Chapter 2 together with the standards listed 
 the design cycle is the increments of Chapter 7 and their verification in Chapter 9.
 
 Delivery followed an incremental and iterative lifecycle rather than a single pass, for the reason
-given in §4.4: a single unpaid maintainer working in irregular hours cannot hold a long
-specification-to-integration cycle open, and needs a working system after every increment. The
-evaluation plan, including the metrics, instruments and thresholds, is declared in §4.5 and §4.6
-before any measurement is reported, so that Chapter 12 cannot select its own criteria after seeing
-the results. Chapter 4 gives the full account.
+given in §4.4, the process-model justification: a single unpaid maintainer working in irregular
+hours cannot hold a long specification-to-integration cycle open, and needs a working system after
+every increment. The evaluation plan, including the metrics, instruments and thresholds, is declared
+in the evaluation strategy of §4.5 and the metric definitions of §4.6 before any measurement is
+reported, so that Chapter 12 cannot select its own criteria after seeing the results. Chapter 4
+gives the full account.
 
 ## 1.9 Contributions of this Work
 
 The three claims are stated in full in the front matter under Statement of Contributions and are
 substantiated in §13.2. In brief: a traceable method for encoding a voluntary association's written
-constitution as software business rules, with a defended boundary between what software may decide
-and what must remain a human procedure; an account of a deliberately gateway-free payment design and
+constitution as software business rules, together with the five-class scheme of §3.10 that decides,
+for each rule, whether the software may enforce it, compute it, collect evidence for a person to
+judge, support a procedure it does not decide, or stay out of it; an account of a deliberately
+gateway-free payment design and
 its consequences; and a requirements and architecture characterisation for the single-maintainer,
 zero-licence case, recorded with its costs rather than presented as a best practice.
 
@@ -280,10 +284,10 @@ decisions taken.
 
 Part III covers construction and validation. Chapter 7 reports the implementation and the notable
 problems solved along the way. Chapter 8 covers security, privacy and trust, and states the threat
-model. Chapter 9 then reports verification, validation and the product metrics, including the security
-testing derived from that threat model, which is why it follows Chapter 8 rather than preceding it.
-Chapter 10 covers deployment and operations, including the cost model. Chapter 11 reports project
-management.
+model. Chapter 9 then reports verification, validation and the product metrics, including the
+security testing derived from that threat model, which is why it follows Chapter 8 rather than
+preceding it. Chapter 10 covers deployment and operations, including the cost model. Chapter 11
+reports project management.
 
 Part IV closes. Chapter 12 executes the evaluation plan and answers the research questions.
 Chapter 13 concludes and sets out future work.
@@ -294,7 +298,7 @@ Chapter 13 concludes and sets out future work.
 
 ### Figure 1.1 — Context diagram (DFD Level 0): platform boundary and external entities
 
-*Derived from `docs/architecture_data_flow.md` and the controller inventory in `GHCAA.API/Controllers`.*
+*Derived from `docs/ARCHITECTURE.md` and the controller inventory in `GHCAA.API/Controllers`.*
 
 ```mermaid
 flowchart LR

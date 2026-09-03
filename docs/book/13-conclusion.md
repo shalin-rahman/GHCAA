@@ -2,6 +2,12 @@
 
 *[Chapter not written. The headings below are generated from `docs/DOCUMENTATION_BOOK_OUTLINE.md` and are kept in step with it: `build.py --strict` fails if a section exists in one and not the other.]*
 
+**What this chapter owns.** What was done, what was learned, what it is worth and what should
+happen next.
+
+**What it must not repeat.** No new evidence appears here. Anything that would need to be defended
+belongs in the chapter that carries its evidence, and is cited from here rather than restated.
+
 ## 13.1 Summary of the Work
 
 *[Not written.]*

@@ -2,9 +2,9 @@
 
 This chapter is written to the structure of ISO/IEC/IEEE 29148 [21]. Requirements are stated in the
 "shall" form, each with an identifier, a source and a priority, and each traceable forward through
-the design and test artefacts by way of Table 3.4. Quality requirements are classified by ISO/IEC
-25010 characteristic [6] and cross-referenced to FURPS+ [23], and each is restated as a
-quality-attribute scenario in §3.5 so that it can be tested rather than merely asserted.
+the design and test artefacts in Table 3.4. Quality requirements are classified by ISO/IEC 25010
+characteristic [6] and cross-referenced to FURPS+ [23], and each is restated as a quality-attribute
+scenario in §3.5 so that it can be tested rather than merely asserted.
 
 One property of this specification distinguishes it from a conventional one. A substantial part of
 the requirement set is not negotiable with the stakeholders, because it is dictated by the
@@ -37,7 +37,7 @@ contact details, on the reasonable argument that a directory nobody can use is n
 Several members, asked directly, objected to their mobile number being visible to a membership of
 several hundred people they do not all know. The resolution was a masked projection by default with
 per-field opt-in disclosure controlled by the owning member, specified in FR-03 and FR-05 and
-implemented as the masking protocol in §8.7. Officers retain unmasked access for administrative
+implemented as the masking protocol in §8.11, on personal data. Officers retain unmasked access for administrative
 purposes, which is itself logged. This satisfies neither party completely and is recorded as such.
 
 **Automatic termination for non-payment against Article X.** An early requirement, offered by an
@@ -114,7 +114,8 @@ appear on an identity card the Association had not authorised.
 FR-11 states the security-stamp requirement in requirement form. A change of role, a password reset
 or a change of membership status must take effect immediately rather than at token expiry, because
 the alternative is a window in which a terminated member retains the rights of an active one. The
-mechanism is described in §7.4 and its threat rationale in §8.5.
+mechanism is described in §7.4 and its threat rationale in §8.3, on authentication and session
+security.
 
 ### 3.3.3 Events, Registration, Attendance and Gallery
 
@@ -226,7 +227,7 @@ had tried.
 | FR-54 | The system shall permit a member to post a job or career opportunity, and shall hold the posting unpublished until an administrator approves or rejects it, with a recorded reason on rejection. | R | C |
 
 FR-54 came after the elicitation of §3.1 had closed. Its provenance is a dated stakeholder request
-logged in the project tracker: `docs/TODO.md`, Area 40, "Member albums with admin approval,
+logged in the project tracker: `docs/TODO.md`, Work Package 40, "Member albums with admin approval,
 job-posting approval, events without registration (raised by user 2026-08-26)", which is also the
 origin of FR-53. That is a weaker record than an interview transcript, and it is marked R rather than
 I for that reason: what survives is the request and the date, not the discussion behind it. Both
@@ -282,7 +283,7 @@ system being "intuitive".
 | ID | Requirement and acceptance criterion |
 | --- | --- |
 | NFR-U1 | The system shall meet WCAG 2.1 level AA for all member-facing pages [24]. Criterion: automated audit clean, plus manual keyboard and contrast checks recorded in §9.11. |
-| NFR-U2 | Registration shall be completable on a handset in a single sitting by a member without assistance. Criterion: task completion rate and time reported in §12.5. |
+| NFR-U2 | Registration shall be completable on a handset in a single sitting by a member without assistance. Criterion: task completion rate and time reported in §12.6. |
 | NFR-U3 | The system shall obtain a System Usability Scale score of at least 68, the published average, from member participants [33]. |
 | NFR-U4 | Every error presented to a user shall state what happened and what to do next, and shall not expose an internal identifier, stack trace or provider message. |
 | NFR-U5 | All member-facing text shall support Bengali content and shall render Bengali script correctly in all clients, including generated documents. |
@@ -330,7 +331,7 @@ system being "intuitive".
 
 Each scenario is stated in the six-part form of Bass, Clements and Kazman: source, stimulus,
 artefact, environment, response, response measure [13]. These are the scenarios carried into the
-utility tree of Figure 3.10 and into the architectural evaluation of §6.12. Ten are given here; the
+utility tree of Figure 3.10 and into the design verification of §6.14. Ten are given here; the
 remainder are in `docs/SRS.md`.
 
 | ID | NFR | Source | Stimulus | Artefact | Environment | Response | Response measure |
@@ -386,7 +387,7 @@ decompose it, and each cites the requirement it serves. Two representative examp
 > a voting member in arrears attempts to vote, then the vote is refused with the reason stated, and
 > when an eligible member votes twice, then the second attempt is refused.
 
-**Definition of done**, applied uniformly and reported against in §11.7: the acceptance criteria pass;
+**Definition of done**, applied uniformly and reported against in §11.10, the record of quality-assurance activities: the acceptance criteria pass;
 automated tests exist at the appropriate level and the whole suite is green; the architecture test of
 NFR-M1 passes; authorisation is asserted for every new endpoint; input validation and, where
 applicable, sanitisation are present; the traceability matrix is updated; user-facing text meets
@@ -446,31 +447,71 @@ These are the rules the software may not violate, listed in Table 3.6. They deri
 constitution at version 4.2 and from the election documents, and each cites its source. Where the wording below abbreviates the
 clause, the clause governs.
 
-| ID | Constraint | Source | Enforced by |
-| --- | --- | --- | --- |
-| DC-01 | The Association's name, crest and motto shall be used only as the constitution prescribes, and the college's institutional identity shall not be represented as the Association's own. | Art. I §5 | FR-46, §7.9 |
-| DC-02 | The Association shall be non-political; no member shall use it for partisan purpose, and a Founding Member holding partisan office is suspended automatically. | Art. I, Art. III, Art. VII | FR-24, §5.6 |
-| DC-03 | Only Founding, Executive and General members may vote. Associate, Honorary and Advisory members may not. | Art. III §B | FR-36, FR-38 |
-| DC-04 | Founding membership requires at least twenty years since higher secondary completion, a bachelor's degree, documented contribution to the Association or the college, no partisan office, and a signed non-political declaration. | Art. III | Administrative, recorded; §5.6 |
-| DC-05 | Executive membership requires at least ten years since completion, existing General membership in good standing, and a meeting-attendance record of at least sixty percent. | Art. III | Administrative, recorded; §5.6 |
-| DC-06 | Every membership tier is assigned by the Association; an applicant may not select a tier, and Honorary membership requires a two-thirds decision of the Executive Committee. | Art. III | FR-01, FR-41 |
-| DC-07 | Membership shall be terminated only by the disciplinary procedure, with notice and a right of appeal exercisable within fifteen working days; false information in an application is ground for immediate termination under that procedure. | Art. III §E, Art. X | FR-24, §3.2 |
-| DC-08 | An application shall be verified within thirty days of submission. | Art. III §E | FR-23 |
-| DC-09 | The Executive Committee comprises fifteen positions, thirteen elected and two ex officio without vote, for a term of three years. | Art. IV | FR-34 |
-| DC-10 | For the first fifteen years, three elected positions, being President, General Secretary and Treasurer, are reserved for Founding Members. | Art. IV | FR-34, FR-38 |
-| DC-11 | The Executive Committee shall meet at least half-yearly, with a quorum of fifty percent of elected members; Advisory members are excluded from the quorum computation. | Art. IV, Art. III | FR-34, §5.6 |
-| DC-12 | Elections for all voting members in good standing shall be held every three years, conducted under the authority of Article V and the election documents. | Art. V | FR-38, FR-39 |
-| DC-13 | An amendment may be proposed by the Executive Committee or by a petition of twenty percent of Voting Members, shall be circulated at least fourteen days before the Annual General Meeting, and requires a two-thirds majority at that meeting. | Art. VIII | FR-35, FR-37 |
-| DC-14 | Financial records shall be maintained and reported to the membership; the Treasurer is accountable for receipts and disbursements. | Art. VI | FR-21, FR-25, FR-44 |
-| DC-15 | The conduct of a ballot, its sealing, counting and the declaration of result rest with the Election Commission under the election documents, and not with the platform. | Art. V, election regulations, ballot sealing certificate, counting authorisation | FR-39, §8.10 |
-| DC-16 | The constitution in force is the latest ratified version by effective date; earlier versions are superseded and retained, not destroyed. | Art. VIII | FR-32, FR-33 |
+Each constraint also carries a class, and the classes matter more than the individual rules. Writing
+the constitution into software forces a question of every clause that reading it never asks: what is
+the software allowed to do with this rule. Answering it sixteen times produced five answers, and they
+are not a spectrum of how much automation is possible but five different kinds of relationship
+between a rule and a program.
 
-DC-04 and DC-05 deserve a note, because they are the clearest boundary of what software can do. The
-system records the evidence, computes what is computable, namely the elapsed years, and presents the
-rest to a human decision. "Documented contribution to the Association" is not a computable
-predicate, and a system that pretended otherwise would be converting a judgement into an
-arithmetic. That distinction, applied consistently, is what §2.7 called the line between eligibility
-as fact and adjudication.
+- **Deterministic.** The rule can be decided from data the system already holds, and deciding it is
+  arithmetic or a lookup. The software enforces it outright, and a human override would be an error
+  rather than a discretion.
+- **State.** The rule is a standing that follows from a history of recorded events. The software
+  computes and displays it, and the computation is only as good as the recording, so the failure mode
+  is a gap in the record rather than a wrong rule.
+- **Evidence.** The rule turns on a judgement about evidence that has no computable predicate.
+  The software collects the evidence, computes whatever part of the rule is computable, and presents
+  the rest to a person. Automating the judgement would convert it into an arithmetic that the
+  constitution never authorised.
+- **Procedural.** The rule is a sequence with notice periods, thresholds and rights attached. The
+  software supports the procedure by tracking its steps and its deadlines, and does not decide its
+  outcome.
+- **Authority.** The rule belongs to a body other than the platform's operator. The software may
+  publish, inform and record around it, and must not perform it, because performing it would move
+  authority to whoever administers the server.
+
+The classification is used again in §12.8 to answer RQ3, where the boundary it draws is the answer
+rather than a preliminary to it. Its value is that the line between what software may do and what it
+must leave alone stops being a matter of the designer's restraint and becomes a property of the rule,
+readable from the constitution before any code is written.
+
+| ID | Constraint | Class | Source | Enforced by |
+| --- | --- | --- | --- | --- |
+| DC-01 | The Association's name, crest and motto shall be used only as the constitution prescribes, and the college's institutional identity shall not be represented as the Association's own. | Deterministic | Art. I §5 | FR-46, §7.9 |
+| DC-02 | The Association shall be non-political; no member shall use it for partisan purpose, and a Founding Member holding partisan office is suspended automatically. | Evidence | Art. I, Art. III, Art. VII | FR-24, §5.6 |
+| DC-03 | Only Founding, Executive and General members may vote. Associate, Honorary and Advisory members may not. | Deterministic | Art. III §B | FR-36, FR-38 |
+| DC-04 | Founding membership requires at least twenty years since higher secondary completion, a bachelor's degree, documented contribution to the Association or the college, no partisan office, and a signed non-political declaration. | Evidence | Art. III | Administrative, recorded; §5.6 |
+| DC-05 | Executive membership requires at least ten years since completion, existing General membership in good standing, and a meeting-attendance record of at least sixty percent. | State | Art. III | Administrative, recorded; §5.6 |
+| DC-06 | Every membership tier is assigned by the Association; an applicant may not select a tier, and Honorary membership requires a two-thirds decision of the Executive Committee. | Procedural | Art. III | FR-01, FR-41 |
+| DC-07 | Membership shall be terminated only by the disciplinary procedure, with notice and a right of appeal exercisable within fifteen working days; false information in an application is ground for immediate termination under that procedure. | Procedural | Art. III §E, Art. X | FR-24, §3.2 |
+| DC-08 | An application shall be verified within thirty days of submission. | State | Art. III §E | FR-23 |
+| DC-09 | The Executive Committee comprises fifteen positions, thirteen elected and two ex officio without vote, for a term of three years. | Deterministic | Art. IV | FR-34 |
+| DC-10 | For the first fifteen years, three elected positions, being President, General Secretary and Treasurer, are reserved for Founding Members. | Deterministic | Art. IV | FR-34, FR-38 |
+| DC-11 | The Executive Committee shall meet at least half-yearly, with a quorum of fifty percent of elected members; Advisory members are excluded from the quorum computation. | State | Art. IV, Art. III | FR-34, §5.6 |
+| DC-12 | Elections for all voting members in good standing shall be held every three years, conducted under the authority of Article V and the election documents. | Authority | Art. V | FR-38, FR-39 |
+| DC-13 | An amendment may be proposed by the Executive Committee or by a petition of twenty percent of Voting Members, shall be circulated at least fourteen days before the Annual General Meeting, and requires a two-thirds majority at that meeting. | Procedural | Art. VIII | FR-35, FR-37 |
+| DC-14 | Financial records shall be maintained and reported to the membership; the Treasurer is accountable for receipts and disbursements. | Deterministic | Art. VI | FR-21, FR-25, FR-44 |
+| DC-15 | The conduct of a ballot, its sealing, counting and the declaration of result rest with the Election Commission under the election documents, and not with the platform. | Authority | Art. V, election regulations, ballot sealing certificate, counting authorisation | FR-39, §8.10 |
+| DC-16 | The constitution in force is the latest ratified version by effective date; earlier versions are superseded and retained, not destroyed. | Deterministic | Art. VIII | FR-32, FR-33 |
+
+DC-04 and DC-05 are the pair that shows why the classification is not a matter of degree. They read
+almost identically, both being lists of qualifying conditions for a membership tier, and they fall on
+opposite sides of the line. Every condition in DC-05 is recorded somewhere: years since completion,
+existing membership, an attendance figure. The system computes it, which makes it State. DC-04
+carries the same computable years and adds "documented contribution to the Association", which is not
+a computable predicate at all, and one such term is enough to make the whole rule Evidence. The
+system records the evidence, computes the elapsed years, and presents the rest to a person. A system
+that scored the contribution would be converting a judgement into an arithmetic, which is the line
+§2.7 drew between eligibility as fact and adjudication.
+
+DC-12 and DC-15 are the only two constraints in the Authority class, and they are the reason the
+platform stops where it does. DC-15 leaves the conduct of a ballot, its sealing, its counting and the
+declaration of the result with the Election Commission. The platform publishes the election documents
+and the timetable, records who is eligible under DC-03, and does nothing else. That is a deliberate
+refusal rather than an unimplemented feature: a system that also counted the votes would make the
+Association's most contested decision depend on the integrity of whoever holds the server
+credentials, which in this deployment is one unpaid volunteer. Section 8.10 states the same boundary
+as a security position, and §12.8 treats it as the substantive answer to RQ3.
 
 DC-16 is the reason no page in this system names a constitution version. The reader always resolves
 the version in force, so a page cannot become stale by pointing at a superseded document, which was
@@ -527,7 +568,7 @@ Defect classes sought were ambiguity, omission, inconsistency, untestability and
 Two sessions were held, on 3 July 2026 and 29 July 2026, each working through the specification
 module by module against the implementation of the day. The record is the findings log kept in the
 repository at `docs/BUSINESS_FINDINGS.md`, supplemented by the consolidation report at
-`docs/PHASE4_FINAL_REVIEW.md`. That log carries eighty-two numbered entries across the two sessions.
+`docs/BACKEND_REVIEW_2026-07-03.md`. That log carries eighty-two numbered entries across the two sessions.
 Thirty-nine of them record a check that passed; the remainder record a defect, a coverage gap or an
 environment blocker, of which twenty-one were still open when the second session closed. Most belong
 to the implementation rather than to the specification, and are reported in that character in
@@ -559,7 +600,7 @@ One finding was recorded and deliberately not resolved. Entry P3-F2 observes tha
 enforce a ten-minute idle timeout while the API enforces none, so a captured token remains valid
 until it expires on its own schedule. The specification never stated an idle-expiry requirement, and
 adding one at this stage would have meant server-side session state that the stateless token design
-of §8.5 was chosen to avoid. It is carried as a known gap rather than closed, and it is the reason
+of §8.3 was chosen to avoid. It is carried as a known gap rather than closed, and it is the reason
 NFR-S5 is worded around credential change rather than around inactivity.
 
 Residual risks carried forward: the participant sample is small and purposive, so the requirement
@@ -1081,7 +1122,7 @@ Given in §3.8, with the count per priority band, the basis on which the band wa
 enumerated Won't set, and the two contested reclassifications recorded with their reasons. The three
 negotiated conflicts and their resolutions are in §3.2.
 
-### Table 3.6 — Domain constraints traced to constitutional article
+### Table 3.6 — Domain constraints, their class and their constitutional article
 
 Given in §3.10, with the sixteen DC entries, each stating the constraint, its source article and
 section, and the requirement or design element by which it is enforced.
