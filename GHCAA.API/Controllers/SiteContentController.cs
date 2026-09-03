@@ -3,6 +3,7 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
@@ -19,6 +20,7 @@ namespace GHCAA.API.Controllers
         }
 
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
         [HttpGet]
         public async Task<IActionResult> GetByGroup([FromQuery] string group = "about", CancellationToken cancellationToken = default)
         {

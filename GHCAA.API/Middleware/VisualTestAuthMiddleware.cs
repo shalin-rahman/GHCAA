@@ -6,11 +6,8 @@ using GHCAA.Application.Security;
 
 namespace GHCAA.API.Middleware
 {
-    // TODO [CRITICAL]: This middleware is registered unconditionally in Program.cs regardless of environment.
-    // Anyone who knows "visual_test_token" / "visual_admin_token" / "visual_superadmin_token" gains full
-    // admin access on any deployment. Wrap Program.cs registration in:
-    //   if (env.IsDevelopment() && Configuration["ASP_SEED_PROFILE"] == "Visual")
-    // Also reject any "Bearer visual_*" token outside the Visual profile to prevent accidental exposure.
+    // Registered only when IsDevelopment() && ASP_SEED_PROFILE == "Visual" (Program.cs, near
+    // UseAuthentication) — never reachable in a real deployment.
     /// <summary>Backdoor for Playwright visual tests: authenticates requests carrying a 'visual_*_token'.</summary>
     public class VisualTestAuthMiddleware
     {

@@ -36,9 +36,7 @@ export class Health {
 
   checkHealth() {
     this.loading.set(true);
-    // Directly calling the backend healtz endpoint
-    const url = '/healtz';
-    this.http.get<any>(url).subscribe({
+    this.http.get<any>(API_ENDPOINTS.HEALTH).subscribe({
       next: (res) => {
         this.status.set(res.Status);
         this.timestamp.set(new Date(res.Timestamp));

@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using System.Security.Claims;
 using GHCAA.Application.Security;
+using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
 {
@@ -26,6 +28,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("ec/current")]
         [HttpGet("current")]
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicReference)]
         public async Task<IActionResult> GetCurrentEC(CancellationToken cancellationToken)
         {
             var period = await _governanceService.GetActivePeriodAsync(cancellationToken);
@@ -37,6 +40,7 @@ namespace GHCAA.API.Controllers
 
         [HttpGet("ec/history")]
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicReference)]
         public async Task<IActionResult> GetECHistory(CancellationToken cancellationToken)
         {
             var periods = await _governanceService.GetAllPeriodsAsync(cancellationToken);
@@ -45,6 +49,7 @@ namespace GHCAA.API.Controllers
 
         [HttpGet("constitution")]
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicReference)]
         public async Task<IActionResult> GetCurrentConstitution(CancellationToken cancellationToken)
         {
             var constitution = await _governanceService.GetActiveConstitutionAsync(cancellationToken);
@@ -53,6 +58,7 @@ namespace GHCAA.API.Controllers
 
         [HttpGet("constitution/history")]
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicReference)]
         public async Task<IActionResult> GetConstitutionHistory(CancellationToken cancellationToken)
         {
             var history = await _governanceService.GetConstitutionHistoryAsync(cancellationToken);

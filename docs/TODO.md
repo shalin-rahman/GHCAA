@@ -3255,6 +3255,13 @@ from the profile, not from code (see plan 8.6).
 62.7 [TODO] **Priority: P2 | Depends on: 62.6.** Domain: move `Constants.Defaults.MembershipPrefix`
 (`"GHC-"`) and `ImportEmailBase` (`"haragangian"`) to config. NEW numbers only. No backfill or
 reformat of already-issued `MembershipNumber` values (plan 8.2).
+Audit scope (2026-09-03, `GHCAA.Domain/Constants.cs`): these two fields are the only
+organisation-identity literals in the file — the ones a second institution couldn't reuse without
+editing code. Everything else there is generic across institutions and stays a compiled constant:
+`Roles`, `Policies` (auth policy names), `ConfigKeys` (`IConfiguration` key paths), `TemplateCodes`
+(email-template lookup codes), and the rest of `Defaults` (file-size caps, image-compression
+quality/size targets, `UnknownValue`/`ImportPrefix` fallback labels). No further extraction is
+needed from this file beyond these two.
 
 62.8 [TODO] **Priority: P2 | Depends on: 62.6.** Infra: `IDCardService` (QuestPDF) takes
 `IOrgConfigService`. Removes the three hardcoded institution strings (lines ~73, ~141, ~197) and the
@@ -4903,3 +4910,173 @@ framework scaffolding and prior reuse have no meaning for a stdlib-only script.
 
 Effect on the figures: still to do 73 days to 69, at completion 351 days to 347. The system size is
 unchanged at 105,618 lines and 703 nominal days, which is the point of reporting the scripts apart.
+
+---
+
+# Work Package 80 — Output-cache cross-user leak, and what a caching/architecture sweep found
+
+<!-- wbs: component=C2 start=2026-09-03 end=2026-09-03 after=44 -->
+
+Origin: user instruction, 2026-09-03/04, asking whether caching exists anywhere, whether it's needed
+for performance, and for an implementation plan if so — plus a look at cookies/sessions and any
+broken or half-wired flows while at it. Four parallel audits covered: existing caching, hot read
+paths, cookies/tokens/headers, and broken flows. Every finding below was checked against the actual
+code or a throwaway repro before being written down; three claims from the audits did not survive
+that check and are recorded as verified-non-issues so nobody re-raises them.
+
+80.1 [DONE 2026-09-03] **Priority: P0.** Fixed a real cross-member data leak. `GHCAA.API/Program.cs`
+registered Output Cache with `AddBasePolicy(b => b.Cache())` — every GET/HEAD 200 response cached by
+URL alone, and Output Cache does not vary by Cookie or Authorization unless told to. Reproduced
+against a throwaway ASP.NET Core 9 app: two requests to the same URL carrying two different
+members' `access_token` cookies got back the identical cached body. Any authenticated fixed-URL
+route (`/api/me/profile`, `/api/financials/my-dues`, `/api/events/my-registrations`, every other
+"me"-shaped route) was one cache hit away from serving one member's response to the next member who
+hit the same URL inside the cache window.
+
+Fix: base policy is now `NoCache`; nothing is cached unless a controller action opts in with
+`[OutputCache(PolicyName = ...)]`, and that's only done on `[AllowAnonymous]` actions that return the
+same body to every caller. Two named policies replace the old single `"StaticData"` one (which was
+registered but never actually applied to any endpoint): `PublicReference` (2 min — lookups,
+governance/EC/constitution) and `PublicContent` (30 s — news, events, gallery, jobs, site content).
+Policy names live in `GHCAA.Domain.Constants.OutputCachePolicies`, not as literals at each call site.
+`OrgConfigController` and `ThemeController` were deliberately left undecorated — both already have
+their own `IMemoryCache` layer (10 min / 5 min TTL) with correct invalidation on write, so an output-
+cache attribute would add a second, looser-invalidated cache on top for no real gain.
+
+Tests: `GHCAA.Tests/Integration/OutputCacheTestFactory.cs` (a `WebApplicationFactory<Program>` in the
+Development environment so `VisualTestAuthMiddleware` is active, letting a request authenticate as a
+known Visual-seed member via a `Bearer visual_*_token` header with no real login round trip) and
+`GHCAA.Tests/Integration/OutputCacheSecurityTests.cs`, three tests: an authenticated fixed-URL
+endpoint reflects a database write made between two calls (proves it isn't cached); the same
+endpoint at the same URL never mixes two different members' data; a `PublicReference`-decorated
+endpoint does serve a stale copy within its window (proves the opt-in policy is actually wired, not
+just present). Full `GHCAA.Tests` suite re-run green after the change (2026-09-03).
+
+80.2 [TODO] **Priority: P1.** Real routing bug, unrelated to caching, found while auditing broken
+flows: `FamilyController.cs` (`[Route("api/[controller]")]` → `api/Family`) declares `[HttpGet
+("links")]` and `[HttpGet("search")]`, and `FamilyLinkController.cs` separately declares the absolute
+routes `[HttpGet("/api/Family/links")]` and `[HttpGet("/api/Family/search")]` as "web parity aliases".
+Two controllers register the identical route template and HTTP verb — `AmbiguousMatchException` at
+request time for both paths, not a compile-time error. Resolve by deleting the aliases from
+`FamilyLinkController` (the intended owner per its own name) or merging the two controllers; confirm
+which callers actually use `/api/Family/links` vs `/api/family-links` first.
+
+80.3 [TODO] **Priority: P2.** `GHCAA.API/Program.cs`'s rate limiter defines an `"api"` policy (100/min)
+that is never applied anywhere — no `[EnableRateLimiting("api")]`, no global limiter. Only
+`AuthController` and `RegistrationController` are rate-limited; every other endpoint, including the
+now-cached public reads, has no request-rate ceiling. Apply the `"api"` policy globally (a
+`RequireRateLimiting` on `MapControllers()`, overridden per-controller where a tighter policy already
+applies) rather than leaving it as dead configuration.
+
+80.4 [TODO] **Priority: P2.** Three client calls that 404 against the real API surface, found by
+diffing Angular/Flutter call sites against controller routes: `GHCAA.Mobile/lib/features/auth/
+auth_service.dart:170` posts `/api/auth/forgot-password` (no such route — only `reset-password`
+exists), `.../support/support_service.dart:45,55` calls `/api/familylink` (the controller is routed
+`api/family-links`), and `.../networking/networking_service.dart:81` calls `PUT /api/profile/update`
+(`ProfileController` has no `update` segment). Each is a dead feature on mobile today. Fix the client
+call or add the missing route, whichever matches what the screen is supposed to do.
+
+80.5 [TODO] **Priority: P3.** Swallowed exceptions that turn a real failure into silence:
+`HealthController.cs:61`'s `catch { }` discards the exception and reports a generic "Error" for every
+storage failure; `LoginRateLimitMiddleware.cs:27`'s `catch { }` silently falls back to IP-only rate
+limiting on a malformed body; `Program.cs`'s seeding blocks (~395, ~400, ~435) downgrade a seed
+failure to `LogWarning` and continue booting with partially-seeded data. None of these need to stay
+silent; at minimum, log the exception before continuing.
+
+80.6 [TODO] **Priority: P3.** Six Angular components subscribe to `ActivatedRoute` observables
+(`queryParams`/`queryParamMap`/`paramMap`/`url`) that never complete, without `takeUntilDestroyed` or
+manual unsubscribe: `admin/comm/admin-comm.ts:89`, `member/messages/messages.ts:59`, `common/news/
+news.ts:58`, `common/payment-status/payment-status.ts:93,97`, `member/forum/topic-detail.ts:48`,
+`public/elections/elections.ts:141`. Each re-navigation to these routes adds another live handler.
+Also uncleaned: `core/services/auth.service.ts:109`'s `inactivityTimer` and `common/directory/
+directory.ts:122`'s `searchDebounce`, neither cleared in `ngOnDestroy`.
+
+80.7 [TODO] **Priority: P3.** `MeController` (`api/me`, 5 endpoints) and `ProfileController` overlap:
+`id-card`/`id-card/pdf`/`certificate`/`certificate/pdf` exist on both, and no client calls
+`MeController` at all. Pick one owner and delete the other; low urgency since the dead one costs
+nothing at runtime, just maintenance confusion.
+
+Verified non-issues, recorded so a future sweep doesn't re-flag them: the payment-gateway DI
+registration (`AddHttpClient<T>()` does register a bare `HttpClient`, confirmed with a standalone DI
+container test — no `InvalidOperationException` at resolution); `ThemeService`'s own `IMemoryCache`
+(it already calls `_cache.Remove(CacheKey)` on create/update/delete); `AuthController.RefreshMobile`
+missing an `IsActive`/`IsArchived` recheck (it has the identical guard as the cookie-based `Refresh`
+action, `AuthController.cs:122`); `Program.cs`'s seed-ordering hazard at the old line 438 (fixed and
+closed as 44.18); and `app.constants.ts:284`'s `getMembershipTypeLabel` comment (it documents a
+Work Package 35 bug already fixed — the comment is a warning against regressing it, not a live one).
+
+80.8 [DONE 2026-09-04] **Priority: P3.** Three stale comments that describe a problem already fixed a
+few lines below them, found and cleaned in the same pass as 80.1–80.7: `AuthService.cs:39-44`'s "TODO
+[CRITICAL]: No brute-force / lockout protection" and "TODO [HIGH]: Username enumeration via timing" —
+both S5.1/S5.2 are implemented in the body of the same method (`LockoutUntil` check, dummy
+`BCrypt.Verify` on user-not-found); and `VisualTestAuthMiddleware.cs:9-13`'s "TODO [CRITICAL]:
+registered unconditionally" — `Program.cs` has guarded it with `IsDevelopment() && ASP_SEED_PROFILE
+== "Visual"` since 2026-08-29. All three replaced with a one-line factual note. No behaviour change.
+
+80.9 [DONE 2026-09-04] **Priority: P2.** Real dead health-check page, found in the same sweep:
+`common/health/health.ts` called `this.http.get('/healtz')` (missing an 'h') against a same-origin
+SPA, so the request fell through Output Cache's `MapFallback` and returned the SPA shell instead of
+the real `/healthz` JSON — the health widget always showed whatever garbage came back from parsing
+HTML as JSON. Fixed: the Angular route (`app.routes.ts`) and the HTTP call both renamed to
+`healthz`, and the URL is now `API_ENDPOINTS.HEALTH` instead of a literal. Also removed
+`API_ENDPOINTS.ORG` (`'/api/org'`, zero references anywhere in the app, and wrong — no controller
+serves that route; `CONFIG` already covers `OrgConfigController`) and fixed
+`admin-dashboard.html:191`'s dead `routerLink="/admin/governance"` to the real route,
+`/admin/members/ec` (matches `nav.service.ts`'s own correct link to the same screen). `tsc --noEmit`
+and `dotnet build` both clean after all three fixes.
+
+80.10 [TODO] **Priority: P1.** `NagadGateway.cs:28-47` is a complete stub — `InitiatePaymentAsync`
+always returns `Success=false` ("coming soon"), yet it is registered as a live
+`IPaymentGatewayService` (`DependencyInjection.cs:87`) and selectable in the admin payment-config
+dropdown per 29G.3's note ("SSLCommerz/BkashGateway/NagadGateway all have registered
+implementations — not dead"). That note is about DI registration, not functional completeness — a
+member who selects Nagad hits a silent "coming soon" failure today. Either finish the Nagad
+integration or hide it from the selectable-method dropdown until it's real; don't leave a gateway
+option in the UI that cannot take a payment.
+
+80.11 [TODO] **Priority: P2.** `GatewaysController.cs`'s webhook path is not centrally wired: the
+`IPaymentGatewayService.ProcessWebhookAsync` contract returns only `bool`, so `HandleSuccessfulPayment`
+(the shared amount-verification gate from 29B.2) is never reachable from a webhook — each gateway
+mutates payment state itself instead. `DGePayGateway.cs:168-173`'s `ProcessWebhookAsync` always
+returns `false` for this reason ("For now, we'll focus on the callback redirect flow"), so DGePay
+webhooks always resolve to a failed-looking response even on a real successful payment. Change the
+contract to return enough data (transaction id, confirmed amount) for `HandleSuccessfulPayment` to
+run on every gateway's webhook path, not just the redirect-callback path. (First flagged as an inline
+TODO in 61.4; this is the numbered item for the underlying fix.)
+
+80.12 [TODO] **Priority: P3.** Reflection-based DI auto-registration in `DependencyInjection.cs:61-71`
+(`AddScoped(iface, type)` for every class under a `*.Services` namespace implementing an
+`Application.Interfaces` type) makes a duplicate implementation silently last-wins with no compiler
+or runtime warning, and the registration set isn't visible at any call site. `GreenwebSmsService` is
+already registered twice this way — once by the reflection loop, once by the explicit
+`AddHttpClient<ISmsService, GreenwebSmsService>()` a few lines below. Not a live bug (the two
+registrations happen to agree), but one typo away from a hard-to-diagnose wrong-implementation bug.
+Replace with explicit registrations, or at minimum assert exactly one implementation per interface
+at startup.
+
+80.13 [TODO] **Priority: P3.** Clean Architecture layer boundary crossed in 8 controllers that inject
+`ApplicationDbContext` directly instead of going through an Application-layer service:
+`AdminSocialAuthController`, `AuthController`, `FinancialsController`, `GatewaysController`,
+`GovernanceController`, `HealthController`, `PaymentConfigController`, `SecureFilesController`.
+`FinancialsController`, `GovernanceController` and `GatewaysController` inject *both* the domain
+service and the raw context, so a given resource's write path is split across two layers with no
+single owner. `GHCAA.API.csproj` also carries a direct `PackageReference` on
+`Microsoft.EntityFrameworkCore`/`.Relational`/`.Design`/`Pomelo.EntityFrameworkCore.MySql` on top of
+the `GHCAA.Infrastructure` project reference. Lower priority: this is an architecture-cleanliness
+debt (`GHCAA.Domain` and `GHCAA.Application` are still clean of it), not a functional defect, and
+untangling 8 controllers' write paths needs its own change, not a drive-by fix.
+
+80.14 [TODO] **Priority: P3.** Dead/duplicate HTTP surface not covered by 80.4 or 80.7: `SecureFilesController`
+has zero call sites from either client (only an unused `SECURE_FILES` constant references it in
+`app.constants.ts`); `FinancialLedgerController`'s second route attribute, `api/financial/ledger`, has
+no caller (only `api/ledger` is used); `FamilyLinkController.cs:33,96` binds `POST`/`GET` to the
+absolute route `/api/members/family` as a "legacy alias for mobile", which overlaps
+`FamilyController`'s own `api/Family` routes in the same way the `links`/`search` aliases do (80.2) —
+resolve both alias sets in the same change once it's clear which controller mobile and web actually
+depend on.
+
+80.15 [TODO] **Priority: P4.** Two long-lived Angular subscriptions outside the six route-param ones
+already covered by 80.6: `core/services/auth.service.ts:109`'s `inactivityTimer` and
+`common/directory/directory.ts:122`'s `searchDebounce`, neither cleared in `ngOnDestroy`. Lowest
+priority here — both are timers on components that in practice live for the session/page lifetime,
+not ones that accumulate across repeated navigation the way the route-param subscriptions in 80.6 do.

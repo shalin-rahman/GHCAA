@@ -20,6 +20,16 @@ namespace GHCAA.Domain
             public const string MemberOnly = "MemberOnly";
         }
 
+        // Output Cache policy names (registered once in Program.cs's AddOutputCache), referenced
+        // from every [OutputCache(PolicyName = ...)] attribute. Only [AllowAnonymous] endpoints
+        // that return the same body to every caller may use one — see the comment above
+        // AddOutputCache in Program.cs for why an authenticated route must never opt in.
+        public static class OutputCachePolicies
+        {
+            public const string PublicReference = "PublicReference";
+            public const string PublicContent = "PublicContent";
+        }
+
         public static class ConfigKeys
         {
             public const string MaxFileSizeBytes = "FileStorage:MaxFileSizeBytes";

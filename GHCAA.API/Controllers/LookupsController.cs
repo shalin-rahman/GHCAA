@@ -6,6 +6,7 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
@@ -24,6 +25,7 @@ namespace GHCAA.API.Controllers
         }
 
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicReference)]
         [HttpGet("stats")]
         public async Task<IActionResult> GetPublicStats(CancellationToken cancellationToken)
         {
@@ -32,6 +34,7 @@ namespace GHCAA.API.Controllers
         }
 
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicReference)]
         [HttpGet]
         public async Task<IActionResult> GetAllLookups(CancellationToken cancellationToken)
         {
@@ -40,6 +43,7 @@ namespace GHCAA.API.Controllers
         }
 
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicReference)]
         [HttpGet("{group}")]
         public async Task<IActionResult> GetByGroup(string group, CancellationToken cancellationToken)
         {

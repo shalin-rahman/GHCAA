@@ -527,7 +527,7 @@ export const API_ENDPOINTS = {
         BASE: '/api/polls',
         ACTIVE: '/api/polls/active'
     },
-    ORG: '/api/org',
     CONFIG: '/api/config',
-    FORUM: '/api/forum'
+    FORUM: '/api/forum',
+    HEALTH: '/healthz'
 } as const;

@@ -51,11 +51,30 @@ builder.Services.AddResponseCompression(options =>
 });
 
 // 3. Configure Output Caching (.NET 8+)
+//
+// Output Cache keys a response by URL alone — it does not vary by Cookie or Authorization
+// unless a policy says to. The old base policy, builder.Cache(), cached every GET/HEAD 200
+// by default, so an authenticated fixed-URL route (/api/financials/my-dues, /api/me/profile,
+// any "me"-shaped route) would serve one member's cached response to the next member who
+// hit the same URL inside the cache window, cookie or bearer token notwithstanding.
+//
+// Base policy is now NoCache. A controller action opts back in with
+// [OutputCache(PolicyName = ...)] only when it's [AllowAnonymous] and returns the same body
+// to every caller — see docs/TODO.md Work Package 80 for the endpoint-by-endpoint audit.
 builder.Services.AddOutputCache(options =>
 {
-    options.AddBasePolicy(builder => builder.Cache());
-    options.AddPolicy("StaticData", builder =>
-        builder.Expire(TimeSpan.FromMinutes(5)).SetVaryByQuery("*"));
+    options.AddBasePolicy(build => build.NoCache());
+
+    // Reference data that changes rarely (lookups, governance/EC/constitution):
+    // safe to hold for 2 minutes.
+    options.AddPolicy(GHCAA.Domain.Constants.OutputCachePolicies.PublicReference, build =>
+        build.Expire(TimeSpan.FromMinutes(2)).SetVaryByQuery("*"));
+
+    // Content that admins edit more often (news, events, gallery, jobs, site content):
+    // a shorter window keeps an edit visible sooner without giving up the cache hit on
+    // the landing-page traffic that reads it.
+    options.AddPolicy(GHCAA.Domain.Constants.OutputCachePolicies.PublicContent, build =>
+        build.Expire(TimeSpan.FromSeconds(30)).SetVaryByQuery("*"));
 });
 
 // Configure JWT Authentication

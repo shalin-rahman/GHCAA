@@ -6,6 +6,7 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using GHCAA.Domain;
 using GHCAA.Application.Security;
 
@@ -27,6 +28,7 @@ namespace GHCAA.API.Controllers
         // --- PUBLIC / MEMBER ENDPOINTS ---
 
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
         [HttpGet]
         public async Task<IActionResult> GetActiveEvents(CancellationToken cancellationToken)
         {
@@ -36,6 +38,7 @@ namespace GHCAA.API.Controllers
 
         [HttpGet("{id}/participants")]
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
         public async Task<IActionResult> GetPublicParticipants(int id, CancellationToken cancellationToken)
         {
             var participants = await _eventService.GetPublicParticipantsAsync(id, cancellationToken);
@@ -43,6 +46,7 @@ namespace GHCAA.API.Controllers
         }
 
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetEventById(int id, CancellationToken cancellationToken)
         {

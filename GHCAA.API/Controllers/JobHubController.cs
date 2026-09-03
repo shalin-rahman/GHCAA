@@ -3,6 +3,7 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
@@ -21,6 +22,7 @@ namespace GHCAA.API.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
         public async Task<IActionResult> GetActiveJobs([FromQuery] Enums.JobCategory? jobCategory, [FromQuery] string? query, CancellationToken cancellationToken)
         {
             var jobs = await _jobService.GetActiveJobsAsync(jobCategory, query, cancellationToken);
@@ -59,6 +61,7 @@ namespace GHCAA.API.Controllers
 
         [HttpGet("{id}")]
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
         public async Task<IActionResult> GetJob(int id, CancellationToken cancellationToken)
         {
             var job = await _jobService.GetJobByIdAsync(id, cancellationToken);

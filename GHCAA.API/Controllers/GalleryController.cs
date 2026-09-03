@@ -8,6 +8,7 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using GHCAA.Domain;
 using GHCAA.Application.Security;
 
@@ -52,6 +53,7 @@ namespace GHCAA.API.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
         public async Task<IActionResult> GetGalleries(CancellationToken cancellationToken)
         {
             // Public viewing shows only active galleries
@@ -94,6 +96,7 @@ namespace GHCAA.API.Controllers
 
         [HttpGet("{id}")]
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
         public async Task<IActionResult> GetGallery(int id, CancellationToken cancellationToken)
         {
             var gallery = await _galleryService.GetGalleryByIdAsync(id, cancellationToken);

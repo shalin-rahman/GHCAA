@@ -7,6 +7,7 @@ using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using System.Security.Claims;
 using System.IO;
 using System;
@@ -29,6 +30,7 @@ namespace GHCAA.API.Controllers
         }
 
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
         [HttpGet]
         public async Task<IActionResult> GetActiveNews([FromQuery] Enums.ArticleCategory? articleCategory, [FromQuery] Enums.PostType? postType, CancellationToken cancellationToken)
         {
@@ -37,6 +39,7 @@ namespace GHCAA.API.Controllers
         }
 
         [AllowAnonymous]
+        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetNewsById(int id, CancellationToken cancellationToken)
         {

@@ -36,12 +36,8 @@ namespace GHCAA.Infrastructure.Services
             _httpClientFactory = httpClientFactory;
         }
 
-        // TODO [CRITICAL]: No brute-force / lockout protection. An attacker can make unlimited login
-        // attempts against any discoverable username. Add FailedLoginAttempts + LockoutUntil to User,
-        // increment on each failure, lock for 15 min after 5 failures, and return uniform 401 always.
-        // TODO [HIGH]: Username enumeration via timing. BCrypt.Verify only runs when the user EXISTS —
-        // a measurably shorter response for "user not found" reveals valid usernames. Always run a
-        // dummy BCrypt.Verify against a static hash when the user is not found to normalize timing.
+        // Brute-force lockout (S5.1) and timing-enumeration equalization (S5.2) are both handled
+        // inline below, not here.
         public async Task<TokenResponseDto?> LoginAsync(LoginDto loginDto, CancellationToken cancellationToken = default)
         {
             // Trim whitespace and remove internal spaces for identifiers like NID/Username

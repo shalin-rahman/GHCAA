@@ -99,7 +99,7 @@ export const routes: Routes = [
                 ]
             },
             {
-                path: 'healtz',
+                path: 'healthz',
                 loadComponent: () => import('./common/health/health').then(m => m.Health)
             }
         ]
