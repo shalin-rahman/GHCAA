@@ -39,7 +39,8 @@ PORTRAIT_H = 255 * MM          # 297 - 20 - 22
 LANDSCAPE_W = 257 * MM         # 297 - 20 - 20
 LANDSCAPE_H = 174 * MM         # 210 - 18 - 18
 
-# Under a fifth of a millimetre; below this a difference is rounding, not overflow.
+# Half a millimetre at 96 dpi. Below this a difference is layout rounding rather
+# than overflow, and chasing it produces false failures on every reflow.
 SLACK = 2.0
 
 BROWSER_ENV = "BOOK_BROWSER"
@@ -131,6 +132,9 @@ def _base_args(profile):
         "--run-all-compositor-stages-before-draw",
         "--virtual-time-budget=60000",       # Mermaid needs the CDN fetch plus layout
     ]
+    # The last two are for one-shot runs only. devtools.Browser omits them and
+    # waits on document.body.dataset.diagrams instead, because a virtual-time
+    # budget on a long-lived session ends the page target under the client.
 
 
 def _run(browser, args, timeout):

@@ -115,13 +115,14 @@ LABEL_ROW = re.compile(r"^\|\s*(\d+\.\d+)\s*\|\s*([^|]+?)\s*\|")
 def anchors_from_front(front_text):
     """What to look for in the PDF, per row of the three front-matter tables.
 
-    Returns a list of (row text, anchor) pairs. The anchor for a contents row
+    Returns a list of (line index, row text, anchor) triples. The anchor for a
+    contents row
     is the heading itself; for a figure or table row it is the caption label,
     which is the shortest string unique to the page the artefact sits on.
     """
     pairs = []
     section = None
-    for line in front_text.splitlines():
+    for index, line in enumerate(front_text.splitlines()):
         stripped = line.strip()
         if stripped.startswith("## "):
             lowered = stripped.lower()
@@ -139,11 +140,11 @@ def anchors_from_front(front_text):
         if section == "contents":
             chapter = CHAPTER_ROW.match(stripped)
             if chapter:
-                pairs.append((line, chapter.group(1)))
+                pairs.append((index, line, chapter.group(1)))
                 continue
             heading = SECTION_ROW.match(stripped)
             if heading:
-                pairs.append((line, "%s %s" % (heading.group(1), heading.group(2))))
+                pairs.append((index, line, "%s %s" % (heading.group(1), heading.group(2))))
             continue
         row = LABEL_ROW.match(stripped)
         if row:
@@ -152,7 +153,7 @@ def anchors_from_front(front_text):
             # before the table itself. Anchor on the label plus the opening of
             # the caption, which only the artefact carries.
             label = ("Fig. %s." % row.group(1)) if section == "figures" else ("Table %s" % row.group(1))
-            pairs.append((line, "%s %s" % (label, _caption_head(row.group(2)))))
+            pairs.append((index, line, "%s %s" % (label, _caption_head(row.group(2)))))
     return pairs
 
 
@@ -162,6 +163,9 @@ TRAILING_CELL = re.compile(r"\|\s*\d*\s*\|\s*$")
 def write_pages(front_path, numbers):
     """Put a page number in the last cell of each row we found a page for.
 
+    Keyed by line index, not by row text: two byte-identical rows in the front
+    matter would otherwise collapse to one entry and both take the same page.
+
     The cell is overwritten whether it is empty or already holds a number: the
     page a figure sits on moves whenever the text above it changes, so a run
     that only filled blanks would leave yesterday's folios in place.
@@ -169,7 +173,7 @@ def write_pages(front_path, numbers):
     lines = io.open(front_path, encoding="utf-8").read().splitlines(True)
     filled = 0
     for index, line in enumerate(lines):
-        page = numbers.get(line.rstrip("\n"))
+        page = numbers.get(index)
         if not page:
             continue
         stripped = line.rstrip("\n").rstrip()
@@ -178,7 +182,8 @@ def write_pages(front_path, numbers):
         lines[index] = TRAILING_CELL.sub("| %d |" % page, stripped) + "\n"
         filled += 1
     if filled:
-        io.open(front_path, "w", encoding="utf-8").write("".join(lines))
+        with io.open(front_path, "w", encoding="utf-8", newline="") as fh:
+            fh.write("".join(lines))
     return filled
 
 
@@ -192,10 +197,10 @@ def fill(front_path, pdf_path, read=None):
         return 0, 0
     start = body_start(pages)
     pairs = anchors_from_front(io.open(front_path, encoding="utf-8").read())
-    located = locate(pages, [anchor for _row, anchor in pairs], start_page=start)
+    located = locate(pages, [anchor for _i, _row, anchor in pairs], start_page=start)
     numbers = {}
-    for row, anchor in pairs:
+    for index, _row, anchor in pairs:
         page = located.get(anchor)
         if page:
-            numbers[row.rstrip("\n")] = page
+            numbers[index] = page
     return write_pages(front_path, numbers), len(pairs)

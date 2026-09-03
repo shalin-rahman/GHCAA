@@ -132,6 +132,7 @@ Core; Angular; Flutter.
 
 
 
+
 Section numbers are as printed in the body. Page numbers are the folios the PDF carries; a rebuild renumbers them, so they are filled in from the printed copy rather than kept by hand.
 
 | Part, chapter and section | Page |
@@ -286,13 +287,14 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 11.2 Work Breakdown Structure | 95 |
 | 11.3 Scheduling, Task Network and Critical Path | 95 |
 | 11.4 Effort Estimation | 95 |
-| 11.5 Progress Tracking and Earned Value | 95 |
-| 11.6 Team Structure and Responsibilities | 96 |
-| 11.7 Configuration and Change Management in Practice | 96 |
-| 11.8 Risk Monitoring Record | 96 |
-| 11.9 Quality Assurance Activities Performed | 96 |
-| 11.10 Lessons in Project Management | 96 |
-| 11.11 Summary | 96 |
+| 11.5 How the Implementation Time Was Optimised | 95 |
+| 11.6 Progress Tracking and Earned Value | 96 |
+| 11.7 Team Structure and Responsibilities | 96 |
+| 11.8 Configuration and Change Management in Practice | 96 |
+| 11.9 Risk Monitoring Record | 96 |
+| 11.10 Quality Assurance Activities Performed | 96 |
+| 11.11 Lessons in Project Management | 96 |
+| 11.12 Summary | 96 |
 | **PART IV — EVALUATION AND CLOSURE** | 97 |
 | **Chapter 12 — Results, Evaluation and Discussion** | 98 |
 | 12.1 Overview of the Delivered Artefact | 98 |

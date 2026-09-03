@@ -21,6 +21,7 @@ import html
 import io
 import os
 import re
+import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -107,8 +108,15 @@ def inline(text):
     )
     text = _BOLD.sub(lambda m: "<strong>%s</strong>" % m.group(1), text)
     text = _EM.sub(lambda m: "<em>%s</em>" % m.group(1), text)
-    for i, markup in enumerate(holds):
-        text = text.replace("\x00%d\x00" % i, markup)
+    # A held span can sit inside a later one (a code span inside a link
+    # label), so one pass leaves a placeholder buried in the markup it was
+    # substituted into. Repeat until none is left.
+    while "\x00" in text:
+        before = text
+        for i, markup in enumerate(holds):
+            text = text.replace("\x00%d\x00" % i, markup)
+        if text == before:
+            break
     return text
 
 
@@ -518,7 +526,12 @@ if (location.search.includes("audit")) {
       const scale = parseFloat(svg.dataset.scale || 1);
       item.scale = scale;
       item.width = vbw * scale;
-      item.height = vbh * scale + (cap ? cap.getBoundingClientRect().height : 0);
+      // The caption is not the only thing sharing the figure with the drawing:
+      // a lead-in note does too, and a figure that measures as fitting without
+      // it will still overflow.
+      const note = fig.querySelector(".note");
+      item.height = vbh * scale + (cap ? cap.getBoundingClientRect().height : 0)
+                    + (note ? note.getBoundingClientRect().height : 0);
       item.pt = +(BASE_PT * scale).toFixed(2);
       item.aspect = vbw && vbh ? +(vbw / vbh).toFixed(2) : null;
       item.nodes = svg.querySelectorAll("g.node, g.classGroup, g.entityBox, .actor, g.stateGroup").length;
@@ -691,7 +704,8 @@ def main(argv=None):
                 failures += len(problems)
                 if not args.no_folios:
                     failures += _fill_folios(args.output, pdf_path, args.two_column)
-        except (printer.BrowserMissing, RuntimeError) as exc:
+        except (printer.BrowserMissing, RuntimeError, OSError,
+                subprocess.TimeoutExpired) as exc:
             print("  pdf       : not produced — %s" % exc)
             failures += 1
 
@@ -737,9 +751,9 @@ def _fill_folios(html_path, pdf_path, two_column):
     pages = read(pdf_path)
     start = folios.body_start(pages)
     pairs = folios.anchors_from_front(io.open(front, encoding="utf-8").read())
-    again = folios.locate(pages, [a for _row, a in pairs], start_page=start)
+    again = folios.locate(pages, [a for _i, _row, a in pairs], start_page=start)
     stated = {}
-    for row, anchor in pairs:
+    for _index, row, anchor in pairs:
         match = re.search(r"\|\s*(\d+)\s*\|\s*$", row.rstrip())
         if match:
             stated[anchor] = int(match.group(1))

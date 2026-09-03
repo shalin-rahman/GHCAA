@@ -269,7 +269,8 @@ def main(argv=None):
             original = io.open(path, encoding="utf-8").read()
             text = rewrite(original, mapping)
             if text != original:
-                io.open(path, "w", encoding="utf-8").write(text)
+                with io.open(path, "w", encoding="utf-8", newline="") as fh:
+                    fh.write(text)
                 print("  rewrote %s" % os.path.basename(path))
 
     # Rebuild the lists from the captions as they now stand.
@@ -279,7 +280,8 @@ def main(argv=None):
     updated = replace_list_sections(front, build_lists(ordered, figures, tables))
     updated = replace_contents(updated, build_contents(paths, headings))
     if updated != front:
-        io.open(FRONT, "w", encoding="utf-8").write(updated)
+        with io.open(FRONT, "w", encoding="utf-8", newline="") as fh:
+            fh.write(updated)
         print("  rebuilt the contents, List of Figures and List of Tables in %s"
               % os.path.basename(FRONT))
     return 0

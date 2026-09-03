@@ -38,31 +38,51 @@
 
 *[Not written. Brief: 97 days, about 4.4 person-months across all four streams, against the function-point model's prediction at the standard productivity factor. The model over-predicts by roughly two orders of magnitude, and the reasons are stated: framework scaffolding, no coordination overhead, no separate quality-assurance or project-management roles, and generated code counted as delivered function. The productivity factor assumes a team; there is no team]*
 
-## 11.5 Progress Tracking and Earned Value
+## 11.5 How the Implementation Time Was Optimised
+
+*[Not written. Brief: the section that answers the question a reader forms as soon as the scale is stated: one unpaid maintainer, seven months, and a system with 276 endpoints, 49 entities, two clients and 898 automated tests. The answer is not that the work was small. Four things compounded — what the framework generated, what the project reused, what earlier projects supplied, and what tooling drafted — and this section prices each instead of asserting it]*
+
+### 11.5.1 Sizing the delivered code
+
+*[Not written. Brief: 105,618 hand-written lines counted from the tree, generated code excluded, at a production rate per kind of source rather than one blended rate: 12 lines an hour for backend logic, 25 for templates and stylesheets, 18 for Dart, 20 for test code. 5,626 hours, 703 working days built conventionally]*
+
+### 11.5.2 The four reductions, each with its evidence
+
+*[Not written. Brief: framework scaffolding and code generation (x0.80), reuse of shared components within the project (x0.85), reuse from the author's own earlier projects (x0.83, derived not judged: the carried-over modules are 22,941 lines, 21.7% of the codebase, and 75 to 80 per cent of each came over intact from his 2024 projects), AI-assisted and rapid development tooling (x0.70). They multiply rather than add, because a screen built from an existing control, scaffolded by the framework and finished with an assistant is cheaper than any one of those alone makes it]*
+
+### 11.5.3 The result and its sensitivity
+
+*[Not written. Brief: product 0.40, so 278 working days for what is delivered, and with the 70 days still outstanding, about 350 for the completed project. Two factors carry most of the reduction and they differ in kind: prior reuse is measured, tooling is judged]*
+
+### 11.5.4 What this cost
+
+*[Not written. Brief: reuse buys speed and spends independence, and the largest input is a person rather than a technique: the author's own 2024 projects, which no association can hire on a volunteer's budget. The generated migration corpus is 81 MB of C# that made the Render build run out of memory; the carried-over gateway adapters brought a payment model the Association cannot fully use; assistant-drafted code needs the review time the remaining 70 per cent pays for. The section reports the trade and the boundary condition, not only the saving]*
+
+## 11.6 Progress Tracking and Earned Value
 
 *[Not written. Brief: BCWS, BCWP, BAC and ACWP, with **SPI = BCWP/BCWS** and **CPI = BCWP/ACWP**, reconstructed from the dated tracker items and the commit record, which is the only effort evidence this project has. The reconstruction and its limits are stated as such; no weekly earned-value record was kept, and the chapter does not pretend one was]*
 
-## 11.6 Team Structure and Responsibilities
+## 11.7 Team Structure and Responsibilities
 
 *[Not written. Brief: one maintainer holding every role the four P's assign to different people, and what that costs: no independent review, and no separation between the person who declares a payment rule and the person who tests it. The mitigation was mechanical, being the tracker and the test suite, and §12.11 treats it as a validity threat]*
 
-## 11.7 Configuration and Change Management in Practice
+## 11.8 Configuration and Change Management in Practice
 
 *[Not written. Brief: there was no change-control board. There was one file: `docs/TODO.md`, 3,839 lines, simultaneously the project plan, the change log, the defect log and the decision record. The 409 reactive tasks *are* the change log, and Table 11.5 is generated from them rather than reconstructed]*
 
-## 11.8 Risk Monitoring Record
+## 11.9 Risk Monitoring Record
 
 *[Not written. Brief: the RMMM plan of §4.8 as it was executed, with **risk exposure RE = P × C** computed per risk and impact on the 1–5 scale, plus one worked Risk Information Sheet. §4.8 needs revising to carry RE; the impact costs are author-stated and have to be supplied]*
 
-## 11.9 Quality Assurance Activities Performed
+## 11.10 Quality Assurance Activities Performed
 
 *[Not written. Brief: against Pressman's 40‑20‑40 allocation, this project spent roughly a third of its evidenced effort on feature code and about 15% on testing, well under the 40% prescribed. Data-backed self-criticism, with **DRE = E / (E + D)** computed from the findings log as E and live defects as D, and **MTTC** named as what QAS-06 already measures]*
 
-## 11.10 Lessons in Project Management
+## 11.11 Lessons in Project Management
 
 *[Not written.]*
 
-## 11.11 Summary
+## 11.12 Summary
 
 *[Not written.]*
 

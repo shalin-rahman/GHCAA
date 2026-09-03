@@ -386,7 +386,7 @@ decompose it, and each cites the requirement it serves. Two representative examp
 > a voting member in arrears attempts to vote, then the vote is refused with the reason stated, and
 > when an eligible member votes twice, then the second attempt is refused.
 
-**Definition of done**, applied uniformly and reported against in §11.6: the acceptance criteria pass;
+**Definition of done**, applied uniformly and reported against in §11.7: the acceptance criteria pass;
 automated tests exist at the appropriate level and the whole suite is green; the architecture test of
 NFR-M1 passes; authorisation is asserted for every new endpoint; input validation and, where
 applicable, sanitisation are present; the traceability matrix is updated; user-facing text meets

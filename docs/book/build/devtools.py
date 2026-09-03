@@ -47,10 +47,14 @@ class WebSocket(object):
             ("GET %s HTTP/1.1\r\nHost: %s:%d\r\nUpgrade: websocket\r\n"
              "Connection: Upgrade\r\nSec-WebSocket-Key: %s\r\n"
              "Sec-WebSocket-Version: 13\r\n\r\n" % (path, host, port, key)).encode())
-        header = self._read_until(b"\r\n\r\n")
+        data = self._read_until(b"\r\n\r\n")
+        header, _, rest = data.partition(b"\r\n\r\n")
         if b"101" not in header.split(b"\r\n")[0]:
+            self.sock.close()
             raise ProtocolError("websocket upgrade refused: %r" % header[:200])
-        self.buffer = b""
+        # Whatever arrived in the same read as the header is the start of the
+        # first frame. Discarding it leaves the next recv mid-frame.
+        self.buffer = rest
 
     def _read_until(self, marker):
         data = b""
@@ -138,10 +142,23 @@ class Browser(object):
             "--remote-debugging-port=0",
             "--user-data-dir=%s" % self.profile,
             "--window-size=1240,1754",
+            # Deliberately without printer.py's
+            # --run-all-compositor-stages-before-draw and
+            # --virtual-time-budget: those make a one-shot --dump-dom run wait
+            # for Mermaid, and on a long-lived session the virtual-time budget
+            # kills the page target instead. This session waits explicitly, on
+            # document.body.dataset.diagrams, which is the stronger check.
             "about:blank",
         ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        self.port = self._wait_for_port()
-        self.ws = WebSocket(self._page_target(), timeout=timeout)
+        # Anything raised from here on escapes the constructor, so `with
+        # Browser(...)` never runs __exit__: the browser would stay alive and
+        # the profile directory would accumulate.
+        try:
+            self.port = self._wait_for_port()
+            self.ws = WebSocket(self._page_target(), timeout=timeout)
+        except BaseException:
+            self.close()
+            raise
         self.next_id = 0
 
     def _wait_for_port(self):
@@ -223,8 +240,13 @@ class Browser(object):
         return out_path
 
     def close(self):
+        # Also called from the constructor's failure path, where the socket may
+        # never have been made.
         try:
-            self.ws.close()
+            if getattr(self, "ws", None) is not None:
+                self.ws.close()
+        except OSError:
+            pass
         finally:
             self.proc.terminate()
             try:

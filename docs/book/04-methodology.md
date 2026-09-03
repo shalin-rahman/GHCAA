@@ -372,7 +372,7 @@ author's judgement was imperfect.
 The incremental process, chosen for the reasons of §4.4, also means the requirement set of Chapter 3
 and the architecture of Chapter 6 were not fixed before construction began in the sense a waterfall
 study would fix them; the version presented in this dissertation is the state reached by 28 August
-2026, and §11.7 records the changes of scope that occurred on the way there rather than presenting
+2026, and §11.8 records the changes of scope that occurred on the way there rather than presenting
 the final state as though it had been the plan from the start.
 
 Finally, this is a single-case design science study in Runeson and Höst's sense [10]. The evaluation

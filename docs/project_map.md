@@ -1866,10 +1866,12 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 | Script | Path | Purpose |
 |---|---|---|
 | `build.py` | `docs/book/build/build.py` | Builds the dissertation to print-ready HTML; `--pdf` also prints A4 through headless Chrome/Edge, `--audit` measures A4 fit, `--strict` fails on any defect |
-| `lint.py` | `docs/book/build/lint.py` | Source checks run on every build: house tone, figure/table numbering, forward references, front-matter lists, abstract length, open placeholders |
-| `printer.py` | `docs/book/build/printer.py` | Browser discovery, the localhost server the page is served from, the A4 measurement pass, and print-to-PDF |
+| `lint.py` | `docs/book/build/lint.py` | Source checks run on every build: outline-versus-chapter drift in both directions, house tone, figure/table numbering, forward references, front-matter lists both ways, abstract length, open placeholders |
+| `printer.py` | `docs/book/build/printer.py` | Browser discovery, the localhost server the page is served from, the A4 measurement pass (size, label legibility, overprinted labels, labels clipped outside the frame), and print-to-PDF |
 | `renumber.py` | `docs/book/build/renumber.py` | Renumbers figures and tables into bound order, rewrites every mention, rebuilds the List of Figures and List of Tables |
-| `wbs.py` | `docs/book/build/wbs.py` | Derives Chapter 11 project-management evidence from git history and `docs/TODO.md`: apportioned commit-days per component, critical path, task counts per component, planned-versus-reactive arrival profile |
+| `wbs.py` | `docs/book/build/wbs.py` | Derives Chapter 11 project-management evidence from git history, the tree and `docs/TODO.md`: pre-development activities back-scheduled from the first commit, apportioned commit-days and observed span per component, critical path, task counts, arrival profile, the reuse-adjusted effort model, and the work still outstanding. `--check` fails on an unmapped area; `--sync` writes a `wbs:` marker into any area that has none |
+| `folios.py` | `docs/book/build/folios.py` | Reads the printed PDF back and writes the page numbers into the contents and the lists, then the book is printed again |
+| `devtools.py` | `docs/book/build/devtools.py` | A stdlib DevTools Protocol client, because Chrome's `--print-to-pdf` switch cannot add a page number and drops background graphics |
 | `ieee-print.css` | `docs/book/build/ieee-print.css` | IEEE print stylesheet: A4 `@page` rules, the landscape page, caption placement, two-column option |
 
 Rules for touching the book are in `docs/book/README.md`; the short version is in the root

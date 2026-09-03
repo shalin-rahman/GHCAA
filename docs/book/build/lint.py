@@ -101,8 +101,12 @@ def _prose_lines(path):
             continue
         if in_fence or not stripped:
             continue
-        if stripped.startswith(("#", "|", ">")):
+        if stripped.startswith(("#", "|")):
             continue
+        if stripped.startswith(">"):
+            # Block quotes here are user stories and acceptance criteria, which
+            # the author wrote, so the tone rules apply to them.
+            text = stripped.lstrip("> ")
         yield number, text
 
 
@@ -170,8 +174,18 @@ def _mentions(lines):
     the span, which is how IEEE numbering is normally cited.
     """
     first = {}
+    in_fence = False
     for number, raw in enumerate(lines, 1):
-        if CAPTION.match(raw.strip()):
+        stripped = raw.strip()
+        # A figure named inside another figure's Mermaid source is not the body
+        # naming it, and counting it would satisfy the forward-reference rule
+        # with no prose anywhere.
+        if stripped.startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        if CAPTION.match(stripped):
             continue
         for match in REFERENCE.finditer(raw):
             kind = "Table" if match.group(1).lower().startswith("table") else "Figure"
@@ -263,7 +277,8 @@ def abstract_word_count(front_path):
     text = io.open(front_path, encoding="utf-8").read()
     match = ABSTRACT.search(text)
     if not match:
-        return []
+        return [(front_path, 1, "the Abstract heading or its Word count line no longer matches "
+                                "the pattern, so the length was not checked")]
     body = re.sub(r"[`*]", "", match.group(1))
     words = len([w for w in body.split() if WORD.search(w)])
     stated = int(match.group(2).replace(",", ""))
@@ -288,14 +303,20 @@ def references(paths, refs_path):
     are already in the list — and becomes a defect only for a finished copy.
     """
     if not os.path.exists(refs_path):
-        return [], []
+        # Silence here would turn citation checking off for good the day the
+        # reference file is renamed.
+        return [(refs_path or "(no 99- file)", 1,
+                 "no reference list found, so no citation was checked")], []
     defined = set(int(m.group(1)) for m in REF_ENTRY.finditer(
         io.open(refs_path, encoding="utf-8").read()))
     cited, where = set(), {}
     for path in paths:
         if os.path.abspath(path) == os.path.abspath(refs_path):
             continue
-        text = FENCE.sub("", io.open(path, encoding="utf-8").read())
+        # Replacing the fence with its own newlines keeps every later line at
+        # the number it has in the file.
+        text = FENCE.sub(lambda m: "\n" * m.group(0).count("\n"),
+                         io.open(path, encoding="utf-8").read())
         for number, line in enumerate(text.splitlines(), 1):
             for match in CITATION.finditer(line):
                 value = int(match.group(1))

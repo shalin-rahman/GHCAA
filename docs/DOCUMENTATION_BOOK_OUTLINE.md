@@ -570,24 +570,25 @@ course material uses and the one an examiner will read it against: the four P's 
 metrics, estimation, scheduling and risk. Only the parts this project has evidence for are written.
 Where a technique was not used — and a single unpaid maintainer did not run earned-value analysis week
 by week — the chapter says so and reports what was done instead, rather than reconstructing a plan
-after the fact. The RMMM plan is already in §4.8; §11.8 reports its execution rather than restating it.
+after the fact. The RMMM plan is already in §4.8; §11.9 reports its execution rather than restating it.
 
 **Every figure in this chapter is regenerated, not typed.** `python docs/book/build/wbs.py` derives the
 durations, the task counts and the arrival profile from git history and `docs/TODO.md`. Re-run it
 before submission; where a number in the text disagrees with the script, the script is right.
 
-**Four work streams, and each activity states which class of evidence its duration rests on.** That
+**Five work streams, and each activity states which class of evidence its duration rests on.** That
 matters more than the numbers themselves:
 
 | Class | Covers | What it can support |
 |---|---|---|
 | Git-dated | 17 code components, 8 documentation deliverables | dated and verifiable; a commit-day is a *lower bound* on effort, since reading, debugging and thinking leave no commit |
-| Tracker-dated | 67 areas, 615 tasks, the arrival profile | dated in `docs/TODO.md` |
+| Tracker-dated | 73 areas, 664 tasks, the arrival profile | dated in `docs/TODO.md`, and from Area 68 onwards each area states its own component and dates in a `wbs:` marker |
+| Back-scheduled | P1 to P5, the research, specification and design that preceded the first commit | placed in the order the work had to happen, ending as the first commit lands on 9 February 2026. A reconstruction, and labelled as one wherever it appears |
 | Not yet written | installation, user and administrator manuals | future effort under the page budget, not completed work |
 | Calculated assumption | elicitation, interviews, review sessions, stakeholder discussion, incident response | **no commits exist**, so the duration is calculated from a stated rate and a measured quantity, and the arithmetic is printed with it. A reader who rejects the rate can redo the sum. These are labelled as assumptions everywhere they appear and are never presented as measurements |
 
-The fourth class is the one that would be easiest to fabricate, so its arithmetic is shown rather
-than its conclusion:
+The last two classes are the ones easiest to fabricate, so the arithmetic is shown rather than the
+conclusion:
 
 | ID | Activity | Basis | Hours | Days | Additive |
 |---|---|---|---|---|---|
@@ -601,32 +602,83 @@ U5 is deliberately not added. Those four dates carry 9, 7, 10 and 2 commits, amo
 project, so the fix work already sits inside the measured commit-days; only the diagnosis before the
 first commit is invisible, and double-counting it would inflate the total.
 
-That gives the project's total effort: **63 measured code commit-days, 23 measured document
-commit-days and 11 assumed days, being 97 days, about 4.4 person-months at 22 days to the month.**
+That gives the project's total effort: **64 measured code commit-days, 24 measured document
+commit-days, 30 stated pre-development days and 4 further assumed days, being 122 days, about 5.5
+person-months at 22 days to the month, spread over the 207 calendar days from 9 February to 3
+September 2026.**
 Every rate above is a judgement and is stated as one. The reading rate of 1,500 words an hour for
 normative text and the write-up ratio of 1× contact time are the two most open to challenge, and §11.4
 says so.
 
 Git also *misdates* the research stream: the requirements documents were committed from July 2026,
 five months after the elicitation they record and after the code they governed was already written.
-For code that gap is small; for research it inverts the schedule, and §11.2 states it.
+For code that gap is small; for research it inverts the schedule. The fix is a fifth stream, P1 to
+P5, holding the work that came before the first commit — the governing-document study, the
+elicitation, the requirements analysis and specification, the architecture and technology choice,
+and the test strategy with its first test cases. Thirty working days, back-scheduled from 9
+February 2026 in the order the work had to happen, and reported as a reconstruction rather than a
+diary, because no diary was kept.
 
-- **11.0** The Four P's Applied — People, Product, Process, Project, with the single-maintainer case stated plainly against each. None of Pressman's four organisational paradigms (closed, random, open, synchronous) describes one unpaid maintainer; saying so is the finding, not forcing a label
+A third figure joins them, and it is the one an examiner will ask for. Neither commit-days nor
+calendar span says how much system was delivered, so §11.4 sizes the delivered code directly:
+105,618 hand-written lines across four kinds of source, each at its own production rate, since
+markup and test code are not produced at the speed of business logic and generated code is excluded
+entirely. That comes to 5,626 hours, **703 working days built conventionally**. Four multiplicative
+reductions then apply, each carrying a one-line reason a reader can accept or reject:
+
+| Reduction | Factor | Why |
+|---|---|---|
+| Framework scaffolding and code generation | ×0.80 | generated, not written |
+| Reuse of shared components within the project | ×0.85 | written once, used on dozens of screens |
+| Reuse from the author's own earlier projects | ×0.83 | measured footprint × the share that came over intact |
+| AI-assisted and rapid development tooling | ×0.70 | drafts generated, then reviewed and corrected |
+
+They multiply rather than add because they compound, and the product is 0.40, giving a
+**reuse-adjusted effort of 278 working days** for the code delivered so far, against 122 the
+record evidences. The work still outstanding is counted the same way — 141 unwritten chapter
+sections, 76 figures and tables not yet made, and 151 open tracker items priced by priority,
+being 70 working days — so the **completed project comes to about 350 working days**. The item
+rates cover a defect fix and the test that pins it together, because §3.7's definition of done
+requires both.
+
+No single factor dominates, and that is deliberate. The two largest are the tooling reduction and reuse from the
+author's own 2024 projects. They are different in kind and the chapter keeps them apart: the reuse
+figure is measured from a footprint, the tooling figure is a judgement, because assistance was diffuse
+rather than confined to modules. The reuse half is also the more consequential, being what §12.11
+names as the limit on what this dissertation's cost conclusion transfers to. The chapter reports the evidenced figure beside
+the adjusted one and states which part of the gap it cannot separate, since unrecorded reading,
+debugging and design leave no commit and the reuse is already inside the factors.
+
+One further correction, and it matters more than it looks. Effort and duration are not the same
+quantity and the chapter no longer prints one as though it were the other. Apportioned commit-days
+are **effort**: how much work a component took. First commit to last is **duration**: how long it
+stayed open, which for most components is five to seven months because a part-time maintainer
+returns to them. The precedence network runs on effort; the spans go on the Gantt chart. Building
+the network on spans instead was tried and abandoned — the components overlap almost completely, so
+a serial pass sums to 1,008 working days across a project that ran for 207 calendar days, which is
+an arithmetic artefact and not a schedule.
+
+- **11.0** The Four P's Applied — People, Product, Process, Project, with the single-maintainer case stated plainly against each. **People** carries a figure the rest of the chapter depends on: twenty years of professional development experience, and a personal library of 2024 projects close enough in technology generation to be reused as code rather than as ideas, from which about a quarter of this codebase descends. Pressman's staffing models price a team by headcount; this project's capacity is one person whose productivity rests on two decades of accumulated reusable work, which §11.5 quantifies and §12.11 treats as the limit on what transfers. None of Pressman's four organisational paradigms (closed, random, open, synchronous) describes one unpaid maintainer; saying so is the finding, not forcing a label
 - **11.1** Process Model in Practice and its Deviations from Plan — led by the arrival profile: **67% of delivered tasks were not planned** (409 of 615, figures of 2 September 2026), arriving as stakeholder feedback (35%), review findings (18%) or defects (14%), and 26 of the dated areas landed in August 2026 alone. A critical path over an up-front work breakdown would be fiction, because two thirds of the work did not exist when that breakdown would have been drawn
-- **11.2** Work Breakdown Structure — the four streams above; the 17 code components each tied to the tracker areas that produced them, so the activity list and the tracker are one list read two ways
-- **11.3** Scheduling, Task Network and Critical Path — activity-on-node by the precedence diagram method, with duration, float, early and late start and finish. Reported as a **retrospective** network: critical path 48 working days against 63 worked and 206 elapsed. The gap is availability, not dependency, and that is the section's point. Persistence and security behave as **hammock activities**, touched on 42 and 33 separate days across the whole span, and are drawn as such rather than as boxes at day zero
+- **11.2** Work Breakdown Structure — the five streams above, the fifth being the pre-development research and design of P1 to P5; the 17 code components each tied to the tracker areas that produced them, so the activity list and the tracker are one list read two ways
+- **11.3** Scheduling, Task Network and Critical Path — activity-on-node by the precedence diagram method, with duration, float, early and late start and finish. Reported as a **retrospective** network: critical path 48 working days of effort against 64 days worked, 122 days of total effort and 207 elapsed. The gap is availability, not dependency, and that is the section's point. Persistence and security behave as **hammock activities**, touched on 42 and 33 separate days across the whole span, and are drawn as such rather than as boxes at day zero
   - **11.3.1** CPM summary ordered by float, so the schedule can be read by slack rather than by sequence
   - **11.3.2** Crashing analysis, and the honest result: the single resource on the critical path cannot be crashed, so every classical crashing lever is unavailable. What shortened the schedule instead was scope deferral, recorded in the Won't set of §3.8
 - **11.4** Effort Estimation — the function-point chain, computed from the delivered system: EI, EO and EQ from the 276 endpoint attributes, ILF from the 49 `DbSet` properties, EIF from the four payment gateways plus email, SMS and social identity. UFP, then TDI over the fourteen general system characteristics, **VAF = 0.65 + 0.01 × TDI**, AFP, effort at a stated productivity factor, LOC via the language factor, and cost in BDT. **COCOMO II is dropped**: its five scale factors and seventeen effort multipliers cannot be justified here, and a model nobody can defend adds no evidence
   - **11.4.1** Two estimates compared — apportioned commit-days against completed-task counts, on a common base. Eight of the seventeen components disagree by more than twofold: authentication, governance, gallery and security look heavy by task count because the tracker holds many small items there; persistence, events and the job board look heavy by commit-day because a handful of items each took days. **Task granularity varies by an order of magnitude between components, so any estimate built on task counts inherits that noise** — a stronger result than either estimate alone
-  - **11.4.2** The estimate against the actual — 97 days, about 4.4 person-months across all four streams, against the function-point model's prediction at the standard productivity factor. The model over-predicts by roughly two orders of magnitude, and the reasons are stated: framework scaffolding, no coordination overhead, no separate quality-assurance or project-management roles, and generated code counted as delivered function. The productivity factor assumes a team; there is no team
-- **11.5** Progress Tracking and Earned Value — BCWS, BCWP, BAC and ACWP, with **SPI = BCWP/BCWS** and **CPI = BCWP/ACWP**, reconstructed from the dated tracker items and the commit record, which is the only effort evidence this project has. The reconstruction and its limits are stated as such; no weekly earned-value record was kept, and the chapter does not pretend one was
-- **11.6** Team Structure and Responsibilities — one maintainer holding every role the four P's assign to different people, and what that costs: no independent review, and no separation between the person who declares a payment rule and the person who tests it. The mitigation was mechanical, being the tracker and the test suite, and §12.11 treats it as a validity threat
-- **11.7** Configuration and Change Management in Practice — there was no change-control board. There was one file: `docs/TODO.md`, 3,839 lines, simultaneously the project plan, the change log, the defect log and the decision record. The 409 reactive tasks *are* the change log, and Table 11.5 is generated from them rather than reconstructed
-- **11.8** Risk Monitoring Record — the RMMM plan of §4.8 as it was executed, with **risk exposure RE = P × C** computed per risk and impact on the 1–5 scale, plus one worked Risk Information Sheet. §4.8 needs revising to carry RE; the impact costs are author-stated and have to be supplied
-- **11.9** Quality Assurance Activities Performed — against Pressman's 40‑20‑40 allocation, this project spent roughly a third of its evidenced effort on feature code and about 15% on testing, well under the 40% prescribed. Data-backed self-criticism, with **DRE = E / (E + D)** computed from the findings log as E and live defects as D, and **MTTC** named as what QAS-06 already measures
-- **11.10** Lessons in Project Management
-- **11.11** Summary
+  - **11.4.2** The estimate against the actual — three figures, not two: 703 nominal working days for the delivered code built conventionally, 344 after the reuse and tooling factors, and 122 days evidenced by the record across all five streams, against the function-point model's prediction at the standard productivity factor. The model over-predicts by roughly two orders of magnitude, and the reasons are stated: framework scaffolding, no coordination overhead, no separate quality-assurance or project-management roles, and generated code counted as delivered function. The productivity factor assumes a team; there is no team
+- **11.5** How the Implementation Time Was Optimised — the section that answers the question a reader forms as soon as the scale is stated: one unpaid maintainer, seven months, and a system with 276 endpoints, 49 entities, two clients and 898 automated tests. The answer is not that the work was small. It is that four things compounded — what the framework generated, what the project reused, what earlier projects supplied, and what tooling drafted — and this section prices each instead of asserting it
+  - **11.5.1** Sizing the delivered code — 105,618 hand-written lines counted from the tree, generated code excluded, at a production rate per kind of source rather than one blended rate: 12 lines an hour for backend logic, 25 for templates and stylesheets, 18 for Dart, 20 for test code. Markup is not produced at the speed of business logic and pretending otherwise is where estimates of this shape usually go wrong. 5,626 hours, **703 working days built conventionally**
+  - **11.5.2** The four reductions, each with its evidence — framework scaffolding and code generation (×0.80: EF Core migrations, Angular CLI scaffolds, Flutter project structure, and 1.7 million generated migration lines nobody wrote); reuse of shared components within the project (×0.85: the shared control set, the token layer, base services, the common admin table and form patterns); reuse from the author's own earlier projects (×0.83, and this one is derived rather than judged: authentication with its OTP, token and middleware pipeline, the front-end grid with the shared controls, core services and layouts behind it, the design-token stylesheet, file handling and validation, and the payment-gateway adapters come to **22,941 lines, 21.7% of the codebase**, of which the author puts **75 to 80 per cent** as carried over intact from his 2024 projects; 21.7% × 77.5% is 16.8% of total effort saved, hence ×0.83); AI-assisted and rapid development tooling (×0.70: generated first drafts, refactors and test scaffolds, reviewed and corrected rather than accepted. One block is nameable — the 2,453 lines of service interfaces and DTOs in `GHCAA.Application` were generated rather than carried over, which is why they are not in the reuse table — but the factor stays a judgement, because assistance was diffuse across the codebase rather than confined to modules a footprint could measure). They multiply rather than add, because a screen built from an existing control, scaffolded by the framework and finished with an assistant is cheaper than any one of those alone makes it
+  - **11.5.3** The result and its sensitivity — product 0.40, so **278 working days for what is delivered**, and with the 70 days still outstanding, **about 350 for the completed project**. Two of the four factors carry most of the reduction and they are different in kind: prior reuse is measured, tooling is judged, and the chapter says which is which instead of blending them. A sensitivity line, not a hidden assumption
+  - **11.5.4** What this cost, which is the half a reuse argument usually omits — reuse buys speed and spends independence. The generated migration corpus is 81 MB of C# that made the Render build run out of memory (§10.9); the carried-over gateway adapters brought a payment model the Association cannot fully use (§8.9); assistant-drafted code needs the review time that the remaining 65 per cent pays for, and §9.2 reports what review actually caught. The section reports the trade, not only the saving
+- **11.6** Progress Tracking and Earned Value — BCWS, BCWP, BAC and ACWP, with **SPI = BCWP/BCWS** and **CPI = BCWP/ACWP**, reconstructed from the dated tracker items and the commit record, which is the only effort evidence this project has. The reconstruction and its limits are stated as such; no weekly earned-value record was kept, and the chapter does not pretend one was
+- **11.7** Team Structure and Responsibilities — one maintainer holding every role the four P's assign to different people, and what that costs: no independent review, and no separation between the person who declares a payment rule and the person who tests it. The mitigation was mechanical, being the tracker and the test suite, and §12.11 treats it as a validity threat
+- **11.8** Configuration and Change Management in Practice — there was no change-control board. There was one file: `docs/TODO.md`, 3,839 lines, simultaneously the project plan, the change log, the defect log and the decision record. The 409 reactive tasks *are* the change log, and Table 11.5 is generated from them rather than reconstructed
+- **11.9** Risk Monitoring Record — the RMMM plan of §4.8 as it was executed, with **risk exposure RE = P × C** computed per risk and impact on the 1–5 scale, plus one worked Risk Information Sheet. §4.8 needs revising to carry RE; the impact costs are author-stated and have to be supplied
+- **11.10** Quality Assurance Activities Performed — against Pressman's 40‑20‑40 allocation, this project spent roughly a third of its evidenced effort on feature code and about 15% on testing, well under the 40% prescribed. Data-backed self-criticism, with **DRE = E / (E + D)** computed from the findings log as E and live defects as D, and **MTTC** named as what QAS-06 already measures
+- **11.11** Lessons in Project Management
+- **11.12** Summary
 
 **Figures and tables**
 
@@ -636,11 +688,12 @@ seventeen nodes with nine edges converging on the web client would print at abou
 
 - Figures 11.1–11.17 — Activity diagram per component, C1 to C17, each with its entry and exit conditions, and its tracker areas named in the caption
 - Figure 11.18 — Chapter-level dependency graph, critical-path components only: C1 → C2 → C3 → C5 → C8 → C13 → C15 → C17
-- Figure 11.19 — Work breakdown structure across the four streams
+- Figure 11.19 — Work breakdown structure across the five streams
 - Figure 11.20 — Arrival profile over time: planned, feedback, defect and review work by month
 - Figure 11.21 — Float distribution across the seventeen components
 - Figure 11.22 — Two estimates compared per component: commit-days against task counts
 - Figure 11.23 — Effort distribution by stream and component, against the 40‑20‑40 allocation
+- Figure 11.24 — Where the implementation time went: nominal 703 days reduced by each leverage in turn to 280, with the 69 days outstanding shown separately
 - Table 11.1 — Activity list: ID, activity, duration, ES, EF, LS, LF, float, predecessors, tracker areas, evidence class
 - Table 11.2 — Function-point count: EI, EO, EQ, ILF and EIF with complexity weighting, from the delivered system
 - Table 11.3 — TDI over the fourteen general system characteristics, and the VAF it yields
@@ -667,7 +720,7 @@ defined there.
 - **12.8** Answering the Research Questions — RQ1 through RQ4 answered explicitly, each with the evidence supporting the answer and the confidence that evidence warrants
 - **12.9** Discussion — interpretation, and comparison against the literature of Chapter 2: where this work agrees with prior findings and where it diverges
 - **12.10** Comparison against the Existing Manual System
-- **12.11** Threats to Validity — construct, internal, external and conclusion validity, each with the mitigation applied and the residual limitation acknowledged
+- **12.11** Threats to Validity — construct, internal, external and conclusion validity, each with the mitigation applied and the residual limitation acknowledged. The heaviest threat to external validity is named here rather than left implicit: the platform was affordable because the maintainer brought a personal library of his own 2024 projects on the same technology generation, and an association without such a person faces the licence cost Chapter 2 quotes, not the build cost §11.5 computes. The conclusion transfers to the class of institution that has one; it does not transfer to every institution
 - **12.12** Limitations of the Artefact
 - **12.13** Reflection on the Design Science Contribution — what transfers beyond this institution
 - **12.14** Summary
