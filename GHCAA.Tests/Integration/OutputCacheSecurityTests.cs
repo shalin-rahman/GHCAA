@@ -30,7 +30,9 @@ namespace GHCAA.Tests.Integration
         private const string MemberFullNameFragment = "Shamsul";      // Member 200's name, Visual seed
         private const string AdminFullNameFragment = "Demo Member";   // Member 1's name, Visual seed
 
-        private const string MeProfileRoute = "/api/me/profile";
+        // MeController (the original /api/me/profile) was deleted 2026-09-04 (docs/TODO.md 80.7) —
+        // ProfileController's own GET is the same shape (GetProfileAsync(memberId, isPrivileged: true)).
+        private const string MeProfileRoute = "/api/profile";
         private const string LookupsRoute = "/api/lookups";
         private const int KnownLookupId = 1;
         private const string KnownLookupLabel = "HSC"; // Lookup 1's Label, Visual seed

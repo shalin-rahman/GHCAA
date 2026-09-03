@@ -1,0 +1,99 @@
+{
+  "OrgId": "default",
+  "SchemaVersion": 1,
+  "Branding": {
+    "ShortName": "Alumni Association",
+    "FullName": "Sample Alumni Association",
+    "MemberNickname": "Alumni",
+    "InstitutionName": "Sample Institution",
+    "InstitutionAcronym": "SAA",
+    "MembershipNumberPrefix": "MEM-",
+    "ApprovalSeal": "APPROVED",
+    "EstablishedOn": "",
+    "LogoUrl": "/assets/logo.png",
+    "PrimaryColor": "#121212",
+    "AccentColor": "#2f6f4f"
+  },
+  "Contact": {
+    "SupportEmail": "support@example.org",
+    "ImportEmailBase": "member",
+    "RegisteredOffice": "",
+    "CampusAddress": "",
+    "PhoneNumbers": [],
+    "MapEmbedUrl": "",
+    "PortalBaseUrl": "",
+    "SocialLinks": {
+      "Facebook": "#",
+      "Whatsapp": "#",
+      "Youtube": "#",
+      "Linkedin": "#",
+      "Instagram": "#"
+    }
+  },
+  "Currency": {
+    "Code": "USD",
+    "Symbol": "$",
+    "Name": "US Dollar"
+  },
+  "Features": {
+    "EnableEvents": true,
+    "EnableJobHub": true,
+    "EnableGallery": true,
+    "EnableForum": true,
+    "EnableMentorship": true,
+    "EnableFamilyLink": false,
+    "EnableMagazine": false,
+    "EnablePolls": true,
+    "EnableGamification": false,
+    "EnablePublicDirectory": true,
+    "EnableDigitalIdCard": true,
+    "EnableCertificates": true,
+    "EnableSocialAuth": false,
+    "RequirePaymentForMembership": false,
+    "RequireDocumentUpload": false,
+    "AllowSelfRegistration": true,
+    "AllowNonMemberEventRegistration": true
+  },
+  "Workflow": {
+    "MemberApprovalMode": "ManualReview",
+    "OtpVerificationRequired": true,
+    "DefaultMembershipType": "General",
+    "AdminEmailOnNewRegistration": true,
+    "MembershipTypes": ["General"]
+  },
+  "Localization": {
+    "DefaultLocale": "en",
+    "SupportedLocales": ["en"],
+    "Locales": {
+      "en": {
+        "OrgName": "Sample Alumni Association",
+        "Tagline": "Connecting our graduates",
+        "MemberLabel": "Member",
+        "MemberPluralLabel": "Members",
+        "MemberNickname": "Alumni",
+        "AlumniLabel": "Alumni",
+        "MembershipLabel": "Membership",
+        "MembershipTypeLabels": {
+          "General": "General"
+        },
+        "MemberCategoryLabels": {},
+        "EcRoleLabels": {},
+        "Nav": {
+          "Administration": "Administration",
+          "MyAccount": "My Account",
+          "Community": "Community",
+          "MediaAndTools": "Media & Tools",
+          "AdminRoleLabel": "Admin",
+          "MemberRoleLabel": "Member",
+          "BatchPrefix": "Batch: "
+        },
+        "EmailSubjects": {
+          "PasswordReset": "Reset your password",
+          "OtpVerification": "Your verification code",
+          "Welcome": "Welcome",
+          "FeeReminder": "Membership fee reminder"
+        }
+      }
+    }
+  }
+}

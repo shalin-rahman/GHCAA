@@ -1,4 +1,5 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -19,6 +20,7 @@ export class TopicDetail implements OnInit {
     private forumService = inject(ForumService);
     private authService = inject(AuthService);
     private route = inject(ActivatedRoute);
+    private destroyRef = inject(DestroyRef);
     private router = inject(Router);
 
     topic = signal<ForumTopic | null>(null);
@@ -45,7 +47,7 @@ export class TopicDetail implements OnInit {
     });
 
     ngOnInit() {
-        this.route.paramMap.subscribe(params => {
+        this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
             const topicId = Number(params.get('id'));
             if (topicId) {
                 this.loadTopic(topicId);

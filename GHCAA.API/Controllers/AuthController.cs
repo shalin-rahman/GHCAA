@@ -14,7 +14,7 @@ namespace GHCAA.API.Controllers
 {
     [ApiController]
     [Route("api/auth")]
-    [EnableRateLimiting("auth")]
+    [EnableRateLimiting(Constants.RateLimitPolicies.Auth)]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -79,7 +79,7 @@ namespace GHCAA.API.Controllers
         // 24.27+24.44: Issue a new access token from a valid refresh token cookie.
         [HttpPost("refresh")]
         [AllowAnonymous]
-        [EnableRateLimiting("refresh")]
+        [EnableRateLimiting(Constants.RateLimitPolicies.Refresh)]
         public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
         {
             if (!Request.Cookies.TryGetValue("refresh_token", out var oldRefreshToken) || string.IsNullOrEmpty(oldRefreshToken))
@@ -113,7 +113,7 @@ namespace GHCAA.API.Controllers
         // travels in the request/response body instead.
         [HttpPost("refresh-mobile")]
         [AllowAnonymous]
-        [EnableRateLimiting("refresh")]
+        [EnableRateLimiting(Constants.RateLimitPolicies.Refresh)]
         public async Task<IActionResult> RefreshMobile([FromBody] RefreshRequestDto dto, CancellationToken cancellationToken)
         {
             var rotation = await _tokenService.RotateRefreshTokenAsync(dto.RefreshToken, cancellationToken);

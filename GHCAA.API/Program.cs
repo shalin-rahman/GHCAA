@@ -98,7 +98,7 @@ builder.Services.AddRateLimiter(options =>
     // key handed each distinct username its own 5/min bucket, so one IP could password-spray
     // thousands of accounts (N usernames × 5/min). Keying on IP alone bounds the total auth
     // attempts a single source can make regardless of how many accounts it targets.
-    options.AddPolicy<string>("auth", httpContext =>
+    options.AddPolicy<string>(GHCAA.Domain.Constants.RateLimitPolicies.Auth, httpContext =>
     {
         var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         var key = isTestEnv ? "__test__" : ip;
@@ -112,7 +112,7 @@ builder.Services.AddRateLimiter(options =>
 
     // 3c: Refresh policy — keyed per IP, lenient enough for legit silent-refresh retries
     // but bounded so a stolen/guessed refresh token can't be replayed unlimited times.
-    options.AddPolicy<string>("refresh", httpContext =>
+    options.AddPolicy<string>(GHCAA.Domain.Constants.RateLimitPolicies.Refresh, httpContext =>
     {
         var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         var key = isTestEnv ? "__test__" : ip;
@@ -125,7 +125,7 @@ builder.Services.AddRateLimiter(options =>
     });
 
     // Registration Policy: Moderate (10 requests per 5 minutes)
-    options.AddFixedWindowLimiter("registration", opt =>
+    options.AddFixedWindowLimiter(GHCAA.Domain.Constants.RateLimitPolicies.Registration, opt =>
     {
         opt.Window = TimeSpan.FromMinutes(5);
         opt.PermitLimit = isTestEnv ? 1000 : 10;
@@ -133,7 +133,7 @@ builder.Services.AddRateLimiter(options =>
     });
 
     // General API Policy: (100 requests per 1 minute)
-    options.AddFixedWindowLimiter("api", opt =>
+    options.AddFixedWindowLimiter(GHCAA.Domain.Constants.RateLimitPolicies.Api, opt =>
     {
         opt.Window = TimeSpan.FromMinutes(1);
         opt.PermitLimit = isTestEnv ? 10000 : 100;
@@ -194,6 +194,10 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Resolved eagerly so a missing/invalid institution profile pack (docs/TODO.md 62.1) fails boot
+// with a readable error instead of surfacing lazily on whatever request first needs it.
+app.Services.GetRequiredService<GHCAA.Application.Interfaces.IInstitutionProfileProvider>();
 
 // SECURITY AUDIT (2026-08-29): must run before everything else. Render terminates TLS at its edge
 // and forwards to this container over plain HTTP with X-Forwarded-Proto: https — without this,
@@ -338,7 +342,12 @@ if (app.Environment.IsDevelopment() && app.Configuration["ASP_SEED_PROFILE"] == 
 app.UseMiddleware<SecurityStampMiddleware>(); // Invalidates sessions on status change
 app.UseMiddleware<GHCAA.API.Middleware.XsrfMiddleware>(); // 1a: CSRF protection for cookie-authenticated clients
 app.UseAuthorization();
-app.MapControllers();
+// "api" (100/min) was registered above but never applied anywhere — every endpoint outside
+// AuthController/RegistrationController had no rate limit at all. Applying it here as the floor
+// for every controller action; [EnableRateLimiting("auth"/"refresh"/"registration")] on a specific
+// action still applies on top of this, and [DisableRateLimiting] (AuthController /me, /logout)
+// still overrides it.
+app.MapControllers().RequireRateLimiting(GHCAA.Domain.Constants.RateLimitPolicies.Api);
 app.MapHealthChecks("/health");
 app.MapHub<GHCAA.API.Hubs.ChatHub>("/api/hubs/chat");
 app.MapHub<GHCAA.API.Hubs.NotificationHub>("/api/hubs/notifications");

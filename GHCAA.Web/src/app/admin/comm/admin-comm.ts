@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit, computed, ViewChild, ElementRef } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, ViewChild, ElementRef, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminCommService, EmailTemplate, EmailLog, TEMPLATE_VARIABLES, MessageChannels } from '../../core/services/admin-comm.service';
@@ -20,6 +21,7 @@ export class AdminComm implements OnInit {
     private commService = inject(AdminCommService);
     private notify = inject(NotificationService);
     private route = inject(ActivatedRoute);
+    private destroyRef = inject(DestroyRef);
 
     @ViewChild(RichTextEditor) bodyEditor?: RichTextEditor;
     @ViewChild('smsBodyInput') smsBodyInput?: ElementRef<HTMLTextAreaElement>;
@@ -86,7 +88,7 @@ export class AdminComm implements OnInit {
         this.loadTemplates();
 
         // Handle pre-filled target from Registry/Individual contact
-        this.route.queryParams.subscribe(params => {
+        this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
             if (params['target']) {
                 this.sendOptions.target = params['target'];
             }

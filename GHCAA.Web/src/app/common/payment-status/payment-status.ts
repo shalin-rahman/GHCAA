@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
@@ -85,16 +86,17 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 })
 export class PaymentStatus implements OnInit {
   private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
   
   isSuccess = signal<boolean>(true);
   trxId = signal<string | null>(null);
 
   ngOnInit() {
-    this.route.url.subscribe(url => {
+    this.route.url.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(url => {
       this.isSuccess.set(url.length > 0 && url[0].path === 'success');
     });
 
-    this.route.queryParamMap.subscribe(params => {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       this.trxId.set(params.get('trxId'));
     });
   }

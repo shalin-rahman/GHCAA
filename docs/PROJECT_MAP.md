@@ -739,6 +739,7 @@ graph TD
 | `IGamificationService` | `GamificationService` | `AddPoints`, `GetLeaderboard`, `GetConfig` |
 | `IMemberImportService` | `MemberImportService` | `ImportFromCsvAsync(stream)` |
 | `IThemeService` | `ThemeService` | `GetActiveTheme()`, `SetTheme(id)`, `CreateTheme(dto)` |
+| `IInstitutionProfileProvider` | `InstitutionProfileProvider` | `ProfileName`, `OrgConfigDefaults` — reads `profiles/<ORG_PROFILE>/org-config.json`, resolved eagerly at boot. `AddSingleton`, not consumed anywhere yet (docs/TODO.md 62.1) |
 | `IRealTimeService` | `RealTimeService` (API) | `NotifyUserAsync(userId, event, data)`, `BroadcastAsync(...)` |
 | `IPaymentGatewayService` | `SSLCommerzGateway` | Gateways/ |
 | `IPaymentGatewayService` | `BkashGateway` | Gateways/ |
@@ -823,6 +824,7 @@ All services are registered as **Scoped** unless noted.
 | `IEventService` | `EventService` | Services/ |
 | `IMemberImportService` | `MemberImportService` | Services/ |
 | `IThemeService` | `ThemeService` | Services/ |
+| `IInstitutionProfileProvider` | `InstitutionProfileProvider` | Services/ (Singleton, excluded from the reflection scan — see `DependencyInjection.cs`) |
 | `IGovernanceService` | `GovernanceService` | Services/ |
 | `IGamificationService` | `GamificationService` | Services/ |
 | `IFamilyLinkService` | `FamilyLinkService` | Services/ |
@@ -888,7 +890,6 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 | `AuthController` | `/api/auth` | Public | `IAuthService`, `IMemberService` |
 | `RegistrationController` | `/api/registration` | Public / RateLimit: registration | `IMemberService`, `IOtpService` |
 | `ProfileController` | `/api/profile` | Auth | `IMemberService`, `INetworkingService` |
-| `MeController` | `/api/me` | Auth | `IMemberService`, `IActivityService` |
 | `PollController` | `/api/polls` | Auth | `IPollService` |
 | `AdminSocialAuthController` | `/api/admin/social-auth` | Admin | `ApplicationDbContext` |
 | `AdminPollController` | `/api/admin/polls` | Admin | `IPollService` |
@@ -909,8 +910,7 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 | `NotificationController` | `/api/notifications` | Auth | `INotificationService` |
 | `MessagingController` | `/api/messaging` | Auth | `IChatService` |
 | `ActivityController` | `/api/activity` | Auth | `IActivityService` |
-| `FamilyController` | `/api/family` | Auth | `IFamilyService` |
-| `FamilyLinkController` | `/api/family-link` | Auth | `IFamilyLinkService` |
+| `FamilyLinkController` | `/api/family-links` | Auth | `IFamilyLinkService`, `IFamilyService` |
 | `MentorshipController` | `/api/mentorship` | Auth | `IMentorshipService` |
 | `LookupsController` | `/api/lookups` | Public + Admin | `ILookupService` |
 | `RolesController` | `/api/roles` | SuperAdmin | `IRoleService` |
@@ -1544,7 +1544,22 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 | `getProfile()` | `() => Future<Map?>` | `GET /profile` |
 | `getECPeriods()` | `() => Future<List>` | `GET /networking/periods` |
 | `getExecutiveCommittee()` | `({periodId?}) => Future<List>` | `GET /networking/committee` |
-| `updateProfile()` | `(Map data) => Future<bool>` | `PUT /profile/update` |
+
+---
+
+### `FamilyService` (`features/networking/family_service.dart`)
+**Provider:** `familyServiceProvider` → `Provider<FamilyService>`
+
+| Method | Signature | API |
+|---|---|---|
+| `getMyFamily()` | `() => Future<List>` | `GET /family-links/my-family` |
+| `getSentRequests()` | `() => Future<List>` | `GET /family-links/sent` |
+| `getReceivedRequests()` | `() => Future<List>` | `GET /family-links/received` |
+| `sendRequest()` | `(membershipNo, relationshipType, {note?}) => Future<bool>` | `POST /family-links/send` |
+
+Used by `screens/member/family_link_screen.dart`, the only screen with a family-linking UI. Profile
+editing (`profile_edit_screen.dart`) goes through `AuthService.updateProfile()` (`PUT /profile`), not
+through this class.
 
 ---
 
@@ -1677,29 +1692,17 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 
 ---
 
-### `FamilyService` (`features/family/family_service.dart`)
-**Provider:** `familyServiceProvider`
-**Auto-dispose Provider:** `familyListProvider` → `FutureProvider.autoDispose<List>`
+### `SupportService` (`features/support/support_service.dart`)
+**Provider:** `supportServiceProvider`
 
 | Method | API |
-|---|---|
-| `getFamilyMembers()` | `GET /members/family` |
-| `addFamilyMember(data)` | `POST /members/family` |
-
----
-
-### `SupportService` + `FamilyService` (2nd) (`features/support/support_service.dart`)
-**Providers:** `supportServiceProvider`, `familyServiceProvider` (re-export)
-
-| Method (Support) | API |
 |---|---|
 | `checkSystemHealth()` | `GET /health` |
 | `contactSupport(message)` | `POST /contact` |
 
-| Method (Family — duplicate) | API |
-|---|---|
-| `getFamilyLinks()` | `GET /familylink` |
-| `addFamilyMember(data)` | `POST /familylink` |
+Family linking is handled entirely by `FamilyService` in `features/networking/family_service.dart`
+(see Networking below) — two other classes of the same name were deleted 2026-09-04, both dead code
+with no callers (docs/TODO.md 80.4, 44.16).
 
 ---
 

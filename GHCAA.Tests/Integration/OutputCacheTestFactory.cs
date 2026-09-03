@@ -30,6 +30,13 @@ namespace GHCAA.Tests.Integration
             Directory.CreateDirectory(Path.Combine(_contentRoot, "wwwroot"));
             _dbPath = Path.Combine(_contentRoot, "test.db");
 
+            // IInstitutionProfileProvider is resolved eagerly at boot and throws without a
+            // profiles/default/org-config.json under the content root — see SpaStaticFileFactory
+            // for the same fixture and why an empty JSON object is enough.
+            var profileDir = Path.Combine(_contentRoot, "profiles", "default");
+            Directory.CreateDirectory(profileDir);
+            File.WriteAllText(Path.Combine(profileDir, "org-config.json"), "{}");
+
             Environment.SetEnvironmentVariable("ASP_SEED_PROFILE", "Visual");
             Environment.SetEnvironmentVariable("Jwt__Key", "output-cache-test-dummy-key-please-32chars");
             Environment.SetEnvironmentVariable("AppSettings__AllowedOrigins__0", "http://localhost");

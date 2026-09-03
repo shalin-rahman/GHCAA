@@ -210,7 +210,7 @@ Each flow verified on **Web + Mobile + API** where applicable. Code references b
 | A6 | Registration fee payment | Payment required before admin approval | `ApproveMemberAsync` L367–376 checks `PaymentHistories` for `RegistrationFee`/`MembershipFee` + `Completed` |
 | A7 | Digital ID card | SVG/PDF + QR for Active only | `AdminController` + `IIDCardService` |
 | A8 | Privacy toggles | Directory masks phone/email/address | `MemberService.GetProfileAsync`; `NetworkingService` |
-| A9 | Family/spouse linking | Search-by-name link | `FamilyLinkController`, `FamilyController` |
+| A9 | Family/spouse linking | Search-by-name link | `FamilyLinkController` |
 | A10 | Blue tick verification | Verified badge in directory | `Member.IsVerified` set on approval |
 | A11 | Social login | Links verified email; onboarding wizard | `AuthController`, `AdminSocialAuthController` |
 

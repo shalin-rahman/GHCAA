@@ -9,8 +9,13 @@ namespace GHCAA.API.Middleware
     {
         private const string LoginPath = "/api/auth/login";
         private readonly RequestDelegate _next;
+        private readonly ILogger<LoginRateLimitMiddleware> _logger;
 
-        public LoginRateLimitMiddleware(RequestDelegate next) => _next = next;
+        public LoginRateLimitMiddleware(RequestDelegate next, ILogger<LoginRateLimitMiddleware> logger)
+        {
+            _next = next;
+            _logger = logger;
+        }
 
         public async Task InvokeAsync(HttpContext context)
         {
@@ -24,7 +29,10 @@ namespace GHCAA.API.Middleware
                     if (doc.RootElement.TryGetProperty("username", out var usernameProp))
                         context.Items["LoginUsername"] = usernameProp.GetString() ?? "";
                 }
-                catch { /* malformed body — rate-limit by IP only */ }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Login request body could not be parsed for username extraction — rate-limiting by IP only");
+                }
                 finally
                 {
                     context.Request.Body.Position = 0;

@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit, ViewChild, ElementRef, AfterViewChecked, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, ViewChild, ElementRef, AfterViewChecked, computed, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -22,6 +23,7 @@ export class Messages implements OnInit, AfterViewChecked {
   route = inject(ActivatedRoute);
   private networkService = inject(NetworkingService);
   private notify = inject(NotificationService);
+  private destroyRef = inject(DestroyRef);
 
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
 
@@ -56,7 +58,7 @@ export class Messages implements OnInit, AfterViewChecked {
 
     this.chat.loadRecentChats();
 
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const threadId = params['thread'];
       if (threadId) {
         this.selectThread(Number(threadId));

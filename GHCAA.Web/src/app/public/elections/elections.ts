@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -31,6 +32,7 @@ export interface FormStageGroup {
 export class ElectionsPage implements OnInit {
     private http = inject(HttpClient);
     private route = inject(ActivatedRoute);
+    private destroyRef = inject(DestroyRef);
     private router = inject(Router);
     orgConfigService = inject(OrgConfigService);
 
@@ -138,7 +140,7 @@ export class ElectionsPage implements OnInit {
 
     ngOnInit() {
         // `?doc=` keeps a specific document linkable and survives a refresh.
-        this.route.queryParamMap.subscribe(params => {
+        this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
             const id = params.get('doc');
             const doc = this.docs.find(d => d.id === id) ?? null;
             if (doc?.id === this.selected()?.id) return;

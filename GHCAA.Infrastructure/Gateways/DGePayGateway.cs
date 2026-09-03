@@ -5,6 +5,7 @@ using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
@@ -16,6 +17,12 @@ namespace GHCAA.Infrastructure.Gateways
 {
     public class DGePayGateway : IPaymentGatewayService
     {
+        // Keys VerifyCallbackAsync writes into the passed dictionary so ProcessWebhookAsync (and the
+        // redirect callback in GatewaysController) can read the decrypted fields back out.
+        private const string DataKey = "data";
+        private const string UniqueTxnIdKey = "unique_txn_id";
+        private const string AmountKey = "amount";
+
         private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _db;
         private readonly ILogger<DGePayGateway> _logger;
@@ -119,7 +126,7 @@ namespace GHCAA.Infrastructure.Gateways
         {
             try
             {
-                if (!callbackData.TryGetValue("data", out var encryptedData))
+                if (!callbackData.TryGetValue(DataKey, out var encryptedData))
                 {
                     _logger.LogWarning("DGePay Callback missing 'data' parameter.");
                     return false;
@@ -143,9 +150,9 @@ namespace GHCAA.Infrastructure.Gateways
                 if (data == null) return false;
 
                 // Store decrypted info for the controller
-                callbackData["unique_txn_id"] = data.UniqueTxnId ?? "";
+                callbackData[UniqueTxnIdKey] = data.UniqueTxnId ?? "";
                 callbackData["status_code"] = data.StatusCode?.ToString() ?? "";
-                callbackData["amount"] = data.Amount?.ToString() ?? "0";
+                callbackData[AmountKey] = data.Amount?.ToString() ?? "0";
 
                 // Status code 3 = success
                 if (data.StatusCode != 3)
@@ -165,11 +172,51 @@ namespace GHCAA.Infrastructure.Gateways
             }
         }
 
-        public Task<bool> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+        public async Task<PaymentWebhookResultDto> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
         {
-            // Webhooks for DGePay often send the same structure as callbacks or similar.
-            // For now, we'll focus on the callback redirect flow.
-            return Task.FromResult(false);
+            try
+            {
+                using var reader = new StreamReader(body);
+                var content = await reader.ReadToEndAsync(cancellationToken);
+                if (string.IsNullOrWhiteSpace(content)) return PaymentWebhookResultDto.Invalid();
+
+                // DGePay's webhook carries the same encrypted "data" field as the redirect callback
+                // (GatewaysController.DGePayCallback), either as a JSON body or form/query-encoded —
+                // try JSON first, since that's the more common server-to-server webhook shape.
+                string? encryptedData = null;
+                try
+                {
+                    using var doc = JsonDocument.Parse(content);
+                    if (doc.RootElement.TryGetProperty(DataKey, out var dataProp))
+                        encryptedData = dataProp.GetString();
+                }
+                catch (JsonException)
+                {
+                    var parsed = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(content);
+                    if (parsed.TryGetValue(DataKey, out var dataVal))
+                        encryptedData = dataVal.ToString();
+                }
+
+                if (string.IsNullOrEmpty(encryptedData)) return PaymentWebhookResultDto.Invalid();
+
+                var callbackData = new Dictionary<string, string> { { DataKey, encryptedData } };
+                if (!await VerifyCallbackAsync(callbackData, cancellationToken))
+                    return PaymentWebhookResultDto.Invalid();
+
+                // VerifyCallbackAsync wrote unique_txn_id/amount back into callbackData on success.
+                return new PaymentWebhookResultDto
+                {
+                    IsValid = true,
+                    TransactionId = callbackData.TryGetValue(UniqueTxnIdKey, out var tid) ? tid : null,
+                    ConfirmedAmount = callbackData.TryGetValue(AmountKey, out var amt) && decimal.TryParse(amt, out var parsedAmount) ? parsedAmount : (decimal?)null,
+                    GatewayPaymentId = callbackData.TryGetValue(UniqueTxnIdKey, out var gwId) ? gwId : null
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DGePay Webhook Processing Failed");
+                return PaymentWebhookResultDto.Invalid();
+            }
         }
 
         private async Task<bool> VerifyStatusWithServerAsync(string uniqueTxnId, CancellationToken cancellationToken)

@@ -13,12 +13,14 @@ namespace GHCAA.API.Controllers
         private readonly ApplicationDbContext _db;
         private readonly IEmailService _email;
         private readonly IConfiguration _config;
+        private readonly ILogger<HealthController> _logger;
 
-        public HealthController(ApplicationDbContext db, IEmailService email, IConfiguration config)
+        public HealthController(ApplicationDbContext db, IEmailService email, IConfiguration config, ILogger<HealthController> logger)
         {
             _db = db;
             _email = email;
             _config = config;
+            _logger = logger;
         }
 
         [AllowAnonymous]
@@ -41,10 +43,12 @@ namespace GHCAA.API.Controllers
                 health.Checks.Add(new { Name = "Database", Status = canConnect ? "Healthy" : "Unhealthy" });
                 if (!canConnect) allHealthy = false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Anonymous endpoint — never leak raw exception text (host/port/credentials can
-                // appear in Npgsql connection-failure messages).
+                // Anonymous endpoint — never leak raw exception text in the response (host/port/
+                // credentials can appear in Npgsql connection-failure messages). Server-side log is
+                // fine; only the client-facing body stays generic.
+                _logger.LogError(ex, "Health check: Database probe failed");
                 health.Checks.Add(new { Name = "Database", Status = "Error" });
                 allHealthy = false;
             }
@@ -58,7 +62,12 @@ namespace GHCAA.API.Controllers
                 health.Checks.Add(new { Name = "FileStorage", Status = storageOk ? "Healthy" : "Unhealthy" });
                 if (!storageOk) allHealthy = false;
             }
-            catch { health.Checks.Add(new { Name = "FileStorage", Status = "Error" }); allHealthy = false; }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Health check: FileStorage probe failed");
+                health.Checks.Add(new { Name = "FileStorage", Status = "Error" });
+                allHealthy = false;
+            }
 
             // 3. Email Config check
             var emailConfig = _config.GetSection("GmailSettings");

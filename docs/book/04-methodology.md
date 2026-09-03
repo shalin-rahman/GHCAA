@@ -52,8 +52,8 @@ was rejected and why.
 The **design cycle** is the inner loop of building and evaluating, repeated across the increments
 Chapter 7 reports and gated, in every increment, by the verification discipline described in §4.4.
 This is the cycle that ran most often. It is also the cycle for which the repository itself is the
-clearest evidence, since every one of the two hundred and three commits between 9 February and 28
-August 2026 is a turn of it.
+clearest evidence, since every one of the two hundred and thirty-five commits between 9 February and 4
+September 2026 is a turn of it.
 
 ## 4.3 Mapping Design Science Activities to the Work Performed
 
@@ -71,7 +71,7 @@ document.
 | Communication | This dissertation, and the documentation corpus in `docs/` that a successor maintainer would read first | Whole document |
 
 The "design and development" row understates nothing by omission and nothing by exaggeration: the
-forty-six work packages are `docs/TODO.md`'s own numbering, several of them opened explicitly "raised by
+eighty-two work packages are `docs/TODO.md`'s own numbering, several of them opened explicitly "raised by
 user" on a dated request, which is the clearest documentary evidence available that the relevance
 cycle kept running throughout construction rather than only at the requirements stage.
 
@@ -104,7 +104,7 @@ change in response to what the working software reveals [53], [54].
 
 What was actually followed is incremental and evolutionary delivery in the sense Lehman describes
 software's continuing growth and increasing complexity as inherent to a live system rather than as a
-process failure [55]: forty-six work packages, opened as problems were found or requested, each closed
+process failure [55]: eighty-two work packages, opened as problems were found or requested, each closed
 against a gate rather than against a date. The gate is stated plainly in `docs/TODO.md`'s own
 verification standard: "no task marked done until its test passes", and the phased remediation plans
 in `docs/FORUM_PLAN_2026-05.md` end each phase with an explicit gate line, for example `dotnet test` (API),
@@ -417,7 +417,7 @@ the argument of §12.13 about what transfers, not an assumption that it transfer
 ## 4.11 Summary
 
 The method is design science research, run as Hevner's three cycles and Peffers' six activities,
-delivered through forty-six incrementally opened work packages gated by an automated test rather than by
+delivered through eighty-two incrementally opened work packages gated by an automated test rather than by
 a calendar date. The evaluation plan is fixed in this chapter across six dimensions, each with a
 named metric, tool and threshold, before Chapter 9 measures anything. Risk was managed through the
 same gated work-item mechanism as everything else, and the RMMM table of §4.8 is built from the

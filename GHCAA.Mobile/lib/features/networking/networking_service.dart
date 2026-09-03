@@ -76,13 +76,4 @@ class NetworkingService {
     }
   }
 
-  Future<bool> updateProfile(Map<String, dynamic> data) async {
-    try {
-      final response = await _dio.put('/profile/update', data: data);
-      return response.statusCode == 200;
-    } catch (e) {
-      debugPrint('NetworkingService.updateProfile failed: $e');
-      return false;
-    }
-  }
 }

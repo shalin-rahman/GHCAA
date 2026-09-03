@@ -12,6 +12,12 @@ namespace GHCAA.Infrastructure.Gateways
 {
     public class BkashGateway : IPaymentGatewayService
     {
+        // Keys used both when reading a callback/webhook payload and when VerifyCallbackAsync
+        // writes the Execute-response fields back into the passed dictionary for ProcessWebhookAsync.
+        private const string PaymentIdKey = "paymentID";
+        private const string MerchantInvoiceNumberKey = "merchantInvoiceNumber";
+        private const string AmountKey = "amount";
+
         private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _db;
         private readonly ILogger<BkashGateway> _logger;
@@ -87,7 +93,7 @@ namespace GHCAA.Infrastructure.Gateways
 
         public async Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
         {
-            if (!callbackData.TryGetValue("paymentID", out var paymentId) || string.IsNullOrEmpty(paymentId)) return false;
+            if (!callbackData.TryGetValue(PaymentIdKey, out var paymentId) || string.IsNullOrEmpty(paymentId)) return false;
             // Accept both "success" and "Success" — bKash docs inconsistently use both forms.
             if (!callbackData.TryGetValue("status", out var status)
                 || !string.Equals(status, "success", StringComparison.OrdinalIgnoreCase)) return false;
@@ -135,6 +141,15 @@ namespace GHCAA.Infrastructure.Gateways
                     }
                 }
 
+                // Same pattern DGePayGateway uses: write the fields the caller actually needs to
+                // key off back into the passed dictionary, since VerifyCallbackAsync's own signature
+                // is fixed by IPaymentGatewayService and can't return them directly. MerchantInvoiceNumber
+                // is our internal TransactionId, not bKash's own paymentID — the two are different fields.
+                if (!string.IsNullOrEmpty(result.MerchantInvoiceNumber))
+                    callbackData[MerchantInvoiceNumberKey] = result.MerchantInvoiceNumber;
+                if (!string.IsNullOrEmpty(result.Amount))
+                    callbackData[AmountKey] = result.Amount;
+
                 return true;
             }
             catch (Exception ex)
@@ -145,7 +160,7 @@ namespace GHCAA.Infrastructure.Gateways
         }
 
         // 24.10: Verify X-APP-Key header before trusting any paymentID in the webhook body.
-        public async Task<bool> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+        public async Task<PaymentWebhookResultDto> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -153,7 +168,7 @@ namespace GHCAA.Infrastructure.Gateways
                 if (!headers.TryGetValue("X-APP-Key", out var incomingKey) || string.IsNullOrEmpty(incomingKey))
                 {
                     _logger.LogWarning("bKash webhook rejected: missing X-APP-Key header");
-                    return false;
+                    return PaymentWebhookResultDto.Invalid();
                 }
 
                 var config = await _db.PaymentConfigurations
@@ -163,19 +178,32 @@ namespace GHCAA.Infrastructure.Gateways
                 if (config == null || config.GatewayPublicKey != incomingKey)
                 {
                     _logger.LogWarning("bKash webhook rejected: invalid X-APP-Key");
-                    return false;
+                    return PaymentWebhookResultDto.Invalid();
                 }
 
                 var payload = await System.Text.Json.JsonSerializer.DeserializeAsync<Dictionary<string, object>>(body, cancellationToken: cancellationToken);
-                if (payload == null) return false;
+                if (payload == null) return PaymentWebhookResultDto.Invalid();
 
                 var data = payload.ToDictionary(x => x.Key, x => x.Value?.ToString() ?? "");
-                return await VerifyCallbackAsync(data, cancellationToken);
+                var paymentId = data.TryGetValue(PaymentIdKey, out var pid) ? pid : null;
+
+                if (!await VerifyCallbackAsync(data, cancellationToken))
+                    return PaymentWebhookResultDto.Invalid();
+
+                // VerifyCallbackAsync wrote merchantInvoiceNumber/amount back into `data` on success —
+                // merchantInvoiceNumber is our internal TransactionId, not bKash's own paymentID.
+                return new PaymentWebhookResultDto
+                {
+                    IsValid = true,
+                    TransactionId = data.TryGetValue(MerchantInvoiceNumberKey, out var inv) ? inv : null,
+                    ConfirmedAmount = data.TryGetValue(AmountKey, out var amt) && decimal.TryParse(amt, out var parsed) ? parsed : (decimal?)null,
+                    GatewayPaymentId = paymentId
+                };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "bKash Webhook Processing Failed");
-                return false;
+                return PaymentWebhookResultDto.Invalid();
             }
         }
 

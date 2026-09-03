@@ -29,6 +29,9 @@ CATEGORY = {
     48: ("Security", "Audit, scanning and hardening"),
     72: ("Security", "Audit, scanning and hardening"),
 }
+CATEGORY[80] = ("Code", "Backend and web engineering")
+CATEGORY[81] = ("Feature", "Product work requested by the Association")
+CATEGORY[82] = ("Architecture", "Audit findings and the refactoring they name")
 for n in range(63, 80):
     CATEGORY[n] = ("Dissertation", "The book, its build and its evidence")
 
@@ -85,16 +88,22 @@ def parse():
                 break
             body.append(nxt.strip())
         blob = " ".join(body)
-        pr = re.search(r"Priority: (P\d)", blob)
-        dep = re.search(r"Depends on:? ([^.*|]+)", blob)
-        clean = re.sub(r"\*\*Priority: P\d\.?\*\*|Priority: P\d\.?", "", blob)
-        clean = re.sub(r"\|?\s*\*\*Depends on:?[^*]*\*\*|Depends on:? [\d.,\s]+\.", "", clean)
-        clean = re.sub(r"^[\s|*]+", "", clean).strip()
+        # An item states its priority and dependencies in one bold run:
+        # "**Priority: P2 | Depends on: 82.1.**". Older items split them or
+        # omit the bold, so both shapes have to parse.
+        meta = re.search(r"\*\*([^*]*(?:Priority|Depends on):[^*]*)\*\*", blob)
+        meta_text = meta.group(1) if meta else blob
+        pr = re.search(r"Priority:\s*(P\d)", meta_text)
+        dep_m = re.search(r"Depends on:?\s*([^|*]+)", meta_text)
+        clean = re.sub(r"\*\*[^*]*(?:Priority|Depends on):[^*]*\*\*", "", blob)
+        clean = re.sub(r"Priority:\s*P\d\s*[.|]?", "", clean)
+        clean = re.sub(r"Depends on:?\s*(?:none|[\d.,a-z\s]+?)\.", "", clean, count=1)
+        clean = re.sub(r"^[\s|*.]+", "", clean).strip()
         cat, cat_note = classify(num, blob)
         items.append(dict(
             id=f"{m.group(1)}.{m.group(2)}", wp=num, state=m.group(3),
             pr=pr.group(1) if pr else "none",
-            dep=dep.group(1).strip().rstrip(".") if dep else "",
+            dep=dep_m.group(1).strip().rstrip(".").strip() if dep_m else "",
             cat=cat, cat_note=cat_note, text=clean))
     return titles, items
 

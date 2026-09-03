@@ -1,4 +1,5 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { NewsService } from '../../core/services/news.service';
 import { NewsPost, PostType } from '../../core/models/business.models';
@@ -17,6 +18,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 export class News implements OnInit {
   private newsService = inject(NewsService);
   private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
   private router = inject(Router);
   getArticleCategoryLabel = getArticleCategoryLabel;
 
@@ -55,7 +57,7 @@ export class News implements OnInit {
   }
 
   ngOnInit() {
-    this.route.queryParamMap.subscribe(params => {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const type = params.get('type');
       this.applyFilter(type === 'Notice' || type === 'News' ? type : '');
     });

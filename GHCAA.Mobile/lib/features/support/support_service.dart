@@ -29,34 +29,3 @@ class SupportService {
     }
   }
 }
-
-final familyServiceProvider = Provider<FamilyService>((ref) => FamilyService(ref.read(dioProvider)));
-
-class FamilyService {
-  final Dio _dio;
-  FamilyService(this._dio);
-
-  // NOTE: there are 3 distinct classes named `FamilyService` in this codebase (this one, plus
-  // features/family/family_service.dart and features/networking/family_service.dart) — the
-  // "(support_service.dart)" suffix disambiguates which one logged, since the class name alone
-  // does not.
-  Future<List<dynamic>> getFamilyLinks() async {
-    try {
-      final response = await _dio.get('/familylink');
-      return response.data as List<dynamic>;
-    } catch (e) {
-      debugPrint('FamilyService.getFamilyLinks failed (support_service.dart): $e');
-      rethrow;
-    }
-  }
-
-  Future<bool> addFamilyMember(Map<String, dynamic> data) async {
-    try {
-      final response = await _dio.post('/familylink', data: data);
-      return response.statusCode == 200 || response.statusCode == 201;
-    } catch (e) {
-      debugPrint('FamilyService.addFamilyMember failed (support_service.dart): $e');
-      return false;
-    }
-  }
-}

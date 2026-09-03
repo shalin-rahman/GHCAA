@@ -66,4 +66,7 @@ ENV DOTNET_hostBuilder__reloadConfigOnChange=false
 COPY --from=publish /app/publish .
 # Copy the built Angular SPA into wwwroot so UseStaticFiles serves it at /
 COPY --from=web /web/dist/GHCAA.Web/browser ./wwwroot
+# Institution profile pack (docs/WHITE_LABEL_PLAN.md, docs/TODO.md Work Package 62) — data, not
+# code, so it's copied as-is rather than published through the .csproj.
+COPY profiles/ ./profiles/
 ENTRYPOINT ["dotnet", "GHCAA.API.dll"]

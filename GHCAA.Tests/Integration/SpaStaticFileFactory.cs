@@ -40,6 +40,14 @@ namespace GHCAA.Tests.Integration
             Directory.CreateDirectory(Path.Combine(WebRoot, "assets", "placeholders"));
             File.WriteAllText(Path.Combine(WebRoot, "assets", "placeholders", "image-placeholder.svg"), "<svg>placeholder</svg>");
 
+            // IInstitutionProfileProvider is resolved eagerly at boot (Program.cs) and throws if it
+            // can't find profiles/default/org-config.json under the content root — an empty JSON
+            // object deserializes to every default value on OrgConfigDto, so this satisfies that
+            // without needing the repo's real profiles/ folder.
+            var profileDir = Path.Combine(_contentRoot, "profiles", "default");
+            Directory.CreateDirectory(profileDir);
+            File.WriteAllText(Path.Combine(profileDir, "org-config.json"), "{}");
+
             _dbPath = Path.Combine(_contentRoot, "test.db");
 
             Environment.SetEnvironmentVariable("ASP_SEED_PROFILE", "Visual");

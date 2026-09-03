@@ -122,8 +122,10 @@
                           <option value="None">None (Manual Channels)</option>
                           <option value="SSLCommerz">SSLCommerz (Local Cards/MFS)</option>
                           <option value="BkashGateway">bKash (Direct Tokenized)</option>
-                          <option value="NagadGateway">Nagad (Direct Gateway)</option>
                       </select>
+                      <!-- NagadGateway (backend/NagadGateway.cs) always returns "coming soon" — removed
+                           from this list so nobody can assign it to a live config. Restore the option
+                           once the integration is real (docs/TODO.md 80.10). -->
                       <p class="text-[9px] text-muted uppercase font-black px-2 mt-1">Assigning a gateway enables real-time synchronization.</p>
                   </div>
               </div>

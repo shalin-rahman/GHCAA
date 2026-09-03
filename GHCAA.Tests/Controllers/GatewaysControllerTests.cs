@@ -340,5 +340,70 @@ namespace GHCAA.Tests.Controllers
             var updatedReg = await _context.EventRegistrations.FirstOrDefaultAsync(r => r.Id == registration.Id);
             Assert.That(updatedReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
         }
+
+        // Regression coverage for docs/TODO.md 80.11: a webhook used to be dead-ended at a bool,
+        // so a real gateway confirmation could never reach HandleSuccessfulPayment. This proves the
+        // webhook path now drives the same completion logic the redirect callback uses.
+        [Test]
+        public async Task GatewayWebhook_MarksPaymentCompleted_WhenGatewayConfirmsValid()
+        {
+            const string trxId = "SSL-WEBHOOK-1";
+            var payment = new PaymentHistory
+            {
+                MemberId = _testMember.Id,
+                Amount = 500,
+                TransactionId = trxId,
+                Status = Enums.PaymentStatus.Pending
+            };
+            _context.PaymentHistories.Add(payment);
+            await _context.SaveChangesAsync();
+
+            var webhookGatewayMock = new Mock<IPaymentGatewayService>();
+            webhookGatewayMock
+                .Setup(x => x.ProcessWebhookAsync(It.IsAny<Stream>(), It.IsAny<IDictionary<string, string>>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new PaymentWebhookResultDto
+                {
+                    IsValid = true,
+                    TransactionId = trxId,
+                    ConfirmedAmount = 500,
+                    GatewayPaymentId = "gw-ref-1"
+                });
+            _gatewayFactoryMock.Setup(x => x.GetGateway(Enums.PaymentGateway.SSLCommerz)).Returns(webhookGatewayMock.Object);
+
+            _controller.ControllerContext.HttpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes("irrelevant-for-this-mock"));
+
+            var result = await _controller.GatewayWebhook("SSLCommerz", CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            _financialServiceMock.Verify(x => x.UpdatePaymentStatusAsync(payment.Id, Enums.PaymentStatus.Completed, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
+        public async Task GatewayWebhook_DoesNotTouchPayment_WhenGatewayReportsInvalid()
+        {
+            const string trxId = "SSL-WEBHOOK-2";
+            var payment = new PaymentHistory
+            {
+                MemberId = _testMember.Id,
+                Amount = 500,
+                TransactionId = trxId,
+                Status = Enums.PaymentStatus.Pending
+            };
+            _context.PaymentHistories.Add(payment);
+            await _context.SaveChangesAsync();
+
+            var webhookGatewayMock = new Mock<IPaymentGatewayService>();
+            webhookGatewayMock
+                .Setup(x => x.ProcessWebhookAsync(It.IsAny<Stream>(), It.IsAny<IDictionary<string, string>>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(PaymentWebhookResultDto.Invalid());
+            _gatewayFactoryMock.Setup(x => x.GetGateway(Enums.PaymentGateway.SSLCommerz)).Returns(webhookGatewayMock.Object);
+
+            _controller.ControllerContext.HttpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes("irrelevant-for-this-mock"));
+
+            var result = await _controller.GatewayWebhook("SSLCommerz", CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            _financialServiceMock.Verify(x => x.UpdatePaymentStatusAsync(It.IsAny<int>(), It.IsAny<Enums.PaymentStatus>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
     }
 }

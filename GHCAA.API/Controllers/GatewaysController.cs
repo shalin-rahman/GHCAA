@@ -276,14 +276,11 @@ namespace GHCAA.API.Controllers
             }
             var headers = Request.Headers.ToDictionary(h => h.Key, h => h.Value.ToString());
 
-            var isValid = await gatewayService.ProcessWebhookAsync(Request.Body, headers, cancellationToken);
+            var result = await gatewayService.ProcessWebhookAsync(Request.Body, headers, cancellationToken);
 
-            if (isValid)
+            if (result.IsValid && !string.IsNullOrEmpty(result.TransactionId))
             {
-                // TODO: ProcessWebhookAsync returns only a bool, not the transaction ID, so we can't call
-                // HandleSuccessfulPayment from here. Each gateway implementation currently updates the DB
-                // itself; change ProcessWebhookAsync to return a result with TrxId so this controller can
-                // drive that update centrally instead.
+                await HandleSuccessfulPayment(result.TransactionId, cancellationToken, result.ConfirmedAmount, result.GatewayPaymentId);
                 return Ok(new { status = "success" });
             }
 

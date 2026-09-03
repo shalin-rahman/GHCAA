@@ -15,6 +15,12 @@ namespace GHCAA.Infrastructure.Gateways
 {
     public class SSLCommerzGateway : IPaymentGatewayService
     {
+        // SSLCommerz's own field names, read from both the redirect callback form body and the
+        // webhook body.
+        private const string TranIdKey = "tran_id";
+        private const string AmountKey = "amount";
+        private const string ValIdKey = "val_id";
+
         private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _db;
         private readonly ILogger<SSLCommerzGateway> _logger;
@@ -120,7 +126,7 @@ namespace GHCAA.Infrastructure.Gateways
         {
             if (!callbackData.ContainsKey("status") || callbackData["status"] != "VALID") return false;
 
-            var valId = callbackData.TryGetValue("val_id", out var v) ? v : "";
+            var valId = callbackData.TryGetValue(ValIdKey, out var v) ? v : "";
             if (string.IsNullOrEmpty(valId)) return false;
 
             var config = await _db.PaymentConfigurations
@@ -156,7 +162,7 @@ namespace GHCAA.Infrastructure.Gateways
             }
         }
 
-        public async Task<bool> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+        public async Task<PaymentWebhookResultDto> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -166,12 +172,28 @@ namespace GHCAA.Infrastructure.Gateways
                 var parsed = QueryHelpers.ParseQuery(content);
                 var data = parsed.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString());
 
-                return await VerifyCallbackAsync(data, cancellationToken);
+                if (!await VerifyCallbackAsync(data, cancellationToken))
+                    return PaymentWebhookResultDto.Invalid();
+
+                // Same fields and the same null-vs-reported-zero rule the redirect callback uses
+                // (GatewaysController.SSLCommerzCallback), so a payment completed via webhook goes
+                // through the identical amount check.
+                decimal? amount = data.TryGetValue(AmountKey, out var a)
+                    ? (decimal.TryParse(a, out var amt) ? amt : 0m)
+                    : (decimal?)null;
+
+                return new PaymentWebhookResultDto
+                {
+                    IsValid = true,
+                    TransactionId = data.TryGetValue(TranIdKey, out var tid) ? tid : null,
+                    ConfirmedAmount = amount,
+                    GatewayPaymentId = data.TryGetValue(ValIdKey, out var vi) ? vi : null
+                };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "SSLCommerz Webhook Processing Failed");
-                return false;
+                return PaymentWebhookResultDto.Invalid();
             }
         }
 

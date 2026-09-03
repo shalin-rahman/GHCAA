@@ -1,6 +1,7 @@
 using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
@@ -11,7 +12,7 @@ namespace GHCAA.API.Controllers
 {
     [ApiController]
     [Route("api/auth")]
-    [EnableRateLimiting("registration")]
+    [EnableRateLimiting(Constants.RateLimitPolicies.Registration)]
     public class RegistrationController : ControllerBase
     {
         private readonly IMemberService _memberService;
@@ -88,7 +89,7 @@ namespace GHCAA.API.Controllers
 
         [HttpPost("verify-email")]
         [AllowAnonymous]
-        [EnableRateLimiting("auth")]
+        [EnableRateLimiting(Constants.RateLimitPolicies.Auth)]
         public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailDto dto, CancellationToken cancellationToken)
         {
             var isVerified = await _memberService.VerifyEmailAsync(dto.Email, dto.OtpCode, cancellationToken);
@@ -103,7 +104,7 @@ namespace GHCAA.API.Controllers
 
         [HttpPost("resend-otp")]
         [AllowAnonymous]
-        [EnableRateLimiting("auth")]
+        [EnableRateLimiting(Constants.RateLimitPolicies.Auth)]
         public async Task<IActionResult> ResendOtp([FromBody] ResendOtpDto dto, CancellationToken cancellationToken)
         {
             var success = await _memberService.ResendOtpAsync(dto.Email, cancellationToken);

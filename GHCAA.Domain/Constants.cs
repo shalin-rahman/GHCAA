@@ -24,6 +24,17 @@ namespace GHCAA.Domain
         // from every [OutputCache(PolicyName = ...)] attribute. Only [AllowAnonymous] endpoints
         // that return the same body to every caller may use one — see the comment above
         // AddOutputCache in Program.cs for why an authenticated route must never opt in.
+        // Rate-limiter policy names (registered once in Program.cs's AddRateLimiter), referenced
+        // from every [EnableRateLimiting] attribute and from the "api" fallback applied to
+        // MapControllers().
+        public static class RateLimitPolicies
+        {
+            public const string Auth = "auth";
+            public const string Refresh = "refresh";
+            public const string Registration = "registration";
+            public const string Api = "api";
+        }
+
         public static class OutputCachePolicies
         {
             public const string PublicReference = "PublicReference";

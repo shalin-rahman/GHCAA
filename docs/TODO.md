@@ -150,6 +150,9 @@ risk on the same basis.
   reflect the ~৳47,000 in per-member fees that ARE recorded correctly.
 - **34.D10** — Likely already superseded by `MigrationBootstrapper` (see `gotcha_ensurecreated_no_op_existing_db`)
   — verify against current `Program.cs` before treating this as still open; don't just re-do it.
+- **82.1 / 82.2** — Run the architecture and engineering audit briefed in `docs/materials/REVIEW.md`
+  and reconcile its findings against this tracker. Blocking, because 82.6 and 82.8–82.13 are scoped by
+  what the audit finds, and because an unreconciled review would open a second backlog against SR-3.
 
 ### P2 — MEDIUM (real, no urgency signal)
 - **45.1–45.7** — Admin error-log viewer, fully planned, nothing built.
@@ -166,6 +169,11 @@ risk on the same basis.
 - **7.16, 8.3–8.7** — Mobile hardening/perf backlog (SSL pinning, pagination, background threading, etc.).
 - **12.1–12.6** — Process items (API-change checklist, contract registry, mobile log capture).
 - **52.5** — Mobile's separate "quick create gallery" dialog — left as-is, a future cleanup decision.
+- **82.3 / 82.4 / 82.5 / 82.7 / 82.8 / 82.10a** — Cross-cutting engineering gaps measured 2026-09-04: no
+  API versioning against an independently shipped mobile client; three error-response shapes; 55 copies
+  of claim parsing in the controllers; seven Angular components bypassing the service layer; paging
+  applied to only a fraction of the list endpoints; and no published API contract to diff, the OpenAPI
+  document being served in Development only.
 - **61.1 / 61.2** — Dynamic/runtime dead-code scan (unused services/classes/widgets) + follow-up
   refactor pass, run module-by-module via graphify rather than one blind full-repo sweep.
 
@@ -173,6 +181,10 @@ risk on the same basis.
 - **Work Package 37** (37.2–37.10) — scholarships, fundraising, cohorts/reunions, oral-history archive,
   bilingual UI, credential verification, geographic chapters, annual impact report.
 - **6.2** — Alumni referral system for jobs/internships.
+- **82.6 / 82.9 / 82.10b / 82.11–82.13** — Audit follow-through: split `MemberService` (1,577 lines),
+  request correlation and structured logging, typed Dart models for the auth, profile and payment
+  payloads, the configuration and constants classifications, and the missing decision records and
+  recovery runbook. (82.10, whether to generate clients from OpenAPI, is decided and closed: rejected.)
 - **61.3** — Drop the `Summary:`-style comment banner in `GHCAA.Tools/db_diag.cs` next time that file is touched.
 
 ## WORK PACKAGE 1: MOBILE PLATFORM STABILITY & PARITY
@@ -1725,11 +1737,14 @@ in the log text, since there are 3 unrelated classes named `FamilyService` in th
 updated: `gateway_service`'s failure-wrapper test asserted the old raw-exception passthrough, now
 asserts the generic message and that the raw text is absent).
 
-44.16 [TODO] **Priority: P3.** Not fixed — deliberately out of scope for a logging sweep: 3 classes are all named
-`FamilyService` (`features/family/family_service.dart`, `features/networking/family_service.dart`,
-`features/support/support_service.dart`). Renaming is a real refactor (import aliasing, provider
-naming, call-site updates) with regression risk disproportionate to a naming/debugging-clarity issue
-— worth doing deliberately, not as a drive-by.
+44.16 [DONE 2026-09-04] Resolved as a side effect of 80.2/80.4, not by the rename this item originally
+called for. `features/family/family_service.dart` turned out to have zero importers anywhere in the
+app (dead file, deleted) and `features/support/support_service.dart`'s own `FamilyService` was equally
+dead — `support_screen.dart` imports the file only for `SupportService`, never calls
+`getFamilyLinks`/`addFamilyMember`, and that class's route (`/familylink`) didn't match any real
+endpoint anyway (see 80.4). Deleting both leaves exactly one `FamilyService` in the codebase
+(`features/networking/family_service.dart`, the one `family_link_screen.dart` actually uses), so the
+naming collision this item was tracking no longer exists. No rename was needed.
 
 44.17 [SUPERSEDED by 44.20] The `OutputCacheMiddleware`/compression-mismatch theory below turned out
 to be wrong — see 44.20 for the real cause and fix of the live outage this was originally guessing
@@ -3221,15 +3236,44 @@ tone rule. Not worth a standalone edit today — it's a diagnostic script, not s
 
 ### PHASE A: PROFILE PACK FOUNDATION (blocking, no user-visible change)
 
-62.1 [TODO] **Priority: P1 | Depends on: none.** Infra: `IInstitutionProfileProvider` +
-implementation. Resolves `ORG_PROFILE` env var (default `default`), loads `profiles/<name>/*.json`,
-merges file-by-file over `profiles/default/`, caches, validates on boot and fails with a readable
-error listing missing keys. Registered in DI ahead of `OrgConfigService`.
+62.1 [DONE 2026-09-04] `IInstitutionProfileProvider` (`GHCAA.Application.Interfaces`) +
+`InstitutionProfileProvider` (`GHCAA.Infrastructure.Services`). Resolves `ORG_PROFILE` (default
+`default`), reads `profiles/<name>/org-config.json`, falls back to `profiles/default/org-config.json`
+file-by-file (today that's the only file type built — see 62.2's partial status), and throws a
+message naming both the requested profile and the missing file if neither exists. Registered
+`AddSingleton` — the "boot plane" per ADR-3, loaded once, not per-request — excluded from the
+reflection-based auto-registration loop for the same reason 80.12 excluded `GreenwebSmsService`
+(needs a specific lifetime the loop can't express). `Program.cs` resolves it eagerly right after
+`builder.Build()` so a bad pack fails boot with a readable error instead of surfacing on first use.
+`Dockerfile`'s final stage gained `COPY profiles/ ./profiles/` — without it the folder never reaches
+the image `dotnet publish` produces. Path resolution checks the content root, then its parent (a
+local `dotnet run` from `GHCAA.API/` has its content root one level below the repo root that actually
+holds `profiles/`; Docker's `WORKDIR /app` has it directly).
 
-62.2 [TODO] **Priority: P1 | Depends on: 62.1.** Create `profiles/default/` neutral pack:
-org-config.json, site-content.json, email-templates.json, lookups.json, membership-tiers.json,
-governance.json, documents.json, seo.json, assets/ (neutral logo, favicons, seal), demo-data/ (small
-synthetic set). Must contain zero real personal data and zero GHC strings.
+Not yet consumed anywhere (that's 62.6, a separate phase) — `OrgConfigService` still builds its
+defaults in code, so this ships with **zero effect on GHC's live behavior**, matching Phase A's own
+"no user-visible change" requirement. Regression found and fixed while building this:
+`WebApplicationFactory`-based integration tests (`SpaStaticFileFactory`, `OutputCacheTestFactory`)
+boot the real `Program.cs` against a synthetic temp content root with no `profiles/` folder anywhere
+near it, so eager resolution started throwing at boot for all 14 of them; both factories now write a
+minimal `profiles/default/org-config.json` (`{}` — every `OrgConfigDto` field has a default, so an
+empty object deserializes fine) alongside their other boot-required fixtures. Five new unit tests in
+`InstitutionProfileProviderTests.cs` cover: default-profile resolution, a named profile found
+directly, a named profile falling back to `default` file-by-file, the readable error when neither
+exists, and the parent-directory resolution path Docker/local-dev actually rely on but the
+integration tests' direct-match content root doesn't exercise. `dotnet build`/`dotnet test` clean
+full suite green.
+
+62.2 [PARTIAL 2026-09-04] Only `org-config.json` exists so far, both for `profiles/default/` (a
+genuinely neutral "Sample Alumni Association" pack — no GHC strings, no real personal data, checked
+against `OrgConfigDto`'s full shape) and as the file type 62.1's provider actually reads. The other
+seven file types ADR-2 specifies (`site-content.json`, `email-templates.json`, `lookups.json`,
+`membership-tiers.json`, `governance.json`, `documents.json`, `seo.json`) and the `assets/`/
+`demo-data/` folders are deliberately not built yet — nothing reads them until the phase that
+introduces each one (Phase B for email templates, Phase C for web assets/SEO, Phase E for tiers/
+governance/documents), and building a schema today for a consumer that doesn't exist yet is exactly
+the premature-abstraction risk the project's own "no new abstraction without a concrete problem"
+rule warns against.
 
 62.3 [TODO] **Priority: P1 | Depends on: 62.1.** Create `profiles/ghc/` by extracting today's values
 verbatim from `OrgConfigService.BuildGhcaaDefaults()`, `Constants.Defaults`, `appsettings.json`
@@ -4745,6 +4789,22 @@ consistency pass. This departs from the review brief, which scheduled 11 near th
 
 ---
 
+78.14 [TODO] **Priority: P1. Depends on: none.** Defect raised against §4.2, §4.3 and §4.13 of
+`docs/book/04-methodology.md`, found by an external read of the 4 September 2026 PDF. The chapter
+quoted "two hundred and three commits" and "forty-six work packages" in four places while the tree
+carried 235 commits and 82 work packages. The four sentences were corrected the same day, so the
+defect is closed; the control that would have caught it is not, which is what this item is for.
+Repository counts drift every time work is added, and nothing fails when the prose falls behind.
+Add the check to `docs/book/build/lint.py`: recognise a quoted repository count in the chapters,
+whether written in digits or in words, and fail `--strict` when it disagrees with what `wbs.py`
+computes from the tree. The same read raised a second point that is fair and cheap to settle in the
+same edit: commit, tracker task, numbered work package, WBS activity and feature are five different
+units and the chapters use them near each other without ever saying so. State the five definitions
+once, in Chapter 11 where the counts are used, and cross-refer to them from Chapter 4.
+**Acceptance:** `build.py --strict` fails on a chapter figure that no longer matches the tree, naming
+the sentence; the five units are defined in one place; and no chapter states a repository count that a
+command cannot reproduce on the date given.
+
 # Work Package 79 — Plain-language sweep against the widened SR-1
 
 <!-- wbs: component=C17 start=2026-09-03 end=2026-09-03 after=78 -->
@@ -4952,14 +5012,17 @@ endpoint at the same URL never mixes two different members' data; a `PublicRefer
 endpoint does serve a stale copy within its window (proves the opt-in policy is actually wired, not
 just present). Full `GHCAA.Tests` suite re-run green after the change (2026-09-03).
 
-80.2 [TODO] **Priority: P1.** Real routing bug, unrelated to caching, found while auditing broken
-flows: `FamilyController.cs` (`[Route("api/[controller]")]` → `api/Family`) declares `[HttpGet
-("links")]` and `[HttpGet("search")]`, and `FamilyLinkController.cs` separately declares the absolute
-routes `[HttpGet("/api/Family/links")]` and `[HttpGet("/api/Family/search")]` as "web parity aliases".
-Two controllers register the identical route template and HTTP verb — `AmbiguousMatchException` at
-request time for both paths, not a compile-time error. Resolve by deleting the aliases from
-`FamilyLinkController` (the intended owner per its own name) or merging the two controllers; confirm
-which callers actually use `/api/Family/links` vs `/api/family-links` first.
+80.2 [DONE 2026-09-04] Confirmed neither web nor mobile calls any `FamilyController` route (grepped
+both clients for every literal and constant shape before deleting — zero hits), and it fully
+duplicates `FamilyLinkController`'s `links`/`search` functionality under a colliding route template.
+Deleted `GHCAA.API/Controllers/FamilyController.cs`, which removes the `AmbiguousMatchException` risk
+permanently rather than just resolving the alias. `IFamilyService`/`FamilyService` were NOT deleted
+with it on the first pass — a filtered grep missed that `FamilyLinkController` also depends on
+`IFamilyService` for its own `search` action (`_familyService.SearchByNameAsync`, line 122); the build
+caught the mistake immediately, both files were restored, and the fix is now just the one dead
+controller. `dotnet build`/`dotnet test` clean afterward. `FamilyLinkController`'s own `/api/Family/
+links` and `/api/Family/search` aliases were left in place — harmless now that nothing else claims the
+same template, and no client uses them either way.
 
 80.3 [TODO] **Priority: P2.** `GHCAA.API/Program.cs`'s rate limiter defines an `"api"` policy (100/min)
 that is never applied anywhere — no `[EnableRateLimiting("api")]`, no global limiter. Only
@@ -4968,33 +5031,62 @@ now-cached public reads, has no request-rate ceiling. Apply the `"api"` policy g
 `RequireRateLimiting` on `MapControllers()`, overridden per-controller where a tighter policy already
 applies) rather than leaving it as dead configuration.
 
-80.4 [TODO] **Priority: P2.** Three client calls that 404 against the real API surface, found by
-diffing Angular/Flutter call sites against controller routes: `GHCAA.Mobile/lib/features/auth/
-auth_service.dart:170` posts `/api/auth/forgot-password` (no such route — only `reset-password`
-exists), `.../support/support_service.dart:45,55` calls `/api/familylink` (the controller is routed
-`api/family-links`), and `.../networking/networking_service.dart:81` calls `PUT /api/profile/update`
-(`ProfileController` has no `update` segment). Each is a dead feature on mobile today. Fix the client
-call or add the missing route, whichever matches what the screen is supposed to do.
+80.4 [DONE 2026-09-04] Three client calls that 404'd, resolved individually — two turned out to be
+dead duplicate code sitting next to a working equivalent, one is a real missing backend feature:
 
-80.5 [TODO] **Priority: P3.** Swallowed exceptions that turn a real failure into silence:
-`HealthController.cs:61`'s `catch { }` discards the exception and reports a generic "Error" for every
-storage failure; `LoginRateLimitMiddleware.cs:27`'s `catch { }` silently falls back to IP-only rate
-limiting on a malformed body; `Program.cs`'s seeding blocks (~395, ~400, ~435) downgrade a seed
-failure to `LogWarning` and continue booting with partially-seeded data. None of these need to stay
-silent; at minimum, log the exception before continuing.
+- `.../networking/networking_service.dart:79-87 (`updateProfile`, calling `PUT /api/profile/update`)
+  — dead. `profile_edit_screen.dart` actually calls `AuthService.updateProfile()`, which already
+  correctly hits `PUT /api/profile` (matching `ProfileController`'s real route). The
+  `NetworkingService` copy had no caller; deleted rather than pointed at a URL nothing would ever
+  reach through it.
+- `.../support/support_service.dart`'s inline `FamilyService` (`getFamilyLinks`/`addFamilyMember`,
+  calling `/familylink`) — dead, and its sibling `features/family/family_service.dart` (calling
+  `/members/family`, which — unlike `/familylink` — is a real registered alias on
+  `FamilyLinkController`) had zero importers either. Neither was reachable from any screen; both
+  deleted. This also closed 44.16 (see that item) by leaving exactly one `FamilyService` class.
+- `GHCAA.Mobile/lib/features/auth/auth_service.dart:167-175` (`forgotPassword`, posting
+  `/api/auth/forgot-password`) — different case, left as-is. Nothing calls it either, but unlike the
+  two above there is no working equivalent to point it at: `AuthController` has no endpoint to
+  *request* a reset token at all, only `reset-password` (`Email`+`Token`+`NewPassword`) to *consume*
+  one already issued some other way. This is an absent self-service feature, not a URL mismatch —
+  see 80.16 for the real work.
 
-80.6 [TODO] **Priority: P3.** Six Angular components subscribe to `ActivatedRoute` observables
-(`queryParams`/`queryParamMap`/`paramMap`/`url`) that never complete, without `takeUntilDestroyed` or
-manual unsubscribe: `admin/comm/admin-comm.ts:89`, `member/messages/messages.ts:59`, `common/news/
-news.ts:58`, `common/payment-status/payment-status.ts:93,97`, `member/forum/topic-detail.ts:48`,
-`public/elections/elections.ts:141`. Each re-navigation to these routes adds another live handler.
-Also uncleaned: `core/services/auth.service.ts:109`'s `inactivityTimer` and `common/directory/
-directory.ts:122`'s `searchDebounce`, neither cleared in `ngOnDestroy`.
+`dotnet build`/`dotnet test` and `flutter analyze lib` both clean after all three.
 
-80.7 [TODO] **Priority: P3.** `MeController` (`api/me`, 5 endpoints) and `ProfileController` overlap:
-`id-card`/`id-card/pdf`/`certificate`/`certificate/pdf` exist on both, and no client calls
-`MeController` at all. Pick one owner and delete the other; low urgency since the dead one costs
-nothing at runtime, just maintenance confusion.
+80.16 [TODO] **Priority: P2 | Depends on: none.** Build the missing half of self-service password
+reset: an endpoint to request a reset token (generate, store with an expiry, email it — check
+whether the OTP infrastructure already used at registration is reusable here rather than building a
+second token mechanism) and the mobile screen that calls `AuthService.forgotPassword()`, which
+already posts the right shape (`{identifier}`) to `/api/auth/forgot-password` and only needs that
+route to exist. Needs its own rate-limit policy (the existing `auth`/`refresh` policies aren't sized
+for this) and must not reveal whether an identifier matched an account, matching the timing-safety
+already used in `AuthService.LoginAsync` (S5.2).
+
+80.5 [DONE 2026-09-04] Two of the three named catches were genuinely silent and are fixed:
+`HealthController` (both its DB and FileStorage probes; the DB one deliberately keeps its
+client-facing response generic — Npgsql failure text can contain host/credentials — but now logs
+server-side via a newly-injected `ILogger<HealthController>`) and `LoginRateLimitMiddleware.cs:27`
+(now logs via `ILogger<LoginRateLimitMiddleware>` instead of a bare `catch { }`). The third claim
+was wrong: `Program.cs`'s seeding blocks (~395, ~421, ~439) already call `app.Logger.LogError`/
+`LogWarning` with the exception attached and a comment explaining why continuing is the intended
+behavior (schema/seed gaps need a human, not a crashed boot) — not swallowed, just non-fatal by
+design. `dotnet build`/`dotnet test` clean.
+
+80.6 [DONE 2026-09-04] All six `ActivatedRoute` subscriptions now carry `takeUntilDestroyed(this.
+destroyRef)`, matching the pattern already used in `layouts/public-layout/public-layout.ts` (the
+project's existing convention — `takeUntilDestroyed()` called bare only works inside a constructor's
+injection context, and all six call sites are in `ngOnInit`, so each file gained a `private
+destroyRef = inject(DestroyRef)` field to pass explicitly): `admin/comm/admin-comm.ts`,
+`member/messages/messages.ts`, `common/news/news.ts`, `common/payment-status/payment-status.ts`
+(both of its two subscriptions), `member/forum/topic-detail.ts`, `public/elections/elections.ts`.
+`tsc --noEmit` clean, `npx vitest run` 381/381 (74 files) green. (The `inactivityTimer`/
+`searchDebounce` half of this item turned out already correct — see 80.15.)
+
+80.7 [DONE 2026-09-04] Confirmed zero callers of any `api/me` route from either client, and both
+constructor dependencies (`IMemberService`, `IIDCardService`) are already shared with
+`ProfileController`, so deleting the controller strands nothing (same check that caught the
+`FamilyController`/`IFamilyService` mistake in 80.2 was run here first). Deleted
+`GHCAA.API/Controllers/MeController.cs`. `dotnet build` clean.
 
 Verified non-issues, recorded so a future sweep doesn't re-flag them: the payment-gateway DI
 registration (`AddHttpClient<T>()` does register a bare `HttpClient`, confirmed with a standalone DI
@@ -5025,34 +5117,42 @@ serves that route; `CONFIG` already covers `OrgConfigController`) and fixed
 `/admin/members/ec` (matches `nav.service.ts`'s own correct link to the same screen). `tsc --noEmit`
 and `dotnet build` both clean after all three fixes.
 
-80.10 [TODO] **Priority: P1.** `NagadGateway.cs:28-47` is a complete stub — `InitiatePaymentAsync`
-always returns `Success=false` ("coming soon"), yet it is registered as a live
-`IPaymentGatewayService` (`DependencyInjection.cs:87`) and selectable in the admin payment-config
-dropdown per 29G.3's note ("SSLCommerz/BkashGateway/NagadGateway all have registered
-implementations — not dead"). That note is about DI registration, not functional completeness — a
-member who selects Nagad hits a silent "coming soon" failure today. Either finish the Nagad
-integration or hide it from the selectable-method dropdown until it's real; don't leave a gateway
-option in the UI that cannot take a payment.
+80.10 [DONE 2026-09-04] Removed the `NagadGateway` (`"Nagad (Direct Gateway)"`) option from the
+admin payment-config's Gateway dropdown (`admin-payment-config.html`) — confirmed no seed data or
+live config referenced it first. A member can no longer select a gateway that always fails with
+"coming soon". The backend stub is untouched; restore the option once the integration is real.
+`tsc --noEmit` clean.
 
-80.11 [TODO] **Priority: P2.** `GatewaysController.cs`'s webhook path is not centrally wired: the
-`IPaymentGatewayService.ProcessWebhookAsync` contract returns only `bool`, so `HandleSuccessfulPayment`
-(the shared amount-verification gate from 29B.2) is never reachable from a webhook — each gateway
-mutates payment state itself instead. `DGePayGateway.cs:168-173`'s `ProcessWebhookAsync` always
-returns `false` for this reason ("For now, we'll focus on the callback redirect flow"), so DGePay
-webhooks always resolve to a failed-looking response even on a real successful payment. Change the
-contract to return enough data (transaction id, confirmed amount) for `HandleSuccessfulPayment` to
-run on every gateway's webhook path, not just the redirect-callback path. (First flagged as an inline
-TODO in 61.4; this is the numbered item for the underlying fix.)
+80.11 [DONE 2026-09-04] Changed `IPaymentGatewayService.ProcessWebhookAsync` to return a new
+`PaymentWebhookResultDto` (`IsValid`, `TransactionId`, `ConfirmedAmount`, `GatewayPaymentId`) instead
+of a bare `bool`, and implemented it properly in all four gateways:
+- `SSLCommerzGateway`/`BkashGateway`: parse the same fields their redirect-callback siblings already
+  use (`tran_id`/`amount`/`val_id` for SSLCommerz; bKash needed `VerifyCallbackAsync` to write
+  `merchantInvoiceNumber`/`amount` back into the passed dictionary, since that method's own signature
+  is fixed by the interface and can't return them directly — the same pattern `DGePayGateway`
+  already used for its own callback).
+- `DGePayGateway`: implemented for real (was `Task.FromResult(false)`), parsing the webhook body as
+  either a JSON `data` field or form/query-encoded, matching what the redirect callback already
+  expects, then running the same `VerifyCallbackAsync` decrypt-and-verify path.
+- `NagadGateway`: still `PaymentWebhookResultDto.Invalid()` — it's the stub from 80.10, nothing to
+  wire up until the gateway itself is real.
 
-80.12 [TODO] **Priority: P3.** Reflection-based DI auto-registration in `DependencyInjection.cs:61-71`
-(`AddScoped(iface, type)` for every class under a `*.Services` namespace implementing an
-`Application.Interfaces` type) makes a duplicate implementation silently last-wins with no compiler
-or runtime warning, and the registration set isn't visible at any call site. `GreenwebSmsService` is
-already registered twice this way — once by the reflection loop, once by the explicit
-`AddHttpClient<ISmsService, GreenwebSmsService>()` a few lines below. Not a live bug (the two
-registrations happen to agree), but one typo away from a hard-to-diagnose wrong-implementation bug.
-Replace with explicit registrations, or at minimum assert exactly one implementation per interface
-at startup.
+`GatewaysController.GatewayWebhook` now calls `HandleSuccessfulPayment` directly when a gateway
+reports a valid result with a transaction id, closing the gap the inline TODO (added by 61.4) named:
+a webhook could validate a payment but never actually mark it Completed. Dictionary keys used more
+than once (`"tran_id"`, `"amount"`, `"val_id"`, `"merchantInvoiceNumber"`, `"paymentID"`,
+`"unique_txn_id"`, `"data"`) are now `private const string` fields on each gateway class, not
+repeated literals. Two new tests in `GatewaysControllerTests.cs` prove the wiring: a valid webhook
+result reaches `UpdatePaymentStatusAsync(..., Completed, ...)`, an invalid one touches nothing.
+`dotnet build`/`dotnet test` clean (9/9 in `GatewaysControllerTests`, full suite green).
+
+80.12 [DONE 2026-09-04] Reflection-based DI auto-registration in `DependencyInjection.cs` now
+excludes `GreenwebSmsService` explicitly (it needs the typed `HttpClient` only `AddHttpClient<ISmsService,
+...>` can wire, which the reflection loop can't provide — registering it twice was correct only
+because the `AddHttpClient` line happened to run second) and tracks every `(interface, implementation)`
+pair it registers, throwing at startup if two different implementations are ever found for the same
+interface instead of silently letting scan order pick a winner. `dotnet build`/`dotnet test` clean —
+the guard doesn't fire today, confirming there's no live duplicate, only the risk of one.
 
 80.13 [TODO] **Priority: P3.** Clean Architecture layer boundary crossed in 8 controllers that inject
 `ApplicationDbContext` directly instead of going through an Application-layer service:
@@ -5066,17 +5166,286 @@ the `GHCAA.Infrastructure` project reference. Lower priority: this is an archite
 debt (`GHCAA.Domain` and `GHCAA.Application` are still clean of it), not a functional defect, and
 untangling 8 controllers' write paths needs its own change, not a drive-by fix.
 
-80.14 [TODO] **Priority: P3.** Dead/duplicate HTTP surface not covered by 80.4 or 80.7: `SecureFilesController`
-has zero call sites from either client (only an unused `SECURE_FILES` constant references it in
-`app.constants.ts`); `FinancialLedgerController`'s second route attribute, `api/financial/ledger`, has
-no caller (only `api/ledger` is used); `FamilyLinkController.cs:33,96` binds `POST`/`GET` to the
-absolute route `/api/members/family` as a "legacy alias for mobile", which overlaps
-`FamilyController`'s own `api/Family` routes in the same way the `links`/`search` aliases do (80.2) —
-resolve both alias sets in the same change once it's clear which controller mobile and web actually
-depend on.
+80.14 [PARTIAL 2026-09-04] Three items; two done, one deliberately left for its own investigation.
 
-80.15 [TODO] **Priority: P4.** Two long-lived Angular subscriptions outside the six route-param ones
-already covered by 80.6: `core/services/auth.service.ts:109`'s `inactivityTimer` and
-`common/directory/directory.ts:122`'s `searchDebounce`, neither cleared in `ngOnDestroy`. Lowest
-priority here — both are timers on components that in practice live for the session/page lifetime,
-not ones that accumulate across repeated navigation the way the route-param subscriptions in 80.6 do.
+- **Done:** removed `FinancialLedgerController`'s dead second route attribute, `api/financial/ledger`
+  (confirmed zero callers; `api/ledger` is the one both clients use).
+- **Done:** `FamilyLinkController.cs:33,96`'s `/api/members/family` alias no longer overlaps anything
+  — `FamilyController` (the thing it overlapped with) was deleted in 80.2.
+- **Not done, and priority raised to P1 pending that investigation:** `SecureFilesController` has
+  zero call sites from either client (only the unused `SECURE_FILES` constant in `app.constants.ts`
+  references it), yet it is a real access-controlled file-serving endpoint — it checks the requesting
+  user against `FileUploads`' recorded owner before serving a file. A controller like that sitting
+  unused is only a tidiness question if every sensitive upload (`PaymentProofPath`, `CertificatePath`,
+  `SignaturePath`) is *also* unreachable by URL guessing through the plain `UseStaticFiles` block at
+  `/api/uploads` (Program.cs:260-264, no auth, no per-file ownership check). A quick grep for where
+  the Angular/Flutter clients actually render these paths turned up nothing conclusive in the time
+  available — that's the open question, not whether to delete the controller. Someone needs to trace
+  where each of those three fields is served from before deciding: wire the client to
+  `SecureFilesController` for these paths, or confirm they're already protected another way and this
+  really is just dead code.
+
+80.15 [VERIFIED-STALE 2026-09-04] Both timers named here turned out already correct on inspection.
+`core/services/auth.service.ts`'s `inactivityTimer` lives in a root-injectable singleton `@Injectable`
+service, not a component — there is no `ngOnDestroy` to leak into, since the service exists for the
+app's whole session by design, and `resetTimer()` already clears the previous timer (`if
+(this.inactivityTimer) clearTimeout(...)`) before setting a new one, so at most one is ever live.
+`common/directory/directory.ts` already `implements OnDestroy` and clears `searchDebounce` at
+`ngOnDestroy():96`. Closing as not-applicable rather than done; the audit's premise was wrong for both.
+
+80.17 [TODO] **Priority: P4.** Found while fixing 80.5's logging gap, unrelated to it:
+`LoginRateLimitMiddleware` parses the login request body and stashes the username in
+`context.Items["LoginUsername"]`, and its own class comment says this is "so the
+PartitionedRateLimiter can key on (IP, username)". Nothing reads that key — the `auth` rate-limit
+policy in `Program.cs` keys purely on IP (29B.5, deliberately: a per-username key let one IP spray
+thousands of accounts at 5/min each). Either the comment is stale and the parse-and-stash should be
+deleted, or partitioning by (IP, username) was intended for some *other* policy that was never wired
+up — check git history/the 29B.5 discussion before picking one.
+
+80.18 [TODO] **Priority: P2 | Depends on: none.** User instruction, 2026-09-04: a stateful action
+(save, search, any button that triggers an API call and changes what the user sees) should not be
+triggerable a second time until the first call resolves — success or error — to stop double-submit
+bugs (duplicate saves, doubled search requests). Explicitly scoped to stateful actions only: a
+stateless/fire-and-forget call must not be blocked by this. Needs an audit of every save/search
+entry point across `GHCAA.Web` (and `GHCAA.Mobile` if the same class of bug exists there) before
+picking one mechanism — a shared `[disabled]="saving()"`-style signal guard per form/search
+component is the likely shape, matching the existing `signal()`-based state pattern already used
+throughout the Angular app, rather than a global HTTP-interceptor lock (which can't tell a stateful
+save from a stateless background poll).
+
+80.19 [TODO] **Priority: P2 | Depends on: none.** Found while confirming 80.4/44.16's family-linking
+cleanup didn't remove a real feature: the send/accept/cancel/remove flow is fully built and wired
+end to end on mobile (`FamilyLinkController` backend, `features/networking/family_service.dart`,
+`screens/member/family_link_screen.dart`) but **does not exist at all on web** — no component,
+service, or route anywhere in `GHCAA.Web/src/app` calls any `/api/family-links/*` route. The
+`enableFamilyLink` feature flag (`OrgConfigModel`, `org-config.service.ts`) defaults `true` with
+nothing to gate. Build the web equivalent of `family_link_screen.dart` (send by membership number,
+respond to received requests, cancel a sent one, remove an accepted link, view accepted/pending),
+or set the default flag to `false` until it exists so the flag isn't advertising a feature the web
+member portal doesn't have.
+
+---
+
+# Work Package 81 — Unified approvals and communication history, for members and admins
+
+<!-- wbs: component=C7 start=2026-09-04 end=2026-09-04 after=80 -->
+
+Origin: user instruction, 2026-09-04. Two related gaps, checked against the tracker and the code
+before writing this so nothing here duplicates an existing item.
+
+81.1 [TODO] **Priority: P2 | Depends on: none.** A member has no view of the email/SMS sent to them,
+and an admin has no per-member view either — only a global flat list. `NotificationController.
+GetMyNotifications` already gives a member their own in-app notifications (that part exists and is
+not in scope here). `CommunicationController` (`api/admin/comm`, `AdminOnly`) exposes `GET /logs` via
+`ICommunicationService.GetRecentLogsAsync(count)`, which has no member filter at all — it is the most
+recent N `EmailLog` rows across the whole association, not "what did we send Farhana." Build: a
+member-facing `GET /api/communications/me` (email + SMS sent to that member, paginated, with a detail
+view per message — subject/body/channel/timestamp/status); an admin-facing per-member equivalent
+(`GET /api/admin/comm/member/{id}`) alongside the existing global log; and note in each row whether
+it was a targeted send or part of a broadcast, so "global vs individual" is visible without the
+reader having to infer it from the recipient list.
+
+81.2 [TODO] **Priority: P2 | Depends on: none.** Pending/awaiting-approval items are scattered across
+five-plus separate admin queues with no single place either an admin or the submitting member can see
+everything waiting on them: `NewsController` (`pending`/`admin/pending`), `GalleryController`
+(`admin/pending`), `JobHubController` (`admin/pending`), `FamilyLinkController` (`received`),
+`MentorshipController` (`received`), plus member registration and event-registration approval, which
+don't even have a dedicated pending-list endpoint — an admin filters the full list client-side today.
+Build: an admin-facing aggregated "awaiting your action" view pulling a count and a summary row from
+each existing pending endpoint (do not reimplement the approval logic itself, only the aggregation);
+and a member-facing "your pending requests" view (a submitted article awaiting review, a family-link
+request awaiting the other member's response, a submitted job posting, an event registration awaiting
+approval) so a member isn't left checking five different screens to find out what's still pending on
+something they did.
+
+81.3 [TODO] **Priority: P3 | Depends on: 81.1, 81.2.** Once both exist, add them to the member portal
+and admin dashboard navigation, and to the mobile equivalents if the same gap exists there (check
+`GHCAA.Mobile` for a communications/notifications screen and an approvals screen before assuming
+neither exists — `NotificationController`'s parity has not been checked on mobile as part of writing
+this item).
+
+---
+
+# Work Package 82 — Platform architecture and engineering audit, and the refactoring it names
+
+<!-- wbs: component=C17 start=2026-09-04 end=2026-09-04 after=81 -->
+
+Origin: `docs/materials/REVIEW.md`, supplied by the user on 2026-09-04 as the review brief, with the
+instruction to carry its refactoring and auditing findings into this tracker as work. REVIEW.md is a
+brief, not a report: nothing in it has been executed yet. §21A of that brief forbids the review from
+opening a second backlog, so 82.1 and 82.2 below fix the method before any finding is written, and the
+findings already measured against the tree (82.3 to 82.13) are recorded here with the command that
+produced them.
+
+Reconciliation done before writing these items, so none of them re-opens work that already exists:
+Work Package 24 and its OWASP round-2 block own security controls; Work Package 27 owns test coverage
+and the 80% gate (27.8); Work Package 28 and Work Package 62 own the configuration and white-label
+platform; Work Package 29 owns the 2026-07-24 full-stack findings; Work Package 61 owns comment tone
+and the dead-code sweep, itself re-scoped into 62.46-62.49; Work Package 80 owns the last cross-cutting
+sweep. What follows is the work those packages do not cover.
+
+82.1 [TODO] **Priority: P1 | Depends on: none.** Run the review in `docs/materials/REVIEW.md` and
+produce one report at `docs/ARCHITECTURE_AUDIT_2026-09.md` carrying the deliverables its §23 and §25.11
+name: executive assessment, current architecture map, strengths, critical problems, architecture gap
+analysis, configuration blueprint, target architecture, replaceability matrix, security gap analysis,
+technical debt register, duplication matrix, centralisation matrix, reusable component inventory and
+the refactoring backlog. Scope is the whole ecosystem, not three separate applications: `GHCAA.API`,
+`GHCAA.Application`, `GHCAA.Domain`, `GHCAA.Infrastructure`, `GHCAA.Web/src`, `GHCAA.Mobile/lib`,
+`GHCAA.Tests`, the migration tree, `Dockerfile`, `.github/workflows` and `docs/`.
+**Acceptance:** every finding in the report carries a file path or a command that produced it, and one
+of the eight status labels from REVIEW.md §3 (implemented and verified, implemented but incomplete,
+documented but not implemented, planned only, partially implemented, incorrectly implemented,
+deprecated, missing). A finding with no evidence line is a defect in the report, not a finding.
+
+82.2 [TODO] **Priority: P1 | Depends on: 82.1.** The report must end in a reconciliation section, not a
+new list. Produce the three registers of REVIEW.md §21A.11, which set out how findings are matched
+against work that already exists: existing-task reconciliation matrix, new-task justification register,
+and obsolete/duplicate/superseded register. **Acceptance:** every finding ends with exactly one of
+Retained, Updated, Expanded, Merged, Split, Reprioritised, Deferred, Superseded, Deprecated, Rejected or
+Newly Created; every "Newly Created" row states which existing work packages were checked and why they do
+not cover it; and any new work lands in this tracker as a numbered item, with the report holding the
+analysis and this file holding the assignment. No item may be left ambiguous.
+
+82.3 [TODO] **Priority: P2 | Depends on: none.** The API has no versioning. `grep -rn "ApiVersion"
+GHCAA.API` returns nothing, and every route is unversioned. The web client deploys with the API, so it
+never sees a mismatch, but the Flutter build ships through the stores and lags behind: a renamed route
+or a changed DTO field breaks installed mobile builds with no contract in place to signal it. Decide and
+implement one approach (URL segment, header, or an explicitly recorded decision to stay unversioned with
+a compatibility rule instead). **Acceptance:** the chosen approach is written down with its reason, and
+if versioning is adopted, the mobile client sends or requests a version and the API rejects an unknown
+one rather than serving it silently.
+
+82.4 [TODO] **Priority: P2 | Depends on: none.** Error responses have three shapes, so no client can
+parse errors one way. `ExceptionMiddleware` returns `{statusCode, message, details}` for unhandled
+exceptions, while the controllers return `BadRequest("plain string")` 21 times, `BadRequest(new
+{ Message = ... })` 35 times, `BadRequest(new { message = ... })` 6 times and one `new { status = ... }`
+(counted 2026-09-04 across `GHCAA.API/Controllers`). Pick one error contract, apply it to every failure
+path, and route the Angular and Flutter error handlers through it. **Acceptance:** one documented error
+shape; a grep over the controllers finds no other shape; `global-error-handler.ts` and the mobile
+`api_client.dart` read the message from one place.
+
+82.5 [TODO] **Priority: P2 | Depends on: none.** Current-user resolution is copied through the API
+layer: 55 inline `FindFirst`/`FindFirstValue` claim reads across `GHCAA.API/Controllers` (counted
+2026-09-04). Each one re-decides how the acting member is identified and what happens when the claim is
+missing. Extract one accessor (an `ICurrentUser` service or a `ControllerBase` extension) and route the
+controllers through it. This is the refactor only. The authorisation behaviour itself is settled in
+Work Package 24, where the server-side identity rules were fixed, and must not change here.
+**Acceptance:** one implementation of "who is calling", controllers hold no claim-parsing code, and the
+existing controller tests pass unchanged.
+
+82.6 [TODO] **Priority: P3 | Depends on: 82.1.** `GHCAA.Infrastructure/Services/MemberService.cs` is
+1,577 lines, over twice the next largest service (`EventService.cs`, 746). It is the single place the
+registry, the approval workflow, profile updates and member search all live. Split it along the seams
+that already exist elsewhere in the codebase (`MemberImportService` is already separate, so the pattern
+is established), one responsibility at a time. Classified in REVIEW.md §25.10 terms, which grade a
+refactor by how much regression risk it carries, as controlled refactoring: behaviour must not change,
+and the service tests under `GHCAA.Tests/Services` are the regression net. **Acceptance:** no resulting
+file over roughly 600 lines, no interface change visible to the controllers, and the backend suite green
+before and after each split.
+
+82.7 [TODO] **Priority: P2 | Depends on: none.** Seven Angular components inject `HttpClient` directly
+instead of a feature service: `admin/audit/admin-audit.ts`, `admin/governance/admin-governance.ts`,
+`admin/roles/admin-roles.ts`, `common/health/health.ts`, `member/change-password/change-password.ts`,
+`public/elections/elections.ts` and `public/reset-password/reset-password.ts` (`app.config.ts` also
+references it, correctly, to provide the client). Around 40 services already exist under
+`core/services/`, so these seven bypass whatever those services centralise: endpoint constants, response
+shaping and error handling. Move each call into a service alongside its peers. **Acceptance:** no
+component outside `core/services/` injects `HttpClient`, and the web unit tests pass.
+
+82.8 [TODO] **Priority: P2 | Depends on: 82.1.** Paging is not applied consistently. There are 35
+controllers but only 15 references to a page, page-size, skip or take parameter across all of them
+(counted 2026-09-04), so a number of list endpoints return the whole table and will keep doing so as the
+registry grows. The audit must list every list-returning endpoint, say which pages and which does not,
+and one paging contract must be chosen for the ones that need it. Related, not duplicated: 81.1, the new
+member communications history endpoint, already requires paging, so it follows whatever contract this
+item settles. **Acceptance:** a table of list endpoints with their paging status, one contract
+documented, and the endpoints holding unbounded institutional data (members, payments, audit log) paged.
+
+82.9 [TODO] **Priority: P3 | Depends on: 82.1.** Operationally the platform can be checked but not
+diagnosed. `Program.cs` exposes `MapHealthChecks("/health")` and there is an `AuditLogMiddleware`, but
+there is no Serilog or OpenTelemetry reference anywhere, no correlation identifier tying a client
+request to its server-side log lines, and no structured request log carrying the acting member. After a
+failure on preprod, "what failed, when, and who was affected" is answered by reading unstructured Render
+output. Add the minimum that answers those questions: a correlation identifier assigned per request,
+returned to the client and logged, and a structured request log line. Distributed tracing is out of
+scope at this scale, under REVIEW.md §4, which requires every recommendation to name the problem it
+solves now. **Acceptance:** a failure reproduced on preprod can be traced from the client error to its
+server log lines using one identifier.
+
+82.10 [DONE 2026-09-04] **Client code generation from OpenAPI: rejected. Contract drift is caught by a
+CI diff instead.** Decided on the evidence below rather than deferred, because the assessment this item
+asked for could be answered from the tree in one sitting.
+
+The problem is real. The contract is written out three times: 42 DTO files (1,471 lines) in
+`GHCAA.Application/DTOs`, 60 interfaces in `GHCAA.Web/src/app/core/models/business.models.ts`, and the
+mobile client's own reading of the same payloads. Drift between them is found by a person noticing,
+which is how the parity gaps of Work Package 11 and Work Package 35 were found.
+
+Generation does not fit the mobile client as it stands. There is no model layer to regenerate: 16
+`fromJson` factories across 6 Dart files, against 799 raw `json['field']` map reads through the screens
+and services (counted 2026-09-04). Introducing generated Dart models means rewriting nearly all mobile
+data handling, which is a large controlled refactor whose only reward is a defect class that has not
+actually shipped a fault yet. That is the situation REVIEW.md §4 tells the reviewer to decline. The
+Angular half would be cheap to generate, but generating one client and hand-writing the other leaves the
+drift risk in place and adds a build step for the half that was never the problem.
+
+The cheaper control catches the same drift for both clients at once, and is where the residual work goes:
+publish the OpenAPI document, commit it, and fail the build when it changes unexpectedly. That also gives
+82.3, the versioning decision, something concrete to version.
+
+**Rejected explicitly, so it is not re-proposed:** generated Angular clients, generated Dart models, and
+a shared code artefact between the two clients. Revisit only if the mobile client gains a real model
+layer for another reason, at which point generation costs a fraction of what it costs today.
+
+82.10a [TODO] **Priority: P2 | Depends on: none.** Swagger is registered unconditionally
+(`AddSwaggerGen`, `Program.cs`) but only served inside `if (app.Environment.IsDevelopment())`, so
+nothing outside a developer's machine ever sees the contract and nothing checks it. Produce the
+document at build time instead of serving it: run `dotnet swagger tofile` in CI, commit the resulting
+`swagger.json` as a snapshot, and fail the build when a regenerated document differs from the committed
+copy. A diff is then a deliberate act with a reviewer looking at it, which is the whole control: a
+removed field or a renamed route cannot reach a released mobile build unnoticed. The production
+endpoint stays off, and this item must not be read as asking for it: the interactive UI on a live host
+hands an attacker a complete map of the API and a form to fire requests at it, which is exactly the
+enumeration aid Work Package 48 spent an audit closing off elsewhere. A build artefact gives the same
+drift protection with no runtime surface at all.
+**Acceptance:** the snapshot is in the repository, CI fails on an uncommitted contract change, and the
+failure message names the changed paths rather than dumping the whole document.
+
+82.10b [TODO] **Priority: P3 | Depends on: 82.10a.** Type the mobile payloads where a silent field
+change does the most damage: authentication and token handling, member profile, and payments. These
+parse from raw maps today, so a renamed field fails at runtime on a member's phone with no compile-time
+signal, and the phone is the client that cannot be hot-fixed. Scope is deliberately those three areas,
+not all 799 map reads. **Acceptance:** each of the three areas parses through a Dart class with a
+`fromJson` factory that fails loudly on a missing required field, and `flutter analyze` stays clean.
+
+82.11 [TODO] **Priority: P3 | Depends on: 82.1.** Produce the code / environment-configuration /
+administrator-managed classification that REVIEW.md §10 and §11 ask for, covering organisation identity,
+feature flags, membership policy, governance, workflow, notification, content and integration settings.
+This is not a new configuration feature and must not be built as one: Work Package 28 delivered the
+configuration framework and Work Package 62 owns the white-label work, so the output is a classification
+over what those two already provide, feeding any gap back into them as expanded items rather than new
+ones. The classification must also name what may never become freely editable, in particular the
+constitutional and election rules that carry formal institutional authority and are held in
+Work Package 36 and Work Package 37. **Acceptance:** one table covering every capability, each row with
+a reason, and a stated list of rules held in code on purpose.
+
+82.12 [TODO] **Priority: P3 | Depends on: 82.1.** Run the constants and magic-value classification of
+REVIEW.md §25.8 over `GHCAA.Domain/Constants.cs`, `GHCAA.Web/src/app/core/constants/app.constants.ts`
+(533 lines) and the Flutter equivalents, classifying each value as technical constant, environment
+value, organisation value, administrator-managed value or business policy. The standing rule that a
+repeated literal gets a named constant already applies to every change, so the value here is the
+classification, not another renaming pass: it says which of the existing constants are GHC-specific and
+therefore belong in the Work Package 62 profile pack rather than in code. **Acceptance:** every entry in
+those files classified, and the organisation-specific ones raised against Work Package 62 as expanded
+items.
+
+82.13 [TODO] **Priority: P3 | Depends on: 82.1.** The documentation set has no architecture decision
+records and no operational runbook. `docs/` carries `ARCHITECTURE.md`, `PROJECT_MAP.md` and
+`RENDER_DEPLOYMENT.md`, but there is no `docs/adr/` directory and no document answering how to restore
+the platform after a data loss or a failed migration, which REVIEW.md §22 requires for an operator.
+Several decisions this project has already made are recorded only in commit messages and memory, among
+them the two-format date contract of 29F.3, the choice not to run migrations at startup, and the
+protected super-admin list. Start the record with those, and write the recovery procedure against what
+Render actually provides. **Acceptance:** a decision record exists for each decision the audit finds is
+load bearing and undocumented, and an operator who has never seen the system can restore it by following
+the runbook.
