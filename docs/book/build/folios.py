@@ -104,7 +104,9 @@ def body_start(pages):
 
 
 CHAPTER_ROW = re.compile(r"^\|\s*\*\*(.+?)\*\*\s*\|")
-SECTION_ROW = re.compile(r"^\|\s*§(\d+\.\d+)\s+(.+?)\s*\|")
+# The section sign is optional: contents rows carry the bare number, but a
+# hand-written row may still use it.
+SECTION_ROW = re.compile(r"^\|\s*§?(\d+\.\d+)\s+(.+?)\s*\|")
 # The title cell only: stopping at the next pipe keeps a page number that is
 # already in the row out of the anchor.
 LABEL_ROW = re.compile(r"^\|\s*(\d+\.\d+)\s*\|\s*([^|]+?)\s*\|")

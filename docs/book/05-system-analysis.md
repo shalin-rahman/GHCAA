@@ -217,7 +217,7 @@ architecture and design that realise it.
 
 ## Figures and Tables
 
-### Figure 5.1 — DFD Level 0 (context)
+### Figure 5.1 — DFD Level 0 (context). In and out are relative to the platform
 
 ```mermaid
 flowchart TB
@@ -226,14 +226,10 @@ flowchart TB
     A([Officer / Admin]):::ext
     EC([Election Commission]):::ext
     P((0<br/>GHCAA Platform)):::sys
-    G -->|application| P
-    P -->|status, public content| G
-    M -->|profile, declaration, vote| P
-    P -->|receipt, notices, results| M
-    A -->|approval, verification| P
-    P -->|queues, ledger| A
-    EC -->|voter roll request| P
-    P -->|voter roll| EC
+    G <-->|"in: application<br/>out: status, public content"| P
+    M <-->|"in: profile, declaration, vote<br/>out: receipt, notices, results"| P
+    A <-->|"in: approval, verification<br/>out: queues, ledger"| P
+    EC <-->|"in: voter roll request<br/>out: voter roll"| P
     classDef ext fill:#eef,stroke:#446
     classDef sys fill:#ffe9b3,stroke:#8a6d1f,stroke-width:2px
 ```

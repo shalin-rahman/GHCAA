@@ -20,7 +20,7 @@ engagement.
 This has a direct consequence for how claims in this dissertation are read. A statement such as "the
 manual payment path is the correct design for this institution" is not offered as a general
 proposition about payment systems. It is offered as a proposition that held, for this Association,
-under the constraints of §1.6, and that is defended by the evidence Chapter 12 assembles. Where the
+under the constraints of §1.7, and that is defended by the evidence Chapter 12 assembles. Where the
 literature review of Chapter 2 disagrees with a choice made here, §12.9 says so rather than quietly
 picking a side.
 
@@ -64,7 +64,7 @@ document.
 | DSR activity | What was done | Evidence and chapter |
 | --- | --- | --- |
 | Problem identification and motivation | Observation of the paper-based application, cash-and-ledger collection and Facebook-circulated constitution described in §1.2 | §1.2, §1.3 |
-| Definition of objectives for a solution | The eight objectives of §1.5, each traced to a research question | §1.5 |
+| Definition of objectives for a solution | The eight objectives of §1.6, each traced to a research question | §1.6 |
 | Design and development | Sixty-two numbered work areas recorded as they were opened, most of them triggered by a stakeholder request rather than by the author's own plan; forty-nine mapped entities, thirty-seven API controllers and two client applications delivered across them | `docs/TODO.md`; Chs. 5–7 |
 | Demonstration | The artefact running against a seeded database, exercised in the formal technical review sessions of §3.12 and deployed to the pre-production environment of Chapter 10 | §3.12, Ch. 10 |
 | Evaluation | Executed against the plan declared in §4.5 | Ch. 9, Ch. 12 |
@@ -425,7 +425,7 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    A1[1. Identify problem<br/>§1.2, §1.3] --> A2[2. Define objectives<br/>§1.5]
+    A1[1. Identify problem<br/>§1.2, §1.3] --> A2[2. Define objectives<br/>§1.6]
     A2 --> A3[3. Design and develop<br/>Chs. 5-7]
     A3 --> A4[4. Demonstrate<br/>§3.12, Ch. 10]
     A4 --> A5[5. Evaluate<br/>§4.5, Chs. 8, 12]
@@ -480,14 +480,14 @@ quadrantChart
     quadrant-2 Act first
     quadrant-3 Accept
     quadrant-4 Act, low urgency
-    Maintainer unavailability: [0.45, 0.85]
-    Payment amount bypass: [0.45, 0.85]
-    Admin attribution: [0.45, 0.85]
-    Event capacity race: [0.45, 0.55]
-    Date format drift: [0.85, 0.85]
-    Stale schema and seed data: [0.85, 0.85]
-    Verification backlog: [0.45, 0.55]
-    Officer turnover: [0.45, 0.55]
+    Maintainer absent: [0.34, 0.94]
+    Payment bypass: [0.34, 0.83]
+    Admin attribution: [0.34, 0.72]
+    Capacity race: [0.34, 0.63]
+    Verification backlog: [0.34, 0.56]
+    Officer turnover: [0.14, 0.63]
+    Date-format drift: [0.86, 0.90]
+    Stale schema and seed: [0.86, 0.76]
 ```
 
 ### Table 4.3 — Evaluation plan

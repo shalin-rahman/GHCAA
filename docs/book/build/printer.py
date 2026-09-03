@@ -194,12 +194,16 @@ MIN_LABEL_PT = 7.0
 def overflows(items):
     """Figures and tables that will not print correctly on A4.
 
-    Three separate failures, which need different fixes:
+    Five separate failures, which need different fixes:
 
       too wide      the artefact runs past the text block, so the edge is cut
       too tall      it cannot fit a page and is not marked as breakable, so the
                     browser will either shrink the page or split it badly
       too small     it fits, but only by shrinking its labels below legibility
+      clipped       a title or label is wider than the drawing, so the browser
+                    cuts it off at the frame
+      overprinted   it fits and is legible, but two labels sit on top of each
+                    other, so neither can be read
 
     A landscape figure is measured against the landscape page; everything else
     against the portrait text block. A table marked long is allowed to run over
@@ -232,6 +236,17 @@ def overflows(items):
         if item.get("overflowX", 0) > SLACK:
             reasons.append("table content is %.0fmm wider than its column"
                            % (item["overflowX"] / MM))
+        cut = item.get("clippedCount", 0)
+        if cut:
+            reasons.append("%d label%s drawn outside the frame and cut off: %s — shorten the "
+                           "title or the label so the drawing is the widest thing in the figure"
+                           % (cut, "" if cut == 1 else "s", "; ".join(item.get("clipped", [])[:3])))
+        hits = item.get("collisionCount", 0)
+        if hits:
+            sample = "; ".join(item.get("collisions", [])[:3])
+            reasons.append("%d label%s printed over another: %s — separate the "
+                           "points, shorten the labels, or set it as a table"
+                           % (hits, "" if hits == 1 else "s", sample))
 
         if reasons:
             bad.append((item, reasons))
@@ -265,9 +280,18 @@ def print_pdf(browser, url, out_path, timeout=300, folio=True, running_head=Fals
     If the protocol cannot be reached the switch is used instead, and the
     caller is told the PDF has no page numbers rather than left to find out.
 
-    Returns (path, numbered).
+    Returns (path, numbered, reason), where reason says why the protocol route
+    was not used, so a fallback can be diagnosed rather than merely noticed.
     """
     out_path = os.path.abspath(out_path)
+    if os.path.exists(out_path):
+        try:
+            open(out_path, "r+b").close()
+        except OSError:
+            raise RuntimeError(
+                "cannot write %s: it is open in another program. Close the PDF viewer and run "
+                "again. Without this check the build quietly falls back to the command-line "
+                "switch and ships a copy with no page numbers." % out_path)
     try:
         with devtools.Browser(browser, timeout=timeout) as page:
             page.open_page(url)
@@ -280,15 +304,23 @@ def print_pdf(browser, url, out_path, timeout=300, folio=True, running_head=Fals
             page.print_pdf(out_path,
                            header=HEADER if running_head else "",
                            footer=FOOTER if folio else "")
-        return out_path, True
+        return out_path, True, ""
     except (devtools.ProtocolError, OSError) as exc:
+        # Yesterday's PDF would otherwise satisfy the size test below and be
+        # returned as today's, page count and all, if the fallback writes
+        # nothing.
+        if os.path.exists(out_path):
+            try:
+                os.remove(out_path)
+            except OSError:
+                pass
         proc = _run(browser, ["--print-to-pdf=%s" % out_path, "--no-pdf-header-footer", url],
                     timeout)
         if not os.path.exists(out_path) or os.path.getsize(out_path) < 20000:
             raise RuntimeError("the browser produced no usable PDF: %s; the protocol route "
                                "failed first with: %s"
                                % (proc.stderr.decode("utf-8", "replace")[-400:], exc))
-        return out_path, False
+        return out_path, False, str(exc)
 
 
 def pdf_page_count(path):
@@ -328,7 +360,7 @@ def to_pdf(html_path, pdf_path=None, audit=True, stream=sys.stdout):
             stream.write("  measured  : %d figures and tables laid out\n" % len(items))
             for item, reasons in problems:
                 stream.write("  OVERFLOWS A4: %s — %s\n" % (item["label"], "; ".join(reasons)))
-        _, numbered = print_pdf(browser, server.url(filename), pdf_path)
+        _, numbered, why = print_pdf(browser, server.url(filename), pdf_path)
 
     pages = pdf_page_count(pdf_path)
     stream.write("  pdf       : %s (%.1f MB%s)\n" % (
@@ -337,5 +369,13 @@ def to_pdf(html_path, pdf_path=None, audit=True, stream=sys.stdout):
     if not numbered:
         stream.write("  WARNING   : printed through the command-line switch, so this PDF carries "
                      "no page numbers and no background graphics\n")
+        stream.write("  cause     : %s\n" % why)
+        # Counted as a defect rather than only announced. The reprint that fills
+        # the folios sends this stream to a discarded buffer, so a warning alone
+        # let a PDF with no page numbers ship under "clean, ready to deliver".
+        problems = list(problems) + [
+            ({"label": "the PDF itself"},
+             ["printed through the command-line switch, so it has no page numbers and no "
+              "background graphics: %s" % why])]
     stream.write("  engine    : %s\n" % os.path.basename(browser))
     return pdf_path, problems

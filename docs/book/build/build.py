@@ -41,6 +41,13 @@ CHAPTERS = [
     "04-methodology.md",
     "05-system-analysis.md",
     "06-architecture.md",
+    "07-implementation.md",
+    "08-security.md",
+    "09-verification.md",
+    "10-deployment.md",
+    "11-project-management.md",
+    "12-results.md",
+    "13-conclusion.md",
     "99-references.md",
 ]
 
@@ -515,6 +522,46 @@ if (location.search.includes("audit")) {
       item.pt = +(BASE_PT * scale).toFixed(2);
       item.aspect = vbw && vbh ? +(vbw / vbh).toFixed(2) : null;
       item.nodes = svg.querySelectorAll("g.node, g.classGroup, g.entityBox, .actor, g.stateGroup").length;
+      // Two labels printed on top of each other are unreadable, and neither
+      // the size check nor the fit check can see it: the drawing is the right
+      // shape and the type is large enough, but the words are stacked. Mermaid
+      // does this whenever two points share a coordinate or two edges join the
+      // same pair of nodes.
+      const boxes = [];
+      for (const el of svg.querySelectorAll("text, foreignObject")) {
+        if (!(el.textContent || "").trim()) continue;
+        if (el.closest("foreignObject") !== el && el.closest("foreignObject")) continue;
+        const r = el.getBoundingClientRect();
+        if (r.width < 2 || r.height < 2) continue;
+        boxes.push({ t: el.textContent.trim().replace(/\\s+/g, " ").slice(0, 28), r: r });
+      }
+      const collisions = [];
+      for (let i = 0; i < boxes.length; i++) {
+        for (let j = i + 1; j < boxes.length; j++) {
+          const a = boxes[i].r, b = boxes[j].r;
+          const w = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+          const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+          if (w <= 0 || h <= 0) continue;
+          const share = (w * h) / Math.min(a.width * a.height, b.width * b.height);
+          if (share > 0.25) collisions.push(boxes[i].t + " / " + boxes[j].t);
+        }
+      }
+      item.collisions = collisions.slice(0, 6);
+      item.collisionCount = collisions.length;
+      // Mermaid sizes the viewBox from the drawing, not from the title, so a
+      // title or a point label wider than the chart is simply cut off at the
+      // edge. The fit check cannot see it: the box is the right size, and the
+      // missing words are outside it.
+      const frame = svg.getBoundingClientRect();
+      const clipped = [];
+      for (const b of boxes) {
+        if (b.r.left < frame.left - 1 || b.r.right > frame.right + 1
+            || b.r.top < frame.top - 1 || b.r.bottom > frame.bottom + 1) {
+          clipped.push(b.t);
+        }
+      }
+      item.clipped = clipped.slice(0, 6);
+      item.clippedCount = clipped.length;
     }
     if (table) {
       item.overflowX = table.scrollWidth - table.clientWidth;
@@ -551,8 +598,10 @@ def write_html(output, two_column=False):
     for name in CHAPTERS:
         path = os.path.join(BOOK, name)
         if not os.path.exists(path):
-            sys.stderr.write("skipping missing %s\n" % name)
-            continue
+            # Carrying on used to produce a book with a chapter missing and
+            # still report it clean, because the checks only see the files
+            # that were read.
+            raise RuntimeError("%s is listed in CHAPTERS but not on disk" % name)
         sources.append(path)
         with io.open(path, encoding="utf-8") as fh:
             lines = [substitute(line) for line in fh.readlines()]
@@ -573,6 +622,15 @@ def write_html(output, two_column=False):
 
 
 def main(argv=None):
+    # The book is full of en dashes, non-breaking hyphens and section signs, and
+    # a Windows console defaults to cp1252, which cannot encode any of them. A
+    # lint finding quoting one used to end the run in a UnicodeEncodeError
+    # traceback instead of printing the finding.
+    for handle in (sys.stdout, sys.stderr):
+        try:
+            handle.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("-o", "--output",
                     default=os.path.join(BOOK, "GHCAA-Documentation-Book.html"))
@@ -632,7 +690,7 @@ def main(argv=None):
                 pdf_path, problems = printer.to_pdf(args.output, target)
                 failures += len(problems)
                 if not args.no_folios:
-                    _fill_folios(args.output, pdf_path, args.two_column)
+                    failures += _fill_folios(args.output, pdf_path, args.two_column)
         except (printer.BrowserMissing, RuntimeError) as exc:
             print("  pdf       : not produced — %s" % exc)
             failures += 1
@@ -652,21 +710,28 @@ def _fill_folios(html_path, pdf_path, two_column):
     lands on is not known until the document has been paginated, and the
     contents page has to state it. The second print is checked against the
     first, so a number that moved is reported rather than left wrong.
+
+    Returns the number of defects found, so that a contents page known to be
+    wrong cannot end the run in "clean, ready to deliver".
     """
     front = os.path.join(BOOK, CHAPTERS[0])
     read = folios.reader()
     if read is None:
         print("  folios    : Page columns left empty (install pypdf to fill them: "
               "python -m pip install pypdf)")
-        return
+        return 0
 
     filled, total = folios.fill(front, pdf_path, read)
     if not filled:
-        print("  folios    : nothing to fill")
-        return
+        print("  folios    : nothing to fill, though %d rows want a page number" % total)
+        return 1 if total else 0
 
     write_html(html_path, two_column)
-    printer.to_pdf(html_path, pdf_path, audit=False, stream=io.StringIO())
+    reprint = io.StringIO()
+    _, reprint_problems = printer.to_pdf(html_path, pdf_path, audit=False, stream=reprint)
+    defects = len(reprint_problems)
+    for _item, reasons in reprint_problems:
+        print("  REPRINT   : %s" % "; ".join(reasons))
 
     # Adding the numbers changed the front matter, so confirm nothing moved.
     pages = read(pdf_path)
@@ -678,12 +743,20 @@ def _fill_folios(html_path, pdf_path, two_column):
         match = re.search(r"\|\s*(\d+)\s*\|\s*$", row.rstrip())
         if match:
             stated[anchor] = int(match.group(1))
-    moved = [a for a, page in stated.items() if again.get(a) not in (None, page)]
+    # An anchor that cannot be found on the reprint is a defect too: the row
+    # keeps whatever number it had, and nothing says so.
+    moved = [a for a, page in stated.items() if again.get(a) != page]
     print("  folios    : %d of %d page numbers written from the printed copy"
           % (filled, total))
+    if filled < total:
+        print("  FOLIOS UNFILLED: %d rows found no match in the PDF, so they keep whatever "
+              "number they had" % (total - filled))
+        defects += total - filled
     if moved:
         print("  FOLIOS MOVED on the reprint: %s. Run --pdf again to settle them."
               % ", ".join(sorted(moved)[:6]))
+        defects += len(moved)
+    return defects
 
 
 def _audit_only(html_path):

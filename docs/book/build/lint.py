@@ -208,7 +208,12 @@ def forward_references(paths, caps):
 
 
 def front_matter_lists(front_path, caps):
-    """Figures and tables missing from the List of Figures / List of Tables."""
+    """The lists and the captions must name the same artefacts, both ways round.
+
+    Checking only that a caption is listed leaves the reverse open: a figure
+    that is deleted or renumbered leaves a row behind in the List of Figures,
+    with a page number that now points at something else.
+    """
     if not os.path.exists(front_path):
         return []
     with io.open(front_path, encoding="utf-8") as fh:
@@ -224,14 +229,21 @@ def front_matter_lists(front_path, caps):
         block = text[start:end if end > 0 else len(text)]
         sections[name] = {m.group(1) for m in LOF_ROW.finditer(block)}
     problems = []
+    captioned = {"Figure": set(), "Table": set()}
     for path, number, kind, chapter, index, _t, _l in caps:
         if os.path.abspath(path) == os.path.abspath(front_path):
             continue
         label = "%d.%d" % (chapter, index)
+        captioned.setdefault(kind, set()).add(label)
         listed = sections.get(kind, set())
         if label not in listed:
             problems.append((path, number,
                              "%s %s is not in the List of %ss" % (kind, label, kind)))
+    for kind, listed in sections.items():
+        for label in sorted(listed - captioned.get(kind, set())):
+            problems.append((front_path, 1,
+                             "the List of %ss has a row for %s %s and no such caption exists; "
+                             "run renumber.py --lists --apply" % (kind, kind, label)))
     return problems
 
 
@@ -324,12 +336,97 @@ def placeholders(paths):
     return open_items
 
 
+# docs/book/build/lint.py -> docs/DOCUMENTATION_BOOK_OUTLINE.md
+OUTLINE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__)))), "DOCUMENTATION_BOOK_OUTLINE.md")
+
+OUTLINE_CHAPTER = re.compile(r"^## Chapter (\d+) — (.+)$")
+OUTLINE_SECTION = re.compile(r"^\s*- \*\*(\d+\.\d+(?:\.\d+)?)\*\*")
+BODY_CHAPTER = re.compile(r"^# Chapter (\d+) — (.+)$")
+BODY_SECTION = re.compile(r"^#{2,3} (\d+\.\d+(?:\.\d+)?) ")
+
+
+def _outline(outline_path):
+    """chapter -> (title, [section numbers]) as the outline promises them."""
+    spec, chapter = {}, None
+    for raw in io.open(outline_path, encoding="utf-8"):
+        line = raw.rstrip("\n")
+        head = OUTLINE_CHAPTER.match(line)
+        if head:
+            chapter = int(head.group(1))
+            spec[chapter] = (head.group(2).strip(), [])
+            continue
+        if chapter and (line.startswith("# ") or line.startswith("## ")):
+            chapter = None
+            continue
+        section = OUTLINE_SECTION.match(line)
+        if chapter and section:
+            spec[chapter][1].append(section.group(1))
+    return spec
+
+
+def outline_drift(paths, outline_path=None):
+    """Sections the outline promises and the chapter does not carry, or the reverse.
+
+    The outline is reviewed and approved before writing; the chapters are what
+    gets bound. They are two views of one structure, so a section may not appear
+    in one without the other, and a chapter may not be retitled in one alone.
+    Both directions are checked, because drift has happened in both: a chapter
+    swap that reached the prose but not the outline's own numbering, and a
+    written section that the outline never learned about.
+    """
+    outline_path = outline_path or OUTLINE
+    if not os.path.exists(outline_path):
+        return [(outline_path, 0, "the outline is missing, so the structure cannot be checked")]
+    spec = _outline(outline_path)
+    findings = []
+    for path in paths:
+        chapter, present = None, []
+        for number, raw in enumerate(io.open(path, encoding="utf-8"), 1):
+            line = raw.rstrip("\n")
+            head = BODY_CHAPTER.match(line)
+            if head:
+                chapter = int(head.group(1))
+                promised = spec.get(chapter)
+                if promised and promised[0] != head.group(2).strip():
+                    findings.append((path, number, "chapter title is %r, the outline says %r"
+                                     % (head.group(2).strip(), promised[0])))
+                continue
+            section = BODY_SECTION.match(line)
+            if section:
+                present.append((section.group(1), number))
+        if chapter is None:
+            continue
+        if chapter not in spec:
+            findings.append((path, 1, "Chapter %d is not in the outline" % chapter))
+            continue
+        promised = spec[chapter][1]
+        seen = [n for n, _ in present]
+        for number, line_no in present:
+            if number not in promised:
+                findings.append((path, line_no,
+                                 "§%s is written but the outline does not list it" % number))
+        for number in promised:
+            if number not in seen:
+                findings.append((path, 1,
+                                 "the outline lists §%s and this chapter does not carry it" % number))
+        # Same sections, different sequence: the outline is the approved reading
+        # order, so a chapter that reorders its topics has to say so there too.
+        if sorted(seen) == sorted(promised) and seen != promised:
+            first = next(i for i in range(len(seen)) if seen[i] != promised[i])
+            findings.append((path, 1, "sections are in a different order from the outline, "
+                                      "first at §%s where the outline has §%s"
+                                      % (seen[first], promised[first])))
+    return findings
+
+
 def run(paths, front_path):
     """All checks. Returns a dict of category -> list of findings."""
     caps = captions(paths)
     refs_path = next((p for p in paths if os.path.basename(p).startswith("99-")), "")
     dangling, uncited = references(paths, refs_path)
     return {
+        "outline drift": outline_drift(paths),
         "citations": dangling,
         "uncited references": uncited,
         "tone": tone(paths),
@@ -356,7 +453,7 @@ def report(results, stream, no_placeholders=False, final=False):
     references numbered for Part III cannot be cited until it exists.
     """
     failures = 0
-    for name in ("tone", "numbering", "forward references", "front-matter lists",
+    for name in ("outline drift", "tone", "numbering", "forward references", "front-matter lists",
                  "abstract length", "citations"):
         items = results[name]
         if not items:
@@ -376,9 +473,18 @@ def report(results, stream, no_placeholders=False, final=False):
 
     open_items = results["placeholders"]
     if open_items:
-        stream.write("  placeholders still open: %d\n" % len(open_items))
+        by_file = {}
         for path, number, text in open_items:
-            stream.write("    %s:%d  %s\n" % (os.path.basename(path), number, text))
+            by_file.setdefault(os.path.basename(path), []).append(number)
+        stream.write("  placeholders still open: %d across %d files (%s)\n"
+                     % (len(open_items), len(by_file),
+                        ", ".join("%s %d" % (name, len(rows))
+                                  for name, rows in sorted(by_file.items()))))
+        # Listing every one only helps when they are what is being closed. A stub
+        # chapter carries one per section, and 130 of them bury the real findings
+        # printed above.
         if no_placeholders:
+            for path, number, text in open_items:
+                stream.write("    %s:%d  %s\n" % (os.path.basename(path), number, text))
             failures += len(open_items)
     return failures

@@ -128,11 +128,20 @@ wider than anything the screen preview can show, so its scale has to be calculat
 - landscape figures fit 257 x 148 mm
 - a diagram smaller than its box is enlarged, but never by more than half again
 
-`--audit` then reports any figure or table that still does not work on paper, in three kinds:
+`--audit` then reports any figure or table that still does not work on paper, in five kinds:
 
 - **too wide** — it runs past the text block, so the edge would be cut
 - **too tall** — it cannot fit a page and is not marked breakable
 - **labels too small** — it fits, but only by shrinking its labels below 7pt
+- **labels overprinted** — two labels sit on top of each other, so neither reads
+- **labels clipped** — a title or label is wider than the drawing and is cut off at the frame
+
+The last two are about the words rather than the box, and neither is visible in the page count or the
+figure size. Mermaid overprints whenever two chart points share a coordinate or two edges join the
+same pair of nodes: give the points distinct positions, or replace the pair of arrows with one
+double-headed arrow whose label says which flow goes which way. It clips whenever a `title` or a
+point label is wider than the chart, because the viewBox is sized from the drawing and everything
+outside it is simply cut: shorten the title, or drop it and let the figure caption carry the name.
 
 The last one is the common one, and marking it `{landscape}` is usually the wrong fix. A diagram is
 too small because its shape does not match the page: a fan-out tree drawn `TB` grows sideways, a
@@ -154,6 +163,10 @@ while most of the page height goes unused. The fixes, in the order to try them:
 6. **Only then, `{landscape}`.** It buys 257mm of width and costs a page of its own. It is the right
    answer for a genuinely wide diagram, such as the high-level architecture of Figure 6.1.
 
+Close the PDF before building. A viewer holding `GHCAA-Documentation-Book.pdf` open locks the file;
+the build now stops and says so, because the older behaviour was worse — it fell back to the
+command-line switch and produced a copy with no page numbers and no background graphics.
+
 After a figure is added, dropped, moved or turned into a table, run
 `python docs/book/build/renumber.py --apply`. It relabels captions in bound order, rewrites every
 mention in the body, and rebuilds the List of Figures and List of Tables from the captions, so the
@@ -166,18 +179,33 @@ a mention of that label would be ambiguous.
 
 | Check | What fails it |
 |---|---|
+| outline drift | a section in a chapter and not in the outline, or the reverse, or the two in a different order, or a chapter retitled in one alone |
 | tone | a word or opener the house style rules out (the list is `BANNED` in `lint.py`) |
 | numbering | a figure or table number used twice, or a chapter's numbering with a gap in it |
 | forward references | an artefact printed before the body has named it, which IEEE does not allow |
-| front-matter lists | a figure or table missing from the List of Figures or List of Tables |
+| front-matter lists | a figure or table missing from the List of Figures or List of Tables, or a row in either list with no caption behind it |
 | abstract length | the stated word count no longer matching the abstract |
 | citations | a `[n]` marker with no entry in `99-references.md` |
 | uncited references | an entry nothing cites yet; expected while Part III and IV are unwritten, a defect for a finished copy |
-| placeholders | every `*[` paragraph still open, listed with its line |
+| placeholders | every `*[` paragraph still open, counted per file; listed line by line under `--no-placeholders` |
 | drifted captions | a caption with no artefact under it that is not in the allowed set |
 
 The reference list is exempt from the tone check: it is titles and journal names, not the author's
 prose. Headings, tables and code fences are exempt too.
+
+### The outline and the chapters are one structure
+
+`docs/DOCUMENTATION_BOOK_OUTLINE.md` is the approved structure and `docs/book/*.md` is what gets
+bound. They are two views of the same thing, so **a change to either is a change to both**: add a
+section to a chapter and add its bullet to the outline; renumber, retitle, reorder or drop a section
+in the outline and do the same in the chapter. This is not a convention to remember — `lint.py`
+compares them on every build and `--strict` fails on any disagreement, in either direction,
+including a difference in order alone.
+
+Chapters 7 to 13 exist as stubs generated from the outline: the headings are real and checked, and
+each section carries a `*[Not written]*` placeholder with the outline's brief, so `--no-placeholders`
+counts exactly what is left to write. Fill a section by replacing its placeholder; do not delete the
+heading.
 
 ## Diagrams
 
@@ -224,7 +252,8 @@ cited by designation and year of the edition consulted. Figures numbered per cha
 below; tables numbered per chapter with the caption above; every figure and table named in the body
 before it appears, and listed in the front matter. Both of those last two are enforced by the build,
 not left to attention. Cross-references by section number (§9.4), never by page or by "the section
-above".
+above". The section sign belongs in a cross-reference and nowhere else: the contents list
+carries the bare number, which is the convention a reader expects there.
 
 **Tone.** Plain declarative English, British spelling, first person singular where the author is the
 one who did the thing. Vary sentence length. State what was done and what happened; do not editorialise

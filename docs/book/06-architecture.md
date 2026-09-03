@@ -82,6 +82,14 @@ which is where the dependency rule is either kept or broken.
 pipeline of §6.4. It composes the other three layers at startup through `Program.cs` and the
 `AddInfrastructure` extension method, and depends on all of them.
 
+One implementation lives here rather than in Infrastructure, and the reason is worth stating because
+it looks like a violation of §6.3.6 and is not. `IRealTimeService` is declared in the Application
+layer, and the services that push notifications — member, financial, family and notification — depend
+on that interface like any other. Its implementation, `RealTimeService`, needs `IHubContext<T>`, which
+is an ASP.NET Core hosting type, so it sits in `GHCAA.API` beside the hubs it drives. The dependency
+still points inwards: Infrastructure knows only the interface, and the arrow from the service
+implementations to the hubs in Figure 6.1 is a call at run time, not a compile-time reference.
+
 ### 6.3.5 Presentation layers
 
 Two independent clients consume the API rather than sit inside the solution's dependency graph:
@@ -307,7 +315,7 @@ completed piece of design, and §13.6.2 carries it forward as a named item of te
 
 Accessibility is targeted at WCAG 2.1 level AA per NFR-U1, verified by the audit reported in §9.12
 rather than asserted here. Responsive layout follows Marcotte's approach of a fluid grid over fixed
-breakpoints [36], necessary because NFR-P3 and the assumption of §1.6 both treat a mobile browser,
+breakpoints [36], necessary because NFR-P3 and the assumption of §1.7 both treat a mobile browser,
 not a desktop one, as the primary surface for a member.
 
 ### 6.8.5 Web application design pyramid
@@ -327,11 +335,11 @@ concerns are worth naming: the identity card is rendered from data cached at fir
 remains visible without a network connection at the venue where it is presented (FR-49), and payment
 evidence images are compressed on the device before upload to the limit stated in NFR-P4, rather than
 relying on server-side compression, because the upload itself is the expensive step on the
-connections §1.6 assumes.
+connections §1.7 assumes.
 
 ## 6.10 Configuration-Driven Design
 
-Feature flags and organisation identity are design elements, not afterthoughts, because §1.6's
+Feature flags and organisation identity are design elements, not afterthoughts, because §1.7's
 delimitation to one association does not mean the code should hardcode that association's name.
 `OrganizationConfig.ConfigJson`, read through `IOrgConfigService` with a ten-minute in-memory cache
 and a fallback chain of cache, then database, then a built-in default so that a missing configuration
@@ -642,6 +650,7 @@ flowchart TB
     SVC --> FS
     GW --> EXT
     SVC --> GW
+    SVC -.->|IRealTimeService| HUB
 ```
 
 ### Figure 6.2 — Layered / clean architecture diagram with the dependency-inversion boundary marked
@@ -966,16 +975,16 @@ flowchart LR
 
 ```mermaid
 quadrantChart
-    title Candidate architectures: operability by one maintainer against independent scaling
+    title Operability against independent scaling
     x-axis "Hard for one maintainer to operate" --> "Easy for one maintainer to operate"
     y-axis "No independent scaling" --> "Independent scaling"
-    quadrant-1 "Scaling this project does not need"
+    quadrant-1 "Scaling not needed here"
     quadrant-2 "Would suit a larger team"
     quadrant-3 "Poor fit"
     quadrant-4 "Chosen quadrant"
-    "Layered, no dependency rule": [0.55, 0.2]
-    "Clean architecture, enforced": [0.8, 0.25]
-    "Modular monolith, convention only": [0.6, 0.3]
+    "Layered, no dependency rule": [0.50, 0.08]
+    "Modular monolith (convention)": [0.60, 0.30]
+    "Clean architecture (enforced)": [0.84, 0.18]
     "Microservices": [0.25, 0.85]
 ```
 

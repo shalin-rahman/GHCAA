@@ -17,12 +17,17 @@ Chapters 1 to 6 are written and measured. The rest is budgeted, not estimated: t
 what each chapter is allowed, rather than what it would run to at the density Part I and Part II
 actually print at.
 
+Nothing of chapters 7 to 13 exists as a file. `docs/book/` holds `01` to `06` and the references, so
+the printed PDF stops at the architecture chapter. Where the evidence for an unwritten chapter has
+already been gathered, this outline says where it is kept, so that it is written up rather than
+derived a second time. Tracked as Area 67 in `docs/TODO.md`.
+
 | Part | State | Pages |
 |---|---|---|
 | Front matter | written; grows as the contents grow | 10–14 |
 | Part I and Part II, chapters 1–6 | written, measured 2 September 2026 | 72 |
-| Part III, chapters 7–11 | budgeted | 55 |
-| Part IV, chapters 12–13 | budgeted | 19 |
+| Part III, chapters 7–11 | budgeted; no source file exists yet | 55 |
+| Part IV, chapters 12–13 | budgeted; no source file exists yet | 19 |
 | References | written; grows with Part III | 5–8 |
 | Appendices carried in print | see the back matter below | 11–19 |
 | Index, if the programme requires one | not started | 0–6 |
@@ -34,8 +39,8 @@ run to 82–99 pages, so each is roughly two pages tighter than it would otherwi
 | Chapter | Pages |
 |---|---|
 | 7 Implementation | 12 |
-| 8 Verification, validation and quality assurance | 14 |
-| 9 Security, privacy and trust | 11 |
+| 8 Security, privacy and trust | 11 |
+| 9 Verification, validation and quality assurance | 14 |
 | 10 Deployment and operations | 9 |
 | 11 Project management | 9 |
 | 12 Results, evaluation and discussion | 14 |
@@ -108,23 +113,25 @@ the book's own List of Figures for what it contains. Where the two disagree, the
 - **1.1** Research Context: Alumni Relations as an Institutional Function
 - **1.2** Problem Domain: the Govt. Haraganga College Alumni Association
 - **1.3** Problem Statement
-- **1.4** Research Questions, each answerable by evidence presented in this document
+- **1.4** Conceptual Framework — the whole in one view before the detail: the rule set, current practice and the operating reality as inputs; the platform as the designed artefact built and evaluated over increments; the artefact and the evidence about it as outputs; and the evaluation findings returning as requirements
+- **1.5** Research Questions, each answerable by evidence presented in this document
   - RQ1 — What functional and quality requirements characterise an alumni-management platform for a resource-constrained institution in a low-bandwidth, mobile-first, cash-and-manual-payment context?
   - RQ2 — Which architectural approach best satisfies those requirements under a single-maintainer, low-budget sustainability constraint, and at what cost?
   - RQ3 — To what extent can institutional governance processes (constitution, elections, committee terms, member voting) be encoded as software without loss of procedural legitimacy?
   - RQ4 — What measurable quality is achieved by the resulting artefact against ISO/IEC 25010 characteristics, and what does that reveal about the approach?
-- **1.5** Aims and Objectives, each objective mapped to a research question
-- **1.6** Scope, Delimitations and Assumptions
-- **1.7** Research Method in Brief, with forward reference to Chapter 4
-- **1.8** Contributions of this Work
-- **1.9** Stakeholders and Beneficiaries
-- **1.10** Structure of the Dissertation
+- **1.6** Aims and Objectives, each objective mapped to a research question
+- **1.7** Scope, Delimitations and Assumptions
+- **1.8** Research Method in Brief, with forward reference to Chapter 4
+- **1.9** Contributions of this Work
+- **1.10** Stakeholders and Beneficiaries
+- **1.11** Structure of the Dissertation
 
 **Figures and tables**
 
 - Figure 1.1 — Context diagram (DFD Level 0): platform boundary and external entities
 - Figure 1.2 — Stakeholder / onion diagram: core, direct, indirect and regulatory rings
-- Figure 1.3 — Research question ↔ objective ↔ chapter map, on a single page
+- Figure 1.3 — Conceptual framework: inputs, the designed artefact and how it is judged, with the evaluation loop drawn rather than implied
+- Figure 1.4 — Research question ↔ objective ↔ chapter map, on a single page
 
 ---
 
@@ -183,7 +190,7 @@ followed is stated in §2.2.
 - **3.6** Use-Case Modelling
 - **3.7** User Stories, Acceptance Criteria and the Definition of Done
 - **3.8** Requirements Prioritisation (MoSCoW), with the negotiation outcome recorded
-- **3.9** Requirements Traceability
+- **3.9** Requirements Traceability — the chain from constitutional clause to requirement to rule to test, and the direction it does not yet run in: no test carries a requirement or constraint identifier, so the matrix is maintained by hand and could drift from the suite without failing
 - **3.10** Domain Constraints — constitutional and electoral rules the software must not violate
 - **3.11** Feasibility Analysis — technical, economic, operational, schedule, legal and ethical
 - **3.12** Requirements Validation and Formal Technical Review
@@ -249,8 +256,7 @@ followed is stated in §2.2.
 - **5.2** Structured Analysis: Data-Flow Modelling
   - **5.2.1** Context level
   - **5.2.2** Level 1 decomposition
-  - **5.2.3** Level 2 decompositions of the critical processes
-  - **5.2.4** Process specifications and data-store definitions
+  - **5.2.3** Level 2 decompositions of the critical processes, carrying the process specification for every numbered process (Table 5.3) and the data stores each reads and writes (Table 5.4)
 - **5.3** Object-Oriented Analysis
   - **5.3.1** Noun and verb analysis; candidate classes
   - **5.3.2** CRC modelling — class, responsibilities, collaborators
@@ -259,6 +265,8 @@ followed is stated in §2.2.
 - **5.5** State Modelling of Long-Lived Entities
 - **5.6** Business Rules Catalogue — including the rules imported from the association's constitution and election code, each tagged with the article that mandates it
 - **5.7** Data Modelling — conceptual only. The logical and physical progression belongs to §6.5.1 and is not repeated here; §5.7 stops where persistence concerns begin
+  - **5.7.1** Conceptual to logical progression
+  - **5.7.2** Multiplicities worth stating explicitly
 - **5.8** Analysis Model Review and Validation
 - **5.9** Summary
 
@@ -453,29 +461,29 @@ followed is stated in §2.2.
 - **9.1** Verification and Validation Strategy and Test Levels
 - **9.2** Software Quality Assurance Plan — reviews, standards conformance, defect prevention, and the role of formal technical reviews in this project
 - **9.3** Test-Case Design Techniques Applied
-  - **8.3.1** Equivalence partitioning
-  - **8.3.2** Boundary value analysis
-  - **8.3.3** Decision-table testing for the dues and eligibility rules
-  - **8.3.4** State-transition testing derived from the state machines of Chapter 5
-  - **8.3.5** Basis-path testing using the control-flow graph and cyclomatic complexity of §7.8
-  - **8.3.6** Use-case and scenario-based testing
-  - **8.3.7** Exploratory testing and its recorded charters
+  - **9.3.1** Equivalence partitioning
+  - **9.3.2** Boundary value analysis
+  - **9.3.3** Decision-table testing for the dues and eligibility rules
+  - **9.3.4** State-transition testing derived from the state machines of Chapter 5
+  - **9.3.5** Basis-path testing using the control-flow graph and cyclomatic complexity of §7.8
+  - **9.3.6** Use-case and scenario-based testing
+  - **9.3.7** Exploratory testing and its recorded charters
 - **9.4** Unit Testing — Backend
-  - **8.4.1** Framework, runner and project layout
-  - **8.4.2** The definition of a unit in this system, and the reasoning for testing at the service boundary rather than at the controller or the repository
-  - **8.4.3** Test doubles — stubs, mocks, fakes and the in-memory provider; where each is appropriate and the fidelity each sacrifices
-  - **8.4.4** Test structure and naming: arrange–act–assert, given–when–then
-  - **8.4.5** Testing the business rules that carry constitutional force — dues, eligibility, committee terms, voting rights — traced back to the rule catalogue of §5.6
-  - **8.4.6** Testing of failure and exception paths
-  - **8.4.7** Test independence, determinism and the elimination of order dependence
+  - **9.4.1** Framework, runner and project layout
+  - **9.4.2** The definition of a unit in this system, and the reasoning for testing at the service boundary rather than at the controller or the repository
+  - **9.4.3** Test doubles — stubs, mocks, fakes and the in-memory provider; where each is appropriate and the fidelity each sacrifices
+  - **9.4.4** Test structure and naming: arrange–act–assert, given–when–then
+  - **9.4.5** Testing the business rules that carry constitutional force — dues, eligibility, committee terms, voting rights — traced back to the rule catalogue of §5.6 and forward to Table 9.9, which names the test that pins each DC identifier
+  - **9.4.6** Testing of failure and exception paths
+  - **9.4.7** Test independence, determinism and the elimination of order dependence
 - **9.5** Unit and Component Testing — Web Client
-  - **8.5.1** Runner, harness and component-testing strategy
-  - **8.5.2** Testing signals, computed state and change propagation
-  - **8.5.3** Testing guards, interceptors and the token-refresh queue
-  - **8.5.4** HTTP mocking and contract fidelity against the live API
+  - **9.5.1** Runner, harness and component-testing strategy
+  - **9.5.2** Testing signals, computed state and change propagation
+  - **9.5.3** Testing guards, interceptors and the token-refresh queue
+  - **9.5.4** HTTP mocking and contract fidelity against the live API
 - **9.6** Widget and Golden Testing — Mobile Client
-  - **8.6.1** Widget-test scope
-  - **8.6.2** Golden (snapshot) testing: what it catches, what it cannot, and the platform-rendering problem that requires it to be skipped in continuous integration
+  - **9.6.1** Widget-test scope
+  - **9.6.2** Golden (snapshot) testing: what it catches, what it cannot, and the platform-rendering problem that requires it to be skipped in continuous integration
 - **9.7** Integration Testing Strategy, and the reasoning for rejecting big-bang integration
 - **9.8** System and End-to-End Testing
 - **9.9** Regression Testing and Test Selection
@@ -484,11 +492,11 @@ followed is stated in §2.2.
 - **9.12** Usability and Accessibility Testing — task success, time on task, System Usability Scale scores, WCAG audit
 - **9.13** User Acceptance Testing — participants, protocol, results, sign-off
 - **9.14** Product Metrics and Static Analysis
-  - **8.14.1** Size — lines of code and function points
-  - **8.14.2** Complexity — cyclomatic complexity distribution and the worst offenders
-  - **8.14.3** Coupling and cohesion — CBO, LCOM, afferent and efferent coupling, instability
-  - **8.14.4** Maintainability index and technical-debt estimate
-  - **8.14.5** Test adequacy: coverage, and the argument coverage can and cannot support
+  - **9.14.1** Size — lines of code and function points
+  - **9.14.2** Complexity — cyclomatic complexity distribution and the worst offenders
+  - **9.14.3** Coupling and cohesion — CBO, LCOM, afferent and efferent coupling, instability
+  - **9.14.4** Maintainability index and technical-debt estimate
+  - **9.14.5** Test adequacy: coverage, and the argument coverage can and cannot support
     - Statement, branch and, where available, mutation coverage, reported per layer rather than as a single headline figure
     - Coverage treated as a necessary but not sufficient criterion: high coverage demonstrates that code is executed, not that behaviour is verified. Mutation score is reported as the corrective measure, and where it was not run that is stated
     - Risk-weighted targets: coverage thresholds set by module criticality, with payment, authentication and governance held to a higher bar than presentation code, declared in §4.6 in advance of measurement
@@ -519,6 +527,7 @@ followed is stated in §2.2.
 - Table 9.6 — Coverage by module against its risk-weighted target: module, criticality, target, statement percentage, branch percentage, mutation score, verdict, and the justification for any shortfall
 - Table 9.7 — Defect log
 - Table 9.8 — User acceptance test results and sign-off
+- Table 9.9 — Constitutional traceability: DC identifier, constitutional article and section, the rule as enforced, the requirement it governs, the automated test that pins it, and the verdict. Closes the loop Table 3.4 opens: §3.10 states the constraint, this states the test that would fail if the software stopped honouring it
 
 ---
 
@@ -528,6 +537,8 @@ followed is stated in §2.2.
 - **10.2** Environment Topology and Configuration Differences
 - **10.3** Containerisation Strategy
 - **10.4** Continuous Integration and Continuous Deployment
+  - **10.4.1** Pipeline stages and the quality gates actually enforced — formatting, type checking, static analysis, build and test, per workflow
+  - **10.4.2** Security in the pipeline — what is automated and what is not. Dependabot raises grouped dependency updates against preprod for NuGet, npm, pub, Actions and Docker, so a published advisory against a library this project uses arrives as a pull request rather than waiting to be noticed. Nothing else is automated, and the reasons are separate rather than one excuse: static application security testing was scoped and rejected on cost, CodeQL being free only on a public repository and needing paid GitHub Advanced Security on a private one; dynamic testing has no environment to run against that is not either preprod or production; and the Flutter client would be out of reach of CodeQL in any case, Dart not being one of its languages. The security work of Chapter 8 was therefore done by review and by test, which is a weaker guarantee than a scan and is reported as one, with the remedy costed in §13.4
 - **10.5** Database Provisioning, Migration and Live Data Synchronisation
 - **10.6** Configuration and Secret Management
 - **10.7** Observability — logging, monitoring, alerting, error reporting
@@ -571,7 +582,7 @@ matters more than the numbers themselves:
 | Class | Covers | What it can support |
 |---|---|---|
 | Git-dated | 17 code components, 8 documentation deliverables | dated and verifiable; a commit-day is a *lower bound* on effort, since reading, debugging and thinking leave no commit |
-| Tracker-dated | 63 areas, 590 tasks, the arrival profile | dated in `docs/TODO.md` |
+| Tracker-dated | 67 areas, 615 tasks, the arrival profile | dated in `docs/TODO.md` |
 | Not yet written | installation, user and administrator manuals | future effort under the page budget, not completed work |
 | Calculated assumption | elicitation, interviews, review sessions, stakeholder discussion, incident response | **no commits exist**, so the duration is calculated from a stated rate and a measured quantity, and the arithmetic is printed with it. A reader who rejects the rate can redo the sum. These are labelled as assumptions everywhere they appear and are never presented as measurements |
 
@@ -601,7 +612,7 @@ five months after the elicitation they record and after the code they governed w
 For code that gap is small; for research it inverts the schedule, and §11.2 states it.
 
 - **11.0** The Four P's Applied — People, Product, Process, Project, with the single-maintainer case stated plainly against each. None of Pressman's four organisational paradigms (closed, random, open, synchronous) describes one unpaid maintainer; saying so is the finding, not forcing a label
-- **11.1** Process Model in Practice and its Deviations from Plan — led by the arrival profile: **65% of delivered tasks were not planned**, arriving as stakeholder feedback (32%), review findings (19%) or defects (14%), and 26 of the dated areas landed in August 2026 alone. A critical path over an up-front work breakdown would be fiction, because two thirds of the work did not exist when that breakdown would have been drawn
+- **11.1** Process Model in Practice and its Deviations from Plan — led by the arrival profile: **67% of delivered tasks were not planned** (409 of 615, figures of 2 September 2026), arriving as stakeholder feedback (35%), review findings (18%) or defects (14%), and 26 of the dated areas landed in August 2026 alone. A critical path over an up-front work breakdown would be fiction, because two thirds of the work did not exist when that breakdown would have been drawn
 - **11.2** Work Breakdown Structure — the four streams above; the 17 code components each tied to the tracker areas that produced them, so the activity list and the tracker are one list read two ways
 - **11.3** Scheduling, Task Network and Critical Path — activity-on-node by the precedence diagram method, with duration, float, early and late start and finish. Reported as a **retrospective** network: critical path 48 working days against 63 worked and 206 elapsed. The gap is availability, not dependency, and that is the section's point. Persistence and security behave as **hammock activities**, touched on 42 and 33 separate days across the whole span, and are drawn as such rather than as boxes at day zero
   - **11.3.1** CPM summary ordered by float, so the schedule can be read by slack rather than by sequence
@@ -611,7 +622,7 @@ For code that gap is small; for research it inverts the schedule, and §11.2 sta
   - **11.4.2** The estimate against the actual — 97 days, about 4.4 person-months across all four streams, against the function-point model's prediction at the standard productivity factor. The model over-predicts by roughly two orders of magnitude, and the reasons are stated: framework scaffolding, no coordination overhead, no separate quality-assurance or project-management roles, and generated code counted as delivered function. The productivity factor assumes a team; there is no team
 - **11.5** Progress Tracking and Earned Value — BCWS, BCWP, BAC and ACWP, with **SPI = BCWP/BCWS** and **CPI = BCWP/ACWP**, reconstructed from the dated tracker items and the commit record, which is the only effort evidence this project has. The reconstruction and its limits are stated as such; no weekly earned-value record was kept, and the chapter does not pretend one was
 - **11.6** Team Structure and Responsibilities — one maintainer holding every role the four P's assign to different people, and what that costs: no independent review, and no separation between the person who declares a payment rule and the person who tests it. The mitigation was mechanical, being the tracker and the test suite, and §12.11 treats it as a validity threat
-- **11.7** Configuration and Change Management in Practice — there was no change-control board. There was one file: `docs/TODO.md`, 3,589 lines, simultaneously the project plan, the change log, the defect log and the decision record. The 384 reactive tasks *are* the change log, and Table 11.5 is generated from them rather than reconstructed
+- **11.7** Configuration and Change Management in Practice — there was no change-control board. There was one file: `docs/TODO.md`, 3,839 lines, simultaneously the project plan, the change log, the defect log and the decision record. The 409 reactive tasks *are* the change log, and Table 11.5 is generated from them rather than reconstructed
 - **11.8** Risk Monitoring Record — the RMMM plan of §4.8 as it was executed, with **risk exposure RE = P × C** computed per risk and impact on the 1–5 scale, plus one worked Risk Information Sheet. §4.8 needs revising to carry RE; the impact costs are author-stated and have to be supplied
 - **11.9** Quality Assurance Activities Performed — against Pressman's 40‑20‑40 allocation, this project spent roughly a third of its evidenced effort on feature code and about 15% on testing, well under the 40% prescribed. Data-backed self-criticism, with **DRE = E / (E + D)** computed from the findings log as E and live defects as D, and **MTTC** named as what QAS-06 already measures
 - **11.10** Lessons in Project Management
@@ -634,7 +645,7 @@ seventeen nodes with nine edges converging on the web client would print at abou
 - Table 11.2 — Function-point count: EI, EO, EQ, ILF and EIF with complexity weighting, from the delivered system
 - Table 11.3 — TDI over the fourteen general system characteristics, and the VAF it yields
 - Table 11.4 — Cost model: effort, rate and total, by both the function-point and the lines-of-code route
-- Table 11.5 — Change log generated from the 384 reactive tracker tasks: area, arrival class, date, cause, impact
+- Table 11.5 — Change log generated from the reactive tracker tasks, 409 of them at the last count: area, arrival class, date, cause, impact
 - Table 11.6 — Documentation deliverables: document, artefact, lines, active days, status
 
 ---
@@ -703,7 +714,7 @@ defined there.
 **Printed in the bound volume** (11–19 pages, per the appendix policy above):
 
 - Appendix A — Ethics: the permission obtained, and the absence of a written consent procedure, per §4.9. There is no participant information sheet or consent form to reproduce; consent was verbal. 2–4 pp
-- Appendix B — Closed requirements traceability matrix: requirement → design → code → test → result, for all of FR-01 to FR-54 and the NFR set. This is the appendix an examiner actually uses. 4–6 pp
+- Appendix B — Closed requirements traceability matrix: requirement → design → code → test → result, for all of FR-01 to FR-54 and the NFR set. This is the appendix an examiner actually uses. Compiled by hand until the tests carry identifiers (tracker 73.4), after which it is generated. 4–6 pp
 - Appendix C — Full-page fold-out plates: the four ER sub-models and the design class diagram, at landscape size. 3–5 pp
 - Appendix D — Originality / similarity report: tool output. 2–4 pp
 

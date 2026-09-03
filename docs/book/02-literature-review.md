@@ -373,7 +373,8 @@ operating cost, with this platform's position marked.
   hosting together.
 - **C4 Single-maintainer feasibility.** Can one part-time volunteer with the maintainer's actual
   skill set operate, extend and recover the system?
-- **C5 Data sovereignty and exit.** Can the Association hold its own data and leave without loss?
+- **C5 Data sovereignty and exit, which is vendor lock-in measured from the buyer's side.** Can the
+  Association hold its own data and leave without loss?
 - **C6 Mobile fitness.** Usable on a mid-range handset over mobile data.
 - **C7 Localisation fitness.** Bengali content, local financial channels, local naming and identity
   conventions including national identity numbers.
@@ -410,7 +411,7 @@ reported. Table 2.3 states this as residual gaps against the best available cove
 required capability.
 
 Two honest qualifications. First, none of the four elements is individually novel; the claim is
-about the combination and about the recorded reasoning, which is why the contributions in §1.8 are
+about the combination and about the recorded reasoning, which is why the contributions in §1.9 are
 stated as a method and an account rather than as an invention. Second, the gap is defined partly by
 a constraint, namely one maintainer and no budget, which some readers will regard as a circumstance
 rather than a research problem. Section 12.8 takes that objection seriously, and the response in
@@ -510,14 +511,14 @@ quadrantChart
     quadrant-3 "Cheap and shallow"
     quadrant-4 "Costly and shallow"
     "GHCAA platform": [0.12, 0.90]
-    "CiviCRM + Drupal": [0.28, 0.52]
+    "CiviCRM + Drupal": [0.32, 0.62]
     "WordPress + membership plugin": [0.30, 0.24]
     "Discourse": [0.35, 0.10]
     "Zoho CRM": [0.55, 0.26]
     "Salesforce NPSP": [0.62, 0.34]
-    "Almabase / Graduway": [0.82, 0.40]
-    "Hivebrite": [0.88, 0.44]
-    "Anthology Encompass": [0.95, 0.38]
+    "Almabase / Graduway": [0.76, 0.44]
+    "Hivebrite": [0.84, 0.34]
+    "Anthology Encompass": [0.88, 0.22]
 ```
 
 ### Table 2.1 — Review protocol summary

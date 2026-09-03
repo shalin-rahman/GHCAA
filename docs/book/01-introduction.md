@@ -95,10 +95,47 @@ nothing for constitutional tiers, committee terms or amendment voting. The gap i
 feature. It is a missing combination: deep domain governance at close to zero operating cost, with
 manual payment as a first-class design position rather than a degraded fallback.
 
-## 1.4 Research Questions
+## 1.4 Conceptual Framework
+
+The problem statement above names four needs; the chapters that follow answer them in pieces. This
+section states the whole in one view, so that a reader can see what the work takes in, what it
+produces and how the two are judged against each other before meeting any of it in detail. Figure 1.3
+draws it.
+
+Three kinds of input govern the work, and they are not interchangeable. The first is the
+Association's own rule set: the constitution at version 4.2 and the seven documents of the election
+code, whose normative clauses become the domain constraints of §3.10 and are not negotiable with any
+stakeholder. The second is current practice, being the paper application form, the treasurer's
+ledger and the recognition-based approval described in §1.2, which the software must either preserve
+or deliberately replace. The third is the operating reality: one volunteer maintainer, no licence
+budget, no payment-gateway credentials, and members reaching the system on mid-range handsets over
+mobile data. The first input constrains what the artefact may do, the second what it must handle,
+and the third what it can afford to be.
+
+The artefact sits between them. It is a running platform rather than a model of one, built and
+revised over increments, and the design-science position of Chapter 4 is what licenses treating its
+construction as research: each increment is a designed response to a stated problem, and each is
+evaluated before the next is specified. The rules do not merely inform the design; they are encoded
+in it and are traceable back to the clause they came from, which is the property §3.9 and Table 9.9
+exist to demonstrate.
+
+The outputs are of two kinds, and keeping them apart matters. The artefact itself is one
+contribution, deployed and in use by real members with real records. The evidence about it is the
+other: requirement closure, the quality-attribute measurements against the thresholds declared in
+advance in §4.6, the operating cost of §10.10, and the comparison against the manual practice it
+replaced in §12.10. The thresholds are declared before measurement, in Chapter 4, precisely so that
+the evaluation cannot be written to fit whatever the system turned out to do.
+
+The feedback path is the part that a static diagram most easily loses. Evaluation did not happen once
+at the end. Findings from use, from review and from deployment failures re-entered the work as new
+requirements, and §11.1 reports how much of the delivered work arrived that way rather than from the
+original specification. That loop is the design cycle of §4.2, and it is drawn in Figure 1.3 as a
+return edge rather than left implicit.
+
+## 1.5 Research Questions
 
 Each question is answerable from evidence presented later in this document, and the mapping is drawn
-in Figure 1.3.
+in Figure 1.4.
 
 **RQ1.** What functional and quality requirements characterise an alumni-management platform for a
 resource-constrained institution in a low-bandwidth, mobile-first, cash-and-manual-payment context?
@@ -128,7 +165,7 @@ RQ3 is the question of genuine interest. RQ1 and RQ2 are the questions that must
 in order to have an artefact against which RQ3 can be asked, and RQ4 is what makes the answers
 defensible rather than anecdotal.
 
-## 1.5 Aims and Objectives
+## 1.6 Aims and Objectives
 
 **Aim.** To design, build and evaluate a sustainable alumni-management platform for a governed,
 resource-constrained association, and from that to establish how far institutional governance can be
@@ -145,7 +182,7 @@ encoded in software before procedural legitimacy is damaged.
 | O7 | Design and operate a deployment that a single volunteer can sustain, and cost it | RQ2 | Ch. 10 |
 | O8 | Evaluate the artefact against ISO/IEC 25010, against the manual process it replaces, and against the four research questions | RQ4, RQ3 | Ch. 12 |
 
-## 1.6 Scope, Delimitations and Assumptions
+## 1.7 Scope, Delimitations and Assumptions
 
 **In scope.** Member registration and the approval workflow; profile management with per-field
 privacy control; authentication, including one-time password verification and social sign-in; the
@@ -179,7 +216,7 @@ trained operators, so administrative workflows must be forgiving and reversible.
 cannot commit to a recurring software licence. The constitution will be amended during the system's
 life, so version handling is a requirement and not a convenience.
 
-## 1.7 Research Method in Brief
+## 1.8 Research Method in Brief
 
 The work is a design science research study in the sense of Hevner et al. [4], organised as the six
 activities of Peffers et al. [5]: problem identification, definition of objectives for a solution,
@@ -195,7 +232,7 @@ evaluation plan, including the metrics, instruments and thresholds, is declared 
 before any measurement is reported, so that Chapter 12 cannot select its own criteria after seeing
 the results. Chapter 4 gives the full account.
 
-## 1.8 Contributions of this Work
+## 1.9 Contributions of this Work
 
 The three claims are stated in full in the front matter under Statement of Contributions and are
 substantiated in §13.2. In brief: a traceable method for encoding a voluntary association's written
@@ -210,7 +247,7 @@ architecture as Martin describes it [1] and the enterprise patterns Fowler catal
 contribution lies in the recorded reasoning about their cost in this setting, not in the patterns
 themselves.
 
-## 1.9 Stakeholders and Beneficiaries
+## 1.10 Stakeholders and Beneficiaries
 
 | Stakeholder | Interest | Where their requirements appear |
 | --- | --- | --- |
@@ -230,7 +267,7 @@ roll and the money without reconstructing them by hand. Figure 1.2 places the sa
 stakeholders by distance from the system, from the officers who operate it daily out to the college
 administration and the general public.
 
-## 1.10 Structure of the Dissertation
+## 1.11 Structure of the Dissertation
 
 Part I states the problem. Chapter 2 reviews the literature and surveys existing systems, ending
 with the gap. Chapter 3 specifies the requirements, including the constitutional constraints the
@@ -320,7 +357,37 @@ flowchart TB
 
 
 
-### Figure 1.3 — Research question, objective and chapter map
+### Figure 1.3 — Conceptual framework: inputs, the designed artefact, and how it is judged
+
+```mermaid
+flowchart TB
+    subgraph IN["Inputs"]
+      direction TB
+      R["Rule set<br/>constitution v4.2, election code<br/>becomes DC-01 to DC-16"]
+      P["Current practice<br/>paper form, ledger,<br/>recognition-based approval"]
+      C["Operating reality<br/>one maintainer, no licence budget,<br/>no gateway credentials, mobile data"]
+    end
+    subgraph ART["Designed artefact, built over increments"]
+      direction TB
+      D["Design<br/>requirements, architecture"]
+      B["Build<br/>API, web, mobile"]
+      E["Evaluate<br/>against thresholds set in advance"]
+      D --> B --> E
+    end
+    subgraph OUT["Outputs"]
+      direction TB
+      A["The platform in use"]
+      V["Evidence about it<br/>requirement closure, quality measures,<br/>operating cost, comparison with manual practice"]
+    end
+    R --> D
+    P --> D
+    C --> D
+    E --> A
+    E --> V
+    E -.->|"findings re-enter as requirements"| D
+```
+
+### Figure 1.4 — Research question, objective and chapter map
 
 ```mermaid
 flowchart LR

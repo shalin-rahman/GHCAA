@@ -3586,7 +3586,7 @@ Figures 12.1-12.20 screenshots carry that evidence) and the UML profile diagram 
 exist); the diagram inventory rows for the ERD, wireframes, mockups and profile diagram now match.
 The abstract was 363 words against the outline's own 250-350 range and is now 349.
 
-63.26 [DONE 2026-09-02] **Priority: P1.** Page budget decided by the user: **150 to 200 pages for the
+63.28 [DONE 2026-09-02] **Priority: P1.** Page budget decided by the user: **150 to 200 pages for the
 whole volume.** It cannot be met by cutting appendices alone, because the body plus front matter,
 references and index already comes to 173-201 on its own, so the decision carries two commitments,
 both now recorded in `docs/DOCUMENTATION_BOOK_OUTLINE.md`.
@@ -3752,3 +3752,429 @@ Patterns (seven) come after §6.8 to §6.10 on user interface, mobile and config
 more fundamental than the specific designs that apply them, so the conventional order would put them
 first. Not done: reordering sections inside a written chapter renumbers a large share of the 84 §6
 references for a modest gain. Worth doing only if the chapter is revised for another reason anyway.
+
+# Area 66 — Print legibility: overprinted and clipped diagram labels
+
+Raised by user 2026-09-02 from two screenshots of the printed PDF: risk-matrix labels stacked on top
+of each other, and DFD edge labels overlapping. A third arrived while the first two were being fixed:
+a quadrant-chart title cut off at the left, missing its first letter.
+
+66.1 [DONE 2026-09-02] **Priority: P0.** The A4 audit measured the box and the type size and passed
+every one of these figures. Both defects are invisible to it by construction: the drawing is the
+right shape and the labels are above the 7pt floor, but the words are printed over each other or
+outside the frame. Two checks added to the measurement pass in `build.py`, reported by
+`printer.overflows()`:
+
+  - **overprinted** — every text element's client rectangle is compared pairwise; an intersection
+    over a quarter of the smaller box is a collision, reported with the two label texts.
+  - **clipped** — any text element extending past the SVG's own frame is cut off at print, because
+    Mermaid sizes the viewBox from the drawing and not from the title.
+
+Both run inside `--audit` and therefore inside `--strict`, so a figure that overprints now fails the
+build the same way one that overflows the page does.
+
+66.2 [DONE 2026-09-02] **Priority: P1.** Five figures fixed, three of which nobody had reported:
+
+  - Figure 4.5 risk matrix — eight risks plotted on three coordinates, so six labels printed on top
+    of each other. Spread within each rating band; every risk stays in the quadrant its Table 4.2
+    probability and impact put it in.
+  - Figure 5.1 DFD Level 0 — two arrows between the same pair of nodes put both labels at the same
+    midpoint. Replaced with one double-headed arrow per actor, labelled `in:` and `out:` relative to
+    the platform, and the caption now says so.
+  - Figure 2.4 positioning chart — CiviCRM sat on the quadrant-3 title, and Anthology Encompass at
+    x = 0.95 ran off the right edge. Both moved; the ordering the chart argues is unchanged.
+  - Figure 3.9 domain model — the `holds` role name printed over a multiplicity. Reordering the
+    associations did not clear it and neither did renaming, so the role name is dropped; the
+    Member-to-CommitteeTerm association is unambiguous without it.
+  - Figure 6.13 architecture trade-off — the title was wider than the chart and lost its first
+    letter, and two of the four candidates overlapped. Title shortened to the axis it compares, the
+    figure caption carrying the full name; points spread.
+
+66.3 [DONE 2026-09-02] **Priority: P1.** The PDF build was silently degrading. When the output file
+is open in a viewer the protocol route cannot write it, and the fallback to Chrome's `--print-to-pdf`
+switch produces a copy with no page numbers and no background graphics. It said so in one warning
+line and still reported `clean, ready to deliver`. Now the build checks the file is writable first
+and stops with the reason, and any other fallback prints the underlying cause rather than only the
+consequence. **Close the PDF before building.**
+
+66.4 [DONE 2026-09-02] **Priority: P3.** The contents list prefixed every section row with the
+section sign, "§4.1 Research Paradigm". The section sign marks a cross-reference in prose; a contents
+list carries the bare number. `renumber.py` no longer writes it and `folios.py` treats it as optional
+so a hand-written row still matches.
+
+# Area 67 — The remaining chapters: nothing of Areas 63 to 66 reaches a reader yet
+
+Raised by user 2026-09-02, on being told Area 64 was complete: "doesn't those going in book? where?"
+A fair question, and the answer is that it does not, yet.
+
+67.1 [TODO] **Priority: P0.** `docs/book/` holds chapters 1 to 6 and the references. Chapters 7 to 13
+do not exist as files, so the 85-page PDF the build produces stops at the architecture chapter. Every
+piece of Area 64 evidence — the activity list with predecessors, the critical path, the float
+distribution, the two estimates compared, the arrival profile — lives in exactly two places, neither
+of them the book: the Chapter 11 specification in `docs/DOCUMENTATION_BOOK_OUTLINE.md`, and
+`docs/book/build/wbs.py`, which regenerates the numbers on demand. The same is true of the security
+model (Area 65's Chapter 8) and everything the diagram inventory lists from row 45 on.
+
+  Files to create, with the page budget 63.28 fixed: `07-implementation.md` (12), `08-security.md`
+  (14), `09-verification.md` (11), `10-deployment.md` (9), `11-project-management.md` (9),
+  `12-results.md` (14), `13-conclusion.md` (5). Each is added to the source list in `build.py` as it
+  is written, and `renumber.py --apply` run after it.
+
+67.2 [TODO] **Priority: P1 | Depends on: 67.1.** Chapter 11 is the one to write first, and not
+because it comes first. It is the only unwritten chapter whose evidence is already computed and
+checkable: `wbs.py` prints the activity table, the critical path and the arrival profile from git and
+this file, so the chapter is a matter of writing prose around generated numbers rather than gathering
+anything. Writing it also exercises the claim in Area 64 that the numbers are reproducible; if the
+chapter cannot be written from the script's output, the script is not producing what a reader needs.
+
+67.3 [TODO] **Priority: P2 | Depends on: 67.2.** Seventeen per-component activity diagrams (64.9)
+plus the six chapter-level charts. They cannot be drawn before the chapter exists to hold them, and
+under Area 66 every one of them has to survive the overprint and clipping checks, which the two
+quadrant charts and the DFD did not.
+
+67.4 [TODO] **Priority: P2.** The reference list carries seventeen entries no written chapter cites
+yet. They are not stale: each was collected for a chapter in Part III or IV. The build reports them
+as expected while those parts are unwritten, and `--final` is the gate that stops accepting that
+excuse. Do not delete a reference to quieten the report; write the chapter that uses it, or remove it
+deliberately with the reason recorded here.
+
+67.5 [DONE 2026-09-02] **Priority: P2.** `docs/DOCUMENTATION_BOOK_OUTLINE.md` drifted in three ways
+and now matches the tree:
+
+  - Its per-chapter page budget still read "8 Verification, validation and quality assurance" and
+    "9 Security, privacy and trust". The 65.1 swap did not reach it, so the budget was attached to
+    the wrong chapters. Corrected: 8 Security at 11 pages, 9 Verification at 14.
+  - The state table said Parts III and IV were "budgeted" without saying that no source file exists.
+    It now says so, and a paragraph above the table records where the evidence for an unwritten
+    chapter is kept, so it gets written up rather than derived again.
+  - Chapter 11's figures were quoted from an earlier run: 63 areas, 590 tasks, 65% unplanned, 384
+    reactive, `TODO.md` at 3,589 lines. Re-derived from `wbs.py` on 2 September 2026: 67 areas,
+    615 tasks, 67% unplanned, 409 reactive, 3,839 lines. These move every session, which is why the
+    chapter states the script is authoritative where the two disagree.
+
+67.6 [DONE 2026-09-02] **Priority: P3.** Two tracker items were both numbered 63.26, one open (the
+appendix policy question) and one closed (the page budget the user decided, which answered it). The
+closed one is renumbered 63.28.
+
+# Area 68 — Chapter files for 7 to 13, and the outline kept in step by the build
+
+Raised by user 2026-09-02: "create other chapter md files with book outline contents heading, remember
+any changes in book outline need same needed changes on this new outline files, vice versa, remember
+this always", then "make sure chapters and topics are follows as per needed order".
+
+68.1 [DONE 2026-09-02] **Priority: P1.** Seven chapter files created and wired into `CHAPTERS` in
+`build.py`, in bound order: `07-implementation.md`, `08-security.md`, `09-verification.md`,
+`10-deployment.md`, `11-project-management.md`, `12-results.md`, `13-conclusion.md`. Chapter 7 carries
+the Part III title and Chapter 12 carries Part IV. Every heading is generated from
+`docs/DOCUMENTATION_BOOK_OUTLINE.md`, and each section holds one `*[Not written]*` placeholder with
+the outline's brief, so the count of what is left to write is exact: 139 placeholders across the seven
+files. The book now prints 102 pages with 261 folios, all filled.
+
+68.2 [DONE 2026-09-02] **Priority: P0.** The sync rule the user asked for is enforced, not remembered.
+`lint.outline_drift` compares every chapter against the outline in both directions — a section in one
+and not the other, the two in a different order, a chapter retitled in one alone — and `--strict`
+fails on any of it. Recorded in `docs/book/README.md` and in `CLAUDE.md`.
+
+68.3 [DONE 2026-09-02] **Priority: P1.** Two drifts the new check found immediately, both invisible
+before it:
+
+  - The 65.1 chapter swap missed three-part sub-bullets: 25 of them still read `**8.x.y**` under
+    Chapter 9 in the outline, because the sweep only matched two-part numbers.
+  - The outline promised §5.2.4 "Process specifications and data-store definitions", which the written
+    chapter folded into §5.2.3 (Tables 5.3 and 5.4 carry it), and the written §5.7.1 and §5.7.2 were
+    never added to the outline. Both reconciled.
+
+  Order was checked as well as membership: all thirteen chapters now run in the outline's sequence,
+  and the four parts open at chapters 1, 4, 7 and 12.
+
+68.4 [DONE 2026-09-02] **Priority: P2.** Two build-output faults found while doing the above. A lint
+finding quoting a non-breaking hyphen killed the run with a `UnicodeEncodeError` on a cp1252 console;
+stdout and stderr are now reconfigured to UTF-8. And the placeholder list printed 139 lines on every
+build, burying the real findings above it; it now prints one summary line per file and the full list
+only under `--no-placeholders`, which is when it is the thing being closed.
+
+# Area 69 — Review of the seven book build scripts
+
+Raised by user 2026-09-02: "review ALL THE TOOLS AND SCRIPTS". Reviewed by the `code-reviewer`
+subagent against `docs/book/README.md`, findings verified by running the modules read-only. The design
+of the gate held up; what it found were holes through which a bad artefact could still ship under
+"clean, ready to deliver". Those are fixed. The rest are recorded here, unfixed, in the reviewer's own
+order of severity.
+
+69.1 [DONE 2026-09-02] **Priority: P0.** The fallback print shipped silently on the reprint. The
+folio-filling reprint passed `stream=io.StringIO()`, so the warning that the PDF had been printed
+through the command-line switch — no page numbers, no background graphics, possibly Mermaid source
+boxes — went into a discarded buffer and nothing counted it. `to_pdf` now returns that as a defect in
+the problems list, so both callers count it, and `_fill_folios` prints it.
+
+69.2 [DONE 2026-09-02] **Priority: P0.** The fallback accepted a stale PDF as a fresh one: if the
+command-line print wrote nothing, yesterday's file passed the exists-and-over-20KB test and was
+returned as the deliverable, page count and all. The old file is deleted before the fallback runs.
+
+69.3 [DONE 2026-09-02] **Priority: P1.** `FOLIOS MOVED` was printed and never added to the failure
+count, so a run that knew the contents page numbers were wrong still ended clean. `_fill_folios` now
+returns a defect count, and an anchor that vanishes on the reprint counts as moved rather than as
+unchanged.
+
+69.4 [DONE 2026-09-02] **Priority: P1.** An anchor that stopped matching left yesterday's folio in the
+row with nothing said. `filled < total` is now a failure, and "nothing to fill" with rows waiting is a
+failure rather than a note.
+
+69.5 [DONE 2026-09-02] **Priority: P1.** A missing chapter file was a line on stderr and the build
+carried on, producing a book with a hole that lint could not see, since the captions of the missing
+chapter simply ceased to exist. A file listed in `CHAPTERS` and not on disk is now fatal.
+
+69.6 [DONE 2026-09-02] **Priority: P1.** Front-matter drift was checked one way only: a caption
+missing from the List of Figures was reported, a row in the list with no caption behind it was not. So
+a deleted or renumbered figure left a stale row with a stale page number and the build passed. Both
+directions are checked now.
+
+69.7 [TODO] **Priority: P2.** `lint._mentions` is the only scanner in `lint.py` with no fence
+tracking, so a figure named inside another figure's Mermaid source counts as a body mention and can
+satisfy the IEEE forward-reference check without any prose naming it. Live examples exist
+(`04-methodology.md` Figure 4.5's title, `06-architecture.md` Figure 6.12's node label); both also
+have a prose mention, so nothing is masked today. Fix: skip fenced lines the way `_prose_lines` does.
+
+69.8 [TODO] **Priority: P3.** Citation findings report a line number short by the number of fenced
+lines above them: `FENCE.sub("", text)` removes the newlines along with the fence before the lines are
+counted. Fix: substitute a newline per line removed.
+
+69.9 [TODO] **Priority: P2.** Two checks disable themselves in silence when their anchor moves.
+Retitle the Abstract heading and the word-count check returns nothing; rename `99-references.md` and
+citation checking stops. Both should report "check not run" rather than pass.
+
+69.10 [TODO] **Priority: P3.** Blockquotes escape the tone check — 14 lines of user stories and
+acceptance criteria in `03-requirements.md` are author prose, and the README lists only headings,
+tables and fences as exempt.
+
+69.11 [TODO] **Priority: P2.** `devtools.Browser.__init__` leaks a headless Chrome process and a temp
+profile if anything after `Popen` raises, because the exception escapes the constructor and `__exit__`
+never runs — and the run then falls through to the fallback print of 69.1. Fix: kill and clean up in
+the constructor before re-raising.
+
+69.12 [TODO] **Priority: P3.** The WebSocket handshake discards bytes that arrived with the header, so
+the next frame read can start mid-frame; and the failure path raises without closing the socket.
+
+69.13 [TODO] **Priority: P2.** A browser timeout aborts with a traceback instead of a report:
+`subprocess.TimeoutExpired` and a `pypdf` read error both escape the `except (BrowserMissing,
+RuntimeError)` in `main`.
+
+69.14 [TODO] **Priority: P3.** A code span inside a link label emits raw NUL characters into the HTML,
+because the inline placeholder pass never expands placeholders held inside later ones. No source uses
+that construct today.
+
+69.15 [TODO] **Priority: P2.** The A4 audit ignores a figure's lead-in note: the height is the diagram
+plus its caption, and the `note` div in the same figure is not counted, so a noted figure can measure
+as fitting and still overflow.
+
+69.16 [TODO] **Priority: P2.** The page that is measured for A4 fit and the page that is printed are
+rendered under different browser settings: `printer._base_args` carries
+`--run-all-compositor-stages-before-draw` and `--virtual-time-budget=60000`, and the protocol print in
+`devtools.py` carries neither.
+
+69.17 [TODO] **Priority: P3.** `printer.SLACK = 2.0` CSS px is 0.53 mm, and its comment claims "under
+a fifth of a millimetre". One of the two is wrong, and it is the tolerance the whole A4 gate uses.
+
+69.18 [TODO] **Priority: P3.** `folios.py` and `renumber.py` write the front matter without
+`newline=""`, converting it to CRLF on every run while chapters 1 to 6 stay LF. `.gitattributes` keeps
+it out of the commit, so the cost is working-tree churn. The same lines leave the write handle
+unclosed.
+
+69.19 [TODO] **Priority: P3.** `folios.write_pages` keys page numbers by row text, so two identical
+rows in the front matter collapse to one entry and both get the same page.
+
+69.20 [TODO] **Priority: P1.** `wbs.commit_days` never checks git's exit status. With `git` absent or
+the path not a repository, every component gets an empty day set, durations floor to 1, and the script
+prints a complete and entirely fabricated schedule — numbers destined for Chapter 11. Only `--check`
+would notice, and only obliquely.
+
+69.21 [TODO] **Priority: P2.** The arrival percentages are computed over a subset: tasks in an area
+whose heading does not match `AREA_HEAD` are counted per component but left out of the denominator, so
+"reactive: X of Y tasks" understates Y. A zero denominator raises `ZeroDivisionError` rather than
+reporting that `docs/TODO.md` no longer parses.
+
+69.22 [TODO] **Priority: P3.** The critical path is joined in `CODE` declaration order rather than
+schedule order, correct only while `CODE` happens to be topologically sorted, and `critical_path`
+raises `KeyError` on a predecessor id that is not a component instead of naming the typo.
+
+# Area 70 — Architecture diagram: the real-time path
+
+Raised by user 2026-09-03, marking the SignalR hubs on Figure 6.1 and asking how mobile connects with
+the services.
+
+70.1 [DONE 2026-09-03] **Priority: P1.** Figure 6.1 left the two SignalR hubs as a dead end: clients
+connected to them and nothing connected them to the rest of the system, so the diagram could not
+answer "how does the mobile client reach a service?". The REST path was there all along
+(`MOB -->|HTTPS + JWT| MW`), but the push path was missing entirely. Added
+`SVC -.->|IRealTimeService| HUB`, and §6.3.4 now explains the part that looks like a layering
+violation and is not: `IRealTimeService` is declared in `GHCAA.Application`, the member, financial,
+family and notification services depend on the interface, and the implementation sits in `GHCAA.API`
+because it needs `IHubContext<T>`, a hosting type. Verified in the tree:
+`GHCAA.API/Services/RealTimeService.cs`, `GHCAA.API/Hubs/NotificationHub.cs` and `ChatHub.cs`, and
+the mobile client connecting to `/hubs/notifications` in
+`GHCAA.Mobile/lib/core/real_time/notification_hub_service.dart`.
+
+# Area 71 — Supervisor-style review of the book: verify each suggestion, act where justified
+
+Raised by user 2026-09-03 with ten suggestions across structure, depth, modernity and trimming. Each
+was checked against the tree and the outline before anything was changed; four were already satisfied
+and are recorded as such rather than re-done.
+
+71.1 [DONE 2026-09-03] **Priority: P1.** Conceptual framework added as §1.4, with Figure 1.3 drawing
+inputs, artefact and outputs and the evaluation loop as a return edge rather than an implication. This
+was a genuine gap: Chapter 1 had a context diagram, a stakeholder onion and an RQ-to-chapter map, none
+of which links the Association's rule set, its current practice and its operating constraints to the
+artefact and then to the evidence. Sections 1.4 to 1.10 shifted to 1.5 to 1.11; the renumber cost was
+eight cross-references outside Chapter 1, which is why this was cheap enough to do properly rather
+than bolt on at the end of the chapter.
+
+71.2 [DONE 2026-09-03] **Priority: P1.** Constitutional traceability into testing: Table 9.9 added to
+the Chapter 9 specification — DC identifier, constitutional article and section, the rule as enforced,
+the requirement it governs, the automated test that pins it, and the verdict. §9.4.5 now points
+forward to it. Table 3.4 traces requirements through to a test; this closes the other loop, from the
+clause in the constitution to the test that fails if the software stops honouring it, which for this
+project is the claim the whole dissertation rests on.
+
+71.3 [DONE 2026-09-03] **Priority: P1.** DevSecOps: checked before writing. There is no security
+scanning in the pipeline at all — no CodeQL or other SAST, no DAST, no dependency vulnerability
+scanning, no secret scanning, no Dependabot. The five workflows run `dotnet format --verify-no-changes`,
+`npm run type-check`, `flutter analyze`, build, test and deploy. So the suggestion cannot be met by
+writing it up, only by building it or by saying so. §10.4 now splits into §10.4.1, the gates actually
+enforced, and §10.4.2, security in the pipeline and what is not automated, with the remedy costed in
+§13.4. Writing a DevSecOps posture the pipeline does not have would have been the one unrecoverable
+kind of error in this document.
+
+71.4 [DONE 2026-09-03] **Priority: P2.** The user asked for both to be added, targeting preprod, on
+the reasoning that the project needs them after delivery anyway. Done in Area 72.
+
+71.5 [DONE 2026-09-03] **Priority: P3.** Vendor lock-in named. Criterion C5 in §2.10 already measured
+it as "data sovereignty and exit" and the comparison table already carries per-vendor licence cost
+with citations, so the substance was there under another name; the criterion now says it is vendor
+lock-in measured from the buyer's side, which is the term an examiner will look for.
+
+71.6 [DONE 2026-09-03] **Priority: P3.** Four suggestions verified as already satisfied, and
+deliberately not re-done:
+
+  - **Design-science thread.** §4.3 already maps each design-science activity to the chapter that
+    evidences it, §1.8 states the method in brief and forward-references Chapter 4, and §12.13 reflects
+    on the contribution. Adding more DSR vocabulary to intermediate chapters would be decoration.
+  - **Deployment economics.** §10.10 is an operational cost model under institutional budget
+    constraints, with Table 10.2 giving component, tier, monthly cost and scaling trigger.
+  - **Threats to validity.** §12.11 covers construct, internal, external and conclusion validity with
+    Table 12.4, and §9.16 raises the evaluation-specific threats and points there.
+  - **Data privacy compliance.** §8.11 covers lawful basis, minimisation, consent, retention and
+    subject rights, with Table 8.4 as the personal-data inventory; the front-matter declaration and
+    §4.9 carry the position on live member data.
+
+71.7 [DONE 2026-09-03] **Priority: P3.** The two trimming suggestions were already the practice.
+Tables 3.1 and 3.2 do not reprint the requirement catalogues: they state that §3.3 carries the ID,
+statement, source and priority for FR-01 to FR-54 and give the research-question linkage only, which
+is why the build lists them as captions with no artefact beneath them. Chapter 11 defines no textbook
+methodology: its specification says only the parts with evidence are written, and where a technique
+was not used it reports what was done instead. Neither Agile nor Scrum is defined anywhere in the
+book.
+
+# Area 72 — Dependency and static-analysis scanning in CI
+
+Raised by user 2026-09-03, answering 71.4: add Dependabot and CodeQL, targeting preprod. The user's
+own reasoning recorded as given: this is needed after delivery regardless, so it is not work done only
+for the dissertation.
+
+72.1 [DONE 2026-09-03] **Priority: P2.** `.github/dependabot.yml` added. Five ecosystems, all opening
+against **preprod**, which is the branch CI and the Render deploy hook watch: NuGet at the solution
+root, npm in `GHCAA.Web`, pub in `GHCAA.Mobile`, GitHub Actions and Docker. Weekly for the three code
+ecosystems and monthly for Actions and Docker, with per-ecosystem PR caps of 2 to 5 and the Microsoft
+and Angular families grouped into single PRs. The caps and the grouping are the point: one maintainer
+reviews every one of these by hand, and an uncapped Dependabot on five ecosystems produces more pull
+requests than it does security.
+
+72.2 [SUPERSEDED 2026-09-03] **Priority: P2.** A CodeQL workflow was added and then removed the same
+day, on the user's decision: the repository is private, CodeQL needs paid GitHub Advanced Security
+there, and a workflow that fails its licensing check on every run is worse than no workflow. Deleted
+rather than left disabled, so that nothing in the repository implies a scan that does not happen.
+
+72.3 [DONE 2026-09-03] **Priority: P3.** §10.4.2 states the position as it now is: dependency updates
+are automated, and nothing else is. The three reasons are given separately rather than as one excuse
+— static analysis rejected on cost, dynamic testing having no environment to run against that is not
+preprod or production, and the Flutter client being out of CodeQL's reach in any case because Dart is
+not one of its languages. The security work of Chapter 8 was done by review and by test, which is a
+weaker guarantee than a scan and is reported as one. Outline and chapter changed together.
+
+72.4 [TODO] **Priority: P3.** Watch the first Dependabot run. Five ecosystems opening at once
+produces a burst even with the caps, and the grouping rules are a guess until they have been seen
+against a real week's updates. Adjust the caps or the groups if the burst is unmanageable rather than
+turning Dependabot off.
+
+72.5 [TODO] **Priority: P3 | Depends on: user.** If the repository is ever made public, CodeQL becomes
+free and 72.2 is worth revisiting; §10.4.2 would then need rewriting, since it currently states cost
+as the reason static analysis is absent.
+
+# Area 73 — Traceability and constitutional alignment: what is true, and what was claimed
+
+Raised by user 2026-09-03 with six statements about requirements traceability, domain constraints,
+verification of constraints, dependency mapping, an audit trail and non-functional constraints, and
+an instruction to sync the docs. Each was checked against the tree before anything was written.
+Three are already true and documented; three describe a system stronger than the one that exists, and
+writing them up as fact would have put an unverifiable claim into a document whose whole argument is
+that its claims are checkable.
+
+73.1 [DONE 2026-09-03] **Priority: P0.** Two false claims found in written prose and corrected. §3.9
+said the traceability matrix "is held in the repository alongside the code rather than in this
+document alone, so that it can be checked against the tree", and Table 3.4 repeated it. **No such
+file exists** — `find` over the tree returns nothing but build output. §3.9 also said Table 3.4
+records the chain "for the full set" while Table 3.4 itself says it prints a representative extract
+with the full matrix in Appendix B. An examiner can check the first claim in ten seconds. Both
+corrected to what is true: the matrix is in the book and Appendix B, maintained by hand.
+
+73.2 [DONE 2026-09-03] **Priority: P1.** The limit that correction exposes is now stated in §3.9
+rather than left for a reader to find. The trace runs in one direction only: from a constitutional
+clause through the matrix to the requirement, the rule and the test, but **no test carries a
+requirement or constraint identifier** — `grep -c "DC-[0-9]"` and `grep -c "FR-[0-9]"` over
+`GHCAA.Tests` both return zero across 517 tests. So the same trace cannot be started from the code
+and read back, and the matrix could drift from the suite without anything failing.
+
+73.3 [DONE 2026-09-03] **Priority: P3.** Verified as already true and needing no change:
+
+  - **Constitutional override.** §3.2 records the three occasions a stakeholder wish lost to a clause,
+    §3.10 carries DC-01 to DC-16 with the article each comes from, and §3.3 cites the governing
+    article in the Source column.
+  - **The worked example the user gave is accurate.** Article III Section B to DC-03 to FR-36 is
+    already the chain the book uses, in §3.9, in QAS-08 and in user story US-31. FR-36 does carry
+    `D (Art. III §B, Art. V)` as its source.
+  - **Non-functional constraints.** RBAC is NFR-S6 with NFR-S5 for session invalidation on a role
+    change, and performance is NFR-P1 with QAS-01 as its scenario.
+
+73.4 [TODO] **Priority: P1.** Tag the tests. Giving each test that pins a domain constraint or a
+requirement its identifier — an NUnit `[Category]` or a name convention — is what turns the matrix
+from a hand-maintained document into something a script can check, and it is the prerequisite for
+Table 9.9 (71.2) being generated rather than typed. Until it is done, "traceable forward to
+verification" is true of the document and not of the code.
+
+73.5 [TODO] **Priority: P2 | Depends on: 73.4.** Generate the traceability matrix as a repository
+artefact from those tags, the way `wbs.py` generates the Chapter 11 tables. Then §3.9's original
+claim becomes true and can be restored, and §12.2 can close the matrix from evidence rather than by
+reading.
+
+73.6 [TODO] **Priority: P2.** "Constitutional rules fail the build if they drift from the governing
+text" is the user's description and is not what happens today. `ConstitutionSeeder` synchronises the
+stored constitution with the source document at boot, and the business rules have tests, but nothing
+compares the two: the seeded text could diverge from the ratified PDF, or a rule could be changed
+away from its clause, and the suite would stay green. A narrow, honest version is cheap — a test that
+pins the seeded constitution's version and a hash of its clause text, so that changing the governing
+data without changing the test is a failure. That is worth building, and it would let Chapter 8 and
+Chapter 9 make a claim no commercial CRM comparison in Chapter 2 can match. Not built unasked,
+because it is application code rather than documentation.
+
+73.7 [TODO] **Priority: P3.** Two of the user's statements have no counterpart in the system and are
+recorded here so they are not written up by mistake. There is no mapping of requirements to
+dependency trees; the dependency evidence in the book is the assembly-level structure matrix of
+Figure 7.2, which is a different thing. And there is no immutable per-requirement version history
+recording who authorised a change: `docs/TODO.md` and the git history together carry when and why,
+but not an authorisation record, and the Association has no change-control board to authorise
+anything (§11.7 says so).
+
+73.8 [TODO] **Priority: P3.** NFR-P1 states 500 ms at the 95th percentile under 50 concurrent users
+as a general read target. The user is right that a voting window is the peak this system actually
+has, and it is not specified separately. Adding a quality-attribute scenario for it needs a defensible
+concurrency figure, which means a measurement rather than a guess, so it is recorded rather than
+invented.

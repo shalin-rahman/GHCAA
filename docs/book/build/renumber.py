@@ -163,10 +163,11 @@ TOC_HEADING = "Table of Contents"
 # levels are left out: a contents page that lists §6.12.7 is a concordance.
 TOC_LEVEL1 = re.compile(r"^#\s+(PART\s.+|Chapter\s.+|References\s*)$")
 TOC_LEVEL2 = re.compile(r"^##\s+(\d+\.\d+\s+.+)$")
-# A section row is marked with the book's own section sign rather than
-# indented: the builder strips whitespace from a table cell, so leading
-# spaces of any width would vanish.
-SECTION_MARK = "§"
+# Chapter rows are bold and section rows are not; that is the whole of the
+# indentation a Markdown table cell allows, since leading spaces are stripped.
+# The section sign belongs in a cross-reference in the prose, not in a contents
+# list, where the number alone is the convention.
+SECTION_MARK = ""
 
 
 def build_contents(paths, headings=None):

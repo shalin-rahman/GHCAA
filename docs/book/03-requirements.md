@@ -409,7 +409,7 @@ Constitutional mandate was treated as automatically Must, which removed a third 
 prioritisation argument before it began. The Won't set comprises live gateway payment, binding
 election balloting, statutory accounting output, offline-first mobile synchronisation, a native
 desktop client, machine-learning recommendation, an external language-model assistant, and
-multi-organisation tenancy. Each is recorded with its reason in §1.6 or §13.4.
+multi-organisation tenancy. Each is recorded with its reason in §1.7 or §13.4.
 
 Two prioritisation decisions are worth exposing because they were contested. Real-time messaging
 (FR-31) was reduced from Should to Could, on the ground that members already have working messaging
@@ -427,11 +427,18 @@ project the answer is frequently a constitutional clause, which makes the trace 
 a reviewer can read Article III Section B and follow it to DC-03, to FR-36, to the rule in §5.6, to
 the guard in the governance service, and to the named test.
 
-Table 3.4 records requirement to use case to design element to implementation artefact to test case
-for the full set. It is established here, maintained through Chapters 5 to 8, and closed in §12.2,
-where any requirement not traced to a passing test is reported as such. The matrix is held in the
-repository alongside the code rather than in this document alone, so that it can be checked against
-the tree.
+Table 3.4 records requirement to use case to design element to implementation artefact to test case.
+It prints a representative extract; the full matrix is Appendix B, and §12.2 closes it by reporting
+any requirement not traced to a passing test.
+
+One limit of the chain as it currently stands has to be stated, because it bears on how far the
+traceability claim can be pressed. The trace is complete in one direction only. From a constitutional
+clause a reader can follow the matrix to the requirement, the rule and the test that pins it, but the
+tests themselves carry no requirement or constraint identifier, so the same trace cannot be started
+from the code and read back. The matrix is therefore maintained by hand and could drift from the
+suite without anything failing. §9.4.5 and Table 9.9 close the governance half of that gap by naming
+the test for each domain constraint; making the whole matrix machine-checkable would need the tests
+tagged, which is recorded as future work in §13.4 rather than claimed here.
 
 ## 3.10 Domain Constraints
 
@@ -843,12 +850,12 @@ classDiagram
     Member "1" -- "0..*" EventRegistration
     Event "1" -- "0..*" EventRegistration
     EventRegistration "1" -- "0..1" Attendance
+    CommitteePosition "1" -- "0..*" CommitteeTerm
+    Member "1" -- "0..*" CommitteeTerm
     Member "1" -- "0..*" Post : authors
     ConstitutionVersion "1" -- "0..*" AmendmentProposal : amends
     AmendmentProposal "1" -- "0..*" AmendmentVote
     Member "1" -- "0..*" AmendmentVote : casts
-    CommitteePosition "1" -- "0..*" CommitteeTerm
-    Member "1" -- "0..*" CommitteeTerm : holds
 ```
 
 
@@ -1047,10 +1054,9 @@ The remaining use cases are in `docs/SRS.md`.
 
 ### Table 3.4 — Requirements traceability matrix
 
-The matrix is established here and maintained in the repository so that it can be checked against the
-tree. The columns are requirement, constitutional source where applicable, use case, design element,
+The columns are requirement, constitutional source where applicable, use case, design element,
 implementation artefact and test case. A representative extract follows; the full matrix appears as
-Appendix B and is closed in §12.2.
+Appendix B and is closed in §12.2. It is maintained by hand, with the consequence stated in §3.9.
 
 | Req | DC / clause | Use case | Design element (Ch. 5–6) | Implementation artefact (Ch. 7) | Test (Ch. 9) |
 | --- | --- | --- | --- | --- | --- |

@@ -129,89 +129,195 @@ Core; Angular; Flutter.
 
 
 
+
+
+
 Section numbers are as printed in the body. Page numbers are the folios the PDF carries; a rebuild renumbers them, so they are filled in from the printed copy rather than kept by hand.
 
 | Part, chapter and section | Page |
 | --- | --- |
-| **PART I — PROBLEM AND CONTEXT** | 9 |
-| **Chapter 1 — Introduction** | 10 |
-| §1.1 Research Context: Alumni Relations as an Institutional Function | 10 |
-| §1.2 Problem Domain: the Govt. Haraganga College Alumni Association | 10 |
-| §1.3 Problem Statement | 10 |
-| §1.4 Research Questions | 10 |
-| §1.5 Aims and Objectives | 11 |
-| §1.6 Scope, Delimitations and Assumptions | 11 |
-| §1.7 Research Method in Brief | 11 |
-| §1.8 Contributions of this Work | 11 |
-| §1.9 Stakeholders and Beneficiaries | 12 |
-| §1.10 Structure of the Dissertation | 12 |
-| **Chapter 2 — Literature Review and Related Work** | 15 |
-| §2.1 Review Objectives and Questions | 15 |
-| §2.2 Review Protocol | 15 |
-| §2.3 Alumni Relations and Engagement: the Institutional Literature | 15 |
-| §2.4 Community and Membership Platforms: Academic Treatment | 16 |
-| §2.5 Architectural Literature | 16 |
-| §2.6 Web and Mobile Engineering Literature | 16 |
-| §2.7 Digital Governance, Electronic Voting and Procedural Legitimacy | 16 |
-| §2.8 Security and Privacy Engineering Baselines | 17 |
-| §2.9 Survey of Existing Systems and Products | 17 |
-| §2.10 Comparative Analysis and Evaluation Criteria | 18 |
-| §2.11 Research Gap | 18 |
-| §2.12 Summary | 19 |
-| **Chapter 3 — Requirements Engineering** | 24 |
-| §3.1 Sources of the Requirements | 24 |
-| §3.2 Requirements Analysis and Negotiation | 24 |
-| §3.3 Requirements Specification | 24 |
-| §3.4 Non-Functional Requirements | 27 |
-| §3.5 Quality-Attribute Scenarios | 29 |
-| §3.6 Use-Case Modelling | 29 |
-| §3.7 User Stories, Acceptance Criteria and the Definition of Done | 29 |
-| §3.8 Requirements Prioritisation | 30 |
-| §3.9 Requirements Traceability | 30 |
-| §3.10 Domain Constraints | 30 |
-| §3.11 Feasibility Analysis | 31 |
-| §3.12 Requirements Validation and Formal Technical Review | 31 |
-| §3.13 Summary | 32 |
-| **PART II — METHOD AND DESIGN** | 42 |
-| **Chapter 4 — Research Methodology** | 43 |
-| §4.1 Research Paradigm and Philosophical Position | 43 |
-| §4.2 Design Science Research as the Governing Method | 43 |
-| §4.3 Mapping Design Science Activities to the Work Performed | 43 |
-| §4.4 Software Process Model and its Justification | 43 |
-| §4.5 Evaluation Strategy | 44 |
-| §4.6 Metrics Definition | 44 |
-| §4.7 Data Collection and Analysis Procedures | 45 |
-| §4.8 Risk Management: the RMMM Plan | 46 |
-| §4.9 Research Ethics | 46 |
-| §4.10 Limitations of the Chosen Method | 47 |
-| §4.11 Summary | 47 |
-| **Chapter 5 — System Analysis and Behavioural Modelling** | 53 |
-| §5.1 Analysis Approach | 53 |
-| §5.2 Structured Analysis: Data-Flow Modelling | 53 |
-| §5.3 Object-Oriented Analysis | 53 |
-| §5.4 Behavioural Modelling | 53 |
-| §5.5 State Modelling of Long-Lived Entities | 54 |
-| §5.6 Business Rules Catalogue | 54 |
-| §5.7 Data Modelling | 55 |
-| §5.8 Analysis Model Review and Validation | 55 |
-| §5.9 Summary | 55 |
-| **Chapter 6 — System Architecture and Design** | 68 |
-| §6.1 Design Goals, Principles and Constraints | 68 |
-| §6.2 Architectural Alternatives Considered and the Decision Taken | 68 |
-| §6.3 Architectural Design — Clean Architecture | 68 |
-| §6.4 Component-Level Design | 69 |
-| §6.5 Data Design | 69 |
-| §6.6 Interface Design | 70 |
-| §6.7 Security Architecture | 70 |
-| §6.8 User-Interface Design | 70 |
-| §6.9 Mobile Application Design and Platform-Specific Concerns | 71 |
-| §6.10 Configuration-Driven Design | 71 |
-| §6.11 Design Principles: Claim, Mechanism and Evidence | 71 |
-| §6.12 Design Patterns Applied | 72 |
-| §6.13 Architecture Decision Records | 73 |
-| §6.14 Design Verification | 73 |
-| §6.15 Summary | 74 |
-| **References** | 83 |
+| **PART I — PROBLEM AND CONTEXT** | 11 |
+| **Chapter 1 — Introduction** | 12 |
+| 1.1 Research Context: Alumni Relations as an Institutional Function | 12 |
+| 1.2 Problem Domain: the Govt. Haraganga College Alumni Association | 12 |
+| 1.3 Problem Statement | 12 |
+| 1.4 Conceptual Framework | 12 |
+| 1.5 Research Questions | 13 |
+| 1.6 Aims and Objectives | 13 |
+| 1.7 Scope, Delimitations and Assumptions | 13 |
+| 1.8 Research Method in Brief | 14 |
+| 1.9 Contributions of this Work | 14 |
+| 1.10 Stakeholders and Beneficiaries | 14 |
+| 1.11 Structure of the Dissertation | 14 |
+| **Chapter 2 — Literature Review and Related Work** | 17 |
+| 2.1 Review Objectives and Questions | 17 |
+| 2.2 Review Protocol | 17 |
+| 2.3 Alumni Relations and Engagement: the Institutional Literature | 17 |
+| 2.4 Community and Membership Platforms: Academic Treatment | 18 |
+| 2.5 Architectural Literature | 18 |
+| 2.6 Web and Mobile Engineering Literature | 18 |
+| 2.7 Digital Governance, Electronic Voting and Procedural Legitimacy | 18 |
+| 2.8 Security and Privacy Engineering Baselines | 19 |
+| 2.9 Survey of Existing Systems and Products | 19 |
+| 2.10 Comparative Analysis and Evaluation Criteria | 20 |
+| 2.11 Research Gap | 20 |
+| 2.12 Summary | 21 |
+| **Chapter 3 — Requirements Engineering** | 26 |
+| 3.1 Sources of the Requirements | 26 |
+| 3.2 Requirements Analysis and Negotiation | 26 |
+| 3.3 Requirements Specification | 26 |
+| 3.4 Non-Functional Requirements | 29 |
+| 3.5 Quality-Attribute Scenarios | 31 |
+| 3.6 Use-Case Modelling | 31 |
+| 3.7 User Stories, Acceptance Criteria and the Definition of Done | 31 |
+| 3.8 Requirements Prioritisation | 32 |
+| 3.9 Requirements Traceability | 32 |
+| 3.10 Domain Constraints | 32 |
+| 3.11 Feasibility Analysis | 33 |
+| 3.12 Requirements Validation and Formal Technical Review | 33 |
+| 3.13 Summary | 34 |
+| **PART II — METHOD AND DESIGN** | 44 |
+| **Chapter 4 — Research Methodology** | 45 |
+| 4.1 Research Paradigm and Philosophical Position | 45 |
+| 4.2 Design Science Research as the Governing Method | 45 |
+| 4.3 Mapping Design Science Activities to the Work Performed | 45 |
+| 4.4 Software Process Model and its Justification | 45 |
+| 4.5 Evaluation Strategy | 46 |
+| 4.6 Metrics Definition | 46 |
+| 4.7 Data Collection and Analysis Procedures | 47 |
+| 4.8 Risk Management: the RMMM Plan | 48 |
+| 4.9 Research Ethics | 48 |
+| 4.10 Limitations of the Chosen Method | 49 |
+| 4.11 Summary | 49 |
+| **Chapter 5 — System Analysis and Behavioural Modelling** | 55 |
+| 5.1 Analysis Approach | 55 |
+| 5.2 Structured Analysis: Data-Flow Modelling | 55 |
+| 5.3 Object-Oriented Analysis | 55 |
+| 5.4 Behavioural Modelling | 55 |
+| 5.5 State Modelling of Long-Lived Entities | 56 |
+| 5.6 Business Rules Catalogue | 56 |
+| 5.7 Data Modelling | 57 |
+| 5.8 Analysis Model Review and Validation | 57 |
+| 5.9 Summary | 57 |
+| **Chapter 6 — System Architecture and Design** | 70 |
+| 6.1 Design Goals, Principles and Constraints | 70 |
+| 6.2 Architectural Alternatives Considered and the Decision Taken | 70 |
+| 6.3 Architectural Design — Clean Architecture | 70 |
+| 6.4 Component-Level Design | 71 |
+| 6.5 Data Design | 71 |
+| 6.6 Interface Design | 72 |
+| 6.7 Security Architecture | 72 |
+| 6.8 User-Interface Design | 72 |
+| 6.9 Mobile Application Design and Platform-Specific Concerns | 73 |
+| 6.10 Configuration-Driven Design | 73 |
+| 6.11 Design Principles: Claim, Mechanism and Evidence | 73 |
+| 6.12 Design Patterns Applied | 74 |
+| 6.13 Architecture Decision Records | 75 |
+| 6.14 Design Verification | 76 |
+| 6.15 Summary | 76 |
+| **PART III — CONSTRUCTION AND VALIDATION** | 85 |
+| **Chapter 7 — Implementation** | 86 |
+| 7.1 Development Environment, Toolchain and Reproducibility | 86 |
+| 7.2 Solution and Module Structure | 86 |
+| 7.3 Coding Standards, Conventions and Static Enforcement | 86 |
+| 7.4 Implementation of the Domain and Persistence Layers | 86 |
+| 7.5 Implementation of the Application and Business Services | 86 |
+| 7.6 Implementation of the API Layer | 86 |
+| 7.7 Implementation of the Web Client | 86 |
+| 7.8 Implementation of the Mobile Client | 86 |
+| 7.9 Real-Time Features | 86 |
+| 7.10 Security Implementation | 86 |
+| 7.11 Document Generation | 86 |
+| 7.12 Constitution Publication Pipeline | 86 |
+| 7.13 Third-Party Libraries: selection criteria | 86 |
+| 7.14 Software Configuration Management | 86 |
+| 7.15 Notable Implementation Challenges and Their Resolution | 87 |
+| 7.16 Summary | 87 |
+| **Chapter 8 — Security, Privacy and Trust** | 88 |
+| 8.1 Security Objectives and Assumptions | 88 |
+| 8.2 Threat Modelling (STRIDE) | 88 |
+| 8.3 Authentication and Session Security | 88 |
+| 8.4 Authorisation Model and the Role–Permission Matrix | 88 |
+| 8.5 Input Validation and Output Sanitisation | 88 |
+| 8.6 File Upload Security | 88 |
+| 8.7 Transport, Header and Browser-Policy Security | 88 |
+| 8.8 Rate Limiting and Abuse Prevention | 88 |
+| 8.9 Payment-Related Risk and the No-Gateway-Keys Posture | 88 |
+| 8.10 Governance Integrity | 88 |
+| 8.11 Personal Data: Lawful Basis, Minimisation, Consent, Retention and Subject Rights | 88 |
+| 8.12 Audit Logging and Non-Repudiation | 88 |
+| 8.13 Conformance Assessment against OWASP ASVS | 88 |
+| 8.14 Residual Risks and Recommendations | 88 |
+| 8.15 Summary | 89 |
+| **Chapter 9 — Verification, Validation and Quality Assurance** | 90 |
+| 9.1 Verification and Validation Strategy and Test Levels | 90 |
+| 9.2 Software Quality Assurance Plan | 90 |
+| 9.3 Test-Case Design Techniques Applied | 90 |
+| 9.4 Unit Testing | 90 |
+| 9.5 Unit and Component Testing | 91 |
+| 9.6 Widget and Golden Testing | 91 |
+| 9.7 Integration Testing Strategy | 91 |
+| 9.8 System and End-to-End Testing | 91 |
+| 9.9 Regression Testing and Test Selection | 91 |
+| 9.10 Security Testing | 91 |
+| 9.11 Performance and Load Testing | 91 |
+| 9.12 Usability and Accessibility Testing | 92 |
+| 9.13 User Acceptance Testing | 92 |
+| 9.14 Product Metrics and Static Analysis | 92 |
+| 9.15 Defect Analysis | 92 |
+| 9.16 Threats to the Validity of the Evaluation | 92 |
+| 9.17 Summary | 92 |
+| **Chapter 10 — Deployment and Operations** | 93 |
+| 10.1 Deployment Architecture | 93 |
+| 10.2 Environment Topology and Configuration Differences | 93 |
+| 10.3 Containerisation Strategy | 93 |
+| 10.4 Continuous Integration and Continuous Deployment | 93 |
+| 10.5 Database Provisioning, Migration and Live Data Synchronisation | 93 |
+| 10.6 Configuration and Secret Management | 93 |
+| 10.7 Observability | 93 |
+| 10.8 Backup, Recovery and Business Continuity | 93 |
+| 10.9 Release and Rollback Procedure | 93 |
+| 10.10 Operational Cost Model and Sustainability under Institutional Budget Constraints | 93 |
+| 10.11 Maintenance Plan and Handover | 93 |
+| 10.12 Summary | 94 |
+| **Chapter 11 — Project Management** | 95 |
+| 11.0 The Four P's Applied | 95 |
+| 11.1 Process Model in Practice and its Deviations from Plan | 95 |
+| 11.2 Work Breakdown Structure | 95 |
+| 11.3 Scheduling, Task Network and Critical Path | 95 |
+| 11.4 Effort Estimation | 95 |
+| 11.5 Progress Tracking and Earned Value | 95 |
+| 11.6 Team Structure and Responsibilities | 96 |
+| 11.7 Configuration and Change Management in Practice | 96 |
+| 11.8 Risk Monitoring Record | 96 |
+| 11.9 Quality Assurance Activities Performed | 96 |
+| 11.10 Lessons in Project Management | 96 |
+| 11.11 Summary | 96 |
+| **PART IV — EVALUATION AND CLOSURE** | 97 |
+| **Chapter 12 — Results, Evaluation and Discussion** | 98 |
+| 12.1 Overview of the Delivered Artefact | 98 |
+| 12.2 Functional Evaluation | 98 |
+| 12.3 Quality Evaluation against ISO/IEC 25010 | 98 |
+| 12.4 Performance Evaluation Results | 98 |
+| 12.5 Security Evaluation Results | 98 |
+| 12.6 Usability and Accessibility Evaluation Results | 98 |
+| 12.7 Stakeholder and Expert Evaluation | 98 |
+| 12.8 Answering the Research Questions | 98 |
+| 12.9 Discussion | 98 |
+| 12.10 Comparison against the Existing Manual System | 98 |
+| 12.11 Threats to Validity | 98 |
+| 12.12 Limitations of the Artefact | 98 |
+| 12.13 Reflection on the Design Science Contribution | 98 |
+| 12.14 Summary | 98 |
+| **Chapter 13 — Conclusion and Future Work** | 100 |
+| 13.1 Summary of the Work | 100 |
+| 13.2 Contributions Restated and Substantiated | 100 |
+| 13.3 Answers to the Research Questions, in Brief | 100 |
+| 13.4 Practical Implications for Similar Institutions | 100 |
+| 13.5 Lessons Learned | 100 |
+| 13.6 Future Work | 100 |
+| 13.7 Concluding Remarks | 100 |
+| **References** | 101 |
 
 ---
 
@@ -219,62 +325,63 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 
 | Figure | Title | Page |
 | --- | --- | --- |
-| 1.1 | Context diagram (DFD Level 0): platform boundary and external entities | 12 |
-| 1.2 | Stakeholder onion diagram | 13 |
-| 1.3 | Research question, objective and chapter map | 14 |
-| 2.1 | Study selection flow | 19 |
-| 2.2 | Concept map of the reviewed literature | 20 |
-| 2.3 | As-is process model of current manual practice (BPMN, abstracted) | 21 |
-| 2.4 | Positioning chart: governance depth against annual operating cost | 22 |
-| 3.1 | System-level use-case diagram, packaged | 32 |
-| 3.2 | Membership subsystem use cases | 33 |
-| 3.3 | Events subsystem use cases | 34 |
-| 3.4 | Payments subsystem use cases | 34 |
-| 3.5 | Governance subsystem use cases | 35 |
-| 3.6 | Administration subsystem use cases | 36 |
-| 3.7 | Actor generalisation hierarchy | 36 |
-| 3.8 | Domain model, analysis level: membership, obligations and payment | 37 |
-| 3.9 | Domain model, analysis level: participation, governance and content | 37 |
-| 3.10 | Quality-attribute utility tree | 38 |
-| 3.11 | Requirements classification, FURPS+ | 39 |
-| 3.12 | Goal model | 39 |
-| 4.1 | Design Science Research framework with this project's instantiation labelled | 48 |
-| 4.2 | Design Science process model as executed | 49 |
-| 4.3 | Research design overview: phases, inputs, outputs, evaluation points | 50 |
-| 4.4 | Process model diagram of the adopted incremental lifecycle | 51 |
-| 4.5 | Risk exposure matrix | 52 |
-| 5.1 | DFD Level 0 (context) | 55 |
-| 5.2 | DFD Level 1 | 56 |
-| 5.3 | DFD Level 2: Payment processing | 56 |
-| 5.4 | DFD Level 2: Membership approval | 57 |
-| 5.5 | DFD Level 2: Constitution publication | 58 |
-| 5.6 | Activity diagram: registration and administrative approval | 59 |
-| 5.7 | Activity diagram: payment declaration and verification | 60 |
-| 5.8 | Activity diagram: event registration with waitlist | 61 |
-| 5.9 | Swimlane activity diagram: constitution amendment vote | 62 |
-| 5.10 | BPMN process diagram of the election cycle | 63 |
-| 5.11 | State-machine diagram: member lifecycle | 63 |
-| 5.12 | State-machine diagram: payment and declaration | 64 |
-| 5.13 | State-machine diagram: constitution version | 64 |
-| 5.14 | State-machine diagram: event lifecycle | 65 |
-| 5.15 | Sequence diagram: login with OTP, token issue | 65 |
-| 5.16 | Sequence diagram: event registration | 66 |
-| 5.17 | Sequence diagram: payment declaration and verification | 66 |
-| 5.18 | Sequence diagram: real-time notification over SignalR | 66 |
-| 5.19 | Timing diagram: token lifetime and refresh window | 67 |
-| 6.1 | High-level architecture diagram | 75 |
-| 6.2 | Layered / clean architecture diagram with the dependency-inversion boundary marked | 76 |
-| 6.3 | Entity–relationship diagram, identity and records sub-model | 76 |
-| 6.4 | Entity–relationship diagram, standing and money sub-model | 77 |
-| 6.5 | Entity–relationship diagram, events and participation sub-model | 77 |
-| 6.6 | Entity–relationship diagram, governance sub-model | 78 |
-| 6.7 | Design class diagram: domain model | 78 |
-| 6.8 | Design class diagram: application interfaces and infrastructure services | 79 |
-| 6.9 | Component diagram with provided and required interfaces | 79 |
-| 6.10 | Middleware pipeline diagram | 80 |
-| 6.11 | Navigation and route map | 80 |
-| 6.12 | Site map and information architecture of the public site | 81 |
-| 6.13 | Architectural trade-off radar | 81 |
+| 1.1 | Context diagram (DFD Level 0): platform boundary and external entities | 15 |
+| 1.2 | Stakeholder onion diagram | 15 |
+| 1.3 | Conceptual framework: inputs, the designed artefact, and how it is judged | 16 |
+| 1.4 | Research question, objective and chapter map | 16 |
+| 2.1 | Study selection flow | 21 |
+| 2.2 | Concept map of the reviewed literature | 22 |
+| 2.3 | As-is process model of current manual practice (BPMN, abstracted) | 23 |
+| 2.4 | Positioning chart: governance depth against annual operating cost | 24 |
+| 3.1 | System-level use-case diagram, packaged | 34 |
+| 3.2 | Membership subsystem use cases | 35 |
+| 3.3 | Events subsystem use cases | 36 |
+| 3.4 | Payments subsystem use cases | 36 |
+| 3.5 | Governance subsystem use cases | 37 |
+| 3.6 | Administration subsystem use cases | 38 |
+| 3.7 | Actor generalisation hierarchy | 38 |
+| 3.8 | Domain model, analysis level: membership, obligations and payment | 39 |
+| 3.9 | Domain model, analysis level: participation, governance and content | 39 |
+| 3.10 | Quality-attribute utility tree | 40 |
+| 3.11 | Requirements classification, FURPS+ | 41 |
+| 3.12 | Goal model | 41 |
+| 4.1 | Design Science Research framework with this project's instantiation labelled | 50 |
+| 4.2 | Design Science process model as executed | 51 |
+| 4.3 | Research design overview: phases, inputs, outputs, evaluation points | 52 |
+| 4.4 | Process model diagram of the adopted incremental lifecycle | 53 |
+| 4.5 | Risk exposure matrix | 54 |
+| 5.1 | DFD Level 0 (context). In and out are relative to the platform | 57 |
+| 5.2 | DFD Level 1 | 57 |
+| 5.3 | DFD Level 2: Payment processing | 58 |
+| 5.4 | DFD Level 2: Membership approval | 59 |
+| 5.5 | DFD Level 2: Constitution publication | 60 |
+| 5.6 | Activity diagram: registration and administrative approval | 61 |
+| 5.7 | Activity diagram: payment declaration and verification | 62 |
+| 5.8 | Activity diagram: event registration with waitlist | 63 |
+| 5.9 | Swimlane activity diagram: constitution amendment vote | 64 |
+| 5.10 | BPMN process diagram of the election cycle | 65 |
+| 5.11 | State-machine diagram: member lifecycle | 65 |
+| 5.12 | State-machine diagram: payment and declaration | 66 |
+| 5.13 | State-machine diagram: constitution version | 66 |
+| 5.14 | State-machine diagram: event lifecycle | 67 |
+| 5.15 | Sequence diagram: login with OTP, token issue | 67 |
+| 5.16 | Sequence diagram: event registration | 68 |
+| 5.17 | Sequence diagram: payment declaration and verification | 68 |
+| 5.18 | Sequence diagram: real-time notification over SignalR | 68 |
+| 5.19 | Timing diagram: token lifetime and refresh window | 69 |
+| 6.1 | High-level architecture diagram | 77 |
+| 6.2 | Layered / clean architecture diagram with the dependency-inversion boundary marked | 78 |
+| 6.3 | Entity–relationship diagram, identity and records sub-model | 78 |
+| 6.4 | Entity–relationship diagram, standing and money sub-model | 79 |
+| 6.5 | Entity–relationship diagram, events and participation sub-model | 79 |
+| 6.6 | Entity–relationship diagram, governance sub-model | 80 |
+| 6.7 | Design class diagram: domain model | 80 |
+| 6.8 | Design class diagram: application interfaces and infrastructure services | 81 |
+| 6.9 | Component diagram with provided and required interfaces | 81 |
+| 6.10 | Middleware pipeline diagram | 82 |
+| 6.11 | Navigation and route map | 82 |
+| 6.12 | Site map and information architecture of the public site | 83 |
+| 6.13 | Architectural trade-off radar | 83 |
 
 *Figures for Chapters 4 to 13 are listed as those chapters are written.*
 
@@ -284,30 +391,30 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 
 | Table | Title | Page |
 | --- | --- | --- |
-| 2.1 | Review protocol summary | 22 |
-| 2.2 | Feature and capability comparison | 23 |
-| 2.3 | Gap table | 23 |
-| 3.1 | Functional requirement catalogue | 39 |
-| 3.2 | Non-functional requirement catalogue | 39 |
-| 3.3 | Use-case descriptions, ten highest-value cases | 40 |
-| 3.4 | Requirements traceability matrix | 41 |
-| 3.5 | MoSCoW prioritisation and negotiation outcome | 41 |
-| 3.6 | Domain constraints traced to constitutional article | 41 |
-| 3.7 | Feasibility summary | 41 |
-| 3.8 | Specification defects found by the formal technical review | 41 |
-| 4.1 | Metric definitions | 45 |
-| 4.2 | RMMM table | 46 |
-| 4.3 | Evaluation plan | 52 |
-| 5.1 | Business rules catalogue | 54 |
-| 5.2 | CRC card set for the analysis classes with the widest collaboration surface | 58 |
-| 5.3 | Process specifications for the Level-2 processes | 67 |
-| 5.4 | Data-store definitions (analysis level) | 67 |
-| 6.1 | ADR index | 73 |
-| 6.2 | Data dictionary (representative slice; the full dictionary is generated from the schema) | 82 |
-| 6.3 | API endpoint catalogue (by controller; the full catalogue is the generated OpenAPI document) | 82 |
-| 6.4 | Design pattern catalogue (selected entries; full catalogue is §6.12 in full) | 82 |
-| 6.5 | Quality-attribute scenario to architectural tactic mapping | 82 |
-| 6.6 | Anti-patterns detected and remediated | 82 |
+| 2.1 | Review protocol summary | 24 |
+| 2.2 | Feature and capability comparison | 25 |
+| 2.3 | Gap table | 25 |
+| 3.1 | Functional requirement catalogue | 41 |
+| 3.2 | Non-functional requirement catalogue | 41 |
+| 3.3 | Use-case descriptions, ten highest-value cases | 42 |
+| 3.4 | Requirements traceability matrix | 43 |
+| 3.5 | MoSCoW prioritisation and negotiation outcome | 43 |
+| 3.6 | Domain constraints traced to constitutional article | 43 |
+| 3.7 | Feasibility summary | 43 |
+| 3.8 | Specification defects found by the formal technical review | 43 |
+| 4.1 | Metric definitions | 47 |
+| 4.2 | RMMM table | 48 |
+| 4.3 | Evaluation plan | 54 |
+| 5.1 | Business rules catalogue | 56 |
+| 5.2 | CRC card set for the analysis classes with the widest collaboration surface | 60 |
+| 5.3 | Process specifications for the Level-2 processes | 69 |
+| 5.4 | Data-store definitions (analysis level) | 69 |
+| 6.1 | ADR index | 75 |
+| 6.2 | Data dictionary (representative slice; the full dictionary is generated from the schema) | 84 |
+| 6.3 | API endpoint catalogue (by controller; the full catalogue is the generated OpenAPI document) | 84 |
+| 6.4 | Design pattern catalogue (selected entries; full catalogue is §6.12 in full) | 84 |
+| 6.5 | Quality-attribute scenario to architectural tactic mapping | 84 |
+| 6.6 | Anti-patterns detected and remediated | 84 |
 
 ---
 
