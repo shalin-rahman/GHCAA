@@ -95,3 +95,41 @@ The platform employs a **Sequential CI Pipeline** that ensures every code change
 
 > [!IMPORTANT]
 > **Mobile Connectivity**: Ensure `AppConfig.apiBaseUrl` in Flutter matches the Unified API Prefix configured in `Program.cs`.
+
+---
+
+## 4. Which entities carry audit fields
+
+Written down in Work Package 82.16, after the 2026-09 architecture audit found audit fields had been
+added wherever a specific bug forced them rather than by any rule. Apply this when adding an entity to
+`GHCAA.Domain/Models/`.
+
+An entity falls in **Class A** if a row of it is evidence: money received or spent, a governance
+decision, a membership status, or anything a member could later dispute. Class A entities carry all
+five fields, and are never hard-deleted:
+
+```csharp
+public DateTime? UpdatedAt { get; set; }
+public int? UpdatedByAdminId { get; set; }
+public bool IsDeleted { get; set; }
+public DateTime? DeletedAt { get; set; }
+public int? DeletedByAdminId { get; set; }
+```
+
+Class A entities also get `HasQueryFilter(x => !x.IsDeleted)` in their EF configuration, so ordinary
+reads keep the meaning they had before soft delete was introduced. Callers that genuinely need the
+deleted rows ask for them with `IgnoreQueryFilters()`. A service method that deletes a Class A row
+takes the acting admin's id as a required argument, and the controller returns `Unauthorized()` rather
+than attributing the act to admin 0 when it cannot identify the caller.
+
+Class A today: `FinancialRecord`, `PaymentHistory`, `MembershipDue`, `MembershipHistory`, `Member`,
+`User`, `ECMember`, `Constitution`, `Poll`.
+
+Everything else is **Class B** — content and configuration that can be recreated if lost (news, gallery
+photos, site content, job posts, notifications, lookups). Class B carries `CreatedAt` and nothing more,
+and a hard delete is fine.
+
+Two known gaps this rule names but 82.16 did not close, each tracked separately: `ECMember` has two
+removal semantics side by side (`GovernanceService.DeleteECMemberAsync` hard-removes while
+`RemoveMemberFromCommitteeAsync` end-dates), and `Member`/`User` use `IsArchived` rather than
+`IsDeleted` for the same idea.

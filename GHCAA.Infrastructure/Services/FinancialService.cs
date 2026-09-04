@@ -74,12 +74,9 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<PaymentHistoryDto> RecordPaymentAsync(CreatePaymentHistoryDto dto, CancellationToken cancellationToken = default)
         {
-            if (!dto.MemberId.HasValue)
-                throw new ArgumentException("MemberId is required for recording payment.");
-
             var payment = new PaymentHistory
             {
-                MemberId = dto.MemberId.Value,
+                MemberId = dto.MemberId,
                 TransactionId = dto.TransactionId,
                 Amount = dto.Amount,
                 PaidAt = DateTime.SpecifyKind(dto.PaidAt, DateTimeKind.Utc),
@@ -92,56 +89,67 @@ namespace GHCAA.Infrastructure.Services
             await _db.PaymentHistories.AddAsync(payment, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
 
-            // Handle Receipt Upload if present
-            if (dto.Receipt != null)
+            // 82.32: a guest (no MemberId — an event that AllowNonMembers) has no member folder to
+            // store a receipt against and no member record to email or notify. IFileStorageService,
+            // the email templates and in-app notifications are all keyed by a real member id, so
+            // none of that is attempted for a guest payment; it stays recorded, just without those
+            // side effects. Capturing guest contact details for a receipt/notification path is
+            // separate feature work, not part of stopping the crash this guarded.
+            if (payment.MemberId.HasValue)
             {
-                using var ms = new MemoryStream();
-                await dto.Receipt.CopyToAsync(ms, cancellationToken);
-                ms.Position = 0;
+                var memberId = payment.MemberId.Value;
 
-                var path = await _storage.SaveFileAsync(ms, dto.Receipt.FileName, payment.MemberId, Enums.FileUploadType.PaymentProof, cancellationToken);
-
-                payment.ReceiptPath = path;
-
-                // Track in FileUploads table too
-                var fu = new FileUpload
+                // Handle Receipt Upload if present
+                if (dto.Receipt != null)
                 {
-                    MemberId = payment.MemberId,
-                    UploadType = Enums.FileUploadType.PaymentProof,
-                    FileName = dto.Receipt.FileName,
-                    FilePath = path,
-                    SizeBytes = dto.Receipt.Length
-                };
-                await _db.FileUploads.AddAsync(fu, cancellationToken);
+                    using var ms = new MemoryStream();
+                    await dto.Receipt.CopyToAsync(ms, cancellationToken);
+                    ms.Position = 0;
 
-                await _db.SaveChangesAsync(cancellationToken);
-            }
+                    var path = await _storage.SaveFileAsync(ms, dto.Receipt.FileName, memberId, Enums.FileUploadType.PaymentProof, cancellationToken);
 
-            // Send Notification
-            // We use simple fire-and-forget or await? The interface awaits.
-            // Using try-catch for notification to not block payment recording if email fails?
-            // Existing code awaited it. keeping it consistent.
-            try
-            {
-                await _communication.SendIndividualEmailAsync(payment.MemberId, "PAYMENT_RECEIVED", new Dictionary<string, string>
+                    payment.ReceiptPath = path;
+
+                    // Track in FileUploads table too
+                    var fu = new FileUpload
+                    {
+                        MemberId = memberId,
+                        UploadType = Enums.FileUploadType.PaymentProof,
+                        FileName = dto.Receipt.FileName,
+                        FilePath = path,
+                        SizeBytes = dto.Receipt.Length
+                    };
+                    await _db.FileUploads.AddAsync(fu, cancellationToken);
+
+                    await _db.SaveChangesAsync(cancellationToken);
+                }
+
+                // Send Notification
+                // We use simple fire-and-forget or await? The interface awaits.
+                // Using try-catch for notification to not block payment recording if email fails?
+                // Existing code awaited it. keeping it consistent.
+                try
                 {
-                    { "Amount", payment.Amount.ToString("N2") },
-                    { "TrxID", payment.TransactionId }
-                }, cancellationToken);
-            }
-            catch
-            {
-                // Log warning? For now just continue as payment is recorded.
-            }
+                    await _communication.SendIndividualEmailAsync(memberId, "PAYMENT_RECEIVED", new Dictionary<string, string>
+                    {
+                        { "Amount", payment.Amount.ToString("N2") },
+                        { "TrxID", payment.TransactionId }
+                    }, cancellationToken);
+                }
+                catch
+                {
+                    // Log warning? For now just continue as payment is recorded.
+                }
 
-            // In-app Notification
-            await _notification.CreateNotificationAsync(
-                payment.MemberId,
-                "Payment Recorded",
-                $"Your payment of {payment.Amount:N2} (TrxID: {payment.TransactionId}) has been received and is pending verification.",
-                Enums.NotificationType.GeneralSystem,
-                "/portal/payments",
-                cancellationToken);
+                // In-app Notification
+                await _notification.CreateNotificationAsync(
+                    memberId,
+                    "Payment Recorded",
+                    $"Your payment of {payment.Amount:N2} (TrxID: {payment.TransactionId}) has been received and is pending verification.",
+                    Enums.NotificationType.GeneralSystem,
+                    "/portal/payments",
+                    cancellationToken);
+            }
 
             return MapToPaymentDto(payment);
         }
@@ -161,7 +169,12 @@ namespace GHCAA.Infrastructure.Services
 
             if (status == Enums.PaymentStatus.Completed)
             {
-                await _notification.CreateNotificationAsync(payment.MemberId, "Payment Verified", $"Your payment of {payment.Amount:N2} has been successfully verified.", Enums.NotificationType.GeneralSystem, "/finance/history", cancellationToken);
+                // 82.32: a guest payment (MemberId null) has nobody to notify — the admin alert
+                // below still fires either way, since that one is not member-scoped.
+                if (payment.MemberId.HasValue)
+                {
+                    await _notification.CreateNotificationAsync(payment.MemberId.Value, "Payment Verified", $"Your payment of {payment.Amount:N2} has been successfully verified.", Enums.NotificationType.GeneralSystem, "/finance/history", cancellationToken);
+                }
 
                 // Trigger Live Admin Alert (Real-time Audit Trace)
                 await _realTime.SendAdminAlertAsync("NEW_PAYMENT", new
@@ -224,15 +237,33 @@ namespace GHCAA.Infrastructure.Services
                 }
             }
 
-            // Case B: Member Admission Approval
-            if (payment.MemberId > 0)
+            // Case B: Member Admission Approval.
+            // 82.32: this path had drifted from the callback in GatewaysController it duplicates —
+            // it ran for ANY payment category (an event fee could auto-induct an Applied member,
+            // the exact bug 29B.3 closed on the gateway path) and treated "no fee config found" as
+            // fee zero rather than refusing, so any payment amount would clear it. Brought in line
+            // with both guards. This method currently has no production caller (ProcessGatewayPaymentAsync
+            // is exercised only by tests), so neither defect was live, but a fix here is cheap and the
+            // next caller should not inherit either gap.
+            if (payment.MemberId is int payerMemberId && payerMemberId > 0
+                && payment.FinancialCategory == Enums.FinancialCategory.MembershipFee)
             {
-                var member = await _db.Members.FindAsync(new object[] { payment.MemberId }, cancellationToken);
+                var member = await _db.Members.FindAsync(new object[] { payerMemberId }, cancellationToken);
                 if (member != null && member.Status == Enums.MembershipStatus.Applied)
                 {
                     // Verify if it covers the dues
-                    var fee = await GetApplicableMembershipFeeAsync(member.MembershipType, DateTime.UtcNow.Year, cancellationToken);
-                    if (payment.Amount >= fee)
+                    var feeConfig = await _db.MembershipFeeConfigs
+                        .Where(c => c.IsActive && c.Category == Enums.FinancialCategory.MembershipFee
+                            && c.MembershipType == member.MembershipType && c.EffectiveDate <= DateTime.UtcNow
+                            && (c.EffectiveTo == null || c.EffectiveTo >= DateTime.UtcNow))
+                        .OrderByDescending(c => c.EffectiveDate)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                    if (feeConfig == null)
+                    {
+                        _logger.LogError("Auto-approval skipped for Member {Id}: no fee config found for type {Type}", member.Id, member.MembershipType);
+                    }
+                    else if (payment.Amount >= feeConfig.Amount)
                     {
                         // 29C.1: Delegate to the single canonical approval path in MemberService
                         // (Serializable transaction, Id-ordered serial generation, profile/status/
@@ -468,10 +499,10 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
-        public async Task<bool> DeletePaymentAsync(int paymentId, CancellationToken cancellationToken = default)
+        public async Task<bool> DeletePaymentAsync(int paymentId, int adminId, CancellationToken cancellationToken = default)
         {
             var payment = await _db.PaymentHistories.FindAsync(new object[] { paymentId }, cancellationToken);
-            if (payment == null) return false;
+            if (payment == null || payment.IsDeleted) return false;
 
             // Find any dues linked to this payment and reset them
             var linkedDues = await _db.MembershipDues
@@ -485,7 +516,14 @@ namespace GHCAA.Infrastructure.Services
                 due.PaymentHistoryId = null;
             }
 
-            _db.PaymentHistories.Remove(payment);
+            // 82.16: soft delete, replacing _db.PaymentHistories.Remove(payment). Unlinking the
+            // dues above already reverses the payment's effect, so the row itself has no work left
+            // to do except be evidence that it happened — which is exactly the reason not to
+            // destroy it. PaymentHistoryConfiguration's query filter keeps it out of ordinary reads.
+            payment.IsDeleted = true;
+            payment.DeletedAt = DateTime.UtcNow;
+            payment.DeletedByAdminId = adminId;
+
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }

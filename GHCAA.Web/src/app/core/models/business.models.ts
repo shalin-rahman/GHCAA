@@ -69,7 +69,8 @@ export interface Member {
 
 export interface PaymentHistory {
     id: number;
-    memberId: number;
+    // null for a guest event payment (no member record).
+    memberId: number | null;
     transactionId: string;
     amount: number;
     paidAt: string | Date;

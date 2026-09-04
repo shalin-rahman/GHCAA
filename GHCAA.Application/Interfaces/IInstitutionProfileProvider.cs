@@ -13,6 +13,14 @@ namespace GHCAA.Application.Interfaces
         // The profile actually resolved (ORG_PROFILE's value, or "default" if unset).
         string ProfileName { get; }
 
+        // Whether ORG_PROFILE was actually set, as opposed to ProfileName having fallen back to
+        // "default". The distinction matters because an unset ORG_PROFILE almost always means a
+        // deployment nobody has configured yet, not a deliberate request for the neutral sample
+        // pack — and serving sample branding to a live institution is worse than serving nothing.
+        // OrgConfigService uses this to decide whether the pack may drive live configuration
+        // (62.6); see the transitional note there.
+        bool ProfileExplicitlySelected { get; }
+
         // The org-config.json shape for the resolved profile, loaded and cached once at
         // startup. Throws at construction if neither the named profile nor the default one
         // has a readable, valid org-config.json.

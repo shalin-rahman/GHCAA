@@ -25,7 +25,9 @@ namespace GHCAA.Application.Interfaces
         Task<MembershipFeeConfigDto> UpdateMembershipFeeConfigAsync(UpdateMembershipFeeConfigDto dto, int adminMemberId, CancellationToken cancellationToken = default);
         Task<decimal> GetApplicableMembershipFeeAsync(Domain.Enums.MembershipType type, int year, CancellationToken cancellationToken = default);
         Task<decimal> GetApplicableFeeAsync(Domain.Enums.FinancialCategory category, Domain.Enums.MembershipType type, DateTime date, CancellationToken cancellationToken = default);
-        Task<bool> DeletePaymentAsync(int paymentId, CancellationToken cancellationToken = default);
+        // 82.16: soft delete, recording the acting admin. A payment row is evidence that money
+        // was received, so it is marked deleted rather than removed.
+        Task<bool> DeletePaymentAsync(int paymentId, int adminId, CancellationToken cancellationToken = default);
         Task<byte[]> GenerateTaxReceiptAsync(int paymentId, CancellationToken cancellationToken = default);
 
         // Saved Payment Methods

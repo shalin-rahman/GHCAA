@@ -201,6 +201,10 @@ namespace GHCAA.Tests.Controllers
                 Amount = 100,
                 TransactionId = txnId,
                 Status = Enums.PaymentStatus.Pending,
+                // 82.32: HandleSuccessfulPayment now discriminates an event-registration payment by
+                // FinancialCategory (set at InitiatePayment for every real payment on this path),
+                // not by parsing Notes case-sensitively.
+                FinancialCategory = Enums.FinancialCategory.RegistrationFee,
                 Notes = "Initiated via SSLCommerz. Ref: EVT-REG-ABCD"
             };
             _context.PaymentHistories.Add(payment);
@@ -245,6 +249,7 @@ namespace GHCAA.Tests.Controllers
                 Amount = 500,
                 TransactionId = txnId,
                 Status = Enums.PaymentStatus.Pending,
+                FinancialCategory = Enums.FinancialCategory.RegistrationFee,
                 Notes = "Initiated via BkashGateway. Ref: EVT-REG-COMPLEX-99 (Optional extra text here)"
             };
             _context.PaymentHistories.Add(payment);
@@ -328,6 +333,7 @@ namespace GHCAA.Tests.Controllers
                 Amount = 200,
                 TransactionId = txnId,
                 Status = Enums.PaymentStatus.Pending,
+                FinancialCategory = Enums.FinancialCategory.RegistrationFee,
                 Notes = "Initiated via BkashGateway. Ref: EVT-REG-BK"
             };
             _context.PaymentHistories.Add(payment);

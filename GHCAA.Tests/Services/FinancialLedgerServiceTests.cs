@@ -46,7 +46,7 @@ public class FinancialLedgerServiceTests : TestBase
             Reference = "NEW-REF"
         };
 
-        var result = await _service.UpdateRecordAsync(update);
+        var result = await _service.UpdateRecordAsync(update, adminId: 1);
 
         result.Year.Should().Be(2024);
         result.RecordType.Should().Be(Enums.FinancialRecordType.Expense);

@@ -7,7 +7,9 @@ namespace GHCAA.Application.DTOs
     public class PaymentHistoryDto
     {
         public int Id { get; set; }
-        public int MemberId { get; set; }
+
+        // Nullable: a guest event payment (AllowNonMembers) has no Member row.
+        public int? MemberId { get; set; }
         public string TransactionId { get; set; } = null!;
         public decimal Amount { get; set; }
         public DateTime PaidAt { get; set; }

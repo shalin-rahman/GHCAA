@@ -54,11 +54,18 @@ namespace GHCAA.API.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> RecordPayment([FromForm] CreatePaymentHistoryDto dto, CancellationToken cancellationToken)
         {
+            // 82.32: was silently keeping the client-supplied dto.MemberId when the MemberId claim
+            // was absent, so any authenticated principal without that claim (a system-admin token)
+            // could attribute a payment, and its receipt, to an arbitrary member id of its choosing.
+            // This endpoint is member self-service only (mobile derives MemberId server-side for the
+            // same reason) — every sibling endpoint in this controller already refuses rather than
+            // trusts the body in this situation.
             var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
-            if (!string.IsNullOrEmpty(memberIdClaim) && int.TryParse(memberIdClaim, out var memberId))
+            if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
-                dto.MemberId = memberId;
+                return Unauthorized();
             }
+            dto.MemberId = memberId;
 
             // 29B.7: Content-validate the uploaded receipt (magic-byte check) so a renamed
             // executable/script can't be stored under a .jpg/.pdf name in the secure tree.
@@ -111,7 +118,15 @@ namespace GHCAA.API.Controllers
                 if (User.IsInRole("SuperAdmin"))
                     return Ok(new List<object>());
 
-                var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+                // 82.32: was `int.Parse(...NameIdentifier)!.Value`, which crashed with a 500 for
+                // any caller reaching this branch without a parseable nameid claim — the exact
+                // shape every sibling endpoint in this controller instead answers with
+                // Unauthorized/BadRequest. This is the system-admin branch (no MemberId claim), so
+                // it is reached routinely, not only on a malformed token.
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+                    return Unauthorized("Invalid session.");
+
                 var user = await _db.Users.FindAsync(userId);
                 memberId = user?.MemberId ?? 0;
             }
@@ -182,7 +197,12 @@ namespace GHCAA.API.Controllers
         [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> DeletePayment(int id, CancellationToken cancellationToken)
         {
-            var success = await _financialService.DeletePaymentAsync(id, cancellationToken);
+            // 82.16: a deleted payment records who deleted it, so refuse rather than attribute it
+            // to admin 0 when the caller cannot be identified.
+            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var adminId))
+                return Unauthorized();
+
+            var success = await _financialService.DeletePaymentAsync(id, adminId, cancellationToken);
             return success ? Ok() : NotFound();
         }
 

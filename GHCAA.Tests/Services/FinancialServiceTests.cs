@@ -266,7 +266,7 @@ public class FinancialServiceTests : TestBase
         _context.PaymentHistories.Add(p);
         await _context.SaveChangesAsync();
 
-        var result = await _service.DeletePaymentAsync(p.Id);
+        var result = await _service.DeletePaymentAsync(p.Id, adminId: 1);
 
         result.Should().BeTrue();
         var exists = await _context.PaymentHistories.AnyAsync(ph => ph.Id == p.Id);

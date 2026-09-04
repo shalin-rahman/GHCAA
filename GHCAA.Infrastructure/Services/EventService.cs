@@ -352,7 +352,16 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<object> GetAllRegistrationsForAdminAsync(int page = 1, int pageSize = 10, int? eventId = null, string? status = null, string? search = null, CancellationToken cancellationToken = default)
         {
+            // 82.32: page/pageSize were unvalidated (see the same fix in FinancialLedgerService for
+            // the exact failure). And EventRegistrationConfiguration filters on `Event.IsActive`, so
+            // this admin listing — reached by filtering on a specific eventId, which is normal for a
+            // draft or an unpublished event — silently returned nothing for exactly those events.
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+            if (pageSize > 200) pageSize = 200;
+
             var query = _context.EventRegistrations
+                .IgnoreQueryFilters()
                 .Include(r => r.Event)
                 .Include(r => r.Member)
                 .AsQueryable();
@@ -538,7 +547,10 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<IEnumerable<EventTaskDto>> GetEventTasksAsync(int eventId, CancellationToken cancellationToken = default)
         {
+            // 82.32: EventTaskConfiguration filters on Event.IsActive. An admin unpublishing an
+            // event (or a draft that was never published) made its task list read as empty.
             return await _context.EventTasks
+                .IgnoreQueryFilters()
                 .Include(t => t.AssignedMember)
                 .Where(t => t.EventId == eventId)
                 .OrderBy(t => t.DueDate)
@@ -596,7 +608,10 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<EventBudgetDto?> GetEventBudgetAsync(int eventId, CancellationToken cancellationToken = default)
         {
+            // 82.32: EventBudgetConfiguration filters on Event.IsActive, same failure as the tasks
+            // list above.
             var budget = await _context.EventBudgets
+                .IgnoreQueryFilters()
                 .Include(b => b.Expenses)
                 .FirstOrDefaultAsync(b => b.EventId == eventId, cancellationToken);
 
@@ -621,7 +636,11 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<bool> UpdateEventBudgetAsync(UpdateEventBudgetDto dto, CancellationToken cancellationToken = default)
         {
-            var budget = await _context.EventBudgets.FirstOrDefaultAsync(b => b.EventId == dto.EventId, cancellationToken);
+            // 82.32: without IgnoreQueryFilters(), the filter hides an existing budget row for an
+            // inactive event, so this fell into the "create" branch below and hit EventBudget's
+            // unique index on EventId — a 500, not an update, and the event stayed uneditable until
+            // republished.
+            var budget = await _context.EventBudgets.IgnoreQueryFilters().FirstOrDefaultAsync(b => b.EventId == dto.EventId, cancellationToken);
             if (budget == null)
             {
                 budget = new EventBudget
@@ -644,7 +663,9 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<EventExpense> AddEventExpenseAsync(AddEventExpenseDto dto, CancellationToken cancellationToken = default)
         {
-            var budget = await _context.EventBudgets.FirstOrDefaultAsync(b => b.EventId == dto.EventId, cancellationToken);
+            // 82.32: same reason as UpdateEventBudgetAsync above — without this an inactive event's
+            // existing budget row is invisible here and a duplicate gets attempted.
+            var budget = await _context.EventBudgets.IgnoreQueryFilters().FirstOrDefaultAsync(b => b.EventId == dto.EventId, cancellationToken);
             if (budget == null)
             {
                 budget = new EventBudget

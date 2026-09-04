@@ -10,7 +10,20 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace GHCAA.Infrastructure.Services
 {
-    public class OrgConfigService(ApplicationDbContext db, IMemoryCache cache) : IOrgConfigService
+    // `profiles` is optional on purpose, and only until ORG_PROFILE is set on the deployments.
+    // Work Package 62.6 replaces the hardcoded GHC defaults below with a read of
+    // profiles/<ORG_PROFILE>/org-config.json. The pack and the hardcoded values are proven
+    // byte-identical by OrgConfigGoldenSnapshotTests, so the swap itself is safe — what is not safe
+    // is *selecting* the pack when nobody has said which one. An unset ORG_PROFILE resolves to the
+    // neutral "default" sample pack, and serving "Sample Alumni Association" and MEM- numbers to a
+    // live association with real members would be a far worse outcome than keeping 190 lines of C#
+    // a little longer. So the pack drives configuration only once a profile is explicitly chosen,
+    // and until then this behaves exactly as it did before. Once ORG_PROFILE=ghc is set on the
+    // deployments, BuildGhcaaDefaults() is dead code and 62.6b deletes it along with this parameter.
+    public class OrgConfigService(
+        ApplicationDbContext db,
+        IMemoryCache cache,
+        IInstitutionProfileProvider? profiles = null) : IOrgConfigService
     {
         private const string CacheKey = "org_config_v1";
         private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(10);
@@ -31,8 +44,8 @@ namespace GHCAA.Infrastructure.Services
                 entry.AbsoluteExpirationRelativeToNow = CacheTtl;
                 var record = await db.OrganizationConfigs.AsNoTracking().FirstOrDefaultAsync();
                 var dto = record is not null
-                    ? JsonSerializer.Deserialize<OrgConfigDto>(record.ConfigJson, JsonOpts) ?? BuildGhcaaDefaults()
-                    : BuildGhcaaDefaults();
+                    ? JsonSerializer.Deserialize<OrgConfigDto>(record.ConfigJson, JsonOpts) ?? BuildDefaults()
+                    : BuildDefaults();
 
                 // Localization copy has no admin UI to edit it deliberately (org-config admin form
                 // only touches Branding/Workflow/Features), but a stored config row round-trips the
@@ -41,7 +54,9 @@ namespace GHCAA.Infrastructure.Services
                 // (e.g. a corrected Bengali tagline) stays permanently stale otherwise. Since this
                 // section is code-owned, always serve the current source value rather than trusting
                 // whatever happened to be persisted.
-                return dto with { Localization = BuildGhcaaDefaults().Localization };
+                // 62.6: heal from the active source — the profile pack when one is selected, the
+                // hardcoded copy otherwise — rather than always from code.
+                return dto with { Localization = BuildDefaults().Localization };
             }))!;
         }
 
@@ -67,6 +82,15 @@ namespace GHCAA.Infrastructure.Services
         }
 
         private void InvalidateCache() => cache.Remove(CacheKey);
+
+        // The defaults actually in force. Reads the institution profile pack once ORG_PROFILE names
+        // one; falls back to the hardcoded GHC copy while it is unset, for the reason given on the
+        // class. Both sides are asserted byte-identical by OrgConfigGoldenSnapshotTests, so which
+        // branch runs is invisible to callers today — that is what makes the eventual deletion safe.
+        private OrgConfigDto BuildDefaults() =>
+            profiles is { ProfileExplicitlySelected: true }
+                ? profiles.OrgConfigDefaults
+                : BuildGhcaaDefaults();
 
         // Single authoritative source of GHCAA defaults.
         // Used when DB table is empty (first boot before seed completes).

@@ -208,6 +208,10 @@ make corrections additive rather than destructive. No event sourcing, no separat
 ### Finding 3 — Audit-field and soft-delete coverage is incidental rather than designed
 
 **Status:** partially implemented. **Disposition:** Merged into 82.16 (same remediation as Finding 2).
+**Closed 2026-09-04** for the rule itself: `docs/ARCHITECTURE.md` §4 now states which entity classes
+carry audit fields and which do not, and `FinancialRecord` and `PaymentHistory` were brought into line.
+The two gaps the rule names — `ECMember`'s two removal semantics, and `Member`/`User` using
+`IsArchived` where the rule says `IsDeleted` — stay open as 82.29 and 82.30.
 
 Across the 46 files in `GHCAA.Domain/Models/`: 3 carry `IsArchived` (`Member`, `Poll`, `User`), 6
 carry any created-by/modified-by field, 8 carry any updated-at field against 16 that carry

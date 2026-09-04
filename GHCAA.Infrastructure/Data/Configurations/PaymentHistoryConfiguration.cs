@@ -15,17 +15,29 @@ namespace GHCAA.Infrastructure.Data.Configurations
                 .HasForeignKey(p => p.MemberId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // 82.32: TransactionId is a real bank/gateway reference, so it must stay unique among
+            // live rows, but a soft-deleted payment must not permanently occupy it — reusing the
+            // same TransactionId after an admin deletes a wrong or duplicate entry is the ordinary
+            // case this exists to fix, not an edge case.
             builder.HasIndex(p => p.TransactionId)
-                .IsUnique();
+                .IsUnique()
+                .HasFilter("\"IsDeleted\" = false");
 
             builder.HasIndex(p => new { p.MemberId, p.TransactionId });
 
             // 24.13: Partial unique index on GatewayPaymentId prevents duplicate callback processing.
+            // 82.32: excludes soft-deleted rows for the same reason as TransactionId above.
             builder.HasIndex(p => p.GatewayPaymentId)
                 .IsUnique()
-                .HasFilter("\"GatewayPaymentId\" IS NOT NULL");
+                .HasFilter("\"GatewayPaymentId\" IS NOT NULL AND \"IsDeleted\" = false");
 
-            builder.HasQueryFilter(ph => ph.Member != null && !ph.Member.IsArchived);
+            // 82.16 added `!ph.IsDeleted`: a soft-deleted payment must not appear in any ordinary
+            // read, or "delete" would stop meaning delete to every caller that already exists.
+            // 82.32: MemberId is nullable (guest event payments), so `Member == null` must pass this
+            // filter rather than hide every guest row from the ledger — the prior version silently
+            // dropped them because the null-check was written the wrong way round.
+            // Admin views that need to see deleted rows use IgnoreQueryFilters() deliberately.
+            builder.HasQueryFilter(ph => (ph.Member == null || !ph.Member.IsArchived) && !ph.IsDeleted);
         }
     }
 }

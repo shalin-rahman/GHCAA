@@ -154,11 +154,20 @@ namespace GHCAA.API.Controllers
                 // Record the intent in history
                 await _financialService.RecordPaymentAsync(new CreatePaymentHistoryDto
                 {
-                    MemberId = memberId ?? 0,
+                    // 82.32: was `memberId ?? 0`, which attributed every guest event payment to a
+                    // fabricated Member with Id 0 and crashed on the foreign key (PaymentHistory.MemberId
+                    // is nullable now for exactly this case).
+                    MemberId = memberId,
                     Amount = request.Amount,
                     TransactionId = trxId,
                     PaidAt = DateTime.UtcNow,
-                    FinancialCategory = request.Reference.Contains("EVT-REG") ? Enums.FinancialCategory.RegistrationFee : Enums.FinancialCategory.MembershipFee,
+                    // 82.32: was `.Contains("EVT-REG")`, case-sensitive, while `isEventOnlinePayment`
+                    // above and the callback's own classification (HandleSuccessfulPayment) both match
+                    // case-insensitively. A lowercase reference (client-supplied) fell through to
+                    // MembershipFee here while being treated as an event payment everywhere else, so a
+                    // member paying an event fee could end up auto-inducted as a full member on
+                    // callback — the exact failure 29B.3's category guard exists to block.
+                    FinancialCategory = isEventOnlinePayment ? Enums.FinancialCategory.RegistrationFee : Enums.FinancialCategory.MembershipFee,
                     Notes = $"Initiated via {request.Gateway}. Ref: {request.Reference}" + (memberId == null ? " (Guest)" : "")
                 }, cancellationToken);
 
@@ -325,12 +334,25 @@ namespace GHCAA.API.Controllers
             // 1. Mark as Completed
             await _financialService.UpdatePaymentStatusAsync(payment.Id, Enums.PaymentStatus.Completed, "Verified via Gateway Automatic Protocol", cancellationToken);
 
-            // 2. If it was an Event Registration, Auto-Approve the registration
-            if (payment.Notes != null && payment.Notes.Contains("EVT-REG-"))
+            // 2. If it was an Event Registration, Auto-Approve the registration.
+            // 82.32: was a case-sensitive Contains("EVT-REG-") against free text, which missed a
+            // lowercase client-supplied reference even though FinancialCategory was already set
+            // correctly for exactly this payment (see InitiatePayment). FinancialCategory is now
+            // the authoritative check here; the Notes text is only used to recover which
+            // registration this payment was for.
+            if (payment.FinancialCategory == Enums.FinancialCategory.RegistrationFee)
             {
-                var regRef = payment.Notes.Split("EVT-REG-")[1].Split(" ")[0]; // Extract just the reference
-                var fullRef = "EVT-REG-" + regRef;
-                var registration = await _db.EventRegistrations.Include(r => r.Event).FirstOrDefaultAsync(r => r.PaymentReference == fullRef, cancellationToken);
+                var refPrefixIndex = payment.Notes?.IndexOf("Ref: ", StringComparison.OrdinalIgnoreCase) ?? -1;
+                // The reference itself never contains a space; anything from the first space
+                // onward is trailing text this format appends (" (Guest)", or free text a caller
+                // added), same as the original Split("EVT-REG-")[1].Split(" ")[0] this replaces.
+                var fullRef = refPrefixIndex >= 0
+                    ? payment.Notes!.Substring(refPrefixIndex + "Ref: ".Length).Split(' ')[0].Trim()
+                    : null;
+
+                var registration = string.IsNullOrEmpty(fullRef)
+                    ? null
+                    : await _db.EventRegistrations.Include(r => r.Event).FirstOrDefaultAsync(r => r.PaymentReference == fullRef, cancellationToken);
 
                 if (registration != null && registration.Status == Enums.EventRegistrationStatus.Pending && registration.Event != null)
                 {
@@ -360,24 +382,26 @@ namespace GHCAA.API.Controllers
             //    MemberId, so without this FinancialCategory guard a member paying an event fee would be
             //    silently auto-inducted as a full member. Gateway-initiated payments always set the category
             //    at initiation (see InitiatePayment), so this is a reliable discriminator on this code path.
-            if (payment.MemberId > 0 && payment.FinancialCategory == Enums.FinancialCategory.MembershipFee)
+            if (payment.MemberId is int membershipPayerId && membershipPayerId > 0
+                && payment.FinancialCategory == Enums.FinancialCategory.MembershipFee)
             {
-                var member = await _db.Members.FindAsync(new object[] { payment.MemberId }, cancellationToken);
+                var member = await _db.Members.FindAsync(new object[] { membershipPayerId }, cancellationToken);
                 if (member != null && member.Status == Enums.MembershipStatus.Applied)
                 {
-                    // Check if payment amount matches the membership type fee
-                    var currentFee = await _db.MembershipFeeConfigs
-                        .Where(f => f.MembershipType == member.MembershipType && f.EffectiveDate <= DateTime.UtcNow)
-                        .OrderByDescending(f => f.EffectiveDate)
-                        .FirstOrDefaultAsync(cancellationToken);
+                    // 82.32: was an inline query missing IsActive, the Category filter and the
+                    // EffectiveTo upper bound — a disabled or expired fee row, or a differently
+                    // categorised row for the same MembershipType (e.g. an EventFee), could win by
+                    // being the most recent EffectiveDate. GetApplicableFeeAsync is the one query
+                    // every other fee lookup in the codebase uses; this path had drifted from it.
+                    var required = await _financialService.GetApplicableFeeAsync(
+                        Enums.FinancialCategory.MembershipFee, member.MembershipType, DateTime.UtcNow, cancellationToken);
 
                     // S4.3: Fail loudly when fee config is missing — do not silently default.
-                    if (currentFee == null)
+                    if (required <= 0)
                     {
                         _logger.LogError("Auto-approval skipped for Member {Id}: no fee config found for type {Type}", member.Id, member.MembershipType);
                         return;
                     }
-                    var required = currentFee.Amount;
                     if (payment.Amount >= required)
                     {
                         // S4.3: Fail loudly when SystemAdminId is not configured.

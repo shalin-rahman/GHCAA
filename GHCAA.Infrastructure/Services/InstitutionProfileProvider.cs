@@ -14,11 +14,14 @@ namespace GHCAA.Infrastructure.Services
         private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
         public string ProfileName { get; }
+        public bool ProfileExplicitlySelected { get; }
         public OrgConfigDto OrgConfigDefaults { get; }
 
         public InstitutionProfileProvider(IConfiguration configuration, IHostEnvironment environment)
         {
-            ProfileName = configuration["ORG_PROFILE"] ?? DefaultProfileName;
+            var configured = configuration["ORG_PROFILE"];
+            ProfileExplicitlySelected = !string.IsNullOrWhiteSpace(configured);
+            ProfileName = ProfileExplicitlySelected ? configured! : DefaultProfileName;
 
             var profilesRoot = ResolveProfilesRoot(environment.ContentRootPath);
             var path = FindFile(profilesRoot, ProfileName, OrgConfigFileName)

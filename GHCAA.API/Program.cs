@@ -197,7 +197,19 @@ var app = builder.Build();
 
 // Resolved eagerly so a missing/invalid institution profile pack (docs/TODO.md 62.1) fails boot
 // with a readable error instead of surfacing lazily on whatever request first needs it.
-app.Services.GetRequiredService<GHCAA.Application.Interfaces.IInstitutionProfileProvider>();
+var institutionProfile = app.Services.GetRequiredService<GHCAA.Application.Interfaces.IInstitutionProfileProvider>();
+
+// 62.6: with ORG_PROFILE unset, OrgConfigService keeps using its hardcoded defaults rather than
+// serving the neutral "default" sample pack to whoever this deployment actually belongs to. That is
+// the safe behaviour, but it is silent, so say it out loud once at boot — otherwise the profile
+// packs look wired up while nothing reads them.
+if (!institutionProfile.ProfileExplicitlySelected)
+{
+    app.Logger.LogWarning(
+        "ORG_PROFILE is not set. Institution configuration is being served from the hardcoded "
+        + "defaults in OrgConfigService, not from profiles/. Set ORG_PROFILE (for this deployment: "
+        + "ORG_PROFILE=ghc) to serve profiles/<name>/org-config.json instead. See docs/TODO.md 62.6.");
+}
 
 // SECURITY AUDIT (2026-08-29): must run before everything else. Render terminates TLS at its edge
 // and forwards to this container over plain HTTP with X-Forwarded-Proto: https — without this,

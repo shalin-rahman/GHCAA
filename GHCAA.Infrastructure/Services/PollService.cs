@@ -82,37 +82,61 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<bool> VoteAsync(int pollId, int memberId, List<int> optionIds, CancellationToken cancellationToken = default)
         {
-            var poll = await _db.Polls
-                .Include(p => p.Options)
-                .Include(p => p.Votes)
-                .FirstOrDefaultAsync(p => p.Id == pollId && p.IsActive && !p.IsArchived, cancellationToken);
+            // 82.32: an empty list passed every check below (no duplicate vote, no choice-count
+            // violation, no invalid option) and returned true having recorded nothing — a caller
+            // could not tell an actual vote from a no-op.
+            if (optionIds == null || optionIds.Count == 0) return false;
 
-            if (poll == null) return false;
-            if (poll.ExpiryDate < DateTime.UtcNow) return false;
-
-            // Check if already voted
-            if (poll.Votes.Any(v => v.MemberId == memberId)) return false;
-
-            // Check choice constraints
-            if (!poll.AllowMultipleChoice && optionIds.Count > 1) return false;
-
-            // Check if all optionIds belong to this poll
-            var validOptions = poll.Options.Select(o => o.Id).ToList();
-            if (optionIds.Any(id => !validOptions.Contains(id))) return false;
-
-            foreach (var optId in optionIds)
+            // 82.32: the unique index backing this is (PollOptionId, MemberId), which is correct —
+            // it has to allow several rows per member on a multiple-choice poll. That leaves the
+            // "already voted" rule for single-choice polls enforced only by the in-memory check
+            // below, so two concurrent single-choice votes for two different options both passed it
+            // and both got inserted. Serializable isolation, the same pattern MemberService already
+            // uses for its own check-then-act writes, makes the second transaction fail instead.
+            using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+            try
             {
-                _db.PollVotes.Add(new PollVote
-                {
-                    PollId = pollId,
-                    PollOptionId = optId,
-                    MemberId = memberId,
-                    VotedAt = DateTime.UtcNow
-                });
-            }
+                var poll = await _db.Polls
+                    .Include(p => p.Options)
+                    .Include(p => p.Votes)
+                    .FirstOrDefaultAsync(p => p.Id == pollId && p.IsActive && !p.IsArchived, cancellationToken);
 
-            await _db.SaveChangesAsync(cancellationToken);
-            return true;
+                if (poll == null) return false;
+                if (poll.ExpiryDate < DateTime.UtcNow) return false;
+
+                // Check if already voted
+                if (poll.Votes.Any(v => v.MemberId == memberId)) return false;
+
+                // Check choice constraints
+                if (!poll.AllowMultipleChoice && optionIds.Count > 1) return false;
+
+                // Check if all optionIds belong to this poll
+                var validOptions = poll.Options.Select(o => o.Id).ToList();
+                if (optionIds.Any(id => !validOptions.Contains(id))) return false;
+
+                foreach (var optId in optionIds)
+                {
+                    _db.PollVotes.Add(new PollVote
+                    {
+                        PollId = pollId,
+                        PollOptionId = optId,
+                        MemberId = memberId,
+                        VotedAt = DateTime.UtcNow
+                    });
+                }
+
+                await _db.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                return true;
+            }
+            catch (Exception)
+            {
+                // Matches MemberService's other Serializable-transaction writes: roll back and
+                // rethrow rather than swallow, so a genuine conflict surfaces instead of reading as
+                // an ordinary "vote rejected" false.
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
         }
 
         public async Task<bool> TogglePollStatusAsync(int id, bool isActive, CancellationToken cancellationToken = default)

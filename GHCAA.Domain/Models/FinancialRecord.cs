@@ -32,5 +32,16 @@ namespace GHCAA.Domain.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public int CreatedByAdminId { get; set; }
+
+        // 82.16. A ledger row records money. Before this, it could be edited or hard-deleted with
+        // no trace of the previous value and no trace of who did it — the audit's top finding, and
+        // the first thing anyone reviewing an association's accounts asks about. Updates now stamp
+        // who and when; deletes set IsDeleted instead of removing the row, so a correction never
+        // destroys the record it corrects.
+        public DateTime? UpdatedAt { get; set; }
+        public int? UpdatedByAdminId { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
+        public int? DeletedByAdminId { get; set; }
     }
 }

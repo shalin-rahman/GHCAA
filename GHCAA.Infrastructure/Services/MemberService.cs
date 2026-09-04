@@ -905,8 +905,15 @@ namespace GHCAA.Infrastructure.Services
                     .Where(r => r.RecordType == Enums.FinancialRecordType.Expense)
                     .SumAsync(r => r.Amount, cancellationToken);
 
+                // 82.32: PaymentHistoryConfiguration's query filter also hides a payment whose
+                // Member is archived, on top of hiding soft-deleted rows. FinancialRecords carries
+                // no such filter, so archiving a member silently shrank the org-wide balance by
+                // everything they had already paid — money already received is not undone by the
+                // payer being archived later. IgnoreQueryFilters() restores that half; !IsDeleted is
+                // reapplied by hand since that half of the filter is still correct here.
                 var memberPayments = await _db.PaymentHistories
-                    .Where(p => p.Status == Enums.PaymentStatus.Completed)
+                    .IgnoreQueryFilters()
+                    .Where(p => p.Status == Enums.PaymentStatus.Completed && !p.IsDeleted)
                     .SumAsync(p => p.Amount, cancellationToken);
 
                 balance = ledgerIncome + memberPayments - ledgerExpense;

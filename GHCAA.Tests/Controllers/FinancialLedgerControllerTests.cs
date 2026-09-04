@@ -42,10 +42,10 @@ namespace GHCAA.Tests.Controllers
         public async Task GetRecords_ReturnsOk()
         {
             var fakeResult = new { TotalItems = 0, Items = new List<FinancialRecord>() };
-            _ledgerServiceMock.Setup(x => x.GetRecordsAsync(1, 10, null, null, null, It.IsAny<CancellationToken>()))
+            _ledgerServiceMock.Setup(x => x.GetRecordsAsync(1, 10, null, null, null, false, It.IsAny<CancellationToken>()))
                               .ReturnsAsync(fakeResult);
 
-            var result = await _controller.GetRecords(1, 10, null, null, null, CancellationToken.None);
+            var result = await _controller.GetRecords(1, 10, null, null, null, false, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
@@ -78,7 +78,7 @@ namespace GHCAA.Tests.Controllers
         public async Task UpdateRecord_ReturnsOk()
         {
             var record = new FinancialRecord { Id = 1, Description = "Updated" };
-            _ledgerServiceMock.Setup(x => x.UpdateRecordAsync(It.IsAny<FinancialRecord>(), It.IsAny<CancellationToken>()))
+            _ledgerServiceMock.Setup(x => x.UpdateRecordAsync(It.IsAny<FinancialRecord>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
                               .ReturnsAsync(record);
 
             var result = await _controller.UpdateRecord(1, record, CancellationToken.None);
@@ -89,7 +89,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task DeleteRecord_ReturnsOk_OnSuccess()
         {
-            _ledgerServiceMock.Setup(x => x.DeleteRecordAsync(1, It.IsAny<CancellationToken>()))
+            _ledgerServiceMock.Setup(x => x.DeleteRecordAsync(1, It.IsAny<int>(), It.IsAny<CancellationToken>()))
                               .ReturnsAsync(true);
 
             var result = await _controller.DeleteRecord(1, CancellationToken.None);

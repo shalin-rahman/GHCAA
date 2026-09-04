@@ -190,6 +190,11 @@ risk on the same basis.
   missing ownership check; `FinancialsController.RecordPayment` trusts a client-supplied `MemberId`;
   refresh-token replay isn't detected/revoked; `MemberImportController` upload skips file validation;
   raw `FullName` interpolated into an HTML email body (XSS-adjacent).
+- **82.31 / 62.31** — 631 real alumni records, including all 631 password hashes, are literal
+  `InsertData` values in eight committed migrations, so a clean clone of this repo builds a database
+  full of real personal data. Editing `Seed/members.json` does not reach it, and no environment
+  variable turns it off. Needs a decision on the history purge and a forced password reset before any
+  code moves. `docs/SEED_CLASSIFICATION.md` has the per-file breakdown.
 
 ### P1 — HIGH (security surface / explicitly time-sensitive / blocking other work)
 - **47.13.3–47.13.7** — Mutation-coverage remediation, remaining after 47.13.1/47.13.2 closed
@@ -206,10 +211,11 @@ risk on the same basis.
   auth-flow fix the original plan missed (system admins have no email to look the reset up by).
 - **46.5** — Org-wide Financial Ledger has zero rows post-import; aggregate income/expense view doesn't
   reflect the ~৳47,000 in per-member fees that ARE recorded correctly.
-- **82.16** — Financial ledger and payment rows can be edited or hard-deleted with no record of the
-  prior value or who changed it (`FinancialLedgerService.cs:69,91`, `FinancialService.cs:488`). Raised
-  by the 2026-09-04 architecture audit; the association already collects real dues, so this is a
-  present auditability gap, not a growth concern.
+- **82.16 done 2026-09-04** — Financial ledger and payment rows now record who changed them and when,
+  and are soft-deleted rather than removed. The rule for which entity classes need audit fields is
+  `docs/ARCHITECTURE.md` §4, which splits entities into Class A (evidence) and Class B (recreatable
+  content). Left two named gaps open as 82.29 (`ECMember` has two removal semantics) and 82.30
+  (`Member`/`User` use `IsArchived` where the rule says `IsDeleted`), both below P1.
 - **82.14** — The same audit did not cover the Angular or Flutter clients (two research streams
   returned nothing). `docs/ARCHITECTURE_AUDIT_2026-09.md` is a backend review until this closes.
 
@@ -3443,14 +3449,41 @@ governance/documents), and building a schema today for a consumer that doesn't e
 the premature-abstraction risk the project's own "no new abstraction without a concrete problem"
 rule warns against.
 
-62.3 [TODO] **Priority: P1 | Depends on: 62.1.** Create `profiles/ghc/` by extracting today's values
-verbatim from `OrgConfigService.BuildGhcaaDefaults()`, `Constants.Defaults`, `appsettings.json`
-GeneralSettings, and the existing Seed JSON files. Verbatim means verbatim: this pack is the
-regression baseline.
+62.3 [DONE 2026-09-04] `profiles/ghc/org-config.json` created, 212 lines, matching the PascalCase
+indented shape `profiles/default/org-config.json` already uses (`InstitutionProfileProvider` reads
+case-insensitively, so casing is presentation only).
 
-62.4 [TODO] **Priority: P1 | Depends on: 62.3.** Tests: golden config snapshot. Capture
-`GET /api/config` output BEFORE any Phase B change, then assert `ORG_PROFILE=ghc` reproduces it
-byte-identically. This test is what makes the rest of the area safe; write it first.
+**Generated from `BuildGhcaaDefaults()` rather than typed by hand**, which is the part that makes
+"verbatim means verbatim" a fact rather than a promise: hand-transcribing ~190 lines of nested
+records, dictionaries and two locale packs would be one silent typo away from a pack that looks right
+and is not, and this pack is the regression baseline the rest of the work package is measured
+against. `GhcProfilePackTests.Regenerate_GhcPack_FromCode` reflects on the private static method,
+serializes with `UnsafeRelaxedJsonEscaping` so the currency glyph and the Bengali locale strings stay
+readable to whoever edits a pack for a second institution instead of becoming `\uXXXX`, and is marked
+`[Explicit]` because regenerating is a deliberate act, not something a test run should do.
+
+Two ordinary tests guard it: the pack still deserializes to something serializing identically to
+`BuildGhcaaDefaults()`, and it still declares `OrgId` `ghcaa` (a cheap guard against a regeneration
+pointed at the wrong profile, which would otherwise hand 62.6 the neutral sample values). Verified
+the parity test actually catches drift rather than merely passing: editing `ShortName` in the pack
+turns it red, regenerating turns it green. Nothing in `Constants.Defaults` or `appsettings.json`
+needed to be read in the end — `BuildGhcaaDefaults()` already carries every value the DTO has.
+
+62.4 [DONE 2026-09-04] `GHCAA.Tests/OrgConfig/golden/org-config-ghc.golden.json`, captured from the
+real `OrgConfigService` against an empty database before 62.6 changed anything, plus
+`OrgConfigGoldenSnapshotTests` asserting the running service still matches it.
+
+**Why a frozen file rather than another code-to-pack comparison:** 62.3's parity test compares the
+pack against `BuildGhcaaDefaults()`, and after 62.6 those two move together — they would agree with
+each other even if both were wrong. The golden does not move. It is what the service actually
+returned while the values were still hardcoded, so it can still fail the swap afterwards. The
+regeneration path is `[Explicit]` and the test message says plainly that a failure is a question
+about what changed, not an instruction to regenerate.
+
+Result worth recording: the golden and `profiles/ghc/org-config.json` came out byte-identical. That
+is a stronger check on 62.3 than its own test, because the golden goes through the whole
+`GetConfigAsync` path including the Localization overlay, not just `BuildGhcaaDefaults()` in
+isolation — so the pack is confirmed correct by two independent routes.
 
 62.5 [TODO] **Priority: P2 | Depends on: 62.2.** CI: `brand-lint` script scanning API/Web/Mobile
 source (excluding `profiles/`, migrations, test fixtures) for banned literals: `GHCAA`, `GHC-`,
@@ -3459,10 +3492,50 @@ in `brand-lint.config.json` with a reason per entry.
 
 ### PHASE B: API DE-BRANDING
 
-62.6 [TODO] **Priority: P1 | Depends on: 62.1, 62.4.** Infra: replace
-`OrgConfigService.BuildGhcaaDefaults()` (~190 lines of hardcoded C#) with
-`BuildDefaultsFromProfile()` reading the pack. Keep the Localization self-heal behaviour, but heal
-from the profile, not from code (see plan 8.6).
+62.6 [DONE 2026-09-04] `OrgConfigService` now reads the institution profile pack, via a new private
+`BuildDefaults()` that returns `profiles.OrgConfigDefaults` when a profile is explicitly selected and
+`BuildGhcaaDefaults()` when one is not. The Localization self-heal heals from whichever source is
+active, satisfying plan 8.6's "heal from the profile, not from code" for every deployment that has
+chosen a profile.
+
+**The guard, and why the hardcoded block is still there.** The plan (`WHITE_LABEL_PLAN.md:185`)
+assumes `ORG_PROFILE=ghc` is set on the existing deployments. It is not set anywhere in this
+repository — not the `Dockerfile`, not any workflow, not `appsettings` — and
+`InstitutionProfileProvider` resolves an unset `ORG_PROFILE` to `default`, which is the neutral
+sample pack. A straight swap would therefore have rebranded a live association with real members to
+"Sample Alumni Association", changed the membership prefix from `GHC-` to `MEM-`, and pointed support
+at `support@example.org`, on the next deploy and with no error. Setting a Render environment variable
+is the user's to do, so the code could not simply assume it.
+
+The behaviour is now: profile selected → pack drives configuration; not selected → today's values,
+unchanged, plus a startup warning naming `ORG_PROFILE=ghc` so an unconfigured deployment is visible
+rather than silent. `IInstitutionProfileProvider` gained `ProfileExplicitlySelected` to tell "chosen"
+apart from "defaulted", since only the former is safe to act on. The `profiles` constructor parameter
+is optional, which also left the eight existing `new OrgConfigService(...)` test call sites untouched.
+
+This is the strangler shape on purpose: the risky half is the *selection*, not the values — 62.4's
+golden proves pack and code produce byte-identical output — so the swap ships behind a guard that
+costs nothing and the 190 lines come out once the deployment is configured. That deletion is 62.6b.
+
+Tests (`ProfileDrivenConfigTests`, 4): `ORG_PROFILE=ghc` reproduces the 62.4 golden byte-identically,
+which is Phase A's stated exit criterion; an unset profile keeps the hardcoded values rather than
+serving the sample pack; no provider at all behaves the same; and an explicitly-selected *sample*
+profile really does change the output to "Sample Alumni Association"/`MEM-`, which is what proves the
+pack branch is live rather than the guard swallowing every case. Full suite 573 to 580, green.
+
+62.6b [TODO] **Priority: P2 | Depends on: 62.6, and on `ORG_PROFILE=ghc` being set on the
+deployments.** Delete `OrgConfigService.BuildGhcaaDefaults()` (~190 lines), the optional `profiles`
+constructor parameter, and the `ProfileExplicitlySelected` branch in `BuildDefaults()`, leaving the
+service reading the pack unconditionally. **Why it is a separate item rather than part of 62.6:** the
+hardcoded copy is the fallback that stops an unconfigured deployment serving sample branding to a
+live association, so it cannot be removed while any deployment still lacks `ORG_PROFILE`. Removing it
+first would reintroduce exactly the failure 62.6's guard exists to prevent.
+
+**Acceptance:** `ORG_PROFILE` is confirmed set on every running deployment (preprod and any other);
+`BuildGhcaaDefaults()` and the guard are gone; `ProfileDrivenConfigTests` is updated so the cases that
+currently assert the unset-profile fallback instead assert that an unset profile now fails loudly;
+`OrgConfigGoldenSnapshotTests` still passes unchanged, which is what proves the deletion changed
+nothing.
 
 62.7 [TODO] **Priority: P2 | Depends on: 62.6.** Domain: move `Constants.Defaults.MembershipPrefix`
 (`"GHC-"`) and `ImportEmailBase` (`"haragangian"`) to config. NEW numbers only. No backfill or
@@ -3600,12 +3673,20 @@ institutions this is a personal-data disclosure. Decide before Phase E ships: (a
 data out of the repo and load it from an operator-supplied file at deploy time (recommended), or
 (b) anonymise the committed copy. `profiles/default/` must never contain real personal data. This
 item is independent of the refactor and is the highest-priority thing in the area.
+**Correction 2026-09-04:** neither option finishes the job. Because seeds load through `HasData`, the
+same records are already literal `InsertData` values in eight committed migrations, so a clean clone
+still builds a database full of real alumni whatever `members.json` says. Whichever option is chosen
+here has to be paired with 82.31, which covers the committed chain.
 
 62.32 [TODO] **Priority: P2 | Depends on: 62.31.** Move the institution-specific seed sets
 (`members.json`, `ec_members.json`, `ec_periods.json`, `events.json`, `galleries.json`, `news.json`,
 `financial_records.json`, `academic_records.json`, `professional_records.json`, `photos.json`,
 `payment_histories.json`, `membership_*`) into `profiles/ghc/demo-data/`, and author a small
-synthetic equivalent for `profiles/default/demo-data/`.
+synthetic equivalent for `profiles/default/demo-data/`. **Add `users.json` and `user_roles.json` to
+that list** — the original list missed them, and they are the two carrying the 631 password hashes.
+The full set is Class 3 in `docs/SEED_CLASSIFICATION.md`, which also records what must stay behind:
+`roles.json`, `lookups.json` and `email_templates.json` are structural and every institution needs
+them unchanged.
 
 62.33 [TODO] **Priority: P2 | Depends on: 62.6.** Membership tiers per ADR-4: `membership-tiers.json`
 supplies label (en/bn), display order, enabled, visible, self-selectable-at-registration, and fee
@@ -3635,7 +3716,9 @@ fee display, mobile) assumes BDT or an en/bn-only locale pack.
 
 62.38 [TODO] **Priority: P2 | Depends on: 62.2.** `docs/INSTITUTION_ONBOARDING.md`: what a new
 institution supplies, in what format, with a worked example. Written for a deployer, not for a
-developer of this repo.
+developer of this repo. Say plainly which tables are empty on day one: a new institution gets Class 1
+and Class 2 of `docs/SEED_CLASSIFICATION.md` and nothing else, so no members, no events, no galleries
+and no payment history until it enters its own.
 
 62.39 [TODO] **Priority: P3 | Depends on: 62.38.** `scripts/new-institution.mjs`: scaffolds a profile
 pack from `default` and prompts for the dozen values that actually matter (names, acronym, prefix,
@@ -4300,10 +4383,24 @@ unclosed.
 69.19 [TODO] **Priority: P3.** `folios.write_pages` keys page numbers by row text, so two identical
 rows in the front matter collapse to one entry and both get the same page.
 
-69.20 [TODO] **Priority: P1.** `wbs.commit_days` never checks git's exit status. With `git` absent or
-the path not a repository, every component gets an empty day set, durations floor to 1, and the script
-prints a complete and entirely fabricated schedule — numbers destined for Chapter 11. Only `--check`
-would notice, and only obliquely.
+69.20 [DONE 2026-09-04] `wbs.commit_days` checks git's exit status. **The guard was already in the
+code when this item was picked up** — `wbs.py:212-220` wraps the call in `try/except OSError` for a
+missing git binary and raises `SystemExit` on any non-zero return status, with the directory and
+git's own stderr in the message. Its docstring already paraphrased this item's wording, so the fix
+shipped at some point without the item being re-ticked. Another instance of the status drift
+`gotcha_todo_status_drift` records; the item is closed against verification, not against new code.
+
+What was genuinely missing, and is what this item delivered: nothing pinned the behaviour. No test
+existed for any script under `docs/book/build/`, so a later edit could drop the check and silently
+restore the original defect — and that defect's output is not a crash but a complete, confident,
+fabricated schedule whose numbers are quoted in Chapter 11. New `docs/book/build/test_wbs.py`,
+standard library `unittest` only (matching the build's stdlib-only design, no new dependency), 4
+tests: the happy path still returns real dates from this repository; a non-repository directory
+raises rather than returning an empty set; any non-zero exit surfaces with git's stderr; and a
+missing git binary raises. **Verified the test actually catches the regression** rather than merely
+passing — removing the `returncode` guard from `wbs.py` turns 2 of the 4 red, and restoring it turns
+them green, which is the §3.7 standard of a defect closing against a test that would fail if it came
+back. `wbs.py` itself is unchanged (restored via `git checkout` after the experiment).
 
 69.21 [TODO] **Priority: P2.** The arrival percentages are computed over a subset: tasks in an area
 whose heading does not match `AREA_HEAD` are counted per component but left out of the denominator, so
@@ -5621,7 +5718,7 @@ the runbook.
 
 82.1 and 82.2 closed 2026-09-04. The report is `docs/ARCHITECTURE_AUDIT_2026-09.md`, 730 lines,
 carrying the §23/§25.11 deliverables and the three §21A.11 reconciliation registers. Items 82.14 to
-82.28 below are the work it raised. Two corrections the report makes to its own research, recorded
+82.31 below are the work it raised. Two corrections the report makes to its own research, recorded
 here because both would have caused damage if acted on: `/health` **does** have a registered
 `DbContextCheck` (`DependencyInjection.cs:59`) and is not a dead endpoint, and the five migrations
 sitting loose under `Data/Migrations/` are **live** in the chain — `dotnet ef migrations list` shows
@@ -5660,7 +5757,7 @@ that live directly under `Data/Migrations/` while doing this** — they are live
 proves a boot against each, or the switch, the shim types and ADR-02's claim are removed together and
 the ADR records why.
 
-82.16 [TODO] **Priority: P1 | Depends on: none.** Financial records can be edited and hard-deleted with
+82.16 [DONE 2026-09-04] **Priority: P1 | Depends on: none.** Financial records can be edited and hard-deleted with
 no trace. `FinancialLedgerService.cs:69` exposes `UpdateRecordAsync` and line 91 does
 `_db.FinancialRecords.Remove(record)`; `FinancialService.cs:488` does `_db.PaymentHistories.Remove(payment)`.
 Neither `FinancialRecord` nor `PaymentHistory` carries `UpdatedAt`, `UpdatedByAdminId` or a soft-delete
@@ -5678,6 +5775,32 @@ entities carry `IsArchived`, 6 carry any created-by field, 8 any updated-at) by 
 for which entity classes need these fields, so the next entity added does not inherit the gap.
 **Acceptance:** a ledger or payment row cannot be silently altered or removed; every change records who
 and when; a stated rule exists for which entities require audit fields; `dotnet test` green per SR-6.
+**Done 2026-09-04.** `FinancialRecord` and `PaymentHistory` each gained `UpdatedAt`,
+`UpdatedByAdminId`, `IsDeleted`, `DeletedAt`, `DeletedByAdminId`. Both delete paths are now soft:
+`FinancialLedgerService.DeleteRecordAsync` and `FinancialService.DeletePaymentAsync` take the acting
+admin's id as a required argument and stamp the row instead of calling `Remove()`. Their controllers
+return `Unauthorized()` rather than attributing a deletion to admin 0 when the caller cannot be
+identified. `FinancialRecordConfiguration` (new) and `PaymentHistoryConfiguration` filter deleted rows
+out of ordinary reads, so no existing query changed meaning. Migration
+`20260904115342_AddFinancialAuditTrail` is purely additive — ten `AddColumn`, nothing else; the
+scaffolder's seed churn was removed by hand, matching every prior migration in that folder.
+**SR-8 justification for the refactoring involved:** the delete signatures changed because the audit
+trail is worthless if the actor is optional — an `int?` would have let every existing caller keep
+compiling while recording nothing, which is the failure mode the item exists to prevent. Making the
+argument required turned it into a compile error at each of the two call sites, both of which were
+then fixed to check the claim.
+**The rule the item asked for** is now `docs/ARCHITECTURE.md` §4, which splits entities into Class A
+(evidence — carries all five fields, never hard-deleted) and Class B (recreatable content — `CreatedAt`
+only), lists the Class A membership, and states the query-filter and required-actor conventions that go
+with it.
+**Deliberately not done:** `Amount` was left as unconstrained `numeric` rather than `numeric(18,2)`.
+Constraining it silently rounds any live row holding more than two decimals, and a lossy alteration to
+a money column inside the change meant to protect money columns is self-defeating. It needs its own
+item, an out-of-range check first, and its own migration.
+**Tests:** `GHCAA.Tests/Services/FinancialAuditTrailTests.cs`, 5 tests, each tamper-tested (guard
+removed, test goes red). Full suite 585 passing, up from 580, none broken.
+**Left open by this item:** 82.29 (`ECMember`'s two removal semantics) and 82.30 (`Member`/`User` use
+`IsArchived` where the rule says `IsDeleted`).
 
 82.17 [TODO] **Priority: P3 | Depends on: none.** Configuration is bound entirely through raw string
 keys — `grep -rl "IOptions<\|IOptionsSnapshot<\|IOptionsMonitor<" GHCAA.Infrastructure/Services/*.cs
@@ -5826,3 +5949,45 @@ research pass called them dead pre-split artifacts and recommended deleting them
 list` shows all five in the live chain, so deleting them would break migration history. If their
 location is ever tidied, that is a separate change needing a migration-chain test, not a cleanup.
 **Acceptance:** `UnitTest1.cs` is gone and the suite still passes.
+
+82.29 [TODO] **Priority: P2 | Depends on: 82.16 (done — supplies the rule and the pattern).** `ECMember`
+has two removal semantics living side by side: `GovernanceService.DeleteECMemberAsync` does a hard
+`Remove()`, while `RemoveMemberFromCommitteeAsync` end-dates the row by setting `EndDate`. Same entity,
+two meanings, and which one a member's committee service disappears under depends on which screen an
+admin used. `docs/ARCHITECTURE.md` §4 places `ECMember` in Class A, so the hard delete contradicts the
+stated rule. **Why P2 and not P1:** governance records are evidence, but unlike money they are
+reconstructable from meeting minutes, and the end-dating path is the one the UI actually leads with.
+**Scope:** bring `DeleteECMemberAsync` onto the Class A pattern (soft delete plus actor), or remove it
+entirely if end-dating is the only semantics the product wants — decide which before writing code, and
+record the decision. **Acceptance:** one removal semantics for `ECMember`, matching §4; a test pins it.
+
+82.30 [TODO] **Priority: P3 | Depends on: 82.16 (done — supplies the rule).** `Member` and `User` carry
+`IsArchived` where `docs/ARCHITECTURE.md` §4 names the field `IsDeleted`. Same idea, two names, so a
+developer reading either entity cannot tell whether the difference is deliberate. **Why P3:** nothing is
+broken — `IsArchived` works and is indexed (`Member(Status, IsArchived)`, WP 24.37). This is a naming
+divergence, and renaming a column that a composite index, a global query filter and several auth guards
+all depend on costs more than it currently returns. **Two acceptable outcomes, not one:** either rename
+to `IsDeleted` with a migration that also rebuilds the index, or amend §4 to name `IsArchived` as the
+Class A field and rename `FinancialRecord`/`PaymentHistory` to match instead. Pick the cheaper one.
+**Acceptance:** one name for the soft-delete flag across all Class A entities, and §4 says which.
+
+82.31 [TODO] **Priority: P0 | Depends on: 62.31 (decides the target state).** DATA PROTECTION, and the
+half of it 62.31 does not reach. Every seed is loaded with `HasData`, which is part of the EF model
+rather than a runtime import, so each seeded row was written into a migration as a literal `InsertData`
+value and committed. Eight migrations carry roughly 4.3 MB of seed data, and across that chain there
+are **612 distinct email addresses, 638 mobile numbers and 631 bcrypt password hashes** — 631 being the
+whole `Users` table, so every real member's password hash is in git. The seeded `Members` insert also
+carries `NID`, `DateOfBirth`, `FatherName`, `MotherName`, both addresses and emergency contact details.
+**Why this is separate from 62.31 rather than part of it:** 62.31 proposes anonymising or externalising
+`Seed/members.json`. Editing that file changes what a *future* migration would contain and changes
+nothing about the eight already committed; a fresh database built from this repo still comes up holding
+631 real alumni. `ApplicationDbContext.IsSeedDisabled` and `ASP_SEED_PROFILE` do not help either —
+both are evaluated in `OnModelCreating`, so they gate migration *generation*, not migration *apply*.
+**Also a rotation problem, not only a disclosure one:** 631 password hashes that have been in a
+repository cannot be treated as secret again by deleting them, so whatever is done here has to be
+paired with a forced reset, and that ordering needs deciding before any of it starts.
+**Not started, and deliberately not started here:** this is P0 data-protection work of the type the
+project owner has put on hold. Recorded so the gap is not rediscovered a fourth time; no file touched.
+**Acceptance:** a database built from a clean clone of this repository contains no real personal data,
+and the route by which the existing hashes stop being usable is written down and carried out.
+See `docs/SEED_CLASSIFICATION.md` for the per-file classification this rests on.
