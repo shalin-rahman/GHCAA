@@ -51,28 +51,17 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
-        [Test]
-        public async Task VerifyEmail_ReturnsOk_OnSuccess()
+        [TestCase("123456", true, typeof(OkObjectResult))]
+        [TestCase("wrong", false, typeof(BadRequestObjectResult))]
+        public async Task VerifyEmail_ReturnsResultMatchingServiceOutcome(string otpCode, bool serviceResult, System.Type expectedResultType)
         {
-            var dto = new VerifyEmailDto { Email = "test@test.com", OtpCode = "123456" };
-            _memberServiceMock.Setup(x => x.VerifyEmailAsync("test@test.com", "123456", It.IsAny<CancellationToken>()))
-                              .ReturnsAsync(true);
+            var dto = new VerifyEmailDto { Email = "test@test.com", OtpCode = otpCode };
+            _memberServiceMock.Setup(x => x.VerifyEmailAsync("test@test.com", otpCode, It.IsAny<CancellationToken>()))
+                              .ReturnsAsync(serviceResult);
 
             var result = await _controller.VerifyEmail(dto, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<OkObjectResult>());
-        }
-
-        [Test]
-        public async Task VerifyEmail_ReturnsBadRequest_OnFailure()
-        {
-            var dto = new VerifyEmailDto { Email = "test@test.com", OtpCode = "wrong" };
-            _memberServiceMock.Setup(x => x.VerifyEmailAsync("test@test.com", "wrong", It.IsAny<CancellationToken>()))
-                              .ReturnsAsync(false);
-
-            var result = await _controller.VerifyEmail(dto, CancellationToken.None);
-
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf(expectedResultType));
         }
     }
 }

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { AdminGallery } from './admin-gallery';
 import { GalleryService } from '../../core/services/gallery.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -22,11 +23,7 @@ describe('AdminGallery Component', () => {
             removePhoto: vi.fn().mockReturnValue(of({ success: true }))
         };
 
-        notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn(),
-            warning: vi.fn()
-        };
+        notificationServiceMock = createNotificationServiceMock();
 
         await TestBed.configureTestingModule({
             imports: [AdminGallery],

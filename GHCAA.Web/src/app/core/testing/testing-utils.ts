@@ -27,24 +27,15 @@ export function createAuthServiceMock(overrides: any = {}) {
 }
 
 /**
- * Creates a standard mock for the AlertService.
+ * Creates a standard mock for the NotificationService (the toast service —
+ * success/error/info/warning). Components only ever call a subset of these,
+ * so providing all four is safe even where a spec only asserts on one or two.
  */
-export function createAlertServiceMock() {
+export function createNotificationServiceMock() {
   return {
     success: vi.fn(),
     error: vi.fn(),
     info: vi.fn(),
     warning: vi.fn()
-  };
-}
-
-/**
- * Creates a standard mock for the NotificationService.
- */
-export function createNotificationServiceMock() {
-  return {
-    getNotifications: vi.fn().mockReturnValue(of([])),
-    markAsRead: vi.fn().mockReturnValue(of({})),
-    markAllAsRead: vi.fn().mockReturnValue(of({}))
   };
 }

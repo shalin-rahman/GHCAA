@@ -4,20 +4,24 @@ import 'package:ghcaa_mobile/features/auth/register_wizard_provider.dart';
 
 void main() {
   group('Haragangian 3-Step Registration Wizard Unit Tests', () {
+    // Every test needs its own fresh wizard instance — a container reused
+    // across tests would leak state (steps, form data) between them.
+    late ProviderContainer container;
+    late RegisterWizardNotifier wizard;
+
+    setUp(() {
+      container = ProviderContainer();
+      wizard = container.read(registerWizardProvider.notifier);
+    });
 
     // ── Navigation ────────────────────────────────────────────────────────────
     test('Wizard initialises at step 0 (Identity & Contact)', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
       expect(wizard.state.currentStep, 0);
       expect(wizard.state.step, 1);
       expect(wizard.state.isLastStep, isFalse);
     });
 
     test('nextPage advances through all 3 steps correctly', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
-
       wizard.nextPage(); // → step 1 (Academic & Media)
       expect(wizard.state.currentStep, 1);
       expect(wizard.state.isLastStep, isFalse);
@@ -32,9 +36,6 @@ void main() {
     });
 
     test('prevPage retreats correctly and cannot go below step 0', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
-
       wizard.prevPage(); // already at 0 — should stay
       expect(wizard.state.currentStep, 0);
 
@@ -48,9 +49,6 @@ void main() {
 
     // ── Step 1: Identity & Contact ────────────────────────────────────────────
     test('Step 1: updateModel persists all identity fields', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
-
       wizard.updateModel(
         fullName: 'Shalin Rahman',
         email: 'shalin@ghcaa.org',
@@ -71,9 +69,6 @@ void main() {
     });
 
     test('Step 1: updateData key-value path persists identity fields', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
-
       wizard.updateData('FullName', 'Habibur Rahman');
       wizard.updateData('Email', 'habib@ghcaa.org');
       wizard.updateData('MobileNo', '01811111111');
@@ -87,15 +82,10 @@ void main() {
 
     // ── Step 2: Academic & Media ──────────────────────────────────────────────
     test('Step 2: academicHistory defaults to empty', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
       expect(wizard.state.model.academicHistory, isEmpty);
     });
 
     test('Step 2: academic and career fields persist correctly', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
-
       wizard.updateModel(
         academicHistory: [
           {'institutionName': 'Govt. Haraganga College', 'degree': 'HSC', 'passingYear': '2015', 'isGHC': true},
@@ -114,9 +104,6 @@ void main() {
     });
 
     test('Step 2: media paths default to null and update via updateData', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
-
       expect(wizard.state.model.profileImagePath, isNull);
       expect(wizard.state.model.nidPhotoPath, isNull);
 
@@ -129,9 +116,6 @@ void main() {
 
     // ── Step 3: Preferences & Verification ───────────────────────────────────
     test('Step 3: all notification preferences default to true (opt-in)', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
-
       expect(wizard.state.model.notifyEventCreation, isTrue);
       expect(wizard.state.model.notifyParticipationApproval, isTrue);
       expect(wizard.state.model.notifyRegistrationUpdate, isTrue);
@@ -139,9 +123,6 @@ void main() {
     });
 
     test('Step 3: individual notifications can be opted-out', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
-
       wizard.updateData('NotifyEventCreation', false);
       wizard.updateData('NotifyParticipationApproval', false);
 
@@ -153,23 +134,16 @@ void main() {
     });
 
     test('Step 3: terms acceptance defaults to false', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
       expect(wizard.state.model.hasAcceptedTerms, isFalse);
     });
 
     test('Step 3: accepting terms via updateData', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
-
       wizard.updateData('HasAcceptedTerms', true);
       expect(wizard.state.model.hasAcceptedTerms, isTrue);
     });
 
     // ── state.data map completeness ───────────────────────────────────────────
     test('state.data exposes all notification preference keys for UI binding', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
       final data = wizard.state.data;
 
       expect(data.containsKey('NotifyEventCreation'), isTrue);
@@ -181,9 +155,6 @@ void main() {
 
     // ── toJson() for API submission ───────────────────────────────────────────
     test('toJson() contains all fields needed for /auth/register API', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
-
       wizard.updateModel(
         fullName: 'Test User',
         email: 'test@ghcaa.org',
@@ -213,9 +184,6 @@ void main() {
 
     // ── Reset ─────────────────────────────────────────────────────────────────
     test('reset() returns wizard to initial empty state', () {
-      final container = ProviderContainer();
-      final wizard = container.read(registerWizardProvider.notifier);
-
       wizard.updateModel(fullName: 'Someone', email: 'some@test.com');
       wizard.nextPage();
       wizard.nextPage();

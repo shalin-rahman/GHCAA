@@ -37,12 +37,48 @@ public class EventServiceTests : TestBase
     [Test]
     public async Task CreateEventAsync_ShouldAddEvent()
     {
-        var dto = new CreateEventDto { Title = "Test Event", Description = "Test Description", Location = "Dhaka City Park", StartDate = DateTime.UtcNow.AddDays(30), EndDate = DateTime.UtcNow.AddDays(31), RegistrationFee = 100, IsActive = true, RegistrationEndDate = DateTime.UtcNow.AddDays(5), AdminNote = "Staff only" };
+        var startDate = DateTime.UtcNow.AddDays(30);
+        var endDate = DateTime.UtcNow.AddDays(31);
+        var regStartDate = DateTime.UtcNow.AddDays(1);
+        var regEndDate = DateTime.UtcNow.AddDays(5);
+        var dto = new CreateEventDto
+        {
+            Title = "Test Event",
+            Description = "Test Description",
+            Location = "Dhaka City Park",
+            StartDate = startDate,
+            EndDate = endDate,
+            RegistrationFee = 100,
+            RequiresPayment = true,
+            IsActive = true,
+            ImageUrl = "/uploads/events/test.jpg",
+            RegistrationStartDate = regStartDate,
+            RegistrationEndDate = regEndDate,
+            AllowNonMembers = true,
+            AdminNote = "Staff only",
+            ParticipantLimit = 50,
+            HasWaitlist = true,
+            RequiresRegistration = true
+        };
         var result = await _service.CreateEventAsync(dto);
 
         result.Should().NotBeNull();
         result.Title.Should().Be("Test Event");
+        result.Description.Should().Be("Test Description");
+        result.StartDate.Should().Be(DateTime.SpecifyKind(startDate, DateTimeKind.Utc));
+        result.EndDate.Should().Be(DateTime.SpecifyKind(endDate, DateTimeKind.Utc));
+        result.Location.Should().Be("Dhaka City Park");
+        result.RegistrationFee.Should().Be(100);
+        result.RequiresPayment.Should().BeTrue();
+        result.IsActive.Should().BeTrue();
+        result.ImageUrl.Should().Be("/uploads/events/test.jpg");
+        result.RegistrationStartDate.Should().Be(DateTime.SpecifyKind(regStartDate, DateTimeKind.Utc));
+        result.RegistrationEndDate.Should().Be(DateTime.SpecifyKind(regEndDate, DateTimeKind.Utc));
+        result.AllowNonMembers.Should().BeTrue();
         result.AdminNote.Should().Be("Staff only");
+        result.ParticipantLimit.Should().Be(50);
+        result.HasWaitlist.Should().BeTrue();
+        result.RequiresRegistration.Should().BeTrue();
         _context.AlumniEvents.Count().Should().Be(1);
     }
 
@@ -174,15 +210,52 @@ public class EventServiceTests : TestBase
     [Test]
     public async Task UpdateEventAsync_ShouldUpdateAllFields()
     {
-        var ev = new AlumniEvent { Title = "Old Title", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L" };
+        var ev = new AlumniEvent { Title = "Old Title", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", RegistrationFee = 0, RequiresPayment = false, ImageUrl = "/old.jpg", AllowNonMembers = false, ParticipantLimit = 5, HasWaitlist = false, RequiresRegistration = false };
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
 
-        var result = await _service.UpdateEventAsync(new UpdateEventDto { Id = ev.Id, Title = "New Title", Description = "New D", StartDate = DateTime.UtcNow.AddDays(1), EndDate = DateTime.UtcNow.AddDays(2), Location = "New Loc", AdminNote = "Important Update" });
+        var newStartDate = DateTime.UtcNow.AddDays(1);
+        var newEndDate = DateTime.UtcNow.AddDays(2);
+        var newRegStartDate = DateTime.UtcNow.AddHours(1);
+        var newRegEndDate = DateTime.UtcNow.AddHours(12);
+        var result = await _service.UpdateEventAsync(new UpdateEventDto
+        {
+            Id = ev.Id,
+            Title = "New Title",
+            Description = "New D",
+            StartDate = newStartDate,
+            EndDate = newEndDate,
+            Location = "New Loc",
+            RegistrationFee = 250,
+            RequiresPayment = true,
+            IsActive = true,
+            ImageUrl = "/new.jpg",
+            RegistrationStartDate = newRegStartDate,
+            RegistrationEndDate = newRegEndDate,
+            AllowNonMembers = true,
+            AdminNote = "Important Update",
+            ParticipantLimit = 20,
+            HasWaitlist = true,
+            RequiresRegistration = true
+        });
 
         result.Should().NotBeNull();
         result!.Title.Should().Be("New Title");
+        result.Description.Should().Be("New D");
+        result.StartDate.Should().Be(DateTime.SpecifyKind(newStartDate, DateTimeKind.Utc));
+        result.EndDate.Should().Be(DateTime.SpecifyKind(newEndDate, DateTimeKind.Utc));
+        result.Location.Should().Be("New Loc");
+        result.RegistrationFee.Should().Be(250);
+        result.RequiresPayment.Should().BeTrue();
+        result.IsActive.Should().BeTrue();
+        result.ImageUrl.Should().Be("/new.jpg");
+        result.RegistrationStartDate.Should().Be(DateTime.SpecifyKind(newRegStartDate, DateTimeKind.Utc));
+        result.RegistrationEndDate.Should().Be(DateTime.SpecifyKind(newRegEndDate, DateTimeKind.Utc));
+        result.AllowNonMembers.Should().BeTrue();
         result.AdminNote.Should().Be("Important Update");
+        result.ParticipantLimit.Should().Be(20);
+        result.HasWaitlist.Should().BeTrue();
+        result.RequiresRegistration.Should().BeTrue();
     }
 
     [Test]

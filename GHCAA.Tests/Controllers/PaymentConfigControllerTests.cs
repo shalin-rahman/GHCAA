@@ -46,10 +46,11 @@ namespace GHCAA.Tests.Controllers
             Assert.That(count, Is.EqualTo(1));
         }
 
-        [Test]
-        public async Task GetAllConfigs_ObfuscatesSecretsForAdmin()
+        [TestCase("Admin", "********", "********")]
+        [TestCase("SuperAdmin", "super-secret", "pub-key")]
+        public async Task GetAllConfigs_ObfuscatesSecrets_UnlessSuperAdmin(string role, string expectedSecret, string expectedPublic)
         {
-            SetUserContext(_controller, null, "Admin");
+            SetUserContext(_controller, null, role);
             _context.PaymentConfigurations.Add(new PaymentConfiguration
             {
                 DisplayName = "Gateway",
@@ -63,60 +64,24 @@ namespace GHCAA.Tests.Controllers
             var okResult = result as OkObjectResult;
             var configs = okResult!.Value as List<PaymentConfiguration>;
 
-            Assert.That(configs![0].GatewaySecretKey, Is.EqualTo("********"));
-            Assert.That(configs[0].GatewayPublicKey, Is.EqualTo("********"));
+            Assert.That(configs![0].GatewaySecretKey, Is.EqualTo(expectedSecret));
+            Assert.That(configs[0].GatewayPublicKey, Is.EqualTo(expectedPublic));
         }
 
-        [Test]
-        public async Task GetAllConfigs_ShowsSecretsForSuperAdmin()
+        [TestCase("SuperAdmin", "NewSec", "NewSec")] // SuperAdmin can set a real new secret
+        [TestCase("Admin", "********", "OldSec")]    // Admin sends the obfuscated placeholder back (as the UI would); it must not overwrite the real secret
+        public async Task UpdateConfig_OnlySuperAdminCanChangeSecrets(string role, string submittedSecret, string expectedSecret)
         {
-            SetUserContext(_controller, null, "SuperAdmin");
-            _context.PaymentConfigurations.Add(new PaymentConfiguration
-            {
-                DisplayName = "Gateway",
-                GatewaySecretKey = "super-secret",
-                GatewayPublicKey = "pub-key",
-                Method = Domain.Enums.PaymentMethod.CreditCard
-            });
-            await _context.SaveChangesAsync();
-
-            var result = await _controller.GetAllConfigs(CancellationToken.None);
-            var okResult = result as OkObjectResult;
-            var configs = okResult!.Value as List<PaymentConfiguration>;
-
-            Assert.That(configs![0].GatewaySecretKey, Is.EqualTo("super-secret"));
-            Assert.That(configs[0].GatewayPublicKey, Is.EqualTo("pub-key"));
-        }
-
-        [Test]
-        public async Task UpdateConfig_SuperAdminCanChangeSecrets()
-        {
-            SetUserContext(_controller, null, "SuperAdmin");
+            SetUserContext(_controller, null, role);
             var original = new PaymentConfiguration { DisplayName = "Old", GatewaySecretKey = "OldSec", Method = Domain.Enums.PaymentMethod.CreditCard };
             _context.PaymentConfigurations.Add(original);
             await _context.SaveChangesAsync();
 
-            var updateDto = new PaymentConfiguration { DisplayName = "New", GatewaySecretKey = "NewSec" };
-            var result = await _controller.UpdateConfig(original.Id, updateDto, CancellationToken.None);
-
-            var updated = await _context.PaymentConfigurations.FindAsync(original.Id);
-            Assert.That(updated!.GatewaySecretKey, Is.EqualTo("NewSec"));
-        }
-
-        [Test]
-        public async Task UpdateConfig_AdminCannotChangeSecrets()
-        {
-            SetUserContext(_controller, null, "Admin");
-            var original = new PaymentConfiguration { DisplayName = "Old", GatewaySecretKey = "OldSec", Method = Domain.Enums.PaymentMethod.CreditCard };
-            _context.PaymentConfigurations.Add(original);
-            await _context.SaveChangesAsync();
-
-            // Admin sends obfuscated string (which would happen from UI)
-            var updateDto = new PaymentConfiguration { DisplayName = "New", GatewaySecretKey = "********" };
+            var updateDto = new PaymentConfiguration { DisplayName = "New", GatewaySecretKey = submittedSecret };
             await _controller.UpdateConfig(original.Id, updateDto, CancellationToken.None);
 
             var updated = await _context.PaymentConfigurations.FindAsync(original.Id);
-            Assert.That(updated!.GatewaySecretKey, Is.EqualTo("OldSec"));
+            Assert.That(updated!.GatewaySecretKey, Is.EqualTo(expectedSecret));
         }
         [Test]
         public async Task GetActivePaymentMethods_ReturnsProperlyMappedObjects()

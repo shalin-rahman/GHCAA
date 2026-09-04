@@ -144,7 +144,8 @@ DOCS = [
     ("D4", "Project plan and change log", ["docs/TODO.md", "docs/FORUM_PLAN_2026-05.md"]),
     ("D5", "Test and validation plan",
      ["docs/BUSINESS_TEST_CHECKLIST.md", "docs/COVERAGE_SNAPSHOT_2026-05-26.md",
-      "docs/BACKEND_REVIEW_2026-07-03.md"]),
+      "docs/BACKEND_REVIEW_2026-07-03.md", "docs/ARCHITECTURE_AUDIT_2026-09.md",
+      "docs/materials/57.1-field-coverage-audit.md"]),
     ("D6", "Deployment runbook",
      ["docs/RENDER_DEPLOYMENT.md", "docs/appsettings.txt", "docs/deploy_connection.txt"]),
     ("D7", "Dissertation", ["docs/book", "docs/DOCUMENTATION_BOOK_OUTLINE.md"]),
@@ -164,9 +165,13 @@ DOCS = [
 # (id, activity, basis, hours, additive)
 ASSUMED = [
     ("U3", "Formal technical review sessions",
-     "2 sessions (3 and 29 July 2026) x (2h preparation + 2h session + 1h logging); the output was "
-     "the 5 specification defects of Table 3.8",
-     10.0, True),
+     "3 sessions. Two specification reviews (3 and 29 July 2026) x (2h preparation + 2h session + "
+     "1h logging), whose output was the 5 specification defects of Table 3.8; plus the architecture "
+     "and engineering audit of 4 September 2026 against the brief in docs/materials/REVIEW.md, "
+     "recorded in docs/ARCHITECTURE_AUDIT_2026-09.md, at 5h. That third session is a design review "
+     "rather than a specification review, and its output was 15 tracker items (82.14-82.28) rather "
+     "than specification defects",
+     15.0, True),
     ("U4", "Stakeholder discussion",
      "18 feedback work packages x 30 min of discussion; triage into tracker items is excluded, being "
      "already counted under D4",

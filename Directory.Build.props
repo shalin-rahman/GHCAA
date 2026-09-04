@@ -1,0 +1,11 @@
+<Project>
+  <!--
+    Applies to every .csproj under the repo root (MSBuild picks this up automatically).
+    RestorePackagesWithLockFile makes `dotnet restore` write/verify a per-project
+    packages.lock.json, matching what npm ci already does for GHCAA.Web via package-lock.json —
+    without it, NuGet restore has no integrity check against a tampered or re-published package.
+  -->
+  <PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+</Project>

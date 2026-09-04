@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { AdminGovernance } from './admin-governance';
 import { HttpClient } from '@angular/common/http';
 import { AdminService } from '../../core/services/admin.service';
@@ -23,10 +24,7 @@ describe('AdminGovernance Component', () => {
             assignECRole: vi.fn().mockReturnValue(of({ success: true })),
             updatePeriod: vi.fn().mockReturnValue(of({ success: true }))
         };
-        notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn()
-        };
+        notificationServiceMock = createNotificationServiceMock();
 
         await TestBed.configureTestingModule({
             imports: [AdminGovernance],

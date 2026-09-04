@@ -159,6 +159,28 @@ export class AdminRoles implements OnInit {
         });
     }
 
+    resetPassword(user: any) {
+        if (!confirm(`Reset the password for system administrator "${user.username}"? Any active session will be signed out.`)) return;
+        this.http.post<any>(`/api/roles/users/${user.id}/reset-password-admin`, {}).subscribe({
+            next: (res) => {
+                if (res?.resetUrl) {
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(res.resetUrl).then(() => {
+                            this.notify.success('Reset link copied to clipboard. Share it with the admin.');
+                        }).catch(() => {
+                            prompt('Password Reset Link:', res.resetUrl);
+                        });
+                    } else {
+                        prompt('Password Reset Link:', res.resetUrl);
+                    }
+                } else {
+                    this.notify.success('Password reset link generated.');
+                }
+            },
+            error: (err) => this.notify.error(err.error?.message || 'Failed to generate reset link')
+        });
+    }
+
     deleteUser(user: any) {
         if (!confirm(`Permanently delete system administrator "${user.username}"?`)) return;
         this.http.delete(`/api/roles/users/${user.id}`).subscribe({

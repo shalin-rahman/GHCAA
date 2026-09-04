@@ -156,6 +156,8 @@
                             </button>
                             }
                             @if (!user.memberId) {
+                            <button class="icon-btn" (click)="resetPassword(user)"
+                                title="Reset Password">🔐</button>
                             <button class="icon-btn delete" (click)="deleteUser(user)"
                                 title="Delete System Administrator Account">🗑️</button>
                             }

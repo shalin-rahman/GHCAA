@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { MemberApproval } from './member-approval';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -17,10 +18,7 @@ describe('MemberApproval Component', () => {
             rejectMember: vi.fn().mockReturnValue(of({ success: true }))
         };
 
-        notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn()
-        };
+        notificationServiceMock = createNotificationServiceMock();
 
         await TestBed.configureTestingModule({
             imports: [MemberApproval],

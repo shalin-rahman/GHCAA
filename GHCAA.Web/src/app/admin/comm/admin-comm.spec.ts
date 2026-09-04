@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { AdminComm } from './admin-comm';
 import { AdminCommService, MessageChannels } from '../../core/services/admin-comm.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -22,11 +23,7 @@ describe('AdminComm Component', () => {
             sendCustom: vi.fn().mockReturnValue(of({}))
         };
 
-        notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn(),
-            warning: vi.fn()
-        };
+        notificationServiceMock = createNotificationServiceMock();
 
         await TestBed.configureTestingModule({
             imports: [AdminComm],

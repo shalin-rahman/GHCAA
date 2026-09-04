@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { AdminFeeConfig } from './admin-fee-config';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { FinancialService } from '../../core/services/financial.service';
@@ -19,11 +20,7 @@ describe('AdminFeeConfig Component', () => {
             updateFeeConfig: vi.fn().mockReturnValue(of({}))
         };
 
-        notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn(),
-            info: vi.fn()
-        };
+        notificationServiceMock = createNotificationServiceMock();
 
         await TestBed.configureTestingModule({
             imports: [AdminFeeConfig, HttpClientTestingModule, ReactiveFormsModule],

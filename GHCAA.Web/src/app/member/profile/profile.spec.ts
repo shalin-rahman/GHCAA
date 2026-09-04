@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { Profile } from './profile';
 import { ProfileService } from '../../core/services/profile.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -17,10 +18,7 @@ describe('Profile Component', () => {
             uploadPhoto: vi.fn().mockReturnValue(of({ photoPath: 'test.jpg' }))
         };
 
-        notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn()
-        };
+        notificationServiceMock = createNotificationServiceMock();
 
         await TestBed.configureTestingModule({
             imports: [Profile],

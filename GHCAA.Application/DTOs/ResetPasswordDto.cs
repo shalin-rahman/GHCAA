@@ -4,8 +4,10 @@ namespace GHCAA.Application.DTOs
 {
     public class ResetPasswordDto
     {
-        [Required(ErrorMessage = "Email is required.")]
-        [EmailAddress(ErrorMessage = "A valid email address is required.")]
+        // A member's link carries their email here; a system admin has no Member/email, so their
+        // link carries their Username instead (see AuthService.ResetPasswordAsync). Same field,
+        // two account kinds, hence no [EmailAddress] format check.
+        [Required(ErrorMessage = "Email or username is required.")]
         public string Email { get; set; } = null!;
 
         [Required(ErrorMessage = "Reset token is required.")]

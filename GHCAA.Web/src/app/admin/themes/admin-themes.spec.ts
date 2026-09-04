@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { AdminThemes } from './admin-themes';
 import { AdminService } from '../../core/services/admin.service';
 import { ThemeService } from '../../core/services/theme.service';
@@ -24,11 +25,7 @@ describe('AdminThemes Component', () => {
             loadActiveSpecialTheme: vi.fn()
         };
 
-        notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn(),
-            warning: vi.fn()
-        };
+        notificationServiceMock = createNotificationServiceMock();
 
         await TestBed.configureTestingModule({
             imports: [AdminThemes],

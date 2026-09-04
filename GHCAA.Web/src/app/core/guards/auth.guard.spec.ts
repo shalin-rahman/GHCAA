@@ -85,14 +85,8 @@ describe('AuthGuards', () => {
     });
 
     describe('adminGuard', () => {
-        it('should allow Admin role', async () => {
-            (authServiceMock.currentUser as any).mockReturnValue({ role: 'Admin' });
-            const result = await runGuard(TestBed.runInInjectionContext(() => adminGuard()));
-            expect(result).toBe(true);
-        });
-
-        it('should allow SuperAdmin role', async () => {
-            (authServiceMock.currentUser as any).mockReturnValue({ role: 'SuperAdmin' });
+        it.each(['Admin', 'SuperAdmin'])('should allow %s role', async (role) => {
+            (authServiceMock.currentUser as any).mockReturnValue({ role });
             const result = await runGuard(TestBed.runInInjectionContext(() => adminGuard()));
             expect(result).toBe(true);
         });

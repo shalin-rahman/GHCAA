@@ -68,34 +68,21 @@ public class OtpServiceTests : TestBase
             email, "OTP_EMAIL", It.IsAny<Dictionary<string, string>>(), null, It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Test]
-    public async Task GenerateAndSendOtpAsync_WithCustomExpiryMinutes_ShouldUseCustomValue()
+    // "invalid" falls back to the 10-minute default; "5" is honored as a real custom value.
+    [TestCase("5", "otp4@example.com", 4, 6)]
+    [TestCase("invalid", "otp5@example.com", 9, 11)]
+    public async Task GenerateAndSendOtpAsync_ShouldRespectConfiguredExpiry_OrFallBackToDefault(
+        string configValue, string email, int minMinutes, int maxMinutes)
     {
-        _mockConfig.Setup(x => x["OtpSettings:ExpiryMinutes"]).Returns("5");
+        _mockConfig.Setup(x => x["OtpSettings:ExpiryMinutes"]).Returns(configValue);
         var service = new OtpService(_context, _mockCommunication.Object, _mockConfig.Object, _mockLogger.Object);
-        var email = "otp4@example.com";
         var before = DateTime.UtcNow;
         await service.GenerateAndSendOtpAsync(email);
         var after = DateTime.UtcNow;
 
         var otp = await _context.Otps.FirstOrDefaultAsync(o => o.Email == email);
-        otp!.ExpiryAt.Should().BeAfter(before.AddMinutes(4));
-        otp.ExpiryAt.Should().BeBefore(after.AddMinutes(6));
-    }
-
-    [Test]
-    public async Task GenerateAndSendOtpAsync_WithInvalidConfigValue_ShouldUseDefaultExpiry()
-    {
-        _mockConfig.Setup(x => x["OtpSettings:ExpiryMinutes"]).Returns("invalid");
-        var service = new OtpService(_context, _mockCommunication.Object, _mockConfig.Object, _mockLogger.Object);
-        var email = "otp5@example.com";
-        var before = DateTime.UtcNow;
-        await service.GenerateAndSendOtpAsync(email);
-        var after = DateTime.UtcNow;
-
-        var otp = await _context.Otps.FirstOrDefaultAsync(o => o.Email == email);
-        otp!.ExpiryAt.Should().BeAfter(before.AddMinutes(9));
-        otp.ExpiryAt.Should().BeBefore(after.AddMinutes(11));
+        otp!.ExpiryAt.Should().BeAfter(before.AddMinutes(minMinutes));
+        otp.ExpiryAt.Should().BeBefore(after.AddMinutes(maxMinutes));
     }
 
     [Test]

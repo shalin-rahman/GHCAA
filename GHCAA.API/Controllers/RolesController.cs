@@ -106,5 +106,16 @@ namespace GHCAA.API.Controllers
             if (!success) return BadRequest(new { Message = "Only non-member system administrator accounts can be deleted here." });
             return Ok(new { Message = "System administrator account deleted." });
         }
+
+        [HttpPost("users/{id}/reset-password-admin")]
+        [GHCAA.API.Filters.RequireStepUp]
+        public async Task<IActionResult> ResetPasswordAdmin(int id, CancellationToken cancellationToken)
+        {
+            var (success, resetUrl) = await _userService.SendAdminPasswordResetLinkAsync(id, cancellationToken);
+            if (!success) return BadRequest(new { Message = "User not found." });
+            // System admin accounts carry no email, so the link is handed back for the caller to
+            // copy and share rather than sent automatically like a member's reset email.
+            return Ok(new { ResetUrl = resetUrl });
+        }
     }
 }

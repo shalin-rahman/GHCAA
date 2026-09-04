@@ -63,13 +63,64 @@ public class NewsServiceTests : TestBase
         _context.NewsPosts.Add(post);
         await _context.SaveChangesAsync();
 
+        var publishDate = DateTime.UtcNow.AddDays(-2);
+        var dto = new UpdateNewsDto
+        {
+            Id = post.Id,
+            Title = "New Title",
+            Content = "Updated content",
+            ArticleCategory = Enums.ArticleCategory.Magazine,
+            Status = Enums.SubmissionStatus.Approved,
+            PostType = Enums.PostType.Notice,
+            PublishDate = publishDate,
+            ImageUrl = "/uploads/news/new.jpg",
+            AttachmentUrl = "/uploads/news/new.pdf",
+            AttachmentFileName = "new.pdf",
+            IsActive = false,
+            Collaborators = new List<string> { "collab@example.com" }
+        };
+
         // Act
-        var result = await _service.UpdateNewsAsync(new UpdateNewsDto { Id = post.Id, Title = "New Title", Content = "Updated content" });
+        var result = await _service.UpdateNewsAsync(dto);
 
         // Assert
         result.Title.Should().Be("New Title");
+        result.Content.Should().Be("Updated content");
         var updated = await _context.NewsPosts.FindAsync(post.Id);
         updated!.Title.Should().Be("New Title");
+        updated.Content.Should().Be("Updated content");
+        updated.ArticleCategory.Should().Be(Enums.ArticleCategory.Magazine);
+        updated.PostType.Should().Be(Enums.PostType.Notice);
+        updated.PublishDate.Should().Be(publishDate);
+        updated.ImageUrl.Should().Be("/uploads/news/new.jpg");
+        updated.AttachmentUrl.Should().Be("/uploads/news/new.pdf");
+        updated.AttachmentFileName.Should().Be("new.pdf");
+        updated.IsActive.Should().BeFalse();
+        updated.ExternalCollaborators.Should().Be("collab@example.com");
+    }
+
+    // 57.1 audit flag: `existing.Status = dto.Status` runs unconditionally, unlike PublishDate two
+    // lines above it (guarded by `dto.PublishDate.HasValue`). UpdateNewsDto inherits Status from
+    // CreateNewsDto, which defaults to Approved — so a caller building an update DTO for an
+    // unrelated field change, without setting Status, would silently flip a Pending post to
+    // Approved. This proves the DTO default reaches the DB: it is a real bug, not a missing
+    // assertion, since UpdateNewsAsync gives no way to say "leave status alone."
+    [Test]
+    public async Task UpdateNewsAsync_OverwritesStatus_WithDtoDefault_WhenCallerDoesNotSetIt()
+    {
+        var post = new NewsPost { Title = "Pending Post", Content = "C", AuthorId = _authorId, Status = Enums.SubmissionStatus.Pending };
+        _context.NewsPosts.Add(post);
+        await _context.SaveChangesAsync();
+
+        // Deliberately does not set Status - relies on UpdateNewsDto's inherited default.
+        var dto = new UpdateNewsDto { Id = post.Id, Title = "Pending Post", Content = "C" };
+        dto.Status.Should().Be(Enums.SubmissionStatus.Approved, "this is the DTO default the audit flagged, not a value this test chose");
+
+        await _service.UpdateNewsAsync(dto);
+
+        var updated = await _context.NewsPosts.FindAsync(post.Id);
+        updated!.Status.Should().Be(Enums.SubmissionStatus.Approved,
+            "UpdateNewsAsync assigns existing.Status = dto.Status unconditionally, so an update that never intended to touch status silently approves a Pending post");
     }
 
     [Test]

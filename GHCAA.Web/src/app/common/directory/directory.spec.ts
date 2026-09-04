@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { Directory } from './directory';
 import { NetworkingService } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -19,10 +20,7 @@ describe('Directory Component', () => {
         networkServiceMock = {
             searchMembers: vi.fn().mockReturnValue(of({ items: [], totalItems: 0, totalPages: 0, page: 1, pageSize: 20, hasNextPage: false }))
         };
-        notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn()
-        };
+        notificationServiceMock = createNotificationServiceMock();
         routerMock = {
             navigate: vi.fn()
         };

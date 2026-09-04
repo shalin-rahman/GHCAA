@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { GalleryApproval } from './gallery-approval';
 import { GalleryService } from '../../core/services/gallery.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -19,11 +20,7 @@ describe('GalleryApproval Component', () => {
             rejectPhoto: vi.fn().mockReturnValue(of({ success: true }))
         };
 
-        notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn(),
-            warning: vi.fn()
-        };
+        notificationServiceMock = createNotificationServiceMock();
 
         await TestBed.configureTestingModule({
             imports: [GalleryApproval],

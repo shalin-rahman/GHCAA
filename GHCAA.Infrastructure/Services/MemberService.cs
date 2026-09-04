@@ -1360,6 +1360,10 @@ namespace GHCAA.Infrastructure.Services
             user.ResetTokenExpiry = DateTime.UtcNow.AddHours(24);
             await _db.SaveChangesAsync(cancellationToken);
 
+            // An admin-initiated reset otherwise leaves any refresh token issued before it still
+            // valid, so a session taken over before the reset survives the reset.
+            await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
+
             // Log activity
             await _activityService.LogActivityAsync(memberId, "Password Reset", "Admin initiated password reset email.", cancellationToken: cancellationToken);
 

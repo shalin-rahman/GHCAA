@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { AdminMembers } from './admin-members';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -25,10 +26,7 @@ describe('AdminMembers Component', () => {
             sendPasswordResetLink: vi.fn().mockReturnValue(of({ message: 'Success' }))
         };
 
-        notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn()
-        };
+        notificationServiceMock = createNotificationServiceMock();
 
         navServiceMock = {
             isSuperAdmin: signal(false) as any

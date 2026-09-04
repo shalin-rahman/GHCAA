@@ -1,9 +1,15 @@
 # See https://aka.ms/customizecontainer for more info on Docker customization.
+#
+# Base images below are pinned by digest (resolved via `docker buildx imagetools inspect
+# <image>:<tag>` on 2026-09-04), not by floating tag, so a re-pointed tag on the registry can't
+# change what actually builds. A pinned digest also means no patch releases reach the image
+# automatically — refresh the digest deliberately (re-run the inspect command) rather than
+# leaving it stale indefinitely; Dependabot's Docker ecosystem support can do this on a schedule.
 
 # --- ANGULAR FRONTEND BUILD STAGE ---
 # Builds the GHCAA.Web SPA and hands its static output to the API's wwwroot,
 # so a single Render service serves both the API and the web app.
-FROM node:22-alpine AS web
+FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS web
 WORKDIR /web
 COPY ["GHCAA.Web/package.json", "GHCAA.Web/package-lock.json", "./"]
 RUN npm ci
@@ -16,12 +22,12 @@ RUN npm run sync:docs
 RUN npx ng build --configuration preprod
 # @angular/build:application emits the browser bundle under dist/GHCAA.Web/browser
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:9.0@sha256:b1201ee0ccf9a22c06844982296c1be40d5ff9c7685dc002729f204e63fb1730 AS base
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0@sha256:f190d2dd9eef2899c91ac323caa0bd2b39334a5400ba93013e5199da39dad940 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 

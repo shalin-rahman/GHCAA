@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 
 import 'package:ghcaa_mobile/screens/auth/register_screen.dart';
 import 'package:ghcaa_mobile/features/auth/auth_service.dart';
@@ -16,56 +13,17 @@ import 'package:ghcaa_mobile/features/files/file_service.dart';
 import 'package:ghcaa_mobile/core/storage/storage_service.dart';
 import 'package:ghcaa_mobile/core/theme/app_theme.dart';
 import 'package:ghcaa_mobile/core/services/biometric_service.dart';
-import 'package:local_auth/local_auth.dart';
 
-// --- Fakes ---
-class _FakeStorageService implements StorageService {
-  @override Future<void> saveToken(String token) async {}
-  @override Future<String?> getToken() async => 'mock-token';
-  @override Future<void> removeToken() async {}
-  @override Future<void> saveRole(String role) async {}
-  @override Future<String?> getRole() async => 'Member';
-  @override Future<void> saveDashboardLayout(bool isCompact) async {}
-  @override Future<bool> getDashboardLayout() async => false;
-  @override Future<void> saveProfile(Map<String, dynamic> profile) async {}
-  @override Future<Map<String, dynamic>?> getProfile() async => null;
-  @override Future<void> clearAll() async {}
-  @override Future<void> saveCredentials(String username, String password) async {}
-  @override Future<Map<String, String>?> getCredentials() async => null;
-  @override Future<void> clearCredentials() async {}
-  @override Future<void> saveRefreshToken(String token) async {}
-  @override Future<String?> getRefreshToken() async => null;
-  @override Future<void> removeRefreshToken() async {}
-}
+import 'helpers/fake_services.dart';
+import 'helpers/golden_test_utils.dart';
 
-class _FakeAuthService implements AuthService {
-  @override Future<String?> login(String identifier, String password, {bool enableBiometric = false}) async => null;
-  @override Future<void> logout() async {}
-  @override Future<String?> register(Map<String, dynamic> data) async => null;
-  @override Future<bool> forgotPassword(String identifier) async => true;
-  @override Future<String?> getRole() async => 'Member';
-  @override Future<bool> updateProfile(Map<String, dynamic> data) async => true;
-  @override Future<List<Map<String, dynamic>>> getSocialProviders() async => [];
-  @override Future<String?> googleLogin(String idToken) async => null;
-  @override Future<String?> facebookLogin(String accessToken) async => null;
-}
-
+// This wizard needs a dropdown fixture with exactly one option (unlike the
+// other visual-freeze files, which use zero or two) — kept local rather than
+// merged into helpers/fake_services.dart since it covers a different case.
 class _FakeDropdownService implements DropdownService {
   @override Future<List<Map<String, String>>> getOptions(String group) async => [
     {'value': '1', 'label': 'Option A', 'instructions': 'Instruction text'},
   ];
-}
-
-class _FakeFileService implements FileService {
-  @override Future<File?> pickImage({ImageSource source = ImageSource.gallery}) async => null;
-  @override Future<String?> uploadProfilePhoto(File file) async => 'mock/photo.png';
-  @override Future<String?> uploadArticleImage(File file) async => 'mock/article.png';
-}
-
-class _FakeBiometricService implements BiometricService {
-  @override Future<bool> isBiometricsAvailable() async => false;
-  @override Future<List<BiometricType>> getAvailableBiometrics() async => [];
-  @override Future<bool> authenticate({required String reason}) async => true;
 }
 
 /// Build the wrapped app with all required provider overrides.
@@ -82,11 +40,11 @@ Widget _wrapInApp(Widget child, {int step = 0}) {
 
   return ProviderScope(
     overrides: [
-      storageServiceProvider.overrideWith((ref) => _FakeStorageService()),
-      authServiceProvider.overrideWith((ref) => _FakeAuthService()),
+      storageServiceProvider.overrideWith((ref) => FakeStorageService()),
+      authServiceProvider.overrideWith((ref) => FakeAuthService()),
       dropdownDataProvider.overrideWith((ref) => _FakeDropdownService()),
-      fileServiceProvider.overrideWith((ref) => _FakeFileService()),
-      biometricServiceProvider.overrideWith((ref) => _FakeBiometricService()),
+      fileServiceProvider.overrideWith((ref) => FakeFileService()),
+      biometricServiceProvider.overrideWith((ref) => FakeBiometricService()),
       // Pre-seed wizard at the desired step — bypasses form validation
       registerWizardProvider.overrideWith(
         (ref) => RegisterWizardNotifier()..setStep(step),
@@ -104,47 +62,27 @@ void main() {
   setUpAll(() async {
     await loadAppFonts();
     dotenv.testLoad(fileInput: 'PORTAL_TITLE=GHCAA\nPORTAL_SUBTITLE=ALUMNI');
-
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/local_auth'),
-      (methodCall) async {
-        if (methodCall.method == 'getAvailableBiometrics') return <String>[];
-        if (methodCall.method == 'isDeviceSupported') return false;
-        return null;
-      },
-    );
+    mockLocalAuthChannel();
   });
 
   group('Registration Wizard Visual Freeze', () {
-    testGoldens('Register Step 1: Identity & Contact', (tester) async {
-      await tester.pumpWidgetBuilder(
-        _wrapInApp(const RegisterScreen(), step: 0),
-        surfaceSize: const Size(390, 844),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
-      await screenMatchesGolden(tester, 'registration_step_1');
-    });
+    // Same pump/golden-compare shape for every wizard step, only the seeded
+    // step index and golden file name change.
+    const steps = [
+      (label: 'Register Step 1: Identity & Contact', step: 0, golden: 'registration_step_1'),
+      (label: 'Register Step 2: Academic & Career', step: 1, golden: 'registration_step_2'),
+      (label: 'Register Step 3: Preferences & Registry', step: 2, golden: 'registration_step_3'),
+    ];
 
-    testGoldens('Register Step 2: Academic & Career', (tester) async {
-      await tester.pumpWidgetBuilder(
-        _wrapInApp(const RegisterScreen(), step: 1),
-        surfaceSize: const Size(390, 844),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
-      await screenMatchesGolden(tester, 'registration_step_2');
-    });
-
-    testGoldens('Register Step 3: Preferences & Registry', (tester) async {
-      await tester.pumpWidgetBuilder(
-        _wrapInApp(const RegisterScreen(), step: 2),
-        surfaceSize: const Size(390, 844),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
-      await screenMatchesGolden(tester, 'registration_step_3');
-    });
+    for (final s in steps) {
+      testGoldens(s.label, (tester) async {
+        await tester.pumpWidgetBuilder(
+          _wrapInApp(const RegisterScreen(), step: s.step),
+          surfaceSize: const Size(390, 844),
+        );
+        await pumpAndSettleShort(tester);
+        await screenMatchesGolden(tester, s.golden);
+      });
+    }
   });
 }

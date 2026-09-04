@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { MemberPolls } from './polls.component';
 import { PollService } from '../../core/services/poll.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -18,11 +19,7 @@ describe('MemberPolls', () => {
       getPollById: vi.fn()
     };
     
-    notifyMock = {
-      success: vi.fn(),
-      error: vi.fn(),
-      warning: vi.fn()
-    };
+    notifyMock = createNotificationServiceMock();
 
     await TestBed.configureTestingModule({
       imports: [MemberPolls],

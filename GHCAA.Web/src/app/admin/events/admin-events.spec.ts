@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { AdminEvents } from './admin-events';
 import { EventsService } from '../../core/services/events.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -17,11 +18,7 @@ describe('AdminEvents Component', () => {
             getAllRegistrations: vi.fn().mockReturnValue(of({ items: [], totalItems: 0, totalPages: 0 }))
         };
 
-        notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn(),
-            warning: vi.fn()
-        };
+        notificationServiceMock = createNotificationServiceMock();
 
         const navServiceMock = {
             portalNavItems: () => [],

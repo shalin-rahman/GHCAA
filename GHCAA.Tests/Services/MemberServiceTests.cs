@@ -25,6 +25,7 @@ public class MemberServiceTests : TestBase
     private Mock<IConfiguration> _mockConfig = null!;
     private Mock<IGamificationService> _mockGamification = null!;
     private Mock<IFinancialService> _mockFinancialService = null!;
+    private Mock<ITokenService> _mockTokenService = null!;
     private MemberService _service = null!;
 
     private Mock<ICommunicationService> _mockCommunication = null!;
@@ -43,6 +44,7 @@ public class MemberServiceTests : TestBase
         _mockConfig = new Mock<IConfiguration>();
         _mockGamification = new Mock<IGamificationService>();
         _mockFinancialService = new Mock<IFinancialService>();
+        _mockTokenService = new Mock<ITokenService>();
         var mockOrgConfigService = new Mock<IOrgConfigService>();
 
         _service = new MemberService(
@@ -60,7 +62,7 @@ public class MemberServiceTests : TestBase
             _mockFinancialService.Object,
             new Mock<IRealTimeService>().Object,
             mockOrgConfigService.Object,
-            new Mock<ITokenService>().Object
+            _mockTokenService.Object
         );
     }
 
@@ -158,38 +160,17 @@ public class MemberServiceTests : TestBase
         member!.MembershipType.Should().Be(Enums.MembershipType.General);
     }
 
-    [Test]
-    public async Task RegisterAsync_WithDuplicateEmail_ShouldThrowException()
+    [TestCase("Email")]
+    [TestCase("NID")]
+    [TestCase("Mobile")]
+    public async Task RegisterAsync_WithDuplicateField_ShouldThrowException(string duplicateField)
     {
         // Arrange
         var dto = CreateValidDto();
-        await CreateAndSaveTestMemberAsync("Other User", dto.Email, "01999999999", "9999999999");
-
-        // Act & Assert
-        var act = async () => await _service.RegisterAsync(dto, null, null, null);
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("Member with same Email, NID, or Mobile already exists.");
-    }
-
-    [Test]
-    public async Task RegisterAsync_WithDuplicateNID_ShouldThrowException()
-    {
-        // Arrange
-        var dto = CreateValidDto();
-        await CreateAndSaveTestMemberAsync("Other User", "other@example.com", "01999999999", dto.NID);
-
-        // Act & Assert
-        var act = async () => await _service.RegisterAsync(dto, null, null, null);
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("Member with same Email, NID, or Mobile already exists.");
-    }
-
-    [Test]
-    public async Task RegisterAsync_WithDuplicateMobile_ShouldThrowException()
-    {
-        // Arrange
-        var dto = CreateValidDto();
-        await CreateAndSaveTestMemberAsync("Other User", "other@example.com", dto.MobileNo, "9999999999");
+        var email = duplicateField == "Email" ? dto.Email : "other@example.com";
+        var mobile = duplicateField == "Mobile" ? dto.MobileNo : "01999999999";
+        var nid = duplicateField == "NID" ? dto.NID : "9999999999";
+        await CreateAndSaveTestMemberAsync("Other User", email, mobile, nid);
 
         // Act & Assert
         var act = async () => await _service.RegisterAsync(dto, null, null, null);
@@ -323,48 +304,26 @@ public class MemberServiceTests : TestBase
         result.EmailSent.Should().BeTrue();
     }
 
-    [Test]
-    public async Task VerifyEmailAsync_WithValidOtp_ShouldVerifyEmail()
+    [TestCase("123456", true, true)]
+    [TestCase("999999", false, false)]
+    public async Task VerifyEmailAsync_SetsEmailVerifiedFlag_MatchingOtpOutcome(string otpCode, bool otpValid, bool expectVerified)
     {
         // Arrange
         var email = "test@example.com";
-        var otpCode = "123456";
         var member = await CreateAndSaveTestMemberAsync("Test Member", email, "01712345678", "1234567890");
         member.EmailVerified = false;
         await _context.SaveChangesAsync();
 
         _mockOtp.Setup(x => x.VerifyOtpAsync(email, otpCode, It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
+            .ReturnsAsync(otpValid);
 
         // Act
         var result = await _service.VerifyEmailAsync(email, otpCode);
 
         // Assert
-        result.Should().BeTrue();
+        result.Should().Be(expectVerified);
         var updatedMember = await _context.Members.FirstAsync(m => m.Email == email);
-        updatedMember.EmailVerified.Should().BeTrue();
-    }
-
-    [Test]
-    public async Task VerifyEmailAsync_WithInvalidOtp_ShouldReturnFalse()
-    {
-        // Arrange
-        var email = "test@example.com";
-        var otpCode = "999999";
-        var member = await CreateAndSaveTestMemberAsync("Test Member", email, "01712345678", "1234567890");
-        member.EmailVerified = false;
-        await _context.SaveChangesAsync();
-
-        _mockOtp.Setup(x => x.VerifyOtpAsync(email, otpCode, It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
-
-        // Act
-        var result = await _service.VerifyEmailAsync(email, otpCode);
-
-        // Assert
-        result.Should().BeFalse();
-        var updatedMember = await _context.Members.FirstAsync(m => m.Email == email);
-        updatedMember.EmailVerified.Should().BeFalse();
+        updatedMember.EmailVerified.Should().Be(expectVerified);
     }
 
     [Test]
@@ -469,15 +428,34 @@ public class MemberServiceTests : TestBase
 
         var updateDto = new UpdateProfileDto
         {
+            FullName = "Updated Member",
+            FatherName = "Updated Father",
+            MotherName = "Updated Mother",
+            DateOfBirth = new DateTime(1985, 5, 5),
+            Gender = Enums.Gender.Female,
+            BloodGroup = Enums.BloodGroup.BPositive,
             PresentAddress = "New Address",
             PermanentAddress = "Perm Address",
+            EmergencyContactName = "Updated EC",
+            EmergencyContactRelation = "Sister",
+            EmergencyContactPhone = "01888888888",
+            TShirtSize = "L",
+            PhotoPath = "uploads/members/1/photo/new.jpg",
             AcademicHistory = new List<AcademicRecordDto>
             {
                 new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "Bachelor", Subject = "Science", PassingYear = 2007, IsGHC = true }
             },
+            ProfessionalHistory = new List<ProfessionalRecordDto>
+            {
+                new ProfessionalRecordDto { OrganizationName = "New Org", Designation = "Engineer", Sector = "IT", Location = "Dhaka", StartDate = new DateTime(2020, 1, 1), IsCurrent = true }
+            },
             IsMobilePublic = true,
             IsEmailPublic = true,
-            IsAddressPublic = true
+            IsAddressPublic = true,
+            IsNIDPublic = true,
+            NotifyEventCreation = false,
+            NotifyParticipationApproval = false,
+            NotifyRegistrationUpdate = false
         };
 
         // Act
@@ -485,10 +463,32 @@ public class MemberServiceTests : TestBase
 
         // Assert
         result.Should().BeTrue();
-        var updatedMember = await _context.Members.FindAsync(member.Id);
+        var updatedMember = await _context.Members
+            .Include(m => m.AcademicHistory)
+            .Include(m => m.ProfessionalHistory)
+            .FirstOrDefaultAsync(m => m.Id == member.Id);
         updatedMember!.PresentAddress.Should().Be("New Address");
-        //         updatedMember.Designation.Should().Be("Senior Dev");
+        updatedMember.PermanentAddress.Should().Be("Perm Address");
+        updatedMember.FullName.Should().Be("Updated Member");
+        updatedMember.FatherName.Should().Be("Updated Father");
+        updatedMember.MotherName.Should().Be("Updated Mother");
+        updatedMember.DateOfBirth.Should().Be(DateTime.SpecifyKind(new DateTime(1985, 5, 5), DateTimeKind.Utc));
+        updatedMember.Gender.Should().Be(Enums.Gender.Female);
+        updatedMember.BloodGroup.Should().Be(Enums.BloodGroup.BPositive);
+        updatedMember.EmergencyContactName.Should().Be("Updated EC");
+        updatedMember.EmergencyContactRelation.Should().Be("Sister");
+        updatedMember.EmergencyContactPhone.Should().Be("01888888888");
+        updatedMember.TShirtSize.Should().Be("L");
+        updatedMember.PhotoPath.Should().Be("uploads/members/1/photo/new.jpg");
         updatedMember.IsMobilePublic.Should().BeTrue();
+        updatedMember.IsEmailPublic.Should().BeTrue();
+        updatedMember.IsAddressPublic.Should().BeTrue();
+        updatedMember.IsNIDPublic.Should().BeTrue();
+        updatedMember.NotifyEventCreation.Should().BeFalse();
+        updatedMember.NotifyParticipationApproval.Should().BeFalse();
+        updatedMember.NotifyRegistrationUpdate.Should().BeFalse();
+        updatedMember.AcademicHistory.Should().ContainSingle(a => a.InstitutionName == "Govt. Haraganga College" && a.PassingYear == 2007);
+        updatedMember.ProfessionalHistory.Should().ContainSingle(p => p.OrganizationName == "New Org" && p.Designation == "Engineer");
     }
 
     [Test]
@@ -712,6 +712,46 @@ public class MemberServiceTests : TestBase
     }
 
     [Test]
+    public async Task SendAdminPasswordResetLinkAsync_ShouldRevokeExistingRefreshTokens()
+    {
+        // Arrange: a member with an existing session. An admin-initiated reset must not leave a
+        // token issued before the reset still usable after it.
+        var member = new Member
+        {
+            FullName = "P1",
+            Email = "p1@e.com",
+            NID = "123",
+            MobileNo = "017",
+            Status = Enums.MembershipStatus.Active,
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0",
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } }
+        };
+        await _context.Members.AddAsync(member);
+        await _context.SaveChangesAsync();
+
+        var user = new User { Username = member.NID, PasswordHash = "x", MemberId = member.Id };
+        await _context.Users.AddAsync(user);
+        await _context.SaveChangesAsync();
+
+        // A DB-stored template short-circuits the org-config fallback branch this test doesn't
+        // otherwise set up.
+        _mockCommunication.Setup(x => x.GetTemplateByCodeAsync(Constants.TemplateCodes.PasswordReset, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new EmailTemplate { Code = Constants.TemplateCodes.PasswordReset, Subject = "Reset", Body = "{{FullName}} {{ResetUrl}} {{MembershipNumber}}", Description = "test" });
+
+        // Act
+        await _service.SendAdminPasswordResetLinkAsync(member.Id, isPrivilegedCaller: true);
+
+        // Assert
+        _mockTokenService.Verify(x => x.RevokeAllRefreshTokensAsync(user.Id, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
     public async Task RejectMemberAsync_ShouldSendEmailAndSoftDeleteMember()
     {
         // Arrange
@@ -780,17 +820,45 @@ public class MemberServiceTests : TestBase
             FatherName = "Updated Father",
             MotherName = "Updated Mother",
             DateOfBirth = new DateTime(1990, 1, 1),
+            Gender = Enums.Gender.Female,
+            BloodGroup = Enums.BloodGroup.BPositive,
             PresentAddress = "Updated Address",
             PermanentAddress = "Updated Perm Address",
             EmergencyContactName = "EC",
             EmergencyContactRelation = "Brother",
             EmergencyContactPhone = "01800000000",
+            TShirtSize = "XL",
+            PhotoPath = "uploads/members/1/photo/updated.jpg",
+            SignaturePath = "uploads/members/1/signature/updated.jpg",
+            CertificatePath = "uploads/members/1/certificate/updated.pdf",
+            PaymentProofPath = "uploads/members/1/paymentproof/updated.jpg",
             MembershipNumber = "GHC-9999",
             Email = "updated@e.com",
             MobileNo = "01799999999",
             NID = "9999999999",
             Category = Enums.MemberCategory.LifelongPatron,
-            MembershipType = Enums.MembershipType.Founding
+            MembershipType = Enums.MembershipType.Founding,
+            Status = Enums.MembershipStatus.InactivePayment,
+            MembershipChangeReason = "Reviewed",
+            ECChangeReason = "N/A",
+            IsVerified = true,
+            ContributionPoints = 50,
+            IsMobilePublic = true,
+            IsEmailPublic = true,
+            IsAddressPublic = true,
+            IsNIDPublic = true,
+            NotifyEventCreation = false,
+            NotifyParticipationApproval = false,
+            NotifyRegistrationUpdate = false,
+            NotifyRelevantUpdates = false,
+            AcademicHistory = new List<AcademicRecordDto>
+            {
+                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "Bachelor", Subject = "Science", PassingYear = 2007, IsGHC = true }
+            },
+            ProfessionalHistory = new List<ProfessionalRecordDto>
+            {
+                new ProfessionalRecordDto { OrganizationName = "New Org", Designation = "Engineer", Sector = "IT", Location = "Dhaka", StartDate = new DateTime(2020, 1, 1), IsCurrent = true }
+            }
         };
 
         // Act
@@ -798,10 +866,47 @@ public class MemberServiceTests : TestBase
 
         // Assert
         result.Should().BeTrue();
-        var updated = await _context.Members.FindAsync(member.Id);
+        var updated = await _context.Members
+            .Include(m => m.AcademicHistory)
+            .Include(m => m.ProfessionalHistory)
+            .FirstOrDefaultAsync(m => m.Id == member.Id);
         updated!.FullName.Should().Be("Updated Name");
         updated.MembershipNumber.Should().Be("GHC-9999");
         updated.Category.Should().Be(Enums.MemberCategory.LifelongPatron);
+        updated.FatherName.Should().Be("Updated Father");
+        updated.MotherName.Should().Be("Updated Mother");
+        updated.DateOfBirth.Should().Be(DateTime.SpecifyKind(new DateTime(1990, 1, 1), DateTimeKind.Utc));
+        updated.NID.Should().Be("9999999999");
+        updated.MobileNo.Should().Be("01799999999");
+        updated.Email.Should().Be("updated@e.com");
+        updated.PresentAddress.Should().Be("Updated Address");
+        updated.PermanentAddress.Should().Be("Updated Perm Address");
+        updated.EmergencyContactName.Should().Be("EC");
+        updated.EmergencyContactRelation.Should().Be("Brother");
+        updated.EmergencyContactPhone.Should().Be("01800000000");
+        updated.TShirtSize.Should().Be("XL");
+        updated.Gender.Should().Be(Enums.Gender.Female);
+        updated.BloodGroup.Should().Be(Enums.BloodGroup.BPositive);
+        updated.PhotoPath.Should().Be("uploads/members/1/photo/updated.jpg");
+        updated.SignaturePath.Should().Be("uploads/members/1/signature/updated.jpg");
+        updated.CertificatePath.Should().Be("uploads/members/1/certificate/updated.pdf");
+        updated.PaymentProofPath.Should().Be("uploads/members/1/paymentproof/updated.jpg");
+        updated.MembershipType.Should().Be(Enums.MembershipType.Founding);
+        updated.Status.Should().Be(Enums.MembershipStatus.InactivePayment);
+        updated.MembershipChangeReason.Should().Be("Reviewed");
+        updated.ECChangeReason.Should().Be("N/A");
+        updated.IsVerified.Should().BeTrue();
+        updated.ContributionPoints.Should().Be(50);
+        updated.IsMobilePublic.Should().BeTrue();
+        updated.IsEmailPublic.Should().BeTrue();
+        updated.IsAddressPublic.Should().BeTrue();
+        updated.IsNIDPublic.Should().BeTrue();
+        updated.NotifyEventCreation.Should().BeFalse();
+        updated.NotifyParticipationApproval.Should().BeFalse();
+        updated.NotifyRegistrationUpdate.Should().BeFalse();
+        updated.NotifyRelevantUpdates.Should().BeFalse();
+        updated.AcademicHistory.Should().ContainSingle(a => a.InstitutionName == "Govt. Haraganga College" && a.PassingYear == 2007);
+        updated.ProfessionalHistory.Should().ContainSingle(p => p.OrganizationName == "New Org" && p.Designation == "Engineer");
     }
 
     [Test]

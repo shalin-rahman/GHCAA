@@ -368,10 +368,20 @@ namespace GHCAA.Infrastructure.Services
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(m => m.Email.ToLower() == email.Trim().ToLower(), cancellationToken);
 
-            if (member == null) return false;
-
-            var user = await _db.Users
-                .FirstOrDefaultAsync(u => u.MemberId == member.Id && u.ResetToken == token, cancellationToken);
+            User? user;
+            if (member != null)
+            {
+                user = await _db.Users
+                    .FirstOrDefaultAsync(u => u.MemberId == member.Id && u.ResetToken == token, cancellationToken);
+            }
+            else
+            {
+                // A system admin has no Member/email, so its link carries the Username instead.
+                // Scoped to MemberId == null so this cannot also be used to look up a member's
+                // account by guessing their username.
+                user = await _db.Users
+                    .FirstOrDefaultAsync(u => u.MemberId == null && u.Username == email.Trim() && u.ResetToken == token, cancellationToken);
+            }
 
             if (user == null) return false;
 
@@ -391,7 +401,7 @@ namespace GHCAA.Infrastructure.Services
             await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
             _logger.LogInformation("Password reset successful for user {Username}", user.Username);
 
-            await _activityService.LogActivityAsync(member.Id, "Password Reset", "User reset their password via email link.", cancellationToken: cancellationToken);
+            await _activityService.LogActivityAsync(member?.Id, "Password Reset", "User reset their password via email link.", cancellationToken: cancellationToken);
 
             return true;
         }

@@ -16,7 +16,7 @@ reason for each gap.
 
 ## 11.1 Process Model in Practice and its Deviations from Plan
 
-*[Not written. Brief: led by the arrival profile: **70% of tracker tasks were not planned** (529 of 754, figures of 4 September 2026), arriving as stakeholder feedback (39%), review findings (18%) or defects (13%), and 26 of the dated work packages landed in August 2026 alone. A critical path over an up-front work breakdown would be fiction, because two thirds of the work did not exist when that breakdown would have been drawn]*
+*[Not written. Brief: led by the arrival profile: **71% of tracker tasks were not planned** (547 of 772, figures of 4 September 2026), arriving as stakeholder feedback (38%), review findings (20%) or defects (13%), and 26 of the dated work packages landed in August 2026 alone. A critical path over an up-front work breakdown would be fiction, because two thirds of the work did not exist when that breakdown would have been drawn]*
 
 ## 11.2 Work Breakdown Structure
 
@@ -60,7 +60,7 @@ reason for each gap.
 
 ### 11.5.3 The result and its sensitivity
 
-*[Not written. Brief: product 0.40, so 280 working days for what is delivered, and with the 73 days still outstanding, about 353 for the completed project. Two factors carry most of the reduction and they differ in kind: prior reuse is measured, tooling is judged]*
+*[Not written. Brief: product 0.40, so 282 working days for what is delivered, and with the 74 days still outstanding, about 357 for the completed project. Two factors carry most of the reduction and they differ in kind: prior reuse is measured, tooling is judged]*
 
 ### 11.5.4 What this cost
 
@@ -76,7 +76,7 @@ reason for each gap.
 
 ## 11.8 Configuration and Change Management in Practice
 
-*[Not written. Brief: there was no change-control board. There was one file: `docs/TODO.md`, 5,451 lines, simultaneously the project plan, the change log, the defect log and the decision record. The 529 reactive tasks *are* the change log, and Table 11.5 is generated from them rather than reconstructed]*
+*[Not written. Brief: there was no change-control board. There was one file: `docs/TODO.md`, 5,828 lines, simultaneously the project plan, the change log, the defect log and the decision record. The 547 reactive tasks *are* the change log, and Table 11.5 is generated from them rather than reconstructed]*
 
 ## 11.9 Risk Monitoring Record
 

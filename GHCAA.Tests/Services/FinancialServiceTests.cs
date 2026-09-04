@@ -55,15 +55,16 @@ public class FinancialServiceTests : TestBase
         }
     }
 
-    [Test]
-    public async Task RecordPaymentAsync_ShouldAddPaymentAndReturnDto()
+    // Full-detail active member (Status + AcademicHistory) shared by the tests below that touch
+    // membership-fee/dues logic, as opposed to CreateMinimalMemberAsync used for FK-only cases.
+    private async Task<Member> CreateActiveMemberWithHistoryAsync(string fullName, string email, string nid)
     {
         var member = new Member
         {
-            FullName = "Payer",
-            Email = "fsp@e.com",
-            NID = "FSP1",
-            MobileNo = "FSP1",
+            FullName = fullName,
+            Email = email,
+            NID = nid,
+            MobileNo = nid,
             Status = Enums.MembershipStatus.Active,
             FatherName = "F",
             MotherName = "M",
@@ -76,6 +77,13 @@ public class FinancialServiceTests : TestBase
         };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
+        return member;
+    }
+
+    [Test]
+    public async Task RecordPaymentAsync_ShouldAddPaymentAndReturnDto()
+    {
+        var member = await CreateActiveMemberWithHistoryAsync("Payer", "fsp@e.com", "FSP1");
 
         var dto = new CreatePaymentHistoryDto { MemberId = member.Id, Amount = 500, TransactionId = "TRX-FSP-100", PaidAt = DateTime.UtcNow, Notes = "Test Payment" };
         var result = await _service.RecordPaymentAsync(dto);
@@ -92,24 +100,7 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task GetMemberPaymentHistoryAsync_ShouldReturnDtoList()
     {
-        var member = new Member
-        {
-            FullName = "History User",
-            Email = "fsh@e.com",
-            NID = "FSH1",
-            MobileNo = "FSH1",
-            Status = Enums.MembershipStatus.Active,
-            FatherName = "F",
-            MotherName = "M",
-            PresentAddress = "A",
-            PermanentAddress = "A",
-            EmergencyContactName = "E",
-            EmergencyContactRelation = "R",
-            EmergencyContactPhone = "0",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
-        };
-        _context.Members.Add(member);
-        await _context.SaveChangesAsync();
+        var member = await CreateActiveMemberWithHistoryAsync("History User", "fsh@e.com", "FSH1");
 
         _context.PaymentHistories.Add(new PaymentHistory { MemberId = member.Id, TransactionId = "FSH-T1", Amount = 100, PaidAt = DateTime.UtcNow.AddDays(-1), Status = Enums.PaymentStatus.Completed });
         _context.PaymentHistories.Add(new PaymentHistory { MemberId = member.Id, TransactionId = "FSH-T2", Amount = 200, PaidAt = DateTime.UtcNow, Status = Enums.PaymentStatus.Pending });
@@ -124,24 +115,7 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task GenerateAnnualDuesAsync_ShouldCreateDuesForActiveMembers()
     {
-        var member = new Member
-        {
-            FullName = "Active User",
-            Email = "fsg@e.com",
-            NID = "FSG1",
-            MobileNo = "FSG1",
-            Status = Enums.MembershipStatus.Active,
-            FatherName = "F",
-            MotherName = "M",
-            PresentAddress = "A",
-            PermanentAddress = "A",
-            EmergencyContactName = "E",
-            EmergencyContactRelation = "R",
-            EmergencyContactPhone = "0",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
-        };
-        _context.Members.Add(member);
-        await _context.SaveChangesAsync();
+        var member = await CreateActiveMemberWithHistoryAsync("Active User", "fsg@e.com", "FSG1");
 
         await _service.GenerateAnnualDuesAsync(2024);
 
@@ -154,24 +128,7 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task MarkDueAsPaidAsync_ShouldUpdateStatus()
     {
-        var member = new Member
-        {
-            FullName = "M",
-            Email = "fsm@e.com",
-            NID = "FSM1",
-            MobileNo = "FSM1",
-            Status = Enums.MembershipStatus.Active,
-            FatherName = "F",
-            MotherName = "M",
-            PresentAddress = "A",
-            PermanentAddress = "A",
-            EmergencyContactName = "E",
-            EmergencyContactRelation = "R",
-            EmergencyContactPhone = "0",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
-        };
-        _context.Members.Add(member);
-        await _context.SaveChangesAsync();
+        var member = await CreateActiveMemberWithHistoryAsync("M", "fsm@e.com", "FSM1");
 
         var due = new MembershipDue { MemberId = member.Id, Year = 2025, Amount = 1000, DueDate = DateTime.UtcNow, IsPaid = false };
         _context.MembershipDues.Add(due);
@@ -215,12 +172,19 @@ public class FinancialServiceTests : TestBase
         fee2025.Should().Be(2000);
     }
 
+    // Minimal member for tests that only need a valid MemberId FK, not membership status/history.
+    private async Task<Member> CreateMinimalMemberAsync(string suffix)
+    {
+        var member = new Member { FullName = suffix, Email = $"{suffix.ToLowerInvariant()}@e.com", NID = suffix, MobileNo = suffix, FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "P", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+        return member;
+    }
+
     [Test]
     public async Task GetSavedPaymentMethodsAsync_ShouldReturnSavedMethods()
     {
-        var member = new Member { FullName = "U1", Email = "u1@e.com", NID = "U1", MobileNo = "U1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "P", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-        _context.Members.Add(member);
-        await _context.SaveChangesAsync();
+        var member = await CreateMinimalMemberAsync("U1");
 
         _context.SavedPaymentMethods.Add(new SavedPaymentMethod { MemberId = member.Id, Method = "BKash", AccountNumber = "01711", DisplayName = "My BKash", LastUsedAt = DateTime.UtcNow });
         await _context.SaveChangesAsync();
@@ -234,9 +198,7 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task AddSavedPaymentMethodAsync_ShouldCreateMethod()
     {
-        var member = new Member { FullName = "U2", Email = "u2@e.com", NID = "U2", MobileNo = "U2", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "P", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-        _context.Members.Add(member);
-        await _context.SaveChangesAsync();
+        var member = await CreateMinimalMemberAsync("U2");
 
         var dto = new CreateSavedPaymentMethodDto { Method = "Nagad", AccountNumber = "01811", DisplayName = "Nagad Personal" };
         var result = await _service.AddSavedPaymentMethodAsync(member.Id, dto);
@@ -251,9 +213,7 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task DeleteSavedPaymentMethodAsync_ShouldRemoveMethodIfOwner()
     {
-        var member = new Member { FullName = "U3", Email = "u3@e.com", NID = "U3", MobileNo = "U3", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "P", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-        _context.Members.Add(member);
-        await _context.SaveChangesAsync();
+        var member = await CreateMinimalMemberAsync("U3");
 
         var method = new SavedPaymentMethod { MemberId = member.Id, Method = "Rocket", AccountNumber = "01911", DisplayName = "Rocket", LastUsedAt = DateTime.UtcNow };
         _context.SavedPaymentMethods.Add(method);

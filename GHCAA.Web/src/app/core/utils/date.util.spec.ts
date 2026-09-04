@@ -2,23 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { formatPeriodRange, getEventStatus, getEventStatusMeta } from './date.util';
 
 describe('formatPeriodRange', () => {
-    it('shows the real stored year range even while active', () => {
-        expect(formatPeriodRange({ startDate: '2024-12-01', endDate: '2026-06-30', isActive: true }))
-            .toBe('2024 - 2026');
-    });
-
-    it('shows just the start year when endDate is missing, active or not', () => {
-        expect(formatPeriodRange({ startDate: '2025-01-01', isActive: true })).toBe('2025');
-    });
-
-    it('shows a real range for a concluded period spanning multiple years', () => {
-        expect(formatPeriodRange({ startDate: '2015-01-01', endDate: '2017-12-31', isActive: false }))
-            .toBe('2015 - 2017');
-    });
-
-    it('collapses to a single year when start and end fall in the same year', () => {
-        expect(formatPeriodRange({ startDate: '2020-01-01', endDate: '2020-11-30', isActive: false }))
-            .toBe('2020');
+    it.each([
+        ['shows the real stored year range even while active', { startDate: '2024-12-01', endDate: '2026-06-30', isActive: true }, '2024 - 2026'],
+        ['shows just the start year when endDate is missing, active or not', { startDate: '2025-01-01', isActive: true }, '2025'],
+        ['shows a real range for a concluded period spanning multiple years', { startDate: '2015-01-01', endDate: '2017-12-31', isActive: false }, '2015 - 2017'],
+        ['collapses to a single year when start and end fall in the same year', { startDate: '2020-01-01', endDate: '2020-11-30', isActive: false }, '2020']
+    ] as const)('%s', (_label, period, expected) => {
+        expect(formatPeriodRange(period)).toBe(expected);
     });
 });
 
@@ -28,22 +18,17 @@ describe('getEventStatus', () => {
     const YEAR_3000 = '3000-01-01';
     const YEAR_2000 = '2000-01-01';
 
-    it('is Unpublished when isActive is false, regardless of dates', () => {
-        expect(getEventStatus({ isActive: false, startDate: YEAR_2000, endDate: YEAR_3000 })).toBe('Unpublished');
+    it.each([
+        ['is Unpublished when isActive is false, regardless of dates', false, YEAR_2000, YEAR_3000, 'Unpublished'],
+        ['is Upcoming when now is before startDate', true, YEAR_3000, YEAR_3000, 'Upcoming'],
+        ['is Ended when now is after endDate', true, YEAR_2000, YEAR_2000, 'Ended'],
+        ['is Ongoing when now falls between startDate and endDate', true, YEAR_2000, YEAR_3000, 'Ongoing']
+    ] as const)('%s', (_label, isActive, startDate, endDate, expected) => {
+        expect(getEventStatus({ isActive, startDate, endDate })).toBe(expected);
     });
 
-    it('is Upcoming when now is before startDate', () => {
-        expect(getEventStatus({ isActive: true, startDate: YEAR_3000, endDate: YEAR_3000 })).toBe('Upcoming');
-    });
-
-    it('is Ended when now is after endDate', () => {
-        expect(getEventStatus({ isActive: true, startDate: YEAR_2000, endDate: YEAR_2000 })).toBe('Ended');
-    });
-
-    it('is Ongoing when now falls between startDate and endDate', () => {
-        expect(getEventStatus({ isActive: true, startDate: YEAR_2000, endDate: YEAR_3000 })).toBe('Ongoing');
-    });
-
+    // Same inputs and outcome as the "is Unpublished when isActive is false" case above —
+    // flagged as a genuine duplicate, kept as-is pending a call on whether to drop it.
     it('Unpublished takes priority over date-computed status even mid-event', () => {
         expect(getEventStatus({ isActive: false, startDate: YEAR_2000, endDate: YEAR_3000 })).toBe('Unpublished');
     });

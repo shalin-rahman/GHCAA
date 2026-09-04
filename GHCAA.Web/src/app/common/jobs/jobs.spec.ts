@@ -1,4 +1,4 @@
-import { createAuthServiceMock } from '../../core/testing/testing-utils';
+import { createAuthServiceMock, createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Jobs } from './jobs';
 import { JobService } from '../../core/services/job.service';
@@ -25,11 +25,7 @@ describe('Jobs Component', () => {
             currentUser: signal(null)
         };
 
-        notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn(),
-            warning: vi.fn()
-        };
+        notificationServiceMock = createNotificationServiceMock();
 
         await TestBed.configureTestingModule({
             imports: [Jobs],

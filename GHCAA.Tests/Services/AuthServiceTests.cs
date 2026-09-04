@@ -158,6 +158,42 @@ namespace GHCAA.Tests.Services
         }
 
         [Test]
+        public async Task ResetPasswordAsync_ForSystemAdminByUsername_ShouldChangePassword()
+        {
+            // A system admin has no Member/email, so its reset link carries Username in the
+            // Email field instead. No Member row matches, so the MemberId == null fallback path
+            // must be the one that finds it.
+            var username = "sysadmin_reset";
+            var token = "sysadmin_token";
+            var user = new User { Username = username, PasswordHash = "old", MemberId = null, CreatedAt = DateTime.UtcNow, IsActive = true, ResetToken = token, ResetTokenExpiry = DateTime.UtcNow.AddHours(1) };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.ResetPasswordAsync(username, token, "NewPassword123");
+
+            result.Should().BeTrue();
+            var updatedUser = await _context.Users.FindAsync(user.Id);
+            BCrypt.Net.BCrypt.Verify("NewPassword123", updatedUser!.PasswordHash).Should().BeTrue();
+            updatedUser.ResetToken.Should().BeNull();
+        }
+
+        [Test]
+        public async Task ResetPasswordAsync_MemberCannotBeResetByUsernameFallback()
+        {
+            // The MemberId == null fallback must not also let a member's account be reset by
+            // guessing their Username — it is scoped to system-admin accounts only.
+            var member = await CreateAndSaveTestMemberAsync("Test", "scoped@example.com", "555", "555");
+            var user = await CreateAndSaveTestUserAsync(member.Id, "member_username_only");
+            user.ResetToken = "member_token";
+            user.ResetTokenExpiry = DateTime.UtcNow.AddHours(1);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.ResetPasswordAsync("member_username_only", "member_token", "NewPassword123");
+
+            result.Should().BeFalse();
+        }
+
+        [Test]
         public async Task SocialLoginAsync_WithValidGoogleId_ShouldReturnTokenResponse()
         {
             // Arrange

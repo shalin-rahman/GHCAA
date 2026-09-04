@@ -173,39 +173,22 @@ namespace GHCAA.Tests.Services
                 .Should().NotContain(c => c.Type == GHCAA.Application.Security.StepUpClaim.Type);
         }
 
-        [Test]
-        public void TryGetValidStepUpEpoch_ReturnsEpoch_WhenPreviousTokenWasStepUpVerifiedAndWithinTtl()
+        // A 0-minute TTL means "must have verified this instant" — any elapsed time fails it,
+        // simulating a token from well outside the grace window without needing to wait.
+        [TestCase(true, 60, true)]   // step-up token, within TTL -> epoch returned
+        [TestCase(false, 60, false)] // plain login token carries no step-up claim -> null
+        [TestCase(true, 0, false)]   // step-up token, TTL already exceeded -> null
+        public void TryGetValidStepUpEpoch_HonoursStepUpClaimAndTtl(bool useStepUpToken, int ttlMinutes, bool expectEpoch)
         {
             var user = new User { Id = 1, Username = "admin" };
-            var previousToken = _service.CreateStepUpToken(user);
+            var previousToken = useStepUpToken ? _service.CreateStepUpToken(user) : _service.CreateToken(user);
 
-            var epoch = _service.TryGetValidStepUpEpoch(previousToken, ttlMinutes: 60);
+            var epoch = _service.TryGetValidStepUpEpoch(previousToken, ttlMinutes: ttlMinutes);
 
-            epoch.Should().NotBeNull();
-        }
-
-        [Test]
-        public void TryGetValidStepUpEpoch_ReturnsNull_WhenPreviousTokenHasNoStepUpClaim()
-        {
-            var user = new User { Id = 1, Username = "admin" };
-            var previousToken = _service.CreateToken(user); // plain login token
-
-            var epoch = _service.TryGetValidStepUpEpoch(previousToken, ttlMinutes: 60);
-
-            epoch.Should().BeNull();
-        }
-
-        [Test]
-        public void TryGetValidStepUpEpoch_ReturnsNull_WhenVerificationHasExceededTtl()
-        {
-            var user = new User { Id = 1, Username = "admin" };
-            var previousToken = _service.CreateStepUpToken(user);
-
-            // A 0-minute TTL means "must have verified this instant" — any elapsed time fails it,
-            // simulating a token from well outside the grace window without needing to wait.
-            var epoch = _service.TryGetValidStepUpEpoch(previousToken, ttlMinutes: 0);
-
-            epoch.Should().BeNull();
+            if (expectEpoch)
+                epoch.Should().NotBeNull();
+            else
+                epoch.Should().BeNull();
         }
 
         [Test]

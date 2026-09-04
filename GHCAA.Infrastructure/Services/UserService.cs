@@ -4,9 +4,11 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using BCrypt.Net;
 
@@ -17,13 +19,15 @@ namespace GHCAA.Infrastructure.Services
         private readonly ApplicationDbContext _db;
         private readonly ILogger<UserService> _logger;
         private readonly ITokenService _tokenService;
+        private readonly IConfiguration _config;
         private const string PasswordChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        public UserService(ApplicationDbContext db, ILogger<UserService> logger, ITokenService tokenService)
+        public UserService(ApplicationDbContext db, ILogger<UserService> logger, ITokenService tokenService, IConfiguration config)
         {
             _db = db;
             _logger = logger;
             _tokenService = tokenService;
+            _config = config;
         }
 
         public async Task<User> CreateUserAccountAsync(int memberId, string username, string password, CancellationToken cancellationToken = default)
@@ -135,6 +139,30 @@ namespace GHCAA.Infrastructure.Services
             await _db.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("System admin account deleted: {UserId}", userId);
             return true;
+        }
+
+        public async Task<(bool Success, string? ResetUrl)> SendAdminPasswordResetLinkAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            var user = await _db.Users.FindAsync(new object[] { userId }, cancellationToken);
+            if (user == null) return (false, null);
+
+            var token = Guid.NewGuid().ToString("N");
+            user.ResetToken = token;
+            user.ResetTokenExpiry = DateTime.UtcNow.AddHours(24);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Same reasoning as the member-facing reset (MemberService.SendAdminPasswordResetLinkAsync):
+            // a token issued before the reset must not survive it.
+            await _tokenService.RevokeAllRefreshTokensAsync(userId, cancellationToken);
+
+            _logger.LogInformation("Admin password reset initiated for system account {UserId}", userId);
+
+            // System admin accounts carry no email address, so there is nothing to send this to.
+            // The URL goes back to the caller (RolesController) for the acting SuperAdmin to copy
+            // and hand over manually, rather than being emailed like a member's reset link.
+            var clientUrl = _config[Constants.ConfigKeys.ClientUrl] ?? "http://localhost:4200";
+            var resetUrl = $"{clientUrl}/reset-password?email={Uri.EscapeDataString(user.Username)}&token={token}";
+            return (true, resetUrl);
         }
 
         public string GenerateDefaultPassword()

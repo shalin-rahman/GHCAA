@@ -2,6 +2,7 @@ using FluentAssertions;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -14,6 +15,7 @@ namespace GHCAA.Tests.Services
     {
         private Mock<ILogger<UserService>> _mockLogger = null!;
         private Mock<ITokenService> _mockTokenService = null!;
+        private Mock<IConfiguration> _mockConfig = null!;
         private UserService _service = null!;
 
         [SetUp]
@@ -21,7 +23,8 @@ namespace GHCAA.Tests.Services
         {
             _mockLogger = new Mock<ILogger<UserService>>();
             _mockTokenService = new Mock<ITokenService>();
-            _service = new UserService(_context, _mockLogger.Object, _mockTokenService.Object);
+            _mockConfig = new Mock<IConfiguration>();
+            _service = new UserService(_context, _mockLogger.Object, _mockTokenService.Object, _mockConfig.Object);
         }
 
         [Test]
@@ -127,6 +130,37 @@ namespace GHCAA.Tests.Services
             var result = await _service.ChangePasswordAsync(user.Id, "WrongOldPassword", "NewPassword456");
 
             result.Should().BeFalse();
+        }
+
+        [Test]
+        public async Task SendAdminPasswordResetLinkAsync_ForSystemAdmin_ShouldReturnUrlAndRevokeTokens()
+        {
+            // System admin accounts carry no Member/email, so the link is built from Username
+            // and handed back rather than emailed. See AuthService.ResetPasswordAsync's matching
+            // MemberId == null fallback for the consuming side.
+            var user = new User { Username = "sysadmin1", PasswordHash = "x", MemberId = null, CreatedAt = DateTime.UtcNow, IsActive = true };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            var (success, resetUrl) = await _service.SendAdminPasswordResetLinkAsync(user.Id);
+
+            success.Should().BeTrue();
+            resetUrl.Should().Contain("token=").And.Contain(Uri.EscapeDataString(user.Username));
+            _mockTokenService.Verify(x => x.RevokeAllRefreshTokensAsync(user.Id, It.IsAny<CancellationToken>()), Times.Once);
+
+            var updated = await _context.Users.FindAsync(user.Id);
+            updated!.ResetToken.Should().NotBeNullOrEmpty();
+            updated.ResetTokenExpiry.Should().NotBeNull();
+        }
+
+        [Test]
+        public async Task SendAdminPasswordResetLinkAsync_ForUnknownUser_ShouldReturnFalse()
+        {
+            var (success, resetUrl) = await _service.SendAdminPasswordResetLinkAsync(99999);
+
+            success.Should().BeFalse();
+            resetUrl.Should().BeNull();
+            _mockTokenService.Verify(x => x.RevokeAllRefreshTokensAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }

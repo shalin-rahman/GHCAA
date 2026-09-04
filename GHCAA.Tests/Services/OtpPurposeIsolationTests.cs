@@ -48,24 +48,13 @@ public class OtpPurposeIsolationTests : TestBase
         result.Should().BeTrue();
     }
 
-    [Test]
-    public async Task VerifyOtpAsync_ShouldRejectRegistrationCode_PresentedAsStepUp()
+    [TestCase(OtpPurpose.Registration, OtpPurpose.AdminStepUp, "stepup-cross@example.com")]
+    [TestCase(OtpPurpose.AdminStepUp, OtpPurpose.Registration, "stepup-reverse@example.com")]
+    public async Task VerifyOtpAsync_ShouldReject_WhenPurposeAtVerifyDoesNotMatchGenerate(OtpPurpose generatePurpose, OtpPurpose verifyPurpose, string email)
     {
-        var email = "stepup-cross@example.com";
-        var registrationCode = await _service.GenerateAndSendOtpAsync(email, OtpPurpose.Registration);
+        var code = await _service.GenerateAndSendOtpAsync(email, generatePurpose);
 
-        var result = await _service.VerifyOtpAsync(email, registrationCode, OtpPurpose.AdminStepUp);
-
-        result.Should().BeFalse();
-    }
-
-    [Test]
-    public async Task VerifyOtpAsync_ShouldRejectStepUpCode_PresentedAsRegistration()
-    {
-        var email = "stepup-reverse@example.com";
-        var stepUpCode = await _service.GenerateAndSendOtpAsync(email, OtpPurpose.AdminStepUp);
-
-        var result = await _service.VerifyOtpAsync(email, stepUpCode, OtpPurpose.Registration);
+        var result = await _service.VerifyOtpAsync(email, code, verifyPurpose);
 
         result.Should().BeFalse();
     }

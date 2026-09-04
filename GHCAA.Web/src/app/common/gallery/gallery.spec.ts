@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { Gallery } from './gallery';
 import { GalleryService } from '../../core/services/gallery.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -29,11 +30,7 @@ describe('Gallery Component', () => {
             })
         };
 
-        const notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn(),
-            warning: vi.fn()
-        };
+        const notificationServiceMock = createNotificationServiceMock();
 
         await TestBed.configureTestingModule({
             imports: [Gallery],

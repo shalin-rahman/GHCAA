@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { Register } from './register';
 import { RegistrationService } from '../../core/services/registration.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -25,11 +26,7 @@ describe('Register Component', () => {
             verifyEmail: vi.fn()
         };
 
-        notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn(),
-            warning: vi.fn()
-        };
+        notificationServiceMock = createNotificationServiceMock();
 
         routerMock = {
             navigate: vi.fn()

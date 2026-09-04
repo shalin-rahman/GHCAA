@@ -32,12 +32,20 @@ namespace GHCAA.Tests.Services
             _context.SaveChanges();
         }
 
+        // Only a valid MemberId FK matters for these tests, not membership status/history — matches
+        // the 10-field shape TestBase.CreateAndSaveTestMemberAsync fills for the full-detail cases.
+        private async Task<Member> CreatePosterMemberAsync(string suffix, string fullName = "M")
+        {
+            var member = new Member { FullName = fullName, Email = $"{suffix.ToLowerInvariant()}@e.com", NID = suffix, MobileNo = suffix, FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+            _context.Members.Add(member);
+            await _context.SaveChangesAsync();
+            return member;
+        }
+
         [Test]
         public async Task PostJobAsync_ShouldAddJobAndReturnDto()
         {
-            var member = new Member { FullName = "Recruiter", Email = "jhr@e.com", NID = "JHR1", FatherName = "F", MotherName = "M", MobileNo = "JHR1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-            _context.Members.Add(member);
-            await _context.SaveChangesAsync();
+            var member = await CreatePosterMemberAsync("JHR1", "Recruiter");
 
             var dto = new CreateJobDto { Title = "Software Engineer", CompanyName = "Tech Corp", Location = "Dhaka", Description = "Develop software", Requirements = "C# Knowledge", ApplicationEmail = "jobs@tech.com", ApplicationDeadline = DateTime.UtcNow.AddDays(30), JobCategory = Enums.JobCategory.IT };
             var result = await _service.PostJobAsync(dto, member.Id, isAdmin: false);
@@ -53,11 +61,64 @@ namespace GHCAA.Tests.Services
         }
 
         [Test]
+        public async Task UpdateJobAsync_ShouldUpdateAllFields_WhenPoster()
+        {
+            var poster = await CreatePosterMemberAsync("JHU1", "Poster");
+            var job = new JobOpportunity { Title = "Old Title", Company = "Old Co", Location = "Old Loc", Description = "Old Desc", Requirements = "Old Req", ContactEmail = "old@e.com", ApplicationLink = "http://old.example.com", PostedByMemberId = poster.Id, IsActive = true, ExpiryDate = DateTime.UtcNow.AddDays(5), JobCategory = Enums.JobCategory.IT };
+            _context.JobOpportunities.Add(job);
+            await _context.SaveChangesAsync();
+
+            var deadline = DateTime.UtcNow.AddDays(45);
+            var dto = new CreateJobDto
+            {
+                Title = "New Title",
+                CompanyName = "New Co",
+                Location = "New Loc",
+                Description = "New Desc",
+                Requirements = "New Req",
+                ApplicationEmail = "new@e.com",
+                ApplicationLink = "http://new.example.com",
+                JobCategory = Enums.JobCategory.Finance,
+                ApplicationDeadline = deadline
+            };
+
+            var result = await _service.UpdateJobAsync(job.Id, dto, poster.Id, isAdmin: false);
+
+            result.Should().BeTrue();
+            var updated = await _context.JobOpportunities.FindAsync(job.Id);
+            updated!.Title.Should().Be("New Title");
+            updated.Company.Should().Be("New Co");
+            updated.Location.Should().Be("New Loc");
+            updated.Description.Should().Be("New Desc");
+            updated.Requirements.Should().Be("New Req");
+            updated.ContactEmail.Should().Be("new@e.com");
+            updated.ApplicationLink.Should().Be("http://new.example.com");
+            updated.JobCategory.Should().Be(Enums.JobCategory.Finance);
+            updated.ExpiryDate.Should().Be(DateTime.SpecifyKind(deadline, DateTimeKind.Utc));
+        }
+
+        [Test]
+        public async Task UpdateJobAsync_ReturnsFalse_WhenNeitherPosterNorAdmin()
+        {
+            var poster = await CreatePosterMemberAsync("JHU2", "Poster");
+            var otherMember = await CreatePosterMemberAsync("JHU3", "Other");
+            var job = new JobOpportunity { Title = "Title", Company = "Co", Location = "Loc", Description = "Desc", Requirements = "Req", ContactEmail = "e@e.com", PostedByMemberId = poster.Id, IsActive = true, JobCategory = Enums.JobCategory.IT };
+            _context.JobOpportunities.Add(job);
+            await _context.SaveChangesAsync();
+
+            var dto = new CreateJobDto { Title = "Hijacked", CompanyName = "Co", Location = "Loc", Description = "Desc", Requirements = "Req", JobCategory = Enums.JobCategory.IT };
+
+            var result = await _service.UpdateJobAsync(job.Id, dto, otherMember.Id, isAdmin: false);
+
+            result.Should().BeFalse();
+            var unchanged = await _context.JobOpportunities.FindAsync(job.Id);
+            unchanged!.Title.Should().Be("Title");
+        }
+
+        [Test]
         public async Task GetActiveJobsAsync_ShouldReturnOnlyActiveAndUnexpiredJobs()
         {
-            var member = new Member { FullName = "M", Email = "jhm@e.com", NID = "JHM1", MobileNo = "JHM1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-            _context.Members.Add(member);
-            await _context.SaveChangesAsync();
+            var member = await CreatePosterMemberAsync("JHM1");
 
             _context.JobOpportunities.Add(new JobOpportunity { Title = "Active Job", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, ExpiryDate = DateTime.UtcNow.AddDays(10), JobCategory = Enums.JobCategory.IT });
             _context.JobOpportunities.Add(new JobOpportunity { Title = "Expired Job", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, ExpiryDate = DateTime.UtcNow.AddDays(-1), JobCategory = Enums.JobCategory.IT });
@@ -73,9 +134,7 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task DeactivateJobAsync_ShouldSetIsActiveToFalse()
         {
-            var member = new Member { FullName = "M", Email = "jhd@e.com", NID = "JHD1", MobileNo = "JHD1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-            _context.Members.Add(member);
-            await _context.SaveChangesAsync();
+            var member = await CreatePosterMemberAsync("JHD1");
 
             var job = new JobOpportunity { Title = "Job To Deactivate", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, ExpiryDate = DateTime.UtcNow.AddDays(10), JobCategory = Enums.JobCategory.IT };
             _context.JobOpportunities.Add(job);
@@ -91,9 +150,7 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task PostJobAsync_NonAdmin_SetsStatusPending_AndNotifiesAdmins()
         {
-            var member = new Member { FullName = "Poster", Email = "jhp@e.com", NID = "JHP1", FatherName = "F", MotherName = "M", MobileNo = "JHP1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-            _context.Members.Add(member);
-            await _context.SaveChangesAsync();
+            var member = await CreatePosterMemberAsync("JHP1", "Poster");
 
             var dto = new CreateJobDto { Title = "Pending Job", CompanyName = "Tech Corp", Location = "Dhaka", Description = "D", Requirements = "R", JobCategory = Enums.JobCategory.IT };
             var result = await _service.PostJobAsync(dto, member.Id, isAdmin: false);
@@ -106,9 +163,7 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task PostJobAsync_Admin_SetsStatusApproved_AndNotifiesPoster()
         {
-            var member = new Member { FullName = "AdminPoster", Email = "jha@e.com", NID = "JHA1", FatherName = "F", MotherName = "M", MobileNo = "JHA1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-            _context.Members.Add(member);
-            await _context.SaveChangesAsync();
+            var member = await CreatePosterMemberAsync("JHA1", "AdminPoster");
 
             var dto = new CreateJobDto { Title = "Admin Job", CompanyName = "Tech Corp", Location = "Dhaka", Description = "D", Requirements = "R", JobCategory = Enums.JobCategory.IT };
             var result = await _service.PostJobAsync(dto, member.Id, isAdmin: true);
@@ -120,9 +175,7 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task ApproveJobAsync_SetsStatusApproved_AndNotifiesPoster()
         {
-            var member = new Member { FullName = "M", Email = "jhaa@e.com", NID = "JHAA1", MobileNo = "JHAA1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-            _context.Members.Add(member);
-            await _context.SaveChangesAsync();
+            var member = await CreatePosterMemberAsync("JHAA1");
 
             var job = new JobOpportunity { Title = "Job", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, JobCategory = Enums.JobCategory.IT, Status = Enums.SubmissionStatus.Pending };
             _context.JobOpportunities.Add(job);
@@ -139,9 +192,7 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task RejectJobAsync_SetsStatusRejected_AndDeactivates()
         {
-            var member = new Member { FullName = "M", Email = "jhrj@e.com", NID = "JHRJ1", MobileNo = "JHRJ1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-            _context.Members.Add(member);
-            await _context.SaveChangesAsync();
+            var member = await CreatePosterMemberAsync("JHRJ1");
 
             var job = new JobOpportunity { Title = "Job", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, JobCategory = Enums.JobCategory.IT, Status = Enums.SubmissionStatus.Pending };
             _context.JobOpportunities.Add(job);
@@ -159,9 +210,7 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task GetPendingJobsAsync_ReturnsOnlyPendingJobs()
         {
-            var member = new Member { FullName = "M", Email = "jhgp@e.com", NID = "JHGP1", MobileNo = "JHGP1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-            _context.Members.Add(member);
-            await _context.SaveChangesAsync();
+            var member = await CreatePosterMemberAsync("JHGP1");
 
             _context.JobOpportunities.Add(new JobOpportunity { Title = "Pending", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, JobCategory = Enums.JobCategory.IT, Status = Enums.SubmissionStatus.Pending });
             _context.JobOpportunities.Add(new JobOpportunity { Title = "Approved", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, JobCategory = Enums.JobCategory.IT, Status = Enums.SubmissionStatus.Approved });

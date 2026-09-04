@@ -1,4 +1,4 @@
-import { createAuthServiceMock } from '../../core/testing/testing-utils';
+import { createAuthServiceMock, createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Events } from './events';
@@ -31,10 +31,7 @@ describe('Events Component', () => {
             initiatePayment: vi.fn().mockReturnValue(of({ success: true, gatewayUrl: 'http://pay.com' }))
         };
 
-        notificationServiceMock = {
-            success: vi.fn(),
-            error: vi.fn()
-        };
+        notificationServiceMock = createNotificationServiceMock();
 
         activatedRouteMock = {
             snapshot: { queryParamMap: { get: vi.fn().mockReturnValue(null) } }

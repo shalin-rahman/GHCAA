@@ -269,6 +269,44 @@ public class GalleryServiceTests : TestBase
             It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
+    // ---- update --------------------------------------------------------------------
+
+    [Test]
+    public async Task UpdateEventGalleryAsync_ShouldUpdateAllFields_AndNormalizeEventDateToUtc()
+    {
+        var gallery = await _service.CreateEventGalleryAsync(new EventGallery
+        {
+            Title = "Old Title",
+            Description = "Old Description",
+            EventDate = DateTime.UtcNow,
+            Status = Enums.SubmissionStatus.Pending,
+            IsActive = false
+        });
+        DetachAll();
+
+        var unspecifiedKindDate = DateTime.SpecifyKind(new DateTime(2026, 12, 25), DateTimeKind.Unspecified);
+        var update = new EventGallery
+        {
+            Id = gallery.Id,
+            Title = "New Title",
+            Description = "New Description",
+            EventDate = unspecifiedKindDate,
+            Status = Enums.SubmissionStatus.Approved,
+            IsActive = true
+        };
+
+        var result = await _service.UpdateEventGalleryAsync(update);
+
+        result.EventDate.Kind.Should().Be(DateTimeKind.Utc);
+
+        var saved = await _context.EventGalleries.FindAsync(gallery.Id);
+        saved!.Title.Should().Be("New Title");
+        saved.Description.Should().Be("New Description");
+        saved.EventDate.Should().Be(DateTime.SpecifyKind(unspecifiedKindDate, DateTimeKind.Utc));
+        saved.Status.Should().Be(Enums.SubmissionStatus.Approved);
+        saved.IsActive.Should().BeTrue();
+    }
+
     // ---- CRUD ------------------------------------------------------------------------
 
     [Test]

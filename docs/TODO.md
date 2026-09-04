@@ -92,6 +92,61 @@ hand is optional: `python docs/book/build/wbs.py --sync` writes one for every ar
 taking the dates from the area's own `[DONE]` stamps and the component from the source paths it
 names, and `--sync --dry-run` shows what it would write first.
 
+**SR-6 — A test change may not reduce coverage, and a new test is checked against existing coverage
+before it is written.** Set 2026-09-04 by the user, applying to every test suite this project has:
+`GHCAA.Tests` (NUnit), `GHCAA.Web`'s spec files (vitest), and `GHCAA.Mobile/test` (Flutter). Before
+adding a test, check whether an existing test already exercises the same setup and assertion shape.
+Where one does, extend or parameterize it (`[TestCase]` in NUnit, `it.each` in vitest, a table-driven
+loop or shared `group()`/fixture in Dart) rather than pasting a near-copy beside it. Where the existing
+suite already has a shared helper for the setup in question, use it; where several tests independently
+reimplement the same setup and none of them is the natural shared helper yet, that duplication is
+itself a defect worth fixing in the same change, not a pattern to add a fourth copy of. Write a new,
+separate test only when no existing test covers the case.
+
+The other half of the rule is the one that bounds the first: consolidating tests must never cost a
+real assertion. Two tests that look alike but exercise a different branch, status value, or failure
+path are not duplicates and stay separate. A change that merges tests runs the full suite before and
+after and reports both counts; a drop in count with no corresponding branch actually removed is a
+defect in the change, not a cleanup. A pair that looks redundant but the change's author is not certain
+about is flagged in place, left untouched, and named to the user — never silently deleted. The
+2026-09-04 audits of all three suites (`GHCAA.Tests` 532→532, `GHCAA.Web` 381→383, `GHCAA.Mobile`
+93→93, all held at zero net coverage loss with several genuine duplicates removed) are the worked
+example of what this rule asks for.
+
+**SR-7 — A new item is checked against the existing tracker before it is opened.** Set 2026-09-04 by
+the user, generalising the reconciliation process Work Package 82 ran once against `docs/materials/
+REVIEW.md` into a standing rule for every future addition to this file, not only a review's findings.
+Before adding a new numbered item, search this file for one that already covers the same problem —
+compared by root cause, affected component and intended outcome, not by title wording, since
+"centralise X" and "remove duplicate X handling" can be the same underlying work said two ways. Where
+a match exists: reuse it as-is if it fully covers the finding, expand it if the finding adds a genuinely
+new sub-scope, or mark it superseded with a reason if the finding shows it is no longer the right
+approach. Open a new item only when no existing one covers the ground, and say in the new item what was
+checked and why it did not already exist there — the "Reconciliation done before writing these items"
+paragraph at the top of Work Package 82 is the pattern to follow. This does not relax SR-3: there is
+still exactly one list, and this rule is about not padding it with near-duplicate entries.
+
+**SR-8 — A refactoring carries its justification, not just its description.** Set 2026-09-04 by the
+user, applying to every refactoring this project has already done and every one it has yet to do.
+A tracker entry, commit message or report row that says only *what* was moved, split, merged or
+renamed is incomplete. It must also say **why**: the concrete duplication, coupling, defect or cost
+that made the change worth doing, and what is different afterwards. "Split `MemberService`" is a
+description; "split `MemberService` because one 1,577-line file holds the registry, the approval
+workflow, profile updates and search, so any change to one of them re-reads and re-tests all four"
+is a justification.
+
+The reason is that a refactoring with no recorded cause cannot be reviewed, cannot be argued against,
+and cannot be undone safely by anyone who was not in the room — it reads as taste. It also guards
+against the failure REVIEW.md §4 and §25 both warn about: a change made because a pattern is
+textbook-correct rather than because a real problem demanded it. If the justification cannot be
+written down, that is evidence the refactoring should not be done.
+
+This is retroactive in the same limited sense SR-1 is: when a past refactoring is touched or cited,
+its justification gets written down then, rather than triggering a sweep of the whole history. It
+applies equally to the refactorings named in `docs/ARCHITECTURE_AUDIT_2026-09.md`, which is why every
+row in that report's refactoring backlog carries a problem statement and an evidence line rather than
+a recommendation on its own.
+
 ---
 
 ## PRIORITY INDEX (triaged 2026-08-30 — re-triage when this drifts, don't trust it blind per `gotcha_todo_status_drift`)
@@ -137,22 +192,26 @@ risk on the same basis.
   raw `FullName` interpolated into an HTML email body (XSS-adjacent).
 
 ### P1 — HIGH (security surface / explicitly time-sensitive / blocking other work)
-- **47.13.1–47.13.7** — Mutation-coverage remediation (~35% of POST/PUT/DELETE still untested). Start
-  with **47.13.1** (`AuthController` non-Login actions, including this project's own untested step-up
-  endpoints) and **47.13.2** (`LookupsController` full CRUD, zero coverage).
-- **48.18 / 48.19** — Dependency/CI supply-chain hardening: EF Core/Npgsql pinned to exact `9.0.0` GA
-  with no patch tracking; CI Actions pinned to mutable tags with access to the Render deploy-hook
-  secret in the same workflow; no NuGet lockfile; no Docker base-image digest pin.
-- **49.1–49.3** — Custom roles grant zero actual permissions (label-only — misleads admins); no
-  disable/enable for system-admin accounts; no admin-initiated password reset for system admins. Each
-  has a "DECISION NEEDED" gate before work starts (see Work Package 49 for the actual questions).
+- **47.13.3–47.13.7** — Mutation-coverage remediation, remaining after 47.13.1/47.13.2 closed
+  2026-09-04 (`AuthController` non-Login actions incl. the step-up endpoints, 20 tests; `LookupsController`
+  full CRUD, 12 tests; backend suite 532→564, zero regressions).
+- **48.18a** — 48.18/48.19 (dependency/CI supply-chain hardening) done 2026-09-04: packages bumped
+  to latest `9.0.x`, CI Actions pinned to commit SHA, Docker base images pinned by digest, NuGet
+  lockfiles added with `--locked-mode` restore in CI. What remains: a live-Postgres migration-apply
+  check the bump couldn't get in this session (no reachable Docker daemon).
+- **49.1 / 49.2** — Custom roles grant zero actual permissions (label-only — misleads admins); no
+  disable/enable for system-admin accounts. Each has a "DECISION NEEDED" gate before work starts (see
+  Work Package 49 for the actual questions). **49.3 done 2026-09-04**: admin-initiated reset shipped
+  for both members (a real token-revocation gap closed) and system admins (new), including the
+  auth-flow fix the original plan missed (system admins have no email to look the reset up by).
 - **46.5** — Org-wide Financial Ledger has zero rows post-import; aggregate income/expense view doesn't
   reflect the ~৳47,000 in per-member fees that ARE recorded correctly.
-- **34.D10** — Likely already superseded by `MigrationBootstrapper` (see `gotcha_ensurecreated_no_op_existing_db`)
-  — verify against current `Program.cs` before treating this as still open; don't just re-do it.
-- **82.1 / 82.2** — Run the architecture and engineering audit briefed in `docs/materials/REVIEW.md`
-  and reconcile its findings against this tracker. Blocking, because 82.6 and 82.8–82.13 are scoped by
-  what the audit finds, and because an unreconciled review would open a second backlog against SR-3.
+- **82.16** — Financial ledger and payment rows can be edited or hard-deleted with no record of the
+  prior value or who changed it (`FinancialLedgerService.cs:69,91`, `FinancialService.cs:488`). Raised
+  by the 2026-09-04 architecture audit; the association already collects real dues, so this is a
+  present auditability gap, not a growth concern.
+- **82.14** — The same audit did not cover the Angular or Flutter clients (two research streams
+  returned nothing). `docs/ARCHITECTURE_AUDIT_2026-09.md` is a backend review until this closes.
 
 ### P2 — MEDIUM (real, no urgency signal)
 - **45.1–45.7** — Admin error-log viewer, fully planned, nothing built.
@@ -966,7 +1025,16 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 34.D7 [TODO] Regenerate the 21 stale mobile goldens (`flutter test --update-goldens`) as a standalone housekeeping task, so a genuinely new mobile regression is not masked by the existing baseline drift. Deliberately kept out of this area — it is unrelated binary churn from a prior session's theme fix.
 34.D8 [TODO] Live-browser verification of this area: public `/about` (seeded CMS blocks + hardcoded fallback), `/contact` (campus address, phones, map guard), `/news?type=Notice`; admin CMS block edit round-trip; admin notice creation with a PDF and a working public download link; and a **member account confirming it cannot create a Notice** (34.C3). **Blocked by the same local seed/role mismatch as 33.13** — `shalin` and `superadmin` resolve to ordinary alumni members in the local DB, so `adminGuard` bounces `/admin/*`; the local role assignment must be fixed before the admin-side steps can run.
 34.D9 [DONE 2026-08-03] Preprod schema catch-up script `docs/sql/preprod_area34_sitecontent.sql` — idempotent SQL mirroring migration `20260802163432_AddSiteContentAndNoticeFields` (three `NewsPosts` columns + `SiteContents` table, unique `Key` index, the five seed blocks, and an identity-sequence `setval` so the first admin-created block does not collide on `Id = 1`). Needed because Work Package 34 shipped to preprod but the content never appeared: the runtime builds schema with `EnsureCreated()` (`GHCAA.API/Program.cs:290`), which is a **no-op on a database that already has tables**, so the new table and columns were never created and `/about` fell back to its static markup. **Applied to preprod/Neon 2026-08-03 and verified**: the three `NewsPosts` columns exist, the five blocks are present, the identity sequence sits at 5, `GET /api/news` returns 200 (was a 500 — `42703: column n.AttachmentFileName does not exist`) and `GET /api/site-content?group=about` returns the four About blocks.
-34.D10 [TODO] **Durable fix for the above**: the app has a real migration tree but nothing runs it at startup, so every future schema change will hit the same silent no-op on any non-empty environment. Switch the non-Visual startup path from `Database.EnsureCreated()` to `Database.Migrate()`. Non-trivial because the preprod/Neon database was originally built by `EnsureCreated` and therefore has **no `__EFMigrationsHistory` table** — it must first be baselined (create the history table and insert every existing migration id as already-applied) or `Migrate()` will try to re-create tables that exist and fail. Plan: baseline preprod → switch the call → confirm a no-op `Migrate()` on an already-current DB → confirm a fresh empty DB still builds end-to-end. Also decide what happens to the `HasData` seed rows, which `EnsureCreated` and `Migrate` apply by different routes. Keep SQLite/local dev working throughout (it relies on `EnsureCreated` and has no SQLite migration tree — see 34.D4).
+34.D10 [DONE 2026-09-04] **Superseded, verified against `Program.cs`.** The non-Visual startup path
+no longer calls `Database.EnsureCreated()` directly. `Program.cs:388-406` calls
+`MigrationBootstrapper.EnsureMigratedAsync(schemaCtx, app.Logger)` for every profile except `Visual`,
+which does exactly what this item asked for: baselines a legacy `EnsureCreated`-built database (writes
+`__EFMigrationsHistory` for migrations already present) before running `Migrate()`, so new columns and
+tables ship on boot without a manual step. `EnsureCreated()` survives only inside the `catch` as a
+degrade-to-today's-behaviour fallback if the bootstrap itself throws, logged as an error rather than
+silently. Per `gotcha_migrationbootstrapper_fixed_offset`, this shipped across two rounds of fixes
+already covered elsewhere in this tracker; this entry closes because the item asked whether the switch
+had happened, and it has. Visual profile keeps its own recreate/seed path, unaffected.
 34.D11 [DONE 2026-08-03] Seeded SiteContent titles contained HTML entities (`Logo &amp; Flag`, `Purpose &amp; Objectives`), but `about.html` renders the title with `{{ }}` interpolation (which escapes) while only the body uses `[innerHTML]` — so the headings showed a literal `&amp;`. Corrected in all four places that carry the value: `Seed/site_content.json`, the migration's `InsertData`, `docs/sql/preprod_area34_sitecontent.sql`, and the live Neon rows (`UPDATE ... replace("Title",'&amp;','&')`). Body HTML entities (`&ndash;`, `&ldquo;`) are correct as-is — that field *is* parsed as HTML.
 34.D12 [DONE 2026-08-03] Public nav fixes raised by user: (a) the association full name never rendered under the logo — `public-layout.html` carried `class="hidden xl:block"`, but this project has **no Tailwind**, so `hidden` matched the real global `.hidden { display: none }` utility in `styles.scss` while `xl:block` matched nothing; both classes removed, leaving `.hide-mobile` and the existing `≤600px` rule to do the responsive hiding. (b) The public site could get stuck on a white background: the theme choice is persisted globally by `ThemeService`, but the switch lived only in `<app-user-menu>` (portal/admin), so a visitor who once chose light mode had no way back. Extracted the button into a shared `common/theme-toggle/` component (per the "try common changes as reusable" constraint) and placed it in both the user menu and the public nav. `npx vitest run` **60 files / 244 tests** green; `ng build` clean.
 
@@ -2025,14 +2093,30 @@ broken into independently-completable tasks below. Common approach for all of th
 test + one failure-path test per action is the target depth; this is breadth-over-depth work, not
 deep edge-case testing. Run `dotnet test` after each task, not just at the end.
 
-47.13.1 [TODO] **`AuthController` non-Login actions** (highest priority — the security surface, and
+47.13.1 [DONE 2026-09-04] **`AuthController` non-Login actions** (highest priority — the security surface, and
 this session's own new step-up endpoints are among the untested ones): `GoogleLogin`, `FacebookLogin`,
 `Refresh`, `RefreshMobile`, `Logout`, `RequestStepUp`, `VerifyStepUp`, `ResetPassword`. New file
 `AuthControllerMutationTests.cs`.
 
-47.13.2 [TODO] **`LookupsController` full CRUD** (`CreateLookup`/`UpdateLookup`/`DeleteLookup`) — zero
+`GHCAA.Tests/Controllers/AuthControllerMutationTests.cs` added, mocking `IAuthService`/`ITokenService`/
+`IOtpService` directly with Moq and reusing `ControllerTestBase.SetUserContext` for the claims-principal
+setup `Refresh`/`Logout`/`RequestStepUp`/`VerifyStepUp` need, per this project's existing controller-test
+pattern (`GalleryControllerTests.cs`, `DestructiveStepUpActionsTests.cs`). 20 tests: one success-path
+and one failure-path test per action, plus extra failure cases for `Refresh`/`RefreshMobile` (no cookie,
+rotated-but-invalid token, inactive/archived user are genuinely distinct failure modes) and for
+`RequestStepUp`/`VerifyStepUp` (missing email-on-file vs. an invalid/expired OTP code). All 20 pass, and
+the full suite (`dotnet test GHCAA.Tests/GHCAA.Tests.csproj`) is green at 564/564.
+
+47.13.2 [DONE 2026-09-04] **`LookupsController` full CRUD** (`CreateLookup`/`UpdateLookup`/`DeleteLookup`) — zero
 coverage today, controls dropdown/lookup master data; same "silent bad data" risk class as this
 Area's seed-integrity bugs (47.1). New file `LookupsControllerTests.cs`.
+
+`GHCAA.Tests/Controllers/LookupsControllerTests.cs` added, covering every action on the controller
+rather than just the three named above (`GetPublicStats`, `GetAllLookups`, `GetByGroup` included for
+completeness): one success-path and one failure-path test per action, 12 tests total, mocking
+`ILookupService`/`IMemberService` directly with Moq per this project's existing controller-test
+pattern (`GalleryControllerTests.cs`, `DestructiveStepUpActionsTests.cs`). All 12 pass, and the full
+suite (`dotnet test GHCAA.Tests/GHCAA.Tests.csproj`) is green at 564/564.
 
 47.13.3 [TODO] **`RolesController` remaining actions** (`CreateAdmin`, `CreateRole`, `AssignRole`,
 `RemoveRole` — `DeleteUser` already covered per 47.9). Extend the existing
@@ -2195,24 +2279,62 @@ ERESOLVE peer-dependency conflicts against the stale lockfile). This brought `np
 `xlsx@0.18.5` issue (48.9), which is unfixable via npm registry and deferred deliberately, not by
 oversight.
 
-48.18 [TODO] **Priority: P2.** **A06/Medium — all Microsoft/EF Core/Npgsql NuGet packages pinned to exactly `9.0.0`
-(the .NET 9 GA release), no servicing patches since.** Not fixed this round (needs care — a batch
-EF Core bump should be verified against the full migration suite before landing). Bump
-`Microsoft.EntityFrameworkCore*`, `Npgsql.EntityFrameworkCore.PostgreSQL`,
-`Pomelo.EntityFrameworkCore.MySql`, `Microsoft.AspNetCore.Authentication.JwtBearer`, and
-`Microsoft.Extensions.*` to the latest `9.0.x` patch. Also flagged: `Swashbuckle.AspNetCore 6.6.2`
-(mitigated — Swagger is dev-gated) and `AutoMapper.Extensions.Microsoft.DependencyInjection 12.0.0`
-(behind the 13+/14+ line).
+48.18 [DONE 2026-09-04] **A06/Medium — all Microsoft/EF Core/Npgsql NuGet packages pinned to exactly
+`9.0.0`, no servicing patches since.** Every named package bumped to the highest `9.0.x` release on
+NuGet as of 2026-09-04 (checked per-package against the NuGet flat-container API, not assumed):
+`Microsoft.EntityFrameworkCore*`, `Microsoft.AspNetCore.Authentication.JwtBearer`, and every
+`Microsoft.Extensions.*` in the four `.csproj` files to `9.0.19`; `Npgsql.EntityFrameworkCore.
+PostgreSQL` to `9.0.4` (its actual latest 9.0.x, lower than the others). `Pomelo.EntityFrameworkCore.
+MySql` left at `9.0.0` — that IS its latest 9.0.x release, nothing newer exists on that line, so no
+change was a defect, not an omission. `dotnet list package --outdated` was checked first and
+deliberately not followed for these packages: its "Latest" column showed `10.0.11`, which is a .NET
+10 major-version jump outside this item's `9.0.x` patch scope, not a patch release — do not read
+`--outdated` output as "already fixed" without checking which version line it's comparing against.
 
-48.19 [TODO] **Priority: P2.** **A08/Medium — CI Actions pinned to mutable tags; no NuGet lockfile.** Every GitHub
-Action in `ghcaa-ci-preprod.yml` is pinned by floating major tag (`actions/checkout@v5`, etc.,
-including third-party `subosito/flutter-action@v2`) with access to `RENDER_DEPLOY_HOOK_URL` in the
-same workflow — a repointed tag executes with deploy-to-production access. Base images in
-`Dockerfile` (`node:22-alpine`, `mcr.microsoft.com/dotnet/aspnet:9.0`, `.../sdk:9.0`) are floating
-tags with no `@sha256:` digest. `npm ci` correctly uses `package-lock.json` integrity hashes; NuGet
-restore has no equivalent (`packages.lock.json` doesn't exist anywhere in the repo). Not fixed this
-round — pinning every action to a specific commit SHA needs those real SHAs looked up (Dependabot
-can maintain them going forward), not guessed.
+Verified: `dotnet build GHCAA.sln -c Release` clean; `dotnet test GHCAA.Tests/GHCAA.Tests.csproj` is
+564/564 (unchanged from the 47.13.1/47.13.2 baseline — this bump broke nothing the suite exercises,
+and that suite runs its EF Core/Sqlite/InMemory operations under the new package version throughout);
+`dotnet ef migrations list` resolves the full migration tree (through `20260831000000_
+FixAssociationContentMergeLogoFlag`) with no model-snapshot error. **Not verified**: an actual
+`dotnet ef database update` against a live Postgres instance — no Postgres and no running Docker
+daemon were reachable in this session to stand one up for a real apply dry run (the `docker buildx
+imagetools inspect` calls used for 48.19's digest pinning query a registry directly and don't need a
+local daemon; `docker ps` failed once an actual container was needed). That live-apply check is the
+residual verification step before this should be trusted on preprod, tracked so it isn't silently
+assumed done: see 48.18a. Also flagged, out of scope for this item's `9.0.x` line and left alone:
+`Swashbuckle.AspNetCore 6.6.2` (mitigated — Swagger is dev-gated, see 82.10a) and `AutoMapper.
+Extensions.Microsoft.DependencyInjection 12.0.0` (behind the 13+/14+ line, a major-version jump like
+the EF Core 10 case above, not a patch).
+
+48.18a [TODO] **Priority: P2 | Depends on: none.** Run the live-Postgres verification 48.18 could not:
+`dotnet ef database update` (or a throwaway-DB dry run matching the pattern in
+`session_migration_idempotency_validation` memory) against a real Postgres instance on the bumped
+`9.0.19`/`Npgsql 9.0.4` packages, confirming the full migration chain still applies cleanly end to
+end, not just that its metadata resolves. **Acceptance:** a real Postgres (local Docker or a
+throwaway Neon branch) receives every migration through the current head with no error, and the
+result is recorded here with the command used.
+
+48.19 [DONE 2026-09-04] **A08/Medium — CI Actions pinned to mutable tags; no NuGet lockfile.**
+All five actions in `ghcaa-ci-preprod.yml` (`actions/checkout@v5`, `actions/setup-dotnet@v4`,
+`actions/setup-node@v5`, `actions/setup-java@v4`, `subosito/flutter-action@v2`) pinned to the commit
+SHA their tag currently resolves to (`owner/repo@<sha> # <tag>, resolved 2026-09-04`), looked up live
+rather than guessed. The three `Dockerfile` base images (`node:22-alpine`,
+`mcr.microsoft.com/dotnet/aspnet:9.0`, `.../sdk:9.0`) pinned to their manifest-list digest via
+`docker buildx imagetools inspect`, with a header comment explaining the digest has no auto-patch
+path and needs a deliberate refresh (Dependabot's Docker ecosystem can do this on a schedule). NuGet
+lockfiles added: root `Directory.Build.props` sets `RestorePackagesWithLockFile` for every project
+under it (matches `npm ci`'s use of `package-lock.json`, doesn't touch `GHCAA.Export`/`HashGen`,
+which aren't in `GHCAA.sln`), `packages.lock.json` generated for the 5 solution projects via
+`dotnet restore`, and both `dotnet restore` calls in `ghcaa-ci-preprod.yml` changed to
+`dotnet restore --locked-mode` so a lockfile/manifest mismatch fails the build instead of silently
+restoring something else. Verified: `dotnet restore --locked-mode` succeeds from a clean `obj/`, and
+`dotnet test` is 564/564 (same as the 47.13.1/47.13.2 baseline — this item touched no test code).
+A pinned SHA/digest is only as good as the lookup that produced it; the CI Actions SHAs came from a
+web fetch against GitHub's release pages rather than the GitHub API (which 403'd from this sandbox),
+so the very first CI run on `preprod` after this lands is the real verification — a wrong SHA fails
+that run loudly (checkout would simply not resolve), it does not fail silently. The Docker digests
+came directly from `docker buildx imagetools inspect` against the live registry, not a web lookup, so
+those carry no equivalent caveat.
 
 48.20 [DONE] **A10/Low — unescaped `mobileNo` in `GreenwebSmsService`'s SMS API query string.**
 Currently mitigated by `MemberRegistrationValidator`'s `^01\d{9}$` regex at the only write path
@@ -2321,47 +2443,52 @@ attribute, so assigning one grants zero additional access.
        user; do not silently pick one. If kept, this becomes its own follow-up item — do not scope-creep
        it into this task.
 
-49.3 [TODO] **Priority: P1.** **Admin-initiated password reset — system admins (new) and members (security fix).**
-  - **49.3.A — System admin accounts (new backend + UI):**
-    1. `GHCAA.Application/Interfaces/IUserService.cs`: add
-       `Task<(bool Success, string? ResetUrl)> SendAdminPasswordResetLinkAsync(int userId, CancellationToken cancellationToken = default);`
-       (same return shape as `IMemberService`'s version for consistency).
-    2. `GHCAA.Infrastructure/Services/UserService.cs`: implement it — load `User` by id (no `Member`
-       join), generate `token = Guid.NewGuid().ToString("N")`, set `ResetToken`/`ResetTokenExpiry =
-       UtcNow.AddHours(24)`, `SaveChangesAsync`, build `resetUrl` using `Constants.ConfigKeys.ClientUrl`
-       exactly as `MemberService.cs:1366-1367` does but keyed on `user.Username` (system admins may not
-       have a real inbox — email may not apply; if `User` has no email field, return the `resetUrl` in
-       the response for the SuperAdmin to copy/share manually rather than emailing it — confirm `User`
-       entity has no `Email` field before assuming this).
-    3. `RolesController.cs`: add
-       ```
-       [HttpPost("users/{id}/reset-password-admin")]
-       [GHCAA.API.Filters.RequireStepUp]
-       public async Task<IActionResult> ResetPasswordAdmin(int id, CancellationToken cancellationToken)
-       ```
-       calling `_userService.SendAdminPasswordResetLinkAsync`, returning the `ResetUrl` in the response
-       body so the UI can display/copy it.
-    4. `admin-roles.ts/html`: add a reset-password `.icon-btn` in system-admin rows; on click, call the
-       endpoint and show the returned URL in a copyable dialog/toast (reuse whatever pattern
-       `admin-members` uses if `ResetPasswordAdmin` already surfaces a URL client-side — check
-       `admin-members.ts` for how it currently handles `AdminController.ResetPasswordAdmin`'s response
-       before inventing a new pattern).
-    5. Add `RolesControllerTests.cs` case for this action (see 49.5).
-  - **49.3.B — Member accounts (security fix, no UI change to behavior — just backend hardening +
-    add the missing button):**
-    1. `GHCAA.Infrastructure/Services/MemberService.cs`, inside `SendAdminPasswordResetLinkAsync`
-       (starts line 1344), immediately after the `user.ResetToken`/`ResetTokenExpiry` block and
-       `SaveChangesAsync` (line 1361), add:
-       `await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);`
-       (matches the pattern at `MemberService.cs:802` and `:1263`/`:1453`).
-    2. `admin-members.html`: add a reset-password `.icon-btn` — check
-       `GHCAA.Web/src/app/admin/members/` for an existing member-detail/"Manage" component first (the
-       row already has Approve/Archive/Contact/Manage; if the Manage detail view exists, put it there
-       instead of adding a 5th row icon — read that component before deciding).
-    3. Wire it to `AdminController.ResetPasswordAdmin` (already exists, no backend change needed here
-       beyond 49.3.B.1).
-    4. Add/extend a test in `GHCAA.Tests/Controllers/AdminControllerTests.cs` (or `MemberServiceTests.cs`)
-       asserting `RevokeAllRefreshTokensAsync` is now called during this flow.
+49.3 [DONE 2026-09-04] **Admin-initiated password reset — system admins (new) and members (security
+fix), plus the auth-flow gap the original plan missed.**
+
+  - **49.3.B — Member accounts (security fix).** `MemberService.SendAdminPasswordResetLinkAsync` now
+    calls `_tokenService.RevokeAllRefreshTokensAsync(user.Id, ...)` right after issuing the reset
+    token, matching the pattern already used at `MemberService.cs:802/1263/1453`. The UI button
+    (`admin-members.html`'s `🔐 Reset Password` in the Manage modal, wired to `sendResetLink`)
+    and `AdminController.ResetPasswordAdmin` already existed; only the missing revocation was new.
+    Test: `MemberServiceTests.SendAdminPasswordResetLinkAsync_ShouldRevokeExistingRefreshTokens`.
+
+  - **49.3.A — System admin accounts (new).** `IUserService`/`UserService` gained
+    `SendAdminPasswordResetLinkAsync(userId, ...)`; `RolesController` gained
+    `POST users/{id}/reset-password-admin` behind `[RequireStepUp]`; `admin-roles.ts`/`.html` gained a
+    matching `🔐` icon button next to the existing delete button, reusing the copy-to-clipboard
+    pattern from `admin-members.ts`. Tests:
+    `UserServiceTests.SendAdminPasswordResetLinkAsync_ForSystemAdmin_ShouldReturnUrlAndRevokeTokens`
+    and `..._ForUnknownUser_ShouldReturnFalse`.
+
+  - **The auth-flow gap the original plan didn't cover.** System admin accounts have `MemberId =
+    null` — no `Member`, no email. The plan as written would have generated a reset URL that could
+    never actually work: `AuthController.ResetPassword` → `AuthService.ResetPasswordAsync` looked
+    the account up by `Members.Email` only, and `ResetPasswordDto.Email` was `[EmailAddress]`-
+    validated, so a username-carrying link would fail both the form and the lookup. Fixed at the
+    root rather than building a UI on top of a link that would 400: `ResetPasswordAsync` now falls
+    back to `Users.MemberId == null && Username == <field>` when no `Member` matches, and the DTO's
+    `[EmailAddress]` constraint was dropped (kept `[Required]`) since the same field now legitimately
+    carries either an email or a username. The fallback is scoped to `MemberId == null` specifically
+    so it cannot be used to reset a member's account by guessing their username. Tests:
+    `AuthServiceTests.ResetPasswordAsync_ForSystemAdminByUsername_ShouldChangePassword` and
+    `..._MemberCannotBeResetByUsernameFallback` (the scoping guard).
+
+  Verified: `dotnet test` 532/532 (was 528; four tests added, none removed or changed).
+
+49.3.C [TODO] **Priority: P2 | Depends on: none.** Raised while building 49.3: user instruction
+2026-09-04, "verify random two/three information ... or bypass to admin as request for reset link to
+new shared email address" — for system admin accounts specifically, which is the class with no email
+at all today (`User` has no `Email` field). Two directions were named and neither is decided:
+(a) a challenge of 2-3 known facts before honoring a reset request, or (b) an optional contact email
+on the `User` row that the reset link is emailed to when present, falling back to the current
+copy/share flow when absent. (b) is the smaller change — one nullable column, one migration, one
+`SendEmailAsync` call reusing the member template pattern already in `MemberService` — and is the
+more likely fit given the rest of this item's pattern already leans on email delivery. Needs a
+decision on which (or both) before starting; not started here because it requires a schema migration,
+which is a different class of change than the rest of 49.3.
+**Acceptance:** decision recorded with its reason; if (b), a nullable `ContactEmail` column with a
+migration, and the reset flow sends there when populated.
 
 49.4 [TODO] **Priority: P3.** **Grid/row-control design consistency fixes** (mechanical, per [[ghcaa-design]]):
   1. `GHCAA.Web/src/app/admin/events/admin-events.html` line 322: rename the `.admin-table` class to
@@ -2381,14 +2508,18 @@ attribute, so assigning one grants zero additional access.
      one of the four, add it as a new lettered sub-item here (49.4.E, .F, ...) with the exact line
      number found, rather than fixing silently in the same pass — keeps this checklist auditable.
 
-49.5 [TODO] **Priority: P2.** **Test coverage for all new/changed endpoints above.** Add or extend
-`GHCAA.Tests/Controllers/RolesControllerTests.cs` (new file if it doesn't exist yet) covering:
-`DisableUser`, `EnableUser`, `ResetPasswordAdmin` (system-admin version) from 49.2.A/49.3.A, plus the
-still-open pre-existing gap from 47.13.3 (`CreateAdmin`, `CreateRole`, `AssignRole`, `RemoveRole`) so
-this doesn't become a second untracked follow-up — one test file, one PR, covering the whole
-controller. Also extend `GHCAA.Tests/Services/MemberServiceTests.cs` or
-`GHCAA.Tests/Controllers/AdminControllerTests.cs` per 49.3.B.4 for the refresh-token-revocation
-regression test.
+49.5 [TODO] **Priority: P2 | Depends on: 49.1, 49.2.** **Test coverage for all new/changed
+endpoints above.** 49.3's service-level coverage shipped
+(`MemberServiceTests.SendAdminPasswordResetLinkAsync_ShouldRevokeExistingRefreshTokens`,
+`UserServiceTests.SendAdminPasswordResetLinkAsync_For*`,
+`AuthServiceTests.ResetPasswordAsync_ForSystemAdminByUsername_ShouldChangePassword` +
+`..._MemberCannotBeResetByUsernameFallback`), but there is still no
+`GHCAA.Tests/Controllers/RolesControllerTests.cs` at all — no controller-level test exists for
+`ResetPasswordAdmin`, `DeleteUser`, or anything else on that controller. New file covering:
+`DisableUser`, `EnableUser` (once 49.2.A ships), `ResetPasswordAdmin` (49.3.A, done), `DeleteUser`,
+plus the still-open pre-existing gap from 47.13.3 (`CreateAdmin`, `CreateRole`, `AssignRole`,
+`RemoveRole`) so this doesn't become a second untracked follow-up — one test file, one PR, covering
+the whole controller.
 
 # Work Package 50 — Admin-configurable email/SMS template bodies (raised by user 2026-08-29/30: "need to
 manage emails body to be confurable with all relevant informations, this also for sms (if used) by
@@ -2804,22 +2935,19 @@ saving, can't modify date"):
 
 # Work Package 57 — Test coverage audit + a new live-site report to investigate (2026-08-31)
 
-57.1 [TODO] **Priority: P1 | Depends on: none.** User asked: does the test suite actually verify
-that create/update actions persist **every field** correctly, for **every entity** — not just a
-happy-path subset? This has not been audited in this session. Needs a systematic pass: for each
-entity with a create/update service method (Member, NewsPost, AlumniEvent, GalleryAlbum,
-FinancialRecord, FeeConfiguration, PaymentConfiguration, User/Role, PollOption, MentorshipRequest,
-etc.), check whether its existing test(s) actually assert on **every mapped field** after a
-save/update round-trip (e.g. `existing.Status = dto.Status` needs a test that asserts
-`result.Status == dto.Status`, not just "the call didn't throw" or "one or two fields matched").
-Recommended approach: grep each `*Service.cs`'s `Update*Async`/`Create*Async` methods for the full
-list of `existing.X = dto.X` assignments, cross-reference against that service's test file's
-assertions, and report gaps as a checklist (entity → fields covered vs. fields silently untested) —
-this is exactly the class of bug 54.6/56.2 turned out to be (a field quietly not applied, or applied
-but never checked), so this audit is likely to surface real, currently-undetected bugs, not just
-formalities. Do the audit and report findings before writing new tests, since the fix in each case
-might be "add an assertion" or might be "the field genuinely isn't being saved" — those need
-different responses.
+57.1 [DONE 2026-09-04] User asked: does the test suite actually verify that create/update actions
+persist **every field**, not just a happy-path subset? Audit run and written to
+`docs/materials/57.1-field-coverage-audit.md`: 19 service files, ~28 `Create*Async`/`Update*Async`
+methods, each field assignment cross-referenced against its test's assertions with file:line for
+both sides. No case found where a field is provably *not* persisted — every assignment reaches
+`SaveChangesAsync()` — but 10 methods have a real assertion gap: a field the service writes on every
+call with no test anywhere reading it back, several touching money, registration limits, or a
+member's login-identity fields (Email/MobileNo/NID). Worst: `MemberService.AdminUpdateMemberAsync`
+assigns ~30 fields, its one test asserts 3. `FinancialLedgerService.UpdateRecordAsync`,
+`JobHubService.UpdateJobAsync`, `LookupService.UpdateLookupItemAsync`,
+`ThemeService.CreateThemeAsync`/`UpdateThemeAsync`, and `GalleryService.UpdateEventGalleryAsync` have
+no real test at all — only a controller test that mocks the service call. Follow-up to close the
+gaps is 57.3.
 
 57.2 [DONE — likely resolved as a side effect of 58.1, needs live confirmation] **Priority: P2 |
 Depends on: 58.1.** User reported seeing "0% Profile Complete," in the **same message** reporting
@@ -2837,6 +2965,46 @@ place, which 58.1 now fixes. **Needs live confirmation**, not just code inspecti
 same memberless admin account after this deploys — if 0%/missing-payments still appears on an
 account that HAS a real memberId, that would be a genuinely separate bug and this item should be
 reopened.
+
+57.3 [DONE 2026-09-04] Closed all 10 gaps 57.1's audit found. `MemberService.
+AdminUpdateMemberAsync`/`UpdateProfileAsync` extended in place (`MemberServiceTests.cs`) to assert
+the ~27/~15 fields each assigns, including the login-identity fields (Email/MobileNo/NID) and the
+academic/professional history round-trip; `ECHistory` was already covered by
+`MemberService_EC_Tests.cs` and correctly left alone. The five zero-test methods
+(`FinancialLedgerService.UpdateRecordAsync`, `JobHubService.UpdateJobAsync`,
+`LookupService.UpdateLookupItemAsync`, `ThemeService.CreateThemeAsync`/`UpdateThemeAsync`,
+`GalleryService.UpdateEventGalleryAsync`) each got the real service-level test that was missing
+(`LookupServiceTests.cs` is a new file). `EventService.CreateEventAsync`/`UpdateEventAsync` extended
+in place for their remaining fields. Verified: `dotnet test` 564→573 (9 net new tests across both
+extension and new-file work), 0 failed, per SR-6.
+
+Every added assertion passed against real (non-mocked) service + SQLite-backed `DbContext` behavior
+except one: `NewsService.UpdateNewsAsync`'s `Status` overwrite is a genuine behavioral defect, not a
+missing-assertion gap, and closes 57.1's "or a defect raised here with its own item" clause as 57.4.
+
+57.4 [TODO] **Priority: P2 | Depends on: none.** Defect found while closing 57.3, proven by a test
+rather than inferred: `NewsService.UpdateNewsAsync` (`NewsService.cs:134`) runs
+`existing.Status = dto.Status` unconditionally, two lines below `PublishDate`, which is correctly
+null-guarded (`if (dto.PublishDate.HasValue)`). `UpdateNewsDto` inherits `CreateNewsDto.Status`'s
+default of `Enums.SubmissionStatus.Approved`, so any caller that builds the DTO without deliberately
+setting `Status` silently flips the post to `Approved` — confirmed by
+`NewsServiceTests.UpdateNewsAsync_OverwritesStatus_WithDtoDefault_WhenCallerDoesNotSetIt`, which
+seeds a `Pending` post, updates via a DTO that never touches `Status`, and gets back `Approved`.
+
+Checked before writing this: `NewsController.UpdateNews` (`AdminOnly`) is the only caller of this
+method — approve/reject go through the separate `ApproveArticleAsync`/`RejectArticleAsync`, which
+don't touch this path — and the one live caller, `admin-news.ts`'s edit form, seeds
+`status: post.status ?? 2` (`admin-news.ts:97`) before every save, so **no live UI path triggers this
+today**. It's a latent defect in the method's own contract, not a currently-exploitable one: a future
+caller (a partial-update endpoint, direct API use via Swagger, a minimal-payload mobile client) that
+doesn't know to always resend the current status would silently move a post to Approved with no
+error. Fix: guard `Status` the same way `PublishDate` already is — either make it nullable on
+`UpdateNewsDto` and only apply when set, or split it into a dedicated status-change action (matching
+how approve/reject are already separate from the general update) so `UpdateNewsAsync` stops being
+able to change status as a side effect of an unrelated edit.
+**Acceptance:** `UpdateNewsAsync` no longer changes `Status` unless the caller explicitly intends to,
+and the existing regression test (renamed/adjusted as needed) asserts the new, safe behavior instead
+of the current defect.
 
 ---
 
@@ -5284,27 +5452,28 @@ platform; Work Package 29 owns the 2026-07-24 full-stack findings; Work Package 
 and the dead-code sweep, itself re-scoped into 62.46-62.49; Work Package 80 owns the last cross-cutting
 sweep. What follows is the work those packages do not cover.
 
-82.1 [TODO] **Priority: P1 | Depends on: none.** Run the review in `docs/materials/REVIEW.md` and
-produce one report at `docs/ARCHITECTURE_AUDIT_2026-09.md` carrying the deliverables its §23 and §25.11
-name: executive assessment, current architecture map, strengths, critical problems, architecture gap
-analysis, configuration blueprint, target architecture, replaceability matrix, security gap analysis,
-technical debt register, duplication matrix, centralisation matrix, reusable component inventory and
-the refactoring backlog. Scope is the whole ecosystem, not three separate applications: `GHCAA.API`,
-`GHCAA.Application`, `GHCAA.Domain`, `GHCAA.Infrastructure`, `GHCAA.Web/src`, `GHCAA.Mobile/lib`,
-`GHCAA.Tests`, the migration tree, `Dockerfile`, `.github/workflows` and `docs/`.
-**Acceptance:** every finding in the report carries a file path or a command that produced it, and one
-of the eight status labels from REVIEW.md §3 (implemented and verified, implemented but incomplete,
-documented but not implemented, planned only, partially implemented, incorrectly implemented,
-deprecated, missing). A finding with no evidence line is a defect in the report, not a finding.
+82.1 [DONE 2026-09-04] Review in `docs/materials/REVIEW.md` run; report written to
+`docs/ARCHITECTURE_AUDIT_2026-09.md` (730 lines) carrying the §23 and §25.11 deliverables. Every
+finding cites a file path or the command that produced it and a §3 status label. **Two of five
+research streams returned nothing** before the session hit a provider rate limit, so REVIEW.md §7
+(Angular), §8 (Flutter) and §25's systematic duplication sweep are **not covered** — stated in the
+report's own coverage table rather than papered over, and tracked as 82.14. Findings raised: 82.14
+through 82.28. Two research claims were checked against the tree and found wrong before they reached
+the report: `/health` does have a registered `DbContextCheck` (`DependencyInjection.cs:59`), and the
+five migrations loose under `Data/Migrations/` are live in the chain, so the recommendation to delete
+them would have broken migration history. Both corrections are recorded in the report.
 
-82.2 [TODO] **Priority: P1 | Depends on: 82.1.** The report must end in a reconciliation section, not a
-new list. Produce the three registers of REVIEW.md §21A.11, which set out how findings are matched
-against work that already exists: existing-task reconciliation matrix, new-task justification register,
-and obsolete/duplicate/superseded register. **Acceptance:** every finding ends with exactly one of
-Retained, Updated, Expanded, Merged, Split, Reprioritised, Deferred, Superseded, Deprecated, Rejected or
-Newly Created; every "Newly Created" row states which existing work packages were checked and why they do
-not cover it; and any new work lands in this tracker as a numbered item, with the report holding the
-analysis and this file holding the assignment. No item may be left ambiguous.
+82.2 [DONE 2026-09-04] The report's §N carries the three §21A.11 registers: existing-task
+reconciliation matrix, new-task justification register, and obsolete/duplicate/superseded register.
+Every finding ends with one of the eleven dispositions. Existing work reconciled rather than
+duplicated: 82.3-82.13 re-confirmed and not re-derived; 82.9 expanded (health-endpoint contract,
+production logging config); 82.11 expanded (Localization is code-owned despite sitting in the
+admin-editable DTO); 48.19 expanded (its pinning reached one workflow of five); WP 48 expanded
+(plaintext gateway-credential columns); WP 62.7/62.34 retained (org-identity and EC-role-label
+duplication). Rejected as findings, with reasons recorded so they are not re-raised: no CQRS/MediatR,
+the narrow repository pattern, rate limiting (already global, not login-only), CSRF, step-up MFA,
+mass assignment, and `appsettings.json` placeholders. Fifteen items newly created, each naming which
+existing packages were checked.
 
 82.3 [TODO] **Priority: P2 | Depends on: none.** The API has no versioning. `grep -rn "ApiVersion"
 GHCAA.API` returns nothing, and every route is unversioned. The web client deploys with the API, so it
@@ -5449,3 +5618,211 @@ protected super-admin list. Start the record with those, and write the recovery 
 Render actually provides. **Acceptance:** a decision record exists for each decision the audit finds is
 load bearing and undocumented, and an operator who has never seen the system can restore it by following
 the runbook.
+
+82.1 and 82.2 closed 2026-09-04. The report is `docs/ARCHITECTURE_AUDIT_2026-09.md`, 730 lines,
+carrying the §23/§25.11 deliverables and the three §21A.11 reconciliation registers. Items 82.14 to
+82.28 below are the work it raised. Two corrections the report makes to its own research, recorded
+here because both would have caused damage if acted on: `/health` **does** have a registered
+`DbContextCheck` (`DependencyInjection.cs:59`) and is not a dead endpoint, and the five migrations
+sitting loose under `Data/Migrations/` are **live** in the chain — `dotnet ef migrations list` shows
+all five — so they must not be deleted.
+
+Every item below states why the work is worth doing, not only what to change, per SR-8.
+
+82.14 [TODO] **Priority: P2 | Depends on: none.** The audit did not assess the Angular or Flutter
+clients. Two of five research streams returned nothing before the session hit a provider rate limit,
+so REVIEW.md §7 (Angular architecture, state management, API integration, UI quality) and §8 (Flutter
+architecture, state, offline, platform concerns) have no coverage, and §25's systematic duplication
+sweep ran only across the backend. **Why this matters rather than being left implicit:** the report
+presents itself as a whole-ecosystem review and would mislead a reader who did not reach its coverage
+table. Anyone acting on it today is acting on a backend review. Run the two client reviews against the
+same brief and fold the results into the existing report rather than starting a second document.
+**Acceptance:** §7, §8 and §25's client-side sweep are covered to the same evidence standard as the
+backend sections (file path or command per finding, a §3 status label, an 82.2 disposition), and the
+report's coverage table no longer says "not assessed".
+
+82.15 [TODO] **Priority: P2 | Depends on: none.** `GHCAA.Infrastructure/DependencyInjection.cs:32-53`
+switches on a `DatabaseProvider` setting across `sqlite`, `mysql` and PostgreSQL, pooling a
+provider-specific shim context from `Data/DbContextShims.cs` for each. Only PostgreSQL works:
+`Data/Migrations/` has one provider folder, `PgSql/`, and every migration in it is attributed
+`[DbContext(typeof(PgSqlApplicationDbContext))]`. No migration anywhere is attributed to the Sqlite or
+MySql shim types, and `MigrationBootstrapper`'s self-heal path is Postgres-specific (`PostgresException`,
+`pg.SqlState`, lines 192 and 212). Selecting either other provider boots against an empty schema.
+**Why fix it when nothing selects those providers:** the switch is an invitation. A future maintainer
+reading it would reasonably believe MySQL is supported and plan against that, and `docs/book/06-architecture.md`'s
+ADR-02 already states as a consequence that "migrations apply correctly on boot across PostgreSQL,
+MySQL and SQLite", which is not true of this tree — so the codebase is currently teaching a false fact
+in two places. The cheaper and more honest of the two available fixes is to delete the shims and the
+switch down to PostgreSQL, matching the same principle ADR-06 applied correctly when it declined to
+build a second file-storage adapter before a second need existed. **Do not touch the five migrations
+that live directly under `Data/Migrations/` while doing this** — they are live, see the note above.
+**Acceptance:** either the other two providers have working migration trees and a documented test that
+proves a boot against each, or the switch, the shim types and ADR-02's claim are removed together and
+the ADR records why.
+
+82.16 [TODO] **Priority: P1 | Depends on: none.** Financial records can be edited and hard-deleted with
+no trace. `FinancialLedgerService.cs:69` exposes `UpdateRecordAsync` and line 91 does
+`_db.FinancialRecords.Remove(record)`; `FinancialService.cs:488` does `_db.PaymentHistories.Remove(payment)`.
+Neither `FinancialRecord` nor `PaymentHistory` carries `UpdatedAt`, `UpdatedByAdminId` or a soft-delete
+flag — `FinancialRecord` has `CreatedAt`/`CreatedByAdminId` only. `PaymentHistory.Status` moves
+Pending → Completed/Failed/Refunded with no history table, unlike membership changes, which have
+`MembershipHistory`. **Why this is P1 and not a growth concern:** the association already collects real
+dues, and REVIEW.md §14 asks specifically whether payment records are immutable. They are not — a row
+recording money received can be altered or removed and nothing records the prior value or who did it.
+That is the first thing an external reviewer or an auditor checks, and the association is the kind of
+institution that will eventually face one. **Scope deliberately kept small:** add `UpdatedAt` and
+`UpdatedByAdminId` plus a soft-delete flag to both entities and make corrections additive rather than
+destructive. No event sourcing, no separate audit-log service — that would be the overengineering
+REVIEW.md §4 rules out. Fold in the audit-field inconsistency the report's Finding 3 describes (3 of 46
+entities carry `IsArchived`, 6 carry any created-by field, 8 any updated-at) by writing down the rule
+for which entity classes need these fields, so the next entity added does not inherit the gap.
+**Acceptance:** a ledger or payment row cannot be silently altered or removed; every change records who
+and when; a stated rule exists for which entities require audit fields; `dotnet test` green per SR-6.
+
+82.17 [TODO] **Priority: P3 | Depends on: none.** Configuration is bound entirely through raw string
+keys — `grep -rl "IOptions<\|IOptionsSnapshot<\|IOptionsMonitor<" GHCAA.Infrastructure/Services/*.cs
+GHCAA.API/*.cs` returns zero files. Every consumer parses by hand:
+`configuration.GetValue<string>("DatabaseProvider")` (`DependencyInjection.cs:23`),
+`configuration.GetSection("AppSettings:AllowedOrigins").Get<string[]>()` (`Program.cs:175`), and the
+same shape repeats across services. **Why it is worth doing:** there is no compile-time check on config
+shape and no single place showing what a feature needs, so a mistyped key returns the default silently
+rather than failing. This is distinct from 82.11 and 82.12, which classify *which values* belong in
+configuration; this is about how configuration is bound in code. **Why it is P3 rather than higher:**
+nothing is currently broken by it, and the fix is mechanical. Use `services.Configure<T>(...)` with
+constructor injection — .NET's own idiom, not a new abstraction layer.
+**Acceptance:** each configuration section a service depends on is bound to a typed options class, and
+a mistyped or missing key surfaces at startup or in a test rather than silently defaulting.
+
+82.18 [TODO] **Priority: P2 | Depends on: none.** Refresh-token rotation has no reuse detection.
+`TokenService.RotateRefreshTokenAsync:129` matches on `TokenHash == hash && !IsRevoked && ExpiresAt > Now`,
+revokes the presented token and issues a new one. `RefreshToken` has no `ReplacedByTokenId` or family
+chain. When an already-rotated (revoked) token is replayed — the standard signal that a token was
+stolen — the lookup finds nothing, the request fails, and nothing else happens. **Why that is the gap
+that matters:** rotation without reuse detection means an attacker who uses a stolen refresh token once,
+before the real user's next refresh, is never detected and the user's other tokens stay valid. WP 24.27
+delivered rotation and hashed storage; WP 48.3 fixed token survival across password reset; neither
+covers replay. The machinery already exists — `RevokeAllRefreshTokensAsync` (line 152) is called from
+the password-change and admin-reset paths — it is simply not wired to this signal.
+**Acceptance:** presenting a revoked refresh token revokes that user's whole token family and logs the
+event; a test proves replay of a rotated token kills the session rather than merely failing.
+
+82.19 [TODO] **Priority: P3 | Depends on: none.** `AsNoTracking()` appears in 5 of 39 service files
+against roughly 183 read queries (`grep -rc "AsNoTracking" GHCAA.Infrastructure/Services/*.cs | grep -v ":0"`
+versus the `ToListAsync|FirstOrDefaultAsync|SingleOrDefaultAsync` count across the same directory).
+`MemberService.cs` runs multi-`Include` reads at lines 502-510, 931-934 and 1101-1102 pulling academic
+history, professional history, EC memberships and payment history together, all tracked, on paths that
+only serialise to a DTO. **Why it is P3 and scale-tiered rather than a straight fix:** at today's ~631
+members the change-tracker overhead is negligible and this would be premature optimisation. It becomes
+measurable on admin list and export endpoints in the low thousands, and only needs a project-wide audit
+beyond that. **Why not a blanket automated change:** some paths legitimately rely on tracking to save
+changes afterwards, so a repo-wide `AsNoTracking` insertion would introduce real bugs. Scope this to a
+targeted pass over the confirmed read-only paths in `MemberService`, `FinancialService` and
+`NetworkingService`. Related to but distinct from 82.6, which is about that file's size, not its query
+tracking. **Acceptance:** the named read-only paths are untracked, each change confirmed read-only by
+reading its caller, and the suite stays green.
+
+82.20 [TODO] **Priority: P3 | Depends on: none.** The platform cannot run more than one instance, and
+that limit is nowhere written down. `Program.cs:64` registers `AddOutputCache()` with no distributed
+backing; `OrgConfigService` and `ThemeService` use `IMemoryCache` directly with no cache abstraction;
+`Program.cs:170` registers `AddSignalR()` with no backplane; `ChatHub`'s connection map is a
+process-local `ConcurrentDictionary`. **Why this item is documentation rather than code:** every one of
+those choices is correct for the current single-instance Render deployment, and building Redis-backed
+caching and a SignalR backplane now would be exactly the overengineering REVIEW.md §4 rules out. But
+the day someone scales to two instances, output-cache entries, config and theme caches, and SignalR
+group membership all silently diverge — a client on one instance stops receiving pushes sent from the
+other, and a config edit clears one cache and not the other. That failure is confusing and hard to
+diagnose precisely because nothing warns it is coming. **Acceptance:** the constraint is written where
+someone about to scale out would find it (deployment docs and an ADR under 82.13's work), naming the
+three specific mechanisms that must change first.
+
+82.21 [TODO] **Priority: P3 | Depends on: none.** In-app notifications bypass the template system
+entirely. `EmailTemplate` is a real admin-editable templating mechanism — DB rows with `Code`,
+`Subject`, `Body`, `Variables` and a `Channel` enum that includes SMS — but
+`NotificationService.CreateNotificationAsync` and `BroadcastNotificationAsync` never reference it. They
+take raw `title`/`message` strings from each call site and write straight to the `Notification` table
+plus a real-time push. **Why it is worth aligning:** there are two notification paths with different
+governance. An administrator who edits a template reasonably expects the in-app text to change too, and
+it will not — the in-app wording is hardcoded at each call site and only a developer can change it.
+That is the kind of split that is invisible until someone edits a template and cannot work out why
+nothing happened. Related to WP 50, which built the template mechanism for email and never had the
+in-app path in scope. **Acceptance:** in-app notification text comes from the same template source as
+email, or the split is deliberately retained and documented with the reason.
+
+82.22 [TODO] **Priority: P2 | Depends on: none.** `Notification` has no index at all — not even on
+`MemberId` — while being the table that grows fastest by construction. Of 46 entities, only 15
+configuration files declare any `HasIndex`. `Notification` declares a `HasQueryFilter` through
+`Member.IsArchived` but no index, and `NotificationService.GetUserNotificationsAsync` runs
+`.Where(n => n.MemberId == memberId).OrderByDescending(n => n.CreatedAt).Take(50)` — an unindexed filter
+plus sort. `MembershipHistory` and `MembershipDue` likewise have query filters but no index on their own
+`MemberId` foreign key, and both are queried per member. `FinancialRecord` has no entity configuration
+file at all despite `Year`, `RecordType` and `FinancialCategory` being its natural filter columns.
+**Why this ranks above 82.19's tracking overhead:** notification rows accumulate one per member per
+broadcast, so this degrades with broadcast count rather than member count and will bite sooner. The fix
+is four index declarations, not a redesign. `Member`'s `(Status, IsArchived)` composite index — added
+under 24.37 with the admin-listing query cited in a comment — is the pattern to copy.
+**Acceptance:** the four named query paths are index-backed, each new index carrying a comment naming
+the query that justifies it, as 24.37's does.
+
+82.23 [TODO] **Priority: P2 | Depends on: none.** A 30-file Playwright suite exists and CI never runs
+it. `GHCAA.Web/tests/` covers admin workflows, the alumni directory, article editorial, membership and
+event flows, and gallery; `package.json` defines `test:e2e`; `playwright.config.ts` boots both the API
+and the Angular dev server and polls `/healthz`. Neither `ghcaa-ci-preprod.yml` nor
+`ghcaa-ci-standard.yml` invokes it — both run only the vitest unit suite. **Why it matters more than an
+ordinary coverage gap:** these are the end-to-end tests for the platform's critical business flows, and
+because nothing runs them they can rot silently. A broken membership-approval flow would pass every
+gate the project currently has. Work Packages 14, 20 and 22 wrote these specs; none of them wired the
+suite into CI, which is why this is new rather than a duplicate. **Acceptance:** a CI job runs the
+Playwright suite on the same triggers as the unit tests, and a deliberately broken flow fails it.
+
+82.24 [TODO] **Priority: P2 | Depends on: none.** `.github/workflows/main.yml` is a weaker duplicate of
+`ghcaa-ci-standard.yml` and should be deleted. Both trigger on push and pull_request to `main`/`master`.
+`main.yml` targets `dotnet-version: 8.x` while the rest of the project is .NET 9, runs no tests at all
+(build only — no `dotnet test`, no vitest), and uses unpinned action tags. **Why deleting is the fix
+rather than upgrading it:** two workflows racing on the same trigger means the weaker one can report
+green independently of the real one, which is worse than having no second workflow — a green check that
+means nothing is a check people learn to trust. `ghcaa-ci-standard.yml` already does the full
+lint/test/build chain on the same branches, so nothing is lost. This looks like a leftover from before
+that workflow existed. **Acceptance:** `main.yml` is gone and the branches it covered are still gated by
+`ghcaa-ci-standard.yml`.
+
+82.25 [TODO] **Priority: P2 | Depends on: none.** The mobile release pipeline ships to app stores with
+no test gate. `mobile_deployment.yml` triggers on `push: tags: v*` and goes straight to
+`flutter build appbundle --release` and `flutter build ipa --release`, then uploads to the Play Store
+internal track and TestFlight. There is no `flutter test` step and no `needs:` tying the release to a
+passing run — it relies entirely on the tagged commit having been gated earlier by a different
+workflow. **Why the reliance is not good enough:** a tag pushed by hand, or pushed at a commit that
+never went through CI, ships untested code to app stores, which is the one target where a bad build
+cannot be hot-fixed and has to go through review again. **Acceptance:** the release job cannot run
+unless tests for that commit have passed, either through `needs:` or an explicit test step in the
+workflow.
+
+82.26 [TODO] **Priority: P3 | Depends on: none.** CI runs no dependency or container scanning — no
+CodeQL, no `npm audit`, no `dotnet list package --vulnerable`, no image scan anywhere in
+`.github/workflows/`. **Why the recommendation is deliberately two commands and not a security
+pipeline:** a full SAST/DAST setup would be the overengineering REVIEW.md §4 rules out at this scale.
+But `npm audit --audit-level=high` and `dotnet list package --vulnerable` are two lines that would have
+caught what 48.9 and 48.17 (a stale `xlsx`, Angular CVEs) had to be found by hand. The justification is
+the cost asymmetry, not thoroughness for its own sake. **Acceptance:** both commands run in CI, and a
+known-vulnerable dependency fails the build rather than being found by a person later.
+
+82.27 [TODO] **Priority: P2 | Depends on: none.** `README.md:324` tells operators something false about
+how the schema is provisioned: "Schema — created and seeded at startup via EF Core `EnsureCreated()`
+(not migrations); safe to re-run against an existing database." `Program.cs:388-405` does the opposite —
+`MigrationBootstrapper.EnsureMigratedAsync` runs first and applies real EF Core migrations, baselining
+migration history on a legacy `EnsureCreated`-built database, and `EnsureCreated()` survives only as the
+`catch` fallback, logged as an error. **Why this specific wrong sentence is worth an item:** it is aimed
+at the operator audience on the one subject where a wrong belief is most expensive. An operator reading
+it concludes the platform has no migration path and plans schema changes accordingly. 82.13 tracks the
+*absence* of recorded decisions; it does not catch an existing statement being actively wrong, which is
+worse than silence. **Acceptance:** the README describes what `Program.cs` actually does, and the
+migration mechanism gets an ADR under 82.13's work so the correction has somewhere permanent to live.
+
+82.28 [TODO] **Priority: P4 | Depends on: none.** `GHCAA.Tests/UnitTest1.cs` is the unmodified
+`dotnet new nunit` scaffold — a single `Assert.Pass()` — sitting in an otherwise well-organised 79-file
+suite. Delete it. **Why it is worth a tracker line at all rather than just doing it:** three separate
+review passes have now rediscovered it, and an item is cheaper than a fourth rediscovery.
+**Explicitly not in scope:** the five migrations sitting directly under `Data/Migrations/`. An earlier
+research pass called them dead pre-split artifacts and recommended deleting them; `dotnet ef migrations
+list` shows all five in the live chain, so deleting them would break migration history. If their
+location is ever tidied, that is a separate change needing a migration-chain test, not a cleanup.
+**Acceptance:** `UnitTest1.cs` is gone and the suite still passes.
