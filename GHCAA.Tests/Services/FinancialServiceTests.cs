@@ -97,6 +97,28 @@ public class FinancialServiceTests : TestBase
         dbPayment!.MemberId.Should().Be(member.Id);
     }
 
+    // 82.32: a guest event payment (AllowNonMembers) reaches this with no MemberId at all.
+    // GatewaysController used to pass `memberId ?? 0`, which threw a foreign-key DbUpdateException
+    // because Member Id 0 does not exist. This pins that a null MemberId is recorded, not defaulted,
+    // and that recording one does not attempt member-scoped notification/receipt-storage side
+    // effects that would themselves throw for a member that does not exist.
+    [Test]
+    public async Task RecordPaymentAsync_WithNullMemberId_RecordsGuestPaymentWithoutThrowing()
+    {
+        var dto = new CreatePaymentHistoryDto { MemberId = null, Amount = 200, TransactionId = "TRX-GUEST-1", PaidAt = DateTime.UtcNow, Notes = "Guest event fee" };
+
+        var act = async () => await _service.RecordPaymentAsync(dto);
+        await act.Should().NotThrowAsync();
+
+        var dbPayment = await _context.PaymentHistories.FirstOrDefaultAsync(p => p.TransactionId == "TRX-GUEST-1");
+        dbPayment.Should().NotBeNull();
+        dbPayment!.MemberId.Should().BeNull();
+
+        _notificationMock.Verify(x => x.CreateNotificationAsync(
+            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
     [Test]
     public async Task GetMemberPaymentHistoryAsync_ShouldReturnDtoList()
     {
