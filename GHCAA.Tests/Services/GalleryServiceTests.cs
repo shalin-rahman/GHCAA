@@ -37,7 +37,7 @@ public class GalleryServiceTests : TestBase
     // ---- member album creation -------------------------------------------------
 
     [Category("FR-53")]
-        [Test]
+    [Test]
     public async Task CreateMemberAlbumAsync_CreatesPendingInactiveAlbum_AndNotifiesAdmins()
     {
         var memberId = await CreateMemberIdAsync();
@@ -53,7 +53,7 @@ public class GalleryServiceTests : TestBase
     }
 
     [Category("FR-53")]
-        [Test]
+    [Test]
     public async Task AddMemberPhotoToAlbumAsync_CreatesPendingPhoto_AndNotifiesAdmins()
     {
         var memberId = await CreateMemberIdAsync();
@@ -69,7 +69,7 @@ public class GalleryServiceTests : TestBase
     }
 
     [Category("FR-53")]
-        [Test]
+    [Test]
     public async Task AddMemberPhotoToAlbumAsync_ReturnsNull_WhenAlbumDoesNotExist()
     {
         var memberId = await CreateMemberIdAsync();
@@ -80,7 +80,7 @@ public class GalleryServiceTests : TestBase
     }
 
     [Category("FR-53")]
-        [Test]
+    [Test]
     public async Task GetMemberAlbumsAsync_ReturnsOnlyThatMembersAlbums()
     {
         var ownerA = await CreateMemberIdAsync("Owner A");
@@ -184,7 +184,7 @@ public class GalleryServiceTests : TestBase
     // ---- approve / reject transitions ----------------------------------------------
 
     [Category("FR-53")]
-        [Test]
+    [Test]
     public async Task ApproveGalleryAsync_ActivatesGallery_ClearsRejectionReason_AndNotifiesOwner()
     {
         var memberId = await CreateMemberIdAsync();
@@ -210,7 +210,7 @@ public class GalleryServiceTests : TestBase
     }
 
     [Category("FR-53")]
-        [Test]
+    [Test]
     public async Task RejectGalleryAsync_DeactivatesGallery_AndRecordsReason()
     {
         var memberId = await CreateMemberIdAsync();
@@ -228,7 +228,7 @@ public class GalleryServiceTests : TestBase
     }
 
     [Category("FR-53")]
-        [Test]
+    [Test]
     public async Task ApprovePhotoAsync_ApprovesPhoto_AndNotifiesUploader()
     {
         var memberId = await CreateMemberIdAsync();
@@ -244,7 +244,7 @@ public class GalleryServiceTests : TestBase
     }
 
     [Category("FR-53")]
-        [Test]
+    [Test]
     public async Task RejectPhotoAsync_RejectsPhoto_AndRecordsReason()
     {
         var memberId = await CreateMemberIdAsync();
@@ -280,7 +280,7 @@ public class GalleryServiceTests : TestBase
     // ---- update --------------------------------------------------------------------
 
     [Category("FR-17")]
-        [Test]
+    [Test]
     public async Task UpdateEventGalleryAsync_ShouldUpdateAllFields_AndNormalizeEventDateToUtc()
     {
         var gallery = await _service.CreateEventGalleryAsync(new EventGallery
@@ -329,7 +329,7 @@ public class GalleryServiceTests : TestBase
     }
 
     [Category("FR-17")]
-        [Test]
+    [Test]
     public async Task AddPhotosToGalleryAsync_AddsAllPaths_AndReturnsFalse_ForUnknownGallery()
     {
         var gallery = await _service.CreateEventGalleryAsync(new EventGallery { Title = "Photo Batch", EventDate = DateTime.UtcNow, IsActive = true });

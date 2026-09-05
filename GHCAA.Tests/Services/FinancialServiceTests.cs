@@ -81,8 +81,8 @@ public class FinancialServiceTests : TestBase
     }
 
     [Category("FR-21")]
-        [Category("FR-22")]
-        [Test]
+    [Category("FR-22")]
+    [Test]
     public async Task RecordPaymentAsync_ShouldAddPaymentAndReturnDto()
     {
         var member = await CreateActiveMemberWithHistoryAsync("Payer", "fsp@e.com", "FSP1");
@@ -105,7 +105,7 @@ public class FinancialServiceTests : TestBase
     // and that recording one does not attempt member-scoped notification/receipt-storage side
     // effects that would themselves throw for a member that does not exist.
     [Category("FR-22")]
-        [Test]
+    [Test]
     public async Task RecordPaymentAsync_WithNullMemberId_RecordsGuestPaymentWithoutThrowing()
     {
         var dto = new CreatePaymentHistoryDto { MemberId = null, Amount = 200, TransactionId = "TRX-GUEST-1", PaidAt = DateTime.UtcNow, Notes = "Guest event fee" };
@@ -138,7 +138,7 @@ public class FinancialServiceTests : TestBase
     }
 
     [Category("FR-20")]
-        [Test]
+    [Test]
     public async Task GenerateAnnualDuesAsync_ShouldCreateDuesForActiveMembers()
     {
         var member = await CreateActiveMemberWithHistoryAsync("Active User", "fsg@e.com", "FSG1");
@@ -286,8 +286,8 @@ public class FinancialServiceTests : TestBase
     }
 
     [Category("FR-25")]
-        [Category("FR-44")]
-        [Test]
+    [Category("FR-44")]
+    [Test]
     public async Task DeletePaymentAsync_ShouldRemovePaymentAndLogActivity()
     {
         var p = new PaymentHistory { MemberId = 1, TransactionId = "DEL-T1", Amount = 100, Status = Enums.PaymentStatus.Completed, PaidAt = DateTime.UtcNow };

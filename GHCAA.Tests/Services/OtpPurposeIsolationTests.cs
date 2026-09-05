@@ -28,7 +28,7 @@ public class OtpPurposeIsolationTests : TestBase
     }
 
     [Category("FR-09")]
-        [Test]
+    [Test]
     public async Task GenerateAndSendOtpAsync_ShouldPersistRequestedPurpose()
     {
         var email = "stepup-persist@example.com";
@@ -39,7 +39,7 @@ public class OtpPurposeIsolationTests : TestBase
     }
 
     [Category("FR-09")]
-        [Test]
+    [Test]
     public async Task VerifyOtpAsync_ShouldAcceptCode_ForMatchingPurpose()
     {
         var email = "stepup-match@example.com";
@@ -62,7 +62,7 @@ public class OtpPurposeIsolationTests : TestBase
     }
 
     [Category("FR-09")]
-        [Test]
+    [Test]
     public async Task GenerateAndSendOtpAsync_ShouldNotInvalidate_PendingCodeOfAnotherPurpose()
     {
         var email = "stepup-coexist@example.com";
@@ -76,7 +76,7 @@ public class OtpPurposeIsolationTests : TestBase
     }
 
     [Category("FR-09")]
-        [Test]
+    [Test]
     public async Task GenerateAndSendOtpAsync_ShouldInvalidate_EarlierCodeOfSamePurpose()
     {
         var email = "stepup-supersede@example.com";

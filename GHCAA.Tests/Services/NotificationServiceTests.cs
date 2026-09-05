@@ -32,7 +32,7 @@ public class NotificationServiceTests : TestBase
     // ── CreateNotificationAsync — preference gate ────────────────────────────
 
     [Category("FR-30")]
-        [Test]
+    [Test]
     public async Task CreateNotification_WhenEventOptedIn_ShouldPersistNotification()
     {
         var member = await CreateAndSaveTestMemberAsync();
@@ -50,7 +50,7 @@ public class NotificationServiceTests : TestBase
     }
 
     [Category("FR-30")]
-        [Test]
+    [Test]
     public async Task CreateNotification_WhenEventOptedOut_ShouldSkipNotification()
     {
         var member = await CreateAndSaveTestMemberAsync();
@@ -68,7 +68,7 @@ public class NotificationServiceTests : TestBase
     }
 
     [Category("FR-30")]
-        [Test]
+    [Test]
     public async Task CreateNotification_ParticipationApproval_RespectsOptOut()
     {
         var member = await CreateAndSaveTestMemberAsync();
@@ -83,7 +83,7 @@ public class NotificationServiceTests : TestBase
     }
 
     [Category("FR-30")]
-        [Test]
+    [Test]
     public async Task CreateNotification_RegistrationUpdate_RespectsOptOut()
     {
         var member = await CreateAndSaveTestMemberAsync();
@@ -98,7 +98,7 @@ public class NotificationServiceTests : TestBase
     }
 
     [Category("FR-30")]
-        [Test]
+    [Test]
     public async Task CreateNotification_DirectMessage_AlwaysDelivered_RegardlessOfPreferences()
     {
         var member = await CreateAndSaveTestMemberAsync();
@@ -136,7 +136,7 @@ public class NotificationServiceTests : TestBase
     // ── GetUserNotificationsAsync ─────────────────────────────────────────────
 
     [Category("FR-30")]
-        [Test]
+    [Test]
     public async Task GetUserNotifications_ShouldReturnOnlyMembersOwnNotifications()
     {
         var m1 = await CreateAndSaveTestMemberAsync("Member One", "m1@test.com", "01711111111", "1111111111");

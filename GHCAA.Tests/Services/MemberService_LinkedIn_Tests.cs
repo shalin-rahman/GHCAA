@@ -88,7 +88,7 @@ public class MemberService_LinkedIn_Tests : TestBase
     }
 
     [Category("FR-04")]
-        [Test]
+    [Test]
     public async Task UpdateProfile_WithNoGHCRecord_ShouldThrowException()
     {
         // Arrange
@@ -111,7 +111,7 @@ public class MemberService_LinkedIn_Tests : TestBase
     }
 
     [Category("FR-04")]
-        [Test]
+    [Test]
     public async Task UpdateProfile_WithGHCRecord_ShouldSucceed()
     {
         // Arrange
@@ -149,7 +149,7 @@ public class MemberService_LinkedIn_Tests : TestBase
     }
 
     [Category("FR-04")]
-        [Test]
+    [Test]
     public async Task RegisterAsync_WithHistory_ShouldSaveCorrectly()
     {
         // Arrange

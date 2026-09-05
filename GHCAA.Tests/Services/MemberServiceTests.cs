@@ -105,7 +105,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Category("FR-01")]
-        [Test]
+    [Test]
     public async Task RegisterAsync_WithValidData_ShouldCreateMemberAndPaymentHistory()
     {
         // Arrange
@@ -288,7 +288,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Category("FR-02")]
-        [Test]
+    [Test]
     public async Task GetStatusAsync_WithValidMemberId_ShouldReturnStatus()
     {
         // Arrange
@@ -346,7 +346,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Category("FR-03")]
-        [Test]
+    [Test]
     public async Task GetProfileAsync_WithPrivilegedAccess_ShouldReturnFullProfile()
     {
         // Arrange
@@ -363,7 +363,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Category("FR-03")]
-        [Test]
+    [Test]
     public async Task GetProfileAsync_WithNonPrivilegedAccess_ShouldReturnMaskedProfile()
     {
         // Arrange
@@ -381,7 +381,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Category("FR-12")]
-        [Test]
+    [Test]
     public async Task GetProfileAsync_ProfileCompletionPercentage_ShouldMatchDashboardChecklistCriteria()
     {
         // 30.28: ProfileCompletionPercentage must be computed from the same 4-item criteria
@@ -497,7 +497,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Category("FR-02")]
-        [Test]
+    [Test]
     public async Task GetStatusAsync_WithInvalidMemberId_ShouldThrowException()
     {
         // Act & Assert
@@ -758,7 +758,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Category("FR-44")]
-        [Test]
+    [Test]
     public async Task RejectMemberAsync_ShouldSendEmailAndSoftDeleteMember()
     {
         // Arrange

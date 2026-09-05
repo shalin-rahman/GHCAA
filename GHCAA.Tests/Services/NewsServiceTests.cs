@@ -28,7 +28,7 @@ public class NewsServiceTests : TestBase
     }
 
     [Category("FR-26")]
-        [Test]
+    [Test]
     public async Task GetActiveNewsAsync_ShouldOnlyReturnActivePosts()
     {
         _context.NewsPosts.AddRange(
@@ -42,7 +42,7 @@ public class NewsServiceTests : TestBase
     }
 
     [Category("FR-26")]
-        [Test]
+    [Test]
     public async Task CreateNewsAsync_ShouldSavePostWithImageUrl()
     {
         // Act
@@ -58,7 +58,7 @@ public class NewsServiceTests : TestBase
     }
 
     [Category("FR-28")]
-        [Test]
+    [Test]
     public async Task UpdateNewsAsync_ShouldModifyExistingPost()
     {
         // Arrange
@@ -127,7 +127,7 @@ public class NewsServiceTests : TestBase
     }
 
     [Category("FR-27")]
-        [Test]
+    [Test]
     public async Task ApproveArticleAsync_ShouldUpdateStatus()
     {
         // Arrange
@@ -144,7 +144,7 @@ public class NewsServiceTests : TestBase
     }
 
     [Category("FR-28")]
-        [Test]
+    [Test]
     public async Task DeleteNewsAsync_ShouldRemovePost()
     {
         // Arrange

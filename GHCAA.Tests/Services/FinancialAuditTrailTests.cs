@@ -42,8 +42,8 @@ public class FinancialAuditTrailTests : TestBase
     }
 
     [Category("FR-25")]
-        [Category("FR-43")]
-        [Test]
+    [Category("FR-43")]
+    [Test]
     public async Task UpdateRecord_RecordsWhoChangedItAndWhen()
     {
         var record = await SeedRecordAsync();
@@ -62,8 +62,8 @@ public class FinancialAuditTrailTests : TestBase
     }
 
     [Category("FR-25")]
-        [Category("FR-44")]
-        [Test]
+    [Category("FR-44")]
+    [Test]
     public async Task DeleteRecord_KeepsTheRow_AndRecordsWhoDeletedIt()
     {
         var record = await SeedRecordAsync();
@@ -85,8 +85,8 @@ public class FinancialAuditTrailTests : TestBase
     }
 
     [Category("FR-25")]
-        [Category("FR-44")]
-        [Test]
+    [Category("FR-44")]
+    [Test]
     public async Task DeletedRecord_DisappearsFromOrdinaryReads()
     {
         var kept = await SeedRecordAsync(100m);

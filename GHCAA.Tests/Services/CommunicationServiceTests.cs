@@ -84,7 +84,7 @@ public class CommunicationServiceTests : TestBase
     }
 
     [Category("FR-29")]
-        [Test]
+    [Test]
     public async Task SendBatchEmailAsync_ShouldSendMultipleEmails()
     {
         // Arrange
@@ -106,7 +106,7 @@ public class CommunicationServiceTests : TestBase
     }
 
     [Category("FR-29")]
-        [Test]
+    [Test]
     public async Task SendBatchCustomEmailAsync_ShouldSendToCorrectYear()
     {
         // Arrange
@@ -128,7 +128,7 @@ public class CommunicationServiceTests : TestBase
     }
 
     [Category("FR-29")]
-        [Test]
+    [Test]
     public async Task SendTypeCustomEmailAsync_ShouldSendToCorrectMembershipType()
     {
         // Arrange
