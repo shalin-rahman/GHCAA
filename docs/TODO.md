@@ -3874,12 +3874,22 @@ regression proof this session's fixes needed: `dotnet test` 590/590, vitest 390/
 `flutter analyze` clean, `flutter test` 0 logic failures (58 expected golden-image staleness from the
 Phase D branding change). Playwright e2e not run.
 
-62.45 [TODO] **Priority: P4 | Depends on: 62.41.** Docs sweep per the project's "update all relevant
-docs" rule: ARCHITECTURE, BUSINESS_FINDINGS, FEATURES, FORUM_PLAN_2026-05, PROJECT_MAP, SRS, README, and
-CONFIG_DRIVEN_FRAMEWORK.md (which documents Work Package 28 and now has a successor). Also decide whether to
-rename the solution/projects off the `GHCAA.` prefix; recommendation is NO, because the rename churn
-and its deploy risk buy nothing a profile pack does not already deliver, but record the decision
-rather than leaving it implicit.
+62.45 [DONE 2026-09-05] Docs sweep per the project's "update all relevant docs" rule, done for every
+file the rule names except one deliberate skip. Updated: ARCHITECTURE.md (new §E, "Which Institution
+the App Is Running For"; fixed a stale claim about the constitution PDF fallback), FEATURES.md (new
+white-label entry), PROJECT_MAP.md (new Institution Profile Packs subsection), SRS.md (new bullet
+under Infrastructure & Deployment), README.md (new `ORG_PROFILE` section), and
+CONFIG_DRIVEN_FRAMEWORK.md (status line moved to done, TD-1/TD-4 marked resolved, sections 10-12
+rewritten to state how it relates to the newer profile-pack mechanism). Also updated
+`docs/book/07-implementation.md` (new §7.16, kept in sync with `docs/DOCUMENTATION_BOOK_OUTLINE.md`
+and `wbs.py`) and `docs/book/04-methodology.md` (three stale repository counts corrected). Skipped
+BUSINESS_FINDINGS.md on purpose: it is a QA-run finding log, and no QA walkthrough happened this
+session, so there is nothing true to add to it. FORUM_PLAN_2026-05 checked, does not reference
+anything WP62 touches, left as is.
+
+Rename decision, recorded rather than left implicit: do NOT rename the solution/projects off the
+`GHCAA.` prefix. The rename's churn and deploy risk buy nothing a profile pack does not already
+deliver.
 
 ### PHASE G: WORK PACKAGE 61 CARRY-OVER (runs inside phases A-F, not after them)
 
