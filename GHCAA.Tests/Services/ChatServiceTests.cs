@@ -18,7 +18,8 @@ public class ChatServiceTests : TestBase
     // 30.29: confirms the existing POST /api/messaging/send (ChatService.SendMessageAsync)
     // already supports starting a brand-new conversation - i.e. a "first message to a member" -
     // since it does not require any prior ChatMessage row to exist between the two users.
-    [Test]
+    [Category("FR-31")]
+        [Test]
     public async Task SendMessageAsync_WithNoPriorHistory_ShouldStartNewConversation()
     {
         var senderMember = await CreateAndSaveTestMemberAsync("Chat Sender", "chat.sender@example.com", "01199990001", "NTCH0001");

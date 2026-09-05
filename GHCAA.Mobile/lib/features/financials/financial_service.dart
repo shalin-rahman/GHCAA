@@ -37,8 +37,14 @@ class FinancialService {
 
   Future<double> getOutstandingDues() async {
     try {
+      // 82.32: was `response.data['amount']`, but GET /api/financials/my-dues returns a JSON
+      // array of MembershipDueDto (Id, Year, Amount, IsPaid, ...), not a single object with an
+      // 'amount' key. Indexing a list with a string key threw, and the catch below silently
+      // turned every real balance into 0.0 with no error shown to the member.
       final response = await _dio.get('/financials/my-dues');
-      return (response.data['amount'] ?? 0.0).toDouble();
+      final List<dynamic> dues = response.data as List<dynamic>;
+      final unpaid = dues.where((d) => d['isPaid'] != true);
+      return unpaid.fold<double>(0.0, (sum, d) => sum + ((d['amount'] ?? 0.0) as num).toDouble());
     } catch (e) {
       debugPrint('FinancialService.getOutstandingDues failed: $e');
       return 0.0;

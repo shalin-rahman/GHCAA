@@ -98,6 +98,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkResult>());
         }
 
+        [Category("FR-53")]
         [Test]
         public async Task CreateAlbum_ReturnsCreatedAtAction()
         {
@@ -110,6 +111,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<CreatedAtActionResult>());
         }
 
+        [Category("FR-53")]
         [Test]
         public async Task GetMyAlbums_ReturnsOk()
         {
@@ -121,6 +123,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-53")]
         [Test]
         public async Task AddPhotoToAlbum_ReturnsForbid_WhenNotOwnerAndNotAdmin()
         {
@@ -133,6 +136,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<ForbidResult>());
         }
 
+        [Category("FR-53")]
         [Test]
         public async Task ApproveGallery_ReturnsOk_OnSuccess()
         {
@@ -144,6 +148,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-53")]
         [Test]
         public async Task RejectGallery_ReturnsOk_OnSuccess()
         {

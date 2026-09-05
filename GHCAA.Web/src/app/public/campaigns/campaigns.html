@@ -1,0 +1,104 @@
+<div class="campaigns-page">
+  @if (loading()) {
+    <div class="loading-wrap"><app-logo-spinner [size]="80" /></div>
+  } @else if (!slug()) {
+    <!-- List view -->
+    <h1 class="page-title">Fundraising Campaigns</h1>
+    @if (campaigns().length === 0) {
+      <p class="empty-msg">No fundraising campaigns are open right now.</p>
+    } @else {
+      <div class="campaign-grid">
+        @for (c of campaigns(); track c.id) {
+          <a [routerLink]="['/campaigns', c.slug]" class="campaign-card">
+            @if (c.coverImagePath) {
+              <img [src]="c.coverImagePath" [alt]="c.title" class="cover" />
+            }
+            <h3>{{ c.title }}</h3>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="progressPercent(c)"></div>
+            </div>
+            <p class="progress-text">৳{{ c.amountReceived | number }} raised of ৳{{ c.targetAmount | number }} ({{ progressPercent(c) }}%)</p>
+          </a>
+        }
+      </div>
+    }
+  } @else if (campaign()) {
+    <!-- Detail view -->
+    <div class="campaign-detail">
+      <a routerLink="/campaigns" class="back-link">&larr; All Campaigns</a>
+      <h1>{{ campaign()!.title }}</h1>
+      @if (campaign()!.coverImagePath) {
+        <img [src]="campaign()!.coverImagePath" [alt]="campaign()!.title" class="cover-large" />
+      }
+      <div class="progress-bar large">
+        <div class="progress-fill" [style.width.%]="progressPercent(campaign()!)"></div>
+      </div>
+      <p class="progress-text">৳{{ campaign()!.amountReceived | number }} raised of ৳{{ campaign()!.targetAmount | number }} ({{ progressPercent(campaign()!) }}%)</p>
+      <p class="story">{{ campaign()!.story }}</p>
+
+      <section class="pledge-form">
+        <h2>Make a Pledge</h2>
+        <label>
+          Amount (৳)
+          <input type="number" min="1" [(ngModel)]="pledgeAmount" name="pledgeAmount" />
+        </label>
+        @if (!isMember()) {
+          <label>
+            Your name
+            <input type="text" [(ngModel)]="donorName" name="donorName" />
+          </label>
+          <label>
+            Email (optional)
+            <input type="email" [(ngModel)]="donorEmail" name="donorEmail" />
+          </label>
+          <label>
+            Phone (optional)
+            <input type="tel" [(ngModel)]="donorPhone" name="donorPhone" />
+          </label>
+        }
+        <label>
+          Message (optional)
+          <textarea [(ngModel)]="message" name="message"></textarea>
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" [(ngModel)]="isAnonymous" name="isAnonymous" />
+          Give anonymously (your name will not appear on the public honour roll)
+        </label>
+        <button type="button" (click)="submitPledge()" [disabled]="submitting()">
+          {{ submitting() ? 'Submitting...' : 'Pledge Now' }}
+        </button>
+        <p class="pledge-note">Pledging records your intent to give. Please use the wallet/bank details already published on this site to send the payment — an admin will confirm receipt.</p>
+      </section>
+
+      @if (honourRoll()) {
+        <section class="honour-roll">
+          <h2>Honour Roll</h2>
+          @for (tier of honourRoll()!.tiers; track tier.tierName) {
+            <div class="tier">
+              <h3>{{ tier.tierName }}</h3>
+              @for (d of tier.donors; track $index) {
+                <div class="donor-row">
+                  <span class="donor-name">{{ d.displayName }}</span>
+                  <span class="donor-amount">৳{{ d.amountReceived | number }}</span>
+                </div>
+              }
+            </div>
+          }
+          @if (honourRoll()!.untiered.length > 0) {
+            <div class="tier">
+              <h3>Contributors</h3>
+              @for (d of honourRoll()!.untiered; track $index) {
+                <div class="donor-row">
+                  <span class="donor-name">{{ d.displayName }}</span>
+                  <span class="donor-amount">৳{{ d.amountReceived | number }}</span>
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
+    </div>
+  } @else {
+    <p class="empty-msg">This campaign could not be found.</p>
+  }
+</div>

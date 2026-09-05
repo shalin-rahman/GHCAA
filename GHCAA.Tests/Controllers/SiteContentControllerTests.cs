@@ -24,6 +24,7 @@ namespace GHCAA.Tests.Controllers
             SetUserContext(_controller, null, "Admin", 1);
         }
 
+        [Category("FR-45")]
         [Test]
         public async Task GetByGroup_ReturnsOk()
         {
@@ -46,6 +47,8 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<NotFoundResult>());
         }
 
+        [Category("FR-45")]
+        [Category("FR-43")]
         [Test]
         public async Task Create_ReturnsCreated_AndPassesAdminId()
         {

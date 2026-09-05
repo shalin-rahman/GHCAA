@@ -61,8 +61,14 @@ export class FinancialService {
         return this.http.delete(`${this.apiUrl}/saved-methods/${id}`);
     }
 
-    getReceiptUrl(paymentId: number): string {
-        return `${this.apiUrl}/my-receipt/${paymentId}`;
+    // 82.32: was `my-receipt/{id}`, which does not exist — the controller declares
+    // `receipt/{paymentId}` (`FinancialsController.cs`) — so every click 404'd. Returned as an
+    // Observable<Blob> rather than a plain URL string: the endpoint is behind [Authorize], and a
+    // caller opening that URL directly in a new tab (`window.open`) sends no Authorization header,
+    // so even the corrected path would 401. Fetching through HttpClient lets the auth interceptor
+    // attach the token; the caller turns the blob into an object URL to display it.
+    getReceipt(paymentId: number): Observable<Blob> {
+        return this.http.get(`${this.apiUrl}/receipt/${paymentId}`, { responseType: 'blob' });
     }
 
     // Admin: Membership/Registration Fee Configs

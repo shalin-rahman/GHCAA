@@ -104,7 +104,8 @@ public class MemberServiceTests : TestBase
         };
     }
 
-    [Test]
+    [Category("FR-01")]
+        [Test]
     public async Task RegisterAsync_WithValidData_ShouldCreateMemberAndPaymentHistory()
     {
         // Arrange
@@ -286,7 +287,8 @@ public class MemberServiceTests : TestBase
         _mockOtp.Verify(x => x.GenerateAndSendOtpAsync(dto.Email, It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Test]
+    [Category("FR-02")]
+        [Test]
     public async Task GetStatusAsync_WithValidMemberId_ShouldReturnStatus()
     {
         // Arrange
@@ -343,7 +345,8 @@ public class MemberServiceTests : TestBase
         result.Should().BeFalse();
     }
 
-    [Test]
+    [Category("FR-03")]
+        [Test]
     public async Task GetProfileAsync_WithPrivilegedAccess_ShouldReturnFullProfile()
     {
         // Arrange
@@ -359,7 +362,8 @@ public class MemberServiceTests : TestBase
         result.NID.Should().Be("1234567890");
     }
 
-    [Test]
+    [Category("FR-03")]
+        [Test]
     public async Task GetProfileAsync_WithNonPrivilegedAccess_ShouldReturnMaskedProfile()
     {
         // Arrange
@@ -376,7 +380,8 @@ public class MemberServiceTests : TestBase
         result.NID.Should().Contain("*");
     }
 
-    [Test]
+    [Category("FR-12")]
+        [Test]
     public async Task GetProfileAsync_ProfileCompletionPercentage_ShouldMatchDashboardChecklistCriteria()
     {
         // 30.28: ProfileCompletionPercentage must be computed from the same 4-item criteria
@@ -491,7 +496,8 @@ public class MemberServiceTests : TestBase
         updatedMember.ProfessionalHistory.Should().ContainSingle(p => p.OrganizationName == "New Org" && p.Designation == "Engineer");
     }
 
-    [Test]
+    [Category("FR-02")]
+        [Test]
     public async Task GetStatusAsync_WithInvalidMemberId_ShouldThrowException()
     {
         // Act & Assert
@@ -751,7 +757,8 @@ public class MemberServiceTests : TestBase
         _mockTokenService.Verify(x => x.RevokeAllRefreshTokensAsync(user.Id, It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Test]
+    [Category("FR-44")]
+        [Test]
     public async Task RejectMemberAsync_ShouldSendEmailAndSoftDeleteMember()
     {
         // Arrange

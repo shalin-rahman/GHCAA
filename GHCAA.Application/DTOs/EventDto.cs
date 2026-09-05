@@ -22,6 +22,12 @@ namespace GHCAA.Application.DTOs
         public string? AdminNote { get; set; }
         public int ParticipantCount { get; set; }
         public bool RequiresRegistration { get; set; }
+
+        // 82.32: were write-only (CreateEventDto/UpdateEventDto only) — the admin edit form reads
+        // these back from the event it just fetched, so their absence here meant every edit-then-
+        // save round trip silently wiped whatever limit/waitlist setting had been set at creation.
+        public int? ParticipantLimit { get; set; }
+        public bool HasWaitlist { get; set; }
     }
 
     public class CreateEventDto : IValidatableObject

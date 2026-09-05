@@ -128,6 +128,20 @@ export const PAYMENT_STATUS_MAP: Record<string | number, { label: string, class:
     3: { label: 'Refunded', class: 'refunded' }
 };
 
+// TODO 37.3: PledgeStatus { Pledged, PartiallyPaid, Paid, Lapsed, Cancelled } (GHCAA.Domain/Enums.cs).
+export const PLEDGE_STATUS_MAP: Record<string | number, { label: string, class: string }> = {
+    Pledged: { label: 'Pledged', class: 'pending' },
+    0: { label: 'Pledged', class: 'pending' },
+    PartiallyPaid: { label: 'Partially Paid', class: 'pending' },
+    1: { label: 'Partially Paid', class: 'pending' },
+    Paid: { label: 'Paid', class: 'success' },
+    2: { label: 'Paid', class: 'success' },
+    Lapsed: { label: 'Lapsed', class: 'failed' },
+    3: { label: 'Lapsed', class: 'failed' },
+    Cancelled: { label: 'Cancelled', class: 'failed' },
+    4: { label: 'Cancelled', class: 'failed' }
+};
+
 export const SUBMISSION_STATUS = {
     DRAFT: 'Draft',
     PENDING: 'Pending',
@@ -274,6 +288,26 @@ export function getPaymentStatusClass(status: string | number | null | undefined
     if (match) return match.class;
     if (typeof status === 'string' && /^\d+$/.test(status)) {
         return PAYMENT_STATUS_MAP[parseInt(status, 10)]?.class || '';
+    }
+    return '';
+}
+
+export function getPledgeStatusLabel(status: string | number | null | undefined): string {
+    if (status === null || status === undefined) return 'Unknown';
+    const match = PLEDGE_STATUS_MAP[status];
+    if (match) return match.label;
+    if (typeof status === 'string' && /^\d+$/.test(status)) {
+        return PLEDGE_STATUS_MAP[parseInt(status, 10)]?.label || status;
+    }
+    return String(status);
+}
+
+export function getPledgeStatusClass(status: string | number | null | undefined): string {
+    if (status === null || status === undefined) return '';
+    const match = PLEDGE_STATUS_MAP[status];
+    if (match) return match.class;
+    if (typeof status === 'string' && /^\d+$/.test(status)) {
+        return PLEDGE_STATUS_MAP[parseInt(status, 10)]?.class || '';
     }
     return '';
 }
@@ -486,6 +520,7 @@ export const API_ENDPOINTS = {
     JOBS: '/api/jobs',
     PROFILE: '/api/profile',
     FINANCIALS: '/api/financials',
+    CAMPAIGNS: '/api/campaigns',
     MESSAGING: {
         RECENT: '/api/messaging/recent',
         HISTORY: '/api/messaging/history',

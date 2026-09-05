@@ -37,7 +37,10 @@ class _GatekeeperScreenState extends ConsumerState<GatekeeperScreen> {
     try {
       final dio = ref.read(dioProvider);
       final response = await dio.get('/admin/members/$id');
-      
+
+      // 82.32: setState after an await with no mounted guard throws if the admin leaves this
+      // screen (e.g. backs out of the QR scanner) while the request is still in flight.
+      if (!mounted) return;
       if (response.statusCode == 200) {
         setState(() {
           _scannedMember = response.data;
@@ -49,6 +52,7 @@ class _GatekeeperScreenState extends ConsumerState<GatekeeperScreen> {
         throw Exception('Member not found or unauthorized');
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = 'Registry Error: Identity Node not found in archive.';
         _isLoading = false;
@@ -67,7 +71,8 @@ class _GatekeeperScreenState extends ConsumerState<GatekeeperScreen> {
     try {
       final dio = ref.read(dioProvider);
       final response = await dio.post('/events/admin/checkin/qr', data: {'ticketCode': ticketCode});
-      
+
+      if (!mounted) return;
       if (response.statusCode == 200) {
         setState(() {
           _scannedMember = {
@@ -83,6 +88,7 @@ class _GatekeeperScreenState extends ConsumerState<GatekeeperScreen> {
         throw Exception();
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = 'Invalid Ticket: Code unusable or already checked in.';
         _isLoading = false;

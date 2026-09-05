@@ -867,9 +867,27 @@ All registered as **HttpClient** + **Scoped IPaymentGatewayService**.
 `ApplicationDbContext.LoadSeed<T>(fileName)` (`internal static`, so runtime syncers reuse the same
 profile gate and path resolution).
 
+**Schema migration at boot (TODO 37.0):** `GHCAA.Infrastructure/Data/MigrationBootstrapper.EnsureMigratedAsync`,
+called from `Program.cs` for every non-Visual profile before any seed/sync step runs. A schema
+change committed to `preprod` reaches the Render deployment through this, with no manual database
+step. It handles three starting states: a brand-new database (baselines every migration as applied,
+since `EnsureCreatedAsync` already built the current-model schema, then nothing further to run), a
+legacy database from an earlier `EnsureCreated()` boot with no `__EFMigrationsHistory` table (walks
+every migration in order, applying it for real; a Postgres "object already exists" error means that
+migration's effect predates migration tracking, so it is marked applied without re-running it — any
+other failure aborts), and a database with real migration history (self-heals a false-baselined
+migration — one whose "applied" row is a false positive because a same-transaction seed insert rolled
+back partway — then calls `Database.MigrateAsync()`). On any bootstrap failure the boot logs an error
+and falls back to `EnsureCreated()` rather than crash, so a migration bug degrades to the old status
+quo instead of taking the app down. `ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))`
+is set everywhere a context is configured — see `gotcha_pending_model_changes_seed`, that warning is
+non-deterministic `HasData` seed churn, not real schema drift, and scaffolding a migration for it is
+wrong. Validated 2026-09 by a full migration-chain dry run against a throwaway database.
+
 **Runtime data sync:** `GHCAA.Infrastructure/Data/ConstitutionSeeder.SyncAsync(context, logger, ct)` —
-called from `Program.cs` at boot. `EnsureCreated()` is a no-op on a non-empty database, so `HasData`
-seed edits never reach preprod; this syncer publishes `Seed/constitution.json` idempotently, inserts
+called from `Program.cs` at boot, after the schema migration above. `HasData` seed edits alone do not
+reach an already-migrated preprod database (EF only applies a seed row's insert the first time its
+owning migration runs); this syncer publishes `Seed/constitution.json` idempotently, inserts
 unknown versions, refreshes changed text in place, supersedes (never deletes) prior versions so
 `AmendmentVote` rows survive, and removes only vote-free placeholder versions.
 

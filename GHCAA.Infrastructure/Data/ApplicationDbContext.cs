@@ -125,6 +125,9 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<SavedPaymentMethod> SavedPaymentMethods { get; set; } = null!;
         public DbSet<NewsCollaborator> NewsCollaborators { get; set; } = null!;
         public DbSet<Constitution> Constitutions { get; set; } = null!;
+        public DbSet<Campaign> Campaigns { get; set; } = null!;
+        public DbSet<CampaignPledge> CampaignPledges { get; set; } = null!;
+        public DbSet<DonorRecognitionTier> DonorRecognitionTiers { get; set; } = null!;
         public DbSet<AmendmentVote> AmendmentVotes { get; set; } = null!;
         public DbSet<MentorshipRequest> MentorshipRequests { get; set; } = null!;
         public DbSet<SocialAuthConfig> SocialAuthConfigs { get; set; } = null!;

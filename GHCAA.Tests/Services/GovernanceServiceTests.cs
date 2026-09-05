@@ -26,6 +26,7 @@ namespace GHCAA.Tests.Services
             _service = new GovernanceService(_context);
         }
 
+        [Category("FR-34")]
         [Test]
         public async Task CreatePeriodAsync_ShouldAddPeriod()
         {
@@ -38,6 +39,7 @@ namespace GHCAA.Tests.Services
             _context.ECPeriods.Count().Should().Be(1); // Cleared in setup, so 0+1=1
         }
 
+        [Category("FR-34")]
         [Test]
         public async Task ActivatePeriodAsync_ShouldDeactivateOthers()
         {
@@ -61,6 +63,7 @@ namespace GHCAA.Tests.Services
             updatedP2!.IsActive.Should().BeTrue();
         }
 
+        [Category("FR-34")]
         [Test]
         public async Task AssignMemberToRoleAsync_ShouldCreateRecordAndSyncProfile()
         {
@@ -83,6 +86,7 @@ namespace GHCAA.Tests.Services
             ecMember.ChangeReason.Should().Be("Voted");
         }
 
+        [Category("FR-34")]
         [Test]
         public async Task RemoveMemberFromCommitteeAsync_ShouldEndRecordAndResetProfile()
         {
@@ -105,6 +109,7 @@ namespace GHCAA.Tests.Services
             updatedECMember!.EndDate.Should().NotBeNull();
         }
 
+        [Category("FR-34")]
         [Test]
         public async Task UpdatePeriodAsync_ShouldModifyFieldsAndForceUtc()
         {

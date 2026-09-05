@@ -79,7 +79,8 @@ export class OrgConfigService {
           requirePaymentForMembership: true,
           requireDocumentUpload: true,
           allowSelfRegistration: true,
-          allowNonMemberEventRegistration: true
+          allowNonMemberEventRegistration: true,
+          enableFundraising: true
         },
         workflow: {
           memberApprovalMode: 'ManualReview',

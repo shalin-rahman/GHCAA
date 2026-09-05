@@ -141,7 +141,7 @@
                 </div>
                 <div class="feed-items">
                     @for (item of recentNews(); track item.id) {
-                    <a [routerLink]="['/portal/news', item.id]" class="feed-item news-feed-item">
+                    <a routerLink="/portal/news" [queryParams]="{ id: item.id }" class="feed-item news-feed-item">
                         <div class="dot" style="background: var(--accent-color)"></div>
                         <div class="text">
                             <strong>{{ item.title }}</strong>

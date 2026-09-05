@@ -27,7 +27,8 @@ public class ThemeServiceTests : TestBase
         _cache.Dispose();
     }
 
-    [Test]
+    [Category("FR-47")]
+        [Test]
     public async Task CreateThemeAsync_ShouldSaveAllFields()
     {
         var start = DateTime.UtcNow.Date;
@@ -54,7 +55,8 @@ public class ThemeServiceTests : TestBase
         saved.IsEnabled.Should().BeTrue();
     }
 
-    [Test]
+    [Category("FR-47")]
+        [Test]
     public async Task UpdateThemeAsync_ShouldUpdateAllFields()
     {
         var existing = new SpecialDayTheme

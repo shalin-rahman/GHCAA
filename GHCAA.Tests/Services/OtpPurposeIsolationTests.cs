@@ -27,7 +27,8 @@ public class OtpPurposeIsolationTests : TestBase
         _service = new OtpService(_context, mockCommunication.Object, mockConfig.Object, mockLogger.Object);
     }
 
-    [Test]
+    [Category("FR-09")]
+        [Test]
     public async Task GenerateAndSendOtpAsync_ShouldPersistRequestedPurpose()
     {
         var email = "stepup-persist@example.com";
@@ -37,7 +38,8 @@ public class OtpPurposeIsolationTests : TestBase
         otp.Purpose.Should().Be(OtpPurpose.AdminStepUp);
     }
 
-    [Test]
+    [Category("FR-09")]
+        [Test]
     public async Task VerifyOtpAsync_ShouldAcceptCode_ForMatchingPurpose()
     {
         var email = "stepup-match@example.com";
@@ -59,7 +61,8 @@ public class OtpPurposeIsolationTests : TestBase
         result.Should().BeFalse();
     }
 
-    [Test]
+    [Category("FR-09")]
+        [Test]
     public async Task GenerateAndSendOtpAsync_ShouldNotInvalidate_PendingCodeOfAnotherPurpose()
     {
         var email = "stepup-coexist@example.com";
@@ -72,7 +75,8 @@ public class OtpPurposeIsolationTests : TestBase
         result.Should().BeTrue();
     }
 
-    [Test]
+    [Category("FR-09")]
+        [Test]
     public async Task GenerateAndSendOtpAsync_ShouldInvalidate_EarlierCodeOfSamePurpose()
     {
         var email = "stepup-supersede@example.com";

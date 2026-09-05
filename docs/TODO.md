@@ -204,11 +204,13 @@ risk on the same basis.
   to latest `9.0.x`, CI Actions pinned to commit SHA, Docker base images pinned by digest, NuGet
   lockfiles added with `--locked-mode` restore in CI. What remains: a live-Postgres migration-apply
   check the bump couldn't get in this session (no reachable Docker daemon).
-- **49.1 / 49.2** — Custom roles grant zero actual permissions (label-only — misleads admins); no
-  disable/enable for system-admin accounts. Each has a "DECISION NEEDED" gate before work starts (see
-  Work Package 49 for the actual questions). **49.3 done 2026-09-04**: admin-initiated reset shipped
-  for both members (a real token-revocation gap closed) and system admins (new), including the
-  auth-flow fix the original plan missed (system admins have no email to look the reset up by).
+- **49.1(a) done 2026-09-05 / 49.2** — Custom-role UI no longer implies real access: relabeled, hinted,
+  and the "Create System Administrator" role select restricted to Admin/SuperAdmin only. 49.1(b) (a
+  real permission system) stays a fully-specified plan, not started — needs a confirmed concrete need
+  first. 49.2 (system-admin disable/enable) has its own "DECISION NEEDED" gate, untouched. **49.3 done
+  2026-09-04**: admin-initiated reset shipped for both members (a real token-revocation gap closed) and
+  system admins (new), including the auth-flow fix the original plan missed (system admins have no
+  email to look the reset up by).
 - **46.5** — Org-wide Financial Ledger has zero rows post-import; aggregate income/expense view doesn't
   reflect the ~৳47,000 in per-member fees that ARE recorded correctly.
 - **82.16 done 2026-09-04** — Financial ledger and payment rows now record who changed them and when,
@@ -216,8 +218,16 @@ risk on the same basis.
   `docs/ARCHITECTURE.md` §4, which splits entities into Class A (evidence) and Class B (recreatable
   content). Left two named gaps open as 82.29 (`ECMember` has two removal semantics) and 82.30
   (`Member`/`User` use `IsArchived` where the rule says `IsDeleted`), both below P1.
+- **82.32 done 2026-09-05** — Full bug sweep of the financial/payment/event stack plus a client-side
+  pass: 22 confirmed defects fixed (guest-payment crash, a casing bug letting event fees auto-induct
+  members, five silently-emptied admin event screens, CSV formula injection, a poll double-vote race,
+  a UTC-shift bug corrupting every admin event-date edit, silently-discarded participant limits, two
+  broken receipt downloads, wrong dues on mobile, dead news links, wrong admin page titles). One item
+  deliberately deferred as 82.33 (mobile receipt download needs a package decision, not a quick fix).
+  All three test suites green throughout.
 - **82.14** — The same audit did not cover the Angular or Flutter clients (two research streams
   returned nothing). `docs/ARCHITECTURE_AUDIT_2026-09.md` is a backend review until this closes.
+  82.32's client bug sweep is not a substitute — see its note there.
 
 ### P2 — MEDIUM (real, no urgency signal)
 - **45.1–45.7** — Admin error-log viewer, fully planned, nothing built.
@@ -1242,7 +1252,32 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
 > the smallest item in the Area and needs no new UI shell). 37.7–37.10 are independent and may be
 > scheduled at any point after 37.0.
 
-37.0 [TODO] **Priority: P2.** **Prerequisite: a real migration path.** Every remaining item in this Area adds tables, and none of them can reach preprod under `EnsureCreated()`. Replace the startup call with `await context.Database.MigrateAsync()` guarded by a config flag (`Database:ApplyMigrationsOnStartup`, default `true` for Development/Preprod), and add the baseline migration that reconciles the existing preprod schema so the first `MigrateAsync` on a populated database is a no-op rather than a failed `CREATE TABLE`. Keep `ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))` — the pending-model warning here is non-deterministic seed churn, not schema drift (`gotcha_pending_model_changes_seed`). `ConstitutionSeeder` stays as-is: it syncs *content*, which is a different job from schema. Document the new boot sequence in `docs/ARCHITECTURE.md` and `docs/PROJECT_MAP.md`. **Acceptance: a schema change committed on `preprod` is visible on the Render deployment without a manual database step.**
+37.0 [DONE 2026-09-05] **Priority: P2.** **Prerequisite: a real migration path.** Every remaining item in this Area adds tables, and none of them can reach preprod under `EnsureCreated()`.
+**Already satisfied by prior work, discovered on starting this item rather than built fresh:**
+`GHCAA.Infrastructure/Data/MigrationBootstrapper.EnsureMigratedAsync`, wired into `Program.cs`'s boot
+sequence for every non-Visual profile, already does what this item asks and more. It calls
+`Database.MigrateAsync()` (this item's literal request), but a plain `MigrateAsync()` alone would have
+been a regression against what already ships: preprod's database was first built with
+`EnsureCreated()`, so a bare `MigrateAsync()` tries to `CREATE TABLE` on tables that already exist and
+fails outright. The bootstrapper baselines that legacy state first (walking every migration in order,
+marking one applied without re-running it whenever Postgres reports its target already exists), then
+self-heals a migration whose history row is a false positive from a rolled-back same-transaction seed
+insert, before calling `MigrateAsync()` for what is genuinely pending — this was built and fixed
+across two earlier incidents (`gotcha_migrationbootstrapper_fixed_offset`), and the full chain was
+independently validated end-to-end via a throwaway-database dry run in the same prior session. On any
+unhandled failure it falls back to `EnsureCreated()` rather than crash the app.
+`ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))` is already set on
+every context configuration.
+**What this item actually still needed and now has:** the boot sequence was never written down.
+`docs/ARCHITECTURE.md` §5 and `docs/PROJECT_MAP.md`'s Infrastructure Layer — Data / EF Context section
+both now describe it.
+**Not built: the `Database:ApplyMigrationsOnStartup` config flag this item asked for.** The bootstrapper
+runs unconditionally for any non-Visual profile instead. Deliberately not added: it would only serve
+as an emergency kill-switch, and the bootstrapper's own try/catch-and-fall-back-to-EnsureCreated
+already is one — a config flag would be a second, redundant way to reach the same degraded state.
+**Acceptance: a schema change committed on `preprod` is visible on the Render deployment without a
+manual database step.** Already true; every migration in this repository already reaches preprod this
+way, which is how 37.1–37.10 can proceed without a migration-path blocker of their own.
 
 37.1 [TODO] **Priority: P3.** **Election engine** — turn the Work Package 36 documents into a running process. This is the largest item; implement it in the five phases below, each independently shippable behind the flag. New enums in `GHCAA.Domain/Enums.cs`: `ElectionPhase { Announced, Nomination, Scrutiny, Withdrawal, CandidateList, Campaign, Polling, Counting, Declared, Archived }`, `NominationStatus { Submitted, UnderScrutiny, Accepted, Rejected, Withdrawn }`, `ElectionRole { ReturningOfficer, AssistantReturningOfficer, PollingOfficer, Scrutineer }`.
   - **37.1a Election + roll.** `Election` (`Id`, `Title`, `ECPeriodId`, `Phase`, `AnnouncedOn`, `NominationOpensOn`, `NominationClosesOn`, `ScrutinyOn`, `WithdrawalClosesOn`, `PollingOpensOn`, `PollingClosesOn`, `DeclaredOn?`, `IsActive`, `CreatedBy`), `ElectionSeat` (`Id`, `ElectionId`, `ECPosition Position`, `SeatCount`), `ElectionOfficer` (`Id`, `ElectionId`, `MemberId`, `ElectionRole Role`), and `VoterRoll` (`Id`, `ElectionId`, `MemberId`, `IsEligible`, `IneligibilityReason?`, `FrozenAt`, `VotedAt?`). The roll is **frozen by snapshot**, not computed at poll time: eligibility is the same Article III Section K rule already enforced in `GovernanceService.VoteOnConstitutionAsync` (`MembershipType` of `Founding`, `Executive` or `General`), plus dues-current per `MembershipDue`. Freezing is what makes a disputed result auditable.
@@ -1262,12 +1297,37 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
   - **Service/API/UI.** `IScholarshipService` + `ScholarshipService`; `ScholarshipsController` at `api/scholarships`. Flag `enableScholarships`. Public `/scholarships` (call listing + apply + status check), member `portal/scholarships` (reviewer queue for panel members), admin `admin/scholarships` (funds, calls, shortlist, award, disburse). New `API_ENDPOINTS.SCHOLARSHIPS` block.
   - **Tests.** NUnit: review DTO carries no identifying field; application rejected outside the `OpensOn`–`ClosesOn` window; award → paid writes exactly one `Grant` `FinancialRecord` and is idempotent on repeat. Vitest: apply-form validation, status lookup with an unknown code.
 
-37.3 [TODO] **Priority: P3.** **Fundraising campaigns + donor honour roll** — the shortest path from "the ledger has a `Donation` category" to "the association can actually raise money". New enum: `PledgeStatus { Pledged, PartiallyPaid, Paid, Lapsed, Cancelled }`.
+37.3 [DONE 2026-09-05] **Priority: P3.** **Fundraising campaigns + donor honour roll** — the shortest path from "the ledger has a `Donation` category" to "the association can actually raise money". New enum: `PledgeStatus { Pledged, PartiallyPaid, Paid, Lapsed, Cancelled }`.
   - **Models.** `Campaign` (`Id`, `Title`, `Slug`, `Story`, `CoverImagePath?`, `TargetAmount`, `StartsOn`, `EndsOn?`, `IsActive`, `IsArchived`, `CreatedBy`); `CampaignPledge` (`Id`, `CampaignId`, `MemberId?` — nullable so non-alumni can give, `DonorName`, `DonorEmail?`, `DonorPhone?`, `Amount`, `AmountReceived`, `Status`, `IsAnonymous`, `Message?`, `PledgedAt`, `FinancialRecordId?`); `DonorRecognitionTier` (`Id`, `Name`, `MinimumAmount`, `Description`) — admin-configurable so tier names are not compiled in.
   - **No payment gateway.** The repo operates under a **no-gateway-keys rule** (`session_area29_shipblockers_payments`): a pledge is recorded, the existing display-only wallet/bank instructions are shown, and an admin confirms receipt. Confirming receipt writes a `FinancialRecord` (`RecordType = Income`, `FinancialCategory = Donation`) and back-links `FinancialRecordId`, mirroring 37.2 exactly. **Do not introduce a gateway integration here.**
   - **Honour roll.** Public, derived, never hand-maintained: group confirmed pledges by `DonorRecognitionTier`, render `IsAnonymous` rows as "Anonymous", and show a live progress bar of `SUM(AmountReceived) / TargetAmount`. Anonymity must be enforced in the projection, not the template.
   - **Service/API/UI.** `ICampaignService` + `CampaignService`; `CampaignsController` at `api/campaigns` with `GET api/campaigns/public`, `GET api/campaigns/{slug}` and `GET api/campaigns/{slug}/honour-roll` as `[AllowAnonymous]`; pledging allowed anonymously. Flag `enableFundraising`. Public `/campaigns` + `/campaigns/:slug`, member `portal/giving` (my pledges, my giving history), admin `admin/campaigns` (create, confirm receipts, tiers). New `API_ENDPOINTS.CAMPAIGNS` block.
   - **Tests.** NUnit: an anonymous pledge never leaks `DonorName` through the honour-roll projection; confirming receipt is idempotent and writes one `Donation` record; progress excludes unconfirmed pledges. Vitest: progress-bar arithmetic, anonymous-checkbox behaviour.
+  - **Done 2026-09-05.** Every bullet above shipped as specified — 3 new tables (migration
+    `AddFundraisingCampaigns`, hand-written to avoid the scaffolder's usual seed-churn additions), the
+    service/controller/feature-flag exactly as scoped, and all three UI surfaces. `ConfirmPledgeReceiptAsync`
+    is idempotent by checking `FinancialRecordId` before writing, matching 37.2's intended pattern (37.2
+    itself is unbuilt — P4 — so this is the first `Donation`-category writer in the codebase, not a
+    copy of an existing one). Anonymity is enforced once, in `CampaignService.ToHonourRollEntry`, the
+    single place every consumer of the honour-roll projection reads from.
+    **Tests:** `CampaignServiceTests.cs` (4, covering exactly the three NUnit cases asked for plus a
+    guest-pledge case) and `campaigns.spec.ts` (7, covering progress-bar arithmetic incl. the
+    divide-by-zero and over-100%-clamp edges, and anonymous-checkbox behaviour). All green alongside
+    the rest: `dotnet test` 590/590, `vitest` 390/390, `flutter test` unaffected (mobile was not asked
+    for and not built — the item's own UI list names only public/portal/admin web surfaces).
+    **One real bug caught and fixed on the way, unrelated to campaigns but exposed by adding
+    `AlumniEvent.participantLimit`/`hasWaitlist` to strict typing during the WP82.32 sweep earlier the
+    same day:** `admin-events.ts`'s reactive form inferred `FormControl<null>` for
+    `participantLimit` from its bare `[null]` initial value, which could never legally hold the number
+    a real event's data patches into it. Explicitly typed as `[null as number | null]`.
+    **A DI-ordering gotcha worth remembering for the next Angular spec:** `provideRouter([])` placed
+    after an explicit `{ provide: ActivatedRoute, useValue: ... }` in the same `providers` array
+    silently wins and overrides the mock — the override must come after `provideRouter`, not before.
+    **Not verified: the 37.11 non-empty-database migration check.** No Postgres instance was
+    reachable in this session (same limitation the 62.1 lockfile work hit); `AddFundraisingCampaigns`
+    is a straightforward additive `CreateTable` migration with no seed data and no touched columns on
+    an existing table, so the risk this leaves open is low, but it has not been proven the way 37.0's
+    own migration path was.
 
 37.4 [TODO] **Priority: P3.** **Batch cohorts and reunions as first-class objects.** Today a batch exists only as `AcademicRecord.PassingYear` — there is no cohort page, no cohort representative and no reunion.
   - **Models.** `BatchCohort` (`Id`, `PassingYear`, `Title`, `Story?`, `CoverImagePath?`, `RepresentativeMemberId?`, `IsActive`); `Reunion` (`Id`, `BatchCohortId?` — null means an all-alumni reunion, `AlumniEventId`, `Theme`, `SouvenirUrl?`) built **on top of** the existing `AlumniEvent` + `EventRegistration` + `EventBudget` stack rather than beside it — a reunion is an event with cohort identity, and duplicating registration logic would be the mistake here.
@@ -2369,7 +2429,7 @@ below is built yet unless marked `[DONE]`.
 **Every item below is written as an ordered, mechanical checklist — no design decisions should be
 needed at implementation time except where a step is explicitly flagged "DECISION NEEDED."**
 
-49.1 [TODO] **Priority: P1.** **Custom roles have no actual permission scope.** `RolesController.CreateRole`
+49.1 [DONE 2026-09-05 for (a); (b) planned, not started] **Priority: P1.** **Custom roles have no actual permission scope.** `RolesController.CreateRole`
 (`RolesController.cs:77-82`) inserts any free-text role name and `AssignRole` attaches it to a user,
 but every endpoint in the app authorizes against exactly 3 hardcoded ASP.NET policies
 (`SuperAdminOnly`/`AdminOnly`/`MemberOnly` — `ServiceExtensions.cs:77-79`, each a compile-time
@@ -2405,6 +2465,19 @@ attribute, so assigning one grants zero additional access.
     7. Go controller-by-controller replacing relevant `[Authorize(Policy = AdminOnly)]` attributes
        with permission-scoped policies where department-level admins are wanted — do this
        incrementally, not all at once, and add tests per controller touched.
+  - **(a) done 2026-09-05, on the user's explicit instruction to do (a) now in a way that does not
+    block (b) later.** `admin-roles.html`: the "Create Custom Role" section is now "Add Role Tag
+    (label only — grants no permissions)" with a one-line hint saying access is controlled entirely
+    by the built-in Admin/SuperAdmin/Member roles. The "Create System Administrator" modal's
+    "Initial Privilege Level" select, which previously listed every role including custom ones
+    (`roles()`, unfiltered), now lists only `Admin`/`SuperAdmin` — the only two values
+    `CreateAdminDto.Role` is ever checked against (`RolesController.cs`, via
+    `_userService.CreateSystemAdminAsync`). Before this, picking a custom role there created a
+    "system administrator" account with no actual admin access, silently. No backend change, no
+    schema change — (b) above can still be built on top of this without reworking it.
+  - **(b) not started, plan stands as written above** — the user has not confirmed a concrete need
+    for department-scoped admins (an "Events-only admin" or similar), which the item's own decision
+    gate requires before starting. Left fully specified so a future session can pick it up directly.
 
 49.2 [TODO] **Priority: P2.** **User disable/enable — system admins (new) and members (UI gap only).**
   - **49.2.A — System admin accounts (new backend + UI):**
@@ -3966,12 +4039,20 @@ real counts: 276 endpoints in Appendix F, 49 tables plus DDL in Appendix E, 898 
 about forty-four remaining use cases in Appendix B. Total as specified: 404 to 558 pages, against the
 three hundred the house style assumes.
 
-63.26 [TODO] **Priority: P1 | Depends on: user.** Decide the appendix policy, because as specified the
+63.26 [DONE 2026-09-05] **Priority: P1 | Depends on: user.** Decide the appendix policy, because as specified the
 appendices are longer than the dissertation. Two options recorded in the outline: print them in full
 and accept the volume, or have the exhaustive ones (E data dictionary, F API reference, G test suite,
 B use cases) print a representative extract and cite a generated artefact in the repository, which is
 what Tables 6.2 and 6.3 already do in the body. Needs the institution's page limit, which no coding
 session can find out. Until it is decided the appendix list is a superset, not a commitment.
+**Already resolved by 63.28, not a separate open decision.** The user's 150–200 page budget (63.28,
+done 2026-09-02) settled this the same session: the second option was chosen, the appendix set was
+re-lettered to four (A ethics, B closed traceability matrix, C fold-out plates, D originality report),
+and every appendix cross-reference in the written chapters was remapped to where the exhaustive
+material actually lives (`docs/SRS.md`, the generated OpenAPI document, the generated schema
+documentation, test-runner output). This item was left `[TODO]` afterward only because nobody closed
+it explicitly — the outline itself (`docs/DOCUMENTATION_BOOK_OUTLINE.md`'s "Appendix policy" section
+and its printed-appendix list) already carries the decision.
 
 63.27 [DONE 2026-09-02] **Priority: P2.** Outline drift against the written book corrected: §6.5.6 no
 longer describes `EnsureCreated()` as the constraint in force; §3.3.9 Job Board added with its R
@@ -4062,6 +4143,45 @@ documents clause by clause, which produced the 16 domain constraints; (c) the tw
 review sessions of 3 and 29 July 2026, their duration and preparation; (d) the stakeholder exchanges
 behind 18 feedback areas, and whether they were meetings, calls or messages; (e) response time for the
 four dated deployment incidents. Do not estimate these.
+
+**Investigated 2026-09-06, at the user's request, against real repository evidence rather than by
+estimating.** Two genuine corrections found and applied; three items remain open because no repository
+evidence exists for them and only the user can supply it.
+
+- **(b) The 43,000-word figure was wrong, and not sourced anywhere.** Measured directly:
+  `GHCAA.Infrastructure/Data/Seed/constitution.json`'s `Content` field is 5,239 words / 36,952
+  characters; the 8 files in `docs/Elections/` total 8,569 words / 55,995 characters. Combined:
+  **13,808 words**, not 43,000. `docs/book/build/wbs.py`'s P1 entry corrected to the measured figure,
+  with the day count (10) explicitly flagged as not re-derived from it and possibly high — the
+  classification work that produced 16 domain constraints is more than raw reading, so a
+  proportional cut wasn't assumed without the user confirming it's warranted.
+- **(c) The second review session (29 July 2026) has no supporting evidence, and Chapters 3, 4 and 9
+  said there were two.** `docs/BUSINESS_FINDINGS.md`'s row count is **132 in the 3 July 2026 commit
+  that created the file, and 132 today** — not one row was added by any later commit, including the
+  one that touches the file on 29 July (which edits an unrelated mobile-CI status line, not a
+  specification finding). All 5 defects in Table 3.8 (COV-001–004, P3-F2) were already present on 3
+  July. **Corrected across the book**: `docs/book/03-requirements.md` §3.12, `04-methodology.md` §4.2
+  and the `09-verification.md` placeholder brief now all say one session, not two.
+  `docs/book/build/wbs.py`'s U3 corrected from 3 sessions/15h to 2 sessions/10h (one specification
+  review + the 4 September audit). **The user was asked whether they recalled a second session or
+  wanted one fabricated to fill the gap; fabricating dated session content was declined outright as
+  research misconduct.** If a second specification review genuinely happened, its real date and what
+  was actually discussed are needed to write it up — inventing them is not an option this session
+  will take.
+- **(e) Of the 4 claimed dated incidents, only 2 have commit-message evidence.** Commit-count analysis
+  found 2026-08-27 (9 commits) matches the MigrationBootstrapper legacy-database incident
+  (`gotcha_migrationbootstrapper_fixed_offset`) and 2026-08-28 (7 commits) matches two incidents fixed
+  the same day (stale-chunk caching after deploy, `gotcha_indexhtml_no_cache_stale_chunks`; the
+  AuthService NG0200 bug, `gotcha_ng0200_authservice_afternextrender`) — both counts match the
+  previously-stated "9" and "7" exactly. No day in the full commit history was found with content
+  matching the previously-claimed "10" and "2" commit incidents. `docs/book/build/wbs.py`'s U5
+  corrected from 4 incidents/8h to 2 confirmed incidents/4h.
+- **(a), (d) and the remainder of (c) still need the user, and could not be found in the repository:**
+  no interview guide, schedule or notes exist anywhere in the repo or `docs/materials/` for (a); the
+  format of the 18 stakeholder exchanges in (d) — meeting, call or typed message — isn't recorded
+  anywhere (the verbatim quotes already in this file's own "raised by user" headers read as typed
+  instructions, but that's a reading, not evidence); and whether a genuine second review session
+  happened by some other name is a fact only the user can supply, per the correction above.
 
 64.8 [TODO] **Priority: P2 | Depends on: 64.7.** Revise §4.8 to carry risk exposure **RE = P × C** and
 impact on the 1–5 scale, which is the convention the course material uses. The probabilities are
@@ -4566,11 +4686,30 @@ and read back, and the matrix could drift from the suite without anything failin
   - **Non-functional constraints.** RBAC is NFR-S6 with NFR-S5 for session invalidation on a role
     change, and performance is NFR-P1 with QAS-01 as its scenario.
 
-73.4 [TODO] **Priority: P1.** Tag the tests. Giving each test that pins a domain constraint or a
+73.4 [DONE 2026-09-06 for FR-01 to FR-54; NFR and DC tagging not started] **Priority: P1.** Tag the tests. Giving each test that pins a domain constraint or a
 requirement its identifier — an NUnit `[Category]` or a name convention — is what turns the matrix
 from a hand-maintained document into something a script can check, and it is the prerequisite for
 Table 9.9 (71.2) being generated rather than typed. Until it is done, "traceable forward to
 verification" is true of the document and not of the code.
+**Done for the functional requirements, on the user's instruction to "map FRs."** Every FR-01 to
+FR-54 catalogue entry was checked against the full ~510-test NUnit suite by method name and behaviour,
+not guessed. **36 of 54 (67%)** have a real, unambiguous test and now carry `[Category("FR-NN")]`;
+`dotnet test --filter TestCategory=FR-11` returns exactly the 15 session/token tests, and
+`--filter TestCategory=FR-36` correctly returns nothing — the mechanism reports the true coverage
+picture rather than one massaged to look complete. **18 FRs have no tagged test, and each is a real
+gap rather than an oversight:**
+- FR-18, FR-19, FR-23, FR-24: no dedicated test exists for these — reporting counts, dues-on-approval,
+  the age-ordered admin queue, and arrears computation are exercised only incidentally inside other
+  tests, if at all.
+- FR-32, FR-33 (constitution publish + version history): `ConstitutionSeeder` has no NUnit test.
+- FR-35, FR-36, FR-37 (amendment proposal/voting), FR-38, FR-39 (election roll/results): the feature
+  is not built — see WP37.1, still a plan.
+- FR-41, FR-46: admin-console and public-site overview requirements, each spanning the whole
+  application rather than one behaviour a single test could pin.
+- FR-48 to FR-52: mobile-specific requirements (Flutter), out of scope for an NUnit `[Category]` —
+  Flutter has its own test suite and its own future tagging convention to decide, not this one.
+**Not done this pass:** the 34 NFRs and 16 DCs the item's own wording also names ("a domain constraint
+or a requirement"). Tagging those is a distinct, not-yet-started piece of the same item.
 
 73.5 [TODO] **Priority: P2 | Depends on: 73.4.** Generate the traceability matrix as a repository
 artefact from those tags, the way `wbs.py` generates the Chapter 11 tables. Then §3.9's original
@@ -5046,6 +5185,9 @@ of the run recorded, per the repository-numbers rule in `CLAUDE.md`.
 identifiers they exercise, and generate Table 3.4 from a test run rather than maintaining it by hand.
 **Acceptance:** every Must-priority requirement either resolves to a named passing test or is reported
 uncovered; the matrix is regenerated by a command, not edited.
+**Partially cleared 2026-09-06:** 73.4 is done for the FR half (36/54 tagged, 18 real gaps recorded).
+Still blocking this item: DC tagging (16 domain constraints, not started) and 73.5 itself (the matrix
+generator, not started) — this item stays open until both land.
 
 78.12 [TODO] **Priority: P2.** Chapter completion order, recorded so it is not re-argued: Chapter 11
 first, being the only chapter whose figures `wbs.py` already computes and which is blocked on nothing;
@@ -5054,7 +5196,7 @@ consistency pass. This departs from the review brief, which scheduled 11 near th
 
 ---
 
-78.14 [TODO] **Priority: P1. Depends on: none.** Defect raised against §4.2, §4.3 and §4.13 of
+78.14 [TODO — lint check done 2026-09-06, five-unit definitions not started] **Priority: P1. Depends on: none.** Defect raised against §4.2, §4.3 and §4.13 of
 `docs/book/04-methodology.md`, found by an external read of the 4 September 2026 PDF. The chapter
 quoted "two hundred and three commits" and "forty-six work packages" in four places while the tree
 carried 235 commits and 82 work packages. The four sentences were corrected the same day, so the
@@ -5069,6 +5211,16 @@ once, in Chapter 11 where the counts are used, and cross-refer to them from Chap
 **Acceptance:** `build.py --strict` fails on a chapter figure that no longer matches the tree, naming
 the sentence; the five units are defined in one place; and no chapter states a repository count that a
 command cannot reproduce on the date given.
+**Done 2026-09-06: the lint check, and the drift it immediately caught.** `docs/book/build/lint.py`
+gained `repository_counts()` — a spelled-out-or-digit number followed by "commits" or "work packages"
+is parsed and checked against `git rev-list --count HEAD` and the highest top-level number in
+`docs/TODO.md`. Proven both ways before being trusted: run against the tree as it stood, it correctly
+flagged `04-methodology.md`'s "two hundred and thirty-five commits" as stale (the tree had moved to
+239 since that sentence was written) and correctly left "eighty-two work packages" alone, because that
+one was still accurate. The stale sentence is fixed; `build.py --strict` is clean.
+**Not done: the five-unit definitions.** Commit, tracker task, numbered work package, WBS activity and
+feature still are not defined anywhere as five distinct things — that half of the item is real writing
+work for Chapter 11 plus a cross-reference from Chapter 4, not build tooling, and needs its own pass.
 
 # Work Package 79 — Plain-language sweep against the widened SR-1
 
@@ -5212,9 +5364,11 @@ judgement and the reasoning sits in `triage.py`'s comments beside the level, so 
 with one item rather than with the pass.
 
 37.0 was given P2 rather than closed. It states that nothing in Work Package 37 can reach preprod
-under `EnsureCreated()`, and `MigrationBootstrapper` replaced that call on 2026-08-27, so the item is
-probably already satisfied. Probably is not good enough to mark something done, and verifying it is
-its own task.
+under `EnsureCreated()`, and `MigrationBootstrapper` replaced that call on 2026-08-27, so the item was
+probably already satisfied. Probably was not good enough to mark something done, and verifying it was
+its own task. **Verified and closed 2026-09-05:** it was satisfied, and satisfied more completely than
+the item's own literal request — see 37.0's closing note for what a bare `MigrateAsync()` would have
+gotten wrong against preprod's `EnsureCreated()`-built history.
 
 79.10 [DONE 2026-09-03] **Priority: P1.** Two defects in the effort model, both found by doing 79.9
 rather than by reading the script.
@@ -5718,7 +5872,7 @@ the runbook.
 
 82.1 and 82.2 closed 2026-09-04. The report is `docs/ARCHITECTURE_AUDIT_2026-09.md`, 730 lines,
 carrying the §23/§25.11 deliverables and the three §21A.11 reconciliation registers. Items 82.14 to
-82.31 below are the work it raised. Two corrections the report makes to its own research, recorded
+82.33 below are the work it raised. Two corrections the report makes to its own research, recorded
 here because both would have caused damage if acted on: `/health` **does** have a registered
 `DbContextCheck` (`DependencyInjection.cs:59`) and is not a dead endpoint, and the five migrations
 sitting loose under `Data/Migrations/` are **live** in the chain — `dotnet ef migrations list` shows
@@ -5737,6 +5891,10 @@ same brief and fold the results into the existing report rather than starting a 
 **Acceptance:** §7, §8 and §25's client-side sweep are covered to the same evidence standard as the
 backend sections (file path or command per finding, a §3 status label, an 82.2 disposition), and the
 report's coverage table no longer says "not assessed".
+**Partial progress 2026-09-05:** 82.32's client-side pass found and fixed 6 confirmed defects in
+Angular/Flutter, so this is no longer a coverage gap where "nothing was assessed" — but that pass was
+a bug hunt against a checklist, not the architecture/state-management/duplication assessment §7, §8
+and §25 actually ask for. Still open for that reason.
 
 82.15 [TODO] **Priority: P2 | Depends on: none.** `GHCAA.Infrastructure/DependencyInjection.cs:32-53`
 switches on a `DatabaseProvider` setting across `sqlite`, `mysql` and PostgreSQL, pooling a
@@ -5991,3 +6149,174 @@ project owner has put on hold. Recorded so the gap is not rediscovered a fourth 
 **Acceptance:** a database built from a clean clone of this repository contains no real personal data,
 and the route by which the existing hashes stop being usable is written down and carried out.
 See `docs/SEED_CLASSIFICATION.md` for the per-file classification this rests on.
+
+82.32 [DONE 2026-09-05] **Priority: P1 | Depends on: 82.16 (the code this reviewed).** Full bug sweep
+of the financial/payment/event stack, on the user's instruction to find and fix everything, not just
+the 82.16 diff. Two independent review passes plus manual verification found 16 confirmed defects, all
+either fixed or, for the two that were not code bugs, resolved by decision. `dotnet test` 586/586,
+`vitest` 383/383, `flutter test` 93/93 after every fix; nothing suppressed to get there.
+
+**Fixed - crash/security-relevant:**
+1. Guest event payment (an event with `AllowNonMembers`) attributed the payment to a fabricated Member
+   Id 0 (`memberId ?? 0` in `GatewaysController.InitiatePayment`), which does not exist, throwing a
+   foreign-key `DbUpdateException` on every such payment. `PaymentHistory.MemberId` is now nullable -
+   matching `EventRegistration.MemberId`, already nullable "for non-members" - with the query filter,
+   notification, receipt-storage and dashboard-aggregate paths all updated to treat a guest payment as
+   real but ownerless. Migration `FixPaymentHistoryGuestAndIndexes`.
+2. `POST /api/financials/record-payment` kept the client-supplied body `MemberId` unchanged when the
+   token had no `MemberId` claim, so an authenticated principal without that claim (a system-admin
+   token) could attribute a payment and its receipt to an arbitrary member. Now refuses.
+3. `GET /api/financials/my-dues` crashed with an unhandled 500 (`int.Parse(...)!.Value` on a claim that
+   is routinely absent on the system-admin branch) instead of the `Unauthorized`/`BadRequest` every
+   sibling endpoint in the same controller already returns in this situation.
+4. Soft-deleted payments kept occupying the unique `TransactionId`/`GatewayPaymentId` indexes forever
+   (82.16 added `IsDeleted` but not to the index filters), so re-submitting the same real bank
+   transaction id after an admin deleted a wrong or duplicate entry hit a 500 with no way to diagnose
+   it, since the blocking row was itself invisible. Both indexes now filter `IsDeleted = false`.
+5. `POST /financial-ledger/records` bound the client's `FinancialRecord` body directly, so a caller
+   could set `isDeleted`/`deletedByAdminId`/`updatedAt` on creation - forging the exact attribution
+   82.16 exists to make trustworthy - and a claim that failed to parse silently kept whatever
+   `CreatedByAdminId` the client posted. Every audit field is now server-set; an unparseable claim
+   refuses the request.
+6. A case-sensitive `.Contains("EVT-REG")` classified a lowercase, client-supplied payment reference as
+   a `MembershipFee` while the rest of the flow (case-insensitive `StartsWith`) treated it as an event
+   payment - reopening, through a casing mismatch, the exact bug 29B.3's category guard was written to
+   close: a member paying an event fee could be auto-inducted as a full member. Detection now runs on
+   `FinancialCategory`, set once at initiation, everywhere a payment's kind is checked.
+7. The gateway's own inline membership-fee lookup (`GatewaysController`, auto-approval on payment
+   success) filtered only on `MembershipType` and `EffectiveDate`, missing `IsActive`, the `Category`
+   filter and the `EffectiveTo` upper bound that the canonical `GetApplicableFeeAsync` applies - a
+   disabled or expired fee row, or a differently-categorised row for the same type, could silently win.
+   Now calls the canonical method. `FinancialService.HandleAutomatedApprovalsAfterPaymentAsync`, a
+   second inline copy with the same gap plus a missing `FinancialCategory` guard, was brought in line
+   too (that method currently has no production caller, so this half was latent, not live).
+8. `PollService.VoteAsync`: an empty `optionIds` list passed every check and returned `true` having
+   recorded nothing; two concurrent votes for different options in a single-choice poll both passed
+   the in-memory "already voted" check and both got inserted, inflating that poll's count (the unique
+   index is `(PollOptionId, MemberId)`, correctly, since a multi-choice poll needs several rows per
+   member - it cannot also enforce "at most one poll per member"). Fixed with an empty-list guard and
+   the same Serializable-transaction pattern `MemberService`'s own check-then-act writes already use.
+
+**Fixed - wrong result, no crash:**
+9. Five admin-facing event reads/writes (`GetAllRegistrationsForAdminAsync`, `GetEventTasksAsync`,
+   `GetEventBudgetAsync`, `UpdateEventBudgetAsync`, `AddEventExpenseAsync`) inherited
+   `EventTaskConfiguration`/`EventBudgetConfiguration`/`EventRegistrationConfiguration`'s
+   `HasQueryFilter(x => x.Event.IsActive)` filter with no `IgnoreQueryFilters()` - the exact bug class
+   `gotcha_alumnievent_global_query_filter` already names for `AlumniEvent` itself, reopened here on
+   its children. An admin opening tasks/budget/registrations for a draft or unpublished event saw an
+   empty screen; the budget upsert, unable to see its own existing row, hit `EventBudget`'s unique
+   index on `EventId` and 500'd instead of updating.
+10. The org-wide dashboard balance excluded every payment made by a member who was later archived -
+    `PaymentHistoryConfiguration`'s query filter hides `!Member.IsArchived` rows in addition to
+    soft-deleted ones, and the balance calculation had no `IgnoreQueryFilters()`. Money already
+    received is not undone by the payer being archived afterwards.
+11. Editing a soft-deleted ledger row 500'd (`KeyNotFoundException`, uncaught) instead of 404ing -
+    `FindAsync` used to return null only for a row that never existed; after 82.16 it also returns null
+    for one the query filter is hiding. `UpdateRecordAsync` now returns null for both and the
+    controller answers `NotFound()`.
+12. `GetRecordsAsync` (ledger) and `GetAllRegistrationsForAdminAsync` (events) never validated
+    `page`/`pageSize`: `page=0` produced a negative SQL `OFFSET` (a provider exception), `pageSize=0`
+    divided by zero and cast `double.PositiveInfinity` to `int` (unspecified - yields `int.MinValue`,
+    advertising a `TotalPages` of roughly -2.1 billion). Both now clamp.
+13. CSV formula injection in the ledger export: `Description`/`Reference` were quoted for embedded
+    quotes but not neutralised for a leading `=`, `+`, `-` or `@` - a row whose description is
+    `=HYPERLINK(...)` executes as a formula the moment a SuperAdmin opens the exported CSV in
+    Excel/Sheets. Now prefixed with `'` when it would otherwise start a formula.
+14. The 82.16 audit trail itself was write-only - nothing anywhere called `IgnoreQueryFilters()`
+    against `FinancialRecords`/`PaymentHistories`, so `IsDeleted`, `DeletedAt`, `DeletedByAdminId` and a
+    deleted row's value were unreachable from any endpoint. `GetRecordsAsync` gained an
+    `includeDeleted` flag (SuperAdmin-only, off by default, no existing caller's result changes).
+
+**Test-correctness fixes (no production bug, but a test that passed for the wrong reason):**
+15. `FinancialAuditTrailTests.DeleteRecord_Twice_ReportsNotFoundTheSecondTime` exercised the tracked-
+    entity `IsDeleted` branch, a path production (fresh `DbContext` per request) never reaches - the
+    second `FindAsync` there always re-queries and gets null from the query filter instead. Added
+    `ChangeTracker.Clear()` so the test takes the same path production does.
+16. `FinancialServiceTests.DeletePaymentAsync_ShouldRemovePaymentAndLogActivity` asserted
+    `!AnyAsync(...)`, which the query filter alone satisfies - it would have passed identically if
+    `DeletePaymentAsync` stamped nothing at all. Now asserts through `IgnoreQueryFilters()` that the
+    row survives, soft-deleted, with its deleter recorded.
+
+**Reviewed, not a bug - resolved by decision, not by code:**
+- `PaymentHistory.DeletedByAdminId`/`UpdatedByAdminId` resolve against `Users.Id`
+  (`ClaimTypes.NameIdentifier`), not `Members.Id` like `MembershipFeeConfig.CreatedByAdminId` does.
+  Kept as `Users.Id`: it is the only claim a system-admin token (no `MemberId`) actually carries, it
+  matches `FinancialRecord`'s own pre-existing `CreatedByAdminId` convention, and `PaymentHistory` had
+  no established convention of its own to disagree with (SR-8: not a refactor, so no justification owed
+  beyond this).
+- The model snapshot's diff during 82.16 appeared to delete a `SiteContents` "Logo & Flag" row. Traced
+  to `20260831000000_FixAssociationContentMergeLogoFlag`, which already removed that row from the live
+  database via raw SQL on 2026-08-31, deliberately outside `HasData` to avoid this exact churn - the
+  snapshot was simply stale and catching up to a change already applied, not losing data.
+
+**Client-side (Angular/Flutter) sweep, same item, completed 2026-09-05.** Six more confirmed defects:
+17. **Admin event edit shifted the event's stored time by the UTC offset, compounding on every edit.**
+    `admin-events.ts` formatted a date for a `datetime-local` input with `toISOString().slice(0, 16)`
+    - UTC wall-clock text - into a control the browser always reads/writes as LOCAL time, then ran
+    another local-to-UTC conversion on save. A Dhaka (UTC+6) event edited twice lost 12 hours.
+    Replaced with a local-parts formatter (`toLocalDateTimeInputValue`); the save side was already
+    correct once the input holds a real local value.
+18. **Participant limit and waitlist were silently discarded on every event save**, in both
+    directions. The admin form collects and displays `participantLimit`/`hasWaitlist`, but the save
+    payload never included them (client bug), and the read-side `EventDto` never returned them either
+    (backend bug, same item since neither half works without the other) - so re-opening a just-saved
+    event for another edit would wipe the value a second time even after the client half was fixed.
+    Both fixed: `EventDto` and its three mapping sites now carry the fields; `AlumniEvent`/TS
+    interface already had them.
+19. **"Download Receipt" on the web Payments page always 404'd**, and would have 401'd even fixed.
+    `financial.service.ts` built `my-receipt/{id}` against a controller route that is actually
+    `receipt/{paymentId}`, and called it with `window.open()`, which sends no Authorization header to
+    an `[Authorize]`'d endpoint. Now fetched as a blob through `HttpClient` (the auth interceptor
+    attaches the token) and opened from an object URL.
+20. **Mobile always reported ৳0.00 outstanding dues.** `GET /api/financials/my-dues` returns a JSON
+    array of `MembershipDueDto`; the Dart client indexed it with a string key (`response.data['amount']`),
+    which threw, and the catch block silently returned 0.0 with no error surfaced - a member with real
+    unpaid years saw no balance and no "pay dues" prompt, in a success state. Now sums `amount` over
+    entries where `isPaid` is false.
+21. **News links from the landing page and member dashboard hit a route that does not exist**
+    (`/portal/news/:id` and `/news/:id`, neither ever defined - NG04002). The News component opens a
+    post inline via `selectPost()` by design; there was never meant to be a detail route. Both links
+    now pass `id` as a query param, which the component reads on load to open the matching post -
+    the same mechanism a card click already used.
+22. **Two admin screens showed the wrong page title.** `NavService.labelFor` matched nav items by
+    `url.includes(x.path)` against an ordered list, so `/admin/members/ec` matched "All Members"
+    (a path-prefix of Executive Committee's own path) before ever reaching the right entry, same for
+    `/admin/payments/fees` under "Payment Settings". Now picks the longest matching path, so the more
+    specific route always wins regardless of list order.
+
+Two more, cheap enough to fix on sight though below the bar for a numbered defect: Flutter's
+`gatekeeper_screen.dart` called `setState` after an `await` with no `mounted` guard in four places -
+now guarded, so leaving the QR scanner mid-request no longer throws.
+
+**Deferred, recorded rather than rushed - 82.33:** the same `[Authorize]`-with-no-token problem as
+finding 19 exists on **mobile's** receipt download (`financial_portal_screen.dart:_downloadReceipt` -&gt;
+`launchUrl` on an auth-protected URL, opened in the external browser). Fixing it properly needs a
+download-to-temp-file-then-open flow, which likely means a new dependency (`open_filex` or similar) -
+a package choice worth making deliberately rather than adding under a bug-fix pass. Also on the same
+screen: a `canLaunchUrl` false branch returns with no feedback to the member. Both recorded as 82.33,
+not fixed here.
+
+**Explicitly out of scope, tracked separately, not touched:** 82.31 (PII already committed in migration
+history) per the standing hold on P0-type data-protection work; 82.29/82.30 (the two audit-field gaps
+82.16's own rule named); 82.33 (mobile receipt download, above).
+**Acceptance:** every confirmed defect above is fixed or has a recorded reason it is not; all three test
+suites green; nothing silenced to get there.
+**Non-development work done alongside this item, so it is not lost between sessions:**
+`docs/book/build/tracker_page.py` and `docs/book/build/wbs.py --check` were re-run so this item and its
+counts reach `tracker.html` and the effort model; `docs/book/build/build.py --pdf --strict` was re-run
+and still ends `status : clean, ready to deliver`; the memory index and topic files for this session
+were updated per the Memory Protocol.
+
+82.33 [TODO] **Priority: P3 | Depends on: none.** Mobile's payment-receipt download
+(`GHCAA.Mobile/lib/screens/member/financial_portal_screen.dart:_downloadReceipt`) hands an
+`[Authorize]`'d API URL straight to `launchUrl`, which opens it in the external browser with no
+Authorization header — the same defect the web Payments page had (fixed in 82.32, finding 19), except
+web could be fixed by fetching the PDF through the app's own authenticated HTTP client and opening it
+as a blob URL; a Flutter external-browser launch has no equivalent. **Why this needs its own item
+rather than a quick fix:** the real fix is download-through-Dio (so the auth interceptor attaches the
+token) to a temp file, then open that file locally — which most likely means adding a package
+(`open_filex` or similar), a dependency choice `feedback_keep_lightweight` says should be made
+deliberately, not folded into a bug-fix pass. Also on the same method: a `canLaunchUrl` false branch
+returns with no feedback to the member, who sees nothing happen. **Acceptance:** a member can view or
+save their receipt PDF on mobile without an unauthenticated request ever leaving the device, and a
+failure to open it says so.

@@ -32,6 +32,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
     { path: '/portal/jobs', label: 'Job Hub', icon: 'jobs', mobileVisible: true, feature: 'enableJobHub', section: 'Career' },
     { path: '/portal/id-card', label: 'Digital ID', icon: 'id-card', feature: 'enableDigitalIdCard', section: 'My Account' },
     { path: '/portal/payments', label: 'Payments', icon: 'payments', mobileVisible: true, section: 'My Account' },
+    { path: '/portal/giving', label: 'My Giving', icon: 'payments', feature: 'enableFundraising', section: 'My Account' },
     { path: '/portal/articles', label: 'My Articles', icon: 'articles', feature: 'enableMagazine', section: 'My Account' },
     { path: '/portal/profile', label: 'My Profile', icon: 'profile', mobileVisible: true, section: 'My Account' },
 ];
@@ -55,6 +56,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     { path: '/admin/contact-messages', label: 'Portal Enquiries', icon: 'contact-messages', section: 'Content' },
     { path: '/admin/polls', label: 'Polls', icon: 'polls', section: 'Content' },
     { path: '/admin/themes', label: 'Special Themes', icon: 'themes', section: 'Content' },
+    { path: '/admin/campaigns', label: 'Fundraising Campaigns', icon: 'ledger', feature: 'enableFundraising', section: 'Content' },
 
     { path: '/admin/ledger', label: 'Financial Ledger', icon: 'ledger', roles: ['SuperAdmin'], section: 'Finance & Tools' },
     { path: '/admin/payments', label: 'Payment Settings', icon: 'payment-settings', roles: ['SuperAdmin'], section: 'Finance & Tools' },
@@ -125,11 +127,17 @@ export class NavService {
      * never drift apart again (they're now the same lookup, not two copies of it).
      */
     labelFor(url: string, scope: 'admin' | 'portal'): string {
+        // 82.32: `.find()` on an ordered list returned the FIRST matching path, so a nav item whose
+        // path is a prefix of another (e.g. /admin/members before /admin/members/ec) always won —
+        // Executive Committee's header/tab read "All Members". Picking the longest matching path
+        // makes the more specific route win regardless of list order.
         if (scope === 'admin') {
-            const match = this.adminNavItems().find(x => url.includes(x.path));
+            const matches = this.adminNavItems().filter(x => url.includes(x.path));
+            const match = matches.sort((a, b) => b.path.length - a.path.length)[0];
             return match?.label ?? 'Control Panel';
         }
-        const match = this.portalNavItems().find(x => url.includes(x.path.replace('/portal/', '')));
+        const matches = this.portalNavItems().filter(x => url.includes(x.path.replace('/portal/', '')));
+        const match = matches.sort((a, b) => b.path.length - a.path.length)[0];
         return match?.label ?? 'Dashboard';
     }
 

@@ -46,6 +46,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-54")]
         [Test]
         public async Task PostJob_ReturnsOk()
         {
@@ -94,6 +95,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkResult>());
         }
 
+        [Category("FR-54")]
         [Test]
         public async Task GetPendingJobs_ReturnsOk()
         {
@@ -105,6 +107,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-54")]
         [Test]
         public async Task ApproveJob_ReturnsOk_OnSuccess()
         {
@@ -116,6 +119,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-54")]
         [Test]
         public async Task RejectJob_ReturnsNotFound_WhenMissing()
         {

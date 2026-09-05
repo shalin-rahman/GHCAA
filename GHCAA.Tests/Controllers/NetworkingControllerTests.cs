@@ -23,6 +23,7 @@ namespace GHCAA.Tests.Controllers
             _controller = new NetworkingController(_networkingServiceMock.Object);
         }
 
+        [Category("FR-05")]
         [Test]
         public async Task Search_ReturnsOk()
         {

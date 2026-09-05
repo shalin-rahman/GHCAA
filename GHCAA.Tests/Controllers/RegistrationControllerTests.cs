@@ -28,6 +28,7 @@ namespace GHCAA.Tests.Controllers
             _controller = new RegistrationController(_memberServiceMock.Object, _fileValidationServiceMock.Object);
         }
 
+        [Category("FR-01")]
         [Test]
         public async Task Register_ReturnsCreatedAtAction()
         {
@@ -40,6 +41,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<CreatedAtActionResult>());
         }
 
+        [Category("FR-02")]
         [Test]
         public async Task GetStatus_ReturnsOk()
         {

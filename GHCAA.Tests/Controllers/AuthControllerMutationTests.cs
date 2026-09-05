@@ -93,6 +93,7 @@ namespace GHCAA.Tests.Controllers
 
         // --- GoogleLogin ---
 
+        [Category("FR-10")]
         [Test]
         public async Task GoogleLogin_ReturnsOk_OnSuccess()
         {
@@ -106,6 +107,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That((result as OkObjectResult)!.Value, Is.EqualTo(responseDto));
         }
 
+        [Category("FR-10")]
         [Test]
         public async Task GoogleLogin_ReturnsUnauthorized_OnFailure()
         {
@@ -119,6 +121,7 @@ namespace GHCAA.Tests.Controllers
 
         // --- FacebookLogin ---
 
+        [Category("FR-10")]
         [Test]
         public async Task FacebookLogin_ReturnsOk_OnSuccess()
         {
@@ -132,6 +135,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That((result as OkObjectResult)!.Value, Is.EqualTo(responseDto));
         }
 
+        [Category("FR-10")]
         [Test]
         public async Task FacebookLogin_ReturnsUnauthorized_OnFailure()
         {
@@ -145,6 +149,7 @@ namespace GHCAA.Tests.Controllers
 
         // --- Refresh ---
 
+        [Category("FR-11")]
         [Test]
         public async Task Refresh_ReturnsOk_WhenRotationSucceedsAndUserIsActive()
         {
@@ -159,6 +164,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-11")]
         [Test]
         public async Task Refresh_ReturnsUnauthorized_WhenNoRefreshTokenCookie()
         {
@@ -167,6 +173,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
         }
 
+        [Category("FR-11")]
         [Test]
         public async Task Refresh_ReturnsUnauthorized_WhenRefreshTokenIsInvalidOrExpired()
         {
@@ -179,6 +186,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
         }
 
+        [Category("FR-11")]
         [Test]
         public async Task Refresh_ReturnsUnauthorized_WhenUserIsInactive()
         {
@@ -194,6 +202,7 @@ namespace GHCAA.Tests.Controllers
 
         // --- RefreshMobile ---
 
+        [Category("FR-11")]
         [Test]
         public async Task RefreshMobile_ReturnsOk_WhenRotationSucceedsAndUserIsActive()
         {
@@ -207,6 +216,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-11")]
         [Test]
         public async Task RefreshMobile_ReturnsUnauthorized_WhenRefreshTokenIsInvalidOrExpired()
         {
@@ -218,6 +228,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
         }
 
+        [Category("FR-11")]
         [Test]
         public async Task RefreshMobile_ReturnsUnauthorized_WhenUserIsArchived()
         {
@@ -232,6 +243,7 @@ namespace GHCAA.Tests.Controllers
 
         // --- Logout ---
 
+        [Category("FR-11")]
         [Test]
         public async Task Logout_ReturnsOk_AndRevokesTokens_WhenUserIdClaimPresent()
         {
@@ -245,6 +257,7 @@ namespace GHCAA.Tests.Controllers
             _tokenServiceMock.Verify(x => x.RevokeAllRefreshTokensAsync(5, It.IsAny<CancellationToken>()), Times.Once);
         }
 
+        [Category("FR-11")]
         [Test]
         public async Task Logout_ReturnsOk_ButSkipsRevocation_WhenNoUserIdClaim()
         {
@@ -324,6 +337,7 @@ namespace GHCAA.Tests.Controllers
 
         // --- ResetPassword ---
 
+        [Category("FR-09")]
         [Test]
         public async Task ResetPassword_ReturnsOk_OnSuccess()
         {
@@ -335,6 +349,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-09")]
         [Test]
         public async Task ResetPassword_ReturnsBadRequest_WhenTokenIsInvalidOrExpired()
         {

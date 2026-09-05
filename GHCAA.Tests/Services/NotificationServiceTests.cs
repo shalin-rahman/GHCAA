@@ -31,7 +31,8 @@ public class NotificationServiceTests : TestBase
 
     // ── CreateNotificationAsync — preference gate ────────────────────────────
 
-    [Test]
+    [Category("FR-30")]
+        [Test]
     public async Task CreateNotification_WhenEventOptedIn_ShouldPersistNotification()
     {
         var member = await CreateAndSaveTestMemberAsync();
@@ -48,7 +49,8 @@ public class NotificationServiceTests : TestBase
         saved[0].IsRead.Should().BeFalse();
     }
 
-    [Test]
+    [Category("FR-30")]
+        [Test]
     public async Task CreateNotification_WhenEventOptedOut_ShouldSkipNotification()
     {
         var member = await CreateAndSaveTestMemberAsync();
@@ -65,7 +67,8 @@ public class NotificationServiceTests : TestBase
             Times.Never);
     }
 
-    [Test]
+    [Category("FR-30")]
+        [Test]
     public async Task CreateNotification_ParticipationApproval_RespectsOptOut()
     {
         var member = await CreateAndSaveTestMemberAsync();
@@ -79,7 +82,8 @@ public class NotificationServiceTests : TestBase
         _context.Notifications.Where(n => n.MemberId == member.Id).Should().BeEmpty();
     }
 
-    [Test]
+    [Category("FR-30")]
+        [Test]
     public async Task CreateNotification_RegistrationUpdate_RespectsOptOut()
     {
         var member = await CreateAndSaveTestMemberAsync();
@@ -93,7 +97,8 @@ public class NotificationServiceTests : TestBase
         _context.Notifications.Where(n => n.MemberId == member.Id).Should().BeEmpty();
     }
 
-    [Test]
+    [Category("FR-30")]
+        [Test]
     public async Task CreateNotification_DirectMessage_AlwaysDelivered_RegardlessOfPreferences()
     {
         var member = await CreateAndSaveTestMemberAsync();
@@ -130,7 +135,8 @@ public class NotificationServiceTests : TestBase
 
     // ── GetUserNotificationsAsync ─────────────────────────────────────────────
 
-    [Test]
+    [Category("FR-30")]
+        [Test]
     public async Task GetUserNotifications_ShouldReturnOnlyMembersOwnNotifications()
     {
         var m1 = await CreateAndSaveTestMemberAsync("Member One", "m1@test.com", "01711111111", "1111111111");

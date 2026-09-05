@@ -47,6 +47,7 @@ namespace GHCAA.Tests.Controllers
             };
         }
 
+        [Category("FR-08")]
         [Test]
         public async Task Login_ReturnsOk_OnSuccess()
         {
@@ -68,6 +69,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(okResult!.Value, Is.EqualTo(responseDto));
         }
 
+        [Category("FR-08")]
         [Test]
         public async Task Login_ReturnsUnauthorized_OnFailure()
         {

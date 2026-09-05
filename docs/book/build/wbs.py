@@ -165,22 +165,31 @@ DOCS = [
 # (id, activity, basis, hours, additive)
 ASSUMED = [
     ("U3", "Formal technical review sessions",
-     "3 sessions. Two specification reviews (3 and 29 July 2026) x (2h preparation + 2h session + "
-     "1h logging), whose output was the 5 specification defects of Table 3.8; plus the architecture "
-     "and engineering audit of 4 September 2026 against the brief in docs/materials/REVIEW.md, "
-     "recorded in docs/ARCHITECTURE_AUDIT_2026-09.md, at 5h. That third session is a design review "
-     "rather than a specification review, and its output was 15 tracker items (82.14-82.28) rather "
-     "than specification defects",
-     15.0, True),
+     "2 sessions, corrected 2026-09-06 from an earlier claim of 3. docs/BUSINESS_FINDINGS.md's own "
+     "row count is unchanged (132) in every commit since 3 July 2026, which is the evidence that the "
+     "specification review was one session that day, not two on 3 and 29 July as previously stated — "
+     "the 29 July commit that touches the file edits an unrelated mobile-CI row, not a specification "
+     "finding. One session (2h preparation + 2h session + 1h logging = 5h), whose output was the 5 "
+     "specification defects of Table 3.8; plus the architecture and engineering audit of 4 September "
+     "2026 against the brief in docs/materials/REVIEW.md, recorded in "
+     "docs/ARCHITECTURE_AUDIT_2026-09.md, at 5h. That second session is a design review rather than a "
+     "specification review, and its output was 15 tracker items (82.14-82.28) rather than "
+     "specification defects",
+     10.0, True),
     ("U4", "Stakeholder discussion",
      "18 feedback work packages x 30 min of discussion; triage into tracker items is excluded, being "
      "already counted under D4",
      9.0, True),
     ("U5", "Deployment incident response",
-     "4 dated incidents x 2h diagnosis before the first fix commit. Not additive: those four dates "
-     "carry 9, 7, 10 and 2 commits, among the busiest in the project, so the fix work already sits "
-     "inside the measured commit-days",
-     8.0, False),
+     "2 confirmed dated incidents, corrected 2026-09-06 from a previously claimed 4. Commit-message "
+     "content on 2026-08-27 (9 commits) matches the MigrationBootstrapper legacy-database incident; "
+     "2026-08-28 (7 commits) matches two incidents diagnosed and fixed the same day (stale-chunk "
+     "caching after deploy, and the AuthService NG0200 bug). No commit-message evidence was found "
+     "tying any other date to a deployment incident, so the other two originally-claimed incidents "
+     "are dropped rather than carried on an unverified count. 2h diagnosis each before the first fix "
+     "commit. Not additive: those two dates carry 9 and 7 commits, among the busiest in the project, "
+     "so the fix work already sits inside the measured commit-days",
+     4.0, False),
 ]
 
 HOURS_PER_DAY = 8.0
@@ -234,7 +243,11 @@ def commit_days(paths):
 # version the requirements cite.
 PRE = [
     ("P1", "Governing-document study: constitution and election code", 10, [],
-     "43,000 words classified clause by clause into 16 constraints"),
+     "13,800 words (the constitution plus the 8 election documents, measured directly from "
+     "GHCAA.Infrastructure/Data/Seed/constitution.json and docs/Elections/*.md, corrected 2026-09-06 "
+     "from an earlier, unsourced figure of 43,000) classified clause by clause into 16 constraints. "
+     "The day count below was not independently re-derived from the corrected word count and may be "
+     "high for it — confirm or revise"),
     ("P2", "Requirements elicitation: interviews and observation", 5, ["P1"],
      "10 participants at 30-40 min, plus guides and write-up"),
     ("P3", "Requirements analysis and specification", 8, ["P1", "P2"],

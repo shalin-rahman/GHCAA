@@ -53,5 +53,8 @@ namespace GHCAA.Domain
 
         // Communication Template Enums
         public enum MessageChannel { Email, Sms }
+
+        // Fundraising Enums (TODO 37.3)
+        public enum PledgeStatus { Pledged, PartiallyPaid, Paid, Lapsed, Cancelled }
     }
 }

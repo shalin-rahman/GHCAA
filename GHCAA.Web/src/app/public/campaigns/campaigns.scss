@@ -1,0 +1,129 @@
+.campaigns-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.loading-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 4rem 0;
+}
+
+.page-title {
+  margin-bottom: 1.5rem;
+}
+
+.campaign-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.campaign-card {
+  display: block;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  padding: 1rem;
+  text-decoration: none;
+  color: inherit;
+
+  .cover {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+  }
+}
+
+.progress-bar {
+  background: var(--surface-muted, #eee);
+  border-radius: 999px;
+  height: 10px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+
+  &.large {
+    height: 16px;
+  }
+}
+
+.progress-fill {
+  background: var(--accent-color, #16a34a);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.cover-large {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.story {
+  white-space: pre-line;
+  margin: 1rem 0 2rem;
+}
+
+.pledge-form,
+.honour-roll {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color, #e0e0e0);
+
+  label {
+    display: block;
+    margin-bottom: 0.75rem;
+
+    input, textarea {
+      display: block;
+      width: 100%;
+      margin-top: 0.25rem;
+      padding: 0.5rem;
+    }
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    input { width: auto; }
+  }
+}
+
+.pledge-note {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  margin-top: 0.5rem;
+}
+
+.tier {
+  margin-bottom: 1rem;
+}
+
+.donor-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  border-bottom: 1px dashed var(--border-color, #e0e0e0);
+}
+
+.empty-msg {
+  opacity: 0.7;
+  padding: 2rem 0;
+  text-align: center;
+}

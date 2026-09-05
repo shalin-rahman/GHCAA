@@ -1,0 +1,102 @@
+<div class="admin-feature reveal-top">
+  @if (!showForm() && !selectedCampaign()) {
+    <app-page-header title="Fundraising Campaigns"
+        [total]="campaigns().length"
+        emptySubtitle="Create and manage fundraising campaigns">
+        <small subtitle>Showing {{ filteredCampaigns().length }} of {{ campaigns().length }} campaigns</small>
+        <div actions>
+            <button (click)="openCreateForm()" class="btn btn-accent">+ New Campaign</button>
+        </div>
+    </app-page-header>
+
+    <app-search-bar [value]="searchTerm()" (valueChange)="searchTerm.set($event)" placeholder="Search campaigns…" />
+
+    @if (loading()) {
+      <div class="loading-wrap"><app-logo-spinner [size]="80" /></div>
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr><th>Title</th><th>Progress</th><th>Active</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          @for (c of filteredCampaigns(); track c.id) {
+            <tr>
+              <td>{{ c.title }}</td>
+              <td>৳{{ c.amountReceived | number }} / ৳{{ c.targetAmount | number }}</td>
+              <td>{{ c.isActive ? 'Yes' : 'No' }}</td>
+              <td>
+                <button (click)="openEditForm(c)" class="btn btn-sm">Edit</button>
+                <button (click)="viewPledges(c)" class="btn btn-sm">Pledges</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    <section class="tiers-section">
+      <h2>Donor Recognition Tiers</h2>
+      <ul class="tier-list">
+        @for (t of tiers(); track t.id) {
+          <li>{{ t.name }} — minimum ৳{{ t.minimumAmount | number }}</li>
+        }
+      </ul>
+      <div class="tier-form">
+        <input type="text" [(ngModel)]="newTier.name" placeholder="Tier name (e.g. Gold Patron)" />
+        <input type="number" [(ngModel)]="newTier.minimumAmount" placeholder="Minimum amount" />
+        <input type="text" [(ngModel)]="newTier.description" placeholder="Description (optional)" />
+        <button (click)="addTier()" class="btn btn-sm">Add Tier</button>
+      </div>
+    </section>
+  } @else if (showForm()) {
+    <div class="campaign-form-page">
+      <h2>{{ editingId() ? 'Edit Campaign' : 'New Campaign' }}</h2>
+      <label>Title <input type="text" [(ngModel)]="form.title" /></label>
+      <label>Slug (used in the public URL) <input type="text" [(ngModel)]="form.slug" /></label>
+      <label>Story <textarea [(ngModel)]="form.story" rows="6"></textarea></label>
+      <label>Cover image path (optional) <input type="text" [(ngModel)]="form.coverImagePath" /></label>
+      <label>Target amount (৳) <input type="number" min="1" [(ngModel)]="form.targetAmount" /></label>
+      <label>Starts on <input type="date" [(ngModel)]="form.startsOn" /></label>
+      <label>Ends on (optional) <input type="date" [(ngModel)]="form.endsOn" /></label>
+      <label class="checkbox-row"><input type="checkbox" [(ngModel)]="form.isActive" /> Active (visible on the public site)</label>
+      @if (editingId()) {
+        <label class="checkbox-row"><input type="checkbox" [(ngModel)]="form.isArchived" /> Archived</label>
+      }
+      <div class="form-actions">
+        <button (click)="submitCampaign()" class="btn btn-accent">Save</button>
+        <button (click)="showForm.set(false)" class="btn">Cancel</button>
+      </div>
+    </div>
+  } @else if (selectedCampaign()) {
+    <div class="pledges-page">
+      <button (click)="closeDetail()" class="btn btn-sm">&larr; Back</button>
+      <h2>Pledges — {{ selectedCampaign()!.title }}</h2>
+      @if (pledgesLoading()) {
+        <div class="loading-wrap"><app-logo-spinner [size]="80" /></div>
+      } @else if (pledges().length === 0) {
+        <p class="empty-msg">No pledges yet.</p>
+      } @else {
+        <table class="data-table">
+          <thead>
+            <tr><th>Donor</th><th>Pledged</th><th>Received</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            @for (p of pledges(); track p.id) {
+              <tr>
+                <td>{{ p.donorName }} @if (p.isAnonymous) { <em>(anonymous publicly)</em> }</td>
+                <td>৳{{ p.amount | number }}</td>
+                <td>৳{{ p.amountReceived | number }}</td>
+                <td><span class="status-badge" [class]="getPledgeStatusClass(p.status)">{{ getPledgeStatusLabel(p.status) }}</span></td>
+                <td>
+                  @if (p.amountReceived === 0) {
+                    <button (click)="confirmReceipt(p)" class="btn btn-sm btn-accent">Confirm Receipt</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  }
+</div>

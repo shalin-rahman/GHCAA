@@ -54,7 +54,9 @@ namespace GHCAA.Infrastructure.Services
                     RegistrationEndDate = e.RegistrationEndDate,
                     AdminNote = null, // Secure: Do not leak AdminNote in public listing
                     ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected),
-                    RequiresRegistration = e.RequiresRegistration
+                    RequiresRegistration = e.RequiresRegistration,
+                    ParticipantLimit = e.ParticipantLimit,
+                    HasWaitlist = e.HasWaitlist
                 })
                 .ToListAsync(cancellationToken);
         }
@@ -84,7 +86,9 @@ namespace GHCAA.Infrastructure.Services
                     RegistrationEndDate = e.RegistrationEndDate,
                     AdminNote = e.AdminNote,
                     ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected),
-                    RequiresRegistration = e.RequiresRegistration
+                    RequiresRegistration = e.RequiresRegistration,
+                    ParticipantLimit = e.ParticipantLimit,
+                    HasWaitlist = e.HasWaitlist
                 })
                 .ToListAsync(cancellationToken);
         }
@@ -110,7 +114,9 @@ namespace GHCAA.Infrastructure.Services
                 RegistrationEndDate = e.RegistrationEndDate,
                 AdminNote = null, // Secure: Do not leak AdminNote in public detail view
                 ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected),
-                RequiresRegistration = e.RequiresRegistration
+                RequiresRegistration = e.RequiresRegistration,
+                ParticipantLimit = e.ParticipantLimit,
+                HasWaitlist = e.HasWaitlist
             };
         }
 

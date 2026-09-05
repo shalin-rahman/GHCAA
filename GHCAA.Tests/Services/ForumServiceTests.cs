@@ -70,6 +70,7 @@ namespace GHCAA.Tests.Services
         // FindAsync, which honors that filter, so an admin could never reach (and soft-delete) a
         // topic orphaned under an already-deactivated category. It now uses
         // IgnoreQueryFilters().FirstOrDefaultAsync so the row is still reachable.
+        [Category("FR-44")]
         [Test]
         public async Task DeleteTopicAsync_ShouldSoftDelete_TopicHiddenByQueryFilter_ViaIgnoreQueryFilters()
         {
@@ -122,6 +123,7 @@ namespace GHCAA.Tests.Services
         // (Author == null || !Author.IsArchived). DeletePostAsync now uses
         // IgnoreQueryFilters().FirstOrDefaultAsync so a superadmin can still moderate a post whose
         // author has since been archived.
+        [Category("FR-44")]
         [Test]
         public async Task DeletePostAsync_ShouldSoftDelete_PostHiddenByQueryFilter_ViaIgnoreQueryFilters()
         {

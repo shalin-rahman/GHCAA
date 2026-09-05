@@ -287,6 +287,8 @@ export interface AlumniEvent {
     allowNonMembers: boolean;
     participantCount?: number;
     requiresRegistration: boolean;
+    participantLimit?: number | null;
+    hasWaitlist?: boolean;
 }
 
 
@@ -576,4 +578,87 @@ export interface CreateForumPostDto {
     topicId: number;
     content: string;
     parentPostId?: number;
+}
+
+// TODO 37.3: fundraising campaigns + donor honour roll.
+export type PledgeStatus = 'Pledged' | 'PartiallyPaid' | 'Paid' | 'Lapsed' | 'Cancelled';
+
+export interface Campaign {
+    id: number;
+    title: string;
+    slug: string;
+    story: string;
+    coverImagePath?: string;
+    targetAmount: number;
+    amountReceived: number;
+    startsOn: string | Date;
+    endsOn?: string | Date;
+    isActive: boolean;
+    isArchived?: boolean;
+}
+
+export interface CreateCampaignPayload {
+    title: string;
+    slug: string;
+    story: string;
+    coverImagePath?: string;
+    targetAmount: number;
+    startsOn: string | Date;
+    endsOn?: string | Date;
+    isActive: boolean;
+}
+
+export interface UpdateCampaignPayload extends CreateCampaignPayload {
+    id: number;
+    isArchived: boolean;
+}
+
+export interface CampaignPledge {
+    id: number;
+    campaignId: number;
+    memberId?: number | null;
+    donorName: string;
+    amount: number;
+    amountReceived: number;
+    status: PledgeStatus;
+    isAnonymous: boolean;
+    message?: string;
+    pledgedAt: string | Date;
+}
+
+export interface CreatePledgePayload {
+    amount: number;
+    donorName?: string;
+    donorEmail?: string;
+    donorPhone?: string;
+    isAnonymous: boolean;
+    message?: string;
+}
+
+export interface DonorRecognitionTier {
+    id: number;
+    name: string;
+    minimumAmount: number;
+    description?: string;
+}
+
+export interface HonourRollEntry {
+    displayName: string;
+    amountReceived: number;
+    message?: string;
+}
+
+export interface HonourRollTier {
+    tierName: string;
+    minimumAmount: number;
+    donors: HonourRollEntry[];
+}
+
+export interface CampaignHonourRoll {
+    targetAmount: number;
+    totalReceived: number;
+    progressPercent: number;
+    donorCount: number;
+    tiers: HonourRollTier[];
+    untiered: HonourRollEntry[];
 }

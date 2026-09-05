@@ -18,7 +18,8 @@ public class SiteContentServiceTests : TestBase
         await _context.SaveChangesAsync();
     }
 
-    [Test]
+    [Category("FR-45")]
+        [Test]
     public async Task GetActiveByGroupAsync_FiltersByGroupAndActive_OrderedByDisplayOrder()
     {
         _context.SiteContents.AddRange(
@@ -36,7 +37,8 @@ public class SiteContentServiceTests : TestBase
         results[1].Key.Should().Be("a2");
     }
 
-    [Test]
+    [Category("FR-45")]
+        [Test]
     public async Task CreateAsync_SanitizesBodyHtml()
     {
         var dto = new UpsertSiteContentDto
@@ -53,7 +55,9 @@ public class SiteContentServiceTests : TestBase
         result.BodyHtml.Should().Contain("Safe");
     }
 
-    [Test]
+    [Category("FR-45")]
+        [Category("FR-43")]
+        [Test]
     public async Task UpdateAsync_PersistsChangesAndStampsAdmin()
     {
         var created = await _service.CreateAsync(
@@ -70,7 +74,8 @@ public class SiteContentServiceTests : TestBase
         saved.LastModified.Should().NotBeNull();
     }
 
-    [Test]
+    [Category("FR-45")]
+        [Test]
     public async Task DeleteAsync_ReturnsFalse_WhenMissing()
     {
         (await _service.DeleteAsync(9999)).Should().BeFalse();

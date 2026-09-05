@@ -289,6 +289,106 @@ def abstract_word_count(front_path):
     return []
 
 
+_ONES = {"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7,
+         "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12, "thirteen": 13,
+         "fourteen": 14, "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18,
+         "nineteen": 19}
+_TENS = {"twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70,
+         "eighty": 80, "ninety": 90}
+
+
+def _words_to_int(phrase):
+    """Parse a spelled-out English integer up to a few thousand, or return None.
+
+    Only needs to cover how this book actually phrases a repository count:
+    "eighty-two", "two hundred and thirty-five". Not a general parser.
+    """
+    words = re.split(r"[\s-]+", phrase.lower().strip())
+    words = [w for w in words if w and w != "and"]
+    if not words:
+        return None
+    total = 0
+    current = 0
+    for w in words:
+        if w in _ONES:
+            current += _ONES[w]
+        elif w in _TENS:
+            current += _TENS[w]
+        elif w == "hundred":
+            current = (current or 1) * 100
+        elif w == "thousand":
+            total += (current or 1) * 1000
+            current = 0
+        else:
+            return None
+    return total + current
+
+
+_NUMBER_WORD = r"[A-Za-z]+(?:[\s-]+[A-Za-z]+){0,4}"
+REPO_COUNT_PATTERNS = [
+    (re.compile(r"(?:\b(\d[\d,]*)\b|\b(" + _NUMBER_WORD + r")\b)\s+commits\b", re.I),
+     "commit", lambda: _git_commit_count()),
+    (re.compile(r"(?:\b(\d[\d,]*)\b|\b(" + _NUMBER_WORD + r")\b)\s+work packages\b", re.I),
+     "work package", lambda: _todo_work_package_count()),
+]
+
+
+def _git_commit_count():
+    import subprocess
+    try:
+        out = subprocess.run(["git", "rev-list", "--count", "HEAD"], capture_output=True,
+                              text=True, check=True, cwd=os.path.dirname(os.path.abspath(__file__)))
+        return int(out.stdout.strip())
+    except Exception:
+        return None
+
+
+def _todo_work_package_count():
+    """The highest top-level number `docs/TODO.md` has reached — matching how the
+
+    chapters phrase it ("eighty-two work packages" = numbering reached 82), not
+    a count of distinct numbers in use, since renumbering can leave gaps.
+    """
+    todo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "TODO.md")
+    if not os.path.exists(todo_path):
+        return None
+    text = io.open(todo_path, encoding="utf-8").read()
+    numbers = [int(n) for n in re.findall(r"(?m)^(\d+)\.\d+[a-zA-Z]?\s*\[", text)]
+    return max(numbers) if numbers else None
+
+
+def repository_counts(paths):
+    """A quoted repository count (commits, work packages), digits or words,
+
+    checked against what the tree gives right now. Repository numbers drift
+    every time work is added; this is what makes the drift a build failure
+    instead of a defect an external reader has to find, per the repository-
+    numbers rule in CLAUDE.md.
+    """
+    problems = []
+    live = {}
+    for path in paths:
+        for number, text in _prose_lines(path):
+            for pattern, kind, get_live in REPO_COUNT_PATTERNS:
+                for match in pattern.finditer(text):
+                    digit_group, word_group = match.group(1), match.group(2)
+                    if digit_group:
+                        quoted = int(digit_group.replace(",", ""))
+                    else:
+                        quoted = _words_to_int(word_group)
+                        if quoted is None:
+                            continue
+                    if kind not in live:
+                        live[kind] = get_live()
+                    actual = live[kind]
+                    if actual is None:
+                        continue
+                    if quoted != actual:
+                        problems.append((path, number,
+                                          "quotes %d %ss; the tree gives %d" % (quoted, kind, actual)))
+    return problems
+
+
 REF_ENTRY = re.compile(r"^\[(\d+)\]", re.M)
 CITATION = re.compile(r"\[(\d+)\]")
 FENCE = re.compile(r"```.*?```", re.S)
@@ -456,6 +556,7 @@ def run(paths, front_path):
         "forward references": forward_references(paths, caps),
         "front-matter lists": front_matter_lists(front_path, caps),
         "placeholders": placeholders(paths),
+        "repository counts": repository_counts(paths),
         "captions": caps,
     }
 
@@ -475,7 +576,7 @@ def report(results, stream, no_placeholders=False, final=False):
     """
     failures = 0
     for name in ("outline drift", "tone", "numbering", "forward references", "front-matter lists",
-                 "abstract length", "citations"):
+                 "abstract length", "citations", "repository counts"):
         items = results[name]
         if not items:
             continue

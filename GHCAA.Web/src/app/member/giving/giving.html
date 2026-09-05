@@ -1,0 +1,31 @@
+<div class="giving-page">
+  <h1>My Giving</h1>
+
+  @if (loading()) {
+    <div class="loading-wrap"><app-logo-spinner [size]="80" /></div>
+  } @else if (pledges().length === 0) {
+    <p class="empty-msg">You haven't made a pledge yet. <a routerLink="/campaigns">Browse open campaigns</a>.</p>
+  } @else {
+    <p class="total-line">Total confirmed giving: <strong>৳{{ totalGiven() | number }}</strong></p>
+    <table class="giving-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Pledged</th>
+          <th>Received</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of pledges(); track p.id) {
+          <tr>
+            <td>{{ p.pledgedAt | date: 'mediumDate' }}</td>
+            <td>৳{{ p.amount | number }}</td>
+            <td>৳{{ p.amountReceived | number }}</td>
+            <td><span class="status-badge" [class]="getPledgeStatusClass(p.status)">{{ getPledgeStatusLabel(p.status) }}</span></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

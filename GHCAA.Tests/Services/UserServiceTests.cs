@@ -90,6 +90,7 @@ namespace GHCAA.Tests.Services
             (p1 == p2 && p2 == p3).Should().BeFalse();
         }
 
+        [Category("FR-08")]
         [Test]
         public async Task CreateUserAccountAsync_ShouldHashPasswordWithBCrypt()
         {

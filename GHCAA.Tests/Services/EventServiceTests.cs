@@ -34,7 +34,8 @@ public class EventServiceTests : TestBase
         await _context.SaveChangesAsync();
     }
 
-    [Test]
+    [Category("FR-13")]
+        [Test]
     public async Task CreateEventAsync_ShouldAddEvent()
     {
         var startDate = DateTime.UtcNow.AddDays(30);
@@ -110,7 +111,8 @@ public class EventServiceTests : TestBase
         result.Single().Title.Should().Be("Active Event");
     }
 
-    [Test]
+    [Category("FR-13")]
+        [Test]
     public async Task UpdateEventAsync_ShouldAllowReactivatingAnUnpublishedEvent()
     {
         var ev = new AlumniEvent { Title = "Unpublished Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", IsActive = false };
@@ -134,7 +136,8 @@ public class EventServiceTests : TestBase
         result!.IsActive.Should().BeTrue();
     }
 
-    [Test]
+    [Category("FR-14")]
+        [Test]
     public async Task RegisterForEventAsync_ShouldCreateRegistration()
     {
         var member = new Member { FullName = "EVT", Email = "e@t.com", NID = "12", MobileNo = "12", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
@@ -196,7 +199,8 @@ public class EventServiceTests : TestBase
         result.ReceiptPath.Should().Be("/uploads/r.jpg");
     }
 
-    [Test]
+    [Category("FR-14")]
+        [Test]
     public async Task RegisterForEventAsync_ShouldThrowException_WhenDeadlinePassed()
     {
         var ev = new AlumniEvent { Title = "Past Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", RegistrationEndDate = DateTime.UtcNow.AddHours(-1) };
@@ -207,7 +211,8 @@ public class EventServiceTests : TestBase
         await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("Registration for this event is closed.");
     }
 
-    [Test]
+    [Category("FR-13")]
+        [Test]
     public async Task UpdateEventAsync_ShouldUpdateAllFields()
     {
         var ev = new AlumniEvent { Title = "Old Title", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", RegistrationFee = 0, RequiresPayment = false, ImageUrl = "/old.jpg", AllowNonMembers = false, ParticipantLimit = 5, HasWaitlist = false, RequiresRegistration = false };
@@ -258,7 +263,8 @@ public class EventServiceTests : TestBase
         result.RequiresRegistration.Should().BeTrue();
     }
 
-    [Test]
+    [Category("FR-14")]
+        [Test]
     public async Task RegisterForEventAsync_NonMember_ShouldFail_WhenEventDoesNotAllow()
     {
         var ev = new AlumniEvent { Title = "Member Only", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", AllowNonMembers = false };
@@ -271,7 +277,8 @@ public class EventServiceTests : TestBase
         await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("This event is for members only.");
     }
 
-    [Test]
+    [Category("FR-14")]
+        [Test]
     public async Task RegisterForEventAsync_NonMember_ShouldSucceed_WhenEventAllows()
     {
         var ev = new AlumniEvent { Title = "Open Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", AllowNonMembers = true };
@@ -332,7 +339,8 @@ public class EventServiceTests : TestBase
         path.Should().Be("/uploads/receipt.pdf");
     }
 
-    [Test]
+    [Category("FR-13")]
+        [Test]
     public async Task DeleteEventAsync_ShouldRemoveEventIfNoRegistrations()
     {
         var ev = new AlumniEvent { Title = "Empty Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(1), Location = "L" };
@@ -344,7 +352,8 @@ public class EventServiceTests : TestBase
         _context.AlumniEvents.Any(e => e.Id == ev.Id).Should().BeFalse();
     }
 
-    [Test]
+    [Category("FR-16")]
+        [Test]
     public async Task CheckInParticipantAsync_ShouldSetCheckInTime()
     {
         var member = new Member { FullName = "EVT3", Email = "e3@t.com", NID = "1234", MobileNo = "1234", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
@@ -363,7 +372,8 @@ public class EventServiceTests : TestBase
         updated!.CheckedInAt.Should().NotBeNull();
     }
 
-    [Test]
+    [Category("FR-13")]
+        [Test]
     public async Task AddEventExpenseAsync_ShouldCreateExpense()
     {
         var ev = new AlumniEvent { Title = "Exp Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(1), Location = "L" };
@@ -378,7 +388,8 @@ public class EventServiceTests : TestBase
         _context.EventExpenses.Any(ex => ex.Id == result.Id).Should().BeTrue();
     }
 
-    [Test]
+    [Category("FR-15")]
+        [Test]
     public async Task RegisterForEventAsync_ShouldWaitlist_WhenCapacityExceeded()
     {
         // Arrange
@@ -419,7 +430,8 @@ public class EventServiceTests : TestBase
         result.Status.Should().Be(EventRegistrationStatus.Waitlisted);
     }
 
-    [Test]
+    [Category("FR-15")]
+        [Test]
     public async Task RegisterForEventAsync_ShouldThrow_WhenCapacityFull_AndNoWaitlist()
     {
         // 29A.4: with a participant limit but no waitlist, registrations past the cap must be
@@ -492,7 +504,8 @@ public class EventServiceTests : TestBase
             Times.Once);
     }
 
-    [Test]
+    [Category("FR-16")]
+        [Test]
     public async Task CheckInParticipantAsync_ShouldFail_WhenNotApproved()
     {
         // 29A.5: a Pending (or Rejected/Waitlisted) registration must not be able to check in

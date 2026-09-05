@@ -80,7 +80,9 @@ public class FinancialServiceTests : TestBase
         return member;
     }
 
-    [Test]
+    [Category("FR-21")]
+        [Category("FR-22")]
+        [Test]
     public async Task RecordPaymentAsync_ShouldAddPaymentAndReturnDto()
     {
         var member = await CreateActiveMemberWithHistoryAsync("Payer", "fsp@e.com", "FSP1");
@@ -102,7 +104,8 @@ public class FinancialServiceTests : TestBase
     // because Member Id 0 does not exist. This pins that a null MemberId is recorded, not defaulted,
     // and that recording one does not attempt member-scoped notification/receipt-storage side
     // effects that would themselves throw for a member that does not exist.
-    [Test]
+    [Category("FR-22")]
+        [Test]
     public async Task RecordPaymentAsync_WithNullMemberId_RecordsGuestPaymentWithoutThrowing()
     {
         var dto = new CreatePaymentHistoryDto { MemberId = null, Amount = 200, TransactionId = "TRX-GUEST-1", PaidAt = DateTime.UtcNow, Notes = "Guest event fee" };
@@ -134,7 +137,8 @@ public class FinancialServiceTests : TestBase
         result.First().TransactionId.Should().Be("FSH-T2"); // Ordered by Date Descending
     }
 
-    [Test]
+    [Category("FR-20")]
+        [Test]
     public async Task GenerateAnnualDuesAsync_ShouldCreateDuesForActiveMembers()
     {
         var member = await CreateActiveMemberWithHistoryAsync("Active User", "fsg@e.com", "FSG1");
@@ -281,7 +285,9 @@ public class FinancialServiceTests : TestBase
         history[0].ChangedTo.Should().Be("Life");
     }
 
-    [Test]
+    [Category("FR-25")]
+        [Category("FR-44")]
+        [Test]
     public async Task DeletePaymentAsync_ShouldRemovePaymentAndLogActivity()
     {
         var p = new PaymentHistory { MemberId = 1, TransactionId = "DEL-T1", Amount = 100, Status = Enums.PaymentStatus.Completed, PaidAt = DateTime.UtcNow };
@@ -291,8 +297,15 @@ public class FinancialServiceTests : TestBase
         var result = await _service.DeletePaymentAsync(p.Id, adminId: 1);
 
         result.Should().BeTrue();
-        var exists = await _context.PaymentHistories.AnyAsync(ph => ph.Id == p.Id);
-        exists.Should().BeFalse();
+
+        // 82.32: since 82.16, "delete" is soft — PaymentHistoryConfiguration's query filter hides
+        // the row, it does not remove it. The plain AnyAsync() this used to assert with would pass
+        // identically if DeletePaymentAsync stamped nothing at all, since the filter alone accounts
+        // for the false. IgnoreQueryFilters() checks what the row actually holds.
+        var stillThere = await _context.PaymentHistories.IgnoreQueryFilters().FirstOrDefaultAsync(ph => ph.Id == p.Id);
+        stillThere.Should().NotBeNull("a payment must never be physically removed");
+        stillThere!.IsDeleted.Should().BeTrue();
+        stillThere.DeletedByAdminId.Should().Be(1);
     }
 }
 

@@ -56,6 +56,7 @@ export interface FeatureToggles {
   requireDocumentUpload: boolean;
   allowSelfRegistration: boolean;
   allowNonMemberEventRegistration: boolean;
+  enableFundraising: boolean;
 }
 
 export interface OrgWorkflow {

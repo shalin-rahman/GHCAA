@@ -28,7 +28,8 @@ public class OtpServiceTests : TestBase
         _service = new OtpService(_context, _mockCommunication.Object, _mockConfig.Object, _mockLogger.Object);
     }
 
-    [Test]
+    [Category("FR-09")]
+        [Test]
     public async Task GenerateAndSendOtpAsync_ShouldCreateOtpInDatabase()
     {
         var email = "otp1@example.com";
@@ -45,7 +46,8 @@ public class OtpServiceTests : TestBase
         otp.IsVerified.Should().BeFalse();
     }
 
-    [Test]
+    [Category("FR-09")]
+        [Test]
     public async Task GenerateAndSendOtpAsync_ShouldSetCorrectExpiryTime()
     {
         var email = "otp2@example.com";
@@ -58,7 +60,8 @@ public class OtpServiceTests : TestBase
         otp.ExpiryAt.Should().BeBefore(afterGeneration.AddMinutes(11));
     }
 
-    [Test]
+    [Category("FR-09")]
+        [Test]
     public async Task GenerateAndSendOtpAsync_ShouldSendEmail()
     {
         var email = "otp3@example.com";
@@ -85,7 +88,8 @@ public class OtpServiceTests : TestBase
         otp.ExpiryAt.Should().BeBefore(after.AddMinutes(maxMinutes));
     }
 
-    [Test]
+    [Category("FR-09")]
+        [Test]
     public async Task VerifyOtpAsync_WithValidOtp_ShouldReturnTrue()
     {
         var email = "otp6@example.com";
@@ -99,7 +103,8 @@ public class OtpServiceTests : TestBase
         otp!.IsVerified.Should().BeTrue();
     }
 
-    [Test]
+    [Category("FR-09")]
+        [Test]
     public async Task VerifyOtpAsync_WithInvalidCode_ShouldReturnFalse()
     {
         var email = "otp7@example.com";
@@ -108,7 +113,8 @@ public class OtpServiceTests : TestBase
         result.Should().BeFalse();
     }
 
-    [Test]
+    [Category("FR-09")]
+        [Test]
     public async Task VerifyOtpAsync_WithExpiredOtp_ShouldReturnFalse()
     {
         var email = "otp8@example.com";
@@ -118,7 +124,8 @@ public class OtpServiceTests : TestBase
         result.Should().BeFalse();
     }
 
-    [Test]
+    [Category("FR-09")]
+        [Test]
     public async Task VerifyOtpAsync_WithAlreadyVerifiedOtp_ShouldReturnFalse()
     {
         var email = "otp9@example.com";
@@ -128,7 +135,8 @@ public class OtpServiceTests : TestBase
         result.Should().BeFalse();
     }
 
-    [Test]
+    [Category("FR-09")]
+        [Test]
     public async Task VerifyOtpAsync_WithWrongEmail_ShouldReturnFalse()
     {
         var email = "otp10@example.com";
@@ -137,7 +145,8 @@ public class OtpServiceTests : TestBase
         result.Should().BeFalse();
     }
 
-    [Test]
+    [Category("FR-09")]
+        [Test]
     public async Task VerifyOtpAsync_WithMultipleOtps_ShouldVerifyMostRecent()
     {
         var email = "otp11@example.com";

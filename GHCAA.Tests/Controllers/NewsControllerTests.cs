@@ -58,6 +58,7 @@ namespace GHCAA.Tests.Controllers
             _newsServiceMock.Verify(x => x.GetActiveNewsAsync(null, Enums.PostType.Notice, It.IsAny<CancellationToken>()), Times.Once);
         }
 
+        [Category("FR-27")]
         [Test]
         public async Task SubmitArticle_Forbids_WhenMemberSubmitsNotice()
         {
@@ -71,6 +72,7 @@ namespace GHCAA.Tests.Controllers
             _newsServiceMock.Verify(x => x.CreateNewsAsync(It.IsAny<CreateNewsDto>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
+        [Category("FR-27")]
         [Test]
         public async Task SubmitArticle_Allows_WhenAdminSubmitsNotice()
         {
@@ -133,6 +135,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<CreatedAtActionResult>());
         }
 
+        [Category("FR-28")]
         [Test]
         public async Task UpdateNews_ReturnsOk()
         {
@@ -144,6 +147,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-28")]
         [Test]
         public async Task DeleteNews_ReturnsOk_OnSuccess()
         {
@@ -154,6 +158,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkResult>());
         }
 
+        [Category("FR-27")]
         [Test]
         public async Task ApproveArticle_ReturnsOk_OnSuccess()
         {
@@ -164,6 +169,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-27")]
         [Test]
         public async Task RejectArticle_ReturnsOk_OnSuccess()
         {

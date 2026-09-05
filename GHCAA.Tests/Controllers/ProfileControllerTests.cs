@@ -75,6 +75,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-06")]
         [Test]
         public async Task GetIDCard_ReturnsOk_OnSuccess()
         {

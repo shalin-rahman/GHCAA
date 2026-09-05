@@ -27,7 +27,8 @@ public class NewsServiceTests : TestBase
         _authorId = user.Id;
     }
 
-    [Test]
+    [Category("FR-26")]
+        [Test]
     public async Task GetActiveNewsAsync_ShouldOnlyReturnActivePosts()
     {
         _context.NewsPosts.AddRange(
@@ -40,7 +41,8 @@ public class NewsServiceTests : TestBase
         results.Should().HaveCount(1);
     }
 
-    [Test]
+    [Category("FR-26")]
+        [Test]
     public async Task CreateNewsAsync_ShouldSavePostWithImageUrl()
     {
         // Act
@@ -55,7 +57,8 @@ public class NewsServiceTests : TestBase
         saved!.ImageUrl.Should().Be("/uploads/news/test.jpg");
     }
 
-    [Test]
+    [Category("FR-28")]
+        [Test]
     public async Task UpdateNewsAsync_ShouldModifyExistingPost()
     {
         // Arrange
@@ -123,7 +126,8 @@ public class NewsServiceTests : TestBase
             "UpdateNewsAsync assigns existing.Status = dto.Status unconditionally, so an update that never intended to touch status silently approves a Pending post");
     }
 
-    [Test]
+    [Category("FR-27")]
+        [Test]
     public async Task ApproveArticleAsync_ShouldUpdateStatus()
     {
         // Arrange
@@ -139,7 +143,8 @@ public class NewsServiceTests : TestBase
         updated!.Status.Should().Be(Enums.SubmissionStatus.Approved);
     }
 
-    [Test]
+    [Category("FR-28")]
+        [Test]
     public async Task DeleteNewsAsync_ShouldRemovePost()
     {
         // Arrange

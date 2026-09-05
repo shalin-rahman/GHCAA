@@ -23,7 +23,9 @@ public class NetworkingServiceTests : TestBase
         _context.SaveChanges();
     }
 
-    [Test]
+    [Category("FR-03")]
+        [Category("FR-05")]
+        [Test]
     public async Task SearchMembersAsync_ShouldHonorPrivacyFlags()
     {
         var publicMember = await CreateAndSaveTestMemberAsync("Alpha Jane", "public.nt@example.com", "01100001111", "NTST1111");
@@ -52,7 +54,8 @@ public class NetworkingServiceTests : TestBase
         privateResult.MobileNo.Should().Be("Confidential");
     }
 
-    [Test]
+    [Category("FR-34")]
+        [Test]
     public async Task GetExecutiveCommitteeAsync_ShouldReturnMembersWithECPosition()
     {
         var president = await CreateAndSaveTestMemberAsync("EC President", "ep.nt@example.com", "01122223333", "NTST3333");
@@ -73,7 +76,8 @@ public class NetworkingServiceTests : TestBase
         results.First().FullName.Should().Be("EC President");
     }
 
-    [Test]
+    [Category("FR-05")]
+        [Test]
     public async Task SearchMembersAsync_WithNewTableFilters_ShouldReturnCorrectMembers()
     {
         // Setup scenarios: 
@@ -107,7 +111,8 @@ public class NetworkingServiceTests : TestBase
         res3.Items.First().FullName.Should().Be("Jane Doe");
     }
 
-    [Test]
+    [Category("FR-34")]
+        [Test]
     public async Task GetExecutiveCommitteeAsync_ShouldPopulateBatchInformation()
     {
         // 30.27: EC/networking summary cards must show PassingYear/Degree/Subject -
@@ -134,7 +139,8 @@ public class NetworkingServiceTests : TestBase
         summary.Subject.Should().Be("Political Science");
     }
 
-    [Test]
+    [Category("FR-05")]
+        [Test]
     public async Task SearchMembersAsync_ShouldHideInactiveAndArchivedMembers()
     {
         var inactive = await CreateAndSaveTestMemberAsync("Inactive Member", "i.nt@example.com", "01144445555", "NTST5555");

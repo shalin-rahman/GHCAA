@@ -39,8 +39,8 @@ The **relevance cycle** connects the environment, meaning the Association, its c
 current practice, to the research. It supplies the requirements of Chapter 3 and receives the
 artefact back for field testing; Figure 4.1 labels the three cycles with what each carried in this
 project, and Figure 4.2 shows the process as it was actually executed rather than as the model
-prescribes it; the formal technical review sessions of 3 and 29 July 2026, recorded
-in §3.12 with an officer of the Association acting as domain reviewer, are this cycle closing partway
+prescribes it; the formal technical review session of 3 July 2026, recorded
+in §3.12 with an officer of the Association acting as domain reviewer, is this cycle closing partway
 through the project rather than only at the end.
 
 The **rigour cycle** connects the research to the existing knowledge base: the architecture,
@@ -52,7 +52,7 @@ was rejected and why.
 The **design cycle** is the inner loop of building and evaluating, repeated across the increments
 Chapter 7 reports and gated, in every increment, by the verification discipline described in §4.4.
 This is the cycle that ran most often. It is also the cycle for which the repository itself is the
-clearest evidence, since every one of the two hundred and thirty-five commits between 9 February and 4
+clearest evidence, since every one of the two hundred and thirty-nine commits between 9 February and 4
 September 2026 is a turn of it.
 
 ## 4.3 Mapping Design Science Activities to the Work Performed

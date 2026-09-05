@@ -66,6 +66,16 @@ export class News implements OnInit {
       next: (data) => {
         this.news.set(data);
         this.loading.set(false);
+
+        // 82.32: /portal/news/:id and /news/:id had no route (NG04002), reached from the landing
+        // page and member dashboard news feeds. There is no detail route by design — a post opens
+        // inline via selectPost() — so those links pass the id as a query param instead, and this
+        // opens the matching post the same way a card click does.
+        const id = this.route.snapshot.queryParamMap.get('id');
+        if (id) {
+          const post = data.find(p => p.id === Number(id));
+          if (post) this.selectPost(post);
+        }
       },
       error: () => this.loading.set(false)
     });

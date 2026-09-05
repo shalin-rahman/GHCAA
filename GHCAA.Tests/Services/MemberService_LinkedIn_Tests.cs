@@ -87,7 +87,8 @@ public class MemberService_LinkedIn_Tests : TestBase
         };
     }
 
-    [Test]
+    [Category("FR-04")]
+        [Test]
     public async Task UpdateProfile_WithNoGHCRecord_ShouldThrowException()
     {
         // Arrange
@@ -109,7 +110,8 @@ public class MemberService_LinkedIn_Tests : TestBase
             .WithMessage("At least one academic record must be from Govt. Haraganga College.");
     }
 
-    [Test]
+    [Category("FR-04")]
+        [Test]
     public async Task UpdateProfile_WithGHCRecord_ShouldSucceed()
     {
         // Arrange
@@ -146,7 +148,8 @@ public class MemberService_LinkedIn_Tests : TestBase
         updated.ProfessionalHistory.First().OrganizationName.Should().Be("Tech Corp");
     }
 
-    [Test]
+    [Category("FR-04")]
+        [Test]
     public async Task RegisterAsync_WithHistory_ShouldSaveCorrectly()
     {
         // Arrange

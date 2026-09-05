@@ -75,6 +75,9 @@ namespace GHCAA.Application.DTOs
         public bool RequireDocumentUpload { get; init; } = true;
         public bool AllowSelfRegistration { get; init; } = true;
         public bool AllowNonMemberEventRegistration { get; init; } = true;
+
+        // TODO 37.3
+        public bool EnableFundraising { get; init; } = true;
     }
 
     public record WorkflowDto

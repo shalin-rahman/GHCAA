@@ -55,6 +55,7 @@ namespace GHCAA.Tests.Services
             _connection.Close();
         }
 
+        [Category("FR-11")]
         [Test]
         public void CreateToken_ShouldReturnValidJwtToken()
         {
@@ -74,6 +75,7 @@ namespace GHCAA.Tests.Services
             jwtToken.Claims.Should().Contain(c => c.Type == "MemberId" && c.Value == "100");
         }
 
+        [Category("FR-11")]
         [Test]
         public void CreateToken_ShouldExpireInApproximately60Minutes()
         {
@@ -86,6 +88,7 @@ namespace GHCAA.Tests.Services
             jwtToken.ValidTo.Should().BeCloseTo(before.AddMinutes(60), TimeSpan.FromSeconds(10));
         }
 
+        [Category("FR-11")]
         [Test]
         public void GenerateRefreshToken_ShouldReturnBase64String()
         {
@@ -96,6 +99,7 @@ namespace GHCAA.Tests.Services
             bytes.Should().HaveCount(32);
         }
 
+        [Category("FR-11")]
         [Test]
         public async Task StoreAndRotateRefreshToken_ShouldRotateCorrectly()
         {
@@ -120,6 +124,7 @@ namespace GHCAA.Tests.Services
             revoked.IsRevoked.Should().BeTrue();
         }
 
+        [Category("FR-11")]
         [Test]
         public async Task RotateRefreshToken_WithInvalidToken_ShouldReturnNull()
         {
@@ -127,6 +132,7 @@ namespace GHCAA.Tests.Services
             result.Should().BeNull();
         }
 
+        [Category("FR-11")]
         [Test]
         public async Task RevokeAllRefreshTokens_ShouldMarkAllRevoked()
         {

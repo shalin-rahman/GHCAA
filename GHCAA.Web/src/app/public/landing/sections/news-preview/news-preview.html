@@ -12,7 +12,7 @@
              landing section uses — this was the specific ask, scoped to News only. -->
         <div class="news-feed-list">
             @for (item of news(); track item.id) {
-            <a [routerLink]="['/portal/news', item.id]" class="news-feed-item">
+            <a routerLink="/news" [queryParams]="{ id: item.id }" class="news-feed-item">
                 <div class="dot"></div>
                 <div class="text">
                     <strong>{{ item.title }}</strong>

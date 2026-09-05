@@ -55,7 +55,8 @@
     "RequirePaymentForMembership": true,
     "RequireDocumentUpload": true,
     "AllowSelfRegistration": true,
-    "AllowNonMemberEventRegistration": true
+    "AllowNonMemberEventRegistration": true,
+    "EnableFundraising": true
   },
   "Workflow": {
     "MemberApprovalMode": "ManualReview",

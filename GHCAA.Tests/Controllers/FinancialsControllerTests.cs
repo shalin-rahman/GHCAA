@@ -54,6 +54,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(okResult!.Value, Is.Empty);
         }
 
+        [Category("FR-22")]
         [Test]
         public async Task RecordPayment_ReturnsOk()
         {
@@ -67,6 +68,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-07")]
         [Test]
         public async Task GetMyDues_ReturnsOk()
         {

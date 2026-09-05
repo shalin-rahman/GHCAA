@@ -41,7 +41,9 @@ public class FinancialAuditTrailTests : TestBase
         return record;
     }
 
-    [Test]
+    [Category("FR-25")]
+        [Category("FR-43")]
+        [Test]
     public async Task UpdateRecord_RecordsWhoChangedItAndWhen()
     {
         var record = await SeedRecordAsync();
@@ -59,7 +61,9 @@ public class FinancialAuditTrailTests : TestBase
         saved.CreatedByAdminId.Should().Be(7, "the original author is not overwritten by an edit");
     }
 
-    [Test]
+    [Category("FR-25")]
+        [Category("FR-44")]
+        [Test]
     public async Task DeleteRecord_KeepsTheRow_AndRecordsWhoDeletedIt()
     {
         var record = await SeedRecordAsync();
@@ -80,7 +84,9 @@ public class FinancialAuditTrailTests : TestBase
         stillThere.Amount.Should().Be(500m, "the deleted row keeps its values, or it is not evidence");
     }
 
-    [Test]
+    [Category("FR-25")]
+        [Category("FR-44")]
+        [Test]
     public async Task DeletedRecord_DisappearsFromOrdinaryReads()
     {
         var kept = await SeedRecordAsync(100m);
@@ -102,6 +108,14 @@ public class FinancialAuditTrailTests : TestBase
         var service = NewLedgerService();
 
         (await service.DeleteRecordAsync(record.Id, ActingAdminId)).Should().BeTrue();
+
+        // In production a fresh request gets a fresh scoped DbContext, so the second call's
+        // FindAsync always runs a real query against the (now-filtered) DbSet and gets null there —
+        // record.IsDeleted is never actually read on that path. Without clearing the tracker here,
+        // this assertion would pass for the wrong reason: through the still-tracked, still-`false`
+        // second delete, in a state production never reaches.
+        _context.ChangeTracker.Clear();
+
         (await service.DeleteRecordAsync(record.Id, ActingAdminId)).Should().BeFalse(
             "an already-deleted row must not be re-stamped with a new deleter, which would "
             + "overwrite the record of who actually deleted it");

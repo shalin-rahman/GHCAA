@@ -33,6 +33,7 @@ namespace GHCAA.Tests.Services
             _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object, _mockConfig.Object, _mockHttp.Object);
         }
 
+        [Category("FR-08")]
         [Test]
         public async Task LoginAsync_WithValidCredentials_ShouldReturnTokenResponse()
         {
@@ -58,6 +59,7 @@ namespace GHCAA.Tests.Services
             result.MemberId.Should().Be(member.Id);
         }
 
+        [Category("FR-08")]
         [Test]
         public async Task LoginAsync_WithNonExistentUser_ShouldReturnNull()
         {
@@ -66,6 +68,7 @@ namespace GHCAA.Tests.Services
             result.Should().BeNull();
         }
 
+        [Category("FR-08")]
         [Test]
         public async Task LoginAsync_WithWrongPassword_ShouldReturnNull()
         {
@@ -77,6 +80,7 @@ namespace GHCAA.Tests.Services
             result.Should().BeNull();
         }
 
+        [Category("FR-08")]
         [Test]
         public async Task LoginAsync_WithInactiveUser_ShouldReturnNull()
         {
@@ -91,6 +95,7 @@ namespace GHCAA.Tests.Services
             result.Should().BeNull();
         }
 
+        [Category("FR-08")]
         [Test]
         public async Task LoginAsync_AfterFiveFailedAttempts_ShouldLockOutForFifteenMinutes()
         {
@@ -114,6 +119,7 @@ namespace GHCAA.Tests.Services
             updated.LockoutUntil!.Value.Should().BeAfter(DateTime.UtcNow);
         }
 
+        [Category("FR-09")]
         [Test]
         public async Task ResetPasswordAsync_WithValidToken_ShouldChangePassword()
         {
@@ -137,6 +143,7 @@ namespace GHCAA.Tests.Services
             updatedUser.ResetToken.Should().BeNull();
         }
 
+        [Category("FR-09")]
         [Test]
         public async Task ResetPasswordAsync_WithExpiredToken_ShouldReturnFalse()
         {
@@ -157,6 +164,7 @@ namespace GHCAA.Tests.Services
             result.Should().BeFalse();
         }
 
+        [Category("FR-09")]
         [Test]
         public async Task ResetPasswordAsync_ForSystemAdminByUsername_ShouldChangePassword()
         {
@@ -177,6 +185,7 @@ namespace GHCAA.Tests.Services
             updatedUser.ResetToken.Should().BeNull();
         }
 
+        [Category("FR-09")]
         [Test]
         public async Task ResetPasswordAsync_MemberCannotBeResetByUsernameFallback()
         {
@@ -193,6 +202,7 @@ namespace GHCAA.Tests.Services
             result.Should().BeFalse();
         }
 
+        [Category("FR-10")]
         [Test]
         public async Task SocialLoginAsync_WithValidGoogleId_ShouldReturnTokenResponse()
         {

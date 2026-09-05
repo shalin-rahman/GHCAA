@@ -55,6 +55,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-14")]
         [Test]
         public async Task RegisterForEventForm_ReturnsOk()
         {
@@ -66,6 +67,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-14")]
         [Test]
         public async Task RegisterForEventJson_ReturnsOk()
         {
@@ -107,6 +109,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-13")]
         [Test]
         public async Task CreateEvent_ReturnsCreatedAtAction()
         {
@@ -118,6 +121,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<CreatedAtActionResult>());
         }
 
+        [Category("FR-13")]
         [Test]
         public async Task UpdateEvent_ReturnsOk()
         {
@@ -129,6 +133,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
+        [Category("FR-13")]
         [Test]
         public async Task DeleteEvent_ReturnsOk_OnSuccess()
         {

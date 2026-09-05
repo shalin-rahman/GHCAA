@@ -16,6 +16,17 @@ import { NavService } from '../../core/services/nav.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { getEventStatusMeta } from '../../core/utils/date.util';
 
+// 82.32: `new Date(x).toISOString().slice(0, 16)` formats in UTC, but `<input type="datetime-local">`
+// always reads/writes local wall-clock time. Loading an event's UTC-formatted date into that input
+// displayed the wrong time, and saving it again ran another local-to-UTC conversion on top of the
+// first, shifting the stored date by the timezone offset on every edit. This formats from the local
+// Date parts instead, matching what the input actually expects.
+function toLocalDateTimeInputValue(value: string | Date): string {
+    const d = new Date(value);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 
 @Component({
     selector: 'app-admin-events',
@@ -127,7 +138,11 @@ export class AdminEvents implements OnInit {
         allowNonMembers: [false],
         requiresRegistration: [true],
         imageUrl: [''],
-        participantLimit: [null],
+        // 82.32: explicitly typed — Angular's typed reactive forms infer a control's type from its
+        // initial value alone, so a bare `[null]` produced FormControl<null>, which could never
+        // legally hold the number patchValue assigns to it once AlumniEvent.participantLimit was
+        // typed as `number | null`.
+        participantLimit: [null as number | null],
         hasWaitlist: [false]
     }, { validators: AdminEvents.eventDatesValidator });
 
@@ -206,19 +221,19 @@ export class AdminEvents implements OnInit {
         this.eventForm.patchValue({
             title: ev.title,
             description: ev.description,
-            startDate: ev.startDate ? new Date(ev.startDate).toISOString().slice(0, 16) : '',
-            endDate: ev.endDate ? new Date(ev.endDate).toISOString().slice(0, 16) : '',
+            startDate: ev.startDate ? toLocalDateTimeInputValue(ev.startDate) : '',
+            endDate: ev.endDate ? toLocalDateTimeInputValue(ev.endDate) : '',
             location: ev.location,
             registrationFee: ev.registrationFee,
             requiresPayment: ev.requiresPayment,
-            registrationStartDate: ev.registrationStartDate ? new Date(ev.registrationStartDate).toISOString().slice(0, 16) : '',
-            registrationEndDate: ev.registrationEndDate ? new Date(ev.registrationEndDate).toISOString().slice(0, 16) : '',
+            registrationStartDate: ev.registrationStartDate ? toLocalDateTimeInputValue(ev.registrationStartDate) : '',
+            registrationEndDate: ev.registrationEndDate ? toLocalDateTimeInputValue(ev.registrationEndDate) : '',
             adminNote: ev.adminNote,
             isActive: ev.isActive,
             allowNonMembers: ev.allowNonMembers,
             requiresRegistration: ev.requiresRegistration ?? true,
-            participantLimit: (ev as any).participantLimit,
-            hasWaitlist: (ev as any).hasWaitlist
+            participantLimit: ev.participantLimit,
+            hasWaitlist: ev.hasWaitlist
         });
         this.selectedLogo.set(null);
         this.logoPreview.set(ev.imageUrl || null);
@@ -279,7 +294,12 @@ export class AdminEvents implements OnInit {
             isActive: raw.isActive ?? true,
             allowNonMembers: raw.allowNonMembers ?? false,
             requiresRegistration: raw.requiresRegistration ?? true,
-            imageUrl: raw.imageUrl || undefined
+            imageUrl: raw.imageUrl || undefined,
+            // 82.32: the form has these fields and the API accepts them (CreateEventDto/
+            // UpdateEventDto), but the save payload never included them, so every save silently
+            // wiped whatever limit/waitlist setting an admin had entered.
+            participantLimit: raw.participantLimit ?? null,
+            hasWaitlist: raw.hasWaitlist ?? false
         };
 
         const id = this.editingEventId();

@@ -39,6 +39,7 @@ namespace GHCAA.Tests.Controllers
             _controller = new ThemeController(_themeServiceMock.Object);
         }
 
+        [Category("FR-47")]
         [Test]
         public async Task GetActiveTheme_WhenThemeExists_ReturnsOk()
         {
@@ -78,6 +79,7 @@ namespace GHCAA.Tests.Controllers
             Assert.That(list, Has.Count.EqualTo(2));
         }
 
+        [Category("FR-47")]
         [Test]
         public async Task CreateTheme_ReturnsCreatedWithNewTheme()
         {

@@ -133,3 +133,27 @@ Two known gaps this rule names but 82.16 did not close, each tracked separately:
 removal semantics side by side (`GovernanceService.DeleteECMemberAsync` hard-removes while
 `RemoveMemberFromCommitteeAsync` end-dates), and `Member`/`User` use `IsArchived` rather than
 `IsDeleted` for the same idea.
+
+---
+
+## 5. Schema migration at boot (TODO 37.0)
+
+`GHCAA.Infrastructure/Data/MigrationBootstrapper.EnsureMigratedAsync`, called from `Program.cs` for
+every non-Visual profile, runs before any data seed/sync step. It is what makes a schema change
+committed to `preprod` reach the Render deployment with no manual database step.
+
+The problem it solves: preprod's database was first built with `Database.EnsureCreated()`, which
+creates the schema straight from the current model and never touches `__EFMigrationsHistory`. A
+plain `MigrateAsync()` against that database tries to `CREATE TABLE` on tables that already exist and
+fails. `MigrationBootstrapper` baselines a legacy database first — walking every migration in order
+and marking one applied without re-running it whenever Postgres reports its target object already
+exists — then calls `MigrateAsync()` for anything genuinely still pending. It also self-heals a
+migration whose "applied" history row is a false positive (a same-transaction seed insert that rolled
+back partway through a migration that otherwise succeeded). Any unhandled failure during bootstrap
+falls back to `EnsureCreated()` rather than crash the app, so a bug here degrades to the old status
+quo instead of taking preprod down.
+
+`ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))` is set on every
+context. That warning is non-deterministic `HasData` seed churn (see `gotcha_pending_model_changes_seed`
+in memory), not real schema drift — scaffolding a migration to silence it would apply spurious
+`UpdateData` operations against live rows.

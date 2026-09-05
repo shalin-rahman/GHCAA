@@ -70,8 +70,17 @@ export class Payments implements OnInit {
     }
 
     downloadReceipt(id: number) {
-        window.open(this.financialService.getReceiptUrl(id), '_blank');
-        this.notify.info('Accessing secure receipt registry...');
+        // 82.32: was window.open(getReceiptUrl(id)) against a URL that didn't exist and, even
+        // corrected, sends no auth header to an [Authorize]'d endpoint. Fetch as a blob (the auth
+        // interceptor attaches the token) and open that instead.
+        this.financialService.getReceipt(id).subscribe({
+            next: (blob) => {
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+                setTimeout(() => URL.revokeObjectURL(url), 30_000);
+            },
+            error: () => this.notify.error('Could not load the receipt. Please try again.')
+        });
     }
 
     removeMethod(id: number) {

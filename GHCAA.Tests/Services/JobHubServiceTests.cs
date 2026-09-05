@@ -147,6 +147,7 @@ namespace GHCAA.Tests.Services
             dbJob!.IsActive.Should().BeFalse();
         }
 
+        [Category("FR-54")]
         [Test]
         public async Task PostJobAsync_NonAdmin_SetsStatusPending_AndNotifiesAdmins()
         {
@@ -160,6 +161,7 @@ namespace GHCAA.Tests.Services
             _notificationMock.Verify(x => x.CreateNotificationAsync(member.Id, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
+        [Category("FR-54")]
         [Test]
         public async Task PostJobAsync_Admin_SetsStatusApproved_AndNotifiesPoster()
         {
@@ -172,6 +174,7 @@ namespace GHCAA.Tests.Services
             _adminNotificationMock.Verify(x => x.NotifyPendingApprovalAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
+        [Category("FR-54")]
         [Test]
         public async Task ApproveJobAsync_SetsStatusApproved_AndNotifiesPoster()
         {
@@ -189,6 +192,7 @@ namespace GHCAA.Tests.Services
             _notificationMock.Verify(x => x.CreateNotificationAsync(member.Id, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
+        [Category("FR-54")]
         [Test]
         public async Task RejectJobAsync_SetsStatusRejected_AndDeactivates()
         {
@@ -207,6 +211,7 @@ namespace GHCAA.Tests.Services
             dbJob.IsActive.Should().BeFalse();
         }
 
+        [Category("FR-54")]
         [Test]
         public async Task GetPendingJobsAsync_ReturnsOnlyPendingJobs()
         {

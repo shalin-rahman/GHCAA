@@ -29,6 +29,7 @@ namespace GHCAA.Tests.Services
             _db = _context;
         }
 
+        [Category("FR-40")]
         [Test]
         public async Task CreatePollAsync_ShouldSavePollWithOptions()
         {
@@ -51,6 +52,7 @@ namespace GHCAA.Tests.Services
             poll.Options.Count.Should().Be(2);
         }
 
+        [Category("FR-40")]
         [Test]
         public async Task VoteAsync_ShouldRecordVoteAndPreventDuplicate()
         {
@@ -86,6 +88,7 @@ namespace GHCAA.Tests.Services
             secondResult.Should().BeFalse();
         }
 
+        [Category("FR-40")]
         [Test]
         public async Task GetActivePollsAsync_ShouldReturnPollsWithCorrectPercentages()
         {

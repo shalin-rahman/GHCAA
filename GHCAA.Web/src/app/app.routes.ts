@@ -80,6 +80,17 @@ export const routes: Routes = [
                 ]
             },
             {
+                // TODO 37.3: fundraising campaigns + donor honour roll.
+                path: 'campaigns',
+                canActivate: [featureGuard('enableFundraising')],
+                title: 'Fundraising Campaigns | GHCAA',
+                data: { description: 'Support the Govt. Haraganga College Alumni Association through an active fundraising campaign.' },
+                children: [
+                    { path: '', loadComponent: () => import('./public/campaigns/campaigns').then(m => m.Campaigns) },
+                    { path: ':slug', loadComponent: () => import('./public/campaigns/campaigns').then(m => m.Campaigns) }
+                ]
+            },
+            {
                 path: 'news',
                 loadComponent: () => import('./common/news/news').then(m => m.News),
                 title: 'News & Notices | GHCAA',
@@ -159,6 +170,12 @@ export const routes: Routes = [
                 canActivate: [featureGuard('enableGallery')]
             },
             {
+                // TODO 37.3: member's own pledges + giving history.
+                path: 'giving',
+                loadComponent: () => import('./member/giving/giving').then(m => m.Giving),
+                canActivate: [featureGuard('enableFundraising')]
+            },
+            {
                 path: 'news',
                 loadComponent: () => import('./common/news/news').then(m => m.News)
             },
@@ -219,6 +236,11 @@ export const routes: Routes = [
             {
                 path: 'gallery',
                 loadComponent: () => import('./admin/gallery/admin-gallery').then(m => m.AdminGallery)
+            },
+            {
+                // TODO 37.3: create/edit campaigns, confirm pledge receipts, manage donor tiers.
+                path: 'campaigns',
+                loadComponent: () => import('./admin/campaigns/admin-campaigns').then(m => m.AdminCampaigns)
             },
             {
                 path: 'comm',

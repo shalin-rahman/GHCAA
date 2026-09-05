@@ -83,7 +83,8 @@ public class CommunicationServiceTests : TestBase
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Test]
+    [Category("FR-29")]
+        [Test]
     public async Task SendBatchEmailAsync_ShouldSendMultipleEmails()
     {
         // Arrange
@@ -104,7 +105,8 @@ public class CommunicationServiceTests : TestBase
         _mockEmail.Verify(x => x.SendEmailAsync(It.IsAny<string>(), "S", It.Is<string>(b => b.Contains("B")), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 
-    [Test]
+    [Category("FR-29")]
+        [Test]
     public async Task SendBatchCustomEmailAsync_ShouldSendToCorrectYear()
     {
         // Arrange
@@ -125,7 +127,8 @@ public class CommunicationServiceTests : TestBase
         _mockEmail.Verify(x => x.SendEmailAsync("2010b@e.com", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    [Test]
+    [Category("FR-29")]
+        [Test]
     public async Task SendTypeCustomEmailAsync_ShouldSendToCorrectMembershipType()
     {
         // Arrange

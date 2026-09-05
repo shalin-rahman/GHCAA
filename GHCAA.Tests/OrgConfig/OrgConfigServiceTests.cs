@@ -36,6 +36,7 @@ namespace GHCAA.Tests.OrgConfig
             config.Branding.ShortName.Should().Be("GHCAA");
         }
 
+        [Category("FR-42")]
         [Test]
         public async Task UpdateConfigAsync_PersistsToDb_AndInvalidatesCache()
         {

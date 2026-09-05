@@ -565,12 +565,12 @@ in fact had one.
 **Formal technical review** in the sense Fagan established [48], conducted as a structured
 walkthrough of the specification with an officer of the Association acting as domain reviewer.
 Defect classes sought were ambiguity, omission, inconsistency, untestability and over-specification.
-Two sessions were held, on 3 July 2026 and 29 July 2026, each working through the specification
-module by module against the implementation of the day. The record is the findings log kept in the
-repository at `docs/BUSINESS_FINDINGS.md`, supplemented by the consolidation report at
-`docs/BACKEND_REVIEW_2026-07-03.md`. That log carries eighty-two numbered entries across the two sessions.
-Thirty-nine of them record a check that passed; the remainder record a defect, a coverage gap or an
-environment blocker, of which twenty-one were still open when the second session closed. Most belong
+One session was held, on 3 July 2026, working through the specification module by module against the
+implementation of the day. The record is the findings log kept in the repository at
+`docs/BUSINESS_FINDINGS.md`, supplemented by the consolidation report at
+`docs/BACKEND_REVIEW_2026-07-03.md`. The log has not grown since: its row count is unchanged in every
+commit that has touched the file after 3 July, which is itself the evidence that no later session
+added findings to it. Most entries belong
 to the implementation rather than to the specification, and are reported in that character in
 Chapter 11. Five are attributable to the specification itself, and those are the ones this section is
 answerable for.

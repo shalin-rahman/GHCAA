@@ -50,6 +50,7 @@ namespace GHCAA.Tests.Services
             }
         }
 
+        [Category("FR-34")]
         [Test]
         public async Task AdminUpdateMemberAsync_ShouldCreateHistoricalRecord_WhenPositionChanges()
         {
@@ -81,6 +82,7 @@ namespace GHCAA.Tests.Services
             ecMember.ECPeriod!.Title.Should().Be("Interim Executive Committee");
         }
 
+        [Category("FR-34")]
         [Test]
         public async Task AdminUpdateMemberAsync_ShouldEndPreviousRecord_WhenPositionChangesMidTerm()
         {
