@@ -364,7 +364,7 @@ namespace GHCAA.API.Controllers
                     var expectedAmount = (ev.RegistrationFee ?? 0) > 0 ? (ev.RegistrationFee ?? 0) : (registration.ContributionAmount ?? 0);
                     if (payment.Amount >= expectedAmount)
                     {
-                        var adminIdStr = _config["GeneralSettings:SystemAdminId"] ?? "1";
+                        var adminIdStr = _config[Constants.ConfigKeys.SystemAdminId] ?? "1";
                         int.TryParse(adminIdStr, out var adminId);
 
                         _logger.LogInformation("Auto-Approving Event Registration {Id} for reference {Ref}", registration.Id, fullRef);
@@ -408,8 +408,8 @@ namespace GHCAA.API.Controllers
                     if (payment.Amount >= required)
                     {
                         // S4.3: Fail loudly when SystemAdminId is not configured.
-                        var adminIdStr = _config["GeneralSettings:SystemAdminId"]
-                            ?? throw new InvalidOperationException("GeneralSettings:SystemAdminId is not configured.");
+                        var adminIdStr = _config[Constants.ConfigKeys.SystemAdminId]
+                            ?? throw new InvalidOperationException($"{Constants.ConfigKeys.SystemAdminId} is not configured.");
                         int.TryParse(adminIdStr, out var adminId);
 
                         _logger.LogInformation("Auto-Approving Member {MemberId} after successful gateway payment.", member.Id);

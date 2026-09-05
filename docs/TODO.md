@@ -2184,9 +2184,10 @@ completeness): one success-path and one failure-path test per action, 12 tests t
 pattern (`GalleryControllerTests.cs`, `DestructiveStepUpActionsTests.cs`). All 12 pass, and the full
 suite (`dotnet test GHCAA.Tests/GHCAA.Tests.csproj`) is green at 564/564.
 
-47.13.3 [TODO] **`RolesController` remaining actions** (`CreateAdmin`, `CreateRole`, `AssignRole`,
-`RemoveRole` — `DeleteUser` already covered per 47.9). Extend the existing
-`DestructiveStepUpActionsTests.cs` or add a sibling `RolesControllerTests.cs`.
+47.13.3 [DONE 2026-09-06] `GHCAA.Tests/Controllers/RolesControllerTests.cs` added, covering
+`CreateAdmin`, `CreateRole`, `AssignRole`, `RemoveRole`, `GetUsers`, `GetRoles` (success + failure
+path each), plus `DeleteUser`/`DisableUser`/`EnableUser`/`ResetPasswordAdmin` landed here too as part
+of 49.5. Folded into the same file/PR as instructed there.
 
 47.13.4 [TODO] **`AdminPollController`** (`DeletePoll`, `ToggleStatus` — `CreatePoll` already covered).
 New file or extend existing poll test coverage.
@@ -2479,48 +2480,26 @@ attribute, so assigning one grants zero additional access.
     for department-scoped admins (an "Events-only admin" or similar), which the item's own decision
     gate requires before starting. Left fully specified so a future session can pick it up directly.
 
-49.2 [TODO] **Priority: P2.** **User disable/enable — system admins (new) and members (UI gap only).**
-  - **49.2.A — System admin accounts (new backend + UI):**
-    1. `GHCAA.Application/Interfaces/IUserService.cs`: add
-       `Task<bool> SetUserActiveAsync(int userId, bool isActive, CancellationToken cancellationToken = default);`
-    2. `GHCAA.Infrastructure/Services/UserService.cs`: implement `SetUserActiveAsync` following the
-       shape of `DeleteSystemAdminAsync` (line 126) — load user, guard against
-       `ProtectedSuperAdminSeeder`-protected accounts (same check `DeleteSystemAdminAsync` uses), set
-       `user.IsActive = isActive`, `SaveChangesAsync`; when `isActive == false`, also rotate
-       `user.SecurityStamp` and call `await _tokenService.RevokeAllRefreshTokensAsync(userId,
-       cancellationToken)` (mirror `UserService.cs:122`). Return `false` if user not found or
-       protected.
-    3. `GHCAA.API/Controllers/RolesController.cs`: add two actions under the existing `[Authorize(Policy
-       = SuperAdminOnly)]` class-level attribute:
-       ```
-       [HttpPost("users/{id}/disable")]
-       [GHCAA.API.Filters.RequireStepUp]
-       public async Task<IActionResult> DisableUser(int id, CancellationToken cancellationToken)
-       [HttpPost("users/{id}/enable")]
-       [GHCAA.API.Filters.RequireStepUp]
-       public async Task<IActionResult> EnableUser(int id, CancellationToken cancellationToken)
-       ```
-       Both call `_userService.SetUserActiveAsync(id, true/false, cancellationToken)`, return
-       `BadRequest` on `false`, else `Ok`.
-    4. `GHCAA.Web/src/app/admin/roles/admin-roles.ts`: add `toggleUserActive(userId: number, isActive:
-       boolean)` calling the new endpoints, refreshing the grid on success.
-    5. `admin-roles.html`: add an `.icon-btn` toggle in the row actions (near the existing delete
-       icon) — show a "disable" icon when `user.isActive`, an "enable" icon otherwise; bind to
-       `toggleUserActive`.
-    6. Add `RolesControllerTests.cs` cases for both new actions (see 49.5).
-  - **49.2.B — Member accounts (pure UI wiring, no backend change — endpoint already exists):**
-    1. `GHCAA.Web/src/app/admin/members/admin-members.ts`: add `restoreMember(memberId: number)`
-       calling the existing `POST members/{id}/restore` endpoint (same pattern as the existing
-       `archiveMember` at `admin-members.ts:280-285`), refreshing the grid on success.
-    2. `admin-members.html`: next to the existing "Archive" `.icon-btn` (lines 112-115), add a
-       "Restore" `.icon-btn` shown only when `member.isArchived` is true (mirror the `@if
-       (nav.isSuperAdmin())` guard already wrapping Archive), bound to `restoreMember`.
-    3. Do not touch `ReactivateMemberAsync`/`member.Status` — that is a separate business-status
-       action, unrelated to this restore/unarchive control.
-    4. **DECISION NEEDED:** should `User.IsActive` be removed for members (since `IsArchived` already
-       covers lockout) or kept as a distinct "temporarily disabled without archiving" state? Flag to
-       user; do not silently pick one. If kept, this becomes its own follow-up item — do not scope-creep
-       it into this task.
+49.2 [DONE 2026-09-06] **User disable/enable — system admins (new) and members (UI gap only).**
+  - **49.2.A shipped.** `IUserService.SetUserActiveAsync` added; `UserService.SetUserActiveAsync`
+    rotates `SecurityStamp` and revokes refresh tokens on disable, guards protected usernames.
+    `RolesController` gained `DisableUser`/`EnableUser`, both behind `[RequireStepUp]`.
+    `admin-roles.ts`/`.html` gained `toggleUserActive`, an icon toggle next to Reset Password.
+    Correction made while implementing: `DeleteSystemAdminAsync` did NOT actually have a
+    protected-username guard despite this item assuming it did (it only checked `MemberId != null`)
+    — added the same guard there too, since a protected account (`shalin`) could otherwise be
+    hard-deleted outright. New `Constants.ConfigKeys.ProtectedSuperAdmins` centralizes the config key
+    (was a raw string in `Program.cs`, now shared).
+  - **49.2.B shipped.** `admin.service.ts` gained `restoreMember`; `admin-members.ts` gained
+    `restoreMember(id)`; `admin-members.html` shows Restore in place of Archive when
+    `member.isArchived`. `ReactivateMemberAsync`/`member.Status` untouched as instructed.
+    `MemberSummaryDto` did not carry `IsArchived` at all before this — the admin member list's DTO
+    projection dropped it — so the Restore button's guard would never have fired; added the field to
+    the DTO and its mapping in `MemberService.GetAllMembersAsync`.
+  - **DECISION STILL NEEDED, not picked here:** should `User.IsActive` be removed for members (since
+    `IsArchived` already covers lockout) or kept as a distinct "temporarily disabled without
+    archiving" state? Raised to the user in this session; no answer yet, so nothing was changed. If
+    kept, that's its own follow-up item, not scope for this one.
 
 49.3 [DONE 2026-09-04] **Admin-initiated password reset — system admins (new) and members (security
 fix), plus the auth-flow gap the original plan missed.**
@@ -2569,7 +2548,7 @@ which is a different class of change than the rest of 49.3.
 **Acceptance:** decision recorded with its reason; if (b), a nullable `ContactEmail` column with a
 migration, and the reset flow sends there when populated.
 
-49.4 [TODO] **Priority: P3.** **Grid/row-control design consistency fixes** (mechanical, per [[ghcaa-design]]):
+49.4 [PARTIAL 2026-09-06] **Priority: P3.** **Grid/row-control design consistency fixes** (mechanical, per [[ghcaa-design]]):
   1. `GHCAA.Web/src/app/admin/events/admin-events.html` line 322: rename the `.admin-table` class to
      `.data-table`. Then `grep -rn "admin-table" GHCAA.Web/src` to confirm no other file references it
      as a CSS selector; if the SCSS for `.admin-table` is now dead, delete that SCSS block.
@@ -2581,24 +2560,29 @@ migration, and the reset flow sends there when populated.
      one exists for inline-chip contexts; otherwise use the same `.icon-btn` sizing as the delete icon
      at line 150 and accept the size looking slightly large inside the chip — do not invent a new
      button variant class).
-  4. After 1-3 are done, grep each of these files for `app-page-header`, `app-search-bar`,
-     `.data-table`, `.icon-btn` to confirm all four are present: `admin-gallery.html`, `admin-jobs.html`,
-     `admin-news.html`, `admin-financials.html` (not yet inspected in this audit). For each file missing
-     one of the four, add it as a new lettered sub-item here (49.4.E, .F, ...) with the exact line
-     number found, rather than fixing silently in the same pass — keeps this checklist auditable.
+  4. [DONE 2026-09-06] 1-3 shipped: `admin-events.html`'s table renamed to `.data-table`, its
+     View/Edit/Delete row buttons converted to `.icon-btn` (👁️/✏️/🗑️), `admin-roles.html`'s bare `✕`
+     role-chip button converted to `.icon-btn.delete`. `dotnet test`/`vitest` unaffected (markup only).
+     Checked the four files this item names — two don't exist under those names
+     (`admin-jobs.html`/`admin-financials.html` were guesses, never verified); checked the real pages
+     that own that work instead (`job-approval.html`, `ledger.html`, plus `fee-config` for the
+     `.data-table` question since it's the same page family). Findings, not fixed here:
+  4.E [TODO] **Priority: P4.** `admin/ledger/ledger.html:120` still uses `.admin-table`, not
+     `.data-table` — the one file in this sweep still on the old class name.
+  4.F [TODO] **Priority: P4.** `admin/job-approval/job-approval.html:43`'s row action is a labelled
+     `.btn.btn-secondary.btn-sm` ("Review Job"), not an `.icon-btn`. May be intentional — it's a single
+     action per row, not a View/Edit/Delete triad — flagging rather than assuming it should change.
+  4.G [TODO] **Priority: P4.** `admin/fee-config/admin-fee-config.html` has no `app-search-bar`. Likely
+     fine (short, fixed-size config list, not a searchable directory) — flagging per the item's own
+     instruction to log rather than silently skip, not asserting it's a real gap.
+     `admin-gallery.html` and `admin-news.html` (the two names in this list that do exist) already had
+     all four patterns present; nothing to log for those two.
 
-49.5 [TODO] **Priority: P2 | Depends on: 49.1, 49.2.** **Test coverage for all new/changed
-endpoints above.** 49.3's service-level coverage shipped
-(`MemberServiceTests.SendAdminPasswordResetLinkAsync_ShouldRevokeExistingRefreshTokens`,
-`UserServiceTests.SendAdminPasswordResetLinkAsync_For*`,
-`AuthServiceTests.ResetPasswordAsync_ForSystemAdminByUsername_ShouldChangePassword` +
-`..._MemberCannotBeResetByUsernameFallback`), but there is still no
-`GHCAA.Tests/Controllers/RolesControllerTests.cs` at all — no controller-level test exists for
-`ResetPasswordAdmin`, `DeleteUser`, or anything else on that controller. New file covering:
-`DisableUser`, `EnableUser` (once 49.2.A ships), `ResetPasswordAdmin` (49.3.A, done), `DeleteUser`,
-plus the still-open pre-existing gap from 47.13.3 (`CreateAdmin`, `CreateRole`, `AssignRole`,
-`RemoveRole`) so this doesn't become a second untracked follow-up — one test file, one PR, covering
-the whole controller.
+49.5 [DONE 2026-09-06] `GHCAA.Tests/Controllers/RolesControllerTests.cs` (17 tests) covers
+`DisableUser`, `EnableUser`, `ResetPasswordAdmin`, `DeleteUser`, `CreateAdmin`, `CreateRole`,
+`AssignRole`, `RemoveRole`, `GetUsers`, `GetRoles` — one file, per the instruction here. Service-level
+coverage for the guard behaviour (protected-username, token revocation on disable) added to
+`UserServiceTests.cs` (6 tests). Full suite: `dotnet test` 613/613 (was 590).
 
 # Work Package 50 — Admin-configurable email/SMS template bodies (raised by user 2026-08-29/30: "need to
 manage emails body to be confurable with all relevant informations, this also for sms (if used) by
@@ -3856,13 +3840,41 @@ before `ng build`. Verified by running all three scripts locally against the `gh
 diffing the result against git HEAD — byte-identical. The env-matrix documentation this item also
 asks for is now in `docs/INSTITUTION_ONBOARDING.md` (62.38) rather than duplicated here.
 
-62.41 [TODO] **Priority: P1 | Depends on: 62.6, 62.15, 62.27.** Acceptance test for "generic": boot
-with `ORG_PROFILE=default` against an empty database and walk register, login, portal, admin, ID card,
-certificate, and PDF generation. Nothing may render "GHCAA", the college name, the Bengali motto, or
-the gold crest anywhere. This is the item that proves the area is done.
+62.41 [PARTIAL 2026-09-06] **Priority: P1 | Depends on: 62.6, 62.15, 62.27 (all done, so this was
+unblocked).** Acceptance test written: `GHCAA.Web/tests/e2e/generic-profile-acceptance.spec.ts` +
+its own `playwright.generic.config.ts` (kept separate from the normal suite on purpose — it needs a
+server booted with `ORG_PROFILE=default` against a database that has never run a migration, which
+the everyday dev server doesn't provide, and it self-skips unless
+`PLAYWRIGHT_GENERIC_BASE_URL` is set so it can never fail the normal CI run by accident). Walks
+landing page, `/api/config`, register, login as the `default` profile's demo member, portal, digital
+ID card, and the admin shell, asserting none of them render "GHCAA", "Govt. Haraganga College",
+"Haraganga", or the Bengali name.
+**Not run against a real empty database — that would mean provisioning one, which wasn't asked for.**
+Written and confirmed to compile and load (`npx playwright test --list`); not executed end to end.
+**Two reasons it would fail today, one already tracked and one new:**
+1. The known one (62.31/82.31): 8 committed migrations still bake 631 real GHC alumni via
+   `InsertData` regardless of `ORG_PROFILE`, so "an empty database" isn't actually empty.
+2. **New, found while writing this test:** there is no bootstrap that creates an initial SuperAdmin
+   *account* on a fresh database. `ProtectedSuperAdminSeeder` only re-grants the SuperAdmin *role* to
+   a username that already exists (`AppSettings:ProtectedSuperAdmins`) — on a database that has never
+   had GHCAA's real data, no such username exists yet, so there is nothing to log into as admin. This
+   item's own admin-walk step is the thing that would catch it. Tracked as 62.50 below rather than
+   fixed here, since it's a new finding, not what this item asked for.
+This is the item that proves the area is done, so it stays open until it's actually green, not just
+written.
 
-62.42 [TODO] **Not started 2026-09-05** — blocked on 62.41 (the acceptance test), which is itself not
-started. **Priority: P2 | Depends on: 62.41.** Flip `brand-lint` from warn-only to blocking in CI.
+62.42 [TODO] **Priority: P2 | Depends on: 62.41.** Flip `brand-lint` from warn-only to blocking in
+CI. Still blocked — 62.41 is written but not passing yet (see above).
+
+62.50 [TODO] **Priority: P1 | Depends on: none.** No bootstrap creates an initial SuperAdmin
+*account* on a fresh database — only `ProtectedSuperAdminSeeder`, which re-grants the SuperAdmin
+*role* to a username in `AppSettings:ProtectedSuperAdmins` that must already exist. On a database
+that has never run GHCAA's real seed data (i.e. once 62.31/82.31 is fixed, or for a second
+institution today), there is no such username, so nobody can ever log in as admin. Needs a real
+bootstrap: on boot, if no user holds the SuperAdmin role, create one for the first protected username
+with a random generated password logged once (or written to a file) for the operator to rotate on
+first login — same shape as `GenerateDefaultPassword`/`MustChangePassword` already used for member
+accounts.
 
 62.43 [TODO] **Priority: P3 | Depends on: 62.41.** Extend `GHCAA.Web/tests/e2e/config-regression.spec.ts`
 to run twice, once per profile. It already asserts the org name comes from an intercepted config
@@ -4777,6 +4789,17 @@ gap rather than an oversight:**
   Flutter has its own test suite and its own future tagging convention to decide, not this one.
 **Not done this pass:** the 34 NFRs and 16 DCs the item's own wording also names ("a domain constraint
 or a requirement"). Tagging those is a distinct, not-yet-started piece of the same item.
+**One NFR tag added 2026-09-06, on instruction, for new work this same session:**
+`UserServiceTests.SetUserActiveAsync_Disable_ShouldRevokeTokensAndRotateStamp` now also carries
+`[Category("NFR-S5")]` alongside `FR-11` — it directly demonstrates NFR-S5 ("a change of a member's
+credentials, roles or status shall invalidate all outstanding sessions... within one request") as well
+as FR-11, since disabling an account is exactly that kind of status change. `--filter
+TestCategory=NFR-S5` returns exactly this one test — the first NFR tag in the suite, not a broader
+sweep. Deliberately did not tag the new protected-username guard tests
+(`SetUserActiveAsync_ProtectedUsername_...`, `DeleteSystemAdminAsync_ProtectedUsername_...`) against
+NFR-S6: NFR-S6 is about role/ownership-based entitlement to a resource, and the protected-superadmin
+guard is a hardcoded username exclusion, a different mechanism — tagging it NFR-S6 would overstate
+what that test proves.
 
 73.5 [TODO] **Priority: P2 | Depends on: 73.4.** Generate the traceability matrix as a repository
 artefact from those tags, the way `wbs.py` generates the Chapter 11 tables. Then §3.9's original

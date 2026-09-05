@@ -285,6 +285,14 @@ export class AdminMembers implements OnInit {
     });
   }
 
+  restoreMember(id: number) {
+    if (!confirm('Restore this member from the archive?')) return;
+    this.adminService.restoreMember(id).subscribe({
+      next: () => { this.notify.success('Member restored.'); this.loadMembers(); },
+      error: () => this.notify.error('Restore failed.')
+    });
+  }
+
   sendResetLink(id: number) {
     if (!confirm('Send a password reset link to this member?')) return;
     this.adminService.sendPasswordResetLink(id).subscribe({

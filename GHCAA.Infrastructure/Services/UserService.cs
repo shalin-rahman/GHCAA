@@ -133,12 +133,41 @@ namespace GHCAA.Infrastructure.Services
             // Member-linked accounts are the member's portal login and must be managed
             // via member archive/restore instead, to avoid silently locking a member out.
             var user = await _db.Users.FindAsync(new object[] { userId }, cancellationToken);
-            if (user == null || user.MemberId != null) return false;
+            if (user == null || user.MemberId != null || IsProtectedUsername(user.Username)) return false;
 
             _db.Users.Remove(user);
             await _db.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("System admin account deleted: {UserId}", userId);
             return true;
+        }
+
+        public async Task<bool> SetUserActiveAsync(int userId, bool isActive, CancellationToken cancellationToken = default)
+        {
+            var user = await _db.Users.FindAsync(new object[] { userId }, cancellationToken);
+            if (user == null || IsProtectedUsername(user.Username)) return false;
+
+            user.IsActive = isActive;
+            if (!isActive)
+            {
+                // Same reasoning as ChangePasswordAsync: disabling an account must kill both
+                // the access token (via the stamp) and any still-valid refresh token, or the
+                // account can keep working until its current JWT happens to expire.
+                user.SecurityStamp = Guid.NewGuid().ToString("N");
+                await _tokenService.RevokeAllRefreshTokensAsync(userId, cancellationToken);
+            }
+            await _db.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("User {UserId} set to IsActive={IsActive}", userId, isActive);
+            return true;
+        }
+
+        // Protected usernames (AppSettings:ProtectedSuperAdmins) can't be deleted or disabled
+        // through the admin API — same list ProtectedSuperAdminSeeder re-grants SuperAdmin to on
+        // every boot, so disabling one here would just be undone (for the role) on next deploy
+        // while leaving the account confusingly half-locked in the meantime.
+        private bool IsProtectedUsername(string username)
+        {
+            var protectedUsernames = _config.GetSection(Constants.ConfigKeys.ProtectedSuperAdmins).Get<string[]>() ?? [];
+            return protectedUsernames.Contains(username, StringComparer.OrdinalIgnoreCase);
         }
 
         public async Task<(bool Success, string? ResetUrl)> SendAdminPasswordResetLinkAsync(int userId, CancellationToken cancellationToken = default)

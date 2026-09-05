@@ -107,6 +107,24 @@ namespace GHCAA.API.Controllers
             return Ok(new { Message = "System administrator account deleted." });
         }
 
+        [HttpPost("users/{id}/disable")]
+        [GHCAA.API.Filters.RequireStepUp]
+        public async Task<IActionResult> DisableUser(int id, CancellationToken cancellationToken)
+        {
+            var success = await _userService.SetUserActiveAsync(id, false, cancellationToken);
+            if (!success) return BadRequest(new { Message = "User not found or this account cannot be disabled." });
+            return Ok(new { Message = "User disabled." });
+        }
+
+        [HttpPost("users/{id}/enable")]
+        [GHCAA.API.Filters.RequireStepUp]
+        public async Task<IActionResult> EnableUser(int id, CancellationToken cancellationToken)
+        {
+            var success = await _userService.SetUserActiveAsync(id, true, cancellationToken);
+            if (!success) return BadRequest(new { Message = "User not found or this account cannot be changed." });
+            return Ok(new { Message = "User enabled." });
+        }
+
         [HttpPost("users/{id}/reset-password-admin")]
         [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> ResetPasswordAdmin(int id, CancellationToken cancellationToken)

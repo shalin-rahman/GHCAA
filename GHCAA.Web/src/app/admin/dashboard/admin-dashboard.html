@@ -132,6 +132,25 @@
 
         <!-- Sidebar: Upcoming Events + Quick Links -->
         <div class="sidebar-col">
+            <!-- Awaiting Your Action (WP81.2) -->
+            @if (pendingRows().length > 0) {
+            <div class="glass-card content-card">
+                <div class="card-header">
+                    <h3>⏳ Awaiting Your Action</h3>
+                </div>
+                <div class="news-feed-list">
+                    @for (row of pendingRows(); track row.label) {
+                    <a [routerLink]="row.link" class="news-feed-item">
+                        <div class="news-feed-body">
+                            <strong>{{ row.label }}</strong>
+                        </div>
+                        <div class="news-status-chip pending">{{ row.count }}</div>
+                    </a>
+                    }
+                </div>
+            </div>
+            }
+
             <!-- Upcoming Events -->
             <div class="glass-card content-card">
                 <div class="card-header">

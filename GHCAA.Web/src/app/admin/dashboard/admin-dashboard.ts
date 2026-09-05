@@ -21,6 +21,12 @@ interface StatCard {
   linkLabel?: string;
 }
 
+interface PendingRow {
+  label: string;
+  count: number;
+  link: string;
+}
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -38,6 +44,7 @@ export class AdminDashboard implements OnInit {
   recentNews = signal<any[]>([]);
   publishedArticleCount = signal(0);
   upcomingEvents = signal<any[]>([]);
+  pendingRows = signal<PendingRow[]>([]);
   loading = signal(true);
   now = new Date();
 
@@ -45,9 +52,11 @@ export class AdminDashboard implements OnInit {
     forkJoin({
       stats: this.adminService.getStats().pipe(catchError(() => of(null))),
       news: this.newsService.getNewsAdmin().pipe(catchError(() => of([]))),
-      events: this.eventsService.getEvents().pipe(catchError(() => of([])))
+      events: this.eventsService.getEvents().pipe(catchError(() => of([]))),
+      pending: this.adminService.getPendingSummary().pipe(catchError(() => of(null)))
     }).subscribe({
-      next: ({ stats, news, events }) => {
+      next: ({ stats, news, events, pending }) => {
+        this.pendingRows.set(this.mapPendingRows(pending));
         // Handle case-insensitive stats mapping (PascalCase from C# vs camelCase in JS)
         const s: any = stats || {};
         const mappedStats: DashboardStats = {
@@ -92,6 +101,22 @@ export class AdminDashboard implements OnInit {
 
   get inactiveCount(): number {
     return this.stats()?.inactive ?? 0;
+  }
+
+  // Each queue's own endpoint owns the real list and its paging; this only reads back
+  // how many items came back, for the "awaiting your action" summary on this dashboard.
+  private mapPendingRows(pending: any): PendingRow[] {
+    if (!pending) return [];
+    const countOf = (list: any): number => Array.isArray(list) ? list.length : (list?.totalItems ?? list?.TotalItems ?? 0);
+
+    return [
+      { label: 'Article submissions', count: countOf(pending.news ?? pending.News), link: '/admin/article-approvals' },
+      { label: 'Gallery albums', count: countOf(pending.galleries ?? pending.Galleries), link: '/admin/gallery-approvals' },
+      { label: 'Gallery photos', count: countOf(pending.photos ?? pending.Photos), link: '/admin/gallery-approvals' },
+      { label: 'Job postings', count: countOf(pending.jobs ?? pending.Jobs), link: '/admin/job-approvals' },
+      { label: 'Member applications', count: countOf(pending.members ?? pending.Members), link: '/admin/approvals' },
+      { label: 'Event registrations', count: countOf(pending.eventRegistrations ?? pending.EventRegistrations), link: '/admin/events' },
+    ].filter(row => row.count > 0);
   }
 
   formatBDT(value: number): string {

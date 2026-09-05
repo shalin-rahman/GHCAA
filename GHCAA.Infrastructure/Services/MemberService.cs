@@ -1041,6 +1041,7 @@ namespace GHCAA.Infrastructure.Services
                     BloodGroup = member.BloodGroup,
                     MembershipType = member.MembershipType,
                     Category = member.Category,
+                    IsArchived = member.IsArchived,
                     IsEmailPublic = member.IsEmailPublic,
                     IsMobilePublic = member.IsMobilePublic,
                     IsAddressPublic = member.IsAddressPublic,

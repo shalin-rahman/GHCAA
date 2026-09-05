@@ -55,6 +55,11 @@ namespace GHCAA.Domain
 
             public const string AllowedOrigins = "AppSettings:AllowedOrigins";
             public const string ClientUrl = "AppSettings:ClientUrl";
+            public const string ProtectedSuperAdmins = "AppSettings:ProtectedSuperAdmins";
+            public const string SystemAdminId = "GeneralSettings:SystemAdminId";
+            public const string PortalBaseUrlOverride = "GeneralSettings:PortalBaseUrl";
+            public const string SSLCommerzSandboxUrl = "PaymentGateways:SSLCommerz:SandboxUrl";
+            public const string SSLCommerzProductionUrl = "PaymentGateways:SSLCommerz:ProductionUrl";
         }
 
         public static class TemplateCodes

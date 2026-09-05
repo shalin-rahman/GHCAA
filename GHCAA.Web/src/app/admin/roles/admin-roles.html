@@ -134,8 +134,8 @@
                             <span
                                 class="px-2 py-0.5 rounded bg-primary/20 border border-primary/30 text-[10px] font-black uppercase tracking-tighter flex items-center gap-2">
                                 {{ role }}
-                                <button (click)="removeRole(user.id, role)"
-                                    class="hover:text-red-500 transition-colors">✕</button>
+                                <button (click)="removeRole(user.id, role)" class="icon-btn delete"
+                                    title="Remove Role">✕</button>
                             </span>
                             }
                         </div>
@@ -164,6 +164,10 @@
                             @if (!user.memberId) {
                             <button class="icon-btn" (click)="resetPassword(user)"
                                 title="Reset Password">🔐</button>
+                            <button class="icon-btn" (click)="toggleUserActive(user.id, user.isActive)"
+                                [title]="user.isActive ? 'Disable Account' : 'Enable Account'">
+                                {{ user.isActive ? '⏸️' : '▶️' }}
+                            </button>
                             <button class="icon-btn delete" (click)="deleteUser(user)"
                                 title="Delete System Administrator Account">🗑️</button>
                             }

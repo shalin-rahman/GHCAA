@@ -289,39 +289,39 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 11.2 Work Breakdown Structure | 96 |
 | 11.3 Scheduling, Task Network and Critical Path | 96 |
 | 11.4 Effort Estimation | 96 |
-| 11.5 How the Implementation Time Was Optimised | 96 |
+| 11.5 How the Implementation Time Was Optimised | 97 |
 | 11.6 Progress Tracking and Earned Value | 97 |
 | 11.7 Team Structure and Responsibilities | 97 |
 | 11.8 Configuration and Change Management in Practice | 97 |
 | 11.9 Risk Monitoring Record | 97 |
-| 11.10 Quality Assurance Activities Performed | 97 |
-| 11.11 Lessons in Project Management | 97 |
-| 11.12 Summary | 97 |
-| **PART IV — EVALUATION AND CLOSURE** | 98 |
-| **Chapter 12 — Results, Evaluation and Discussion** | 99 |
-| 12.1 Overview of the Delivered Artefact | 99 |
-| 12.2 Functional Evaluation | 99 |
-| 12.3 Quality Evaluation against ISO/IEC 25010 | 99 |
-| 12.4 Performance Evaluation Results | 99 |
-| 12.5 Security Evaluation Results | 99 |
-| 12.6 Usability and Accessibility Evaluation Results | 99 |
-| 12.7 Stakeholder and Expert Evaluation | 99 |
-| 12.8 Answering the Research Questions | 99 |
-| 12.9 Discussion | 99 |
-| 12.10 Comparison against the Existing Manual System | 99 |
-| 12.11 Threats to Validity | 99 |
-| 12.12 Limitations of the Artefact | 99 |
-| 12.13 Reflection on the Design Science Contribution | 99 |
-| 12.14 Summary | 100 |
-| **Chapter 13 — Conclusion and Future Work** | 101 |
-| 13.1 Summary of the Work | 101 |
-| 13.2 Contributions Restated and Substantiated | 101 |
-| 13.3 Answers to the Research Questions, in Brief | 101 |
-| 13.4 Practical Implications for Similar Institutions | 101 |
-| 13.5 Lessons Learned | 101 |
-| 13.6 Future Work | 101 |
-| 13.7 Concluding Remarks | 101 |
-| **References** | 102 |
+| 11.10 Quality Assurance Activities Performed | 98 |
+| 11.11 Lessons in Project Management | 98 |
+| 11.12 Summary | 98 |
+| **PART IV — EVALUATION AND CLOSURE** | 99 |
+| **Chapter 12 — Results, Evaluation and Discussion** | 100 |
+| 12.1 Overview of the Delivered Artefact | 100 |
+| 12.2 Functional Evaluation | 100 |
+| 12.3 Quality Evaluation against ISO/IEC 25010 | 100 |
+| 12.4 Performance Evaluation Results | 100 |
+| 12.5 Security Evaluation Results | 100 |
+| 12.6 Usability and Accessibility Evaluation Results | 100 |
+| 12.7 Stakeholder and Expert Evaluation | 100 |
+| 12.8 Answering the Research Questions | 100 |
+| 12.9 Discussion | 100 |
+| 12.10 Comparison against the Existing Manual System | 100 |
+| 12.11 Threats to Validity | 100 |
+| 12.12 Limitations of the Artefact | 100 |
+| 12.13 Reflection on the Design Science Contribution | 100 |
+| 12.14 Summary | 101 |
+| **Chapter 13 — Conclusion and Future Work** | 102 |
+| 13.1 Summary of the Work | 102 |
+| 13.2 Contributions Restated and Substantiated | 102 |
+| 13.3 Answers to the Research Questions, in Brief | 102 |
+| 13.4 Practical Implications for Similar Institutions | 102 |
+| 13.5 Lessons Learned | 102 |
+| 13.6 Future Work | 102 |
+| 13.7 Concluding Remarks | 102 |
+| **References** | 103 |
 
 ---
 

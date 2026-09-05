@@ -180,6 +180,30 @@
                 </div>
             </div>
             }
+
+            <!-- Your Pending Requests (WP81.2) -->
+            @if (pendingRows().length > 0) {
+            <div class="glass-card activity-feed mt-4">
+                <div class="feed-header">
+                    <h3>⏳ Your Pending Requests</h3>
+                </div>
+                <div class="feed-items">
+                    @for (row of pendingRows(); track row.label) {
+                    @if (row.link) {
+                    <a [routerLink]="row.link" class="feed-item">
+                        <div class="text"><strong>{{ row.label }}</strong></div>
+                        <span class="unread-badge">{{ row.count }}</span>
+                    </a>
+                    } @else {
+                    <div class="feed-item">
+                        <div class="text"><strong>{{ row.label }}</strong></div>
+                        <span class="unread-badge">{{ row.count }}</span>
+                    </div>
+                    }
+                    }
+                </div>
+            </div>
+            }
         </div>
 
         <!-- Right: Notifications -->

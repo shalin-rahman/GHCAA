@@ -51,8 +51,8 @@ namespace GHCAA.Infrastructure.Gateways
             var org = await _orgConfig.GetConfigAsync();
 
             var isSandbox = config.IsSandbox;
-            var sandboxUrl = _config["PaymentGateways:SSLCommerz:SandboxUrl"] ?? "https://sandbox.sslcommerz.com";
-            var prodUrl = _config["PaymentGateways:SSLCommerz:ProductionUrl"] ?? "https://securepay.sslcommerz.com";
+            var sandboxUrl = _config[Constants.ConfigKeys.SSLCommerzSandboxUrl] ?? "https://sandbox.sslcommerz.com";
+            var prodUrl = _config[Constants.ConfigKeys.SSLCommerzProductionUrl] ?? "https://securepay.sslcommerz.com";
             var url = isSandbox
                 ? $"{sandboxUrl.TrimEnd('/')}/gwprocess/v4/api.php"
                 : $"{prodUrl.TrimEnd('/')}/gwprocess/v4/api.php";
@@ -145,8 +145,8 @@ namespace GHCAA.Infrastructure.Gateways
             }
 
             var isSandbox = config.IsSandbox;
-            var sandboxUrl = _config["PaymentGateways:SSLCommerz:SandboxUrl"] ?? "https://sandbox.sslcommerz.com";
-            var prodUrl = _config["PaymentGateways:SSLCommerz:ProductionUrl"] ?? "https://securepay.sslcommerz.com";
+            var sandboxUrl = _config[Constants.ConfigKeys.SSLCommerzSandboxUrl] ?? "https://sandbox.sslcommerz.com";
+            var prodUrl = _config[Constants.ConfigKeys.SSLCommerzProductionUrl] ?? "https://securepay.sslcommerz.com";
 
             var baseValidationUrl = isSandbox ? sandboxUrl : prodUrl;
             var validationUrl = $"{baseValidationUrl.TrimEnd('/')}/validator/api/validationserverAPI.php?val_id={valId}&store_id={config.GatewayPublicKey}&store_passwd={config.GatewaySecretKey}&format=json";

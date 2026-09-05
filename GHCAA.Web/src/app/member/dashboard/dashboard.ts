@@ -31,6 +31,7 @@ export class Dashboard implements OnInit {
   recentMembers = signal<any[]>([]);
   recentNews = signal<any[]>([]);
   upcomingEvents = signal<any[]>([]);
+  pendingRows = signal<{ label: string; count: number; link: string }[]>([]);
   loading = signal(true);
 
   get profileCompletion(): number {
@@ -43,6 +44,21 @@ export class Dashboard implements OnInit {
     return this.profile()?.rank ?? '—';
   }
 
+  // Family-link and mentorship requests have a real API (WP81.2) but no dedicated member-facing
+  // page yet, so those two rows carry a count with no link until one exists — see docs/TODO.md.
+  private mapPendingRows(pending: any): { label: string; count: number; link: string }[] {
+    if (!pending) return [];
+    const countOf = (list: any): number => Array.isArray(list) ? list.length : 0;
+
+    return [
+      { label: 'Article submissions awaiting review', count: countOf(pending.news ?? pending.News), link: '/portal/articles' },
+      { label: 'Job postings awaiting review', count: countOf(pending.pendingJobPostings ?? pending.PendingJobPostings), link: '/portal/jobs' },
+      { label: 'Event registrations awaiting approval', count: countOf(pending.pendingEventRegistrations ?? pending.PendingEventRegistrations), link: '/portal/events' },
+      { label: 'Family-link requests awaiting response', count: countOf(pending.familyLinkRequestsSent ?? pending.FamilyLinkRequestsSent), link: '' },
+      { label: 'Mentorship requests awaiting response', count: countOf(pending.mentorshipRequestsSent ?? pending.MentorshipRequestsSent), link: '' },
+    ].filter(row => row.count > 0);
+  }
+
   ngOnInit() {
     this.alertService.loadNotifications();
 
@@ -50,10 +66,12 @@ export class Dashboard implements OnInit {
       profile: this.profileService.getProfile().pipe(catchError(() => of(null))),
       events: this.eventsService.getEvents().pipe(catchError(() => of([]))),
       members: this.networkingService.getRecentlyJoined(6).pipe(catchError(() => of({items:[]}))),
-      news: this.newsService.getNews(undefined, true).pipe(catchError(() => of([])))
+      news: this.newsService.getNews(undefined, true).pipe(catchError(() => of([]))),
+      pending: this.profileService.getMyPendingSummary().pipe(catchError(() => of(null)))
     }).subscribe({
-      next: ({ profile, events, members, news }) => {
+      next: ({ profile, events, members, news, pending }) => {
         this.profile.set(profile);
+        this.pendingRows.set(this.mapPendingRows(pending));
 
         const upcoming = (events as any[]).filter(e => new Date(e.startDate) >= new Date());
         this.eventCount.set(upcoming.length);

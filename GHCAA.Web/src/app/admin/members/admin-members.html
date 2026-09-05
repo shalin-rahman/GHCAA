@@ -110,8 +110,13 @@
                             title="Approve Member">✅</button>
                         }
                         @if (nav.isSuperAdmin()) {
+                        @if (member.isArchived) {
+                        <button class="icon-btn" (click)="restoreMember(member.id)"
+                            title="Restore Member">♻️</button>
+                        } @else {
                         <button class="icon-btn archive" (click)="archiveMember(member.id)"
                             title="Archive Member">🗄️</button>
+                        }
                         }
                         <button class="icon-btn contact" (click)="contactMember(member.email)"
                             title="Send Message">📨</button>

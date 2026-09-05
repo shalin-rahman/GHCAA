@@ -57,6 +57,10 @@ export class ProfileService {
         return this.http.put(this.apiUrl, profile);
     }
 
+    getMyPendingSummary(): Observable<any> {
+        return this.http.get<any>(API_ENDPOINTS.PENDING.MY_SUMMARY);
+    }
+
     getIDCard(): Observable<{ dataUri: string }> {
         return this.http.get<{ dataUri: string }>(`${this.apiUrl}/id-card`);
     }

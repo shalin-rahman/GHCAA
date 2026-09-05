@@ -63,7 +63,7 @@ namespace GHCAA.Infrastructure.Services
                 // needed a per-environment value distinct from the profile pack (preprod uses
                 // https://preprod.haragangian.com/portal, the pack carries the production URL).
                 // Absent config or an absent key leaves the profile/pack value untouched.
-                var portalBaseUrlOverride = configuration?["GeneralSettings:PortalBaseUrl"];
+                var portalBaseUrlOverride = configuration?[Constants.ConfigKeys.PortalBaseUrlOverride];
                 if (!string.IsNullOrWhiteSpace(portalBaseUrlOverride))
                     dto = dto with { Contact = dto.Contact with { PortalBaseUrl = portalBaseUrlOverride } };
 

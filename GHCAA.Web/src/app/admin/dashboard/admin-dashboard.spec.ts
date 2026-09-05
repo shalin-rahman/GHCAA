@@ -12,6 +12,7 @@ describe('AdminDashboard Component', () => {
     beforeEach(async () => {
         adminServiceMock = {
             getStats: vi.fn().mockReturnValue(of({ totalMembers: 0, pendingMembers: 0, totalIncome: 0 })),
+            getPendingSummary: vi.fn().mockReturnValue(of(null)),
             getDailyActivity: vi.fn().mockReturnValue(of([]))
         };
 

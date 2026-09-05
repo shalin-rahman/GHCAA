@@ -18,12 +18,14 @@ namespace GHCAA.Tests.Services
     {
         private MentorshipService _service = null!;
         private Mock<ILogger<MentorshipService>> _mockLogger = null!;
+        private Mock<INotificationService> _mockNotifications = null!;
 
         [SetUp]
         public void Setup()
         {
             _mockLogger = new Mock<ILogger<MentorshipService>>();
-            _service = new MentorshipService(_context, _mockLogger.Object);
+            _mockNotifications = new Mock<INotificationService>();
+            _service = new MentorshipService(_context, _mockLogger.Object, _mockNotifications.Object);
         }
 
         [Test]
@@ -42,6 +44,9 @@ namespace GHCAA.Tests.Services
             request.MentorId.Should().Be(mentor.Id);
             request.Status.Should().Be(MentorshipStatus.Pending);
             request.Message.Should().Be("Help me");
+            _mockNotifications.Verify(x => x.CreateNotificationAsync(
+                mentor.Id, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<GHCAA.Domain.Enums.NotificationType>(),
+                It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Test]
@@ -77,6 +82,9 @@ namespace GHCAA.Tests.Services
             updated!.Status.Should().Be(MentorshipStatus.Accepted);
             updated.ResponseNote.Should().Be("WIP Note");
             updated.RespondedAt.Should().NotBeNull();
+            _mockNotifications.Verify(x => x.CreateNotificationAsync(
+                requester.Id, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<GHCAA.Domain.Enums.NotificationType>(),
+                It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Test]

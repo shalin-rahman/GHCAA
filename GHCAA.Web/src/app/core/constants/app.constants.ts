@@ -497,6 +497,10 @@ export const API_ENDPOINTS = {
         SOCIAL_AUTH: '/api/admin/social-auth',
         POLLS: '/api/admin/polls'
     },
+    PENDING: {
+        ADMIN_SUMMARY: '/api/pending/admin/summary',
+        MY_SUMMARY: '/api/pending/me/summary'
+    },
     AUTH: {
         LOGIN: '/api/auth/login',
         REGISTER: '/api/auth/register',
