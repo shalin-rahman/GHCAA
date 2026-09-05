@@ -403,7 +403,8 @@ followed is stated in §2.2.
 - **7.13** Third-Party Libraries: selection criteria, licence review and justification
 - **7.14** Software Configuration Management — version control strategy, branching model, change control and release identification
 - **7.15** Notable Implementation Challenges and Their Resolution, presented as symptom, hypothesis, evidence and resolution
-- **7.16** Summary
+- **7.16** Institution Profile Packs and White-Label Configuration — the profile-pack mechanism, the explicit-selection guard that keeps an unset `ORG_PROFILE` unchanged, and the two latent seed-loading defects its seed-data move exposed
+- **7.17** Summary
 
 **Figures, tables and listings**
 

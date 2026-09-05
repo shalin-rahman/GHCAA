@@ -133,6 +133,7 @@ Core; Angular; Flutter.
 
 
 
+
 Section numbers are as printed in the body. Page numbers are the folios the PDF carries; a rebuild renumbers them, so they are filled in from the printed copy rather than kept by hand.
 
 | Part, chapter and section | Page |
@@ -233,7 +234,8 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 7.13 Third-Party Libraries: selection criteria | 87 |
 | 7.14 Software Configuration Management | 88 |
 | 7.15 Notable Implementation Challenges and Their Resolution | 88 |
-| 7.16 Summary | 88 |
+| 7.16 Institution Profile Packs and White-Label Configuration | 88 |
+| 7.17 Summary | 88 |
 | **Chapter 8 — Security, Privacy and Trust** | 89 |
 | 8.1 Security Objectives and Assumptions | 89 |
 | 8.2 Threat Modelling (STRIDE) | 89 |

@@ -284,6 +284,14 @@ Do not commit real passwords, API keys, or production connection strings. Base s
 
 Set the values above as environment variables in the host (Render, Docker, etc.). On each release that changes host URLs, add every browser origin (scheme + host + port) to `AppSettings:AllowedOrigins`, and confirm SignalR clients (`/hubs/chat`) use an allowed origin over HTTPS.
 
+### `ORG_PROFILE` (institution profile pack)
+
+Which institution this deployment is branded for. Leave it unset and everything behaves exactly as
+it does today (hardcoded GHC branding). Set it to a folder name under `profiles/` (e.g. `ghc`) to
+read branding, contact details, currency, and seed data from that folder's `org-config.json`
+instead. See `docs/INSTITUTION_ONBOARDING.md` before deploying this for a second institution — a
+known gap (real alumni data still baked into committed migrations) makes that unsafe right now.
+
 ---
 
 ## Testing & Quality

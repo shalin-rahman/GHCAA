@@ -73,6 +73,31 @@ graph TD
 | `registration` | 5 min | 10 req |
 | `api` | 1 min | 100 req |
 
+### Institution Profile Packs (Work Package 62)
+
+Added 2026-09. `profiles/<name>/` (e.g. `profiles/ghc/`, `profiles/default/`) holds
+`org-config.json`, `demo-data/*.json`, `site-content.json`, `seo.json`, and `assets/` for one
+institution. `IInstitutionProfileProvider`/`InstitutionProfileProvider` in Infrastructure read the
+`ORG_PROFILE` environment variable and pick the matching folder, falling back file by file to
+`profiles/default/` for anything missing. Four things read from this:
+
+- `OrgConfigService.BuildDefaults()`. The pack only drives config once `ORG_PROFILE` is explicitly
+  set. Left unset, the service keeps the hardcoded GHC defaults it always had (see
+  `OrgConfigDto`/`OrgConfigService` further down, in Infrastructure Layer — Services).
+- `ApplicationDbContext.LoadSeed`. Sends Class 1/2/3 seed files (see
+  `docs/SEED_CLASSIFICATION.md`) to the active profile's `demo-data/` folder or root, falling back
+  to `Data/Seed/` if nothing profile-specific exists.
+- `GHCAA.Web`'s `scripts/apply-brand.mjs`, `generate-org-config-fallback.mjs`, and
+  `generate-site-content.mjs`. Run at build time. They rewrite `index.html`, the sitemap, and the
+  favicons, and generate the Angular boot fallback from the pack.
+- `GHCAA.Mobile/tool/apply_profile.dart`. Also build time, syncs the app label, icons, and splash
+  screen per flavor.
+
+`scripts/brand-lint.mjs` scans API/Web/Mobile source for GHC-specific literals and warns (it does
+not block a build yet). For the full mechanism and where it stands, see
+`docs/WHITE_LABEL_PLAN.md`, `docs/INSTITUTION_ONBOARDING.md`, and Work Package 62 in
+`docs/TODO.md`.
+
 ### Environments & Pipelines
 
 | Environment | API Config | Mobile Config | Pipeline Config | Purpose |

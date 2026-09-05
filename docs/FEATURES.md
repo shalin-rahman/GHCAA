@@ -352,3 +352,17 @@ Note: on a brand-new empty database, the runtime builds the schema and applies s
 - Swagger/OpenAPI interactive documentation for manual API verification.
 - Excel-to-database member import utility with column mapping and auto-generation of missing legacy data.
 - File storage abstraction (local storage today, with an interface ready for cloud/S3/Azure expansion).
+
+### White-label / multi-institution support (in progress)
+- A second institution runs this same codebase by supplying a profile pack
+  (`profiles/<name>/org-config.json`, its own seed data, site text, and assets) instead of editing
+  source code. Picked at deploy time by the `ORG_PROFILE` environment variable.
+- Branding, contact details, currency, enabled payment gateways, and the bilingual locale pack all
+  come from the pack. Left unset, `ORG_PROFILE` defaults to today's hardcoded GHC values, so this
+  deployment is unaffected either way.
+- `scripts/brand-lint.mjs` scans the codebase for GHC-specific literals that slipped in outside the
+  profile pack (warns only, does not block a build yet).
+- Not finished yet: 631 real alumni records are still written into committed database migrations,
+  which a profile pack cannot override, so a second institution should not actually be deployed from
+  this repository until that is fixed (Work Package 62.31/82.31 in `docs/TODO.md`). See
+  `docs/INSTITUTION_ONBOARDING.md` for what a deployer needs to know.
