@@ -4323,36 +4323,37 @@ so a hand-written row still matches.
 Raised by user 2026-09-02, on being told Work Package 64 was complete: "doesn't those going in book? where?"
 A fair question, and the answer is that it does not, yet.
 
-67.1 [TODO] **Priority: P0.** `docs/book/` holds chapters 1 to 6 and the references. Chapters 7 to 13
-do not exist as files, so the 85-page PDF the build produces stops at the architecture chapter. Every
-piece of Work Package 64 evidence — the activity list with predecessors, the critical path, the float
-distribution, the two estimates compared, the arrival profile — lives in exactly two places, neither
-of them the book: the Chapter 11 specification in `docs/DOCUMENTATION_BOOK_OUTLINE.md`, and
-`docs/book/build/wbs.py`, which regenerates the numbers on demand. The same is true of the security
-model (Work Package 65's Chapter 8) and everything the diagram inventory lists from row 45 on.
+67.1 [DONE 2026-09-02, superseded by 68.1] **Priority: P0.** `docs/book/` held chapters 1 to 6 and
+the references only, so the 85-page PDF the build produced stopped at the architecture chapter. This
+was fixed by 68.1: all seven files now exist and are wired into `build.py`. What this item actually
+asked for — Work Package 64's evidence and the Work Package 65 security model reaching the book — is
+still open; see 67.2 below for the real remaining gap, which is content, not files.
 
-  Files to create, with the page budget 63.28 fixed: `07-implementation.md` (12), `08-security.md`
-  (14), `09-verification.md` (11), `10-deployment.md` (9), `11-project-management.md` (9),
-  `12-results.md` (14), `13-conclusion.md` (5). Each is added to the source list in `build.py` as it
-  is written, and `renumber.py --apply` run after it.
-
-67.2 [TODO] **Priority: P1 | Depends on: 67.1.** Chapter 11 is the one to write first, and not
-because it comes first. It is the only unwritten chapter whose evidence is already computed and
-checkable: `wbs.py` prints the activity table, the critical path and the arrival profile from git and
-this file, so the chapter is a matter of writing prose around generated numbers rather than gathering
-anything. Writing it also exercises the claim in Work Package 64 that the numbers are reproducible; if the
-chapter cannot be written from the script's output, the script is not producing what a reader needs.
+67.2 [TODO] **Priority: P1.** Files exist (68.1) but are almost entirely unwritten: as of 2026-09-05,
+`build.py --strict` reports 146 placeholders across the seven chapters (`07-implementation.md` 18,
+`08-security.md` 17, `09-verification.md` 44, `10-deployment.md` 16, `11-project-management.md` 23,
+`12-results.md` 16, `13-conclusion.md` 12), out of 148 headed sections total — only a handful of
+sections, corrected in passing during other work (e.g. the 64.7 effort-figure fixes in Chapter 11,
+§4.7's word-count correction in Chapter 9), carry real prose. Chapter 11 is the one to write first,
+and not because it comes first: `wbs.py` prints the activity table, the critical path and the arrival
+profile from git and this file, so writing it is a matter of prose around generated numbers rather
+than gathering anything. Writing it also tests the claim in Work Package 64 that the numbers are
+reproducible; if the chapter cannot be written from the script's output, the script is not producing
+what a reader needs.
 
 67.3 [TODO] **Priority: P2 | Depends on: 67.2.** Seventeen per-component activity diagrams (64.9)
-plus the six chapter-level charts. They cannot be drawn before the chapter exists to hold them, and
-under Work Package 66 every one of them has to survive the overprint and clipping checks, which the two
-quadrant charts and the DFD did not.
+plus the six chapter-level charts, for chapters 7 to 13. Confirmed still at zero: none of the seven
+new chapter files contains a single ```mermaid``` block (all 57 existing diagrams belong to chapters 1
+to 6). They cannot be drawn before the surrounding prose exists to hold them, and under Work Package 66
+every one of them has to survive the overprint and clipping checks, which the two quadrant charts and
+the DFD did not on first attempt.
 
-67.4 [TODO] **Priority: P2.** The reference list carries seventeen entries no written chapter cites
-yet. They are not stale: each was collected for a chapter in Part III or IV. The build reports them
-as expected while those parts are unwritten, and `--final` is the gate that stops accepting that
-excuse. Do not delete a reference to quieten the report; write the chapter that uses it, or remove it
-deliberately with the reason recorded here.
+67.4 [TODO] **Priority: P2.** The reference list still carries seventeen entries no written chapter
+cites (confirmed unchanged 2026-09-05: `build.py --strict` reports the same seventeen numbers). They
+are not stale: each was collected for a chapter in Part III or IV. The build reports them as expected
+while those parts are unwritten, and `--final` is the gate that stops accepting that excuse. Do not
+delete a reference to quieten the report; write the chapter that uses it, or remove it deliberately
+with the reason recorded here.
 
 67.5 [DONE 2026-09-02] **Priority: P2.** `docs/DOCUMENTATION_BOOK_OUTLINE.md` drifted in three ways
 and now matches the tree:
@@ -5221,6 +5222,13 @@ one was still accurate. The stale sentence is fixed; `build.py --strict` is clea
 **Not done: the five-unit definitions.** Commit, tracker task, numbered work package, WBS activity and
 feature still are not defined anywhere as five distinct things — that half of the item is real writing
 work for Chapter 11 plus a cross-reference from Chapter 4, not build tooling, and needs its own pass.
+**A genuinely unavoidable limit surfaced immediately: the count is self-referential.** The commit
+that records this fix moves the live count itself, so the sentence was stale again — by exactly one —
+within minutes of being corrected, before this line was even written. Fixed to the count as it now
+stands (240); the next commit after this one will make it 241. This is not a bug in the check; it is
+what quoting a live repository count from inside the repository always costs, and no wording avoids it
+short of stating a count "as of commit `<hash>`" instead of a plain number — a change to what the
+chapter promises, not to the tooling, and left for whoever next touches this sentence to decide.
 
 # Work Package 79 — Plain-language sweep against the widened SR-1
 
