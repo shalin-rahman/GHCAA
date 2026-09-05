@@ -1,0 +1,24 @@
+[
+  {
+    "Id": 1,
+    "MemberId": 1,
+    "InstitutionName": "Sample Institution",
+    "Degree": "Bachelor",
+    "Subject": "Sample Subject",
+    "AdmissionYear": 2008,
+    "PassingYear": 2012,
+    "IsGHC": true,
+    "Result": ""
+  },
+  {
+    "Id": 2,
+    "MemberId": 2,
+    "InstitutionName": "Sample Institution",
+    "Degree": "Bachelor",
+    "Subject": "Sample Subject",
+    "AdmissionYear": 2010,
+    "PassingYear": 2014,
+    "IsGHC": true,
+    "Result": ""
+  }
+]

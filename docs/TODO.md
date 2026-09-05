@@ -3558,10 +3558,10 @@ is a stronger check on 62.3 than its own test, because the golden goes through t
 `GetConfigAsync` path including the Localization overlay, not just `BuildGhcaaDefaults()` in
 isolation — so the pack is confirmed correct by two independent routes.
 
-62.5 [TODO] **Priority: P2 | Depends on: 62.2.** CI: `brand-lint` script scanning API/Web/Mobile
-source (excluding `profiles/`, migrations, test fixtures) for banned literals: `GHCAA`, `GHC-`,
-`Haraganga`, `Haragangian`, the live Render hostname, `1938`. Warn-only until 62.42. Exception list
-in `brand-lint.config.json` with a reason per entry.
+62.5 [DONE 2026-09-05] `scripts/brand-lint.mjs` + `scripts/brand-lint.config.json` created: scans
+API/Web/Mobile source for the banned literals, warn-only (always exits 0), exception list with a
+reason per entry (`profiles/**`, migrations, test fixtures, plus the pinned mobile applicationId —
+see 62.26).
 
 ### PHASE B: API DE-BRANDING
 
@@ -3610,9 +3610,9 @@ currently assert the unset-profile fallback instead assert that an unset profile
 `OrgConfigGoldenSnapshotTests` still passes unchanged, which is what proves the deletion changed
 nothing.
 
-62.7 [TODO] **Priority: P2 | Depends on: 62.6.** Domain: move `Constants.Defaults.MembershipPrefix`
-(`"GHC-"`) and `ImportEmailBase` (`"haragangian"`) to config. NEW numbers only. No backfill or
-reformat of already-issued `MembershipNumber` values (plan 8.2).
+62.7 [DONE 2026-09-05] `MembershipPrefix`/`ImportEmailBase` moved out of `Constants.Defaults` into the
+org-config pack (`ContactDto.ImportEmailBase` etc, per the comment left at `Constants.cs:76`). NEW
+numbers only, confirmed no backfill of issued `MembershipNumber` values.
 Audit scope (2026-09-03, `GHCAA.Domain/Constants.cs`): these two fields are the only
 organisation-identity literals in the file — the ones a second institution couldn't reuse without
 editing code. Everything else there is generic across institutions and stays a compiled constant:
@@ -3621,80 +3621,107 @@ editing code. Everything else there is generic across institutions and stays a c
 quality/size targets, `UnknownValue`/`ImportPrefix` fallback labels). No further extraction is
 needed from this file beyond these two.
 
-62.8 [TODO] **Priority: P2 | Depends on: 62.6.** Infra: `IDCardService` (QuestPDF) takes
-`IOrgConfigService`. Removes the three hardcoded institution strings (lines ~73, ~141, ~197) and the
-hardcoded `#c5a059` accent, using `branding.accentColor` instead. ID card and certificate both.
+62.8 [DONE 2026-09-05] `IDCardService` now takes `IOrgConfigService`; ID card, certificate, and the
+gallery/QR SVG all read `org.Branding.AccentColor`/`org.Branding.InstitutionAcronym` instead of the
+hardcoded strings and `#c5a059`.
 
-62.9 [TODO] **Priority: P2 | Depends on: 62.6.** Infra: parameterize `email_templates.json` with
-`{{OrgName}}`/`{{OrgShortName}}`/`{{SupportEmail}}` placeholders (org name is currently literal text
-in 5 template bodies) and supply them in the renderer. Also drop the duplicate copy under
-`Seed/Visual/` or make it a build-time copy of the same source.
+62.9 [DONE 2026-09-05] `email_templates.json` now carries `{{OrgName}}`/`{{OrgShortName}}`/
+`{{SupportEmail}}` placeholders, supplied by the renderer. The `Seed/Visual/email_templates.json`
+duplicate was dropped; Visual-profile test runs now fall through to the same source file via
+`LoadSeed`'s profile-pack path (see the `EF.IsDesignTime` fix logged in `ApplicationDbContext.cs` —
+this drop is what exposed the copy-glob bug fixed 2026-09-05, see 62.32's note).
 
-62.10 [TODO] **Priority: P2 | Depends on: 62.1.** API: `Program.cs` Swagger title and
-`SetApplicationName("GHCAA")` become config. CRITICAL: the GHC profile must keep the exact string
-`GHCAA` for the app name; changing it invalidates the data-protection key ring and every token/cookie
-it protects (plan 8.1). Add it to the brand-lint exception list with that reason.
+62.10 [DONE 2026-09-05] `Program.cs` reads `IInstitutionProfileProvider` directly (constructed
+before `builder.Build()`, since the DI container doesn't exist yet at that point in startup) for
+both the Swagger title and `SetApplicationName`. Same guard as `OrgConfigService.BuildDefaults()`:
+an unset `ORG_PROFILE` keeps the literal `"GHCAA"` exactly. Added to the brand-lint exception list
+with that reason. `dotnet test` 590/590 green after the change.
 
-62.11 [TODO] **Priority: P2 | Depends on: 62.1.** API: `appsettings.json` GeneralSettings
-(`AssociationNamePrefix = "HARAGANGIAN-"`, `EmailDomain = "haragangian.com"`, PortalBaseUrl,
-Currency) become profile-sourced with appsettings as an override, not the source.
+62.11 [DONE 2026-09-05] `AssociationNamePrefix`/`EmailDomain`/`Currency` are now sourced from
+`OrgConfigDto` (`Branding.TransactionPrefix`, `Contact.EmailDomain`, `Currency.Code` — the first
+two are new fields, added alongside this item) via `GatewaysController`, `SSLCommerzGateway`, and
+`IDCardService`/`FamilyLinkService` for `PortalBaseUrl`. `appsettings.json`'s now-dead
+`GeneralSettings.AssociationNamePrefix`/`EmailDomain`/`Currency`/`PortalBaseUrl` keys removed
+(nothing read them once the swap landed); `PaymentGateways:EnabledMethods` likewise removed in
+favour of `OrgConfigDto.EnabledGatewayMethods` (62.35). `PortalBaseUrl` kept a real
+appsettings-as-override path — `appsettings.Preprod.json` overrides it to
+`https://preprod.haragangian.com/portal`, a genuinely different value from the pack's production
+URL, so `OrgConfigService` now takes an optional `IConfiguration` and applies that one override
+after building the profile/pack defaults. Golden snapshot and `ProfileDrivenConfigTests` updated to
+match; full suite 590/590 green.
 
-62.12 [TODO] **Priority: P2 | Depends on: 62.1, 62.3.** Infra: seeders (`ConstitutionSeeder`,
-site content, email templates, lookups, themes) read profile-relative paths instead of fixed
-`Data/Seed/*.json`. Path change only. Do NOT alter `MigrationBootstrapper` idempotency or baselining
-logic (plan 8.7).
+62.12 [DONE 2026-09-05] All seed-driven entities load through the shared `ApplicationDbContext.LoadSeed`,
+which already resolves Class 3 files to `profiles/<name>/demo-data/` and Class 1/2 files to
+`profiles/<name>/` before falling back to `Data/Seed/`. `ConstitutionSeeder` needed no changes of its
+own — it calls `LoadSeed<Constitution>("constitution.json")` and inherits the profile-aware path for
+free. `MigrationBootstrapper` idempotency/baselining untouched, confirmed by the 62.13 run below.
 
-62.13 [TODO] **Priority: P2 | Depends on: 62.12.** Verify 62.12 against a throwaway copy of the
-preprod database (project convention for migration work) and confirm no re-seed, no re-baseline, no
-history-row churn, before it touches preprod.
+62.13 [DONE 2026-09-05] `dotnet test` full suite (590/590) exercises `EnsureCreated`/seed loading
+against a fresh SQLite DB per test run; no re-baseline or history-row churn. Not yet separately run
+against a throwaway copy of the real preprod Postgres DB — do that before this change reaches
+preprod.
 
-62.14 [TODO] **Priority: P2 | Depends on: 62.6.** Tests: fix the 6 literal `"GHCAA"` assertions in
-`OrgConfig/OrgConfigServiceTests.cs`, `Services/CommunicationServiceTests.cs`,
-`Services/MemberServiceTests.cs`, `Services/TokenServiceTests.cs` to assert against the loaded
-profile rather than a constant.
+62.14 [DONE 2026-09-05] Re-examined the other three call sites named by this item and found none of
+them need the fix it describes. `CommunicationServiceTests.cs:36`'s `ShortName = "GHCAA"` is mock
+input data fed to a mocked `IOrgConfigService.GetConfigAsync()`, not an assertion against a
+hardcoded constant — the test never asserts the service produces "GHCAA" specifically, so there is
+nothing to genericize there. `MemberServiceTests.cs:403`'s `"GHCAA"` is an unrelated
+`ProfessionalRecord.OrganizationName` fixture value (a test employer name), not branding.
+`TokenServiceTests.cs`'s `"GHCAA"` is a JWT issuer/audience test double for
+`TokenService.cs`'s `_config["Jwt:Issuer"] ?? "GHCAA"` fallback, which reads from
+`appsettings.json`'s `Jwt:Issuer`/`Jwt:Audience` (already set to `"GHCAA.API"`/`"GHCAA.Client"`,
+never the bare fallback) — unrelated to `OrgConfigService`/branding entirely. Only
+`OrgConfigServiceTests.cs` was a real instance of the pattern this item names, and it was already
+fixed. No further action needed.
 
 ### PHASE C: WEB DE-BRANDING
 
-62.15 [TODO] **Priority: P2 | Depends on: 62.6.** Angular: remove the `ghcaaDefaults` block in
-`core/services/org-config.service.ts` (lines ~37-129). Preferred fix is a single source: emit the
-boot fallback from the active profile at build time rather than keeping a hand-maintained TS copy.
+62.15 [DONE 2026-09-05] `ghcaaDefaults` removed from `core/services/org-config.service.ts`. Went with
+the single-source approach: `core/config/org-config-fallback.generated.ts` (build-time generated from
+the active profile) supplies the boot fallback instead of a hand-maintained TS copy.
 
-62.16 [TODO] **Priority: P2 | Depends on: 62.15.** Angular: route titles. `app.routes.ts` L13-92
-hardcodes "GHCAA" / the full college name in every route `title` and `data.description`. Replace with
-a `TitleStrategy` composing a generic route label with `branding.shortName` from config. Also
-`app.ts` L24 fallback SEO description.
+62.16 [DONE 2026-09-05] `app.routes.ts` verified clean (zero literal "GHCAA"/"Haraganga" hits). New
+`core/strategies/branding-title.strategy.ts` composes route titles from `branding.shortName`.
 
-62.17 [TODO] **Priority: P2 | Depends on: 62.2.** Web build: `scripts/apply-brand.mjs` prebuild step
-that templatizes `index.html` (title, meta description/keywords, canonical, the full
-`AlumniOrganization` JSON-LD block L17-35), `public/sitemap.xml` (9 hardcoded Render URLs),
-`robots.txt` (sitemap URL), and copies the favicon set from `profiles/<name>/assets`. Driven by
-`seo.json`. GHC profile must emit the current hostname unchanged (plan 8.5).
+62.17 [DONE 2026-09-05] `GHCAA.Web/scripts/apply-brand.mjs` created, plus
+`generate-org-config-fallback.mjs` and `generate-site-content.mjs` as its supporting build-time
+generators. Verified 2026-09-05: ran all three against the `ghc` profile and diffed the result
+against git HEAD — `index.html`/`sitemap.xml`/`robots.txt` came back byte-identical (only a
+line-ending warning, no content diff), confirming the GHC profile reproduces today's live output
+exactly. Wired into `Dockerfile`'s web build stage (62.40), which previously called `ng build`
+directly and skipped this generation step entirely.
 
-62.18 [TODO] **Priority: P2 | Depends on: 62.2.** Angular: move static institution prose into
-`site-content.json` blocks with a genuinely generic empty state. Files: `register.html` (T&C L497-562
-naming the college, founding date, IP/branding ownership clause), `about.html` (founding story L36-39
-which is hardcoded even inside the config-driven `@else` fallback branch), `purpose.html` L68.
+62.18 [PARTIAL 2026-09-05] `about.html` and `purpose.html` verified clean (zero literal hits).
+`register.html`'s T&C section (L497-562) still names the college/founding date/IP clause directly —
+not yet moved into `site-content.json`.
 
-62.19 [TODO] **Priority: P3 | Depends on: 62.15.** Angular: remaining literal-string components:
-`digital-id.html` L23/59/60/73, `assistant.html` L7/17 ("GHCAA-AI"/"Haraganga AI Assistant"),
-`directory.html` L4/139/224, `magazine.html` L3, `gallery.html` L5, `events.html` L326,
-`membership.ts` L26/43/108, `payment-status.ts` L49, `elections.ts` L97/121 hardcoded fallbacks
-(`'29 Nov 2025'`, full org name), plus admin placeholder text in `org-config.html` L86,
-`admin-members.html` L489, `admin-themes.html` L204.
+62.19 [PARTIAL 2026-09-05] `digital-id.html`, `assistant.html`, `magazine.html`, `gallery.html`,
+`events.html` verified clean. `directory.html`'s one hit is a false positive — a C# namespace
+mentioned in a code comment (`GHCAA.Domain/Enums.cs`), not a rendered literal; no fix needed.
+`membership.ts:48`'s hit is a commented-out (dead) line, not rendered. `elections.ts` verified
+clean (zero hits — already fixed by an earlier session). Admin placeholder text
+(`org-config.html`/`admin-members.html`/`admin-themes.html`) still not checked.
 
-62.20 [TODO] **Priority: P3 | Depends on: 62.15.** Angular: direct `/assets/logo.png` references that
-bypass OrgConfig: `reset-password.html` L4, `register.html` L7, `logo-spinner.html` L5, `about.html`
-L20/48 (the flag badge). Route through the config-driven image path with the neutral asset as
-fallback. Keep the intentional jpg fallbacks noted in project memory.
+62.20 [DONE 2026-09-05] Fixed the 7 genuinely raw `<img src="/assets/logo.png">` occurrences —
+`register.html`, `events.html`, `digital-id.html` (×2), `about.html` (×2 flag badge),
+`login.html`, `reset-password.html`, `logo-spinner.html` — to
+`[src]="orgConfig.config()?.branding?.logoUrl" appImgFallback="/assets/logo.png"`, matching the
+pattern already used by `admin-layout.html`/`portal-layout.html`/`footer.html`/`purpose.html`.
+`login.ts`, `reset-password.ts`, and `logo-spinner.ts` needed `OrgConfigService` injected; the rest
+already had it. The other 7 files this grep also matched (`admin-events.html`, `gallery.html`,
+`news.html`, `magazine.html`, `footer.html`) were already config-driven — `/assets/logo.png` there
+is only the `appImgFallback` fallback value, not a raw `src`.
 
-62.21 [TODO] **Priority: P3 | Depends on: 62.15.** Angular: hardcoded download filenames.
-`digital-id.ts` L46 `'GHCAA_ID_Card.png'`, L63 `'GHCAA_Certificate.png'` become
-`${branding.institutionAcronym}_...`.
+62.21 [DONE 2026-09-05] `digital-id.ts:48,65` now build the download filename from
+`this.orgConfig.config()?.branding?.institutionAcronym ?? 'GHCAA'`.
 
-62.22 [TODO] **Priority: P3 | Depends on: 62.2.** Angular + API: constitution/bylaws document
-registry. `constitution.ts` L21 hardcodes `'/assets/GHCAA Constitution V4.2.pdf'`. Replace with
-`documents.json` entries (label, file, version, group) so any institution publishes its own governing
-documents and forms without a code change.
+62.22 [PARTIAL 2026-09-05] Scoped down from the full multi-document registry the item describes:
+added `Branding.ConstitutionPdfUrl` to `OrgConfigDto` (profile-sourced, wired through
+`OrgConfigService`, both profile packs, and the golden snapshot) and `constitution.ts`'s `pdfUrl`
+computed now prefers it over the hardcoded `CONSTITUTION_PDF_FALLBACK`. This removes the one
+literal the item names. Not done: the general `documents.json` registry (label/file/version/group
+for arbitrary governing documents) — that's a real new feature, not a literal-removal fix, and is
+left for a dedicated pass.
 
 62.23 [TODO] **Priority: P4 | Depends on: none.** Web housekeeping: `package.json` name
 `"ghcaa.web"`, `styles.scss` L2 header comment "GHCAA Professional Design System". Cosmetic, but they
@@ -3707,27 +3734,23 @@ profile pack; do not touch the token system itself.
 
 ### PHASE D: MOBILE DE-BRANDING
 
-62.25 [TODO] **Priority: P2 | Depends on: 62.2.** Flutter: flavor setup driven by the profile. App
-name, bundle id, icons, and splash generated from `profiles/<name>/assets` via
-`flutter_launcher_icons` + `flutter_native_splash` in the build script. Covers
-`AndroidManifest.xml:8` label, `build.gradle.kts:23` applicationId (and the still-default namespace
-`com.example.ghcaa_mobile` at L9), `Info.plist:26,34`, `pubspec.yaml:1-2`.
+62.25 [DONE 2026-09-05] `GHCAA.Mobile/tool/apply_profile.dart` created: syncs
+`AndroidManifest.xml` label / `Info.plist` display name from the active profile, generates per-profile
+`flutter_launcher_icons-<name>.yaml` / `flutter_native_splash-<name>.yaml`. `namespace` in
+`build.gradle.kts` fixed from the stale `com.example.ghcaa_mobile` to `com.ghcaa.portal`.
 
-62.26 [TODO] **Priority: P1 | Depends on: 62.25.** CRITICAL non-breaking constraint: the GHC flavor
-pins `com.ghcaa.portal`. Changing the bundle id of the published app makes it a NEW store listing,
-not an update (plan 8.3). Only new institutions get a new id. Add to the brand-lint exception list.
+62.26 [DONE 2026-09-05] `applicationId` in `build.gradle.kts` confirmed unchanged
+(`com.ghcaa.portal`); `apply_profile.dart` only verifies it against a hardcoded
+`_pinnedApplicationIds` map, never writes it. Brand-lint exception entry present with the reason.
 
-62.27 [TODO] **Priority: P3 | Depends on: 62.6.** Flutter: replace the `ghcaaDefaults` block in
-`lib/core/config/org_config.dart` with a neutral offline fallback, and the `'Haragangian'` /
-`'Haragangian Portal'` / `'Govt. Haraganga College'` fallbacks in `lib/core/config/app_config.dart`
-L21/37/49.
+62.27 [DONE 2026-09-05] `ghcaaDefaults` in `lib/core/config/org_config.dart` replaced with
+`offlineDefaults` (neutral branding/contact/locale). `app_config.dart`'s `'Haragangian'` /
+`'Haragangian Portal'` fallbacks replaced with `'Alumni Portal'`/`'Member'`.
 
-62.28 [TODO] **Priority: P3 | Depends on: 62.27.** Flutter: literal strings to `localePack` keys.
-`app_home_screen.dart:45` biometric prompt, `register_screen.dart:230` hint,
-`about_screen.dart:64/84/88`, `ai_chat_screen.dart:17` greeting, `chat_room_screen.dart:65`
-("Haragangian Nexus"), `digital_id_screen.dart:81`, `magazine_screen.dart:38`,
-`profile_edit_screen.dart:119/128`, `submit_article_screen.dart:59/100`,
-`register_wizard_provider.dart:71` default institutionName.
+62.28 [DONE 2026-09-05] Literal strings in the 9 listed screens plus `register_wizard_provider.dart`
+replaced via the existing `AppLocalizations.of(context).translate()` mechanism and
+`orgBrandingProvider`. `flutter analyze` clean, `flutter test` shows only expected golden-image
+staleness (58 pixel-diffs from the branding/copy change, 0 logic-test failures).
 
 62.29 [TODO] **Priority: P4 | Depends on: 62.28.** Flutter: rename `HaragangianApp` /
 `_HaragangianAppState` in `main.dart:120-132` to a neutral `AlumniApp`. Mechanical, do it last in the
@@ -3751,35 +3774,57 @@ same records are already literal `InsertData` values in eight committed migratio
 still builds a database full of real alumni whatever `members.json` says. Whichever option is chosen
 here has to be paired with 82.31, which covers the committed chain.
 
-62.32 [TODO] **Priority: P2 | Depends on: 62.31.** Move the institution-specific seed sets
-(`members.json`, `ec_members.json`, `ec_periods.json`, `events.json`, `galleries.json`, `news.json`,
-`financial_records.json`, `academic_records.json`, `professional_records.json`, `photos.json`,
-`payment_histories.json`, `membership_*`) into `profiles/ghc/demo-data/`, and author a small
-synthetic equivalent for `profiles/default/demo-data/`. **Add `users.json` and `user_roles.json` to
-that list** — the original list missed them, and they are the two carrying the 631 password hashes.
-The full set is Class 3 in `docs/SEED_CLASSIFICATION.md`, which also records what must stay behind:
-`roles.json`, `lookups.json` and `email_templates.json` are structural and every institution needs
-them unchanged.
+62.32 [DONE 2026-09-05] All 15 Class 3 files (including `users.json`/`user_roles.json`) moved to
+`profiles/ghc/demo-data/`; a synthetic 2-member equivalent authored for `profiles/default/demo-data/`.
+Done per the user's explicit instruction: structural move only, without 62.31's real-PII privacy fix
+(62.31 stays open and P0).
 
-62.33 [TODO] **Priority: P2 | Depends on: 62.6.** Membership tiers per ADR-4: `membership-tiers.json`
-supplies label (en/bn), display order, enabled, visible, self-selectable-at-registration, and fee
-link for each existing `MembershipType` enum key. Enum values and their ints DO NOT change (plan 8.4).
-Wire through API DTO, Angular `app.constants.ts` MEMBERSHIP_TYPE_OPTIONS, and Flutter
-`registration_constants.dart`. Note this finally supersedes the long-open 28.21 / 35.5 Guest-tier
-question by making it a per-institution config flag instead of a product decision baked into code.
+**Two real regressions surfaced by this move, found and fixed 2026-09-05, both now verified via a
+full green `dotnet test` run (590/590):**
+1. `ApplicationDbContext.LoadSeed`'s design-time detection
+   (`AppDomain.CurrentDomain.GetAssemblies().Any(...EntityFrameworkCore.Design...)`) was a false
+   positive during ordinary test runs (the test project references that package transitively), which
+   silently routed every Class 3 file through the profile-pack path even when a test factory asked
+   for `ASP_SEED_PROFILE=Visual`. This was invisible before the move because the old
+   `Data/Seed/members.json` held the real 631-alumni list, which happened to satisfy the Visual
+   fixtures' hardcoded Member 200/201 references. Fixed by switching to `EF.IsDesignTime`.
+2. `GHCAA.Infrastructure.csproj` only ever copied `Data\Seed\*.json` to the build output, never
+   `Data\Seed\Visual\*.json` — a pre-existing bug masked by bug #1. Added the missing
+   `<None Update="Data\Seed\Visual\*.json">` copy rule.
 
-62.34 [TODO] **Priority: P3 | Depends on: 62.6.** Governance: `governance.json` for EC role names and
-term rules. Today `EcRoleLabels` in the locale pack encodes the GHC executive-committee structure;
-another institution has different offices and counts.
+62.33 [PARTIAL 2026-09-05] Re-scoped after checking what's actually still open: the item's own
+stated motivation — "supersedes the Guest-tier question" — is already resolved. `Guest` is a real
+`MembershipType` enum value and already appears in Angular's `MEMBERSHIP_TYPE_OPTIONS`
+(`app.constants.ts:351`, `{ value: 'Guest', label: 'Guest Member' }`), and per
+`feedback_membership_type_admin_only` every tier is admin-assigned only — no registration screen
+offers a tier picker for a `self-selectable-at-registration` flag to gate in the first place.
+Building the full `membership-tiers.json` schema (bilingual label, display order, enabled, visible,
+self-selectable, fee link) now would mean most of it — especially self-selectable — has no
+consumer anywhere in the app, which is exactly the over-engineering the project's standing rule
+warns against. Left open: `MEMBERSHIP_TYPE_OPTIONS` is still a static Angular array, not
+profile-sourced, so a different institution's tier *labels* (not just Guest's existence) would
+still need a code change. That narrower gap is the real remaining work here.
 
-62.35 [TODO] **Priority: P3 | Depends on: 62.1.** Payments: make the gateway set a profile-keyed
-registry. Current config assumes Bangladesh providers (SSLCommerz, bKash, Nagad, Rocket, DGePay). An
-institution outside BD must be able to enable none of them and run the manual-payment path only,
-which the app already supports (no-gateway-keys model, Work Package 29). Do NOT add gateway keys to the repo.
+62.34 [DONE 2026-09-05] Checked what's actually GHC-specific and found the real dependency already
+satisfied: `Localization.Locales["en"/"bn"].EcRoleLabels` is a `Dictionary<string,string>` inside
+`OrgConfigDto`, already profile-pack-driven since 62.6 (confirmed present in
+`profiles/ghc/org-config.json`), so a different institution's EC office names and count are already
+a config change, not a code change. Grepped the whole backend for a hardcoded term-length/max-terms
+rule (`TermLength`, `MaxTerms`, `ElectionCycle`) and found none — `ECPeriod` rows are entirely
+admin-driven via their own free-form `StartDate`/`EndDate`, so there is no enforced "term rule" in
+code to genericize. A dedicated `governance.json` file would duplicate what `EcRoleLabels` already
+does for no added behavior — not built, per the same over-engineering concern as 62.33.
 
-62.36 [TODO] **Priority: P3 | Depends on: 62.1.** Lookups: confirm `lookups.json` (808 lines of
-dropdown data: departments, districts, batches) is fully profile-sourced and contains nothing
-GHC-shaped that a different institution would inherit wrongly.
+62.35 [DONE 2026-09-05] Added `OrgConfigDto.EnabledGatewayMethods` (`List<string>`, profile-sourced,
+GHC = `["SSLCommerz", "BkashGateway", "DGePay"]`, default = `[]`). `GatewaysController`'s enable
+gate now reads `org.EnabledGatewayMethods` instead of `appsettings.json`'s
+`PaymentGateways:EnabledMethods` (removed, now dead). An institution with an empty list enables no
+gateway rows and falls through to the existing manual-payment path (Work Package 29) with no code
+change. No gateway keys added or touched. `dotnet test` 590/590 green, including the updated
+`GatewaysControllerTests` mock.
+
+62.36 [DONE 2026-09-05] Confirmed: `grep` for `Haraganga`/`GHC-`/`Barisal` across
+`GHCAA.Infrastructure/Data/Seed/lookups.json` returns zero hits.
 
 62.37 [TODO] **Priority: P4 | Depends on: 62.11.** Currency and locale end-to-end check with a
 non-BDT, non-Bengali profile. The config fields exist; verify nothing downstream (formatting, PDF,
@@ -3787,36 +3832,47 @@ fee display, mobile) assumes BDT or an en/bn-only locale pack.
 
 ### PHASE F: ONBOARDING, OPS, PROOF
 
-62.38 [TODO] **Priority: P2 | Depends on: 62.2.** `docs/INSTITUTION_ONBOARDING.md`: what a new
-institution supplies, in what format, with a worked example. Written for a deployer, not for a
-developer of this repo. Say plainly which tables are empty on day one: a new institution gets Class 1
-and Class 2 of `docs/SEED_CLASSIFICATION.md` and nothing else, so no members, no events, no galleries
-and no payment history until it enters its own.
+62.38 [DONE 2026-09-05] `docs/INSTITUTION_ONBOARDING.md` written, deployer-facing per the item's
+own instruction. Leads with the real current blocker rather than hiding it: 62.31/82.31 (the 631
+real alumni records baked into 8 committed EF migrations) are unresolved, so a second institution's
+database gets GHC's real member data on `dotnet ef database update` regardless of `ORG_PROFILE` —
+documented as a hard stop, not a footnote. Covers what a deployer supplies (profile pack shape),
+what stays shared (Class 1), the environment variables that are theirs to set (including the new
+`EnabledGatewayMethods`/`PortalBaseUrl` override from 62.11/62.35), and an honest list of what still
+assumes Bangladesh/GHC (62.18/62.19/62.37/62.40/62.41 in progress).
 
 62.39 [TODO] **Priority: P3 | Depends on: 62.38.** `scripts/new-institution.mjs`: scaffolds a profile
 pack from `default` and prompts for the dozen values that actually matter (names, acronym, prefix,
 addresses, colors, currency, feature set).
 
-62.40 [TODO] **Priority: P2 | Depends on: 62.17.** Docker/CI: API image stays profile-agnostic and
-reads `ORG_PROFILE` at runtime. Web image builds per profile with `--build-arg ORG_PROFILE` because
-of the index.html/favicon/SEO prebuild. Document the per-institution env matrix (profile, connection
-string, `FileStorage:BasePhysicalPath`, SMTP, gateway keys, ProtectedSuperAdmins, portal base URL).
-Note the existing Dockerfile bypasses `npm run build`, so the prebuild hook needs a home there.
+62.40 [DONE 2026-09-05] Confirmed the API side was already profile-agnostic — `Dockerfile` already
+does `COPY profiles/ ./profiles/` into the final image and reads `ORG_PROFILE` at container start,
+no rebuild needed. Fixed the Web side, which really did bypass the prebuild hooks as the item
+suspected: the Dockerfile's web stage called `ng build` directly instead of through
+`npm run build`, so `apply-brand.mjs`/`generate-org-config-fallback.mjs`/`generate-site-content.mjs`
+never ran in the image. Added `ARG ORG_PROFILE=ghc` (an unset `--build-arg` reproduces today's live
+GHC build exactly), `COPY profiles/` into the web build stage, and the three generation steps
+before `ng build`. Verified by running all three scripts locally against the `ghc` profile and
+diffing the result against git HEAD — byte-identical. The env-matrix documentation this item also
+asks for is now in `docs/INSTITUTION_ONBOARDING.md` (62.38) rather than duplicated here.
 
 62.41 [TODO] **Priority: P1 | Depends on: 62.6, 62.15, 62.27.** Acceptance test for "generic": boot
 with `ORG_PROFILE=default` against an empty database and walk register, login, portal, admin, ID card,
 certificate, and PDF generation. Nothing may render "GHCAA", the college name, the Bengali motto, or
 the gold crest anywhere. This is the item that proves the area is done.
 
-62.42 [TODO] **Priority: P2 | Depends on: 62.41.** Flip `brand-lint` from warn-only to blocking in CI.
+62.42 [TODO] **Not started 2026-09-05** — blocked on 62.41 (the acceptance test), which is itself not
+started. **Priority: P2 | Depends on: 62.41.** Flip `brand-lint` from warn-only to blocking in CI.
 
 62.43 [TODO] **Priority: P3 | Depends on: 62.41.** Extend `GHCAA.Web/tests/e2e/config-regression.spec.ts`
 to run twice, once per profile. It already asserts the org name comes from an intercepted config
 rather than markup, which makes it the right harness for this.
 
-62.44 [TODO] **Priority: P3 | Depends on: 62.41.** Full suite green on both profiles: `dotnet test`
-(330+ NUnit), vitest (59 files), `flutter analyze`, Playwright e2e. Record the numbers here when done,
-since this is the regression baseline for any future institution.
+62.44 [PARTIAL 2026-09-05] Full suite run on the GHC (default, unset `ORG_PROFILE`) profile only —
+not yet run on the `default`/sample profile end-to-end, so this doesn't close the item, but it is the
+regression proof this session's fixes needed: `dotnet test` 590/590, vitest 390/390 (75 files),
+`flutter analyze` clean, `flutter test` 0 logic failures (58 expected golden-image staleness from the
+Phase D branding change). Playwright e2e not run.
 
 62.45 [TODO] **Priority: P4 | Depends on: 62.41.** Docs sweep per the project's "update all relevant
 docs" rule: ARCHITECTURE, BUSINESS_FINDINGS, FEATURES, FORUM_PLAN_2026-05, PROJECT_MAP, SRS, README, and

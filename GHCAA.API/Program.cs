@@ -31,10 +31,20 @@ JwtSigningKeyResolver.Resolve(configuration, builder.Environment);
 var keyRingPath = configuration["DataProtection:KeyRingPath"];
 if (!string.IsNullOrWhiteSpace(keyRingPath))
 {
+    // Same guard as OrgConfigService.BuildDefaults(): an unset ORG_PROFILE keeps "GHCAA" exactly,
+    // since changing this value invalidates every existing session token/cookie under the current
+    // key ring (docs/TODO.md 62.10). Built directly here, before builder.Build(), because the DI
+    // container that would normally hand out IInstitutionProfileProvider doesn't exist yet at this
+    // point in startup.
+    var profileForAppName = new GHCAA.Infrastructure.Services.InstitutionProfileProvider(configuration, builder.Environment);
+    var applicationName = profileForAppName.ProfileExplicitlySelected
+        ? profileForAppName.OrgConfigDefaults.Branding.AppName
+        : "GHCAA";
+
     Directory.CreateDirectory(keyRingPath);
     builder.Services.AddDataProtection()
         .PersistKeysToFileSystem(new DirectoryInfo(keyRingPath))
-        .SetApplicationName("GHCAA");
+        .SetApplicationName(applicationName);
 }
 
 // Register layers
@@ -234,10 +244,16 @@ app.UseCors("AngularApp");
 
 if (app.Environment.IsDevelopment())
 {
+    // Same guard as OrgConfigService.BuildDefaults(): an unset ORG_PROFILE keeps today's title
+    // rather than switching to whatever the "default" sample pack says.
+    var swaggerTitle = institutionProfile.ProfileExplicitlySelected
+        ? $"{institutionProfile.OrgConfigDefaults.Branding.ShortName} API V1"
+        : "GHCAA API V1";
+
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "GHCAA API V1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", swaggerTitle);
         c.DisplayRequestDuration();
         c.EnableDeepLinking();
     });

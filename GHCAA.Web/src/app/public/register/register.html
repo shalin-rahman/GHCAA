@@ -4,7 +4,7 @@
             <!-- Desktop Wizard Sidebar -->
             <div class="wizard-sidebar hide-mobile on-dark">
                 <div class="brand-box">
-                    <img src="/assets/logo.png" alt="GHCAA" appImgFallback>
+                    <img [src]="orgConfig.config()?.branding?.logoUrl" alt="Logo" appImgFallback="/assets/logo.png">
                     <h3>Member<br>Registry</h3>
                 </div>
                 <div class="steps-list">
@@ -477,9 +477,9 @@
     <div class="modal-box reveal-top max-w-3xl" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <div class="flex flex-col">
-                <h2 class="text-accent font-black uppercase tracking-tighter leading-none mb-1">GHCAA ("HARAGANGIAN")</h2>
+                <h2 class="text-accent font-black uppercase tracking-tighter leading-none mb-1">{{ termsHeading() }}</h2>
                 <h3 class="text-xs text-white/60 font-medium uppercase tracking-widest">Membership Registration: Terms and Conditions</h3>
-                <span class="text-[10px] text-muted uppercase font-bold mt-2">Effective Date: 29 November 2025</span>
+                <span class="text-[10px] text-muted uppercase font-bold mt-2">Effective Date: {{ termsContent.effectiveDate }}</span>
             </div>
             <button class="close-btn" (click)="showTerms.set(false)">×</button>
         </div>
@@ -494,7 +494,7 @@
                     <div class="space-y-4">
                         <div>
                             <h5 class="font-bold text-accent/80 mb-2">Section 1.01: Definitive Eligibility</h5>
-                            <p>Registration is exclusively open to "eligible alumni" of Government Haraganga College (established 18 Dec 1938). To qualify, the Applicant must prove they are:</p>
+                            <p>{{ termsContent.eligibilityParagraph }}</p>
                             <ul class="list-disc ml-6 mt-2 space-y-2">
                                 <li><strong>a) Graduate Member:</strong> An individual who has successfully completed a degree (HSC, Pass, Honors, Masters) from the institution.</li>
                                 <li><strong>b) Associate Member:</strong> An individual who was a regular student of the institution for a period of at least two full academic years but did not complete a degree.</li>
@@ -559,7 +559,7 @@
                     <div class="space-y-4">
                         <div>
                             <h5 class="font-bold text-accent/80 mb-2">Section 4.01: Exclusive Rights to Name and Logo</h5>
-                            <p>The Applicant acknowledges that the name "Govt. Haraganga College," its official logo, and all branding elements are the exclusive intellectual property of the Institution (Article I, Sections 5 & 6).</p>
+                            <p>{{ termsContent.ipParagraph }}</p>
                         </div>
                         <div>
                             <h5 class="font-bold text-accent/80 mb-2">Section 4.02: Permitted and Prohibited Use</h5>

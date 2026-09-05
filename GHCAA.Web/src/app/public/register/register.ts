@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RegistrationService } from '../../core/services/registration.service';
@@ -15,6 +15,7 @@ import { PaymentGateway } from '../../core/models/business.models';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { Icon } from '../../common/icon/icon';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { SITE_CONTENT } from '../../core/config/site-content.generated';
 
 @Component({
   selector: 'app-register',
@@ -29,7 +30,14 @@ export class Register implements OnDestroy {
   private notify = inject(NotificationService);
   private gatewaysService = inject(GatewaysService);
   private finService = inject(FinancialService);
-  private orgConfig = inject(OrgConfigService);
+  orgConfig = inject(OrgConfigService);
+
+  /** T&C institution-specific clauses, from the active institution profile pack. */
+  termsContent = SITE_CONTENT.registerTerms;
+  termsHeading = computed(() => {
+    const branding = this.orgConfig.config()?.branding;
+    return `${branding?.shortName ?? ''} ("${branding?.memberNickname ?? ''}")`;
+  });
 
   loading = signal(false);
   registrationFee = signal<number>(500); // Default placeholder

@@ -10,70 +10,70 @@ export const routes: Routes = [
             {
                 path: '',
                 loadComponent: () => import('./public/landing/landing').then(m => m.Landing),
-                title: 'Govt. Haraganga College Alumni Association | Haragangian Portal',
-                data: { description: 'Official alumni association of Govt. Haraganga College, Munshiganj — reconnecting Haragangians worldwide through heritage, networking, and advancement.' }
+                title: '{branding.fullName} | {branding.memberNickname} Portal',
+                data: { description: 'Official alumni association of {branding.institutionName}, Munshiganj — reconnecting {branding.memberNickname}s worldwide through heritage, networking, and advancement.' }
             },
             {
                 path: 'login',
                 loadComponent: () => import('./public/login/login').then(m => m.Login),
-                title: 'Member Login | GHCAA'
+                title: 'Member Login | {branding.shortName}'
             },
             {
                 path: 'register',
                 loadComponent: () => import('./public/register/register').then(m => m.Register),
-                title: 'Join the Association | GHCAA',
-                data: { description: 'Register as a member of the Govt. Haraganga College Alumni Association (GHCAA), Munshiganj.' }
+                title: 'Join the Association | {branding.shortName}',
+                data: { description: 'Register as a member of {branding.fullName} ({branding.shortName}), Munshiganj.' }
             },
             {
                 path: 'reset-password',
                 loadComponent: () => import('./public/reset-password/reset-password').then(m => m.ResetPassword),
-                title: 'Reset Password | GHCAA'
+                title: 'Reset Password | {branding.shortName}'
             },
             {
                 path: 'about',
                 loadComponent: () => import('./public/about/about').then(m => m.About),
-                title: 'About Us | Govt. Haraganga College Alumni Association',
-                data: { description: 'The history, mission, and legacy of Govt. Haraganga College, Munshiganj and its Alumni Association.' }
+                title: 'About Us | {branding.fullName}',
+                data: { description: 'The history, mission, and legacy of {branding.institutionName}, Munshiganj and its Alumni Association.' }
             },
             {
                 path: 'contact',
                 loadComponent: () => import('./public/contact/contact').then(m => m.Contact),
-                title: 'Contact Us | GHCAA',
-                data: { description: 'Get in touch with the Govt. Haraganga College Alumni Association secretariat.' }
+                title: 'Contact Us | {branding.shortName}',
+                data: { description: 'Get in touch with the {branding.fullName} secretariat.' }
             },
             {
                 // Public governance surface. Both pages are anonymous by design — the
                 // constitution and the election rules must be readable without a login.
                 path: 'constitution',
                 loadComponent: () => import('./public/constitution/constitution').then(m => m.ConstitutionPage),
-                title: 'Constitution | GHCAA'
+                title: 'Constitution | {branding.shortName}'
             },
             {
                 path: 'elections',
                 loadComponent: () => import('./public/elections/elections').then(m => m.ElectionsPage),
-                title: 'Elections & Governance | GHCAA'
+                title: 'Elections & Governance | {branding.shortName}'
             },
             {
                 path: 'gallery',
                 loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery),
                 canActivate: [featureGuard('enableGallery')],
-                title: 'Event Gallery | GHCAA'
+                title: 'Event Gallery | {branding.shortName}'
             },
             {
                 path: 'magazine',
                 loadComponent: () => import('./public/magazine/magazine').then(m => m.Magazine),
-                title: 'Alumni Magazine | GHCAA'
+                title: 'Alumni Magazine | {branding.shortName}'
             },
             {
                 path: 'directory',
                 loadComponent: () => import('./public/directory/public-directory').then(m => m.PublicDirectory),
-                title: 'Alumni Directory | GHCAA'
+                title: 'Alumni Directory | {branding.shortName}'
             },
             {
                 path: 'events',
                 canActivate: [featureGuard('enableEvents')],
-                title: 'Events | GHCAA',
-                data: { description: 'Upcoming and past events hosted by the Govt. Haraganga College Alumni Association, Munshiganj.' },
+                title: 'Events | {branding.shortName}',
+                data: { description: 'Upcoming and past events hosted by {branding.fullName}, Munshiganj.' },
                 children: [
                     { path: '', loadComponent: () => import('./common/events/events').then(m => m.Events) },
                     { path: ':id', loadComponent: () => import('./common/events/events').then(m => m.Events) }
@@ -83,8 +83,8 @@ export const routes: Routes = [
                 // TODO 37.3: fundraising campaigns + donor honour roll.
                 path: 'campaigns',
                 canActivate: [featureGuard('enableFundraising')],
-                title: 'Fundraising Campaigns | GHCAA',
-                data: { description: 'Support the Govt. Haraganga College Alumni Association through an active fundraising campaign.' },
+                title: 'Fundraising Campaigns | {branding.shortName}',
+                data: { description: 'Support {branding.fullName} through an active fundraising campaign.' },
                 children: [
                     { path: '', loadComponent: () => import('./public/campaigns/campaigns').then(m => m.Campaigns) },
                     { path: ':slug', loadComponent: () => import('./public/campaigns/campaigns').then(m => m.Campaigns) }
@@ -93,14 +93,14 @@ export const routes: Routes = [
             {
                 path: 'news',
                 loadComponent: () => import('./common/news/news').then(m => m.News),
-                title: 'News & Notices | GHCAA',
-                data: { description: 'Latest news, updates, and notices from Govt. Haraganga College Alumni Association, Munshiganj.' }
+                title: 'News & Notices | {branding.shortName}',
+                data: { description: 'Latest news, updates, and notices from {branding.fullName}, Munshiganj.' }
             },
             {
                 path: 'jobs',
                 loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs),
                 canActivate: [featureGuard('enableJobHub')],
-                title: 'Job Hub | GHCAA'
+                title: 'Job Hub | {branding.shortName}'
             },
             {
                 path: 'payment',

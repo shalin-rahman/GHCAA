@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../features/messaging/chat_service.dart';
+import '../../core/services/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
@@ -62,7 +63,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     final stream = ref.watch(chatServiceProvider).messageStream;
 
     return AppScaffold(
-      title: 'Haragangian Nexus',
+      title: AppLocalizations.of(context).translate('chat_room_title'),
       breadcrumb: 'Portal > Secure Chat',
       child: Column(
         children: [

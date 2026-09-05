@@ -1,0 +1,24 @@
+[
+  {
+    "Id": 1,
+    "MemberId": 1,
+    "OrganizationName": "Sample Company",
+    "Designation": "Sample Role",
+    "Sector": "Sample Sector",
+    "Location": "",
+    "StartDate": "2015-01-01T00:00:00Z",
+    "EndDate": null,
+    "IsCurrent": true
+  },
+  {
+    "Id": 2,
+    "MemberId": 2,
+    "OrganizationName": "Sample Company",
+    "Designation": "Sample Role",
+    "Sector": "Sample Sector",
+    "Location": "",
+    "StartDate": "2016-01-01T00:00:00Z",
+    "EndDate": null,
+    "IsCurrent": true
+  }
+]

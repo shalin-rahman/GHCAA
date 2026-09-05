@@ -1,8 +1,8 @@
 <section class="page-header reveal-text on-dark">
     <div class="container header-content">
         <h1 class="glow-text">The {{ orgConfigService.config()?.branding?.memberNickname }} Legacy</h1>
-        <p>From 1938 to eternity: Preserving history while engineering a future of unity and progress.</p>
-        <div class="header-badge">ESTABLISHED 18 DECEMBER 1938</div>
+        <p>{{ foundingStory.tagline }}</p>
+        <div class="header-badge">{{ foundingStory.establishedBadge }}</div>
     </div>
     <div class="header-overlay"></div>
 </section>
@@ -17,7 +17,7 @@
             <h3>{{ block.title }}</h3>
             @if (block.key === 'about-association') {
             <div class="assoc-flag-badge" title="Official flag">
-                <img src="/assets/logo.png" alt="Association flag" class="waving-flag" appImgFallback>
+                <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Association flag" class="waving-flag" appImgFallback="/assets/logo.png">
             </div>
             }
             <div class="cms-body" [innerHTML]="block.bodyHtml"></div>
@@ -32,12 +32,7 @@
             <img src="/assets/images/concept/founder_artistic_lineart_1773859752969.png" alt="" class="founder-art" appImgFallback>
             <div class="card-tag">OUR ORIGIN</div>
             <h3>Historic Foundation</h3>
-            <p>
-                <strong>{{ orgConfigService.config()?.branding?.institutionName }}</strong>, Munshiganj, established on <strong>18 December 1938</strong>,
-                stands as the premier cradle of knowledge with a visionary donation of ₹1,00,000 from the legendary philanthropist <strong>Mr. Ashutosh Ganguly</strong>.
-                Named after his parents, Haranath Ganguly and Gangaswari Devi, the institution was built to serve generations
-                and was inaugurated by Sher-e-Bangla A.K. Fazlul Huq. Over eight decades, it has produced visionaries who have shaped the destiny of our nation.
-            </p>
+            <p [innerHTML]="foundingStoryHtml()"></p>
             <div class="feature-line"></div>
         </div>
 
@@ -45,7 +40,7 @@
             <div class="card-tag">OUR PURPOSE</div>
             <h3>The {{ orgConfigService.config()?.branding?.shortName }} Vision</h3>
             <div class="assoc-flag-badge" title="Official flag">
-                <img src="/assets/logo.png" alt="Association flag" class="waving-flag" appImgFallback>
+                <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Association flag" class="waving-flag" appImgFallback="/assets/logo.png">
             </div>
             <p>
                 The {{ orgConfigService.config()?.branding?.fullName }} ({{ orgConfigService.config()?.branding?.shortName }}) isn't just a registry;

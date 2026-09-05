@@ -7,6 +7,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { getMembershipTypeLabel } from '../../core/constants/app.constants';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
   selector: 'app-digital-id',
@@ -19,6 +20,7 @@ export class DigitalId implements OnInit {
   private profileService = inject(ProfileService);
   auth = inject(AuthService);
   private notify = inject(NotificationService);
+  orgConfig = inject(OrgConfigService);
 
   profile = signal<MemberProfile | null>(null);
 
@@ -43,7 +45,7 @@ export class DigitalId implements OnInit {
         if (res.dataUri) {
           const link = document.createElement('a');
           link.href = res.dataUri;
-          link.download = 'GHCAA_ID_Card.png';
+          link.download = `${this.orgConfig.config()?.branding?.institutionAcronym ?? 'GHCAA'}_ID_Card.png`;
           link.click();
           this.notify.success('ID Card downloaded.');
         } else {
@@ -60,7 +62,7 @@ export class DigitalId implements OnInit {
         if (res.dataUri) {
           const link = document.createElement('a');
           link.href = res.dataUri;
-          link.download = 'GHCAA_Certificate.png';
+          link.download = `${this.orgConfig.config()?.branding?.institutionAcronym ?? 'GHCAA'}_Certificate.png`;
           link.click();
         } else {
           this.notify.error('Certificate is not available yet.');

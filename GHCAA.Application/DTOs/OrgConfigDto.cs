@@ -7,6 +7,10 @@ namespace GHCAA.Application.DTOs
         public BrandingDto Branding { get; init; } = new();
         public ContactDto Contact { get; init; } = new();
         public CurrencyDto Currency { get; init; } = new();
+        // Gateway names (matching Enums.PaymentGateway) this institution accepts online. An empty
+        // list means manual-payment only — the app already supports that (Work Package 29); this
+        // just lets a profile outside Bangladesh declare it without an appsettings.json edit.
+        public List<string> EnabledGatewayMethods { get; init; } = new();
         public FeatureToggleDto Features { get; init; } = new();
         public WorkflowDto Workflow { get; init; } = new();
         public LocalizationDto Localization { get; init; } = new();
@@ -14,16 +18,29 @@ namespace GHCAA.Application.DTOs
 
     public record BrandingDto
     {
+        // ASP.NET Core's data-protection key ring name (SetApplicationName in Program.cs). Deliberately
+        // separate from ShortName: ShortName is admin-editable through the org-config UI, but changing
+        // this value invalidates every existing session token/cookie, so it must stay fixed once a
+        // deployment has issued cookies under it — an admin renaming the display name must not also
+        // rotate this.
+        public string AppName { get; init; } = string.Empty;
         public string ShortName { get; init; } = string.Empty;
         public string FullName { get; init; } = string.Empty;
         public string MemberNickname { get; init; } = string.Empty;
         public string InstitutionName { get; init; } = string.Empty;
         public string InstitutionAcronym { get; init; } = string.Empty;
         public string MembershipNumberPrefix { get; init; } = string.Empty;
+        // Prefix for payment gateway transaction IDs. Kept separate from MembershipNumberPrefix:
+        // GHC has used a different string for each ("HARAGANGIAN-" vs "GHC-") since before this
+        // config existed, and merging them would change live transaction ID formatting.
+        public string TransactionPrefix { get; init; } = string.Empty;
         public string ApprovalSeal { get; init; } = string.Empty;
         /// <summary>Founding date as it is printed on letterhead — Constitution, Article I.</summary>
         public string EstablishedOn { get; init; } = string.Empty;
         public string LogoUrl { get; init; } = string.Empty;
+        // Governing-document PDF that predates the versioned Constitution table. Used as the
+        // download target whenever the active row carries no pdfUrl of its own.
+        public string ConstitutionPdfUrl { get; init; } = string.Empty;
         public string PrimaryColor { get; init; } = "#121212";
         public string AccentColor { get; init; } = "#c5a059";
     }
@@ -32,6 +49,7 @@ namespace GHCAA.Application.DTOs
     {
         public string SupportEmail { get; init; } = string.Empty;
         public string ImportEmailBase { get; init; } = string.Empty;
+        public string EmailDomain { get; init; } = string.Empty;
         public string RegisteredOffice { get; init; } = string.Empty;
         public string CampusAddress { get; init; } = string.Empty;
         public List<string> PhoneNumbers { get; init; } = new();

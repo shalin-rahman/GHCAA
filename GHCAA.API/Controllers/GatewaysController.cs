@@ -20,6 +20,7 @@ namespace GHCAA.API.Controllers
         private readonly ApplicationDbContext _db;
         private readonly ILogger<GatewaysController> _logger;
         private readonly IConfiguration _config;
+        private readonly IOrgConfigService _orgConfig;
 
         public GatewaysController(
             IPaymentGatewayFactory gatewayFactory,
@@ -27,7 +28,8 @@ namespace GHCAA.API.Controllers
             IMemberService memberService,
             ApplicationDbContext db,
             ILogger<GatewaysController> logger,
-            IConfiguration config)
+            IConfiguration config,
+            IOrgConfigService orgConfig)
         {
             _gatewayFactory = gatewayFactory;
             _financialService = financialService;
@@ -35,6 +37,7 @@ namespace GHCAA.API.Controllers
             _db = db;
             _logger = logger;
             _config = config;
+            _orgConfig = orgConfig;
         }
 
         [HttpPost("initiate")]
@@ -110,8 +113,8 @@ namespace GHCAA.API.Controllers
                 }
             }
 
-            var enabledGateways = _config.GetSection("PaymentGateways:EnabledMethods").Get<string[]>() ?? Array.Empty<string>();
-            if (!enabledGateways.Contains(request.Gateway.ToString()))
+            var org = await _orgConfig.GetConfigAsync();
+            if (!org.EnabledGatewayMethods.Contains(request.Gateway.ToString()))
             {
                 _logger.LogWarning("Blocked initiation of disabled gateway: {Gateway}", request.Gateway);
                 return BadRequest("This payment method is temporarily unavailable via system configuration.");
@@ -127,7 +130,7 @@ namespace GHCAA.API.Controllers
             var gatewayService = _gatewayFactory.GetGateway(request.Gateway);
 
             // Create a pending payment history record first
-            var prefix = _config["GeneralSettings:AssociationNamePrefix"] ?? "GHCAA-";
+            var prefix = org.Branding.TransactionPrefix;
             var trxId = prefix + Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
 
             // S4.3: Derive CallbackUrl from server-side config, never from client-supplied BaseUrl.
@@ -138,7 +141,7 @@ namespace GHCAA.API.Controllers
             {
                 MemberId = memberId,
                 Amount = request.Amount,
-                Currency = _config["GeneralSettings:Currency"] ?? "BDT",
+                Currency = org.Currency.Code,
                 Reference = request.Reference,
                 TransactionId = trxId,
                 CallbackUrl = $"{publicApiBase.TrimEnd('/')}/api/gateways/callback/{request.Gateway.ToString().ToLower()}",

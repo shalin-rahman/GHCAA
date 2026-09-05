@@ -7,6 +7,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { getECPositionName, getCurrentECPosition, getAcademicYears, PROFESSIONAL_SECTORS, getBloodGroupName, MEMBER_CATEGORY_OPTIONS, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
     selector: 'app-directory',
@@ -26,6 +27,7 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     private networkService = inject(NetworkingService);
     private notify = inject(NotificationService);
     private router = inject(Router);
+    orgConfig = inject(OrgConfigService);
 
     // 58.2: table is the default view for the full page; the compact embedded mode (used inside
     // e.g. the messages "start conversation" picker) always stays card-based regardless of this.

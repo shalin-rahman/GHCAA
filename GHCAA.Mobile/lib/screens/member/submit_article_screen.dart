@@ -11,6 +11,7 @@ import '../../features/lookups/dropdown_service.dart';
 import '../../features/files/file_service.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/config/app_config.dart';
+import '../../core/services/app_localizations.dart';
 
 class SubmitArticleScreen extends ConsumerStatefulWidget {
   const SubmitArticleScreen({super.key});
@@ -56,7 +57,7 @@ class _SubmitArticleScreenState extends ConsumerState<SubmitArticleScreen> {
       
       if (response.statusCode == 200 || response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Your Haragangian Story was submitted for executive review!'))
+          SnackBar(content: Text(AppLocalizations.of(context).translate('article_submitted_msg')))
         );
         context.pop();
       } else {
@@ -97,7 +98,7 @@ class _SubmitArticleScreenState extends ConsumerState<SubmitArticleScreen> {
               GlassContainer(
                 child: Column(
                   children: [
-                    _buildInputField('Article Headline', _titleController, 'e.g., The Future of Haragangian Alumni', maxLines: 1),
+                    _buildInputField('Article Headline', _titleController, AppLocalizations.of(context).translate('article_headline_hint'), maxLines: 1),
                     const Divider(color: Colors.white12, height: 32),
                     _buildInputField('Brief Summary', _summaryController, 'A quick highlight...', maxLines: 2),
                     const Divider(color: Colors.white12, height: 32),

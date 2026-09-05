@@ -7,6 +7,8 @@ import { RouterOutlet, Router, ActivatedRoute, NavigationEnd } from '@angular/ro
 import { Meta } from '@angular/platform-browser';
 import { ToastComponent } from './common/toast/toast';
 import { StepUpDialog } from './common/step-up-dialog/step-up-dialog';
+import { OrgConfigService } from './core/services/org-config.service';
+import { interpolateOrgTemplate } from './core/utils/org-template';
 import { filter } from 'rxjs';
 
 @Component({
@@ -19,9 +21,10 @@ export class App {
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
   private meta = inject(Meta);
+  private orgConfig = inject(OrgConfigService);
 
-  private static readonly DEFAULT_DESCRIPTION =
-    'Official portal of the Haragangians. Reconnecting Haraganga College members worldwide through heritage, networking, and advancement.';
+  private static readonly DEFAULT_DESCRIPTION_TEMPLATE =
+    'Official portal of the {branding.memberNickname}s. Reconnecting {branding.institutionName} members worldwide through heritage, networking, and advancement.';
 
   constructor() {
     this.router.events.pipe(
@@ -39,7 +42,8 @@ export class App {
   private updateMetaDescription(): void {
     let route = this.activatedRoute;
     while (route.firstChild) route = route.firstChild;
-    const description = route.snapshot.data['description'] ?? App.DEFAULT_DESCRIPTION;
+    const template = route.snapshot.data['description'] ?? App.DEFAULT_DESCRIPTION_TEMPLATE;
+    const description = interpolateOrgTemplate(template, this.orgConfig.config());
     this.meta.updateTag({ name: 'description', content: description });
   }
 }

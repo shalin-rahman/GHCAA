@@ -181,8 +181,8 @@ public class CommunicationServiceTests : TestBase
 
         _mockEmail.Verify(x => x.SendEmailAsync(
             "orgvar@e.com",
-            "Welcome to GHC Alumni Association",
-            It.Is<string>(b => b.Contains("support@ghcaa.org") && b.Contains("https://ghcaa.example/portal") && b.Contains(DateTime.UtcNow.Year.ToString())),
+            $"Welcome to {_mockConfig.Branding.FullName}",
+            It.Is<string>(b => b.Contains(_mockConfig.Contact.SupportEmail) && b.Contains(_mockConfig.Contact.PortalBaseUrl) && b.Contains(DateTime.UtcNow.Year.ToString())),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
   selector: 'app-payment-status',
@@ -47,7 +48,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
                 <a routerLink="/events" class="btn btn-secondary h-12 opacity-80">Return to Events</a>
             </div>
 
-            <p class="text-[10px] uppercase font-black tracking-[0.3em] opacity-30 mt-12">Govt. Haraganga College Alumni Association</p>
+            <p class="text-[10px] uppercase font-black tracking-[0.3em] opacity-30 mt-12">{{ orgConfig.config()?.branding?.fullName }}</p>
         </div>
     </div>
   `,
@@ -87,7 +88,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 export class PaymentStatus implements OnInit {
   private route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
-  
+  orgConfig = inject(OrgConfigService);
+
   isSuccess = signal<boolean>(true);
   trxId = signal<string | null>(null);
 

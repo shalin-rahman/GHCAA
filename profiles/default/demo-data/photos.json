@@ -1,0 +1,9 @@
+[
+  {
+    "Id": 1,
+    "EventGalleryId": 1,
+    "PhotoPath": "/assets/logo.png",
+    "Caption": "Sample photo",
+    "UploadedAt": "2024-06-02T00:00:00Z"
+  }
+]

@@ -29,6 +29,7 @@ namespace GHCAA.Tests.Controllers
         private Mock<IMemberService> _memberServiceMock = null!;
         private Mock<ILogger<GatewaysController>> _loggerMock = null!;
         private IConfiguration _gatewayTestConfig = null!;
+        private Mock<IOrgConfigService> _orgConfigMock = null!;
         private GatewaysController _controller = null!;
         private Member _testMember = null!;
 
@@ -55,13 +56,22 @@ namespace GHCAA.Tests.Controllers
                 .ReturnsAsync(true);
             _gatewayFactoryMock.Setup(x => x.GetGateway(It.IsAny<Enums.PaymentGateway>())).Returns(defaultGatewayMock.Object);
 
+            _orgConfigMock = new Mock<IOrgConfigService>();
+            _orgConfigMock.Setup(x => x.GetConfigAsync()).ReturnsAsync(new OrgConfigDto
+            {
+                Branding = new BrandingDto { TransactionPrefix = "TEST-" },
+                Currency = new CurrencyDto { Code = "BDT" },
+                EnabledGatewayMethods = new List<string> { "SSLCommerz", "BkashGateway" }
+            });
+
             _controller = new GatewaysController(
                 _gatewayFactoryMock.Object,
                 _financialServiceMock.Object,
                 _memberServiceMock.Object,
                 _context,
                 _loggerMock.Object,
-                _gatewayTestConfig);
+                _gatewayTestConfig,
+                _orgConfigMock.Object);
 
             _testMember = await CreateAndSaveTestMemberAsync("Test Member", "test@test.com", "123", "123");
 

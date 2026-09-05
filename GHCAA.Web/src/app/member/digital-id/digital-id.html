@@ -2,7 +2,7 @@
     <div class="header">
         <div class="header-main">
             <h2>Digital ID</h2>
-            <p>Your official digital identity as a Haragangian</p>
+            <p>Your official digital identity as a {{ orgConfig.config()?.branding?.memberNickname }}</p>
         </div>
         <div class="header-btns">
             <button class="btn btn-accent" (click)="download()">
@@ -18,9 +18,9 @@
         <!-- Front View -->
         <div class="id-card glass-card reveal-card">
             <div class="card-header">
-                <img src="/assets/logo.png" alt="Logo" class="logo" appImgFallback>
+                <img [src]="orgConfig.config()?.branding?.logoUrl" alt="Logo" class="logo" appImgFallback="/assets/logo.png">
                 <div class="header-text">
-                    <h3>GHCAA</h3>
+                    <h3>{{ orgConfig.config()?.branding?.shortName }}</h3>
                     <small>ALUMNI ASSOCIATION</small>
                 </div>
             </div>
@@ -56,7 +56,7 @@
                     <small>VERIFY IDENTITY</small>
                 </div>
                 <div class="institution">
-                    <strong>Govt. Haraganga College</strong>
+                    <strong>{{ orgConfig.config()?.branding?.institutionName }}</strong>
                     <span>Est. 1938</span>
                 </div>
             </div>
@@ -70,7 +70,7 @@
                     <div class="divider"></div>
                 </div>
                 <ul class="terms-list">
-                    <li>This card is non-transferable and remains the property of GHCAA.</li>
+                    <li>This card is non-transferable and remains the property of {{ orgConfig.config()?.branding?.shortName }}.</li>
                     <li>Loss must be reported to the IT Cell immediately.</li>
                     <li>Valid for official GHC Alumni events and campus access.</li>
                     <li>Bearer must uphold the association's code of ethics.</li>
@@ -80,7 +80,7 @@
                     <span>December 2030</span>
                 </div>
                 <div class="official-seal">
-                    <img src="/assets/logo.png" alt="Seal" appImgFallback>
+                    <img [src]="orgConfig.config()?.branding?.logoUrl" alt="Seal" appImgFallback="/assets/logo.png">
                     <p>OFFICIAL SEAL</p>
                 </div>
             </div>

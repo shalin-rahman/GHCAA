@@ -1,7 +1,7 @@
 <div class="directory-page" [class.compact]="isCompact">
     <div class="header">
         <h2 *ngIf="!isCompact">Alumni Directory</h2>
-        <p *ngIf="!isCompact">Find and connect with fellow Haragangians</p>
+        <p *ngIf="!isCompact">Find and connect with fellow {{ orgConfig.config()?.branding?.memberNickname }}s</p>
     </div>
 
     <!-- Search & Filters -->
@@ -136,7 +136,7 @@
             @if (loadingMore()) {
             <div class="load-more-spinner">
                 <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
-                <span>Syncing Haragangian records...</span>
+                <span>Syncing {{ orgConfig.config()?.branding?.memberNickname }} records...</span>
             </div>
             } @else if (hasMore()) {
             <div class="manual-load">
@@ -221,7 +221,7 @@
             @if (loadingMore()) {
             <div class="load-more-spinner">
                 <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
-                <span>Syncing Haragangian records...</span>
+                <span>Syncing {{ orgConfig.config()?.branding?.memberNickname }} records...</span>
             </div>
             } @else if (hasMore()) {
             <div class="manual-load">

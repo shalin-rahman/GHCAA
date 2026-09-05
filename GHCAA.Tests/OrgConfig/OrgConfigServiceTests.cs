@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FluentAssertions;
 using GHCAA.Application.DTOs;
 using GHCAA.Infrastructure.Data;
@@ -11,6 +12,23 @@ namespace GHCAA.Tests.OrgConfig
     [TestFixture]
     public class OrgConfigServiceTests
     {
+        // No ORG_PROFILE means OrgConfigService builds from its hardcoded BuildGhcaaDefaults(), not
+        // from a profile pack — but OrgConfigGoldenSnapshotTests already proves the two are
+        // byte-identical, so reading the real pack here keeps this test tied to that source of
+        // truth instead of a bare string literal that could silently drift from it.
+        private static string RepoRoot()
+        {
+            var dir = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
+            while (dir is not null && !Directory.Exists(Path.Combine(dir.FullName, "profiles")))
+                dir = dir.Parent;
+            dir.Should().NotBeNull();
+            return dir!.FullName;
+        }
+
+        private static readonly BrandingDto GhcPackBranding = JsonSerializer.Deserialize<OrgConfigDto>(
+            File.ReadAllText(Path.Combine(RepoRoot(), "profiles", "ghc", "org-config.json")),
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!.Branding;
+
         private ApplicationDbContext GetDbContext(string dbName)
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -33,7 +51,7 @@ namespace GHCAA.Tests.OrgConfig
             // Assert
             config.Should().NotBeNull();
             config.OrgId.Should().Be("ghcaa");
-            config.Branding.ShortName.Should().Be("GHCAA");
+            config.Branding.ShortName.Should().Be(GhcPackBranding.ShortName);
         }
 
         [Category("FR-42")]

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/config/app_config.dart';
+import '../../core/services/app_localizations.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
@@ -35,7 +36,7 @@ class _MagazineScreenState extends ConsumerState<MagazineScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppScaffold(
-      title: 'Haragangian Journal',
+      title: AppLocalizations.of(context).translate('magazine_title'),
       breadcrumb: 'Member Portal > Annual Publications',
       child: Column(
         children: [

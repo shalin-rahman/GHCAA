@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Icon } from '../../common/icon/icon';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -17,6 +18,7 @@ export class ResetPassword {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
+  orgConfig = inject(OrgConfigService);
 
   email = '';
   token = '';

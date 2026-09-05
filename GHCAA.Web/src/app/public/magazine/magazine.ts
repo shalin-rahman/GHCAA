@@ -4,6 +4,7 @@ import { NewsService } from '../../core/services/news.service';
 import { NewsPost } from '../../core/models/business.models';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
   selector: 'app-magazine',
@@ -14,6 +15,7 @@ import { ImgFallbackDirective } from '../../common/directives/img-fallback.direc
 })
 export class Magazine implements OnInit {
   private newsService = inject(NewsService);
+  orgConfig = inject(OrgConfigService);
 
   articles = signal<NewsPost[]>([]);
   loading = signal(true);

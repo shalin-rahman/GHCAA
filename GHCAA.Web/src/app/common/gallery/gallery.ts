@@ -10,6 +10,7 @@ import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { safeImageUrl } from '../../core/utils/image.util';
 import { SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
   selector: 'app-gallery',
@@ -22,6 +23,7 @@ export class Gallery implements OnInit {
   private galleryService = inject(GalleryService);
   private notify = inject(NotificationService);
   auth = inject(AuthService);
+  orgConfig = inject(OrgConfigService);
 
   galleries = signal<EventGallery[]>([]);
   loading = signal(true);

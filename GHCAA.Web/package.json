@@ -3,16 +3,19 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "npm run sync:docs && ng serve",
-    "type-check": "tsc --noEmit -p tsconfig.app.json",
-    "build": "npm run sync:docs && npm run type-check && ng build",
+    "start": "npm run sync:docs && npm run gen:org-config && npm run gen:site-content && ng serve",
+    "type-check": "npm run gen:org-config && npm run gen:site-content && tsc --noEmit -p tsconfig.app.json",
+    "build": "npm run sync:docs && npm run gen:org-config && npm run gen:site-content && npm run apply-brand && npm run type-check && ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:unit": "vitest run",
+    "test:unit": "npm run gen:org-config && npm run gen:site-content && vitest run",
     "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "sync:docs": "node scripts/sync-election-docs.mjs"
+    "sync:docs": "node scripts/sync-election-docs.mjs",
+    "gen:org-config": "node scripts/generate-org-config-fallback.mjs",
+    "gen:site-content": "node scripts/generate-site-content.mjs",
+    "apply-brand": "node scripts/apply-brand.mjs"
   },
   "prettier": {
     "printWidth": 100,

@@ -11,6 +11,7 @@ import '../../features/auth/auth_service.dart';
 import '../../features/lookups/dropdown_service.dart';
 import '../../features/files/file_service.dart';
 import '../../core/utils/app_utils.dart';
+import '../../core/services/org_config_service.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -227,7 +228,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         _buildTextField(
           label: 'Educational Institution *',
           initialValue: state.data['InstitutionName'],
-          hintText: 'Default: Govt. Haraganga College',
+          hintText: 'Default: ${ref.watch(orgBrandingProvider).institutionName}',
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('InstitutionName', v),
         ),
         _gap(),

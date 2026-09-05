@@ -73,8 +73,8 @@ namespace GHCAA.Domain
             public const int TargetImageSizeKB = 350;
             public const int ImageMaxDimensionPx = 1920; // longest side; display images never need more
 
-            public const string ImportEmailBase = "haragangian";
-            public const string MembershipPrefix = "GHC-";
+            // ImportEmailBase/MembershipPrefix moved to the org-config pack (ContactDto.ImportEmailBase,
+            // BrandingDto.MembershipNumberPrefix) — see MemberImportService for the new consumer.
             public const string UnknownValue = "Unknown";
             public const string ImportPrefix = "IMPORT";
         }

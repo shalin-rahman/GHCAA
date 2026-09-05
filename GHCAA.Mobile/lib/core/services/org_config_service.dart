@@ -16,7 +16,7 @@ const String _cacheKey = 'org_config_cache';
 // OrgConfigService — Fetch → Cache → Fallback chain
 // ---------------------------------------------------------------------------
 /// Fetches [OrgConfig] from the backend, caches the JSON in SharedPreferences,
-/// and falls back to [OrgConfig.ghcaaDefaults] when both network and cache
+/// and falls back to [OrgConfig.offlineDefaults] when both network and cache
 /// are unavailable. This guarantees the app never crashes from missing config.
 class OrgConfigService {
   final Dio _dio;
@@ -54,8 +54,8 @@ class OrgConfigService {
     }
 
     // 3. Build defaults — app always works
-    debugPrint('[OrgConfigService] Using GHCAA build defaults.');
-    return OrgConfig.ghcaaDefaults;
+    debugPrint('[OrgConfigService] Using offline default config.');
+    return OrgConfig.offlineDefaults;
   }
 
   /// Force-refresh: ignores cache, hits network, then updates cache.
@@ -124,8 +124,8 @@ final localePackProvider = Provider<LocalePack>((ref) {
 
   return configAsync.when(
     data: (config) => config.locales[langCode] ?? config.locales['en'] ?? LocalePack.fromJson({}),
-    loading: () => OrgConfig.ghcaaDefaults.locales[langCode] ?? OrgConfig.ghcaaDefaults.locales['en']!,
-    error: (_, __) => OrgConfig.ghcaaDefaults.locales[langCode] ?? OrgConfig.ghcaaDefaults.locales['en']!,
+    loading: () => OrgConfig.offlineDefaults.locales[langCode] ?? OrgConfig.offlineDefaults.locales['en']!,
+    error: (_, __) => OrgConfig.offlineDefaults.locales[langCode] ?? OrgConfig.offlineDefaults.locales['en']!,
   );
 });
 
@@ -135,8 +135,8 @@ final featureTogglesProvider = Provider<FeatureToggles>((ref) {
 
   return configAsync.when(
     data: (config) => config.features,
-    loading: () => OrgConfig.ghcaaDefaults.features,
-    error: (_, __) => OrgConfig.ghcaaDefaults.features,
+    loading: () => OrgConfig.offlineDefaults.features,
+    error: (_, __) => OrgConfig.offlineDefaults.features,
   );
 });
 
@@ -146,7 +146,7 @@ final orgBrandingProvider = Provider<OrgBranding>((ref) {
 
   return configAsync.when(
     data: (config) => config.branding,
-    loading: () => OrgConfig.ghcaaDefaults.branding,
-    error: (_, __) => OrgConfig.ghcaaDefaults.branding,
+    loading: () => OrgConfig.offlineDefaults.branding,
+    error: (_, __) => OrgConfig.offlineDefaults.branding,
   );
 });

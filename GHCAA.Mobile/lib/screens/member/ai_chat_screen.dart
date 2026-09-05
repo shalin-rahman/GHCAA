@@ -6,6 +6,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../features/assistant/assistant_service.dart';
+import '../../core/services/app_localizations.dart';
 
 class Message {
   final String text;
@@ -13,8 +14,10 @@ class Message {
   Message(this.text, this.isMe);
 }
 
+// No BuildContext at provider-init time, so this pulls straight from the
+// translations map (English) rather than through AppLocalizations.of(context).
 final chatMessagesProvider = StateProvider<List<Message>>((ref) => [
-  Message('Hi! I am the Haragangian AI. How can I assist you with alumni connections today?', false),
+  Message(translations['en']!['ai_chat_greeting']!, false),
 ]);
 
 class AIChatScreen extends ConsumerStatefulWidget {

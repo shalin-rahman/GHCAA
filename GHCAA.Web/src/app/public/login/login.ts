@@ -8,6 +8,7 @@ import { LoginDto, User } from '../../core/models/auth.models';
 import { Icon } from '../../common/icon/icon';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { ROUTES } from '../../core/constants/app.constants';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 declare var google: any;
 declare var FB: any;
@@ -25,6 +26,7 @@ export class Login implements OnInit {
   private route = inject(ActivatedRoute);
   private notify = inject(NotificationService);
   private cdr = inject(ChangeDetectorRef);
+  orgConfig = inject(OrgConfigService);
 
   credentials: LoginDto = { username: '', password: '' };
   loading = signal(false);

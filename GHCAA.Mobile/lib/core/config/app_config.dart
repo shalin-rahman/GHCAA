@@ -18,7 +18,7 @@ class AppConfig {
   }
 
   static String get appName {
-    return dotenv.env['APP_NAME'] ?? 'Haragangian';
+    return dotenv.env['APP_NAME'] ?? 'Alumni Portal';
   }
 
   static String get organizationName {
@@ -34,7 +34,7 @@ class AppConfig {
   }
 
   static String get portalTitle {
-    return dotenv.env['PORTAL_TITLE'] ?? 'Haragangian Portal';
+    return dotenv.env['PORTAL_TITLE'] ?? 'Alumni Portal';
   }
 
   static String get portalDescription {
@@ -46,7 +46,7 @@ class AppConfig {
   }
 
   static String get memberNoun {
-    return dotenv.env['MEMBER_NOUN'] ?? 'Haragangian';
+    return dotenv.env['MEMBER_NOUN'] ?? 'Member';
   }
   static String? resolveImageUrl(String? path) {
     if (path == null || path.trim().isEmpty) return null;

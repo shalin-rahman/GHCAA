@@ -17,6 +17,8 @@ export interface OrgBranding {
   /** Founding date as printed on letterhead — Constitution, Article I. */
   establishedOn: string;
   logoUrl: string;
+  /** Governing-document PDF that predates the versioned Constitution table — see constitution.ts. */
+  constitutionPdfUrl: string;
   primaryColor: string;
   accentColor: string;
 }

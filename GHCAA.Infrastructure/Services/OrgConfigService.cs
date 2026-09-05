@@ -23,7 +23,8 @@ namespace GHCAA.Infrastructure.Services
     public class OrgConfigService(
         ApplicationDbContext db,
         IMemoryCache cache,
-        IInstitutionProfileProvider? profiles = null) : IOrgConfigService
+        IInstitutionProfileProvider? profiles = null,
+        Microsoft.Extensions.Configuration.IConfiguration? configuration = null) : IOrgConfigService
     {
         private const string CacheKey = "org_config_v1";
         private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(10);
@@ -56,7 +57,17 @@ namespace GHCAA.Infrastructure.Services
                 // whatever happened to be persisted.
                 // 62.6: heal from the active source — the profile pack when one is selected, the
                 // hardcoded copy otherwise — rather than always from code.
-                return dto with { Localization = BuildDefaults().Localization };
+                dto = dto with { Localization = BuildDefaults().Localization };
+
+                // 62.11: appsettings is an override, not the source — only PortalBaseUrl has ever
+                // needed a per-environment value distinct from the profile pack (preprod uses
+                // https://preprod.haragangian.com/portal, the pack carries the production URL).
+                // Absent config or an absent key leaves the profile/pack value untouched.
+                var portalBaseUrlOverride = configuration?["GeneralSettings:PortalBaseUrl"];
+                if (!string.IsNullOrWhiteSpace(portalBaseUrlOverride))
+                    dto = dto with { Contact = dto.Contact with { PortalBaseUrl = portalBaseUrlOverride } };
+
+                return dto;
             }))!;
         }
 
@@ -102,15 +113,18 @@ namespace GHCAA.Infrastructure.Services
             SchemaVersion = 1,
             Branding = new()
             {
+                AppName = "GHCAA",
                 ShortName = "GHCAA",
                 FullName = "Govt. Haraganga College Alumni Association",
                 MemberNickname = "Haragangian",
                 InstitutionName = "Govt. Haraganga College",
                 InstitutionAcronym = "GHC",
                 MembershipNumberPrefix = "GHC-",
+                TransactionPrefix = "HARAGANGIAN-",
                 ApprovalSeal = "GHC APPROVED",
                 EstablishedOn = "29 Nov 2025",
                 LogoUrl = "/assets/logo.png",
+                ConstitutionPdfUrl = "/assets/GHCAA Constitution V4.2.pdf",
                 PrimaryColor = "#121212",
                 AccentColor = "#c5a059"
             },
@@ -118,6 +132,7 @@ namespace GHCAA.Infrastructure.Services
             {
                 SupportEmail = "haragangian@gmail.com",
                 ImportEmailBase = "haragangian",
+                EmailDomain = "haragangian.com",
                 RegisteredOffice = "Govt. Haraganga College Campus, Munshiganj, Bangladesh.",
                 CampusAddress = "Govt. Haraganga College, Munshiganj-1500, Bangladesh.",
                 PhoneNumbers = new List<string> { "+880 1711-234567", "+880 1812-345678" },
@@ -125,6 +140,7 @@ namespace GHCAA.Infrastructure.Services
                 SocialLinks = new() { Facebook = "#", Whatsapp = "#", Youtube = "#" }
             },
             Currency = new() { Code = "BDT", Symbol = "৳", Name = "Bangladeshi Taka" },
+            EnabledGatewayMethods = new List<string> { "SSLCommerz", "BkashGateway", "DGePay" },
             Features = new(),
             Workflow = new()
             {
