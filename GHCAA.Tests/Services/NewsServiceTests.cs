@@ -102,14 +102,13 @@ public class NewsServiceTests : TestBase
         updated.ExternalCollaborators.Should().Be("collab@example.com");
     }
 
-    // 57.1 audit flag: `existing.Status = dto.Status` runs unconditionally, unlike PublishDate two
-    // lines above it (guarded by `dto.PublishDate.HasValue`). UpdateNewsDto inherits Status from
-    // CreateNewsDto, which defaults to Approved — so a caller building an update DTO for an
-    // unrelated field change, without setting Status, would silently flip a Pending post to
-    // Approved. This proves the DTO default reaches the DB: it is a real bug, not a missing
-    // assertion, since UpdateNewsAsync gives no way to say "leave status alone."
+    // 57.4: fixed. UpdateNewsAsync used to assign existing.Status = dto.Status unconditionally, so
+    // a caller that never touched Status still got UpdateNewsDto's inherited default (Approved),
+    // silently flipping a Pending post to Approved. Status changes now only happen through
+    // ApproveArticleAsync/RejectArticleAsync.
+    [Category("FR-28")]
     [Test]
-    public async Task UpdateNewsAsync_OverwritesStatus_WithDtoDefault_WhenCallerDoesNotSetIt()
+    public async Task UpdateNewsAsync_DoesNotChangeStatus_EvenWhenDtoCarriesTheDefault()
     {
         var post = new NewsPost { Title = "Pending Post", Content = "C", AuthorId = _authorId, Status = Enums.SubmissionStatus.Pending };
         _context.NewsPosts.Add(post);
@@ -117,13 +116,13 @@ public class NewsServiceTests : TestBase
 
         // Deliberately does not set Status - relies on UpdateNewsDto's inherited default.
         var dto = new UpdateNewsDto { Id = post.Id, Title = "Pending Post", Content = "C" };
-        dto.Status.Should().Be(Enums.SubmissionStatus.Approved, "this is the DTO default the audit flagged, not a value this test chose");
+        dto.Status.Should().Be(Enums.SubmissionStatus.Approved, "this is the DTO default the fix must not let leak into an unrelated edit");
 
         await _service.UpdateNewsAsync(dto);
 
         var updated = await _context.NewsPosts.FindAsync(post.Id);
-        updated!.Status.Should().Be(Enums.SubmissionStatus.Approved,
-            "UpdateNewsAsync assigns existing.Status = dto.Status unconditionally, so an update that never intended to touch status silently approves a Pending post");
+        updated!.Status.Should().Be(Enums.SubmissionStatus.Pending,
+            "an edit that never intended to touch status must not move a Pending post to Approved");
     }
 
     [Category("FR-27")]

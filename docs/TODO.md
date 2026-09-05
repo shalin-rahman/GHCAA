@@ -3045,7 +3045,7 @@ Every added assertion passed against real (non-mocked) service + SQLite-backed `
 except one: `NewsService.UpdateNewsAsync`'s `Status` overwrite is a genuine behavioral defect, not a
 missing-assertion gap, and closes 57.1's "or a defect raised here with its own item" clause as 57.4.
 
-57.4 [TODO] **Priority: P2 | Depends on: none.** Defect found while closing 57.3, proven by a test
+57.4 [DONE 2026-09-06] Defect found while closing 57.3, proven by a test
 rather than inferred: `NewsService.UpdateNewsAsync` (`NewsService.cs:134`) runs
 `existing.Status = dto.Status` unconditionally, two lines below `PublishDate`, which is correctly
 null-guarded (`if (dto.PublishDate.HasValue)`). `UpdateNewsDto` inherits `CreateNewsDto.Status`'s
@@ -3068,6 +3068,13 @@ able to change status as a side effect of an unrelated edit.
 **Acceptance:** `UpdateNewsAsync` no longer changes `Status` unless the caller explicitly intends to,
 and the existing regression test (renamed/adjusted as needed) asserts the new, safe behavior instead
 of the current defect.
+**Fixed 2026-09-06.** Took the second option: `existing.Status = dto.Status;` removed from
+`UpdateNewsAsync` entirely rather than making the DTO field nullable, since the only live caller
+(`admin-news.ts`) always resends the current status anyway and status changes belong to
+`ApproveArticleAsync`/`RejectArticleAsync` exclusively. The regression test was renamed
+(`UpdateNewsAsync_DoesNotChangeStatus_EvenWhenDtoCarriesTheDefault`) and now asserts a `Pending` post
+survives an unrelated edit instead of asserting the old bug. Tagged `[Category("FR-28")]`. Full suite
+616/616.
 
 ---
 
@@ -5761,24 +5768,46 @@ view per message — subject/body/channel/timestamp/status); an admin-facing per
 it was a targeted send or part of a broadcast, so "global vs individual" is visible without the
 reader having to infer it from the recipient list.
 
-81.2 [TODO] **Priority: P2 | Depends on: none.** Pending/awaiting-approval items are scattered across
-five-plus separate admin queues with no single place either an admin or the submitting member can see
-everything waiting on them: `NewsController` (`pending`/`admin/pending`), `GalleryController`
-(`admin/pending`), `JobHubController` (`admin/pending`), `FamilyLinkController` (`received`),
-`MentorshipController` (`received`), plus member registration and event-registration approval, which
-don't even have a dedicated pending-list endpoint — an admin filters the full list client-side today.
-Build: an admin-facing aggregated "awaiting your action" view pulling a count and a summary row from
-each existing pending endpoint (do not reimplement the approval logic itself, only the aggregation);
-and a member-facing "your pending requests" view (a submitted article awaiting review, a family-link
-request awaiting the other member's response, a submitted job posting, an event registration awaiting
-approval) so a member isn't left checking five different screens to find out what's still pending on
-something they did.
+81.2 [DONE 2026-09-06] New `GHCAA.API/Controllers/PendingApprovalsController.cs`
+(`api/pending/admin/summary`, `api/pending/me/summary`) aggregates every existing pending endpoint —
+news, gallery albums/photos, jobs, member applications, event registrations for admin; a member's own
+article submissions, sent family-link/mentorship requests, and pending job postings/event
+registrations for the member view. It calls each existing service method as-is and does not touch any
+approval logic, per the item's own instruction. Wired into both dashboards: `admin-dashboard`'s new
+"Awaiting Your Action" card (links to the real approval screens — `article-approvals`,
+`gallery-approvals`, `job-approvals`, `approvals`, `events`) and the member `dashboard`'s new "Your
+Pending Requests" card. 17 backend tests (`PendingApprovalsControllerTests.cs`), full suite 616/616;
+`vitest` 390/390 after fixing the two dashboard specs' service mocks; `ng build` clean.
+**Left honestly incomplete:** family-link and mentorship requests have no dedicated member-facing page
+at all yet (checked `GHCAA.Web/src/app/member/` and `common/` — neither exists), so those two rows in
+the member widget show a count with no link. Not built here since a full request/response UI for both
+is its own scope, not an aggregation task. Tracked as 81.4 below.
+**Also found and fixed while building this, on the user's explicit instruction to check notification
+wiring on every approval flow:** `MentorshipService` sent no notification at all, on either a new
+request or a response — `SendRequestAsync`/`RespondAsync` now call `INotificationService`, matching
+the pattern already used by `FamilyLinkService`, `GalleryService`, `JobHubService`, `EventService` and
+`MemberService`. 2 new assertions in `MentorshipServiceTests.cs`.
 
 81.3 [TODO] **Priority: P3 | Depends on: 81.1, 81.2.** Once both exist, add them to the member portal
 and admin dashboard navigation, and to the mobile equivalents if the same gap exists there (check
 `GHCAA.Mobile` for a communications/notifications screen and an approvals screen before assuming
 neither exists — `NotificationController`'s parity has not been checked on mobile as part of writing
 this item).
+
+81.4 [TODO] **Priority: P3 | Depends on: none.** Build the member-facing family-link and mentorship
+request screens — accept/decline a received request, see the status of a sent one. The backend
+(`FamilyLinkController`, `MentorshipController`, both now notification-wired per 81.2) has supported
+this from before this session; there has simply never been an Angular page for either. Until this
+exists, the two rows 81.2 added to the member "Your Pending Requests" widget can only show a count.
+
+81.5 [TODO] **Priority: P4 | Depends on: none.** Raised by the user while building 81.2: "approval and
+notification can be reusable component" — worth doing, but a real architectural change (an
+approval-workflow abstraction and a notification-dispatch abstraction that every domain service calls
+through, instead of each service owning its own `INotificationService` calls as today), not a
+same-session extension of the aggregation work. Scope it separately before starting; don't fold it
+into whichever feature next happens to touch an approval flow. See also
+[[feedback_security_rbac_reusable_design]] for the same "build it reusable" instruction applied to
+security/RBAC work.
 
 ---
 

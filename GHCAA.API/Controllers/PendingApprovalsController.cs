@@ -53,8 +53,8 @@ namespace GHCAA.API.Controllers
             var photos = await _galleryService.GetPendingPhotoApprovalsAsync(cancellationToken);
             var jobs = await _jobService.GetPendingJobsAsync(cancellationToken);
             // pageSize=5: a summary row, not the full list — the existing screens still own paging.
-            var members = await _memberService.GetAllMembersAsync(1, 5, "", "Applied", "all", "all", false, true, cancellationToken);
-            var eventRegistrations = await _eventService.GetAllRegistrationsForAdminAsync(1, 5, null, "Pending", null, cancellationToken);
+            var members = await _memberService.GetAllMembersAsync(1, 5, "", nameof(Enums.MembershipStatus.Applied), "all", "all", false, true, cancellationToken);
+            var eventRegistrations = await _eventService.GetAllRegistrationsForAdminAsync(1, 5, null, nameof(Enums.EventRegistrationStatus.Pending), null, cancellationToken);
 
             return Ok(new
             {

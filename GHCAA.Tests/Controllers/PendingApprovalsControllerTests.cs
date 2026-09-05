@@ -69,16 +69,16 @@ namespace GHCAA.Tests.Controllers
                 .ReturnsAsync(new List<EventPhoto>());
             _jobServiceMock.Setup(x => x.GetPendingJobsAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<JobDto>());
-            _memberServiceMock.Setup(x => x.GetAllMembersAsync(1, 5, "", "Applied", "all", "all", false, true, It.IsAny<CancellationToken>()))
+            _memberServiceMock.Setup(x => x.GetAllMembersAsync(1, 5, "", nameof(GHCAA.Domain.Enums.MembershipStatus.Applied), "all", "all", false, true, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new { TotalItems = 0, Items = new object[0] });
-            _eventServiceMock.Setup(x => x.GetAllRegistrationsForAdminAsync(1, 5, null, "Pending", null, It.IsAny<CancellationToken>()))
+            _eventServiceMock.Setup(x => x.GetAllRegistrationsForAdminAsync(1, 5, null, nameof(GHCAA.Domain.Enums.EventRegistrationStatus.Pending), null, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new { TotalItems = 0, Items = new object[0] });
 
             var result = await _controller.GetAdminSummary(CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             _newsServiceMock.Verify(x => x.GetPendingSubmissionsAsync(It.IsAny<CancellationToken>()), Times.Once);
-            _eventServiceMock.Verify(x => x.GetAllRegistrationsForAdminAsync(1, 5, null, "Pending", null, It.IsAny<CancellationToken>()), Times.Once);
+            _eventServiceMock.Verify(x => x.GetAllRegistrationsForAdminAsync(1, 5, null, nameof(GHCAA.Domain.Enums.EventRegistrationStatus.Pending), null, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Test]
