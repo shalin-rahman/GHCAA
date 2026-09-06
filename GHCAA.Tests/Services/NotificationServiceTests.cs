@@ -16,6 +16,7 @@ namespace GHCAA.Tests.Services;
 public class NotificationServiceTests : TestBase
 {
     private Mock<IRealTimeService> _mockRealTime = null!;
+    private Mock<ICommunicationService> _mockCommunication = null!;
     private NotificationService _service = null!;
 
     [SetUp]
@@ -26,7 +27,9 @@ public class NotificationServiceTests : TestBase
             .Setup(r => r.SendNotificationToUserAsync(It.IsAny<int>(), It.IsAny<Notification>()))
             .Returns(Task.CompletedTask);
 
-        _service = new NotificationService(_context, _mockRealTime.Object);
+        _mockCommunication = new Mock<ICommunicationService>();
+
+        _service = new NotificationService(_context, _mockRealTime.Object, _mockCommunication.Object);
     }
 
     // ── CreateNotificationAsync — preference gate ────────────────────────────
@@ -223,6 +226,53 @@ public class NotificationServiceTests : TestBase
         await _service.MarkAllAsReadAsync(member.Id);
 
         _context.Notifications.Where(n => n.MemberId == member.Id && !n.IsRead).Should().BeEmpty();
+    }
+
+    // ── CreateNotificationFromTemplateAsync — 82.21 template-driven in-app text ─
+
+    [Test]
+    public async Task CreateNotificationFromTemplate_WhenTemplateExists_UsesTemplateTextAndStripsHtml()
+    {
+        var member = await CreateAndSaveTestMemberAsync();
+        member.NotifyRelevantUpdates = true;
+        await _context.SaveChangesAsync();
+
+        _mockCommunication
+            .Setup(c => c.ResolveTemplateTextAsync(
+                Constants.TemplateCodes.PaymentReceived, member.Id, It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(("Payment Received: 500.00 BDT", "<p>Thanks <strong>for</strong> paying</p>"));
+
+        var usedTemplate = await _service.CreateNotificationFromTemplateAsync(
+            member.Id, Constants.TemplateCodes.PaymentReceived, Enums.NotificationType.GeneralSystem,
+            fallbackTitle: "Payment Recorded", fallbackMessage: "fallback message",
+            templateVars: new Dictionary<string, string> { { "Amount", "500.00" } });
+
+        usedTemplate.Should().BeTrue();
+        var saved = _context.Notifications.Single(n => n.MemberId == member.Id);
+        saved.Title.Should().Be("Payment Received: 500.00 BDT");
+        saved.Message.Should().Be("Thanks for paying");
+    }
+
+    [Test]
+    public async Task CreateNotificationFromTemplate_WhenTemplateMissing_FallsBackToLiteralText()
+    {
+        var member = await CreateAndSaveTestMemberAsync();
+        member.NotifyRelevantUpdates = true;
+        await _context.SaveChangesAsync();
+
+        _mockCommunication
+            .Setup(c => c.ResolveTemplateTextAsync(
+                "NO_SUCH_TEMPLATE", member.Id, It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(((string Subject, string Body)?)null);
+
+        var usedTemplate = await _service.CreateNotificationFromTemplateAsync(
+            member.Id, "NO_SUCH_TEMPLATE", Enums.NotificationType.GeneralSystem,
+            fallbackTitle: "Fallback Title", fallbackMessage: "Fallback message");
+
+        usedTemplate.Should().BeFalse();
+        var saved = _context.Notifications.Single(n => n.MemberId == member.Id);
+        saved.Title.Should().Be("Fallback Title");
+        saved.Message.Should().Be("Fallback message");
     }
 
     // ── BroadcastNotificationAsync — preference filtering ─────────────────────

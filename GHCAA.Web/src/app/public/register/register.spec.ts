@@ -5,6 +5,7 @@ import { RegistrationService } from '../../core/services/registration.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { GatewaysService } from '../../core/services/gateways.service';
 import { FinancialService } from '../../core/services/financial.service';
+import { LookupService } from '../../core/services/lookup.service';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
@@ -40,6 +41,11 @@ describe('Register Component', () => {
             getApplicableFee: vi.fn().mockReturnValue(of({ amount: 500 }))
         };
 
+        const lookupServiceMock = {
+            getOptions: vi.fn().mockReturnValue(of([])),
+            getAcademicYears: vi.fn().mockReturnValue(of([]))
+        };
+
         await TestBed.configureTestingModule({
             imports: [Register],
             providers: [
@@ -47,7 +53,8 @@ describe('Register Component', () => {
                 { provide: NotificationService, useValue: notificationServiceMock },
                 { provide: Router, useValue: routerMock },
                 { provide: GatewaysService, useValue: gatewaysServiceMock },
-                { provide: FinancialService, useValue: financialServiceMock }
+                { provide: FinancialService, useValue: financialServiceMock },
+                { provide: LookupService, useValue: lookupServiceMock }
             ]
         }).compileComponents();
 

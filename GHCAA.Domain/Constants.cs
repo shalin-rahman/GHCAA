@@ -69,6 +69,16 @@ namespace GHCAA.Domain
             public const string Welcome = "WELCOME_EMAIL";
             public const string FeeReminder = "FEE_REMINDER";
             public const string PasswordReset = "PASSWORD_RESET";
+            public const string PaymentReceived = "PAYMENT_RECEIVED";
+            public const string PaymentStatusUpdated = "PAYMENT_STATUS_UPDATED";
+        }
+
+        // 82.9: header carrying the per-request correlation id (CorrelationIdMiddleware in
+        // GHCAA.API). One constant so the client-visible name never drifts from what the
+        // middleware reads/writes.
+        public static class Headers
+        {
+            public const string CorrelationId = "X-Correlation-Id";
         }
 
         public static class Defaults

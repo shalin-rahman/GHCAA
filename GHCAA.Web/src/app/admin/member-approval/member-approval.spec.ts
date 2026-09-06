@@ -3,6 +3,7 @@ import { createNotificationServiceMock } from '../../core/testing/testing-utils'
 import { MemberApproval } from './member-approval';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { LookupService } from '../../core/services/lookup.service';
 import { of } from 'rxjs';
 
 describe('MemberApproval Component', () => {
@@ -24,7 +25,8 @@ describe('MemberApproval Component', () => {
             imports: [MemberApproval],
             providers: [
                 { provide: AdminService, useValue: adminServiceMock },
-                { provide: NotificationService, useValue: notificationServiceMock }
+                { provide: NotificationService, useValue: notificationServiceMock },
+                { provide: LookupService, useValue: { getOptions: vi.fn().mockReturnValue(of([])), getAcademicYears: vi.fn().mockReturnValue(of([])) } }
             ]
         }).compileComponents();
 

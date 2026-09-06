@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.API.Extensions;
@@ -75,7 +75,7 @@ namespace GHCAA.API.Controllers
             int? memberId = null;
             if (User.Identity?.IsAuthenticated == true)
             {
-                var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+                var memberIdClaim = this.CurrentMemberIdRaw();
                 if (!string.IsNullOrEmpty(memberIdClaim) && int.TryParse(memberIdClaim, out var mid))
                 {
                     memberId = mid;
@@ -94,7 +94,7 @@ namespace GHCAA.API.Controllers
             if (receipt != null)
             {
                 var receiptValidation = _fileValidationService.ValidateFormFile(receipt, FileCategory.Document, 10 * 1024 * 1024);
-                if (!receiptValidation.IsValid) return BadRequest(new { Message = receiptValidation.ErrorMessage });
+                if (!receiptValidation.IsValid) return Problem(detail: receiptValidation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
 
                 var ms = new MemoryStream();
                 await receipt.CopyToAsync(ms, cancellationToken);
@@ -116,13 +116,13 @@ namespace GHCAA.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetMyRegistrations(CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
                 if (User.IsInRole("SuperAdmin"))
                     return Ok(new List<object>());
 
-                return BadRequest("User is not associated with a member account.");
+                return Problem(detail: "User is not associated with a member account.", statusCode: StatusCodes.Status400BadRequest);
             }
 
             var registrations = await _eventService.GetRegistrationsByMemberAsync(memberId, cancellationToken);
@@ -137,7 +137,7 @@ namespace GHCAA.API.Controllers
             if (registration == null) return NotFound();
 
             bool isAdmin = User.IsInRole("Admin");
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
 
             if (!isAdmin)
             {
@@ -148,7 +148,7 @@ namespace GHCAA.API.Controllers
 
                 if (registration.Status != GHCAA.Domain.Enums.EventRegistrationStatus.Approved)
                 {
-                    return BadRequest("Invitation is only available for approved registrations.");
+                    return Problem(detail: "Invitation is only available for approved registrations.", statusCode: StatusCodes.Status400BadRequest);
                 }
             }
 
@@ -195,7 +195,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> UploadEventLogo(int id, IFormFile logo, CancellationToken cancellationToken)
         {
             var logoValidation = _fileValidationService.ValidateFormFile(logo, FileCategory.Image, 5 * 1024 * 1024);
-            if (!logoValidation.IsValid) return BadRequest(new { Message = logoValidation.ErrorMessage });
+            if (!logoValidation.IsValid) return Problem(detail: logoValidation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
 
             using var ms = new MemoryStream();
             await logo.CopyToAsync(ms, cancellationToken);
@@ -225,7 +225,7 @@ namespace GHCAA.API.Controllers
         [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> ApproveRegistration([FromBody] ApproveRegistrationDto dto, CancellationToken cancellationToken)
         {
-            var adminIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var adminIdClaim = this.CurrentUserIdRaw();
             if (!int.TryParse(adminIdClaim, out var adminUserId))
             {
                 return Unauthorized();
@@ -240,16 +240,16 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> SendInvitation(int id, CancellationToken cancellationToken)
         {
             var success = await _eventService.SendInvitationEmailAsync(id, cancellationToken);
-            return success ? Ok() : BadRequest("Failed to send invitation or registration not approved.");
+            return success ? Ok() : Problem(detail: "Failed to send invitation or registration not approved.", statusCode: StatusCodes.Status400BadRequest);
         }
 
         [HttpPost("admin/checkin/qr")]
         [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> QRCodeCheckIn([FromBody] QrCheckInDto dto, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(dto.TicketCode)) return BadRequest();
+            if (string.IsNullOrEmpty(dto.TicketCode)) return Problem(statusCode: StatusCodes.Status400BadRequest);
             var success = await _eventService.CheckInByTicketCodeAsync(dto.TicketCode, cancellationToken);
-            return success ? Ok(new { Message = "Check-in successful." }) : NotFound(new { Message = "Ticket code invalid, already used, or not found." });
+            return success ? Ok(new { Message = "Check-in successful." }) : Problem(detail: "Ticket code invalid, already used, or not found.", statusCode: StatusCodes.Status404NotFound);
         }
 
         // --- Operations (Tasks & Budget) ---
@@ -299,7 +299,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> UpdateBudget([FromBody] UpdateEventBudgetDto dto, CancellationToken cancellationToken)
         {
             var success = await _eventService.UpdateEventBudgetAsync(dto, cancellationToken);
-            return success ? Ok() : BadRequest();
+            return success ? Ok() : Problem(statusCode: StatusCodes.Status400BadRequest);
         }
 
         [HttpPost("admin/expenses")]

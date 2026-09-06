@@ -1,10 +1,11 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Application.Security;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -51,7 +52,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> CreatePledge(string slug, [FromBody] CreatePledgeDto dto, CancellationToken cancellationToken)
         {
             int? memberId = null;
-            if (int.TryParse(User.FindFirst(AppClaimTypes.MemberId)?.Value, out var mid))
+            if (int.TryParse(this.CurrentMemberIdRaw(), out var mid))
                 memberId = mid;
 
             try
@@ -61,11 +62,11 @@ namespace GHCAA.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message });
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -73,7 +74,7 @@ namespace GHCAA.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetMyPledges(CancellationToken cancellationToken)
         {
-            if (!int.TryParse(User.FindFirst(AppClaimTypes.MemberId)?.Value, out var memberId))
+            if (!int.TryParse(this.CurrentMemberIdRaw(), out var memberId))
                 return Unauthorized();
 
             return Ok(await _campaigns.GetMemberPledgesAsync(memberId, cancellationToken));
@@ -90,7 +91,7 @@ namespace GHCAA.API.Controllers
         [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> Create([FromBody] CreateCampaignDto dto, CancellationToken cancellationToken)
         {
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var adminId))
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var adminId))
                 return Unauthorized();
 
             try
@@ -100,7 +101,7 @@ namespace GHCAA.API.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -115,7 +116,7 @@ namespace GHCAA.API.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -130,7 +131,7 @@ namespace GHCAA.API.Controllers
         [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> ConfirmReceipt([FromBody] ConfirmPledgeReceiptDto dto, CancellationToken cancellationToken)
         {
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var adminId))
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var adminId))
                 return Unauthorized();
 
             var success = await _campaigns.ConfirmPledgeReceiptAsync(dto, adminId, cancellationToken);

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,10 +7,12 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../features/networking/networking_service.dart';
 import '../../features/lookups/dropdown_service.dart';
 import '../../core/config/app_config.dart';
+import '../../core/constants/registration_constants.dart';
 import '../../core/widgets/custom_network_image.dart';
 import '../../core/widgets/skeleton_loader.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/widgets/app_search_field.dart';
 
 final directorySearchQueryProvider = StateProvider<String>((ref) => '');
 
@@ -37,7 +38,6 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
   int _totalItems = 0;
 
   final TextEditingController _searchController = TextEditingController();
-  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -54,7 +54,6 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
-    _searchDebounce?.cancel();
     super.dispose();
   }
 
@@ -124,11 +123,8 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
   }
 
   void _onSearchChanged(String value) {
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
-      ref.read(directorySearchQueryProvider.notifier).state = value.toLowerCase();
-      _fetchAlumni(refresh: true);
-    });
+    ref.read(directorySearchQueryProvider.notifier).state = value.toLowerCase();
+    _fetchAlumni(refresh: true);
   }
 
   @override
@@ -141,23 +137,13 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
         child: Column(
           children: [
             const SizedBox(height: AppTheme.spaceM),
-            TextField(
+            AppSearchField(
               key: const ValueKey('directory_search'),
               controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search members...',
-                prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.royalGold),
-                suffixIcon: _searchController.text.isNotEmpty 
-                  ? IconButton(
-                      icon: const Icon(Icons.backspace_rounded, size: 16, color: Colors.white24),
-                      onPressed: () {
-                        _searchController.clear();
-                        _onSearchChanged('');
-                      },
-                    )
-                  : null,
-              ),
+              hintText: 'Search members...',
+              debounce: const Duration(milliseconds: 300),
               onChanged: _onSearchChanged,
+              onClear: () => _onSearchChanged(''),
             ),
             if (!_isLoading && _totalItems > 0)
               Padding(
@@ -184,7 +170,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                   children: [
                     Expanded(
                       child: FutureBuilder<List<Map<String, String>>>(
-                        future: ref.read(dropdownDataProvider).getOptions('PassingYear'),
+                        future: ref.read(dropdownDataProvider).getOptions(LookupGroups.passingYear),
                         builder: (context, snapshot) => _buildFilterDropdown('YEAR', snapshot.data?.map((e) => e['label']!).toList() ?? []),
                       ),
                     ),

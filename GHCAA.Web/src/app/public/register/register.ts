@@ -6,7 +6,8 @@ import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
 import { PaymentPortalComponent } from '../../common/payment-portal/payment-portal.component';
 import { FinancialService } from '../../core/services/financial.service';
-import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GENDER_OPTIONS, TSHIRT_SIZES, ROUTES } from '../../core/constants/app.constants';
+import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, TSHIRT_SIZES, ROUTES, LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { parseDisplayDate } from '../../core/utils/date.util';
@@ -30,6 +31,7 @@ export class Register implements OnDestroy {
   private notify = inject(NotificationService);
   private gatewaysService = inject(GatewaysService);
   private finService = inject(FinancialService);
+  private lookupService = inject(LookupService);
   orgConfig = inject(OrgConfigService);
 
   /** T&C institution-specific clauses, from the active institution profile pack. */
@@ -53,12 +55,14 @@ export class Register implements OnDestroy {
   private timerInterval: any;
   ACADEMIC = ACADEMIC_DATA;
   IS_HSC = IS_HSC;
-  years = this.ACADEMIC.getYears();
   certificateOptions = this.ACADEMIC.certificates;
   subjectOptions = this.ACADEMIC.subjects;
   sectorOptions = this.ACADEMIC.sectors;
-  bloodGroupOptions = BLOOD_GROUP_OPTIONS;
-  genderOptions = GENDER_OPTIONS;
+
+  // 82.42: sourced from /lookups/{group} via LookupService, filled in ngOnInit.
+  years: number[] = [];
+  bloodGroupOptions: LookupOption[] = [];
+  genderOptions: LookupOption[] = [];
   tShirtOptions = TSHIRT_SIZES;
 
 
@@ -123,6 +127,9 @@ export class Register implements OnDestroy {
   ngOnInit() {
     this.loadPaymentInfo();
     this.loadRegistrationFee();
+    this.lookupService.getAcademicYears().subscribe(years => this.years = years);
+    this.lookupService.getOptions(LOOKUP_GROUPS.BloodGroup).subscribe(opts => this.bloodGroupOptions = opts);
+    this.lookupService.getOptions(LOOKUP_GROUPS.Gender).subscribe(opts => this.genderOptions = opts);
   }
 
   loadRegistrationFee() {

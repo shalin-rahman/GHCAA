@@ -1,10 +1,11 @@
-using GHCAA.Application.DTOs;
+﻿using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GHCAA.Application.Security;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -50,7 +51,7 @@ namespace GHCAA.API.Controllers
         [HttpPost("topics")]
         public async Task<ActionResult<ForumTopicDto>> CreateTopic([FromBody] CreateForumTopicDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
             var memberId = GetMemberId();
             if (memberId == 0) return Unauthorized();
@@ -62,9 +63,9 @@ namespace GHCAA.API.Controllers
         [HttpPost("topics/{topicId}/posts")]
         public async Task<ActionResult<ForumPostDto>> CreatePost(int topicId, [FromBody] CreateForumPostDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
-            if (dto.TopicId != topicId) return BadRequest("Topic ID mismatch.");
+            if (dto.TopicId != topicId) return Problem(detail: "Topic ID mismatch.", statusCode: StatusCodes.Status400BadRequest);
 
             var memberId = GetMemberId();
             if (memberId == 0) return Unauthorized();
@@ -99,8 +100,8 @@ namespace GHCAA.API.Controllers
 
         private int GetMemberId()
         {
-            var claim = User.FindFirst(AppClaimTypes.MemberId);
-            if (claim != null && int.TryParse(claim.Value, out int id))
+            var claim = this.CurrentMemberIdRaw();
+            if (claim != null && int.TryParse(claim, out int id))
             {
                 return id;
             }

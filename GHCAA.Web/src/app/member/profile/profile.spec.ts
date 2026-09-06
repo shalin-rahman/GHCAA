@@ -3,6 +3,7 @@ import { createNotificationServiceMock } from '../../core/testing/testing-utils'
 import { Profile } from './profile';
 import { ProfileService } from '../../core/services/profile.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { LookupService } from '../../core/services/lookup.service';
 import { of } from 'rxjs';
 
 describe('Profile Component', () => {
@@ -20,11 +21,17 @@ describe('Profile Component', () => {
 
         notificationServiceMock = createNotificationServiceMock();
 
+        const lookupServiceMock = {
+            getOptions: vi.fn().mockReturnValue(of([])),
+            getAcademicYears: vi.fn().mockReturnValue(of([]))
+        };
+
         await TestBed.configureTestingModule({
             imports: [Profile],
             providers: [
                 { provide: ProfileService, useValue: profileServiceMock },
-                { provide: NotificationService, useValue: notificationServiceMock }
+                { provide: NotificationService, useValue: notificationServiceMock },
+                { provide: LookupService, useValue: lookupServiceMock }
             ]
         }).compileComponents();
 
@@ -55,7 +62,8 @@ describe('Profile Component', () => {
                 imports: [Profile],
                 providers: [
                     { provide: ProfileService, useValue: mock },
-                    { provide: NotificationService, useValue: notificationServiceMock }
+                    { provide: NotificationService, useValue: notificationServiceMock },
+                    { provide: LookupService, useValue: { getOptions: vi.fn().mockReturnValue(of([])), getAcademicYears: vi.fn().mockReturnValue(of([])) } }
                 ]
             });
             const f = TestBed.createComponent(Profile);

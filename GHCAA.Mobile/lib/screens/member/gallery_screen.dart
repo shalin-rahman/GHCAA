@@ -13,6 +13,7 @@ import '../../core/widgets/app_search_field.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/widgets/glass_tile.dart';
+import '../../core/widgets/confirm_dialog.dart';
 
 final galleryItemsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   final role = await ref.read(authServiceProvider).getRole();
@@ -388,25 +389,15 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
 
   Future<void> _confirmDeleteGallery(int id) async {
     if (_busyGalleryIds.contains(id)) return;
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.deepCharcoal,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: Colors.redAccent, width: 0.5)),
-        title: const Text('DELETE GALLERY', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w900, fontSize: 16)),
-        content: const Text('Are you sure you want to delete this gallery and all its photos? This action cannot be undone.', style: TextStyle(color: Colors.white70, height: 1.5)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL')),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true), 
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            child: const Text('DELETE'),
-          ),
-        ],
-      ),
+    final confirm = await showConfirmDialog(
+      context,
+      title: 'Delete Gallery',
+      message: 'Are you sure you want to delete this gallery and all its photos? This action cannot be undone.',
+      confirmLabel: 'Delete',
+      destructive: true,
     );
- 
-    if (confirm == true) {
+
+    if (confirm) {
       setState(() => _busyGalleryIds.add(id));
       try {
         final success = await ref.read(galleryServiceProvider).deleteGallery(id);

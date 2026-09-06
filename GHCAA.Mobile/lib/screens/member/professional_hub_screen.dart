@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +9,7 @@ import '../../core/api/api_client.dart';
 import '../../core/config/app_config.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/widgets/app_search_field.dart';
 
 final profHubSearchQueryProvider = StateProvider<String>((ref) => '');
 
@@ -33,7 +33,6 @@ class _ProfessionalHubScreenState extends ConsumerState<ProfessionalHubScreen> {
   int _totalItems = 0;
 
   String? _selectedSector;
-  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -48,7 +47,6 @@ class _ProfessionalHubScreenState extends ConsumerState<ProfessionalHubScreen> {
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
-    _searchDebounce?.cancel();
     super.dispose();
   }
 
@@ -113,11 +111,8 @@ class _ProfessionalHubScreenState extends ConsumerState<ProfessionalHubScreen> {
   }
 
   void _onSearchChanged(String value) {
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
-      ref.read(profHubSearchQueryProvider.notifier).state = value.toLowerCase();
-      _fetchAlumni(refresh: true);
-    });
+    ref.read(profHubSearchQueryProvider.notifier).state = value.toLowerCase();
+    _fetchAlumni(refresh: true);
   }
 
   @override
@@ -129,22 +124,12 @@ class _ProfessionalHubScreenState extends ConsumerState<ProfessionalHubScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           children: [
-            TextField(
+            AppSearchField(
               controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search by industry or designation...',
-                prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                suffixIcon: _searchController.text.isNotEmpty 
-                  ? IconButton(
-                      icon: const Icon(Icons.cancel_rounded, size: 18, color: Colors.white24),
-                      onPressed: () {
-                        _searchController.clear();
-                        _onSearchChanged('');
-                      },
-                    )
-                  : null,
-              ),
+              hintText: 'Search by industry or designation...',
+              debounce: const Duration(milliseconds: 300),
               onChanged: _onSearchChanged,
+              onClear: () => _onSearchChanged(''),
             ),
             if (!_isLoading && _totalItems > 0)
               Padding(

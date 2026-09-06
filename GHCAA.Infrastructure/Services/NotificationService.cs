@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Domain;
@@ -15,11 +16,13 @@ namespace GHCAA.Infrastructure.Services
     {
         private readonly ApplicationDbContext _db;
         private readonly IRealTimeService _realTime;
+        private readonly ICommunicationService _communication;
 
-        public NotificationService(ApplicationDbContext db, IRealTimeService realTime)
+        public NotificationService(ApplicationDbContext db, IRealTimeService realTime, ICommunicationService communication)
         {
             _db = db;
             _realTime = realTime;
+            _communication = communication;
         }
 
         public async Task CreateNotificationAsync(int memberId, string title, string message, Enums.NotificationType type, string? targetUrl = null, CancellationToken cancellationToken = default)
@@ -55,6 +58,31 @@ namespace GHCAA.Infrastructure.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             await _realTime.SendNotificationToUserAsync(memberId, notification);
+        }
+
+        public async Task<bool> CreateNotificationFromTemplateAsync(int memberId, string templateCode, Enums.NotificationType type, string fallbackTitle, string fallbackMessage, Dictionary<string, string>? templateVars = null, string? targetUrl = null, CancellationToken cancellationToken = default)
+        {
+            var resolved = await _communication.ResolveTemplateTextAsync(templateCode, memberId, templateVars, cancellationToken);
+
+            string title = fallbackTitle;
+            string message = fallbackMessage;
+            if (resolved.HasValue)
+            {
+                title = resolved.Value.Subject;
+                message = StripHtml(resolved.Value.Body);
+            }
+
+            await CreateNotificationAsync(memberId, title, message, type, targetUrl, cancellationToken);
+            return resolved.HasValue;
+        }
+
+        // EmailTemplate bodies are authored as HTML for the email channel. The in-app Notification
+        // table stores plain text, so this strips tags rather than rendering markup in a list.
+        private static string StripHtml(string html)
+        {
+            var text = Regex.Replace(html, "<.*?>", " ");
+            text = System.Net.WebUtility.HtmlDecode(text);
+            return Regex.Replace(text, @"\s+", " ").Trim();
         }
 
         public async Task<IEnumerable<Notification>> GetUserNotificationsAsync(int memberId, CancellationToken cancellationToken = default)

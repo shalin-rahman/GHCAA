@@ -29,12 +29,20 @@ class AcademicConstants {
     'Electrical', 'Medical', 'Dentestry', 'Engineering', 'Law',
     'Pharma', 'Agriculture', 'Textile', 'Lather', 'Education'
   ];
+}
 
-  static List<int> getAcademicYears() {
-    final int currentYear = DateTime.now().year;
-    const int startYear = 1950;
-    return List.generate(currentYear - startYear + 1, (i) => currentYear - i);
-  }
+// 82.42: group names for DropdownService.getOptions(group) — these used to be repeated as
+// separate string literals in register_screen.dart, profile_edit_screen.dart and
+// dropdown_service.dart's own switch, which is exactly the drift risk that let the API-side
+// group name and the client's fallback switch case fall out of sync in the first place.
+class LookupGroups {
+  static const String membershipStatus = 'MembershipStatus';
+  static const String userStatus = 'UserStatus'; // profile_edit_screen's admin-only status field uses this alias
+  static const String memberCategory = 'MemberCategory';
+  static const String gender = 'Gender';
+  static const String bloodGroup = 'BloodGroup';
+  static const String jobCategory = 'JobCategory';
+  static const String passingYear = 'PassingYear';
 }
 
 class MembershipConstants {

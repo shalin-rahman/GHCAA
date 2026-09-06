@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.API.Controllers;
 using GHCAA.Application.Interfaces;
@@ -37,7 +37,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await controller.DeleteUser(5, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         [Test]

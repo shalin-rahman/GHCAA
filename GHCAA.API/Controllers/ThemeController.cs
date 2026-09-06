@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
@@ -47,7 +47,7 @@ namespace GHCAA.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTheme(int id, SpecialDayTheme theme)
         {
-            if (id != theme.Id) return BadRequest();
+            if (id != theme.Id) return Problem(statusCode: StatusCodes.Status400BadRequest);
             await _themeService.UpdateThemeAsync(theme);
             return NoContent();
         }

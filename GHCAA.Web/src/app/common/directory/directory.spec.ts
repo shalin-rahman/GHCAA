@@ -6,6 +6,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
+import { LookupService } from '../../core/services/lookup.service';
 
 describe('Directory Component', () => {
     let component: Directory;
@@ -30,7 +31,8 @@ describe('Directory Component', () => {
             providers: [
                 { provide: NetworkingService, useValue: networkServiceMock },
                 { provide: NotificationService, useValue: notificationServiceMock },
-                { provide: Router, useValue: routerMock }
+                { provide: Router, useValue: routerMock },
+                { provide: LookupService, useValue: { getOptions: vi.fn().mockReturnValue(of([])), getAcademicYears: vi.fn().mockReturnValue(of([])) } }
             ]
         }).compileComponents();
 

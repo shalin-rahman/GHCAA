@@ -1,4 +1,4 @@
-using GHCAA.Application.DTOs;
+﻿using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Security;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -24,7 +25,7 @@ namespace GHCAA.API.Controllers
         // 24.50: Returns null when the claim is absent or not a valid integer, avoiding int.Parse crash.
         private int? GetMemberId()
         {
-            var value = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var value = this.CurrentMemberIdRaw();
             return int.TryParse(value, out var id) ? id : null;
         }
 
@@ -54,7 +55,7 @@ namespace GHCAA.API.Controllers
             if (memberId == null) return Unauthorized();
 
             var success = await _pollService.VoteAsync(id, memberId.Value, dto.OptionIds, cancellationToken);
-            if (!success) return BadRequest(new { Message = "Voting failed. You may have already voted or the poll is closed." });
+            if (!success) return Problem(detail: "Voting failed. You may have already voted or the poll is closed.", statusCode: StatusCodes.Status400BadRequest);
 
             return Ok(new { Message = "Vote recorded successfully." });
         }

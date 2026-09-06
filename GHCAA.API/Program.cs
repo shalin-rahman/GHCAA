@@ -182,6 +182,11 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(x =>
     x.MemoryBufferThreshold = (int)Math.Min(maxBodySize, int.MaxValue);
 });
 
+// 82.4: one error shape everywhere — RFC 7807 ProblemDetails. Controllers return it via
+// Problem(...)/ValidationProblem(...); ExceptionMiddleware builds the same shape by hand for an
+// unhandled exception, since that path runs outside MVC's ProblemDetailsFactory.
+builder.Services.AddProblemDetails();
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -261,6 +266,10 @@ var forwardedHeadersOptions = new ForwardedHeadersOptions
 forwardedHeadersOptions.KnownNetworks.Clear();
 forwardedHeadersOptions.KnownProxies.Clear();
 app.UseForwardedHeaders(forwardedHeadersOptions);
+
+// 82.9: assign the correlation id before anything else gets a chance to log, so
+// ExceptionMiddleware's unhandled-exception line (and every log line downstream) carries it.
+app.UseMiddleware<GHCAA.API.Middleware.CorrelationIdMiddleware>();
 
 // Use Exception Middleware first to catch all subsequent errors
 app.UseMiddleware<ExceptionMiddleware>();

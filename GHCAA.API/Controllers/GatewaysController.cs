@@ -1,10 +1,11 @@
-using GHCAA.Application.DTOs;
+﻿using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using System.Linq;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GHCAA.Application.Security;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -46,13 +47,13 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> InitiatePayment([FromBody] InitiatePaymentRequest request, CancellationToken cancellationToken)
         {
             if (request.Amount <= 0 || request.Amount > 10_000_000m)
-                return BadRequest(new { message = "Payment amount is out of the allowed range." });
+                return Problem(detail: "Payment amount is out of the allowed range.", statusCode: StatusCodes.Status400BadRequest);
 
             if (string.IsNullOrWhiteSpace(request.Reference))
-                return BadRequest(new { message = "Reference is required." });
+                return Problem(detail: "Reference is required.", statusCode: StatusCodes.Status400BadRequest);
 
             int? memberId = null;
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (!string.IsNullOrEmpty(memberIdClaim) && int.TryParse(memberIdClaim, out var midClaim))
             {
                 memberId = midClaim;
@@ -67,7 +68,7 @@ namespace GHCAA.API.Controllers
                 if (!memberId.HasValue)
                 {
                     _logger.LogWarning("Blocked payment initiation without MemberId claim for reference {Ref}", request.Reference);
-                    return Unauthorized(new { message = "Sign in is required to start this payment." });
+                    return Problem(detail: "Sign in is required to start this payment.", statusCode: StatusCodes.Status401Unauthorized);
                 }
             }
             else
@@ -79,14 +80,14 @@ namespace GHCAA.API.Controllers
                 if (registration?.Event == null)
                 {
                     _logger.LogWarning("Event payment initiation failed: unknown or non-pending registration {Ref}", request.Reference);
-                    return BadRequest(new { message = "Unknown or inactive event registration reference." });
+                    return Problem(detail: "Unknown or inactive event registration reference.", statusCode: StatusCodes.Status400BadRequest);
                 }
 
                 var regFee = registration.Event.RegistrationFee ?? 0;
                 var expected = regFee > 0 ? regFee : (registration.ContributionAmount ?? 0);
 
                 if (expected <= 0 && request.Amount > 0.01m)
-                    return BadRequest(new { message = "This registration does not require an online payment." });
+                    return Problem(detail: "This registration does not require an online payment.", statusCode: StatusCodes.Status400BadRequest);
 
                 if (expected > 0 && Math.Abs(request.Amount - expected) > 0.01m)
                 {
@@ -95,7 +96,7 @@ namespace GHCAA.API.Controllers
                         request.Reference,
                         expected,
                         request.Amount);
-                    return BadRequest(new { message = $"Amount must match the event fee ({expected})." });
+                    return Problem(detail: $"Amount must match the event fee ({expected}).", statusCode: StatusCodes.Status400BadRequest);
                 }
 
                 if (registration.MemberId.HasValue)
@@ -103,7 +104,7 @@ namespace GHCAA.API.Controllers
                     if (!memberId.HasValue || memberId.Value != registration.MemberId.Value)
                     {
                         _logger.LogWarning("Event payment member mismatch for {Ref}", request.Reference);
-                        return Unauthorized(new { message = "Sign in as the member who registered to complete payment." });
+                        return Problem(detail: "Sign in as the member who registered to complete payment.", statusCode: StatusCodes.Status401Unauthorized);
                     }
                 }
                 else
@@ -116,14 +117,14 @@ namespace GHCAA.API.Controllers
             if (!org.EnabledGatewayMethods.Contains(request.Gateway.ToString()))
             {
                 _logger.LogWarning("Blocked initiation of disabled gateway: {Gateway}", request.Gateway);
-                return BadRequest("This payment method is temporarily unavailable via system configuration.");
+                return Problem(detail: "This payment method is temporarily unavailable via system configuration.", statusCode: StatusCodes.Status400BadRequest);
             }
 
             var dbConfig = await _paymentConfigService.GetEnabledByGatewayAsync(request.Gateway, cancellationToken);
             if (dbConfig == null)
             {
                 _logger.LogWarning("Blocked initiation of disabled gateway (DB): {Gateway}", request.Gateway);
-                return BadRequest("This payment method is not active in the registry.");
+                return Problem(detail: "This payment method is not active in the registry.", statusCode: StatusCodes.Status400BadRequest);
             }
 
             var gatewayService = _gatewayFactory.GetGateway(request.Gateway);
@@ -176,7 +177,7 @@ namespace GHCAA.API.Controllers
                 return Ok(response);
             }
 
-            return BadRequest(response.Message);
+            return Problem(detail: response.Message, statusCode: StatusCodes.Status400BadRequest);
         }
 
         [HttpPost("callback/sslcommerz")]
@@ -268,7 +269,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> GatewayWebhook(string gateway, CancellationToken cancellationToken)
         {
             if (!Enum.TryParse<Enums.PaymentGateway>(gateway, true, out var gatewayType))
-                return BadRequest("Invalid gateway type.");
+                return Problem(detail: "Invalid gateway type.", statusCode: StatusCodes.Status400BadRequest);
 
             _logger.LogInformation("Webhook received for {Gateway}", gatewayType);
 
@@ -283,7 +284,7 @@ namespace GHCAA.API.Controllers
             catch (NotSupportedException ex)
             {
                 _logger.LogWarning(ex, "Webhook for unregistered gateway {Gateway}", gatewayType);
-                return NotFound(new { status = "unsupported_gateway" });
+                return Problem(detail: "unsupported_gateway", statusCode: StatusCodes.Status404NotFound);
             }
             var headers = Request.Headers.ToDictionary(h => h.Key, h => h.Value.ToString());
 
@@ -295,7 +296,7 @@ namespace GHCAA.API.Controllers
                 return Ok(new { status = "success" });
             }
 
-            return BadRequest(new { status = "failed" });
+            return Problem(detail: "failed", statusCode: StatusCodes.Status400BadRequest);
         }
 
         private async Task HandleSuccessfulPayment(string transactionId, CancellationToken cancellationToken, decimal? confirmedAmount = null, string? gatewayPaymentId = null)

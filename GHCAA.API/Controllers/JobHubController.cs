@@ -1,10 +1,11 @@
-using GHCAA.Application.DTOs;
+﻿using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using GHCAA.Application.Security;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -32,10 +33,10 @@ namespace GHCAA.API.Controllers
         [HttpPost]
         public async Task<IActionResult> PostJob([FromBody] CreateJobDto job, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
-                return BadRequest("Invalid user session");
+                return Problem(detail: "Invalid user session", statusCode: StatusCodes.Status400BadRequest);
             }
 
             var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
@@ -46,10 +47,10 @@ namespace GHCAA.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateJob(int id, [FromBody] CreateJobDto job, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
-                return BadRequest("Invalid user session");
+                return Problem(detail: "Invalid user session", statusCode: StatusCodes.Status400BadRequest);
             }
 
             var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
@@ -73,7 +74,7 @@ namespace GHCAA.API.Controllers
         [HttpPatch("deactivate/{id}")]
         public async Task<IActionResult> DeactivateJob(int id, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
 
             var job = await _jobService.GetJobByIdAsync(id, cancellationToken);

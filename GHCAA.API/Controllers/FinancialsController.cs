@@ -1,4 +1,4 @@
-using GHCAA.Application.DTOs;
+﻿using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.API.Extensions;
 using GHCAA.Domain.Models;
@@ -35,13 +35,13 @@ namespace GHCAA.API.Controllers
         [HttpGet("my-history")]
         public async Task<IActionResult> GetMyPaymentHistory(CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
                 if (User.IsInRole("SuperAdmin"))
                     return Ok(new List<GHCAA.Application.DTOs.PaymentHistoryDto>());
 
-                return BadRequest("Invalid user session");
+                return Problem(detail: "Invalid user session", statusCode: StatusCodes.Status400BadRequest);
             }
 
             var history = await _financialService.GetMemberPaymentHistoryAsync(memberId, cancellationToken);
@@ -58,7 +58,7 @@ namespace GHCAA.API.Controllers
             // This endpoint is member self-service only (mobile derives MemberId server-side for the
             // same reason) — every sibling endpoint in this controller already refuses rather than
             // trusts the body in this situation.
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
                 return Unauthorized();
@@ -70,7 +70,7 @@ namespace GHCAA.API.Controllers
             if (dto.Receipt != null)
             {
                 var receiptValidation = _fileValidationService.ValidateFormFile(dto.Receipt, FileCategory.Document, 10 * 1024 * 1024);
-                if (!receiptValidation.IsValid) return BadRequest(new { Message = receiptValidation.ErrorMessage });
+                if (!receiptValidation.IsValid) return Problem(detail: receiptValidation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
             }
 
             var result = await _financialService.RecordPaymentAsync(dto, cancellationToken);
@@ -91,7 +91,7 @@ namespace GHCAA.API.Controllers
             // Security check: If not admin, verify ownership
             if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
             {
-                var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+                var memberIdClaim = this.CurrentMemberIdRaw();
                 if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
                 {
                     return Unauthorized("Invalid session.");
@@ -109,7 +109,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("my-dues")]
         public async Task<IActionResult> GetMyDues(CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             int memberId;
             if (memberIdClaim == null || !int.TryParse(memberIdClaim, out memberId))
             {
@@ -121,7 +121,7 @@ namespace GHCAA.API.Controllers
                 // shape every sibling endpoint in this controller instead answers with
                 // Unauthorized/BadRequest. This is the system-admin branch (no MemberId claim), so
                 // it is reached routinely, not only on a malformed token.
-                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                var userIdClaim = this.CurrentUserIdRaw();
                 if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
                     return Unauthorized("Invalid session.");
 
@@ -152,7 +152,7 @@ namespace GHCAA.API.Controllers
         [Authorize(Policy = Constants.Policies.SuperAdminOnly)] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> AddFeeConfig([FromBody] CreateMembershipFeeConfigDto dto, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var adminId))
             {
                 return Unauthorized();
@@ -166,7 +166,7 @@ namespace GHCAA.API.Controllers
         [Authorize(Policy = Constants.Policies.SuperAdminOnly)] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> UpdateFeeConfig([FromBody] UpdateMembershipFeeConfigDto dto, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var adminId))
             {
                 return Unauthorized();
@@ -182,7 +182,7 @@ namespace GHCAA.API.Controllers
             // If not admin, can only see own history
             if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
             {
-                var myMemberId = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+                var myMemberId = this.CurrentMemberIdRaw();
                 if (myMemberId != memberId.ToString()) return Forbid();
             }
 
@@ -196,7 +196,7 @@ namespace GHCAA.API.Controllers
         {
             // 82.16: a deleted payment records who deleted it, so refuse rather than attribute it
             // to admin 0 when the caller cannot be identified.
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var adminId))
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var adminId))
                 return Unauthorized();
 
             var success = await _financialService.DeletePaymentAsync(id, adminId, cancellationToken);
@@ -214,7 +214,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("saved-methods")]
         public async Task<IActionResult> GetSavedPaymentMethods(CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId)) return Unauthorized();
 
             var methods = await _financialService.GetSavedPaymentMethodsAsync(memberId, cancellationToken);
@@ -224,7 +224,7 @@ namespace GHCAA.API.Controllers
         [HttpPost("saved-methods")]
         public async Task<IActionResult> AddSavedPaymentMethod([FromBody] CreateSavedPaymentMethodDto dto, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId)) return Unauthorized();
 
             var result = await _financialService.AddSavedPaymentMethodAsync(memberId, dto, cancellationToken);
@@ -234,7 +234,7 @@ namespace GHCAA.API.Controllers
         [HttpDelete("saved-methods/{id}")]
         public async Task<IActionResult> DeleteSavedPaymentMethod(int id, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId)) return Unauthorized();
 
             var result = await _financialService.DeleteSavedPaymentMethodAsync(memberId, id, cancellationToken);

@@ -1,10 +1,11 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using GHCAA.Domain;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -80,6 +81,6 @@ namespace GHCAA.API.Controllers
         }
 
         private bool TryGetAdminId(out int adminId)
-            => int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out adminId);
+            => int.TryParse(this.CurrentUserIdRaw(), out adminId);
     }
 }

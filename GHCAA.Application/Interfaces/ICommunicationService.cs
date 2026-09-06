@@ -26,5 +26,12 @@ namespace GHCAA.Application.Interfaces
         Task SendTypeCustomEmailAsync(IEnumerable<string> membershipTypes, string subject, string htmlBody, CancellationToken cancellationToken = default);
         Task SendMemberCustomEmailAsync(int memberId, string subject, string htmlBody, CancellationToken cancellationToken = default);
         Task SendEmailByCodeAsync(string to, string templateCode, Dictionary<string, string>? customVars = null, Member? member = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Resolves an EmailTemplate's Subject/Body against the same variable set SendEmailByCodeAsync
+        /// uses (member fields + org branding + customVars), without sending anything. Returns null if
+        /// no template with that code exists — callers decide their own fallback text.
+        /// </summary>
+        Task<(string Subject, string Body)?> ResolveTemplateTextAsync(string templateCode, int? memberId = null, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default);
     }
 }

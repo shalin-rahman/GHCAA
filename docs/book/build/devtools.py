@@ -143,11 +143,14 @@ class Browser(object):
             "--user-data-dir=%s" % self.profile,
             "--window-size=1240,1754",
             # Deliberately without printer.py's
-            # --run-all-compositor-stages-before-draw and
-            # --virtual-time-budget: those make a one-shot --dump-dom run wait
-            # for Mermaid, and on a long-lived session the virtual-time budget
-            # kills the page target instead. This session waits explicitly, on
-            # document.body.dataset.diagrams, which is the stronger check.
+            # --run-all-compositor-stages-before-draw and --virtual-time-budget:
+            # those are for the one-shot --print-to-pdf fallback, where nothing
+            # else can wait for Mermaid, and a virtual-time budget kills a
+            # long-lived session's page target instead of just running out.
+            # This session waits explicitly, on document.body.dataset.diagrams,
+            # for both the audit measurement and the print — the same wait, on
+            # the same page, so one is not passing a rendering the other never
+            # printed.
             "about:blank",
         ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # Anything raised from here on escapes the constructor, so `with

@@ -6,6 +6,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/confirm_dialog.dart';
 import 'package:flutter/services.dart';
 import '../../core/config/app_config.dart';
 import '../../features/content/content_service.dart';
@@ -40,22 +41,15 @@ class _MemberArticlesScreenState extends ConsumerState<MemberArticlesScreen> {
       return;
     }
 
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: const Text('Are you sure you want to delete this submission?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('CANCEL')),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('DELETE', style: TextStyle(color: Colors.redAccent))
-          ),
-        ],
-      ),
+    final confirm = await showConfirmDialog(
+      context,
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to delete this submission?',
+      confirmLabel: 'Delete',
+      destructive: true,
     );
 
-    if (confirm != true) return;
+    if (!confirm) return;
 
     try {
       await ref.read(newsServiceProvider).deleteMySubmission(id);

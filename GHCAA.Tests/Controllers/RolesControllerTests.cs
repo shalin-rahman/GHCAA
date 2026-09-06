@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.API.Controllers;
@@ -47,7 +47,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.CreateAdmin(dto, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         [Test]
@@ -78,7 +79,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.AssignRole(999, "Admin", CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         [Test]
@@ -98,7 +100,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.RemoveRole(999, "Admin", CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         [Test]
@@ -118,7 +121,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.DeleteUser(1, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         [Test]
@@ -138,7 +142,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.DisableUser(1, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         [Test]
@@ -158,7 +163,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.EnableUser(999, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         [Test]
@@ -180,7 +186,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.ResetPasswordAdmin(999, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         [Test]

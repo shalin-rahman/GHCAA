@@ -18,6 +18,16 @@ import io
 import os
 import re
 
+# pypdf's own read error, so a caller can catch one name regardless of which
+# reader (pypdf or PyMuPDF) is installed. A locked or truncated PDF raises this
+# from pypdf.PdfReader, not OSError, so a caller only catching OSError still
+# sees the traceback.
+try:
+    from pypdf.errors import PyPdfError as PdfError
+except ImportError:
+    class PdfError(Exception):
+        pass
+
 
 def reader():
     """A callable pdf_path -> list of page texts, or None if no library is present."""

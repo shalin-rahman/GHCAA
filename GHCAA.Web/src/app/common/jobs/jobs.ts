@@ -5,7 +5,8 @@ import { JobService } from '../../core/services/job.service';
 import { Job } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
-import { JOB_CATEGORIES, getJobCategoryLabel, SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
+import { getJobCategoryLabel, SUBMISSION_STATUS_MAP, LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { LookupService } from '../../core/services/lookup.service';
 import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
@@ -19,6 +20,7 @@ import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 export class Jobs implements OnInit {
   private jobService = inject(JobService);
   private notify = inject(NotificationService);
+  private lookupService = inject(LookupService);
 
   jobs = signal<Job[]>([]);
   loading = signal(true);
@@ -32,7 +34,10 @@ export class Jobs implements OnInit {
   editingId = signal<number | null>(null);
   private auth = inject(AuthService);
 
-  categories = JOB_CATEGORIES;
+  // 82.42: sourced from /lookups/JobCategory via LookupService, filled in ngOnInit. Kept as
+  // {id,name} here (not {value,label}) so jobs.html's existing cat.id/cat.name bindings didn't
+  // need touching.
+  categories: { id: string; name: string }[] = [];
 
   newJob: any = {
     title: '',
@@ -47,6 +52,9 @@ export class Jobs implements OnInit {
 
   ngOnInit() {
     this.loadJobs();
+    this.lookupService.getOptions(LOOKUP_GROUPS.JobCategory).subscribe(
+      opts => this.categories = opts.map(o => ({ id: o.value, name: o.label }))
+    );
   }
 
   loadJobs(jobCategory?: any) {

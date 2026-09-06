@@ -69,7 +69,9 @@ namespace GHCAA.Tests.Middleware
             var (context, _, _) = await InvokeAsync("Production", new InvalidOperationException("boom"));
 
             Assert.That(context.Response.StatusCode, Is.EqualTo(500));
-            Assert.That(context.Response.ContentType, Is.EqualTo("application/json"));
+            // 82.4: unhandled exceptions now carry the same ProblemDetails (RFC 7807) shape as
+            // every controller failure path.
+            Assert.That(context.Response.ContentType, Is.EqualTo("application/problem+json"));
         }
 
         [Test]
@@ -78,8 +80,8 @@ namespace GHCAA.Tests.Middleware
             var (_, body, _) = await InvokeAsync("Production", new InvalidOperationException("sensitive db connection string leaked here"));
 
             var payload = JsonSerializer.Deserialize<JsonElement>(body);
-            Assert.That(payload.GetProperty("message").GetString(), Is.EqualTo("Internal Server Error"));
-            Assert.That(payload.TryGetProperty("details", out var details) && details.ValueKind != JsonValueKind.Null, Is.False);
+            Assert.That(payload.GetProperty("detail").GetString(), Is.EqualTo("Internal Server Error"));
+            Assert.That(payload.TryGetProperty("stackTrace", out var stackTrace) && stackTrace.ValueKind != JsonValueKind.Null, Is.False);
         }
 
         [Test]
@@ -88,7 +90,8 @@ namespace GHCAA.Tests.Middleware
             var (_, body, _) = await InvokeAsync("Development", new InvalidOperationException("boom"));
 
             var payload = JsonSerializer.Deserialize<JsonElement>(body);
-            Assert.That(payload.GetProperty("message").GetString(), Is.EqualTo("boom"));
+            Assert.That(payload.GetProperty("detail").GetString(), Is.EqualTo("boom"));
+            Assert.That(payload.GetProperty("stackTrace").ValueKind, Is.Not.EqualTo(JsonValueKind.Null));
         }
 
         [Test]

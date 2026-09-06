@@ -6,6 +6,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/registration_constants.dart';
 import '../../features/auth/register_wizard_provider.dart';
 import '../../features/auth/auth_service.dart';
 import '../../features/lookups/dropdown_service.dart';
@@ -191,7 +192,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         const Divider(color: Colors.white10),
         _buildAsyncDropdown(
           label: 'Blood Group *',
-          group: 'BloodGroup',
+          group: LookupGroups.bloodGroup,
           value: state.data['BloodGroup'],
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('BloodGroup', v),
         ),

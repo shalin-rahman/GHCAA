@@ -1,6 +1,8 @@
 using System.Net;
 using System.Text.Json;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace GHCAA.API.Middleware
@@ -38,32 +40,34 @@ namespace GHCAA.API.Middleware
                 }
 
                 context.Response.Clear();
-                context.Response.ContentType = "application/json";
+                context.Response.ContentType = "application/problem+json";
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-                var response = _env.IsDevelopment()
-                    ? new ApiException(context.Response.StatusCode, ex.Message, ex.StackTrace?.ToString())
-                    : new ApiException(context.Response.StatusCode, "Internal Server Error");
+                // 82.4: same ProblemDetails shape controllers return via Problem(...)/ValidationProblem(...)
+                // — this path runs outside MVC's ProblemDetailsFactory, so it's built by hand here.
+                var problem = new ProblemDetails
+                {
+                    Status = context.Response.StatusCode,
+                    Title = "An unexpected error occurred.",
+                    Detail = _env.IsDevelopment() ? ex.Message : "Internal Server Error",
+                    Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1"
+                };
+
+                // 82.9: ties this error back to CorrelationIdMiddleware's request-scoped log lines.
+                if (context.Items.TryGetValue(Constants.Headers.CorrelationId, out var correlationId) && correlationId is string cid)
+                {
+                    problem.Extensions["correlationId"] = cid;
+                }
+                if (_env.IsDevelopment())
+                {
+                    problem.Extensions["stackTrace"] = ex.StackTrace;
+                }
 
                 var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-                var json = JsonSerializer.Serialize(response, options);
+                var json = JsonSerializer.Serialize(problem, options);
 
                 await context.Response.WriteAsync(json);
             }
         }
-    }
-
-    public class ApiException
-    {
-        public ApiException(int statusCode, string message, string? details = null)
-        {
-            StatusCode = statusCode;
-            Message = message;
-            Details = details;
-        }
-
-        public int StatusCode { get; set; }
-        public string Message { get; set; }
-        public string? Details { get; set; }
     }
 }

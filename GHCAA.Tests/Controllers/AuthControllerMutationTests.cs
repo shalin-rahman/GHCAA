@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
@@ -126,7 +126,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.GoogleLogin(new AuthController.SocialLoginRequest { Token = "bad-token" }, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(401));
         }
 
         // --- FacebookLogin ---
@@ -154,7 +155,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.FacebookLogin(new AuthController.SocialLoginRequest { Token = "bad-token" }, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(401));
         }
 
         // --- Refresh ---
@@ -180,7 +182,8 @@ namespace GHCAA.Tests.Controllers
         {
             var result = await _controller.Refresh(CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(401));
         }
 
         [Category("FR-11")]
@@ -193,7 +196,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.Refresh(CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(401));
         }
 
         [Category("FR-11")]
@@ -235,7 +239,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.RefreshMobile(new RefreshRequestDto { RefreshToken = "bad-token" }, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(401));
         }
 
         [Category("FR-11")]
@@ -302,7 +307,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.RequestStepUp(_otpServiceMock.Object, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         // --- VerifyStepUp ---
@@ -331,7 +337,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.VerifyStepUp(new StepUpVerifyDto { Code = "000000" }, _otpServiceMock.Object, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         [Test]
@@ -342,7 +349,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.VerifyStepUp(new StepUpVerifyDto { Code = "123456" }, _otpServiceMock.Object, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         // --- ResetPassword ---
@@ -368,7 +376,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.ResetPassword(new ResetPasswordDto { Email = "user@example.com", Token = "bad-token", NewPassword = "NewPass123" }, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
     }
 }

@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +7,7 @@ using GHCAA.Application.Security;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -72,7 +73,7 @@ namespace GHCAA.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetMySummary(CancellationToken cancellationToken)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = this.CurrentUserIdRaw();
             if (!int.TryParse(userIdClaim, out var userId)) return Unauthorized();
 
             var memberId = GetMemberId();
@@ -101,7 +102,7 @@ namespace GHCAA.API.Controllers
         // 24.50: null on an absent/malformed claim, same convention as FamilyLinkController.
         private int? GetMemberId()
         {
-            var value = User.FindFirstValue(AppClaimTypes.MemberId);
+            var value = this.CurrentMemberIdRaw();
             return int.TryParse(value, out var id) ? id : null;
         }
     }

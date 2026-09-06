@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,6 +6,7 @@ using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GHCAA.Domain;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -62,7 +63,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> AssignMember(int id, [FromBody] AssignMemberRequest request, CancellationToken cancellationToken)
         {
             var success = await _governanceService.AssignMemberToRoleAsync(id, request.MemberId, request.Position, request.Reason, request.NotifyMember, cancellationToken);
-            if (!success) return BadRequest(new { Message = "Assignment failed" });
+            if (!success) return Problem(detail: "Assignment failed", statusCode: StatusCodes.Status400BadRequest);
             return Ok(new { Message = "Member assigned to role successfully" });
         }
 
@@ -80,7 +81,7 @@ namespace GHCAA.API.Controllers
         {
             // 82.29: a deleted ECMember records who deleted it, so refuse rather than attribute it
             // to admin 0 when the caller cannot be identified.
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var adminId))
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var adminId))
                 return Unauthorized();
 
             var success = await _governanceService.DeleteECMemberAsync(ecMemberId, adminId, notifyMember, cancellationToken);

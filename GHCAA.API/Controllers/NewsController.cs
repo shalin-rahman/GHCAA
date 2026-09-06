@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
@@ -69,7 +69,7 @@ namespace GHCAA.API.Controllers
         [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> CreateNews([FromBody] CreateNewsDto dto, CancellationToken cancellationToken)
         {
-            var authorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var authorIdClaim = this.CurrentUserIdRaw();
             if (!int.TryParse(authorIdClaim, out var authorId))
             {
                 return Unauthorized();
@@ -100,7 +100,7 @@ namespace GHCAA.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetMySubmissions(CancellationToken cancellationToken)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = this.CurrentUserIdRaw();
             if (!int.TryParse(userIdClaim, out var userId)) return Unauthorized();
 
             // GetMySubmissionsAsync takes the user ID directly, not memberId.
@@ -112,7 +112,7 @@ namespace GHCAA.API.Controllers
         [Authorize]
         public async Task<IActionResult> SubmitArticle([FromBody] CreateNewsDto dto, CancellationToken cancellationToken)
         {
-            var authorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var authorIdClaim = this.CurrentUserIdRaw();
             if (!int.TryParse(authorIdClaim, out var authorId)) return Unauthorized();
 
             // Ensure status is Pending if submitted by member, or Draft if requested
@@ -154,7 +154,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> AddCollaborator(int id, int userId, CancellationToken cancellationToken)
         {
             var success = await _newsService.AddCollaboratorAsync(id, userId, cancellationToken);
-            return success ? Ok(new { Message = "Collaborator added." }) : BadRequest("Could not add collaborator.");
+            return success ? Ok(new { Message = "Collaborator added." }) : Problem(detail: "Could not add collaborator.", statusCode: StatusCodes.Status400BadRequest);
         }
 
         [HttpDelete("{id:int}/collaborators/{userId:int}")]
@@ -170,9 +170,9 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> UploadImage(IFormFile file, CancellationToken cancellationToken)
         {
             var validation = _fileValidationService.ValidateFormFile(file, FileCategory.Image, 10 * 1024 * 1024);
-            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
+            if (!validation.IsValid) return Problem(detail: validation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
 
-            var authorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var authorIdClaim = this.CurrentUserIdRaw();
             if (!int.TryParse(authorIdClaim, out var authorId))
             {
                 return Unauthorized();
@@ -200,9 +200,9 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> UploadDocument(IFormFile file, CancellationToken cancellationToken)
         {
             var validation = _fileValidationService.ValidateFormFile(file, FileCategory.Document, 10 * 1024 * 1024);
-            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
+            if (!validation.IsValid) return Problem(detail: validation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
 
-            var authorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var authorIdClaim = this.CurrentUserIdRaw();
             if (!int.TryParse(authorIdClaim, out var authorId))
             {
                 return Unauthorized();

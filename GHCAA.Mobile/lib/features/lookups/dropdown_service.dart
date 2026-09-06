@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
+import '../../core/constants/registration_constants.dart';
 import 'lookup_service.dart';
 
 final dropdownDataProvider = Provider<DropdownService>((ref) {
@@ -92,7 +93,7 @@ class DropdownService {
         return defaultGeneralSubjects.map((s) => {'value': s, 'label': s}).toList();
       case 'Degree':
         return defaultDegrees.map((s) => {'value': s, 'label': s}).toList();
-      case 'BloodGroup':
+      case LookupGroups.bloodGroup:
         return bloodGroupMap.entries.map((e) => {'value': e.key, 'label': e.value}).toList();
       case 'MembershipType':
         return defaultMembershipTypes.map((s) => {'value': s, 'label': s}).toList();
@@ -100,16 +101,16 @@ class DropdownService {
         return defaultRelationshipTypes.map((s) => {'value': s, 'label': s}).toList();
       case 'ArticleCategory':
         return defaultArticleCategories;
-      case 'JobCategory':
+      case LookupGroups.jobCategory:
         return jobCategoryMap.entries.map((e) => {'value': e.key, 'label': e.value}).toList();
-      case 'Gender':
+      case LookupGroups.gender:
         return [
           {'value': 'None', 'label': 'Not Specified'},
           {'value': 'Male', 'label': 'Male'},
           {'value': 'Female', 'label': 'Female'},
           {'value': 'Other', 'label': 'Other'},
         ];
-      case 'MemberCategory':
+      case LookupGroups.memberCategory:
         return [
           {'value': 'None', 'label': 'None'},
           {'value': 'LifelongPatron', 'label': 'Lifelong Patron'},
@@ -123,8 +124,8 @@ class DropdownService {
           {'value': 'Guest', 'label': 'Guest'},
           {'value': 'Student', 'label': 'Student'},
         ];
-      case 'UserStatus':
-      case 'MembershipStatus':
+      case LookupGroups.userStatus:
+      case LookupGroups.membershipStatus:
         return [
           {'value': 'Applied', 'label': 'Pending Approval'},
           {'value': 'Active', 'label': 'Active Member'},
@@ -132,7 +133,7 @@ class DropdownService {
           {'value': 'InactiveResigned', 'label': 'Resigned'},
           {'value': 'Terminated', 'label': 'Terminated'},
         ];
-      case 'PassingYear':
+      case LookupGroups.passingYear:
         final currentYear = DateTime.now().year;
         return List.generate(currentYear - 1950 + 1, (i) => (currentYear - i).toString())
             .map((y) => {'value': y, 'label': y}).toList();

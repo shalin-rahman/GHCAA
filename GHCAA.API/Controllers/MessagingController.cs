@@ -1,7 +1,8 @@
-using GHCAA.Application.Interfaces;
+﻿using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -22,7 +23,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("conversations")]
         public async Task<IActionResult> GetConversations(CancellationToken cancellationToken)
         {
-            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdStr = this.CurrentUserIdRaw();
             if (!int.TryParse(userIdStr, out var userId)) return Unauthorized();
 
             var recent = await _chatService.GetRecentChatsAsync(userId, cancellationToken);
@@ -32,7 +33,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("history/{otherUserId}")]
         public async Task<IActionResult> GetChatHistory(int otherUserId, CancellationToken cancellationToken)
         {
-            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdStr = this.CurrentUserIdRaw();
             if (!int.TryParse(userIdStr, out var userId)) return Unauthorized();
 
             // We default to 50 messages for mobile history view
@@ -43,7 +44,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("unread")]
         public async Task<IActionResult> GetUnreadCount(CancellationToken cancellationToken)
         {
-            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdStr = this.CurrentUserIdRaw();
             if (!int.TryParse(userIdStr, out var userId)) return Unauthorized();
 
             var unread = await _chatService.GetUnreadMessagesAsync(userId, cancellationToken);
@@ -61,7 +62,7 @@ namespace GHCAA.API.Controllers
         [HttpPost("send")]
         public async Task<IActionResult> SendMessage([FromBody] ChatMessageDto dto, CancellationToken cancellationToken)
         {
-            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdStr = this.CurrentUserIdRaw();
             if (!int.TryParse(userIdStr, out var userId)) return Unauthorized();
 
             var message = await _chatService.SendMessageAsync(userId, dto.ReceiverId, dto.Content, cancellationToken);

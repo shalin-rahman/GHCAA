@@ -1,4 +1,4 @@
-using GHCAA.Application.DTOs;
+﻿using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Application.Security;
 using Microsoft.AspNetCore.Hosting;
@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using GHCAA.Domain;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -45,7 +46,7 @@ namespace GHCAA.API.Controllers
         {
             var result = await _authService.LoginAsync(loginDto, cancellationToken);
             if (result == null)
-                return Unauthorized(new { Message = "Invalid username or password" });
+                return Problem(detail: "Invalid username or password", statusCode: StatusCodes.Status401Unauthorized);
 
             await SetAuthCookiesAsync(result, cancellationToken);
             return Ok(result);
@@ -56,7 +57,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> GoogleLogin([FromBody] SocialLoginRequest request, CancellationToken cancellationToken)
         {
             var result = await _authService.GoogleLoginAsync(request.Token, cancellationToken);
-            if (result == null) return Unauthorized(new { Message = "Google authentication failed" });
+            if (result == null) return Problem(detail: "Google authentication failed", statusCode: StatusCodes.Status401Unauthorized);
             await SetAuthCookiesAsync(result, cancellationToken);
             return Ok(result);
         }
@@ -66,7 +67,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> FacebookLogin([FromBody] SocialLoginRequest request, CancellationToken cancellationToken)
         {
             var result = await _authService.FacebookLoginAsync(request.Token, cancellationToken);
-            if (result == null) return Unauthorized(new { Message = "Facebook authentication failed" });
+            if (result == null) return Problem(detail: "Facebook authentication failed", statusCode: StatusCodes.Status401Unauthorized);
             await SetAuthCookiesAsync(result, cancellationToken);
             return Ok(result);
         }
@@ -78,13 +79,13 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
         {
             if (!Request.Cookies.TryGetValue("refresh_token", out var oldRefreshToken) || string.IsNullOrEmpty(oldRefreshToken))
-                return Unauthorized(new { Message = "No refresh token." });
+                return Problem(detail: "No refresh token.", statusCode: StatusCodes.Status401Unauthorized);
 
             var rotation = await _tokenService.RotateRefreshTokenAsync(oldRefreshToken, cancellationToken);
             if (rotation == null)
             {
                 ClearAuthCookies();
-                return Unauthorized(new { Message = "Invalid or expired refresh token." });
+                return Problem(detail: "Invalid or expired refresh token.", statusCode: StatusCodes.Status401Unauthorized);
             }
 
             var (newRefreshToken, userId) = rotation.Value;
@@ -112,7 +113,7 @@ namespace GHCAA.API.Controllers
         {
             var rotation = await _tokenService.RotateRefreshTokenAsync(dto.RefreshToken, cancellationToken);
             if (rotation == null)
-                return Unauthorized(new { Message = "Invalid or expired refresh token." });
+                return Problem(detail: "Invalid or expired refresh token.", statusCode: StatusCodes.Status401Unauthorized);
 
             var (newRefreshToken, userId) = rotation.Value;
 
@@ -130,10 +131,10 @@ namespace GHCAA.API.Controllers
         [DisableRateLimiting]
         public IActionResult Me()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var username = User.FindFirst(ClaimTypes.Name)?.Value;
-            var role = User.FindFirst(ClaimTypes.Role)?.Value ?? "Member";
-            var memberId = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var userId = this.CurrentUserIdRaw();
+            var username = this.CurrentUsername();
+            var role = this.CurrentRole() ?? "Member";
+            var memberId = this.CurrentMemberIdRaw();
 
             return Ok(new
             {
@@ -149,7 +150,7 @@ namespace GHCAA.API.Controllers
         [DisableRateLimiting]
         public async Task<IActionResult> Logout(CancellationToken cancellationToken)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = this.CurrentUserIdRaw();
             if (int.TryParse(userIdClaim, out var userId))
                 await _tokenService.RevokeAllRefreshTokensAsync(userId, cancellationToken);
 
@@ -168,7 +169,7 @@ namespace GHCAA.API.Controllers
             var email = user?.Member?.Email;
 
             if (user == null || string.IsNullOrWhiteSpace(email))
-                return BadRequest(new { Message = "No email address is on file for this account." });
+                return Problem(detail: "No email address is on file for this account.", statusCode: StatusCodes.Status400BadRequest);
 
             await otpService.GenerateAndSendOtpAsync(email, Domain.Enums.OtpPurpose.AdminStepUp, cancellationToken);
             return Ok(new { Message = "A verification code has been sent to your registered email address." });
@@ -182,11 +183,11 @@ namespace GHCAA.API.Controllers
             var email = user?.Member?.Email;
 
             if (user == null || string.IsNullOrWhiteSpace(email))
-                return BadRequest(new { Message = "No email address is on file for this account." });
+                return Problem(detail: "No email address is on file for this account.", statusCode: StatusCodes.Status400BadRequest);
 
             var verified = await otpService.VerifyOtpAsync(email, dto.Code, Domain.Enums.OtpPurpose.AdminStepUp, cancellationToken);
             if (!verified)
-                return BadRequest(new { Message = "That verification code is invalid or has expired." });
+                return Problem(detail: "That verification code is invalid or has expired.", statusCode: StatusCodes.Status400BadRequest);
 
             // Re-issue the access token carrying the step-up claim. The refresh token is left
             // alone: this raises the current session's assurance level, it is not a new login.
@@ -218,7 +219,7 @@ namespace GHCAA.API.Controllers
 
         private async Task<GHCAA.Domain.Models.User?> LoadCurrentUserAsync(CancellationToken cancellationToken)
         {
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
                 return null;
 
             return await _authService.GetUserWithRolesAndMemberAsync(userId, cancellationToken);
@@ -243,7 +244,7 @@ namespace GHCAA.API.Controllers
         {
             var success = await _authService.ResetPasswordAsync(dto.Email, dto.Token, dto.NewPassword, cancellationToken);
             if (!success)
-                return BadRequest(new { Message = "Invalid or expired reset token." });
+                return Problem(detail: "Invalid or expired reset token.", statusCode: StatusCodes.Status400BadRequest);
 
             return Ok(new { Message = "Password has been reset successfully. You can now login." });
         }
@@ -256,7 +257,7 @@ namespace GHCAA.API.Controllers
 
             var refreshToken = _tokenService.GenerateRefreshToken();
             // Resolve User.Id from the JWT claim we just created.
-            if (int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
+            if (int.TryParse(this.CurrentUserIdRaw(), out var userId))
             {
                 await _tokenService.StoreRefreshTokenAsync(userId, refreshToken, cancellationToken);
             }

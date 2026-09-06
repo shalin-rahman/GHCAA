@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -192,7 +192,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.InitiatePayment(request, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(401));
             _financialServiceMock.Verify(x => x.RecordPaymentAsync(It.IsAny<CreatePaymentHistoryDto>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -224,7 +225,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.InitiatePayment(request, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
             _financialServiceMock.Verify(x => x.RecordPaymentAsync(It.IsAny<CreatePaymentHistoryDto>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -460,7 +462,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.GatewayWebhook("SSLCommerz", CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
             _financialServiceMock.Verify(x => x.UpdatePaymentStatusAsync(It.IsAny<int>(), It.IsAny<Enums.PaymentStatus>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
         }
     }

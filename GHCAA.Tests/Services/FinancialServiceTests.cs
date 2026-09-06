@@ -97,6 +97,14 @@ public class FinancialServiceTests : TestBase
         var dbPayment = await _context.PaymentHistories.FirstOrDefaultAsync(p => p.TransactionId == "TRX-FSP-100");
         dbPayment.Should().NotBeNull();
         dbPayment!.MemberId.Should().Be(member.Id);
+
+        // 82.21: the in-app notification routes through PAYMENT_RECEIVED, the same template
+        // code SendIndividualEmailAsync just used above for the email side.
+        _notificationMock.Verify(x => x.CreateNotificationFromTemplateAsync(
+            member.Id, Constants.TemplateCodes.PaymentReceived, Enums.NotificationType.GeneralSystem,
+            It.IsAny<string>(), It.IsAny<string>(),
+            It.Is<Dictionary<string, string>?>(v => v != null && v["Amount"] == "500.00" && v["TrxID"] == "TRX-FSP-100"),
+            It.IsAny<string?>(), It.IsAny<System.Threading.CancellationToken>()), Times.Once);
     }
 
     // 82.32: a guest event payment (AllowNonMembers) reaches this with no MemberId at all.
@@ -120,6 +128,24 @@ public class FinancialServiceTests : TestBase
         _notificationMock.Verify(x => x.CreateNotificationAsync(
             It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()),
             Times.Never);
+    }
+
+    [Test]
+    public async Task UpdatePaymentStatusAsync_Completed_NotifiesThroughPaymentStatusUpdatedTemplate()
+    {
+        var member = await CreateActiveMemberWithHistoryAsync("Payer2", "fsp2@e.com", "FSP2");
+        var payment = new PaymentHistory { MemberId = member.Id, Amount = 500, TransactionId = "FSM-T300", Status = Enums.PaymentStatus.Pending, PaidAt = DateTime.UtcNow };
+        _context.PaymentHistories.Add(payment);
+        await _context.SaveChangesAsync();
+
+        await _service.UpdatePaymentStatusAsync(payment.Id, Enums.PaymentStatus.Completed);
+
+        // 82.21: this routes through PAYMENT_STATUS_UPDATED so an admin-edited template
+        // changes the in-app text too, not just an untouched literal string.
+        _notificationMock.Verify(x => x.CreateNotificationFromTemplateAsync(
+            member.Id, Constants.TemplateCodes.PaymentStatusUpdated, Enums.NotificationType.GeneralSystem,
+            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<string?>(),
+            It.IsAny<System.Threading.CancellationToken>()), Times.Once);
     }
 
     [Test]

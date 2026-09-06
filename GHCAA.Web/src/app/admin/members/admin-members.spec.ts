@@ -4,6 +4,7 @@ import { AdminMembers } from './admin-members';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
+import { LookupService } from '../../core/services/lookup.service';
 import { of } from 'rxjs';
 import { signal } from '@angular/core';
 
@@ -39,6 +40,11 @@ describe('AdminMembers Component', () => {
             snapshot: {}
         };
 
+        const lookupServiceMock = {
+            getOptions: vi.fn().mockReturnValue(of([])),
+            getAcademicYears: vi.fn().mockReturnValue(of([]))
+        };
+
         await TestBed.configureTestingModule({
             imports: [AdminMembers],
             providers: [
@@ -46,7 +52,8 @@ describe('AdminMembers Component', () => {
                 { provide: NotificationService, useValue: notificationServiceMock },
                 { provide: NavService, useValue: navServiceMock },
                 { provide: Router, useValue: routerMock },
-                { provide: ActivatedRoute, useValue: activatedRouteMock }
+                { provide: ActivatedRoute, useValue: activatedRouteMock },
+                { provide: LookupService, useValue: lookupServiceMock }
             ]
         }).compileComponents();
 

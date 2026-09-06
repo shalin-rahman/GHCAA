@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -35,9 +35,9 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> UploadPhoto(IFormFile file, CancellationToken cancellationToken)
         {
             var validation = _fileValidationService.ValidateFormFile(file, FileCategory.Image, 10 * 1024 * 1024);
-            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
+            if (!validation.IsValid) return Problem(detail: validation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
 
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (!int.TryParse(memberIdClaim, out var memberId))
             {
                 // Fallback to simpler user ID claim if needed, but Admin should have MemberId
@@ -108,7 +108,7 @@ namespace GHCAA.API.Controllers
         [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> CreateGallery([FromBody] EventGallery gallery, CancellationToken cancellationToken)
         {
-            var adminIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var adminIdClaim = this.CurrentMemberIdRaw();
             if (int.TryParse(adminIdClaim, out var adminId))
             {
                 gallery.CreatedByAdminId = adminId;
@@ -169,7 +169,7 @@ namespace GHCAA.API.Controllers
             if (!TryGetMemberId(out var memberId)) return Unauthorized();
 
             var validation = _fileValidationService.ValidateFormFile(file, FileCategory.Image, 10 * 1024 * 1024);
-            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
+            if (!validation.IsValid) return Problem(detail: validation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
 
             using var stream = file.OpenReadStream();
             var path = await _fileStorage.SaveFileAsync(stream, file.FileName, memberId, Domain.Enums.FileUploadType.GalleryPhoto, cancellationToken);
@@ -216,7 +216,7 @@ namespace GHCAA.API.Controllers
             if (gallery.OwnerMemberId != memberId && !isAdmin) return Forbid();
 
             var validation = _fileValidationService.ValidateFormFile(file, FileCategory.Image, 10 * 1024 * 1024);
-            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
+            if (!validation.IsValid) return Problem(detail: validation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
 
             using var stream = file.OpenReadStream();
             var path = await _fileStorage.SaveFileAsync(stream, file.FileName, memberId, Domain.Enums.FileUploadType.GalleryPhoto, cancellationToken);
@@ -270,7 +270,7 @@ namespace GHCAA.API.Controllers
 
         private bool TryGetMemberId(out int memberId)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             return int.TryParse(memberIdClaim, out memberId);
         }
 

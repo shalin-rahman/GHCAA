@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GHCAA.Domain;
 using GHCAA.Application.Security;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -24,9 +25,9 @@ namespace GHCAA.API.Controllers
         [HttpGet("me")]
         public async Task<IActionResult> GetMyActivity(CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
-                return BadRequest("Invalid user session");
+                return Problem(detail: "Invalid user session", statusCode: StatusCodes.Status400BadRequest);
 
             var logs = await _activityService.GetMemberActivityAsync(memberId, 20, cancellationToken);
             return Ok(logs);

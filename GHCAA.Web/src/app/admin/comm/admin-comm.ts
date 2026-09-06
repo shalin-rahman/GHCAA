@@ -5,7 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { AdminCommService, EmailTemplate, EmailLog, TEMPLATE_VARIABLES, MessageChannels } from '../../core/services/admin-comm.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ActivatedRoute } from '@angular/router';
-import { getAcademicYears, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
+import { MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
+import { LookupService } from '../../core/services/lookup.service';
 import { RichTextEditor } from '../../common/rich-text-editor/rich-text-editor';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
@@ -22,6 +23,7 @@ export class AdminComm implements OnInit {
     private notify = inject(NotificationService);
     private route = inject(ActivatedRoute);
     private destroyRef = inject(DestroyRef);
+    private lookupService = inject(LookupService);
 
     @ViewChild(RichTextEditor) bodyEditor?: RichTextEditor;
     @ViewChild('smsBodyInput') smsBodyInput?: ElementRef<HTMLTextAreaElement>;
@@ -53,13 +55,15 @@ export class AdminComm implements OnInit {
         customBody: ''
     };
 
-    years: number[] = getAcademicYears();
+    // 82.42: sourced from /lookups/PassingYear via LookupService. A signal (not a plain array)
+    // because filteredYears below is a computed() that only reruns off signal reads.
+    years = signal<number[]>([]);
     membershipTypes = MEMBERSHIP_TYPE_OPTIONS;
 
     yearSearch = signal('');
     filteredYears = computed(() => {
         const q = this.yearSearch().toLowerCase();
-        return this.years.filter(y => y.toString().includes(q));
+        return this.years().filter(y => y.toString().includes(q));
     });
 
     templateSearch = signal('');
@@ -86,6 +90,7 @@ export class AdminComm implements OnInit {
 
     ngOnInit() {
         this.loadTemplates();
+        this.lookupService.getAcademicYears().subscribe(years => this.years.set(years));
 
         // Handle pre-filled target from Registry/Individual contact
         this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
@@ -217,7 +222,7 @@ export class AdminComm implements OnInit {
     }
 
     selectAllYears() {
-        this.sendOptions.targetYears = [...this.years];
+        this.sendOptions.targetYears = [...this.years()];
     }
 
     selectFilteredYears() {

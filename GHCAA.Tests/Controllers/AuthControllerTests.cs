@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
@@ -82,7 +82,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.Login(loginDto, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(401));
         }
     }
 }

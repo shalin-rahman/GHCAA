@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.OutputCaching;
 using System.Security.Claims;
 using GHCAA.Application.Security;
 using GHCAA.Domain;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -66,12 +67,12 @@ namespace GHCAA.API.Controllers
         [HttpPost("constitution/{id:int}/vote")]
         public async Task<IActionResult> VoteOnAmendment(int id, [FromBody] bool isFor, [FromQuery] string? comments, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
                 return Unauthorized();
 
             var success = await _governanceService.VoteOnConstitutionAsync(id, memberId, isFor, comments, cancellationToken);
-            return success ? Ok(new { Message = "Vote recorded." }) : BadRequest("Could not record vote. Ensure the version is active and you haven't voted yet.");
+            return success ? Ok(new { Message = "Vote recorded." }) : Problem(detail: "Could not record vote. Ensure the version is active and you haven't voted yet.", statusCode: StatusCodes.Status400BadRequest);
         }
     }
 }

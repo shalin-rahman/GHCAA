@@ -1,9 +1,10 @@
-using GHCAA.Application.DTOs;
+﻿using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GHCAA.Domain;
 using GHCAA.Application.Security;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -24,9 +25,9 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> UpdateConfig([FromBody] OrgConfigDto dto)
         {
             if (dto is null)
-                return BadRequest("Config payload is required.");
+                return Problem(detail: "Config payload is required.", statusCode: StatusCodes.Status400BadRequest);
 
-            var adminId = User.FindFirst(AppClaimTypes.MemberId)?.Value ?? string.Empty;
+            var adminId = this.CurrentMemberIdRaw() ?? string.Empty;
             await configService.UpdateConfigAsync(dto, adminId);
             return NoContent();
         }

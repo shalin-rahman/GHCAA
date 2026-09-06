@@ -7,6 +7,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../features/admin/roles_service.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/widgets/confirm_dialog.dart';
 
 final _usersProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(rolesServiceProvider).getUsers();
@@ -409,20 +410,15 @@ class _PermissionsMatrixScreenState
 
   Future<void> _confirmDeleteRole(String roleName) async {
     HapticFeedback.heavyImpact();
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.midnightSurface,
-        title: const Text('Delete Custom Role?', style: TextStyle(color: Colors.white)),
-        content: Text('This will permanently remove the "$roleName" role. Members assigned this role will lose associated permissions.', style: const TextStyle(color: Colors.white54, fontSize: 12)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('DELETE', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))),
-        ],
-      ),
+    final confirm = await showConfirmDialog(
+      context,
+      title: 'Delete Custom Role?',
+      message: 'This will permanently remove the "$roleName" role. Members assigned this role will lose associated permissions.',
+      confirmLabel: 'Delete',
+      destructive: true,
     );
     // Role deletion endpoint not yet exposed — inform user
-    if (confirm == true && mounted) {
+    if (confirm && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Role deletion requires SuperAdmin API access. Contact system operator.'),
         backgroundColor: Colors.orange,

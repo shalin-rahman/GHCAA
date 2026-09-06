@@ -244,4 +244,49 @@ public class CommunicationServiceTests : TestBase
         fetched.Should().NotBeNull();
         fetched!.Channel.Should().Be(MessageChannel.Sms);
     }
+
+    // ── ResolveTemplateTextAsync — 82.21 in-app notification text sourcing ────
+
+    [Test]
+    public async Task ResolveTemplateTextAsync_WhenTemplateExists_FillsMemberAndCustomVars()
+    {
+        var member = new Member
+        {
+            FullName = "Jane Roe",
+            Email = "jane@example.com",
+            NID = "456",
+            MobileNo = "02",
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0"
+        };
+        _context.Members.Add(member);
+        _context.EmailTemplates.Add(new EmailTemplate
+        {
+            Code = "RESOLVE_TEST",
+            Subject = "Hi {{FullName}}",
+            Body = "Your amount is {{Amount}}",
+            Description = "Resolve test"
+        });
+        await _context.SaveChangesAsync();
+
+        var result = await _service.ResolveTemplateTextAsync(
+            "RESOLVE_TEST", member.Id, new Dictionary<string, string> { { "Amount", "250.00" } });
+
+        result.Should().NotBeNull();
+        result!.Value.Subject.Should().Be("Hi Jane Roe");
+        result.Value.Body.Should().Be("Your amount is 250.00");
+    }
+
+    [Test]
+    public async Task ResolveTemplateTextAsync_WhenTemplateMissing_ReturnsNull()
+    {
+        var result = await _service.ResolveTemplateTextAsync("NO_SUCH_TEMPLATE_CODE");
+
+        result.Should().BeNull();
+    }
 }

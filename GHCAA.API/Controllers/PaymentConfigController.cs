@@ -1,4 +1,4 @@
-using GHCAA.Domain.Models;
+﻿using GHCAA.Domain.Models;
 using GHCAA.Domain;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -143,7 +143,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> SeedDefaults(CancellationToken cancellationToken)
         {
             if (await _paymentConfigService.HasAnyAsync(cancellationToken))
-                return BadRequest("Payment configurations already exist.");
+                return Problem(detail: "Payment configurations already exist.", statusCode: StatusCodes.Status400BadRequest);
 
             var defaults = await _paymentConfigService.SeedDefaultsAsync(cancellationToken);
             return Ok(defaults);

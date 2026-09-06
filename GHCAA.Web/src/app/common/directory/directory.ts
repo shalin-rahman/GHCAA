@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName, getCurrentECPosition, getAcademicYears, PROFESSIONAL_SECTORS, getBloodGroupName, MEMBER_CATEGORY_OPTIONS, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
+import { getECPositionName, getCurrentECPosition, PROFESSIONAL_SECTORS, getBloodGroupName, MEMBERSHIP_TYPE_OPTIONS, LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { OrgConfigService } from '../../core/services/org-config.service';
@@ -27,6 +28,7 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     private networkService = inject(NetworkingService);
     private notify = inject(NotificationService);
     private router = inject(Router);
+    private lookupService = inject(LookupService);
     orgConfig = inject(OrgConfigService);
 
     // 58.2: table is the default view for the full page; the compact embedded mode (used inside
@@ -39,9 +41,10 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     hasMore = signal(true);
     totalItems = signal(0);
 
-    years: number[] = getAcademicYears();
+    // 82.42: sourced from /lookups/{group} via LookupService, filled in ngOnInit.
+    years: number[] = [];
+    memberCategories: LookupOption[] = [];
     sectors = PROFESSIONAL_SECTORS;
-    memberCategories = MEMBER_CATEGORY_OPTIONS;
     membershipTypes = MEMBERSHIP_TYPE_OPTIONS; // 35.3: template drove this off a hardcoded list
 
     selectedMember = signal<any | null>(null);
@@ -87,6 +90,8 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
 
     ngOnInit() {
         this.doSearch(); // Initial load
+        this.lookupService.getAcademicYears().subscribe(years => this.years = years);
+        this.lookupService.getOptions(LOOKUP_GROUPS.MemberCategory).subscribe(opts => this.memberCategories = opts);
     }
 
     ngAfterViewInit() {

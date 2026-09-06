@@ -74,14 +74,14 @@ namespace GHCAA.Infrastructure.Services
             },
             new EmailTemplate
             {
-                Code = "PAYMENT_RECEIVED",
+                Code = Constants.TemplateCodes.PaymentReceived,
                 Subject = "Payment Received: {{Amount}} BDT",
                 Description = "Acknowledgment of payment submission",
                 Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Payment Received</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>We have successfully received your payment. It is currently under verification.</p><div style='background: #f8f9fa; padding: 15px; border-radius: 5px;'><p><strong>Amount:</strong> {{Amount}} BDT</p><p><strong>Transaction ID:</strong> {{TrxID}}</p></div><p>You will be notified once the payment is verified.</p></div>"
             },
             new EmailTemplate
             {
-                Code = "PAYMENT_STATUS_UPDATED",
+                Code = Constants.TemplateCodes.PaymentStatusUpdated,
                 Subject = "Payment Status Updated: {{Status}}",
                 Description = "Notification when payment is verified/rejected",
                 Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Payment Status Update</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>The status of your transaction <strong>{{TrxID}}</strong> has been updated to <strong>{{Status}}</strong>.</p><p>Thank you for your contribution.</p></div>"
@@ -429,6 +429,29 @@ namespace GHCAA.Infrastructure.Services
                 if (!vars.TryGetValue(key, out string? value)) return m.Value;
                 return encodeHtml ? System.Net.WebUtility.HtmlEncode(value) : value;
             });
+        }
+
+        public async Task<(string Subject, string Body)?> ResolveTemplateTextAsync(string templateCode, int? memberId = null, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default)
+        {
+            var template = await GetTemplateByCodeAsync(templateCode, cancellationToken);
+            if (template == null) return null;
+
+            Member? member = memberId.HasValue
+                ? await _db.Members
+                    .Include(m => m.AcademicHistory)
+                    .Include(m => m.ProfessionalHistory)
+                    .FirstOrDefaultAsync(m => m.Id == memberId.Value, cancellationToken)
+                : null;
+
+            var vars = await BuildTemplateVariables(member, cancellationToken);
+            if (customVars != null)
+            {
+                foreach (var kvp in customVars) vars[kvp.Key] = kvp.Value;
+            }
+
+            string subject = ReplacePlaceholders(template.Subject, vars, encodeHtml: false);
+            string body = ReplacePlaceholders(template.Body, vars, encodeHtml: false);
+            return (subject, body);
         }
 
         private async Task<string> GetEmailFooterAsync()

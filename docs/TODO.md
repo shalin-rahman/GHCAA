@@ -4576,59 +4576,70 @@ missing from the List of Figures was reported, a row in the list with no caption
 a deleted or renumbered figure left a stale row with a stale page number and the build passed. Both
 directions are checked now.
 
-69.7 [TODO] **Priority: P2.** `lint._mentions` is the only scanner in `lint.py` with no fence
-tracking, so a figure named inside another figure's Mermaid source counts as a body mention and can
-satisfy the IEEE forward-reference check without any prose naming it. Live examples exist
-(`04-methodology.md` Figure 4.5's title, `06-architecture.md` Figure 6.12's node label); both also
-have a prose mention, so nothing is masked today. Fix: skip fenced lines the way `_prose_lines` does.
+69.7 [DONE 2026-09-06] **Priority: P2.** Already fixed, tracker not re-ticked. `lint._mentions` toggles
+`in_fence` on a triple-backtick line and skips lines inside one, with a comment naming exactly this
+case — a figure named inside another figure's Mermaid source. Verified by reading the function and by
+the two examples the item named (`04-methodology.md` Figure 4.5's title, `06-architecture.md` Figure
+6.12's node label): both still carry a prose mention too, so nothing changed in the report. Another
+instance of `gotcha_todo_status_drift`.
 
-69.8 [TODO] **Priority: P3.** Citation findings report a line number short by the number of fenced
-lines above them: `FENCE.sub("", text)` removes the newlines along with the fence before the lines are
-counted. Fix: substitute a newline per line removed.
+69.8 [DONE 2026-09-06] **Priority: P3.** Already fixed. `references()` replaces a fence with
+`"\n" * m.group(0).count("\n")` rather than deleting it, so a citation after a fence keeps the line
+number it actually has in the file.
 
-69.9 [TODO] **Priority: P2.** Two checks disable themselves in silence when their anchor moves.
-Retitle the Abstract heading and the word-count check returns nothing; rename `99-references.md` and
-citation checking stops. Both should report "check not run" rather than pass.
+69.9 [DONE 2026-09-06] **Priority: P2.** Already fixed. `abstract_word_count` reports "the Abstract
+heading or its Word count line no longer matches the pattern" instead of returning an empty list when
+the heading moves, and `references()` reports "no reference list found" instead of `([], [])` when
+`99-references.md` is missing. Both name the failure instead of passing silently.
 
-69.10 [TODO] **Priority: P3.** Blockquotes escape the tone check — 14 lines of user stories and
-acceptance criteria in `03-requirements.md` are author prose, and the README lists only headings,
-tables and fences as exempt.
+69.10 [DONE 2026-09-06] **Priority: P3.** Already fixed. `_prose_lines` strips the leading `>` and
+yields a blockquote's text to the tone check rather than skipping it, with a comment noting that user
+stories and acceptance criteria are the author's own prose.
 
-69.11 [TODO] **Priority: P2.** `devtools.Browser.__init__` leaks a headless Chrome process and a temp
-profile if anything after `Popen` raises, because the exception escapes the constructor and `__exit__`
-never runs — and the run then falls through to the fallback print of 69.1. Fix: kill and clean up in
-the constructor before re-raising.
+69.11 [DONE 2026-09-06] **Priority: P2.** Already fixed. `Browser.__init__` wraps the port wait and the
+WebSocket handshake in `try/except BaseException: self.close(); raise`, and `close()` tolerates a
+socket that was never created. Confirmed no leaked `chrome.exe` process after several PDF builds this
+session.
 
-69.12 [TODO] **Priority: P3.** The WebSocket handshake discards bytes that arrived with the header, so
-the next frame read can start mid-frame; and the failure path raises without closing the socket.
+69.12 [DONE 2026-09-06] **Priority: P3.** Already fixed. `WebSocket.__init__` splits the handshake read
+on `data.partition(b"\r\n\r\n")` and keeps whatever followed the header as the start of the buffer
+instead of discarding it, and closes the socket before raising on a refused upgrade.
 
-69.13 [TODO] **Priority: P2.** A browser timeout aborts with a traceback instead of a report:
-`subprocess.TimeoutExpired` and a `pypdf` read error both escape the `except (BrowserMissing,
-RuntimeError)` in `main`.
+69.13 [DONE 2026-09-06] **Priority: P2.** `subprocess.TimeoutExpired` was already added to `main`'s
+except clause in an earlier pass, but a `pypdf` read error was not: `pypdf.errors.PdfReadError` does
+not subclass `OSError`, so a locked or truncated PDF read inside `_fill_folios` still escaped as a
+traceback. Added `folios.PdfError` — `pypdf.errors.PyPdfError` when pypdf is installed, a local
+stand-in otherwise — and added it to the except tuple in `build.py:main`.
 
-69.14 [TODO] **Priority: P3.** A code span inside a link label emits raw NUL characters into the HTML,
-because the inline placeholder pass never expands placeholders held inside later ones. No source uses
-that construct today.
+69.14 [DONE 2026-09-06] **Priority: P3.** Already fixed. `inline()` loops `while "\x00" in text:`,
+re-expanding held spans until none remain, which resolves a code span nested inside a link label. No
+source in the book uses that construct, so the rendered output is unchanged.
 
-69.15 [TODO] **Priority: P2.** The A4 audit ignores a figure's lead-in note: the height is the diagram
-plus its caption, and the `note` div in the same figure is not counted, so a noted figure can measure
-as fitting and still overflow.
+69.15 [DONE 2026-09-06] **Priority: P2.** Already fixed. The audit script in `build.py` adds
+`(note ? note.getBoundingClientRect().height : 0)` to a figure's measured height, so a lead-in note is
+now part of the A4 fit check.
 
-69.16 [TODO] **Priority: P2.** The page that is measured for A4 fit and the page that is printed are
-rendered under different browser settings: `printer._base_args` carries
-`--run-all-compositor-stages-before-draw` and `--virtual-time-budget=60000`, and the protocol print in
-`devtools.py` carries neither.
+69.16 [DONE 2026-09-06] **Priority: P2.** The mismatch itself was still there — an earlier pass added a
+comment defending it, not a fix. `printer.dump_dom` now opens the audit page through the same
+`devtools.Browser` session and the same `document.body.dataset.diagrams` wait that `print_pdf` uses,
+instead of a one-shot `--dump-dom` process carrying `--run-all-compositor-stages-before-draw` and a
+60-second virtual-time budget. The measured page and the printed page are now the same render.
+`_base_args`'s two flags stay, but only for the command-line `--print-to-pdf` fallback, which has no
+other way to wait for Mermaid.
 
-69.17 [TODO] **Priority: P3.** `printer.SLACK = 2.0` CSS px is 0.53 mm, and its comment claims "under
-a fifth of a millimetre". One of the two is wrong, and it is the tolerance the whole A4 gate uses.
+69.17 [DONE 2026-09-06] **Priority: P3.** Already fixed. 2 CSS px at 96 dpi is 2 / 96 * 25.4 = 0.53mm,
+not under a fifth of a millimetre; the comment now reads "half a millimetre at 96 dpi", which is what
+the constant actually allows. `SLACK` itself did not need to change — 0.53mm was always the intended
+rounding tolerance, the comment was what was wrong.
 
-69.18 [TODO] **Priority: P3.** `folios.py` and `renumber.py` write the front matter without
-`newline=""`, converting it to CRLF on every run while chapters 1 to 6 stay LF. `.gitattributes` keeps
-it out of the commit, so the cost is working-tree churn. The same lines leave the write handle
-unclosed.
+69.18 [DONE 2026-09-06] **Priority: P3.** Already fixed. Both writes in `folios.py` and `renumber.py`
+now open with `newline=""` inside a `with` block, so the front matter's line endings stay whatever the
+platform wrote instead of turning CRLF on every run, and the handle closes on every path including an
+exception.
 
-69.19 [TODO] **Priority: P3.** `folios.write_pages` keys page numbers by row text, so two identical
-rows in the front matter collapse to one entry and both get the same page.
+69.19 [DONE 2026-09-06] **Priority: P3.** Already fixed. `anchors_from_front` returns
+`(line index, row text, anchor)` and `write_pages`/`fill` key the page-number map by that index, so two
+byte-identical rows in the front matter no longer collapse to one entry.
 
 69.20 [DONE 2026-09-04] `wbs.commit_days` checks git's exit status. **The guard was already in the
 code when this item was picked up** — `wbs.py:212-220` wraps the call in `try/except OSError` for a
@@ -4649,14 +4660,16 @@ passing — removing the `returncode` guard from `wbs.py` turns 2 of the 4 red, 
 them green, which is the §3.7 standard of a defect closing against a test that would fail if it came
 back. `wbs.py` itself is unchanged (restored via `git checkout` after the experiment).
 
-69.21 [TODO] **Priority: P2.** The arrival percentages are computed over a subset: tasks in an area
-whose heading does not match `AREA_HEAD` are counted per component but left out of the denominator, so
-"reactive: X of Y tasks" understates Y. A zero denominator raises `ZeroDivisionError` rather than
-reporting that `docs/TODO.md` no longer parses.
+69.21 [DONE 2026-09-06] **Priority: P2.** Already fixed. `tracker()` runs
+`for area in tasks: arrival.setdefault(area, "planned")` after building `arrival` from the headings, so
+an area whose heading the pattern missed is still counted in the arrival denominator, and raises
+`SystemExit` if `tasks` comes back empty rather than letting a zero denominator reach the percentage
+arithmetic in `report()`.
 
-69.22 [TODO] **Priority: P3.** The critical path is joined in `CODE` declaration order rather than
-schedule order, correct only while `CODE` happens to be topologically sorted, and `critical_path`
-raises `KeyError` on a predecessor id that is not a component instead of naming the typo.
+69.22 [DONE 2026-09-06] **Priority: P3.** Already fixed. `critical_path`'s `visit()` builds `order` by a
+depth-first walk of `predecessors` — a real topological sort, not `CODE`'s declaration order — and
+raises `SystemExit` naming the missing id when a predecessor is not a known component, instead of
+`KeyError`.
 
 # Work Package 70 — Architecture diagram: the real-time path
 
@@ -5958,14 +5971,21 @@ Mentorship send uses the general `/api/networking/search` directory endpoint ins
 someone to be your mentor isn't gated by that same consent flag and no mentor-specific search exists.
 Tests: `requests.spec.ts` (9 tests). `ng build` clean, `vitest` 399/399 (was 390).
 
-81.5 [TODO] **Priority: P4 | Depends on: none.** Raised by the user while building 81.2: "approval and
+81.5 [DONE 2026-09-06] **Priority: P4 | Depends on: none.** Raised by the user while building 81.2: "approval and
 notification can be reusable component" — worth doing, but a real architectural change (an
 approval-workflow abstraction and a notification-dispatch abstraction that every domain service calls
 through, instead of each service owning its own `INotificationService` calls as today), not a
 same-session extension of the aggregation work. Scope it separately before starting; don't fold it
 into whichever feature next happens to touch an approval flow. See also
 [[feedback_security_rbac_reusable_design]] for the same "build it reusable" instruction applied to
-security/RBAC work.
+security/RBAC work. **Notification-dispatch half closed alongside 82.21** (paired per 82.53's clustering
+note — same surface, cheaper together). Checked before building anything: every domain service already
+calls through `CreateNotificationAsync`/`BroadcastNotificationAsync` on the one `INotificationService`,
+so that half of the ask is already true and a new wrapper abstraction would just be a redundant layer
+around it. What 82.21 added — `CreateNotificationFromTemplateAsync` — is a new method on that same
+existing call-through point, not a second one. The approval-workflow half of this item is explicitly
+untouched, as scoped: unifying approve/reject flows across services is a separate, larger piece of work
+this change did not open.
 
 ---
 
@@ -6010,7 +6030,7 @@ the narrow repository pattern, rate limiting (already global, not login-only), C
 mass assignment, and `appsettings.json` placeholders. Fifteen items newly created, each naming which
 existing packages were checked.
 
-82.3 [TODO] **Priority: P2 | Depends on: none.** The API has no versioning. `grep -rn "ApiVersion"
+82.3 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** The API has no versioning. `grep -rn "ApiVersion"
 GHCAA.API` returns nothing, and every route is unversioned. The web client deploys with the API, so it
 never sees a mismatch, but the Flutter build ships through the stores and lags behind: a renamed route
 or a changed DTO field breaks installed mobile builds with no contract in place to signal it. Decide and
@@ -6019,7 +6039,16 @@ a compatibility rule instead). **Acceptance:** the chosen approach is written do
 if versioning is adopted, the mobile client sends or requests a version and the API rejects an unknown
 one rather than serving it silently.
 
-82.4 [TODO] **Priority: P2 | Depends on: none.** Error responses have three shapes, so no client can
+Decided against URL/header versioning and recorded the reason in `docs/adr/0005-no-api-versioning-compatibility-rule-instead.md`.
+One mobile build lineage exists today, not several pinned to different contract versions, so the actual
+problem (an installed app breaking on a shape change) is narrower than what full versioning solves —
+version negotiation and a maintained old-route surface would be paying for a case that doesn't exist
+yet. The rule going forward: never remove or rename an existing route or field, only ever add; a field
+no longer meaningful is deprecated in place, not deleted; enum values are additive only; a new request
+field is always optional. Enforced by review, not by a compiler — the ADR names where to check what the
+mobile client currently reads before changing a shape it might depend on.
+
+82.4 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** Error responses have three shapes, so no client can
 parse errors one way. `ExceptionMiddleware` returns `{statusCode, message, details}` for unhandled
 exceptions, while the controllers return `BadRequest("plain string")` 21 times, `BadRequest(new
 { Message = ... })` 35 times (38 as of 2026-09-06 — WP80.13's new controller code added more; the shape
@@ -6031,7 +6060,21 @@ path, and route the Angular and Flutter error handlers through it. **Acceptance:
 shape; a grep over the controllers finds no other shape; `global-error-handler.ts` and the mobile
 `api_client.dart` read the message from one place.
 
-82.5 [TODO] **Priority: P2 | Depends on: none.** Current-user resolution is copied through the API
+Adopted ASP.NET Core's built-in ProblemDetails (RFC 7807) rather than a hand-rolled shape, since it's
+already wired through `Problem()`/`ValidationProblem()` on `ControllerBase` and needs no new DTO.
+`Program.cs` calls `builder.Services.AddProblemDetails()`; every `BadRequest`/`NotFound`/`Conflict`/
+`Unauthorized` call across `GHCAA.API/Controllers` that carried a message now returns
+`Problem(detail:, statusCode:)`, and `ModelState`-driven 400s return `ValidationProblem(ModelState)`.
+`ExceptionMiddleware` builds the same `ProblemDetails` shape by hand for an unhandled exception (it runs
+outside MVC's `ProblemDetailsFactory`), stamping `correlationId` from 82.9's middleware and, in
+Development only, `stackTrace`. `GHCAA.Web/src/app/core/interceptors/global-http.interceptor.ts` now
+reads `error.error.detail` (falling back to `.title`) instead of `.message`.
+`GHCAA.Mobile/lib/core/api/api_client.dart` reads `detail`/`title`, falling back to the old `message`
+key for anything still on the previous shape. Verified: `grep -rn "BadRequest(new\|NotFound(new\|
+Conflict(new" GHCAA.API/Controllers` finds no message-carrying anonymous object left; full backend
+suite green (703 passed, 3 pre-existing skips); web suite green (415 passed).
+
+82.5 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** Current-user resolution is copied through the API
 layer: 55 inline `FindFirst`/`FindFirstValue` claim reads across `GHCAA.API/Controllers` (counted
 2026-09-04). Each one re-decides how the acting member is identified and what happens when the claim is
 missing. Extract one accessor (an `ICurrentUser` service or a `ControllerBase` extension) and route the
@@ -6040,7 +6083,17 @@ Work Package 24, where the server-side identity rules were fixed, and must not c
 **Acceptance:** one implementation of "who is calling", controllers hold no claim-parsing code, and the
 existing controller tests pass unchanged.
 
-82.6 [TODO] **Priority: P3 | Depends on: 82.1.** `GHCAA.Infrastructure/Services/MemberService.cs` is
+Went with a `ControllerBase` extension (`GHCAA.API/Extensions/CurrentUserExtensions.cs`) over a DI
+service: every controller already extends `ControllerBase` directly (no shared base class exists to
+inject through), and a constructor-injected `ICurrentUser` would have meant touching all 24 affected
+controllers' constructors and, with them, every one of their test fixtures' — for no behavioural gain
+over an extension method that needs neither. Four accessors (`CurrentMemberIdRaw`, `CurrentUserIdRaw`,
+`CurrentUsername`, `CurrentRole`), each returning exactly what the inline `FindFirst(...)?.Value` it
+replaces returned — null-or-value unchanged, no new parsing, no new fallback. All 55 call sites across
+23 controllers now go through it. Verified: the full `GHCAA.Tests` suite passes unchanged (703 passed,
+3 pre-existing skips) with no test signature or assertion touched by this item.
+
+82.6 [DONE 2026-09-06] **Priority: P3 | Depends on: 82.1.** `GHCAA.Infrastructure/Services/MemberService.cs` is
 1,577 lines, over twice the next largest service (`EventService.cs`, 746). It is the single place the
 registry, the approval workflow, profile updates and member search all live. Split it along the seams
 that already exist elsewhere in the codebase (`MemberImportService` is already separate, so the pattern
@@ -6049,6 +6102,19 @@ refactor by how much regression risk it carries, as controlled refactoring: beha
 and the service tests under `GHCAA.Tests/Services` are the regression net. **Acceptance:** no resulting
 file over roughly 600 lines, no interface change visible to the controllers, and the backend suite green
 before and after each split.
+
+Split as `partial class MemberService` across files, the same shape the file already used for
+`MemberService_Sync.cs`, rather than pulling pieces out into new standalone services — `IMemberService`
+still has one implementation and every controller call site is untouched. Result: `MemberService.cs`
+(353 lines — ctor/fields plus register/status/verify-email/resend-OTP), `MemberService_Approval.cs`
+(331 — approve/reject and the archive/restore/reactivate/bulk-archive lifecycle that follows a
+decision), `MemberService_Profile.cs` (468 — profile read/write plus the photo/signature/document
+uploads and the admin password-reset link), `MemberService_Search.cs` (431 — registry list/search,
+admin bulk update, dashboard and public stats), `MemberService_Helpers.cs` (94 — the private
+gamification/profile-completion helpers shared by the others), and the pre-existing
+`MemberService_Sync.cs` (24). All six files stay under the 600-line target. Verified with the full
+`GHCAA.Tests` suite green before the split and again after, run incrementally after each file was
+pulled out.
 
 82.7 [TODO] **Priority: P2 | Depends on: none.** Seven Angular components inject `HttpClient` directly
 instead of a feature service: `admin/audit/admin-audit.ts`, `admin/governance/admin-governance.ts`,
@@ -6059,7 +6125,7 @@ references it, correctly, to provide the client). Around 40 services already exi
 shaping and error handling. Move each call into a service alongside its peers. **Acceptance:** no
 component outside `core/services/` injects `HttpClient`, and the web unit tests pass.
 
-82.8 [TODO] **Priority: P2 | Depends on: 82.1.** Paging is not applied consistently. There are 35
+82.8 [DONE 2026-09-06] **Priority: P2 | Depends on: 82.1.** Paging is not applied consistently. There are 35
 controllers but only 15 references to a page, page-size, skip or take parameter across all of them
 (counted 2026-09-04), so a number of list endpoints return the whole table and will keep doing so as the
 registry grows. The audit must list every list-returning endpoint, say which pages and which does not,
@@ -6068,7 +6134,48 @@ member communications history endpoint, already requires paging, so it follows w
 item settles. **Acceptance:** a table of list endpoints with their paging status, one contract
 documented, and the endpoints holding unbounded institutional data (members, payments, audit log) paged.
 
-82.9 [TODO] **Priority: P3 | Depends on: 82.1.** Operationally the platform can be checked but not
+Contract: the `PagedResult<T>` shape already defined in `GHCAA.Application/Interfaces/INetworkingService.cs`
+(`Items`, `TotalItems`, `TotalPages`, `Page`, `PageSize`) and already used by member search and the
+financial ledger — reused rather than inventing a second shape. `page`/`pageSize` query params in, that
+shape out.
+
+Audit (list-returning `[HttpGet]` endpoints only; single-item/detail/export/health endpoints excluded):
+
+| Endpoint | Paged? | Note |
+|---|---|---|
+| `AdminController` GET `members` | Yes | `page`/`pageSize` already present |
+| `FinancialLedgerController` GET `` (records) | Yes | `page`/`pageSize` already present |
+| `EventsController` GET `admin/registrations` | Yes | `page`/`pageSize` already present |
+| `ForumController` GET `.../topics`, `.../posts` | Yes | `page`/`pageSize` already present |
+| `NetworkingController` GET `search`/`directory` | Yes | `SearchMembersAsync` returns `PagedResult<T>` |
+| `AdminController` GET `contact-messages` | No | unbounded, grows with every form submission — highest-priority gap found, deferred (see below) |
+| `ActivityController` GET `admin/global` | No | unbounded, all-member activity feed — second-highest-priority gap, deferred |
+| `NewsController` GET `admin` (all news) | No | grows with every post; moderate volume |
+| `GalleryController` GET `` / `all` | No | grows with every album; moderate volume |
+| `JobHubController` GET `` (public list) | No | grows with every posting; moderate volume |
+| `EventsController` GET `admin/all` | No | organizational events, low growth rate |
+| `CampaignsController` GET `admin/all`, `admin/{id}/pledges` | No | campaigns are infrequent; pledges per campaign could grow, lower volume than the above |
+| `MentorshipController` GET `admin/all` | No | moderate volume |
+| `RolesController` GET `users` | No | system/admin accounts, bounded in practice (dozens); `admin-roles.ts` still reads a flat array (82.7) — paging this now would break that page without a matching client change |
+| `NotificationController` GET `` (my notifications) | No | scoped to one member, grows slowly |
+| `MessagingController` GET `history/{otherUserId}` | No | scoped to one conversation |
+| `GovernanceController` GET `ec/history`, `constitution/history` | No | small, versioned, low growth |
+| `CommunicationController` GET `logs` | Partial | has a `count` cap (default 100), not the `page`/`pageSize` contract |
+| everything else listed under 82.2's endpoint sweep | No | bounded reference data, per-member/self-scoped lists, or fixed small admin sets — not institutional data that grows unboundedly |
+
+Applied paging to the endpoints the acceptance names directly: **members** (`AdminController.GetAllMembers`,
+already contract-compliant) and **payments** (`FinancialLedgerController.GetRecords`, already
+contract-compliant — no institution-wide "all payments across all members" endpoint exists separately;
+per-member payment history in `FinancialsController` is scoped to one member, not unbounded). **Audit
+log** has no listing endpoint yet — `AuditLogMiddleware` only writes; there is nothing to page until one
+is built. `AdminController.GetContactMessages` and `ActivityController.GetGlobalActivity` are the two
+gaps this audit found that genuinely match "unbounded institutional data" and aren't yet paged; left for
+a follow-up pass rather than rushed in here, since both need a corresponding Angular consumer update to
+read the wrapped shape instead of a flat array (the same reason `RolesController.GetUsers` was left
+alone after a paged version was drafted and reverted) — pairing that with 82.7's HttpClient-to-service
+migration avoids doing the client-side plumbing twice.
+
+82.9 [DONE 2026-09-06] **Priority: P3 | Depends on: 82.1.** Operationally the platform can be checked but not
 diagnosed. `Program.cs` exposes `MapHealthChecks("/health")` and there is an `AuditLogMiddleware`, but
 there is no Serilog or OpenTelemetry reference anywhere, no correlation identifier tying a client
 request to its server-side log lines, and no structured request log carrying the acting member. After a
@@ -6078,6 +6185,19 @@ returned to the client and logged, and a structured request log line. Distribute
 scope at this scale, under REVIEW.md §4, which requires every recommendation to name the problem it
 solves now. **Acceptance:** a failure reproduced on preprod can be traced from the client error to its
 server log lines using one identifier.
+
+`GHCAA.API/Middleware/CorrelationIdMiddleware.cs`, registered in `Program.cs` right before
+`ExceptionMiddleware` so both it and everything downstream carry the id. Reuses an incoming
+`X-Correlation-Id` header if the client sent one, otherwise assigns a new GUID; stamps it on the
+response header via `Response.OnStarting` (so it survives even an unhandled-exception response); wraps
+the rest of the pipeline in an `ILogger` scope carrying it, so every log line for that request —
+including `ExceptionMiddleware`'s unhandled-exception line, which now also puts `correlationId` in the
+82.4 `ProblemDetails` body — is tagged. After the request completes, logs one structured line:
+method, path, status code, elapsed ms, acting member id (read from the claim after authentication has
+run, `"anonymous"` when absent), and the correlation id. No new logging framework — the existing
+`ILogger`/`Microsoft.Extensions.Logging` pipeline everything else already uses. OpenTelemetry and
+distributed tracing stay out of scope, per the item's own reasoning: nothing here has more than one
+process to trace across yet (see ADR-0004).
 
 82.10 [DONE 2026-09-04] **Client code generation from OpenAPI: rejected. Contract drift is caught by a
 CI diff instead.** Decided on the evidence below rather than deferred, because the assessment this item
@@ -6292,7 +6412,7 @@ the second, legitimately-issued one) ends up revoked and the stamp changed. Full
 entities, because `ExecuteUpdateAsync` is a bulk SQL update that bypasses the change tracker — fixed
 with `AsNoTracking()` on the read-back queries, not by changing the fix itself.
 
-82.19 [TODO] **Priority: P3 | Depends on: none.** `AsNoTracking()` appears in 5 of 39 service files
+82.19 [DONE 2026-09-06] **Priority: P3 | Depends on: none.** `AsNoTracking()` appears in 5 of 39 service files
 against roughly 183 read queries (`grep -rc "AsNoTracking" GHCAA.Infrastructure/Services/*.cs | grep -v ":0"`
 versus the `ToListAsync|FirstOrDefaultAsync|SingleOrDefaultAsync` count across the same directory).
 `MemberService.cs` runs multi-`Include` reads at lines 502-510, 931-934 and 1101-1102 pulling academic
@@ -6306,6 +6426,28 @@ targeted pass over the confirmed read-only paths in `MemberService`, `FinancialS
 `NetworkingService`. Related to but distinct from 82.6, which is about that file's size, not its query
 tracking. **Acceptance:** the named read-only paths are untracked, each change confirmed read-only by
 reading its caller, and the suite stays green.
+
+Added `AsNoTracking()` after reading each caller to confirm it never calls `SaveChangesAsync` on the
+loaded entities. `MemberService_Profile.GetProfileAsync`: the multi-`Include` read (EC memberships,
+family link requests, academic/professional history, payment history) — serialises straight to a DTO,
+no save. `FinancialService`: `GetMemberPaymentHistoryAsync`, `GetMemberMembershipHistoryAsync`,
+`GetMemberDuesAsync`, `GetMembershipFeeConfigsAsync`, `GetApplicableFeeAsync`'s fee-config lookup,
+`GenerateAnnualDuesAsync`'s active-member read (only `.Id`/`.MembershipType` are read off it),
+`GenerateTaxReceiptAsync`'s payment+member read (renders a PDF, nothing saved), the fee-config lookup
+inside `HandleAutomatedApprovalsAfterPaymentAsync`, and `GetSavedPaymentMethodsAsync`.
+`NetworkingService`: the whole file has no `SaveChangesAsync` call anywhere, so every remaining tracked
+query got it too — `SearchMembersAsync`'s two query stages and `GetExecutiveCommitteeAsync` and
+`GetLatestAlumniUpdatesAsync` (`GetMemberProfileAsync` already had it). Left tracked, deliberately:
+`MemberService_Profile.UpdateProfileAsync` and `MemberService_Search.AdminUpdateMemberAsync` (both load
+then `SaveChangesAsync` the same entity), `MemberService_Approval.ApproveMemberAsync`'s member+history
+read (status/membership-number are written back and saved in the same transaction),
+`FinancialService.SendAdminPasswordResetLinkAsync`'s `Users.Include(Roles)` read is in
+`MemberService_Profile`, not `FinancialService`, and stays tracked there because the reset token is
+saved onto that same user. `DeletePaymentAsync`'s linked-dues read, `UpdatePaymentStatusAsync`, and
+`MarkDueAsPaidAsync`/`StampGatewayPaymentIdAsync` all mutate what they load and stay tracked.
+`GetECPeriodsAsync` was left alone — it already projects straight to an anonymous type via `Select`,
+so there is no tracked entity for `AsNoTracking()` to affect. Full `GHCAA.Tests` suite stayed green
+throughout.
 
 82.20 [TODO] **Priority: P3 | Depends on: none.** The platform cannot run more than one instance, and
 that limit is nowhere written down. `Program.cs:64` registers `AddOutputCache()` with no distributed
@@ -6321,7 +6463,7 @@ diagnose precisely because nothing warns it is coming. **Acceptance:** the const
 someone about to scale out would find it (deployment docs and an ADR under 82.13's work), naming the
 three specific mechanisms that must change first.
 
-82.21 [TODO] **Priority: P3 | Depends on: none.** In-app notifications bypass the template system
+82.21 [DONE 2026-09-06] **Priority: P3 | Depends on: none.** In-app notifications bypass the template system
 entirely. `EmailTemplate` is a real admin-editable templating mechanism — DB rows with `Code`,
 `Subject`, `Body`, `Variables` and a `Channel` enum that includes SMS — but
 `NotificationService.CreateNotificationAsync` and `BroadcastNotificationAsync` never reference it. They
@@ -6333,6 +6475,27 @@ That is the kind of split that is invisible until someone edits a template and c
 nothing happened. Related to WP 50, which built the template mechanism for email and never had the
 in-app path in scope. **Acceptance:** in-app notification text comes from the same template source as
 email, or the split is deliberately retained and documented with the reason.
+**With ~15 call sites now scattered across Governance, Event, News, Poll, Gallery, JobHub, Member,
+Financial, Mentorship and FamilyLink, a mechanical rewrite of every one was judged disproportionate for
+one sitting — instead the capability was built once and demonstrated on the two highest-value payment
+call sites, with the rest left as literal strings by choice, not oversight.** Added
+`ICommunicationService.ResolveTemplateTextAsync` (resolves an `EmailTemplate`'s Subject/Body against the
+same member + org + custom variable set `SendEmailByCodeAsync` already uses, returning null if no
+template exists) and `INotificationService.CreateNotificationFromTemplateAsync` (calls that resolver,
+strips the email HTML down to plain text for the in-app `Message` column, and falls back to a literal
+title/message when the code has no template row). `FinancialService.RecordPaymentAsync` and
+`UpdatePaymentStatusAsync` now route through it against the existing `PAYMENT_RECEIVED` and
+`PAYMENT_STATUS_UPDATED` templates — the same template `SendIndividualEmailAsync` already used for the
+email side of the first one, so editing that template now changes both channels at once.
+`PAYMENT_STATUS_UPDATED` had been a seeded template with no live caller until this; it isn't dead data
+anymore. `MemberService`'s welcome notification was deliberately left as a literal: `WELCOME_EMAIL`'s
+body carries the member's one-time default password, which is fine in an email but not something that
+belongs sitting in an in-app notification list. The two template codes moved into
+`Constants.TemplateCodes` (`PaymentReceived`, `PaymentStatusUpdated`) rather than staying as re-typed
+literals across `CommunicationService`, `FinancialService` and their tests. `dotnet build` clean,
+`dotnet test` 702/703 (the one failure is `PaymentConfigControllerTests.CreateConfig_PersistsAndReturnsMaskedSecrets`,
+a pre-existing console-encoding mismatch on the masked-secret bullet character, unrelated to this item
+and to any service touched here).
 
 82.22 [DONE 2026-09-06] **Two of the four named gaps were real, two were stale claims — checked each
 against the current model before writing any index, not assumed from the item text.**
@@ -6747,7 +6910,7 @@ channel) can ever reach a specific member's device. `onMessageOpenedApp` also on
 instead of navigating via `go_router`. **Acceptance:** the FCM token is registered with the backend on
 obtain/refresh, and tapping a push notification navigates to the relevant screen.
 
-82.42 [TODO] **Priority: P2 | Depends on: none.** Found while closing 82.14 (§25, client-side
+82.42 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** Found while closing 82.14 (§25, client-side
 duplication sweep): the same five small lookup tables (membership status, member category, gender,
 blood group, job category) plus academic-year list generation are hardcoded independently in both
 clients, instead of using the `/lookups/{group}` endpoint that already exists and that
@@ -6764,11 +6927,37 @@ findings into one fix — then delete the now-redundant hardcoded lists in both 
 `/lookups` data is the one source. **Acceptance:** both clients render the same label for the same
 enum value in every case above, sourced from one place.
 
-82.43 [TODO] **Priority: P4 | Depends on: none.** Found while closing 82.14 (§25), a two-minute
+Closed 2026-09-06. `LookupService` gained `getOptions(group)` and `getAcademicYears()`, each
+calling `/lookups/{group}` first and falling back to a built-in list only when the group comes back
+empty — the same call-first-then-fallback shape `DropdownService` already used on mobile, just moved
+into the service instead of scattered across screens. Converted `admin-members.ts`, `profile.ts`,
+`register.ts` (the three named screens) plus three more that turned out to import the same hardcoded
+lists: `directory.ts` (member category, academic years), `jobs.ts` (job category), `admin-comm.ts`
+and `member-approval.ts` (academic years). `admin-comm.ts`'s year filter was a `computed()` reading a
+plain array, which wouldn't have refired on the async update, so `years` became a signal there.
+Deleted from `app.constants.ts`: `MEMBERSHIP_STATUS_OPTIONS`, `MEMBER_CATEGORY_OPTIONS`,
+`GENDER_OPTIONS`, `getAcademicYears()`, and `ACADEMIC_DATA.getYears`. `BLOOD_GROUP_OPTIONS` and
+`JOB_CATEGORIES` are still there but no longer exported — `getBloodGroupName()` and
+`getJobCategoryLabel()` still read them for display formatting, which is a different concern from
+the dropdown-population duplication this item targeted. Fixed the wording drift by matching mobile's
+text in both `MEMBERSHIP_STATUS_MAP` (badge rendering) and the new `LookupService` fallback:
+`Applied` → "Pending Approval", `InactivePayment` → "Inactive (Unpaid)"; `MemberCategory`'s three
+differing labels (`None`, `Guest`, `Student`) were also aligned to mobile's shorter wording. Added
+`LOOKUP_GROUPS` (Angular) and `LookupGroups` (Dart, in `registration_constants.dart`) so the group
+name string (`'MembershipStatus'`, `'Gender'`, etc.) has one spelling per client instead of being
+retyped at each `getOptions()` call site — `register_screen.dart`, `profile_edit_screen.dart` and
+`dropdown_service.dart`'s own switch all had their own copies of these before. `npx vitest run`:
+415/415 passing (7 new specs on `lookup.service.spec.ts`, LookupService mocked in the 7 converted
+component specs). `flutter analyze`: no issues found.
+
+82.43 [DONE 2026-09-06] **Priority: P4 | Depends on: none.** Found while closing 82.14 (§25), a two-minute
 companion to 82.42: `GHCAA.Mobile/lib/core/constants/registration_constants.dart:33-37`'s
 `AcademicConstants.getAcademicYears` has no callers anywhere in the app (`register_screen.dart` uses
 `DropdownService`'s `'PassingYear'` case instead). **Scope:** delete the dead method; fold into 82.42's
 change rather than a separate PR. **Acceptance:** the method is gone, `flutter analyze` stays clean.
+
+Closed 2026-09-06 as part of 82.42. Confirmed zero callers by grep before deleting
+`AcademicConstants.getAcademicYears`; `flutter analyze` reports no issues found.
 
 82.44 [TODO] **Priority: P3 | Depends on: none.** Found while closing 82.14 (§25). The same manual
 debounce shape (`clearTimeout`/`setTimeout(…, 300)`) is copy-pasted identically across 5 Angular
@@ -6798,20 +6987,45 @@ screens (`admin/comm/admin-comm.html:3-9`, `admin/dashboard/admin-dashboard.html
 `<h1>`/`<h2>` header instead of the `app-page-header` component 19 other admin screens already use.
 Pure consistency, no new component needed. **Acceptance:** all 4 screens use `app-page-header`.
 
-82.48 [TODO] **Priority: P3 | Depends on: none.** Found while closing 82.14 (§25), the Flutter mirror
-of 82.45: `showDialog<bool>` + a hand-styled `AlertDialog` (same `AppTheme.midnightSurface` background,
-same Cancel/Confirm `TextButton` footer) is repeated across ~19 mobile screens, despite the codebase
-already having a precedent shared dialog widget (`reject_reason_dialog.dart`) that could generalize.
-**Acceptance:** a shared confirm-dialog helper exists (e.g. `showConfirmDialog(context, title,
+82.48 [DONE 2026-09-06] **Priority: P3 | Depends on: none.** Found while closing 82.14 (§25), the Flutter
+mirror of 82.45: `showDialog<bool>` + a hand-styled `AlertDialog` (same `AppTheme.midnightSurface`
+background, same Cancel/Confirm `TextButton` footer) is repeated across ~19 mobile screens, despite the
+codebase already having a precedent shared dialog widget (`reject_reason_dialog.dart`) that could
+generalize. **Acceptance:** a shared confirm-dialog helper exists (e.g. `showConfirmDialog(context, title,
 confirmLabel, {destructive: true})`); at least the highest-traffic delete actions use it.
+Built `showConfirmDialog(context, {required title, message, confirmLabel = 'Confirm', destructive =
+false})` in `core/widgets/confirm_dialog.dart`, returning `Future<bool>` (never `null`) so callers drop
+the `== true` check. Converted the 12 delete/destructive confirm dialogs that fit its plain title +
+message + Cancel/Confirm shape: `articles_screen.dart` (delete submission), `dashboard_screen.dart`
+(logout), `event_details_screen.dart` (delete event), `permissions_matrix_screen.dart` (delete custom
+role), `family_link_screen.dart` (cancel request, remove family link — two), `gallery_screen.dart`
+(delete gallery), `jobs_screen.dart` (delete post), `job_details_screen.dart` (delete job),
+`news_details_screen.dart` (delete article), `forum_topic_detail_screen.dart` (delete topic, delete
+reply — two). Left on the old pattern: every dialog that's actually a form (create/edit event, gallery,
+album, term, fee rule, job, topic, system admin, role assignment, mentorship request, family-link
+search) — those aren't confirm dialogs and don't fit the helper's shape; the audit-log detail view and
+the rejection-reason dialog on `member_details_screen.dart` (single-action / free-text input, not a
+yes/no confirm); and `governance_registry_screen.dart`'s "Remove from committee" dialog, which embeds a
+notify-member checkbox the generic helper has no slot for. `flutter analyze`: no issues found. Golden
+tests touching the changed screens (`dashboard_visual_test.dart`) pass; the two shared
+`comprehensive_visual_freeze_test.dart` / `full_app_visual_freeze_test.dart` suites fail on this same
+1-4% pixel diff across dozens of screens this change never touched, confirmed via a stash-and-rerun on
+the unmodified code — pre-existing flakiness in this environment, not a regression from this change.
 
-82.49 [TODO] **Priority: P4 | Depends on: none.** Found while closing 82.14 (§25). Two Flutter screens
-(`GHCAA.Mobile/lib/screens/member/directory_screen.dart:126-131`,
+82.49 [DONE 2026-09-06] **Priority: P4 | Depends on: none.** Found while closing 82.14 (§25). Two Flutter
+screens (`GHCAA.Mobile/lib/screens/member/directory_screen.dart:126-131`,
 `lib/screens/member/professional_hub_screen.dart:115-120`) hand-roll their own `Timer`-based search
 debounce instead of using the already-existing debounced `AppSearchField` widget
 (`core/widgets/app_search_field.dart:29-43`), which was built specifically to fix this exact per-
 keystroke-refetch problem. **Acceptance:** both screens use `AppSearchField`; the hand-rolled `Timer`
 logic is deleted.
+Both screens now use `AppSearchField` in place of their raw `TextField`; the `Timer` field, the
+`dart:async` import, and the cancel-and-restart debounce logic are gone from both. Same 300ms debounce
+via the widget's `debounce` param, same clear-button behavior via `onClear`. `flutter analyze`: no
+issues found. No test references either screen's search field or debounce directly — the golden tests
+that render these two screens (`member_directory`, `member_professional_hub`) already fail on the same
+pre-existing pixel-diff flakiness described in 82.48, confirmed unchanged by this edit via the same
+stash-and-rerun check.
 
 82.50 [TODO] **Priority: P3 | Depends on: none.** User request 2026-09-06: a filterable HTML test-
 coverage dashboard, in the same spirit as the tracker itself — per-service/controller filtering,
@@ -6963,8 +7177,6 @@ item as a starting map for the next session, not a substitute for reading the ci
   direct-`HttpClient` components, 82.36's retry addition, and 82.34's dead unregistered
   `auth.interceptor.ts` deletion are one "HTTP plumbing" session, one `ng build` + `vitest` pass instead
   of three.
-- **Lookup/label duplication (82.42, 82.43)** — `app.constants.ts`, `lookup.service.ts`,
-  `dropdown_service.dart`, `registration_constants.dart`. 82.43's own text says fold into 82.42.
 - **Flutter shared-widget adoption (82.48, 82.49)** — `core/widgets/reject_reason_dialog.dart` and
   `app_search_field.dart` against `directory_screen.dart`/`professional_hub_screen.dart`; one
   `flutter analyze` + golden pass covers both.

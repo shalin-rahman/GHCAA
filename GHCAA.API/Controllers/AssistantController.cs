@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +22,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> Ask([FromBody] AssistantQueryDto dto, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(dto.Query))
-                return BadRequest("Query cannot be empty.");
+                return Problem(detail: "Query cannot be empty.", statusCode: StatusCodes.Status400BadRequest);
 
             var response = await _assistantService.AskAsync(dto.Query, cancellationToken);
             return Ok(response);

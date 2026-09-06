@@ -11,6 +11,7 @@ import '../../core/widgets/logo_spinner.dart';
 import '../../features/jobs/job_service.dart';
 import '../../features/auth/auth_service.dart';
 import '../../core/utils/app_utils.dart';
+import '../../core/widgets/confirm_dialog.dart';
 
 final jobSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
 
@@ -188,18 +189,13 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                                                       : const Icon(Icons.delete_outline, color: Colors.redAccent, size: 18),
                                                   onPressed: _deletingJobId != null ? null : () async {
                                                      HapticFeedback.lightImpact();
-                                                     final confirm = await showDialog<bool>(
-                                                       context: context,
-                                                       builder: (ctx) => AlertDialog(
-                                                         backgroundColor: AppTheme.midnightSurface,
-                                                         title: const Text('Delete Post?', style: TextStyle(color: Colors.white, fontSize: 14)),
-                                                         actions: [
-                                                           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('CANCEL')),
-                                                           TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('DELETE', style: TextStyle(color: Colors.redAccent))),
-                                                         ],
-                                                       ),
+                                                     final confirm = await showConfirmDialog(
+                                                       context,
+                                                       title: 'Delete Post?',
+                                                       confirmLabel: 'Delete',
+                                                       destructive: true,
                                                      );
-                                                     if (confirm == true) {
+                                                     if (confirm) {
                                                        HapticFeedback.mediumImpact();
                                                        setState(() => _deletingJobId = job['id']);
                                                        try {
