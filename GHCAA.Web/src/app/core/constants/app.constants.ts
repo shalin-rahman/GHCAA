@@ -501,6 +501,8 @@ export const API_ENDPOINTS = {
         ADMIN_SUMMARY: '/api/pending/admin/summary',
         MY_SUMMARY: '/api/pending/me/summary'
     },
+    FAMILY_LINKS: '/api/family-links',
+    MENTORSHIP: '/api/mentorship',
     AUTH: {
         LOGIN: '/api/auth/login',
         REGISTER: '/api/auth/register',

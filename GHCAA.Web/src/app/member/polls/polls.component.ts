@@ -19,6 +19,7 @@ export class MemberPolls implements OnInit {
 
   polls = signal<PollDto[]>([]);
   loading = signal(false);
+  votingId = signal<number | null>(null);
 
   ngOnInit() {
     this.loadPolls();
@@ -58,11 +59,13 @@ export class MemberPolls implements OnInit {
   }
 
   submitVote(poll: PollDto) {
+    if (this.votingId() !== null) return;
     if (poll.selectedOptionIds.length === 0) {
       this.notify.warning('Please select at least one option.');
       return;
     }
 
+    this.votingId.set(poll.id);
     this.pollService.vote(poll.id, poll.selectedOptionIds).subscribe({
       next: (updatedPoll) => {
         this.notify.success('Thank you for voting!');
@@ -70,6 +73,7 @@ export class MemberPolls implements OnInit {
         this.pollService.getPollById(poll.id).subscribe({
             // 29F.2: surface HTTP failures instead of failing silently
             next: data => {
+                this.votingId.set(null);
                 const index = this.polls().findIndex(p => p.id === poll.id);
                 if (index > -1) {
                     const newPolls = [...this.polls()];
@@ -77,10 +81,16 @@ export class MemberPolls implements OnInit {
                     this.polls.set(newPolls);
                 }
             },
-            error: () => this.notify.error('Failed to refresh poll results.')
+            error: () => {
+                this.votingId.set(null);
+                this.notify.error('Failed to refresh poll results.');
+            }
         });
       },
-      error: (err) => this.notify.error(err.error?.message || 'Failed to submit vote.')
+      error: (err) => {
+        this.votingId.set(null);
+        this.notify.error(err.error?.message || 'Failed to submit vote.');
+      }
     });
   }
 }

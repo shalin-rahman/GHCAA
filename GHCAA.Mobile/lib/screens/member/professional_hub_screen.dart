@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +33,7 @@ class _ProfessionalHubScreenState extends ConsumerState<ProfessionalHubScreen> {
   int _totalItems = 0;
 
   String? _selectedSector;
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -46,6 +48,7 @@ class _ProfessionalHubScreenState extends ConsumerState<ProfessionalHubScreen> {
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    _searchDebounce?.cancel();
     super.dispose();
   }
 
@@ -110,8 +113,11 @@ class _ProfessionalHubScreenState extends ConsumerState<ProfessionalHubScreen> {
   }
 
   void _onSearchChanged(String value) {
-    ref.read(profHubSearchQueryProvider.notifier).state = value.toLowerCase();
-    _fetchAlumni(refresh: true);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      ref.read(profHubSearchQueryProvider.notifier).state = value.toLowerCase();
+      _fetchAlumni(refresh: true);
+    });
   }
 
   @override

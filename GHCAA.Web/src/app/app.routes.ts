@@ -192,6 +192,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./member/articles/articles').then(m => m.MemberArticles)
             },
             {
+                path: 'requests',
+                loadComponent: () => import('./member/requests/requests').then(m => m.MemberRequests)
+            },
+            {
                 path: 'polls',
                 loadComponent: () => import('./member/polls/polls.component').then(m => m.MemberPolls)
             },

@@ -141,7 +141,20 @@ namespace GHCAA.Infrastructure.Services
                 .Where(r => r.Year == year)
                 .ToListAsync(cancellationToken);
 
-            var totalIncome = records.Where(r => r.RecordType == Enums.FinancialRecordType.Income).Sum(r => r.Amount);
+            // 46.5: this summary used to count FinancialRecords only, so a year with real
+            // membership/event fee income but no manually-entered ledger rows reported near-zero
+            // income — understating it exactly as GetDashboardStatsAsync's own comment already
+            // explains for the org-wide balance. Same fix here: add member payment collection
+            // (PaymentHistories) as its own line, rather than writing FinancialRecord rows for it,
+            // which would double-count against this same query once both existed.
+            var memberPayments = await _db.PaymentHistories
+                .IgnoreQueryFilters()
+                .Where(p => p.Status == Enums.PaymentStatus.Completed && !p.IsDeleted && p.PaidAt.Year == year)
+                .ToListAsync(cancellationToken);
+
+            var ledgerIncome = records.Where(r => r.RecordType == Enums.FinancialRecordType.Income).Sum(r => r.Amount);
+            var memberPaymentTotal = memberPayments.Sum(p => p.Amount);
+            var totalIncome = ledgerIncome + memberPaymentTotal;
             var totalExpense = records.Where(r => r.RecordType == Enums.FinancialRecordType.Expense).Sum(r => r.Amount);
 
             var byCategory = records
@@ -151,7 +164,21 @@ namespace GHCAA.Infrastructure.Services
                     Type = g.Key.RecordType.ToString(),
                     FinancialCategory = g.Key.FinancialCategory.ToString(),
                     Total = g.Sum(r => r.Amount)
-                });
+                })
+                .ToList();
+
+            if (memberPaymentTotal > 0)
+            {
+                var byPaymentCategory = memberPayments
+                    .GroupBy(p => p.FinancialCategory)
+                    .Select(g => new LedgerCategorySummaryDto
+                    {
+                        Type = "Income (Payment History)",
+                        FinancialCategory = g.Key.ToString(),
+                        Total = g.Sum(p => p.Amount)
+                    });
+                byCategory.AddRange(byPaymentCategory);
+            }
 
             return new LedgerSummaryDto
             {
@@ -159,7 +186,7 @@ namespace GHCAA.Infrastructure.Services
                 TotalIncome = totalIncome,
                 TotalExpense = totalExpense,
                 NetBalance = totalIncome - totalExpense,
-                Details = byCategory.ToList()
+                Details = byCategory
             };
         }
 

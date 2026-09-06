@@ -1585,5 +1585,11 @@ namespace GHCAA.Infrastructure.Services
 
             return (rank, GetCategoryBadge(points));
         }
+
+        public async Task<(Enums.MembershipStatus Status, Enums.MembershipType MembershipType)?> GetMembershipSnapshotAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
+            return member == null ? null : (member.Status, member.MembershipType);
+        }
     }
 }

@@ -16,13 +16,11 @@ namespace GHCAA.API.Controllers
     public class FinancialsController : ControllerBase
     {
         private readonly IFinancialService _financialService;
-        private readonly GHCAA.Infrastructure.Data.ApplicationDbContext _db;
         private readonly IFileValidationService _fileValidationService;
 
-        public FinancialsController(IFinancialService financialService, GHCAA.Infrastructure.Data.ApplicationDbContext db, IFileValidationService fileValidationService)
+        public FinancialsController(IFinancialService financialService, IFileValidationService fileValidationService)
         {
             _financialService = financialService;
-            _db = db;
             _fileValidationService = fileValidationService;
         }
 
@@ -99,9 +97,9 @@ namespace GHCAA.API.Controllers
                     return Unauthorized("Invalid session.");
                 }
 
-                var payment = await _db.PaymentHistories.FindAsync(new object[] { paymentId }, cancellationToken);
-                if (payment == null) return NotFound();
-                if (payment.MemberId != memberId) return Forbid("You can only download your own receipts.");
+                var ownerMemberId = await _financialService.GetPaymentOwnerMemberIdAsync(paymentId, cancellationToken);
+                if (ownerMemberId == null) return NotFound();
+                if (ownerMemberId != memberId) return Forbid("You can only download your own receipts.");
             }
 
             var pdfBytes = await _financialService.GenerateTaxReceiptAsync(paymentId, cancellationToken);
@@ -127,8 +125,7 @@ namespace GHCAA.API.Controllers
                 if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
                     return Unauthorized("Invalid session.");
 
-                var user = await _db.Users.FindAsync(userId);
-                memberId = user?.MemberId ?? 0;
+                memberId = await _financialService.GetMemberIdForUserAsync(userId, cancellationToken) ?? 0;
             }
 
             var dues = await _financialService.GetMemberDuesAsync(memberId, cancellationToken);

@@ -29,7 +29,7 @@ namespace GHCAA.Tests.Controllers
             _fileValidationServiceMock = new Mock<IFileValidationService>();
             _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<System.IO.Stream>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
                                       .Returns(new FileValidationResult { IsValid = true });
-            _controller = new FinancialsController(_financialServiceMock.Object, _context, _fileValidationServiceMock.Object);
+            _controller = new FinancialsController(_financialServiceMock.Object, _fileValidationServiceMock.Object);
         }
 
         [Test]
@@ -100,6 +100,63 @@ namespace GHCAA.Tests.Controllers
             var result = await _controller.GenerateAnnualDues(2023, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        // 80.13: GetMyDues's system-admin branch (no MemberId claim, not SuperAdmin) resolves the
+        // target memberId via IFinancialService.GetMemberIdForUserAsync instead of a raw EF read.
+        [Test]
+        public async Task GetMyDues_SystemAdminWithoutMemberIdClaim_ResolvesMemberIdViaService()
+        {
+            SetUserContext(_controller, memberId: null, role: "Admin", userId: 7);
+            _financialServiceMock.Setup(x => x.GetMemberIdForUserAsync(7, It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync(42);
+            _financialServiceMock.Setup(x => x.GetMemberDuesAsync(42, It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync(new List<MembershipDueDto>());
+
+            var result = await _controller.GetMyDues(CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            _financialServiceMock.Verify(x => x.GetMemberDuesAsync(42, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        // 80.13: DownloadReceipt's non-admin ownership check now goes through
+        // IFinancialService.GetPaymentOwnerMemberIdAsync instead of a raw PaymentHistories read.
+        [Test]
+        public async Task DownloadReceipt_NonAdminOwnsPayment_ReturnsFile()
+        {
+            SetUserContext(_controller, memberId: 10, role: "Member");
+            _financialServiceMock.Setup(x => x.GetPaymentOwnerMemberIdAsync(5, It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync(10);
+            _financialServiceMock.Setup(x => x.GenerateTaxReceiptAsync(5, It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync(new byte[] { 1, 2, 3 });
+
+            var result = await _controller.DownloadReceipt(5, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<FileContentResult>());
+        }
+
+        [Test]
+        public async Task DownloadReceipt_NonAdminDoesNotOwnPayment_ReturnsForbid()
+        {
+            SetUserContext(_controller, memberId: 10, role: "Member");
+            _financialServiceMock.Setup(x => x.GetPaymentOwnerMemberIdAsync(5, It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync(999);
+
+            var result = await _controller.DownloadReceipt(5, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<ForbidResult>());
+        }
+
+        [Test]
+        public async Task DownloadReceipt_NonAdminPaymentDoesNotExist_ReturnsNotFound()
+        {
+            SetUserContext(_controller, memberId: 10, role: "Member");
+            _financialServiceMock.Setup(x => x.GetPaymentOwnerMemberIdAsync(5, It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync((int?)null);
+
+            var result = await _controller.DownloadReceipt(5, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<NotFoundResult>());
         }
     }
 }

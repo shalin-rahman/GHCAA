@@ -527,5 +527,58 @@ public class EventServiceTests : TestBase
         updated!.IsCheckedIn.Should().BeFalse();
         updated.CheckedInAt.Should().BeNull();
     }
+
+    // 80.13: extracted from GatewaysController's payment-initiation/callback paths so it
+    // doesn't touch ApplicationDbContext directly.
+    [Test]
+    public async Task GetRegistrationByPaymentReferenceAsync_ReturnsMatch_WithEventIncluded()
+    {
+        var ev = new AlumniEvent { Title = "E", Description = "D", Location = "L" };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        var reg = new EventRegistration { EventId = ev.Id, PaymentReference = "EVT-REG-XYZ", Status = EventRegistrationStatus.Pending };
+        _context.EventRegistrations.Add(reg);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetRegistrationByPaymentReferenceAsync("EVT-REG-XYZ");
+
+        result.Should().NotBeNull();
+        result!.Event.Should().NotBeNull();
+        result.Event!.Title.Should().Be("E");
+    }
+
+    [Test]
+    public async Task GetRegistrationByPaymentReferenceAsync_ReturnsNull_WhenNoMatch()
+    {
+        var result = await _service.GetRegistrationByPaymentReferenceAsync("NO-SUCH-REF");
+
+        result.Should().BeNull();
+    }
+
+    [Test]
+    public async Task AutoApproveRegistrationAfterPaymentAsync_SetsApprovedFieldsWithoutNotification()
+    {
+        var ev = new AlumniEvent { Title = "E2", Description = "D", Location = "L" };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        var reg = new EventRegistration { EventId = ev.Id, PaymentReference = "EVT-REG-AUTO", Status = EventRegistrationStatus.Pending };
+        _context.EventRegistrations.Add(reg);
+        await _context.SaveChangesAsync();
+
+        await _service.AutoApproveRegistrationAfterPaymentAsync(reg.Id, adminId: 1);
+
+        var updated = await _context.EventRegistrations.FindAsync(reg.Id);
+        updated!.Status.Should().Be(EventRegistrationStatus.Approved);
+        updated.ApprovedByAdminId.Should().Be(1);
+        updated.ApprovedAt.Should().NotBeNull();
+
+        // Deliberately narrower than ApproveRegistrationAsync: this is a payment confirmation,
+        // not an admin review, so it must not fire the participation-approved notification.
+        _notificationMock.Verify(x => x.CreateNotificationAsync(
+            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<NotificationType>(), It.IsAny<string>(), It.IsAny<System.Threading.CancellationToken>()),
+            Times.Never);
+    }
 }
 

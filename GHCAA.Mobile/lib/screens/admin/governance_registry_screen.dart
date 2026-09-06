@@ -24,6 +24,7 @@ class AdminGovernanceScreen extends ConsumerStatefulWidget {
 
 class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
   final TextEditingController _searchController = TextEditingController();
+  int? _activatingPeriodId;
 
   @override
   void dispose() {
@@ -42,11 +43,16 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
   }
 
   Future<void> _activatePeriod(int id) async {
+    if (_activatingPeriodId != null) return;
+    setState(() => _activatingPeriodId = id);
     try {
       final dio = ref.read(dioProvider);
       await dio.post('/admin/governance/periods/$id/activate');
       ref.invalidate(ecPeriodsAdminProvider);
-    } catch (_) {}
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _activatingPeriodId = null);
+    }
   }
 
   void _editPeriod(dynamic period) {
@@ -61,52 +67,60 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
     final titleCtrl = TextEditingController(text: period != null ? period['title'] : '');
     final startCtrl = TextEditingController(text: period != null ? period['startDate']?.split('T')[0] : '');
     final endCtrl = TextEditingController(text: period != null ? period['endDate']?.split('T')[0] : '');
+    bool saving = false;
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.midnightSurface,
-        title: Text(period == null ? 'ESTABLISH GOVERNANCE TERM' : 'MODIFY TERM ASSET', style: const TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.bold)),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: titleCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Term Title (e.g., EC 2026-2028)')),
-              TextField(controller: startCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Start Date (YYYY-MM-DD)')),
-              TextField(controller: endCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'End Date (YYYY-MM-DD) - Optional')),
-            ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: AppTheme.midnightSurface,
+          title: Text(period == null ? 'ESTABLISH GOVERNANCE TERM' : 'MODIFY TERM ASSET', style: const TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.bold)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: titleCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Term Title (e.g., EC 2026-2028)')),
+                TextField(controller: startCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Start Date (YYYY-MM-DD)')),
+                TextField(controller: endCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'End Date (YYYY-MM-DD) - Optional')),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(onPressed: saving ? null : () => Navigator.pop(ctx), child: const Text('ABORT', style: TextStyle(color: Colors.white54))),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
+              onPressed: saving ? null : () async {
+                setDialogState(() => saving = true);
+                try {
+                  final dio = ref.read(dioProvider);
+                  final payload = {
+                    'title': titleCtrl.text,
+                    'startDate': startCtrl.text,
+                    if (endCtrl.text.isNotEmpty) 'endDate': endCtrl.text,
+                  };
+
+                  if (period == null) {
+                    await dio.post('/admin/governance/periods', data: payload);
+                  } else {
+                    await dio.put('/admin/governance/periods/${period['id']}', data: payload);
+                  }
+
+                  ref.invalidate(ecPeriodsAdminProvider);
+                  if (ctx.mounted) Navigator.pop(ctx);
+                } catch (e) {
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Error saving term: $e')));
+                  }
+                } finally {
+                  if (ctx.mounted) setDialogState(() => saving = false);
+                }
+              },
+              child: saving
+                  ? SizedBox(height: 16, width: 16, child: LogoSpinner.small())
+                  : const Text('COMMIT CHANGES', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('ABORT', style: TextStyle(color: Colors.white54))),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
-            onPressed: () async {
-              try {
-                final dio = ref.read(dioProvider);
-                final payload = {
-                  'title': titleCtrl.text,
-                  'startDate': startCtrl.text,
-                  if (endCtrl.text.isNotEmpty) 'endDate': endCtrl.text,
-                };
-                
-                if (period == null) {
-                  await dio.post('/admin/governance/periods', data: payload);
-                } else {
-                  await dio.put('/admin/governance/periods/${period['id']}', data: payload);
-                }
-                
-                ref.invalidate(ecPeriodsAdminProvider);
-                if (ctx.mounted) Navigator.pop(ctx);
-              } catch (e) {
-                if (ctx.mounted) {
-                  ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Error saving term: $e')));
-                }
-              }
-            },
-            child: const Text('COMMIT CHANGES', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-          ),
-        ],
       ),
     );
   }
@@ -221,7 +235,7 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
                                             if (p['isActive'] != true)
                                               IconButton(
                                                 icon: const Icon(Icons.bolt, color: AppTheme.royalGold, size: 18),
-                                                onPressed: () => _activatePeriod(p['id']),
+                                                onPressed: _activatingPeriodId == p['id'] ? null : () => _activatePeriod(p['id']),
                                               ),
                                             IconButton(
                                               icon: const Icon(Icons.edit_outlined, color: Colors.white70, size: 18),

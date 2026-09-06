@@ -174,7 +174,7 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
             if (isMember)
               IconButton(
                 icon: const Icon(Icons.link_off, color: Colors.redAccent, size: 20),
-                onPressed: () => _confirmRemoveLink(m['id']),
+                onPressed: _processingLinkId == m['id'] ? null : () => _confirmRemoveLink(m['id']),
               ),
           ],
         ),
@@ -211,16 +211,16 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
                 if (isReceived) ...[
                   IconButton(
                     icon: const Icon(Icons.check_circle_outline, color: Colors.greenAccent),
-                    onPressed: () => _handleResponse(r['id'], true),
+                    onPressed: _processingLinkId == r['id'] ? null : () => _handleResponse(r['id'], true),
                   ),
                   IconButton(
                     icon: const Icon(Icons.cancel_outlined, color: Colors.redAccent),
-                    onPressed: () => _handleResponse(r['id'], false),
+                    onPressed: _processingLinkId == r['id'] ? null : () => _handleResponse(r['id'], false),
                   ),
                 ] else
                   IconButton(
                     icon: const Icon(Icons.delete_sweep_outlined, color: Colors.white38),
-                    onPressed: () => _confirmCancelRequest(r['id']),
+                    onPressed: _processingLinkId == r['id'] ? null : () => _confirmCancelRequest(r['id']),
                   ),
               ],
             ),
@@ -357,15 +357,26 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
     }
   }
 
+  // Shared across all three: each acts on one request/link id and reloads the same
+  // lists afterward, so they can't overlap each other either.
+  int? _processingLinkId;
+
   Future<void> _handleResponse(int id, bool approve) async {
-    final success = await ref.read(familyServiceProvider).respondToRequest(id, approve);
-    if (success) {
-      ref.invalidate(receivedRequestsProvider);
-      ref.invalidate(familyListProvider);
+    if (_processingLinkId != null) return;
+    setState(() => _processingLinkId = id);
+    try {
+      final success = await ref.read(familyServiceProvider).respondToRequest(id, approve);
+      if (success) {
+        ref.invalidate(receivedRequestsProvider);
+        ref.invalidate(familyListProvider);
+      }
+    } finally {
+      if (mounted) setState(() => _processingLinkId = null);
     }
   }
 
   Future<void> _confirmCancelRequest(int id) async {
+    if (_processingLinkId != null) return;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -378,12 +389,18 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
       ),
     );
     if (confirm == true) {
-      final success = await ref.read(familyServiceProvider).cancelRequest(id);
-      if (success) ref.invalidate(sentRequestsProvider);
+      setState(() => _processingLinkId = id);
+      try {
+        final success = await ref.read(familyServiceProvider).cancelRequest(id);
+        if (success) ref.invalidate(sentRequestsProvider);
+      } finally {
+        if (mounted) setState(() => _processingLinkId = null);
+      }
     }
   }
 
   Future<void> _confirmRemoveLink(int id) async {
+    if (_processingLinkId != null) return;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -397,8 +414,13 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
       ),
     );
     if (confirm == true) {
-      final success = await ref.read(familyServiceProvider).removeLink(id);
-      if (success) ref.invalidate(familyListProvider);
+      setState(() => _processingLinkId = id);
+      try {
+        final success = await ref.read(familyServiceProvider).removeLink(id);
+        if (success) ref.invalidate(familyListProvider);
+      } finally {
+        if (mounted) setState(() => _processingLinkId = null);
+      }
     }
   }
 }

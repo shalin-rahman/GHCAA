@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,6 +37,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
   int _totalItems = 0;
 
   final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -52,6 +54,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    _searchDebounce?.cancel();
     super.dispose();
   }
 
@@ -121,8 +124,11 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
   }
 
   void _onSearchChanged(String value) {
-    ref.read(directorySearchQueryProvider.notifier).state = value.toLowerCase();
-    _fetchAlumni(refresh: true);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      ref.read(directorySearchQueryProvider.notifier).state = value.toLowerCase();
+      _fetchAlumni(refresh: true);
+    });
   }
 
   @override

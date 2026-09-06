@@ -35,6 +35,10 @@ class GalleryScreen extends ConsumerStatefulWidget {
 
 class _GalleryScreenState extends ConsumerState<GalleryScreen> {
   final TextEditingController _searchController = TextEditingController();
+  // One shared busy-set per gallery card: toggle/upload/delete all act on the same
+  // card and reload the same list afterward, so they shouldn't overlap each other either.
+  final Set<int> _busyGalleryIds = {};
+  final Set<int> _busyAlbumIds = {};
 
   @override
   void dispose() {
@@ -178,41 +182,59 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
   }
 
   Future<void> _toggleActive(int id) async {
-    final result = await ref.read(galleryServiceProvider).toggleActive(id);
-    if (result != null) {
-      ref.invalidate(galleryItemsProvider);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Album is now ${result ? 'Public' : 'Hidden'}.')));
+    if (_busyGalleryIds.contains(id)) return;
+    setState(() => _busyGalleryIds.add(id));
+    try {
+      final result = await ref.read(galleryServiceProvider).toggleActive(id);
+      if (result != null) {
+        ref.invalidate(galleryItemsProvider);
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Album is now ${result ? 'Public' : 'Hidden'}.')));
+      }
+    } finally {
+      if (mounted) setState(() => _busyGalleryIds.remove(id));
     }
   }
 
   Future<void> _toggleFeatured(int id) async {
-    final result = await ref.read(galleryServiceProvider).toggleFeatured(id);
-    if (result != null) {
-      ref.invalidate(galleryItemsProvider);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Album is now ${result ? 'Featured' : 'Regular'}.')));
+    if (_busyGalleryIds.contains(id)) return;
+    setState(() => _busyGalleryIds.add(id));
+    try {
+      final result = await ref.read(galleryServiceProvider).toggleFeatured(id);
+      if (result != null) {
+        ref.invalidate(galleryItemsProvider);
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Album is now ${result ? 'Featured' : 'Regular'}.')));
+      }
+    } finally {
+      if (mounted) setState(() => _busyGalleryIds.remove(id));
     }
   }
- 
+
   Future<void> _uploadPhotos(int galleryId) async {
+    if (_busyGalleryIds.contains(galleryId)) return;
     final picker = ImagePicker();
     final images = await picker.pickMultiImage();
     if (images.isEmpty) return;
- 
+
     if (!mounted) return;
+    setState(() => _busyGalleryIds.add(galleryId));
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Uploading ${images.length} photos...')));
- 
-    final uploadedPaths = <String>[];
-    for (final img in images) {
-      final path = await ref.read(galleryServiceProvider).uploadPhoto(img.path);
-      if (path != null) uploadedPaths.add(path);
-    }
- 
-    if (uploadedPaths.isNotEmpty) {
-      final success = await ref.read(galleryServiceProvider).addPhotosToGallery(galleryId, uploadedPaths);
-      if (success) {
-        ref.invalidate(galleryItemsProvider);
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photos added successfully.')));
+
+    try {
+      final uploadedPaths = <String>[];
+      for (final img in images) {
+        final path = await ref.read(galleryServiceProvider).uploadPhoto(img.path);
+        if (path != null) uploadedPaths.add(path);
       }
+
+      if (uploadedPaths.isNotEmpty) {
+        final success = await ref.read(galleryServiceProvider).addPhotosToGallery(galleryId, uploadedPaths);
+        if (success) {
+          ref.invalidate(galleryItemsProvider);
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photos added successfully.')));
+        }
+      }
+    } finally {
+      if (mounted) setState(() => _busyGalleryIds.remove(galleryId));
     }
   }
  
@@ -259,22 +281,28 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
   }
 
   Future<void> _addPhotoToAlbum(int albumId) async {
+    if (_busyAlbumIds.contains(albumId)) return;
     final picker = ImagePicker();
     final images = await picker.pickMultiImage();
     if (images.isEmpty) return;
 
     if (!mounted) return;
+    setState(() => _busyAlbumIds.add(albumId));
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Uploading ${images.length} photos...')));
 
-    var successCount = 0;
-    for (final img in images) {
-      final success = await ref.read(galleryServiceProvider).addPhotoToAlbum(albumId, img.path);
-      if (success) successCount++;
-    }
+    try {
+      var successCount = 0;
+      for (final img in images) {
+        final success = await ref.read(galleryServiceProvider).addPhotoToAlbum(albumId, img.path);
+        if (success) successCount++;
+      }
 
-    if (successCount > 0) {
-      ref.invalidate(myAlbumsProvider);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$successCount photo(s) submitted for review.')));
+      if (successCount > 0) {
+        ref.invalidate(myAlbumsProvider);
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$successCount photo(s) submitted for review.')));
+      }
+    } finally {
+      if (mounted) setState(() => _busyAlbumIds.remove(albumId));
     }
   }
 
@@ -340,7 +368,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                           IconButton(
                             icon: const Icon(Icons.add_a_photo_outlined, size: 18, color: AppTheme.royalGold),
                             tooltip: 'Add Photos',
-                            onPressed: () => _addPhotoToAlbum(album['id']),
+                            onPressed: _busyAlbumIds.contains(album['id']) ? null : () => _addPhotoToAlbum(album['id']),
                           ),
                         ],
                       ),
@@ -359,6 +387,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
   }
 
   Future<void> _confirmDeleteGallery(int id) async {
+    if (_busyGalleryIds.contains(id)) return;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -378,9 +407,14 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
     );
  
     if (confirm == true) {
-      final success = await ref.read(galleryServiceProvider).deleteGallery(id);
-      if (success) {
-        ref.invalidate(galleryItemsProvider);
+      setState(() => _busyGalleryIds.add(id));
+      try {
+        final success = await ref.read(galleryServiceProvider).deleteGallery(id);
+        if (success) {
+          ref.invalidate(galleryItemsProvider);
+        }
+      } finally {
+        if (mounted) setState(() => _busyGalleryIds.remove(id));
       }
     }
   }
@@ -477,17 +511,19 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                             icon: (gallery['isActive'] ?? true) ? Icons.visibility_rounded : Icons.visibility_off_rounded,
                                             color: (gallery['isActive'] ?? true) ? AppTheme.royalGold : Colors.white38,
                                             tooltip: (gallery['isActive'] ?? true) ? 'Hide Album' : 'Publish Album',
+                                            disabled: _busyGalleryIds.contains(gallery['id']),
                                             onTap: () => _toggleActive(gallery['id']),
                                           ),
                                           AdminActionCircle(
                                             icon: (gallery['isFeatured'] ?? false) ? Icons.star_rounded : Icons.star_border_rounded,
                                             color: (gallery['isFeatured'] ?? false) ? AppTheme.royalGold : Colors.white38,
                                             tooltip: (gallery['isFeatured'] ?? false) ? 'Unfeature Album' : 'Feature Album',
+                                            disabled: _busyGalleryIds.contains(gallery['id']),
                                             onTap: () => _toggleFeatured(gallery['id']),
                                           ),
                                           AdminActionCircle(icon: Icons.edit_rounded, color: AppTheme.royalGold, tooltip: 'Edit Album Info', onTap: () => _createGallery(existing: gallery)),
-                                          AdminActionCircle(icon: Icons.upload_file_rounded, color: AppTheme.royalGold, tooltip: 'Upload Photos', onTap: () => _uploadPhotos(gallery['id'])),
-                                          AdminActionCircle(icon: Icons.delete_sweep_rounded, color: Colors.redAccent, tooltip: 'Delete Gallery', onTap: () => _confirmDeleteGallery(gallery['id'])),
+                                          AdminActionCircle(icon: Icons.upload_file_rounded, color: AppTheme.royalGold, tooltip: 'Upload Photos', disabled: _busyGalleryIds.contains(gallery['id']), onTap: () => _uploadPhotos(gallery['id'])),
+                                          AdminActionCircle(icon: Icons.delete_sweep_rounded, color: Colors.redAccent, tooltip: 'Delete Gallery', disabled: _busyGalleryIds.contains(gallery['id']), onTap: () => _confirmDeleteGallery(gallery['id'])),
                                         ],
                                       ),
                                     ),

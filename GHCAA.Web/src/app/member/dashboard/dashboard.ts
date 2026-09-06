@@ -44,8 +44,6 @@ export class Dashboard implements OnInit {
     return this.profile()?.rank ?? '—';
   }
 
-  // Family-link and mentorship requests have a real API (WP81.2) but no dedicated member-facing
-  // page yet, so those two rows carry a count with no link until one exists — see docs/TODO.md.
   private mapPendingRows(pending: any): { label: string; count: number; link: string }[] {
     if (!pending) return [];
     const countOf = (list: any): number => Array.isArray(list) ? list.length : 0;
@@ -54,8 +52,8 @@ export class Dashboard implements OnInit {
       { label: 'Article submissions awaiting review', count: countOf(pending.news ?? pending.News), link: '/portal/articles' },
       { label: 'Job postings awaiting review', count: countOf(pending.pendingJobPostings ?? pending.PendingJobPostings), link: '/portal/jobs' },
       { label: 'Event registrations awaiting approval', count: countOf(pending.pendingEventRegistrations ?? pending.PendingEventRegistrations), link: '/portal/events' },
-      { label: 'Family-link requests awaiting response', count: countOf(pending.familyLinkRequestsSent ?? pending.FamilyLinkRequestsSent), link: '' },
-      { label: 'Mentorship requests awaiting response', count: countOf(pending.mentorshipRequestsSent ?? pending.MentorshipRequestsSent), link: '' },
+      { label: 'Family-link requests awaiting response', count: countOf(pending.familyLinkRequestsSent ?? pending.FamilyLinkRequestsSent), link: '/portal/requests' },
+      { label: 'Mentorship requests awaiting response', count: countOf(pending.mentorshipRequestsSent ?? pending.MentorshipRequestsSent), link: '/portal/requests' },
     ].filter(row => row.count > 0);
   }
 

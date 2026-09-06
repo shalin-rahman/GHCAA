@@ -14,6 +14,7 @@ import '../../core/widgets/custom_network_image.dart';
 import '../../core/utils/app_utils.dart';
 import '../../core/widgets/app_search_field.dart';
 import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/logo_spinner.dart';
 
 final eventSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
 
@@ -334,11 +335,12 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
     final capacityCtrl = TextEditingController();
     bool isFree = false;
     bool allowNonMembers = false;
+    bool saving = false;
     DateTime startDate = DateTime.now().add(const Duration(days: 30));
     DateTime endDate = DateTime.now().add(const Duration(days: 30, hours: 4));
     DateTime? regStart;
     DateTime? regEnd;
- 
+
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -456,13 +458,14 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL', style: TextStyle(color: Colors.white38))),
+            TextButton(onPressed: saving ? null : () => Navigator.pop(ctx), child: const Text('CANCEL', style: TextStyle(color: Colors.white38))),
             ElevatedButton(
-              onPressed: () async {
+              onPressed: saving ? null : () async {
                 if (titleCtrl.text.isEmpty || descCtrl.text.isEmpty || locCtrl.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all required fields.')));
                   return;
                 }
+                setDialogState(() => saving = true);
                 try {
                   final fee = isFree ? null : (double.tryParse(feeCtrl.text));
                   final payload = {
@@ -486,9 +489,13 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                   }
                 } catch (e) {
                   if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: Colors.redAccent));
+                } finally {
+                  if (ctx.mounted) setDialogState(() => saving = false);
                 }
               },
-              child: const Text('CREATE EVENT'),
+              child: saving
+                  ? SizedBox(height: 16, width: 16, child: LogoSpinner.small())
+                  : const Text('CREATE EVENT'),
             ),
           ],
         ),

@@ -1,8 +1,6 @@
 using GHCAA.Application.Interfaces;
-using GHCAA.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GHCAA.API.Controllers
 {
@@ -10,14 +8,14 @@ namespace GHCAA.API.Controllers
     [Route("healthz")]
     public class HealthController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IDatabaseHealthService _dbHealth;
         private readonly IEmailService _email;
         private readonly IConfiguration _config;
         private readonly ILogger<HealthController> _logger;
 
-        public HealthController(ApplicationDbContext db, IEmailService email, IConfiguration config, ILogger<HealthController> logger)
+        public HealthController(IDatabaseHealthService dbHealth, IEmailService email, IConfiguration config, ILogger<HealthController> logger)
         {
-            _db = db;
+            _dbHealth = dbHealth;
             _email = email;
             _config = config;
             _logger = logger;
@@ -39,7 +37,7 @@ namespace GHCAA.API.Controllers
             // 1. DB check
             try
             {
-                var canConnect = await _db.Database.CanConnectAsync(ct);
+                var canConnect = await _dbHealth.CanConnectAsync(ct);
                 health.Checks.Add(new { Name = "Database", Status = canConnect ? "Healthy" : "Unhealthy" });
                 if (!canConnect) allHealthy = false;
             }

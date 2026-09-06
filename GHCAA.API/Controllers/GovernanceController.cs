@@ -17,12 +17,10 @@ namespace GHCAA.API.Controllers
     public class GovernanceController : ControllerBase
     {
         private readonly IGovernanceService _governanceService;
-        private readonly GHCAA.Infrastructure.Data.ApplicationDbContext _db;
 
-        public GovernanceController(IGovernanceService governanceService, GHCAA.Infrastructure.Data.ApplicationDbContext db)
+        public GovernanceController(IGovernanceService governanceService)
         {
             _governanceService = governanceService;
-            _db = db;
         }
 
         [HttpGet("ec/current")]

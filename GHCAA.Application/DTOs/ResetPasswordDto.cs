@@ -19,4 +19,10 @@ namespace GHCAA.Application.DTOs
             ErrorMessage = "Password must contain at least one uppercase letter, one lowercase letter, and one digit.")]
         public string NewPassword { get; set; } = null!;
     }
+
+    public class ForgotPasswordDto
+    {
+        [Required(ErrorMessage = "Email is required.")]
+        public string Identifier { get; set; } = null!;
+    }
 }

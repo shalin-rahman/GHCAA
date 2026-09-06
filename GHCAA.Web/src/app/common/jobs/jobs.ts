@@ -64,8 +64,11 @@ export class Jobs implements OnInit {
     });
   }
 
+  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+
   onSearch() {
-    this.loadJobs();
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => this.loadJobs(), 300);
   }
 
   postJob() {

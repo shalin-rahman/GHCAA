@@ -109,12 +109,19 @@ export class Messages implements OnInit, AfterViewChecked {
     this.showNewMessageModal.set(false);
   }
 
+  private memberPickerSearchTimer: ReturnType<typeof setTimeout> | null = null;
+
   searchMembersForNewMessage(query: string): void {
     this.memberPickerQuery.set(query);
+    if (this.memberPickerSearchTimer) clearTimeout(this.memberPickerSearchTimer);
     if (query.trim().length < 2) {
       this.memberPickerResults.set([]);
       return;
     }
+    this.memberPickerSearchTimer = setTimeout(() => this.runMemberPickerSearch(query), 300);
+  }
+
+  private runMemberPickerSearch(query: string): void {
     this.isSearchingMembers.set(true);
     this.networkService.searchMembers({ query, pageSize: 10 }).subscribe({
       next: (res) => {

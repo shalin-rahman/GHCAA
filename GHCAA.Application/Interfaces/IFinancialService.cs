@@ -34,5 +34,15 @@ namespace GHCAA.Application.Interfaces
         Task<IEnumerable<SavedPaymentMethodDto>> GetSavedPaymentMethodsAsync(int memberId, CancellationToken cancellationToken = default);
         Task<SavedPaymentMethodDto> AddSavedPaymentMethodAsync(int memberId, CreateSavedPaymentMethodDto dto, CancellationToken cancellationToken = default);
         Task<bool> DeleteSavedPaymentMethodAsync(int memberId, int id, CancellationToken cancellationToken = default);
+
+        // FinancialsController: ownership check before handing out a receipt, and resolving the
+        // target memberId for a system-admin caller (no MemberId claim) requesting dues.
+        Task<int?> GetPaymentOwnerMemberIdAsync(int paymentId, CancellationToken cancellationToken = default);
+        Task<int?> GetMemberIdForUserAsync(int userId, CancellationToken cancellationToken = default);
+
+        // GatewaysController's gateway-callback/webhook handling.
+        Task<bool> IsGatewayPaymentAlreadyProcessedAsync(string gatewayPaymentId, CancellationToken cancellationToken = default);
+        Task<PaymentHistoryDto?> GetPaymentSnapshotByTransactionIdAsync(string transactionId, CancellationToken cancellationToken = default);
+        Task StampGatewayPaymentIdAsync(int paymentId, string gatewayPaymentId, CancellationToken cancellationToken = default);
     }
 }

@@ -233,6 +233,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 _handleLogin();
                               },
                               child: const Text('ENGAGE PORTAL')),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () => context.push('/forgot-password'),
+                            child: const Text('Forgot Password?',
+                                style: TextStyle(color: Colors.white54, fontSize: 12)),
+                          ),
+                        ),
                         // 29E.1: social login section removed — see note above _LoginScreenState.build.
                       ],
                     ),

@@ -40,6 +40,47 @@ namespace GHCAA.Tests.Controllers
             _financialServiceMock = new Mock<IFinancialService>();
             _memberServiceMock = new Mock<IMemberService>();
             _loggerMock = new Mock<ILogger<GatewaysController>>();
+
+            // 80.13: GatewaysController no longer touches ApplicationDbContext directly — the
+            // EventRegistration/PaymentConfiguration reads and writes it used to do inline now go
+            // through IEventService/IPaymentConfigService. This suite seeds and asserts against
+            // _context directly (real EF, not mocked), so real service instances backed by the
+            // same _context keep that behavior working instead of re-deriving mock setups per test.
+            var eventService = new GHCAA.Infrastructure.Services.EventService(
+                _context,
+                Mock.Of<ICommunicationService>(),
+                Mock.Of<IFileStorageService>(),
+                Mock.Of<IGamificationService>(),
+                Mock.Of<INotificationService>(),
+                Mock.Of<ILogger<GHCAA.Infrastructure.Services.EventService>>());
+            var paymentConfigService = new GHCAA.Infrastructure.Services.PaymentConfigService(_context);
+
+            // GetPaymentSnapshotByTransactionIdAsync/IsGatewayPaymentAlreadyProcessedAsync/
+            // StampGatewayPaymentIdAsync are the other three IFinancialService reads/writes this
+            // controller now goes through; back them with _context too so seeded PaymentHistory
+            // rows are found the same way a real FinancialService would find them.
+            _financialServiceMock.Setup(x => x.GetPaymentSnapshotByTransactionIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(async (string trxId, CancellationToken ct) =>
+                {
+                    var p = await _context.PaymentHistories.AsNoTracking().FirstOrDefaultAsync(x => x.TransactionId == trxId, ct);
+                    if (p == null) return null;
+                    return new PaymentHistoryDto
+                    {
+                        Id = p.Id,
+                        MemberId = p.MemberId,
+                        TransactionId = p.TransactionId,
+                        Amount = p.Amount,
+                        PaidAt = p.PaidAt,
+                        Status = p.Status,
+                        FinancialCategory = p.FinancialCategory,
+                        PaymentMethod = p.PaymentMethod,
+                        Notes = p.Notes
+                    };
+                });
+            _financialServiceMock.Setup(x => x.IsGatewayPaymentAlreadyProcessedAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(false);
+            _financialServiceMock.Setup(x => x.StampGatewayPaymentIdAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
             var json = """
 {
   "PaymentGateways": { "EnabledMethods": [ "SSLCommerz", "BkashGateway" ] },
@@ -68,7 +109,8 @@ namespace GHCAA.Tests.Controllers
                 _gatewayFactoryMock.Object,
                 _financialServiceMock.Object,
                 _memberServiceMock.Object,
-                _context,
+                eventService,
+                paymentConfigService,
                 _loggerMock.Object,
                 _gatewayTestConfig,
                 _orgConfigMock.Object);

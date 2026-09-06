@@ -22,6 +22,7 @@ export class ContactMessages implements OnInit {
   loading = signal(true);
   selectedMessage = signal<any | null>(null);
   searchQuery = signal('');
+  deletingId = signal<number | null>(null);
 
   filteredMessages = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -70,16 +71,22 @@ export class ContactMessages implements OnInit {
   }
 
   deleteMessage(msg: any) {
+    if (this.deletingId() !== null) return;
     if (!confirm('Delete this enquiry permanently?')) return;
+    this.deletingId.set(msg.id);
     this.contactService.deleteMessage(msg.id).subscribe({
       next: () => {
+        this.deletingId.set(null);
         this.notify.success('Enquiry deleted.');
         if (this.selectedMessage()?.id === msg.id) {
           this.selectedMessage.set(null);
         }
         this.loadMessages();
       },
-      error: () => this.notify.error('Failed to delete enquiry.')
+      error: () => {
+        this.deletingId.set(null);
+        this.notify.error('Failed to delete enquiry.');
+      }
     });
   }
 }

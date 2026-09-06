@@ -21,7 +21,8 @@ namespace GHCAA.Tests.Controllers
         [SetUp]
         public void Setup()
         {
-            _context.PaymentConfigurations.RemoveRange(_context.PaymentConfigurations); _context.SaveChanges(); _controller = new PaymentConfigController(_context);
+            _context.PaymentConfigurations.RemoveRange(_context.PaymentConfigurations); _context.SaveChanges();
+            _controller = new PaymentConfigController(new GHCAA.Infrastructure.Services.PaymentConfigService(_context));
         }
 
         [Test]
@@ -112,6 +113,65 @@ namespace GHCAA.Tests.Controllers
                 Assert.That(doc.RootElement.GetProperty("WalletNumber").GetString(), Is.EqualTo("017"));
                 Assert.That(doc.RootElement.GetProperty("IsOnline").GetBoolean(), Is.False);
             }
+        }
+
+        // 47.13.5: mutation coverage for Create/Toggle/Delete (Update/SeedDefaults already covered above).
+        [Test]
+        public async Task CreateConfig_PersistsAndReturnsMaskedSecrets()
+        {
+            SetUserContext(_controller, null, "SuperAdmin");
+            var dto = new PaymentConfiguration { DisplayName = "New Gateway", Method = Domain.Enums.PaymentMethod.CreditCard, GatewaySecretKey = "raw-secret" };
+
+            var result = await _controller.CreateConfig(dto, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            Assert.That(await _context.PaymentConfigurations.CountAsync(), Is.EqualTo(1));
+            var json = System.Text.Json.JsonSerializer.Serialize((result as OkObjectResult)!.Value);
+            var doc = System.Text.Json.JsonDocument.Parse(json);
+            Assert.That(doc.RootElement.GetProperty("GatewaySecretKey").GetString(), Is.EqualTo("••••••••"));
+        }
+
+        [Test]
+        public async Task ToggleConfig_FlipsIsEnabled()
+        {
+            var config = new PaymentConfiguration { DisplayName = "T", IsEnabled = true, Method = Domain.Enums.PaymentMethod.BKash };
+            _context.PaymentConfigurations.Add(config);
+            await _context.SaveChangesAsync();
+
+            var result = await _controller.ToggleConfig(config.Id, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var updated = await _context.PaymentConfigurations.FindAsync(config.Id);
+            Assert.That(updated!.IsEnabled, Is.False);
+        }
+
+        [Test]
+        public async Task ToggleConfig_ReturnsNotFound_WhenConfigDoesNotExist()
+        {
+            var result = await _controller.ToggleConfig(999, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<NotFoundResult>());
+        }
+
+        [Test]
+        public async Task DeleteConfig_RemovesConfig()
+        {
+            var config = new PaymentConfiguration { DisplayName = "D", Method = Domain.Enums.PaymentMethod.BKash };
+            _context.PaymentConfigurations.Add(config);
+            await _context.SaveChangesAsync();
+
+            var result = await _controller.DeleteConfig(config.Id, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkResult>());
+            Assert.That(await _context.PaymentConfigurations.CountAsync(), Is.EqualTo(0));
+        }
+
+        [Test]
+        public async Task DeleteConfig_ReturnsNotFound_WhenConfigDoesNotExist()
+        {
+            var result = await _controller.DeleteConfig(999, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<NotFoundResult>());
         }
 
         [Test]

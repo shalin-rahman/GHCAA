@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using GHCAA.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
+using GHCAA.Application.Interfaces;
 using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
@@ -11,13 +10,13 @@ namespace GHCAA.API.Controllers
     [Route("api/secure-files")]
     public class SecureFilesController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IFileUploadRepository _fileUploads;
         private readonly ILogger<SecureFilesController> _logger;
         private readonly IConfiguration _config;
 
-        public SecureFilesController(ApplicationDbContext db, ILogger<SecureFilesController> logger, IConfiguration config)
+        public SecureFilesController(IFileUploadRepository fileUploads, ILogger<SecureFilesController> logger, IConfiguration config)
         {
-            _db = db;
+            _fileUploads = fileUploads;
             _logger = logger;
             _config = config;
         }
@@ -32,8 +31,7 @@ namespace GHCAA.API.Controllers
             bool isAdmin = User.IsInRole("SuperAdmin") || User.IsInRole("Admin");
 
             // Find the file in the database to get the owner
-            var fileUpload = await _db.FileUploads
-                .FirstOrDefaultAsync(f => f.FilePath == normalizedPath, cancellationToken);
+            var fileUpload = await _fileUploads.GetByFilePathAsync(normalizedPath, cancellationToken);
 
             if (fileUpload == null)
             {

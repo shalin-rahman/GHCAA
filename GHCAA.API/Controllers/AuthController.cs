@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using GHCAA.Domain;
@@ -19,15 +18,15 @@ namespace GHCAA.API.Controllers
     {
         private readonly IAuthService _authService;
         private readonly ITokenService _tokenService;
-        private readonly GHCAA.Infrastructure.Data.ApplicationDbContext _db;
+        private readonly ISocialAuthConfigService _socialAuthConfigService;
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _config;
 
-        public AuthController(IAuthService authService, ITokenService tokenService, GHCAA.Infrastructure.Data.ApplicationDbContext db, IWebHostEnvironment env, IConfiguration config)
+        public AuthController(IAuthService authService, ITokenService tokenService, ISocialAuthConfigService socialAuthConfigService, IWebHostEnvironment env, IConfiguration config)
         {
             _authService = authService;
             _tokenService = tokenService;
-            _db = db;
+            _socialAuthConfigService = socialAuthConfigService;
             _env = env;
             _config = config;
         }
@@ -36,12 +35,8 @@ namespace GHCAA.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetProviders()
         {
-            var providers = await _db.SocialAuthConfigs
-                .Where(c => c.IsEnabled)
-                .Select(c => new { c.Provider, c.ClientId })
-                .ToListAsync();
-
-            return Ok(providers);
+            var enabled = await _socialAuthConfigService.GetEnabledAsync();
+            return Ok(enabled.Select(c => new { c.Provider, c.ClientId }));
         }
 
         [HttpPost("login")]
@@ -94,8 +89,7 @@ namespace GHCAA.API.Controllers
 
             var (newRefreshToken, userId) = rotation.Value;
 
-            var user = await _db.Users.Include(u => u.Roles)
-                .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+            var user = await _authService.GetUserWithRolesAsync(userId, cancellationToken);
             // A terminated/archived member's SecurityStamp rotation and refresh-token revocation
             // race the client's already-issued refresh token; !IsActive is the backstop that closes
             // that window even if revocation is somehow missed at the point of deactivation.
@@ -122,8 +116,7 @@ namespace GHCAA.API.Controllers
 
             var (newRefreshToken, userId) = rotation.Value;
 
-            var user = await _db.Users.Include(u => u.Roles)
-                .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+            var user = await _authService.GetUserWithRolesAsync(userId, cancellationToken);
             if (user == null || !user.IsActive || user.IsArchived) return Unauthorized();
 
             var newAccessToken = _tokenService.CreateToken(user);
@@ -228,10 +221,20 @@ namespace GHCAA.API.Controllers
             if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
                 return null;
 
-            return await _db.Users
-                .Include(u => u.Roles)
-                .Include(u => u.Member)
-                .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+            return await _authService.GetUserWithRolesAndMemberAsync(userId, cancellationToken);
+        }
+
+        // 80.16: the mobile client already posts this shape to this exact route
+        // (AuthService.forgotPassword() in GHCAA.Mobile) — it only needed the route to exist.
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        [EnableRateLimiting(Constants.RateLimitPolicies.PasswordReset)]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto, CancellationToken cancellationToken)
+        {
+            await _authService.RequestPasswordResetAsync(dto.Identifier, cancellationToken);
+            // Always the same response, matched or not — the request-a-reset endpoint must not be
+            // usable to check which emails/usernames exist.
+            return Ok(new { Message = "If that account exists, a password reset link has been sent." });
         }
 
         [HttpPost("reset-password")]
@@ -260,8 +263,7 @@ namespace GHCAA.API.Controllers
             else
             {
                 // Fallback: look up by username.
-                var user = await _db.Users.AsNoTracking()
-                    .FirstOrDefaultAsync(u => u.Username == result.Username, cancellationToken);
+                var user = await _authService.GetUserByUsernameAsync(result.Username, cancellationToken);
                 if (user != null)
                     await _tokenService.StoreRefreshTokenAsync(user.Id, refreshToken, cancellationToken);
             }

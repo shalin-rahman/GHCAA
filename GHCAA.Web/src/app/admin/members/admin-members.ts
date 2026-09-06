@@ -433,6 +433,7 @@ export class AdminMembers implements OnInit {
   }
 
   saveMember() {
+    if (this.submitting()) return;
     const member = this.selectedMember();
     if (!member) return;
 

@@ -20,6 +20,9 @@ namespace GHCAA.Tests.Services
         private Mock<IActivityService> _mockActivityService = null!;
         private Mock<Microsoft.Extensions.Configuration.IConfiguration> _mockConfig = null!;
         private Mock<System.Net.Http.IHttpClientFactory> _mockHttp = null!;
+        private Mock<IEmailService> _mockEmail = null!;
+        private Mock<ICommunicationService> _mockCommunicationService = null!;
+        private Mock<IOrgConfigService> _mockOrgConfigService = null!;
         private AuthService _service = null!;
 
         [SetUp]
@@ -30,7 +33,12 @@ namespace GHCAA.Tests.Services
             _mockActivityService = new Mock<IActivityService>();
             _mockConfig = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
             _mockHttp = new Mock<System.Net.Http.IHttpClientFactory>();
-            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object, _mockConfig.Object, _mockHttp.Object);
+            _mockEmail = new Mock<IEmailService>();
+            _mockCommunicationService = new Mock<ICommunicationService>();
+            _mockOrgConfigService = new Mock<IOrgConfigService>();
+            _mockOrgConfigService.Setup(x => x.GetConfigAsync())
+                .ReturnsAsync(new OrgConfigDto { Branding = new BrandingDto { ShortName = "GHCAA" } });
+            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object, _mockConfig.Object, _mockHttp.Object, _mockEmail.Object, _mockCommunicationService.Object, _mockOrgConfigService.Object);
         }
 
         [Category("FR-08")]
@@ -145,6 +153,34 @@ namespace GHCAA.Tests.Services
 
         [Category("FR-09")]
         [Test]
+        public async Task RequestPasswordResetAsync_KnownEmail_GeneratesTokenAndSendsEmail()
+        {
+            var email = "resetme@example.com";
+            var member = await CreateAndSaveTestMemberAsync("Reset Me", email, "444", "444");
+            var user = await CreateAndSaveTestUserAsync(member.Id, "testuser_forgot", "old_password");
+
+            await _service.RequestPasswordResetAsync(email);
+
+            var updatedUser = await _context.Users.FindAsync(user.Id);
+            updatedUser!.ResetToken.Should().NotBeNullOrEmpty();
+            updatedUser.ResetTokenExpiry.Should().NotBeNull().And.BeAfter(DateTime.UtcNow);
+            _mockTokenService.Verify(x => x.RevokeAllRefreshTokensAsync(user.Id, It.IsAny<CancellationToken>()), Times.Once);
+            _mockEmail.Verify(x => x.SendEmailAsync(email, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Category("FR-09")]
+        [Test]
+        public async Task RequestPasswordResetAsync_UnknownIdentifier_DoesNothingObservableAndDoesNotThrow()
+        {
+            var act = async () => await _service.RequestPasswordResetAsync("nobody@example.com");
+
+            await act.Should().NotThrowAsync();
+            _mockTokenService.Verify(x => x.RevokeAllRefreshTokensAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+            _mockEmail.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Category("FR-09")]
+        [Test]
         public async Task ResetPasswordAsync_WithExpiredToken_ShouldReturnFalse()
         {
             // Arrange
@@ -224,6 +260,73 @@ namespace GHCAA.Tests.Services
             result.Should().NotBeNull();
             result!.Token.Should().Be(expectedToken);
             result.MemberId.Should().Be(member.Id);
+        }
+
+        // 80.13: extracted from AuthController's Refresh/RefreshMobile/step-up flows so it
+        // doesn't touch ApplicationDbContext directly.
+        [Test]
+        public async Task GetUserWithRolesAsync_ReturnsUser_WhenFound()
+        {
+            var user = new User { Username = "u1", PasswordHash = "h", SecurityStamp = "s", CreatedAt = DateTime.UtcNow };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.GetUserWithRolesAsync(user.Id);
+
+            result.Should().NotBeNull();
+            result!.Id.Should().Be(user.Id);
+        }
+
+        [Test]
+        public async Task GetUserWithRolesAsync_ReturnsNull_WhenNotFound()
+        {
+            var result = await _service.GetUserWithRolesAsync(999);
+
+            result.Should().BeNull();
+        }
+
+        [Test]
+        public async Task GetUserWithRolesAndMemberAsync_IncludesMember()
+        {
+            var member = new Member
+            {
+                FullName = "M", FatherName = "F", MotherName = "Mo", Email = "m@example.com", NID = "N",
+                MobileNo = "01700000000", PresentAddress = "A", PermanentAddress = "A",
+                EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0"
+            };
+            _context.Members.Add(member);
+            await _context.SaveChangesAsync();
+
+            var user = new User { Username = "u2", PasswordHash = "h", SecurityStamp = "s", CreatedAt = DateTime.UtcNow, MemberId = member.Id };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.GetUserWithRolesAndMemberAsync(user.Id);
+
+            result.Should().NotBeNull();
+            result!.Member.Should().NotBeNull();
+            result.Member!.Email.Should().Be("m@example.com");
+        }
+
+        [Test]
+        public async Task GetUserByUsernameAsync_ReturnsMatch()
+        {
+            var user = new User { Username = "findme", PasswordHash = "h", SecurityStamp = "s", CreatedAt = DateTime.UtcNow };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.GetUserByUsernameAsync("findme");
+
+            result.Should().NotBeNull();
+            result!.Username.Should().Be("findme");
+        }
+
+        [Test]
+        public async Task GetUserByUsernameAsync_ReturnsNull_WhenNoMatch()
+        {
+            var result = await _service.GetUserByUsernameAsync("nobody");
+
+            result.Should().BeNull();
         }
     }
 }

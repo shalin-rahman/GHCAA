@@ -26,6 +26,7 @@ class MentorshipHubScreen extends ConsumerStatefulWidget {
 
 class _MentorshipHubScreenState extends ConsumerState<MentorshipHubScreen> with SingleTickerProviderStateMixin {
   late TabController _tabs;
+  int? _processingRequestId;
 
   @override
   void initState() {
@@ -168,7 +169,7 @@ class _MentorshipHubScreenState extends ConsumerState<MentorshipHubScreen> with 
                           Expanded(
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(backgroundColor: Colors.white10),
-                              onPressed: () => _respond(req['id'], false),
+                              onPressed: _processingRequestId == req['id'] ? null : () => _respond(req['id'], false),
                               child: const Text('DECLINE', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold)),
                             ),
                           ),
@@ -176,7 +177,7 @@ class _MentorshipHubScreenState extends ConsumerState<MentorshipHubScreen> with 
                           Expanded(
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
-                              onPressed: () => _respond(req['id'], true),
+                              onPressed: _processingRequestId == req['id'] ? null : () => _respond(req['id'], true),
                               child: const Text('ACCEPT', style: TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.bold)),
                             ),
                           ),
@@ -190,7 +191,7 @@ class _MentorshipHubScreenState extends ConsumerState<MentorshipHubScreen> with 
                         width: double.infinity,
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.blueAccent)),
-                          onPressed: () => _markComplete(req['id']),
+                          onPressed: _processingRequestId == req['id'] ? null : () => _markComplete(req['id']),
                           child: const Text('MARK COMPLETED', style: TextStyle(color: Colors.blueAccent, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
                         ),
                       )
@@ -208,30 +209,42 @@ class _MentorshipHubScreenState extends ConsumerState<MentorshipHubScreen> with 
   }
 
   void _respond(int requestId, bool accept) {
+    if (_processingRequestId != null) return;
     HapticFeedback.lightImpact();
     // Simplified: No note input in mobile yet, just quick accept/decline
     _completeRespondAction(requestId, accept, null);
   }
 
   Future<void> _completeRespondAction(int requestId, bool accept, String? note) async {
-    final success = await ref.read(mentorshipServiceProvider).respondToRequest(requestId, accept, note);
-    if (!mounted) return;
-    if (success) {
-      ref.invalidate(receivedMentorshipsProvider);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(accept ? 'Mentorship accepted.' : 'Mentorship declined.')));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to update status.'), backgroundColor: Colors.redAccent));
+    setState(() => _processingRequestId = requestId);
+    try {
+      final success = await ref.read(mentorshipServiceProvider).respondToRequest(requestId, accept, note);
+      if (!mounted) return;
+      if (success) {
+        ref.invalidate(receivedMentorshipsProvider);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(accept ? 'Mentorship accepted.' : 'Mentorship declined.')));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to update status.'), backgroundColor: Colors.redAccent));
+      }
+    } finally {
+      if (mounted) setState(() => _processingRequestId = null);
     }
   }
 
   Future<void> _markComplete(int requestId) async {
-    final ok = await ref.read(mentorshipServiceProvider).markComplete(requestId);
-    if (mounted) {
-      if (ok) {
-        ref.invalidate(sentMentorshipsProvider);
-        ref.invalidate(receivedMentorshipsProvider);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mentorship marked as completed.')));
+    if (_processingRequestId != null) return;
+    setState(() => _processingRequestId = requestId);
+    try {
+      final ok = await ref.read(mentorshipServiceProvider).markComplete(requestId);
+      if (mounted) {
+        if (ok) {
+          ref.invalidate(sentMentorshipsProvider);
+          ref.invalidate(receivedMentorshipsProvider);
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mentorship marked as completed.')));
+        }
       }
+    } finally {
+      if (mounted) setState(() => _processingRequestId = null);
     }
   }
 }

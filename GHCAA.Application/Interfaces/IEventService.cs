@@ -40,5 +40,13 @@ namespace GHCAA.Application.Interfaces
         // Check-in & QR
         Task<bool> CheckInParticipantAsync(int registrationId, CancellationToken cancellationToken = default);
         Task<bool> CheckInByTicketCodeAsync(string ticketCode, CancellationToken cancellationToken = default);
+
+        // GatewaysController: reads used to validate/initiate a payment against a registration
+        // (by its PaymentReference) and to auto-approve it once the gateway confirms payment. The
+        // auto-approve path deliberately does not send the participation-approved notification
+        // that ApproveRegistrationAsync sends for an admin-initiated approval — this is a payment
+        // confirmation, not an admin review, so it keeps the narrower behavior the controller had.
+        Task<EventRegistration?> GetRegistrationByPaymentReferenceAsync(string paymentReference, CancellationToken cancellationToken = default);
+        Task AutoApproveRegistrationAfterPaymentAsync(int registrationId, int adminId, CancellationToken cancellationToken = default);
     }
 }

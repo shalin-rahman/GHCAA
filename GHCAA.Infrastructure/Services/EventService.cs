@@ -769,5 +769,21 @@ namespace GHCAA.Infrastructure.Services
 
             return true;
         }
+
+        public Task<EventRegistration?> GetRegistrationByPaymentReferenceAsync(string paymentReference, CancellationToken cancellationToken = default)
+            => _context.EventRegistrations
+                .Include(r => r.Event)
+                .FirstOrDefaultAsync(r => r.PaymentReference == paymentReference, cancellationToken);
+
+        public async Task AutoApproveRegistrationAfterPaymentAsync(int registrationId, int adminId, CancellationToken cancellationToken = default)
+        {
+            var registration = await _context.EventRegistrations.FindAsync(new object[] { registrationId }, cancellationToken);
+            if (registration == null) return;
+
+            registration.Status = EventRegistrationStatus.Approved;
+            registration.ApprovedAt = DateTime.UtcNow;
+            registration.ApprovedByAdminId = adminId;
+            await _context.SaveChangesAsync(cancellationToken);
+        }
     }
 }

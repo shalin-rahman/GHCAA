@@ -935,4 +935,34 @@ public class MemberServiceTests : TestBase
         var membersAfter = await _context.Members.CountAsync();
         membersAfter.Should().Be(membersBefore);
     }
+
+    // 80.13: extracted from GatewaysController's gateway-payment auto-approval path so it
+    // doesn't touch ApplicationDbContext directly.
+    [Test]
+    public async Task GetMembershipSnapshotAsync_ReturnsStatusAndType_WhenMemberExists()
+    {
+        var member = new Member
+        {
+            FullName = "M", FatherName = "F", MotherName = "Mo", Email = "snap@example.com", NID = "N",
+            MobileNo = "01700000001", PresentAddress = "A", PermanentAddress = "A",
+            EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0",
+            Status = Enums.MembershipStatus.Applied, MembershipType = Enums.MembershipType.General
+        };
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+
+        var snapshot = await _service.GetMembershipSnapshotAsync(member.Id);
+
+        snapshot.Should().NotBeNull();
+        snapshot!.Value.Status.Should().Be(Enums.MembershipStatus.Applied);
+        snapshot.Value.MembershipType.Should().Be(Enums.MembershipType.General);
+    }
+
+    [Test]
+    public async Task GetMembershipSnapshotAsync_ReturnsNull_WhenMemberDoesNotExist()
+    {
+        var snapshot = await _service.GetMembershipSnapshotAsync(999);
+
+        snapshot.Should().BeNull();
+    }
 }

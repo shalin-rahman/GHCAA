@@ -142,6 +142,22 @@ builder.Services.AddRateLimiter(options =>
         opt.QueueLimit = 0;
     });
 
+    // 80.16: self-service password reset request sends an email per call, so it needs to be
+    // tighter than auth/refresh (which just check a password/token, no outbound side effect) —
+    // otherwise this endpoint becomes a free way to spam a member's inbox or probe which
+    // identifiers exist by other means (response time, delivery bounces, etc).
+    options.AddPolicy<string>(GHCAA.Domain.Constants.RateLimitPolicies.PasswordReset, httpContext =>
+    {
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var key = isTestEnv ? "__test__" : ip;
+        return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+        {
+            Window = TimeSpan.FromMinutes(15),
+            PermitLimit = isTestEnv ? 1000 : 5,
+            QueueLimit = 0
+        });
+    });
+
     // General API Policy: (100 requests per 1 minute)
     options.AddFixedWindowLimiter(GHCAA.Domain.Constants.RateLimitPolicies.Api, opt =>
     {
@@ -175,7 +191,16 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    // 82.10a: EventsController.RegisterForEventForm/RegisterForEventJson deliberately share one
+    // route, disambiguated at runtime by Content-Type ([Consumes] multipart vs. json) — a real,
+    // working pattern, not a routing bug. Swashbuckle can't represent two operations under one
+    // OpenAPI path item, so without this the generator throws outright rather than documenting one
+    // route twice. Keeping the first (form) action's shape in the doc; the json variant is the
+    // same DTO either way.
+    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+});
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<GHCAA.Application.Interfaces.IRealTimeService, GHCAA.API.Services.RealTimeService>();
@@ -271,7 +296,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<AuditLogMiddleware>();
-app.UseMiddleware<LoginRateLimitMiddleware>(); // 24.48: peek username before rate limiter
 
 app.UseRateLimiter(); // Apply Rate Limiting
 

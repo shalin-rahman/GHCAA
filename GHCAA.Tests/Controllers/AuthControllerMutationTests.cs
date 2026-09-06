@@ -22,6 +22,7 @@ namespace GHCAA.Tests.Controllers
         private Mock<IAuthService> _authServiceMock = null!;
         private Mock<ITokenService> _tokenServiceMock = null!;
         private Mock<IOtpService> _otpServiceMock = null!;
+        private Mock<ISocialAuthConfigService> _socialAuthConfigServiceMock = null!;
         private AuthController _controller = null!;
 
         [SetUp]
@@ -40,7 +41,8 @@ namespace GHCAA.Tests.Controllers
 
             var configMock = new Mock<IConfiguration>();
 
-            _controller = new AuthController(_authServiceMock.Object, _tokenServiceMock.Object, _context, envMock.Object, configMock.Object);
+            _socialAuthConfigServiceMock = new Mock<ISocialAuthConfigService>();
+            _controller = new AuthController(_authServiceMock.Object, _tokenServiceMock.Object, _socialAuthConfigServiceMock.Object, envMock.Object, configMock.Object);
 
             _controller.ControllerContext = new ControllerContext
             {
@@ -88,6 +90,14 @@ namespace GHCAA.Tests.Controllers
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+
+            // AuthController now resolves these through IAuthService rather than the DbContext
+            // directly; wire the mock to return the same seeded user (with Member attached
+            // in-memory, since a fresh SaveChangesAsync doesn't populate the navigation).
+            user.Member = member;
+            _authServiceMock.Setup(x => x.GetUserWithRolesAsync(user.Id, It.IsAny<CancellationToken>())).ReturnsAsync(user);
+            _authServiceMock.Setup(x => x.GetUserWithRolesAndMemberAsync(user.Id, It.IsAny<CancellationToken>())).ReturnsAsync(user);
+
             return user;
         }
 

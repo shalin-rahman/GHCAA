@@ -2,10 +2,8 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using System.Linq;
 using GHCAA.Domain;
-using GHCAA.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
@@ -17,7 +15,8 @@ namespace GHCAA.API.Controllers
         private readonly IPaymentGatewayFactory _gatewayFactory;
         private readonly IFinancialService _financialService;
         private readonly IMemberService _memberService;
-        private readonly ApplicationDbContext _db;
+        private readonly IEventService _eventService;
+        private readonly IPaymentConfigService _paymentConfigService;
         private readonly ILogger<GatewaysController> _logger;
         private readonly IConfiguration _config;
         private readonly IOrgConfigService _orgConfig;
@@ -26,7 +25,8 @@ namespace GHCAA.API.Controllers
             IPaymentGatewayFactory gatewayFactory,
             IFinancialService financialService,
             IMemberService memberService,
-            ApplicationDbContext db,
+            IEventService eventService,
+            IPaymentConfigService paymentConfigService,
             ILogger<GatewaysController> logger,
             IConfiguration config,
             IOrgConfigService orgConfig)
@@ -34,7 +34,8 @@ namespace GHCAA.API.Controllers
             _gatewayFactory = gatewayFactory;
             _financialService = financialService;
             _memberService = memberService;
-            _db = db;
+            _eventService = eventService;
+            _paymentConfigService = paymentConfigService;
             _logger = logger;
             _config = config;
             _orgConfig = orgConfig;
@@ -71,11 +72,9 @@ namespace GHCAA.API.Controllers
             }
             else
             {
-                var registration = await _db.EventRegistrations
-                    .Include(r => r.Event)
-                    .FirstOrDefaultAsync(
-                        r => r.PaymentReference == request.Reference && r.Status == Enums.EventRegistrationStatus.Pending,
-                        cancellationToken);
+                var registration = await _eventService.GetRegistrationByPaymentReferenceAsync(request.Reference, cancellationToken);
+                if (registration != null && registration.Status != Enums.EventRegistrationStatus.Pending)
+                    registration = null;
 
                 if (registration?.Event == null)
                 {
@@ -120,7 +119,7 @@ namespace GHCAA.API.Controllers
                 return BadRequest("This payment method is temporarily unavailable via system configuration.");
             }
 
-            var dbConfig = await _db.PaymentConfigurations.FirstOrDefaultAsync(p => p.Gateway == request.Gateway && p.IsEnabled, cancellationToken);
+            var dbConfig = await _paymentConfigService.GetEnabledByGatewayAsync(request.Gateway, cancellationToken);
             if (dbConfig == null)
             {
                 _logger.LogWarning("Blocked initiation of disabled gateway (DB): {Gateway}", request.Gateway);
@@ -304,9 +303,7 @@ namespace GHCAA.API.Controllers
             // 24.13: Idempotency check — short-circuit if this gateway payment was already processed.
             if (!string.IsNullOrEmpty(gatewayPaymentId))
             {
-                var alreadyProcessed = await _db.PaymentHistories.AnyAsync(
-                    p => p.GatewayPaymentId == gatewayPaymentId && p.Status == Enums.PaymentStatus.Completed,
-                    cancellationToken);
+                var alreadyProcessed = await _financialService.IsGatewayPaymentAlreadyProcessedAsync(gatewayPaymentId, cancellationToken);
                 if (alreadyProcessed)
                 {
                     _logger.LogInformation("Duplicate callback ignored for GatewayPaymentId {GwId}", gatewayPaymentId);
@@ -314,12 +311,12 @@ namespace GHCAA.API.Controllers
                 }
             }
 
-            var payment = await _db.PaymentHistories.FirstOrDefaultAsync(p => p.TransactionId == transactionId, cancellationToken);
+            var payment = await _financialService.GetPaymentSnapshotByTransactionIdAsync(transactionId, cancellationToken);
             if (payment == null || payment.Status == Enums.PaymentStatus.Completed) return;
 
             // 24.13: Persist the gateway payment ID for future idempotency checks.
             if (!string.IsNullOrEmpty(gatewayPaymentId))
-                payment.GatewayPaymentId = gatewayPaymentId;
+                await _financialService.StampGatewayPaymentIdAsync(payment.Id, gatewayPaymentId, cancellationToken);
 
             // 29B.2 Security Check: whenever the gateway REPORTS an amount it must match the recorded
             // amount — including a reported 0. The old `confirmedAmount > 0` guard let a 0 (or absent)
@@ -355,7 +352,7 @@ namespace GHCAA.API.Controllers
 
                 var registration = string.IsNullOrEmpty(fullRef)
                     ? null
-                    : await _db.EventRegistrations.Include(r => r.Event).FirstOrDefaultAsync(r => r.PaymentReference == fullRef, cancellationToken);
+                    : await _eventService.GetRegistrationByPaymentReferenceAsync(fullRef, cancellationToken);
 
                 if (registration != null && registration.Status == Enums.EventRegistrationStatus.Pending && registration.Event != null)
                 {
@@ -368,10 +365,7 @@ namespace GHCAA.API.Controllers
                         int.TryParse(adminIdStr, out var adminId);
 
                         _logger.LogInformation("Auto-Approving Event Registration {Id} for reference {Ref}", registration.Id, fullRef);
-                        registration.Status = Enums.EventRegistrationStatus.Approved;
-                        registration.ApprovedAt = DateTime.UtcNow;
-                        registration.ApprovedByAdminId = adminId; // System Admin
-                        await _db.SaveChangesAsync(cancellationToken);
+                        await _eventService.AutoApproveRegistrationAfterPaymentAsync(registration.Id, adminId, cancellationToken);
                     }
                     else
                     {
@@ -388,21 +382,23 @@ namespace GHCAA.API.Controllers
             if (payment.MemberId is int membershipPayerId && membershipPayerId > 0
                 && payment.FinancialCategory == Enums.FinancialCategory.MembershipFee)
             {
-                var member = await _db.Members.FindAsync(new object[] { membershipPayerId }, cancellationToken);
-                if (member != null && member.Status == Enums.MembershipStatus.Applied)
+                var snapshot = await _memberService.GetMembershipSnapshotAsync(membershipPayerId, cancellationToken);
+                if (snapshot != null && snapshot.Value.Status == Enums.MembershipStatus.Applied)
                 {
+                    var membershipType = snapshot.Value.MembershipType;
+
                     // 82.32: was an inline query missing IsActive, the Category filter and the
                     // EffectiveTo upper bound — a disabled or expired fee row, or a differently
                     // categorised row for the same MembershipType (e.g. an EventFee), could win by
                     // being the most recent EffectiveDate. GetApplicableFeeAsync is the one query
                     // every other fee lookup in the codebase uses; this path had drifted from it.
                     var required = await _financialService.GetApplicableFeeAsync(
-                        Enums.FinancialCategory.MembershipFee, member.MembershipType, DateTime.UtcNow, cancellationToken);
+                        Enums.FinancialCategory.MembershipFee, membershipType, DateTime.UtcNow, cancellationToken);
 
                     // S4.3: Fail loudly when fee config is missing — do not silently default.
                     if (required <= 0)
                     {
-                        _logger.LogError("Auto-approval skipped for Member {Id}: no fee config found for type {Type}", member.Id, member.MembershipType);
+                        _logger.LogError("Auto-approval skipped for Member {Id}: no fee config found for type {Type}", membershipPayerId, membershipType);
                         return;
                     }
                     if (payment.Amount >= required)
@@ -412,12 +408,12 @@ namespace GHCAA.API.Controllers
                             ?? throw new InvalidOperationException($"{Constants.ConfigKeys.SystemAdminId} is not configured.");
                         int.TryParse(adminIdStr, out var adminId);
 
-                        _logger.LogInformation("Auto-Approving Member {MemberId} after successful gateway payment.", member.Id);
-                        await _memberService.ApproveMemberAsync(member.Id, adminId, cancellationToken);
+                        _logger.LogInformation("Auto-Approving Member {MemberId} after successful gateway payment.", membershipPayerId);
+                        await _memberService.ApproveMemberAsync(membershipPayerId, adminId, cancellationToken);
                     }
                     else
                     {
-                        _logger.LogWarning("Member {Id} under-paid subscription: Required {R}, Paid {P}", member.Id, required, payment.Amount);
+                        _logger.LogWarning("Member {Id} under-paid subscription: Required {R}, Paid {P}", membershipPayerId, required, payment.Amount);
                     }
                 }
             }

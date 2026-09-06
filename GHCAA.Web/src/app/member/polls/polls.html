@@ -31,10 +31,10 @@
                         <span class="opt-text">{{ opt.text }}</span>
                     </div>
 
-                    <button class="btn btn-accent w-full mt-6" 
-                            [disabled]="poll.selectedOptionIds.length === 0"
+                    <button class="btn btn-accent w-full mt-6"
+                            [disabled]="poll.selectedOptionIds.length === 0 || votingId() === poll.id"
                             (click)="submitVote(poll)">
-                        Submit My Vote
+                        {{ votingId() === poll.id ? 'Submitting...' : 'Submit My Vote' }}
                     </button>
                     <p class="vote-hint" *ngIf="poll.allowMultipleChoice">You can select multiple options.</p>
                 </div>

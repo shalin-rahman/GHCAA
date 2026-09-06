@@ -156,11 +156,18 @@ export class AdminGovernance implements OnInit {
         });
     }
 
+    private searchTimer: ReturnType<typeof setTimeout> | null = null;
+
     searchMembers(query: string) {
+        if (this.searchTimer) clearTimeout(this.searchTimer);
         if (query.length < 2) {
             this.memberSearchResults.set([]);
             return;
         }
+        this.searchTimer = setTimeout(() => this.runMemberSearch(query), 300);
+    }
+
+    private runMemberSearch(query: string) {
         this.isSearching.set(true);
         this.adminService.getMembers(1, 50, query).subscribe({
             next: (response: any) => {

@@ -20,13 +20,22 @@ final newsDetailsProvider = FutureProvider.family<Map<String, dynamic>?, int>((r
   }
 });
 
-class NewsDetailsScreen extends ConsumerWidget {
+class NewsDetailsScreen extends ConsumerStatefulWidget {
   final int newsId;
 
   const NewsDetailsScreen({super.key, required this.newsId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NewsDetailsScreen> createState() => _NewsDetailsScreenState();
+}
+
+class _NewsDetailsScreenState extends ConsumerState<NewsDetailsScreen> {
+  bool _approving = false;
+
+  int get newsId => widget.newsId;
+
+  @override
+  Widget build(BuildContext context) {
     final detailsAsync = ref.watch(newsDetailsProvider(newsId));
     final roleAsync = ref.watch(roleProvider);
     final isAdmin = roleAsync.value?.isStaffAdminRole ?? false;
@@ -36,9 +45,12 @@ class NewsDetailsScreen extends ConsumerWidget {
       breadcrumb: 'Alumni Press > Story',
       actions: isAdmin ? [
         IconButton(
-          icon: const Icon(Icons.check_circle_outline, color: Colors.greenAccent, size: 20),
+          icon: _approving
+              ? SizedBox(height: 16, width: 16, child: LogoSpinner.small())
+              : const Icon(Icons.check_circle_outline, color: Colors.greenAccent, size: 20),
           tooltip: 'Approve',
-          onPressed: () async {
+          onPressed: _approving ? null : () async {
+            setState(() => _approving = true);
             try {
               final dio = ref.read(dioProvider);
               await dio.put('/news/$newsId/approve');
@@ -46,6 +58,8 @@ class NewsDetailsScreen extends ConsumerWidget {
               if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Article approved and published.')));
             } catch (e) {
               if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Approval failed: $e'), backgroundColor: Colors.redAccent));
+            } finally {
+              if (mounted) setState(() => _approving = false);
             }
           },
         ),

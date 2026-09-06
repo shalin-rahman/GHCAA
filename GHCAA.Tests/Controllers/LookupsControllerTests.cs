@@ -43,7 +43,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetPublicStats_ReturnsOk_WhenServiceReturnsNull()
         {
-            _memberServiceMock.Setup(s => s.GetPublicStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(default(object));
+            _memberServiceMock.Setup(s => s.GetPublicStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync((object)null!);
 
             var result = await _controller.GetPublicStats(CancellationToken.None);
 

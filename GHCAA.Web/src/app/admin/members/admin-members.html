@@ -789,7 +789,7 @@
         @if (isEditing()) {
         <div class="modal-footer">
             <button class="btn btn-secondary" (click)="toggleEdit()">Cancel</button>
-            <button class="btn btn-accent" (click)="saveMember()">{{ submitting() ? 'Saving...' : 'Save Changes' }}</button>
+            <button class="btn btn-accent" [disabled]="submitting()" (click)="saveMember()">{{ submitting() ? 'Saving...' : 'Save Changes' }}</button>
         </div>
         }
     </div>

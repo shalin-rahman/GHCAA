@@ -702,5 +702,46 @@ namespace GHCAA.Infrastructure.Services
                 Notes = p.Notes
             };
         }
+
+        public async Task<int?> GetPaymentOwnerMemberIdAsync(int paymentId, CancellationToken cancellationToken = default)
+        {
+            var payment = await _db.PaymentHistories.FindAsync(new object[] { paymentId }, cancellationToken);
+            return payment?.MemberId;
+        }
+
+        public async Task<int?> GetMemberIdForUserAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            var user = await _db.Users.FindAsync(new object[] { userId }, cancellationToken);
+            return user?.MemberId;
+        }
+
+        public Task<bool> IsGatewayPaymentAlreadyProcessedAsync(string gatewayPaymentId, CancellationToken cancellationToken = default)
+            => _db.PaymentHistories.AnyAsync(p => p.GatewayPaymentId == gatewayPaymentId && p.Status == Enums.PaymentStatus.Completed, cancellationToken);
+
+        public async Task<PaymentHistoryDto?> GetPaymentSnapshotByTransactionIdAsync(string transactionId, CancellationToken cancellationToken = default)
+        {
+            var payment = await _db.PaymentHistories.AsNoTracking().FirstOrDefaultAsync(p => p.TransactionId == transactionId, cancellationToken);
+            if (payment == null) return null;
+            return new PaymentHistoryDto
+            {
+                Id = payment.Id,
+                MemberId = payment.MemberId,
+                TransactionId = payment.TransactionId,
+                Amount = payment.Amount,
+                PaidAt = payment.PaidAt,
+                Status = payment.Status,
+                FinancialCategory = payment.FinancialCategory,
+                PaymentMethod = payment.PaymentMethod,
+                Notes = payment.Notes
+            };
+        }
+
+        public async Task StampGatewayPaymentIdAsync(int paymentId, string gatewayPaymentId, CancellationToken cancellationToken = default)
+        {
+            var payment = await _db.PaymentHistories.FindAsync(new object[] { paymentId }, cancellationToken);
+            if (payment == null) return;
+            payment.GatewayPaymentId = gatewayPaymentId;
+            await _db.SaveChangesAsync(cancellationToken);
+        }
     }
 }

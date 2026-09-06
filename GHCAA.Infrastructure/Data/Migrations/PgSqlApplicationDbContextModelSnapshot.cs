@@ -9265,6 +9265,8 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Year", "RecordType", "FinancialCategory");
+
                     b.ToTable("FinancialRecords");
                 });
 
@@ -38825,7 +38827,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MemberId");
+                    b.HasIndex("MemberId", "CreatedAt");
 
                     b.ToTable("Notifications");
                 });

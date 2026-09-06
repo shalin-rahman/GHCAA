@@ -144,6 +144,10 @@ class _GatekeeperScreenState extends ConsumerState<GatekeeperScreen> {
         MobileScanner(
           controller: _controller,
           onDetect: (capture) {
+            // MobileScanner keeps firing onDetect on every camera frame (roughly every
+            // 100ms) regardless of _isScanning/_isLoading, so without this guard the same
+            // barcode gets verified multiple times before the first call's setState lands.
+            if (_isLoading) return;
             final List<Barcode> barcodes = capture.barcodes;
             for (final barcode in barcodes) {
               final String? code = barcode.rawValue;

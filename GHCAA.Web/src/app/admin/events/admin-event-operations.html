@@ -38,9 +38,9 @@
                            placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
                            class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-slate-200">
                 </div>
-                <button (click)="addTask()" 
+                <button (click)="addTask()" [disabled]="addingTask()"
                         class="bg-accent text-slate-900 px-6 py-2 rounded-lg font-bold hover:shadow-lg transition-all h-fit self-end">
-                    Assign
+                    {{ addingTask() ? 'Assigning...' : 'Assign' }}
                 </button>
             </div>
         </div>
@@ -50,7 +50,7 @@
             <div *ngFor="let task of tasks()" 
                  class="flex items-center justify-between p-4 bg-slate-800/40 rounded-xl border border-white/5 hover:border-accent/30 transition-all group">
                 <div class="flex items-center gap-4">
-                    <button (click)="toggleTask(task.id)" 
+                    <button (click)="toggleTask(task.id)" [disabled]="togglingTaskId() === task.id"
                             class="w-6 h-6 rounded-full border-2 border-accent/50 flex items-center justify-center transition-all"
                             [class.bg-accent]="task.isCompleted">
                         <app-icon *ngIf="task.isCompleted" name="check" [size]="14" class="text-slate-900"></app-icon>
@@ -66,7 +66,7 @@
                     </div>
                 </div>
                 
-                <button (click)="deleteTask(task.id)" class="text-slate-600 hover:text-red-400 p-2 opacity-0 group-hover:opacity-100 transition-all">
+                <button (click)="deleteTask(task.id)" [disabled]="deletingTaskId() === task.id" class="text-slate-600 hover:text-red-400 p-2 opacity-0 group-hover:opacity-100 transition-all">
                     <app-icon name="trash" [size]="16"></app-icon>
                 </button>
             </div>
@@ -129,9 +129,9 @@
                            placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
                            class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-slate-200">
                 </div>
-                <button (click)="addExpense()" 
+                <button (click)="addExpense()" [disabled]="addingExpense()"
                         class="bg-emerald-500 text-slate-900 px-6 py-2 rounded-lg font-bold hover:shadow-lg transition-all">
-                    Add Expense
+                    {{ addingExpense() ? 'Adding...' : 'Add Expense' }}
                 </button>
             </div>
         </div>
@@ -155,7 +155,7 @@
                         <td class="px-4 py-4 text-slate-400 italic text-xs">{{ ex.note || '---' }}</td>
                         <td class="px-4 py-4 text-right font-mono text-emerald-400 font-bold">৳ {{ ex.amount | number:'1.2-2' }}</td>
                         <td class="px-4 py-4 text-right">
-                            <button (click)="deleteExpense(ex.id)" class="text-slate-600 hover:text-red-400 transition-all p-2">
+                            <button (click)="deleteExpense(ex.id)" [disabled]="deletingExpenseId() === ex.id" class="text-slate-600 hover:text-red-400 transition-all p-2">
                                 <app-icon name="close" [size]="14"></app-icon>
                             </button>
                         </td>

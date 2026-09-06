@@ -33,6 +33,7 @@ namespace GHCAA.Domain
             public const string Refresh = "refresh";
             public const string Registration = "registration";
             public const string Api = "api";
+            public const string PasswordReset = "passwordReset";
         }
 
         public static class OutputCachePolicies

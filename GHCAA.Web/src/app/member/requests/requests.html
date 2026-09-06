@@ -1,0 +1,161 @@
+<div class="requests-container admin-feature">
+    <app-page-header title="My Requests"
+        emptySubtitle="Family links and mentorship requests you've sent or received.">
+        <button actions class="btn btn-accent" (click)="openSendForm()">
+            <span class="icon">➕</span> New Request
+        </button>
+    </app-page-header>
+
+    <div class="tab-bar glass-card mb-6">
+        <button class="tab-btn" [class.active]="activeTab() === 'family'" (click)="setTab('family')">Family Links</button>
+        <button class="tab-btn" [class.active]="activeTab() === 'mentorship'" (click)="setTab('mentorship')">Mentorship</button>
+    </div>
+
+    @if (showSendForm()) {
+    <div class="glass-card send-form mb-6">
+        <h3>New {{ activeTab() === 'family' ? 'Family Link' : 'Mentorship' }} Request</h3>
+
+        <label>Search for a member</label>
+        <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="search()" placeholder="Type a name...">
+        @if (searchResults().length) {
+        <div class="search-results">
+            @for (m of searchResults(); track m.id) {
+            <div class="search-result-item" (click)="selectMember(m)">{{ m.fullName }} <small>{{ m.membershipNumber }}</small></div>
+            }
+        </div>
+        }
+
+        @if (activeTab() === 'family') {
+        <label>Relationship</label>
+        <select [(ngModel)]="relationship">
+            <option value="Spouse">Spouse</option>
+            <option value="Parent">Parent</option>
+            <option value="Child">Child</option>
+            <option value="Sibling">Sibling</option>
+            <option value="Other">Other</option>
+        </select>
+        } @else {
+        <label>Area you'd like mentorship in (optional)</label>
+        <input type="text" [(ngModel)]="domain" placeholder="e.g. Software Engineering">
+        }
+
+        <label>Message (optional)</label>
+        <textarea [(ngModel)]="message" rows="2"></textarea>
+
+        <div class="form-actions">
+            <button class="btn btn-secondary" (click)="closeSendForm()">Cancel</button>
+            <button class="btn btn-accent" [disabled]="sending()" (click)="sendRequest()">{{ sending() ? 'Sending...' : 'Send Request' }}</button>
+        </div>
+    </div>
+    }
+
+    @if (loading()) {
+    <div class="loading-state glass-card py-20 text-center">
+        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+        <p>Loading your requests...</p>
+    </div>
+    } @else {
+
+    @if (activeTab() === 'family') {
+    <div class="glass-card content-card mb-6">
+        <h3>Received</h3>
+        @if (!familyReceived().length) {
+        <p class="empty-state-compact">No family link requests waiting on you.</p>
+        } @else {
+        @for (r of familyReceived(); track r.id) {
+        <div class="request-row">
+            <div class="text">
+                <strong>{{ r.requesterName }}</strong> wants to link as <em>{{ r.relationship }}</em>
+                @if (r.note) { <p class="note">"{{ r.note }}"</p> }
+            </div>
+            <div class="row-actions">
+                <button class="btn btn-accent btn-sm" [disabled]="processingId() === r.id" (click)="respondFamily(r.id, true)">Accept</button>
+                <button class="btn btn-outline btn-sm" [disabled]="processingId() === r.id" (click)="respondFamily(r.id, false)">Decline</button>
+            </div>
+        </div>
+        }
+        }
+    </div>
+
+    <div class="glass-card content-card mb-6">
+        <h3>Sent</h3>
+        @if (!familySent().length) {
+        <p class="empty-state-compact">You haven't sent any family link requests.</p>
+        } @else {
+        @for (r of familySent(); track r.id) {
+        <div class="request-row">
+            <div class="text">
+                <strong>{{ r.targetMemberName }}</strong> — <em>{{ r.relationship }}</em>
+                <span class="status-badge" [class]="r.status?.toLowerCase()">{{ r.status }}</span>
+            </div>
+            @if (r.status === 'Requested') {
+            <div class="row-actions">
+                <button class="btn btn-outline btn-sm" [disabled]="processingId() === r.id" (click)="cancelFamily(r.id)">Cancel</button>
+            </div>
+            }
+        </div>
+        }
+        }
+    </div>
+
+    <div class="glass-card content-card">
+        <h3>Your Family Network</h3>
+        @if (!familyAccepted().length) {
+        <p class="empty-state-compact">No accepted family links yet.</p>
+        } @else {
+        @for (link of familyAccepted(); track link.id) {
+        <div class="request-row">
+            <div class="text">
+                <strong>{{ otherFamilyMember(link).name }}</strong> — <em>{{ link.relationship }}</em>
+                <small>{{ otherFamilyMember(link).membershipNumber }}</small>
+            </div>
+            <div class="row-actions">
+                <button class="btn btn-outline btn-sm" [disabled]="processingId() === link.id" (click)="removeFamily(link.id)">Remove</button>
+            </div>
+        </div>
+        }
+        }
+    </div>
+    }
+
+    @if (activeTab() === 'mentorship') {
+    <div class="glass-card content-card mb-6">
+        <h3>Received (you as mentor)</h3>
+        @if (!mentorshipReceived().length) {
+        <p class="empty-state-compact">No mentorship requests waiting on you.</p>
+        } @else {
+        @for (r of mentorshipReceived(); track r.id) {
+        <div class="request-row">
+            <div class="text">
+                <strong>{{ r.requester?.fullName }}</strong> asked for mentorship @if (r.domain) { in <em>{{ r.domain }}</em> }
+                @if (r.message) { <p class="note">"{{ r.message }}"</p> }
+            </div>
+            @if (r.status === 'Pending') {
+            <div class="row-actions">
+                <button class="btn btn-accent btn-sm" [disabled]="processingId() === r.id" (click)="respondMentorship(r.id, true)">Accept</button>
+                <button class="btn btn-outline btn-sm" [disabled]="processingId() === r.id" (click)="respondMentorship(r.id, false)">Decline</button>
+            </div>
+            }
+        </div>
+        }
+        }
+    </div>
+
+    <div class="glass-card content-card">
+        <h3>Sent</h3>
+        @if (!mentorshipSent().length) {
+        <p class="empty-state-compact">You haven't sent any mentorship requests.</p>
+        } @else {
+        @for (r of mentorshipSent(); track r.id) {
+        <div class="request-row">
+            <div class="text">
+                <strong>{{ r.mentor?.fullName }}</strong> @if (r.domain) { — <em>{{ r.domain }}</em> }
+                <span class="status-badge" [class]="r.status?.toLowerCase()">{{ r.status }}</span>
+            </div>
+        </div>
+        }
+        }
+    </div>
+    }
+    }
+</div>

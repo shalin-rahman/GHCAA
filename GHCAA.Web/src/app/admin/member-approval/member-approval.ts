@@ -46,6 +46,7 @@ export class MemberApproval implements OnInit {
 
   rejecting = signal(false);
   rejectionReason = '';
+  processing = signal(false);
 
   ngOnInit() {
     this.loadMembers();
@@ -108,28 +109,39 @@ export class MemberApproval implements OnInit {
   }
 
   approve(id: number) {
+    if (this.processing()) return;
     if (confirm('Verify this registry entry? This will officially induct the member and dispatch credentials.')) {
+      this.processing.set(true);
       this.adminService.approveMember(id).subscribe({
         next: () => {
+          this.processing.set(false);
           this.notify.success('Registry verified. Member successfully inducted.');
           this.selectedMember.set(null);
           this.loadMembers();
         },
-        error: () => this.notify.error('Failed to verify registry.')
+        error: () => {
+          this.processing.set(false);
+          this.notify.error('Failed to verify registry.');
+        }
       });
     }
   }
 
   confirmReject() {
-    if (!this.rejectionReason) return;
+    if (this.processing() || !this.rejectionReason) return;
     if (confirm('Permanently decline this registry filing? The applicant will be notified with your reason.')) {
+      this.processing.set(true);
       this.adminService.rejectMember(this.selectedMember().id, this.rejectionReason).subscribe({
         next: () => {
+          this.processing.set(false);
           this.notify.success('Application declined. Record removed from active queue.');
           this.selectedMember.set(null);
           this.loadMembers();
         },
-        error: () => this.notify.error('Failed to decline application.')
+        error: () => {
+          this.processing.set(false);
+          this.notify.error('Failed to decline application.');
+        }
       });
     }
   }

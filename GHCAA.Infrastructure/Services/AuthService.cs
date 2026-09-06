@@ -20,13 +20,19 @@ namespace GHCAA.Infrastructure.Services
         private readonly IActivityService _activityService;
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IEmailService _email;
+        private readonly ICommunicationService _communicationService;
+        private readonly IOrgConfigService _orgConfigService;
 
         public AuthService(ApplicationDbContext db,
             ITokenService tokenService,
             ILogger<AuthService> logger,
             IActivityService activityService,
             IConfiguration configuration,
-            IHttpClientFactory httpClientFactory)
+            IHttpClientFactory httpClientFactory,
+            IEmailService email,
+            ICommunicationService communicationService,
+            IOrgConfigService orgConfigService)
         {
             _db = db;
             _tokenService = tokenService;
@@ -34,6 +40,9 @@ namespace GHCAA.Infrastructure.Services
             _activityService = activityService;
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
+            _email = email;
+            _communicationService = communicationService;
+            _orgConfigService = orgConfigService;
         }
 
         // Brute-force lockout (S5.1) and timing-enumeration equalization (S5.2) are both handled
@@ -362,6 +371,87 @@ namespace GHCAA.Infrastructure.Services
             if (names.Contains(Constants.Roles.Admin)) return Constants.Roles.Admin;
             return names[0];
         }
+        // 80.16: the self-service half of password reset. Always returns — never tells the caller
+        // whether the identifier matched a real account, same reasoning as LoginAsync's S5.2 timing
+        // equalization: an "email not found" response is a ready-made account-enumeration oracle.
+        // System admin accounts have no email (gotcha_system_admin_no_email) so this only reaches
+        // members; an admin still resets a system admin's password via the existing admin flow.
+        public async Task RequestPasswordResetAsync(string identifier, CancellationToken cancellationToken = default)
+        {
+            var trimmed = identifier?.Trim() ?? string.Empty;
+            var member = await _db.Members
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(m => m.Email.ToLower() == trimmed.ToLower(), cancellationToken);
+
+            if (member == null)
+            {
+                // Same shape of work as the match branch below (one BCrypt hash, comparable cost to
+                // the real path's hashing-adjacent work) so a missing identifier doesn't resolve
+                // noticeably faster than one that exists.
+                BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString("N"));
+                return;
+            }
+
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == member.Id, cancellationToken);
+            if (user == null)
+            {
+                BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString("N"));
+                return;
+            }
+
+            var token = Guid.NewGuid().ToString("N");
+            user.ResetToken = token;
+            user.ResetTokenExpiry = DateTime.UtcNow.AddHours(24);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // A reset request otherwise leaves a session taken over before the request still valid
+            // once the reset completes.
+            await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
+
+            await _activityService.LogActivityAsync(member.Id, "Password Reset Requested",
+                "Member requested a password reset link.", cancellationToken: cancellationToken);
+
+            var clientUrl = _configuration[Constants.ConfigKeys.ClientUrl] ?? "http://localhost:4200";
+            var resetUrl = $"{clientUrl}/reset-password?email={Uri.EscapeDataString(member.Email)}&token={token}";
+
+            var dbTemplate = await _communicationService.GetTemplateByCodeAsync(Constants.TemplateCodes.PasswordReset, cancellationToken);
+
+            string subject, body;
+            if (dbTemplate != null)
+            {
+                subject = dbTemplate.Subject.Replace("{{FullName}}", member.FullName);
+                body = dbTemplate.Body
+                    .Replace("{{FullName}}", member.FullName)
+                    .Replace("{{ResetUrl}}", resetUrl)
+                    .Replace("{{MembershipNumber}}", member.MembershipNumber ?? "Pending");
+            }
+            else
+            {
+                var config = await _orgConfigService.GetConfigAsync();
+                subject = $"{config.Branding.ShortName} Password Reset Request";
+                body = $@"
+                <div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto;'>
+                    <h2 style='color: #c5a059;'>Password Reset Requested</h2>
+                    <p>Hello <strong>{member.FullName}</strong>,</p>
+                    <p>We received a request to reset the password on your {config.Branding.ShortName} account.</p>
+                    <p>Please click the button below to set a new password. This link is valid for 24 hours.</p>
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <a href='{resetUrl}' style='background: #111; color: #c5a059; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; border: 1px solid #c5a059;'>Reset My Password</a>
+                    </div>
+                    <p style='color: #666; font-size: 0.9rem;'>If you did not request this, you can safely ignore this email — your password will not change.</p>
+                </div>";
+            }
+
+            try
+            {
+                await _email.SendEmailAsync(member.Email, subject, body);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send password reset email to {Email}", member.Email);
+            }
+        }
+
         public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members
@@ -405,5 +495,14 @@ namespace GHCAA.Infrastructure.Services
 
             return true;
         }
+
+        public Task<User?> GetUserWithRolesAsync(int userId, CancellationToken cancellationToken = default)
+            => _db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        public Task<User?> GetUserWithRolesAndMemberAsync(int userId, CancellationToken cancellationToken = default)
+            => _db.Users.Include(u => u.Roles).Include(u => u.Member).FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        public Task<User?> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default)
+            => _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
     }
 }
