@@ -6574,7 +6574,7 @@ path with `EnsureCreated()` as the logged fallback. **Still open:** the ADR for 
 2026's acceptance asked for one "under 82.13's work," and 82.13 (the ADR set itself) is still `[TODO]`;
 there is nowhere for the ADR to live until that item is built, so this stays PARTIAL rather than DONE.
 
-82.28 [TODO] **Priority: P4 | Depends on: none.** `GHCAA.Tests/UnitTest1.cs` is the unmodified
+82.28 [DONE 2026-09-06] **Priority: P4 | Depends on: none.** `GHCAA.Tests/UnitTest1.cs` is the unmodified
 `dotnet new nunit` scaffold — a single `Assert.Pass()` — sitting in an otherwise well-organised 79-file
 suite. Delete it. **Why it is worth a tracker line at all rather than just doing it:** three separate
 review passes have now rediscovered it, and an item is cheaper than a fourth rediscovery.
@@ -6583,6 +6583,7 @@ research pass called them dead pre-split artifacts and recommended deleting them
 list` shows all five in the live chain, so deleting them would break migration history. If their
 location is ever tidied, that is a separate change needing a migration-chain test, not a cleanup.
 **Acceptance:** `UnitTest1.cs` is gone and the suite still passes.
+**Resolved 2026-09-06:** deleted; `dotnet build GHCAA.Tests` still succeeds.
 
 82.29 [DONE 2026-09-06] **Priority: P2 | Depends on: 82.16 (done — supplies the rule and the pattern).** `ECMember`
 had two removal semantics living side by side: `GovernanceService.DeleteECMemberAsync` did a hard
