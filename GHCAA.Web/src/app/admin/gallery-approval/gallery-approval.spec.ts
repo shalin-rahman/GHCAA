@@ -47,7 +47,7 @@ describe('GalleryApproval Component', () => {
         const album: any = { id: 1, title: 'Test Album', photos: [] };
         component.viewAlbum(album);
         component.approve();
-        expect(galleryServiceMock.approveGallery).toHaveBeenCalledWith(1);
+        expect(galleryServiceMock.approveGallery).toHaveBeenCalledWith(1, true);
     });
 
     it('should reject the selected photo with a reason', () => {
@@ -55,6 +55,26 @@ describe('GalleryApproval Component', () => {
         component.viewPhoto(photo);
         component.rejectReason.set('Not appropriate');
         component.reject();
-        expect(galleryServiceMock.rejectPhoto).toHaveBeenCalledWith(5, 'Not appropriate');
+        expect(galleryServiceMock.rejectPhoto).toHaveBeenCalledWith(5, 'Not appropriate', true);
+    });
+
+    // 82.52 batch 3: notifyMember defaults true (matches the unconditional notify these already did)
+    // and can be turned off per submission.
+    it('viewAlbum resets notifyMember to true and honors opt-out on approve', () => {
+        const album: any = { id: 2, title: 'Another Album', photos: [] };
+        component.viewAlbum(album);
+        expect(component.notifyMember()).toBe(true);
+        component.notifyMember.set(false);
+        component.approve();
+        expect(galleryServiceMock.approveGallery).toHaveBeenCalledWith(2, false);
+    });
+
+    it('rejectGallery carries notifyMember:false when the admin opts out', () => {
+        const album: any = { id: 3, title: 'Third Album', photos: [] };
+        component.viewAlbum(album);
+        component.rejectReason.set('Not appropriate');
+        component.notifyMember.set(false);
+        component.reject();
+        expect(galleryServiceMock.rejectGallery).toHaveBeenCalledWith(3, 'Not appropriate', false);
     });
 });

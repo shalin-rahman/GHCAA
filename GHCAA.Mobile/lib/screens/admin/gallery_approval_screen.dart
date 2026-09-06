@@ -179,12 +179,15 @@ class _GalleryApprovalScreenState extends ConsumerState<GalleryApprovalScreen> {
 
   Future<void> _handleGalleryResolve(BuildContext context, WidgetRef ref, int id, bool approve) async {
     String? reason;
+    bool notify = true;
     if (!approve) {
-      reason = await showRejectReasonDialog(context, title: 'REJECT ALBUM');
-      if (reason == null) return;
+      final result = await showRejectReasonWithNotifyDialog(context, title: 'REJECT ALBUM');
+      if (result == null) return;
+      reason = result.reason;
+      notify = result.notify;
     }
     HapticFeedback.heavyImpact();
-    final success = await ref.read(galleryServiceProvider).resolveGalleryApproval(id, approve, reason: reason);
+    final success = await ref.read(galleryServiceProvider).resolveGalleryApproval(id, approve, reason: reason, notifyMember: notify);
     if (success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(approve ? 'Album approved.' : 'Album rejected.')));
       ref.invalidate(pendingGalleryApprovalsProvider);
@@ -193,12 +196,15 @@ class _GalleryApprovalScreenState extends ConsumerState<GalleryApprovalScreen> {
 
   Future<void> _handlePhotoResolve(BuildContext context, WidgetRef ref, int id, bool approve) async {
     String? reason;
+    bool notify = true;
     if (!approve) {
-      reason = await showRejectReasonDialog(context, title: 'REJECT PHOTO');
-      if (reason == null) return;
+      final result = await showRejectReasonWithNotifyDialog(context, title: 'REJECT PHOTO');
+      if (result == null) return;
+      reason = result.reason;
+      notify = result.notify;
     }
     HapticFeedback.heavyImpact();
-    final success = await ref.read(galleryServiceProvider).resolvePhotoApproval(id, approve, reason: reason);
+    final success = await ref.read(galleryServiceProvider).resolvePhotoApproval(id, approve, reason: reason, notifyMember: notify);
     if (success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(approve ? 'Photo approved.' : 'Photo rejected.')));
       ref.invalidate(pendingGalleryApprovalsProvider);

@@ -413,7 +413,7 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 5.2 | CRC card set for the analysis classes with the widest collaboration surface | 61 |
 | 5.3 | Process specifications for the Level-2 processes | 70 |
 | 5.4 | Data-store definitions (analysis level) | 70 |
-| 6.1 | ADR index | 76 |
+| 6.1 | ADR index | 77 |
 | 6.2 | Data dictionary (representative slice; the full dictionary is generated from the schema) | 85 |
 | 6.3 | API endpoint catalogue (by controller; the full catalogue is the generated OpenAPI document) | 85 |
 | 6.4 | Design pattern catalogue (selected entries; full catalogue is §6.12 in full) | 85 |

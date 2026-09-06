@@ -34,5 +34,10 @@ namespace GHCAA.Application.DTOs
         public string? ApplicationLink { get; set; }
         public DateTime? ApplicationDeadline { get; set; }
         public Enums.JobCategory JobCategory { get; set; }
+
+        // 82.52: gates the "Job Posted" notification PostJobAsync fires when an
+        // admin's posting auto-approves. Default true matches that this already
+        // notified unconditionally before this flag existed.
+        public bool NotifyMembers { get; set; } = true;
     }
 }

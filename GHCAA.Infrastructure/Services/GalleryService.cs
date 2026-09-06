@@ -195,7 +195,7 @@ namespace GHCAA.Infrastructure.Services
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<bool> ApproveGalleryAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<bool> ApproveGalleryAsync(int id, bool notifyMember = true, CancellationToken cancellationToken = default)
         {
             var gallery = await _db.EventGalleries.FindAsync(new object[] { id }, cancellationToken);
             if (gallery == null) return false;
@@ -205,7 +205,7 @@ namespace GHCAA.Infrastructure.Services
             gallery.RejectionReason = null;
             await _db.SaveChangesAsync(cancellationToken);
 
-            if (gallery.OwnerMemberId.HasValue)
+            if (notifyMember && gallery.OwnerMemberId.HasValue)
             {
                 await _notification.CreateNotificationAsync(
                     gallery.OwnerMemberId.Value,
@@ -219,7 +219,7 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
-        public async Task<bool> RejectGalleryAsync(int id, string reason, CancellationToken cancellationToken = default)
+        public async Task<bool> RejectGalleryAsync(int id, string reason, bool notifyMember = true, CancellationToken cancellationToken = default)
         {
             var gallery = await _db.EventGalleries.FindAsync(new object[] { id }, cancellationToken);
             if (gallery == null) return false;
@@ -229,7 +229,7 @@ namespace GHCAA.Infrastructure.Services
             gallery.RejectionReason = reason;
             await _db.SaveChangesAsync(cancellationToken);
 
-            if (gallery.OwnerMemberId.HasValue)
+            if (notifyMember && gallery.OwnerMemberId.HasValue)
             {
                 await _notification.CreateNotificationAsync(
                     gallery.OwnerMemberId.Value,
@@ -243,7 +243,7 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
-        public async Task<bool> ApprovePhotoAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<bool> ApprovePhotoAsync(int id, bool notifyMember = true, CancellationToken cancellationToken = default)
         {
             var photo = await _db.EventPhotos.Include(p => p.EventGallery).FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
             if (photo == null) return false;
@@ -252,7 +252,7 @@ namespace GHCAA.Infrastructure.Services
             photo.RejectionReason = null;
             await _db.SaveChangesAsync(cancellationToken);
 
-            if (photo.UploadedByMemberId.HasValue)
+            if (notifyMember && photo.UploadedByMemberId.HasValue)
             {
                 await _notification.CreateNotificationAsync(
                     photo.UploadedByMemberId.Value,
@@ -266,7 +266,7 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
-        public async Task<bool> RejectPhotoAsync(int id, string reason, CancellationToken cancellationToken = default)
+        public async Task<bool> RejectPhotoAsync(int id, string reason, bool notifyMember = true, CancellationToken cancellationToken = default)
         {
             var photo = await _db.EventPhotos.Include(p => p.EventGallery).FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
             if (photo == null) return false;
@@ -275,7 +275,7 @@ namespace GHCAA.Infrastructure.Services
             photo.RejectionReason = reason;
             await _db.SaveChangesAsync(cancellationToken);
 
-            if (photo.UploadedByMemberId.HasValue)
+            if (notifyMember && photo.UploadedByMemberId.HasValue)
             {
                 await _notification.CreateNotificationAsync(
                     photo.UploadedByMemberId.Value,

@@ -172,8 +172,8 @@ export class AdminService {
     }
 
     // Governance - EC Roles
-    deleteECMember(id: number): Observable<any> {
-        return this.http.delete(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/members/${id}/hard-delete`);
+    deleteECMember(id: number, notifyMember = false): Observable<any> {
+        return this.http.delete(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/members/${id}/hard-delete?notifyMember=${notifyMember}`);
     }
 
     // Finances - Payments

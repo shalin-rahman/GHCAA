@@ -33,6 +33,7 @@ namespace GHCAA.Infrastructure.Services
                     Enums.NotificationType.ParticipationApproval => member.NotifyParticipationApproval,
                     Enums.NotificationType.RegistrationUpdate => member.NotifyRegistrationUpdate,
                     Enums.NotificationType.GeneralSystem => member.NotifyRelevantUpdates,
+                    Enums.NotificationType.CommitteeAssignment => member.NotifyCommitteeChanges,
                     _ => true
                 };
 
@@ -85,6 +86,7 @@ namespace GHCAA.Infrastructure.Services
                 Enums.NotificationType.ParticipationApproval => targetMembers.Where(m => m.NotifyParticipationApproval),
                 Enums.NotificationType.RegistrationUpdate => targetMembers.Where(m => m.NotifyRegistrationUpdate),
                 Enums.NotificationType.GeneralSystem => targetMembers.Where(m => m.NotifyRelevantUpdates),
+                Enums.NotificationType.CommitteeAssignment => targetMembers.Where(m => m.NotifyCommitteeChanges),
                 _ => targetMembers
             };
 

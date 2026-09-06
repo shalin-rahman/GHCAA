@@ -23,9 +23,9 @@ namespace GHCAA.Application.Interfaces
         // Admin approval workflow
         Task<IEnumerable<EventGallery>> GetPendingGalleryApprovalsAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<EventPhoto>> GetPendingPhotoApprovalsAsync(CancellationToken cancellationToken = default);
-        Task<bool> ApproveGalleryAsync(int id, CancellationToken cancellationToken = default);
-        Task<bool> RejectGalleryAsync(int id, string reason, CancellationToken cancellationToken = default);
-        Task<bool> ApprovePhotoAsync(int id, CancellationToken cancellationToken = default);
-        Task<bool> RejectPhotoAsync(int id, string reason, CancellationToken cancellationToken = default);
+        Task<bool> ApproveGalleryAsync(int id, bool notifyMember = true, CancellationToken cancellationToken = default);
+        Task<bool> RejectGalleryAsync(int id, string reason, bool notifyMember = true, CancellationToken cancellationToken = default);
+        Task<bool> ApprovePhotoAsync(int id, bool notifyMember = true, CancellationToken cancellationToken = default);
+        Task<bool> RejectPhotoAsync(int id, string reason, bool notifyMember = true, CancellationToken cancellationToken = default);
     }
 }

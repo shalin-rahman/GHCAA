@@ -8,11 +8,12 @@ import { getJobCategoryLabel } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
+import { NotifyToggleComponent } from '../../common/notify-toggle/notify-toggle.component';
 
 @Component({
   selector: 'app-job-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent],
   templateUrl: './job-approval.html',
   styleUrl: './job-approval.scss'
 })
@@ -24,6 +25,7 @@ export class JobApproval implements OnInit {
   loading = signal(true);
   selectedJob = signal<Job | null>(null);
   rejectReason = signal('');
+  notifyMember = signal(true);
   isProcessing = signal(false);
   searchQuery = signal('');
 
@@ -62,6 +64,7 @@ export class JobApproval implements OnInit {
   viewJob(job: Job) {
     this.selectedJob.set(job);
     this.rejectReason.set('');
+    this.notifyMember.set(true);
   }
 
   approve() {
@@ -69,7 +72,7 @@ export class JobApproval implements OnInit {
     if (!job) return;
 
     this.isProcessing.set(true);
-    this.jobService.approveJob(job.id).subscribe({
+    this.jobService.approveJob(job.id, this.notifyMember()).subscribe({
       next: () => {
         this.notify.success('Job approved and published');
         this.selectedJob.set(null);
@@ -91,7 +94,7 @@ export class JobApproval implements OnInit {
     }
 
     this.isProcessing.set(true);
-    this.jobService.rejectJob(job.id, this.rejectReason()).subscribe({
+    this.jobService.rejectJob(job.id, this.rejectReason(), this.notifyMember()).subscribe({
       next: () => {
         this.notify.success('Job rejected');
         this.selectedJob.set(null);

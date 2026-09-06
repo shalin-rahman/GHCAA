@@ -141,6 +141,10 @@
         </div>
         <div class="modal-footer flex justify-between">
             <button class="btn btn-secondary" (click)="selectedItem.set(null)">Close Review</button>
+            <app-notify-toggle
+                [checked]="notifyMember()"
+                (checkedChange)="notifyMember.set($event)"
+                label="Notify the member"></app-notify-toggle>
             <div class="actions flex gap-4">
                 <button class="btn btn-outline" (click)="reject()" [disabled]="isProcessing()">
                     {{ isProcessing() ? 'Processing...' : 'Reject Submission' }}

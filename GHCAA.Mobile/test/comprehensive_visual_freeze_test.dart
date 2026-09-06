@@ -126,9 +126,9 @@ class FakeGalleryService implements GalleryService {
   @override
   Future<Map<String, List<dynamic>>> getPendingGalleryApprovals() async => {'galleries': [], 'photos': []};
   @override
-  Future<bool> resolveGalleryApproval(int id, bool approve, {String? reason}) async => true;
+  Future<bool> resolveGalleryApproval(int id, bool approve, {String? reason, bool notifyMember = true}) async => true;
   @override
-  Future<bool> resolvePhotoApproval(int photoId, bool approve, {String? reason}) async => true;
+  Future<bool> resolvePhotoApproval(int photoId, bool approve, {String? reason, bool notifyMember = true}) async => true;
 }
 
 /// Returns one gallery with photos and captures toggle-call arguments, so the

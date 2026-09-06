@@ -61,6 +61,11 @@ namespace GHCAA.Application.DTOs
 
         public bool RequiresRegistration { get; set; } = true;
 
+        // 82.52: admin per-action choice of whether creating this event broadcasts a notification.
+        // Defaults true because that's what CreateEventAsync already did (gated on IsActive) before
+        // this item existed — an admin who doesn't touch this field sees unchanged behavior.
+        public bool NotifyMembers { get; set; } = true;
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             // 1. End date must be strictly after start date
@@ -87,6 +92,12 @@ namespace GHCAA.Application.DTOs
     public class UpdateEventDto : CreateEventDto
     {
         public int Id { get; set; }
+
+        // 82.52: UpdateEventAsync never sent a notification before this item, unlike create — a
+        // distinct property (not the inherited NotifyMembers, which stays true by default for
+        // Create's own semantics) so an update request that omits this field keeps that "never"
+        // default rather than inheriting Create's "true".
+        public bool NotifyOnUpdate { get; set; } = false;
     }
 
     public class EventRegistrationDto

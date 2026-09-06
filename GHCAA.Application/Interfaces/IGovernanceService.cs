@@ -15,9 +15,9 @@ namespace GHCAA.Application.Interfaces
         Task<bool> ActivatePeriodAsync(int id, CancellationToken cancellationToken = default);
 
         Task<IEnumerable<ECMemberDto>> GetCommitteeMembersAsync(int periodId, CancellationToken cancellationToken = default);
-        Task<bool> AssignMemberToRoleAsync(int periodId, int memberId, int position, string? reason, CancellationToken cancellationToken = default);
-        Task<bool> RemoveMemberFromCommitteeAsync(int ecMemberId, CancellationToken cancellationToken = default);
-        Task<bool> DeleteECMemberAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> AssignMemberToRoleAsync(int periodId, int memberId, int position, string? reason, bool notifyMember = false, CancellationToken cancellationToken = default);
+        Task<bool> RemoveMemberFromCommitteeAsync(int ecMemberId, bool notifyMember = false, CancellationToken cancellationToken = default);
+        Task<bool> DeleteECMemberAsync(int id, int adminId, bool notifyMember = false, CancellationToken cancellationToken = default);
 
         Task<ECPeriodDto?> GetActivePeriodAsync(CancellationToken cancellationToken = default);
 

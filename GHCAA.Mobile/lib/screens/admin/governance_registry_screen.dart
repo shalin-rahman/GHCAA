@@ -290,6 +290,7 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
   final _idController = TextEditingController();
   final _posController = TextEditingController();
   bool _isAdding = false;
+  bool _notifyOnAssign = false;
   List<dynamic>? _members;
 
   @override
@@ -322,6 +323,7 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
       'memberId': mid,
       'position': pos,
       'reason': 'Governance Assignment',
+      'notifyMember': _notifyOnAssign,
     });
 
     if (success) {
@@ -330,6 +332,46 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
       _load();
     }
     if (mounted) setState(() => _isAdding = false);
+  }
+
+  Future<void> _confirmRemove(dynamic member) async {
+    bool notify = false;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: AppTheme.midnightSurface,
+          title: const Text('REMOVE FROM COMMITTEE', style: TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Remove ${member['fullName'] ?? 'this member'} from the committee?', style: const TextStyle(color: Colors.white70)),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Notify member of this removal', style: TextStyle(fontSize: 12, color: Colors.white70)),
+                value: notify,
+                activeColor: AppTheme.royalGold,
+                controlAffinity: ListTileControlAffinity.leading,
+                onChanged: (v) => setDialogState(() => notify = v ?? false),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('CANCEL', style: TextStyle(color: Colors.white54))),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
+              onPressed: () => Navigator.pop(ctx, notify),
+              child: const Text('REMOVE', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed == null) return; // cancelled
+    final ok = await ref.read(adminServiceProvider).removeMemberFromCommittee(member['id'], notifyMember: confirmed);
+    if (ok) _load();
   }
 
   @override
@@ -377,11 +419,20 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
                 _isAdding
                   ? LogoSpinner.small()
                   : IconButton.filled(
-                      onPressed: _assign, 
+                      onPressed: _assign,
                       style: IconButton.styleFrom(backgroundColor: AppTheme.royalGold),
                       icon: const Icon(Icons.person_add_alt_1, color: Colors.black, size: 20)
                     ),
               ],
+            ),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              title: const Text('Notify member of this assignment', style: TextStyle(fontSize: 11, color: Colors.white54)),
+              value: _notifyOnAssign,
+              activeColor: AppTheme.royalGold,
+              controlAffinity: ListTileControlAffinity.leading,
+              onChanged: (v) => setState(() => _notifyOnAssign = v ?? false),
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -400,10 +451,7 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
                           subtitle: Text('ID: ${m['memberId']} | ROLE: ${m['positionName'] ?? 'Member'}', style: const TextStyle(color: Colors.white38, fontSize: 10)),
                           trailing: IconButton(
                             icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent, size: 18),
-                            onPressed: () async {
-                              final ok = await ref.read(adminServiceProvider).removeMemberFromCommittee(m['id']);
-                              if (ok) _load();
-                            },
+                            onPressed: () => _confirmRemove(m),
                           ),
                         );
                       },

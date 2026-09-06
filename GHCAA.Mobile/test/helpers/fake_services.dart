@@ -130,7 +130,7 @@ class FakeAdminService implements AdminService {
   @override
   Future<bool> assignMemberToCommittee(int periodId, Map<String, dynamic> data) async => true;
   @override
-  Future<bool> removeMemberFromCommittee(int ecMemberId) async => true;
+  Future<bool> removeMemberFromCommittee(int ecMemberId, {bool notifyMember = false}) async => true;
 }
 
 class FakeFinancialService implements FinancialService {
@@ -217,7 +217,7 @@ class FakeJobService implements JobService {
   @override
   Future<List<dynamic>> getPendingJobs() async => [];
   @override
-  Future<bool> resolveJobApproval(int id, bool approve, {String? reason}) async => true;
+  Future<bool> resolveJobApproval(int id, bool approve, {String? reason, bool notifyMember = true}) async => true;
 }
 
 class FakeMentorshipService implements MentorshipService {

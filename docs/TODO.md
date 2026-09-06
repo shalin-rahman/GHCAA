@@ -147,6 +147,16 @@ applies equally to the refactorings named in `docs/ARCHITECTURE_AUDIT_2026-09.md
 row in that report's refactoring backlog carries a problem statement and an evidence line rather than
 a recommendation on its own.
 
+**SR-9 — `[ONHOLD]` marks an item blocked on something outside this session, not just unstarted work.**
+Set 2026-09-06 by the user. `[TODO]` means the next available session can pick the item up and finish
+it; `[ONHOLD]` means it cannot move without an action only the user (or the Association) can take —
+rotating a live credential, deciding a data-protection policy, granting dashboard access — so leaving
+it `[TODO]` would misrepresent it as ready work sitting in a queue. An `[ONHOLD]` item still carries its
+priority and depends-on tags and still counts as open, but `wbs.py`'s remaining-effort estimate excludes
+it (a P0 blocked on the user rotating a key is not 4 hours of anyone's engineering time), and
+`tracker.html` renders it like any other open state. Move an item back to `[TODO]` the moment the
+blocker clears; do not leave it `[ONHOLD]` out of habit once it is actionable again.
+
 ---
 
 ## PRIORITY INDEX (triaged 2026-08-30 — re-triage when this drifts, don't trust it blind per `gotcha_todo_status_drift`)
@@ -2149,7 +2159,7 @@ protected destructive deletes with zero prior coverage (`GHCAA.Tests/Controllers
 refresh, logout, the step-up request/verify endpoints this session added, reset-password — and
 `LookupsController`'s full CRUD) is still open; report exists but no further remediation started.
 
-47.10 [TODO] **Priority: P0.** Still open, explicitly deferred: `docs/deploy_connection.txt` committed live-credentials
+47.10 [ONHOLD 2026-09-06, per SR-9] **Priority: P0.** Still open, explicitly deferred: `docs/deploy_connection.txt` committed live-credentials
 file (flagged, not rotated); `docs/BUSINESS_REVIEW_PLAN.md:79` has a real password in
 plain text (flagged, not scrubbed); member profile photos are genuinely missing for most of the 631
 bulk-imported alumni (not a bug — no photo was ever supplied at import time).
@@ -2247,7 +2257,7 @@ ungated, while sibling fields were correctly privacy-gated. Fixed: stripped thes
 `CertificatePath`) from `NetworkingService.MapToDto` — that DTO only backs the public directory
 profile; the authenticated owner/admin profile is a separate build in `MemberService.GetProfileAsync`.
 
-48.2 [TODO] **Priority: P0.** **CRITICAL — committed secrets, live JWT signing key included.**
+48.2 [ONHOLD 2026-09-06, per SR-9] **Priority: P0.** **CRITICAL — committed secrets, live JWT signing key included.**
 `docs/deploy_connection.txt` (still tracked) contains the production `Jwt__Key` and the Render
 deploy-hook URL, not just DB credentials as previously known. Also newly found with live secrets:
 `.env.remote`, `build_output/appsettings.Production.json`, `build_output/appsettings.json` (Gmail
@@ -2323,7 +2333,7 @@ skips `IFileValidationService` unlike every other upload endpoint (admin-only, s
 `MemberService.cs:~1350` substitutes user-controlled `FullName` raw into an HTML email body
 (HTML-encode template variables).
 
-48.13 [TODO] **Priority: P1.** Known, still-open: `docs/deploy_connection.txt` (see 48.2) still tracked with the live
+48.13 [ONHOLD 2026-09-06, per SR-9] **Priority: P1.** Known, still-open: `docs/deploy_connection.txt` (see 48.2) still tracked with the live
 JWT key. `docs/BUSINESS_REVIEW_PLAN.md`'s plaintext password table (committed since
 2026-07-03) was **upgraded from a docs-hygiene item to a confirmed active exposure on 2026-08-29**:
 its `shalin` / `Shalin@2024!` row was the exact live preprod SuperAdmin credential this session set
@@ -3785,7 +3795,7 @@ this is not a theming rework.
 
 ### PHASE E: DATA, TIERS, GOVERNANCE
 
-62.31 [TODO] **Priority: P0 | Depends on: 62.3.** DATA PROTECTION: `Seed/members.json` holds 631 real
+62.31 [ONHOLD 2026-09-06, per SR-9] **Priority: P0 | Depends on: 62.3 (done — unblocked, still on hold by decision, not by dependency).** DATA PROTECTION: `Seed/members.json` holds 631 real
 alumni records (names, emails, mobile numbers, NIDs, addresses). Once the repo is handed to other
 institutions this is a personal-data disclosure. Decide before Phase E ships: (a) keep real member
 data out of the repo and load it from an operator-supplied file at deploy time (recommended), or
@@ -5871,20 +5881,18 @@ newly wired here since 81.4 itself only covered send/respond/cancel), and view a
 "Your Family Network" section, calling `GET my-family`). `enableFamilyLink` can stay `true` — the web
 portal now has the feature it was already advertising. `ng build` clean, `vitest` 399/399.
 
-80.20 [TODO] **Priority: P3 | Depends on: none.** Found while tagging 80.16's new tests against the
-FR catalogue: FR-09 in `docs/book/03-requirements.md` reads "shall verify a registered email address
+80.20 [DONE 2026-09-06] **Priority: P3 | Depends on: none.** Found while tagging 80.16's new tests against the
+FR catalogue: FR-09 in `docs/book/03-requirements.md` read "shall verify a registered email address
 and mobile number by a single-use, time-limited **code**, and shall use the **same mechanism** for
 password reset." The actual password-reset flow — both the pre-existing admin-initiated one and
 80.16's new self-service one — uses a GUID token embedded in a link, not the OTP code mechanism
-`OtpService` already provides for registration verification. This mismatch predates this session (the
+`OtpService` already provides for registration verification. This mismatch predated this session (the
 admin flow's tests already carried `[Category("FR-09")]` before 80.16 touched anything); 80.16's new
 tests kept the same tag rather than inventing a different one, since the actual behavior does
-genuinely belong under FR-09's password-reset half, just not via the mechanism the requirement names.
-Needs a decision: change FR-09's wording to describe the token-link mechanism actually built (the
-smaller fix, since the link approach already works and is what every client integrates against), or
-change the reset flow to issue an OTP code instead (matches the requirement literally, but touches a
-working flow and the mobile deep-link UX). Not decided or built here — raised as a real gap, not
-picked silently.
+genuinely belong under FR-09's password-reset half, just not via the mechanism the requirement named.
+**Resolved 2026-09-06:** reworded FR-09 to describe the token-link mechanism actually built, rather than
+rebuilding a working reset flow (and its mobile deep-link UX) to match a requirement that never matched
+what was shipped. The `[Category("FR-09")]` tags on the existing reset-flow tests stay accurate as-is.
 
 ---
 
@@ -6388,17 +6396,20 @@ caught what 48.9 and 48.17 (a stale `xlsx`, Angular CVEs) had to be found by han
 the cost asymmetry, not thoroughness for its own sake. **Acceptance:** both commands run in CI, and a
 known-vulnerable dependency fails the build rather than being found by a person later.
 
-82.27 [TODO] **Priority: P2 | Depends on: none.** `README.md:324` tells operators something false about
+82.27 [PARTIAL 2026-09-06] **Priority: P2 | Depends on: none.** `README.md` told operators something false about
 how the schema is provisioned: "Schema — created and seeded at startup via EF Core `EnsureCreated()`
-(not migrations); safe to re-run against an existing database." `Program.cs:388-405` does the opposite —
-`MigrationBootstrapper.EnsureMigratedAsync` runs first and applies real EF Core migrations, baselining
-migration history on a legacy `EnsureCreated`-built database, and `EnsureCreated()` survives only as the
-`catch` fallback, logged as an error. **Why this specific wrong sentence is worth an item:** it is aimed
-at the operator audience on the one subject where a wrong belief is most expensive. An operator reading
-it concludes the platform has no migration path and plans schema changes accordingly. 82.13 tracks the
-*absence* of recorded decisions; it does not catch an existing statement being actively wrong, which is
-worse than silence. **Acceptance:** the README describes what `Program.cs` actually does, and the
-migration mechanism gets an ADR under 82.13's work so the correction has somewhere permanent to live.
+(not migrations); safe to re-run against an existing database." `Program.cs`'s post-boot hook does the
+opposite — `MigrationBootstrapper.EnsureMigratedAsync` runs first and applies real EF Core migrations,
+baselining migration history on a legacy `EnsureCreated`-built database, and `EnsureCreated()` survives
+only as the `catch` fallback, logged as an error. **Why this specific wrong sentence is worth an item:**
+it is aimed at the operator audience on the one subject where a wrong belief is most expensive. An
+operator reading it concludes the platform has no migration path and plans schema changes accordingly.
+82.13 tracks the *absence* of recorded decisions; it does not catch an existing statement being actively
+wrong, which is worse than silence. **Resolved 2026-09-06:** both `README.md` mentions of the schema
+mechanism (Database Setup, Maintenance & Operations) now describe `MigrationBootstrapper` as the real
+path with `EnsureCreated()` as the logged fallback. **Still open:** the ADR for the migration mechanism —
+2026's acceptance asked for one "under 82.13's work," and 82.13 (the ADR set itself) is still `[TODO]`;
+there is nowhere for the ADR to live until that item is built, so this stays PARTIAL rather than DONE.
 
 82.28 [TODO] **Priority: P4 | Depends on: none.** `GHCAA.Tests/UnitTest1.cs` is the unmodified
 `dotnet new nunit` scaffold — a single `Assert.Pass()` — sitting in an otherwise well-organised 79-file
@@ -6410,16 +6421,39 @@ list` shows all five in the live chain, so deleting them would break migration h
 location is ever tidied, that is a separate change needing a migration-chain test, not a cleanup.
 **Acceptance:** `UnitTest1.cs` is gone and the suite still passes.
 
-82.29 [TODO] **Priority: P2 | Depends on: 82.16 (done — supplies the rule and the pattern).** `ECMember`
-has two removal semantics living side by side: `GovernanceService.DeleteECMemberAsync` does a hard
+82.29 [DONE 2026-09-06] **Priority: P2 | Depends on: 82.16 (done — supplies the rule and the pattern).** `ECMember`
+had two removal semantics living side by side: `GovernanceService.DeleteECMemberAsync` did a hard
 `Remove()`, while `RemoveMemberFromCommitteeAsync` end-dates the row by setting `EndDate`. Same entity,
-two meanings, and which one a member's committee service disappears under depends on which screen an
-admin used. `docs/ARCHITECTURE.md` §4 places `ECMember` in Class A, so the hard delete contradicts the
-stated rule. **Why P2 and not P1:** governance records are evidence, but unlike money they are
-reconstructable from meeting minutes, and the end-dating path is the one the UI actually leads with.
-**Scope:** bring `DeleteECMemberAsync` onto the Class A pattern (soft delete plus actor), or remove it
-entirely if end-dating is the only semantics the product wants — decide which before writing code, and
-record the decision. **Acceptance:** one removal semantics for `ECMember`, matching §4; a test pins it.
+two meanings, and which one a member's committee service disappeared under depended on which screen an
+admin used. `docs/ARCHITECTURE.md` §4 places `ECMember` in Class A, so the hard delete contradicted the
+stated rule. **Not a true duplicate, so not resolved by picking one:** the two paths are legitimately
+different admin actions — `RemoveMemberFromCommitteeAsync` ends a real, historical committee term
+(a period ending, a term being terminated with a reason and effective date); `DeleteECMemberAsync` is a
+separate, `[RequireStepUp]`-gated correction for a row that should never have existed (a member added to
+the committee by mistake), live-wired from `admin-members.ts`'s `deleteECHistory`. Removing the hard-
+delete path would have deleted a working feature, not fixed a bug — confirmed with the user before
+touching either method. **Resolved 2026-09-06:** kept both paths, and closed the real gap instead: a
+permanent delete of Class A evidence with no recorded actor. `ECMember` gained the five Class A fields
+(`ARCHITECTURE.md` §4) it was missing — `IsDeleted`, `DeletedAt`, `DeletedByAdminId`, `UpdatedAt`,
+`UpdatedByAdminId` — via migration `20260906094338_AddECMemberSoftDelete` (PgSql only, matching every
+other schema change since 2026-08: the SQLite/MySql migration sets are not actively maintained).
+`ECMemberConfiguration` now filters `!em.IsDeleted` the same way `PaymentHistoryConfiguration` does.
+`DeleteECMemberAsync` takes a required `adminId` and soft-deletes (`IsDeleted`/`DeletedAt`/
+`DeletedByAdminId`), replacing `_db.ECMembers.Remove(ecMember)`, exactly mirroring
+`FinancialService.DeletePaymentAsync`'s existing pattern. `AdminGovernanceController.DeleteECMember`
+resolves the admin id from `ClaimTypes.NameIdentifier` and returns `Unauthorized()` if it cannot,
+matching `FinancialsController.DeletePayment`. Three new tests:
+`GovernanceServiceTests.DeleteECMemberAsync_SoftDeletesWithActorAndTimestamp`,
+`..._ReturnsFalse_WhenAlreadyDeleted`, and
+`DestructiveStepUpActionsTests.AdminGovernanceController_DeleteECMember_ReturnsUnauthorized_WhenCallerIdMissing`.
+**Gotcha hit and fixed while scaffolding the migration:** the first `dotnet ef migrations add` swept in
+~4,400 unrelated `DeleteData`/`InsertData`/`UpdateData` seed-drift operations and truncated
+`PgSqlApplicationDbContextModelSnapshot.cs` from ~74,460 lines to ~4,600 (see
+`gotcha_ef_migrations_add_remove_corrupts_snapshot`, memory) — caught via `git diff --stat` before
+committing, not by the build (it still compiled). Recovered by restoring the real snapshot with `git
+checkout`, hand-patching in just the 5 new property lines, and rebuilding the migration's `.Designer.cs`
+from the corrected snapshot with a script that swaps only the class/method wrapper. Final snapshot diff:
+15 lines changed, matching exactly the 5 properties actually added.
 
 82.30 [TODO] **Priority: P3 | Depends on: 82.16 (done — supplies the rule).** `Member` and `User` carry
 `IsArchived` where `docs/ARCHITECTURE.md` §4 names the field `IsDeleted`. Same idea, two names, so a
@@ -6431,7 +6465,7 @@ to `IsDeleted` with a migration that also rebuilds the index, or amend §4 to na
 Class A field and rename `FinancialRecord`/`PaymentHistory` to match instead. Pick the cheaper one.
 **Acceptance:** one name for the soft-delete flag across all Class A entities, and §4 says which.
 
-82.31 [TODO] **Priority: P0 | Depends on: 62.31 (decides the target state).** DATA PROTECTION, and the
+82.31 [ONHOLD 2026-09-06, per SR-9] **Priority: P0 | Depends on: 62.31 (decides the target state, itself ONHOLD).** DATA PROTECTION, and the
 half of it 62.31 does not reach. Every seed is loaded with `HasData`, which is part of the EF model
 rather than a runtime import, so each seeded row was written into a migration as a literal `InsertData`
 value and committed. Eight migrations carry roughly 4.3 MB of seed data, and across that chain there
@@ -6630,19 +6664,19 @@ two one-off patches. **Acceptance:** a member can view or save their receipt PDF
 unauthenticated request ever leaving the device, a failure to open it says so, and an admin can view a
 member's certificate/payment-proof image in the mobile app (currently broken/404).
 
-82.51 [TODO] **Priority: P4 | Depends on: none.** Found while closing 80.14: `LocalFileStorageService`'s
+82.51 [DONE 2026-09-06] **Priority: P4 | Depends on: none.** Found while closing 80.14: `LocalFileStorageService`'s
 secure/public path separation (`Certificate`/`PaymentProof`/`Signature` → `_secureRoot`, everything else
-→ `_publicRoot`) currently holds only because two independently-chosen fallback defaults happen not to
+→ `_publicRoot`) held only because two independently-chosen fallback defaults happened not to
 collide (`_publicRoot` defaults to `"wwwroot"`, `_secureRoot` to `AppDomain.CurrentDomain.BaseDirectory`)
-— nothing in the code asserts they must stay different roots. `project_uploads_ephemeral_storage.md`
+— nothing in the code asserted they must stay different roots. `project_uploads_ephemeral_storage.md`
 (memory) already flags that this project needs a persistent-disk fix for the ephemeral-storage problem;
 whoever builds that could plausibly set `FileStorage:BasePhysicalPath` to a value that makes
 `_secureRoot` coincide with the static-files webroot, silently exposing every certificate/payment-proof/
-signature with no auth check. **Scope:** an explicit startup-time assertion (or a resolved-path
-containment check) that `_secureRoot` can never resolve inside `IWebHostEnvironment.WebRootPath`, so a
-future misconfiguration fails loudly at boot instead of silently exposing files. **Acceptance:** setting
-`FileStorage:BasePhysicalPath` to a value that would collide the two roots throws at startup with a
-clear message, in a test.
+signature with no auth check. **Resolved 2026-09-06:** `LocalFileStorageService` now takes
+`IWebHostEnvironment` and throws `InvalidOperationException` from its constructor if `_secureRoot`
+resolves to or inside `WebRootPath`. `LocalFileStorageServiceTests.Constructor_ThrowsWhenSecureRootResolvesInsideWebRoot`
+sets `FileStorage:BasePhysicalPath`/`SecureRelativePath` to collide the two roots and asserts the throw
+and message; the other 15 tests in the file still pass unchanged.
 
 82.34 [TODO] **Priority: P4 | Depends on: none.** Found while closing 82.14 (§7, Angular review):
 `GHCAA.Web/src/app/core/interceptors/auth.interceptor.ts` is a complete, unit-tested, bearer-header-
@@ -6665,24 +6699,27 @@ idempotent GET requests only; never retry a POST/PUT/DELETE automatically. **Acc
 `global-http.interceptor.ts` retries a GET once (or twice, with backoff) on a transient network/5xx
 failure before surfacing the error to the user.
 
-82.37 [TODO] **Priority: P5 | Depends on: none.** Found while closing 82.14 (§7). Only 7 of 73 Angular
+82.37 [TODO] **Priority: P4 | Depends on: none.** Found while closing 82.14 (§7). Only 7 of 73 Angular
 templates carry any `aria-*` attribute. **Scope:** the highest-traffic member/admin forms first
 (registration, profile edit, admin member edit), not a blanket pass across all 73 templates — a forced
 pass would produce mechanical, low-value `aria-label`s on elements that don't need them. **Acceptance:**
 the forms named above pass a manual screen-reader smoke test (labelled inputs, announced errors).
 
-82.38 [TODO] **Priority: P1 | Depends on: none.** Found while closing 82.14 (§8, Flutter review): a
+82.38 [DONE 2026-09-06] **Priority: P1 | Depends on: none.** Found while closing 82.14 (§8, Flutter review): a
 correctness bug, not a hygiene item. `roleProvider` and `userProfileProvider`
-(`GHCAA.Mobile/lib/features/auth/auth_service.dart:201-202,263-264`) are documented in their own
+(`GHCAA.Mobile/lib/features/auth/auth_service.dart`) are documented in their own
 comments as needing an explicit `ref.invalidate` after login/logout, but `AuthService.logout()`
-(`auth_service.dart:178-184`) only invalidates the notification-hub provider. On a shared or handed-
-down device, a second user logging in after the first logs out can see the first user's cached
-role/profile (including admin-only UI) until something else happens to trigger a refetch. **Why P1
+only invalidated the notification-hub provider. On a shared or handed-
+down device, a second user logging in after the first logs out could see the first user's cached
+role/profile (including admin-only UI) until something else happened to trigger a refetch. **Why P1
 and not a routine fix:** this is a stale-privilege-label bug, the same class of risk the session's
 `SecurityStampMiddleware`/token-rotation work exists to close on the backend side — a client-side cache
-that outlives the session it belongs to undermines that. **Acceptance:** `logout()` invalidates
-`roleProvider` and `userProfileProvider` (and any other per-user provider found by the same audit); a
-test logs in as user A, logs out, logs in as user B, and asserts A's role/profile never renders for B.
+that outlives the session it belongs to undermines that. **Resolved 2026-09-06:** `logout()` now
+invalidates `roleProvider` and `userProfileProvider` alongside the notification-hub provider; `login()`
+invalidates the same two after a successful sign-in, so a stale value can't survive either transition.
+`GHCAA.Mobile/test/auth_service_test.dart` logs in as user A, logs out, logs in as user B, and asserts
+A's role/profile never renders for B — verified to fail on the pre-fix code (reproduces the bug) and
+pass on the fix.
 
 82.39 [TODO] **Priority: P2 | Depends on: none.** Found while closing 82.14 (§8). Inactivity/session-
 expiry logic exists in two independent places with two different timeouts, both clearing the same
@@ -6727,7 +6764,7 @@ findings into one fix — then delete the now-redundant hardcoded lists in both 
 `/lookups` data is the one source. **Acceptance:** both clients render the same label for the same
 enum value in every case above, sourced from one place.
 
-82.43 [TODO] **Priority: P5 | Depends on: none.** Found while closing 82.14 (§25), a two-minute
+82.43 [TODO] **Priority: P4 | Depends on: none.** Found while closing 82.14 (§25), a two-minute
 companion to 82.42: `GHCAA.Mobile/lib/core/constants/registration_constants.dart:33-37`'s
 `AcademicConstants.getAcademicYears` has no callers anywhere in the app (`register_screen.dart` uses
 `DropdownService`'s `'PassingYear'` case instead). **Scope:** delete the dead method; fold into 82.42's
@@ -6755,7 +6792,7 @@ is hand-rolled identically in 17 Angular template files (`admin/roles/admin-role
 `admin/themes/admin-themes.html`, and 15 more). **Acceptance:** a shared modal-header (or full modal
 shell) component exists; the 17 files use it instead of hand-rolled markup.
 
-82.47 [TODO] **Priority: P5 | Depends on: none.** Found while closing 82.14 (§25). 4 Angular admin
+82.47 [TODO] **Priority: P4 | Depends on: none.** Found while closing 82.14 (§25). 4 Angular admin
 screens (`admin/comm/admin-comm.html:3-9`, `admin/dashboard/admin-dashboard.html`,
 `admin/events/admin-event-operations.html`, `admin/polls/polls.html:3-6`) hand-roll their own
 `<h1>`/`<h2>` header instead of the `app-page-header` component 19 other admin screens already use.
@@ -6790,3 +6827,181 @@ until after the current queue, per direct instruction, so it doesn't compete wit
 TODO-staleness review and book-sync work. **Acceptance:** a published HTML page reflecting the most
 recent test run's coverage, filterable per service/controller, regenerated without a manual step every
 time the relevant test suite runs.
+
+82.52 [IN PROGRESS 2026-09-06] **Priority: P2 | Depends on: none.** User request 2026-09-06: an admin
+"send notification: yes/no" toggle for EC member added/terminated/removed and event created/updated,
+then extended on follow-up ("check any other functionalities/feature need this") to cover every action
+a research pass could find. Survey (`codebase-explorer`, same date) found no separate "Notice" entity —
+only `Notification` (`GHCAA.Domain/Models/Notification.cs`) exists — and that today's behavior is
+inconsistent per action: some fire a notification unconditionally with no way to turn it off (event
+creation, gallery photo/album, job posting, membership approval, payment verification, family link,
+mentorship request), and some fire none at all despite being member-relevant (EC assignment/removal/
+delete, event update, news, polls, governance/constitution changes). The existing `Member.NotifyEventCreation`/
+`NotifyParticipationApproval`/`NotifyRegistrationUpdate`/`NotifyRelevantUpdates` flags are a different,
+already-working mechanism — a member's own opt-out of a notification *type* — and are unaffected by this
+item, which is the admin's per-action choice of whether to send one at all. **Decided:** a per-action
+checkbox on each admin create/edit form (`NotifyMembers`-style bool on the relevant request DTO),
+defaulting to whatever the action does today (checked where a notification already fires, unchecked
+where none does), not a single global per-`NotificationType` setting — an admin needs to silence one
+event's notification without touching every other event. **Scope, full list found by the survey:**
+`GovernanceService.AssignMemberToRoleAsync`/`RemoveMemberFromCommitteeAsync`/`DeleteECMemberAsync`;
+`EventService.CreateEventAsync`/`UpdateEventAsync`; `NewsService`; `PollService`; `GalleryService`
+(photo/album upload paths); `JobHubService`; `MemberService`'s approval path; `FinancialService`'s
+payment-verified path; `FamilyService`/`FamilyLinkService`; `MentorshipService`. **Acceptance:** each
+listed action takes an admin-supplied `NotifyMembers` flag (default matching current behavior) that
+gates the existing `CreateNotificationAsync`/`BroadcastNotificationAsync` call; the admin web (and
+mobile, where the same form exists there) create/edit form exposes the checkbox; a test per action pins
+both the on and off path. Building in batches, largest/most-requested first (EC, then Events), status
+updated here as each batch lands rather than left silent until the whole list is done.
+
+**Also decided (user follow-up, same date):** a member-side mute exists too, alongside the admin-side
+toggle — `Member.NotifyCommitteeChanges` (new, defaults `true`) added to the existing
+`NotifyEventCreation`-style preference block and wired into `NotificationService`'s per-type filter, the
+same way the other four already work; every new `NotificationType` this item adds gets the same
+treatment. New enum value `NotificationType.CommitteeAssignment` added for EC notifications specifically
+(none of the four existing types fit a committee-role change).
+
+**Batch 1 (EC) — done 2026-09-06:** `GovernanceService.AssignMemberToRoleAsync`/
+`RemoveMemberFromCommitteeAsync`/`DeleteECMemberAsync` take a `notifyMember` parameter (default `false`,
+matching that none of the three notified before this item) and call `INotificationService` (newly
+injected) when true. `AdminGovernanceController` threads it through (`NotifyMember` on
+`AssignMemberRequest`, `[FromQuery] bool notifyMember` on both `DELETE` routes). Web: new shared
+`<app-notify-toggle>` component (`GHCAA.Web/src/app/common/notify-toggle/`) so every form this item
+touches reuses one control instead of one-off checkboxes; wired into the assign-role modal, and into a
+new confirm-remove modal that replaces `admin-governance.ts`'s bare `removeMember()` call (it had no
+confirmation step at all before this). Mobile: a checkbox on the inline assign row and a new
+`StatefulBuilder` confirm dialog on remove, in `governance_registry_screen.dart`, matching the existing
+period-save dialog's pattern. **Known remaining gap, deliberately not built here:** `admin-members.ts`'s
+`deleteECHistory` (the hard-delete correction path) still calls `adminService.deleteECMember(id)` with
+its raw `window.confirm()`, unchanged — the API now accepts `notifyMember` (defaults `false`, so
+behavior is unchanged) but no checkbox is wired there yet, since that raw-confirm pattern is 82.45's own
+scope (shared confirm-dialog extraction); doing it here would duplicate that work instead of reusing it.
+Tests: 6 new (3 `GovernanceServiceTests`, verifying `Times.Never`/`Times.Once` on the notify call for
+each method; `DestructiveStepUpActionsTests` updated for the new signature) plus 6 new
+`admin-governance.spec.ts` cases (default-false and opted-in-true for both assign and remove). 683
+backend tests, 403 web tests pass. Migrations `20260906094338_AddECMemberSoftDelete` (82.29, landed
+alongside this) and `20260906100641_AddCommitteeChangeNotificationPreference` both hit the same
+seed-drift scaffolding defect as `gotcha_ef_migrations_add_remove_corrupts_snapshot` (memory) — recovered
+the same way, snapshot diff confirmed as exactly the intended columns before trusting either migration.
+`flutter analyze` clean; the one golden (`admin_governance_registry`) that already fails locally
+(font-AA, not this change — same exact 1.37%/6574px diff reproduces on a stash of the pre-change tree)
+is unaffected.
+
+**Batch 2 (Events) — done 2026-09-06:** `CreateEventDto.NotifyMembers` (default `true`, matching that
+`CreateEventAsync` already broadcast unconditionally whenever `IsActive`) and a distinct
+`UpdateEventDto.NotifyOnUpdate` (default `false`, matching that `UpdateEventAsync` never notified) —
+two separate properties rather than one inherited one, since `UpdateEventDto : CreateEventDto` would
+otherwise have silently inherited Create's `true` default for any update caller that omits the field.
+Both gate the existing `BroadcastNotificationAsync(..., NotificationType.EventCreation, ...)` call
+(reusing the type rather than adding a new one — an update notification is still "news about an event"
+from a member's perspective, and adding a new type would need its own `Member.NotifyX` preference field
+too, which nothing asked for here). Web: one checkbox in `admin-events.ts`'s existing reactive form
+(matching its existing plain-checkbox convention, not the template-driven `<app-notify-toggle>` used in
+82.52's EC batch — different form technology, matched to what's already there), label text switches
+between "when published" and "of this update" depending on create/edit mode; `submitEvent()` maps the
+one checkbox to whichever DTO property the request actually needs. Mobile: only a create dialog exists
+(no admin event-edit UI in `GHCAA.Mobile`), so only that got the toggle (`events_screen.dart`,
+`notifyMembers` bool defaulting `true`, matching the same reasoning as web's create side). Tests: 4 new
+`EventServiceTests` (create default-broadcasts / create-opted-out; update default-silent /
+update-opted-in) and 3 new `admin-events.spec.ts` cases (create defaults true; update defaults
+`notifyOnUpdate:false` and never sends `notifyMembers`; update opted-in sends `true`). 687 backend
+tests, 406 web tests pass; `flutter analyze` clean.
+
+**Batch 3 (Gallery + JobHub approval flows) — done 2026-09-06:** both services already notified
+unconditionally on approve/reject (and JobHub on an admin's auto-approved post), so this batch is a
+straight `notifyMember` bool gate on each, default `true` everywhere to match existing behavior.
+`GalleryService.ApproveGalleryAsync`/`RejectGalleryAsync`/`ApprovePhotoAsync`/`RejectPhotoAsync` each
+take a `notifyMember = true` parameter (no DTO existed for any of the four — plain scalar params, so a
+bare bool matches the file's own convention rather than introducing a request type). `JobHubService`:
+`CreateJobDto.NotifyMembers` (default `true`) gates the "Job Posted" notify inside `PostJobAsync`'s
+auto-approved branch; `ApproveJobAsync`/`RejectJobAsync` each take their own `notifyMember = true`.
+Controllers: `GalleryController`'s two approve routes take `[FromQuery] bool notifyMember = true`, the
+two reject routes' `RejectRequest` gained `NotifyMember` (default `true`); `JobHubController` mirrors
+the same shape on its approve/reject routes. Web: gallery-approval.ts/job-approval.ts both reuse
+`<app-notify-toggle>` (the same shared component 82.52's EC batch built) in their existing review
+modal's footer, one `notifyMember` signal reset to `true` each time a new item is opened. Mobile: the
+shared `showRejectReasonDialog` (`GHCAA.Mobile/lib/core/widgets/reject_reason_dialog.dart`, used by
+gallery, job, and member-application reject flows) gained a second entry point,
+`showRejectReasonWithNotifyDialog`, returning a `({String reason, bool notify})` record with an added
+`CheckboxListTile` — kept as a second function rather than changing the original's return type so the
+one caller not in this batch (`approval_queue_screen.dart`, member applications, out of 82.52's scope)
+needed no change. Gallery's and JobHub's screens both switched to the new dialog on reject; approve on
+mobile stayed a one-tap action with no confirm step (as it already was), so it always sends
+`notifyMember: true` — the same gap Batch 1 recorded for `admin-members.ts`'s hard-delete path: adding a
+confirm-on-approve dialog is 82.45/82.48's shared-dialog-extraction scope, not this item's. Tests: 4 new
+`GalleryServiceTests` (one skip-notify case per method), 3 new `JobHubServiceTests` (post/approve/reject
+skip-notify), 4 new controller tests (`GalleryControllerTests`, `JobHubControllerTests` — notifyMember
+flows through), 4 new web spec cases (2 per component: reset-to-true, opt-out-carries-through). 698
+backend tests, 410 web tests pass; `flutter analyze` clean, no new golden regressions (verified the
+broad golden/pixel and cross-file test-order failures seen on a full `flutter test` run reproduce
+identically on a stash of the pre-batch tree — pre-existing, not from this change).
+
+**Remaining batches, not yet built:** News, Polls, membership approval (`MemberService.ApproveMemberAsync`),
+payment-verified (`FinancialService.UpdatePaymentStatusAsync`), Family/FamilyLink, Mentorship. News and
+Polls have zero existing notification wiring today (the survey found this, see above) — those two are
+"add a notification path from scratch," not "gate an existing one," a different shape of work than every
+batch built so far. `FamilyService` vs `FamilyLinkService` overlap (both exist, parallel implementations,
+member-facing) needs a quick check of which is actually live before building the toggle into both.
+
+82.53 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** User request 2026-09-06: revise the tracker
+for staleness and for batching — group open items that share a file/service/screen so the next session
+spends one visit per file instead of one visit per item. A `codebase-explorer` pass read every open
+item and verified each cluster's shared-file claim against the tree before it is trusted here (grep
+counts and line numbers below are the agent's, re-stated, not re-derived independently — treat this
+item as a starting map for the next session, not a substitute for reading the cited items).
+**Verified clusters, most valuable first:**
+- **`LocalFileStorageService.cs` (51.2, 51.3, 51.5, and 51.4 which is the test item for the first two)** —
+  same two methods (resize loop, `SaveFileAsync`), so 51.4 is only writable once 51.2/51.3 land.
+- **Angular admin-form shell duplication (82.44, 82.45, 82.46, 82.47)** — ~20 overlapping admin
+  component/template pairs (`admin-events.ts`, `admin-members.ts`, `admin-gallery.ts`,
+  `admin-roles.ts`/`.html`, `admin-governance.ts`, `common/jobs/jobs.ts`). 82.46's own text already says
+  "do together" with 82.45; one pass per file replacing `confirm()`, the modal header, `app-page-header`
+  and the debounce pattern beats four passes each re-opening the same file. **Wording correction found:**
+  82.45 says "raw `window.confirm()`"; the actual calls are unqualified `confirm(...)` — `window.confirm`
+  returns zero hits. The 22-file count itself is correct.
+- **Angular HTTP layer (82.7, 82.34, 82.36)** — `global-http.interceptor.ts`, `app.config.ts`. 82.7's 7
+  direct-`HttpClient` components, 82.36's retry addition, and 82.34's dead unregistered
+  `auth.interceptor.ts` deletion are one "HTTP plumbing" session, one `ng build` + `vitest` pass instead
+  of three.
+- **Lookup/label duplication (82.42, 82.43)** — `app.constants.ts`, `lookup.service.ts`,
+  `dropdown_service.dart`, `registration_constants.dart`. 82.43's own text says fold into 82.42.
+- **Flutter shared-widget adoption (82.48, 82.49)** — `core/widgets/reject_reason_dialog.dart` and
+  `app_search_field.dart` against `directory_screen.dart`/`professional_hub_screen.dart`; one
+  `flutter analyze` + golden pass covers both.
+- **`MemberService.cs` (82.6, 82.19)** — 82.19 (mark read-only queries `AsNoTracking`, only 1 use
+  in the whole 1,599-line file today) should land before 82.6 splits the file, or the split relocates
+  the same query sites twice.
+- **`.github/workflows/*.yml` (82.23, 82.24, 82.25, 82.26)** — one CI-config session (delete `main.yml`,
+  add a Playwright job and two scan commands to `ghcaa-ci-standard.yml`, add a test gate to
+  `mobile_deployment.yml`) instead of four separate push-and-watch cycles.
+- **Backend error/observability (45.1-45.7, 82.9, 43.4)** — `ExceptionMiddleware.cs` is both where
+  45.1/45.3 decide the capture shape and where 82.9's correlation id has to be stamped; adding the id
+  while writing the `ErrorLog` row is one column, not a second migration later.
+- **Notification dispatch (82.52, in progress; 82.21; 81.5)** — `NotificationService.cs`. 82.52 is
+  already touching every call site this needs; 82.21 (route text through `EmailTemplate`) and 81.5 (a
+  dispatch abstraction) hit the identical call-site set, so finishing 82.52 first and folding these in
+  is cheaper than three separate sweeps. 81.5's own text warns against folding it into an unrelated
+  feature — 82.52 *is* the notification item, so it is the one legitimate carrier.
+- **Controller-wide API contract sweep (82.4, 82.5)** — all 35 `GHCAA.API/Controllers` files plus
+  `global-error-handler.ts` and `api_client.dart`; both are "touch every controller once" passes
+  verified by the same controller test suite.
+- **`docs/book/build/` scripts, one file per sub-cluster** — `lint.py` (69.7/69.8/69.9/69.10),
+  `devtools.py`+`printer.py` (69.11/69.12/69.13/69.16), `printer.py`'s A4 gate (69.15/69.17),
+  `folios.py`+`renumber.py` (69.18/69.19), `wbs.py` (69.21/69.22, with `test_wbs.py` from 69.20 already
+  the harness).
+- **`docs/adr/` (does not exist yet) (82.13, 82.20, 82.27)** — 82.20's acceptance and 82.27's PARTIAL
+  status both name an ADR under 82.13's work as the missing piece; building 82.13 nearly finishes both.
+- **WP62 close-out chain (62.46, 62.47, 62.48, 62.49, and 61.1/61.2/61.3 redirected into it)** — one
+  declared-dependency chain, not seven separate pieces of work.
+**Unblocked — dependency target already `[DONE]`, so these are ready despite reading like they're
+waiting on something:** 82.6, 82.8, 82.9, 82.11, 82.12, 82.13 (all depend on 82.1, done); 82.30 (depends
+on 82.16, done); 82.10b (depends on 82.10a, done); 62.41/62.42/62.43/62.47 (depend on 62.6/62.15/62.27,
+done); 62.29, 62.30, 62.37, 62.39; 63.10, 63.18; 73.5 (FR half only — NFR/DC tagging still open); 78.9.
+**Still genuinely blocked**, so not worth revisiting yet: 78.11 (needs 73.5's NFR/DC half), 81.3 (needs
+81.1, still open), 82.46 (needs 82.45 — but see the cluster above, do them together).
+**P0/P1 marked `[ONHOLD]` in this same pass (see SR-9):** 47.10, 48.2, 48.13 (all one file,
+`docs/deploy_connection.txt` — the cheapest P0 cluster to close once the user rotates the credentials),
+62.31 (unblocked by dependency, still on hold by the project owner's own decision), 82.31 (blocked on
+62.31). None of these five need engineering time from a session; they need the user or a decision.
+**Not corrected here:** 52.5 was checked against a claim that its cited path had moved — the item does
+not actually cite a path, so there was nothing stale to fix; recorded so the same check is not repeated.

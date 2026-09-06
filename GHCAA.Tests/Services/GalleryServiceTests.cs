@@ -259,6 +259,58 @@ public class GalleryServiceTests : TestBase
         updated.RejectionReason.Should().Be("Blurry photo");
     }
 
+    // 82.52 batch 3: notifyMember defaults true (matches the unconditional notify these
+    // four methods already did) and can be turned off per approve/reject.
+    [Test]
+    public async Task ApproveGalleryAsync_SkipsNotification_WhenNotifyMemberIsFalse()
+    {
+        var memberId = await CreateMemberIdAsync();
+        var album = await _service.CreateMemberAlbumAsync(memberId, "Quiet Approve", null);
+
+        await _service.ApproveGalleryAsync(album.Id, notifyMember: false);
+
+        _notification.Verify(x => x.CreateNotificationAsync(
+            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Test]
+    public async Task RejectGalleryAsync_SkipsNotification_WhenNotifyMemberIsFalse()
+    {
+        var memberId = await CreateMemberIdAsync();
+        var album = await _service.CreateMemberAlbumAsync(memberId, "Quiet Reject", null);
+
+        await _service.RejectGalleryAsync(album.Id, "Reason", notifyMember: false);
+
+        _notification.Verify(x => x.CreateNotificationAsync(
+            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Test]
+    public async Task ApprovePhotoAsync_SkipsNotification_WhenNotifyMemberIsFalse()
+    {
+        var memberId = await CreateMemberIdAsync();
+        var album = await _service.CreateMemberAlbumAsync(memberId, "Album", null);
+        var photo = await _service.AddMemberPhotoToAlbumAsync(memberId, album.Id, "/p.jpg", null);
+
+        await _service.ApprovePhotoAsync(photo!.Id, notifyMember: false);
+
+        _notification.Verify(x => x.CreateNotificationAsync(
+            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Test]
+    public async Task RejectPhotoAsync_SkipsNotification_WhenNotifyMemberIsFalse()
+    {
+        var memberId = await CreateMemberIdAsync();
+        var album = await _service.CreateMemberAlbumAsync(memberId, "Album", null);
+        var photo = await _service.AddMemberPhotoToAlbumAsync(memberId, album.Id, "/p.jpg", null);
+
+        await _service.RejectPhotoAsync(photo!.Id, "Blurry", notifyMember: false);
+
+        _notification.Verify(x => x.CreateNotificationAsync(
+            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
     [Test]
     public async Task ApproveGalleryAsync_DoesNotNotify_WhenGalleryHasNoOwner()
     {

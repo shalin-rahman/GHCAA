@@ -107,7 +107,7 @@ namespace GHCAA.Infrastructure.Services
             var postedBy = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             job.PostedBy = postedBy;
 
-            if (status == Enums.SubmissionStatus.Approved)
+            if (status == Enums.SubmissionStatus.Approved && dto.NotifyMembers)
             {
                 // Notify the poster immediately since no approval step is needed.
                 await _notification.CreateNotificationAsync(
@@ -172,7 +172,7 @@ namespace GHCAA.Infrastructure.Services
             return jobs.Select(MapToDto);
         }
 
-        public async Task<bool> ApproveJobAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<bool> ApproveJobAsync(int id, bool notifyMember = true, CancellationToken cancellationToken = default)
         {
             var job = await _db.JobOpportunities.FindAsync(new object[] { id }, cancellationToken);
             if (job == null) return false;
@@ -181,18 +181,21 @@ namespace GHCAA.Infrastructure.Services
             job.RejectionReason = null;
             await _db.SaveChangesAsync(cancellationToken);
 
-            await _notification.CreateNotificationAsync(
-                job.PostedByMemberId,
-                "Job Approved",
-                $"Your job posting '{job.Title}' has been approved and is now live.",
-                Enums.NotificationType.GeneralSystem,
-                "/portal/jobs",
-                cancellationToken);
+            if (notifyMember)
+            {
+                await _notification.CreateNotificationAsync(
+                    job.PostedByMemberId,
+                    "Job Approved",
+                    $"Your job posting '{job.Title}' has been approved and is now live.",
+                    Enums.NotificationType.GeneralSystem,
+                    "/portal/jobs",
+                    cancellationToken);
+            }
 
             return true;
         }
 
-        public async Task<bool> RejectJobAsync(int id, string reason, CancellationToken cancellationToken = default)
+        public async Task<bool> RejectJobAsync(int id, string reason, bool notifyMember = true, CancellationToken cancellationToken = default)
         {
             var job = await _db.JobOpportunities.FindAsync(new object[] { id }, cancellationToken);
             if (job == null) return false;
@@ -202,13 +205,16 @@ namespace GHCAA.Infrastructure.Services
             job.IsActive = false;
             await _db.SaveChangesAsync(cancellationToken);
 
-            await _notification.CreateNotificationAsync(
-                job.PostedByMemberId,
-                "Job Rejected",
-                $"Your job posting '{job.Title}' was rejected. Reason: {reason}",
-                Enums.NotificationType.GeneralSystem,
-                "/portal/jobs",
-                cancellationToken);
+            if (notifyMember)
+            {
+                await _notification.CreateNotificationAsync(
+                    job.PostedByMemberId,
+                    "Job Rejected",
+                    $"Your job posting '{job.Title}' was rejected. Reason: {reason}",
+                    Enums.NotificationType.GeneralSystem,
+                    "/portal/jobs",
+                    cancellationToken);
+            }
 
             return true;
         }

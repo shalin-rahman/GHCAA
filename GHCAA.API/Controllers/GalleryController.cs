@@ -238,9 +238,9 @@ namespace GHCAA.API.Controllers
 
         [HttpPost("admin/{id}/approve")]
         [Authorize(Policy = Constants.Policies.AdminOnly)]
-        public async Task<IActionResult> ApproveGallery(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> ApproveGallery(int id, [FromQuery] bool notifyMember = true, CancellationToken cancellationToken = default)
         {
-            var result = await _galleryService.ApproveGalleryAsync(id, cancellationToken);
+            var result = await _galleryService.ApproveGalleryAsync(id, notifyMember, cancellationToken);
             return result ? Ok(new { Message = "Album approved." }) : NotFound();
         }
 
@@ -248,15 +248,15 @@ namespace GHCAA.API.Controllers
         [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> RejectGallery(int id, [FromBody] RejectRequest request, CancellationToken cancellationToken)
         {
-            var result = await _galleryService.RejectGalleryAsync(id, request.Reason, cancellationToken);
+            var result = await _galleryService.RejectGalleryAsync(id, request.Reason, request.NotifyMember, cancellationToken);
             return result ? Ok(new { Message = "Album rejected." }) : NotFound();
         }
 
         [HttpPost("photos/{photoId}/approve")]
         [Authorize(Policy = Constants.Policies.AdminOnly)]
-        public async Task<IActionResult> ApprovePhoto(int photoId, CancellationToken cancellationToken)
+        public async Task<IActionResult> ApprovePhoto(int photoId, [FromQuery] bool notifyMember = true, CancellationToken cancellationToken = default)
         {
-            var result = await _galleryService.ApprovePhotoAsync(photoId, cancellationToken);
+            var result = await _galleryService.ApprovePhotoAsync(photoId, notifyMember, cancellationToken);
             return result ? Ok(new { Message = "Photo approved." }) : NotFound();
         }
 
@@ -264,7 +264,7 @@ namespace GHCAA.API.Controllers
         [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> RejectPhoto(int photoId, [FromBody] RejectRequest request, CancellationToken cancellationToken)
         {
-            var result = await _galleryService.RejectPhotoAsync(photoId, request.Reason, cancellationToken);
+            var result = await _galleryService.RejectPhotoAsync(photoId, request.Reason, request.NotifyMember, cancellationToken);
             return result ? Ok(new { Message = "Photo rejected." }) : NotFound();
         }
 
@@ -283,6 +283,7 @@ namespace GHCAA.API.Controllers
         public class RejectRequest
         {
             public string Reason { get; set; } = null!;
+            public bool NotifyMember { get; set; } = true;
         }
     }
 }

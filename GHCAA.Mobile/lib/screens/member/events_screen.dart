@@ -335,6 +335,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
     final capacityCtrl = TextEditingController();
     bool isFree = false;
     bool allowNonMembers = false;
+    bool notifyMembers = true;
     bool saving = false;
     DateTime startDate = DateTime.now().add(const Duration(days: 30));
     DateTime endDate = DateTime.now().add(const Duration(days: 30, hours: 4));
@@ -453,6 +454,24 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: 'Participant Capacity', prefixIcon: Icon(Icons.groups_rounded), hintText: 'Unlimited if empty'),
                   ),
+
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text('NOTIFY MEMBERS',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                      ),
+                      Transform.scale(
+                        scale: 0.7,
+                        child: Switch(
+                          value: notifyMembers,
+                          onChanged: (v) => setDialogState(() => notifyMembers = v),
+                          activeThumbColor: AppTheme.royalGold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -478,6 +497,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                     'registrationFee': fee,
                     'allowNonMembers': allowNonMembers,
                     'isActive': true,
+                    'notifyMembers': notifyMembers,
                     if (regStart != null) 'registrationStartDate': AppUtils.toWire(regStart!),
                     if (regEnd != null) 'registrationEndDate': AppUtils.toWire(regEnd!),
                   };

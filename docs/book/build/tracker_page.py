@@ -13,7 +13,7 @@ OUT = ROOT / "docs" / "book" / "build" / "tracker.html"
 HEAD = re.compile(r"^#+ *Work Package (\d+)[ \u2014:-]*(.*)$")
 # The bracket sometimes carries a trailing date or note, e.g. "[DONE 2026-09-05]"
 # or "[DONE \u2014 see 40.11]", so the state word and that trailing text are two groups.
-ITEM = re.compile(r"^(\d+)\.(\d+[a-z]?) *\[(TODO|IN PROGRESS|BLOCKED|PARTIAL|DONE)([^\]]*)\]\s*(.*)$")
+ITEM = re.compile(r"^(\d+)\.(\d+[a-z]?) *\[(TODO|IN PROGRESS|BLOCKED|ONHOLD|PARTIAL|DONE)([^\]]*)\]\s*(.*)$")
 
 CATEGORY = {
     62: ("White-label", "Making one codebase serve any institution"),
@@ -158,7 +158,7 @@ def main():
                          else f'<span class="state">{it["state_label"].lower()}</span>')
                 cards.append(
                     f'<article class="item" data-pr="{it["pr"]}" data-cat="{html.escape(c)}" '
-                    f'data-status="{it["status"]}" '
+                    f'data-status="{it["status"]}" data-state="{it["state"].lower().replace(" ", "-")}" '
                     f'data-find="{html.escape((it["id"] + " " + it["text"]).lower())}">'
                     f'<div class="meta"><span class="pill {it["pr"]}">{it["pr"]}</span>'
                     f'<span class="id">{it["id"]}</span>{state}{dep}</div>'
@@ -351,6 +351,10 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
 <div class="controls">
   <div class="seg" id="status" role="group" aria-label="Status">
     <button data-status="open" aria-pressed="true" type="button">Open</button>
+    <button data-status="todo" aria-pressed="false" type="button">Todo</button>
+    <button data-status="partial" aria-pressed="false" type="button">Partial</button>
+    <button data-status="onhold" aria-pressed="false" type="button">On Hold</button>
+    <button data-status="blocked" aria-pressed="false" type="button">Blocked</button>
     <button data-status="closed" aria-pressed="false" type="button">Closed</button>
     <button data-status="all" aria-pressed="false" type="button">All</button>
   </div>
@@ -371,10 +375,19 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
   var chips = Array.prototype.slice.call(document.querySelectorAll(".chip"));
   var statusButtons = Array.prototype.slice.call(document.querySelectorAll("#status button"));
 
+  // "open"/"closed"/"all" match the coarse open-vs-done split; any other value
+  // (todo/partial/onhold/blocked) matches the item's exact state word instead,
+  // so a PARTIAL or ONHOLD item can be found without wading through every open item.
+  function statusOk(el) {{
+    if (status === "all") return true;
+    if (status === "open" || status === "closed") return el.dataset.status === status;
+    return el.dataset.state === status;
+  }}
+
   function apply() {{
     var shown = 0;
     items.forEach(function (el) {{
-      var ok = (status === "all" || el.dataset.status === status)
+      var ok = statusOk(el)
         && (!pr.size || pr.has(el.dataset.pr))
         && (!cat.size || cat.has(el.dataset.cat))
         && (!q || el.dataset.find.indexOf(q) > -1);

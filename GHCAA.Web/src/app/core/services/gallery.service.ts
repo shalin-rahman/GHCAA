@@ -93,19 +93,19 @@ export class GalleryService {
         return this.http.get<{ galleries: EventGallery[], photos: EventPhoto[] }>(`${this.apiUrl}/admin/pending`);
     }
 
-    approveGallery(id: number): Observable<any> {
-        return this.http.post(`${this.apiUrl}/admin/${id}/approve`, {});
+    approveGallery(id: number, notifyMember = true): Observable<any> {
+        return this.http.post(`${this.apiUrl}/admin/${id}/approve?notifyMember=${notifyMember}`, {});
     }
 
-    rejectGallery(id: number, reason: string): Observable<any> {
-        return this.http.post(`${this.apiUrl}/admin/${id}/reject`, { reason });
+    rejectGallery(id: number, reason: string, notifyMember = true): Observable<any> {
+        return this.http.post(`${this.apiUrl}/admin/${id}/reject`, { reason, notifyMember });
     }
 
-    approvePhoto(photoId: number): Observable<any> {
-        return this.http.post(`${this.apiUrl}/photos/${photoId}/approve`, {});
+    approvePhoto(photoId: number, notifyMember = true): Observable<any> {
+        return this.http.post(`${this.apiUrl}/photos/${photoId}/approve?notifyMember=${notifyMember}`, {});
     }
 
-    rejectPhoto(photoId: number, reason: string): Observable<any> {
-        return this.http.post(`${this.apiUrl}/photos/${photoId}/reject`, { reason });
+    rejectPhoto(photoId: number, reason: string, notifyMember = true): Observable<any> {
+        return this.http.post(`${this.apiUrl}/photos/${photoId}/reject`, { reason, notifyMember });
     }
 }

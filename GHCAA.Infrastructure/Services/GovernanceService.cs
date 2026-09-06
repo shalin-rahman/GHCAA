@@ -15,10 +15,12 @@ namespace GHCAA.Infrastructure.Services
     public class GovernanceService : IGovernanceService
     {
         private readonly ApplicationDbContext _db;
+        private readonly INotificationService _notificationService;
 
-        public GovernanceService(ApplicationDbContext db)
+        public GovernanceService(ApplicationDbContext db, INotificationService notificationService)
         {
             _db = db;
+            _notificationService = notificationService;
         }
 
         public async Task<IEnumerable<ECPeriodDto>> GetAllPeriodsAsync(CancellationToken cancellationToken = default)
@@ -157,7 +159,7 @@ namespace GHCAA.Infrastructure.Services
             return members.Select(MapToMemberDto);
         }
 
-        public async Task<bool> AssignMemberToRoleAsync(int periodId, int memberId, int position, string? reason, CancellationToken cancellationToken = default)
+        public async Task<bool> AssignMemberToRoleAsync(int periodId, int memberId, int position, string? reason, bool notifyMember = false, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
             if (member == null || member.Status != MembershipStatus.Active)
@@ -176,26 +178,71 @@ namespace GHCAA.Infrastructure.Services
 
             _db.ECMembers.Add(newAssignment);
             await _db.SaveChangesAsync(cancellationToken);
+
+            // 82.52: admin-chosen, off by default (nothing notified here before this item).
+            if (notifyMember)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    memberId,
+                    "Committee Assignment",
+                    $"You have been assigned to the Executive Committee as {(ECPosition)position}.",
+                    NotificationType.CommitteeAssignment,
+                    cancellationToken: cancellationToken);
+            }
+
             return true;
         }
 
-        public async Task<bool> RemoveMemberFromCommitteeAsync(int ecMemberId, CancellationToken cancellationToken = default)
+        public async Task<bool> RemoveMemberFromCommitteeAsync(int ecMemberId, bool notifyMember = false, CancellationToken cancellationToken = default)
         {
             var ecMember = await _db.ECMembers.FindAsync(new object[] { ecMemberId }, cancellationToken);
             if (ecMember == null) return false;
 
             ecMember.EndDate = DateTime.UtcNow;
             await _db.SaveChangesAsync(cancellationToken);
+
+            // 82.52: admin-chosen, off by default (nothing notified here before this item).
+            if (notifyMember)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    ecMember.MemberId,
+                    "Committee Term Ended",
+                    "Your term on the Executive Committee has ended.",
+                    NotificationType.CommitteeAssignment,
+                    cancellationToken: cancellationToken);
+            }
+
             return true;
         }
 
-        public async Task<bool> DeleteECMemberAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteECMemberAsync(int id, int adminId, bool notifyMember = false, CancellationToken cancellationToken = default)
         {
             var ecMember = await _db.ECMembers.FindAsync(new object[] { id }, cancellationToken);
-            if (ecMember == null) return false;
+            if (ecMember == null || ecMember.IsDeleted) return false;
 
-            _db.ECMembers.Remove(ecMember);
+            // 82.29: soft delete, replacing _db.ECMembers.Remove(ecMember). ECMember is Class A
+            // (ARCHITECTURE.md §4) — this path is for a row that should never have existed (wrong
+            // member added), which is still worth keeping as evidence of who removed it and when,
+            // the same reasoning FinancialService.DeletePaymentAsync already applies to PaymentHistory.
+            ecMember.IsDeleted = true;
+            ecMember.DeletedAt = DateTime.UtcNow;
+            ecMember.DeletedByAdminId = adminId;
+
             await _db.SaveChangesAsync(cancellationToken);
+
+            // 82.52: admin-chosen, off by default. This is the "wrong member added" correction
+            // path, so notifying is rarely wanted, but an admin who does want to explain the
+            // removal to the affected member can opt in per action.
+            if (notifyMember)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    ecMember.MemberId,
+                    "Committee Record Removed",
+                    "A committee role record for you has been removed by an administrator.",
+                    NotificationType.CommitteeAssignment,
+                    cancellationToken: cancellationToken);
+            }
+
             return true;
         }
 

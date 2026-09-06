@@ -159,6 +159,11 @@
                                 <span class="label-text">Allow Non-Alumni Participation</span>
                             </label>
                             <label class="premium-checkbox-label">
+                                <input type="checkbox" formControlName="notifyMembers">
+                                <span class="checkmark"></span>
+                                <span class="label-text">{{ editingEventId() ? 'Notify members of this update' : 'Notify members when published' }}</span>
+                            </label>
+                            <label class="premium-checkbox-label">
                                 <input type="checkbox" formControlName="requiresRegistration">
                                 <span class="checkmark"></span>
                                 <span class="label-text">Requires Registration (uncheck for informational-only events)</span>

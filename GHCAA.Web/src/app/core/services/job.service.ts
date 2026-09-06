@@ -39,11 +39,11 @@ export class JobService {
         return this.http.get<Job[]>(`${this.apiUrl}/admin/pending`);
     }
 
-    approveJob(id: number): Observable<any> {
-        return this.http.post(`${this.apiUrl}/admin/${id}/approve`, {});
+    approveJob(id: number, notifyMember = true): Observable<any> {
+        return this.http.post(`${this.apiUrl}/admin/${id}/approve?notifyMember=${notifyMember}`, {});
     }
 
-    rejectJob(id: number, reason: string): Observable<any> {
-        return this.http.post(`${this.apiUrl}/admin/${id}/reject`, { reason });
+    rejectJob(id: number, reason: string, notifyMember = true): Observable<any> {
+        return this.http.post(`${this.apiUrl}/admin/${id}/reject`, { reason, notifyMember });
     }
 }

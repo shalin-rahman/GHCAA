@@ -111,10 +111,10 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task ApproveJob_ReturnsOk_OnSuccess()
         {
-            _jobServiceMock.Setup(x => x.ApproveJobAsync(1, It.IsAny<CancellationToken>()))
+            _jobServiceMock.Setup(x => x.ApproveJobAsync(1, true, It.IsAny<CancellationToken>()))
                            .ReturnsAsync(true);
 
-            var result = await _controller.ApproveJob(1, CancellationToken.None);
+            var result = await _controller.ApproveJob(1, true, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
@@ -123,12 +123,37 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task RejectJob_ReturnsNotFound_WhenMissing()
         {
-            _jobServiceMock.Setup(x => x.RejectJobAsync(1, "reason", It.IsAny<CancellationToken>()))
+            _jobServiceMock.Setup(x => x.RejectJobAsync(1, "reason", true, It.IsAny<CancellationToken>()))
                            .ReturnsAsync(false);
 
             var result = await _controller.RejectJob(1, new JobHubController.RejectJobRequest { Reason = "reason" }, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<NotFoundResult>());
+        }
+
+        // 82.52 batch 3: notifyMember flows straight through to the service.
+        [Category("FR-54")]
+        [Test]
+        public async Task ApproveJob_PassesNotifyMemberFalse_ToService()
+        {
+            _jobServiceMock.Setup(x => x.ApproveJobAsync(1, false, It.IsAny<CancellationToken>()))
+                           .ReturnsAsync(true);
+
+            var result = await _controller.ApproveJob(1, false, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Category("FR-54")]
+        [Test]
+        public async Task RejectJob_PassesNotifyMemberFalse_ToService()
+        {
+            _jobServiceMock.Setup(x => x.RejectJobAsync(1, "reason", false, It.IsAny<CancellationToken>()))
+                           .ReturnsAsync(true);
+
+            var result = await _controller.RejectJob(1, new JobHubController.RejectJobRequest { Reason = "reason", NotifyMember = false }, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
     }
 }

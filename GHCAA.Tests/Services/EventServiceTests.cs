@@ -83,6 +83,44 @@ public class EventServiceTests : TestBase
         _context.AlumniEvents.Count().Should().Be(1);
     }
 
+    // 82.52: CreateEventAsync already broadcast unconditionally when IsActive; NotifyMembers
+    // defaults true so that behavior is unchanged, but an admin can now suppress it per event.
+    [Category("FR-13")]
+    [Test]
+    public async Task CreateEventAsync_Broadcasts_WhenNotifyMembersDefaultsTrueAndActive()
+    {
+        var dto = new CreateEventDto
+        {
+            Title = "Notified Event", Description = "D", Location = "L",
+            StartDate = DateTime.UtcNow.AddDays(1), EndDate = DateTime.UtcNow.AddDays(2),
+            IsActive = true
+        };
+
+        await _service.CreateEventAsync(dto);
+
+        _notificationMock.Verify(n => n.BroadcastNotificationAsync(
+            It.IsAny<string>(), It.IsAny<string>(), NotificationType.EventCreation,
+            It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Category("FR-13")]
+    [Test]
+    public async Task CreateEventAsync_SuppressesBroadcast_WhenNotifyMembersOptedOut()
+    {
+        var dto = new CreateEventDto
+        {
+            Title = "Silent Event", Description = "D", Location = "L",
+            StartDate = DateTime.UtcNow.AddDays(1), EndDate = DateTime.UtcNow.AddDays(2),
+            IsActive = true, NotifyMembers = false
+        };
+
+        await _service.CreateEventAsync(dto);
+
+        _notificationMock.Verify(n => n.BroadcastNotificationAsync(
+            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<NotificationType>(),
+            It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
     [Test]
     public async Task GetAllEventsForAdminAsync_ShouldIncludeInactiveEvents()
     {
@@ -134,6 +172,44 @@ public class EventServiceTests : TestBase
 
         result.Should().NotBeNull();
         result!.IsActive.Should().BeTrue();
+    }
+
+    // 82.52: UpdateEventAsync never notified before this item; NotifyOnUpdate defaults false so
+    // that stays true unless an admin opts in per edit.
+    [Category("FR-13")]
+    [Test]
+    public async Task UpdateEventAsync_DoesNotBroadcast_ByDefault()
+    {
+        var ev = new AlumniEvent { Title = "Existing", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", IsActive = true };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        await _service.UpdateEventAsync(new UpdateEventDto
+        {
+            Id = ev.Id, Title = "Existing Updated", Description = "D", StartDate = ev.StartDate, EndDate = ev.EndDate, Location = "L", IsActive = true
+        });
+
+        _notificationMock.Verify(n => n.BroadcastNotificationAsync(
+            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<NotificationType>(),
+            It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Category("FR-13")]
+    [Test]
+    public async Task UpdateEventAsync_Broadcasts_WhenNotifyOnUpdateOptedIn()
+    {
+        var ev = new AlumniEvent { Title = "Existing", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", IsActive = true };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        await _service.UpdateEventAsync(new UpdateEventDto
+        {
+            Id = ev.Id, Title = "Existing Updated", Description = "D", StartDate = ev.StartDate, EndDate = ev.EndDate, Location = "L", IsActive = true, NotifyOnUpdate = true
+        });
+
+        _notificationMock.Verify(n => n.BroadcastNotificationAsync(
+            It.IsAny<string>(), It.IsAny<string>(), NotificationType.EventCreation,
+            It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Category("FR-14")]

@@ -143,7 +143,10 @@ export class AdminEvents implements OnInit {
         // legally hold the number patchValue assigns to it once AlumniEvent.participantLimit was
         // typed as `number | null`.
         participantLimit: [null as number | null],
-        hasWaitlist: [false]
+        hasWaitlist: [false],
+        // 82.52: create defaults to notifying (matches what this already did unconditionally
+        // when published); edit defaults to not re-notifying (this never notified before).
+        notifyMembers: [true]
     }, { validators: AdminEvents.eventDatesValidator });
 
     ngOnInit() {
@@ -209,7 +212,7 @@ export class AdminEvents implements OnInit {
 
     openCreateForm() {
         this.editingEventId.set(null);
-        this.eventForm.reset({ isActive: true, requiresPayment: true, requiresRegistration: true, registrationFee: 0 });
+        this.eventForm.reset({ isActive: true, requiresPayment: true, requiresRegistration: true, registrationFee: 0, notifyMembers: true });
         this.selectedLogo.set(null);
         this.logoPreview.set(null);
         this.formError.set(null);
@@ -233,7 +236,8 @@ export class AdminEvents implements OnInit {
             allowNonMembers: ev.allowNonMembers,
             requiresRegistration: ev.requiresRegistration ?? true,
             participantLimit: ev.participantLimit,
-            hasWaitlist: ev.hasWaitlist
+            hasWaitlist: ev.hasWaitlist,
+            notifyMembers: false
         });
         this.selectedLogo.set(null);
         this.logoPreview.set(ev.imageUrl || null);
@@ -303,6 +307,14 @@ export class AdminEvents implements OnInit {
         };
 
         const id = this.editingEventId();
+
+        // 82.52: the form has one checkbox, but the two DTOs use distinct property names so an
+        // update request that omits the field can't accidentally inherit create's "notify" default.
+        if (id) {
+            evData.notifyOnUpdate = raw.notifyMembers ?? false;
+        } else {
+            evData.notifyMembers = raw.notifyMembers ?? true;
+        }
 
         const request = id
             ? this.eventsService.updateEvent(id, evData)

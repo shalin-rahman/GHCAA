@@ -118,6 +118,58 @@ describe('AdminEvents Component', () => {
         expect(notificationServiceMock.success).toHaveBeenCalledWith('Event created!');
     });
 
+    // 82.52: create defaults to notifying (matches the unconditional broadcast this already did);
+    // edit defaults to not re-notifying (this never notified before). One checkbox, two DTO fields.
+    it('createEvent payload defaults notifyMembers:true', () => {
+        eventsServiceMock.createEvent = vi.fn().mockReturnValue(of({ id: 1 }));
+        component.openCreateForm();
+        component.eventForm.patchValue({
+            title: 'New Event', description: 'Desc', location: 'Loc',
+            startDate: '2023-12-01T10:00', endDate: '2023-12-01T12:00'
+        });
+
+        component.submitEvent();
+
+        expect(eventsServiceMock.createEvent).toHaveBeenCalledWith(
+            expect.objectContaining({ notifyMembers: true })
+        );
+    });
+
+    it('updateEvent payload defaults notifyOnUpdate:false, not notifyMembers', () => {
+        eventsServiceMock.updateEvent = vi.fn().mockReturnValue(of({ id: 1 }));
+        component.openEditForm({
+            id: 1, title: 'Existing', description: 'Desc', location: 'Loc',
+            startDate: '2023-12-01T10:00', endDate: '2023-12-01T12:00',
+            requiresPayment: true, isActive: true, allowNonMembers: false, requiresRegistration: true
+        } as any);
+
+        component.submitEvent();
+
+        expect(eventsServiceMock.updateEvent).toHaveBeenCalledWith(
+            1,
+            expect.objectContaining({ notifyOnUpdate: false })
+        );
+        const [, payload] = eventsServiceMock.updateEvent.mock.calls[0];
+        expect(payload.notifyMembers).toBeUndefined();
+    });
+
+    it('updateEvent payload carries notifyOnUpdate:true when the admin opts in', () => {
+        eventsServiceMock.updateEvent = vi.fn().mockReturnValue(of({ id: 1 }));
+        component.openEditForm({
+            id: 1, title: 'Existing', description: 'Desc', location: 'Loc',
+            startDate: '2023-12-01T10:00', endDate: '2023-12-01T12:00',
+            requiresPayment: true, isActive: true, allowNonMembers: false, requiresRegistration: true
+        } as any);
+        component.eventForm.patchValue({ notifyMembers: true });
+
+        component.submitEvent();
+
+        expect(eventsServiceMock.updateEvent).toHaveBeenCalledWith(
+            1,
+            expect.objectContaining({ notifyOnUpdate: true })
+        );
+    });
+
     it('should handle logo selection and set preview', async () => {
         const file = new File([''], 'logo.png', { type: 'image/png' });
         const event = { target: { files: [file] } } as any;

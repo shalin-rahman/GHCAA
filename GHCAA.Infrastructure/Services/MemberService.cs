@@ -115,6 +115,7 @@ namespace GHCAA.Infrastructure.Services
                     NotifyParticipationApproval = dto.NotifyParticipationApproval,
                     NotifyRegistrationUpdate = dto.NotifyRegistrationUpdate,
                     NotifyRelevantUpdates = dto.NotifyRelevantUpdates,
+                    NotifyCommitteeChanges = dto.NotifyCommitteeChanges,
                     HasAcceptedTerms = dto.HasAcceptedTerms,
                     HasAcceptedGdpr = dto.HasAcceptedGdpr,
                     GdprAcceptedAt = dto.HasAcceptedGdpr ? DateTime.UtcNow : null,
@@ -545,6 +546,7 @@ namespace GHCAA.Infrastructure.Services
                 NotifyParticipationApproval = member.NotifyParticipationApproval,
                 NotifyRegistrationUpdate = member.NotifyRegistrationUpdate,
                 NotifyRelevantUpdates = member.NotifyRelevantUpdates,
+                NotifyCommitteeChanges = member.NotifyCommitteeChanges,
                 AppliedDate = DateTime.SpecifyKind(member.AppliedDate, DateTimeKind.Utc),
                 // Gamification & Health
                 ContributionPoints = member.ContributionPoints,
@@ -723,6 +725,7 @@ namespace GHCAA.Infrastructure.Services
             member.NotifyEventCreation = dto.NotifyEventCreation;
             member.NotifyParticipationApproval = dto.NotifyParticipationApproval;
             member.NotifyRegistrationUpdate = dto.NotifyRegistrationUpdate;
+            member.NotifyCommitteeChanges = dto.NotifyCommitteeChanges;
 
             // Handle Academic History
             if (dto.AcademicHistory != null && dto.AcademicHistory.Any())
@@ -1155,6 +1158,7 @@ namespace GHCAA.Infrastructure.Services
             member.NotifyParticipationApproval = dto.NotifyParticipationApproval;
             member.NotifyRegistrationUpdate = dto.NotifyRegistrationUpdate;
             member.NotifyRelevantUpdates = dto.NotifyRelevantUpdates;
+            member.NotifyCommitteeChanges = dto.NotifyCommitteeChanges;
 
             member.Gender = dto.Gender;
             member.BloodGroup = dto.BloodGroup;
