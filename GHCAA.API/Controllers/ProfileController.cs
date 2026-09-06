@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
@@ -54,7 +54,7 @@ namespace GHCAA.API.Controllers
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto, CancellationToken cancellationToken)
         {
-            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdStr = this.CurrentUserIdRaw();
             if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out var userId))
             {
                 return Unauthorized();
@@ -63,7 +63,7 @@ namespace GHCAA.API.Controllers
             var success = await _userService.ChangePasswordAsync(userId, dto.OldPassword, dto.NewPassword, cancellationToken);
             if (!success)
             {
-                return BadRequest(new { Message = "Password change failed. Verify your old password." });
+                return Problem(detail: "Password change failed. Verify your old password.", statusCode: StatusCodes.Status400BadRequest);
             }
 
             return Ok(new { Message = "Password changed successfully" });
@@ -115,7 +115,7 @@ namespace GHCAA.API.Controllers
             var memberId = GetMemberId();
             if (memberId == 0) return Unauthorized();
             var validation = _fileValidationService.ValidateFormFile(photo, FileCategory.Image, 5 * 1024 * 1024);
-            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
+            if (!validation.IsValid) return Problem(detail: validation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
 
             var dto = new UploadedFileDto
             {
@@ -134,7 +134,7 @@ namespace GHCAA.API.Controllers
             var memberId = GetMemberId();
             if (memberId == 0) return Unauthorized();
             var validation = _fileValidationService.ValidateFormFile(signature, FileCategory.Image, 2 * 1024 * 1024);
-            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
+            if (!validation.IsValid) return Problem(detail: validation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
 
             var dto = new UploadedFileDto
             {
@@ -149,7 +149,7 @@ namespace GHCAA.API.Controllers
 
         private int GetMemberId()
         {
-            var memberIdStr = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdStr = this.CurrentMemberIdRaw();
             if (int.TryParse(memberIdStr, out var memberId))
             {
                 return memberId;

@@ -1,10 +1,11 @@
-using GHCAA.Application.DTOs;
+﻿using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using GHCAA.Application.Security;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -32,10 +33,10 @@ namespace GHCAA.API.Controllers
         [HttpPost]
         public async Task<IActionResult> PostJob([FromBody] CreateJobDto job, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
-                return BadRequest("Invalid user session");
+                return Problem(detail: "Invalid user session", statusCode: StatusCodes.Status400BadRequest);
             }
 
             var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
@@ -46,10 +47,10 @@ namespace GHCAA.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateJob(int id, [FromBody] CreateJobDto job, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
-                return BadRequest("Invalid user session");
+                return Problem(detail: "Invalid user session", statusCode: StatusCodes.Status400BadRequest);
             }
 
             var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
@@ -73,7 +74,7 @@ namespace GHCAA.API.Controllers
         [HttpPatch("deactivate/{id}")]
         public async Task<IActionResult> DeactivateJob(int id, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdClaim = this.CurrentMemberIdRaw();
             var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
 
             var job = await _jobService.GetJobByIdAsync(id, cancellationToken);
@@ -98,9 +99,9 @@ namespace GHCAA.API.Controllers
 
         [HttpPost("admin/{id}/approve")]
         [Authorize(Policy = Constants.Policies.AdminOnly)]
-        public async Task<IActionResult> ApproveJob(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> ApproveJob(int id, [FromQuery] bool notifyMember = true, CancellationToken cancellationToken = default)
         {
-            var success = await _jobService.ApproveJobAsync(id, cancellationToken);
+            var success = await _jobService.ApproveJobAsync(id, notifyMember, cancellationToken);
             return success ? Ok(new { Message = "Job approved." }) : NotFound();
         }
 
@@ -108,13 +109,14 @@ namespace GHCAA.API.Controllers
         [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> RejectJob(int id, [FromBody] RejectJobRequest request, CancellationToken cancellationToken)
         {
-            var success = await _jobService.RejectJobAsync(id, request.Reason, cancellationToken);
+            var success = await _jobService.RejectJobAsync(id, request.Reason, request.NotifyMember, cancellationToken);
             return success ? Ok(new { Message = "Job rejected." }) : NotFound();
         }
 
         public class RejectJobRequest
         {
             public string Reason { get; set; } = null!;
+            public bool NotifyMember { get; set; } = true;
         }
     }
 }

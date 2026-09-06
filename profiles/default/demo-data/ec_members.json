@@ -1,0 +1,11 @@
+[
+  {
+    "Id": 1,
+    "MemberId": 1,
+    "ECPeriodId": 1,
+    "Position": 1,
+    "StartDate": "2024-01-01T00:00:00+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  }
+]

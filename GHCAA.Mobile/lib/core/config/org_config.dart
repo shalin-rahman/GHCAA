@@ -356,34 +356,36 @@ class OrgConfig {
     );
   }
 
-  /// Hardcoded GHCAA defaults — mirrors BuildGhcaaDefaults() in the backend.
-  /// Used when both network and cache are unavailable.
-  static OrgConfig get ghcaaDefaults => OrgConfig(
-        orgId: 'ghcaa',
+  /// Neutral offline fallback, used before the API config has ever loaded
+  /// (first launch, no cache yet) or when both network and cache fail.
+  /// Carries no institution's real branding — the real values always come
+  /// from the API-fetched OrgConfig once that succeeds.
+  static OrgConfig get offlineDefaults => OrgConfig(
+        orgId: 'default',
         schemaVersion: 1,
         branding: OrgBranding(
-          shortName: 'GHCAA',
-          fullName: 'Govt. Haraganga College Alumni Association',
-          memberNickname: 'Haragangian',
-          institutionName: 'Govt. Haraganga College',
-          institutionAcronym: 'GHC',
-          membershipNumberPrefix: 'GHC-',
-          approvalSeal: 'GHC APPROVED',
+          shortName: 'Alumni Association',
+          fullName: 'Alumni Association',
+          memberNickname: 'Member',
+          institutionName: 'Institution',
+          institutionAcronym: 'AA',
+          membershipNumberPrefix: 'MEM-',
+          approvalSeal: 'APPROVED',
           logoUrl: '/assets/logo.png',
           primaryColor: '#121212',
-          accentColor: '#c5a059',
+          accentColor: '#2f6f4f',
         ),
         contact: OrgContact(
-          supportEmail: 'haragangian@gmail.com',
-          importEmailBase: 'haragangian',
-          registeredOffice: 'Govt. Haraganga College Campus, Munshiganj, Bangladesh.',
-          campusAddress: 'Govt. Haraganga College, Munshiganj-1500, Bangladesh.',
-          phoneNumbers: const ['+880 1711-234567', '+880 1812-345678'],
+          supportEmail: 'support@example.org',
+          importEmailBase: 'member',
+          registeredOffice: '',
+          campusAddress: '',
+          phoneNumbers: const [],
           mapEmbedUrl: '',
-          portalBaseUrl: 'https://haragangian.com/portal',
+          portalBaseUrl: '',
           socialLinks: SocialLinks(facebook: '#', whatsapp: '#', youtube: '#'),
         ),
-        currency: OrgCurrency(code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka'),
+        currency: OrgCurrency(code: 'USD', symbol: '\$', name: 'US Dollar'),
         features: FeatureToggles(
           enableEvents: true,
           enableJobHub: true,
@@ -412,11 +414,11 @@ class OrgConfig {
         ),
         locales: {
           'en': LocalePack(
-            orgName: 'Govt. Haraganga College Alumni Association',
-            tagline: 'Sharing Heritage, Aligning Lives, Integrating Networks',
+            orgName: 'Alumni Association',
+            tagline: '',
             memberLabel: 'Member',
             memberPluralLabel: 'Members',
-            memberNickname: 'Haragangian',
+            memberNickname: 'Member',
             alumniLabel: 'Alumni',
             membershipLabel: 'Membership',
             membershipTypeLabels: {
@@ -441,42 +443,8 @@ class OrgConfig {
               community: 'COMMUNITY',
               mediaAndTools: 'MEDIA & TOOLS',
               adminRoleLabel: 'ADMINISTRATOR',
-              memberRoleLabel: 'ALUMNI MEMBER',
+              memberRoleLabel: 'MEMBER',
               batchPrefix: 'Batch: ',
-            ),
-          ),
-          'bn': LocalePack(
-            orgName: 'সরকারি হারাগঙ্গা কলেজ প্রাক্তন ছাত্রছাত্রী সমিতি',
-            tagline: 'ঐতিহ্যের বিনিময়, জীবনের সমন্বয় ও সংহতির সেতুবন্ধন',
-            memberLabel: 'সদস্য',
-            memberPluralLabel: 'সদস্যগণ',
-            memberNickname: 'হারাগঙ্গিয়ান',
-            alumniLabel: 'প্রাক্তন ছাত্রছাত্রী',
-            membershipLabel: 'সদস্যপদ',
-            membershipTypeLabels: {
-              'Founding': 'প্রতিষ্ঠাতা সদস্য',
-              'Executive': 'নির্বাহী সদস্য',
-              'General': 'সাধারণ সদস্য',
-              'Associate': 'সহযোগী সদস্য',
-              'Honorary': 'সম্মানসূচক সদস্য',
-              'Advisory': 'উপদেষ্টা সদস্য',
-              'Guest': 'অতিথি সদস্য',
-            },
-            memberCategoryLabels: {
-              'None': 'কোনোটি নয়', 'LifelongPatron': 'আজীবন পৃষ্ঠপোষক', 'Sponsor': 'স্পনসর',
-              'Advisor': 'উপদেষ্টা', 'Mentor': 'মেন্টর', 'Recruiter': 'নিয়োগকর্তা',
-              'Active': 'সক্রিয়', 'Volunteer': 'স্বেচ্ছাসেবক', 'Contributor': 'অবদানকারী',
-              'Guest': 'অতিথি', 'Student': 'ছাত্র',
-            },
-            ecRoleLabels: {},
-            nav: NavLabels(
-              administration: 'প্রশাসন',
-              myAccount: 'আমার অ্যাকাউন্ট',
-              community: 'কমিউনিটি',
-              mediaAndTools: 'মিডিয়া ও সরঞ্জাম',
-              adminRoleLabel: 'প্রশাসক',
-              memberRoleLabel: 'অ্যালামনাই সদস্য',
-              batchPrefix: 'ব্যাচ: ',
             ),
           ),
         },

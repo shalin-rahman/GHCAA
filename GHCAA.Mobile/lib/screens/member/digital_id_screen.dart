@@ -9,6 +9,7 @@ import 'package:printing/printing.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 import '../../core/config/app_config.dart';
+import '../../core/services/app_localizations.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
@@ -68,18 +69,18 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
                             padding: const EdgeInsets.fromLTRB(AppTheme.spaceXL, AppTheme.spaceL, AppTheme.spaceXL, AppTheme.spaceXL),
                             child: Column(
                               children: [
-                                 const Row(
+                                 Row(
                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                    children: [
-                                     Icon(Icons.school_outlined, size: 28, color: AppTheme.royalGold),
-                                     SizedBox(width: AppTheme.spaceS),
+                                     const Icon(Icons.school_outlined, size: 28, color: AppTheme.royalGold),
+                                     const SizedBox(width: AppTheme.spaceS),
                                      Expanded(
                                        child: FittedBox(
                                          fit: BoxFit.scaleDown,
                                          alignment: Alignment.centerRight,
                                          child: Text(
-                                           'Haragangian Alumni Digital Pass',
-                                           style: TextStyle(
+                                           AppLocalizations.of(context).translate('digital_id_pass_title'),
+                                           style: const TextStyle(
                                              color: AppTheme.royalGold,
                                              fontWeight: FontWeight.bold,
                                              fontSize: 13,

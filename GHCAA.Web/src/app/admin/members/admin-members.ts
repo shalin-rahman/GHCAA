@@ -6,7 +6,8 @@ import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { EC_ROLES, getECPositionName, getCurrentECPosition, getCurrentECPeriod, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, MEMBERSHIP_STATUS_OPTIONS, MEMBERSHIP_TYPE_OPTIONS, MEMBER_CATEGORY_OPTIONS, EC_ROLES_OPTIONS, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName } from '../../core/constants/app.constants';
+import { EC_ROLES, getECPositionName, getCurrentECPosition, getCurrentECPeriod, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, MEMBERSHIP_TYPE_OPTIONS, EC_ROLES_OPTIONS, getBloodGroupName, LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { DatePipe } from '@angular/common';
 import * as XLSX from 'xlsx';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
@@ -32,6 +33,7 @@ export class AdminMembers implements OnInit {
   private notify = inject(NotificationService);
   private router = inject(Router);
   private datePipe = inject(DatePipe);
+  private lookupService = inject(LookupService);
   nav = inject(NavService);
 
   allMembers = signal<any[]>([]);
@@ -131,14 +133,16 @@ export class AdminMembers implements OnInit {
 
   // Constants for dropdowns
   membershipTypes = MEMBERSHIP_TYPE_OPTIONS;
-  memberCategories = MEMBER_CATEGORY_OPTIONS;
-  statusOptions = MEMBERSHIP_STATUS_OPTIONS;
   ecPositions = EC_ROLES_OPTIONS;
-  genderOptions = GENDER_OPTIONS;
-  bloodGroupOptions = BLOOD_GROUP_OPTIONS;
+
+  // 82.42: these five populate from /lookups/{group} via LookupService, filled in loadLookupOptions().
+  memberCategories: LookupOption[] = [];
+  statusOptions: LookupOption[] = [];
+  genderOptions: LookupOption[] = [];
+  bloodGroupOptions: LookupOption[] = [];
+  yearsList: number[] = [];
 
   ACADEMIC = ACADEMIC_DATA;
-  yearsList = this.ACADEMIC.getYears();
   IS_HSC = IS_HSC;
   degreeOptions = this.ACADEMIC.certificates;
   subjectOptions = this.ACADEMIC.subjects;
@@ -165,6 +169,16 @@ export class AdminMembers implements OnInit {
   ngOnInit() {
     this.loadMembers();
     this.loadECPeriods();
+    this.loadLookupOptions();
+  }
+
+  // 82.42: single place these five lists come from now, instead of each screen hardcoding its own copy.
+  private loadLookupOptions() {
+    this.lookupService.getOptions(LOOKUP_GROUPS.MembershipStatus).subscribe(opts => this.statusOptions = opts);
+    this.lookupService.getOptions(LOOKUP_GROUPS.MemberCategory).subscribe(opts => this.memberCategories = opts);
+    this.lookupService.getOptions(LOOKUP_GROUPS.Gender).subscribe(opts => this.genderOptions = opts);
+    this.lookupService.getOptions(LOOKUP_GROUPS.BloodGroup).subscribe(opts => this.bloodGroupOptions = opts);
+    this.lookupService.getAcademicYears().subscribe(years => this.yearsList = years);
   }
 
   loadECPeriods() {
@@ -282,6 +296,14 @@ export class AdminMembers implements OnInit {
     this.adminService.archiveMember(id).subscribe({
       next: () => { this.notify.success('Member archived.'); this.loadMembers(); },
       error: () => this.notify.error('Archive failed.')
+    });
+  }
+
+  restoreMember(id: number) {
+    if (!confirm('Restore this member from the archive?')) return;
+    this.adminService.restoreMember(id).subscribe({
+      next: () => { this.notify.success('Member restored.'); this.loadMembers(); },
+      error: () => this.notify.error('Restore failed.')
     });
   }
 
@@ -425,6 +447,7 @@ export class AdminMembers implements OnInit {
   }
 
   saveMember() {
+    if (this.submitting()) return;
     const member = this.selectedMember();
     if (!member) return;
 

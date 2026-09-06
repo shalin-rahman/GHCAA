@@ -1,7 +1,8 @@
-using GHCAA.Application.Interfaces;
+﻿using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GHCAA.Application.Security;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -26,7 +27,7 @@ namespace GHCAA.API.Controllers
             try
             {
                 if (!TryGetMemberId(out var memberId))
-                    return Unauthorized(new { message = "Member profile is required for notifications." });
+                    return Problem(detail: "Member profile is required for notifications.", statusCode: StatusCodes.Status401Unauthorized);
 
                 var notifications = await _notificationService.GetUserNotificationsAsync(memberId, cancellationToken);
                 return Ok(notifications);
@@ -34,7 +35,7 @@ namespace GHCAA.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching notifications");
-                return StatusCode(500, new { message = "Error fetching notifications", details = ex.Message });
+                return Problem(detail: ex.Message, title: "Error fetching notifications", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -63,7 +64,7 @@ namespace GHCAA.API.Controllers
         private bool TryGetMemberId(out int memberId)
         {
             memberId = 0;
-            var memberIdStr = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var memberIdStr = this.CurrentMemberIdRaw();
             return !string.IsNullOrEmpty(memberIdStr) && int.TryParse(memberIdStr, out memberId);
         }
     }

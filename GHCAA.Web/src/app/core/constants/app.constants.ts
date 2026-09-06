@@ -14,6 +14,18 @@ export const EC_ROLES = [
     'Institutional Representative'
 ] as const;
 
+// 82.42: the /lookups/{group} route takes any string and matches it against the Lookups
+// table's LookupGroup column — these are the exact group names GHCAA.Mobile's DropdownService
+// already calls with, so both clients ask the API for the same rows.
+export const LOOKUP_GROUPS = {
+    MembershipStatus: 'MembershipStatus',
+    MemberCategory: 'MemberCategory',
+    Gender: 'Gender',
+    BloodGroup: 'BloodGroup',
+    JobCategory: 'JobCategory',
+    PassingYear: 'PassingYear'
+} as const;
+
 export const DATE_FORMAT = 'dd-MM-yyyy';
 export const DATE_REGEX = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
@@ -23,13 +35,16 @@ export const DEVELOPER_INFO = {
     link: 'mailto:shalin.rahman@gmail.com'
 };
 
+// 82.42: Applied/InactivePayment used to read "Pending"/"Inactive" here but "Pending Approval"/
+// "Inactive (Unpaid)" on mobile (dropdown_service.dart). Matched to mobile's wording since that's
+// also what LookupService.LOOKUP_FALLBACKS now uses when the API has no seeded rows for this group.
 export const MEMBERSHIP_STATUS_MAP: Record<string | number, { label: string, class: string }> = {
-    'Applied': { label: 'Pending', class: 'pending' },
-    0: { label: 'Pending', class: 'pending' },
+    'Applied': { label: 'Pending Approval', class: 'pending' },
+    0: { label: 'Pending Approval', class: 'pending' },
     'Active': { label: 'Active', class: 'active' },
     1: { label: 'Active', class: 'active' },
-    'InactivePayment': { label: 'Inactive', class: 'inactive' },
-    2: { label: 'Inactive', class: 'inactive' },
+    'InactivePayment': { label: 'Inactive (Unpaid)', class: 'inactive' },
+    2: { label: 'Inactive (Unpaid)', class: 'inactive' },
     'InactiveResigned': { label: 'Resigned', class: 'resigned' },
     3: { label: 'Resigned', class: 'resigned' },
     'Terminated': { label: 'Terminated', class: 'terminated' },
@@ -67,7 +82,10 @@ export const BLOOD_GROUPS = [
     'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'
 ];
 
-export const BLOOD_GROUP_OPTIONS = [
+// 82.42: not exported any more — getBloodGroupName() below is its only remaining consumer.
+// Screens that used to import this for their blood-group dropdown now call
+// LookupService.getOptions(LOOKUP_GROUPS.BloodGroup) instead.
+const BLOOD_GROUP_OPTIONS = [
     { value: 'Unknown', label: 'Not Specified' },
     { value: 'APositive', label: 'A+' },
     { value: 'ANegative', label: 'A-' },
@@ -83,13 +101,6 @@ export const GENDERS = [
     'Male', 'Female', 'Other'
 ];
 
-export const GENDER_OPTIONS = [
-    { value: 'None', label: 'Not Specified' },
-    { value: 'Male', label: 'Male' },
-    { value: 'Female', label: 'Female' },
-    { value: 'Other', label: 'Other' }
-];
-
 export const TSHIRT_SIZES = [
     { value: 'S', label: 'Small (S)' },
     { value: 'M', label: 'Medium (M)' },
@@ -99,7 +110,9 @@ export const TSHIRT_SIZES = [
     { value: '3XL', label: 'Triple Extra Large (3XL)' }
 ];
 
-export const JOB_CATEGORIES = [
+// 82.42: not exported any more — getJobCategoryLabel() below is its only remaining consumer.
+// jobs.ts now calls LookupService.getOptions(LOOKUP_GROUPS.JobCategory) to populate its select.
+const JOB_CATEGORIES = [
     { id: 'IT', name: 'IT & Software Development' },
     { id: 'Finance', name: 'Finance & Banking' },
     { id: 'Engineering', name: 'Engineering & Construction' },
@@ -332,14 +345,9 @@ export function getBloodGroupName(bg: string | undefined | null): string {
 
 export const EC_ROLES_OPTIONS = EC_ROLES.map((label, index) => ({ value: index, label }));
 
-export const MEMBERSHIP_STATUS_OPTIONS = [
-    { value: 'all', label: 'All Statuses' },
-    { value: 'Applied', label: 'Pending Audit' },
-    { value: 'Active', label: 'Active Member' },
-    { value: 'InactivePayment', label: 'Inactive (Payment)' },
-    { value: 'InactiveResigned', label: 'Inactive (Resigned)' },
-    { value: 'Terminated', label: 'Terminated' }
-];
+// 82.42: MEMBERSHIP_STATUS_OPTIONS and MEMBER_CATEGORY_OPTIONS removed — admin-members.ts and
+// directory.ts now get these from LookupService.getOptions(LOOKUP_GROUPS.MembershipStatus /
+// .MemberCategory) instead of a local hardcoded copy.
 
 export const MEMBERSHIP_TYPE_OPTIONS = [
     { value: 'Founding', label: 'Founding Member' },
@@ -349,20 +357,6 @@ export const MEMBERSHIP_TYPE_OPTIONS = [
     { value: 'Honorary', label: 'Honorary Member' },
     { value: 'Advisory', label: 'Advisory Member' },
     { value: 'Guest', label: 'Guest Member' }
-];
-
-export const MEMBER_CATEGORY_OPTIONS = [
-    { value: 'None', label: 'No Special Status' },
-    { value: 'LifelongPatron', label: 'Lifelong Patron' },
-    { value: 'Sponsor', label: 'Sponsor' },
-    { value: 'Advisor', label: 'Advisor' },
-    { value: 'Mentor', label: 'Mentor' },
-    { value: 'Recruiter', label: 'Recruiter' },
-    { value: 'Active', label: 'Active Member' },
-    { value: 'Volunteer', label: 'Volunteer' },
-    { value: 'Contributor', label: 'Contributor' },
-    { value: 'Guest', label: 'Guest Member' },
-    { value: 'Student', label: 'Student Member' }
 ];
 
 export const FINANCIAL_CATEGORY_OPTIONS = [
@@ -442,19 +436,15 @@ export const PROFESSIONAL_SECTORS = [
     'Public Administration & Defense'
 ];
 
-export const getAcademicYears = (): number[] => {
-    const currentYear = new Date().getFullYear();
-    const startYear = 1950;
-    return Array.from({ length: currentYear - startYear + 1 }, (_, i) => currentYear - i);
-};
+// 82.42: getAcademicYears() removed — every screen that used it now calls
+// LookupService.getAcademicYears() (sourced from the PassingYear lookup group) instead.
 
 export const IS_HSC = (cert: string | undefined | null) => cert === 'HSC';
 
 export const ACADEMIC_DATA = {
     certificates: ACADEMIC_CERTIFICATES,
     subjects: ACADEMIC_SUBJECTS,
-    sectors: PROFESSIONAL_SECTORS,
-    getYears: getAcademicYears
+    sectors: PROFESSIONAL_SECTORS
 };
 
 export const ensureValidAcademicData = (member: any) => {
@@ -497,6 +487,12 @@ export const API_ENDPOINTS = {
         SOCIAL_AUTH: '/api/admin/social-auth',
         POLLS: '/api/admin/polls'
     },
+    PENDING: {
+        ADMIN_SUMMARY: '/api/pending/admin/summary',
+        MY_SUMMARY: '/api/pending/me/summary'
+    },
+    FAMILY_LINKS: '/api/family-links',
+    MENTORSHIP: '/api/mentorship',
     AUTH: {
         LOGIN: '/api/auth/login',
         REGISTER: '/api/auth/register',

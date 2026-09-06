@@ -49,23 +49,40 @@ namespace GHCAA.Tests.Data
             ("site_content.json", typeof(SiteContent)),
         };
 
-        private static string SeedDirectory()
+        // Class 3 files (docs/SEED_CLASSIFICATION.md) moved out of Data/Seed into the GHC profile
+        // pack's demo-data folder — see Work Package 62.32. Everything else stays structural/Class 2
+        // and is still read from Data/Seed.
+        private static readonly HashSet<string> DemoDataFiles = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "members.json", "users.json", "ec_periods.json", "ec_members.json", "news.json",
+            "events.json", "galleries.json", "photos.json", "academic_records.json",
+            "professional_records.json", "membership_histories.json", "membership_dues.json",
+            "financial_records.json", "payment_histories.json",
+        };
+
+        private static string RepoRoot()
         {
             var dir = AppDomain.CurrentDomain.BaseDirectory;
             for (var i = 0; i < 6; i++)
             {
-                var candidate = Path.Combine(dir, "GHCAA.Infrastructure", "Data", "Seed");
-                if (Directory.Exists(candidate)) return candidate;
+                if (Directory.Exists(Path.Combine(dir, "GHCAA.Infrastructure")) && Directory.Exists(Path.Combine(dir, "profiles")))
+                    return dir;
                 dir = Path.GetFullPath(Path.Combine(dir, ".."));
             }
-            throw new DirectoryNotFoundException("Could not locate GHCAA.Infrastructure/Data/Seed from test output directory.");
+            throw new DirectoryNotFoundException("Could not locate the repo root (GHCAA.Infrastructure + profiles) from test output directory.");
         }
+
+        private static string SeedDirectory() => Path.Combine(RepoRoot(), "GHCAA.Infrastructure", "Data", "Seed");
+
+        private static string SeedFilePath(string fileName) => DemoDataFiles.Contains(fileName)
+            ? Path.Combine(RepoRoot(), "profiles", "ghc", "demo-data", fileName)
+            : Path.Combine(SeedDirectory(), fileName);
 
         [TestCaseSource(nameof(SeedFiles))]
         public void SeedFile_EveryJsonKey_MatchesARealEntityProperty((string File, Type EntityType) seed)
         {
-            var path = Path.Combine(SeedDirectory(), seed.File);
-            File.Exists(path).Should().BeTrue($"{seed.File} should exist under Data/Seed");
+            var path = SeedFilePath(seed.File);
+            File.Exists(path).Should().BeTrue($"{seed.File} should exist under Data/Seed or profiles/ghc/demo-data");
 
             var json = File.ReadAllText(path);
             using var doc = JsonDocument.Parse(json);
@@ -102,7 +119,7 @@ namespace GHCAA.Tests.Data
         [TestCaseSource(nameof(SeedFiles))]
         public void SeedFile_EveryPathOrUrlValue_IsNotPunctuationPlaceholder((string File, Type EntityType) seed)
         {
-            var path = Path.Combine(SeedDirectory(), seed.File);
+            var path = SeedFilePath(seed.File);
             var json = File.ReadAllText(path);
             using var doc = JsonDocument.Parse(json);
 

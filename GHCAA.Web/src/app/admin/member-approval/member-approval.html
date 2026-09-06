@@ -63,7 +63,7 @@
                             <button (click)="viewDetails(reg)" class="btn btn-outline btn-sm">Details ↗</button>
                             <button (click)="contactMember(reg.email)" class="btn btn-secondary btn-sm"
                                 title="Contact Applicant">📨</button>
-                            <button (click)="approve(reg.id)" class="btn btn-accent btn-sm">Direct Verify</button>
+                            <button (click)="approve(reg.id)" [disabled]="processing()" class="btn btn-accent btn-sm">Direct Verify</button>
                         </div>
                     </td>
                 </tr>
@@ -245,14 +245,14 @@
                             <div class="flex gap-4 mt-4">
                                 <button (click)="rejecting.set(false)" class="btn btn-secondary flex-1">Cancel</button>
                                 <button (click)="confirmReject()" class="btn btn-accent flex-1 bg-red-600 text-white"
-                                    [disabled]="!rejectionReason">Reject Application</button>
+                                    [disabled]="!rejectionReason || processing()">Reject Application</button>
                             </div>
                         </div>
                         } @else {
                         <div class="flex gap-4">
                             <button (click)="rejecting.set(true)" class="btn btn-outline flex-1">Decline
                                 Application</button>
-                            <button (click)="approve(selectedMember().id)"
+                            <button (click)="approve(selectedMember().id)" [disabled]="processing()"
                                 class="btn btn-accent flex-1 shadow-gold">Approve Member</button>
                         </div>
                         }

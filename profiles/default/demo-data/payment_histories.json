@@ -1,0 +1,26 @@
+[
+  {
+    "Id": 1,
+    "MemberId": 1,
+    "TransactionId": "TXN-DEMO-0001",
+    "Amount": 500.0,
+    "PaidAt": "2024-01-01T00:00:00Z",
+    "Status": 1,
+    "Notes": "Sample registration fee",
+    "PaymentMethod": 1,
+    "ReceiptPath": null,
+    "FinancialCategory": 1
+  },
+  {
+    "Id": 2,
+    "MemberId": 2,
+    "TransactionId": "TXN-DEMO-0002",
+    "Amount": 500.0,
+    "PaidAt": "2024-02-01T00:00:00Z",
+    "Status": 1,
+    "Notes": "Sample registration fee",
+    "PaymentMethod": 1,
+    "ReceiptPath": null,
+    "FinancialCategory": 1
+  }
+]

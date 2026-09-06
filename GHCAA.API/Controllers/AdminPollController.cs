@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Domain;
 using GHCAA.Application.Security;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -24,8 +25,8 @@ namespace GHCAA.API.Controllers
 
         private int GetAdminMemberId()
         {
-            var claim = User.FindFirst(AppClaimTypes.MemberId);
-            return claim != null ? int.Parse(claim.Value) : 0;
+            var claim = this.CurrentMemberIdRaw();
+            return claim != null ? int.Parse(claim) : 0;
         }
 
         [HttpGet]

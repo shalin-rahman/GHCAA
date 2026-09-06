@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,13 @@ namespace GHCAA.Infrastructure.Services
     {
         private readonly ApplicationDbContext _db;
         private readonly ILogger<MentorshipService> _logger;
+        private readonly INotificationService _notifications;
 
-        public MentorshipService(ApplicationDbContext db, ILogger<MentorshipService> logger)
+        public MentorshipService(ApplicationDbContext db, ILogger<MentorshipService> logger, INotificationService notifications)
         {
             _db = db;
             _logger = logger;
+            _notifications = notifications;
         }
 
         public async Task<MentorshipRequest> SendRequestAsync(int requesterId, int mentorId, string? message, string? domain, CancellationToken ct = default)
@@ -45,6 +48,14 @@ namespace GHCAA.Infrastructure.Services
             await _db.SaveChangesAsync(ct);
 
             _logger.LogInformation("Mentorship request {Id} created: Member {R} → Member {M}", request.Id, requesterId, mentorId);
+
+            await _notifications.CreateNotificationAsync(
+                mentorId,
+                "Mentorship Request",
+                "A member has asked you to be their mentor. Review the request to accept or decline.",
+                Enums.NotificationType.GeneralSystem,
+                cancellationToken: ct);
+
             return request;
         }
 
@@ -100,6 +111,13 @@ namespace GHCAA.Infrastructure.Services
             request.RespondedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync(ct);
+
+            var message = accept
+                ? "Your mentorship request was accepted."
+                : "Your mentorship request was declined.";
+            await _notifications.CreateNotificationAsync(
+                request.RequesterId, "Mentorship Update", message, Enums.NotificationType.GeneralSystem, cancellationToken: ct);
+
             return true;
         }
 

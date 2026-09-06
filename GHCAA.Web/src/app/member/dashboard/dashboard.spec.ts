@@ -23,7 +23,8 @@ describe('Dashboard Component', () => {
 
     beforeEach(async () => {
         profileServiceMock = {
-            getProfile: vi.fn().mockReturnValue(of({ fullName: 'Test' }))
+            getProfile: vi.fn().mockReturnValue(of({ fullName: 'Test' })),
+            getMyPendingSummary: vi.fn().mockReturnValue(of(null))
         };
         eventsServiceMock = {
             getEvents: vi.fn().mockReturnValue(of([])),

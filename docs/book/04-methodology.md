@@ -52,7 +52,7 @@ was rejected and why.
 The **design cycle** is the inner loop of building and evaluating, repeated across the increments
 Chapter 7 reports and gated, in every increment, by the verification discipline described in §4.4.
 This is the cycle that ran most often. It is also the cycle for which the repository itself is the
-clearest evidence, since every one of the two hundred and forty commits between 9 February and 4
+clearest evidence, since every one of the two hundred and forty-nine commits between 9 February and 6
 September 2026 is a turn of it.
 
 ## 4.3 Mapping Design Science Activities to the Work Performed
@@ -65,7 +65,7 @@ document.
 | --- | --- | --- |
 | Problem identification and motivation | Observation of the paper-based application, cash-and-ledger collection and Facebook-circulated constitution described in §1.2 | §1.2, §1.3 |
 | Definition of objectives for a solution | The eight objectives of §1.6, each traced to a research question | §1.6 |
-| Design and development | Sixty-two numbered work packages recorded as they were opened, most of them triggered by a stakeholder request rather than by the author's own plan; forty-nine mapped entities, thirty-seven API controllers and two client applications delivered across them | `docs/TODO.md`; Chs. 5–7 |
+| Design and development | Eighty-two numbered work packages recorded as they were opened, most of them triggered by a stakeholder request rather than by the author's own plan; forty-nine mapped entities, thirty-six API controllers and two client applications delivered across them | `docs/TODO.md`; Chs. 5–7 |
 | Demonstration | The artefact running against a seeded database, exercised in the formal technical review sessions of §3.12 and deployed to the pre-production environment of Chapter 10 | §3.12, Ch. 10 |
 | Evaluation | Executed against the plan declared in §4.5 | Ch. 9, Ch. 12 |
 | Communication | This dissertation, and the documentation corpus in `docs/` that a successor maintainer would read first | Whole document |
@@ -73,7 +73,11 @@ document.
 The "design and development" row understates nothing by omission and nothing by exaggeration: the
 eighty-two work packages are `docs/TODO.md`'s own numbering, several of them opened explicitly "raised by
 user" on a dated request, which is the clearest documentary evidence available that the relevance
-cycle kept running throughout construction rather than only at the requirements stage.
+cycle kept running throughout construction rather than only at the requirements stage. This chapter
+and Chapter 11 count the same project by five different units — commit, tracker task, work package,
+WBS activity, feature — and a number that looks inconsistent between them usually means the unit
+changed, not the fact; §11.2, where the schedule and effort figures are built, defines all five once
+so neither chapter has to repeat the definition.
 
 ## 4.4 Software Process Model and its Justification
 

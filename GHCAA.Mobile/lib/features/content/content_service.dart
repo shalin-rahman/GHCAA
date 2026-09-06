@@ -250,12 +250,13 @@ class GalleryService {
     }
   }
 
-  Future<bool> resolveGalleryApproval(int id, bool approve, {String? reason}) async {
+  Future<bool> resolveGalleryApproval(int id, bool approve, {String? reason, bool notifyMember = true}) async {
     try {
       final endpoint = approve ? 'approve' : 'reject';
       final response = await _dio.post(
         '/gallery/admin/$id/$endpoint',
-        data: approve ? null : {'reason': reason},
+        queryParameters: approve ? {'notifyMember': notifyMember} : null,
+        data: approve ? null : {'reason': reason, 'notifyMember': notifyMember},
       );
       return response.statusCode == 200;
     } catch (e) {
@@ -264,12 +265,13 @@ class GalleryService {
     }
   }
 
-  Future<bool> resolvePhotoApproval(int photoId, bool approve, {String? reason}) async {
+  Future<bool> resolvePhotoApproval(int photoId, bool approve, {String? reason, bool notifyMember = true}) async {
     try {
       final endpoint = approve ? 'approve' : 'reject';
       final response = await _dio.post(
         '/gallery/photos/$photoId/$endpoint',
-        data: approve ? null : {'reason': reason},
+        queryParameters: approve ? {'notifyMember': notifyMember} : null,
+        data: approve ? null : {'reason': reason, 'notifyMember': notifyMember},
       );
       return response.statusCode == 200;
     } catch (e) {

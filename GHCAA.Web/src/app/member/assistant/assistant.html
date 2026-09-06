@@ -4,7 +4,7 @@
             <h2>Assistance</h2>
             <p>Search alumni, ask about association rules, or get help with the portal</p>
         </div>
-        <div class="ai-badge">Powered by GHCAA-AI</div>
+        <div class="ai-badge">Powered by {{ orgConfig.config()?.branding?.shortName }}-AI</div>
     </div>
 
     <div class="glass-card chat-container">
@@ -14,7 +14,7 @@
                 <div class="avatar">🤖</div>
                 <div class="content">
                     <div class="bubble">
-                        <p>Hello! I am your Haraganga AI Assistant. You can ask me things like <strong>"Find me alumni
+                        <p>Hello! I am your {{ assistantName() }}. You can ask me things like <strong>"Find me alumni
                                 from 2012"</strong> or <strong>"Who is in the Corporate sector?"</strong>.</p>
                         <p>How can I help you today?</p>
                     </div>

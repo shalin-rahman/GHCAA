@@ -15,9 +15,9 @@ Stated first, because a report that hides its own gaps is worse than a shorter o
 |---|---|---|
 | §5 Architecture principles and patterns | Yes | Read of the four backend `.csproj` files, `DependencyInjection.cs`, `Program.cs`, service/repository inventory |
 | §6 .NET backend | Yes | Read of `GHCAA.API`, `GHCAA.Application`, `GHCAA.Domain`, `GHCAA.Infrastructure` |
-| §7 Angular application | **No** | The research pass assigned to this returned nothing. Not assessed. See "Not assessed" below |
-| §8 Flutter application | **No** | Same. Not assessed |
-| §9 Cross-platform | Partial | Only through the API-contract findings already tracked as 82.3/82.4/82.10 |
+| §7 Angular application | Yes | Read of `GHCAA.Web/src/app` (routing, DI, interceptors, guards, services, forms, templates); see §Q |
+| §8 Flutter application | Yes | Read of `GHCAA.Mobile/lib` (core/features/screens, Riverpod providers, storage, config); see §R |
+| §9 Cross-platform | Partial | Through the API-contract findings already tracked as 82.3/82.4/82.10, plus the cross-client duplication sweep in §S |
 | §10–11 Configuration domains | Yes | Read of `OrganizationConfig`, `OrgConfigDto`, `OrgConfigService`, `Constants.cs`, WP 28/62 shipped state |
 | §12 Replaceability | Yes | Read of `DependencyInjection.cs`, gateway adapters, storage/email interfaces |
 | §13 Domain and business rules | Yes | Read of the 46 files in `GHCAA.Domain/Models/` and the governance/financial/notification services |
@@ -29,14 +29,14 @@ Stated first, because a report that hides its own gaps is worse than a shorter o
 | §19 Performance | Yes | Query/tracking survey across `GHCAA.Infrastructure/Services` |
 | §20 Technical debt | Yes | Register below |
 | §22 Documentation | Yes | Read of `README.md`, `docs/` inventory against §22's four audiences |
-| §25 Refactoring and duplication | **Partial** | The dedicated pass returned nothing. What is here comes from the other streams, not a systematic duplication sweep |
+| §25 Refactoring and duplication | Yes | §25.1/§25.2 (backend, 2026-09-04) plus the client-side sweep added 2026-09-06; see §S |
 
-**Not assessed: §7 (Angular), §8 (Flutter), and §25's systematic duplication sweep.** Two of five
-research streams produced no output before the session hit its provider rate limit. The Angular and
-Flutter clients are therefore represented in this report only by findings that surfaced from the
-backend and cross-platform side (82.7's `HttpClient` bypass, 82.10b's untyped Dart payloads, the
-mobile test-pyramid note in §16). Anyone reading this as a whole-ecosystem review should treat the two
-client applications as unexamined. Closing that gap is tracked as 82.14.
+**2026-09-06 update, closing 82.14:** §7, §8 and §25's client-side sweep were not assessed in the
+2026-09-04 pass (two of five research streams returned nothing before the session hit a provider rate
+limit). That gap is now closed: §Q covers Angular, §R covers Flutter, §S covers the cross-client and
+per-client duplication sweep, each to the same evidence standard as the rest of this report (file path
+or line per finding, a §3 status label, an 82.2 disposition). §L and §M below are updated with pointers
+to the new sections rather than restating them.
 
 ---
 
@@ -634,7 +634,9 @@ from OpenAPI (already decided and closed as 82.10).
 
 ## L. Duplication and centralisation matrices
 
-Partial, per the coverage note — no systematic duplication sweep ran.
+Backend-only, from the 2026-09-04 pass. The client-side (Angular/Flutter) duplication matrix is §S —
+kept separate rather than merged in here because it was produced in a later pass against a different
+brief section (§25's client-side sweep) and cites different evidence (TypeScript/Dart file paths).
 
 | Area | Duplicated behaviour | Locations | Action |
 |---|---|---|---|
@@ -656,9 +658,13 @@ Backend: validation pipeline (FluentValidation, present), exception handling (`E
 present), auditing (`AuditLogMiddleware`, present), pagination (**inconsistent** — 82.8), authorization
 helpers (policies + `RequireStepUp`, present), current-user accessor (**missing** — 82.5).
 
-Angular and Flutter inventories are **not assessed** — see the coverage note. `GHCAA.Web` is known to
-have a shared control layer from earlier work, and the 2026-09-04 duplication audit consolidated 25
-spec files onto a shared mock, but no systematic component inventory was taken in this pass.
+Angular: a small, proven shared set (`page-header`, `search-bar`, `breadcrumb`, `toast`,
+`theme-toggle`, `logo-spinner`, `icon`) used across ~19-40+ screens each — appropriately scaled for
+the app's size, not a gap by itself. What is missing is a shared confirm-dialog and a shared
+modal-header shell; see §S findings 9-10. Flutter: `GlassContainer`, `LogoSpinner`, `AppTheme`
+tokens, `AdminActionCircle`, and `AppSearchField` (debounced) are the proven shared set; the gap is
+the same shape as Angular's — no shared confirm-dialog, and two screens bypass the existing
+`AppSearchField` to hand-roll their own debounce; see §S findings 13-14.
 
 ## N. Reconciliation registers
 
@@ -715,12 +721,19 @@ Every new item states which existing packages were checked and why none cover it
 
 Every action appears once, in one phase.
 
-- **Phase 0, critical stabilisation:** 82.16 (financial audit trail). Blocked on user: 48.2, 48.13.
-- **Phase 1, architecture and foundation:** 82.15, 82.24, 82.5, 82.4, 82.3.
+- **Phase 0, critical stabilisation:** 82.16 (financial audit trail), 82.38 (mobile stale-role/profile
+  on logout). Blocked on user: 48.2, 48.13.
+- **Phase 1, architecture and foundation:** 82.15, 82.24, 82.5, 82.4, 82.3, 82.42 (lookups
+  centralisation), 82.34 (dead Angular interceptor).
 - **Phase 2, configuration platform:** 82.11, 82.12, WP 62's own chain.
-- **Phase 3, quality and security:** 82.18, 82.23, 82.25, 82.26, 48.19 expanded, 82.14.
-- **Phase 4, operational maturity:** 82.9 with the health fix, 82.20, 82.22, 82.27.
-- **Phase 5, later:** 82.17, 82.19, 82.21, 82.28.
+- **Phase 3, quality and security:** 82.18, 82.23, 82.25, 82.26, 48.19 expanded, 82.14 (this pass),
+  82.40 (mobile biometric credential storage), 82.39 (mobile dual inactivity timers), 82.36 (Angular
+  HTTP retry).
+- **Phase 4, operational maturity:** 82.9 with the health fix, 82.20, 82.22, 82.27, 82.41 (mobile push
+  token registration + tap-through).
+- **Phase 5, later:** 82.17, 82.19, 82.21, 82.28, 82.37 (Angular ARIA pass), 82.43-82.49 (client-side
+  UI-consistency/duplication cleanups: confirm-dialog and modal-header extraction on both clients,
+  debounce consolidation, dead-code deletions, page-header consistency).
 
 ## P. Method and limits
 
@@ -728,7 +741,187 @@ Produced 2026-09-04 against the working tree of that date. Backend test suite st
 Every count in this report came from a command run against the tree, not an estimate; where a figure
 is approximate it says so.
 
-Two of five research streams produced no output before the session hit a provider rate limit, so §7,
-§8 and §25's systematic sweep are not covered — stated in the coverage table, in §M, and tracked as
-82.14 rather than papered over. A reader should treat the Angular and Flutter clients as unexamined by
-this audit.
+Two of five research streams produced no output before the session hit a provider rate limit on
+2026-09-04, so §7, §8 and §25's systematic sweep were not covered in that pass — stated at the time in
+the coverage table and in §M, and tracked as 82.14 rather than papered over. That gap was closed on
+2026-09-06: §Q, §R and §S cover the Angular application, the Flutter application, and the client-side
+duplication sweep respectively, each produced by a dedicated read of the corresponding source tree
+(`GHCAA.Web/src/app`, `GHCAA.Mobile/lib`) against REVIEW.md's §7/§8/§25 briefs, to the same
+evidence-per-finding standard as the rest of this report.
+
+---
+
+## Q. Angular Application Review (REVIEW.md §7), added 2026-09-06
+
+Scope: `GHCAA.Web/src/app`, 141 non-spec `.ts` files, 76 `.spec.ts` files, 73 templates.
+
+**Architecture.** Standalone components throughout (0 `standalone: false` matches), feature-based
+folders (`public/`, `member/`, `admin/`, `common/`, `core/`, `layouts/`) mirroring the app's three real
+audiences, and lazy loading is the default routing strategy — 65 `loadComponent()` calls in
+`app.routes.ts`, zero eager `component:` routes. DI is idiomatic `inject()`, not constructor
+boilerplate (`auth.service.ts:15-16`, `auth.guard.ts:24-25`). Two gaps: `core/interceptors/
+auth.interceptor.ts` is a complete, unit-tested, bearer-only interceptor that is never registered
+(`app.config.ts:18` wires only `globalHttpInterceptor`, whose own bearer logic at
+`global-http.interceptor.ts:30-36` is a superset) — dead code duplicating a subset of a live file.
+**Status:** Deprecated or unnecessary. **Disposition:** Newly Created → 82.34 (delete the file and its
+spec). Separately, `ChangeDetectionStrategy.OnPush` appears in only 3 of ~83 components despite the
+signals architecture being well suited to it. **Status:** Implemented but incomplete. **Disposition:**
+Newly Created → 82.35 (P4, opportunistic).
+
+**State management.** Signals-in-services is the primary model (`auth.service.ts:18-28`,
+`org-config.service.ts:13`, 65 files repo-wide use `signal(`), with RxJS used correctly for async
+orchestration only (the 401-refresh gate's `BehaviorSubject` in `global-http.interceptor.ts:10-11`, a
+signal-to-observable bridge for guard timing in `auth.guard.ts:16-18`) rather than as a competing state
+store. No NgRx or any global store library is present (`package.json` dependencies checked; 0 `@ngrx`
+matches) — confirming the prior TODO claim still holds. **Status:** Implemented and verified. NgRx is
+not warranted: no observed symptom (cross-feature state thrashing, undo/time-travel, multi-team
+coordination) that it would fix, and adding it would cost boilerplate against no real problem — exactly
+the outcome REVIEW.md §4 and §7 ask the review to justify before recommending.
+
+**API integration.** `global-http.interceptor.ts` is a single, well-designed pipeline: URL rewriting,
+credentialed requests, bearer fallback, single-flight 401-refresh-and-retry, 403 step-up-challenge-and-
+retry, centralised error-message mapping (lines 13-152). Auth is httpOnly-cookie-based
+(`withCredentials: true`), token lifecycle includes a deferred `/auth/me` session restore
+(`afterNextRender`, avoiding `NG0200`), a 10-minute inactivity auto-logout, and a guard-level
+`authChecked` gate. CSRF is wired via Angular's built-in XSRF support (`app.config.ts:19`). Two real
+gaps: no retry/backoff anywhere for transient 5xx/timeout failures (0 `retry(`/`retryWhen` matches) —
+**Status:** Missing. **Disposition:** Newly Created → 82.36 (P3; scope to idempotent GETs only). And no
+general HTTP response caching layer beyond `OrgConfigService`'s own one-shot cache — **Status:**
+Missing. **Disposition:** Rejected as a finding for now: no evidence of a real performance problem at
+this app's request volume: recommending a caching layer without one would be exactly the
+overengineering REVIEW.md §4 warns against. Revisit if 82.36's retry work surfaces repeat-request cost.
+
+**UI quality.** ARIA coverage is sparse (7 of 73 templates have any `aria-*` attribute) — **Status:**
+Implemented but incomplete. **Disposition:** Newly Created → 82.37 (P3; scope to the highest-traffic
+member/admin forms first, not a blanket pass). Forms are template-driven (`ngModel` + native
+validators) everywhere except one file that uses reactive forms (`admin/events/admin-events.ts`) —
+**Status:** Implemented but incomplete. **Disposition:** Rejected as a standalone finding: template-
+driven forms with per-field messages (verified in `public/register/register.html`) work correctly
+today; converting one inconsistent file to match the other 70+ is lower value than the app's actual
+open gaps. Responsive design is hand-written `@media` per component (33 of 71 `.scss` files), not a
+shared breakpoint system — acceptable at this scale, no action. Centralised feedback (`NotificationService`
++ `ToastComponent`) and a small, proven shared-component set are both confirmed working.
+
+**Overall: Good.** See §Q's individual dispositions above for what keeps it short of Strong — none are
+structural.
+
+## R. Flutter Application Review (REVIEW.md §8), added 2026-09-06
+
+Scope: `GHCAA.Mobile/lib`, 113 Dart files.
+
+**Architecture & state.** `core/`/`features/`/`screens/` layering is consistent across all 113 files.
+Riverpod is used consistently (`Provider`/`FutureProvider`/`StreamProvider`/`StateNotifierProvider`,
+root `ProviderScope` in `main.dart:118-121`). One real correctness bug: `roleProvider` and
+`userProfileProvider` are documented in-code as needing explicit `ref.invalidate` after login/logout,
+but `AuthService.logout()` (`auth_service.dart:178-184`) only invalidates the notification-hub
+provider — not these two. A user logging out and a different user logging back in on the same device
+can see the previous user's cached role/profile until something else happens to refetch it.
+**Status:** Incorrectly implemented. **Disposition:** Newly Created → 82.38 (P1 — this is a stale-
+privilege-label bug on shared/handed-down devices, not cosmetic). Separately, inactivity/session-expiry
+logic exists in two independent places with two different timeouts — `SessionManager` at 15 minutes
+(`session_manager.dart:12`) and `main.dart`'s own `_checkInactivity` at 10 minutes
+(`main.dart:154-155`) — each clearing the same storage independently. **Status:** Incorrectly
+implemented. **Disposition:** Newly Created → 82.39 (P2; pick one timeout and one owner).
+
+**API integration, auth & token storage.** A single shared Dio instance (`dioProvider`) with
+single-flight refresh-token rotation on 401 (`api_client.dart:8-51,84-101`) is correctly implemented
+and tested for the concurrent-request case. Tokens live in `flutter_secure_storage` on mobile with a
+self-healing legacy migration off `SharedPreferences`; web correctly falls back to `SharedPreferences`
+since secure storage isn't meaningfully stronger there (`storage_service.dart:21-93`). One finding
+worth flagging rather than fixing outright: biometric "fast login" stores the user's raw username and
+password in secure storage when opted in (`storage_service.dart:147-165`), which is a wider attack
+surface than a device-bound token even though secure storage itself is appropriate. **Status:**
+Implemented but incomplete. **Disposition:** Newly Created → 82.40 (P2; scope: replace with a
+device-bound long-lived token, not a broader biometric-flow rewrite). 21 of 26 feature services still
+parse raw `Map<String,dynamic>` rather than typed models — this reconfirms 82.10b, still open, and is
+not re-created here.
+
+**Offline, caching & sync.** Real-time connectivity detection is wired app-wide (`connectivity_plus`,
+a persistent banner). `OrgConfigService` is the one genuine offline-first cache (network → cache →
+hardcoded defaults). No other feature (events, jobs, directory, news, forum) has any local cache or
+sync/conflict-resolution mechanism — fetch-on-build only. **Status:** Missing. **Disposition:**
+Rejected as a standalone new item for now: the Flutter reviewer's own assessment is that this doesn't
+block the app's current single-institution scale, and REVIEW.md §4 asks whether a problem is real now
+or only a future possibility — recorded here as a known limitation for the roadmap (§O) rather than a
+priced task, to revisit if multi-institution (WP 62) or spotty-connectivity fieldwork use cases become
+real.
+
+**Push & deep links.** FCM is wired (permission, token retrieval, foreground/background listeners) but
+the device token is only logged, never registered with the backend for targeted push, and
+`onMessageOpenedApp` logs the payload instead of navigating. **Status:** Implemented but incomplete.
+**Disposition:** Newly Created → 82.41 (P3 — push exists and works for broadcast-style notifications
+via the separate SignalR channel; targeted push and tap-to-navigate are the missing pieces). Deep
+linking is entirely absent — no intent-filter beyond `MAIN`/`LAUNCHER` in the Android manifest, no
+`CFBundleURLTypes` in `Info.plist`, no `uni_links`/`app_links` dependency. **Status:** Missing.
+**Disposition:** Rejected as a standalone item: no current feature (email links, shared-content links)
+depends on it; recorded as a backlog note, not priced, until a feature actually needs it.
+
+**Configuration & platform.** Per-platform API base URL resolution, `.env`-driven branding/environment
+name, and a separate build-time "profile pack" mechanism for white-labelling are all implemented and
+verified. Screenshot prevention is correctly scoped to sensitive screens (digital ID, payment, financial
+portal); biometric auth correctly guards itself off on web. No build-flavor-based dev/prod split (a
+single bundled `.env` swapped manually pre-build) — acceptable at the current one-developer-controlled
+release cadence; not raised as a new item.
+
+**Business-logic duplication.** The membership-tier list was previously duplicated client-side and was
+correctly deleted in favour of the backend dropdown (`registration_constants.dart:41-43`) — a positive
+finding, not a defect. Outstanding-dues totals and ledger field remapping are still computed/reshaped
+client-side rather than served pre-computed — folded into §S's cross-client lookups-centralisation
+finding rather than a separate item, since it's the same root pattern (client re-deriving something the
+backend could just serve).
+
+**Overall: Developing.** Concrete, fixable gaps (82.38-82.41) rather than a structural rewrite; see §R's
+dispositions for what separates it from Good.
+
+## S. Client-Side Duplication and Centralisation Sweep (REVIEW.md §25 completion), added 2026-09-06
+
+Backend duplication is §L; this covers cross-client and per-client duplication only, completing the
+gap §L's own note names. 17 findings, in line with the "don't pad the list" instruction in the brief —
+a few resolve to "leave as-is" deliberately, not by omission.
+
+### Cross-client (Angular ↔ Flutter)
+
+The same five small enum/lookup tables are hardcoded independently in both clients — membership status,
+member category, gender, blood group, job category — plus academic-year list generation, instead of
+using the `/lookups/{group}` endpoint that already exists and that `GHCAA.Mobile`'s own
+`DropdownService` already calls first (`dropdown_service.dart:74-81`), falling back to its hardcoded
+copy only when the API returns empty. Two of the five have already drifted in wording between clients
+(membership status: `Applied` reads "Pending" on web, "Pending Approval" on mobile;
+`InactivePayment` reads "Inactive" vs "Inactive (Unpaid)") — `app.constants.ts:26-37,52-64` vs
+`dropdown_service.dart:105-138`. The root cause: `GHCAA.Web` already has a `LookupService` wired to
+the same endpoint (`core/services/lookup.service.ts`), but the screens using these five lists
+(`admin-members.ts`, `profile.ts`, `register.ts`) import the hardcoded constants instead of calling it.
+**Status:** Incorrectly implemented (the two drifted labels), Partially implemented (the other three,
+not yet drifted but same mechanism). **Disposition:** Newly Created → 82.42 (P2; wire the existing
+`LookupService` into the Angular screens that bypass it — this alone collapses five separate findings
+into one fix — then delete the now-redundant hardcoded lists in both clients). A related dead-code
+note: `GHCAA.Mobile/lib/core/constants/registration_constants.dart:33-37`'s
+`AcademicConstants.getAcademicYears` has no callers. **Status:** Deprecated or unnecessary.
+**Disposition:** Newly Created → 82.43 (P4, two-minute deletion, fold into 82.42's change).
+
+### GHCAA.Web-internal
+
+| Finding | Locations | Disposition |
+|---|---|---|
+| Manual debounce (`clearTimeout`/`setTimeout(…,300)`) copy-pasted in 5 components | `admin-governance.ts:159-168`, `directory.ts:122-125`, `jobs.ts:67-72`, `messages.ts:112-122`, `requests.ts:50,92-94` | Newly Created → 82.44 (P3; small `debounce()` helper or a debounced output on `SearchBarComponent`) |
+| Raw `window.confirm()` in 22 files, no shared styled dialog despite `step-up-dialog` already proving the pattern | `admin-members.ts`, `admin-roles.ts`, `admin-events.ts`, `admin-gallery.ts`, `jobs.ts`, `payment-portal.component.ts`, 16 more | Newly Created → 82.45 (P3; a UX-consistency issue as much as duplication — every delete/danger action currently breaks the app's own glass-UI language) |
+| `.modal-header` markup hand-rolled identically in 17 files | `admin-roles.html:13-16`, `admin-themes.html`, 15 more | Newly Created → 82.46 (P3; bundle with 82.45 if a shared modal shell is built — same UI surface) |
+| 4 admin screens hand-roll their own header instead of the already-proven `app-page-header` used by 19 others | `admin-comm.html:3-9`, `admin-dashboard.html`, `admin-event-operations.html`, `polls.html:3-6` | Newly Created → 82.47 (P4; pure consistency, low effort, no new component needed) |
+| Empty-state markup (icon + one line) repeated across ~19 files, but styling already centralised in `styles.scss` | `admin-audit.html:44-46`, `jobs.html:186-188`, `directory.html:212-214`, 16 more | Rejected as a finding: 2-3 lines each, extracting a wrapper component costs more than it saves — the exact "avoid overengineering" case in REVIEW.md §4 |
+
+### GHCAA.Mobile-internal
+
+| Finding | Locations | Disposition |
+|---|---|---|
+| `showDialog<bool>` + styled `AlertDialog` confirm boilerplate repeated across ~19 screens, despite `reject_reason_dialog.dart` already proving a shared-dialog shape | `jobs_screen.dart:191-201`, `family_link_screen.dart:379-385`, `audit_screen.dart`, `fee_config_screen.dart`, `events_screen.dart`, `gallery_screen.dart`, `news_details_screen.dart`, 12 more | Newly Created → 82.48 (P3; mirrors 82.45 on the Web side) |
+| Manual `Timer`-based search debounce in 2 screens that bypass the already-existing debounced `AppSearchField` widget | `directory_screen.dart:126-131`, `professional_hub_screen.dart:115-120` vs `core/widgets/app_search_field.dart:29-43` | Newly Created → 82.49 (P4; swap two screens onto the widget that already does this) |
+| `_formatTime` duplicated between two chat screens, not quite identical (one needs today-vs-older branching) | `chats_screen.dart:264-274`, `chat_room_screen.dart:187-195` | Rejected as a finding: 2 call sites, ~10 lines, marginal — noted for awareness only |
+| `try/catch { debugPrint(...); return false / rethrow }` boilerplate repeats in effectively every service method (100+ occurrences) | `job_service.dart`, `events_service.dart`, `forum_service.dart`, `admin_service.dart`, `auth_service.dart` | Rejected as a finding: coincidental three-line similarity, not a shared behaviour — a wrapper would have to support both "swallow" and "rethrow" callers and would reduce readability, the exact case REVIEW.md §25.2 says to leave alone. The `return false` branch silently discarding the real error message (e.g. `financial_service.dart`'s `getOutstandingDues`) is a correctness/UX concern, not a duplication one — folded into 82.40's error-handling scope rather than raised separately |
+| Role literal strings `'SuperAdmin'`/`'Admin'` repeated 3× within one file | `permissions_matrix_screen.dart:190,246,283,303-306` | Rejected as a finding: single file, no cross-file drift risk, a local `const` is a nicety not a maintenance-cost item |
+
+**Summary:** the strongest finding across all client-side work is the lookups-centralisation one
+(82.42) — five duplicated tables, two already drifted, with the fix mechanism (`LookupService`)
+already built and simply not wired up. The UI-consistency findings (82.44-82.49) are real but lower
+stakes, and about a third of everything the sweep looked at (empty-state markup, chat time formatting,
+service-layer try/catch, three same-file role literals) was correctly triaged as not worth abstracting,
+matching the brief's own caution against overengineering.

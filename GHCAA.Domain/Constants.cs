@@ -33,6 +33,7 @@ namespace GHCAA.Domain
             public const string Refresh = "refresh";
             public const string Registration = "registration";
             public const string Api = "api";
+            public const string PasswordReset = "passwordReset";
         }
 
         public static class OutputCachePolicies
@@ -55,6 +56,11 @@ namespace GHCAA.Domain
 
             public const string AllowedOrigins = "AppSettings:AllowedOrigins";
             public const string ClientUrl = "AppSettings:ClientUrl";
+            public const string ProtectedSuperAdmins = "AppSettings:ProtectedSuperAdmins";
+            public const string SystemAdminId = "GeneralSettings:SystemAdminId";
+            public const string PortalBaseUrlOverride = "GeneralSettings:PortalBaseUrl";
+            public const string SSLCommerzSandboxUrl = "PaymentGateways:SSLCommerz:SandboxUrl";
+            public const string SSLCommerzProductionUrl = "PaymentGateways:SSLCommerz:ProductionUrl";
         }
 
         public static class TemplateCodes
@@ -63,6 +69,16 @@ namespace GHCAA.Domain
             public const string Welcome = "WELCOME_EMAIL";
             public const string FeeReminder = "FEE_REMINDER";
             public const string PasswordReset = "PASSWORD_RESET";
+            public const string PaymentReceived = "PAYMENT_RECEIVED";
+            public const string PaymentStatusUpdated = "PAYMENT_STATUS_UPDATED";
+        }
+
+        // 82.9: header carrying the per-request correlation id (CorrelationIdMiddleware in
+        // GHCAA.API). One constant so the client-visible name never drifts from what the
+        // middleware reads/writes.
+        public static class Headers
+        {
+            public const string CorrelationId = "X-Correlation-Id";
         }
 
         public static class Defaults
@@ -73,8 +89,8 @@ namespace GHCAA.Domain
             public const int TargetImageSizeKB = 350;
             public const int ImageMaxDimensionPx = 1920; // longest side; display images never need more
 
-            public const string ImportEmailBase = "haragangian";
-            public const string MembershipPrefix = "GHC-";
+            // ImportEmailBase/MembershipPrefix moved to the org-config pack (ContactDto.ImportEmailBase,
+            // BrandingDto.MembershipNumberPrefix) — see MemberImportService for the new consumer.
             public const string UnknownValue = "Unknown";
             public const string ImportPrefix = "IMPORT";
         }

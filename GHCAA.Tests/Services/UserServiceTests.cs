@@ -163,5 +163,99 @@ namespace GHCAA.Tests.Services
             resetUrl.Should().BeNull();
             _mockTokenService.Verify(x => x.RevokeAllRefreshTokensAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
         }
+
+        // SetUserActiveAsync/DeleteSystemAdminAsync's protected-username guard reads a real config
+        // section (AppSettings:ProtectedSuperAdmins), which a loose IConfiguration mock can't bind —
+        // these tests build a real one instead of using the fixture's _mockConfig.
+        private UserService ServiceWithProtectedUsernames(params string[] protectedUsernames)
+        {
+            var pairs = protectedUsernames.Select((u, i) => new KeyValuePair<string, string?>($"AppSettings:ProtectedSuperAdmins:{i}", u));
+            var config = new ConfigurationBuilder().AddInMemoryCollection(pairs).Build();
+            return new UserService(_context, _mockLogger.Object, _mockTokenService.Object, config);
+        }
+
+        [Category("FR-11")]
+        [Category("NFR-S5")]
+        [Test]
+        public async Task SetUserActiveAsync_Disable_ShouldRevokeTokensAndRotateStamp()
+        {
+            var user = new User { Username = "toggle1", PasswordHash = "x", MemberId = null, CreatedAt = DateTime.UtcNow, IsActive = true, SecurityStamp = "old" };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            var service = ServiceWithProtectedUsernames("shalin");
+
+            var result = await service.SetUserActiveAsync(user.Id, false);
+
+            result.Should().BeTrue();
+            var updated = await _context.Users.FindAsync(user.Id);
+            updated!.IsActive.Should().BeFalse();
+            updated.SecurityStamp.Should().NotBe("old");
+            _mockTokenService.Verify(x => x.RevokeAllRefreshTokensAsync(user.Id, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
+        public async Task SetUserActiveAsync_Enable_ShouldNotRevokeTokens()
+        {
+            var user = new User { Username = "toggle2", PasswordHash = "x", MemberId = null, CreatedAt = DateTime.UtcNow, IsActive = false };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            var service = ServiceWithProtectedUsernames("shalin");
+
+            var result = await service.SetUserActiveAsync(user.Id, true);
+
+            result.Should().BeTrue();
+            (await _context.Users.FindAsync(user.Id))!.IsActive.Should().BeTrue();
+            _mockTokenService.Verify(x => x.RevokeAllRefreshTokensAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Test]
+        public async Task SetUserActiveAsync_ProtectedUsername_ShouldReturnFalseAndLeaveUnchanged()
+        {
+            var user = new User { Username = "shalin", PasswordHash = "x", MemberId = null, CreatedAt = DateTime.UtcNow, IsActive = true };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            var service = ServiceWithProtectedUsernames("shalin", "superadmin");
+
+            var result = await service.SetUserActiveAsync(user.Id, false);
+
+            result.Should().BeFalse();
+            (await _context.Users.FindAsync(user.Id))!.IsActive.Should().BeTrue();
+        }
+
+        [Test]
+        public async Task SetUserActiveAsync_UnknownUser_ShouldReturnFalse()
+        {
+            var service = ServiceWithProtectedUsernames();
+            var result = await service.SetUserActiveAsync(99999, false);
+            result.Should().BeFalse();
+        }
+
+        [Test]
+        public async Task DeleteSystemAdminAsync_ProtectedUsername_ShouldReturnFalseAndNotDelete()
+        {
+            var user = new User { Username = "superadmin", PasswordHash = "x", MemberId = null, CreatedAt = DateTime.UtcNow, IsActive = true };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            var service = ServiceWithProtectedUsernames("shalin", "superadmin");
+
+            var result = await service.DeleteSystemAdminAsync(user.Id);
+
+            result.Should().BeFalse();
+            (await _context.Users.FindAsync(user.Id)).Should().NotBeNull();
+        }
+
+        [Test]
+        public async Task DeleteSystemAdminAsync_NonProtectedSystemAdmin_ShouldDelete()
+        {
+            var user = new User { Username = "regularadmin", PasswordHash = "x", MemberId = null, CreatedAt = DateTime.UtcNow, IsActive = true };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            var service = ServiceWithProtectedUsernames("shalin");
+
+            var result = await service.DeleteSystemAdminAsync(user.Id);
+
+            result.Should().BeTrue();
+            (await _context.Users.FindAsync(user.Id)).Should().BeNull();
+        }
     }
 }

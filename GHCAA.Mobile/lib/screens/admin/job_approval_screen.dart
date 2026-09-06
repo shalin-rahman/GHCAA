@@ -145,12 +145,15 @@ class _JobApprovalScreenState extends ConsumerState<JobApprovalScreen> {
 
   Future<void> _handleResolve(BuildContext context, WidgetRef ref, int id, bool approve) async {
     String? reason;
+    bool notify = true;
     if (!approve) {
-      reason = await showRejectReasonDialog(context, title: 'REJECT JOB POSTING');
-      if (reason == null) return;
+      final result = await showRejectReasonWithNotifyDialog(context, title: 'REJECT JOB POSTING');
+      if (result == null) return;
+      reason = result.reason;
+      notify = result.notify;
     }
     HapticFeedback.heavyImpact();
-    final success = await ref.read(jobServiceProvider).resolveJobApproval(id, approve, reason: reason);
+    final success = await ref.read(jobServiceProvider).resolveJobApproval(id, approve, reason: reason, notifyMember: notify);
     if (success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(approve ? 'Job approved.' : 'Job rejected.')));
       ref.invalidate(pendingJobsProvider);

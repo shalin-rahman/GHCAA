@@ -5,7 +5,8 @@ import { ImgFallbackDirective } from '../../common/directives/img-fallback.direc
 import { AdminService } from '../../core/services/admin.service';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
-import { ACADEMIC_CERTIFICATES, ACADEMIC_SUBJECTS, PROFESSIONAL_SECTORS, getAcademicYears, getStatusLabel, getStatusClass } from '../../core/constants/app.constants';
+import { ACADEMIC_CERTIFICATES, ACADEMIC_SUBJECTS, PROFESSIONAL_SECTORS, getStatusLabel, getStatusClass } from '../../core/constants/app.constants';
+import { LookupService } from '../../core/services/lookup.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
@@ -21,6 +22,7 @@ export class MemberApproval implements OnInit {
   private adminService = inject(AdminService);
   private router = inject(Router);
   private notify = inject(NotificationService);
+  private lookupService = inject(LookupService);
 
   requests = signal<any[]>([]);
   pendingRequests = computed(() => {
@@ -39,16 +41,19 @@ export class MemberApproval implements OnInit {
       (r.membershipNumber || '').toLowerCase().includes(q)
     );
   });
-  years = getAcademicYears();
+  // 82.42: sourced from /lookups/PassingYear via LookupService, filled in ngOnInit.
+  years: number[] = [];
   certificateOptions = ACADEMIC_CERTIFICATES;
   subjectOptions = ACADEMIC_SUBJECTS;
   sectorOptions = PROFESSIONAL_SECTORS;
 
   rejecting = signal(false);
   rejectionReason = '';
+  processing = signal(false);
 
   ngOnInit() {
     this.loadMembers();
+    this.lookupService.getAcademicYears().subscribe(years => this.years = years);
   }
 
   loadMembers() {
@@ -108,28 +113,39 @@ export class MemberApproval implements OnInit {
   }
 
   approve(id: number) {
+    if (this.processing()) return;
     if (confirm('Verify this registry entry? This will officially induct the member and dispatch credentials.')) {
+      this.processing.set(true);
       this.adminService.approveMember(id).subscribe({
         next: () => {
+          this.processing.set(false);
           this.notify.success('Registry verified. Member successfully inducted.');
           this.selectedMember.set(null);
           this.loadMembers();
         },
-        error: () => this.notify.error('Failed to verify registry.')
+        error: () => {
+          this.processing.set(false);
+          this.notify.error('Failed to verify registry.');
+        }
       });
     }
   }
 
   confirmReject() {
-    if (!this.rejectionReason) return;
+    if (this.processing() || !this.rejectionReason) return;
     if (confirm('Permanently decline this registry filing? The applicant will be notified with your reason.')) {
+      this.processing.set(true);
       this.adminService.rejectMember(this.selectedMember().id, this.rejectionReason).subscribe({
         next: () => {
+          this.processing.set(false);
           this.notify.success('Application declined. Record removed from active queue.');
           this.selectedMember.set(null);
           this.loadMembers();
         },
-        error: () => this.notify.error('Failed to decline application.')
+        error: () => {
+          this.processing.set(false);
+          this.notify.error('Failed to decline application.');
+        }
       });
     }
   }

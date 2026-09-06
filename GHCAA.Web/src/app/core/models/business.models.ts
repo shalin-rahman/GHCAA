@@ -289,6 +289,10 @@ export interface AlumniEvent {
     requiresRegistration: boolean;
     participantLimit?: number | null;
     hasWaitlist?: boolean;
+    // 82.52: write-only — admin's per-save choice of whether this create/update broadcasts a
+    // notification. Not returned by GET, so both are optional here.
+    notifyMembers?: boolean;
+    notifyOnUpdate?: boolean;
 }
 
 

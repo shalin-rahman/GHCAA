@@ -116,8 +116,11 @@ export class ConstitutionPage implements OnInit {
 
     articles = computed(() => parseArticles(this.current()?.content ?? ''));
 
-    /** Prefer the version's own PDF; fall back to the static asset shipped with the site. */
-    pdfUrl = computed(() => this.current()?.pdfUrl?.trim() || CONSTITUTION_PDF_FALLBACK);
+    /** Prefer the version's own PDF, then the profile's, then the static asset shipped with the site. */
+    pdfUrl = computed(() =>
+        this.current()?.pdfUrl?.trim()
+        || this.orgConfigService.config()?.branding?.constitutionPdfUrl?.trim()
+        || CONSTITUTION_PDF_FALLBACK);
 
     /** Superseded versions only — the active one is already rendered above the history panel. */
     pastVersions = computed(() => {

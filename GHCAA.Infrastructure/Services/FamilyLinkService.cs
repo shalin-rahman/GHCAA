@@ -16,14 +16,16 @@ namespace GHCAA.Infrastructure.Services
         private readonly INotificationService _notifications;
         private readonly ICommunicationService _communication;
         private readonly Microsoft.Extensions.Configuration.IConfiguration _config;
+        private readonly IOrgConfigService _orgConfig;
 
-        public FamilyLinkService(ApplicationDbContext db, ILogger<FamilyLinkService> logger, INotificationService notifications, ICommunicationService communication, Microsoft.Extensions.Configuration.IConfiguration config)
+        public FamilyLinkService(ApplicationDbContext db, ILogger<FamilyLinkService> logger, INotificationService notifications, ICommunicationService communication, Microsoft.Extensions.Configuration.IConfiguration config, IOrgConfigService orgConfig)
         {
             _db = db;
             _logger = logger;
             _notifications = notifications;
             _communication = communication;
             _config = config;
+            _orgConfig = orgConfig;
         }
 
         public async Task<FamilyLinkRequestDto> SendRequestAsync(int requesterId, SendFamilyLinkDto dto, CancellationToken ct = default)
@@ -71,11 +73,12 @@ namespace GHCAA.Infrastructure.Services
             // Notify via Email
             try
             {
+                var org = await _orgConfig.GetConfigAsync();
                 await _communication.SendIndividualEmailAsync(target.Id, "FAMILY_LINK_REQUEST", new Dictionary<string, string>
                 {
                     { "RequesterName", requester?.FullName ?? "A member" },
                     { "Relationship", dto.Relationship.ToString() },
-                    { "ProfileUrl", $"{_config["GeneralSettings:PortalBaseUrl"]}/profile" }
+                    { "ProfileUrl", $"{org.Contact.PortalBaseUrl}/profile" }
                 }, ct);
             }
             catch (Exception ex)

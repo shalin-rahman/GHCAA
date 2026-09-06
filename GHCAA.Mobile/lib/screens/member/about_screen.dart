@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/config/app_config.dart';
+import '../../core/services/app_localizations.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
@@ -61,7 +62,7 @@ class AboutScreen extends StatelessWidget {
             const SizedBox(height: AppTheme.spaceL),
             _buildInfoCard(
               'PLATFORM INTEGRITY',
-              'Built with enterprise-grade obsidian-cloud security, real-time auditing, and transparent background processing to serve the Haragangian community worldwide.',
+              AppLocalizations.of(context).translate('about_platform_integrity_desc'),
               Icons.security_outlined,
             ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
             const SizedBox(height: AppTheme.spaceXXL),
@@ -81,11 +82,11 @@ class AboutScreen extends StatelessWidget {
                     color: Colors.white,
                     letterSpacing: 0.5)),
             const SizedBox(height: AppTheme.spaceXS),
-            const Text('Advanced Platform Architect & Haragangian Alumnus',
+            Text(AppLocalizations.of(context).translate('about_architect_title'),
                 style:
-                    TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.w500)),
+                    const TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.w500)),
             const SizedBox(height: AppTheme.spaceHUGE),
-            Text('© ${DateTime.now().year} Haragangian Alumni'.toUpperCase(),
+            Text('© ${DateTime.now().year} ${AppLocalizations.of(context).translate('about_copyright_org')}'.toUpperCase(),
                 style: const TextStyle(fontSize: 9, color: Colors.white12, fontWeight: FontWeight.w900, letterSpacing: 1)),
             const SizedBox(height: AppTheme.spaceXL + AppTheme.spaceS), // 40
           ],

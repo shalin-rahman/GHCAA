@@ -20,7 +20,31 @@ reason for each gap.
 
 ## 11.2 Work Breakdown Structure
 
-*[Not written. Brief: the four streams above; the 17 code components each tied to the tracker work packages that produced them, so the activity list and the tracker are one list read two ways]*
+**Five units, one vocabulary.** This chapter and Chapter 4 count the project five different ways,
+and the counts disagree because the units are different, not because one of them is wrong. Each is
+defined once, here, and used by name everywhere else in the book:
+
+- **Commit.** One entry in the git history. `git rev-list --count HEAD` gives the total on any date.
+  A commit is a unit of code change, not of planning — several commits usually close one tracker task.
+- **Tracker task.** One numbered line in `docs/TODO.md`, such as `62.41`. This is the smallest unit
+  the project plans, tracks and closes; it is what carries a `[TODO]`/`[DONE]` state and a priority.
+- **Numbered work package.** A `# Work Package N` heading in `docs/TODO.md`, grouping the tracker
+  tasks raised for one initiative (a feature request, an audit, a defect sweep). A work package closes
+  when every task under it does.
+- **WBS activity.** One of the seventeen components `docs/book/build/wbs.py` defines (`C1` … `C17`),
+  each a named cluster of source paths — "Persistence and migrations", "Authentication and access"
+  and so on — mapped to the tracker work packages that produced it. Activities exist only for this
+  chapter's schedule and effort figures; the tracker itself has no concept of them.
+- **Feature.** A capability described from the user's side, as `docs/FEATURES.md` or the SRS's
+  functional requirements state it (for example, "digital ID cards"). A feature can span several work
+  packages, and a work package can deliver only part of a feature — the two lists are not the same
+  shape.
+
+`docs/TODO.md` had 82 numbered work packages holding several hundred tracker tasks between them, tied
+to 17 WBS activities and 249 commits, as of 6 September 2026 — five different counts of one project,
+each answering a different question about it.
+
+*[Rest of this section not written. Brief: the four streams above; the 17 code components each tied to the tracker work packages that produced them, so the activity list and the tracker are one list read two ways]*
 
 ## 11.3 Scheduling, Task Network and Critical Path
 

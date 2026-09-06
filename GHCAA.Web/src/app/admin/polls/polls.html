@@ -60,10 +60,10 @@
                     {{ poll.isActive ? 'Active' : 'Inactive' }}
                 </span>
                 <div class="actions">
-                    <button class="icon-btn" (click)="toggleStatus(poll)" [title]="poll.isActive ? 'Deactivate' : 'Activate'">
+                    <button class="icon-btn" (click)="toggleStatus(poll)" [disabled]="togglingId() === poll.id" [title]="poll.isActive ? 'Deactivate' : 'Activate'">
                         <app-icon [name]="poll.isActive ? 'pause' : 'play'" [size]="16"></app-icon>
                     </button>
-                    <button class="icon-btn delete" (click)="deletePoll(poll.id)" title="Delete">
+                    <button class="icon-btn delete" (click)="deletePoll(poll.id)" [disabled]="deletingId() === poll.id" title="Delete">
                         <app-icon name="trash" [size]="16"></app-icon>
                     </button>
                 </div>
@@ -183,7 +183,7 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" (click)="showCreateModal.set(false)">Cancel</button>
-                    <button type="submit" class="btn btn-accent">Publish Poll</button>
+                    <button type="submit" class="btn btn-accent" [disabled]="creating()">{{ creating() ? 'Publishing...' : 'Publish Poll' }}</button>
                 </div>
             </form>
         </div>

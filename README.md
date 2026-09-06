@@ -232,10 +232,10 @@ GHCAA/
 
 ### Database Setup
 
-The schema is created automatically at application startup via EF Core `EnsureCreated()` — there is no manual migration step to run for a first boot. On an empty database the full schema and seed data are created in one pass; on an existing database it is a no-op.
+The schema is created automatically at application startup — there is no manual migration step to run for a first boot. `MigrationBootstrapper` applies EF Core migrations on every boot (baselining migration history first if it finds a legacy `EnsureCreated()`-built database), so an existing database picks up new columns/tables without a manual step. `EnsureCreated()` only runs as a fallback if that fails, and logs an error when it does — schema drift is a bug at that point, not the normal path.
 
 - Local development uses a SQLite file out of the box; no external database is required.
-- For PostgreSQL, provide a connection string (see [Configuration](#configuration)); the same `EnsureCreated` path builds the schema on first boot.
+- For PostgreSQL, provide a connection string (see [Configuration](#configuration)); the same migration path builds the schema on first boot.
 
 ### Running the Application
 
@@ -284,6 +284,14 @@ Do not commit real passwords, API keys, or production connection strings. Base s
 
 Set the values above as environment variables in the host (Render, Docker, etc.). On each release that changes host URLs, add every browser origin (scheme + host + port) to `AppSettings:AllowedOrigins`, and confirm SignalR clients (`/hubs/chat`) use an allowed origin over HTTPS.
 
+### `ORG_PROFILE` (institution profile pack)
+
+Which institution this deployment is branded for. Leave it unset and everything behaves exactly as
+it does today (hardcoded GHC branding). Set it to a folder name under `profiles/` (e.g. `ghc`) to
+read branding, contact details, currency, and seed data from that folder's `org-config.json`
+instead. See `docs/INSTITUTION_ONBOARDING.md` before deploying this for a second institution — a
+known gap (real alumni data still baked into committed migrations) makes that unsafe right now.
+
 ---
 
 ## Testing & Quality
@@ -321,7 +329,7 @@ Additional workflows handle release and infrastructure: `main.yml` (build/packag
 - **Local tooling** — `GHCAA.Tools/run-app.ps1` starts the API, web, and mobile together (`-NoWeb` / `-NoMobile` to skip a frontend); `stop-app.ps1` stops them and frees the ports.
 - **Logging** — tiered `ILogger` throughout the backend, with audit-logging middleware recording sensitive operations.
 - **Data Protection keys** — persisted to `DataProtection__KeyRingPath`; mount a volume to this path in containers so antiforgery tokens and auth cookies survive restarts and redeploys.
-- **Schema** — created and seeded at startup via EF Core `EnsureCreated()` (not migrations); safe to re-run against an existing database.
+- **Schema** — created and kept current at startup by `MigrationBootstrapper`, which applies EF Core migrations (not `EnsureCreated()`); safe to re-run against an existing database. `EnsureCreated()` only fires as a fallback if migration bootstrap fails, and that failure is logged as an error, not silently absorbed.
 - **Operational SQL** — maintenance scripts (e.g. resetting the super-admin password, removing bulk-imported members) live alongside the tooling for recovery tasks.
 
 ---

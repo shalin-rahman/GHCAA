@@ -16,7 +16,16 @@ namespace GHCAA.Domain.Models
         public DateTime? EndDate { get; set; }
         public string? ChangeReason { get; set; }
 
-        // Navigation 
+        // 82.29: Class A soft-delete fields (ARCHITECTURE.md §4). EndDate already covers the
+        // ordinary "this person's term ended" case; these cover the separate case of a row that
+        // should never have existed (wrong member added) and is permanently removed by an admin.
+        public DateTime? UpdatedAt { get; set; }
+        public int? UpdatedByAdminId { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
+        public int? DeletedByAdminId { get; set; }
+
+        // Navigation
         public Member? Member { get; set; }
         public ECPeriod? ECPeriod { get; set; }
     }

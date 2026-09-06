@@ -8140,11 +8140,20 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.Property<string>("ChangeReason")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("DeletedByAdminId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ECPeriodId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("MemberId")
                         .HasColumnType("integer");
@@ -8154,6 +8163,12 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("UpdatedByAdminId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -9264,6 +9279,8 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Year", "RecordType", "FinancialCategory");
 
                     b.ToTable("FinancialRecords");
                 });
@@ -10618,6 +10635,9 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.Property<string>("NID")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("NotifyCommitteeChanges")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("NotifyEventCreation")
                         .HasColumnType("boolean");
@@ -38825,7 +38845,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MemberId");
+                    b.HasIndex("MemberId", "CreatedAt");
 
                     b.ToTable("Notifications");
                 });

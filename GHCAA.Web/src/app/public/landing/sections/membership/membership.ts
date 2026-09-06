@@ -1,6 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { OrgConfigService } from '../../../../core/services/org-config.service';
+import { SITE_CONTENT } from '../../../../core/config/site-content.generated';
+import { interpolateOrgTemplate } from '../../../../core/utils/org-template';
 
 interface TierDetail {
     id: string;
@@ -19,11 +22,13 @@ interface TierDetail {
     styleUrl: './membership.scss',
 })
 export class LandingMembership {
+    private orgConfig = inject(OrgConfigService);
+
     membershipTiers: TierDetail[] = [
         {
             id: 'founding',
             name: 'Founding Member',
-            shortDesc: 'The pioneers of the GHCAA movement, providing initial vision and infrastructure.',
+            shortDesc: interpolateOrgTemplate(SITE_CONTENT.membershipTierCopy.foundingShortDesc, this.orgConfig.config()),
             color: 'var(--tier-founding)',
             criteria: [
                 'Recognized for exceptional contribution during the setup phase.',
@@ -105,7 +110,7 @@ export class LandingMembership {
         {
             id: 'associate',
             name: 'Associate Member',
-            shortDesc: 'Inclusive category for those who shared the Haraganga journey.',
+            shortDesc: interpolateOrgTemplate(SITE_CONTENT.membershipTierCopy.associateShortDesc, this.orgConfig.config()),
             color: 'var(--tier-associate)',
             criteria: [
                 'Open to any verified ex-student (min 1 year of study).',

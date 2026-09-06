@@ -45,7 +45,7 @@ describe('JobApproval Component', () => {
         const job: any = { id: 1, title: 'Test Job', companyName: 'Acme' };
         component.viewJob(job);
         component.approve();
-        expect(jobServiceMock.approveJob).toHaveBeenCalledWith(1);
+        expect(jobServiceMock.approveJob).toHaveBeenCalledWith(1, true);
     });
 
     it('should reject the selected job with a reason', () => {
@@ -53,6 +53,26 @@ describe('JobApproval Component', () => {
         component.viewJob(job);
         component.rejectReason.set('Not appropriate');
         component.reject();
-        expect(jobServiceMock.rejectJob).toHaveBeenCalledWith(5, 'Not appropriate');
+        expect(jobServiceMock.rejectJob).toHaveBeenCalledWith(5, 'Not appropriate', true);
+    });
+
+    // 82.52 batch 3: notifyMember defaults true (matches the unconditional notify these
+    // already did) and the admin can opt out per job.
+    it('viewJob resets notifyMember to true and honors opt-out on approve', () => {
+        const job: any = { id: 2, title: 'Another Job', companyName: 'Acme' };
+        component.viewJob(job);
+        expect(component.notifyMember()).toBe(true);
+        component.notifyMember.set(false);
+        component.approve();
+        expect(jobServiceMock.approveJob).toHaveBeenCalledWith(2, false);
+    });
+
+    it('rejectJob carries notifyMember:false when the admin opts out', () => {
+        const job: any = { id: 3, title: 'Third Job', companyName: 'Acme' };
+        component.viewJob(job);
+        component.rejectReason.set('Not appropriate');
+        component.notifyMember.set(false);
+        component.reject();
+        expect(jobServiceMock.rejectJob).toHaveBeenCalledWith(3, 'Not appropriate', false);
     });
 });

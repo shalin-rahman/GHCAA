@@ -131,7 +131,10 @@ namespace GHCAA.Infrastructure.Services
             existing.Title = dto.Title;
             existing.Content = _sanitizer.Sanitize(dto.Content ?? ""); // 24.42
             existing.ArticleCategory = dto.ArticleCategory;
-            existing.Status = dto.Status;
+            // 57.4: Status is deliberately not settable here. UpdateNewsDto inherits
+            // CreateNewsDto.Status's default (Approved), so a caller that never touches it would
+            // silently flip a Pending post to Approved. Status changes go through
+            // ApproveArticleAsync/RejectArticleAsync instead.
             existing.PostType = dto.PostType;
             if (dto.PublishDate.HasValue) existing.PublishDate = dto.PublishDate.Value;
             existing.ImageUrl = dto.ImageUrl;

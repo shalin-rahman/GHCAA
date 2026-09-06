@@ -65,6 +65,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<IEnumerable<PaymentHistoryDto>> GetMemberPaymentHistoryAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var history = await _db.PaymentHistories
+                .AsNoTracking()
                 .Where(p => p.MemberId == memberId)
                 .OrderByDescending(p => p.PaidAt)
                 .ToListAsync(cancellationToken);
@@ -130,7 +131,7 @@ namespace GHCAA.Infrastructure.Services
                 // Existing code awaited it. keeping it consistent.
                 try
                 {
-                    await _communication.SendIndividualEmailAsync(memberId, "PAYMENT_RECEIVED", new Dictionary<string, string>
+                    await _communication.SendIndividualEmailAsync(memberId, Constants.TemplateCodes.PaymentReceived, new Dictionary<string, string>
                     {
                         { "Amount", payment.Amount.ToString("N2") },
                         { "TrxID", payment.TransactionId }
@@ -141,14 +142,21 @@ namespace GHCAA.Infrastructure.Services
                     // Log warning? For now just continue as payment is recorded.
                 }
 
-                // In-app Notification
-                await _notification.CreateNotificationAsync(
+                // In-app notification: same PAYMENT_RECEIVED template the email above just used,
+                // so an admin editing that template changes both channels at once (82.21).
+                await _notification.CreateNotificationFromTemplateAsync(
                     memberId,
-                    "Payment Recorded",
-                    $"Your payment of {payment.Amount:N2} (TrxID: {payment.TransactionId}) has been received and is pending verification.",
+                    Constants.TemplateCodes.PaymentReceived,
                     Enums.NotificationType.GeneralSystem,
-                    "/portal/payments",
-                    cancellationToken);
+                    fallbackTitle: "Payment Recorded",
+                    fallbackMessage: $"Your payment of {payment.Amount:N2} (TrxID: {payment.TransactionId}) has been received and is pending verification.",
+                    templateVars: new Dictionary<string, string>
+                    {
+                        { "Amount", payment.Amount.ToString("N2") },
+                        { "TrxID", payment.TransactionId }
+                    },
+                    targetUrl: "/portal/payments",
+                    cancellationToken: cancellationToken);
             }
 
             return MapToPaymentDto(payment);
@@ -173,7 +181,21 @@ namespace GHCAA.Infrastructure.Services
                 // below still fires either way, since that one is not member-scoped.
                 if (payment.MemberId.HasValue)
                 {
-                    await _notification.CreateNotificationAsync(payment.MemberId.Value, "Payment Verified", $"Your payment of {payment.Amount:N2} has been successfully verified.", Enums.NotificationType.GeneralSystem, "/finance/history", cancellationToken);
+                    // PAYMENT_STATUS_UPDATED already exists as a seeded template with no live email
+                    // caller; routing this notification through it (82.21) means it stops being dead data.
+                    await _notification.CreateNotificationFromTemplateAsync(
+                        payment.MemberId.Value,
+                        Constants.TemplateCodes.PaymentStatusUpdated,
+                        Enums.NotificationType.GeneralSystem,
+                        fallbackTitle: "Payment Verified",
+                        fallbackMessage: $"Your payment of {payment.Amount:N2} has been successfully verified.",
+                        templateVars: new Dictionary<string, string>
+                        {
+                            { "TrxID", payment.TransactionId },
+                            { "Status", status.ToString() }
+                        },
+                        targetUrl: "/finance/history",
+                        cancellationToken: cancellationToken);
                 }
 
                 // Trigger Live Admin Alert (Real-time Audit Trace)
@@ -253,6 +275,7 @@ namespace GHCAA.Infrastructure.Services
                 {
                     // Verify if it covers the dues
                     var feeConfig = await _db.MembershipFeeConfigs
+                        .AsNoTracking()
                         .Where(c => c.IsActive && c.Category == Enums.FinancialCategory.MembershipFee
                             && c.MembershipType == member.MembershipType && c.EffectiveDate <= DateTime.UtcNow
                             && (c.EffectiveTo == null || c.EffectiveTo >= DateTime.UtcNow))
@@ -291,6 +314,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<IEnumerable<MembershipHistoryDto>> GetMemberMembershipHistoryAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var history = await _db.MembershipHistories
+                .AsNoTracking()
                 .Where(h => h.MemberId == memberId)
                 .OrderByDescending(h => h.ChangedAt)
                 .ToListAsync(cancellationToken);
@@ -326,6 +350,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<IEnumerable<MembershipDueDto>> GetMemberDuesAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var dues = await _db.MembershipDues
+                .AsNoTracking()
                 .Where(d => d.MemberId == memberId)
                 .OrderByDescending(d => d.Year)
                 .ToListAsync(cancellationToken);
@@ -345,6 +370,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<IEnumerable<MembershipFeeConfigDto>> GetMembershipFeeConfigsAsync(CancellationToken cancellationToken = default)
         {
             var configs = await _db.MembershipFeeConfigs
+                .AsNoTracking()
                 .OrderBy(c => c.MembershipType)
                 .ThenByDescending(c => c.EffectiveDate)
                 .ToListAsync(cancellationToken);
@@ -435,6 +461,7 @@ namespace GHCAA.Infrastructure.Services
         {
             // The most recent config where EffectiveDate <= target date AND (EffectiveTo == null OR EffectiveTo >= target date) AND IsActive == true
             var config = await _db.MembershipFeeConfigs
+                .AsNoTracking()
                 .Where(c => c.IsActive && c.Category == category && c.MembershipType == type && c.EffectiveDate <= date && (c.EffectiveTo == null || c.EffectiveTo >= date))
                 .OrderByDescending(c => c.EffectiveDate)
                 .FirstOrDefaultAsync(cancellationToken);
@@ -446,6 +473,7 @@ namespace GHCAA.Infrastructure.Services
         {
             // Only generate for Active members
             var activeMembers = await _db.Members
+                .AsNoTracking()
                 .Where(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
                 .ToListAsync(cancellationToken);
 
@@ -531,6 +559,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<byte[]> GenerateTaxReceiptAsync(int paymentId, CancellationToken cancellationToken = default)
         {
             var payment = await _db.PaymentHistories
+                .AsNoTracking()
                 .Include(p => p.Member)
                 .FirstOrDefaultAsync(p => p.Id == paymentId, cancellationToken);
 
@@ -634,6 +663,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<IEnumerable<SavedPaymentMethodDto>> GetSavedPaymentMethodsAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var methods = await _db.SavedPaymentMethods
+                .AsNoTracking()
                 .Where(s => s.MemberId == memberId)
                 .OrderByDescending(s => s.LastUsedAt)
                 .ToListAsync(cancellationToken);
@@ -701,6 +731,47 @@ namespace GHCAA.Infrastructure.Services
                 PaymentMethod = p.PaymentMethod,
                 Notes = p.Notes
             };
+        }
+
+        public async Task<int?> GetPaymentOwnerMemberIdAsync(int paymentId, CancellationToken cancellationToken = default)
+        {
+            var payment = await _db.PaymentHistories.FindAsync(new object[] { paymentId }, cancellationToken);
+            return payment?.MemberId;
+        }
+
+        public async Task<int?> GetMemberIdForUserAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            var user = await _db.Users.FindAsync(new object[] { userId }, cancellationToken);
+            return user?.MemberId;
+        }
+
+        public Task<bool> IsGatewayPaymentAlreadyProcessedAsync(string gatewayPaymentId, CancellationToken cancellationToken = default)
+            => _db.PaymentHistories.AnyAsync(p => p.GatewayPaymentId == gatewayPaymentId && p.Status == Enums.PaymentStatus.Completed, cancellationToken);
+
+        public async Task<PaymentHistoryDto?> GetPaymentSnapshotByTransactionIdAsync(string transactionId, CancellationToken cancellationToken = default)
+        {
+            var payment = await _db.PaymentHistories.AsNoTracking().FirstOrDefaultAsync(p => p.TransactionId == transactionId, cancellationToken);
+            if (payment == null) return null;
+            return new PaymentHistoryDto
+            {
+                Id = payment.Id,
+                MemberId = payment.MemberId,
+                TransactionId = payment.TransactionId,
+                Amount = payment.Amount,
+                PaidAt = payment.PaidAt,
+                Status = payment.Status,
+                FinancialCategory = payment.FinancialCategory,
+                PaymentMethod = payment.PaymentMethod,
+                Notes = payment.Notes
+            };
+        }
+
+        public async Task StampGatewayPaymentIdAsync(int paymentId, string gatewayPaymentId, CancellationToken cancellationToken = default)
+        {
+            var payment = await _db.PaymentHistories.FindAsync(new object[] { paymentId }, cancellationToken);
+            if (payment == null) return;
+            payment.GatewayPaymentId = gatewayPaymentId;
+            await _db.SaveChangesAsync(cancellationToken);
         }
     }
 }

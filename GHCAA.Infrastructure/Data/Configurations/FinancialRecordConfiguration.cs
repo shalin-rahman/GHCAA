@@ -13,6 +13,10 @@ namespace GHCAA.Infrastructure.Data.Configurations
         {
             builder.HasKey(r => r.Id);
 
+            // 82.22: FinancialLedgerService.GetSummaryAsync/GetRecordsAsync filter on Year and,
+            // optionally, RecordType/FinancialCategory on every ledger page load and CSV export.
+            builder.HasIndex(r => new { r.Year, r.RecordType, r.FinancialCategory });
+
             // Deliberately NOT setting Amount's precision here. It reads as an obvious improvement
             // — money should be numeric(18,2) — but the column is currently unconstrained `numeric`
             // with live rows in it, so constraining it silently rounds anything holding more than

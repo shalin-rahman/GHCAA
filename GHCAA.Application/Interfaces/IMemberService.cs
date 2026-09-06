@@ -32,5 +32,8 @@ namespace GHCAA.Application.Interfaces
         Task<int> BulkArchiveInactiveMembersAsync(CancellationToken cancellationToken = default);
         Task<int> SyncAlumniAsync(CancellationToken cancellationToken = default);
 
+        // GatewaysController: cheap read used to decide whether a member is eligible for
+        // gateway-payment auto-approval, without pulling the full profile/history graph.
+        Task<(MembershipStatus Status, MembershipType MembershipType)?> GetMembershipSnapshotAsync(int memberId, CancellationToken cancellationToken = default);
     }
 }

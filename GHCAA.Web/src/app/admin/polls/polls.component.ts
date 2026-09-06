@@ -25,6 +25,9 @@ export class AdminPolls implements OnInit {
   // available via a toggle.
   viewMode = signal<'table' | 'card'>('table');
   selectedPoll = signal<PollDto | null>(null);
+  creating = signal(false);
+  togglingId = signal<number | null>(null);
+  deletingId = signal<number | null>(null);
 
   newPoll: CreatePollDto = {
     title: '',
@@ -62,41 +65,59 @@ export class AdminPolls implements OnInit {
   }
 
   onCreatePoll() {
+    if (this.creating()) return;
     if (!this.newPoll.title || this.newPoll.options.some(o => !o)) {
       this.notify.warning('Please fill in all fields.');
       return;
     }
 
+    this.creating.set(true);
     this.pollService.createPoll(this.newPoll).subscribe({
       next: () => {
+        this.creating.set(false);
         this.notify.success('Poll created successfully.');
         this.showCreateModal.set(false);
         this.loadPolls();
         this.resetForm();
       },
-      error: () => this.notify.error('Failed to create poll.')
+      error: () => {
+        this.creating.set(false);
+        this.notify.error('Failed to create poll.');
+      }
     });
   }
 
   toggleStatus(poll: PollDto) {
+    if (this.togglingId() !== null) return;
     const newStatus = !poll.isActive;
+    this.togglingId.set(poll.id);
     this.pollService.toggleStatus(poll.id, newStatus).subscribe({
       next: () => {
+        this.togglingId.set(null);
         poll.isActive = newStatus;
         this.notify.success(`Poll ${newStatus ? 'activated' : 'deactivated'}.`);
       },
-      error: () => this.notify.error('Failed to update status.')
+      error: () => {
+        this.togglingId.set(null);
+        this.notify.error('Failed to update status.');
+      }
     });
   }
 
   deletePoll(id: number) {
+    if (this.deletingId() !== null) return;
     if (confirm('Are you sure you want to delete this poll?')) {
+      this.deletingId.set(id);
       this.pollService.deletePoll(id).subscribe({
         next: () => {
+          this.deletingId.set(null);
           this.notify.success('Poll deleted.');
           this.loadPolls();
         },
-        error: () => this.notify.error('Failed to delete poll.')
+        error: () => {
+          this.deletingId.set(null);
+          this.notify.error('Failed to delete poll.');
+        }
       });
     }
   }

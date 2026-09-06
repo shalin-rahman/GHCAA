@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -65,7 +65,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> SendBatch([FromBody] BulkEmailDto dto, CancellationToken cancellationToken)
         {
             var years = dto.PassingYears ?? (dto.PassingYear.HasValue ? new List<int> { dto.PassingYear.Value } : null);
-            if (years == null || !years.Any()) return BadRequest("At least one PassingYear is required");
+            if (years == null || !years.Any()) return Problem(detail: "At least one PassingYear is required", statusCode: StatusCodes.Status400BadRequest);
 
             await _commService.SendBatchEmailAsync(years, dto.TemplateCode, dto.CustomVars, cancellationToken);
             return Ok(new { Message = $"Emails queued for batches: {string.Join(", ", years)}" });
@@ -75,7 +75,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> SendType([FromBody] BulkEmailDto dto, CancellationToken cancellationToken)
         {
             var types = dto.MembershipTypes ?? (!string.IsNullOrEmpty(dto.MembershipType) ? new List<string> { dto.MembershipType } : null);
-            if (types == null || !types.Any()) return BadRequest("At least one MembershipType is required");
+            if (types == null || !types.Any()) return Problem(detail: "At least one MembershipType is required", statusCode: StatusCodes.Status400BadRequest);
 
             await _commService.SendTypeEmailAsync(types, dto.TemplateCode, dto.CustomVars, cancellationToken);
             return Ok(new { Message = $"Emails queued for types: {string.Join(", ", types)}" });
@@ -90,7 +90,7 @@ namespace GHCAA.API.Controllers
             if (dto.TargetMethod == "batch")
             {
                 var years = dto.TargetValues?.Select(int.Parse).ToList() ?? (string.IsNullOrEmpty(dto.TargetValue) ? null : new List<int> { int.Parse(dto.TargetValue) });
-                if (years == null) return BadRequest("Target batch values required");
+                if (years == null) return Problem(detail: "Target batch values required", statusCode: StatusCodes.Status400BadRequest);
 
                 if (sendEmail) await _commService.SendBatchCustomEmailAsync(years, dto.Subject ?? "Broadcast Update", dto.Body ?? "", cancellationToken);
                 if (sendPush) await _notificationService.BroadcastNotificationAsync(dto.Subject ?? "Broadcast Update", dto.Body ?? "", Enums.NotificationType.GeneralSystem, "/portal/notifications", cancellationToken);
@@ -98,7 +98,7 @@ namespace GHCAA.API.Controllers
             else if (dto.TargetMethod == "type")
             {
                 var types = dto.TargetValues ?? (string.IsNullOrEmpty(dto.TargetValue) ? null : new List<string> { dto.TargetValue });
-                if (types == null) return BadRequest("Target membership type values required");
+                if (types == null) return Problem(detail: "Target membership type values required", statusCode: StatusCodes.Status400BadRequest);
 
                 if (sendEmail) await _commService.SendTypeCustomEmailAsync(types, dto.Subject ?? "Broadcast Update", dto.Body ?? "", cancellationToken);
                 if (sendPush) await _notificationService.BroadcastNotificationAsync(dto.Subject ?? "Broadcast Update", dto.Body ?? "", Enums.NotificationType.GeneralSystem, "/portal/notifications", cancellationToken);

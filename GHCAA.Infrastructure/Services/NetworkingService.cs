@@ -41,6 +41,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<PagedResult<MemberSummaryDto>> SearchMembersAsync(MemberSearchFilterDto filter, CancellationToken cancellationToken = default)
         {
             var query = _db.Members
+                .AsNoTracking()
                 .Where(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
                 .AsQueryable();
 
@@ -107,6 +108,7 @@ namespace GHCAA.Infrastructure.Services
         {
             // If no period specified, get current active one
             var query = _db.ECMembers
+                .AsNoTracking()
                 .Include(em => em.Member)
                     .ThenInclude(m => m!.AcademicHistory)
                 .Include(em => em.ECPeriod)
@@ -139,6 +141,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<IEnumerable<MemberSummaryDto>> GetLatestAlumniUpdatesAsync(int count = 10, CancellationToken cancellationToken = default)
         {
             var members = await _db.Members
+                .AsNoTracking()
                 .Include(m => m.ECMembers)
                 .ThenInclude(em => em.ECPeriod)
                 .Where(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived)

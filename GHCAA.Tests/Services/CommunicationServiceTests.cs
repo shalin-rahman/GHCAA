@@ -84,7 +84,7 @@ public class CommunicationServiceTests : TestBase
     }
 
     [Category("FR-29")]
-        [Test]
+    [Test]
     public async Task SendBatchEmailAsync_ShouldSendMultipleEmails()
     {
         // Arrange
@@ -106,7 +106,7 @@ public class CommunicationServiceTests : TestBase
     }
 
     [Category("FR-29")]
-        [Test]
+    [Test]
     public async Task SendBatchCustomEmailAsync_ShouldSendToCorrectYear()
     {
         // Arrange
@@ -128,7 +128,7 @@ public class CommunicationServiceTests : TestBase
     }
 
     [Category("FR-29")]
-        [Test]
+    [Test]
     public async Task SendTypeCustomEmailAsync_ShouldSendToCorrectMembershipType()
     {
         // Arrange
@@ -181,8 +181,8 @@ public class CommunicationServiceTests : TestBase
 
         _mockEmail.Verify(x => x.SendEmailAsync(
             "orgvar@e.com",
-            "Welcome to GHC Alumni Association",
-            It.Is<string>(b => b.Contains("support@ghcaa.org") && b.Contains("https://ghcaa.example/portal") && b.Contains(DateTime.UtcNow.Year.ToString())),
+            $"Welcome to {_mockConfig.Branding.FullName}",
+            It.Is<string>(b => b.Contains(_mockConfig.Contact.SupportEmail) && b.Contains(_mockConfig.Contact.PortalBaseUrl) && b.Contains(DateTime.UtcNow.Year.ToString())),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -243,5 +243,50 @@ public class CommunicationServiceTests : TestBase
         var fetched = await _service.GetTemplateByCodeAsync("SMS_TEST");
         fetched.Should().NotBeNull();
         fetched!.Channel.Should().Be(MessageChannel.Sms);
+    }
+
+    // ── ResolveTemplateTextAsync — 82.21 in-app notification text sourcing ────
+
+    [Test]
+    public async Task ResolveTemplateTextAsync_WhenTemplateExists_FillsMemberAndCustomVars()
+    {
+        var member = new Member
+        {
+            FullName = "Jane Roe",
+            Email = "jane@example.com",
+            NID = "456",
+            MobileNo = "02",
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0"
+        };
+        _context.Members.Add(member);
+        _context.EmailTemplates.Add(new EmailTemplate
+        {
+            Code = "RESOLVE_TEST",
+            Subject = "Hi {{FullName}}",
+            Body = "Your amount is {{Amount}}",
+            Description = "Resolve test"
+        });
+        await _context.SaveChangesAsync();
+
+        var result = await _service.ResolveTemplateTextAsync(
+            "RESOLVE_TEST", member.Id, new Dictionary<string, string> { { "Amount", "250.00" } });
+
+        result.Should().NotBeNull();
+        result!.Value.Subject.Should().Be("Hi Jane Roe");
+        result.Value.Body.Should().Be("Your amount is 250.00");
+    }
+
+    [Test]
+    public async Task ResolveTemplateTextAsync_WhenTemplateMissing_ReturnsNull()
+    {
+        var result = await _service.ResolveTemplateTextAsync("NO_SUCH_TEMPLATE_CODE");
+
+        result.Should().BeNull();
     }
 }

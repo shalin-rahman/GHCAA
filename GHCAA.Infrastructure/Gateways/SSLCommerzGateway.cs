@@ -25,13 +25,15 @@ namespace GHCAA.Infrastructure.Gateways
         private readonly ApplicationDbContext _db;
         private readonly ILogger<SSLCommerzGateway> _logger;
         private readonly IConfiguration _config;
+        private readonly IOrgConfigService _orgConfig;
 
-        public SSLCommerzGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<SSLCommerzGateway> logger, IConfiguration config)
+        public SSLCommerzGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<SSLCommerzGateway> logger, IConfiguration config, IOrgConfigService orgConfig)
         {
             _httpClient = httpClient;
             _db = db;
             _logger = logger;
             _config = config;
+            _orgConfig = orgConfig;
         }
 
         public Enums.PaymentGateway GatewayType => Enums.PaymentGateway.SSLCommerz;
@@ -46,10 +48,11 @@ namespace GHCAA.Infrastructure.Gateways
 
             var storeId = config.GatewayPublicKey;
             var storePass = config.GatewaySecretKey;
+            var org = await _orgConfig.GetConfigAsync();
 
             var isSandbox = config.IsSandbox;
-            var sandboxUrl = _config["PaymentGateways:SSLCommerz:SandboxUrl"] ?? "https://sandbox.sslcommerz.com";
-            var prodUrl = _config["PaymentGateways:SSLCommerz:ProductionUrl"] ?? "https://securepay.sslcommerz.com";
+            var sandboxUrl = _config[Constants.ConfigKeys.SSLCommerzSandboxUrl] ?? "https://sandbox.sslcommerz.com";
+            var prodUrl = _config[Constants.ConfigKeys.SSLCommerzProductionUrl] ?? "https://securepay.sslcommerz.com";
             var url = isSandbox
                 ? $"{sandboxUrl.TrimEnd('/')}/gwprocess/v4/api.php"
                 : $"{prodUrl.TrimEnd('/')}/gwprocess/v4/api.php";
@@ -65,13 +68,13 @@ namespace GHCAA.Infrastructure.Gateways
                 { "fail_url", dto.CallbackUrl },
                 { "cancel_url", dto.CallbackUrl },
                 { "cus_name", dto.CustomerName ?? ("Member " + dto.MemberId) },
-                { "cus_email", dto.CustomerEmail ?? ("member_" + dto.MemberId + "@" + (_config["GeneralSettings:EmailDomain"] ?? "ghcaa.org")) },
+                { "cus_email", dto.CustomerEmail ?? ("member_" + dto.MemberId + "@" + org.Contact.EmailDomain) },
                 { "cus_add1", "Not Provided" },
                 { "cus_city", "Dhaka" },
                 { "cus_postcode", "1000" },
                 { "cus_country", "Bangladesh" },
                 { "cus_phone", dto.CustomerPhone ?? "01700000000" },
-                { "product_name", "GHCAA " + dto.Reference },
+                { "product_name", org.Branding.InstitutionAcronym + " " + dto.Reference },
                 { "product_category", "Membership" },
                 { "product_profile", "general" }
             };
@@ -142,8 +145,8 @@ namespace GHCAA.Infrastructure.Gateways
             }
 
             var isSandbox = config.IsSandbox;
-            var sandboxUrl = _config["PaymentGateways:SSLCommerz:SandboxUrl"] ?? "https://sandbox.sslcommerz.com";
-            var prodUrl = _config["PaymentGateways:SSLCommerz:ProductionUrl"] ?? "https://securepay.sslcommerz.com";
+            var sandboxUrl = _config[Constants.ConfigKeys.SSLCommerzSandboxUrl] ?? "https://sandbox.sslcommerz.com";
+            var prodUrl = _config[Constants.ConfigKeys.SSLCommerzProductionUrl] ?? "https://securepay.sslcommerz.com";
 
             var baseValidationUrl = isSandbox ? sandboxUrl : prodUrl;
             var validationUrl = $"{baseValidationUrl.TrimEnd('/')}/validator/api/validationserverAPI.php?val_id={valId}&store_id={config.GatewayPublicKey}&store_passwd={config.GatewaySecretKey}&format=json";

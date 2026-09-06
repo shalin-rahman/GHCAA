@@ -1,4 +1,4 @@
-"""Build a filterable view of every open item in docs/TODO.md.
+"""Build a filterable view of every item in docs/TODO.md, open and closed.
 
 Reads the tracker, never a hand-kept copy of it, so the page cannot drift from
 the file. Run it again after any tracker change and republish.
@@ -11,7 +11,9 @@ ROOT = Path(__file__).resolve().parents[3]
 OUT = ROOT / "docs" / "book" / "build" / "tracker.html"
 
 HEAD = re.compile(r"^#+ *Work Package (\d+)[ \u2014:-]*(.*)$")
-ITEM = re.compile(r"^(\d+)\.(\d+[a-z]?) *\[(TODO|IN PROGRESS|BLOCKED|PARTIAL)\]\s*(.*)$")
+# The bracket sometimes carries a trailing date or note, e.g. "[DONE 2026-09-05]"
+# or "[DONE \u2014 see 40.11]", so the state word and that trailing text are two groups.
+ITEM = re.compile(r"^(\d+)\.(\d+[a-z]?) *\[(TODO|IN PROGRESS|BLOCKED|ONHOLD|PARTIAL|DONE)([^\]]*)\]\s*(.*)$")
 
 CATEGORY = {
     62: ("White-label", "Making one codebase serve any institution"),
@@ -82,7 +84,7 @@ def parse():
         if not m:
             continue
         num = int(m.group(1))
-        body = [m.group(4)]
+        body = [m.group(5)]
         for nxt in lines[i + 1:]:
             if not nxt.strip() or ITEM.match(nxt) or nxt.startswith("#"):
                 break
@@ -100,8 +102,12 @@ def parse():
         clean = re.sub(r"Depends on:?\s*(?:none|[\d.,a-z\s]+?)\.", "", clean, count=1)
         clean = re.sub(r"^[\s|*.]+", "", clean).strip()
         cat, cat_note = classify(num, blob)
+        state = m.group(3)
+        note = m.group(4).strip(" —-:")
         items.append(dict(
-            id=f"{m.group(1)}.{m.group(2)}", wp=num, state=m.group(3),
+            id=f"{m.group(1)}.{m.group(2)}", wp=num, state=state,
+            state_label=(f"{state} {note}".strip() if note else state),
+            status=("closed" if state == "DONE" else "open"),
             pr=pr.group(1) if pr else "none",
             dep=dep_m.group(1).strip().rstrip(".").strip() if dep_m else "",
             cat=cat, cat_note=cat_note, text=clean))
@@ -110,13 +116,17 @@ def parse():
 
 def main():
     titles, items = parse()
+    open_items = [it for it in items if it["status"] == "open"]
+    closed_total = len(items) - len(open_items)
     cats = {}
     for it in items:
         cats.setdefault(it["cat"], {"note": it["cat_note"], "items": []})["items"].append(it)
-    order = sorted(cats, key=lambda c: -len(cats[c]["items"]))
+    # The priority matrix is about triaging open work, so it counts open items
+    # only; a category with nothing but closed items still gets a (all-zero) row.
+    order = sorted(cats, key=lambda c: -sum(1 for it in cats[c]["items"] if it["status"] == "open"))
 
     counts = {c: {p: 0 for p in PRIORITIES} for c in order}
-    for it in items:
+    for it in open_items:
         counts[it["cat"]][it["pr"]] += 1
     totals = {p: sum(counts[c][p] for c in order) for p in PRIORITIES}
 
@@ -125,11 +135,12 @@ def main():
         cells = "".join(
             f'<td class="n{" z" if counts[c][p] == 0 else ""}">{counts[c][p]}</td>'
             for p in PRIORITIES)
+        cat_open = sum(1 for it in cats[c]["items"] if it["status"] == "open")
         rows.append(f'<tr><th scope="row">{html.escape(c)}</th>{cells}'
-                    f'<td class="n tot">{len(cats[c]["items"])}</td></tr>')
+                    f'<td class="n tot">{cat_open}</td></tr>')
     total_cells = "".join(f'<td class="n">{totals[p]}</td>' for p in PRIORITIES)
     rows.append(f'<tr class="sum"><th scope="row">All</th>{total_cells}'
-                f'<td class="n tot">{len(items)}</td></tr>')
+                f'<td class="n tot">{len(open_items)}</td></tr>')
 
     blocks = []
     for c in order:
@@ -144,9 +155,10 @@ def main():
                 dep = (f'<span class="dep">after {html.escape(it["dep"])}</span>'
                        if it["dep"] and it["dep"].lower() != "none" else "")
                 state = ("" if it["state"] == "TODO"
-                         else f'<span class="state">{it["state"].lower()}</span>')
+                         else f'<span class="state">{it["state_label"].lower()}</span>')
                 cards.append(
                     f'<article class="item" data-pr="{it["pr"]}" data-cat="{html.escape(c)}" '
+                    f'data-status="{it["status"]}" data-state="{it["state"].lower().replace(" ", "-")}" '
                     f'data-find="{html.escape((it["id"] + " " + it["text"]).lower())}">'
                     f'<div class="meta"><span class="pill {it["pr"]}">{it["pr"]}</span>'
                     f'<span class="id">{it["id"]}</span>{state}{dep}</div>'
@@ -154,11 +166,14 @@ def main():
             packs.append(
                 f'<section class="pack"><h3><span class="wp">WP{wp}</span>'
                 f'{html.escape(titles.get(wp, ""))}</h3>{"".join(cards)}</section>')
+        cat_open = sum(1 for it in group["items"] if it["status"] == "open")
+        cat_closed = len(group["items"]) - cat_open
+        count_label = f"{cat_open} open" + (f" · {cat_closed} closed" if cat_closed else "")
         blocks.append(
             f'<section class="cat" data-cat="{html.escape(c)}">'
             f'<header class="cathead"><h2>{html.escape(c)}</h2>'
             f'<p>{html.escape(group["note"])}</p>'
-            f'<span class="count">{len(group["items"])}</span></header>'
+            f'<span class="count">{count_label}</span></header>'
             f'{"".join(packs)}</section>')
 
     filters = "".join(
@@ -166,16 +181,19 @@ def main():
         f'<span>{p}</span><em>{totals[p]}</em></button>' for p in PRIORITIES if totals[p])
     cat_filters = "".join(
         f'<button class="chip" data-filter-cat="{html.escape(c)}">'
-        f'<span>{html.escape(c)}</span><em>{len(cats[c]["items"])}</em></button>' for c in order)
+        f'<span>{html.escape(c)}</span>'
+        f'<em>{sum(1 for it in cats[c]["items"] if it["status"] == "open")}</em></button>'
+        for c in order)
     legend = "".join(f'<div><dt class="pill {p}">{p}</dt><dd>{PRIORITY_MEANING[p]}</dd></div>'
                      for p in PRIORITIES if totals[p])
 
     OUT.write_text(TEMPLATE.format(
         matrix="".join(rows), blocks="".join(blocks), filters=filters,
-        cat_filters=cat_filters, legend=legend, total=len(items),
-        p0=totals["P0"], p1=totals["P1"], untriaged=totals["none"],
-        packs=len({it["wp"] for it in items})), encoding="utf-8")
-    print(f"wrote {OUT} ({OUT.stat().st_size // 1024} KB, {len(items)} items)")
+        cat_filters=cat_filters, legend=legend, total=len(open_items),
+        closed=closed_total, p0=totals["P0"], p1=totals["P1"], untriaged=totals["none"],
+        packs=len({it["wp"] for it in open_items})), encoding="utf-8")
+    print(f"wrote {OUT} ({OUT.stat().st_size // 1024} KB, "
+          f"{len(open_items)} open, {closed_total} closed)")
 
 
 TEMPLATE = """<title>GHCAA Open Work</title>
@@ -248,6 +266,11 @@ tbody th {{ font-weight:400; }}
 .chip.P4[aria-pressed="true"] {{ background:var(--p4-bg); border-color:var(--p4); }}
 .chip.none[aria-pressed="true"] {{ background:var(--pn-bg); border-color:var(--pn); }}
 .sep {{ width:1px; align-self:stretch; background:var(--line); margin:0 4px; }}
+.seg {{ display:inline-flex; border:1px solid var(--line); border-radius:99px; overflow:hidden; }}
+.seg button {{ border:none; background:var(--surface); color:var(--ink-2); font:inherit; font-size:13px;
+  padding:4px 12px; cursor:pointer; }}
+.seg button + button {{ border-left:1px solid var(--line); }}
+.seg button[aria-pressed="true"] {{ background:var(--accent-soft); color:var(--ink); font-weight:500; }}
 input[type=search] {{ flex:1; min-width:180px; padding:5px 11px; border:1px solid var(--line);
   border-radius:99px; background:var(--surface); color:var(--ink); font:inherit; font-size:13px; }}
 input[type=search]:focus-visible, .chip:focus-visible {{ outline:2px solid var(--accent); outline-offset:1px; }}
@@ -301,10 +324,12 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
 <div class="wrap">
 <header class="top">
   <h1>GHCAA Open Work</h1>
-  <p class="sub">Every unfinished item in <code>docs/TODO.md</code>, grouped by the work package
-  that owns it. Generated from the tracker file, so it cannot drift from it.</p>
+  <p class="sub">Every item in <code>docs/TODO.md</code>, grouped by the work package that owns it.
+  Shows open items by default; use the Open/Closed/All control to see what's done.
+  Generated from the tracker file, so it cannot drift from it.</p>
   <div class="stats">
     <div><b>{total}</b><span>open items</span></div>
+    <div><b>{closed}</b><span>closed items</span></div>
     <div><b>{packs}</b><span>work packages</span></div>
     <div><b>{p0}</b><span>P0 blocking</span></div>
     <div><b>{p1}</b><span>P1 next</span></div>
@@ -324,6 +349,16 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
 <dl class="legend">{legend}</dl>
 
 <div class="controls">
+  <div class="seg" id="status" role="group" aria-label="Status">
+    <button data-status="open" aria-pressed="true" type="button">Open</button>
+    <button data-status="todo" aria-pressed="false" type="button">Todo</button>
+    <button data-status="partial" aria-pressed="false" type="button">Partial</button>
+    <button data-status="onhold" aria-pressed="false" type="button">On Hold</button>
+    <button data-status="blocked" aria-pressed="false" type="button">Blocked</button>
+    <button data-status="closed" aria-pressed="false" type="button">Closed</button>
+    <button data-status="all" aria-pressed="false" type="button">All</button>
+  </div>
+  <span class="sep"></span>
   {filters}<span class="sep"></span>{cat_filters}
   <input type="search" id="q" placeholder="Search item text or number" aria-label="Search items">
   <button class="clear" id="clear" type="button">Reset</button>
@@ -335,14 +370,25 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
 
 <script>
 (function () {{
-  var pr = new Set(), cat = new Set(), q = "";
+  var pr = new Set(), cat = new Set(), q = "", status = "open";
   var items = Array.prototype.slice.call(document.querySelectorAll(".item"));
   var chips = Array.prototype.slice.call(document.querySelectorAll(".chip"));
+  var statusButtons = Array.prototype.slice.call(document.querySelectorAll("#status button"));
+
+  // "open"/"closed"/"all" match the coarse open-vs-done split; any other value
+  // (todo/partial/onhold/blocked) matches the item's exact state word instead,
+  // so a PARTIAL or ONHOLD item can be found without wading through every open item.
+  function statusOk(el) {{
+    if (status === "all") return true;
+    if (status === "open" || status === "closed") return el.dataset.status === status;
+    return el.dataset.state === status;
+  }}
 
   function apply() {{
     var shown = 0;
     items.forEach(function (el) {{
-      var ok = (!pr.size || pr.has(el.dataset.pr))
+      var ok = statusOk(el)
+        && (!pr.size || pr.has(el.dataset.pr))
         && (!cat.size || cat.has(el.dataset.cat))
         && (!q || el.dataset.find.indexOf(q) > -1);
       el.hidden = !ok;
@@ -357,6 +403,13 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
     document.getElementById("none").hidden = shown > 0;
   }}
 
+  statusButtons.forEach(function (b) {{
+    b.addEventListener("click", function () {{
+      status = b.dataset.status;
+      statusButtons.forEach(function (o) {{ o.setAttribute("aria-pressed", String(o === b)); }});
+      apply();
+    }});
+  }});
   chips.forEach(function (c) {{
     c.setAttribute("aria-pressed", "false");
     c.addEventListener("click", function () {{
@@ -371,11 +424,13 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
     q = e.target.value.toLowerCase().trim(); apply();
   }});
   document.getElementById("clear").addEventListener("click", function () {{
-    pr.clear(); cat.clear(); q = "";
+    pr.clear(); cat.clear(); q = ""; status = "open";
     document.getElementById("q").value = "";
     chips.forEach(function (c) {{ c.setAttribute("aria-pressed", "false"); }});
+    statusButtons.forEach(function (o) {{ o.setAttribute("aria-pressed", String(o.dataset.status === "open")); }});
     apply();
   }});
+  apply();
 }}());
 </script>
 """

@@ -44,7 +44,7 @@
                     <td>
                         <div class="action-btns">
                             <button class="btn btn-secondary btn-sm" (click)="viewMessage(msg)">View Detail</button>
-                            <button class="icon-btn delete" (click)="deleteMessage(msg)" title="Delete Enquiry">🗑️</button>
+                            <button class="icon-btn delete" (click)="deleteMessage(msg)" [disabled]="deletingId() === msg.id" title="Delete Enquiry">🗑️</button>
                         </div>
                     </td>
                 </tr>
@@ -87,7 +87,7 @@
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" (click)="selectedMessage.set(null)">Close</button>
-            <button class="btn btn-outline" (click)="deleteMessage(selectedMessage())">Delete Enquiry</button>
+            <button class="btn btn-outline" (click)="deleteMessage(selectedMessage())" [disabled]="deletingId() === selectedMessage()?.id">Delete Enquiry</button>
             <a [href]="'mailto:' + selectedMessage().email" class="btn btn-accent">Reply via Email</a>
         </div>
     </div>

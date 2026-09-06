@@ -35,7 +35,7 @@ public class EventServiceTests : TestBase
     }
 
     [Category("FR-13")]
-        [Test]
+    [Test]
     public async Task CreateEventAsync_ShouldAddEvent()
     {
         var startDate = DateTime.UtcNow.AddDays(30);
@@ -83,6 +83,44 @@ public class EventServiceTests : TestBase
         _context.AlumniEvents.Count().Should().Be(1);
     }
 
+    // 82.52: CreateEventAsync already broadcast unconditionally when IsActive; NotifyMembers
+    // defaults true so that behavior is unchanged, but an admin can now suppress it per event.
+    [Category("FR-13")]
+    [Test]
+    public async Task CreateEventAsync_Broadcasts_WhenNotifyMembersDefaultsTrueAndActive()
+    {
+        var dto = new CreateEventDto
+        {
+            Title = "Notified Event", Description = "D", Location = "L",
+            StartDate = DateTime.UtcNow.AddDays(1), EndDate = DateTime.UtcNow.AddDays(2),
+            IsActive = true
+        };
+
+        await _service.CreateEventAsync(dto);
+
+        _notificationMock.Verify(n => n.BroadcastNotificationAsync(
+            It.IsAny<string>(), It.IsAny<string>(), NotificationType.EventCreation,
+            It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Category("FR-13")]
+    [Test]
+    public async Task CreateEventAsync_SuppressesBroadcast_WhenNotifyMembersOptedOut()
+    {
+        var dto = new CreateEventDto
+        {
+            Title = "Silent Event", Description = "D", Location = "L",
+            StartDate = DateTime.UtcNow.AddDays(1), EndDate = DateTime.UtcNow.AddDays(2),
+            IsActive = true, NotifyMembers = false
+        };
+
+        await _service.CreateEventAsync(dto);
+
+        _notificationMock.Verify(n => n.BroadcastNotificationAsync(
+            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<NotificationType>(),
+            It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
     [Test]
     public async Task GetAllEventsForAdminAsync_ShouldIncludeInactiveEvents()
     {
@@ -112,7 +150,7 @@ public class EventServiceTests : TestBase
     }
 
     [Category("FR-13")]
-        [Test]
+    [Test]
     public async Task UpdateEventAsync_ShouldAllowReactivatingAnUnpublishedEvent()
     {
         var ev = new AlumniEvent { Title = "Unpublished Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", IsActive = false };
@@ -136,8 +174,46 @@ public class EventServiceTests : TestBase
         result!.IsActive.Should().BeTrue();
     }
 
+    // 82.52: UpdateEventAsync never notified before this item; NotifyOnUpdate defaults false so
+    // that stays true unless an admin opts in per edit.
+    [Category("FR-13")]
+    [Test]
+    public async Task UpdateEventAsync_DoesNotBroadcast_ByDefault()
+    {
+        var ev = new AlumniEvent { Title = "Existing", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", IsActive = true };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        await _service.UpdateEventAsync(new UpdateEventDto
+        {
+            Id = ev.Id, Title = "Existing Updated", Description = "D", StartDate = ev.StartDate, EndDate = ev.EndDate, Location = "L", IsActive = true
+        });
+
+        _notificationMock.Verify(n => n.BroadcastNotificationAsync(
+            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<NotificationType>(),
+            It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Category("FR-13")]
+    [Test]
+    public async Task UpdateEventAsync_Broadcasts_WhenNotifyOnUpdateOptedIn()
+    {
+        var ev = new AlumniEvent { Title = "Existing", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", IsActive = true };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        await _service.UpdateEventAsync(new UpdateEventDto
+        {
+            Id = ev.Id, Title = "Existing Updated", Description = "D", StartDate = ev.StartDate, EndDate = ev.EndDate, Location = "L", IsActive = true, NotifyOnUpdate = true
+        });
+
+        _notificationMock.Verify(n => n.BroadcastNotificationAsync(
+            It.IsAny<string>(), It.IsAny<string>(), NotificationType.EventCreation,
+            It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
     [Category("FR-14")]
-        [Test]
+    [Test]
     public async Task RegisterForEventAsync_ShouldCreateRegistration()
     {
         var member = new Member { FullName = "EVT", Email = "e@t.com", NID = "12", MobileNo = "12", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
@@ -200,7 +276,7 @@ public class EventServiceTests : TestBase
     }
 
     [Category("FR-14")]
-        [Test]
+    [Test]
     public async Task RegisterForEventAsync_ShouldThrowException_WhenDeadlinePassed()
     {
         var ev = new AlumniEvent { Title = "Past Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", RegistrationEndDate = DateTime.UtcNow.AddHours(-1) };
@@ -212,7 +288,7 @@ public class EventServiceTests : TestBase
     }
 
     [Category("FR-13")]
-        [Test]
+    [Test]
     public async Task UpdateEventAsync_ShouldUpdateAllFields()
     {
         var ev = new AlumniEvent { Title = "Old Title", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", RegistrationFee = 0, RequiresPayment = false, ImageUrl = "/old.jpg", AllowNonMembers = false, ParticipantLimit = 5, HasWaitlist = false, RequiresRegistration = false };
@@ -264,7 +340,7 @@ public class EventServiceTests : TestBase
     }
 
     [Category("FR-14")]
-        [Test]
+    [Test]
     public async Task RegisterForEventAsync_NonMember_ShouldFail_WhenEventDoesNotAllow()
     {
         var ev = new AlumniEvent { Title = "Member Only", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", AllowNonMembers = false };
@@ -278,7 +354,7 @@ public class EventServiceTests : TestBase
     }
 
     [Category("FR-14")]
-        [Test]
+    [Test]
     public async Task RegisterForEventAsync_NonMember_ShouldSucceed_WhenEventAllows()
     {
         var ev = new AlumniEvent { Title = "Open Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", AllowNonMembers = true };
@@ -340,7 +416,7 @@ public class EventServiceTests : TestBase
     }
 
     [Category("FR-13")]
-        [Test]
+    [Test]
     public async Task DeleteEventAsync_ShouldRemoveEventIfNoRegistrations()
     {
         var ev = new AlumniEvent { Title = "Empty Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(1), Location = "L" };
@@ -353,7 +429,7 @@ public class EventServiceTests : TestBase
     }
 
     [Category("FR-16")]
-        [Test]
+    [Test]
     public async Task CheckInParticipantAsync_ShouldSetCheckInTime()
     {
         var member = new Member { FullName = "EVT3", Email = "e3@t.com", NID = "1234", MobileNo = "1234", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
@@ -373,7 +449,7 @@ public class EventServiceTests : TestBase
     }
 
     [Category("FR-13")]
-        [Test]
+    [Test]
     public async Task AddEventExpenseAsync_ShouldCreateExpense()
     {
         var ev = new AlumniEvent { Title = "Exp Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(1), Location = "L" };
@@ -389,7 +465,7 @@ public class EventServiceTests : TestBase
     }
 
     [Category("FR-15")]
-        [Test]
+    [Test]
     public async Task RegisterForEventAsync_ShouldWaitlist_WhenCapacityExceeded()
     {
         // Arrange
@@ -431,7 +507,7 @@ public class EventServiceTests : TestBase
     }
 
     [Category("FR-15")]
-        [Test]
+    [Test]
     public async Task RegisterForEventAsync_ShouldThrow_WhenCapacityFull_AndNoWaitlist()
     {
         // 29A.4: with a participant limit but no waitlist, registrations past the cap must be
@@ -505,7 +581,7 @@ public class EventServiceTests : TestBase
     }
 
     [Category("FR-16")]
-        [Test]
+    [Test]
     public async Task CheckInParticipantAsync_ShouldFail_WhenNotApproved()
     {
         // 29A.5: a Pending (or Rejected/Waitlisted) registration must not be able to check in
@@ -526,6 +602,59 @@ public class EventServiceTests : TestBase
         var updated = await _context.EventRegistrations.FindAsync(reg.Id);
         updated!.IsCheckedIn.Should().BeFalse();
         updated.CheckedInAt.Should().BeNull();
+    }
+
+    // 80.13: extracted from GatewaysController's payment-initiation/callback paths so it
+    // doesn't touch ApplicationDbContext directly.
+    [Test]
+    public async Task GetRegistrationByPaymentReferenceAsync_ReturnsMatch_WithEventIncluded()
+    {
+        var ev = new AlumniEvent { Title = "E", Description = "D", Location = "L" };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        var reg = new EventRegistration { EventId = ev.Id, PaymentReference = "EVT-REG-XYZ", Status = EventRegistrationStatus.Pending };
+        _context.EventRegistrations.Add(reg);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetRegistrationByPaymentReferenceAsync("EVT-REG-XYZ");
+
+        result.Should().NotBeNull();
+        result!.Event.Should().NotBeNull();
+        result.Event!.Title.Should().Be("E");
+    }
+
+    [Test]
+    public async Task GetRegistrationByPaymentReferenceAsync_ReturnsNull_WhenNoMatch()
+    {
+        var result = await _service.GetRegistrationByPaymentReferenceAsync("NO-SUCH-REF");
+
+        result.Should().BeNull();
+    }
+
+    [Test]
+    public async Task AutoApproveRegistrationAfterPaymentAsync_SetsApprovedFieldsWithoutNotification()
+    {
+        var ev = new AlumniEvent { Title = "E2", Description = "D", Location = "L" };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        var reg = new EventRegistration { EventId = ev.Id, PaymentReference = "EVT-REG-AUTO", Status = EventRegistrationStatus.Pending };
+        _context.EventRegistrations.Add(reg);
+        await _context.SaveChangesAsync();
+
+        await _service.AutoApproveRegistrationAfterPaymentAsync(reg.Id, adminId: 1);
+
+        var updated = await _context.EventRegistrations.FindAsync(reg.Id);
+        updated!.Status.Should().Be(EventRegistrationStatus.Approved);
+        updated.ApprovedByAdminId.Should().Be(1);
+        updated.ApprovedAt.Should().NotBeNull();
+
+        // Deliberately narrower than ApproveRegistrationAsync: this is a payment confirmation,
+        // not an admin review, so it must not fire the participation-approved notification.
+        _notificationMock.Verify(x => x.CreateNotificationAsync(
+            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<NotificationType>(), It.IsAny<string>(), It.IsAny<System.Threading.CancellationToken>()),
+            Times.Never);
     }
 }
 

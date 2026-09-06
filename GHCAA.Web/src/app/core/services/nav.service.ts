@@ -27,6 +27,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
     { path: '/portal/messages', label: 'Messaging', icon: 'messages', section: 'Community' },
     { path: '/portal/forum', label: 'Discussions', icon: 'forum', feature: 'enableForum', section: 'Community' },
     { path: '/portal/governance', label: 'Governance', icon: 'governance', section: 'Community' },
+    { path: '/portal/requests', label: 'My Requests', icon: 'messages', section: 'Community' },
     { path: '/portal/directory', label: 'Alumni Directory', icon: 'directory', feature: 'enablePublicDirectory', section: 'Directory' },
     { path: '/portal/gallery', label: 'Event Gallery', icon: 'gallery', feature: 'enableGallery', section: 'Directory' },
     { path: '/portal/jobs', label: 'Job Hub', icon: 'jobs', mobileVisible: true, feature: 'enableJobHub', section: 'Career' },

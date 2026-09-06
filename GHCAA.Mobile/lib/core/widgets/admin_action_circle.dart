@@ -6,6 +6,7 @@ class AdminActionCircle extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
   final String? tooltip;
+  final bool disabled;
 
   const AdminActionCircle({
     super.key,
@@ -13,6 +14,7 @@ class AdminActionCircle extends StatelessWidget {
     required this.color,
     required this.onTap,
     this.tooltip,
+    this.disabled = false,
   });
 
   @override
@@ -20,7 +22,7 @@ class AdminActionCircle extends StatelessWidget {
     return Tooltip(
       message: tooltip ?? '',
       child: GestureDetector(
-        onTap: () {
+        onTap: disabled ? null : () {
           HapticFeedback.mediumImpact();
           onTap();
         },
@@ -29,9 +31,9 @@ class AdminActionCircle extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.black54,
             shape: BoxShape.circle,
-            border: Border.all(color: color.withValues(alpha: 0.3)),
+            border: Border.all(color: (disabled ? Colors.white24 : color).withValues(alpha: 0.3)),
           ),
-          child: Icon(icon, color: color, size: 18),
+          child: Icon(icon, color: disabled ? Colors.white24 : color, size: 18),
         ),
       ),
     );

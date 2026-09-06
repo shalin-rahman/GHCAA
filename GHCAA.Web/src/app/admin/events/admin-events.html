@@ -159,6 +159,11 @@
                                 <span class="label-text">Allow Non-Alumni Participation</span>
                             </label>
                             <label class="premium-checkbox-label">
+                                <input type="checkbox" formControlName="notifyMembers">
+                                <span class="checkmark"></span>
+                                <span class="label-text">{{ editingEventId() ? 'Notify members of this update' : 'Notify members when published' }}</span>
+                            </label>
+                            <label class="premium-checkbox-label">
                                 <input type="checkbox" formControlName="requiresRegistration">
                                 <span class="checkmark"></span>
                                 <span class="label-text">Requires Registration (uncheck for informational-only events)</span>
@@ -268,11 +273,10 @@
 
                 <!-- Actions -->
                 <div class="event-actions">
-                    <button (click)="viewEvent(ev)" class="btn btn-outline btn-sm rounded-xl">View</button>
-                    <button (click)="openEditForm(ev)" class="btn btn-secondary btn-sm rounded-xl">Edit</button>
+                    <button (click)="viewEvent(ev)" class="icon-btn" title="View Event">👁️</button>
+                    <button (click)="openEditForm(ev)" class="icon-btn" title="Edit Event">✏️</button>
                     @if (nav.isSuperAdmin()) {
-                    <button (click)="deleteEvent(ev.id)"
-                        class="btn btn-secondary btn-sm border-red-500/20 text-red-500 hover:bg-red-500/10">Delete</button>
+                    <button (click)="deleteEvent(ev.id)" class="icon-btn delete" title="Delete Event">🗑️</button>
                     }
                 </div>
             </div>
@@ -318,7 +322,7 @@
         </div>
         } @else {
         <div class="glass-card table-container">
-            <table class="admin-table">
+            <table class="data-table">
                 <thead>
                     <tr>
                         <th class="px-6 py-4">Participant</th>

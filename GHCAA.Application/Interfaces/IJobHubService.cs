@@ -14,7 +14,7 @@ namespace GHCAA.Application.Interfaces
 
         // Admin approval workflow
         Task<IEnumerable<JobDto>> GetPendingJobsAsync(CancellationToken cancellationToken = default);
-        Task<bool> ApproveJobAsync(int id, CancellationToken cancellationToken = default);
-        Task<bool> RejectJobAsync(int id, string reason, CancellationToken cancellationToken = default);
+        Task<bool> ApproveJobAsync(int id, bool notifyMember = true, CancellationToken cancellationToken = default);
+        Task<bool> RejectJobAsync(int id, string reason, bool notifyMember = true, CancellationToken cancellationToken = default);
     }
 }

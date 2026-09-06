@@ -9,6 +9,7 @@ import '../../core/api/api_client.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../features/auth/auth_service.dart';
 import '../../core/config/app_config.dart';
+import '../../core/widgets/confirm_dialog.dart';
 
 final newsDetailsProvider = FutureProvider.family<Map<String, dynamic>?, int>((ref, newsId) async {
   try {
@@ -20,13 +21,22 @@ final newsDetailsProvider = FutureProvider.family<Map<String, dynamic>?, int>((r
   }
 });
 
-class NewsDetailsScreen extends ConsumerWidget {
+class NewsDetailsScreen extends ConsumerStatefulWidget {
   final int newsId;
 
   const NewsDetailsScreen({super.key, required this.newsId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NewsDetailsScreen> createState() => _NewsDetailsScreenState();
+}
+
+class _NewsDetailsScreenState extends ConsumerState<NewsDetailsScreen> {
+  bool _approving = false;
+
+  int get newsId => widget.newsId;
+
+  @override
+  Widget build(BuildContext context) {
     final detailsAsync = ref.watch(newsDetailsProvider(newsId));
     final roleAsync = ref.watch(roleProvider);
     final isAdmin = roleAsync.value?.isStaffAdminRole ?? false;
@@ -36,9 +46,12 @@ class NewsDetailsScreen extends ConsumerWidget {
       breadcrumb: 'Alumni Press > Story',
       actions: isAdmin ? [
         IconButton(
-          icon: const Icon(Icons.check_circle_outline, color: Colors.greenAccent, size: 20),
+          icon: _approving
+              ? SizedBox(height: 16, width: 16, child: LogoSpinner.small())
+              : const Icon(Icons.check_circle_outline, color: Colors.greenAccent, size: 20),
           tooltip: 'Approve',
-          onPressed: () async {
+          onPressed: _approving ? null : () async {
+            setState(() => _approving = true);
             try {
               final dio = ref.read(dioProvider);
               await dio.put('/news/$newsId/approve');
@@ -46,6 +59,8 @@ class NewsDetailsScreen extends ConsumerWidget {
               if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Article approved and published.')));
             } catch (e) {
               if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Approval failed: $e'), backgroundColor: Colors.redAccent));
+            } finally {
+              if (mounted) setState(() => _approving = false);
             }
           },
         ),
@@ -221,35 +236,25 @@ class NewsDetailsScreen extends ConsumerWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.midnightSurface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Delete Article', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
-        content: const Text('This article will be permanently removed from the Alumni Press. Proceed?', style: TextStyle(color: AppTheme.textSecondaryDark, height: 1.5)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL', style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold))),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-            onPressed: () async {
-              Navigator.pop(ctx);
-              try {
-                final dio = ref.read(dioProvider);
-                await dio.delete('/news/$newsId');
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Article removed.')));
-                  context.pop();
-                }
-              } catch (e) {
-                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Delete failed: $e'), backgroundColor: Colors.redAccent));
-              }
-            },
-            child: const Text('DELETE', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 1)),
-          ),
-        ],
-      ),
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final confirm = await showConfirmDialog(
+      context,
+      title: 'Delete Article',
+      message: 'This article will be permanently removed from the Alumni Press. Proceed?',
+      confirmLabel: 'Delete',
+      destructive: true,
     );
+    if (!confirm || !context.mounted) return;
+
+    try {
+      final dio = ref.read(dioProvider);
+      await dio.delete('/news/$newsId');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Article removed.')));
+        context.pop();
+      }
+    } catch (e) {
+      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Delete failed: $e'), backgroundColor: Colors.redAccent));
+    }
   }
 }

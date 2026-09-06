@@ -53,12 +53,13 @@ class JobService {
     }
   }
 
-  Future<bool> resolveJobApproval(int id, bool approve, {String? reason}) async {
+  Future<bool> resolveJobApproval(int id, bool approve, {String? reason, bool notifyMember = true}) async {
     try {
       final endpoint = approve ? 'approve' : 'reject';
       final response = await _dio.post(
         '/jobs/admin/$id/$endpoint',
-        data: approve ? null : {'reason': reason},
+        queryParameters: approve ? {'notifyMember': notifyMember} : null,
+        data: approve ? null : {'reason': reason, 'notifyMember': notifyMember},
       );
       return response.statusCode == 200;
     } catch (e) {

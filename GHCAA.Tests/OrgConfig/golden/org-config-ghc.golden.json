@@ -2,21 +2,25 @@
   "OrgId": "ghcaa",
   "SchemaVersion": 1,
   "Branding": {
+    "AppName": "GHCAA",
     "ShortName": "GHCAA",
     "FullName": "Govt. Haraganga College Alumni Association",
     "MemberNickname": "Haragangian",
     "InstitutionName": "Govt. Haraganga College",
     "InstitutionAcronym": "GHC",
     "MembershipNumberPrefix": "GHC-",
+    "TransactionPrefix": "HARAGANGIAN-",
     "ApprovalSeal": "GHC APPROVED",
     "EstablishedOn": "29 Nov 2025",
     "LogoUrl": "/assets/logo.png",
+    "ConstitutionPdfUrl": "/assets/GHCAA Constitution V4.2.pdf",
     "PrimaryColor": "#121212",
     "AccentColor": "#c5a059"
   },
   "Contact": {
     "SupportEmail": "haragangian@gmail.com",
     "ImportEmailBase": "haragangian",
+    "EmailDomain": "haragangian.com",
     "RegisteredOffice": "Govt. Haraganga College Campus, Munshiganj, Bangladesh.",
     "CampusAddress": "Govt. Haraganga College, Munshiganj-1500, Bangladesh.",
     "PhoneNumbers": [
@@ -38,6 +42,11 @@
     "Symbol": "৳",
     "Name": "Bangladeshi Taka"
   },
+  "EnabledGatewayMethods": [
+    "SSLCommerz",
+    "BkashGateway",
+    "DGePay"
+  ],
   "Features": {
     "EnableEvents": true,
     "EnableJobHub": true,

@@ -1,4 +1,4 @@
-using GHCAA.API.Extensions;
+﻿using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -95,7 +95,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> ApproveMember(int id, [FromBody] ApproveMemberDto dto, CancellationToken cancellationToken)
         {
             // 24.51: Read admin identity from the JWT claim, not the request body.
-            if (!int.TryParse(User.FindFirst(AppClaimTypes.MemberId)?.Value, out var adminMemberId))
+            if (!int.TryParse(this.CurrentMemberIdRaw(), out var adminMemberId))
                 return Unauthorized();
 
             try
@@ -110,11 +110,11 @@ namespace GHCAA.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { Message = ex.Message });
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { Message = ex.Message });
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -122,7 +122,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> RejectMember(int id, [FromBody] RejectMemberDto dto, CancellationToken cancellationToken)
         {
             // 24.51: Read admin identity from the JWT claim, not the request body.
-            if (!int.TryParse(User.FindFirst(AppClaimTypes.MemberId)?.Value, out var adminMemberId))
+            if (!int.TryParse(this.CurrentMemberIdRaw(), out var adminMemberId))
                 return Unauthorized();
 
             try
@@ -133,7 +133,7 @@ namespace GHCAA.API.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { Message = ex.Message });
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -176,7 +176,7 @@ namespace GHCAA.API.Controllers
         [HttpPut("members/{id}")]
         public async Task<IActionResult> UpdateMemberAdmin(int id, [FromBody] AdminMemberUpdateDto dto, CancellationToken cancellationToken)
         {
-            var adminIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var adminIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(adminIdClaim) || !int.TryParse(adminIdClaim, out var adminId))
             {
                 return Unauthorized();
@@ -202,7 +202,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> UpdateMemberPhoto(int id, IFormFile photo, CancellationToken cancellationToken)
         {
             var validation = _fileValidationService.ValidateFormFile(photo, FileCategory.Image, 5 * 1024 * 1024);
-            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
+            if (!validation.IsValid) return Problem(detail: validation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
             var dto = new UploadedFileDto { FileName = photo.FileName, Length = photo.Length, Content = photo.OpenReadStream() };
             var path = await _memberService.UpdateMemberPhotoAsync(id, dto, cancellationToken);
             return Ok(new { Message = "Photo updated.", PhotoPath = path });
@@ -212,7 +212,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> UpdateMemberSignature(int id, IFormFile signature, CancellationToken cancellationToken)
         {
             var validation = _fileValidationService.ValidateFormFile(signature, FileCategory.Image, 2 * 1024 * 1024);
-            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
+            if (!validation.IsValid) return Problem(detail: validation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
             var dto = new UploadedFileDto { FileName = signature.FileName, Length = signature.Length, Content = signature.OpenReadStream() };
             var path = await _memberService.UpdateMemberSignatureAsync(id, dto, cancellationToken);
             return Ok(new { Message = "Signature updated.", SignaturePath = path });
@@ -225,7 +225,7 @@ namespace GHCAA.API.Controllers
             if (certificate != null)
             {
                 var certValidation = _fileValidationService.ValidateFormFile(certificate, FileCategory.Document, 10 * 1024 * 1024);
-                if (!certValidation.IsValid) return BadRequest(new { Message = certValidation.ErrorMessage });
+                if (!certValidation.IsValid) return Problem(detail: certValidation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
 
                 certFile = new UploadedFileDto
                 {
@@ -239,7 +239,7 @@ namespace GHCAA.API.Controllers
             if (paymentProof != null)
             {
                 var payValidation = _fileValidationService.ValidateFormFile(paymentProof, FileCategory.Document, 10 * 1024 * 1024);
-                if (!payValidation.IsValid) return BadRequest(new { Message = payValidation.ErrorMessage });
+                if (!payValidation.IsValid) return Problem(detail: payValidation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
 
                 payFile = new UploadedFileDto
                 {
@@ -276,7 +276,7 @@ namespace GHCAA.API.Controllers
             {
                 var isPrivileged = User.IsInRole("SuperAdmin");
                 var result = await _memberService.SendAdminPasswordResetLinkAsync(id, isPrivileged, cancellationToken);
-                if (!result.Success) return NotFound(new { Message = "Member or user account not found. Please ensure the member is approved and active." });
+                if (!result.Success) return Problem(detail: "Member or user account not found. Please ensure the member is approved and active.", statusCode: StatusCodes.Status404NotFound);
                 return Ok(new
                 {
                     Message = "Password reset link has been sent to the member's registered email address."
@@ -289,7 +289,7 @@ namespace GHCAA.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Admin password reset failed for member {MemberId}", id);
-                return BadRequest(new { Message = ex.Message });
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 

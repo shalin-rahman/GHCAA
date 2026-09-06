@@ -6,11 +6,13 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/registration_constants.dart';
 import '../../features/auth/register_wizard_provider.dart';
 import '../../features/auth/auth_service.dart';
 import '../../features/lookups/dropdown_service.dart';
 import '../../features/files/file_service.dart';
 import '../../core/utils/app_utils.dart';
+import '../../core/services/org_config_service.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -190,7 +192,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         const Divider(color: Colors.white10),
         _buildAsyncDropdown(
           label: 'Blood Group *',
-          group: 'BloodGroup',
+          group: LookupGroups.bloodGroup,
           value: state.data['BloodGroup'],
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('BloodGroup', v),
         ),
@@ -227,7 +229,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         _buildTextField(
           label: 'Educational Institution *',
           initialValue: state.data['InstitutionName'],
-          hintText: 'Default: Govt. Haraganga College',
+          hintText: 'Default: ${ref.watch(orgBrandingProvider).institutionName}',
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('InstitutionName', v),
         ),
         _gap(),

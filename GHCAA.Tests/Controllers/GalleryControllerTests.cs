@@ -140,10 +140,10 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task ApproveGallery_ReturnsOk_OnSuccess()
         {
-            _galleryServiceMock.Setup(x => x.ApproveGalleryAsync(5, It.IsAny<CancellationToken>()))
+            _galleryServiceMock.Setup(x => x.ApproveGalleryAsync(5, true, It.IsAny<CancellationToken>()))
                                .ReturnsAsync(true);
 
-            var result = await _controller.ApproveGallery(5, CancellationToken.None);
+            var result = await _controller.ApproveGallery(5, true, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
@@ -152,7 +152,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task RejectGallery_ReturnsOk_OnSuccess()
         {
-            _galleryServiceMock.Setup(x => x.RejectGalleryAsync(5, "Not appropriate", It.IsAny<CancellationToken>()))
+            _galleryServiceMock.Setup(x => x.RejectGalleryAsync(5, "Not appropriate", true, It.IsAny<CancellationToken>()))
                                .ReturnsAsync(true);
 
             var result = await _controller.RejectGallery(5, new GalleryController.RejectRequest { Reason = "Not appropriate" }, CancellationToken.None);
@@ -163,12 +163,37 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task ApprovePhoto_ReturnsNotFound_WhenMissing()
         {
-            _galleryServiceMock.Setup(x => x.ApprovePhotoAsync(99, It.IsAny<CancellationToken>()))
+            _galleryServiceMock.Setup(x => x.ApprovePhotoAsync(99, true, It.IsAny<CancellationToken>()))
                                .ReturnsAsync(false);
 
-            var result = await _controller.ApprovePhoto(99, CancellationToken.None);
+            var result = await _controller.ApprovePhoto(99, true, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<NotFoundResult>());
+        }
+
+        // 82.52 batch 3: notifyMember flows straight through to the service.
+        [Category("FR-53")]
+        [Test]
+        public async Task ApproveGallery_PassesNotifyMemberFalse_ToService()
+        {
+            _galleryServiceMock.Setup(x => x.ApproveGalleryAsync(5, false, It.IsAny<CancellationToken>()))
+                               .ReturnsAsync(true);
+
+            var result = await _controller.ApproveGallery(5, false, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Category("FR-53")]
+        [Test]
+        public async Task RejectGallery_PassesNotifyMemberFalse_ToService()
+        {
+            _galleryServiceMock.Setup(x => x.RejectGalleryAsync(5, "Not appropriate", false, It.IsAny<CancellationToken>()))
+                               .ReturnsAsync(true);
+
+            var result = await _controller.RejectGallery(5, new GalleryController.RejectRequest { Reason = "Not appropriate", NotifyMember = false }, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
     }
 }

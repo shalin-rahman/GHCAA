@@ -4,6 +4,7 @@ import { Jobs } from './jobs';
 import { JobService } from '../../core/services/job.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { LookupService } from '../../core/services/lookup.service';
 import { of } from 'rxjs';
 import { signal } from '@angular/core';
 
@@ -32,7 +33,8 @@ describe('Jobs Component', () => {
             providers: [
                 { provide: JobService, useValue: jobServiceMock },
                 { provide: AuthService, useValue: authServiceMock },
-                { provide: NotificationService, useValue: notificationServiceMock }
+                { provide: NotificationService, useValue: notificationServiceMock },
+                { provide: LookupService, useValue: { getOptions: vi.fn().mockReturnValue(of([])), getAcademicYears: vi.fn().mockReturnValue(of([])) } }
             ]
         }).compileComponents();
 

@@ -7,9 +7,11 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/logo_spinner.dart';
 import '../../features/jobs/job_service.dart';
 import '../../features/auth/auth_service.dart';
 import '../../core/utils/app_utils.dart';
+import '../../core/widgets/confirm_dialog.dart';
 
 final jobSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
 
@@ -26,6 +28,7 @@ class JobsScreen extends ConsumerStatefulWidget {
 
 class _JobsScreenState extends ConsumerState<JobsScreen> {
   final TextEditingController _searchController = TextEditingController();
+  int? _deletingJobId;
 
   @override
   void dispose() {
@@ -181,24 +184,26 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                                               ),
                                               if (isMine)
                                                 IconButton(
-                                                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 18),
-                                                  onPressed: () async {
+                                                  icon: _deletingJobId == job['id']
+                                                      ? SizedBox(height: 16, width: 16, child: LogoSpinner.small())
+                                                      : const Icon(Icons.delete_outline, color: Colors.redAccent, size: 18),
+                                                  onPressed: _deletingJobId != null ? null : () async {
                                                      HapticFeedback.lightImpact();
-                                                     final confirm = await showDialog<bool>(
-                                                       context: context,
-                                                       builder: (ctx) => AlertDialog(
-                                                         backgroundColor: AppTheme.midnightSurface,
-                                                         title: const Text('Delete Post?', style: TextStyle(color: Colors.white, fontSize: 14)),
-                                                         actions: [
-                                                           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('CANCEL')),
-                                                           TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('DELETE', style: TextStyle(color: Colors.redAccent))),
-                                                         ],
-                                                       ),
+                                                     final confirm = await showConfirmDialog(
+                                                       context,
+                                                       title: 'Delete Post?',
+                                                       confirmLabel: 'Delete',
+                                                       destructive: true,
                                                      );
-                                                     if (confirm == true) {
+                                                     if (confirm) {
                                                        HapticFeedback.mediumImpact();
-                                                       await ref.read(jobServiceProvider).deleteJob(job['id']);
-                                                       ref.invalidate(jobsListProvider);
+                                                       setState(() => _deletingJobId = job['id']);
+                                                       try {
+                                                         await ref.read(jobServiceProvider).deleteJob(job['id']);
+                                                         ref.invalidate(jobsListProvider);
+                                                       } finally {
+                                                         if (mounted) setState(() => _deletingJobId = null);
+                                                       }
                                                      }
                                                   },
                                                 )
@@ -258,48 +263,59 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
     final linkCtrl = TextEditingController();
     final descCtrl = TextEditingController();
 
+    bool saving = false;
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.midnightSurface,
-        title: const Text('ADD JOB', style: TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildField('Job Title', titleCtrl),
-              _buildField('Company', companyCtrl),
-              _buildField('Location', locCtrl),
-              _buildField('Application Link', linkCtrl),
-              _buildField('Short Description', descCtrl, maxLines: 3),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setStateDialog) {
+          return AlertDialog(
+            backgroundColor: AppTheme.midnightSurface,
+            title: const Text('ADD JOB', style: TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildField('Job Title', titleCtrl),
+                  _buildField('Company', companyCtrl),
+                  _buildField('Location', locCtrl),
+                  _buildField('Application Link', linkCtrl),
+                  _buildField('Short Description', descCtrl, maxLines: 3),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: saving ? null : () => Navigator.pop(ctx), child: const Text('CANCEL', style: TextStyle(color: Colors.white54))),
+              ElevatedButton(
+                onPressed: saving ? null : () async {
+                  setStateDialog(() => saving = true);
+                  try {
+                    final payload = {
+                      'title': titleCtrl.text,
+                      'companyName': companyCtrl.text,
+                      'location': locCtrl.text,
+                      'externalUrl': linkCtrl.text,
+                      'description': descCtrl.text,
+                      'postedAt': AppUtils.toWire(DateTime.now()),
+                      'isActive': true,
+                    };
+                    final success = await ref.read(jobServiceProvider).postJob(payload);
+                    if (success) {
+                      HapticFeedback.heavyImpact();
+                      ref.invalidate(jobsListProvider);
+                      if (ctx.mounted) Navigator.pop(ctx);
+                    }
+                  } catch (_) {
+                  } finally {
+                    if (ctx.mounted) setStateDialog(() => saving = false);
+                  }
+                },
+                child: saving
+                    ? SizedBox(height: 16, width: 16, child: LogoSpinner.small())
+                    : const Text('POST JOB', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              ),
             ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL', style: TextStyle(color: Colors.white54))),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                final payload = {
-                  'title': titleCtrl.text,
-                  'companyName': companyCtrl.text,
-                  'location': locCtrl.text,
-                  'externalUrl': linkCtrl.text,
-                  'description': descCtrl.text,
-                  'postedAt': AppUtils.toWire(DateTime.now()),
-                  'isActive': true,
-                };
-                final success = await ref.read(jobServiceProvider).postJob(payload);
-                if (success) {
-                  HapticFeedback.heavyImpact();
-                  ref.invalidate(jobsListProvider);
-                  if (ctx.mounted) Navigator.pop(ctx);
-                }
-              } catch (_) {}
-            },
-            child: const Text('POST JOB', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

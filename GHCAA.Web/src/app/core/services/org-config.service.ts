@@ -2,6 +2,7 @@ import { Injectable, signal, inject, effect } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { OrgConfig } from '../models/org-config.model';
+import { ORG_CONFIG_FALLBACK } from '../config/org-config-fallback.generated';
 import { tap, firstValueFrom } from 'rxjs';
 
 @Injectable({
@@ -33,101 +34,11 @@ export class OrgConfigService {
     .then(() => {})
     .catch(err => {
       console.error('Failed to load organization configuration:', err);
-      // Fallback/Default configuration in case of load failure to prevent app breakdown.
-      // Mirrors OrgConfig.ghcaaDefaults in GHCAA.Mobile/lib/core/config/org_config.dart.
-      this.config.set({
-        orgId: 'ghcaa',
-        schemaVersion: 1,
-        branding: {
-          shortName: 'GHCAA',
-          fullName: 'Govt. Haraganga College Alumni Association',
-          memberNickname: 'Haragangian',
-          institutionName: 'Govt. Haraganga College',
-          institutionAcronym: 'GHC',
-          membershipNumberPrefix: 'GHC-',
-          approvalSeal: 'GHC APPROVED',
-          establishedOn: '29 Nov 2025',
-          logoUrl: '/assets/logo.png',
-          primaryColor: '#121212',
-          accentColor: '#c5a059'
-        },
-        contact: {
-          supportEmail: 'haragangian@gmail.com',
-          importEmailBase: 'haragangian',
-          registeredOffice: 'Govt. Haraganga College Campus, Munshiganj, Bangladesh.',
-          campusAddress: 'Govt. Haraganga College, Munshiganj-1500, Bangladesh.',
-          phoneNumbers: ['+880 1711-234567', '+880 1812-345678'],
-          mapEmbedUrl: '',
-          portalBaseUrl: 'https://haragangian.com/portal',
-          socialLinks: { facebook: '#', whatsapp: '#', youtube: '#', linkedin: '#', instagram: '#' }
-        },
-        currency: { code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka' },
-        features: {
-          enableEvents: true,
-          enableJobHub: true,
-          enableGallery: true,
-          enableForum: true,
-          enableMentorship: true,
-          enableFamilyLink: true,
-          enableMagazine: true,
-          enablePolls: true,
-          enableGamification: false,
-          enablePublicDirectory: true,
-          enableDigitalIdCard: true,
-          enableCertificates: true,
-          enableSocialAuth: false,
-          requirePaymentForMembership: true,
-          requireDocumentUpload: true,
-          allowSelfRegistration: true,
-          allowNonMemberEventRegistration: true,
-          enableFundraising: true
-        },
-        workflow: {
-          memberApprovalMode: 'ManualReview',
-          otpVerificationRequired: true,
-          defaultMembershipType: 'General',
-          adminEmailOnNewRegistration: true,
-          membershipTypes: ['Founding', 'Executive', 'General', 'Associate', 'Honorary', 'Advisory', 'Guest']
-        },
-        localization: {
-          locales: {
-            en: {
-              orgName: 'Govt. Haraganga College Alumni Association',
-              tagline: 'Sharing Heritage, Aligning Lives, Integrating Networks',
-              memberLabel: 'Member',
-              memberPluralLabel: 'Members',
-              memberNickname: 'Haragangian',
-              alumniLabel: 'Alumni',
-              membershipLabel: 'Membership',
-              membershipTypeLabels: {
-                Founding: 'Founding Member',
-                Executive: 'Executive Member',
-                General: 'General Member',
-                Associate: 'Associate Member',
-                Honorary: 'Honorary Member',
-                Advisory: 'Advisory Member',
-                Guest: 'Guest Member'
-              },
-              memberCategoryLabels: {
-                None: 'None', LifelongPatron: 'Lifelong Patron', Sponsor: 'Sponsor',
-                Advisor: 'Advisor', Mentor: 'Mentor', Recruiter: 'Recruiter',
-                Active: 'Active', Volunteer: 'Volunteer', Contributor: 'Contributor',
-                Guest: 'Guest', Student: 'Student'
-              },
-              ecRoleLabels: {},
-              nav: {
-                administration: 'ADMINISTRATION',
-                myAccount: 'MY ACCOUNT',
-                community: 'COMMUNITY',
-                mediaAndTools: 'MEDIA & TOOLS',
-                adminRoleLabel: 'ADMINISTRATOR',
-                memberRoleLabel: 'ALUMNI MEMBER',
-                batchPrefix: 'Batch: '
-              }
-            }
-          }
-        }
-      });
+      // Fallback used before the real API response arrives and if it never does.
+      // ORG_CONFIG_FALLBACK is generated at build time from the active institution
+      // profile pack (see scripts/generate-org-config-fallback.mjs) so this isn't a
+      // second hand-maintained copy of the branding values.
+      this.config.set(ORG_CONFIG_FALLBACK);
     });
   }
 

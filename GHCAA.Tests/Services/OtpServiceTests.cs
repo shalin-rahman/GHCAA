@@ -29,7 +29,7 @@ public class OtpServiceTests : TestBase
     }
 
     [Category("FR-09")]
-        [Test]
+    [Test]
     public async Task GenerateAndSendOtpAsync_ShouldCreateOtpInDatabase()
     {
         var email = "otp1@example.com";
@@ -47,7 +47,7 @@ public class OtpServiceTests : TestBase
     }
 
     [Category("FR-09")]
-        [Test]
+    [Test]
     public async Task GenerateAndSendOtpAsync_ShouldSetCorrectExpiryTime()
     {
         var email = "otp2@example.com";
@@ -61,7 +61,7 @@ public class OtpServiceTests : TestBase
     }
 
     [Category("FR-09")]
-        [Test]
+    [Test]
     public async Task GenerateAndSendOtpAsync_ShouldSendEmail()
     {
         var email = "otp3@example.com";
@@ -89,7 +89,7 @@ public class OtpServiceTests : TestBase
     }
 
     [Category("FR-09")]
-        [Test]
+    [Test]
     public async Task VerifyOtpAsync_WithValidOtp_ShouldReturnTrue()
     {
         var email = "otp6@example.com";
@@ -104,7 +104,7 @@ public class OtpServiceTests : TestBase
     }
 
     [Category("FR-09")]
-        [Test]
+    [Test]
     public async Task VerifyOtpAsync_WithInvalidCode_ShouldReturnFalse()
     {
         var email = "otp7@example.com";
@@ -114,7 +114,7 @@ public class OtpServiceTests : TestBase
     }
 
     [Category("FR-09")]
-        [Test]
+    [Test]
     public async Task VerifyOtpAsync_WithExpiredOtp_ShouldReturnFalse()
     {
         var email = "otp8@example.com";
@@ -125,7 +125,7 @@ public class OtpServiceTests : TestBase
     }
 
     [Category("FR-09")]
-        [Test]
+    [Test]
     public async Task VerifyOtpAsync_WithAlreadyVerifiedOtp_ShouldReturnFalse()
     {
         var email = "otp9@example.com";
@@ -136,7 +136,7 @@ public class OtpServiceTests : TestBase
     }
 
     [Category("FR-09")]
-        [Test]
+    [Test]
     public async Task VerifyOtpAsync_WithWrongEmail_ShouldReturnFalse()
     {
         var email = "otp10@example.com";
@@ -146,7 +146,7 @@ public class OtpServiceTests : TestBase
     }
 
     [Category("FR-09")]
-        [Test]
+    [Test]
     public async Task VerifyOtpAsync_WithMultipleOtps_ShouldVerifyMostRecent()
     {
         var email = "otp11@example.com";

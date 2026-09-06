@@ -44,9 +44,10 @@ namespace GHCAA.Tests.Integration
             var result = await controller.UpdateConfig(null!);
 
             // Assert
-            var badRequestResult = result as BadRequestObjectResult;
-            badRequestResult.Should().NotBeNull();
-            badRequestResult!.StatusCode.Should().Be(400);
+            // 82.4: a null-dto failure now returns Problem()'s ObjectResult, not BadRequestObjectResult.
+            var problemResult = result as ObjectResult;
+            problemResult.Should().NotBeNull();
+            problemResult!.StatusCode.Should().Be(400);
         }
 
         [Test]

@@ -1,4 +1,4 @@
-using GHCAA.Application.Interfaces;
+﻿using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GHCAA.Domain;
@@ -22,6 +22,10 @@ namespace GHCAA.API.Controllers
             _logger = logger;
         }
 
+        // 82.8: audited — system/admin accounts are bounded in practice (dozens, not thousands)
+        // and admin-roles.ts (still on a direct HttpClient call per 82.7) expects a flat array.
+        // Left unpaged; revisit together with 82.7's service extraction if the account count ever
+        // grows enough to matter.
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers(CancellationToken cancellationToken)
         {
@@ -50,7 +54,7 @@ namespace GHCAA.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to create admin user {Username}", dto.Username);
-                return BadRequest(new { Message = ex.Message });
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -86,7 +90,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> AssignRole(int userId, string roleName, CancellationToken cancellationToken)
         {
             var success = await _roleService.AssignRoleToUserAsync(userId, roleName, cancellationToken);
-            if (!success) return BadRequest(new { Message = "User or Role not found" });
+            if (!success) return Problem(detail: "User or Role not found", statusCode: StatusCodes.Status400BadRequest);
             return Ok(new { Message = "Role assigned successfully" });
         }
 
@@ -94,7 +98,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> RemoveRole(int userId, string roleName, CancellationToken cancellationToken)
         {
             var success = await _roleService.RemoveRoleFromUserAsync(userId, roleName, cancellationToken);
-            if (!success) return BadRequest(new { Message = "User not found" });
+            if (!success) return Problem(detail: "User not found", statusCode: StatusCodes.Status400BadRequest);
             return Ok(new { Message = "Role removed successfully" });
         }
 
@@ -103,8 +107,26 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> DeleteUser(int id, CancellationToken cancellationToken)
         {
             var success = await _userService.DeleteSystemAdminAsync(id, cancellationToken);
-            if (!success) return BadRequest(new { Message = "Only non-member system administrator accounts can be deleted here." });
+            if (!success) return Problem(detail: "Only non-member system administrator accounts can be deleted here.", statusCode: StatusCodes.Status400BadRequest);
             return Ok(new { Message = "System administrator account deleted." });
+        }
+
+        [HttpPost("users/{id}/disable")]
+        [GHCAA.API.Filters.RequireStepUp]
+        public async Task<IActionResult> DisableUser(int id, CancellationToken cancellationToken)
+        {
+            var success = await _userService.SetUserActiveAsync(id, false, cancellationToken);
+            if (!success) return Problem(detail: "User not found or this account cannot be disabled.", statusCode: StatusCodes.Status400BadRequest);
+            return Ok(new { Message = "User disabled." });
+        }
+
+        [HttpPost("users/{id}/enable")]
+        [GHCAA.API.Filters.RequireStepUp]
+        public async Task<IActionResult> EnableUser(int id, CancellationToken cancellationToken)
+        {
+            var success = await _userService.SetUserActiveAsync(id, true, cancellationToken);
+            if (!success) return Problem(detail: "User not found or this account cannot be changed.", statusCode: StatusCodes.Status400BadRequest);
+            return Ok(new { Message = "User enabled." });
         }
 
         [HttpPost("users/{id}/reset-password-admin")]
@@ -112,7 +134,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> ResetPasswordAdmin(int id, CancellationToken cancellationToken)
         {
             var (success, resetUrl) = await _userService.SendAdminPasswordResetLinkAsync(id, cancellationToken);
-            if (!success) return BadRequest(new { Message = "User not found." });
+            if (!success) return Problem(detail: "User not found.", statusCode: StatusCodes.Status400BadRequest);
             // System admin accounts carry no email, so the link is handed back for the caller to
             // copy and share rather than sent automatically like a member's reset email.
             return Ok(new { ResetUrl = resetUrl });

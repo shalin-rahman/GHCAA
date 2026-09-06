@@ -9,12 +9,13 @@ import { NotificationService } from '../../core/services/notification.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
+import { NotifyToggleComponent } from '../../common/notify-toggle/notify-toggle.component';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
 @Component({
     selector: 'app-admin-governance',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ImgFallbackDirective],
     templateUrl: './admin-governance.html',
     styleUrl: './admin-governance.scss'
 })
@@ -35,10 +36,14 @@ export class AdminGovernance implements OnInit {
 
     // Assign Member
     showAssignModal = signal(false);
-    assignData = signal<any>({ memberId: null, position: 8, reason: '' });
+    assignData = signal<any>({ memberId: null, position: 8, reason: '', notifyMember: false });
     searchQuery = signal('');
     memberSearchResults = signal<any[]>([]);
     isSearching = signal(false);
+
+    // Remove Member (confirm dialog carries the 82.52 notify toggle)
+    removingMemberId = signal<number | null>(null);
+    removeNotifyMember = signal(false);
 
     committeeSearch = signal('');
     filteredMembers = computed(() => {
@@ -156,11 +161,18 @@ export class AdminGovernance implements OnInit {
         });
     }
 
+    private searchTimer: ReturnType<typeof setTimeout> | null = null;
+
     searchMembers(query: string) {
+        if (this.searchTimer) clearTimeout(this.searchTimer);
         if (query.length < 2) {
             this.memberSearchResults.set([]);
             return;
         }
+        this.searchTimer = setTimeout(() => this.runMemberSearch(query), 300);
+    }
+
+    private runMemberSearch(query: string) {
         this.isSearching.set(true);
         this.adminService.getMembers(1, 50, query).subscribe({
             next: (response: any) => {
@@ -206,7 +218,7 @@ export class AdminGovernance implements OnInit {
                 this.notify.success('Role assigned');
                 this.showAssignModal.set(false);
                 this.loadCommittee(period.id);
-                this.assignData.set({ memberId: null, position: 8, reason: '' });
+                this.assignData.set({ memberId: null, position: 8, reason: '', notifyMember: false });
                 this.searchQuery.set('');
             },
             error: (err) => this.notify.error(err.error?.message || 'Assignment failed')
@@ -214,10 +226,18 @@ export class AdminGovernance implements OnInit {
     }
 
     removeMember(ecMemberId: number) {
-        if (!confirm('Remove this member from the committee?')) return;
-        this.http.delete(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/members/${ecMemberId}`).subscribe({
+        this.removeNotifyMember.set(false);
+        this.removingMemberId.set(ecMemberId);
+    }
+
+    confirmRemoveMember() {
+        const ecMemberId = this.removingMemberId();
+        if (ecMemberId == null) return;
+        const notifyMember = this.removeNotifyMember();
+        this.http.delete(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/members/${ecMemberId}?notifyMember=${notifyMember}`).subscribe({
             next: () => {
                 this.notify.success('Member removed');
+                this.removingMemberId.set(null);
                 this.loadCommittee(this.selectedPeriod().id);
             },
             error: () => this.notify.error('Failed to remove member.')

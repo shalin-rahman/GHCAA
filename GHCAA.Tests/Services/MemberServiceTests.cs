@@ -105,7 +105,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Category("FR-01")]
-        [Test]
+    [Test]
     public async Task RegisterAsync_WithValidData_ShouldCreateMemberAndPaymentHistory()
     {
         // Arrange
@@ -288,7 +288,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Category("FR-02")]
-        [Test]
+    [Test]
     public async Task GetStatusAsync_WithValidMemberId_ShouldReturnStatus()
     {
         // Arrange
@@ -346,7 +346,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Category("FR-03")]
-        [Test]
+    [Test]
     public async Task GetProfileAsync_WithPrivilegedAccess_ShouldReturnFullProfile()
     {
         // Arrange
@@ -363,7 +363,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Category("FR-03")]
-        [Test]
+    [Test]
     public async Task GetProfileAsync_WithNonPrivilegedAccess_ShouldReturnMaskedProfile()
     {
         // Arrange
@@ -381,7 +381,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Category("FR-12")]
-        [Test]
+    [Test]
     public async Task GetProfileAsync_ProfileCompletionPercentage_ShouldMatchDashboardChecklistCriteria()
     {
         // 30.28: ProfileCompletionPercentage must be computed from the same 4-item criteria
@@ -497,7 +497,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Category("FR-02")]
-        [Test]
+    [Test]
     public async Task GetStatusAsync_WithInvalidMemberId_ShouldThrowException()
     {
         // Act & Assert
@@ -758,7 +758,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Category("FR-44")]
-        [Test]
+    [Test]
     public async Task RejectMemberAsync_ShouldSendEmailAndSoftDeleteMember()
     {
         // Arrange
@@ -934,5 +934,35 @@ public class MemberServiceTests : TestBase
 
         var membersAfter = await _context.Members.CountAsync();
         membersAfter.Should().Be(membersBefore);
+    }
+
+    // 80.13: extracted from GatewaysController's gateway-payment auto-approval path so it
+    // doesn't touch ApplicationDbContext directly.
+    [Test]
+    public async Task GetMembershipSnapshotAsync_ReturnsStatusAndType_WhenMemberExists()
+    {
+        var member = new Member
+        {
+            FullName = "M", FatherName = "F", MotherName = "Mo", Email = "snap@example.com", NID = "N",
+            MobileNo = "01700000001", PresentAddress = "A", PermanentAddress = "A",
+            EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0",
+            Status = Enums.MembershipStatus.Applied, MembershipType = Enums.MembershipType.General
+        };
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+
+        var snapshot = await _service.GetMembershipSnapshotAsync(member.Id);
+
+        snapshot.Should().NotBeNull();
+        snapshot!.Value.Status.Should().Be(Enums.MembershipStatus.Applied);
+        snapshot.Value.MembershipType.Should().Be(Enums.MembershipType.General);
+    }
+
+    [Test]
+    public async Task GetMembershipSnapshotAsync_ReturnsNull_WhenMemberDoesNotExist()
+    {
+        var snapshot = await _service.GetMembershipSnapshotAsync(999);
+
+        snapshot.Should().BeNull();
     }
 }

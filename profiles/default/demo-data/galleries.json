@@ -1,0 +1,13 @@
+[
+  {
+    "Id": 1,
+    "Title": "Sample Annual Reunion",
+    "Description": "Sample photo gallery for the sample reunion event.",
+    "EventDate": "2024-06-01T09:00:00Z",
+    "CreatedAt": "2024-06-02T00:00:00Z",
+    "CreatedByAdminId": 1,
+    "IsActive": true,
+    "IsFeatured": true,
+    "Location": "Sample Hall"
+  }
+]

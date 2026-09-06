@@ -24,6 +24,7 @@ class AdminGovernanceScreen extends ConsumerStatefulWidget {
 
 class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
   final TextEditingController _searchController = TextEditingController();
+  int? _activatingPeriodId;
 
   @override
   void dispose() {
@@ -42,11 +43,16 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
   }
 
   Future<void> _activatePeriod(int id) async {
+    if (_activatingPeriodId != null) return;
+    setState(() => _activatingPeriodId = id);
     try {
       final dio = ref.read(dioProvider);
       await dio.post('/admin/governance/periods/$id/activate');
       ref.invalidate(ecPeriodsAdminProvider);
-    } catch (_) {}
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _activatingPeriodId = null);
+    }
   }
 
   void _editPeriod(dynamic period) {
@@ -61,52 +67,60 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
     final titleCtrl = TextEditingController(text: period != null ? period['title'] : '');
     final startCtrl = TextEditingController(text: period != null ? period['startDate']?.split('T')[0] : '');
     final endCtrl = TextEditingController(text: period != null ? period['endDate']?.split('T')[0] : '');
+    bool saving = false;
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.midnightSurface,
-        title: Text(period == null ? 'ESTABLISH GOVERNANCE TERM' : 'MODIFY TERM ASSET', style: const TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.bold)),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: titleCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Term Title (e.g., EC 2026-2028)')),
-              TextField(controller: startCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Start Date (YYYY-MM-DD)')),
-              TextField(controller: endCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'End Date (YYYY-MM-DD) - Optional')),
-            ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: AppTheme.midnightSurface,
+          title: Text(period == null ? 'ESTABLISH GOVERNANCE TERM' : 'MODIFY TERM ASSET', style: const TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.bold)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: titleCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Term Title (e.g., EC 2026-2028)')),
+                TextField(controller: startCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Start Date (YYYY-MM-DD)')),
+                TextField(controller: endCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'End Date (YYYY-MM-DD) - Optional')),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(onPressed: saving ? null : () => Navigator.pop(ctx), child: const Text('ABORT', style: TextStyle(color: Colors.white54))),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
+              onPressed: saving ? null : () async {
+                setDialogState(() => saving = true);
+                try {
+                  final dio = ref.read(dioProvider);
+                  final payload = {
+                    'title': titleCtrl.text,
+                    'startDate': startCtrl.text,
+                    if (endCtrl.text.isNotEmpty) 'endDate': endCtrl.text,
+                  };
+
+                  if (period == null) {
+                    await dio.post('/admin/governance/periods', data: payload);
+                  } else {
+                    await dio.put('/admin/governance/periods/${period['id']}', data: payload);
+                  }
+
+                  ref.invalidate(ecPeriodsAdminProvider);
+                  if (ctx.mounted) Navigator.pop(ctx);
+                } catch (e) {
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Error saving term: $e')));
+                  }
+                } finally {
+                  if (ctx.mounted) setDialogState(() => saving = false);
+                }
+              },
+              child: saving
+                  ? SizedBox(height: 16, width: 16, child: LogoSpinner.small())
+                  : const Text('COMMIT CHANGES', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('ABORT', style: TextStyle(color: Colors.white54))),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
-            onPressed: () async {
-              try {
-                final dio = ref.read(dioProvider);
-                final payload = {
-                  'title': titleCtrl.text,
-                  'startDate': startCtrl.text,
-                  if (endCtrl.text.isNotEmpty) 'endDate': endCtrl.text,
-                };
-                
-                if (period == null) {
-                  await dio.post('/admin/governance/periods', data: payload);
-                } else {
-                  await dio.put('/admin/governance/periods/${period['id']}', data: payload);
-                }
-                
-                ref.invalidate(ecPeriodsAdminProvider);
-                if (ctx.mounted) Navigator.pop(ctx);
-              } catch (e) {
-                if (ctx.mounted) {
-                  ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Error saving term: $e')));
-                }
-              }
-            },
-            child: const Text('COMMIT CHANGES', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-          ),
-        ],
       ),
     );
   }
@@ -221,7 +235,7 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
                                             if (p['isActive'] != true)
                                               IconButton(
                                                 icon: const Icon(Icons.bolt, color: AppTheme.royalGold, size: 18),
-                                                onPressed: () => _activatePeriod(p['id']),
+                                                onPressed: _activatingPeriodId == p['id'] ? null : () => _activatePeriod(p['id']),
                                               ),
                                             IconButton(
                                               icon: const Icon(Icons.edit_outlined, color: Colors.white70, size: 18),
@@ -276,6 +290,7 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
   final _idController = TextEditingController();
   final _posController = TextEditingController();
   bool _isAdding = false;
+  bool _notifyOnAssign = false;
   List<dynamic>? _members;
 
   @override
@@ -308,6 +323,7 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
       'memberId': mid,
       'position': pos,
       'reason': 'Governance Assignment',
+      'notifyMember': _notifyOnAssign,
     });
 
     if (success) {
@@ -316,6 +332,46 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
       _load();
     }
     if (mounted) setState(() => _isAdding = false);
+  }
+
+  Future<void> _confirmRemove(dynamic member) async {
+    bool notify = false;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: AppTheme.midnightSurface,
+          title: const Text('REMOVE FROM COMMITTEE', style: TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Remove ${member['fullName'] ?? 'this member'} from the committee?', style: const TextStyle(color: Colors.white70)),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Notify member of this removal', style: TextStyle(fontSize: 12, color: Colors.white70)),
+                value: notify,
+                activeColor: AppTheme.royalGold,
+                controlAffinity: ListTileControlAffinity.leading,
+                onChanged: (v) => setDialogState(() => notify = v ?? false),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('CANCEL', style: TextStyle(color: Colors.white54))),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
+              onPressed: () => Navigator.pop(ctx, notify),
+              child: const Text('REMOVE', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed == null) return; // cancelled
+    final ok = await ref.read(adminServiceProvider).removeMemberFromCommittee(member['id'], notifyMember: confirmed);
+    if (ok) _load();
   }
 
   @override
@@ -363,11 +419,20 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
                 _isAdding
                   ? LogoSpinner.small()
                   : IconButton.filled(
-                      onPressed: _assign, 
+                      onPressed: _assign,
                       style: IconButton.styleFrom(backgroundColor: AppTheme.royalGold),
                       icon: const Icon(Icons.person_add_alt_1, color: Colors.black, size: 20)
                     ),
               ],
+            ),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              title: const Text('Notify member of this assignment', style: TextStyle(fontSize: 11, color: Colors.white54)),
+              value: _notifyOnAssign,
+              activeColor: AppTheme.royalGold,
+              controlAffinity: ListTileControlAffinity.leading,
+              onChanged: (v) => setState(() => _notifyOnAssign = v ?? false),
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -386,10 +451,7 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
                           subtitle: Text('ID: ${m['memberId']} | ROLE: ${m['positionName'] ?? 'Member'}', style: const TextStyle(color: Colors.white38, fontSize: 10)),
                           trailing: IconButton(
                             icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent, size: 18),
-                            onPressed: () async {
-                              final ok = await ref.read(adminServiceProvider).removeMemberFromCommittee(m['id']);
-                              if (ok) _load();
-                            },
+                            onPressed: () => _confirmRemove(m),
                           ),
                         );
                       },

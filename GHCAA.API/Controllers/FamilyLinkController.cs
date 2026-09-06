@@ -1,9 +1,10 @@
-using GHCAA.Application.DTOs;
+﻿using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using GHCAA.Application.Security;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -24,7 +25,7 @@ namespace GHCAA.API.Controllers
         // 24.50: Returns null when claim is absent or malformed, avoiding int.Parse crash.
         private int? GetMemberId()
         {
-            var value = User.FindFirstValue(AppClaimTypes.MemberId);
+            var value = this.CurrentMemberIdRaw();
             return int.TryParse(value, out var id) ? id : null;
         }
 
@@ -40,8 +41,8 @@ namespace GHCAA.API.Controllers
                 var result = await _familyLinkService.SendRequestAsync(memberId.Value, dto, ct);
                 return Ok(result);
             }
-            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
-            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+            catch (KeyNotFoundException ex) { return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound); }
+            catch (InvalidOperationException ex) { return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest); }
         }
 
         /// <summary>Approve or reject a received family link request.</summary>
@@ -116,7 +117,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("/api/Family/search")] // Web parity alias
         public async Task<IActionResult> Search([FromQuery] string name, CancellationToken ct)
         {
-            if (string.IsNullOrWhiteSpace(name)) return BadRequest("Name required");
+            if (string.IsNullOrWhiteSpace(name)) return Problem(detail: "Name required", statusCode: StatusCodes.Status400BadRequest);
             var memberId = GetMemberId();
             if (memberId == null) return Unauthorized();
             var results = await _familyService.SearchByNameAsync(name, memberId.Value, ct);

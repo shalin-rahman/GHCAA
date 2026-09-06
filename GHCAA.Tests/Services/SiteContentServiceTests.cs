@@ -19,7 +19,7 @@ public class SiteContentServiceTests : TestBase
     }
 
     [Category("FR-45")]
-        [Test]
+    [Test]
     public async Task GetActiveByGroupAsync_FiltersByGroupAndActive_OrderedByDisplayOrder()
     {
         _context.SiteContents.AddRange(
@@ -38,7 +38,7 @@ public class SiteContentServiceTests : TestBase
     }
 
     [Category("FR-45")]
-        [Test]
+    [Test]
     public async Task CreateAsync_SanitizesBodyHtml()
     {
         var dto = new UpsertSiteContentDto
@@ -56,8 +56,8 @@ public class SiteContentServiceTests : TestBase
     }
 
     [Category("FR-45")]
-        [Category("FR-43")]
-        [Test]
+    [Category("FR-43")]
+    [Test]
     public async Task UpdateAsync_PersistsChangesAndStampsAdmin()
     {
         var created = await _service.CreateAsync(
@@ -75,7 +75,7 @@ public class SiteContentServiceTests : TestBase
     }
 
     [Category("FR-45")]
-        [Test]
+    [Test]
     public async Task DeleteAsync_ReturnsFalse_WhenMissing()
     {
         (await _service.DeleteAsync(9999)).Should().BeFalse();

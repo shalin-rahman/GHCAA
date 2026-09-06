@@ -1,8 +1,19 @@
 # Configuration-Driven Framework — Implementation Guide
 
-**Status:** Phase 1 (Backend + DB) COMPLETE | Phase 2 (Angular Consumer) TODO | Phase 3 (Flutter Consumer) TODO  
-**Last Updated:** 2026-05-30  
+**Status:** Phase 1 (Backend + DB) COMPLETE | Phase 2 (Angular Consumer) COMPLETE | Phase 3 (Flutter Consumer) COMPLETE  
+**Last Updated:** 2026-09-05  
 **Branch:** `preprod`
+
+**Part of this is now covered by Work Package 62 too.** This document covers *runtime* config for
+one already-deployed organization: an admin edits branding at `/admin/org-config`, which calls
+`PUT /api/config`. Work Package 62 adds an earlier layer: which defaults a fresh deployment starts
+with, before any admin has saved anything. That comes from a profile pack
+(`profiles/<name>/org-config.json`), picked by the `ORG_PROFILE` environment variable, read by
+`IInstitutionProfileProvider`/`OrgConfigService.BuildDefaults()`. The two don't conflict: the
+profile pack only supplies `BuildDefaults()`'s fallback values. An admin's saved row in
+`OrganizationConfigs` still wins once one exists, same as before this was added. See
+`docs/WHITE_LABEL_PLAN.md`, `docs/INSTITUTION_ONBOARDING.md`, and Work Package 62 in
+`docs/TODO.md` for that half. This document is still accurate for the runtime-admin-edit half.
 
 ---
 
@@ -250,45 +261,44 @@ A new `Guest` value was added to `MembershipType` enum. All three platforms must
 
 ## 9. Known Tech Debt (from Opus Review — 2026-05-30)
 
-| ID | Issue | Severity | Area |
-|----|-------|----------|------|
-| TD-1 | `Constants.cs` branding/email sections are now duplicate sources of truth | Medium | 28.16 |
-| TD-2 | No optimistic concurrency token on `OrganizationConfig` entity | Low | 28.17 |
-| TD-3 | `MembershipTypeLabels` in locale packs still require manual sync when enum changes | Medium | 28.18 |
-| TD-4 | `Constants.Branding.*` and `Constants.EmailSubjects.*` not yet deleted/deprecated | Medium | 28.16 |
+| ID | Issue | Severity | Area | Status |
+|----|-------|----------|------|--------|
+| TD-1 | `Constants.cs` branding/email sections are now duplicate sources of truth | Medium | 28.16 | Resolved 2026-09-05 (Work Package 62.7) — both fields moved into the org-config pack |
+| TD-2 | No optimistic concurrency token on `OrganizationConfig` entity | Low | 28.17 | Open |
+| TD-3 | `MembershipTypeLabels` in locale packs still require manual sync when enum changes | Medium | 28.18 | Open — see Work Package 62.33 |
+| TD-4 | `Constants.Branding.*` and `Constants.EmailSubjects.*` not yet deleted/deprecated | Medium | 28.16 | Resolved 2026-09-05 — grep for `Branding`/`EmailSubjects` in `Constants.cs` returns nothing |
 
 ---
 
-## 10. Phase 2 — Angular Consumer (TODO)
+## 10. Phase 2 — Angular Consumer (DONE)
 
-Create `OrgConfigService` Angular service that:
-1. Loads `GET /api/config` via `APP_INITIALIZER` before any component renders
-2. Exposes `config()` as an Angular Signal
-3. Exposes `t(path, locale?)` for locale string lookup
-4. Falls back to `GHCAA_DEFAULT_CONFIG` if API call fails
-5. Exposes `isEnabled(feature)` for feature-gate guards
-
-See `Work Package 28` tasks 28.1–28.9 in TODO.md.
+`GHCAA.Web/src/app/core/services/org-config.service.ts`:
+1. Loads `GET /api/config` and exposes `config()` as an Angular Signal
+2. Falls back to `ORG_CONFIG_FALLBACK` (`core/config/org-config-fallback.generated.ts`, build-time
+   generated from the active profile pack — Work Package 62.15) if the API call fails
+3. `localePack()` exposes the locale-appropriate strings for lookup
 
 ---
 
-## 11. Phase 3 — Flutter Consumer (TODO)
+## 11. Phase 3 — Flutter Consumer (DONE)
 
-Create `OrgConfigService` Dart service that:
-1. Loads `GET /api/config` on app init via `OrgConfigService.instance.load(apiClient)`
-2. Caches in `SharedPreferences` for offline resilience
-3. Exposes `pack` accessor returning locale-appropriate `LocalePack`
-4. Updates `app_drawer.dart` hardcoded strings to read from `pack.nav.*`
-
-See `Work Package 28` tasks 28.10–28.14 in TODO.md.
+`GHCAA.Mobile/lib/core/services/org_config_service.dart` loads config on app init, and
+`lib/core/config/org_config.dart` supplies `OrgConfig.offlineDefaults` (Work Package 62.27) as the
+offline/failure fallback in place of the old hardcoded GHC defaults.
 
 ---
 
-## 12. How to Add a New Organization (Once All 3 Phases Complete)
+## 12. How to Add a New Organization
 
-1. Login as SuperAdmin
-2. Navigate to `/admin/org-config`
-3. Fill in branding, contact, locale labels
-4. Click Save → `PUT /api/config`
-5. All three platforms reflect new organization instantly
-6. No code change. No redeployment.
+Two different operations, easy to conflate:
+
+**Rebrand an already-deployed instance at runtime** (this framework, unchanged since Phase 1):
+1. Login as SuperAdmin → `/admin/org-config` → edit branding/contact/locale labels → Save
+   (`PUT /api/config`). Takes effect immediately, no redeploy.
+
+**Stand up a brand-new institution** (Work Package 62, profile packs):
+1. Build a `profiles/<name>/` folder and set `ORG_PROFILE=<name>` before first boot. This is what
+   the runtime admin form's defaults come from, on a database with no saved `OrganizationConfig`
+   row yet. `docs/INSTITUTION_ONBOARDING.md` has the full deployer-facing checklist.
+   `scripts/new-institution.mjs` (Work Package 62.39) will scaffold this folder automatically, but
+   it has not been built yet, so for now the folder is built by hand.

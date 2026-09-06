@@ -10,7 +10,10 @@ namespace GHCAA.Infrastructure.Data.Configurations
         {
             builder.HasKey(em => em.Id);
 
-            builder.HasQueryFilter(em => em.Member != null && !em.Member.IsArchived);
+            // 82.29: !em.IsDeleted keeps a permanently-deleted (wrong-entry) row out of ordinary
+            // reads, the same way PaymentHistoryConfiguration does for its own hard-delete path.
+            // Admin views that need the deleted rows use IgnoreQueryFilters() deliberately.
+            builder.HasQueryFilter(em => em.Member != null && !em.Member.IsArchived && !em.IsDeleted);
         }
     }
 }

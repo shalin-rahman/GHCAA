@@ -31,10 +31,20 @@ JwtSigningKeyResolver.Resolve(configuration, builder.Environment);
 var keyRingPath = configuration["DataProtection:KeyRingPath"];
 if (!string.IsNullOrWhiteSpace(keyRingPath))
 {
+    // Same guard as OrgConfigService.BuildDefaults(): an unset ORG_PROFILE keeps "GHCAA" exactly,
+    // since changing this value invalidates every existing session token/cookie under the current
+    // key ring (docs/TODO.md 62.10). Built directly here, before builder.Build(), because the DI
+    // container that would normally hand out IInstitutionProfileProvider doesn't exist yet at this
+    // point in startup.
+    var profileForAppName = new GHCAA.Infrastructure.Services.InstitutionProfileProvider(configuration, builder.Environment);
+    var applicationName = profileForAppName.ProfileExplicitlySelected
+        ? profileForAppName.OrgConfigDefaults.Branding.AppName
+        : "GHCAA";
+
     Directory.CreateDirectory(keyRingPath);
     builder.Services.AddDataProtection()
         .PersistKeysToFileSystem(new DirectoryInfo(keyRingPath))
-        .SetApplicationName("GHCAA");
+        .SetApplicationName(applicationName);
 }
 
 // Register layers
@@ -132,6 +142,22 @@ builder.Services.AddRateLimiter(options =>
         opt.QueueLimit = 0;
     });
 
+    // 80.16: self-service password reset request sends an email per call, so it needs to be
+    // tighter than auth/refresh (which just check a password/token, no outbound side effect) —
+    // otherwise this endpoint becomes a free way to spam a member's inbox or probe which
+    // identifiers exist by other means (response time, delivery bounces, etc).
+    options.AddPolicy<string>(GHCAA.Domain.Constants.RateLimitPolicies.PasswordReset, httpContext =>
+    {
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var key = isTestEnv ? "__test__" : ip;
+        return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+        {
+            Window = TimeSpan.FromMinutes(15),
+            PermitLimit = isTestEnv ? 1000 : 5,
+            QueueLimit = 0
+        });
+    });
+
     // General API Policy: (100 requests per 1 minute)
     options.AddFixedWindowLimiter(GHCAA.Domain.Constants.RateLimitPolicies.Api, opt =>
     {
@@ -156,6 +182,11 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(x =>
     x.MemoryBufferThreshold = (int)Math.Min(maxBodySize, int.MaxValue);
 });
 
+// 82.4: one error shape everywhere — RFC 7807 ProblemDetails. Controllers return it via
+// Problem(...)/ValidationProblem(...); ExceptionMiddleware builds the same shape by hand for an
+// unhandled exception, since that path runs outside MVC's ProblemDetailsFactory.
+builder.Services.AddProblemDetails();
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -165,7 +196,16 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    // 82.10a: EventsController.RegisterForEventForm/RegisterForEventJson deliberately share one
+    // route, disambiguated at runtime by Content-Type ([Consumes] multipart vs. json) — a real,
+    // working pattern, not a routing bug. Swashbuckle can't represent two operations under one
+    // OpenAPI path item, so without this the generator throws outright rather than documenting one
+    // route twice. Keeping the first (form) action's shape in the doc; the json variant is the
+    // same DTO either way.
+    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+});
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<GHCAA.Application.Interfaces.IRealTimeService, GHCAA.API.Services.RealTimeService>();
@@ -227,6 +267,10 @@ forwardedHeadersOptions.KnownNetworks.Clear();
 forwardedHeadersOptions.KnownProxies.Clear();
 app.UseForwardedHeaders(forwardedHeadersOptions);
 
+// 82.9: assign the correlation id before anything else gets a chance to log, so
+// ExceptionMiddleware's unhandled-exception line (and every log line downstream) carries it.
+app.UseMiddleware<GHCAA.API.Middleware.CorrelationIdMiddleware>();
+
 // Use Exception Middleware first to catch all subsequent errors
 app.UseMiddleware<ExceptionMiddleware>();
 
@@ -234,10 +278,16 @@ app.UseCors("AngularApp");
 
 if (app.Environment.IsDevelopment())
 {
+    // Same guard as OrgConfigService.BuildDefaults(): an unset ORG_PROFILE keeps today's title
+    // rather than switching to whatever the "default" sample pack says.
+    var swaggerTitle = institutionProfile.ProfileExplicitlySelected
+        ? $"{institutionProfile.OrgConfigDefaults.Branding.ShortName} API V1"
+        : "GHCAA API V1";
+
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "GHCAA API V1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", swaggerTitle);
         c.DisplayRequestDuration();
         c.EnableDeepLinking();
     });
@@ -255,7 +305,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<AuditLogMiddleware>();
-app.UseMiddleware<LoginRateLimitMiddleware>(); // 24.48: peek username before rate limiter
 
 app.UseRateLimiter(); // Apply Rate Limiting
 

@@ -106,9 +106,17 @@ export class AdminService {
         return this.http.get<DashboardStats>(API_ENDPOINTS.ADMIN.STATS);
     }
 
+    getPendingSummary(): Observable<any> {
+        return this.http.get<any>(API_ENDPOINTS.PENDING.ADMIN_SUMMARY);
+    }
+
 
     archiveMember(id: number): Observable<any> {
         return this.http.delete(`${this.apiUrl}/${id}`);
+    }
+
+    restoreMember(id: number): Observable<any> {
+        return this.http.post(`${this.apiUrl}/${id}/restore`, {});
     }
 
     reactivateMember(id: number): Observable<any> {
@@ -164,8 +172,8 @@ export class AdminService {
     }
 
     // Governance - EC Roles
-    deleteECMember(id: number): Observable<any> {
-        return this.http.delete(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/members/${id}/hard-delete`);
+    deleteECMember(id: number, notifyMember = false): Observable<any> {
+        return this.http.delete(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/members/${id}/hard-delete?notifyMember=${notifyMember}`);
     }
 
     // Finances - Payments

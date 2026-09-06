@@ -10,15 +10,27 @@
 # Builds the GHCAA.Web SPA and hands its static output to the API's wwwroot,
 # so a single Render service serves both the API and the web app.
 FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS web
+# Which profiles/<name>/ drives index.html/SEO/site-content generation below (docs/TODO.md 62.17,
+# 62.40). Defaults to 'ghc' so an unset --build-arg reproduces today's live GHCAA build exactly —
+# a different institution's CI passes --build-arg ORG_PROFILE=<name> instead.
+ARG ORG_PROFILE=ghc
+ENV ORG_PROFILE=$ORG_PROFILE
 WORKDIR /web
 COPY ["GHCAA.Web/package.json", "GHCAA.Web/package-lock.json", "./"]
 RUN npm ci
 COPY GHCAA.Web/ ./
+COPY profiles/ ../profiles/
 # Governance documents live in docs/ (the source of truth) and are copied into
 # public/assets/elections/ for the public /elections page. They are committed too, but
 # regenerating here means a docs/ edit can never ship stale — see TODO 36.4.
 COPY docs/Elections/ ../docs/Elections/
 RUN npm run sync:docs
+# gen:org-config / gen:site-content / apply-brand are the profile-driven prebuild steps `npm run
+# build` normally chains (see package.json) — this Dockerfile calls `ng build` directly rather than
+# through that script, so they need running explicitly. type-check is left to CI's own lint/test
+# job rather than repeated here, consistent with the API side not re-running `dotnet test` in this
+# image (see the restore comment below).
+RUN npm run gen:org-config && npm run gen:site-content && npm run apply-brand
 RUN npx ng build --configuration preprod
 # @angular/build:application emits the browser bundle under dist/GHCAA.Web/browser
 

@@ -1,6 +1,7 @@
 using FluentAssertions;
 using GHCAA.Domain;
 using GHCAA.Infrastructure.Services;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -15,6 +16,7 @@ public class LocalFileStorageServiceTests
 {
     private IConfiguration _config = null!;
     private Mock<ILogger<LocalFileStorageService>> _mockLogger = null!;
+    private Mock<IWebHostEnvironment> _mockWebHostEnvironment = null!;
     private LocalFileStorageService _service = null!;
     private string _testDirectory = null!;
 
@@ -24,6 +26,12 @@ public class LocalFileStorageServiceTests
         _mockLogger = new Mock<ILogger<LocalFileStorageService>>();
 
         _testDirectory = Path.Combine(Path.GetTempPath(), "GHCAATests", Guid.NewGuid().ToString());
+
+        // A web root well away from _testDirectory so the 82.51 containment check never fires
+        // for tests that aren't specifically exercising it.
+        _mockWebHostEnvironment = new Mock<IWebHostEnvironment>();
+        _mockWebHostEnvironment.Setup(e => e.WebRootPath)
+            .Returns(Path.Combine(Path.GetTempPath(), "GHCAATests", "wwwroot-" + Guid.NewGuid()));
 
         var inMemorySettings = new Dictionary<string, string> {
             {"FileStorage:BasePhysicalPath", _testDirectory},
@@ -36,7 +44,7 @@ public class LocalFileStorageServiceTests
             .AddInMemoryCollection(inMemorySettings!)
             .Build();
 
-        _service = new LocalFileStorageService(_config, _mockLogger.Object);
+        _service = new LocalFileStorageService(_config, _mockLogger.Object, _mockWebHostEnvironment.Object);
     }
 
     [TearDown]
@@ -257,7 +265,7 @@ public class LocalFileStorageServiceTests
             {"FileStorage:MaxFileSizeBytes", "500000"}
         };
         var testConfig = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings!).Build();
-        var service = new LocalFileStorageService(testConfig, _mockLogger.Object);
+        var service = new LocalFileStorageService(testConfig, _mockLogger.Object, _mockWebHostEnvironment.Object);
         var fileContent = new byte[600000]; // 600KB
         var stream = new MemoryStream(fileContent);
 
@@ -284,7 +292,7 @@ public class LocalFileStorageServiceTests
             {"FileStorage:ImageCompression:MaxDimensionPx", "800"}
         };
         var testConfig = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings!).Build();
-        var service = new LocalFileStorageService(testConfig, _mockLogger.Object);
+        var service = new LocalFileStorageService(testConfig, _mockLogger.Object, _mockWebHostEnvironment.Object);
         var stream = CreateJpeg(3000, 2000); // 3:2 landscape, both dims exceed the 800px cap
 
         // Act
@@ -321,12 +329,35 @@ public class LocalFileStorageServiceTests
             {"FileStorage:MaxFileSizeBytes", "invalid"}
         };
         var testConfig = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings!).Build();
-        var service = new LocalFileStorageService(testConfig, _mockLogger.Object);
+        var service = new LocalFileStorageService(testConfig, _mockLogger.Object, _mockWebHostEnvironment.Object);
 
         // Act
         var result = service;
 
         // Assert
         result.Should().NotBeNull();
+    }
+
+    // 82.51: BasePhysicalPath is the single knob both roots are computed from, so a future value
+    // that puts the secure root inside the web root must fail construction instead of silently
+    // serving certificates/payment proofs/signatures through the unauthenticated static-files route.
+    [Test]
+    public void Constructor_ThrowsWhenSecureRootResolvesInsideWebRoot()
+    {
+        // Arrange: BasePhysicalPath drives both roots, so this collides _secureRoot with WebRootPath.
+        var inMemorySettings = new Dictionary<string, string> {
+            {"FileStorage:BasePhysicalPath", _testDirectory},
+            {"FileStorage:SecureRelativePath", ""}
+        };
+        var testConfig = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings!).Build();
+        var collidingWebHost = new Mock<IWebHostEnvironment>();
+        collidingWebHost.Setup(e => e.WebRootPath).Returns(_testDirectory);
+
+        // Act
+        var act = () => new LocalFileStorageService(testConfig, _mockLogger.Object, collidingWebHost.Object);
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*secure uploads root*web root*");
     }
 }

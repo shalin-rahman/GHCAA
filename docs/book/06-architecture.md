@@ -399,11 +399,15 @@ neither interface forces a caller to depend on methods it does not use.
 
 ### 6.11.6 Information hiding and encapsulation
 
-A controller never queries `ApplicationDbContext` directly except in the four cases Table 6.3 marks
-as depending on it directly, being `AdminSocialAuthController`, `PaymentConfigController`,
-`HealthController` and part of `GatewaysController`'s webhook path; those are named rather than
-hidden, because a principle applied with undisclosed exceptions is not a principle a reader can trust
-elsewhere in the same table.
+A controller never queries `ApplicationDbContext` directly. Eight controllers did until 2026-09-06 —
+`AdminSocialAuthController`, `AuthController`, `FinancialsController`, `GatewaysController`,
+`GovernanceController`, `HealthController`, `PaymentConfigController` and `SecureFilesController` —
+each named rather than hidden while the exception stood, because a principle applied with undisclosed
+exceptions is not a principle a reader can trust elsewhere in the same table. The cleanup moved every
+one of those reads/writes behind a new or extended Application-layer interface (`ISocialAuthConfigService`,
+`IPaymentConfigService`, `IDatabaseHealthService`, and new methods on `IAuthService`, `IFinancialService`,
+`IEventService`, `IMemberService`, `IFileUploadRepository`); `GovernanceController`'s own field turned
+out to be dead — injected but never read. The principle now holds without exception.
 
 ### 6.11.7 Coupling and cohesion
 
@@ -1014,10 +1018,10 @@ quadrantChart
 | EventsController | /api/events | Public read, Auth register, Admin manage | Capacity and waitlist logic |
 | FinancialLedgerController | /api/ledger and /api/financial/ledger | SuperAdmin | Append-only ledger; the controller carries both route attributes, with no comment recording why |
 | GatewaysController | /api/gateways | Auth + public webhook | Callback verification |
-| PaymentConfigController | /api/payment-config | SuperAdmin write, Auth read | Depends on ApplicationDbContext directly |
+| PaymentConfigController | /api/payment-config | SuperAdmin write, Auth read | Depends on `IPaymentConfigService` (2026-09-06; was `ApplicationDbContext` directly) |
 | GovernanceController | /api/governance | Public read, Admin write | Constitution, EC record |
 | AdminGovernanceController | /api/admin/governance | Admin | Committee and amendment administration |
-| HealthController | /healthz | Public | Depends on ApplicationDbContext directly |
+| HealthController | /healthz | Public | Depends on `IDatabaseHealthService` (2026-09-06; was `ApplicationDbContext` directly) |
 
 ### Table 6.4 — Design pattern catalogue (selected entries; full catalogue is §6.12 in full)
 

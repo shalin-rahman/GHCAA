@@ -106,7 +106,7 @@ appear on an identity card the Association had not authorised.
 | ID | Requirement | Source | Pri |
 | --- | --- | --- | --- |
 | FR-08 | The system shall authenticate members by membership number or registered email address together with a password, storing passwords only as an adaptive salted hash. | I | M |
-| FR-09 | The system shall verify a registered email address and mobile number by a single-use, time-limited code, and shall use the same mechanism for password reset. | I | M |
+| FR-09 | The system shall verify a registered email address and mobile number by a single-use, time-limited code, and shall reset a forgotten password by a single-use, time-limited link. | I | M |
 | FR-10 | The system shall permit sign-in by a federated identity provider, associating the federated identity with exactly one member record and requiring completion of the member profile before portal access is granted. | I, C | S |
 | FR-11 | The system shall issue a short-lived access token and a rotating refresh token, shall support explicit sign-out, and shall invalidate all outstanding sessions for a member when his credentials, roles or status change. | D, I | M |
 | FR-12 | The system shall prevent a member whose mandatory profile particulars are incomplete from using member functions other than profile completion, and shall indicate what remains outstanding. | O | M |

@@ -259,4 +259,33 @@ public class FileUploadRepositoryTests
         var allFiles = await _context.FileUploads.ToListAsync();
         allFiles.Should().HaveCount(2);
     }
+
+    // 80.13: backs SecureFilesController's file-path lookup, extracted from a direct
+    // ApplicationDbContext query.
+    [Test]
+    public async Task GetByFilePathAsync_ReturnsMatchingFile()
+    {
+        var file = new FileUpload
+        {
+            MemberId = 1,
+            UploadType = Enums.FileUploadType.Certificate,
+            FileName = "cert.pdf",
+            FilePath = "secure_uploads/members/1/cert.pdf",
+            SizeBytes = 512
+        };
+        await _repository.AddAsync(file);
+
+        var found = await _repository.GetByFilePathAsync("secure_uploads/members/1/cert.pdf");
+
+        found.Should().NotBeNull();
+        found!.FileName.Should().Be("cert.pdf");
+    }
+
+    [Test]
+    public async Task GetByFilePathAsync_ReturnsNull_WhenNoMatch()
+    {
+        var found = await _repository.GetByFilePathAsync("no/such/path.pdf");
+
+        found.Should().BeNull();
+    }
 }

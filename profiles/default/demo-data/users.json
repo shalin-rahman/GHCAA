@@ -1,0 +1,24 @@
+[
+  {
+    "Id": 1,
+    "Username": "demo.member1",
+    "PasswordHash": "$2a$11$C6UzMDM.H6dfI/f/IKcEeOZ0d3z1z3zP3z3z3z3z3z3z3z3z3z3z3",
+    "MemberId": 1,
+    "CreatedAt": "2024-01-01T00:00:00Z",
+    "IsActive": true,
+    "IsArchived": false,
+    "ResetToken": null,
+    "ResetTokenExpiry": null
+  },
+  {
+    "Id": 2,
+    "Username": "demo.member2",
+    "PasswordHash": "$2a$11$C6UzMDM.H6dfI/f/IKcEeOZ0d3z1z3zP3z3z3z3z3z3z3z3z3z3z4",
+    "MemberId": 2,
+    "CreatedAt": "2024-02-01T00:00:00Z",
+    "IsActive": true,
+    "IsArchived": false,
+    "ResetToken": null,
+    "ResetTokenExpiry": null
+  }
+]

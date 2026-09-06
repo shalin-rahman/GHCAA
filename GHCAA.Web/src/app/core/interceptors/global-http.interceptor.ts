@@ -102,6 +102,14 @@ function handle401(
     );
 }
 
+// 82.4: the API returns one error shape now — RFC 7807 ProblemDetails, camelCased by the same
+// JSON options as everything else — so `detail` (falling back to `title`) is the one place a
+// server-supplied message lives. Older cached responses or a non-API failure won't have either,
+// which is what the per-status defaults below are still for.
+function serverMessage(error: HttpErrorResponse): string | undefined {
+    return error.error?.detail || error.error?.title;
+}
+
 function handleError(
     error: HttpErrorResponse,
     req: HttpRequest<unknown>,
@@ -123,10 +131,10 @@ function handleError(
     } else {
         switch (error.status) {
             case 401:
-                errorMessage = error.error?.message || 'Invalid credentials.';
+                errorMessage = serverMessage(error) || 'Invalid credentials.';
                 break;
             case 403:
-                errorMessage = error.error?.message || 'You do not have permission.';
+                errorMessage = serverMessage(error) || 'You do not have permission.';
                 break;
             case 404:
                 errorMessage = 'The requested resource was not found.';
@@ -138,7 +146,7 @@ function handleError(
                 errorMessage = 'Server error. Please try again later.';
                 break;
             default:
-                errorMessage = error.error?.message || errorMessage;
+                errorMessage = serverMessage(error) || errorMessage;
         }
     }
 

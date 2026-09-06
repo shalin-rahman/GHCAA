@@ -1,0 +1,19 @@
+[
+  {
+    "Id": 1,
+    "Title": "Sample Annual Reunion",
+    "Description": "A sample event record showing how a reunion looks once an institution starts adding its own.",
+    "Location": "Sample Hall",
+    "RegistrationFee": 0.0,
+    "IsActive": true,
+    "ImageUrl": null,
+    "CreatedAt": "2024-01-01T00:00:00+00:00",
+    "AdminNote": null,
+    "AllowNonMembers": true,
+    "RequiresPayment": false,
+    "StartDate": "2024-06-01T09:00:00+00:00",
+    "EndDate": "2024-06-01T13:00:00+00:00",
+    "RegistrationEndDate": "2024-05-25T23:59:59+00:00",
+    "RegistrationStartDate": "2024-05-01T00:00:00+00:00"
+  }
+]

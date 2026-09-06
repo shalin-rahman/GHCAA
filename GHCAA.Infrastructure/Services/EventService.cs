@@ -151,7 +151,7 @@ namespace GHCAA.Infrastructure.Services
             _context.AlumniEvents.Add(alumniEvent);
             await _context.SaveChangesAsync(cancellationToken);
 
-            if (alumniEvent.IsActive)
+            if (alumniEvent.IsActive && dto.NotifyMembers)
             {
                 await _notificationService.BroadcastNotificationAsync(
                     "New Event Created!",
@@ -194,6 +194,19 @@ namespace GHCAA.Infrastructure.Services
             alumniEvent.RequiresRegistration = dto.RequiresRegistration;
 
             await _context.SaveChangesAsync(cancellationToken);
+
+            // 82.52: admin-chosen, off by default (this method never notified before this item).
+            if (alumniEvent.IsActive && dto.NotifyOnUpdate)
+            {
+                await _notificationService.BroadcastNotificationAsync(
+                    "Event Updated",
+                    $"Details for {alumniEvent.Title} have been updated. Check the event page for the latest information.",
+                    Enums.NotificationType.EventCreation,
+                    $"/portal/events/{alumniEvent.Id}",
+                    cancellationToken
+                );
+            }
+
             return alumniEvent;
         }
 
@@ -768,6 +781,22 @@ namespace GHCAA.Infrastructure.Services
             }
 
             return true;
+        }
+
+        public Task<EventRegistration?> GetRegistrationByPaymentReferenceAsync(string paymentReference, CancellationToken cancellationToken = default)
+            => _context.EventRegistrations
+                .Include(r => r.Event)
+                .FirstOrDefaultAsync(r => r.PaymentReference == paymentReference, cancellationToken);
+
+        public async Task AutoApproveRegistrationAfterPaymentAsync(int registrationId, int adminId, CancellationToken cancellationToken = default)
+        {
+            var registration = await _context.EventRegistrations.FindAsync(new object[] { registrationId }, cancellationToken);
+            if (registration == null) return;
+
+            registration.Status = EventRegistrationStatus.Approved;
+            registration.ApprovedAt = DateTime.UtcNow;
+            registration.ApprovedByAdminId = adminId;
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

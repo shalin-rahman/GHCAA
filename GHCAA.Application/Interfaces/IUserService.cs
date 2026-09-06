@@ -9,6 +9,7 @@ namespace GHCAA.Application.Interfaces
         Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken = default);
         Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword, CancellationToken cancellationToken = default);
         Task<bool> DeleteSystemAdminAsync(int userId, CancellationToken cancellationToken = default);
+        Task<bool> SetUserActiveAsync(int userId, bool isActive, CancellationToken cancellationToken = default);
         Task<(bool Success, string? ResetUrl)> SendAdminPasswordResetLinkAsync(int userId, CancellationToken cancellationToken = default);
         string GenerateDefaultPassword();
     }

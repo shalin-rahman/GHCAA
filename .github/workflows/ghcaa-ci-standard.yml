@@ -68,6 +68,36 @@ jobs:
       - name: Build and Run Tests
         run: dotnet test GHCAA.Tests/GHCAA.Tests.csproj --configuration Release --no-restore
 
+  api-contract:
+    name: API Contract (Swagger snapshot)
+    needs: [lint-backend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x
+
+      - name: Build API (Release)
+        run: dotnet build GHCAA.API/GHCAA.API.csproj -c Release
+
+      - name: Restore Swagger CLI tool
+        working-directory: GHCAA.API
+        run: dotnet tool restore
+
+      # 82.10a: the interactive Swagger UI only serves in Development (see Program.cs) — never on
+      # a live host, so it can't hand an attacker a request-firing form for the whole API. This
+      # step produces the same contract as a build artefact instead: no runtime surface, but a
+      # reviewer still sees a diff the moment a field is renamed or a route disappears.
+      - name: Generate current swagger.json
+        working-directory: GHCAA.API
+        run: dotnet tool run swagger tofile --output /tmp/swagger.generated.json bin/Release/net9/GHCAA.API.dll v1
+
+      - name: Compare against committed snapshot
+        run: python3 docs/api/diff_swagger.py docs/api/swagger.json /tmp/swagger.generated.json
+
   ui-tests:
     name: Web UI/Frontend Tests
     needs: [api-tests]

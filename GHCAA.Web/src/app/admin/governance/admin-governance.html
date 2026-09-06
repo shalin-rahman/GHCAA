@@ -223,12 +223,44 @@
                     }
                 </select>
             </div>
+
+            <div class="form-group">
+                <app-notify-toggle
+                    [checked]="assignData().notifyMember"
+                    (checkedChange)="assignData.update(d => ({ ...d, notifyMember: $event }))"
+                    label="Notify member of this assignment"></app-notify-toggle>
+            </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-outline" (click)="showAssignModal.set(false)">Cancel</button>
             <button class="btn btn-accent shadow-gold" (click)="assignRole()" [disabled]="!assignData().memberId || posInput.invalid">
                 Assign Role
             </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Remove Member Confirm -->
+@if (removingMemberId() !== null) {
+<div class="modal-overlay" (click)="removingMemberId.set(null)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Remove Committee Member</h3>
+            <button class="close-btn" (click)="removingMemberId.set(null)">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Remove this member from the committee?</p>
+            <div class="form-group">
+                <app-notify-toggle
+                    [checked]="removeNotifyMember()"
+                    (checkedChange)="removeNotifyMember.set($event)"
+                    label="Notify member of this removal"></app-notify-toggle>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" (click)="removingMemberId.set(null)">Cancel</button>
+            <button class="btn btn-accent shadow-gold" (click)="confirmRemoveMember()">Remove</button>
         </div>
     </div>
 </div>

@@ -11,6 +11,7 @@ import '../../core/storage/storage_service.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/services/app_localizations.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/widgets/confirm_dialog.dart';
 
 // Persistent Layout State
 final dashboardLayoutProvider = StateNotifierProvider<DashboardLayoutNotifier, bool>((ref) {
@@ -443,19 +444,14 @@ class DashboardScreen extends ConsumerWidget {
 
   Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
     HapticFeedback.heavyImpact();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.midnightSurface,
-        title: const Text('End Session', style: TextStyle(color: Colors.white)),
-        content: const Text('Securely exit the platform?', style: TextStyle(color: AppTheme.textSecondaryDark)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('CANCEL')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('LOGOUT', style: TextStyle(color: Colors.redAccent))),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'End Session',
+      message: 'Securely exit the platform?',
+      confirmLabel: 'Logout',
+      destructive: true,
     );
-    if (confirmed == true && context.mounted) {
+    if (confirmed && context.mounted) {
       await ref.read(authServiceProvider).logout();
       if (context.mounted) {
         context.go('/login');

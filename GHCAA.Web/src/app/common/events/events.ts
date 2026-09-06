@@ -13,6 +13,7 @@ import { FinancialService } from '../../core/services/financial.service';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { ROUTES } from '../../core/constants/app.constants';
 import { getEventStatusMeta } from '../../core/utils/date.util';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
   selector: 'app-events',
@@ -27,6 +28,7 @@ export class Events implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private gatewaysService = inject(GatewaysService);
+  orgConfig = inject(OrgConfigService);
   private notify = inject(NotificationService);
   private finService = inject(FinancialService);
 

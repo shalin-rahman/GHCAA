@@ -68,7 +68,10 @@ class RegisterModel {
     this.notifyRelevantUpdates = true,
     this.paymentMethodId = 0,
     this.transactionId = '',
-    this.institutionName = 'Govt. Haraganga College',
+    // Compile-time default, so it can't read org config here. Left blank —
+    // the register screen's hint text shows the real institution name from
+    // OrgBranding, and the user can just leave the field as-is to accept it.
+    this.institutionName = '',
   });
 
   RegisterModel copyWith({

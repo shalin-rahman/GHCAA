@@ -8,13 +8,14 @@ import { NotificationService } from '../../core/services/notification.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
+import { NotifyToggleComponent } from '../../common/notify-toggle/notify-toggle.component';
 
 type PendingItem = { kind: 'album'; album: EventGallery } | { kind: 'photo'; photo: EventPhoto };
 
 @Component({
   selector: 'app-gallery-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, NotifyToggleComponent],
   templateUrl: './gallery-approval.html',
   styleUrl: './gallery-approval.scss'
 })
@@ -27,6 +28,7 @@ export class GalleryApproval implements OnInit {
   loading = signal(true);
   selectedItem = signal<PendingItem | null>(null);
   rejectReason = signal('');
+  notifyMember = signal(true);
   isProcessing = signal(false);
   searchQuery = signal('');
 
@@ -67,11 +69,13 @@ export class GalleryApproval implements OnInit {
   viewAlbum(album: EventGallery) {
     this.selectedItem.set({ kind: 'album', album });
     this.rejectReason.set('');
+    this.notifyMember.set(true);
   }
 
   viewPhoto(photo: EventPhoto) {
     this.selectedItem.set({ kind: 'photo', photo });
     this.rejectReason.set('');
+    this.notifyMember.set(true);
   }
 
   approve() {
@@ -80,8 +84,8 @@ export class GalleryApproval implements OnInit {
 
     this.isProcessing.set(true);
     const obs = item.kind === 'album'
-      ? this.galleryService.approveGallery(item.album.id)
-      : this.galleryService.approvePhoto(item.photo.id);
+      ? this.galleryService.approveGallery(item.album.id, this.notifyMember())
+      : this.galleryService.approvePhoto(item.photo.id, this.notifyMember());
 
     obs.subscribe({
       next: () => {
@@ -106,8 +110,8 @@ export class GalleryApproval implements OnInit {
 
     this.isProcessing.set(true);
     const obs = item.kind === 'album'
-      ? this.galleryService.rejectGallery(item.album.id, this.rejectReason())
-      : this.galleryService.rejectPhoto(item.photo.id, this.rejectReason());
+      ? this.galleryService.rejectGallery(item.album.id, this.rejectReason(), this.notifyMember())
+      : this.galleryService.rejectPhoto(item.photo.id, this.rejectReason(), this.notifyMember());
 
     obs.subscribe({
       next: () => {

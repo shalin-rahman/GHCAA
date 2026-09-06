@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../screens/app_home_screen.dart';
 import '../../screens/auth/login_screen.dart';
 import '../../screens/auth/register_screen.dart';
+import '../../screens/auth/forgot_password_screen.dart';
 import '../../screens/member/dashboard_screen.dart';
 import '../../screens/member/directory_screen.dart';
 import '../../screens/member/member_details_screen.dart';
@@ -87,7 +88,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: authNotifier,
     redirect: (context, state) {
       final token = authNotifier.token;
-      final isLoggingIn = state.uri.path == '/login' || state.uri.path == '/register' || state.uri.path == '/';
+      final isLoggingIn = state.uri.path == '/login' || state.uri.path == '/register' || state.uri.path == '/forgot-password' || state.uri.path == '/';
       
       if (token == null && !isLoggingIn) {
         return '/login';
@@ -113,6 +114,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/login', name: 'login', builder: (context, state) => const LoginScreen()),
       GoRoute(path: '/register', name: 'register', builder: (context, state) => const RegisterScreen()),
+      GoRoute(path: '/forgot-password', name: 'forgot-password', builder: (context, state) => const ForgotPasswordScreen()),
       
       ShellRoute(
         builder: (context, state, child) => MainShell(child: child),

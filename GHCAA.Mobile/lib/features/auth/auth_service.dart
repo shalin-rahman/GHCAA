@@ -56,6 +56,13 @@ class AuthService {
         // Note: do NOT call clearCredentials here — we just called clearAll() above.
         // Credentials for biometric are only saved if the user opted in above.
 
+        // roleProvider/userProfileProvider are non-autoDispose and cache across
+        // navigations, so a stale value from the previous session survives clearAll()
+        // above until something re-reads them. Invalidate so the new user's login
+        // always refetches instead of showing whoever was logged in before.
+        _ref.invalidate(roleProvider);
+        _ref.invalidate(userProfileProvider);
+
         return null; // Success
       }
     } catch (e) {
@@ -180,6 +187,11 @@ class AuthService {
     // logout. Invalidating the provider fires its ref.onDispose → dispose(); otherwise the
     // authenticated hub would keep streaming for the previous user until app kill.
     _ref.invalidate(notificationHubServiceProvider);
+    // 82.38: same reasoning applies to role/profile — both are non-autoDispose and were
+    // being left cached, so a second user on a shared device could see the first user's
+    // role/profile (including admin-only UI) until something else triggered a refetch.
+    _ref.invalidate(roleProvider);
+    _ref.invalidate(userProfileProvider);
     await _storage.clearAll();
   }
 

@@ -91,7 +91,7 @@ class AppTheme {
     end: Alignment.bottomCenter,
   );
 
-  static final ThemeData darkTheme = buildTheme(OrgConfig.ghcaaDefaults.branding);
+  static final ThemeData darkTheme = buildTheme(OrgConfig.offlineDefaults.branding);
 
   /// Legacy alias — the "Midnight Gold" branding name used in tests and docs.
   static ThemeData get midnightTheme => darkTheme;

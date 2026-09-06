@@ -22,15 +22,26 @@ public class MemberImportServiceTests : TestBase
 {
     private Mock<IFileStorageService> _storage = null!;
     private Mock<IUserService> _userService = null!;
+    private Mock<IOrgConfigService> _orgConfig = null!;
     private MemberImportService _service = null!;
+
+    // Matches the hardcoded GHCAA defaults BuildGhcaaDefaults() serves today, so import behavior
+    // under test stays the same as before ImportEmailBase/MembershipNumberPrefix moved to org-config.
+    private static readonly OrgConfigDto TestOrgConfig = new()
+    {
+        Branding = new BrandingDto { MembershipNumberPrefix = "GHC-" },
+        Contact = new ContactDto { ImportEmailBase = "haragangian" }
+    };
 
     [SetUp]
     public void Setup()
     {
         _storage = new Mock<IFileStorageService>();
         _userService = new Mock<IUserService>();
+        _orgConfig = new Mock<IOrgConfigService>();
+        _orgConfig.Setup(x => x.GetConfigAsync()).ReturnsAsync(TestOrgConfig);
         _service = new MemberImportService(
-            _context, _storage.Object, _userService.Object, new Mock<ILogger<MemberImportService>>().Object);
+            _context, _storage.Object, _userService.Object, new Mock<ILogger<MemberImportService>>().Object, _orgConfig.Object);
     }
 
     // ---- helpers -------------------------------------------------------------------
@@ -198,7 +209,7 @@ public class MemberImportServiceTests : TestBase
         var result = await _service.ImportMembersAsync(request);
 
         var member = await _context.Members.FirstAsync(m => m.NID == "1990111222");
-        member.Email.Should().Be($"{Constants.Defaults.ImportEmailBase}+1990111222@gmail.com");
+        member.Email.Should().Be($"{TestOrgConfig.Contact.ImportEmailBase}+1990111222@gmail.com");
         result.Errors.Should().Contain(e => e.Contains("Email missing"));
     }
 

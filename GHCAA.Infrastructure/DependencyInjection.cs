@@ -106,6 +106,9 @@ namespace GHCAA.Infrastructure
             services.AddScoped<IThemeService, ThemeService>();
             services.AddScoped<IFileUploadRepository, FileUploadRepository>();
             services.AddScoped<IPaymentGatewayFactory, PaymentGatewayFactory>();
+            services.AddScoped<IDatabaseHealthService, DatabaseHealthService>();
+            services.AddScoped<IPaymentConfigService, PaymentConfigService>();
+            services.AddScoped<ISocialAuthConfigService, SocialAuthConfigService>();
 
             // Payment Gateways (HttpClient instances)
             services.AddHttpClient<SSLCommerzGateway>();

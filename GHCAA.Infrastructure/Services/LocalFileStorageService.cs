@@ -1,5 +1,6 @@
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
@@ -16,7 +17,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly IConfiguration _config;
         private readonly ILogger<LocalFileStorageService> _logger;
 
-        public LocalFileStorageService(IConfiguration config, ILogger<LocalFileStorageService> logger)
+        public LocalFileStorageService(IConfiguration config, ILogger<LocalFileStorageService> logger, IWebHostEnvironment webHostEnvironment)
         {
             _config = config;
             _logger = logger;
@@ -30,6 +31,27 @@ namespace GHCAA.Infrastructure.Services
 
             _publicRoot = Path.Combine(_config["FileStorage:BasePhysicalPath"] ?? "wwwroot", publicRelative);
             _secureRoot = Path.Combine(_config["FileStorage:BasePhysicalPath"] ?? AppDomain.CurrentDomain.BaseDirectory, secureRelative);
+
+            // 82.51: today the two roots stay apart only because their fallback defaults ("wwwroot"
+            // vs. AppDomain.CurrentDomain.BaseDirectory) happen not to collide — nothing enforces it.
+            // A future FileStorage:BasePhysicalPath change could make _secureRoot land inside the
+            // static-files web root, which would serve Certificate/PaymentProof/Signature files with
+            // no auth check. Fail loudly at startup instead of silently exposing them.
+            if (!string.IsNullOrEmpty(webHostEnvironment.WebRootPath))
+            {
+                var webRoot = Path.GetFullPath(webHostEnvironment.WebRootPath);
+                var secureFull = Path.GetFullPath(_secureRoot);
+                var isSameOrNested = secureFull.Equals(webRoot, StringComparison.OrdinalIgnoreCase)
+                    || secureFull.StartsWith(webRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+                if (isSameOrNested)
+                {
+                    throw new InvalidOperationException(
+                        $"FileStorage misconfiguration: the secure uploads root ('{secureFull}') resolves inside the " +
+                        $"static-files web root ('{webRoot}'). This would serve Certificate/PaymentProof/Signature " +
+                        "files through the unauthenticated static-files route. Set FileStorage:SecureRelativePath or " +
+                        "FileStorage:BasePhysicalPath so the secure root stays outside the web root.");
+                }
+            }
 
             _maxFileSize = long.TryParse(_config[Constants.ConfigKeys.MaxFileSizeBytes], out var v) ? v : Constants.Defaults.MaxFileSizeBytes;
         }

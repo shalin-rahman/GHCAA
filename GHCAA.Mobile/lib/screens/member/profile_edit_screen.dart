@@ -11,6 +11,8 @@ import '../../features/admin/admin_service.dart';
 import '../../features/lookups/dropdown_service.dart';
 import '../../features/files/file_service.dart';
 import '../../core/config/app_config.dart';
+import '../../core/constants/registration_constants.dart';
+import '../../core/services/org_config_service.dart';
 import '../../core/utils/app_utils.dart';
 import 'member_details_screen.dart';
 
@@ -116,7 +118,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         if (deg != null && deg.isNotEmpty) row['degree'] = deg;
         if (sub != null && sub.isNotEmpty) row['subject'] = sub;
         final inst = row['institutionName']?.toString() ?? '';
-        if (inst.isEmpty) row['institutionName'] = 'Govt. Haraganga College';
+        if (inst.isEmpty) row['institutionName'] = ref.read(orgBrandingProvider).institutionName;
         row['isGHC'] = true;
         // Ensure admissionYear is sensible if missing
         if (row['admissionYear'] == null && py != null && py > 1902) {
@@ -125,7 +127,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         acad[idx] = row;
       } else if (py != null && deg != null && sub != null && deg.isNotEmpty && sub.isNotEmpty) {
         acad.add({
-          'institutionName': 'Govt. Haraganga College',
+          'institutionName': ref.read(orgBrandingProvider).institutionName,
           'degree': deg,
           'subject': sub,
           'passingYear': py,
@@ -297,9 +299,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     const Divider(color: Colors.white10),
                     _buildTextField("MOTHER'S NAME", 'motherName'),
                     const Divider(color: Colors.white10),
-                    _buildDropdown('GENDER', 'gender', 'Gender'),
+                    _buildDropdown('GENDER', 'gender', LookupGroups.gender),
                     const Divider(color: Colors.white10),
-                    _buildDropdown('BLOOD GROUP', 'bloodGroup', 'BloodGroup'),
+                    _buildDropdown('BLOOD GROUP', 'bloodGroup', LookupGroups.bloodGroup),
                     const Divider(color: Colors.white10),
                     _buildTextField('NATIONAL ID (NID)', 'nid'),
                     _buildTextField('DATE OF BIRTH (REGISTRY RECORD)', 'dateOfBirth'),
@@ -309,7 +311,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                       const Divider(color: Colors.white10),
                       _buildDropdown('ADMIN ROLE', 'role', 'UserRole'),
                       const Divider(color: Colors.white10),
-                      _buildDropdown('USER STATUS', 'status', 'UserStatus'),
+                      _buildDropdown('USER STATUS', 'status', LookupGroups.userStatus),
                     ],
                   ],
                 ),
@@ -439,7 +441,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     children: [
                         _buildDropdown('MEMBERSHIP TYPE', 'membershipType', 'MembershipType'),
                         const Divider(color: Colors.white10),
-                        _buildDropdown('SPECIAL CATEGORY', 'category', 'MemberCategory'),
+                        _buildDropdown('SPECIAL CATEGORY', 'category', LookupGroups.memberCategory),
                     ],
                   ),
                 ),

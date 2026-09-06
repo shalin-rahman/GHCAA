@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using GHCAA.Domain;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -43,7 +44,7 @@ namespace GHCAA.API.Controllers
             // posted in the body when the claim failed to parse, so a forged attribution on
             // creation went uncaught. Every other write path in this controller already refuses
             // rather than proceeds in that situation.
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var adminId))
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var adminId))
                 return Unauthorized();
             record.CreatedByAdminId = adminId;
 
@@ -57,7 +58,7 @@ namespace GHCAA.API.Controllers
         {
             // 82.16: the ledger records who edited a row, so an unidentifiable caller is refused
             // rather than written as admin 0. Same claim AddRecord already reads.
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var adminId))
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var adminId))
                 return Unauthorized();
 
             record.Id = id;
@@ -70,7 +71,7 @@ namespace GHCAA.API.Controllers
         [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> DeleteRecord(int id, CancellationToken cancellationToken)
         {
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var adminId))
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var adminId))
                 return Unauthorized();
 
             var success = await _ledgerService.DeleteRecordAsync(id, adminId, cancellationToken);

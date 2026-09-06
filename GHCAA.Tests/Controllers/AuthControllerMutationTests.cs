@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
@@ -22,6 +22,7 @@ namespace GHCAA.Tests.Controllers
         private Mock<IAuthService> _authServiceMock = null!;
         private Mock<ITokenService> _tokenServiceMock = null!;
         private Mock<IOtpService> _otpServiceMock = null!;
+        private Mock<ISocialAuthConfigService> _socialAuthConfigServiceMock = null!;
         private AuthController _controller = null!;
 
         [SetUp]
@@ -40,7 +41,8 @@ namespace GHCAA.Tests.Controllers
 
             var configMock = new Mock<IConfiguration>();
 
-            _controller = new AuthController(_authServiceMock.Object, _tokenServiceMock.Object, _context, envMock.Object, configMock.Object);
+            _socialAuthConfigServiceMock = new Mock<ISocialAuthConfigService>();
+            _controller = new AuthController(_authServiceMock.Object, _tokenServiceMock.Object, _socialAuthConfigServiceMock.Object, envMock.Object, configMock.Object);
 
             _controller.ControllerContext = new ControllerContext
             {
@@ -88,6 +90,14 @@ namespace GHCAA.Tests.Controllers
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+
+            // AuthController now resolves these through IAuthService rather than the DbContext
+            // directly; wire the mock to return the same seeded user (with Member attached
+            // in-memory, since a fresh SaveChangesAsync doesn't populate the navigation).
+            user.Member = member;
+            _authServiceMock.Setup(x => x.GetUserWithRolesAsync(user.Id, It.IsAny<CancellationToken>())).ReturnsAsync(user);
+            _authServiceMock.Setup(x => x.GetUserWithRolesAndMemberAsync(user.Id, It.IsAny<CancellationToken>())).ReturnsAsync(user);
+
             return user;
         }
 
@@ -116,7 +126,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.GoogleLogin(new AuthController.SocialLoginRequest { Token = "bad-token" }, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(401));
         }
 
         // --- FacebookLogin ---
@@ -144,7 +155,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.FacebookLogin(new AuthController.SocialLoginRequest { Token = "bad-token" }, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(401));
         }
 
         // --- Refresh ---
@@ -170,7 +182,8 @@ namespace GHCAA.Tests.Controllers
         {
             var result = await _controller.Refresh(CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(401));
         }
 
         [Category("FR-11")]
@@ -183,7 +196,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.Refresh(CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(401));
         }
 
         [Category("FR-11")]
@@ -225,7 +239,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.RefreshMobile(new RefreshRequestDto { RefreshToken = "bad-token" }, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(401));
         }
 
         [Category("FR-11")]
@@ -292,7 +307,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.RequestStepUp(_otpServiceMock.Object, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         // --- VerifyStepUp ---
@@ -321,7 +337,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.VerifyStepUp(new StepUpVerifyDto { Code = "000000" }, _otpServiceMock.Object, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         [Test]
@@ -332,7 +349,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.VerifyStepUp(new StepUpVerifyDto { Code = "123456" }, _otpServiceMock.Object, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         // --- ResetPassword ---
@@ -358,7 +376,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.ResetPassword(new ResetPasswordDto { Email = "user@example.com", Token = "bad-token", NewPassword = "NewPass123" }, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
     }
 }

@@ -2,7 +2,7 @@
     <div class="header">
         <div class="title-group">
             <h2>Event Gallery</h2>
-            <p>Visual journey through Haragangian heritage</p>
+            <p>Visual journey through {{ orgConfig.config()?.branding?.memberNickname }} heritage</p>
         </div>
         <div class="header-actions flex gap-3" *ngIf="auth.isAuthenticated()">
             <button class="btn btn-outline" (click)="showAlbums.set(!showAlbums())">

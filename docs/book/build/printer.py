@@ -132,9 +132,12 @@ def _base_args(profile):
         "--run-all-compositor-stages-before-draw",
         "--virtual-time-budget=60000",       # Mermaid needs the CDN fetch plus layout
     ]
-    # The last two are for one-shot runs only. devtools.Browser omits them and
-    # waits on document.body.dataset.diagrams instead, because a virtual-time
-    # budget on a long-lived session ends the page target under the client.
+    # Used only by the command-line `--print-to-pdf` fallback in _run below,
+    # which is one-shot and has no other way to wait for Mermaid. The audit
+    # measurement and the protocol print both go through devtools.Browser
+    # instead, which waits on document.body.dataset.diagrams explicitly —
+    # a virtual-time budget would end a long-lived session's page target
+    # rather than just run out.
 
 
 def _run(browser, args, timeout):
@@ -149,12 +152,21 @@ def _run(browser, args, timeout):
 
 
 def dump_dom(browser, url, timeout=180):
-    """The page as the browser sees it after Mermaid has drawn."""
-    proc = _run(browser, ["--dump-dom", url], timeout)
-    dom = proc.stdout.decode("utf-8", "replace")
-    if not dom.strip():
-        raise RuntimeError("the browser returned an empty document: %s"
-                           % proc.stderr.decode("utf-8", "replace")[-800:])
+    """The page as the browser sees it after Mermaid has drawn.
+
+    Rendered through the same devtools.Browser session and the same explicit
+    wait that print_pdf uses, rather than a one-shot `--dump-dom` process
+    carrying --run-all-compositor-stages-before-draw and a virtual-time
+    budget. Two different sets of browser flags measuring one page and
+    printing another meant the A4 audit could pass or fail on a rendering
+    the printed PDF never went through.
+    """
+    with devtools.Browser(browser, timeout=timeout) as page:
+        page.open_page(url)
+        page.wait_for("document.body && document.body.dataset.diagrams", seconds=timeout)
+        dom = page.evaluate("document.documentElement.outerHTML")
+    if not dom or not dom.strip():
+        raise RuntimeError("the browser returned an empty document")
     return dom
 
 

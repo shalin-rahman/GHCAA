@@ -1,0 +1,18 @@
+{
+  "AboutFoundingStory": {
+    "Tagline": "Preserving our history while building a future of unity and progress.",
+    "EstablishedBadge": "",
+    "ParagraphHtml": "<strong>{branding.institutionName}</strong> is the founding institution behind {branding.fullName}. This is a sample profile with no real founding story on file yet — replace this text in profiles/<name>/site-content.json with the institution's actual history."
+  },
+  "RegisterTerms": {
+    "EffectiveDate": "",
+    "EligibilityParagraph": "Registration is open to eligible alumni of {branding.institutionName}. To qualify, the Applicant must prove they meet the membership criteria set by the Association.",
+    "IpParagraph": "The Applicant acknowledges that the name \"{branding.institutionName}\", its official logo, and all branding elements are the exclusive intellectual property of the Institution."
+  },
+  "PurposeHistoryNote": "",
+  "AssistantName": "{branding.shortName} AI Assistant",
+  "MembershipTierCopy": {
+    "FoundingShortDesc": "The pioneers of the {branding.shortName} movement, providing initial vision and infrastructure.",
+    "AssociateShortDesc": "Inclusive category for those who shared the {branding.institutionName} journey."
+  }
+}

@@ -19,6 +19,7 @@ public class FamilyLinkServiceTests : TestBase
     private Mock<ICommunicationService> _mockCommunication = null!;
     private Mock<ILogger<FamilyLinkService>> _mockLogger = null!;
     private Mock<IConfiguration> _mockConfig = null!;
+    private Mock<IOrgConfigService> _mockOrgConfig = null!;
     private FamilyLinkService _service = null!;
 
     [SetUp]
@@ -28,13 +29,16 @@ public class FamilyLinkServiceTests : TestBase
         _mockCommunication = new Mock<ICommunicationService>();
         _mockLogger = new Mock<ILogger<FamilyLinkService>>();
         _mockConfig = new Mock<IConfiguration>();
+        _mockOrgConfig = new Mock<IOrgConfigService>();
+        _mockOrgConfig.Setup(x => x.GetConfigAsync()).ReturnsAsync(new OrgConfigDto());
 
         _service = new FamilyLinkService(
             _context,
             _mockLogger.Object,
             _mockNotifications.Object,
             _mockCommunication.Object,
-            _mockConfig.Object
+            _mockConfig.Object,
+            _mockOrgConfig.Object
         );
     }
 

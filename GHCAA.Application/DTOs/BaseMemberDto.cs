@@ -81,6 +81,7 @@ namespace GHCAA.Application.DTOs
         public bool NotifyParticipationApproval { get; set; } = true;
         public bool NotifyRegistrationUpdate { get; set; } = true;
         public bool NotifyRelevantUpdates { get; set; } = true;
+        public bool NotifyCommitteeChanges { get; set; } = true;
 
         // Flattened Academic/Professional (for high-level UI/Imports/Directory)
         public string? HighestCertificate { get; set; }

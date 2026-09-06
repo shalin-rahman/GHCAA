@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GHCAA.Domain;
 using GHCAA.Application.Security;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -23,7 +24,7 @@ namespace GHCAA.API.Controllers
 
         private int GetMemberId()
         {
-            var val = User.FindFirst(AppClaimTypes.MemberId)?.Value;
+            var val = this.CurrentMemberIdRaw();
             return int.TryParse(val, out var id) ? id : 0;
         }
 
@@ -33,7 +34,7 @@ namespace GHCAA.API.Controllers
         {
             var requesterId = GetMemberId();
             if (requesterId == 0) return Unauthorized();
-            if (requesterId == dto.MentorId) return BadRequest(new { Message = "You cannot send a mentorship request to yourself." });
+            if (requesterId == dto.MentorId) return Problem(detail: "You cannot send a mentorship request to yourself.", statusCode: StatusCodes.Status400BadRequest);
 
             try
             {
@@ -42,7 +43,7 @@ namespace GHCAA.API.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(new { Message = ex.Message });
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
             }
         }
 

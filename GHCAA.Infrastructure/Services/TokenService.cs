@@ -19,11 +19,13 @@ namespace GHCAA.Infrastructure.Services
         private readonly SymmetricSecurityKey _key;
         private readonly IConfiguration _config;
         private readonly ApplicationDbContext _db;
+        private readonly ILogger<TokenService> _logger;
 
         public TokenService(IConfiguration config, IHostEnvironment environment, ILogger<TokenService> logger, ApplicationDbContext db)
         {
             _config = config;
             _db = db;
+            _logger = logger;
             var secret = JwtSigningKeyResolver.Resolve(config, environment, logger);
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         }
@@ -132,7 +134,30 @@ namespace GHCAA.Infrastructure.Services
             var stored = await _db.RefreshTokens
                 .FirstOrDefaultAsync(r => r.TokenHash == hash && !r.IsRevoked && r.ExpiresAt > DateTime.UtcNow, cancellationToken);
 
-            if (stored == null) return null;
+            if (stored == null)
+            {
+                // 82.18: a hash match that IS revoked means an already-rotated token was presented
+                // again — the standard signal a refresh token was stolen (the legitimate holder
+                // already moved on to the token that replaced it). Kill that user's whole token
+                // family rather than just failing this one request, since whoever holds the stolen
+                // token would otherwise keep trying with it undetected.
+                var reused = await _db.RefreshTokens
+                    .FirstOrDefaultAsync(r => r.TokenHash == hash && r.IsRevoked, cancellationToken);
+                if (reused != null)
+                {
+                    _logger.LogWarning(
+                        "Refresh token reuse detected for user {UserId}: a revoked token was presented again. Revoking all refresh tokens and rotating the security stamp for this user.",
+                        reused.UserId);
+                    await RevokeAllRefreshTokensAsync(reused.UserId, cancellationToken);
+                    // Same reasoning as ChangePasswordAsync/SetUserActiveAsync: revoking refresh
+                    // tokens alone leaves any still-live access token (up to 60 minutes) valid.
+                    // Rotating the stamp kills that too, so "kill the session" is actually true.
+                    var newStamp = Guid.NewGuid().ToString("N");
+                    await _db.Users.Where(u => u.Id == reused.UserId)
+                        .ExecuteUpdateAsync(s => s.SetProperty(u => u.SecurityStamp, newStamp), cancellationToken);
+                }
+                return null;
+            }
 
             stored.IsRevoked = true;
 

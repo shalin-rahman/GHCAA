@@ -113,7 +113,9 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.UpdateTheme(99, theme);
 
-            Assert.That(result, Is.InstanceOf<BadRequestResult>());
+            // 82.4: a mismatched id now returns Problem()'s ObjectResult, not a bare BadRequestResult.
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
         }
 
         [Test]

@@ -1,0 +1,21 @@
+{
+  "bannedLiterals": [
+    { "pattern": "GHCAA", "reason": "product/brand name" },
+    { "pattern": "GHC-", "reason": "membership number prefix" },
+    { "pattern": "Haragangian", "reason": "association demonym" },
+    { "pattern": "Haraganga", "reason": "association name root" },
+    { "pattern": "ghcaa-ryl6.onrender.com", "reason": "live Render preprod hostname" },
+    { "pattern": "1938", "reason": "college founding year" }
+  ],
+  "scanExtensions": [".cs", ".ts", ".html", ".scss", ".css", ".json", ".dart", ".mjs", ".yml", ".yaml"],
+  "exceptions": [
+    { "path": "profiles/**", "reason": "profile packs are meant to carry one institution's real literals; profiles/ghc is the GHC pack on purpose" },
+    { "path": "**/Migrations/**", "reason": "EF migrations are a frozen record of schema already applied to real databases; rewriting them would break existing deployments" },
+    { "path": "GHCAA.Tests/**", "reason": "tests assert today's hardcoded GHCAA behavior on purpose until the profile-pack swap lands; these literals are test fixtures, not shipped output" },
+    { "path": "docs/**", "reason": "narrative docs, not shipped source" },
+    { "path": "scripts/brand-lint.config.json", "reason": "this file lists the banned words itself" },
+    { "path": "scripts/brand-lint.mjs", "reason": "this script's own error messages name the banned words" },
+    { "path": "GHCAA.Mobile/android/app/build.gradle.kts", "reason": "com.ghcaa.portal is the GHC flavor's pinned applicationId, hardcoded on purpose — a bundle id change makes app stores treat the published app as a new listing and breaks it for every existing user" },
+    { "path": "GHCAA.API/Program.cs", "reason": "the unset-ORG_PROFILE fallback for SetApplicationName/Swagger title is pinned to 'GHCAA' on purpose (docs/TODO.md 62.10) — changing the data-protection application name invalidates every existing session token/cookie" }
+  ]
+}

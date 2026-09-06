@@ -4,6 +4,7 @@ import { AdminComm } from './admin-comm';
 import { AdminCommService, MessageChannels } from '../../core/services/admin-comm.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ActivatedRoute } from '@angular/router';
+import { LookupService } from '../../core/services/lookup.service';
 import { of } from 'rxjs';
 
 describe('AdminComm Component', () => {
@@ -30,7 +31,8 @@ describe('AdminComm Component', () => {
             providers: [
                 { provide: AdminCommService, useValue: commServiceMock },
                 { provide: NotificationService, useValue: notificationServiceMock },
-                { provide: ActivatedRoute, useValue: { queryParams: of({}) } }
+                { provide: ActivatedRoute, useValue: { queryParams: of({}) } },
+                { provide: LookupService, useValue: { getOptions: vi.fn().mockReturnValue(of([])), getAcademicYears: vi.fn().mockReturnValue(of([])) } }
             ]
         }).compileComponents();
 

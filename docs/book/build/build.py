@@ -705,7 +705,7 @@ def main(argv=None):
                 if not args.no_folios:
                     failures += _fill_folios(args.output, pdf_path, args.two_column)
         except (printer.BrowserMissing, RuntimeError, OSError,
-                subprocess.TimeoutExpired) as exc:
+                subprocess.TimeoutExpired, folios.PdfError) as exc:
             print("  pdf       : not produced — %s" % exc)
             failures += 1
 

@@ -26,6 +26,13 @@ export class AdminEventOperations implements OnInit {
   // Tab handling
   activeOpTab = signal<'tasks' | 'budget'>('tasks');
 
+  addingTask = signal(false);
+  togglingTaskId = signal<number | null>(null);
+  deletingTaskId = signal<number | null>(null);
+  savingBudget = signal(false);
+  addingExpense = signal(false);
+  deletingExpenseId = signal<number | null>(null);
+
   formatDateToDMY(d: any) {
     return toDisplayDate(d);
   }
@@ -63,66 +70,99 @@ export class AdminEventOperations implements OnInit {
   }
 
   addTask() {
-    if (!this.newTask.title) return;
+    if (this.addingTask() || !this.newTask.title) return;
+    this.addingTask.set(true);
     this.eventsService.createTask({ ...this.newTask, dueDate: toWireDate(this.newTask.dueDate), eventId: this.event.id }).subscribe({
       next: () => {
+        this.addingTask.set(false);
         this.notify.success('Task assigned!');
         this.newTask = { title: '', description: '', assignedMemberId: null, dueDate: '' };
         this.loadTasks();
       },
-      error: () => this.notify.error('Failed to assign task.')
+      error: () => {
+        this.addingTask.set(false);
+        this.notify.error('Failed to assign task.');
+      }
     });
   }
 
   toggleTask(taskId: number) {
+    if (this.togglingTaskId() !== null) return;
+    this.togglingTaskId.set(taskId);
     this.eventsService.toggleTask(taskId).subscribe({
-      next: () => this.loadTasks(),
-      error: () => this.notify.error('Failed to update task.')
+      next: () => { this.togglingTaskId.set(null); this.loadTasks(); },
+      error: () => {
+        this.togglingTaskId.set(null);
+        this.notify.error('Failed to update task.');
+      }
     });
   }
 
   deleteTask(taskId: number) {
+    if (this.deletingTaskId() !== null) return;
     if (confirm('Delete this task?')) {
+      this.deletingTaskId.set(taskId);
       this.eventsService.deleteTask(taskId).subscribe({
         next: () => {
+          this.deletingTaskId.set(null);
           this.notify.success('Task removed');
           this.loadTasks();
         },
-        error: () => this.notify.error('Failed to remove task.')
+        error: () => {
+          this.deletingTaskId.set(null);
+          this.notify.error('Failed to remove task.');
+        }
       });
     }
   }
 
   updateBudget() {
+    if (this.savingBudget()) return;
+    this.savingBudget.set(true);
     this.eventsService.updateBudget({ eventId: this.event.id, estimatedTotal: this.newBudget.estimatedTotal }).subscribe({
       next: () => {
+        this.savingBudget.set(false);
         this.notify.success('Budget updated!');
         this.loadBudget();
       },
-      error: () => this.notify.error('Failed to update budget.')
+      error: () => {
+        this.savingBudget.set(false);
+        this.notify.error('Failed to update budget.');
+      }
     });
   }
 
   addExpense() {
-    if (!this.newExpense.category || this.newExpense.amount <= 0) return;
+    if (this.addingExpense() || !this.newExpense.category || this.newExpense.amount <= 0) return;
+    this.addingExpense.set(true);
     this.eventsService.addExpense({ ...this.newExpense, spentAt: toWireDate(this.newExpense.spentAt), eventId: this.event.id }).subscribe({
       next: () => {
+        this.addingExpense.set(false);
         this.notify.success('Expense recorded!');
         this.newExpense = { category: '', amount: 0, note: '', spentAt: this.formatDateToDMY(new Date()) };
         this.loadBudget();
       },
-      error: () => this.notify.error('Failed to record expense.')
+      error: () => {
+        this.addingExpense.set(false);
+        this.notify.error('Failed to record expense.');
+      }
     });
   }
 
   deleteExpense(expenseId: number) {
+    if (this.deletingExpenseId() !== null) return;
     if (confirm('Delete this expense?')) {
+      this.deletingExpenseId.set(expenseId);
       this.eventsService.deleteExpense(expenseId).subscribe({
         next: () => {
+          this.deletingExpenseId.set(null);
           this.notify.success('Expense removed');
           this.loadBudget();
         },
-        error: () => this.notify.error('Failed to remove expense.')
+        error: () => {
+          this.deletingExpenseId.set(null);
+          this.notify.error('Failed to remove expense.');
+        }
       });
     }
   }

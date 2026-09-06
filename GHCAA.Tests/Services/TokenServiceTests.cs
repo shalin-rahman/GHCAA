@@ -132,6 +132,40 @@ namespace GHCAA.Tests.Services
             result.Should().BeNull();
         }
 
+        [Category("NFR-S5")]
+        [Test]
+        public async Task RotateRefreshToken_ReplayOfARotatedToken_RevokesWholeFamilyAndRotatesStamp()
+        {
+            // 82.18: rotation had no reuse detection — replaying an already-rotated (revoked) token
+            // found nothing and just failed, so a stolen token being reused went undetected while the
+            // real user's other tokens stayed valid. This proves the fix actually kills the session.
+            var user = new User { Username = "u1", PasswordHash = "ph", SecurityStamp = "original-stamp", CreatedAt = DateTime.UtcNow };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            var firstPlaintext = _service.GenerateRefreshToken();
+            await _service.StoreRefreshTokenAsync(user.Id, firstPlaintext);
+
+            // Legitimate rotation: first token used once, replaced by a second.
+            var firstRotation = await _service.RotateRefreshTokenAsync(firstPlaintext);
+            firstRotation.Should().NotBeNull();
+
+            // Attacker replays the now-revoked first token.
+            var replayResult = await _service.RotateRefreshTokenAsync(firstPlaintext);
+
+            replayResult.Should().BeNull("a revoked token must never mint a new one, replay or not");
+
+            // RevokeAllRefreshTokensAsync/the stamp rotation both use ExecuteUpdateAsync, a bulk SQL
+            // update that bypasses the change tracker — AsNoTracking so this reads the real row
+            // state back rather than a stale tracked copy from before the bulk update ran.
+            var allTokens = await _context.RefreshTokens.AsNoTracking().Where(r => r.UserId == user.Id).ToListAsync();
+            allTokens.Should().NotBeEmpty();
+            allTokens.Should().OnlyContain(r => r.IsRevoked, "the whole family must die, including the second, legitimately-issued token");
+
+            var updatedUser = await _context.Users.AsNoTracking().FirstAsync(u => u.Id == user.Id);
+            updatedUser.SecurityStamp.Should().NotBe("original-stamp", "a live access token must not survive detected reuse either");
+        }
+
         [Category("FR-11")]
         [Test]
         public async Task RevokeAllRefreshTokens_ShouldMarkAllRevoked()

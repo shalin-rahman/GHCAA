@@ -43,6 +43,8 @@ export class AdminCampaigns implements OnInit {
     selectedCampaign = signal<Campaign | null>(null);
     pledges = signal<CampaignPledge[]>([]);
     pledgesLoading = signal(false);
+    saving = signal(false);
+    confirmingReceipt = signal(false);
 
     tiers = signal<DonorRecognitionTier[]>([]);
     newTier = { name: '', minimumAmount: 0, description: '' };
@@ -87,6 +89,7 @@ export class AdminCampaigns implements OnInit {
     }
 
     submitCampaign() {
+        if (this.saving()) return;
         if (!this.form.title || !this.form.slug || !this.form.story || this.form.targetAmount <= 0 || !this.form.startsOn) {
             this.notify.error('Please complete all required fields.');
             return;
@@ -108,13 +111,18 @@ export class AdminCampaigns implements OnInit {
             ? this.campaignService.updateCampaign({ ...payload, id: editingId, isArchived: this.form.isArchived })
             : this.campaignService.createCampaign(payload);
 
+        this.saving.set(true);
         request.subscribe({
             next: () => {
+                this.saving.set(false);
                 this.notify.success(editingId ? 'Campaign updated.' : 'Campaign created.');
                 this.showForm.set(false);
                 this.loadCampaigns();
             },
-            error: (err) => this.notify.error(err?.error?.message || 'Could not save the campaign.')
+            error: (err) => {
+                this.saving.set(false);
+                this.notify.error(err?.error?.message || 'Could not save the campaign.');
+            }
         });
     }
 
@@ -133,6 +141,7 @@ export class AdminCampaigns implements OnInit {
     }
 
     confirmReceipt(pledge: CampaignPledge) {
+        if (this.confirmingReceipt()) return;
         const amount = prompt(`Amount received for ${pledge.donorName}'s pledge of ৳${pledge.amount}?`, String(pledge.amount));
         if (!amount) return;
         const parsed = parseFloat(amount);
@@ -141,14 +150,19 @@ export class AdminCampaigns implements OnInit {
             return;
         }
 
+        this.confirmingReceipt.set(true);
         this.campaignService.confirmReceipt(pledge.id, parsed).subscribe({
             next: () => {
+                this.confirmingReceipt.set(false);
                 this.notify.success('Receipt confirmed — recorded in the financial ledger.');
                 const campaign = this.selectedCampaign();
                 if (campaign) this.viewPledges(campaign);
                 this.loadCampaigns();
             },
-            error: () => this.notify.error('Could not confirm receipt.')
+            error: () => {
+                this.confirmingReceipt.set(false);
+                this.notify.error('Could not confirm receipt.');
+            }
         });
     }
 

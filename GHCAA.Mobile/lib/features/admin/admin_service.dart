@@ -188,9 +188,9 @@ class AdminService {
     }
   }
 
-  Future<bool> removeMemberFromCommittee(int ecMemberId) async {
+  Future<bool> removeMemberFromCommittee(int ecMemberId, {bool notifyMember = false}) async {
     try {
-      final response = await _dio.delete('/admin/governance/members/$ecMemberId');
+      final response = await _dio.delete('/admin/governance/members/$ecMemberId', queryParameters: {'notifyMember': notifyMember});
       return response.statusCode == 200;
     } catch (e) {
       debugPrint('AdminService.removeMemberFromCommittee failed: $e');

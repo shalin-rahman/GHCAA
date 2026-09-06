@@ -90,17 +90,18 @@ export class ElectionsPage implements OnInit {
 
     /* --- Letterhead -----------------------------------------------------------
        The pad is the association letterhead: crest, name, address block and the
-       reference/date strip. Values come from OrgConfigService so the printed form
-       carries the same contact details as the rest of the site, with the seeded
-       fallbacks used when the API has not answered yet. */
+       reference/date strip. Values come from OrgConfigService, which is always
+       populated by the time a route renders — APP_INITIALIZER blocks bootstrap on
+       loadConfig(), and that falls back to the build-time profile pack fallback
+       (ORG_CONFIG_FALLBACK) rather than leaving config() empty on API failure. */
 
     /** Constitution, Article I: the official founding date, printed in the pad footer. */
     get establishedOn(): string {
-        return this.orgConfigService.config()?.branding?.establishedOn || '29 Nov 2025';
+        return this.orgConfigService.config()?.branding?.establishedOn ?? '';
     }
 
     get orgName(): string {
-        return this.orgConfigService.config()?.branding?.fullName || 'Govt. Haraganga College Alumni Association';
+        return this.orgConfigService.config()?.branding?.fullName ?? '';
     }
 
     get crestUrl(): string {

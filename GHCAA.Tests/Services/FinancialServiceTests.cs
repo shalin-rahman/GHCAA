@@ -81,8 +81,8 @@ public class FinancialServiceTests : TestBase
     }
 
     [Category("FR-21")]
-        [Category("FR-22")]
-        [Test]
+    [Category("FR-22")]
+    [Test]
     public async Task RecordPaymentAsync_ShouldAddPaymentAndReturnDto()
     {
         var member = await CreateActiveMemberWithHistoryAsync("Payer", "fsp@e.com", "FSP1");
@@ -97,6 +97,14 @@ public class FinancialServiceTests : TestBase
         var dbPayment = await _context.PaymentHistories.FirstOrDefaultAsync(p => p.TransactionId == "TRX-FSP-100");
         dbPayment.Should().NotBeNull();
         dbPayment!.MemberId.Should().Be(member.Id);
+
+        // 82.21: the in-app notification routes through PAYMENT_RECEIVED, the same template
+        // code SendIndividualEmailAsync just used above for the email side.
+        _notificationMock.Verify(x => x.CreateNotificationFromTemplateAsync(
+            member.Id, Constants.TemplateCodes.PaymentReceived, Enums.NotificationType.GeneralSystem,
+            It.IsAny<string>(), It.IsAny<string>(),
+            It.Is<Dictionary<string, string>?>(v => v != null && v["Amount"] == "500.00" && v["TrxID"] == "TRX-FSP-100"),
+            It.IsAny<string?>(), It.IsAny<System.Threading.CancellationToken>()), Times.Once);
     }
 
     // 82.32: a guest event payment (AllowNonMembers) reaches this with no MemberId at all.
@@ -105,7 +113,7 @@ public class FinancialServiceTests : TestBase
     // and that recording one does not attempt member-scoped notification/receipt-storage side
     // effects that would themselves throw for a member that does not exist.
     [Category("FR-22")]
-        [Test]
+    [Test]
     public async Task RecordPaymentAsync_WithNullMemberId_RecordsGuestPaymentWithoutThrowing()
     {
         var dto = new CreatePaymentHistoryDto { MemberId = null, Amount = 200, TransactionId = "TRX-GUEST-1", PaidAt = DateTime.UtcNow, Notes = "Guest event fee" };
@@ -120,6 +128,24 @@ public class FinancialServiceTests : TestBase
         _notificationMock.Verify(x => x.CreateNotificationAsync(
             It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()),
             Times.Never);
+    }
+
+    [Test]
+    public async Task UpdatePaymentStatusAsync_Completed_NotifiesThroughPaymentStatusUpdatedTemplate()
+    {
+        var member = await CreateActiveMemberWithHistoryAsync("Payer2", "fsp2@e.com", "FSP2");
+        var payment = new PaymentHistory { MemberId = member.Id, Amount = 500, TransactionId = "FSM-T300", Status = Enums.PaymentStatus.Pending, PaidAt = DateTime.UtcNow };
+        _context.PaymentHistories.Add(payment);
+        await _context.SaveChangesAsync();
+
+        await _service.UpdatePaymentStatusAsync(payment.Id, Enums.PaymentStatus.Completed);
+
+        // 82.21: this routes through PAYMENT_STATUS_UPDATED so an admin-edited template
+        // changes the in-app text too, not just an untouched literal string.
+        _notificationMock.Verify(x => x.CreateNotificationFromTemplateAsync(
+            member.Id, Constants.TemplateCodes.PaymentStatusUpdated, Enums.NotificationType.GeneralSystem,
+            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<string?>(),
+            It.IsAny<System.Threading.CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -138,7 +164,7 @@ public class FinancialServiceTests : TestBase
     }
 
     [Category("FR-20")]
-        [Test]
+    [Test]
     public async Task GenerateAnnualDuesAsync_ShouldCreateDuesForActiveMembers()
     {
         var member = await CreateActiveMemberWithHistoryAsync("Active User", "fsg@e.com", "FSG1");
@@ -286,8 +312,8 @@ public class FinancialServiceTests : TestBase
     }
 
     [Category("FR-25")]
-        [Category("FR-44")]
-        [Test]
+    [Category("FR-44")]
+    [Test]
     public async Task DeletePaymentAsync_ShouldRemovePaymentAndLogActivity()
     {
         var p = new PaymentHistory { MemberId = 1, TransactionId = "DEL-T1", Amount = 100, Status = Enums.PaymentStatus.Completed, PaidAt = DateTime.UtcNow };
@@ -306,6 +332,83 @@ public class FinancialServiceTests : TestBase
         stillThere.Should().NotBeNull("a payment must never be physically removed");
         stillThere!.IsDeleted.Should().BeTrue();
         stillThere.DeletedByAdminId.Should().Be(1);
+    }
+
+    // 80.13: extracted from FinancialsController/GatewaysController so neither touches
+    // ApplicationDbContext directly.
+    [Test]
+    public async Task GetPaymentOwnerMemberIdAsync_ReturnsMemberId_WhenPaymentExists()
+    {
+        var member = await CreateMinimalMemberAsync("Owner1");
+        var payment = new PaymentHistory { MemberId = member.Id, Amount = 100, TransactionId = "T1", PaidAt = DateTime.UtcNow };
+        _context.PaymentHistories.Add(payment);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetPaymentOwnerMemberIdAsync(payment.Id);
+
+        result.Should().Be(member.Id);
+    }
+
+    [Test]
+    public async Task GetPaymentOwnerMemberIdAsync_ReturnsNull_WhenPaymentDoesNotExist()
+    {
+        var result = await _service.GetPaymentOwnerMemberIdAsync(999);
+
+        result.Should().BeNull();
+    }
+
+    [Test]
+    public async Task GetMemberIdForUserAsync_ReturnsMemberId_WhenUserExists()
+    {
+        var member = await CreateMinimalMemberAsync("UserLink1");
+        var user = new User { Username = "u", PasswordHash = "h", SecurityStamp = "s", CreatedAt = DateTime.UtcNow, MemberId = member.Id };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetMemberIdForUserAsync(user.Id);
+
+        result.Should().Be(member.Id);
+    }
+
+    [Test]
+    public async Task IsGatewayPaymentAlreadyProcessedAsync_ReturnsTrue_OnlyWhenCompletedWithMatchingGatewayId()
+    {
+        var payment = new PaymentHistory { MemberId = 1, Amount = 100, TransactionId = "T2", PaidAt = DateTime.UtcNow, GatewayPaymentId = "gw-1", Status = Enums.PaymentStatus.Completed };
+        _context.PaymentHistories.Add(payment);
+        await _context.SaveChangesAsync();
+
+        (await _service.IsGatewayPaymentAlreadyProcessedAsync("gw-1")).Should().BeTrue();
+        (await _service.IsGatewayPaymentAlreadyProcessedAsync("gw-unknown")).Should().BeFalse();
+    }
+
+    [Test]
+    public async Task GetPaymentSnapshotByTransactionIdAsync_ReturnsMappedDto()
+    {
+        var member = await CreateMinimalMemberAsync("Snap1");
+        var payment = new PaymentHistory { MemberId = member.Id, Amount = 250, TransactionId = "T3", PaidAt = DateTime.UtcNow, Notes = "n" };
+        _context.PaymentHistories.Add(payment);
+        await _context.SaveChangesAsync();
+
+        var dto = await _service.GetPaymentSnapshotByTransactionIdAsync("T3");
+
+        dto.Should().NotBeNull();
+        dto!.Id.Should().Be(payment.Id);
+        dto.MemberId.Should().Be(member.Id);
+        dto.Amount.Should().Be(250);
+        dto.Notes.Should().Be("n");
+    }
+
+    [Test]
+    public async Task StampGatewayPaymentIdAsync_PersistsGatewayPaymentId()
+    {
+        var payment = new PaymentHistory { MemberId = 1, Amount = 100, TransactionId = "T4", PaidAt = DateTime.UtcNow };
+        _context.PaymentHistories.Add(payment);
+        await _context.SaveChangesAsync();
+
+        await _service.StampGatewayPaymentIdAsync(payment.Id, "gw-stamped");
+
+        var updated = await _context.PaymentHistories.FindAsync(payment.Id);
+        updated!.GatewayPaymentId.Should().Be("gw-stamped");
     }
 }
 

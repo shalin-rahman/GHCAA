@@ -1,0 +1,25 @@
+{
+  "Hostname": "https://example.org",
+  "Title": "Alumni | Sample Alumni Association Official Portal",
+  "MetaDescription": "Official portal of the Alumni Association. Reconnecting graduates worldwide through heritage, networking, and advancement.",
+  "MetaKeywords": "Alumni, Alumni Association, Sample Institution, Graduates",
+  "JsonLd": {
+    "Name": "Sample Alumni Association",
+    "AlternateName": "SAA",
+    "Description": "Official portal of the Sample Alumni Association. Reconnecting Sample Institution alumni worldwide through heritage, networking, and advancement.",
+    "ParentOrgName": "Sample Institution",
+    "AddressLocality": "",
+    "AddressCountry": ""
+  },
+  "SitemapPages": [
+    { "Path": "/", "Priority": "1.0", "ChangeFreq": "weekly" },
+    { "Path": "/about", "Priority": "0.8", "ChangeFreq": "monthly" },
+    { "Path": "/contact", "Priority": "0.6", "ChangeFreq": "monthly" },
+    { "Path": "/events", "Priority": "0.7", "ChangeFreq": "weekly" },
+    { "Path": "/news", "Priority": "0.7", "ChangeFreq": "weekly" },
+    { "Path": "/gallery", "Priority": "0.5", "ChangeFreq": "monthly" },
+    { "Path": "/jobs", "Priority": "0.6", "ChangeFreq": "weekly" },
+    { "Path": "/constitution", "Priority": "0.4", "ChangeFreq": "yearly" },
+    { "Path": "/register", "Priority": "0.9", "ChangeFreq": "monthly" }
+  ]
+}

@@ -53,9 +53,9 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
-        [TestCase("123456", true, typeof(OkObjectResult))]
-        [TestCase("wrong", false, typeof(BadRequestObjectResult))]
-        public async Task VerifyEmail_ReturnsResultMatchingServiceOutcome(string otpCode, bool serviceResult, System.Type expectedResultType)
+        [TestCase("123456", true, 200)]
+        [TestCase("wrong", false, 400)]
+        public async Task VerifyEmail_ReturnsResultMatchingServiceOutcome(string otpCode, bool serviceResult, int expectedStatusCode)
         {
             var dto = new VerifyEmailDto { Email = "test@test.com", OtpCode = otpCode };
             _memberServiceMock.Setup(x => x.VerifyEmailAsync("test@test.com", otpCode, It.IsAny<CancellationToken>()))
@@ -63,7 +63,10 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.VerifyEmail(dto, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf(expectedResultType));
+            // 82.4: OK still returns OkObjectResult; a failure now returns Problem()'s ObjectResult
+            // rather than a BadRequestObjectResult, so status code is the shared shape to check.
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(expectedStatusCode));
         }
     }
 }

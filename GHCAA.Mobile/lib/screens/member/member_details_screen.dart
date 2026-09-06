@@ -40,13 +40,22 @@ final memberDetailsProvider = FutureProvider.family<Map<String, dynamic>?, int>(
   }
 });
 
-class MemberDetailsScreen extends ConsumerWidget {
+class MemberDetailsScreen extends ConsumerStatefulWidget {
   final int memberId;
 
   const MemberDetailsScreen({super.key, required this.memberId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MemberDetailsScreen> createState() => _MemberDetailsScreenState();
+}
+
+class _MemberDetailsScreenState extends ConsumerState<MemberDetailsScreen> {
+  bool _processingAudit = false;
+
+  int get memberId => widget.memberId;
+
+  @override
+  Widget build(BuildContext context) {
     final detailsAsync = ref.watch(memberDetailsProvider(memberId));
     final adminAsync = ref.watch(isAdminProvider);
     final isAdmin = adminAsync.value ?? false;
@@ -249,7 +258,7 @@ class MemberDetailsScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => _handleAudit(context, ref, profile['id'], false),
+                    onPressed: _processingAudit ? null : () => _handleAudit(context, ref, profile['id'], false),
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent.withValues(alpha: 0.1), foregroundColor: Colors.redAccent, side: const BorderSide(color: Colors.redAccent, width: 0.5)),
                     child: const Text('REJECT', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
                   ),
@@ -257,7 +266,7 @@ class MemberDetailsScreen extends ConsumerWidget {
                 const SizedBox(width: AppTheme.spaceM),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => _handleAudit(context, ref, profile['id'], true),
+                    onPressed: _processingAudit ? null : () => _handleAudit(context, ref, profile['id'], true),
                     style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold, foregroundColor: Colors.black),
                     child: const Text('APPROVE', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
                   ),
@@ -383,12 +392,14 @@ class MemberDetailsScreen extends ConsumerWidget {
   }
 
   Future<void> _handleAudit(BuildContext context, WidgetRef ref, int id, bool approve) async {
+    if (_processingAudit) return;
     String? reason;
     if (!approve) {
       reason = await _showRejectionDialog(context);
       if (reason == null) return; // Cancelled
     }
 
+    setState(() => _processingAudit = true);
     try {
       final adminProfile = ref.read(userProfileProvider).value;
       final adminId = adminProfile?['id'] ?? 1;
@@ -405,6 +416,8 @@ class MemberDetailsScreen extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Audit Error: $e'), backgroundColor: Colors.redAccent));
       }
+    } finally {
+      if (mounted) setState(() => _processingAudit = false);
     }
   }
 

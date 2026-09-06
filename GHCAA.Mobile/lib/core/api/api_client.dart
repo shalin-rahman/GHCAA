@@ -102,9 +102,15 @@ final dioProvider = Provider<Dio>((ref) {
 
         String message = 'The GHCAA portal encountered a connection hiccup.';
 
-        // Prefer the backend's own error message when present.
-        if (e.response?.data is Map && e.response?.data['message'] != null) {
-          message = e.response?.data['message'];
+        // 82.4: the API now returns one error shape (RFC 7807 ProblemDetails), so 'detail'
+        // (falling back to 'title') is where a server-supplied message lives. 'message' is kept
+        // as a fallback for any response still on the old ad-hoc shape.
+        if (e.response?.data is Map) {
+          final data = e.response?.data as Map;
+          final serverMessage = data['detail'] ?? data['title'] ?? data['message'];
+          if (serverMessage != null) {
+            message = serverMessage.toString();
+          }
         } else if (e.response?.data is String && (e.response?.data as String).isNotEmpty) {
           message = e.response?.data;
         } else {

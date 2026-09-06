@@ -211,6 +211,51 @@ namespace GHCAA.Tests.Services
             dbJob.IsActive.Should().BeFalse();
         }
 
+        // 82.52 batch 3: notifyMember defaults true (matches the unconditional notify these
+        // already did) and can be turned off per action.
+        [Category("FR-54")]
+        [Test]
+        public async Task PostJobAsync_Admin_SkipsNotification_WhenDtoOptsOut()
+        {
+            var member = await CreatePosterMemberAsync("JHA2", "AdminPoster");
+
+            var dto = new CreateJobDto { Title = "Quiet Admin Job", CompanyName = "Tech Corp", Location = "Dhaka", Description = "D", Requirements = "R", JobCategory = Enums.JobCategory.IT, NotifyMembers = false };
+            var result = await _service.PostJobAsync(dto, member.Id, isAdmin: true);
+
+            result.Status.Should().Be(Enums.SubmissionStatus.Approved);
+            _notificationMock.Verify(x => x.CreateNotificationAsync(member.Id, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Category("FR-54")]
+        [Test]
+        public async Task ApproveJobAsync_SkipsNotification_WhenNotifyMemberIsFalse()
+        {
+            var member = await CreatePosterMemberAsync("JHAA2");
+            var job = new JobOpportunity { Title = "Job", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, JobCategory = Enums.JobCategory.IT, Status = Enums.SubmissionStatus.Pending };
+            _context.JobOpportunities.Add(job);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.ApproveJobAsync(job.Id, notifyMember: false);
+
+            result.Should().BeTrue();
+            _notificationMock.Verify(x => x.CreateNotificationAsync(member.Id, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Category("FR-54")]
+        [Test]
+        public async Task RejectJobAsync_SkipsNotification_WhenNotifyMemberIsFalse()
+        {
+            var member = await CreatePosterMemberAsync("JHRJ2");
+            var job = new JobOpportunity { Title = "Job", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, JobCategory = Enums.JobCategory.IT, Status = Enums.SubmissionStatus.Pending };
+            _context.JobOpportunities.Add(job);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.RejectJobAsync(job.Id, "Not relevant", notifyMember: false);
+
+            result.Should().BeTrue();
+            _notificationMock.Verify(x => x.CreateNotificationAsync(member.Id, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
         [Category("FR-54")]
         [Test]
         public async Task GetPendingJobsAsync_ReturnsOnlyPendingJobs()

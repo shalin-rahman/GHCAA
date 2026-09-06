@@ -1,13 +1,16 @@
 using FluentAssertions;
+using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GHCAA.Tests.Services
@@ -16,6 +19,7 @@ namespace GHCAA.Tests.Services
     public class GovernanceServiceTests : TestBase
     {
         private GovernanceService _service = null!;
+        private Mock<INotificationService> _notificationService = null!;
 
         [SetUp]
         public void Setup()
@@ -23,7 +27,8 @@ namespace GHCAA.Tests.Services
             _context.ECMembers.RemoveRange(_context.ECMembers);
             _context.ECPeriods.RemoveRange(_context.ECPeriods);
             _context.SaveChanges();
-            _service = new GovernanceService(_context);
+            _notificationService = new Mock<INotificationService>();
+            _service = new GovernanceService(_context, _notificationService.Object);
         }
 
         [Category("FR-34")]
@@ -84,6 +89,30 @@ namespace GHCAA.Tests.Services
             ecMember.Should().NotBeNull();
             ecMember!.Position.Should().Be(Enums.ECPosition.President);
             ecMember.ChangeReason.Should().Be("Voted");
+
+            // 82.52: default is off — nothing notified this session before this item existed.
+            _notificationService.Verify(n => n.CreateNotificationAsync(
+                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(),
+                It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task AssignMemberToRoleAsync_NotifiesMember_WhenOptedIn()
+        {
+            // Arrange
+            var member = CreateMinimalMember("Notified User");
+            _context.Members.Add(member);
+            var period = await _service.CreatePeriodAsync("Active Period", DateTime.UtcNow.AddDays(-1), null);
+            await _context.SaveChangesAsync();
+
+            // Act
+            await _service.AssignMemberToRoleAsync(period.Id, member.Id, (int)Enums.ECPosition.President, "Voted", notifyMember: true);
+
+            // Assert
+            _notificationService.Verify(n => n.CreateNotificationAsync(
+                member.Id, It.IsAny<string>(), It.IsAny<string>(), Enums.NotificationType.CommitteeAssignment,
+                It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Category("FR-34")]
@@ -107,6 +136,109 @@ namespace GHCAA.Tests.Services
             // Assert
             var updatedECMember = await _context.ECMembers.FindAsync(ecMember.Id);
             updatedECMember!.EndDate.Should().NotBeNull();
+
+            // 82.52: default is off.
+            _notificationService.Verify(n => n.CreateNotificationAsync(
+                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(),
+                It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task RemoveMemberFromCommitteeAsync_NotifiesMember_WhenOptedIn()
+        {
+            // Arrange
+            var member = CreateMinimalMember("Notified User 2");
+            _context.Members.Add(member);
+            var period = await _service.CreatePeriodAsync("Active Period", DateTime.UtcNow.AddDays(-1), null);
+            var ecMember = new ECMember { MemberId = member.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow };
+            _context.ECMembers.Add(ecMember);
+            await _context.SaveChangesAsync();
+
+            // Act
+            await _service.RemoveMemberFromCommitteeAsync(ecMember.Id, notifyMember: true);
+
+            // Assert
+            _notificationService.Verify(n => n.CreateNotificationAsync(
+                member.Id, It.IsAny<string>(), It.IsAny<string>(), Enums.NotificationType.CommitteeAssignment,
+                It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        // 82.29: DeleteECMemberAsync is the separate "this row should never have existed"
+        // path (wrong member added), distinct from RemoveMemberFromCommitteeAsync above (a term
+        // ending). ECMember is Class A, so this must soft-delete with an actor, not Remove().
+        [Category("FR-34")]
+        [Test]
+        public async Task DeleteECMemberAsync_SoftDeletesWithActorAndTimestamp()
+        {
+            // Arrange
+            var member = CreateMinimalMember("Wrongly Added");
+            _context.Members.Add(member);
+            var period = await _service.CreatePeriodAsync("Active Period", DateTime.UtcNow.AddDays(-1), null);
+
+            var ecMember = new ECMember { MemberId = member.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow };
+            _context.ECMembers.Add(ecMember);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _service.DeleteECMemberAsync(ecMember.Id, adminId: 9);
+
+            // Assert
+            result.Should().BeTrue();
+            var stored = await _context.ECMembers.IgnoreQueryFilters().FirstAsync(em => em.Id == ecMember.Id);
+            stored.IsDeleted.Should().BeTrue();
+            stored.DeletedByAdminId.Should().Be(9);
+            stored.DeletedAt.Should().NotBeNull();
+
+            // The row must disappear from ordinary reads once deleted (the query filter), the same
+            // way a soft-deleted PaymentHistory row disappears from ordinary financial queries.
+            (await _context.ECMembers.FirstOrDefaultAsync(em => em.Id == ecMember.Id)).Should().BeNull();
+
+            // 82.52: default is off — this is the "wrong entry" correction path, rarely wanted.
+            _notificationService.Verify(n => n.CreateNotificationAsync(
+                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Enums.NotificationType>(),
+                It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task DeleteECMemberAsync_NotifiesMember_WhenOptedIn()
+        {
+            // Arrange
+            var member = CreateMinimalMember("Notified User 3");
+            _context.Members.Add(member);
+            var period = await _service.CreatePeriodAsync("Active Period", DateTime.UtcNow.AddDays(-1), null);
+            var ecMember = new ECMember { MemberId = member.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow };
+            _context.ECMembers.Add(ecMember);
+            await _context.SaveChangesAsync();
+
+            // Act
+            await _service.DeleteECMemberAsync(ecMember.Id, adminId: 9, notifyMember: true);
+
+            // Assert
+            _notificationService.Verify(n => n.CreateNotificationAsync(
+                member.Id, It.IsAny<string>(), It.IsAny<string>(), Enums.NotificationType.CommitteeAssignment,
+                It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task DeleteECMemberAsync_ReturnsFalse_WhenAlreadyDeleted()
+        {
+            // Arrange
+            var member = CreateMinimalMember("Already Deleted");
+            _context.Members.Add(member);
+            var period = await _service.CreatePeriodAsync("Active Period", DateTime.UtcNow.AddDays(-1), null);
+
+            var ecMember = new ECMember { MemberId = member.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow, IsDeleted = true };
+            _context.ECMembers.Add(ecMember);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _service.DeleteECMemberAsync(ecMember.Id, adminId: 9);
+
+            // Assert
+            result.Should().BeFalse();
         }
 
         [Category("FR-34")]

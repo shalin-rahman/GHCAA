@@ -1,4 +1,4 @@
-using GHCAA.API.Extensions;
+﻿using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
@@ -32,17 +32,17 @@ namespace GHCAA.API.Controllers
             if (photo != null)
             {
                 var photoValidation = _fileValidationService.ValidateFormFile(photo, FileCategory.Image, 5 * 1024 * 1024);
-                if (!photoValidation.IsValid) return BadRequest(new { Message = photoValidation.ErrorMessage });
+                if (!photoValidation.IsValid) return Problem(detail: photoValidation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
             }
             if (certificate != null)
             {
                 var certValidation = _fileValidationService.ValidateFormFile(certificate, FileCategory.Document, 10 * 1024 * 1024);
-                if (!certValidation.IsValid) return BadRequest(new { Message = certValidation.ErrorMessage });
+                if (!certValidation.IsValid) return Problem(detail: certValidation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
             }
             if (paymentProof != null)
             {
                 var paymentValidation = _fileValidationService.ValidateFormFile(paymentProof, FileCategory.Document, 10 * 1024 * 1024);
-                if (!paymentValidation.IsValid) return BadRequest(new { Message = paymentValidation.ErrorMessage });
+                if (!paymentValidation.IsValid) return Problem(detail: paymentValidation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
             }
 
             // map IFormFile -> UploadedFileDto (Application DTO)
@@ -74,7 +74,7 @@ namespace GHCAA.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetStatus(int id, [FromQuery] string email, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(email)) return BadRequest(new { Message = "Email is required." });
+            if (string.IsNullOrWhiteSpace(email)) return Problem(detail: "Email is required.", statusCode: StatusCodes.Status400BadRequest);
 
             try
             {
@@ -96,7 +96,7 @@ namespace GHCAA.API.Controllers
 
             if (!isVerified)
             {
-                return BadRequest(new { Message = "Invalid or expired OTP code" });
+                return Problem(detail: "Invalid or expired OTP code", statusCode: StatusCodes.Status400BadRequest);
             }
 
             return Ok(new { Message = "Email verified successfully" });
@@ -110,7 +110,7 @@ namespace GHCAA.API.Controllers
             var success = await _memberService.ResendOtpAsync(dto.Email, cancellationToken);
             if (!success)
             {
-                return BadRequest(new { Message = "Could not resend OTP. Ensure the email is correct and not already verified." });
+                return Problem(detail: "Could not resend OTP. Ensure the email is correct and not already verified.", statusCode: StatusCodes.Status400BadRequest);
             }
 
             return Ok(new { Message = "A new OTP has been sent to your email." });

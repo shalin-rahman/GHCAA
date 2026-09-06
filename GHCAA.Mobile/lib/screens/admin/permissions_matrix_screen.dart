@@ -7,6 +7,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../features/admin/roles_service.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/widgets/confirm_dialog.dart';
 
 final _usersProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(rolesServiceProvider).getUsers();
@@ -28,6 +29,9 @@ class _PermissionsMatrixScreenState
     extends ConsumerState<PermissionsMatrixScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabs;
+  // Shared coarse lock for the rare admin actions below: create/assign/remove all
+  // reload the same user list, so blocking all three while one is in flight is fine.
+  bool _rolesActionBusy = false;
 
   @override
   void initState() {
@@ -189,7 +193,7 @@ class _PermissionsMatrixScreenState
       label: Text(role, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: isSystem ? Colors.black : Colors.white, letterSpacing: 0.5)),
       backgroundColor: isSystem ? AppTheme.royalGold : Colors.white12,
       deleteIcon: isSystem ? null : const Icon(Icons.close, size: 12, color: Colors.white54),
-      onDeleted: isSystem ? null : () => _removeRole(userId, role),
+      onDeleted: (isSystem || _rolesActionBusy) ? null : () => _removeRole(userId, role),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.compact,
@@ -316,15 +320,20 @@ class _PermissionsMatrixScreenState
       ),
     );
 
-    if (result == true && userCtrl.text.isNotEmpty && passCtrl.text.isNotEmpty) {
-      final ok = await ref.read(rolesServiceProvider).createAdmin(userCtrl.text, passCtrl.text, selectedRole);
-      if (mounted) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(ok ? 'Admin account created.' : 'Failed to create admin.'),
-          backgroundColor: ok ? null : Colors.redAccent,
-        ));
-        if (ok) ref.invalidate(_usersProvider);
+    if (result == true && userCtrl.text.isNotEmpty && passCtrl.text.isNotEmpty && !_rolesActionBusy) {
+      setState(() => _rolesActionBusy = true);
+      try {
+        final ok = await ref.read(rolesServiceProvider).createAdmin(userCtrl.text, passCtrl.text, selectedRole);
+        if (mounted) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(ok ? 'Admin account created.' : 'Failed to create admin.'),
+            backgroundColor: ok ? null : Colors.redAccent,
+          ));
+          if (ok) ref.invalidate(_usersProvider);
+        }
+      } finally {
+        if (mounted) setState(() => _rolesActionBusy = false);
       }
     }
   }
@@ -363,47 +372,53 @@ class _PermissionsMatrixScreenState
       ),
     );
 
-    if (result == true && selected != null) {
-      final ok = await ref.read(rolesServiceProvider).assignRole(userId, selected!);
-      if (mounted) {
-        if (ok) ref.invalidate(_usersProvider);
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(ok ? 'Role assigned.' : 'Failed to assign role.'),
-          backgroundColor: ok ? null : Colors.redAccent,
-        ));
+    if (result == true && selected != null && !_rolesActionBusy) {
+      setState(() => _rolesActionBusy = true);
+      try {
+        final ok = await ref.read(rolesServiceProvider).assignRole(userId, selected!);
+        if (mounted) {
+          if (ok) ref.invalidate(_usersProvider);
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(ok ? 'Role assigned.' : 'Failed to assign role.'),
+            backgroundColor: ok ? null : Colors.redAccent,
+          ));
+        }
+      } finally {
+        if (mounted) setState(() => _rolesActionBusy = false);
       }
     }
   }
 
   Future<void> _removeRole(int userId, String role) async {
+    if (_rolesActionBusy) return;
     HapticFeedback.mediumImpact();
-    final ok = await ref.read(rolesServiceProvider).removeRole(userId, role);
-    if (mounted) {
-      if (ok) ref.invalidate(_usersProvider);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(ok ? 'Role removed.' : 'Failed to remove role.'),
-        backgroundColor: ok ? null : Colors.redAccent,
-      ));
+    setState(() => _rolesActionBusy = true);
+    try {
+      final ok = await ref.read(rolesServiceProvider).removeRole(userId, role);
+      if (mounted) {
+        if (ok) ref.invalidate(_usersProvider);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(ok ? 'Role removed.' : 'Failed to remove role.'),
+          backgroundColor: ok ? null : Colors.redAccent,
+        ));
+      }
+    } finally {
+      if (mounted) setState(() => _rolesActionBusy = false);
     }
   }
 
   Future<void> _confirmDeleteRole(String roleName) async {
     HapticFeedback.heavyImpact();
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.midnightSurface,
-        title: const Text('Delete Custom Role?', style: TextStyle(color: Colors.white)),
-        content: Text('This will permanently remove the "$roleName" role. Members assigned this role will lose associated permissions.', style: const TextStyle(color: Colors.white54, fontSize: 12)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('DELETE', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))),
-        ],
-      ),
+    final confirm = await showConfirmDialog(
+      context,
+      title: 'Delete Custom Role?',
+      message: 'This will permanently remove the "$roleName" role. Members assigned this role will lose associated permissions.',
+      confirmLabel: 'Delete',
+      destructive: true,
     );
     // Role deletion endpoint not yet exposed — inform user
-    if (confirm == true && mounted) {
+    if (confirm && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Role deletion requires SuperAdmin API access. Contact system operator.'),
         backgroundColor: Colors.orange,

@@ -11,6 +11,86 @@ namespace GHCAA.Infrastructure.Data
         private static string GetSeedPath(string fileName)
             => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "Seed", fileName);
 
+        // Class 3 seed files per docs/SEED_CLASSIFICATION.md — one institution's own members,
+        // events and payment history, not something every institution starts with. These live
+        // under profiles/<name>/demo-data/ instead of Data/Seed/.
+        private static readonly HashSet<string> DemoDataFiles = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "members.json", "users.json", "user_roles.json", "ec_members.json", "ec_periods.json",
+            "events.json", "galleries.json", "news.json", "financial_records.json",
+            "academic_records.json", "professional_records.json", "photos.json",
+            "payment_histories.json", "membership_dues.json", "membership_histories.json",
+        };
+
+        // Walks up from a starting directory looking for a "profiles" folder. Needed because
+        // AppDomain.CurrentDomain.BaseDirectory and Directory.GetCurrentDirectory() can both land
+        // several levels below the repo root — e.g. dotnet test's working directory is the test
+        // project's bin/Debug/net9.0, five levels down from where profiles/ actually lives, and a
+        // single parent-directory check (as GetSeedPath's Data/Seed fallback uses) isn't enough.
+        private static string? FindProfilesRoot(string startDir)
+        {
+            var dir = startDir;
+            for (var i = 0; i < 6 && dir != null; i++)
+            {
+                var candidate = Path.Combine(dir, "profiles");
+                if (Directory.Exists(candidate)) return candidate;
+                dir = Directory.GetParent(dir)?.FullName;
+            }
+            return null;
+        }
+
+        // Same fallback shape as InstitutionProfileProvider: try the selected institution profile,
+        // then fall back to the "default" pack, file-by-file, checking both the published output
+        // directory and the solution-relative path a local dev run/migration uses.
+        private static string? ResolveDemoDataPath(string fileName)
+        {
+            var orgProfile = Environment.GetEnvironmentVariable("ORG_PROFILE");
+            var profileName = string.IsNullOrWhiteSpace(orgProfile) ? "default" : orgProfile;
+            var namesToTry = profileName == "default" ? new[] { "default" } : new[] { profileName, "default" };
+
+            var profilesRoot = FindProfilesRoot(AppDomain.CurrentDomain.BaseDirectory)
+                ?? FindProfilesRoot(Directory.GetCurrentDirectory());
+            if (profilesRoot == null) return null;
+
+            foreach (var name in namesToTry)
+            {
+                var path = Path.Combine(profilesRoot, name, "demo-data", fileName);
+                if (File.Exists(path)) return path;
+            }
+
+            return null;
+        }
+
+        // Class 1/2 seed files per docs/SEED_CLASSIFICATION.md — structural rows every institution
+        // needs (lookups, email templates) or institution-specific content a profile pack may want
+        // to supply its own copy of (site content, themes, constitution). Unlike demo-data these
+        // live directly under profiles/<name>/, not a demo-data subfolder. No profile pack ships its
+        // own copy of any of these yet, so this always falls through to the existing Data/Seed/ file
+        // below — it only starts mattering once WP62.33-62.36 add per-profile copies.
+        private static readonly HashSet<string> ProfilePackFiles = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "lookups.json", "email_templates.json", "site_content.json", "themes.json", "constitution.json",
+        };
+
+        private static string? ResolveProfilePackPath(string fileName)
+        {
+            var orgProfile = Environment.GetEnvironmentVariable("ORG_PROFILE");
+            var profileName = string.IsNullOrWhiteSpace(orgProfile) ? "default" : orgProfile;
+            var namesToTry = profileName == "default" ? new[] { "default" } : new[] { profileName, "default" };
+
+            var profilesRoot = FindProfilesRoot(AppDomain.CurrentDomain.BaseDirectory)
+                ?? FindProfilesRoot(Directory.GetCurrentDirectory());
+            if (profilesRoot == null) return null;
+
+            foreach (var name in namesToTry)
+            {
+                var path = Path.Combine(profilesRoot, name, fileName);
+                if (File.Exists(path)) return path;
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Resolves and deserializes a Seed JSON file. Static and internal so runtime data
         /// syncers (e.g. <see cref="ConstitutionSeeder"/>) reuse the exact same profile gate and
@@ -22,39 +102,56 @@ namespace GHCAA.Infrastructure.Data
 
             // SECURITY GATE: Never allow 'Visual' profile during migration generation or if not explicitly requested.
             // Keeps test data (Shalin Rahman, etc.) out of the production database snapshot.
-            var isDesign = AppDomain.CurrentDomain.FriendlyName.Contains("ef") ||
-                           AppDomain.CurrentDomain.GetAssemblies().Any(a => a.FullName?.Contains("Microsoft.EntityFrameworkCore.Design") == true);
+            // EF.IsDesignTime is true only inside `dotnet ef`. The old assembly-scan heuristic also
+            // fired during ordinary test runs (the test assembly references the Design package
+            // transitively), which routed Visual-profile test factories through the Class 3
+            // profile-pack path instead of Seed/Visual once real member data moved out of Data/Seed
+            // into profiles/ghc/demo-data — breaking the FamilyLinkRequests fallback that expects
+            // Member 200/201 to exist.
+            var isDesign = EF.IsDesignTime;
 
             var seedSubDir = (profile == "Visual" && !isDesign) ? "Seed/Visual" : "Seed";
 
-            // 1. Try local publish/output directory
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", seedSubDir, fileName);
-
-            // 2. Fallback to base Seed if Visual missing
-            if (profile == "Visual" && !File.Exists(path))
+            // Visual-profile fixtures are e2e test data, not an institution's own history, so they
+            // stay in Seed/Visual untouched rather than routing through the profile pack.
+            string? path = null;
+            if (seedSubDir != "Seed/Visual")
             {
-                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "Seed", fileName);
+                if (DemoDataFiles.Contains(fileName)) path = ResolveDemoDataPath(fileName);
+                else if (ProfilePackFiles.Contains(fileName)) path = ResolveProfilePackPath(fileName);
             }
 
-            // 3. Fallback to solution-relative path (for dev/migrations)
-            if (!File.Exists(path))
+            if (path == null)
             {
-                var current = Directory.GetCurrentDirectory();
-                var infrastructurePath = Path.Combine(current, "GHCAA.Infrastructure");
+                // 1. Try local publish/output directory
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", seedSubDir, fileName);
 
-                // If we are running from GHCAA.API, look in parent
-                if (!Directory.Exists(infrastructurePath))
+                // 2. Fallback to base Seed if Visual missing
+                if (profile == "Visual" && !File.Exists(path))
                 {
-                    var parent = Directory.GetParent(current)?.FullName;
-                    if (parent != null) infrastructurePath = Path.Combine(parent, "GHCAA.Infrastructure");
+                    path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "Seed", fileName);
                 }
 
-                var relPath = Path.Combine(infrastructurePath, "Data", seedSubDir, fileName);
+                // 3. Fallback to solution-relative path (for dev/migrations)
+                if (!File.Exists(path))
+                {
+                    var current = Directory.GetCurrentDirectory();
+                    var infrastructurePath = Path.Combine(current, "GHCAA.Infrastructure");
 
-                if (profile == "Visual" && !File.Exists(relPath))
-                    relPath = Path.Combine(infrastructurePath, "Data", "Seed", fileName);
+                    // If we are running from GHCAA.API, look in parent
+                    if (!Directory.Exists(infrastructurePath))
+                    {
+                        var parent = Directory.GetParent(current)?.FullName;
+                        if (parent != null) infrastructurePath = Path.Combine(parent, "GHCAA.Infrastructure");
+                    }
 
-                path = relPath;
+                    var relPath = Path.Combine(infrastructurePath, "Data", seedSubDir, fileName);
+
+                    if (profile == "Visual" && !File.Exists(relPath))
+                        relPath = Path.Combine(infrastructurePath, "Data", "Seed", fileName);
+
+                    path = relPath;
+                }
             }
 
             if (!File.Exists(path)) return new List<T>();

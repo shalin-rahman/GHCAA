@@ -53,6 +53,7 @@ namespace GHCAA.Domain.Models
         public bool NotifyParticipationApproval { get; set; } = true;
         public bool NotifyRegistrationUpdate { get; set; } = true;
         public bool NotifyRelevantUpdates { get; set; } = true;
+        public bool NotifyCommitteeChanges { get; set; } = true;
 
         public bool IsArchived { get; set; } = false;
         public DateTime LastUpdateDate { get; set; } = DateTime.UtcNow;

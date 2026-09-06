@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
@@ -18,6 +18,7 @@ namespace GHCAA.Tests.Controllers
     {
         private Mock<IAuthService> _authServiceMock = null!;
         private Mock<ITokenService> _tokenServiceMock = null!;
+        private Mock<ISocialAuthConfigService> _socialAuthConfigServiceMock = null!;
         private AuthController _controller = null!;
 
         [SetUp]
@@ -38,7 +39,8 @@ namespace GHCAA.Tests.Controllers
 
             var configMock = new Mock<IConfiguration>();
 
-            _controller = new AuthController(_authServiceMock.Object, _tokenServiceMock.Object, _context, envMock.Object, configMock.Object);
+            _socialAuthConfigServiceMock = new Mock<ISocialAuthConfigService>();
+            _controller = new AuthController(_authServiceMock.Object, _tokenServiceMock.Object, _socialAuthConfigServiceMock.Object, envMock.Object, configMock.Object);
 
             // Provide a real DefaultHttpContext so Response.Cookies.Append works.
             _controller.ControllerContext = new ControllerContext
@@ -51,10 +53,10 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task Login_ReturnsOk_OnSuccess()
         {
-            // Seed a user so the username fallback lookup succeeds (no explicit Id — let SQLite auto-assign).
-            var user = new User { Username = "user", PasswordHash = "ph", SecurityStamp = "stamp", CreatedAt = DateTime.UtcNow };
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            // Stub the username fallback lookup that SetAuthCookiesAsync uses when it can't
+            // resolve the user id from the JWT claim.
+            var user = new User { Id = 1, Username = "user", PasswordHash = "ph", SecurityStamp = "stamp", CreatedAt = DateTime.UtcNow };
+            _authServiceMock.Setup(x => x.GetUserByUsernameAsync("user", It.IsAny<CancellationToken>())).ReturnsAsync(user);
 
             var loginDto = new LoginDto { Username = "user", Password = "password" };
             var responseDto = new TokenResponseDto { Token = "token", MemberId = 1, Username = "user", Role = "Member" };
@@ -80,7 +82,8 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.Login(loginDto, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(401));
         }
     }
 }

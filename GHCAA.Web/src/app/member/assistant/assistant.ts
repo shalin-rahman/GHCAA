@@ -1,7 +1,10 @@
-import { Component, inject, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AssistantService, AssistantResponse } from '../../core/services/assistant.service';
+import { OrgConfigService } from '../../core/services/org-config.service';
+import { SITE_CONTENT } from '../../core/config/site-content.generated';
+import { interpolateOrgTemplate } from '../../core/utils/org-template';
 
 interface ChatMessage {
     id: number;
@@ -20,6 +23,11 @@ interface ChatMessage {
 })
 export class Assistant {
     private assistantService = inject(AssistantService);
+    orgConfig = inject(OrgConfigService);
+
+    assistantName = computed(() =>
+        interpolateOrgTemplate(SITE_CONTENT.assistantName, this.orgConfig.config())
+    );
 
     messages = signal<ChatMessage[]>([]);
     userInput = '';

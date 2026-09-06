@@ -5,7 +5,8 @@ import { firstValueFrom } from 'rxjs';
 import { ProfileService } from '../../core/services/profile.service';
 import { MemberProfile } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName, getCurrentECPosition, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName, TSHIRT_SIZES } from '../../core/constants/app.constants';
+import { getECPositionName, getCurrentECPosition, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, getBloodGroupName, TSHIRT_SIZES, LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { DatePipe } from '@angular/common';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { toWireDate } from '../../core/utils/date.util';
@@ -28,6 +29,7 @@ export class Profile implements OnInit {
     private profileService = inject(ProfileService);
     private notify = inject(NotificationService);
     private datePipe = inject(DatePipe);
+    private lookupService = inject(LookupService);
 
     loading = signal(true);
     saving = signal(false);
@@ -39,13 +41,15 @@ export class Profile implements OnInit {
     private signatureFile: File | null = null;
     profile: any = {};
     ACADEMIC = ACADEMIC_DATA;
-    yearsList = this.ACADEMIC.getYears();
     IS_HSC = IS_HSC;
     degreeOptions = this.ACADEMIC.certificates;
     subjectOptions = this.ACADEMIC.subjects;
     sectorOptions = this.ACADEMIC.sectors;
-    genderOptions = GENDER_OPTIONS;
-    bloodGroupOptions = BLOOD_GROUP_OPTIONS;
+
+    // 82.42: sourced from /lookups/{group} via LookupService, filled in ngOnInit.
+    yearsList: number[] = [];
+    genderOptions: LookupOption[] = [];
+    bloodGroupOptions: LookupOption[] = [];
     tShirtOptions = TSHIRT_SIZES;
 
     ngOnInit() {
@@ -56,6 +60,9 @@ export class Profile implements OnInit {
             },
             error: () => this.loading.set(false)
         });
+        this.lookupService.getAcademicYears().subscribe(years => this.yearsList = years);
+        this.lookupService.getOptions(LOOKUP_GROUPS.Gender).subscribe(opts => this.genderOptions = opts);
+        this.lookupService.getOptions(LOOKUP_GROUPS.BloodGroup).subscribe(opts => this.bloodGroupOptions = opts);
     }
 
     // 29D.8: Single normalization path for a profile response (case-insensitive property

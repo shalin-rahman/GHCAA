@@ -181,6 +181,17 @@ export class AdminRoles implements OnInit {
         });
     }
 
+    toggleUserActive(userId: number, isActive: boolean) {
+        const action = isActive ? 'disable' : 'enable';
+        this.http.post(`/api/roles/users/${userId}/${action}`, {}).subscribe({
+            next: () => {
+                this.notify.success(isActive ? 'User disabled' : 'User enabled');
+                this.loadData();
+            },
+            error: (err) => this.notify.error(err.error?.message || `Failed to ${action} user`)
+        });
+    }
+
     deleteUser(user: any) {
         if (!confirm(`Permanently delete system administrator "${user.username}"?`)) return;
         this.http.delete(`/api/roles/users/${user.id}`).subscribe({

@@ -385,6 +385,8 @@ HOURS_PER_WORKDAY = 8
 PLACEHOLDER = re.compile(r"^\s*\*\[", re.M)
 OPEN_ITEM = re.compile(
     r"^\s*\d+\.\d+[a-z]?\s*\[TODO\][^\n]*(?:\n(?!\s*\d+\.\d+[a-z]?\s*\[)[^\n]*)*", re.M)
+# ONHOLD items are not counted as remaining engineering effort: they're blocked on something
+# outside this session (user action, a business decision) rather than schedulable work.
 PRIORITY = re.compile(r"\*\*Priority: (P[0-4])")
 
 

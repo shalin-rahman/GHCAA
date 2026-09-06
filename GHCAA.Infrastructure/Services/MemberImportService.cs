@@ -22,17 +22,20 @@ namespace GHCAA.Infrastructure.Services
         private readonly IFileStorageService _storage;
         private readonly IUserService _userService;
         private readonly ILogger<MemberImportService> _logger;
+        private readonly IOrgConfigService _orgConfigService;
 
         public MemberImportService(
             ApplicationDbContext db,
             IFileStorageService storage,
             IUserService userService,
-            ILogger<MemberImportService> logger)
+            ILogger<MemberImportService> logger,
+            IOrgConfigService orgConfigService)
         {
             _db = db;
             _storage = storage;
             _userService = userService;
             _logger = logger;
+            _orgConfigService = orgConfigService;
         }
 
         public async Task<byte[]> ExportMembersToExcelAsync(CancellationToken cancellationToken = default)
@@ -131,6 +134,7 @@ namespace GHCAA.Infrastructure.Services
             var result = new MemberImportResultDto();
             Dictionary<string, string> mapping;
             Dictionary<string, string> defaultValues;
+            var orgConfig = await _orgConfigService.GetConfigAsync();
 
             try
             {
@@ -315,7 +319,7 @@ namespace GHCAA.Infrastructure.Services
                     if (string.IsNullOrWhiteSpace(member.Email))
                     {
                         var id = !string.IsNullOrWhiteSpace(member.NID) ? member.NID.Trim() : $"row{row.RowNumber()}";
-                        member.Email = $"{Constants.Defaults.ImportEmailBase}+{id}@gmail.com";
+                        member.Email = $"{orgConfig.Contact.ImportEmailBase}+{id}@gmail.com";
                         result.Errors.Add($"{rowTag}: Email missing — assigned '{member.Email}'");
                     }
 
@@ -336,7 +340,7 @@ namespace GHCAA.Infrastructure.Services
                     // Pre-generate Membership Number to avoid second DB save
                     if (string.IsNullOrWhiteSpace(member.MembershipNumber))
                     {
-                        member.MembershipNumber = $"{Constants.Defaults.MembershipPrefix}{member.NID}";
+                        member.MembershipNumber = $"{orgConfig.Branding.MembershipNumberPrefix}{member.NID}";
                     }
 
                     // ── DUPLICATE RESOLUTION (DB + intra-batch) ──────────────────────────────

@@ -64,9 +64,11 @@
                 <div class="logo-caption-compact">
                     <h3>{{ orgConfigService.config()?.branding?.memberNickname }}</h3>
                     <p>{{ orgConfigService.localePack()?.tagline }}</p>
+                    @if (historyNote) {
                     <p class="history-note" style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8; font-style: italic;">
-                        Upholding the visionary legacy of Mr. Ashutosh Ganguly since 1938.
+                        {{ historyNote }}
                     </p>
+                    }
                 </div>
             </div>
 

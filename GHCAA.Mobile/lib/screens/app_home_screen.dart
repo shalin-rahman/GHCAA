@@ -42,7 +42,8 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
   }
 
   Future<void> _handleBiometricLogin() async {
-    final success = await ref.read(biometricServiceProvider).authenticate(reason: 'Unlock Haragangian Portal');
+    final reason = AppLocalizations.of(context).translate('biometric_unlock_prompt');
+    final success = await ref.read(biometricServiceProvider).authenticate(reason: reason);
     if (success) {
       final creds = await ref.read(storageServiceProvider).getCredentials();
       if (creds != null) {

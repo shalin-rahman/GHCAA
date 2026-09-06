@@ -7,7 +7,6 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using QRCoder;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -18,12 +17,12 @@ namespace GHCAA.Infrastructure.Services
     public class IDCardService : IIDCardService
     {
         private readonly ApplicationDbContext _db;
-        private readonly IConfiguration _config;
+        private readonly IOrgConfigService _orgConfigService;
 
-        public IDCardService(ApplicationDbContext db, IConfiguration config)
+        public IDCardService(ApplicationDbContext db, IOrgConfigService orgConfigService)
         {
             _db = db;
-            _config = config;
+            _orgConfigService = orgConfigService;
             // Set QuestPDF license (Community is free for individual developers/small organizations)
             QuestPDF.Settings.License = LicenseType.Community;
         }
@@ -42,6 +41,10 @@ namespace GHCAA.Infrastructure.Services
             var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             if (member == null) throw new KeyNotFoundException("Member not found");
 
+            var org = await _orgConfigService.GetConfigAsync();
+            var accentColor = org.Branding.AccentColor;
+            var primaryColor = org.Branding.PrimaryColor;
+
             string photoBase64 = "";
             if (!string.IsNullOrEmpty(member.PhotoPath))
             {
@@ -53,7 +56,7 @@ namespace GHCAA.Infrastructure.Services
                 }
             }
 
-            var verifyUrl = $"{_config["GeneralSettings:PortalBaseUrl"]}/verify/{member.MembershipNumber ?? member.Id.ToString()}";
+            var verifyUrl = $"{org.Contact.PortalBaseUrl}/verify/{member.MembershipNumber ?? member.Id.ToString()}";
             var qrBase64 = GetQrDataUri(verifyUrl).Replace("data:image/png;base64,", "");
 
             var photoElement = !string.IsNullOrEmpty(photoBase64)
@@ -63,19 +66,19 @@ namespace GHCAA.Infrastructure.Services
             var svg = $@"<svg width='350' height='200' viewBox='0 0 350 200' xmlns='http://www.w3.org/2000/svg'>
                 <defs>
                     <linearGradient id='cardGrad' x1='0%' y1='0%' x2='100%' y2='100%'>
-                        <stop offset='0%' style='stop-color:#111;stop-opacity:1' />
-                        <stop offset='100%' style='stop-color:#c5a059;stop-opacity:1' />
+                        <stop offset='0%' style='stop-color:{primaryColor};stop-opacity:1' />
+                        <stop offset='100%' style='stop-color:{accentColor};stop-opacity:1' />
                     </linearGradient>
                 </defs>
                 <rect width='100%' height='100%' fill='url(#cardGrad)' rx='15'/>
                 <rect x='10' y='10' width='330' height='180' fill='#ffffff11' rx='10' stroke='#ffffff22'/>
-                
-                <text x='25' y='40' font-family='sans-serif' font-size='14' font-weight='bold' fill='#c5a059' style='text-transform:uppercase; letter-spacing:1px'>GHC Alumni Association</text>
-                
+
+                <text x='25' y='40' font-family='sans-serif' font-size='14' font-weight='bold' fill='{accentColor}' style='text-transform:uppercase; letter-spacing:1px'>{org.Branding.InstitutionAcronym} Alumni Association</text>
+
                 <text x='25' y='85' font-family='sans-serif' font-size='16' font-weight='900' fill='white'>{member.FullName}</text>
                 <text x='25' y='110' font-family='sans-serif' font-size='10' fill='#bdc3c7' font-weight='bold'>M-ID: {member.MembershipNumber ?? "PENDING"}</text>
                 <text x='25' y='125' font-family='sans-serif' font-size='10' fill='#bdc3c7'>{member.MembershipType} Member</text>
-                
+
                 <image href='data:image/png;base64,{qrBase64}' x='25' y='145' width='35' height='35' />
                 <text x='65' y='160' font-family='sans-serif' font-size='8' fill='#bdc3c7'>Scan to verify dossier</text>
 
@@ -91,21 +94,24 @@ namespace GHCAA.Infrastructure.Services
             var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             if (member == null) throw new KeyNotFoundException("Member not found");
 
-            var verifyUrl = $"{_config["GeneralSettings:PortalBaseUrl"]}/verify/{member.MembershipNumber ?? member.Id.ToString()}";
+            var org = await _orgConfigService.GetConfigAsync();
+            var accentColor = org.Branding.AccentColor;
+
+            var verifyUrl = $"{org.Contact.PortalBaseUrl}/verify/{member.MembershipNumber ?? member.Id.ToString()}";
             var qrBase64 = GetQrDataUri(verifyUrl).Replace("data:image/png;base64,", "");
 
             var svg = $@"<svg width='800' height='550' viewBox='0 0 800 550' xmlns='http://www.w3.org/2000/svg'>
                 <rect width='100%' height='100%' fill='#fffaf0'/>
-                <rect x='20' y='20' width='760' height='510' fill='none' stroke='#c5a059' stroke-width='15' rx='10'/>
-                
+                <rect x='20' y='20' width='760' height='510' fill='none' stroke='{accentColor}' stroke-width='15' rx='10'/>
+
                 <text x='400' y='120' font-family='serif' font-size='42' font-weight='bold' text-anchor='middle' fill='#111'>CERTIFICATE OF MEMBERSHIP</text>
                 <text x='400' y='170' font-family='sans-serif' font-size='18' text-anchor='middle' fill='#666'>This institutional record certifies that</text>
-                
-                <text x='400' y='240' font-family='sans-serif' font-size='36' font-weight='900' text-anchor='middle' fill='#c5a059'>{member.FullName}</text>
-                
+
+                <text x='400' y='240' font-family='sans-serif' font-size='36' font-weight='900' text-anchor='middle' fill='{accentColor}'>{member.FullName}</text>
+
                 <text x='400' y='300' font-family='sans-serif' font-size='18' text-anchor='middle' fill='#666'>is a lifetime recognized member of the</text>
-                <text x='400' y='340' font-family='sans-serif' font-size='24' font-weight='bold' text-anchor='middle' fill='#111'>Govt. Haraganga College Alumni Association</text>
-                
+                <text x='400' y='340' font-family='sans-serif' font-size='24' font-weight='bold' text-anchor='middle' fill='#111'>{org.Branding.FullName}</text>
+
                 <text x='400' y='390' font-family='sans-serif' font-size='14' text-anchor='middle' fill='#999'>Registry ID: {member.MembershipNumber ?? "N/A"}</text>
                 <text x='400' y='415' font-family='sans-serif' font-size='12' text-anchor='middle' fill='#999'>Generated on {DateTime.Now:dd MMM yyyy}</text>
 
@@ -122,7 +128,11 @@ namespace GHCAA.Infrastructure.Services
             var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
             if (member == null) throw new KeyNotFoundException();
 
-            var verifyUrl = $"{_config["GeneralSettings:PortalBaseUrl"]}/verify/{member.MembershipNumber ?? member.Id.ToString()}";
+            var org = await _orgConfigService.GetConfigAsync();
+            var accentColor = org.Branding.AccentColor;
+            var primaryColor = org.Branding.PrimaryColor;
+
+            var verifyUrl = $"{org.Contact.PortalBaseUrl}/verify/{member.MembershipNumber ?? member.Id.ToString()}";
 
             var document = Document.Create(container =>
             {
@@ -130,7 +140,7 @@ namespace GHCAA.Infrastructure.Services
                 {
                     page.Size(250, 150);
                     page.Margin(0);
-                    page.PageColor("#111");
+                    page.PageColor(primaryColor);
 
                     page.Content().Padding(10).Column(col =>
                     {
@@ -138,7 +148,7 @@ namespace GHCAA.Infrastructure.Services
                         {
                             row.RelativeItem().Column(inner =>
                             {
-                                inner.Item().Text("GHC ALUMNI ASSOCIATION").FontSize(10).Bold().FontColor("#c5a059");
+                                inner.Item().Text($"{org.Branding.InstitutionAcronym} ALUMNI ASSOCIATION").FontSize(10).Bold().FontColor(accentColor);
                                 inner.Item().PaddingTop(15).Text(member.FullName).FontSize(14).ExtraBold().FontColor(Colors.White);
                                 inner.Item().Text($"M-ID: {member.MembershipNumber ?? "PENDING"}").FontSize(8).FontColor(Colors.Grey.Lighten1);
                                 inner.Item().Text($"{member.MembershipType} Member").FontSize(8).FontColor(Colors.Grey.Lighten1);
@@ -176,7 +186,10 @@ namespace GHCAA.Infrastructure.Services
             var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
             if (member == null) throw new KeyNotFoundException();
 
-            var verifyUrl = $"{_config["GeneralSettings:PortalBaseUrl"]}/verify/{member.MembershipNumber ?? member.Id.ToString()}";
+            var org = await _orgConfigService.GetConfigAsync();
+            var accentColor = org.Branding.AccentColor;
+
+            var verifyUrl = $"{org.Contact.PortalBaseUrl}/verify/{member.MembershipNumber ?? member.Id.ToString()}";
 
             var document = Document.Create(container =>
             {
@@ -186,15 +199,15 @@ namespace GHCAA.Infrastructure.Services
                     page.Margin(40);
                     page.PageColor("#fffaf0");
 
-                    page.Content().Border(5).BorderColor("#c5a059").Padding(50).Column(col =>
+                    page.Content().Border(5).BorderColor(accentColor).Padding(50).Column(col =>
                     {
                         col.Item().AlignCenter().Text("CERTIFICATE OF MEMBERSHIP").FontSize(40).ExtraBold().FontColor("#111");
                         col.Item().PaddingTop(20).AlignCenter().Text("This institutional record certifies that").FontSize(18).Italic().FontColor(Colors.Grey.Darken1);
 
-                        col.Item().PaddingTop(30).AlignCenter().Text(member.FullName).FontSize(48).Black().FontColor("#c5a059");
+                        col.Item().PaddingTop(30).AlignCenter().Text(member.FullName).FontSize(48).Black().FontColor(accentColor);
 
                         col.Item().PaddingTop(30).AlignCenter().Text("is a lifetime recognized member of the").FontSize(18).FontColor(Colors.Grey.Darken1);
-                        col.Item().AlignCenter().Text("Govt. Haraganga College Alumni Association").FontSize(24).Bold().FontColor("#111");
+                        col.Item().AlignCenter().Text(org.Branding.FullName).FontSize(24).Bold().FontColor("#111");
 
                         col.Item().PaddingTop(50).Row(row =>
                         {

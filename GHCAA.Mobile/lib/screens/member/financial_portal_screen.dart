@@ -32,6 +32,7 @@ class FinancialPortalScreen extends ConsumerStatefulWidget {
 
 class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
   final TextEditingController _searchController = TextEditingController();
+  int? _deletingMethodId;
 
   @override
   void initState() {
@@ -406,9 +407,14 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                               const SizedBox(width: 16),
                               IconButton(
                                 icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 16),
-                                onPressed: () async {
-                                    final success = await ref.read(financialServiceProvider).deleteSavedMethod(m['id']);
-                                    if (success) ref.invalidate(savedMethodsProvider);
+                                onPressed: _deletingMethodId == m['id'] ? null : () async {
+                                    setState(() => _deletingMethodId = m['id']);
+                                    try {
+                                      final success = await ref.read(financialServiceProvider).deleteSavedMethod(m['id']);
+                                      if (success) ref.invalidate(savedMethodsProvider);
+                                    } finally {
+                                      if (mounted) setState(() => _deletingMethodId = null);
+                                    }
                                 },
                               )
                             ],

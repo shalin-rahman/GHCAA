@@ -1,10 +1,12 @@
-using System;
+﻿using System;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GHCAA.Domain;
+using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -60,24 +62,29 @@ namespace GHCAA.API.Controllers
         [HttpPost("periods/{id}/members")]
         public async Task<IActionResult> AssignMember(int id, [FromBody] AssignMemberRequest request, CancellationToken cancellationToken)
         {
-            var success = await _governanceService.AssignMemberToRoleAsync(id, request.MemberId, request.Position, request.Reason, cancellationToken);
-            if (!success) return BadRequest(new { Message = "Assignment failed" });
+            var success = await _governanceService.AssignMemberToRoleAsync(id, request.MemberId, request.Position, request.Reason, request.NotifyMember, cancellationToken);
+            if (!success) return Problem(detail: "Assignment failed", statusCode: StatusCodes.Status400BadRequest);
             return Ok(new { Message = "Member assigned to role successfully" });
         }
 
         [HttpDelete("members/{ecMemberId}")]
-        public async Task<IActionResult> RemoveMember(int ecMemberId, CancellationToken cancellationToken)
+        public async Task<IActionResult> RemoveMember(int ecMemberId, [FromQuery] bool notifyMember, CancellationToken cancellationToken)
         {
-            var success = await _governanceService.RemoveMemberFromCommitteeAsync(ecMemberId, cancellationToken);
+            var success = await _governanceService.RemoveMemberFromCommitteeAsync(ecMemberId, notifyMember, cancellationToken);
             if (!success) return NotFound();
             return Ok(new { Message = "Member removed from committee" });
         }
 
         [HttpDelete("members/{ecMemberId}/hard-delete")]
         [GHCAA.API.Filters.RequireStepUp]
-        public async Task<IActionResult> DeleteECMember(int ecMemberId, CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteECMember(int ecMemberId, [FromQuery] bool notifyMember, CancellationToken cancellationToken)
         {
-            var success = await _governanceService.DeleteECMemberAsync(ecMemberId, cancellationToken);
+            // 82.29: a deleted ECMember records who deleted it, so refuse rather than attribute it
+            // to admin 0 when the caller cannot be identified.
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var adminId))
+                return Unauthorized();
+
+            var success = await _governanceService.DeleteECMemberAsync(ecMemberId, adminId, notifyMember, cancellationToken);
             if (!success) return NotFound();
             return Ok(new { Message = "Member role history permanently deleted" });
         }
@@ -103,5 +110,6 @@ namespace GHCAA.API.Controllers
         public int MemberId { get; set; }
         public int Position { get; set; }
         public string? Reason { get; set; }
+        public bool NotifyMember { get; set; } = false;
     }
 }

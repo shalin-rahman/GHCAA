@@ -12,6 +12,7 @@ namespace GHCAA.Application.DTOs
         public MembershipType MembershipType { get; set; }
         public MemberCategory Category { get; set; }
         public bool IsVerified { get; set; }
+        public bool IsArchived { get; set; }
         public int ContributionPoints { get; set; }
         public DateTime AppliedDate { get; set; }
         public bool IsFamilyPublic { get; set; }

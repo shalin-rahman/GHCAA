@@ -142,6 +142,12 @@ Supporting professional and personal connections within the network.
 * **Storage**: Local file storage abstraction with Cloud (S3/Azure) interface readiness.
 * **Automation**: Multi-stage **Sequential CI Pipeline** (Analysis -> API Tests -> UI Tests -> Mobile Tests -> Build).
 * **Observability**: Tiered `ILogger` implementation with SignalR-based real-time admin analytics.
+* **Multi-institution deployment (in progress)**: the codebase supports running for an institution
+  other than GHC through an institution profile pack (`profiles/<name>/`), selected by the
+  `ORG_PROFILE` environment variable at deploy time, rather than by editing source. Left unset,
+  behavior is unchanged from today. Not yet safe to use for a second institution until the real
+  alumni data still written into committed migrations is removed (`docs/TODO.md`, Work Package
+  62.31/82.31). See `docs/INSTITUTION_ONBOARDING.md`.
 
 ---
 

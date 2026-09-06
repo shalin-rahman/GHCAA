@@ -1,5 +1,8 @@
 name: ghcaa_mobile
-description: "GHCAA Mobile App"
+# Dart package name, unrelated to the platform bundle id/applicationId.
+# Renaming it would touch every `package:ghcaa_mobile/...` import in the repo,
+# so it's left alone here — out of scope for the profile-pack swap.
+description: "Alumni association mobile app"
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -58,6 +61,11 @@ dev_dependencies:
   integration_test:
     sdk: flutter
 
+# Base icon/splash config — matches the GHC profile pack's assets, so it's
+# what a plain `dart run flutter_launcher_icons` / `flutter_native_splash:create`
+# still produces. tool/apply_profile.dart generates a per-profile
+# flutter_launcher_icons-<name>.yaml / flutter_native_splash-<name>.yaml pair
+# from profiles/<name>/assets when building a different institution's flavor.
 flutter_icons:
   android: "launcher_icon"
   ios: true

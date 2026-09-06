@@ -10,6 +10,7 @@ import '../../../core/widgets/logo_spinner.dart';
 import '../../../core/utils/app_utils.dart';
 import '../../../features/forum/forum_service.dart';
 import '../../../features/auth/auth_service.dart';
+import '../../../core/widgets/confirm_dialog.dart';
 
 class ForumTopicDetailScreen extends ConsumerStatefulWidget {
   final int topicId;
@@ -137,22 +138,14 @@ class _ForumTopicDetailScreenState extends ConsumerState<ForumTopicDetailScreen>
                                             icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
                                             onPressed: () async {
                                               HapticFeedback.lightImpact();
-                                              final confirm = await showDialog<bool>(
-                                                context: context,
-                                                builder: (ctx) => AlertDialog(
-                                                  backgroundColor: AppTheme.midnightSurface,
-                                                  title: const Text('Delete Topic?', style: TextStyle(color: Colors.white, fontSize: 14)),
-                                                  content: const Text('This will delete the topic and all replies permanently.'),
-                                                  actions: [
-                                                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('CANCEL')),
-                                                    TextButton(
-                                                      onPressed: () => Navigator.pop(ctx, true),
-                                                      child: const Text('DELETE', style: TextStyle(color: Colors.redAccent)),
-                                                    ),
-                                                  ],
-                                                ),
+                                              final confirm = await showConfirmDialog(
+                                                context,
+                                                title: 'Delete Topic?',
+                                                message: 'This will delete the topic and all replies permanently.',
+                                                confirmLabel: 'Delete',
+                                                destructive: true,
                                               );
-                                              if (confirm == true) {
+                                              if (confirm) {
                                                 HapticFeedback.mediumImpact();
                                                 final ok = await ref.read(forumServiceProvider).deleteTopic(topic.id);
                                                 if (ok && context.mounted) {
@@ -243,21 +236,13 @@ class _ForumTopicDetailScreenState extends ConsumerState<ForumTopicDetailScreen>
                                           icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 16),
                                           onPressed: () async {
                                             HapticFeedback.lightImpact();
-                                            final confirm = await showDialog<bool>(
-                                              context: context,
-                                              builder: (ctx) => AlertDialog(
-                                                backgroundColor: AppTheme.midnightSurface,
-                                                title: const Text('Delete Reply?', style: TextStyle(color: Colors.white, fontSize: 14)),
-                                                actions: [
-                                                  TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('CANCEL')),
-                                                  TextButton(
-                                                    onPressed: () => Navigator.pop(ctx, true),
-                                                    child: const Text('DELETE', style: TextStyle(color: Colors.redAccent)),
-                                                  ),
-                                                ],
-                                              ),
+                                            final confirm = await showConfirmDialog(
+                                              context,
+                                              title: 'Delete Reply?',
+                                              confirmLabel: 'Delete',
+                                              destructive: true,
                                             );
-                                            if (confirm == true) {
+                                            if (confirm) {
                                               HapticFeedback.mediumImpact();
                                               final ok = await ref.read(forumServiceProvider).deletePost(post.id);
                                               if (ok) {
