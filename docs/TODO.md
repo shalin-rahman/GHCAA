@@ -6278,7 +6278,7 @@ therefore belong in the Work Package 62 profile pack rather than in code. **Acce
 those files classified, and the organisation-specific ones raised against Work Package 62 as expanded
 items.
 
-82.13 [TODO] **Priority: P3 | Depends on: 82.1.** The documentation set has no architecture decision
+82.13 [DONE 2026-09-06] **Priority: P3 | Depends on: 82.1.** The documentation set has no architecture decision
 records and no operational runbook. `docs/` carries `ARCHITECTURE.md`, `PROJECT_MAP.md` and
 `RENDER_DEPLOYMENT.md`, but there is no `docs/adr/` directory and no document answering how to restore
 the platform after a data loss or a failed migration, which REVIEW.md §22 requires for an operator.
@@ -6288,6 +6288,12 @@ protected super-admin list. Start the record with those, and write the recovery 
 Render actually provides. **Acceptance:** a decision record exists for each decision the audit finds is
 load bearing and undocumented, and an operator who has never seen the system can restore it by following
 the runbook.
+**Resolved 2026-09-06:** `docs/adr/` created (`0001-two-format-date-contract.md`,
+`0002-migrations-apply-automatically-at-startup.md`, `0003-protected-super-admin-list.md`,
+`0004-single-instance-deployment-constraint.md`, `0005-no-api-versioning-compatibility-rule-instead.md`,
+plus a `README.md` index) and `docs/RECOVERY_RUNBOOK.md` written against what Render actually provides —
+including stating plainly that no backup/restore capability for the Neon database is documented anywhere
+in this repo, rather than inventing one. This is also the ADR 82.27 needed to move from PARTIAL to DONE.
 
 82.1 and 82.2 closed 2026-09-04. The report is `docs/ARCHITECTURE_AUDIT_2026-09.md`, 730 lines,
 carrying the §23/§25.11 deliverables and the three §21A.11 reconciliation registers. Items 82.14 to
@@ -6449,7 +6455,7 @@ saved onto that same user. `DeletePaymentAsync`'s linked-dues read, `UpdatePayme
 so there is no tracked entity for `AsNoTracking()` to affect. Full `GHCAA.Tests` suite stayed green
 throughout.
 
-82.20 [TODO] **Priority: P3 | Depends on: none.** The platform cannot run more than one instance, and
+82.20 [DONE 2026-09-06] **Priority: P3 | Depends on: none.** The platform cannot run more than one instance, and
 that limit is nowhere written down. `Program.cs:64` registers `AddOutputCache()` with no distributed
 backing; `OrgConfigService` and `ThemeService` use `IMemoryCache` directly with no cache abstraction;
 `Program.cs:170` registers `AddSignalR()` with no backplane; `ChatHub`'s connection map is a
@@ -6462,6 +6468,11 @@ other, and a config edit clears one cache and not the other. That failure is con
 diagnose precisely because nothing warns it is coming. **Acceptance:** the constraint is written where
 someone about to scale out would find it (deployment docs and an ADR under 82.13's work), naming the
 three specific mechanisms that must change first.
+**Resolved 2026-09-06:** `docs/RENDER_DEPLOYMENT.md` gained a "Scaling beyond one instance" section and
+`docs/adr/0004-single-instance-deployment-constraint.md` was written, both naming the same three
+mechanisms (output cache, `OrgConfigService`/`ThemeService`'s `IMemoryCache`, `ChatHub`'s process-local
+connection map + backplane-less SignalR) and what has to change first (distributed cache backing,
+Redis-backed SignalR backplane) before scaling out.
 
 82.21 [DONE 2026-09-06] **Priority: P3 | Depends on: none.** In-app notifications bypass the template system
 entirely. `EmailTemplate` is a real admin-editable templating mechanism — DB rows with `Code`,
@@ -6517,7 +6528,7 @@ project's existing migration guidance named it. Verified via `dotnet ef migratio
 the three intended `CREATE INDEX`/`DROP INDEX` statements, nothing else. `dotnet build`/`dotnet test`
 617/617, 0 warnings.
 
-82.23 [TODO] **Priority: P2 | Depends on: none.** A 30-file Playwright suite exists and CI never runs
+82.23 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** A 30-file Playwright suite exists and CI never runs
 it. `GHCAA.Web/tests/` covers admin workflows, the alumni directory, article editorial, membership and
 event flows, and gallery; `package.json` defines `test:e2e`; `playwright.config.ts` boots both the API
 and the Angular dev server and polls `/healthz`. Neither `ghcaa-ci-preprod.yml` nor
@@ -6527,8 +6538,12 @@ because nothing runs them they can rot silently. A broken membership-approval fl
 gate the project currently has. Work Packages 14, 20 and 22 wrote these specs; none of them wired the
 suite into CI, which is why this is new rather than a duplicate. **Acceptance:** a CI job runs the
 Playwright suite on the same triggers as the unit tests, and a deliberately broken flow fails it.
+**Resolved 2026-09-06:** added `e2e-tests` to `ghcaa-ci-standard.yml` (needs `ui-tests`, installs
+Chromium via `npx playwright install --with-deps chromium`, runs `npm run test:e2e`). Not verified by
+an actual CI run from this session (no push/PR access) — YAML validated and `test:e2e` /
+`playwright.config.ts` confirmed to exist.
 
-82.24 [TODO] **Priority: P2 | Depends on: none.** `.github/workflows/main.yml` is a weaker duplicate of
+82.24 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** `.github/workflows/main.yml` is a weaker duplicate of
 `ghcaa-ci-standard.yml` and should be deleted. Both trigger on push and pull_request to `main`/`master`.
 `main.yml` targets `dotnet-version: 8.x` while the rest of the project is .NET 9, runs no tests at all
 (build only — no `dotnet test`, no vitest), and uses unpinned action tags. **Why deleting is the fix
@@ -6538,8 +6553,9 @@ means nothing is a check people learn to trust. `ghcaa-ci-standard.yml` already 
 lint/test/build chain on the same branches, so nothing is lost. This looks like a leftover from before
 that workflow existed. **Acceptance:** `main.yml` is gone and the branches it covered are still gated by
 `ghcaa-ci-standard.yml`.
+**Resolved 2026-09-06:** `main.yml` deleted.
 
-82.25 [TODO] **Priority: P2 | Depends on: none.** The mobile release pipeline ships to app stores with
+82.25 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** The mobile release pipeline ships to app stores with
 no test gate. `mobile_deployment.yml` triggers on `push: tags: v*` and goes straight to
 `flutter build appbundle --release` and `flutter build ipa --release`, then uploads to the Play Store
 internal track and TestFlight. There is no `flutter test` step and no `needs:` tying the release to a
@@ -6549,8 +6565,10 @@ never went through CI, ships untested code to app stores, which is the one targe
 cannot be hot-fixed and has to go through review again. **Acceptance:** the release job cannot run
 unless tests for that commit have passed, either through `needs:` or an explicit test step in the
 workflow.
+**Resolved 2026-09-06:** new `test` job (`flutter test --reporter expanded`); `build-android` and
+`build-ios` both gained `needs: [test]`.
 
-82.26 [TODO] **Priority: P3 | Depends on: none.** CI runs no dependency or container scanning — no
+82.26 [DONE 2026-09-06] **Priority: P3 | Depends on: none.** CI runs no dependency or container scanning — no
 CodeQL, no `npm audit`, no `dotnet list package --vulnerable`, no image scan anywhere in
 `.github/workflows/`. **Why the recommendation is deliberately two commands and not a security
 pipeline:** a full SAST/DAST setup would be the overengineering REVIEW.md §4 rules out at this scale.
@@ -6558,8 +6576,12 @@ But `npm audit --audit-level=high` and `dotnet list package --vulnerable` are tw
 caught what 48.9 and 48.17 (a stale `xlsx`, Angular CVEs) had to be found by hand. The justification is
 the cost asymmetry, not thoroughness for its own sake. **Acceptance:** both commands run in CI, and a
 known-vulnerable dependency fails the build rather than being found by a person later.
+**Resolved 2026-09-06:** added to `ghcaa-ci-standard.yml` — `npm audit --audit-level=high` in
+`lint-frontend`, and a `dotnet list package --vulnerable --include-transitive` check in `lint-backend`
+(grepped against its own report text, since the command exits 0 even when it finds one — confirmed
+locally: it currently flags real transitive vulnerabilities in AngleSharp and AutoMapper).
 
-82.27 [PARTIAL 2026-09-06] **Priority: P2 | Depends on: none.** `README.md` told operators something false about
+82.27 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** `README.md` told operators something false about
 how the schema is provisioned: "Schema — created and seeded at startup via EF Core `EnsureCreated()`
 (not migrations); safe to re-run against an existing database." `Program.cs`'s post-boot hook does the
 opposite — `MigrationBootstrapper.EnsureMigratedAsync` runs first and applies real EF Core migrations,
@@ -6570,9 +6592,10 @@ operator reading it concludes the platform has no migration path and plans schem
 82.13 tracks the *absence* of recorded decisions; it does not catch an existing statement being actively
 wrong, which is worse than silence. **Resolved 2026-09-06:** both `README.md` mentions of the schema
 mechanism (Database Setup, Maintenance & Operations) now describe `MigrationBootstrapper` as the real
-path with `EnsureCreated()` as the logged fallback. **Still open:** the ADR for the migration mechanism —
-2026's acceptance asked for one "under 82.13's work," and 82.13 (the ADR set itself) is still `[TODO]`;
-there is nowhere for the ADR to live until that item is built, so this stays PARTIAL rather than DONE.
+path with `EnsureCreated()` as the logged fallback. **Resolved fully 2026-09-06:** 82.13 built `docs/adr/`, and
+`docs/adr/0002-migrations-apply-automatically-at-startup.md` is the ADR this item's acceptance asked
+for — no manual `dotnet ef database update` step exists anywhere in the pipeline; `MigrationBootstrapper`
+runs on every boot and falls back to `EnsureCreated()` only on failure.
 
 82.28 [DONE 2026-09-06] **Priority: P4 | Depends on: none.** `GHCAA.Tests/UnitTest1.cs` is the unmodified
 `dotnet new nunit` scaffold — a single `Assert.Pass()` — sitting in an otherwise well-organised 79-file
@@ -7043,7 +7066,7 @@ TODO-staleness review and book-sync work. **Acceptance:** a published HTML page 
 recent test run's coverage, filterable per service/controller, regenerated without a manual step every
 time the relevant test suite runs.
 
-82.52 [IN PROGRESS 2026-09-06] **Priority: P2 | Depends on: none.** User request 2026-09-06: an admin
+82.52 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** User request 2026-09-06: an admin
 "send notification: yes/no" toggle for EC member added/terminated/removed and event created/updated,
 then extended on follow-up ("check any other functionalities/feature need this") to cover every action
 a research pass could find. Survey (`codebase-explorer`, same date) found no separate "Notice" entity —
@@ -7151,12 +7174,77 @@ backend tests, 410 web tests pass; `flutter analyze` clean, no new golden regres
 broad golden/pixel and cross-file test-order failures seen on a full `flutter test` run reproduce
 identically on a stash of the pre-batch tree — pre-existing, not from this change).
 
-**Remaining batches, not yet built:** News, Polls, membership approval (`MemberService.ApproveMemberAsync`),
-payment-verified (`FinancialService.UpdatePaymentStatusAsync`), Family/FamilyLink, Mentorship. News and
-Polls have zero existing notification wiring today (the survey found this, see above) — those two are
-"add a notification path from scratch," not "gate an existing one," a different shape of work than every
-batch built so far. `FamilyService` vs `FamilyLinkService` overlap (both exist, parallel implementations,
-member-facing) needs a quick check of which is actually live before building the toggle into both.
+**Batch 4 (News) — done 2026-09-06:** News had zero existing notification wiring (per the survey), so
+this is "add a path," not "gate one." `CreateNewsDto.NotifyMembers` (default `true`) gates a new
+`BroadcastNotificationAsync(..., NotificationType.GeneralSystem, ...)` call in `CreateNewsAsync`, but only
+when the saved post actually lands Approved+active (an admin posting straight to the portal) — a
+member's Pending submission has nothing to announce yet. `ApproveArticleAsync` (the publish moment for
+those pending submissions) takes a new `notifyMember = true` parameter and broadcasts on success, same
+type. Reused `GeneralSystem` (maps to the existing `Member.NotifyRelevantUpdates` preference) rather than
+adding a dedicated enum value — no new admin-facing meaning here beyond "relevant update," matching the
+reasoning Batch 2 used for `EventCreation` on updates. `NewsController.ApproveArticle` gained
+`[FromQuery] bool notifyMember = true`. Web: `admin-news.ts`'s create form gets `<app-notify-toggle>`
+next to the visibility checkbox, shown only when creating (not editing, since edits never notify);
+`article-approval.ts`'s review modal gets the same toggle as Gallery/JobHub's, `notifyMember` signal
+reset to `true` on each `viewArticle`. Mobile: no change — `article_approval_screen.dart`'s approve/reject
+are one-tap icon buttons with no confirm dialog at all (not even a reject-reason one), so nothing to wire
+a checkbox into; the backend default of `true` already matches what mobile always sent. Tests: 4 new
+`NewsServiceTests` (create-broadcasts / create-skips-notify / create-skips-when-pending /
+approve-skips-notify), 1 new `NewsControllerTests` case (plus one existing case updated for the new
+signature), 4 new web spec cases (2 admin-news, 2 article-approval).
+
+**Batch 5 (Polls) — done 2026-09-06:** Same "add a path" shape as News — `PollService.CreatePollAsync`
+always made the poll `IsActive = true` immediately, so `CreatePollDto.NotifyMembers` (default `true`)
+gates a `BroadcastNotificationAsync(..., NotificationType.GeneralSystem, ...)` call right after save;
+reused the same type as News for the same reason (no dedicated member-preference distinction was asked
+for). Web: `AdminPollService`'s `CreatePollDto` interface gained `notifyMembers?: boolean`; the create-poll
+modal footer in `polls.html` gets `<app-notify-toggle>`, `newPoll`/`resetForm()` both default it `true`.
+Mobile: no admin poll-creation UI exists in `GHCAA.Mobile` at all (member side only votes), so nothing to
+change there, same gap Batch 2 recorded for Events. Tests: 2 new `PollServiceTests` (broadcasts by
+default / skips when opted out), 2 new `polls.component.spec.ts` cases.
+
+**Batch 6 (Membership approval + payment-verified) — done 2026-09-06:** Grouped together because fixing
+one surfaced the other's identical compile-site shape (`MemberService.ApproveMemberAsync` is called from
+inside `FinancialService`'s own auto-approval-after-payment path). Both already notified
+unconditionally, so this is a straight gate like Batch 3.
+`ApproveMemberAsync(memberId, approvedByAdminId, notifyMember = true, cancellationToken)` gates only the
+in-app `CreateNotificationAsync("Welcome to GHCAA!", ...)` call — the welcome email with login credentials
+still always sends, since that carries the member's password and isn't a "should we announce this"
+choice. The previously-empty `ApproveMemberDto` (body of `AdminController.ApproveMember`) gained
+`NotifyMember` (default `true`); the two system-triggered call sites (`GatewaysController`'s and
+`FinancialService`'s own auto-approve-after-payment paths) keep the default, unchanged, since neither has
+an admin form to expose a toggle on. `FinancialService.UpdatePaymentStatusAsync` (the "Payment Verified"
+in-app notification, separate from the auto-approval it sometimes triggers) gained the same
+`notifyMember = true` gate; `FinancialsController.UpdateStatus` — the admin manual-verify endpoint —
+exposes `[FromQuery] bool notifyMember = true`, but no web or mobile UI calls that endpoint today (grepped
+clean), so the gate is backend-only for now, ready for whenever a manual-verify screen is built. Web:
+`admin.service.ts`'s `approveMember(id, notifyMember = true)` now posts `{ notifyMember }` instead of an
+empty body; **known gap, deliberately not built here** — both web callers
+(`member-approval.ts`/`admin-members.ts`) drive approval through a raw `confirm()` dialog with nowhere to
+put a checkbox, the same shape as Batch 1's `admin-members.ts` hard-delete gap and Batch 3's mobile
+approve-stays-one-tap gap — adding a proper confirm modal is 82.45/82.48's shared-dialog-extraction scope,
+not this item's. Mobile: `resolveApproval`'s approve path is a one-tap icon button in
+`approval_queue_screen.dart` with no dialog either; left unchanged, same reasoning. Tests: 2 new
+`AdminControllerTests` cases, 1 new `MemberServiceTests` case, 2 new `FinancialServiceTests` cases, 2 new
+`FinancialsControllerTests` cases (the endpoint had no test coverage at all before this).
+
+**Mentorship and Family/FamilyLink — checked 2026-09-06, no change needed:** both were on the original
+scope list, but neither fits the mechanism this item built. `MentorshipService.SendRequestAsync`/
+`RespondAsync` and `FamilyLinkService.SendRequestAsync`/`RespondAsync` (confirmed the live implementation —
+`FamilyLinkController` backs every request/respond/link route with `IFamilyLinkService`; `IFamilyService`
+is wired into the same controller only for the read-only name search, so there is no overlap to resolve)
+all notify a single specific counterpart member that the *other* member in a peer-to-peer exchange took an
+action — there is no admin form and no admin actor anywhere in either flow (Mentorship's only admin
+surface is a read-only `GetAllForAdmin` list view). This item's own design decision (stated above) is "a
+per-action checkbox on each admin create/edit form... an admin's per-action choice of whether to send one
+at all" — these two have no admin choice to expose a checkbox for, and muting either notification would
+break the feature itself (the recipient has to learn a request arrived or was answered to act on it). Both
+already use `NotificationType.GeneralSystem`, so each member's own `NotifyRelevantUpdates` preference is
+the existing, correct opt-out — the same pre-existing mechanism this item's design section carved out as
+"unaffected by this item." Closing 82.52 here rather than forcing an inapplicable pattern onto them.
+
+82.52 status: **DONE 2026-09-06.** Batches 1-6 built (EC, Events, Gallery/JobHub, News, Polls, Membership
+approval + payment-verified); Mentorship and Family/FamilyLink confirmed out of scope per above.
 
 82.53 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** User request 2026-09-06: revise the tracker
 for staleness and for batching — group open items that share a file/service/screen so the next session

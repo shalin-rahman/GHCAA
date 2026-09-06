@@ -7,8 +7,28 @@ on:
   workflow_dispatch:
 
 jobs:
+  # 82.25: a tag pushed by hand, or at a commit that never went through CI, used to go straight
+  # to a store release with no test gate — the one target that can't be hot-fixed if it's broken.
+  test:
+    name: Flutter Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+      - name: Install Dependencies
+        run: flutter pub get
+        working-directory: GHCAA.Mobile
+      - name: Run Tests
+        run: flutter test --reporter expanded
+        working-directory: GHCAA.Mobile
+
   build-android:
     name: Build Android
+    needs: [test]
     runs-on: ubuntu-latest
     env:
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -53,6 +73,7 @@ jobs:
 
   build-ios:
     name: Build iOS
+    needs: [test]
     runs-on: macos-latest
     env:
       CERTIFICATE_BASE64: ${{ secrets.IOS_P12_CERTIFICATE }}

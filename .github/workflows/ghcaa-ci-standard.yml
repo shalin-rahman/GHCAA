@@ -19,6 +19,17 @@ jobs:
           dotnet-version: 9.x
       - name: Verify Formatting
         run: dotnet format --verify-no-changes
+      # 82.26: two cheap commands catch what 48.9/48.17 (a stale xlsx, Angular CVEs) had to be
+      # found by hand. `dotnet list package --vulnerable` exits 0 even when it finds one, so grep
+      # its own report text instead of trusting the exit code.
+      - name: Check for vulnerable NuGet packages
+        run: |
+          report=$(dotnet list package --vulnerable --include-transitive)
+          echo "$report"
+          if echo "$report" | grep -q "has the following vulnerable packages"; then
+            echo "Vulnerable package(s) found."
+            exit 1
+          fi
 
   lint-frontend:
     name: Frontend Analysis
@@ -35,6 +46,10 @@ jobs:
       - name: Type Check
         working-directory: GHCAA.Web
         run: npm run type-check
+      # 82.26: fail the build on a known-vulnerable dependency instead of finding it by hand.
+      - name: Audit npm packages
+        working-directory: GHCAA.Web
+        run: npm audit --audit-level=high
 
   lint-mobile:
     name: Mobile Analysis
@@ -121,6 +136,37 @@ jobs:
       - name: Build Check
         working-directory: GHCAA.Web
         run: npm run build
+
+  e2e-tests:
+    name: End-to-End (Playwright)
+    needs: [ui-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        working-directory: GHCAA.Web
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        working-directory: GHCAA.Web
+        run: npx playwright install --with-deps chromium
+
+      # 82.23: playwright.config.ts boots both the API and the Angular dev server itself and
+      # polls /healthz, so this job needs no separate "start the app" step.
+      - name: Run Playwright E2E Suite
+        working-directory: GHCAA.Web
+        run: npm run test:e2e
 
   mobile-tests:
     name: Mobile/Flutter Tests

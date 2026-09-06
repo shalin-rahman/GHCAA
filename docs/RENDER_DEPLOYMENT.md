@@ -193,6 +193,25 @@ git push
 
 ---
 
+## Scaling beyond one instance
+
+This deployment runs a single Render instance, and three mechanisms currently depend on that:
+
+- **Output cache** — `Program.cs` registers `AddOutputCache()` with no distributed backing. A second
+  instance would cache the same route independently; a public-content edit could clear one instance's
+  cache and leave the other serving a stale page.
+- **`OrgConfigService` / `ThemeService`** — both read `IMemoryCache` directly, in-process. A config or
+  theme edit on one instance would not invalidate the other's cache.
+- **SignalR (`ChatHub`)** — `AddSignalR()` has no backplane, and `ChatHub`'s connection map is a
+  process-local `ConcurrentDictionary`. A client connected to one instance never receives a push
+  triggered from the other.
+
+Before adding a second instance, back the output cache and the two service caches with a distributed
+store, and add a Redis (or equivalent) backplane to SignalR. See
+`docs/adr/0004-single-instance-deployment-constraint.md` for the full reasoning.
+
+---
+
 ## Quick reference — env vars at a glance
 
 | Where | Key | Purpose |
