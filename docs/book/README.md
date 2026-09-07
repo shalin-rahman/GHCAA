@@ -275,10 +275,14 @@ states what the code does, and where the two disagree the code is right.
 
 **Keeping the numbers true.** Repository figures quoted in the text go stale as the code moves. The
 ones in the book now were taken on 7 September 2026: 284 endpoint attributes across 38 controllers,
-53 `DbSet` properties, 29 enumerations, 44 service interfaces with 42 implementations, 25 migrations,
-717 passing backend tests, 430 passing web tests, 3,363 lines of `styles.scss`. Re-take them before
-submission with the commands in `docs/PROJECT_MAP.md` and the two test suites, and correct the
-sentences that carry them.
+54 `DbSet` properties (53 domain models plus `DataProtectionKeys`, a framework table added per
+`docs/adr/0007-data-protection-keys-in-database.md` — §6.3.2's "fifty-three entity sets" still means
+the domain models alone, since that count is about §5.7's analysis model, not every table the schema
+has), 29 enumerations, 44 service interfaces with 42
+implementations, 31 migrations (`dotnet ef migrations list` — a plain folder listing undercounts by 5,
+since the earliest migrations predate the `Migrations/PgSql/` subfolder), 717 passing backend tests,
+430 passing web tests, 3,363 lines of `styles.scss`. Re-take them before submission with the commands
+in `docs/PROJECT_MAP.md` and the two test suites, and correct the sentences that carry them.
 
 ## Before submission
 

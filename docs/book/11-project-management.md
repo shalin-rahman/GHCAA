@@ -41,7 +41,7 @@ defined once, here, and used by name everywhere else in the book:
   shape.
 
 `docs/TODO.md` had 82 numbered work packages holding several hundred tracker tasks between them, tied
-to 17 WBS activities and 258 commits, as of 7 September 2026 — five different counts of one project,
+to 17 WBS activities and 260 commits, as of 7 September 2026 — five different counts of one project,
 each answering a different question about it.
 
 *[Rest of this section not written. Brief: the four streams above; the 17 code components each tied to the tracker work packages that produced them, so the activity list and the tracker are one list read two ways]*
