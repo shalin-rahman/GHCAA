@@ -44,7 +44,6 @@ Beyond code/build/tests, this plan validates **whether the product behaves corre
 | `OtpSettings__MaxAttempts` | appsettings | Brute-force limit | `5` |
 | `GeneralSettings__AssociationNamePrefix` | appsettings | Membership prefix | `HARAGANGIAN-` |
 | `PaymentGateways__DGePay__ClientId/Secret/ApiKey` | appsettings | DGePay sandbox | Empty in base config |
-| `DataProtection__KeyRingPath` | optional | Multi-instance key ring | Empty = default |
 
 **Blockers observed (Phase 1):** See `docs/BUSINESS_FINDINGS.md` — ENV-001 (PostgreSQL availability), ENV-002 (appsettings.json placeholder password).
 

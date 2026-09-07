@@ -14,6 +14,11 @@ namespace GHCAA.Infrastructure.Data.Configurations
                 .WithMany(b => b.Expenses)
                 .HasForeignKey(e => e.EventBudgetId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Mirrors EventBudgetConfiguration's own filter one level up: EventBudget hides rows
+            // whose Event is archived, so a required child that doesn't repeat the same filter
+            // makes EF warn that its required parent can be filtered out from under it.
+            builder.HasQueryFilter(e => e.Budget != null && e.Budget.Event != null && e.Budget.Event.IsActive);
         }
     }
 }

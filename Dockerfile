@@ -44,14 +44,23 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Nothing below depends on the "web" stage's output until the final COPY --from=web near the
-# bottom of this file, so without this line BuildKit schedules "web" and "build" concurrently —
-# `ng build` and `dotnet restore`/`dotnet publish` peaking on the same fixed-memory Render build
-# box at once. That is a strong candidate for the 8GB+ OOM on the 2026-09-07 deploy of 983c476,
-# a plain refactor unlikely to have grown either build's own footprint on its own. This COPY of a
-# throwaway file from "web" gives BuildKit a real dependency, forcing "web" to finish (and free
-# its memory) before this stage starts. See also the two 2026-08-30 OOM fixes below (no test
-# project, no separate build+publish pass) — this is the one remaining structural cause.
+# bottom of this file, so without this line BuildKit would schedule "web" and "build"
+# concurrently. Kept because it is a correct, harmless serialization — but the 2026-09-07 build
+# log for commit b281203 shows "web" fully exiting before this stage starts and the deploy still
+# OOM'd, so concurrent stages were ruled out as the cause; see docs/TODO.md 82.53d for the
+# investigation that replaced this theory.
 COPY --from=web /web/package.json /tmp/.web-stage-done
+
+# GHCAA.Infrastructure/Data/Migrations is ~117MB of EF-generated C# across 25+ migrations (each
+# Designer.cs carries a full point-in-time model snapshot, not a diff) — see docs/book §11.5.4 for
+# the same corpus at 81MB causing an earlier OOM. Compiling that much generated code under the SDK
+# image's default server GC (which sizes heap segments per visible CPU core, not per actual need)
+# is the leading suspect for the 2026-09-07 OOM once concurrent-stage scheduling was ruled out.
+# These two settings are a safe, reversible way to test that theory without touching a single
+# migration file: workstation GC caps segment growth, and disabling MSBuild node reuse stops
+# VBCSCompiler worker processes from accumulating memory across the four project builds below.
+ENV DOTNET_gcServer=0
+ENV MSBUILDDISABLENODEREUSE=1
 
 # Copy all .csproj files first (for layer caching)
 COPY ["GHCAA.API/GHCAA.API.csproj", "GHCAA.API/"]
@@ -66,7 +75,7 @@ COPY ["GHCAA.Infrastructure/GHCAA.Infrastructure.csproj", "GHCAA.Infrastructure/
 # suite's WebApplicationFactory-based integration tests (SpaStaticFileFactory boots the whole app
 # per test) on Render's build machine is what pushed a preprod deploy over 8GB and OOM'd
 # (2026-08-30, commit 5546a34). Removing it also makes every future deploy faster.
-RUN dotnet restore "GHCAA.API/GHCAA.API.csproj"
+RUN dotnet restore "GHCAA.API/GHCAA.API.csproj" -maxcpucount:1
 
 # Copy all source code
 COPY . .
@@ -83,7 +92,7 @@ WORKDIR "/src"
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 WORKDIR "/src"
-RUN dotnet publish "GHCAA.API/GHCAA.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "GHCAA.API/GHCAA.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false -maxcpucount:1
 
 FROM base AS final
 WORKDIR /app

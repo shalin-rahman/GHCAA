@@ -46,7 +46,7 @@ set up today. It is not seeded from a file, so you name your own first admin in 
 | `ORG_PROFILE` | Which `profiles/<name>/` folder drives configuration. Leave it unset and the app uses `default`, the neutral sample pack, and logs a warning at boot to remind you |
 | `ConnectionStrings:*` | Your own database |
 | `GeneralSettings:PortalBaseUrl` (appsettings, optional) | Only needed if one environment needs a different portal URL than the profile pack's — a staging subdomain, say |
-| `Jwt:Key`, `DataProtection:KeyRingPath` | Your own secrets. Never copy GHC's |
+| `Jwt:Key` | Your own secret. Never copy GHC's |
 | `AppSettings:ProtectedSuperAdmins` | Your first administrator's username(s) |
 | Payment gateway sandbox/production URLs and the `PaymentConfigurations` database rows | Your own gateway credentials, never GHC's. No gateway keys belong in this repository |
 

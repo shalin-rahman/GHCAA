@@ -7440,7 +7440,7 @@ filename, so this was verified exhaustive rather than found by iterating replay 
 and the one-off scripts used to verify this were deleted; nothing checked in beyond the migration fixes
 themselves.
 
-82.53d [TODO] **Priority: P1 | Depends on: none.** User reported 2026-09-07: a manually triggered Render
+82.53d [PARTIAL 2026-09-07] **Priority: P1 | Depends on: none.** User reported 2026-09-07: a manually triggered Render
 deploy of commit `983c476` (the 82.51 currency-pipe change, a template/service refactor with no new
 dependencies) failed after 2m24s with "Ran out of memory (used over 8GB)". This is the third distinct
 Render-build OOM this project has hit — the `Dockerfile`'s own comments already document two prior
@@ -7458,6 +7458,113 @@ the final memory figure, not a stage-by-stage breakdown, so this is the best-sup
 the Dockerfile's own structure, not a verified fix. **Acceptance:** a fresh manual Render deploy of the
 current preprod HEAD completes without the OOM notice; if it recurs, the full Render build log (not just
 the final summary) is needed to find the actual peak stage.
+
+**Update 2026-09-07, 15:33: mitigation disproven.** User provided the full build log for commit `b281203`
+(deployed after the sequential-build fix above landed) and it still OOM'd. The log confirms the fix
+did what it was supposed to: `#21 [web 10/10] RUN npx ng build ... DONE 15.6s` completes and the `web`
+stage exits *before* `#22 [build 3/10] COPY --from=web ...` starts — the two stages did run sequentially,
+not concurrently. It OOM'd anyway. **Conclusion: stage concurrency was never the cause; that fix should
+stay (it's a correct, harmless serialization) but does not explain this incident.** The log cuts off
+mid-`dotnet publish` (`GHCAA.Application -> ... .dll` at 7.6s into step `#31`), before showing where
+memory actually peaked, so the true culprit is still unidentified — Render's log capture stopped short of
+the OOM point. Ruled out so far: build-context size is unremarkable (`#7 transferring context: 233.55MB`),
+`npm ci` and `ng build` both complete cleanly and quickly (7.5s, 15.6s), `dotnet restore` completes in
+14.7s. Remaining candidates, none yet tested: (a) `dotnet publish`'s static-web-assets fingerprinting
+pass over `wwwroot`'s ~610 committed files may cost more than expected on Render's box even as a single
+pass; (b) Render's Docker build memory ceiling (reportedly ~8GB, independent of the service's runtime
+plan) may simply be too small for a combined Node+.NET multi-stage image regardless of internal
+sequencing, in which case the real fix is structural — e.g. building the Angular bundle in GitHub
+Actions CI and committing/publishing only its static output for this Dockerfile to `COPY`, removing the
+entire Node toolchain from Render's build — not something to guess at further without the missing log
+tail or a repeatable local reproduction. **Needs a decision from the user**, not another blind patch:
+whether to pursue (a) with real profiling, pursue (b)'s CI-prebuild restructure, or check whether Render
+support/docs confirm a hard, unraisable build-memory ceiling.
+
+**Update 2026-09-07, 16:10: root cause found (mostly), fix validated locally.** User asked for a
+systematic pass over the build pipeline rather than more guessing, in this order:
+
+- **Build context contents:** the 233.55MB context (correcting the "unremarkable" note above — the
+  number itself was fine, its *composition* wasn't checked yet) is `GHCAA.Infrastructure` at 119MB,
+  almost entirely `Data/Migrations/PgSql/*.Designer.cs` — 25+ migrations, each carrying a full
+  point-in-time model snapshot rather than a diff, now ~117MB total (docs/book §11.5.4 already
+  documents this same corpus causing an earlier OOM at 81MB; it has only grown since). Second-largest:
+  `GHCAA.API/wwwroot/uploads` at 62MB of committed member photos, matching the 2026-08-30 investigation
+  the Dockerfile already cites. Compiling ~117MB of generated C# is the leading suspect for what
+  actually spikes memory, now that concurrent stages are ruled out.
+- **Unnecessary files in the build context:** found and removed from git tracking — `debug.sql`,
+  `api_stdout.txt`, `api_stderr.txt`, `build_output.txt`, `build_errors.txt`, `build_current.txt`
+  (already gitignored going forward but never untracked from a past commit) and two committed dev
+  SQLite databases, `GHCAA.API/GHCAADB.db` and `GHCAA.API/visual_test.db` (regenerated automatically by
+  EF migrations against `SqliteConnection`, never needed in git). `.gitignore` updated for the two `.db`
+  files and `debug.sql`. Small in bytes (a few MB combined) but zero legitimate reason to ship them.
+- **`wwwroot/uploads`'s 62MB of member photos left untouched** — per
+  `project_uploads_ephemeral_storage` this is very likely the deliberate (if crude) mechanism keeping
+  uploads alive across Render redeploys given no persistent Disk is mounted, so removing it needs the
+  user's decision, not a unilateral cleanup during an OOM investigation.
+- **Compiler-memory mitigation, without touching a single migration file** (user's explicit
+  instruction): `ENV DOTNET_gcServer=0` (workstation GC caps heap-segment growth instead of sizing
+  segments per visible CPU core) and `ENV MSBUILDDISABLENODEREUSE=1` (stops VBCSCompiler worker
+  processes persisting across the four project builds), plus `-maxcpucount:1` on both the `dotnet
+  restore` and `dotnet publish` `RUN` lines to stop MSBuild from compiling multiple projects' Roslyn
+  workers in parallel. **Validated locally**: `docker build --memory=8g --memory-swap=8g` (Docker's own
+  build-container memory cap, reproducing Render's ceiling) previously would have died at the same
+  point the real deploy did; with these four settings in place, a full build completed end-to-end
+  under the 8GB cap (`dotnet publish`'s `GHCAA.Infrastructure` compile took 239.7s instead of ~5s
+  uncapped — much slower, but it finished rather than OOMing). This is real evidence the mitigation
+  works, not just a plausible theory this time. The earlier sequential-stage `COPY --from=web` fix
+  stays too — harmless, and it did rule out one theory correctly.
+- **Not touched, and not needed to close this out:** the sequential-build `COPY --from=web` line (kept
+  as a correct no-op fix); the migration corpus itself (squashing/baselining old migrations would
+  shrink it further, but that's schema-adjacent work explicitly out of scope for this incident, and a
+  separate exercise if the corpus keeps growing); a Render plan/build-instance upgrade (not needed now
+  that the build fits in 8GB with these settings, but worth knowing the option exists if the corpus
+  keeps growing and eventually outgrows this mitigation again).
+
+**Status: DONE pending a real Render deploy confirming it.** Local Docker reproduction is strong
+evidence but not the same box; next manual Render deploy is the actual acceptance test.
+
+82.53e [DONE 2026-09-07] **Priority: P1 | Depends on: none.** User flagged an EF Core startup warning
+alongside 82.53d's build investigation: `EventExpense.Budget` is a required relationship
+(`EventBudgetId` is non-nullable) to `EventBudget`, which itself has a query filter
+(`b.Event != null && b.Event.IsActive`) hiding budgets whose event is archived — the same pattern
+`EventBudgetConfiguration.cs` already documents fixing one level up, between `EventBudget` and
+`AlumniEvent`. `EventExpense` had no filter of its own, so its required parent could be silently
+filtered out from under it. **Fix:** added a matching
+`HasQueryFilter(e => e.Budget != null && e.Budget.Event != null && e.Budget.Event.IsActive)` to
+`EventExpenseConfiguration.cs`, same shape as the existing fix one level up. No migration needed —
+query filters aren't part of the schema. **Verified:** `dotnet build GHCAA.Infrastructure` clean, 0
+warnings (was 1); `dotnet test` still 717/717 passing.
+
+82.53f [DONE 2026-09-07] **Priority: P1 | Depends on: none.** User flagged a Data Protection startup
+warning in the same log: keys were falling back to
+`/root/.aspnet/DataProtection-Keys`, ASP.NET Core's ephemeral default. Root cause: Render's
+`ASPNETCORE_ENVIRONMENT` is set to `Preprod` (`docs/RENDER_DEPLOYMENT.md`), not the `Production` the
+Dockerfile's own `ENV` bakes in as a default — so `appsettings.Preprod.json` loads instead of
+`appsettings.Production.json`, and `appsettings.Preprod.json` had no `DataProtection:KeyRingPath` key
+at all. `Program.cs`'s `if (!string.IsNullOrWhiteSpace(keyRingPath))` guard was then false, so
+`AddDataProtection()` was never even called with custom persistence. Simply adding
+`KeyRingPath` to `appsettings.Preprod.json` (copying Production's `/data/keys`) would not have actually
+fixed anything — per `project_uploads_ephemeral_storage`, this Render service has no persistent Disk
+mounted at all, so any file path is exactly as ephemeral as the ASP.NET default; every redeploy would
+still rotate the key ring regardless of which path it wrote to. **Fix:** keys now persist to the
+existing PostgreSQL database instead of any file path — the one thing here that actually survives a
+redeploy. `ApplicationDbContext` implements `IDataProtectionKeyContext` (new
+`DbSet<DataProtectionKey> DataProtectionKeys`), `Program.cs` calls
+`.PersistKeysToDbContext<ApplicationDbContext>()` instead of `.PersistKeysToFileSystem(...)` (resolves
+the context lazily at first key access, so it doesn't matter that `AddInfrastructure()`, which
+registers it, runs after this line), and a new migration
+(`20260907120000_AddDataProtectionKeys`) adds the `DataProtectionKeys` table. Hand-written rather than
+scaffolded — `dotnet ef migrations add` pulled in the same spurious `AcademicRecords`/`PaymentHistories`
+seed-drift noise `82.53a`'s comment already names (see `gotcha_ef_migrations_add_remove_corrupts_snapshot`);
+discarded twice, snapshot restored from the index each time, the new entity added to both the migration's
+own `.Designer.cs` and the main `PgSqlApplicationDbContextModelSnapshot.cs` by hand instead, verified with
+a scoped `dotnet ef migrations add` scaffold-then-diff-then-discard that the only real change was the new
+table (no drift beyond the known seed noise). Now works uniformly across environments — replaces the old
+per-environment `KeyRingPath` config entirely (both `appsettings.json` and `appsettings.Production.json`
+still carry the now-unused key, harmless but worth removing on a future pass). **Verified:** `dotnet
+build` clean; `dotnet ef database update` against a fresh throwaway Postgres container applies the full
+25-migration chain plus this one cleanly, ending `Done.`, with `\d "DataProtectionKeys"` confirming the
+`Id`/`FriendlyName`/`Xml` shape; `dotnet test` still 717/717 passing.
 
 82.52 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** User request 2026-09-06: an admin
 "send notification: yes/no" toggle for EC member added/terminated/removed and event created/updated,

@@ -1,10 +1,11 @@
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace GHCAA.Infrastructure.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : DbContext, IDataProtectionKeyContext
     {
         public static bool IsSeedDisabled { get; set; }
 
@@ -244,6 +245,12 @@ namespace GHCAA.Infrastructure.Data
         // 45.2: unhandled exceptions captured by ExceptionMiddleware.
         public DbSet<ErrorLog> ErrorLogs { get; set; } = null!;
         public DbSet<SiteContent> SiteContents { get; set; } = null!;
+
+        // Data Protection keys persisted here rather than to the container filesystem — Render
+        // has no persistent disk mounted on this service, so a file-based key ring (the ASP.NET
+        // Core default, or the old KeyRingPath config) silently regenerates on every redeploy,
+        // invalidating anything it protects. The database already survives redeploys.
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

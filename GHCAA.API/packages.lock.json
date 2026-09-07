@@ -240,6 +240,39 @@
         "resolved": "2.14.1",
         "contentHash": "lQKvtaTDOXnoVJ20ibTuSIOf2i0uO0MPbDhd1jm238I+U/2ZnRENj0cktKZhtchBMtCUSRQ5v4xBCUbKNmyVMw=="
       },
+      "Microsoft.AspNetCore.Cryptography.Internal": {
+        "type": "Transitive",
+        "resolved": "9.0.19",
+        "contentHash": "zqiWdZ8Jw4/sfTBSFHchU3Iajm8EqLPUq/cUIuUjARwNGJ9hrKR7Yf0bs4WlF+GdPX6Bj7kmaf99aY0OTbLCOg=="
+      },
+      "Microsoft.AspNetCore.DataProtection": {
+        "type": "Transitive",
+        "resolved": "9.0.19",
+        "contentHash": "/tO2FwlX7eQ2wqeUmQfFBXOULh5z85/a/SEhONafCH8SqPCpUHQcoROu0QffwOUydklURv1p9sJzsco/yMp22Q==",
+        "dependencies": {
+          "Microsoft.AspNetCore.Cryptography.Internal": "9.0.19",
+          "Microsoft.AspNetCore.DataProtection.Abstractions": "9.0.19",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.19",
+          "Microsoft.Extensions.Hosting.Abstractions": "9.0.19",
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.19",
+          "Microsoft.Extensions.Options": "9.0.19",
+          "System.Security.Cryptography.Xml": "9.0.19"
+        }
+      },
+      "Microsoft.AspNetCore.DataProtection.Abstractions": {
+        "type": "Transitive",
+        "resolved": "9.0.19",
+        "contentHash": "fhcZhiviDZtiX0TSAMhRxouVwC/bUWZcJkPGP2phKTcrmjq+tM7eeDaAOWfFh8JQxsFJtmm0fX3l6W6mwloSFg=="
+      },
+      "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": {
+        "type": "Transitive",
+        "resolved": "9.0.19",
+        "contentHash": "pHsPgM2drB/n+TDqxxwy6NPFujwsZ6GOpWF62EFplSMuk8qDKvYHXF7hfmVWSjO7Gn6K87eo4smTK1Q8OAtlPg==",
+        "dependencies": {
+          "Microsoft.AspNetCore.DataProtection": "9.0.19",
+          "Microsoft.EntityFrameworkCore": "9.0.19"
+        }
+      },
       "Microsoft.Bcl.AsyncInterfaces": {
         "type": "Transitive",
         "resolved": "7.0.0",
@@ -1614,8 +1647,8 @@
       },
       "System.Security.Cryptography.Pkcs": {
         "type": "Transitive",
-        "resolved": "8.0.1",
-        "contentHash": "CoCRHFym33aUSf/NtWSVSZa99dkd0Hm7OCZUxORBjRB16LNhIEOf8THPqzIYlvKM0nNDAPTRBa1FxEECrgaxxA=="
+        "resolved": "9.0.19",
+        "contentHash": "/T5xGxh3IT465U8rLzDvZDolVlLGqUqTunZNHSvkkRBkflblFBzvJO4qTzNwjCApygv81KIec8epg46X0h+yIw=="
       },
       "System.Security.Cryptography.Primitives": {
         "type": "Transitive",
@@ -1661,6 +1694,14 @@
           "runtime.native.System": "4.3.0",
           "runtime.native.System.Net.Http": "4.3.0",
           "runtime.native.System.Security.Cryptography.OpenSsl": "4.3.0"
+        }
+      },
+      "System.Security.Cryptography.Xml": {
+        "type": "Transitive",
+        "resolved": "9.0.19",
+        "contentHash": "7kS3pe/XSt6dgWO+IZ/Xx4UuBDTxcDWjyTcB/OzZ4Y3SsUai5tHlElM6QFwJQnarrNloEH30l9TcFS+RnbfiLw==",
+        "dependencies": {
+          "System.Security.Cryptography.Pkcs": "9.0.19"
         }
       },
       "System.Text.Encoding": {
@@ -1813,6 +1854,7 @@
           "HtmlSanitizer": "[9.0.892, )",
           "MailKit": "[4.16.0, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[9.0.19, )",
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": "[9.0.19, )",
           "Microsoft.EntityFrameworkCore": "[9.0.19, )",
           "Microsoft.EntityFrameworkCore.Design": "[9.0.19, )",
           "Microsoft.EntityFrameworkCore.Relational": "[9.0.19, )",

@@ -28,24 +28,26 @@ if (!string.IsNullOrWhiteSpace(listenPort))
 
 JwtSigningKeyResolver.Resolve(configuration, builder.Environment);
 
-var keyRingPath = configuration["DataProtection:KeyRingPath"];
-if (!string.IsNullOrWhiteSpace(keyRingPath))
-{
-    // Same guard as OrgConfigService.BuildDefaults(): an unset ORG_PROFILE keeps "GHCAA" exactly,
-    // since changing this value invalidates every existing session token/cookie under the current
-    // key ring (docs/TODO.md 62.10). Built directly here, before builder.Build(), because the DI
-    // container that would normally hand out IInstitutionProfileProvider doesn't exist yet at this
-    // point in startup.
-    var profileForAppName = new GHCAA.Infrastructure.Services.InstitutionProfileProvider(configuration, builder.Environment);
-    var applicationName = profileForAppName.ProfileExplicitlySelected
-        ? profileForAppName.OrgConfigDefaults.Branding.AppName
-        : "GHCAA";
+// Same guard as OrgConfigService.BuildDefaults(): an unset ORG_PROFILE keeps "GHCAA" exactly,
+// since changing this value invalidates every existing session token/cookie under the current
+// key ring (docs/TODO.md 62.10). Built directly here, before builder.Build(), because the DI
+// container that would normally hand out IInstitutionProfileProvider doesn't exist yet at this
+// point in startup.
+var profileForAppName = new GHCAA.Infrastructure.Services.InstitutionProfileProvider(configuration, builder.Environment);
+var applicationName = profileForAppName.ProfileExplicitlySelected
+    ? profileForAppName.OrgConfigDefaults.Branding.AppName
+    : "GHCAA";
 
-    Directory.CreateDirectory(keyRingPath);
-    builder.Services.AddDataProtection()
-        .PersistKeysToFileSystem(new DirectoryInfo(keyRingPath))
-        .SetApplicationName(applicationName);
-}
+// Keys persist to ApplicationDbContext's own database rather than the container filesystem.
+// Render mounts no persistent disk on this service, so the old file-based key ring (whether
+// the configured KeyRingPath or ASP.NET Core's own /root/.aspnet/DataProtection-Keys default)
+// silently regenerated on every redeploy, invalidating anything it protects in between. The
+// database is the one thing here that actually survives a redeploy. PersistKeysToDbContext
+// resolves ApplicationDbContext from the service provider lazily, at first key access, so it
+// does not matter that AddInfrastructure() (which registers it) runs after this line.
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<GHCAA.Infrastructure.Data.ApplicationDbContext>()
+    .SetApplicationName(applicationName);
 
 // Register layers
 builder.Services.AddApplication();

@@ -10,3 +10,4 @@ them. Numbering here is local to this folder and unrelated to the ADR-01..06 tab
 - [0004](0004-single-instance-deployment-constraint.md) — Single-instance deployment constraint
 - [0005](0005-no-api-versioning-compatibility-rule-instead.md) — No API versioning — an additive-only compatibility rule instead
 - [0006](0006-drop-mysql-provider.md) — Drop the MySQL provider, keep Sqlite as a test-only path
+- [0007](0007-data-protection-keys-in-database.md) — Data Protection keys persist to the database, not the filesystem
