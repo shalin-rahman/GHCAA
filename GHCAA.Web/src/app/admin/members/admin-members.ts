@@ -7,7 +7,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { EC_ROLES, getECPositionName, getCurrentECPosition, getCurrentECPeriod, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, MEMBERSHIP_TYPE_OPTIONS, EC_ROLES_OPTIONS, getBloodGroupName, LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { EC_ROLES, getECPositionName, getCurrentECPosition, getCurrentECPeriod, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, EC_ROLES_OPTIONS, getBloodGroupName, LOOKUP_GROUPS } from '../../core/constants/app.constants';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { DatePipe } from '@angular/common';
 import * as XLSX from 'xlsx';
@@ -135,14 +135,16 @@ export class AdminMembers implements OnInit {
   ];
 
   // Constants for dropdowns
-  membershipTypes = MEMBERSHIP_TYPE_OPTIONS;
   ecPositions = EC_ROLES_OPTIONS;
 
-  // 82.42: these five populate from /lookups/{group} via LookupService, filled in loadLookupOptions().
+  // 82.42: these six populate from /lookups/{group} via LookupService, filled in loadLookupOptions().
   memberCategories: LookupOption[] = [];
   statusOptions: LookupOption[] = [];
   genderOptions: LookupOption[] = [];
   bloodGroupOptions: LookupOption[] = [];
+  // 62.33: was a static import of MEMBERSHIP_TYPE_OPTIONS; a different institution's tier
+  // labels are now a lookups-table change instead of a code change.
+  membershipTypes: LookupOption[] = [];
   yearsList: number[] = [];
 
   ACADEMIC = ACADEMIC_DATA;
@@ -181,6 +183,7 @@ export class AdminMembers implements OnInit {
     this.lookupService.getOptions(LOOKUP_GROUPS.MemberCategory).subscribe(opts => this.memberCategories = opts);
     this.lookupService.getOptions(LOOKUP_GROUPS.Gender).subscribe(opts => this.genderOptions = opts);
     this.lookupService.getOptions(LOOKUP_GROUPS.BloodGroup).subscribe(opts => this.bloodGroupOptions = opts);
+    this.lookupService.getOptions(LOOKUP_GROUPS.MembershipType).subscribe(opts => this.membershipTypes = opts);
     this.lookupService.getAcademicYears().subscribe(years => this.yearsList = years);
   }
 

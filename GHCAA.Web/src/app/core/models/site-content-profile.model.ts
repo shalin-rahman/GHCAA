@@ -8,7 +8,13 @@ export interface AboutFoundingStoryContent {
 
 export interface RegisterTermsContent {
   effectiveDate: string;
+  /** May contain `{branding.x}` placeholders — run through interpolateOrgTemplate before display. */
+  preambleParagraph: string;
+  /** May contain `{branding.x}` placeholders — run through interpolateOrgTemplate before display. */
   eligibilityParagraph: string;
+  /** May contain `{branding.x}` placeholders — run through interpolateOrgTemplate before display. */
+  verificationParagraph: string;
+  /** May contain `{branding.x}` placeholders — run through interpolateOrgTemplate before display. */
   ipParagraph: string;
 }
 

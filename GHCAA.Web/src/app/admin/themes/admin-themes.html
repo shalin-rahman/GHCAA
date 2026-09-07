@@ -201,7 +201,7 @@
                         <div class="nav-preview-box shadow-2xl mx-auto" [style.background]="selectedTheme.backgroundColor"
                             [style.color]="selectedTheme.textColor">
                             <div class="flex justify-between items-center px-4 h-12">
-                                <div class="font-black text-sm tracking-tighter">GHCAA</div>
+                                <div class="font-black text-sm tracking-tighter">{{ orgConfig.config()?.branding?.shortName }}</div>
                                 <div class="text-[8px] opacity-70 ticker-mock">
                                     {{ selectedTheme.announcementText || 'Theme Preview Label' }}
                                 </div>

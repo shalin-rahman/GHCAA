@@ -109,12 +109,20 @@ class AppTheme {
     }
   }
 
+  // 62.30: only hit if branding.primaryColor/accentColor fails hex parsing —
+  // OrgConfig.offlineDefaults already supplies neutral hex strings, so this is
+  // a last-resort guard. Falls back to that same neutral pair instead of the
+  // app's own gold/obsidian palette, so a malformed tenant color never reads
+  // as this app's brand.
+  static const Color defaultProfilePrimary = Color(0xFF121212);
+  static const Color defaultProfileAccent = Color(0xFF2F6F4F);
+
   /// Builds the app [ThemeData] from tenant [OrgBranding], so white-labeled
   /// orgs get their configured primary/accent colors applied to
   /// theme-driven surfaces (buttons, app bar, inputs, color scheme).
   static ThemeData buildTheme(OrgBranding branding) {
-    final primary = _colorFromHex(branding.primaryColor, royalGold);
-    final secondary = _colorFromHex(branding.accentColor, brightGold);
+    final primary = _colorFromHex(branding.primaryColor, defaultProfilePrimary);
+    final secondary = _colorFromHex(branding.accentColor, defaultProfileAccent);
 
     return ThemeData(
       useMaterial3: true,

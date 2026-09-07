@@ -25,6 +25,7 @@ export const EC_ROLES = [
 export const LOOKUP_GROUPS = {
     MembershipStatus: 'MembershipStatus',
     MemberCategory: 'MemberCategory',
+    MembershipType: 'MembershipType',
     Gender: 'Gender',
     BloodGroup: 'BloodGroup',
     JobCategory: 'JobCategory',
@@ -354,6 +355,12 @@ export const EC_ROLES_OPTIONS = EC_ROLES.map((label, index) => ({ value: index, 
 // directory.ts now get these from LookupService.getOptions(LOOKUP_GROUPS.MembershipStatus /
 // .MemberCategory) instead of a local hardcoded copy.
 
+// 62.33: this is getMembershipTypeLabel's fallback source and LOOKUP_FALLBACKS' seed for
+// LOOKUP_GROUPS.MembershipType. Screens showing a membership-type picker or filter call
+// LookupService.getOptions(LOOKUP_GROUPS.MembershipType) instead of importing this array
+// directly, so a different institution's tier labels are a lookups-table change, not a
+// code change. This array only stays the values/labels getMembershipTypeLabel() reads
+// synchronously and the fallback getOptions() returns if the API has no seeded rows.
 export const MEMBERSHIP_TYPE_OPTIONS = [
     { value: 'Founding', label: 'Founding Member' },
     { value: 'Executive', label: 'Executive Member' },

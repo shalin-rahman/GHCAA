@@ -7,8 +7,8 @@ import { AdminCommService, EmailTemplate, EmailLog, TEMPLATE_VARIABLES, MessageC
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { ActivatedRoute } from '@angular/router';
-import { MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
-import { LookupService } from '../../core/services/lookup.service';
+import { LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { RichTextEditor } from '../../common/rich-text-editor/rich-text-editor';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
@@ -63,7 +63,8 @@ export class AdminComm implements OnInit {
     // 82.42: sourced from /lookups/PassingYear via LookupService. A signal (not a plain array)
     // because filteredYears below is a computed() that only reruns off signal reads.
     years = signal<number[]>([]);
-    membershipTypes = MEMBERSHIP_TYPE_OPTIONS;
+    // 62.33: sourced from LOOKUP_GROUPS.MembershipType, filled in ngOnInit
+    membershipTypes: LookupOption[] = [];
 
     yearSearch = signal('');
     filteredYears = computed(() => {
@@ -96,6 +97,7 @@ export class AdminComm implements OnInit {
     ngOnInit() {
         this.loadTemplates();
         this.lookupService.getAcademicYears().subscribe(years => this.years.set(years));
+        this.lookupService.getOptions(LOOKUP_GROUPS.MembershipType).subscribe(opts => this.membershipTypes = opts);
 
         // Handle pre-filled target from Registry/Individual contact
         this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {

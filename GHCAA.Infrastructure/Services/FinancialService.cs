@@ -619,7 +619,7 @@ namespace GHCAA.Infrastructure.Services
                             {
                                 header.Cell().Text("#");
                                 header.Cell().Text("Description");
-                                header.Cell().AlignRight().Text("Amount (BDT)");
+                                header.Cell().AlignRight().Text($"Amount ({config.Currency.Code})");
                                 header.Cell().Element(Block).PaddingBottom(5).BorderBottom(1);
                             });
 
@@ -628,7 +628,7 @@ namespace GHCAA.Infrastructure.Services
                             table.Cell().AlignRight().Text($"{payment.Amount:N2}");
                         });
 
-                        col.Item().AlignRight().PaddingRight(5).Text($"Total: {payment.Amount:N2} BDT").FontSize(14).Bold();
+                        col.Item().AlignRight().PaddingRight(5).Text($"Total: {payment.Amount:N2} {config.Currency.Code}").FontSize(14).Bold();
 
                         col.Item().PaddingTop(50).Text("Note: This is an automatically generated receipt and does not require a signature.").FontSize(10).Italic().FontColor(Colors.Grey.Medium);
                     });

@@ -11,7 +11,9 @@ export const SITE_CONTENT: SiteContentProfile = {
   },
   "registerTerms": {
     "effectiveDate": "29 November 2025",
+    "preambleParagraph": "By completing the registration process and submitting your application, you (the \"Applicant\" or \"Member\") hereby irrevocably agree to be legally bound by these Comprehensive Terms and Conditions (T&C) and the full Constitution of the {branding.fullName} (\"the Association\"). If you do not agree, you must not register.",
     "eligibilityParagraph": "Registration is exclusively open to \"eligible alumni\" of Government Haraganga College (established 18 Dec 1938). To qualify, the Applicant must prove they are:",
+    "verificationParagraph": "The Association and the Adhoc Committee reserve the absolute right to verify an Applicant's academic history with the official records of Government Haraganga College. Membership is contingent upon successful verification.",
     "ipParagraph": "The Applicant acknowledges that the name \"Govt. Haraganga College,\" its official logo, and all branding elements are the exclusive intellectual property of the Institution (Article I, Sections 5 & 6)."
   },
   "purposeHistoryNote": "Upholding the visionary legacy of Mr. Ashutosh Ganguly since 1938.",

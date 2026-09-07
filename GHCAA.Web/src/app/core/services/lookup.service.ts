@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { API_ENDPOINTS, LOOKUP_GROUPS } from '../constants/app.constants';
+import { API_ENDPOINTS, LOOKUP_GROUPS, MEMBERSHIP_TYPE_OPTIONS } from '../constants/app.constants';
 
 export interface LookupOption {
     value: string;
@@ -36,6 +36,9 @@ const LOOKUP_FALLBACKS: Record<string, LookupOption[]> = {
         { value: 'Guest', label: 'Guest' },
         { value: 'Student', label: 'Student' }
     ],
+    // Reuses MEMBERSHIP_TYPE_OPTIONS as-is (rather than retyping the same value/label pairs)
+    // since it's already the single source getMembershipTypeLabel() reads synchronously.
+    [LOOKUP_GROUPS.MembershipType]: MEMBERSHIP_TYPE_OPTIONS,
     [LOOKUP_GROUPS.Gender]: [
         { value: 'None', label: 'Not Specified' },
         { value: 'Male', label: 'Male' },

@@ -40,7 +40,9 @@ const content = {
     },
     registerTerms: {
         effectiveDate: raw.RegisterTerms?.EffectiveDate ?? '',
+        preambleParagraph: raw.RegisterTerms?.PreambleParagraph ?? '',
         eligibilityParagraph: raw.RegisterTerms?.EligibilityParagraph ?? '',
+        verificationParagraph: raw.RegisterTerms?.VerificationParagraph ?? '',
         ipParagraph: raw.RegisterTerms?.IpParagraph ?? ''
     },
     purposeHistoryNote: raw.PurposeHistoryNote ?? '',

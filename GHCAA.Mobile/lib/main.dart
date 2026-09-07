@@ -117,19 +117,19 @@ Future<void> _initAndRunApp() async {
   
   runApp(
     const ProviderScope(
-      child: HaragangianApp(),
+      child: AlumniApp(),
     ),
   );
 }
 
-class HaragangianApp extends ConsumerStatefulWidget {
-  const HaragangianApp({super.key});
+class AlumniApp extends ConsumerStatefulWidget {
+  const AlumniApp({super.key});
 
   @override
-  ConsumerState<HaragangianApp> createState() => _HaragangianAppState();
+  ConsumerState<AlumniApp> createState() => _AlumniAppState();
 }
 
-class _HaragangianAppState extends ConsumerState<HaragangianApp> with WidgetsBindingObserver {
+class _AlumniAppState extends ConsumerState<AlumniApp> with WidgetsBindingObserver {
   
   @override
   void initState() {

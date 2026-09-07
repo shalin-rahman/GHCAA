@@ -57,6 +57,7 @@ namespace GHCAA.Domain
             public const string AllowedOrigins = "AppSettings:AllowedOrigins";
             public const string ClientUrl = "AppSettings:ClientUrl";
             public const string ProtectedSuperAdmins = "AppSettings:ProtectedSuperAdmins";
+            public const string SuperAdminBootstrapPasswordFilePath = "AppSettings:SuperAdminBootstrapPasswordFilePath";
             public const string SystemAdminId = "GeneralSettings:SystemAdminId";
             public const string PortalBaseUrlOverride = "GeneralSettings:PortalBaseUrl";
             public const string SSLCommerzSandboxUrl = "PaymentGateways:SSLCommerz:SandboxUrl";
@@ -93,6 +94,10 @@ namespace GHCAA.Domain
             // BrandingDto.MembershipNumberPrefix) — see MemberImportService for the new consumer.
             public const string UnknownValue = "Unknown";
             public const string ImportPrefix = "IMPORT";
+
+            // Fallback name for the file BootstrapFirstSuperAdminAsync writes the generated
+            // password to, when AppSettings:SuperAdminBootstrapPasswordFilePath isn't set.
+            public const string SuperAdminBootstrapPasswordFileName = "superadmin-bootstrap-password.txt";
         }
 
         // 45.2/45.6: ErrorLog levels and retention. Rows older than RetentionDays are opportunistically

@@ -1,10 +1,16 @@
+using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
+using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 
@@ -19,10 +25,17 @@ namespace GHCAA.Tests.Services
     {
         private Mock<ILogger> _mockLogger = null!;
 
+        private IUserService _userService = null!;
+
         [SetUp]
         public void Setup()
         {
             _mockLogger = new Mock<ILogger>();
+            _userService = new UserService(
+                _context,
+                new Mock<ILogger<UserService>>().Object,
+                new Mock<ITokenService>().Object,
+                Options.Create(new AppSettingsOptions()));
         }
 
         [Test]
@@ -101,6 +114,67 @@ namespace GHCAA.Tests.Services
 
             var user = await _context.Users.Include(u => u.Roles).FirstAsync(u => u.Username == "protected-test-admin");
             user.Roles.Should().BeEmpty();
+        }
+
+        // Coverage for TODO 62.50: on a fresh database with no SuperAdmin at all, EnsureAsync
+        // above has nothing to re-grant a role to, so nobody could ever log in as admin.
+        // BootstrapFirstSuperAdminAsync creates that first account instead.
+        [Test]
+        public async Task BootstrapFirstSuperAdminAsync_CreatesSuperAdmin_WhenDatabaseHasNone()
+        {
+            await ProtectedSuperAdminSeeder.BootstrapFirstSuperAdminAsync(
+                _context, new[] { "shalin" }, _userService, _mockLogger.Object);
+
+            var user = await _context.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Username == "shalin");
+            user.Should().NotBeNull();
+            user!.Roles.Should().Contain(r => r.Name == "SuperAdmin");
+            user.MustChangePassword.Should().BeTrue("the password is machine-generated and must be rotated");
+        }
+
+        [Test]
+        public async Task BootstrapFirstSuperAdminAsync_NoOps_WhenASuperAdminAlreadyExists()
+        {
+            var member = await CreateAndSaveTestMemberAsync("Existing Admin", "existing-admin@e.com", "222", "222");
+            await CreateAndSaveTestUserAsync(member.Id, "existing-admin");
+            await ProtectedSuperAdminSeeder.EnsureAsync(_context, new[] { "existing-admin" }, _mockLogger.Object);
+
+            await ProtectedSuperAdminSeeder.BootstrapFirstSuperAdminAsync(
+                _context, new[] { "shalin" }, _userService, _mockLogger.Object);
+
+            (await _context.Users.AnyAsync(u => u.Username == "shalin")).Should().BeFalse();
+        }
+
+        [Test]
+        public async Task BootstrapFirstSuperAdminAsync_NoOps_WhenProtectedUsernameExistsWithoutTheRole()
+        {
+            var member = await CreateAndSaveTestMemberAsync("Protected Test Admin", "protected-test-admin@e.com", "111", "111");
+            await CreateAndSaveTestUserAsync(member.Id, "protected-test-admin");
+
+            await ProtectedSuperAdminSeeder.BootstrapFirstSuperAdminAsync(
+                _context, new[] { "protected-test-admin" }, _userService, _mockLogger.Object);
+
+            var user = await _context.Users.Include(u => u.Roles).FirstAsync(u => u.Username == "protected-test-admin");
+            user.Roles.Should().BeEmpty("this account belongs to EnsureAsync, not the bootstrap");
+            (await _context.Users.CountAsync(u => u.Username == "protected-test-admin")).Should().Be(1);
+        }
+
+        [Test]
+        public async Task BootstrapFirstSuperAdminAsync_WritesGeneratedPasswordToFile()
+        {
+            var passwordFilePath = Path.Combine(Path.GetTempPath(), $"superadmin-bootstrap-{Guid.NewGuid():N}.txt");
+            try
+            {
+                await ProtectedSuperAdminSeeder.BootstrapFirstSuperAdminAsync(
+                    _context, new[] { "shalin" }, _userService, _mockLogger.Object, passwordFilePath);
+
+                File.Exists(passwordFilePath).Should().BeTrue();
+                var contents = await File.ReadAllTextAsync(passwordFilePath);
+                contents.Should().Contain("Username: shalin").And.Contain("Password: ");
+            }
+            finally
+            {
+                if (File.Exists(passwordFilePath)) File.Delete(passwordFilePath);
+            }
         }
     }
 }

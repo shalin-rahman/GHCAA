@@ -192,6 +192,10 @@ publish/
 # in these scripts will be unencrypted
 PublishScripts/
 
+# Live DB/deploy credentials - never commit these (see docs/RENDER_DEPLOYMENT.md Step 7)
+docs/deploy_connection.txt
+docs/deploy_conn_Info.txt
+
 # NuGet Packages
 *.nupkg
 # NuGet Symbol Packages

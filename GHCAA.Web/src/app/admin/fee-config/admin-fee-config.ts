@@ -5,10 +5,11 @@ import { firstValueFrom } from 'rxjs';
 import { FinancialService } from '../../core/services/financial.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
-import { FINANCIAL_CATEGORY_OPTIONS, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
+import { FINANCIAL_CATEGORY_OPTIONS, LOOKUP_GROUPS } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
+import { LookupService, LookupOption } from '../../core/services/lookup.service';
 
 @Component({
   selector: 'app-admin-fee-config',
@@ -22,6 +23,7 @@ export class AdminFeeConfig implements OnInit {
   private notify = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
   private fb = inject(FormBuilder);
+  private lookupService = inject(LookupService);
 
   configs = signal<any[]>([]);
   loading = signal(true);
@@ -34,7 +36,8 @@ export class AdminFeeConfig implements OnInit {
   }
 
   feeCategories = FINANCIAL_CATEGORY_OPTIONS;
-  membershipTypes = MEMBERSHIP_TYPE_OPTIONS;
+  // 62.33: sourced from LOOKUP_GROUPS.MembershipType, filled in ngOnInit
+  membershipTypes: LookupOption[] = [];
 
   static configDatesValidator(group: import('@angular/forms').AbstractControl): import('@angular/forms').ValidationErrors | null {
     const start = group.get('effectiveDate')?.value;
@@ -57,6 +60,7 @@ export class AdminFeeConfig implements OnInit {
 
   ngOnInit() {
     this.loadConfigs();
+    this.lookupService.getOptions(LOOKUP_GROUPS.MembershipType).subscribe(opts => this.membershipTypes = opts);
   }
 
   loadConfigs() {

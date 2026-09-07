@@ -22,7 +22,7 @@ export default defineConfig({
   webServer: [
     {
       command: 'dotnet run --project ../GHCAA.API --urls http://localhost:5087',
-      url: 'http://localhost:5087/healthz',
+      url: 'http://localhost:5087/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

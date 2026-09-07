@@ -409,7 +409,7 @@ app.UseAuthorization();
 // action still applies on top of this, and [DisableRateLimiting] (AuthController /me, /logout)
 // still overrides it.
 app.MapControllers().RequireRateLimiting(GHCAA.Domain.Constants.RateLimitPolicies.Api);
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health").AllowAnonymous();
 app.MapHub<GHCAA.API.Hubs.ChatHub>("/api/hubs/chat");
 app.MapHub<GHCAA.API.Hubs.NotificationHub>("/api/hubs/notifications");
 
@@ -532,6 +532,14 @@ try
     var protectedAdminCtx = protectedAdminScope.ServiceProvider.GetRequiredService<GHCAA.Infrastructure.Data.ApplicationDbContext>();
     if (await protectedAdminCtx.Database.CanConnectAsync())
     {
+        // Runs first: on a database with no SuperAdmin at all, creates one for the first
+        // protected username so there's a role for EnsureAsync below to restore on later boots.
+        var userService = protectedAdminScope.ServiceProvider.GetRequiredService<IUserService>();
+        var passwordFilePath = app.Configuration[GHCAA.Domain.Constants.ConfigKeys.SuperAdminBootstrapPasswordFilePath]
+            ?? Path.Combine(app.Environment.ContentRootPath, GHCAA.Domain.Constants.Defaults.SuperAdminBootstrapPasswordFileName);
+        await GHCAA.Infrastructure.Data.ProtectedSuperAdminSeeder.BootstrapFirstSuperAdminAsync(
+            protectedAdminCtx, protectedSuperAdmins, userService, app.Logger, passwordFilePath);
+
         await GHCAA.Infrastructure.Data.ProtectedSuperAdminSeeder.EnsureAsync(protectedAdminCtx, protectedSuperAdmins, app.Logger);
     }
 }

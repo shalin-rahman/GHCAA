@@ -60,8 +60,9 @@
                 <select [(ngModel)]="filters.membershipType" (change)="search()">
                     <option value="">All Types</option>
                     <!-- 35.3: was a hardcoded list ending at Advisory, which silently hid Guest
-                         members from the directory. Driven by MEMBERSHIP_TYPE_OPTIONS so it cannot
-                         drift from GHCAA.Domain/Enums.cs again. -->
+                         members from the directory. 62.33: now sourced from
+                         LOOKUP_GROUPS.MembershipType via LookupService, filled in ngOnInit, so a
+                         different institution's tier labels are a lookups-table change. -->
                     @for (t of membershipTypes; track t.value) {
                     <option [value]="t.value">{{ t.label }}</option>
                     }

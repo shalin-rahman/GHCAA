@@ -486,7 +486,7 @@
         <div class="modal-body terms-scrollable p-8">
             <div class="prose max-w-none text-xs leading-relaxed text-main/90 space-y-8">
                 <div class="premium-alert bg-accent/5 border border-accent/20 p-6 rounded-xl italic text-sm">
-                    By completing the registration process and submitting your application, you (the "Applicant" or "Member") hereby irrevocably agree to be legally bound by these Comprehensive Terms and Conditions (T&C) and the full Constitution of the Govt. Haraganga College Alumni Association ("the Association"). If you do not agree, you must not register.
+                    {{ termsPreamble() }}
                 </div>
                 
                 <section>
@@ -494,11 +494,11 @@
                     <div class="space-y-4">
                         <div>
                             <h5 class="font-bold text-accent/80 mb-2">Section 1.01: Definitive Eligibility</h5>
-                            <p>{{ termsContent.eligibilityParagraph }}</p>
+                            <p>{{ termsEligibility() }}</p>
                             <ul class="list-disc ml-6 mt-2 space-y-2">
                                 <li><strong>a) Graduate Member:</strong> An individual who has successfully completed a degree (HSC, Pass, Honors, Masters) from the institution.</li>
                                 <li><strong>b) Associate Member:</strong> An individual who was a regular student of the institution for a period of at least two full academic years but did not complete a degree.</li>
-                                <li><strong>c) Right of Verification:</strong> The Association and the Adhoc Committee reserve the absolute right to verify an Applicant's academic history with the official records of Government Haraganga College. Membership is contingent upon successful verification.</li>
+                                <li><strong>c) Right of Verification:</strong> {{ termsVerification() }}</li>
                             </ul>
                         </div>
                         <div>
@@ -559,7 +559,7 @@
                     <div class="space-y-4">
                         <div>
                             <h5 class="font-bold text-accent/80 mb-2">Section 4.01: Exclusive Rights to Name and Logo</h5>
-                            <p>{{ termsContent.ipParagraph }}</p>
+                            <p>{{ termsIp() }}</p>
                         </div>
                         <div>
                             <h5 class="font-bold text-accent/80 mb-2">Section 4.02: Permitted and Prohibited Use</h5>

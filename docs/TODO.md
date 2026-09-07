@@ -2197,6 +2197,14 @@ refresh, logout, the step-up request/verify endpoints this session added, reset-
 file (flagged, not rotated); `docs/BUSINESS_REVIEW_PLAN.md:79` has a real password in
 plain text (flagged, not scrubbed); member profile photos are genuinely missing for most of the 631
 bulk-imported alumni (not a bug — no photo was ever supplied at import time).
+**State changed 2026-09-07, hold unaffected:** `docs/deploy_connection.txt` was deleted from tracking and
+replaced by an untracked `docs/deploy_conn_Info.txt` carrying the same class of live credentials (a
+Render Postgres URL with password, confirmed in plain text). That new file was not gitignored, so a
+routine `git add -A` would have committed the same secrets under a new name — added both filenames to
+`.gitignore` on sight. This does **not** close the hold: the credentials already committed in
+`deploy_connection.txt`'s git history (multiple commits, confirmed via `git log --all`) are still
+exposed regardless of what the working tree looks like now. Rotation is still the user's decision to
+make, not something a session can do without dashboard access.
 
 `dotnet test` 486/486, `npx vitest run` 70 files / 347 tests, `ng build` clean throughout this Area.
 
@@ -2298,6 +2306,13 @@ deploy-hook URL, not just DB credentials as previously known. Also newly found w
 app password), `docs/RENDER_DEPLOYMENT.md`. **Requires the user to rotate the JWT key, both DB
 passwords, the Gmail app password, and the Render deploy hook, then `git rm --cached` + `.gitignore`
 + history purge (`git filter-repo`).** Not something this session can do — no dashboard access.
+**State changed 2026-09-07, hold unaffected:** the `git rm --cached` half happened — `docs/deploy_connection.txt`
+is no longer tracked — but a replacement file, `docs/deploy_conn_Info.txt`, appeared with the same class
+of live secret (a Render Postgres password) and was left ungitignored until this pass added it. The
+`.gitignore` half of this item's own instruction is now done for both filenames. **Everything else this
+item asks for is still outstanding**: no rotation has happened, no history purge has run, and the
+already-committed secrets in `deploy_connection.txt`'s git history remain exposed. Still requires the
+user; still not something a session can complete alone.
 
 48.3 [DONE] **HIGH — refresh tokens survived termination/reset.** `SecurityStamp` rotation (the
 documented S5.4 kill-switch) fired in 5 places but never called `RevokeAllRefreshTokensAsync`, so a
@@ -3757,16 +3772,27 @@ line-ending warning, no content diff), confirming the GHC profile reproduces tod
 exactly. Wired into `Dockerfile`'s web build stage (62.40), which previously called `ng build`
 directly and skipped this generation step entirely.
 
-62.18 [PARTIAL 2026-09-05] `about.html` and `purpose.html` verified clean (zero literal hits).
+62.18 [DONE 2026-09-07] `about.html` and `purpose.html` verified clean (zero literal hits).
 `register.html`'s T&C section (L497-562) still names the college/founding date/IP clause directly —
 not yet moved into `site-content.json`.
+**Resolved 2026-09-07:** the two remaining hardcoded T&C clauses (institution name in the preamble and
+verification paragraphs) added to `RegisterTermsContent` (model, `generate-site-content.mjs`, both
+profile packs) and wired into `register.ts` via `interpolateOrgTemplate`-backed computed signals — the
+same mechanism already used for `effectiveDate`/`eligibilityParagraph`/`ipParagraph`. Also fixed a latent
+bug found in passing: the default profile's `{branding.x}` placeholders in `eligibilityParagraph`/
+`ipParagraph` were never actually being interpolated.
 
-62.19 [PARTIAL 2026-09-05] `digital-id.html`, `assistant.html`, `magazine.html`, `gallery.html`,
+62.19 [DONE 2026-09-07] `digital-id.html`, `assistant.html`, `magazine.html`, `gallery.html`,
 `events.html` verified clean. `directory.html`'s one hit is a false positive — a C# namespace
 mentioned in a code comment (`GHCAA.Domain/Enums.cs`), not a rendered literal; no fix needed.
 `membership.ts:48`'s hit is a commented-out (dead) line, not rendered. `elections.ts` verified
 clean (zero hits — already fixed by an earlier session). Admin placeholder text
 (`org-config.html`/`admin-members.html`/`admin-themes.html`) still not checked.
+**Resolved 2026-09-07:** checked the admin placeholder text. Found and fixed three real hits —
+`admin-members.html`'s "e.g. Govt. Haraganga College" placeholder, `org-config.html`'s
+"Govt. Haraganga College, Munshiganj-1500, Bangladesh." placeholder, and a literal `GHCAA` baked into
+`admin-themes.html`'s theme-preview mockup (now bound to `orgConfig.config()?.branding?.shortName`).
+`brand-lint` literal counts dropped as a result (`Haraganga` 670→667, `Haragangian` 33→26).
 
 62.20 [DONE 2026-09-05] Fixed the 7 genuinely raw `<img src="/assets/logo.png">` occurrences —
 `register.html`, `events.html`, `digital-id.html` (×2), `about.html` (×2 flag badge),
@@ -3789,14 +3815,30 @@ literal the item names. Not done: the general `documents.json` registry (label/f
 for arbitrary governing documents) — that's a real new feature, not a literal-removal fix, and is
 left for a dedicated pass.
 
-62.23 [TODO] **Priority: P4 | Depends on: none.** Web housekeeping: `package.json` name
+62.23 [DONE 2026-09-07] **Priority: P4 | Depends on: none.** Web housekeeping: `package.json` name
 `"ghcaa.web"`, `styles.scss` L2 header comment "GHCAA Professional Design System". Cosmetic, but they
 are brand-lint hits so they need either a fix or an exception entry.
+**Resolved 2026-09-07:** checked `brand-lint.mjs`'s actual matching first — `"ghcaa.web"` (lowercase)
+turned out not to be a real hit against the banned `"GHCAA"` pattern; only the `styles.scss` comment was.
+Renamed the comment to a plain single line, and renamed `package.json`/`package-lock.json`'s `name` to
+`alumni-portal-web` anyway for genuine white-label cleanliness. No exception-list entry needed.
 
-62.24 [TODO] **Priority: P3 | Depends on: 62.15.** Verify the gold palette (`--accent-color: #c5a059`,
+62.24 [PARTIAL 2026-09-07] **Priority: P3 | Depends on: 62.15.** Verify the gold palette (`--accent-color: #c5a059`,
 `--gold-gradient` in `styles.scss` L24-130) is only a seeded default and not a hard dependency, given
 `admin-themes` makes themes admin-configurable. If it is a hard default, move the seed values into the
 profile pack; do not touch the token system itself.
+**Progress 2026-09-07:** `--primary-color`/`--accent-color` confirmed genuinely admin-configurable —
+`OrgConfigService`'s constructor effect pushes both from the profile pack into
+`document.documentElement.style` at runtime. **Real hard dependency found, not fixed:** `--gold-gradient`
+and its siblings (`--accent-gold-bright`, `--accent-gold-dark`, `--accent-color-rgb`/`--accent-rgb`,
+`--shadow-gold`, `--glass-border`, `--tier-founding`) are separate hardcoded hex/rgb literals, never
+derived from `--accent-color` and never pushed by `OrgConfigService` — a different institution's chosen
+accent color never reaches any of the ~35 files using `var(--gold-gradient)`. Also found a hardcoded
+`%23c5a059` stroke color baked into an inline SVG data-URI in `admin-payment-config.scss`. **Deliberately
+not fixed here:** the item explicitly rules out touching the token/theming system, and a correct fix needs
+color-derivation logic (`color-mix()` or backend color math), which is squarely theming-system work — the
+same over-engineering concern already raised in 62.33/62.34. Left `[PARTIAL]` with the finding recorded
+for a properly-scoped follow-up rather than adding an inert profile-pack field with no consumer.
 
 ### PHASE D: MOBILE DE-BRANDING
 
@@ -3818,14 +3860,28 @@ replaced via the existing `AppLocalizations.of(context).translate()` mechanism a
 `orgBrandingProvider`. `flutter analyze` clean, `flutter test` shows only expected golden-image
 staleness (58 pixel-diffs from the branding/copy change, 0 logic-test failures).
 
-62.29 [TODO] **Priority: P4 | Depends on: 62.28.** Flutter: rename `HaragangianApp` /
+62.29 [DONE 2026-09-07] **Priority: P4 | Depends on: 62.28.** Flutter: rename `HaragangianApp` /
 `_HaragangianAppState` in `main.dart:120-132` to a neutral `AlumniApp`. Mechanical, do it last in the
 mobile phase to avoid churn in the other diffs.
+**Resolved 2026-09-07:** renamed in `main.dart` (5 references: class, constructor, `createState()`,
+`runApp()`). Confirmed no other file references the class by name — the remaining `"Haragangian"` hits
+elsewhere (Android manifest label, iOS Info.plist, Fastfile) are display strings, already closed by
+62.27/62.28, not this item's scope.
 
-62.30 [TODO] **Priority: P4 | Depends on: 62.27.** Flutter: confirm `app_theme.dart:6-10,116-117`
+62.30 [DONE 2026-09-07] **Priority: P4 | Depends on: 62.27.** Flutter: confirm `app_theme.dart:6-10,116-117`
 gold/obsidian constants stay as fallback-only (`_colorFromHex(branding.primaryColor, royalGold)` is
 already the pattern) and swap the fallback values to neutral. Mobile stays single forced dark theme;
 this is not a theming rework.
+**Resolved 2026-09-07:** the item's premise didn't fully hold — checked before acting on it.
+`royalGold`/`brightGold`/`obsidianBlack`/`deepCharcoal`/`darkGold` are not fallback-only; they're the base
+tokens for the app's single forced dark theme, referenced 487 times across 67 files. Only the two lines
+the item names (116-117) use them as a last-resort fallback when a tenant's hex color fails to parse.
+Renaming the base tokens would be a 487-site re-theme, exactly the "not a theming rework" the item rules
+out — so the file's actual `.dart` path (`lib/core/theme/app_theme.dart`, not `core/config/` as the item
+said) is unchanged, and instead two new constants (`defaultProfilePrimary`/`defaultProfileAccent`,
+matching `OrgConfig.offlineDefaults`'s neutral colors from 62.27) are used only at the two fallback call
+sites. `flutter analyze` clean; no new test failures (59 pre-existing failures unchanged: 58 golden-image
+baseline from 62.28, 1 unrelated device-info-plugin test issue).
 
 ### PHASE E: DATA, TIERS, GOVERNANCE
 
@@ -3858,7 +3914,7 @@ full green `dotnet test` run (590/590):**
    `Data\Seed\Visual\*.json` — a pre-existing bug masked by bug #1. Added the missing
    `<None Update="Data\Seed\Visual\*.json">` copy rule.
 
-62.33 [PARTIAL 2026-09-05] Re-scoped after checking what's actually still open: the item's own
+62.33 [DONE 2026-09-07] Re-scoped after checking what's actually still open: the item's own
 stated motivation — "supersedes the Guest-tier question" — is already resolved. `Guest` is a real
 `MembershipType` enum value and already appears in Angular's `MEMBERSHIP_TYPE_OPTIONS`
 (`app.constants.ts:351`, `{ value: 'Guest', label: 'Guest Member' }`), and per
@@ -3870,6 +3926,14 @@ consumer anywhere in the app, which is exactly the over-engineering the project'
 warns against. Left open: `MEMBERSHIP_TYPE_OPTIONS` is still a static Angular array, not
 profile-sourced, so a different institution's tier *labels* (not just Guest's existence) would
 still need a code change. That narrower gap is the real remaining work here.
+**Resolved 2026-09-07:** `MembershipType` added to `LOOKUP_GROUPS`; `LookupService` gained a
+`LOOKUP_FALLBACKS` entry that reuses `MEMBERSHIP_TYPE_OPTIONS` directly (no duplicated literal array).
+The four static consumers (`admin-comm.ts`, `admin-fee-config.ts`, `admin-members.ts`, `directory.ts`)
+switched to `LookupService.getOptions(LOOKUP_GROUPS.MembershipType)`, matching the exact call-first-
+then-fallback shape already used for `MemberCategory`/`MembershipStatus`. `getMembershipTypeLabel()`/
+`MEMBERSHIP_TYPE_OPTIONS` stay as the synchronous label source, mirroring the existing
+`MEMBERSHIP_STATUS_MAP`/`getStatusLabel` precedent (fallback map and dropdown-options source
+deliberately separate).
 
 62.34 [DONE 2026-09-05] Checked what's actually GHC-specific and found the real dependency already
 satisfied: `Localization.Locales["en"/"bn"].EcRoleLabels` is a `Dictionary<string,string>` inside
@@ -3892,9 +3956,36 @@ change. No gateway keys added or touched. `dotnet test` 590/590 green, including
 62.36 [DONE 2026-09-05] Confirmed: `grep` for `Haraganga`/`GHC-`/`Barisal` across
 `GHCAA.Infrastructure/Data/Seed/lookups.json` returns zero hits.
 
-62.37 [TODO] **Priority: P4 | Depends on: 62.11.** Currency and locale end-to-end check with a
+62.37 [PARTIAL 2026-09-07] **Priority: P4 | Depends on: 62.11.** Currency and locale end-to-end check with a
 non-BDT, non-Bengali profile. The config fields exist; verify nothing downstream (formatting, PDF,
 fee display, mobile) assumes BDT or an en/bn-only locale pack.
+**Progress 2026-09-07:** two trivial backend hits fixed — `FinancialService.GenerateTaxReceiptAsync`'s
+receipt PDF and `CommunicationService`'s `PAYMENT_RECEIVED` email template both hardcoded "BDT" even
+though org config was already in scope; both now read `config.Currency.Code`. `BkashGateway.cs`'s
+hardcoded `"BDT"` is not a bug — Bkash is BDT-only and a non-BDT profile's `EnabledGatewayMethods` never
+includes it. **Left open, raised as 62.51:** the DB-seeded copy of the same email template
+(`Data/Seed/email_templates.json`) still says "BDT" literally — out of bounds for direct editing (seed
+data) without an explicit go-ahead; ~20 Angular templates and several Flutter screens hardcode `৳`/`BDT`
+independent of org config, with no shared currency pipe/service to route through — a systemic gap, not a
+one-line fix, tracked separately rather than force-fixed here.
+
+62.51 [TODO] **Priority: P3 | Depends on: 62.37 (found this).** No shared currency-formatting mechanism
+exists on either client. Angular hardcodes `৳`/`BDT` directly in ~20 places (`admin-dashboard.ts`'s
+`formatBDT()`, `admin-campaigns`, `fee-config`, `events`, `ledger`, `payments`, `giving`,
+`payment-portal`, the org-config admin form placeholder). Flutter has the same pattern —
+`AppUtils.formatCurrency()` and several screens (`ledger_screen.dart`, `fee_config_screen.dart`,
+`event_details_screen.dart`) hardcode `৳`/`en_BD`/"BDT" independent of `OrgConfig`. **Acceptance:** one
+currency-formatting service/pipe per client, sourced from `OrgConfig.Currency`, adopted by every listed
+call site; a non-BDT profile renders its own currency code/symbol everywhere money is shown.
+
+62.52 [TODO] **Priority: P4 | Depends on: 62.44 (found these).** Two Angular unit tests are coupled to
+the GHC profile's fixture data and fail under `ORG_PROFILE=default`, found while verifying 62.44:
+`org-config.service.spec.ts`'s "falls back to built-in defaults" case hardcodes
+`expect(cfg.orgId).toBe('ghcaa')`, and `directory.spec.ts` asserts a `'Guest'` membership-type filter
+option that doesn't exist in the `default` profile's `MembershipTypes` (`["General"]` only, per 62.33's
+lookups-first change). **Acceptance:** both specs pass under either profile — either parametrize them the
+way 62.43 did for `config-regression.spec.ts`, or make their assertions profile-agnostic where the
+underlying behavior genuinely doesn't depend on which profile is active.
 
 ### PHASE F: ONBOARDING, OPS, PROOF
 
@@ -3907,9 +3998,16 @@ what stays shared (Class 1), the environment variables that are theirs to set (i
 `EnabledGatewayMethods`/`PortalBaseUrl` override from 62.11/62.35), and an honest list of what still
 assumes Bangladesh/GHC (62.18/62.19/62.37/62.40/62.41 in progress).
 
-62.39 [TODO] **Priority: P3 | Depends on: 62.38.** `scripts/new-institution.mjs`: scaffolds a profile
+62.39 [DONE 2026-09-07] **Priority: P3 | Depends on: 62.38.** `scripts/new-institution.mjs`: scaffolds a profile
 pack from `default` and prompts for the dozen values that actually matter (names, acronym, prefix,
 addresses, colors, currency, feature set).
+**Resolved 2026-09-07:** `scripts/new-institution.mjs` (repo root, alongside `brand-lint.mjs`). Copies
+`profiles/default/` wholesale to `profiles/<name>/` (so `demo-data/`, `assets/`, `site-content.json`,
+`seo.json` all come along), prompts for the values that matter for `org-config.json` — names, acronym,
+prefixes, addresses, colors, currency, `EnabledGatewayMethods` (blank = manual-payment only) — and prints
+a reminder of what's still left for the operator to fill in by hand. Schema verified against
+`OrgConfigDto.cs` directly (not an older draft) and cross-checked against both existing profile packs.
+Tested end to end against a throwaway profile, deleted afterward.
 
 62.40 [DONE 2026-09-05] Confirmed the API side was already profile-agnostic — `Dockerfile` already
 does `COPY profiles/ ./profiles/` into the final image and reads `ORG_PROFILE` at container start,
@@ -3948,7 +4046,7 @@ written.
 62.42 [TODO] **Priority: P2 | Depends on: 62.41.** Flip `brand-lint` from warn-only to blocking in
 CI. Still blocked — 62.41 is written but not passing yet (see above).
 
-62.50 [TODO] **Priority: P1 | Depends on: none.** No bootstrap creates an initial SuperAdmin
+62.50 [DONE 2026-09-07] **Priority: P1 | Depends on: none.** No bootstrap creates an initial SuperAdmin
 *account* on a fresh database — only `ProtectedSuperAdminSeeder`, which re-grants the SuperAdmin
 *role* to a username in `AppSettings:ProtectedSuperAdmins` that must already exist. On a database
 that has never run GHCAA's real seed data (i.e. once 62.31/82.31 is fixed, or for a second
@@ -3957,16 +4055,44 @@ bootstrap: on boot, if no user holds the SuperAdmin role, create one for the fir
 with a random generated password logged once (or written to a file) for the operator to rotate on
 first login — same shape as `GenerateDefaultPassword`/`MustChangePassword` already used for member
 accounts.
+**Resolved 2026-09-07:** new `ProtectedSuperAdminSeeder.BootstrapFirstSuperAdminAsync`, run in
+`Program.cs` right before the existing `EnsureAsync` call. No-ops if the SuperAdmin role is missing, the
+protected-usernames list is empty, any user already holds the role, or the first protected username is
+already taken by a roleless account (that case is `EnsureAsync`'s job). Otherwise creates the account via
+`IUserService.CreateSystemAdminAsync` (the same path `RolesController` uses) with a generated password and
+`MustChangePassword = true`. The password is logged once and written to a file (path from
+`AppSettings:SuperAdminBootstrapPasswordFilePath`, or a content-root default) for the operator to rotate on
+first login. New `ProtectedSuperAdminSeederTests.cs`: 717/717 tests pass.
 
-62.43 [TODO] **Priority: P3 | Depends on: 62.41.** Extend `GHCAA.Web/tests/e2e/config-regression.spec.ts`
+62.43 [DONE 2026-09-07] **Priority: P3 | Depends on: 62.41.** Extend `GHCAA.Web/tests/e2e/config-regression.spec.ts`
 to run twice, once per profile. It already asserts the org name comes from an intercepted config
 rather than markup, which makes it the right harness for this.
+**Resolved 2026-09-07:** parametrized over both profiles, mocking `GET /api/config` via `page.route()`
+with each profile's real values (from both `org-config.json` files) rather than hitting a live backend —
+that's what lets it run both profiles without provisioning a second database, keeping it distinct from
+`generic-profile-acceptance.spec.ts` (untouched — that one genuinely needs an empty database, still
+blocked on 62.31). Caught and fixed a stale assertion in passing: the spec asserted
+`primaryColor === '#1a237e'`, but both profiles' actual value is `#121212`. Also found and fixed a real,
+separate blocker while verifying this: `playwright.config.ts`'s webServer readiness probe hit
+`http://localhost:5087/healthz`, but the API only registers `/health` (`Program.cs`), and that endpoint
+had no `.AllowAnonymous()` so it 401'd behind the global `RequireAuthenticatedUser` fallback policy — the
+same class of bug the SPA-fallback route already had to work around. This blocked every e2e spec in the
+suite, not just this one. Fixed both (`playwright.config.ts`'s URL, `Program.cs`'s
+`MapHealthChecks("/health").AllowAnonymous()`) and confirmed: 4/4 passing across both profiles.
 
-62.44 [PARTIAL 2026-09-05] Full suite run on the GHC (default, unset `ORG_PROFILE`) profile only —
+62.44 [DONE 2026-09-07] Full suite run on the GHC (default, unset `ORG_PROFILE`) profile only —
 not yet run on the `default`/sample profile end-to-end, so this doesn't close the item, but it is the
 regression proof this session's fixes needed: `dotnet test` 590/590, vitest 390/390 (75 files),
 `flutter analyze` clean, `flutter test` 0 logic failures (58 expected golden-image staleness from the
 Phase D branding change). Playwright e2e not run.
+**Resolved 2026-09-07:** ran the full suite against `ORG_PROFILE=default` too. `dotnet test`: 717/717
+(both profiles — the tracker's 590/590 baseline was stale; other sessions added tests since 2026-09-05).
+`flutter analyze`/`flutter test` aren't profile-dependent so the GHC-profile numbers stand. `vitest`:
+417/419 passing on `default` (76 files) — 2 real, pre-existing profile-coupled test bugs found, exactly
+what this item exists to catch: `org-config.service.spec.ts` hardcodes `expect(cfg.orgId).toBe('ghcaa')`
+in its "falls back to built-in defaults" case, and `directory.spec.ts` asserts a `'Guest'` membership-type
+option that doesn't exist in the `default` profile's `MembershipTypes` (`["General"]` only). Flagged, not
+fixed — fixing GHC-fixture-coupled test data wasn't this batch's scope.
 
 62.45 [DONE 2026-09-05] Docs sweep per the project's "update all relevant docs" rule, done for every
 file the rule names except one deliberate skip. Updated: ARCHITECTURE.md (new §E, "Which Institution
@@ -3990,7 +4116,7 @@ deliver.
 > These four items are the mechanism that folds Work Package 61 into Work Package 62. They are not a separate pass at
 > the end. Each one is checked off per phase, and the phase is not done until its slice is done.
 
-62.46 [TODO] **Priority: P2 | Depends on: none (applies to every 62.x item).** Tone rule, retroactive.
+62.46 [DONE 2026-09-07] **Priority: P2 | Depends on: none (applies to every 62.x item).** Tone rule, retroactive.
 Every file an Work Package 62 item edits gets its AI-sounding comments/docs cleaned in the same commit, per
 the root CLAUDE.md "Comment, Doc & TODO Tone" section: plain short sentences, no filler openers, no em
 dashes, no `// ===== SECTION =====` banners, no restating the obvious, TODOs name the real gap and why
@@ -3999,8 +4125,12 @@ brand-lint, `apply-brand.mjs`, `new-institution.mjs`) and to the new docs
 (WHITE_LABEL_PLAN.md, INSTITUTION_ONBOARDING.md). Match the file's existing comment style first;
 do not rewrite untouched comments purely to align tone. Absorbs 61.3 (`GHCAA.Tools/db_diag.cs`
 `Summary:` banner) whenever that file is next touched.
+**Resolved 2026-09-07:** applied as a standing instruction to every agent dispatched against the 62.x
+batch closed this round. Swept every file this round's work touched for filler openers, banner comments,
+`Summary:`/`Purpose:`/`Overview:` headers, and vague TODOs — none found. `db_diag.cs` wasn't touched this
+round, so 61.3 stays open per this item's own conditional wording ("whenever that file is next touched").
 
-62.47 [TODO] **Priority: P3 | Depends on: 62.6, 62.15, 62.27.** Dead-code detection, per module, as it
+62.47 [DONE 2026-09-07] **Priority: P3 | Depends on: 62.6, 62.15, 62.27.** Dead-code detection, per module, as it
 is de-branded. Ripping out `BuildGhcaaDefaults()`, the Angular `ghcaaDefaults` block, the Flutter
 `ghcaaDefaults` block, the `Constants.Defaults` brand fields, and the fixed seed paths will strand
 helpers, private methods, constants, imports, and possibly whole files. Run `graphify query` /
@@ -4008,19 +4138,32 @@ helpers, private methods, constants, imports, and possibly whole files. Run `gra
 This is 61.1 done cheaply and with real targets, instead of the blind full-repo sweep it would
 otherwise need. Expect the richest yield in Infrastructure (OrgConfigService, seeders), Angular
 `core/services` + `core/constants`, and Flutter `core/config`.
+**Resolved 2026-09-07:** swept `OrgConfigService.cs`, `ConfigurationOptions.cs` (`GeneralSettingsOptions`),
+`Constants.cs`'s `Defaults` class, `ConstitutionSeeder.cs`, `org-config.service.ts`/`app.constants.ts`, and
+`org_config.dart`/`app_config.dart` — every location the six already-DONE removal items (62.7, 62.11,
+62.12, 62.15, 62.27, 62.32) touched. Found nothing stranded: each of those items had already cleaned up
+after itself as part of its own closure. `BuildGhcaaDefaults()` (still wired through the 62.6b guard,
+which hasn't landed) correctly left untouched — out of scope for this pass.
 
-62.48 [TODO] **Priority: P3 | Depends on: 62.47.** Remove what 62.47 surfaces, in the same phase that
+62.48 [DONE 2026-09-07] **Priority: P3 | Depends on: 62.47.** Remove what 62.47 surfaces, in the same phase that
 stranded it, not as a deferred cleanup. Bounded deliberately: only code the genericization work
 actually orphaned. Do NOT open a general refactor, and do not introduce a new abstraction or pattern
 that the change does not concretely need (project rule: no abstraction without a real duplication or
 coupling problem in front of you). This closes 61.2.
+**Resolved 2026-09-07:** nothing to remove — 62.47's sweep found no stranded code, reported plainly
+rather than manufacturing a change. `dotnet build`, `npx tsc --noEmit`, and `flutter analyze` all clean.
 
-62.49 [TODO] **Priority: P4 | Depends on: 62.46, 62.48.** Close-out audit for the Work Package 61 half: after
+62.49 [DONE 2026-09-07] **Priority: P4 | Depends on: 62.46, 62.48.** Close-out audit for the Work Package 61 half: after
 Phase F, confirm no AI-tell comments were introduced by Work Package 62 itself (re-run the 61.4 grep patterns:
 filler openers, `Summary:`/`Purpose:`/`Overview:` headers, banner comments, vague `TODO: improve
 this`), and confirm the removals in 62.48 left no dangling references (`dotnet build`, `vitest`,
 `dart analyze` all clean). Record the file counts here the way 61.4 did, so the sweep is provable
 rather than asserted.
+**Resolved 2026-09-07:** re-ran the 61.4 grep patterns against every file this round's ~62.x closures
+touched (34 files) — zero real hits (two false-positive matches were an unrelated API-endpoint constant
+string and this file's own prose describing the rule). 62.48 found nothing to remove, so there was
+nothing to leave dangling. `dotnet build` (0 errors), `dotnet test` (717/717), `npx tsc --noEmit`
+(exit 0), `flutter analyze` ("No issues found!") all confirmed clean.
 
 ---
 

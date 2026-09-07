@@ -9,6 +9,7 @@ import { ThemeService, SpecialDayTheme } from '../../core/services/theme.service
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { toWireDate, toDisplayDate, parseDisplayDate } from '../../core/utils/date.util';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 export type ThemeStatus = 'SCHEDULED' | 'LIVE' | 'EXPIRED' | 'IDLE';
 
@@ -24,6 +25,7 @@ export class AdminThemes implements OnInit {
     private themeService = inject(ThemeService);
     private notify = inject(NotificationService);
     private confirmDialog = inject(ConfirmDialogService);
+    orgConfig = inject(OrgConfigService);
 
     themes = signal<SpecialDayTheme[]>([]);
     loading = signal(true);

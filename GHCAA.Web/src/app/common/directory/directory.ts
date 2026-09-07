@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName, getCurrentECPosition, PROFESSIONAL_SECTORS, getBloodGroupName, MEMBERSHIP_TYPE_OPTIONS, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS } from '../../core/constants/app.constants';
+import { getECPositionName, getCurrentECPosition, PROFESSIONAL_SECTORS, getBloodGroupName, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS } from '../../core/constants/app.constants';
 import { debounce } from '../../core/utils/debounce.util';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
@@ -46,7 +46,7 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     years: number[] = [];
     memberCategories: LookupOption[] = [];
     sectors = PROFESSIONAL_SECTORS;
-    membershipTypes = MEMBERSHIP_TYPE_OPTIONS; // 35.3: template drove this off a hardcoded list
+    membershipTypes: LookupOption[] = []; // 62.33: sourced from LOOKUP_GROUPS.MembershipType, filled in ngOnInit
 
     selectedMember = signal<any | null>(null);
 
@@ -93,6 +93,7 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
         this.doSearch(); // Initial load
         this.lookupService.getAcademicYears().subscribe(years => this.years = years);
         this.lookupService.getOptions(LOOKUP_GROUPS.MemberCategory).subscribe(opts => this.memberCategories = opts);
+        this.lookupService.getOptions(LOOKUP_GROUPS.MembershipType).subscribe(opts => this.membershipTypes = opts);
     }
 
     ngAfterViewInit() {

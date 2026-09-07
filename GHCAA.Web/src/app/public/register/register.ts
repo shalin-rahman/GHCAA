@@ -17,6 +17,7 @@ import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { Icon } from '../../common/icon/icon';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { SITE_CONTENT } from '../../core/config/site-content.generated';
+import { interpolateOrgTemplate } from '../../core/utils/org-template';
 
 @Component({
   selector: 'app-register',
@@ -40,6 +41,10 @@ export class Register implements OnDestroy {
     const branding = this.orgConfig.config()?.branding;
     return `${branding?.shortName ?? ''} ("${branding?.memberNickname ?? ''}")`;
   });
+  termsPreamble = computed(() => interpolateOrgTemplate(this.termsContent.preambleParagraph, this.orgConfig.config()));
+  termsEligibility = computed(() => interpolateOrgTemplate(this.termsContent.eligibilityParagraph, this.orgConfig.config()));
+  termsVerification = computed(() => interpolateOrgTemplate(this.termsContent.verificationParagraph, this.orgConfig.config()));
+  termsIp = computed(() => interpolateOrgTemplate(this.termsContent.ipParagraph, this.orgConfig.config()));
 
   loading = signal(false);
   registrationFee = signal<number>(500); // Default placeholder

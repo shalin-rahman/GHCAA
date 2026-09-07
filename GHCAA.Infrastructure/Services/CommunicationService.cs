@@ -75,9 +75,9 @@ namespace GHCAA.Infrastructure.Services
             new EmailTemplate
             {
                 Code = Constants.TemplateCodes.PaymentReceived,
-                Subject = "Payment Received: {{Amount}} BDT",
+                Subject = "Payment Received: {{Amount}} {{Currency}}",
                 Description = "Acknowledgment of payment submission",
-                Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Payment Received</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>We have successfully received your payment. It is currently under verification.</p><div style='background: #f8f9fa; padding: 15px; border-radius: 5px;'><p><strong>Amount:</strong> {{Amount}} BDT</p><p><strong>Transaction ID:</strong> {{TrxID}}</p></div><p>You will be notified once the payment is verified.</p></div>"
+                Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Payment Received</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>We have successfully received your payment. It is currently under verification.</p><div style='background: #f8f9fa; padding: 15px; border-radius: 5px;'><p><strong>Amount:</strong> {{Amount}} {{Currency}}</p><p><strong>Transaction ID:</strong> {{TrxID}}</p></div><p>You will be notified once the payment is verified.</p></div>"
             },
             new EmailTemplate
             {
@@ -417,6 +417,7 @@ namespace GHCAA.Infrastructure.Services
             vars["SupportEmail"] = org.Contact.SupportEmail;
             vars["PortalUrl"] = org.Contact.PortalBaseUrl;
             vars["CurrentYear"] = DateTime.UtcNow.Year.ToString();
+            vars["Currency"] = org.Currency.Code;
 
             return vars;
         }
