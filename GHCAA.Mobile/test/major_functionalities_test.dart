@@ -35,6 +35,9 @@ class FakeRef extends Fake implements Ref {
   T read<T>(ProviderListenable<T> provider) {
     throw UnimplementedError();
   }
+
+  @override
+  void invalidate(ProviderOrFamily provider) {}
 }
 
 class FakeDio extends Fake implements Dio {

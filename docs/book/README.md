@@ -274,9 +274,9 @@ a log file, a test run, a commit range — so an examiner can check it. Figures 
 states what the code does, and where the two disagree the code is right.
 
 **Keeping the numbers true.** Repository figures quoted in the text go stale as the code moves. The
-ones in the book now were taken on 1 September 2026: 276 endpoint attributes across 37 controllers,
-49 `DbSet` properties, 28 enumerations, 40 service interfaces with 37 implementations, 21 migrations,
-517 passing backend tests, 381 passing web tests, 3,366 lines of `styles.scss`. Re-take them before
+ones in the book now were taken on 7 September 2026: 284 endpoint attributes across 38 controllers,
+53 `DbSet` properties, 29 enumerations, 44 service interfaces with 42 implementations, 25 migrations,
+717 passing backend tests, 430 passing web tests, 3,363 lines of `styles.scss`. Re-take them before
 submission with the commands in `docs/PROJECT_MAP.md` and the two test suites, and correct the
 sentences that carry them.
 

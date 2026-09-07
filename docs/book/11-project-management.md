@@ -41,7 +41,7 @@ defined once, here, and used by name everywhere else in the book:
   shape.
 
 `docs/TODO.md` had 82 numbered work packages holding several hundred tracker tasks between them, tied
-to 17 WBS activities and 255 commits, as of 7 September 2026 — five different counts of one project,
+to 17 WBS activities and 258 commits, as of 7 September 2026 — five different counts of one project,
 each answering a different question about it.
 
 *[Rest of this section not written. Brief: the four streams above; the 17 code components each tied to the tracker work packages that produced them, so the activity list and the tracker are one list read two ways]*
@@ -60,7 +60,7 @@ each answering a different question about it.
 
 ## 11.4 Effort Estimation
 
-*[Not written. Brief: the function-point chain, computed from the delivered system: EI, EO and EQ from the 276 endpoint attributes, ILF from the 49 `DbSet` properties, EIF from the four payment gateways plus email, SMS and social identity. UFP, then TDI over the fourteen general system characteristics, **VAF = 0.65 + 0.01 × TDI**, AFP, effort at a stated productivity factor, LOC via the language factor, and cost in BDT. **COCOMO II is dropped**: its five scale factors and seventeen effort multipliers cannot be justified here, and a model nobody can defend adds no evidence]*
+*[Not written. Brief: the function-point chain, computed from the delivered system: EI, EO and EQ from the 284 endpoint attributes, ILF from the 53 `DbSet` properties, EIF from the four payment gateways plus email, SMS and social identity. UFP, then TDI over the fourteen general system characteristics, **VAF = 0.65 + 0.01 × TDI**, AFP, effort at a stated productivity factor, LOC via the language factor, and cost in BDT. **COCOMO II is dropped**: its five scale factors and seventeen effort multipliers cannot be justified here, and a model nobody can defend adds no evidence]*
 
 ### 11.4.1 Two estimates compared
 
@@ -72,7 +72,7 @@ each answering a different question about it.
 
 ## 11.5 How the Implementation Time Was Optimised
 
-*[Not written. Brief: the section that answers the question a reader forms as soon as the scale is stated: one unpaid maintainer, seven months, and a system with 276 endpoints, 49 entities, two clients and 898 automated tests. The answer is not that the work was small. Four things compounded — what the framework generated, what the project reused, what earlier projects supplied, and what tooling drafted — and this section prices each instead of asserting it]*
+*[Not written. Brief: the section that answers the question a reader forms as soon as the scale is stated: one unpaid maintainer, seven months, and a system with 284 endpoints, 53 entities, two clients and 898 automated tests. The answer is not that the work was small. Four things compounded — what the framework generated, what the project reused, what earlier projects supplied, and what tooling drafted — and this section prices each instead of asserting it]*
 
 ### 11.5.1 Sizing the delivered code
 

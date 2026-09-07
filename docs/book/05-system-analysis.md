@@ -37,7 +37,7 @@ where the boundary starts to be decomposed.
 
 Figure 5.2 decomposes the platform into seven processes, each corresponding to a subsystem named in
 the use-case model of §3.6, and four persistent data stores. The stores are drawn at the level a
-data-flow diagram uses them, which is coarser than the forty-nine mapped entities of §5.7; D1 Member
+data-flow diagram uses them, which is coarser than the fifty-three mapped entities of §5.7; D1 Member
 Records, for instance, stands for the member, academic-record, professional-record and
 membership-history tables together, because at this level of analysis they are read and written as a
 unit.
@@ -176,7 +176,7 @@ the shipped code actually checks.
 ### 5.7.1 Conceptual to logical progression
 
 The conceptual model is the domain class diagram of Figure 3.8; the logical model is the
-forty-nine `DbSet` properties on `ApplicationDbContext`, one per mapped entity, defined at analysis
+fifty-three `DbSet` properties on `ApplicationDbContext`, one per mapped entity, defined at analysis
 level in Table 5.4, which Chapter 6's
 data design and entity-relationship diagram take as their starting point. Nothing in that progression
 introduces a table that does not correspond to an analysis-level noun from §5.3.1; the nearest

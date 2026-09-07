@@ -43,6 +43,16 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0@sha256:f190d2dd9eef2899c91ac323caa0bd2b393
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
+# Nothing below depends on the "web" stage's output until the final COPY --from=web near the
+# bottom of this file, so without this line BuildKit schedules "web" and "build" concurrently —
+# `ng build` and `dotnet restore`/`dotnet publish` peaking on the same fixed-memory Render build
+# box at once. That is a strong candidate for the 8GB+ OOM on the 2026-09-07 deploy of 983c476,
+# a plain refactor unlikely to have grown either build's own footprint on its own. This COPY of a
+# throwaway file from "web" gives BuildKit a real dependency, forcing "web" to finish (and free
+# its memory) before this stage starts. See also the two 2026-08-30 OOM fixes below (no test
+# project, no separate build+publish pass) — this is the one remaining structural cause.
+COPY --from=web /web/package.json /tmp/.web-stage-done
+
 # Copy all .csproj files first (for layer caching)
 COPY ["GHCAA.API/GHCAA.API.csproj", "GHCAA.API/"]
 COPY ["GHCAA.Application/GHCAA.Application.csproj", "GHCAA.Application/"]

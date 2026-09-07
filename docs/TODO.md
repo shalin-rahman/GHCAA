@@ -7164,6 +7164,21 @@ invalidates the same two after a successful sign-in, so a stale value can't surv
 A's role/profile never renders for B — verified to fail on the pre-fix code (reproduces the bug) and
 pass on the fix.
 
+82.38a [DONE 2026-09-07] **Priority: P2 | Depends on: 82.38.** A previous session wrongly closed the
+book on `major_functionalities_test.dart`'s "Successful Login returns null and saves tokens" CI failure
+as "pre-existing, unrelated to current work" without checking git blame. It is not pre-existing: 82.38
+added `_ref.invalidate(roleProvider)`/`_ref.invalidate(userProfileProvider)` calls inside `login()`
+itself, and this file's own `FakeRef` (distinct from the one `auth_service_test.dart` uses, which never
+calls `login()` directly) only overrides `read()`, not `invalidate()` — Mocktail's `Fake` throws
+`UnimplementedError` for any unstubbed method, so every successful login in this test file started
+throwing and falling through to the generic error message instead of returning `null`. **Fix:** added
+`@override void invalidate(ProviderOrFamily provider) {}` to `FakeRef` in
+`GHCAA.Mobile/test/major_functionalities_test.dart`. **Acceptance:** `flutter test
+test/major_functionalities_test.dart` — 6/6 passing (was 5/6). The wider `flutter test` run still shows
+~58 golden-image failures unrelated to this fix; those are local-machine pixel-diff noise (0.1-0.5%
+per-image, this repo's CI already treats them as "Skip expect" rather than fail) from rendering on this
+Windows box rather than the CI runner's environment, not a regression.
+
 82.39 [DONE 2026-09-07] **Priority: P2 | Depends on: none.** Found while closing 82.14 (§8). Inactivity/session-
 expiry logic exists in two independent places with two different timeouts, both clearing the same
 storage independently: `SessionManager` at 15 minutes (`GHCAA.Mobile/lib/core/session/session_manager.dart:12`)
@@ -7424,6 +7439,25 @@ filename, so this was verified exhaustive rather than found by iterating replay 
 `Done.` reaching the current migration; `dotnet test` still green (713 passing). Both throwaway databases
 and the one-off scripts used to verify this were deleted; nothing checked in beyond the migration fixes
 themselves.
+
+82.53d [TODO] **Priority: P1 | Depends on: none.** User reported 2026-09-07: a manually triggered Render
+deploy of commit `983c476` (the 82.51 currency-pipe change, a template/service refactor with no new
+dependencies) failed after 2m24s with "Ran out of memory (used over 8GB)". This is the third distinct
+Render-build OOM this project has hit — the `Dockerfile`'s own comments already document two prior
+causes fixed on 2026-08-30 (running `GHCAA.Tests`'s `WebApplicationFactory` suite in-image, and a
+redundant `dotnet build` pass before `dotnet publish` re-fingerprinting wwwroot's committed member
+photos) — so the two structural fixes already in place were checked first and ruled out: neither
+regressed. Applied one mitigation on inspection, not yet confirmed against a real deploy: the `web`
+(Angular/Node) stage and the `build` (.NET restore/publish) stage share no `COPY --from` dependency
+until the final image assembly, so BuildKit's DAG schedules them concurrently — `ng build --configuration
+preprod` and `dotnet restore`/`dotnet publish` peaking on the same fixed-memory build box at once is a
+plausible way to tip over 8GB even without either build's own footprint growing. Added a throwaway
+`COPY --from=web /web/package.json /tmp/.web-stage-done` as the first line of the `build` stage to force
+BuildKit to serialize the two stages. **Not yet root-cause-confirmed** — Render's dashboard only reports
+the final memory figure, not a stage-by-stage breakdown, so this is the best-supported candidate from
+the Dockerfile's own structure, not a verified fix. **Acceptance:** a fresh manual Render deploy of the
+current preprod HEAD completes without the OOM notice; if it recurs, the full Render build log (not just
+the final summary) is needed to find the actual peak stage.
 
 82.52 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** User request 2026-09-06: an admin
 "send notification: yes/no" toggle for EC member added/terminated/removed and event created/updated,

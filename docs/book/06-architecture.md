@@ -55,7 +55,7 @@ Figure 6.2 draws the four layers and the single direction dependencies are permi
 
 ### 6.3.1 Domain layer
 
-`GHCAA.Domain` holds the forty-nine entity sets enumerated in §5.7, the twenty-eight enumerations
+`GHCAA.Domain` holds the fifty-three entity sets enumerated in §5.7, the twenty-nine enumerations
 of `Enums.cs`, and constants. Figure 6.7 draws the membership, payment, event and governance
 classes at design level, with the attributes and multiplicities the analysis model of Figure 3.8
 left out. It references nothing else in the solution, which is the dependency rule's
@@ -63,14 +63,14 @@ starting point: if the domain depended on anything, the rule would already be br
 
 ### 6.3.2 Application layer
 
-`GHCAA.Application` holds the service interfaces (forty are declared, and the thirty-seven
+`GHCAA.Application` holds the service interfaces (forty-four are declared, and the forty-two
 implementations in `GHCAA.Infrastructure/Services` are bound to them by the assembly-scanning
 registration of §6.11.9) and the data transfer objects that cross the API boundary. It depends only on
 `GHCAA.Domain`.
 
 ### 6.3.3 Infrastructure layer
 
-`GHCAA.Infrastructure` holds the service implementations, the three EF Core provider shims described
+`GHCAA.Infrastructure` holds the service implementations, the two EF Core provider shims described
 in §6.5.4, the payment gateway adapters, and `ApplicationDbContext`. It depends on `GHCAA.Application`
 and `GHCAA.Domain`, and is the only layer that depends on Entity Framework Core, on `HttpClient`, and
 on the file system. Figure 6.8 draws the interface-to-implementation pairs across that boundary,
@@ -78,7 +78,7 @@ which is where the dependency rule is either kept or broken.
 
 ### 6.3.4 API layer
 
-`GHCAA.API` holds the thirty-seven controllers of Table 6.3, the two SignalR hubs, and the middleware
+`GHCAA.API` holds the thirty-eight controllers of Table 6.3, the two SignalR hubs, and the middleware
 pipeline of §6.4. It composes the other three layers at startup through `Program.cs` and the
 `AddInfrastructure` extension method, and depends on all of them.
 
@@ -123,14 +123,14 @@ stamp can be checked, and must be checked before authorisation decides what it m
 
 ### 6.5.1 Conceptual, logical and physical progression
 
-The conceptual model is Figure 3.8; the logical model is the forty-nine mapped entity sets of §5.7,
-thirty-seven of which have a Fluent API configuration class under
+The conceptual model is Figure 3.8; the logical model is the fifty-three mapped entity sets of §5.7,
+forty of which have a Fluent API configuration class under
 `GHCAA.Infrastructure/Data/Configurations/` rather than attribute-only mapping, which keeps
-persistence concerns out of the domain classes themselves; the remaining twelve are mapped by EF
-Core's conventions alone, which is a gap rather than a decision and is recorded as such; the physical model is whichever of the three schemas in §6.5.4 the running environment
+persistence concerns out of the domain classes themselves; the remaining thirteen are mapped by EF
+Core's conventions alone, which is a gap rather than a decision and is recorded as such; the physical model is whichever of the two schemas in §6.5.4 the running environment
 selects. Figures 6.3 to 6.8 draw that schema as four sub-models, being identity and records, standing and
 money, events and participation, and governance, each with its keys and cardinalities. They are split
-this way rather than drawn as one diagram because one diagram of forty-nine tables cannot be printed
+this way rather than drawn as one diagram because one diagram of fifty-three tables cannot be printed
 at a size anyone can read; the content, communication and configuration tables are in the generated
 schema documentation.
 
@@ -172,11 +172,13 @@ and does prevent the same gateway transaction being credited twice.
 
 ### 6.5.4 Multi-provider portability
 
-`ApplicationDbContext` is abstract: three concrete subclasses, `PgSqlApplicationDbContext`,
-`MySqlApplicationDbContext` and `SqliteApplicationDbContext`, are pooled behind it, selected at
-startup by a `DatabaseProvider` configuration value read in
-`GHCAA.Infrastructure.DependencyInjection`. Production runs PostgreSQL; the test suite runs against
-the SQLite provider and, for unit-level service tests, against EF Core's in-memory provider instead.
+`ApplicationDbContext` is abstract: two concrete subclasses, `PgSqlApplicationDbContext` and
+`SqliteApplicationDbContext`, are pooled behind it, selected at startup by a `DatabaseProvider`
+configuration value read in `GHCAA.Infrastructure.DependencyInjection`. Production runs PostgreSQL,
+the only provider with a migration tree; the test suite runs against the SQLite provider for a
+migration-free bootstrap path, and against EF Core's in-memory provider for unit-level service tests.
+A third subclass, `MySqlApplicationDbContext`, existed earlier and was removed once an audit found it
+advertised support it never had — see ADR-02 and `docs/adr/0006-drop-mysql-provider.md`.
 The cost of this portability is recorded in the source itself: the migrations assembly must be told
 which provider-specific shim type a migration is attributed to, and the DI registration comment
 explains, in the maintainer's own words, why pooling the base `ApplicationDbContext` type rather
@@ -186,7 +188,7 @@ more honest record of the cost than a tidy retrospective claim would be.
 
 ### 6.5.5 Data dictionary
 
-Table 6.2 gives a representative slice of the forty-nine mapped entities; the full dictionary is
+Table 6.2 gives a representative slice of the fifty-three mapped entities; the full dictionary is
 generated from the schema and delivered beside this dissertation.
 
 ### 6.5.6 Seeding and runtime data-synchronisation strategy
@@ -288,7 +290,7 @@ into a guarded one without authenticating, and the admin tree is itself split by
 
 ### 6.8.2 Design-token system, theming and the single-stylesheet decision
 
-Presentation is governed by one stylesheet, `GHCAA.Web/src/styles.scss`, running to 3,366 lines on 1 September 2026. The decision to keep one file rather than a stylesheet per component was made
+Presentation is governed by one stylesheet, `GHCAA.Web/src/styles.scss`, running to 3,363 lines on 7 September 2026. The decision to keep one file rather than a stylesheet per component was made
 for a reason specific to this project's constraint of one maintainer: a shared design-token set for
 colour, spacing and typography, resolved once and consumed everywhere, is the only way one person can
 change a brand colour in one place and have it apply to three route trees without hunting through
@@ -526,7 +528,7 @@ ceremony for a project of this size.
 than uniformly across every entity; every other service reaches `ApplicationDbContext` directly.
 **Unit of Work.** Not hand-written, because EF Core's `DbContext` already is one: `SaveChangesAsync`
 commits every tracked change in a single transaction, which is the property a hand-rolled Unit of
-Work would exist to provide. **Service Layer.** The thirty-seven services of Table 6.3's companion DI
+Work would exist to provide. **Service Layer.** The forty-two services of Table 6.3's companion DI
 map are this pattern, named and applied consistently. **Data Transfer Object.** Applied at every
 controller boundary, discussed in §6.11.12. **Domain Model.** Present but anaemic in Fowler's sense
 [2], as §5.3.1 already noted: state lives on the entity, behaviour that changes it lives on the
@@ -622,11 +624,11 @@ flowchart TB
     subgraph API_L["GHCAA.API"]
       direction TB
       MW[Middleware pipeline]
-      CTRL[37 Controllers]
+      CTRL[38 Controllers]
       HUB[2 SignalR hubs]
     end
     subgraph APP_L["GHCAA.Application"]
-      IFACE[40 service interfaces + DTOs]
+      IFACE[44 service interfaces + DTOs]
     end
     subgraph INF_L["GHCAA.Infrastructure"]
       direction TB
@@ -635,7 +637,7 @@ flowchart TB
       DBC[2 DbContext provider shims]
     end
     subgraph DOM_L["GHCAA.Domain"]
-      ENT[53 entity sets, 28 enums]
+      ENT[53 entity sets, 29 enums]
     end
     subgraph STORE["Storage"]
       direction TB

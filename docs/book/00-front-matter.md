@@ -92,8 +92,8 @@ supply: no payment gateway credentials, no licence budget, no technical staff, a
 bandwidth-constrained membership, and a written constitution whose provisions the software must
 respect rather than reinterpret.
 
-The artefact is a clean-architecture ASP.NET Core 9 API exposing 276 endpoints across 37
-controllers over 49 persisted entity sets, with an Angular 21 web client and a Flutter mobile
+The artefact is a clean-architecture ASP.NET Core 9 API exposing 284 endpoints across 38
+controllers over 53 persisted entity sets, with an Angular 21 web client and a Flutter mobile
 client. Three design positions distinguish it. Constitutional rules are encoded as testable
 business rules traced to the article that mandates them, so that voting rights, committee
 composition and membership tiers cannot drift from the governing document. Payment is deliberately
@@ -536,8 +536,8 @@ reused, because the distinction changes how Chapter 12 should be read.
    single-maintainer, zero-licence-budget constraint, with the architectural decision recorded
    against those constraints instead of against a hypothetical growth curve (Chapter 6).
 
-**Engineering rather than research contribution.** The three clients, the 276-endpoint API surface,
-the 49-entity schema, the CI pipeline, the document-generation subsystem and the shared control
+**Engineering rather than research contribution.** The three clients, the 284-endpoint API surface,
+the 53-entity schema, the CI pipeline, the document-generation subsystem and the shared control
 library are engineering. They are the artefact the research is about, and their quality is measured
 in Chapter 12, but no novelty is claimed for the techniques used to build them.
 

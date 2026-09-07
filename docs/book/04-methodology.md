@@ -52,7 +52,7 @@ was rejected and why.
 The **design cycle** is the inner loop of building and evaluating, repeated across the increments
 Chapter 7 reports and gated, in every increment, by the verification discipline described in §4.4.
 This is the cycle that ran most often. It is also the cycle for which the repository itself is the
-clearest evidence, since every one of the two hundred and fifty-five commits between 9 February and 7
+clearest evidence, since every one of the two hundred and fifty-eight commits between 9 February and 7
 September 2026 is a turn of it.
 
 ## 4.3 Mapping Design Science Activities to the Work Performed
