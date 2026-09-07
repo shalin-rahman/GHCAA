@@ -1,9 +1,10 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { forkJoin, firstValueFrom } from 'rxjs';
 import { FinancialService, PaymentRecord, MembershipDue } from '../../core/services/financial.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { PaymentPortalComponent } from '../../common/payment-portal/payment-portal.component';
 import {
     FINANCIAL_CATEGORY_OPTIONS,
@@ -12,17 +13,19 @@ import {
     getPaymentStatusLabel
 } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 
 @Component({
     selector: 'app-payments',
     standalone: true,
-    imports: [CommonModule, FormsModule, PaymentPortalComponent, LogoSpinnerComponent],
+    imports: [CommonModule, FormsModule, PaymentPortalComponent, LogoSpinnerComponent, ModalHeaderComponent],
     templateUrl: './payments.html',
     styleUrl: './payments.scss'
 })
 export class Payments implements OnInit {
     private financialService = inject(FinancialService);
     private notify = inject(NotificationService);
+    private confirmDialog = inject(ConfirmDialogService);
 
     history = signal<PaymentRecord[]>([]);
     dues = signal<MembershipDue[]>([]);
@@ -83,8 +86,15 @@ export class Payments implements OnInit {
         });
     }
 
-    removeMethod(id: number) {
-        if (!confirm('Deregister this payment method from your identity wallet?')) return;
+    async removeMethod(id: number) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Deregister payment method',
+            message: 'Deregister this payment method from your identity wallet?',
+            confirmLabel: 'Deregister',
+            danger: true
+        }));
+        if (!ok) return;
+
         this.financialService.deleteSavedMethod(id).subscribe({
             next: () => {
                 this.notify.success('Identity wallet updated.');

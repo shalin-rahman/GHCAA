@@ -121,16 +121,22 @@ five fields, and are never hard-deleted:
 ```csharp
 public DateTime? UpdatedAt { get; set; }
 public int? UpdatedByAdminId { get; set; }
-public bool IsDeleted { get; set; }
+public bool IsArchived { get; set; }
 public DateTime? DeletedAt { get; set; }
 public int? DeletedByAdminId { get; set; }
 ```
 
-Class A entities also get `HasQueryFilter(x => !x.IsDeleted)` in their EF configuration, so ordinary
+Class A entities also get `HasQueryFilter(x => !x.IsArchived)` in their EF configuration, so ordinary
 reads keep the meaning they had before soft delete was introduced. Callers that genuinely need the
 deleted rows ask for them with `IgnoreQueryFilters()`. A service method that deletes a Class A row
 takes the acting admin's id as a required argument, and the controller returns `Unauthorized()` rather
 than attributing the act to admin 0 when it cannot identify the caller.
+
+82.30: `IsArchived` is the one name for this flag across every Class A entity. It used to be
+`IsDeleted` on `FinancialRecord`, `PaymentHistory` and `ECMember` while `Member`, `User`, `Poll` and
+`Campaign` already used `IsArchived` — same idea under two names. `IsArchived` won because it was
+already load-bearing on `Member` (the `Member(Status, IsArchived)` composite index, WP 24.37), so
+renaming the smaller group cost less than rebuilding that index.
 
 Class A today: `FinancialRecord`, `PaymentHistory`, `MembershipDue`, `MembershipHistory`, `Member`,
 `User`, `ECMember`, `Constitution`, `Poll`.
@@ -139,10 +145,10 @@ Everything else is **Class B** — content and configuration that can be recreat
 photos, site content, job posts, notifications, lookups). Class B carries `CreatedAt` and nothing more,
 and a hard delete is fine.
 
-Two known gaps this rule names but 82.16 did not close, each tracked separately: `ECMember` has two
+One known gap this rule names that 82.16 did not close, tracked separately: `ECMember` has two
 removal semantics side by side (`GovernanceService.DeleteECMemberAsync` hard-removes while
-`RemoveMemberFromCommitteeAsync` end-dates), and `Member`/`User` use `IsArchived` rather than
-`IsDeleted` for the same idea.
+`RemoveMemberFromCommitteeAsync` end-dates). The other gap 82.16 named — `FinancialRecord`/
+`PaymentHistory`/`ECMember` using `IsDeleted` instead of `IsArchived` — was closed by 82.30 (see above).
 
 ---
 

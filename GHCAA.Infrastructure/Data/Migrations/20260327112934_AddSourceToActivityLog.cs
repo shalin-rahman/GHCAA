@@ -69,8 +69,8 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 column: "LastUpdated",
                 value: new DateTime(2026, 3, 27, 11, 29, 30, 42, DateTimeKind.Utc).AddTicks(3336));
 
-            migrationBuilder.Sql(@"INSERT INTO ""Members"" (""Id"", ""AppliedDate"", ""ApprovedBy"", ""ApprovedDate"", ""BloodGroup"", ""Category"", ""ContributionPoints"", ""DateOfBirth"", ""Email"", ""EmailVerified"", ""EmergencyContactName"", ""EmergencyContactPhone"", ""EmergencyContactRelation"", ""FatherName"", ""FullName"", ""GdprAcceptedAt"", ""Gender"", ""HasAcceptedGdpr"", ""HasAcceptedTerms"", ""IsAddressPublic"", ""IsArchived"", ""IsEmailPublic"", ""IsFamilyPublic"", ""IsMobilePublic"", ""IsNIDPublic"", ""IsProfileComplete"", ""IsVerified"", ""LastUpdateDate"", ""MembershipNumber"", ""MembershipType"", ""MobileNo"", ""MotherName"", ""NID"", ""NotifyEventCreation"", ""NotifyParticipationApproval"", ""NotifyRegistrationUpdate"", ""NotifyRelevantUpdates"", ""PermanentAddress"", ""PhotoPath"", ""PresentAddress"", ""Status"", ""TShirtSize"")
-VALUES (2, TIMESTAMPTZ '2024-01-01 00:00:00', 1, TIMESTAMPTZ '2024-01-01 00:00:00', 2, 0, 0, TIMESTAMPTZ '1990-01-01 00:00:00', 'shalin.rahman@gmail.com', TRUE, 'Emergency', '01700000000', 'Family', 'Father', 'Shalin Rahman', NULL, 0, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TIMESTAMPTZ '2024-01-01 00:00:00', 'GHC-0000000002', 3, '01700000002', 'Mother', '0000000002', FALSE, FALSE, FALSE, FALSE, 'Munshiganj', NULL, 'Munshiganj', 1, 'L')
+            migrationBuilder.Sql(@"INSERT INTO ""Members"" (""Id"", ""AppliedDate"", ""ApprovedBy"", ""ApprovedDate"", ""BloodGroup"", ""Category"", ""ContributionPoints"", ""DateOfBirth"", ""Email"", ""EmailVerified"", ""EmergencyContactName"", ""EmergencyContactPhone"", ""EmergencyContactRelation"", ""FatherName"", ""FullName"", ""GdprAcceptedAt"", ""Gender"", ""HasAcceptedGdpr"", ""HasAcceptedTerms"", ""IsAddressPublic"", ""IsArchived"", ""IsEmailPublic"", ""IsFamilyPublic"", ""IsMobilePublic"", ""IsNIDPublic"", ""IsVerified"", ""LastUpdateDate"", ""MembershipNumber"", ""MembershipType"", ""MobileNo"", ""MotherName"", ""NID"", ""PermanentAddress"", ""PhotoPath"", ""PresentAddress"", ""Status"", ""TShirtSize"")
+VALUES (2, TIMESTAMPTZ '2024-01-01 00:00:00', 1, TIMESTAMPTZ '2024-01-01 00:00:00', 2, 0, 0, TIMESTAMPTZ '1990-01-01 00:00:00', 'shalin.rahman@gmail.com', TRUE, 'Emergency', '01700000000', 'Family', 'Father', 'Shalin Rahman', NULL, 0, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TIMESTAMPTZ '2024-01-01 00:00:00', 'GHC-0000000002', 3, '01700000002', 'Mother', '0000000002', 'Munshiganj', NULL, 'Munshiganj', 1, 'L')
 ON CONFLICT (""Id"") DO NOTHING;");
 
             migrationBuilder.UpdateData(
@@ -4154,8 +4154,8 @@ ON CONFLICT (""Id"") DO NOTHING;");
                 column: "SecurityStamp",
                 value: "360d95f5690144f09bd0b7c783b593fe");
 
-            migrationBuilder.Sql(@"INSERT INTO ""Users"" (""Id"", ""CreatedAt"", ""FailedLoginAttempts"", ""IsActive"", ""IsArchived"", ""MemberId"", ""MustChangePassword"", ""PasswordHash"", ""ResetToken"", ""ResetTokenExpiry"", ""SecurityStamp"", ""Username"")
-VALUES (1, TIMESTAMPTZ '2024-01-01 00:00:00', 0, TRUE, FALSE, 1, FALSE, '$2a$11$yUryc8gFlef8/.jJugVivORnhn76z3IW1HsiAiRjrIvZfPltqSlaC', NULL, NULL, '21e8c25cd3b34c64b6a0e3b6496574f7', 'superadmin')
+            migrationBuilder.Sql(@"INSERT INTO ""Users"" (""Id"", ""CreatedAt"", ""IsActive"", ""IsArchived"", ""MemberId"", ""MustChangePassword"", ""PasswordHash"", ""ResetToken"", ""ResetTokenExpiry"", ""SecurityStamp"", ""Username"")
+VALUES (1, TIMESTAMPTZ '2024-01-01 00:00:00', TRUE, FALSE, 1, FALSE, '$2a$11$yUryc8gFlef8/.jJugVivORnhn76z3IW1HsiAiRjrIvZfPltqSlaC', NULL, NULL, '21e8c25cd3b34c64b6a0e3b6496574f7', 'superadmin')
 ON CONFLICT (""Id"") DO NOTHING;");
 
             migrationBuilder.Sql(@"INSERT INTO ""UserRoles"" (""RolesId"", ""UsersId"") VALUES (1, 1) ON CONFLICT (""RolesId"", ""UsersId"") DO NOTHING;");

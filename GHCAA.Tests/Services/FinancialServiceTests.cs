@@ -3,10 +3,11 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
+using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Moq;
 using System.Linq;
 
@@ -28,7 +29,7 @@ public class FinancialServiceTests : TestBase
         var storageMock = new Mock<IFileStorageService>();
         var realTimeMock = new Mock<IRealTimeService>();
         var loggerMock = new Mock<ILogger<FinancialService>>();
-        var configMock = new Mock<IConfiguration>();
+        var generalSettings = Options.Create(new GeneralSettingsOptions());
         var userMock = new Mock<IUserService>();
         var activityMock = new Mock<IActivityService>();
         var gamificationMock = new Mock<IGamificationService>();
@@ -41,7 +42,7 @@ public class FinancialServiceTests : TestBase
             storageMock.Object,
             realTimeMock.Object,
             loggerMock.Object,
-            configMock.Object,
+            generalSettings,
             userMock.Object,
             activityMock.Object,
             gamificationMock.Object,
@@ -330,7 +331,7 @@ public class FinancialServiceTests : TestBase
         // for the false. IgnoreQueryFilters() checks what the row actually holds.
         var stillThere = await _context.PaymentHistories.IgnoreQueryFilters().FirstOrDefaultAsync(ph => ph.Id == p.Id);
         stillThere.Should().NotBeNull("a payment must never be physically removed");
-        stillThere!.IsDeleted.Should().BeTrue();
+        stillThere!.IsArchived.Should().BeTrue();
         stillThere.DeletedByAdminId.Should().Be(1);
     }
 

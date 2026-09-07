@@ -9,11 +9,14 @@ import { ImgFallbackDirective } from '../../common/directives/img-fallback.direc
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { SEARCH_DEBOUNCE_MS } from '../../core/constants/app.constants';
+import { debounce } from '../../core/utils/debounce.util';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImgFallbackDirective, LogoSpinnerComponent],
+  imports: [CommonModule, FormsModule, ImgFallbackDirective, LogoSpinnerComponent, ModalHeaderComponent],
   templateUrl: './messages.html',
   styleUrl: './messages.scss'
 })
@@ -109,16 +112,15 @@ export class Messages implements OnInit, AfterViewChecked {
     this.showNewMessageModal.set(false);
   }
 
-  private memberPickerSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  private debouncedMemberPickerSearch = debounce((query: string) => this.runMemberPickerSearch(query), SEARCH_DEBOUNCE_MS);
 
   searchMembersForNewMessage(query: string): void {
     this.memberPickerQuery.set(query);
-    if (this.memberPickerSearchTimer) clearTimeout(this.memberPickerSearchTimer);
     if (query.trim().length < 2) {
       this.memberPickerResults.set([]);
       return;
     }
-    this.memberPickerSearchTimer = setTimeout(() => this.runMemberPickerSearch(query), 300);
+    this.debouncedMemberPickerSearch(query);
   }
 
   private runMemberPickerSearch(query: string): void {

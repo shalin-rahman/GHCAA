@@ -50,11 +50,10 @@ class AuthService {
         if (refreshToken != null) await _storage.saveRefreshToken(refreshToken);
         await _storage.saveRole(role);
         
-        if (enableBiometric) {
-          await _storage.saveCredentials(identifier, password); // For Biometric Fast Login
-        }
-        // Note: do NOT call clearCredentials here — we just called clearAll() above.
-        // Credentials for biometric are only saved if the user opted in above.
+        // 82.40: biometric re-login used to store the raw password here. It now just flips
+        // this flag; loginWithStoredToken() below re-authenticates from the refresh token
+        // that saveRefreshToken already persisted above, so no password is ever written.
+        await _storage.setBiometricEnabled(enableBiometric);
 
         // roleProvider/userProfileProvider are non-autoDispose and cache across
         // navigations, so a stale value from the previous session survives clearAll()
@@ -78,6 +77,43 @@ class AuthService {
       return "An unexpected error occurred. Please try again.";
     }
     return "Login failed. Please check your credentials.";
+  }
+
+  /// 82.40: biometric "fast login" re-authenticates through the already-stored refresh
+  /// token (the same device-bound, server-rotatable token /auth/refresh-mobile issues on
+  /// every normal login) instead of resubmitting a saved plaintext password.
+  Future<String?> loginWithStoredToken() async {
+    try {
+      final refreshToken = await _storage.getRefreshToken();
+      if (refreshToken == null) {
+        return "No saved session found. Please log in with your password.";
+      }
+
+      final response = await _dio.post('/auth/refresh-mobile', data: {'refreshToken': refreshToken});
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final token = data['token'];
+        final newRefreshToken = data['refreshToken'];
+        if (token == null) return "Session refresh failed. Please log in with your password.";
+
+        await _storage.saveToken(token);
+        if (newRefreshToken != null) await _storage.saveRefreshToken(newRefreshToken);
+
+        _ref.invalidate(roleProvider);
+        _ref.invalidate(userProfileProvider);
+        return null; // Success
+      }
+    } catch (e) {
+      debugPrint('AuthService.loginWithStoredToken failed: $e');
+      if (e is DioException && e.response?.statusCode == 401) {
+        // Refresh token was revoked or expired server-side — clear it so the biometric
+        // option disappears until the member logs in with a password again.
+        await _storage.clearAll();
+        return "Your saved session has expired. Please log in with your password.";
+      }
+      return "An unexpected error occurred. Please try again.";
+    }
+    return "Session refresh failed. Please log in with your password.";
   }
 
   Future<List<Map<String, dynamic>>> getSocialProviders() async {
@@ -290,13 +326,6 @@ final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
     return await storage.getProfile();
   }
 });
-
-class ActivityNotifier extends StateNotifier<DateTime> {
-  ActivityNotifier() : super(DateTime.now());
-  void update() => state = DateTime.now();
-}
-
-final lastActivityProvider = StateNotifierProvider<ActivityNotifier, DateTime>((ref) => ActivityNotifier());
 
 /// Admin / SuperAdmin checks for mobile UI (case-insensitive; tolerant of API casing).
 extension UserRoleExt on String? {

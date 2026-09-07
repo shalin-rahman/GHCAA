@@ -98,8 +98,12 @@ public class FinancialLedgerServiceTests : TestBase
         // a year with real fee income but no manually-entered ledger rows must not report near-zero.
         _context.FinancialRecords.Add(new FinancialRecord
         {
-            Year = 2024, RecordType = Enums.FinancialRecordType.Income, Amount = 500,
-            FinancialCategory = Enums.FinancialCategory.Donation, Date = new DateTime(2024, 3, 1), Description = "Grant"
+            Year = 2024,
+            RecordType = Enums.FinancialRecordType.Income,
+            Amount = 500,
+            FinancialCategory = Enums.FinancialCategory.Donation,
+            Date = new DateTime(2024, 3, 1),
+            Description = "Grant"
         });
         _context.PaymentHistories.AddRange(
             new PaymentHistory { TransactionId = "TXN-1", Amount = 1000, PaidAt = new DateTime(2024, 1, 15), Status = Enums.PaymentStatus.Completed, FinancialCategory = Enums.FinancialCategory.MembershipFee },

@@ -1,5 +1,7 @@
 using System.Net;
+using System.Security.Claims;
 using System.Text.Json;
+using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +22,10 @@ namespace GHCAA.API.Middleware
             _env = env;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        // IErrorLogService is resolved per-request (method injection) rather than through the
+        // constructor because middleware is a singleton but the service and its DbContext are
+        // scoped — see AuditLogMiddleware for the same pattern.
+        public async Task InvokeAsync(HttpContext context, IErrorLogService errorLogService)
         {
             try
             {
@@ -29,6 +34,30 @@ namespace GHCAA.API.Middleware
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unhandled exception processing {Method} {Path}", context.Request.Method, context.Request.Path);
+
+                // 45.3: this is awaited rather than truly fire-and-forget — errorLogService's
+                // DbContext is request-scoped, and the scope is disposed the moment InvokeAsync
+                // returns, so an un-awaited write would race that disposal. The try/catch around
+                // it is defense in depth: IErrorLogService.LogAsync is contracted to never throw,
+                // but if some future/mock implementation ever did, that must not replace the real
+                // error already being handled with a logging failure instead.
+                try
+                {
+                    await errorLogService.LogAsync(
+                        Constants.ErrorLogs.LevelError,
+                        ex.Message,
+                        ex.GetType().FullName,
+                        ex.StackTrace,
+                        "ExceptionMiddleware",
+                        context.Request.Path,
+                        context.Request.Method,
+                        TryGetUserId(context),
+                        context.User?.Identity?.Name);
+                }
+                catch (Exception logEx)
+                {
+                    _logger.LogWarning(logEx, "Failed to persist ErrorLog for the exception above.");
+                }
 
                 // A throw after the response has already started writing (e.g. mid-SendFileAsync,
                 // a streaming export, a compression flush) can't have its status/headers changed —
@@ -68,6 +97,12 @@ namespace GHCAA.API.Middleware
 
                 await context.Response.WriteAsync(json);
             }
+        }
+
+        private static int? TryGetUserId(HttpContext context)
+        {
+            var claim = context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(claim, out var id) ? id : null;
         }
     }
 }

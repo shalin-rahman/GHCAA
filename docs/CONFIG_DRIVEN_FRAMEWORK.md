@@ -302,3 +302,44 @@ Two different operations, easy to conflate:
    row yet. `docs/INSTITUTION_ONBOARDING.md` has the full deployer-facing checklist.
    `scripts/new-institution.mjs` (Work Package 62.39) will scaffold this folder automatically, but
    it has not been built yet, so for now the folder is built by hand.
+
+---
+
+## 13. Configuration Value Classification (docs/TODO.md 82.11)
+
+`docs/materials/REVIEW.md` §10 asks, for every capability, whether it should be code-defined,
+configuration-defined, or administrator-managed. §11 lists the domains to check. This section is
+that classification, run against what Work Package 28 (this framework) and Work Package 62
+(white-label profile packs) already deliver — it names a gap by pointing at the WP28/WP62 item that
+should carry the fix, not by proposing a new configuration mechanism.
+
+| Capability | Code | Env/Profile Config | Admin Managed (DB) | Reason |
+| --- | --- | --- | --- | --- |
+| Organisation name, branding, logo, colors | | `profiles/<name>/org-config.json` (first boot) | `OrganizationConfig.Branding*` via `/admin/org-config` | Section 12 above: profile pack seeds it, then it's a runtime admin edit. Correctly hybrid — no gap. |
+| Contact details, support email, portal URL | | seeded from profile pack | `OrganizationConfig.Contact*` | Same pattern as branding. No gap. |
+| Domains / public content pages | | | `NewsPost` (ADR-05 merges news/notices into one table) | Content is DB rows an admin edits through the News/Notices UI, not configuration. Correctly admin-managed. |
+| Feature flags (`enableEvents`, `enableForum`, ...) | | | `OrganizationConfig.Features` | Deliberately admin-toggleable per org — this is what WP28 built the framework for. No gap. |
+| Beta / experimental features | Yes (no beta flag concept exists) | | | REVIEW.md's "beta features" item has no code equivalent today. Not a WP28/62 gap — nothing in the codebase distinguishes a beta feature from a normal one, so there's nothing to classify yet; raise only if a beta feature is actually built. |
+| Role-based feature visibility | Yes — `[Authorize(Roles=...)]` / `Constants.Policies` | | | Correctly code: authorization is a compile-time-checked security boundary, exactly the "arbitrary runtime modification would be dangerous" case in REVIEW.md §10.A. |
+| Membership categories (Founding/General/...) | | `OrganizationConfig.Workflow.MembershipTypes` | | Admin-editable per org already (WP28). No gap. |
+| Membership fees | | | `MembershipFeeConfig` table, admin CRUD | Correctly admin-managed — fees vary by type/date range and are already a DB-backed policy table. |
+| Eligibility rules, approval requirements | `MemberService` approval-path code (Serializable transaction, status/profile validation) | | `OrganizationConfig.Workflow.MemberApprovalMode` picks Auto vs ManualReview | Hybrid on purpose: the mode is admin-configurable, but the transaction safety and validation invariants inside each mode are code, matching REVIEW.md §10.A ("correctness is critical"). |
+| Membership statuses | Yes — `Enums.MembershipStatus` | | | A fixed state machine referenced throughout services and migrations; making status values admin-editable would break every status-based query. Correctly code. |
+| Committee structure, EC roles, term durations | Yes — `ECMember`, `Committee`-related models and services | | | Governance structure changes require code changes to the approval/eligibility logic that depends on specific roles (President, Secretary, ...); this is the WP36/WP37 boundary below. |
+| **Constitutional and election rules** | **Yes — held in code/seed on purpose** | | `Constitution` table is admin-*viewable*, ratified via `Data/Seed/constitution.json` + `ConstitutionSeeder.SyncAsync` | **Must never become freely editable outside a ratification process.** Constitutional text and election procedure carry formal institutional authority (Work Package 36, Work Package 37) — a UI edit box would let an admin silently rewrite governance rules the membership never voted on. |
+| Workflow states/transitions (membership approval, event registration, payment) | Yes — `Enums.*Status` + service-layer transition guards | | approval mode / auto-approve threshold via `OrganizationConfig`/`MembershipFeeConfig` | Matches REVIEW.md §11's instruction not to build a generic workflow engine — transitions are code, the policy knobs that pick a path through them are configuration/admin data. No gap. |
+| Notification templates | | | `EmailTemplate` table, admin CRUD | Correctly admin-managed. |
+| Notification channels (email/SMS/push) | Yes — `IEmailService`/`ISmsService` implementations selected at DI registration | env config (`GmailSettings`, `SmsSettings` — see 82.17) | | Which *provider* is wired up is a deployment-time choice (env config + DI), not a per-request admin choice; swapping providers means picking a different `IEmailService` implementation, not data. Correctly code+env, not a WP62 gap. |
+| Notification recipients/events/preferences | | | `ContactUsSettings:Recipients` (env, see below) is one exception | `ContactUsSettings:Recipients` is currently env-config for a fixed distribution list, not a per-user preference; genuine per-member notification preferences are FR/NFR territory tracked elsewhere in docs/TODO.md, not a WP28/62 gap since no per-member preference exists yet to classify. |
+| Payment/email/SMS provider credentials | | `GmailSettings`, `SmsSettings:Token`, gateway sandbox/prod URLs (82.17 now binds these to `IOptions<T>`) | `PaymentConfiguration` table holds public/secret keys, sandbox flag, per-gateway enable | Correctly split: which gateway is *enabled* and its *credentials* are hybrid — the account-level split hazard rule (no gateway keys exist yet) means URLs/library wiring are env config, but the actual enable/credential toggle is admin-managed so it works without a redeploy once a real merchant account exists. |
+| Localization strings (`en`/`bn`) | | `OrganizationConfig.Localization` | admin edit via org-config UI | Already hybrid and working (WP28's "self-heal on stale localization" gotcha already tracked in memory). No gap. |
+
+### What this did not find a home for
+
+Two REVIEW.md §11 items don't map to anything built: **beta feature flagging** and **per-member
+notification preferences**. Both are absent from the codebase entirely, not misclassified — there
+is no beta-flag field and no preference table to point at. Building either is a product decision
+outside this item's scope; this classification only says where it *would* belong once built
+(env/code feature flag for beta gating; a new admin-and-self-service-editable preference table for
+notifications), consistent with WP28/62's existing pattern rather than a new mechanism.
+

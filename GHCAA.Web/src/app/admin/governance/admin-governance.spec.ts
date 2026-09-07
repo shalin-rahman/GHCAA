@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { createNotificationServiceMock } from '../../core/testing/testing-utils';
 import { AdminGovernance } from './admin-governance';
-import { HttpClient } from '@angular/common/http';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { of } from 'rxjs';
@@ -9,27 +8,25 @@ import { of } from 'rxjs';
 describe('AdminGovernance Component', () => {
     let component: AdminGovernance;
     let fixture: ComponentFixture<AdminGovernance>;
-    let httpClientMock: any;
     let adminServiceMock: any;
     let notificationServiceMock: any;
 
     beforeEach(async () => {
-        httpClientMock = {
-            get: vi.fn().mockReturnValue(of([])),
-            post: vi.fn().mockReturnValue(of({})),
-            put: vi.fn().mockReturnValue(of({})),
-            delete: vi.fn().mockReturnValue(of({}))
-        };
         adminServiceMock = {
-            assignECRole: vi.fn().mockReturnValue(of({ success: true })),
-            updatePeriod: vi.fn().mockReturnValue(of({ success: true }))
+            getGovernancePeriods: vi.fn().mockReturnValue(of([])),
+            getCommitteeMembers: vi.fn().mockReturnValue(of([])),
+            createGovernancePeriod: vi.fn().mockReturnValue(of({ success: true })),
+            updateGovernancePeriod: vi.fn().mockReturnValue(of({ success: true })),
+            activateGovernancePeriod: vi.fn().mockReturnValue(of({ success: true })),
+            assignCommitteeRole: vi.fn().mockReturnValue(of({ success: true })),
+            removeCommitteeMember: vi.fn().mockReturnValue(of({ success: true })),
+            getMembers: vi.fn().mockReturnValue(of([]))
         };
         notificationServiceMock = createNotificationServiceMock();
 
         await TestBed.configureTestingModule({
             imports: [AdminGovernance],
             providers: [
-                { provide: HttpClient, useValue: httpClientMock },
                 { provide: AdminService, useValue: adminServiceMock },
                 { provide: NotificationService, useValue: notificationServiceMock }
             ]
@@ -45,7 +42,7 @@ describe('AdminGovernance Component', () => {
     });
 
     it('should load periods and committee on init', () => {
-        expect(httpClientMock.get).toHaveBeenCalled(); // loadPeriods
+        expect(adminServiceMock.getGovernancePeriods).toHaveBeenCalled();
     });
 
     // 82.52: notifyMember defaults to off and is threaded through to the API on both
@@ -56,8 +53,8 @@ describe('AdminGovernance Component', () => {
 
         component.assignRole();
 
-        expect(httpClientMock.post).toHaveBeenCalledWith(
-            expect.any(String),
+        expect(adminServiceMock.assignCommitteeRole).toHaveBeenCalledWith(
+            1,
             expect.objectContaining({ notifyMember: false })
         );
     });
@@ -68,8 +65,8 @@ describe('AdminGovernance Component', () => {
 
         component.assignRole();
 
-        expect(httpClientMock.post).toHaveBeenCalledWith(
-            expect.any(String),
+        expect(adminServiceMock.assignCommitteeRole).toHaveBeenCalledWith(
+            1,
             expect.objectContaining({ notifyMember: true })
         );
     });
@@ -80,7 +77,7 @@ describe('AdminGovernance Component', () => {
 
         component.confirmRemoveMember();
 
-        expect(httpClientMock.delete).toHaveBeenCalledWith(expect.stringContaining('notifyMember=false'));
+        expect(adminServiceMock.removeCommitteeMember).toHaveBeenCalledWith(9, false);
     });
 
     it('confirmRemoveMember deletes with notifyMember=true when the admin opts in', () => {
@@ -90,6 +87,6 @@ describe('AdminGovernance Component', () => {
 
         component.confirmRemoveMember();
 
-        expect(httpClientMock.delete).toHaveBeenCalledWith(expect.stringContaining('notifyMember=true'));
+        expect(adminServiceMock.removeCommitteeMember).toHaveBeenCalledWith(9, true);
     });
 });

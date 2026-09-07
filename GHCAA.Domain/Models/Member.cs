@@ -67,6 +67,13 @@ namespace GHCAA.Domain.Models
         public bool IsProfileComplete { get; set; } = false;
         public int ContributionPoints { get; set; } = 0;
 
+        // Push notifications (82.53a): current FCM token for this member's device, so a
+        // future targeted-push feature has somewhere to read from. Nullable — most members
+        // won't have opened the mobile app, or push permission was denied.
+        public string? FcmToken { get; set; }
+        public string? FcmTokenPlatform { get; set; }
+        public DateTime? FcmTokenUpdatedAt { get; set; }
+
         // Navigation
         public User? User { get; set; }
         public ICollection<ECMember> ECMembers { get; set; } = new List<ECMember>();

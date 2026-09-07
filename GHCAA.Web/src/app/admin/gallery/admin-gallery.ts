@@ -9,6 +9,7 @@ import { firstValueFrom } from 'rxjs';
 import { GalleryService } from '../../core/services/gallery.service';
 import { EventGallery, EventPhoto } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
 @Component({
@@ -21,6 +22,7 @@ import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 export class AdminGallery implements OnInit {
     private galleryService = inject(GalleryService);
     private notify = inject(NotificationService);
+    private confirmDialog = inject(ConfirmDialogService);
 
     galleries = signal<EventGallery[]>([]);
     selectedGallery = signal<EventGallery | null>(null);
@@ -175,8 +177,14 @@ export class AdminGallery implements OnInit {
         });
     }
 
-    deleteGallery(id: number) {
-        if (!confirm('Are you sure you want to delete this gallery? All photos will be unlinked.')) return;
+    async deleteGallery(id: number) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Delete gallery',
+            message: 'Are you sure you want to delete this gallery? All photos will be unlinked.',
+            confirmLabel: 'Delete',
+            danger: true
+        }));
+        if (!ok) return;
 
         this.galleryService.deleteGallery(id).subscribe({
             next: () => {
@@ -236,8 +244,14 @@ export class AdminGallery implements OnInit {
         }
     }
 
-    removePhoto(photoId: number) {
-        if (!confirm('Remove this photo from the library?')) return;
+    async removePhoto(photoId: number) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Remove photo',
+            message: 'Remove this photo from the library?',
+            confirmLabel: 'Remove',
+            danger: true
+        }));
+        if (!ok) return;
 
         this.galleryService.removePhoto(photoId).subscribe({
             next: () => {

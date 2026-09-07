@@ -497,10 +497,7 @@
     <!-- Invitation Card Modal (Printable) -->
     <div *ngIf="showInvitation() && invitationData()" class="modal-overlay invitation-modal no-print">
         <div class="modal-box wide invitation-card-preview animate-fade-up">
-            <div class="modal-header">
-                <h3>Invitation Pass</h3>
-                <button class="close-btn" (click)="closeInvitation()">✕</button>
-            </div>
+            <app-modal-header title="Invitation Pass" (closed)="closeInvitation()"></app-modal-header>
 
             <div class="modal-body">
                 <div id="invitation-card" class="invitation-card print-target">

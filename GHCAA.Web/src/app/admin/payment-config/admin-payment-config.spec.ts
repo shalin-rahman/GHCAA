@@ -3,6 +3,7 @@ import { createNotificationServiceMock } from '../../core/testing/testing-utils'
 import { AdminPaymentConfig } from './admin-payment-config';
 import { PaymentConfigService } from '../../core/services/payment-config.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { of } from 'rxjs';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -11,6 +12,7 @@ describe('AdminPaymentConfig Component', () => {
     let fixture: ComponentFixture<AdminPaymentConfig>;
     let paymentConfigServiceMock: any;
     let notificationServiceMock: any;
+    let confirmDialogServiceMock: any;
 
     beforeEach(async () => {
         paymentConfigServiceMock = {
@@ -23,11 +25,16 @@ describe('AdminPaymentConfig Component', () => {
 
         notificationServiceMock = createNotificationServiceMock();
 
+        confirmDialogServiceMock = {
+            confirm: vi.fn().mockReturnValue(of(true))
+        };
+
         await TestBed.configureTestingModule({
             imports: [AdminPaymentConfig, ReactiveFormsModule],
             providers: [
                 { provide: PaymentConfigService, useValue: paymentConfigServiceMock },
-                { provide: NotificationService, useValue: notificationServiceMock }
+                { provide: NotificationService, useValue: notificationServiceMock },
+                { provide: ConfirmDialogService, useValue: confirmDialogServiceMock }
             ]
         }).compileComponents();
 
@@ -44,16 +51,14 @@ describe('AdminPaymentConfig Component', () => {
         expect(paymentConfigServiceMock.getAllConfigs).toHaveBeenCalled();
     });
 
-    it('should call seedDefaults when confirmed', () => {
-        vi.spyOn(window, 'confirm').mockReturnValue(true);
-        component.seedDefaults();
+    it('should call seedDefaults when confirmed', async () => {
+        await component.seedDefaults();
         expect(paymentConfigServiceMock.seedDefaults).toHaveBeenCalled();
         expect(notificationServiceMock.success).toHaveBeenCalled();
     });
 
-    it('should call deleteConfig when confirmed', () => {
-        vi.spyOn(window, 'confirm').mockReturnValue(true);
-        component.deleteConfig(101);
+    it('should call deleteConfig when confirmed', async () => {
+        await component.deleteConfig(101);
         expect(paymentConfigServiceMock.deleteConfig).toHaveBeenCalledWith(101);
         expect(notificationServiceMock.success).toHaveBeenCalled();
     });

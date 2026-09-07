@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ghcaa_mobile/core/api/api_client.dart';
+import 'package:ghcaa_mobile/core/storage/storage_service.dart';
 import 'package:ghcaa_mobile/features/auth/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -42,6 +43,26 @@ class _FakeLoginAdapter implements HttpClientAdapter {
       final isUserA = options.headers['Authorization'] == 'Bearer token-A';
       return ResponseBody.fromString(
         jsonEncode({'fullName': isUserA ? 'User A' : 'User B'}),
+        200,
+        headers: {
+          Headers.contentTypeHeader: ['application/json'],
+        },
+      );
+    }
+
+    if (options.path.contains('/auth/refresh-mobile')) {
+      final submitted = (options.data as Map)['refreshToken'];
+      if (submitted != 'valid-refresh-token') {
+        return ResponseBody.fromString(
+          jsonEncode({'detail': 'Invalid or expired refresh token.'}),
+          401,
+          headers: {
+            Headers.contentTypeHeader: ['application/json'],
+          },
+        );
+      }
+      return ResponseBody.fromString(
+        jsonEncode({'token': 'refreshed-token', 'refreshToken': 'rotated-refresh-token'}),
         200,
         headers: {
           Headers.contentTypeHeader: ['application/json'],
@@ -118,4 +139,37 @@ void main() {
       );
     },
   );
+
+  group('82.40: biometric re-login via loginWithStoredToken', () {
+    test('fails cleanly when no refresh token has been saved', () async {
+      final authService = container.read(authServiceProvider);
+      final error = await authService.loginWithStoredToken();
+      expect(error, isNotNull);
+    });
+
+    test('rotates the access/refresh tokens on a valid stored refresh token', () async {
+      final storage = container.read(storageServiceProvider);
+      await storage.saveRefreshToken('valid-refresh-token');
+
+      final authService = container.read(authServiceProvider);
+      final error = await authService.loginWithStoredToken();
+
+      expect(error, isNull);
+      expect(await storage.getToken(), 'refreshed-token');
+      expect(await storage.getRefreshToken(), 'rotated-refresh-token');
+    });
+
+    test('clears the stored session when the refresh token was revoked/expired', () async {
+      final storage = container.read(storageServiceProvider);
+      await storage.saveToken('stale-access-token');
+      await storage.saveRefreshToken('revoked-refresh-token');
+
+      final authService = container.read(authServiceProvider);
+      final error = await authService.loginWithStoredToken();
+
+      expect(error, isNotNull);
+      expect(await storage.getToken(), isNull);
+      expect(await storage.getRefreshToken(), isNull);
+    });
+  });
 }

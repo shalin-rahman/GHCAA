@@ -7,9 +7,10 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
+using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 
@@ -43,7 +44,8 @@ namespace GHCAA.Tests.Workflows
 
             var loggerMock = new Mock<ILogger<MemberService>>();
 
-            var configMock = new Mock<IConfiguration>();
+            var generalSettings = Options.Create(new GeneralSettingsOptions());
+            var appSettings = Options.Create(new AppSettingsOptions());
             var gamificationMock = new Mock<IGamificationService>();
 
             var realTimeMock = new Mock<IRealTimeService>();
@@ -58,7 +60,7 @@ namespace GHCAA.Tests.Workflows
                 _storageMock.Object,
                 realTimeMock.Object,
                 financialLoggerMock.Object,
-                configMock.Object,
+                generalSettings,
                 _userServiceMock.Object,
                 _activityMock.Object,
                 gamificationMock.Object,
@@ -75,7 +77,7 @@ namespace GHCAA.Tests.Workflows
                 loggerMock.Object,
                 _activityMock.Object,
                 _notificationMock.Object,
-                configMock.Object,
+                appSettings,
                 gamificationMock.Object,
                 _financialService,
                 realTimeMock.Object,

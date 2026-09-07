@@ -218,13 +218,13 @@ namespace GHCAA.Infrastructure.Services
         public async Task<bool> DeleteECMemberAsync(int id, int adminId, bool notifyMember = false, CancellationToken cancellationToken = default)
         {
             var ecMember = await _db.ECMembers.FindAsync(new object[] { id }, cancellationToken);
-            if (ecMember == null || ecMember.IsDeleted) return false;
+            if (ecMember == null || ecMember.IsArchived) return false;
 
             // 82.29: soft delete, replacing _db.ECMembers.Remove(ecMember). ECMember is Class A
             // (ARCHITECTURE.md §4) — this path is for a row that should never have existed (wrong
             // member added), which is still worth keeping as evidence of who removed it and when,
             // the same reasoning FinancialService.DeletePaymentAsync already applies to PaymentHistory.
-            ecMember.IsDeleted = true;
+            ecMember.IsArchived = true;
             ecMember.DeletedAt = DateTime.UtcNow;
             ecMember.DeletedByAdminId = adminId;
 

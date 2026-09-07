@@ -6,10 +6,12 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Application.Security;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace GHCAA.Infrastructure.Services
@@ -17,13 +19,16 @@ namespace GHCAA.Infrastructure.Services
     public class TokenService : ITokenService
     {
         private readonly SymmetricSecurityKey _key;
-        private readonly IConfiguration _config;
+        private readonly JwtOptions _jwtOptions;
         private readonly ApplicationDbContext _db;
         private readonly ILogger<TokenService> _logger;
 
-        public TokenService(IConfiguration config, IHostEnvironment environment, ILogger<TokenService> logger, ApplicationDbContext db)
+        // config stays here only for JwtSigningKeyResolver.Resolve, which needs the raw
+        // IConfiguration (plus IHostEnvironment) to check several possible secret sources — see
+        // JwtOptions's comment on why the signing key itself isn't part of that options class.
+        public TokenService(IConfiguration config, IOptions<JwtOptions> jwtOptions, IHostEnvironment environment, ILogger<TokenService> logger, ApplicationDbContext db)
         {
-            _config = config;
+            _jwtOptions = jwtOptions.Value;
             _db = db;
             _logger = logger;
             var secret = JwtSigningKeyResolver.Resolve(config, environment, logger);
@@ -45,9 +50,9 @@ namespace GHCAA.Infrastructure.Services
             var validationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
-                ValidIssuer = _config["Jwt:Issuer"] ?? "GHCAA",
+                ValidIssuer = _jwtOptions.Issuer,
                 ValidateAudience = true,
-                ValidAudience = _config["Jwt:Audience"] ?? "GHCAA",
+                ValidAudience = _jwtOptions.Audience,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = _key,
                 // The whole point is to read a token past its 60-minute expiry — only the
@@ -100,8 +105,8 @@ namespace GHCAA.Infrastructure.Services
                 // 24.27: 60-minute access token. Refresh tokens extend sessions without re-login.
                 Expires = DateTime.UtcNow.AddMinutes(60),
                 SigningCredentials = creds,
-                Issuer = _config["Jwt:Issuer"] ?? "GHCAA",
-                Audience = _config["Jwt:Audience"] ?? "GHCAA"
+                Issuer = _jwtOptions.Issuer,
+                Audience = _jwtOptions.Audience
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();

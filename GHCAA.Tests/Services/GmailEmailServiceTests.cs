@@ -1,7 +1,8 @@
 using FluentAssertions;
+using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace GHCAA.Tests.Services;
@@ -9,13 +10,11 @@ namespace GHCAA.Tests.Services;
 [TestFixture]
 public class GmailEmailServiceTests
 {
-    private Mock<IConfiguration> _mockConfig = null!;
     private Mock<ILogger<GmailEmailService>> _mockLogger = null!;
 
     [SetUp]
     public void Setup()
     {
-        _mockConfig = new Mock<IConfiguration>();
         _mockLogger = new Mock<ILogger<GmailEmailService>>();
     }
 
@@ -23,45 +22,42 @@ public class GmailEmailServiceTests
     [TestCase("test@gmail.com", null)]
     public void Constructor_WithMissingCredential_ShouldThrowException(string? email, string? appPassword)
     {
-        // Arrange
-        _mockConfig.Setup(x => x["GmailSettings:Email"]).Returns(email);
-        _mockConfig.Setup(x => x["GmailSettings:AppPassword"]).Returns(appPassword);
+        var settings = Options.Create(new GmailSettingsOptions { Email = email, AppPassword = appPassword });
 
-        // Act & Assert
-        var act = () => new GmailEmailService(_mockConfig.Object, _mockLogger.Object);
+        var act = () => new GmailEmailService(settings, _mockLogger.Object);
         act.Should().Throw<ArgumentNullException>();
     }
 
     [Test]
     public void Constructor_WithValidConfig_ShouldCreateInstance()
     {
-        // Arrange
-        _mockConfig.Setup(x => x["GmailSettings:Email"]).Returns("test@gmail.com");
-        _mockConfig.Setup(x => x["GmailSettings:AppPassword"]).Returns("password");
-        _mockConfig.Setup(x => x["GmailSettings:Host"]).Returns("smtp.gmail.com");
-        _mockConfig.Setup(x => x["GmailSettings:Port"]).Returns("587");
+        var settings = Options.Create(new GmailSettingsOptions
+        {
+            Email = "test@gmail.com",
+            AppPassword = "password",
+            Host = "smtp.gmail.com",
+            Port = 587
+        });
 
-        // Act
-        var service = new GmailEmailService(_mockConfig.Object, _mockLogger.Object);
+        var service = new GmailEmailService(settings, _mockLogger.Object);
 
-        // Assert
         service.Should().NotBeNull();
     }
 
-    [TestCase("GmailSettings:Host", null)]
-    [TestCase("GmailSettings:Port", null)]
-    [TestCase("GmailSettings:Port", "invalid")]
-    public void Constructor_WithMissingOrInvalidHostOrPort_ShouldFallBackToDefault(string key, string? value)
+    [Test]
+    public void Constructor_WithDefaultHostAndPort_ShouldCreateInstance()
     {
-        // Arrange
-        _mockConfig.Setup(x => x["GmailSettings:Email"]).Returns("test@gmail.com");
-        _mockConfig.Setup(x => x["GmailSettings:AppPassword"]).Returns("password");
-        _mockConfig.Setup(x => x[key]).Returns(value);
+        // GmailSettingsOptions.Host/Port already default to smtp.gmail.com/587 when the section
+        // omits them — this is what used to be the "fall back to default" behavior of the raw
+        // IConfiguration reads.
+        var settings = Options.Create(new GmailSettingsOptions
+        {
+            Email = "test@gmail.com",
+            AppPassword = "password"
+        });
 
-        // Act
-        var service = new GmailEmailService(_mockConfig.Object, _mockLogger.Object);
+        var service = new GmailEmailService(settings, _mockLogger.Object);
 
-        // Assert
         service.Should().NotBeNull();
     }
 

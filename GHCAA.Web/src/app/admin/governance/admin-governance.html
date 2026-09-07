@@ -136,10 +136,7 @@
 @if (showPeriodModal()) {
 <div class="modal-overlay" (click)="showPeriodModal.set(false)">
     <div class="modal-box" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3>{{ editPeriodData().id ? 'Edit' : 'Create' }} EC Period</h3>
-            <button class="close-btn" (click)="showPeriodModal.set(false)">✕</button>
-        </div>
+        <app-modal-header [title]="(editPeriodData().id ? 'Edit' : 'Create') + ' EC Period'" (closed)="showPeriodModal.set(false)"></app-modal-header>
         <div class="modal-body">
             <div class="form-group">
                 <label>Period Title <span class="required-star">*</span></label>
@@ -181,10 +178,7 @@
 @if (showAssignModal()) {
 <div class="modal-overlay" (click)="showAssignModal.set(false)">
     <div class="modal-box" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3>Assign Role</h3>
-            <button class="close-btn" (click)="showAssignModal.set(false)">✕</button>
-        </div>
+        <app-modal-header title="Assign Role" (closed)="showAssignModal.set(false)"></app-modal-header>
         <div class="modal-body">
             <!-- Search field for member -->
             <div class="form-group search-group">
@@ -245,10 +239,7 @@
 @if (removingMemberId() !== null) {
 <div class="modal-overlay" (click)="removingMemberId.set(null)">
     <div class="modal-box" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3>Remove Committee Member</h3>
-            <button class="close-btn" (click)="removingMemberId.set(null)">✕</button>
-        </div>
+        <app-modal-header title="Remove Committee Member" (closed)="removingMemberId.set(null)"></app-modal-header>
         <div class="modal-body">
             <p>Remove this member from the committee?</p>
             <div class="form-group">

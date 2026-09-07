@@ -1,12 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { API_ENDPOINTS } from '../../core/constants/app.constants';
+import { HealthService } from '../../core/services/health.service';
 
 @Component({
   selector: 'app-health',
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="health-container" style="padding: 50px; text-align: center; font-family: sans-serif;">
       <h1 [style.color]="status() === 'Healthy' ? '#4caf50' : '#f44336'">System Health: {{ status() }}</h1>
@@ -24,7 +24,7 @@ import { API_ENDPOINTS } from '../../core/constants/app.constants';
   `
 })
 export class Health {
-  private http = inject(HttpClient);
+  private healthService = inject(HealthService);
   status = signal('Checking...');
   timestamp = signal(new Date());
   checks = signal<any[]>([]);
@@ -36,7 +36,7 @@ export class Health {
 
   checkHealth() {
     this.loading.set(true);
-    this.http.get<any>(API_ENDPOINTS.HEALTH).subscribe({
+    this.healthService.check().subscribe({
       next: (res) => {
         this.status.set(res.Status);
         this.timestamp.set(new Date(res.Timestamp));

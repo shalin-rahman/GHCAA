@@ -4,10 +4,11 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -36,12 +37,12 @@ namespace GHCAA.Tests.Services
             var logger = new Mock<ILogger<MemberService>>();
             var activity = new Mock<IActivityService>();
             var notify = new Mock<INotificationService>();
-            var config = new Mock<IConfiguration>();
+            var appSettings = Options.Create(new AppSettingsOptions());
             var gamification = new Mock<IGamificationService>();
             var financials = new Mock<IFinancialService>();
             var orgConfig = new Mock<IOrgConfigService>();
 
-            _service = new MemberService(_context, storage.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, config.Object, gamification.Object, financials.Object, new Mock<IRealTimeService>().Object, orgConfig.Object, new Mock<ITokenService>().Object);
+            _service = new MemberService(_context, storage.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, appSettings, gamification.Object, financials.Object, new Mock<IRealTimeService>().Object, orgConfig.Object, new Mock<ITokenService>().Object);
 
             if (!_context.ECPeriods.Any(p => p.Title == "Interim Executive Committee"))
             {

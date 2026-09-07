@@ -138,65 +138,65 @@
                 </div>
                 <div class="form-grid mb-12">
                     <div class="form-group">
-                        <label>Full Name *</label>
-                        <input type="text" [(ngModel)]="profile.fullName" name="fullName" required maxlength="200" #nameM="ngModel"
+                        <label for="profile-fullName">Full Name *</label>
+                        <input id="profile-fullName" type="text" [(ngModel)]="profile.fullName" name="fullName" required maxlength="200" #nameM="ngModel"
                             [class.border-red-500]="nameM.invalid && nameM.touched">
-                        <div *ngIf="nameM.touched && nameM.invalid" class="text-[10px] text-red-500 mt-1">
+                        <div *ngIf="nameM.touched && nameM.invalid" role="alert" class="text-[10px] text-red-500 mt-1">
                             <span *ngIf="nameM.errors?.['required']">Full name is required.</span>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>National ID (NID)</label>
-                        <input type="text" [value]="profile.nid" name="nid" readonly class="opacity-50"
+                        <label for="profile-nid">National ID (NID)</label>
+                        <input id="profile-nid" type="text" [value]="profile.nid" name="nid" readonly class="opacity-50"
                             title="Contact admin to change verified NID">
                     </div>
                     <div class="form-group">
-                        <label>Date of Birth *</label>
-                        <input type="text" [(ngModel)]="profile.dateOfBirth" name="dateOfBirth" required 
+                        <label for="profile-dateOfBirth">Date of Birth *</label>
+                        <input id="profile-dateOfBirth" type="text" [(ngModel)]="profile.dateOfBirth" name="dateOfBirth" required 
                             placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
                             #dobM="ngModel" [class.border-red-500]="dobM.invalid && dobM.touched">
-                        <div *ngIf="dobM.touched && dobM.invalid" class="text-[10px] text-red-500 mt-1">
+                        <div *ngIf="dobM.touched && dobM.invalid" role="alert" class="text-[10px] text-red-500 mt-1">
                             <span *ngIf="dobM.errors?.['required']">Date of birth is required.</span>
                             <span *ngIf="dobM.errors?.['pattern']">Use format: dd-mm-yyyy</span>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" [value]="profile.email" name="email" readonly class="opacity-50"
+                        <label for="profile-email">Email Address</label>
+                        <input id="profile-email" type="email" [value]="profile.email" name="email" readonly class="opacity-50"
                             title="Contact admin to change verified Email Address">
                     </div>
                     <div class="form-group">
-                        <label>Mobile Number</label>
-                        <input type="text" [value]="profile.mobileNo" name="mobileNo" readonly class="opacity-50"
+                        <label for="profile-mobileNo">Mobile Number</label>
+                        <input id="profile-mobileNo" type="text" [value]="profile.mobileNo" name="mobileNo" readonly class="opacity-50"
                             title="Contact admin to change verified Mobile Number">
                     </div>
                     <div class="form-group">
-                        <label>Father's Name *</label>
-                        <input type="text" [(ngModel)]="profile.fatherName" name="fatherName" required maxlength="200" #fatherM="ngModel"
+                        <label for="profile-fatherName">Father's Name *</label>
+                        <input id="profile-fatherName" type="text" [(ngModel)]="profile.fatherName" name="fatherName" required maxlength="200" #fatherM="ngModel"
                             [class.border-red-500]="fatherM.invalid && fatherM.touched">
                     </div>
                     <div class="form-group">
-                        <label>Mother's Name *</label>
-                        <input type="text" [(ngModel)]="profile.motherName" name="motherName" required maxlength="200" #motherM="ngModel"
+                        <label for="profile-motherName">Mother's Name *</label>
+                        <input id="profile-motherName" type="text" [(ngModel)]="profile.motherName" name="motherName" required maxlength="200" #motherM="ngModel"
                             [class.border-red-500]="motherM.invalid && motherM.touched">
                     </div>
                     <div class="form-group">
-                        <label>Gender *</label>
-                        <select [(ngModel)]="profile.gender" name="gender" required #genderM="ngModel"
+                        <label for="profile-gender">Gender *</label>
+                        <select id="profile-gender" [(ngModel)]="profile.gender" name="gender" required #genderM="ngModel"
                             [class.border-red-500]="genderM.invalid && genderM.touched">
                             <option *ngFor="let g of genderOptions" [value]="g.value">{{ g.label }}</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Blood Group *</label>
-                        <select [(ngModel)]="profile.bloodGroup" name="bloodGroup" required #bgM="ngModel"
+                        <label for="profile-bloodGroup">Blood Group *</label>
+                        <select id="profile-bloodGroup" [(ngModel)]="profile.bloodGroup" name="bloodGroup" required #bgM="ngModel"
                             [class.border-red-500]="bgM.invalid && bgM.touched">
                             <option *ngFor="let b of bloodGroupOptions" [value]="b.value">{{ b.label }}</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>T-Shirt Size *</label>
-                        <select [(ngModel)]="profile.tShirtSize" name="tShirtSize" required #tsM="ngModel"
+                        <label for="profile-tShirtSize">T-Shirt Size *</label>
+                        <select id="profile-tShirtSize" [(ngModel)]="profile.tShirtSize" name="tShirtSize" required #tsM="ngModel"
                             [class.border-red-500]="tsM.invalid && tsM.touched">
                             <option *ngFor="let s of tShirtOptions" [value]="s.value">{{ s.label }}</option>
                         </select>
@@ -285,12 +285,12 @@
                 
                 <div class="form-grid mb-12">
                     <div class="form-group full">
-                        <label>Primary Designation & Organization</label>
-                        <input type="text" [(ngModel)]="profile.designation" name="profileDesignation" maxlength="300" placeholder="e.g. Lead Architect at BuildRight">
+                        <label for="profile-profileDesignation">Primary Designation & Organization</label>
+                        <input id="profile-profileDesignation" type="text" [(ngModel)]="profile.designation" name="profileDesignation" maxlength="300" placeholder="e.g. Lead Architect at BuildRight">
                     </div>
                     <div class="form-group">
-                        <label>Industry Sector</label>
-                        <select [(ngModel)]="profile.professionalSector" name="profileSector">
+                        <label for="profile-profileSector">Industry Sector</label>
+                        <select id="profile-profileSector" [(ngModel)]="profile.professionalSector" name="profileSector">
                             <option value="" disabled selected>Select Sector</option>
                             <option *ngFor="let s of sectorOptions" [value]="s">{{ s }}</option>
                         </select>
@@ -375,18 +375,18 @@
                 </div>
                 <div class="form-grid mb-4">
                     <div class="form-group full">
-                        <label>Contact Person Legal Name *</label>
-                        <input type="text" [(ngModel)]="profile.emergencyContactName" name="ecName" required maxlength="200"
+                        <label for="profile-ecName">Contact Person Legal Name *</label>
+                        <input id="profile-ecName" type="text" [(ngModel)]="profile.emergencyContactName" name="ecName" required maxlength="200"
                             #ecnM="ngModel" [class.border-red-500]="ecnM.invalid && ecnM.touched">
                     </div>
                     <div class="form-group">
-                        <label>Relation *</label>
-                        <input type="text" [(ngModel)]="profile.emergencyContactRelation" name="ecRel" required maxlength="100"
+                        <label for="profile-ecRel">Relation *</label>
+                        <input id="profile-ecRel" type="text" [(ngModel)]="profile.emergencyContactRelation" name="ecRel" required maxlength="100"
                             #ecrM="ngModel" [class.border-red-500]="ecrM.invalid && ecrM.touched">
                     </div>
                     <div class="form-group">
-                        <label>Primary Phone Number *</label>
-                        <input type="text" [(ngModel)]="profile.emergencyContactPhone" name="ecPhone" required pattern="01[3-9]\d{8}"
+                        <label for="profile-ecPhone">Primary Phone Number *</label>
+                        <input id="profile-ecPhone" type="text" [(ngModel)]="profile.emergencyContactPhone" name="ecPhone" required pattern="01[3-9]\d{8}"
                             #ecpM="ngModel" [class.border-red-500]="ecpM.invalid && ecpM.touched">
                     </div>
                 </div>
@@ -399,13 +399,13 @@
                 </div>
                 <div class="form-grid mb-4">
                     <div class="form-group full">
-                        <label>Present Primary Address *</label>
-                        <textarea [(ngModel)]="profile.presentAddress" name="presentAddress" rows="2" required maxlength="500"
+                        <label for="profile-presentAddress">Present Primary Address *</label>
+                        <textarea id="profile-presentAddress" [(ngModel)]="profile.presentAddress" name="presentAddress" rows="2" required maxlength="500"
                             #presAM="ngModel" [class.border-red-500]="presAM.invalid && presAM.touched"></textarea>
                     </div>
                     <div class="form-group full">
-                        <label>Permanent Residential Address *</label>
-                        <textarea [(ngModel)]="profile.permanentAddress" name="permanentAddress" rows="2" required maxlength="500"
+                        <label for="profile-permanentAddress">Permanent Residential Address *</label>
+                        <textarea id="profile-permanentAddress" [(ngModel)]="profile.permanentAddress" name="permanentAddress" rows="2" required maxlength="500"
                             #permAM="ngModel" [class.border-red-500]="permAM.invalid && permAM.touched"></textarea>
                     </div>
                 </div>

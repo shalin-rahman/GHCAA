@@ -6,6 +6,7 @@ using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Repositories;
 using GHCAA.Infrastructure.Services;
 using GHCAA.Infrastructure.Gateways;
+using GHCAA.Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,19 +31,18 @@ namespace GHCAA.Infrastructure
             // migrations for every provider, so MigrationBootstrapper's MigrateAsync/self-heal logic
             // was a no-op on every boot, on every environment. Pool the provider-specific shim type
             // so its runtime type lines up with what the migrations are attributed to.
+            // MySQL was removed (see docs/adr/0006-drop-mysql-provider.md): no migration was ever
+            // attributed to the MySql shim context, so selecting it booted against an empty schema.
+            // Sqlite stays, but only for the test-only fast-boot path (WebApplicationFactory-based
+            // integration tests set DatabaseProvider=Sqlite with ASP_SEED_PROFILE=Visual, which
+            // skips MigrationBootstrapper entirely and calls EnsureCreated() instead — see
+            // GHCAA.API/Program.cs's Visual-profile branch). It is not a supported deployment target.
             switch (provider.ToLower())
             {
                 case "sqlite":
                     services.AddDbContextPool<ApplicationDbContext, SqliteApplicationDbContext>((sp, options) =>
                     {
                         options.UseSqlite(connectionString, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
-                        options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
-                    });
-                    break;
-                case "mysql":
-                    services.AddDbContextPool<ApplicationDbContext, MySqlApplicationDbContext>((sp, options) =>
-                    {
-                        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), o => o.MigrationsAssembly("GHCAA.Infrastructure"));
                         options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
                     });
                     break;
@@ -57,6 +57,20 @@ namespace GHCAA.Infrastructure
 
             // Add Health Checks
             services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>();
+
+            // Typed options (docs/TODO.md 82.17) — one Configure<T> per section a service binds
+            // to, instead of that service parsing IConfiguration["Section:Key"] by hand.
+            services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
+            services.Configure<GmailSettingsOptions>(configuration.GetSection("GmailSettings"));
+            services.Configure<SmsSettingsOptions>(configuration.GetSection("SmsSettings"));
+            services.Configure<OtpSettingsOptions>(configuration.GetSection("OtpSettings"));
+            services.Configure<ContactUsSettingsOptions>(configuration.GetSection("ContactUsSettings"));
+            services.Configure<FileStorageOptions>(configuration.GetSection("FileStorage"));
+            services.Configure<AppSettingsOptions>(configuration.GetSection("AppSettings"));
+            services.Configure<GeneralSettingsOptions>(configuration.GetSection("GeneralSettings"));
+            services.Configure<SslCommerzOptions>(configuration.GetSection("PaymentGateways:SSLCommerz"));
+            services.Configure<BkashOptions>(configuration.GetSection("PaymentGateways:Bkash"));
+            services.Configure<DGePayOptions>(configuration.GetSection("PaymentGateways:DGePay"));
 
             // 2. Automated Service Registration
             // Registers classes in .Services namespace against their implemented IInterfaces in GHCAA.Application.Interfaces
@@ -128,9 +142,6 @@ namespace GHCAA.Infrastructure
         {
             if (provider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
                 return configuration.GetConnectionString("SqliteConnection") ?? "Data Source=ghcaa.db";
-
-            if (provider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
-                return configuration.GetConnectionString("MySqlConnection") ?? "";
 
             // PgSql (with DATABASE_URL support)
             var conn = configuration.GetConnectionString("PgSqlConnection");

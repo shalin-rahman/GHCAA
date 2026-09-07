@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { ProfileService } from '../../core/services/profile.service';
 import { MemberProfile } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { getECPositionName, getCurrentECPosition, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, getBloodGroupName, TSHIRT_SIZES, LOOKUP_GROUPS } from '../../core/constants/app.constants';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { DatePipe } from '@angular/common';
@@ -28,6 +29,7 @@ export class Profile implements OnInit {
     ecRoles = EC_ROLES;
     private profileService = inject(ProfileService);
     private notify = inject(NotificationService);
+    private confirmDialog = inject(ConfirmDialogService);
     private datePipe = inject(DatePipe);
     private lookupService = inject(LookupService);
 
@@ -114,8 +116,14 @@ export class Profile implements OnInit {
         });
     }
 
-    removeAcademicRecord(index: number) {
-        if (!confirm('Remove this academic record?')) return;
+    async removeAcademicRecord(index: number) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Remove academic record',
+            message: 'Remove this academic record?',
+            confirmLabel: 'Remove',
+            danger: true
+        }));
+        if (!ok) return;
         this.profile.academicHistory.splice(index, 1);
     }
 
@@ -132,13 +140,25 @@ export class Profile implements OnInit {
     }
 
 
-    removeProfessionalRecord(index: number) {
-        if (!confirm('Remove this professional record?')) return;
+    async removeProfessionalRecord(index: number) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Remove professional record',
+            message: 'Remove this professional record?',
+            confirmLabel: 'Remove',
+            danger: true
+        }));
+        if (!ok) return;
         this.profile.professionalHistory.splice(index, 1);
     }
 
-    removePhoto() {
-        if (!confirm('Remove your profile photo?')) return;
+    async removePhoto() {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Remove profile photo',
+            message: 'Remove your profile photo?',
+            confirmLabel: 'Remove',
+            danger: true
+        }));
+        if (!ok) return;
         this.profile.photoPath = null;
         this.photoFile = null;
         this.photoPreview.set(null);
@@ -273,8 +293,14 @@ export class Profile implements OnInit {
         reader.readAsDataURL(file);
     }
 
-    removeSignature() {
-        if (!confirm('Remove your signature?')) return;
+    async removeSignature() {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Remove signature',
+            message: 'Remove your signature?',
+            confirmLabel: 'Remove',
+            danger: true
+        }));
+        if (!ok) return;
         this.profile.signaturePath = null;
         this.signatureFile = null;
         this.signaturePreview.set(null);

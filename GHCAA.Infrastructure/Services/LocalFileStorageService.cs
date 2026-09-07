@@ -1,8 +1,9 @@
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
+using GHCAA.Infrastructure.Options;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
@@ -14,23 +15,23 @@ namespace GHCAA.Infrastructure.Services
         private readonly string _publicRoot;
         private readonly string _secureRoot;
         private readonly long _maxFileSize;
-        private readonly IConfiguration _config;
+        private readonly FileStorageOptions _options;
         private readonly ILogger<LocalFileStorageService> _logger;
 
-        public LocalFileStorageService(IConfiguration config, ILogger<LocalFileStorageService> logger, IWebHostEnvironment webHostEnvironment)
+        public LocalFileStorageService(IOptions<FileStorageOptions> options, ILogger<LocalFileStorageService> logger, IWebHostEnvironment webHostEnvironment)
         {
-            _config = config;
+            _options = options.Value;
             _logger = logger;
 
-            var publicRelative = _config[Constants.ConfigKeys.UploadsRelativePath] ?? "uploads/members";
-            var secureRelative = _config[Constants.ConfigKeys.SecureRelativePath] ?? "secure_uploads/members";
+            var publicRelative = _options.UploadsRelativePath;
+            var secureRelative = _options.SecureRelativePath;
 
             // Normalize relative paths to use forward slashes for cross-platform consistency
             publicRelative = publicRelative.Replace("\\", "/").TrimEnd('/');
             secureRelative = secureRelative.Replace("\\", "/").TrimEnd('/');
 
-            _publicRoot = Path.Combine(_config["FileStorage:BasePhysicalPath"] ?? "wwwroot", publicRelative);
-            _secureRoot = Path.Combine(_config["FileStorage:BasePhysicalPath"] ?? AppDomain.CurrentDomain.BaseDirectory, secureRelative);
+            _publicRoot = Path.Combine(_options.BasePhysicalPath ?? "wwwroot", publicRelative);
+            _secureRoot = Path.Combine(_options.BasePhysicalPath ?? AppDomain.CurrentDomain.BaseDirectory, secureRelative);
 
             // 82.51: today the two roots stay apart only because their fallback defaults ("wwwroot"
             // vs. AppDomain.CurrentDomain.BaseDirectory) happen not to collide — nothing enforces it.
@@ -53,14 +54,14 @@ namespace GHCAA.Infrastructure.Services
                 }
             }
 
-            _maxFileSize = long.TryParse(_config[Constants.ConfigKeys.MaxFileSizeBytes], out var v) ? v : Constants.Defaults.MaxFileSizeBytes;
+            _maxFileSize = _options.MaxFileSizeBytes;
         }
 
-        private bool IsCompressionEnabled => _config.GetValue<bool>(Constants.ConfigKeys.ImageCompressionEnabled, true);
-        private int DefaultQuality => _config.GetValue<int>(Constants.ConfigKeys.ImageCompressionQuality, Constants.Defaults.ImageQuality);
-        private int FallbackQuality => _config.GetValue<int>(Constants.ConfigKeys.ImageCompressionFallbackQuality, Constants.Defaults.FallbackImageQuality);
-        private int TargetSizeKB => _config.GetValue<int>(Constants.ConfigKeys.ImageCompressionTargetSizeKB, Constants.Defaults.TargetImageSizeKB);
-        private int MaxDimensionPx => _config.GetValue<int>(Constants.ConfigKeys.ImageCompressionMaxDimensionPx, Constants.Defaults.ImageMaxDimensionPx);
+        private bool IsCompressionEnabled => _options.ImageCompression.Enabled;
+        private int DefaultQuality => _options.ImageCompression.Quality;
+        private int FallbackQuality => _options.ImageCompression.FallbackQuality;
+        private int TargetSizeKB => _options.ImageCompression.TargetSizeKB;
+        private int MaxDimensionPx => _options.ImageCompression.MaxDimensionPx;
 
         private bool IsSecureType(Enums.FileUploadType type)
         {
@@ -87,8 +88,8 @@ namespace GHCAA.Infrastructure.Services
             var safeFileName = Path.GetFileName(fileName);
             var prefix = uploadType.ToString().ToLower();
             var relativeRoot = IsSecureType(uploadType)
-                    ? (_config[Constants.ConfigKeys.SecureRelativePath] ?? "secure_uploads/members")
-                    : (_config[Constants.ConfigKeys.UploadsRelativePath] ?? "uploads/members");
+                    ? _options.SecureRelativePath
+                    : _options.UploadsRelativePath;
 
             // World-class nested structure: members/{id}/{type}/{fileName}
             return Path.Combine(relativeRoot, memberId.ToString(), prefix, safeFileName).Replace("\\", "/");
@@ -105,9 +106,7 @@ namespace GHCAA.Infrastructure.Services
             var prefix = uploadType.ToString().ToLower();
 
             // Create nested directory for member and upload type
-            var relativePrefix = isSecure
-                ? (_config[Constants.ConfigKeys.SecureRelativePath] ?? "secure_uploads/members")
-                : (_config[Constants.ConfigKeys.UploadsRelativePath] ?? "uploads/members");
+            var relativePrefix = isSecure ? _options.SecureRelativePath : _options.UploadsRelativePath;
 
             var targetDir = Path.Combine(rootPath, memberId.ToString(), prefix);
             Directory.CreateDirectory(targetDir);
@@ -174,7 +173,7 @@ namespace GHCAA.Infrastructure.Services
 
         public Task DeleteFileAsync(string relativePath, CancellationToken cancellationToken = default)
         {
-            var basePath = _config["FileStorage:BasePhysicalPath"];
+            var basePath = _options.BasePhysicalPath;
 
             // Try public first
             var publicPath = Path.Combine(basePath ?? "wwwroot", relativePath.TrimStart('/', '\\'));

@@ -3,21 +3,25 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
+import { AdminService } from '../../core/services/admin.service';
 import { Icon } from '../../common/icon/icon';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 
 @Component({
     selector: 'app-admin-roles',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, PageHeaderComponent, SearchBarComponent, Icon, LogoSpinnerComponent],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, PageHeaderComponent, SearchBarComponent, Icon, LogoSpinnerComponent, ModalHeaderComponent],
     templateUrl: './admin-roles.html',
     styleUrl: './admin-roles.scss'
 })
 export class AdminRoles implements OnInit {
-    private http = inject(HttpClient);
+    private adminService = inject(AdminService);
     private notify = inject(NotificationService);
+    private confirmDialog = inject(ConfirmDialogService);
     private fb = inject(FormBuilder);
 
     users = signal<any[]>([]);
@@ -57,7 +61,7 @@ export class AdminRoles implements OnInit {
     loadData() {
         this.loading.set(true);
         // Fetch all system users (identity users)
-        this.http.get<any[]>('/api/roles/users').subscribe({
+        this.adminService.getSystemUsers().subscribe({
             next: (users) => {
                 this.users.set(users);
                 this.loading.set(false);
@@ -66,7 +70,7 @@ export class AdminRoles implements OnInit {
         });
 
         // Fetch available roles
-        this.http.get<any[]>('/api/roles').subscribe({
+        this.adminService.getRoles().subscribe({
             next: (roles) => this.roles.set(roles),
             // 29F.2: surface failures instead of leaving the role list silently empty.
             error: () => this.notify.error('Failed to load available roles.')
@@ -80,7 +84,7 @@ export class AdminRoles implements OnInit {
             return;
         }
         this.submitting.set(true);
-        this.http.post('/api/roles/users', this.createForm.value).subscribe({
+        this.adminService.createSystemUser(this.createForm.value).subscribe({
             next: () => {
                 this.notify.success('System user created successfully');
                 this.showCreateForm.set(false);
@@ -102,9 +106,7 @@ export class AdminRoles implements OnInit {
             return;
         }
         this.creatingRole.set(true);
-        this.http.post('/api/roles', JSON.stringify(role), {
-            headers: { 'Content-Type': 'application/json' }
-        }).subscribe({
+        this.adminService.createCustomRole(role).subscribe({
             next: () => {
                 this.notify.success(`Custom role '${role}' created successfully`);
                 this.customRoleName.set('');
@@ -119,7 +121,7 @@ export class AdminRoles implements OnInit {
     }
 
     assignRole(userId: number, roleName: string) {
-        this.http.post('/api/roles/assign', null, { params: { userId, roleName } }).subscribe({
+        this.adminService.assignUserRole(userId, roleName).subscribe({
             next: () => {
                 this.notify.success(`Role ${roleName} assigned`);
                 this.loadData();
@@ -135,9 +137,9 @@ export class AdminRoles implements OnInit {
     // since "replace which one?" isn't unambiguous there).
     updateRole(userId: number, oldRole: string, newRole: string) {
         if (oldRole === newRole) return;
-        this.http.post('/api/roles/remove', null, { params: { userId, roleName: oldRole } }).subscribe({
+        this.adminService.removeUserRole(userId, oldRole).subscribe({
             next: () => {
-                this.http.post('/api/roles/assign', null, { params: { userId, roleName: newRole } }).subscribe({
+                this.adminService.assignUserRole(userId, newRole).subscribe({
                     next: () => {
                         this.notify.success(`Role updated to ${newRole}`);
                         this.loadData();
@@ -150,7 +152,7 @@ export class AdminRoles implements OnInit {
     }
 
     removeRole(userId: number, roleName: string) {
-        this.http.post('/api/roles/remove', null, { params: { userId, roleName } }).subscribe({
+        this.adminService.removeUserRole(userId, roleName).subscribe({
             next: () => {
                 this.notify.success(`Role ${roleName} removed`);
                 this.loadData();
@@ -159,9 +161,16 @@ export class AdminRoles implements OnInit {
         });
     }
 
-    resetPassword(user: any) {
-        if (!confirm(`Reset the password for system administrator "${user.username}"? Any active session will be signed out.`)) return;
-        this.http.post<any>(`/api/roles/users/${user.id}/reset-password-admin`, {}).subscribe({
+    async resetPassword(user: any) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Reset password',
+            message: `Reset the password for system administrator "${user.username}"? Any active session will be signed out.`,
+            confirmLabel: 'Reset',
+            danger: true
+        }));
+        if (!ok) return;
+
+        this.adminService.resetSystemUserPassword(user.id).subscribe({
             next: (res) => {
                 if (res?.resetUrl) {
                     if (navigator.clipboard) {
@@ -183,7 +192,7 @@ export class AdminRoles implements OnInit {
 
     toggleUserActive(userId: number, isActive: boolean) {
         const action = isActive ? 'disable' : 'enable';
-        this.http.post(`/api/roles/users/${userId}/${action}`, {}).subscribe({
+        this.adminService.setSystemUserActive(userId, action).subscribe({
             next: () => {
                 this.notify.success(isActive ? 'User disabled' : 'User enabled');
                 this.loadData();
@@ -192,9 +201,16 @@ export class AdminRoles implements OnInit {
         });
     }
 
-    deleteUser(user: any) {
-        if (!confirm(`Permanently delete system administrator "${user.username}"?`)) return;
-        this.http.delete(`/api/roles/users/${user.id}`).subscribe({
+    async deleteUser(user: any) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Delete system administrator',
+            message: `Permanently delete system administrator "${user.username}"?`,
+            confirmLabel: 'Delete',
+            danger: true
+        }));
+        if (!ok) return;
+
+        this.adminService.deleteSystemUser(user.id).subscribe({
             next: () => {
                 this.notify.success('System administrator account deleted');
                 this.loadData();

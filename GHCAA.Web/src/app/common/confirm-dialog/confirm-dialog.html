@@ -1,0 +1,17 @@
+@if (dialog.isOpen()) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-dialog-title">
+    <div class="modal-box confirm-dialog-box">
+        <app-modal-header [title]="dialog.title()" headingId="confirm-dialog-title" (closed)="cancel()"></app-modal-header>
+
+        <div class="modal-content">
+            <p class="text-main">{{ dialog.message() }}</p>
+
+            <div class="confirm-dialog-actions">
+                <button type="button" class="btn" [class.btn-danger]="dialog.danger()" [class.btn-primary]="!dialog.danger()"
+                    (click)="confirm()">{{ dialog.confirmLabel() }}</button>
+                <button type="button" class="btn btn-secondary" (click)="cancel()">{{ dialog.cancelLabel() }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+}

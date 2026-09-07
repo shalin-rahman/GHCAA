@@ -1,6 +1,6 @@
 import { HttpInterceptorFn, HttpErrorResponse, HttpRequest, HttpHandlerFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, throwError, BehaviorSubject, switchMap, filter, take, Observable } from 'rxjs';
+import { catchError, throwError, BehaviorSubject, switchMap, filter, take, Observable, retry, timer } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
 import { StepUpService } from '../services/step-up.service';
@@ -36,6 +36,18 @@ export const globalHttpInterceptor: HttpInterceptorFn = (req, next) => {
     }
 
     return next(outReq).pipe(
+        // 82.36: a GET is safe to retry, a POST/PUT/PATCH/DELETE is not — retrying those could
+        // repeat a write. Only a transient failure (no response reached the server, or a 5xx) is
+        // worth a second try; a 4xx means the server saw the request and rejected it, so retrying
+        // it changes nothing.
+        retry({
+            count: outReq.method === 'GET' ? 2 : 0,
+            delay: (error: HttpErrorResponse, retryCount) => {
+                const isTransient = error.status === 0 || (error.status >= 500 && error.status < 600);
+                if (!isTransient) return throwError(() => error);
+                return timer(retryCount * 300);
+            }
+        }),
         catchError((error: HttpErrorResponse) => {
             // 24.44: On 401, attempt token refresh before giving up.
             // /api/auth/me is the session-restore probe every page load fires while possibly

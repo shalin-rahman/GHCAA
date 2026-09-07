@@ -5,8 +5,10 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
+using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 
@@ -18,7 +20,7 @@ namespace GHCAA.Tests.Services
         private Mock<ITokenService> _mockTokenService = null!;
         private Mock<ILogger<AuthService>> _mockLogger = null!;
         private Mock<IActivityService> _mockActivityService = null!;
-        private Mock<Microsoft.Extensions.Configuration.IConfiguration> _mockConfig = null!;
+        private IOptions<AppSettingsOptions> _appSettings = null!;
         private Mock<System.Net.Http.IHttpClientFactory> _mockHttp = null!;
         private Mock<IEmailService> _mockEmail = null!;
         private Mock<ICommunicationService> _mockCommunicationService = null!;
@@ -31,14 +33,14 @@ namespace GHCAA.Tests.Services
             _mockTokenService = new Mock<ITokenService>();
             _mockLogger = new Mock<ILogger<AuthService>>();
             _mockActivityService = new Mock<IActivityService>();
-            _mockConfig = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+            _appSettings = Options.Create(new AppSettingsOptions());
             _mockHttp = new Mock<System.Net.Http.IHttpClientFactory>();
             _mockEmail = new Mock<IEmailService>();
             _mockCommunicationService = new Mock<ICommunicationService>();
             _mockOrgConfigService = new Mock<IOrgConfigService>();
             _mockOrgConfigService.Setup(x => x.GetConfigAsync())
                 .ReturnsAsync(new OrgConfigDto { Branding = new BrandingDto { ShortName = "GHCAA" } });
-            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object, _mockConfig.Object, _mockHttp.Object, _mockEmail.Object, _mockCommunicationService.Object, _mockOrgConfigService.Object);
+            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object, _appSettings, _mockHttp.Object, _mockEmail.Object, _mockCommunicationService.Object, _mockOrgConfigService.Object);
         }
 
         [Category("FR-08")]
@@ -290,9 +292,17 @@ namespace GHCAA.Tests.Services
         {
             var member = new Member
             {
-                FullName = "M", FatherName = "F", MotherName = "Mo", Email = "m@example.com", NID = "N",
-                MobileNo = "01700000000", PresentAddress = "A", PermanentAddress = "A",
-                EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0"
+                FullName = "M",
+                FatherName = "F",
+                MotherName = "Mo",
+                Email = "m@example.com",
+                NID = "N",
+                MobileNo = "01700000000",
+                PresentAddress = "A",
+                PermanentAddress = "A",
+                EmergencyContactName = "E",
+                EmergencyContactRelation = "R",
+                EmergencyContactPhone = "0"
             };
             _context.Members.Add(member);
             await _context.SaveChangesAsync();

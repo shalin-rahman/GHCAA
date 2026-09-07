@@ -186,7 +186,7 @@ namespace GHCAA.Tests.Services
             // Assert
             result.Should().BeTrue();
             var stored = await _context.ECMembers.IgnoreQueryFilters().FirstAsync(em => em.Id == ecMember.Id);
-            stored.IsDeleted.Should().BeTrue();
+            stored.IsArchived.Should().BeTrue();
             stored.DeletedByAdminId.Should().Be(9);
             stored.DeletedAt.Should().NotBeNull();
 
@@ -230,7 +230,7 @@ namespace GHCAA.Tests.Services
             _context.Members.Add(member);
             var period = await _service.CreatePeriodAsync("Active Period", DateTime.UtcNow.AddDays(-1), null);
 
-            var ecMember = new ECMember { MemberId = member.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow, IsDeleted = true };
+            var ecMember = new ECMember { MemberId = member.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow, IsArchived = true };
             _context.ECMembers.Add(ecMember);
             await _context.SaveChangesAsync();
 

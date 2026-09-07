@@ -182,6 +182,15 @@ same one that correctly deferred a second file-storage adapter in ADR-06 — the
 finish the other providers or delete the switch and the shims down to Postgres. Deleting is cheaper
 and is the recommendation.
 
+**Closed 2026-09-07 (82.15):** the recommendation was followed for MySQL only — `MySqlApplicationDbContext`,
+`MySqlDesignTimeDbContextFactory`, the `mysql` DI switch case, its connection-string branch, and the
+`Pomelo.EntityFrameworkCore.MySql` package are gone. Sqlite was kept deliberately: two integration test
+factories boot the real API with `DatabaseProvider=Sqlite` for a fast, migration-free `EnsureCreated()`
+path under the Visual seed profile, which never runs `MigrationBootstrapper` and so was never subject to
+this finding. Reasoning recorded in `docs/adr/0006-drop-mysql-provider.md`. ADR-02's "PostgreSQL, MySQL
+and SQLite" claim still needs its own correction in `docs/book/06-architecture.md` through the book's
+strict build pipeline — flagged there, not done here.
+
 ### Finding 2 — Financial and payment records are mutable and hard-deletable
 
 **Status:** missing. **Disposition:** Newly Created → 82.16.

@@ -100,10 +100,7 @@
 @if (selectedItem(); as item) {
 <div class="modal-overlay" (click)="selectedItem.set(null)">
     <div class="modal-box large reveal-top" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3>{{ item.kind === 'album' ? 'Review Album' : 'Review Photo' }}</h3>
-            <button class="close-btn" (click)="selectedItem.set(null)">×</button>
-        </div>
+        <app-modal-header [title]="item.kind === 'album' ? 'Review Album' : 'Review Photo'" (closed)="selectedItem.set(null)"></app-modal-header>
         <div class="modal-body custom-scrollbar">
             @if (item.kind === 'album') {
             <div class="article-preview">

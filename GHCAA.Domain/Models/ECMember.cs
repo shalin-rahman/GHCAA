@@ -21,7 +21,7 @@ namespace GHCAA.Domain.Models
         // should never have existed (wrong member added) and is permanently removed by an admin.
         public DateTime? UpdatedAt { get; set; }
         public int? UpdatedByAdminId { get; set; }
-        public bool IsDeleted { get; set; }
+        public bool IsArchived { get; set; }
         public DateTime? DeletedAt { get; set; }
         public int? DeletedByAdminId { get; set; }
 

@@ -4,7 +4,9 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angu
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PaymentConfigService, PaymentConfig } from '../../core/services/payment-config.service';
+import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 
 @Component({
@@ -17,6 +19,7 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 export class AdminPaymentConfig implements OnInit {
   private paymentService = inject(PaymentConfigService);
   private notify = inject(NotificationService);
+  private confirmDialog = inject(ConfirmDialogService);
   private fb = inject(FormBuilder);
 
   configs = signal<any[]>([]);
@@ -67,16 +70,21 @@ export class AdminPaymentConfig implements OnInit {
     });
   }
 
-  seedDefaults() {
-    if (confirm('Are you sure you want to seed default payment methods? This should only be done if none exist.')) {
-      this.paymentService.seedDefaults().subscribe({
-        next: () => {
-          this.notify.success('Default payment methods created successfully');
-          this.loadConfigs();
-        },
-        error: (err) => this.notify.error(err.error || 'Failed to seed defaults')
-      });
-    }
+  async seedDefaults() {
+    const ok = await firstValueFrom(this.confirmDialog.confirm({
+      title: 'Seed default payment methods',
+      message: 'Are you sure you want to seed default payment methods? This should only be done if none exist.',
+      confirmLabel: 'Seed'
+    }));
+    if (!ok) return;
+
+    this.paymentService.seedDefaults().subscribe({
+      next: () => {
+        this.notify.success('Default payment methods created successfully');
+        this.loadConfigs();
+      },
+      error: (err) => this.notify.error(err.error || 'Failed to seed defaults')
+    });
   }
 
   toggleStatus(id: number) {
@@ -89,16 +97,22 @@ export class AdminPaymentConfig implements OnInit {
     });
   }
   
-  deleteConfig(id: number) {
-    if (confirm('Are you sure you want to delete this payment method?')) {
-      this.paymentService.deleteConfig(id).subscribe({
-        next: () => {
-          this.notify.success('Payment method deleted');
-          this.loadConfigs();
-        },
-        error: () => this.notify.error('Failed to delete')
-      });
-    }
+  async deleteConfig(id: number) {
+    const ok = await firstValueFrom(this.confirmDialog.confirm({
+      title: 'Delete payment method',
+      message: 'Are you sure you want to delete this payment method?',
+      confirmLabel: 'Delete',
+      danger: true
+    }));
+    if (!ok) return;
+
+    this.paymentService.deleteConfig(id).subscribe({
+      next: () => {
+        this.notify.success('Payment method deleted');
+        this.loadConfigs();
+      },
+      error: () => this.notify.error('Failed to delete')
+    });
   }
 
   openCreateForm() {

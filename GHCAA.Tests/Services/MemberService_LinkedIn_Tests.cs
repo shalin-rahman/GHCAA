@@ -4,10 +4,11 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 
@@ -24,7 +25,7 @@ public class MemberService_LinkedIn_Tests : TestBase
     private Mock<IActivityService> _mockActivityService = null!;
     private Mock<INotificationService> _mockNotificationService = null!;
     private Mock<ICommunicationService> _mockCommunication = null!;
-    private Mock<IConfiguration> _mockConfig = null!;
+    private IOptions<AppSettingsOptions> _appSettings = null!;
     private Mock<IGamificationService> _mockGamification = null!;
     private Mock<IFinancialService> _mockFinancialService = null!;
     private MemberService _service = null!;
@@ -40,7 +41,7 @@ public class MemberService_LinkedIn_Tests : TestBase
         _mockActivityService = new Mock<IActivityService>();
         _mockCommunication = new Mock<ICommunicationService>();
         _mockNotificationService = new Mock<INotificationService>();
-        _mockConfig = new Mock<IConfiguration>();
+        _appSettings = Options.Create(new AppSettingsOptions());
         _mockGamification = new Mock<IGamificationService>();
         _mockFinancialService = new Mock<IFinancialService>();
         var mockOrgConfigService = new Mock<IOrgConfigService>();
@@ -55,7 +56,7 @@ public class MemberService_LinkedIn_Tests : TestBase
             _mockLogger.Object,
             _mockActivityService.Object,
             _mockNotificationService.Object,
-            _mockConfig.Object,
+            _appSettings,
             _mockGamification.Object,
             _mockFinancialService.Object,
             new Mock<IRealTimeService>().Object,

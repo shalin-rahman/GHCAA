@@ -9,13 +9,14 @@ import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { NotifyToggleComponent } from '../../common/notify-toggle/notify-toggle.component';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 
 type PendingItem = { kind: 'album'; album: EventGallery } | { kind: 'photo'; photo: EventPhoto };
 
 @Component({
   selector: 'app-gallery-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, NotifyToggleComponent],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, NotifyToggleComponent, ModalHeaderComponent],
   templateUrl: './gallery-approval.html',
   styleUrl: './gallery-approval.scss'
 })

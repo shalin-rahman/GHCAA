@@ -21,7 +21,7 @@ namespace GHCAA.Infrastructure.Data.Configurations
             // case this exists to fix, not an edge case.
             builder.HasIndex(p => p.TransactionId)
                 .IsUnique()
-                .HasFilter("\"IsDeleted\" = false");
+                .HasFilter("\"IsArchived\" = false");
 
             builder.HasIndex(p => new { p.MemberId, p.TransactionId });
 
@@ -29,15 +29,15 @@ namespace GHCAA.Infrastructure.Data.Configurations
             // 82.32: excludes soft-deleted rows for the same reason as TransactionId above.
             builder.HasIndex(p => p.GatewayPaymentId)
                 .IsUnique()
-                .HasFilter("\"GatewayPaymentId\" IS NOT NULL AND \"IsDeleted\" = false");
+                .HasFilter("\"GatewayPaymentId\" IS NOT NULL AND \"IsArchived\" = false");
 
-            // 82.16 added `!ph.IsDeleted`: a soft-deleted payment must not appear in any ordinary
+            // 82.16 added `!ph.IsArchived`: a soft-deleted payment must not appear in any ordinary
             // read, or "delete" would stop meaning delete to every caller that already exists.
             // 82.32: MemberId is nullable (guest event payments), so `Member == null` must pass this
             // filter rather than hide every guest row from the ledger — the prior version silently
             // dropped them because the null-check was written the wrong way round.
             // Admin views that need to see deleted rows use IgnoreQueryFilters() deliberately.
-            builder.HasQueryFilter(ph => (ph.Member == null || !ph.Member.IsArchived) && !ph.IsDeleted);
+            builder.HasQueryFilter(ph => (ph.Member == null || !ph.Member.IsArchived) && !ph.IsArchived);
         }
     }
 }

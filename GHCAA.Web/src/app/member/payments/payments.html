@@ -133,10 +133,7 @@
 @if (showPayModal()) {
 <div class="modal-overlay" (click)="showPayModal.set(false)">
     <div class="modal-box glass-card reveal-top" (click)="$event.stopPropagation()" style="max-width: 640px;">
-        <div class="modal-header">
-            <h3>Record Payment</h3>
-            <button class="close-btn" (click)="showPayModal.set(false)">✕</button>
-        </div>
+        <app-modal-header title="Record Payment" (closed)="showPayModal.set(false)"></app-modal-header>
         <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
             <div class="form-group">
                 <label>Payment Purpose / Category</label>

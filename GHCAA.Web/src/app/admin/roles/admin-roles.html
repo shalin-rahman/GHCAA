@@ -10,10 +10,7 @@
     <!-- Create Admin Modal -->
     <div class="modal-overlay" *ngIf="showCreateForm()" (click)="showCreateForm.set(false)">
         <div class="modal-box" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-                <h3>New Administrative Protocol</h3>
-                <button class="close-btn" (click)="showCreateForm.set(false)">✕</button>
-            </div>
+            <app-modal-header title="New Administrative Protocol" (closed)="showCreateForm.set(false)"></app-modal-header>
             <div class="modal-body">
                 <p class="text-xs uppercase font-bold text-muted mb-6 tracking-widest">Generating non-member
                     administrative node</p>

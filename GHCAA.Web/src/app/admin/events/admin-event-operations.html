@@ -1,19 +1,14 @@
 <div class="ops-container glass-card p-6 border border-white/20 rounded-2xl shadow-2xl">
-    <div class="flex items-center justify-between mb-6">
-        <h3 class="text-2xl font-bold text-slate-100 flex items-center gap-3">
-            <app-icon name="briefcase" class="text-accent"></app-icon>
-            Event Operations: {{ event.title }}
-        </h3>
-        
-        <div class="flex bg-slate-800/50 p-1 rounded-xl border border-white/5">
-            <button (click)="activeOpTab.set('tasks')" 
+    <app-page-header [title]="'Event Operations: ' + event.title" emptySubtitle="Tasks, volunteers and budget for this event">
+        <div actions class="flex bg-slate-800/50 p-1 rounded-xl border border-white/5">
+            <button (click)="activeOpTab.set('tasks')"
                     [class.bg-accent]="activeOpTab() === 'tasks'"
                     [class.text-slate-900]="activeOpTab() === 'tasks'"
                     [class.text-slate-400]="activeOpTab() !== 'tasks'"
                     class="px-4 py-2 rounded-lg text-sm font-semibold transition-all">
                 Tasks & Volunteers
             </button>
-            <button (click)="activeOpTab.set('budget')" 
+            <button (click)="activeOpTab.set('budget')"
                     [class.bg-accent]="activeOpTab() === 'budget'"
                     [class.text-slate-900]="activeOpTab() === 'budget'"
                     [class.text-slate-400]="activeOpTab() !== 'budget'"
@@ -21,7 +16,7 @@
                 Budget & Expenses
             </button>
         </div>
-    </div>
+    </app-page-header>
 
     <!-- TASKS TAB -->
     <div *ngIf="activeOpTab() === 'tasks'" class="space-y-6 animate-fade-in">

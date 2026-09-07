@@ -1,9 +1,11 @@
 using FluentAssertions;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
+using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,9 +25,9 @@ public class OtpServiceTests : TestBase
         _mockCommunication = new Mock<ICommunicationService>();
         _mockConfig = new Mock<IConfiguration>();
         _mockLogger = new Mock<ILogger<OtpService>>();
-        _mockConfig.Setup(x => x["OtpSettings:ExpiryMinutes"]).Returns("10");
         _mockConfig.Setup(x => x["Jwt:Key"]).Returns("otp-service-test-dummy-hmac-key-please-32chars");
-        _service = new OtpService(_context, _mockCommunication.Object, _mockConfig.Object, _mockLogger.Object);
+        var otpSettings = Options.Create(new OtpSettingsOptions { ExpiryMinutes = 10 });
+        _service = new OtpService(_context, _mockCommunication.Object, otpSettings, _mockConfig.Object, _mockLogger.Object);
     }
 
     [Category("FR-09")]
@@ -71,14 +73,16 @@ public class OtpServiceTests : TestBase
             email, "OTP_EMAIL", It.IsAny<Dictionary<string, string>>(), null, It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    // "invalid" falls back to the 10-minute default; "5" is honored as a real custom value.
-    [TestCase("5", "otp4@example.com", 4, 6)]
-    [TestCase("invalid", "otp5@example.com", 9, 11)]
-    public async Task GenerateAndSendOtpAsync_ShouldRespectConfiguredExpiry_OrFallBackToDefault(
-        string configValue, string email, int minMinutes, int maxMinutes)
+    // 82.17: expiry is now bound to OtpSettingsOptions.ExpiryMinutes via services.Configure<T>,
+    // so a genuinely non-numeric value fails at binding time (the point of the change — see the
+    // acceptance note on 82.17) instead of silently falling back the way the old int.TryParse read
+    // did. This only checks that a configured value is honored.
+    [TestCase(5, "otp4@example.com", 4, 6)]
+    public async Task GenerateAndSendOtpAsync_ShouldRespectConfiguredExpiry(
+        int configValue, string email, int minMinutes, int maxMinutes)
     {
-        _mockConfig.Setup(x => x["OtpSettings:ExpiryMinutes"]).Returns(configValue);
-        var service = new OtpService(_context, _mockCommunication.Object, _mockConfig.Object, _mockLogger.Object);
+        var otpSettings = Options.Create(new OtpSettingsOptions { ExpiryMinutes = configValue });
+        var service = new OtpService(_context, _mockCommunication.Object, otpSettings, _mockConfig.Object, _mockLogger.Object);
         var before = DateTime.UtcNow;
         await service.GenerateAndSendOtpAsync(email);
         var after = DateTime.UtcNow;

@@ -188,4 +188,87 @@ export class AdminService {
     getPeriods(): Observable<any[]> {
         return this.http.get<any[]>(API_ENDPOINTS.NETWORKING.COMMITTEE_PERIODS);
     }
+
+    getGovernancePeriods(): Observable<any[]> {
+        return this.http.get<any[]>(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods`);
+    }
+
+    getCommitteeMembers(periodId: number): Observable<any[]> {
+        return this.http.get<any[]>(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${periodId}/members`);
+    }
+
+    createGovernancePeriod(payload: any): Observable<any> {
+        return this.http.post(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods`, payload);
+    }
+
+    updateGovernancePeriod(id: number, payload: any): Observable<any> {
+        return this.http.put(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${id}`, payload);
+    }
+
+    activateGovernancePeriod(id: number): Observable<any> {
+        return this.http.post(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${id}/activate`, {});
+    }
+
+    assignCommitteeRole(periodId: number, data: any): Observable<any> {
+        return this.http.post(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${periodId}/members`, data);
+    }
+
+    removeCommitteeMember(ecMemberId: number, notifyMember: boolean): Observable<any> {
+        return this.http.delete(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/members/${ecMemberId}?notifyMember=${notifyMember}`);
+    }
+
+    // Audit log
+    getGlobalActivityLog(): Observable<any[]> {
+        return this.http.get<any[]>(API_ENDPOINTS.ACTIVITY.ADMIN_GLOBAL);
+    }
+
+    // Error logs (45.4) — filtering/pagination is pushed to the DB query on the API side, not
+    // an in-memory scan, since the table has no upper bound on row count.
+    getErrorLogs(page: number = 1, pageSize: number = 20, level: string = 'all', query: string = '', fromDate?: string, toDate?: string): Observable<any> {
+        let params = `?page=${page}&pageSize=${pageSize}`;
+        if (level && level !== 'all') params += `&level=${encodeURIComponent(level)}`;
+        if (query) params += `&query=${encodeURIComponent(query)}`;
+        if (fromDate) params += `&fromDate=${encodeURIComponent(fromDate)}`;
+        if (toDate) params += `&toDate=${encodeURIComponent(toDate)}`;
+        return this.http.get<any>(`${API_ENDPOINTS.ADMIN.ERROR_LOGS}${params}`);
+    }
+
+    // System users and roles
+    getSystemUsers(): Observable<any[]> {
+        return this.http.get<any[]>(`${API_ENDPOINTS.ROLES}/users`);
+    }
+
+    getRoles(): Observable<any[]> {
+        return this.http.get<any[]>(API_ENDPOINTS.ROLES);
+    }
+
+    createSystemUser(data: any): Observable<any> {
+        return this.http.post(`${API_ENDPOINTS.ROLES}/users`, data);
+    }
+
+    createCustomRole(roleName: string): Observable<any> {
+        return this.http.post(API_ENDPOINTS.ROLES, JSON.stringify(roleName), {
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
+    assignUserRole(userId: number, roleName: string): Observable<any> {
+        return this.http.post(`${API_ENDPOINTS.ROLES}/assign`, null, { params: { userId, roleName } });
+    }
+
+    removeUserRole(userId: number, roleName: string): Observable<any> {
+        return this.http.post(`${API_ENDPOINTS.ROLES}/remove`, null, { params: { userId, roleName } });
+    }
+
+    resetSystemUserPassword(userId: number): Observable<any> {
+        return this.http.post<any>(`${API_ENDPOINTS.ROLES}/users/${userId}/reset-password-admin`, {});
+    }
+
+    setSystemUserActive(userId: number, action: 'enable' | 'disable'): Observable<any> {
+        return this.http.post(`${API_ENDPOINTS.ROLES}/users/${userId}/${action}`, {});
+    }
+
+    deleteSystemUser(userId: number): Observable<any> {
+        return this.http.delete(`${API_ENDPOINTS.ROLES}/users/${userId}`);
+    }
 }

@@ -65,10 +65,7 @@
 @if (selectedArticle()) {
 <div class="modal-overlay" (click)="selectedArticle.set(null)">
     <div class="modal-box large reveal-top" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3>Review Submission</h3>
-            <button class="close-btn" (click)="selectedArticle.set(null)">×</button>
-        </div>
+        <app-modal-header title="Review Submission" (closed)="selectedArticle.set(null)"></app-modal-header>
         <div class="modal-body custom-scrollbar">
             <div class="article-preview">
                 @if (selectedArticle()?.imageUrl) {

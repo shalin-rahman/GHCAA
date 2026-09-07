@@ -62,10 +62,7 @@
 @if (selectedMessage()) {
 <div class="modal-overlay" (click)="selectedMessage.set(null)">
     <div class="modal-box reveal-top" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3>Message Detail</h3>
-            <button class="close-btn" (click)="selectedMessage.set(null)">×</button>
-        </div>
+        <app-modal-header title="Message Detail" (closed)="selectedMessage.set(null)"></app-modal-header>
         <div class="modal-body">
             <div class="msg-meta mb-6">
                 <div class="row">

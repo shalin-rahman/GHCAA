@@ -61,55 +61,55 @@
                         
                         <div class="form-grid">
                             <div class="form-group full">
-                                <label>Full Legal Name (SSC/HSC Record) <span class="required-star">*</span></label>
-                                <input type="text" [(ngModel)]="model.FullName" name="fullName" required maxlength="200" #nameReg="ngModel"
+                                <label for="reg-fullName">Full Legal Name (SSC/HSC Record) <span class="required-star">*</span></label>
+                                <input id="reg-fullName" type="text" [(ngModel)]="model.FullName" name="fullName" required maxlength="200" #nameReg="ngModel"
                                     [class.border-red-500]="nameReg.invalid && nameReg.touched"
                                     placeholder="Enter full name according to certificates">
-                                <div class="field-error mt-1" *ngIf="nameReg.touched && nameReg.invalid">
+                                <div class="field-error mt-1" role="alert" *ngIf="nameReg.touched && nameReg.invalid">
                                     <span class="text-xs text-red-500" *ngIf="nameReg.errors?.['required']">Full name is required.</span>
                                     <span class="text-xs text-red-500" *ngIf="nameReg.errors?.['maxlength']">Name must not exceed 200 characters.</span>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Father's Name <span class="required-star">*</span></label>
-                                <input type="text" [(ngModel)]="model.FatherName" name="fatherName" required maxlength="200" #fatherReg="ngModel"
+                                <label for="reg-fatherName">Father's Name <span class="required-star">*</span></label>
+                                <input id="reg-fatherName" type="text" [(ngModel)]="model.FatherName" name="fatherName" required maxlength="200" #fatherReg="ngModel"
                                     [class.border-red-500]="fatherReg.invalid && fatherReg.touched"
                                     placeholder="Full Name">
-                                <div class="field-error mt-1" *ngIf="fatherReg.touched && fatherReg.invalid">
+                                <div class="field-error mt-1" role="alert" *ngIf="fatherReg.touched && fatherReg.invalid">
                                     <span class="text-xs text-red-500" *ngIf="fatherReg.errors?.['required']">Father's name is required.</span>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Mother's Name *</label>
-                                <input type="text" [(ngModel)]="model.MotherName" name="motherName" required maxlength="200" #motherReg="ngModel"
+                                <label for="reg-motherName">Mother's Name *</label>
+                                <input id="reg-motherName" type="text" [(ngModel)]="model.MotherName" name="motherName" required maxlength="200" #motherReg="ngModel"
                                     [class.border-red-500]="motherReg.invalid && motherReg.touched"
                                     placeholder="Full Name">
-                                <div class="field-error mt-1" *ngIf="motherReg.touched && motherReg.invalid">
+                                <div class="field-error mt-1" role="alert" *ngIf="motherReg.touched && motherReg.invalid">
                                     <span class="text-xs text-red-500" *ngIf="motherReg.errors?.['required']">Mother's name is required.</span>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Date of Birth *</label>
-                                <input type="text" [(ngModel)]="model.DateOfBirth" name="dateOfBirth" required 
+                                <label for="reg-dateOfBirth">Date of Birth *</label>
+                                <input id="reg-dateOfBirth" type="text" [(ngModel)]="model.DateOfBirth" name="dateOfBirth" required 
                                     placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}" #dobReg="ngModel"
                                     [class.border-red-500]="dobReg.invalid && dobReg.touched">
-                                <div class="field-error mt-1" *ngIf="dobReg.touched && dobReg.invalid">
+                                <div class="field-error mt-1" role="alert" *ngIf="dobReg.touched && dobReg.invalid">
                                     <span class="text-xs text-red-500" *ngIf="dobReg.errors?.['required']">Birth date is required.</span>
                                     <span class="text-xs text-red-500" *ngIf="dobReg.errors?.['pattern']">Use format: dd-mm-yyyy</span>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>National ID (NID) *</label>
-                                <input type="text" [(ngModel)]="model.NID" name="nid" required minlength="6" maxlength="20" #nidReg="ngModel"
+                                <label for="reg-nid">National ID (NID) *</label>
+                                <input id="reg-nid" type="text" [(ngModel)]="model.NID" name="nid" required minlength="6" maxlength="20" #nidReg="ngModel"
                                     [class.border-red-500]="nidReg.invalid && nidReg.touched" placeholder="Verification Number">
-                                <div class="field-error mt-1" *ngIf="nidReg.touched && nidReg.invalid">
+                                <div class="field-error mt-1" role="alert" *ngIf="nidReg.touched && nidReg.invalid">
                                     <span class="text-xs text-red-500" *ngIf="nidReg.errors?.['required']">NID is required.</span>
                                     <span class="text-xs text-red-500" *ngIf="nidReg.errors?.['minlength']">NID must be at least 6 characters.</span>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Gender *</label>
-                                <select [(ngModel)]="model.Gender" name="gender" required #genderReg="ngModel"
+                                <label for="reg-gender">Gender *</label>
+                                <select id="reg-gender" [(ngModel)]="model.Gender" name="gender" required #genderReg="ngModel"
                                     [class.border-red-500]="genderReg.invalid && genderReg.touched">
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
@@ -117,15 +117,15 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Blood Group *</label>
-                                <select [(ngModel)]="model.BloodGroup" name="bloodGroup" required #bgReg="ngModel"
+                                <label for="reg-bloodGroup">Blood Group *</label>
+                                <select id="reg-bloodGroup" [(ngModel)]="model.BloodGroup" name="bloodGroup" required #bgReg="ngModel"
                                     [class.border-red-500]="bgReg.invalid && bgReg.touched">
                                     @for (b of bloodGroupOptions; track b.value) { <option [value]="b.value">{{ b.label }}</option> }
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>T-Shirt Size *</label>
-                                <select [(ngModel)]="model.TShirtSize" name="tShirtSize" required #tsReg="ngModel"
+                                <label for="reg-tShirtSize">T-Shirt Size *</label>
+                                <select id="reg-tShirtSize" [(ngModel)]="model.TShirtSize" name="tShirtSize" required #tsReg="ngModel"
                                     [class.border-red-500]="tsReg.invalid && tsReg.touched">
                                     @for (s of tShirtOptions; track s.value) { <option [value]="s.value">{{ s.label }}</option> }
                                 </select>
@@ -141,40 +141,40 @@
                             </div>
 
                             <div class="form-group">
-                                <label>Primary Email (Login) <span class="required-star">*</span></label>
-                                <input type="email" [(ngModel)]="model.Email" name="email" required email maxlength="200" #emailReg="ngModel"
+                                <label for="reg-email">Primary Email (Login) <span class="required-star">*</span></label>
+                                <input id="reg-email" type="email" [(ngModel)]="model.Email" name="email" required email maxlength="200" #emailReg="ngModel"
                                     [class.border-red-500]="emailReg.invalid && emailReg.touched"
                                     placeholder="alumni@domain.com">
-                                <div class="field-error mt-1" *ngIf="emailReg.touched && emailReg.invalid">
+                                <div class="field-error mt-1" role="alert" *ngIf="emailReg.touched && emailReg.invalid">
                                     <span class="text-xs text-red-500" *ngIf="emailReg.errors?.['required']">Email is required.</span>
                                     <span class="text-xs text-red-500" *ngIf="emailReg.errors?.['email']">Enter a valid email address.</span>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Verified Mobile <span class="required-star">*</span></label>
-                                <input type="text" [(ngModel)]="model.MobileNo" name="mobileNo" required pattern="01[3-9]\d{8}" #mobileReg="ngModel"
+                                <label for="reg-mobileNo">Verified Mobile <span class="required-star">*</span></label>
+                                <input id="reg-mobileNo" type="text" [(ngModel)]="model.MobileNo" name="mobileNo" required pattern="01[3-9]\d{8}" #mobileReg="ngModel"
                                     [class.border-red-500]="mobileReg.invalid && mobileReg.touched"
                                     placeholder="01XXXXXXXXX">
-                                <div class="field-error mt-1" *ngIf="mobileReg.touched && mobileReg.invalid">
+                                <div class="field-error mt-1" role="alert" *ngIf="mobileReg.touched && mobileReg.invalid">
                                     <span class="text-xs text-red-500" *ngIf="mobileReg.errors?.['required']">Mobile is required.</span>
                                     <span class="text-xs text-red-500" *ngIf="mobileReg.errors?.['pattern']">Enter a valid 11-digit mobile number.</span>
                                 </div>
                             </div>
                             <div class="form-group full">
-                                <label>Present Resident Address *</label>
-                                <textarea [(ngModel)]="model.PresentAddress" name="presentAddress" required maxlength="500" #presAddrReg="ngModel"
+                                <label for="reg-presentAddress">Present Resident Address *</label>
+                                <textarea id="reg-presentAddress" [(ngModel)]="model.PresentAddress" name="presentAddress" required maxlength="500" #presAddrReg="ngModel"
                                     [class.border-red-500]="presAddrReg.invalid && presAddrReg.touched" rows="2"
                                     placeholder="House, Street, Area, District"></textarea>
-                                <div class="field-error mt-1" *ngIf="presAddrReg.touched && presAddrReg.invalid">
+                                <div class="field-error mt-1" role="alert" *ngIf="presAddrReg.touched && presAddrReg.invalid">
                                     <span class="text-xs text-red-500" *ngIf="presAddrReg.errors?.['required']">Present address is required.</span>
                                 </div>
                             </div>
                             <div class="form-group full">
-                                <label>Permanent Family Residence *</label>
-                                <textarea [(ngModel)]="model.PermanentAddress" name="permanentAddress" required maxlength="500" #permAddrReg="ngModel"
+                                <label for="reg-permanentAddress">Permanent Family Residence *</label>
+                                <textarea id="reg-permanentAddress" [(ngModel)]="model.PermanentAddress" name="permanentAddress" required maxlength="500" #permAddrReg="ngModel"
                                     [class.border-red-500]="permAddrReg.invalid && permAddrReg.touched" rows="2"
                                     placeholder="Village/Area, PO, PS, District"></textarea>
-                                <div class="field-error mt-1" *ngIf="permAddrReg.touched && permAddrReg.invalid">
+                                <div class="field-error mt-1" role="alert" *ngIf="permAddrReg.touched && permAddrReg.invalid">
                                     <span class="text-xs text-red-500" *ngIf="permAddrReg.errors?.['required']">Permanent address is required.</span>
                                 </div>
                             </div>
@@ -329,20 +329,20 @@
                             <h4 class="text-accent uppercase tracking-widest text-xs font-black mb-10">🆘 Emergency Protocol Personnel</h4>
                             <div class="form-grid">
                                 <div class="form-group full">
-                                    <label>Emergency Contact Person Legal Name *</label>
-                                    <input type="text" [(ngModel)]="model.EmergencyContactName" name="emergencyContactName" required maxlength="200"
+                                    <label for="reg-emergencyContactName">Emergency Contact Person Legal Name *</label>
+                                    <input id="reg-emergencyContactName" type="text" [(ngModel)]="model.EmergencyContactName" name="emergencyContactName" required maxlength="200"
                                         #ecnM="ngModel" [class.border-red-500]="ecnM.invalid && ecnM.touched">
                                 </div>
                                 <div class="form-group">
-                                    <label>Consanguinity / Relationship *</label>
-                                    <input type="text" [(ngModel)]="model.EmergencyContactRelation" name="emergencyContactRelation" required maxlength="100"
+                                    <label for="reg-emergencyContactRelation">Consanguinity / Relationship *</label>
+                                    <input id="reg-emergencyContactRelation" type="text" [(ngModel)]="model.EmergencyContactRelation" name="emergencyContactRelation" required maxlength="100"
                                         #ecrM="ngModel" [class.border-red-500]="ecrM.invalid && ecrM.touched">
                                 </div>
                                 <div class="form-group">
-                                    <label>Direct Phone Channel *</label>
-                                    <input type="text" [(ngModel)]="model.EmergencyContactPhone" name="emergencyContactPhone" required pattern="01[3-9]\d{8}"
+                                    <label for="reg-emergencyContactPhone">Direct Phone Channel *</label>
+                                    <input id="reg-emergencyContactPhone" type="text" [(ngModel)]="model.EmergencyContactPhone" name="emergencyContactPhone" required pattern="01[3-9]\d{8}"
                                         #ecpM="ngModel" [class.border-red-500]="ecpM.invalid && ecpM.touched" placeholder="01XXXXXXXXX">
-                                    <div class="field-error mt-1" *ngIf="ecpM.touched && ecpM.invalid">
+                                    <div class="field-error mt-1" role="alert" *ngIf="ecpM.touched && ecpM.invalid">
                                         <span class="text-xs text-red-500" *ngIf="ecpM.errors?.['pattern']">Enter a valid 11-digit mobile number.</span>
                                     </div>
                                 </div>

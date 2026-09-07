@@ -3,8 +3,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { ForumService } from '../../core/services/forum.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { ForumTopic, ForumPost, CreateForumPostDto } from '../../core/models/business.models';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
@@ -19,6 +21,7 @@ import { ImgFallbackDirective } from '../../common/directives/img-fallback.direc
 export class TopicDetail implements OnInit {
     private forumService = inject(ForumService);
     private authService = inject(AuthService);
+    private confirmDialog = inject(ConfirmDialogService);
     private route = inject(ActivatedRoute);
     private destroyRef = inject(DestroyRef);
     private router = inject(Router);
@@ -133,10 +136,16 @@ export class TopicDetail implements OnInit {
         });
     }
 
-    deleteTopic() {
+    async deleteTopic() {
         const t = this.topic();
         if (!t) return;
-        if (!confirm('Are you sure you want to delete this topic and all its replies?')) return;
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Delete topic',
+            message: 'Are you sure you want to delete this topic and all its replies?',
+            confirmLabel: 'Delete',
+            danger: true
+        }));
+        if (!ok) return;
 
         this.forumService.deleteTopic(t.id).subscribe({
             next: () => {
@@ -148,8 +157,14 @@ export class TopicDetail implements OnInit {
         });
     }
 
-    deletePost(postId: number) {
-        if (!confirm('Are you sure you want to delete this reply?')) return;
+    async deletePost(postId: number) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Delete reply',
+            message: 'Are you sure you want to delete this reply?',
+            confirmLabel: 'Delete',
+            danger: true
+        }));
+        if (!ok) return;
 
         this.forumService.deletePost(postId).subscribe({
             next: () => {

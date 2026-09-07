@@ -8,7 +8,8 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using GHCAA.Infrastructure.Options;
 using Microsoft.Extensions.Logging;
 using BCrypt.Net;
 
@@ -19,15 +20,15 @@ namespace GHCAA.Infrastructure.Services
         private readonly ApplicationDbContext _db;
         private readonly ILogger<UserService> _logger;
         private readonly ITokenService _tokenService;
-        private readonly IConfiguration _config;
+        private readonly IOptions<AppSettingsOptions> _appSettings;
         private const string PasswordChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        public UserService(ApplicationDbContext db, ILogger<UserService> logger, ITokenService tokenService, IConfiguration config)
+        public UserService(ApplicationDbContext db, ILogger<UserService> logger, ITokenService tokenService, IOptions<AppSettingsOptions> appSettings)
         {
             _db = db;
             _logger = logger;
             _tokenService = tokenService;
-            _config = config;
+            _appSettings = appSettings;
         }
 
         public async Task<User> CreateUserAccountAsync(int memberId, string username, string password, CancellationToken cancellationToken = default)
@@ -166,7 +167,7 @@ namespace GHCAA.Infrastructure.Services
         // while leaving the account confusingly half-locked in the meantime.
         private bool IsProtectedUsername(string username)
         {
-            var protectedUsernames = _config.GetSection(Constants.ConfigKeys.ProtectedSuperAdmins).Get<string[]>() ?? [];
+            var protectedUsernames = _appSettings.Value.ProtectedSuperAdmins;
             return protectedUsernames.Contains(username, StringComparer.OrdinalIgnoreCase);
         }
 
@@ -189,7 +190,7 @@ namespace GHCAA.Infrastructure.Services
             // System admin accounts carry no email address, so there is nothing to send this to.
             // The URL goes back to the caller (RolesController) for the acting SuperAdmin to copy
             // and hand over manually, rather than being emailed like a member's reset link.
-            var clientUrl = _config[Constants.ConfigKeys.ClientUrl] ?? "http://localhost:4200";
+            var clientUrl = _appSettings.Value.ClientUrl;
             var resetUrl = $"{clientUrl}/reset-password?email={Uri.EscapeDataString(user.Username)}&token={token}";
             return (true, resetUrl);
         }

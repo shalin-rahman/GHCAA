@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../core/api/api_client.dart';
 
 final fileServiceProvider = Provider<FileService>((ref) {
@@ -62,5 +63,40 @@ class FileService {
       return null;
     }
     return null;
+  }
+
+  /// Fetches a protected resource (receipt PDF, certificate/payment-proof image) through
+  /// the app's own Dio instance, so the auth interceptor attaches the bearer token. Accepts
+  /// either a full URL or a path relative to the API base — both go through the same Dio,
+  /// so both carry the Authorization header. Returns null on any failure rather than
+  /// throwing, since every call site needs to show its own "couldn't load this" state.
+  Future<Uint8List?> fetchAuthenticatedBytes(String pathOrUrl) async {
+    try {
+      final response = await _dio.get<List<int>>(
+        pathOrUrl,
+        options: Options(responseType: ResponseType.bytes),
+      );
+      final data = response.data;
+      return data == null ? null : Uint8List.fromList(data);
+    } catch (e) {
+      debugPrint('FileService.fetchAuthenticatedBytes failed ($pathOrUrl): $e');
+      return null;
+    }
+  }
+
+  /// Downloads a protected resource to a temp file via [fetchAuthenticatedBytes], for
+  /// screens that need a local File (e.g. to hand to share_plus) rather than raw bytes.
+  Future<File?> downloadToTempFile(String pathOrUrl, {required String fileName}) async {
+    final bytes = await fetchAuthenticatedBytes(pathOrUrl);
+    if (bytes == null) return null;
+    try {
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/$fileName');
+      await file.writeAsBytes(bytes, flush: true);
+      return file;
+    } catch (e) {
+      debugPrint('FileService.downloadToTempFile failed: $e');
+      return null;
+    }
   }
 }

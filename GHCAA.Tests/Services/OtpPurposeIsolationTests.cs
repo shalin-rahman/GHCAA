@@ -1,9 +1,11 @@
 using FluentAssertions;
 using GHCAA.Application.Interfaces;
+using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using static GHCAA.Domain.Enums;
 
@@ -22,9 +24,9 @@ public class OtpPurposeIsolationTests : TestBase
         var mockCommunication = new Mock<ICommunicationService>();
         var mockConfig = new Mock<IConfiguration>();
         var mockLogger = new Mock<ILogger<OtpService>>();
-        mockConfig.Setup(x => x["OtpSettings:ExpiryMinutes"]).Returns("10");
         mockConfig.Setup(x => x["Jwt:Key"]).Returns("otp-service-test-dummy-hmac-key-please-32chars");
-        _service = new OtpService(_context, mockCommunication.Object, mockConfig.Object, mockLogger.Object);
+        var otpSettings = Options.Create(new OtpSettingsOptions { ExpiryMinutes = 10 });
+        _service = new OtpService(_context, mockCommunication.Object, otpSettings, mockConfig.Object, mockLogger.Object);
     }
 
     [Category("FR-09")]

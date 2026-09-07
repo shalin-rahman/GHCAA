@@ -9,11 +9,12 @@ import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { NotifyToggleComponent } from '../../common/notify-toggle/notify-toggle.component';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 
 @Component({
   selector: 'app-job-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ModalHeaderComponent],
   templateUrl: './job-approval.html',
   styleUrl: './job-approval.scss'
 })

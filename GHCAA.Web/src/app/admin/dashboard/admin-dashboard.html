@@ -1,14 +1,9 @@
 <div class="admin-feature">
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Dashboard</h2>
-            <small>Live system overview — {{ now | date:'dd-MM-yyyy' }}</small>
-        </div>
-        <div class="header-actions">
-            <span class="pulse-line">Live System Status</span>
-            <div class="pulse-dot"></div>
-        </div>
-    </div>
+    <app-page-header title="Dashboard" [total]="1" emptySubtitle="Live system overview">
+        <small subtitle>Live system overview — {{ now | date:'dd-MM-yyyy' }}</small>
+        <span actions class="pulse-line">Live System Status</span>
+        <div actions class="pulse-dot"></div>
+    </app-page-header>
 
     @if (loading()) {
     <div class="loading-grid">

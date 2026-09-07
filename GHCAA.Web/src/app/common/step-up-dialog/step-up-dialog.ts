@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { StepUpService } from '../../core/services/step-up.service';
+import { ModalHeaderComponent } from '../modal-header/modal-header.component';
 
 /**
  * 7.13: Global host for the admin step-up (2FA) challenge. Rendered once at the app root
@@ -10,7 +11,7 @@ import { StepUpService } from '../../core/services/step-up.service';
 @Component({
     selector: 'app-step-up-dialog',
     standalone: true,
-    imports: [FormsModule],
+    imports: [FormsModule, ModalHeaderComponent],
     templateUrl: './step-up-dialog.html',
     styleUrl: './step-up-dialog.scss'
 })

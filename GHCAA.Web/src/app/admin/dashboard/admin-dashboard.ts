@@ -10,6 +10,7 @@ import { EventsService } from '../../core/services/events.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 
 interface StatCard {
   icon: string;
@@ -30,7 +31,7 @@ interface PendingRow {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, ImgFallbackDirective],
+  imports: [CommonModule, RouterLink, DatePipe, ImgFallbackDirective, PageHeaderComponent],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss'
 })

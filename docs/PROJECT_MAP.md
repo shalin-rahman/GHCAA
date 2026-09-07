@@ -48,7 +48,7 @@ graph TD
     end
 
     subgraph Storage
-        DB["PostgreSQL / MySQL / SQLite\n(via EF Core)"]
+        DB["PostgreSQL (via EF Core)\nSQLite - test bootstrap only, 82.15"]
         FS["Local FileSystem\n(wwwroot/uploads)"]
         GW["Payment Gateways\n(bKash / Nagad / SSLCommerz)"]
     end
@@ -858,6 +858,8 @@ All services are registered as **Scoped** unless noted.
 | `IPollService` | `PollService` | Services/ |
 | `ISmsService` | `GreenwebSmsService` | Services/ (**HttpClient**) |
 | `IRealTimeService` | `RealTimeService` | API/Services/ |
+| `IErrorLogService` | `ErrorLogService` | Services/ (WP45; called from `ExceptionMiddleware`) |
+| `IDeviceTokenService` | `DeviceTokenService` | Services/ (82.53a; FCM token upsert/read for `NotificationController`) |
 
 ---
 
@@ -883,10 +885,9 @@ All registered as **HttpClient** + **Scoped IPaymentGatewayService**.
 | Value | Class | Connection Key |
 |---|---|---|
 | `PgSql` (default) | `PgSqlApplicationDbContext` | `PgSqlConnection` or `DATABASE_URL` env |
-| `MySql` | `MySqlApplicationDbContext` | `MySqlConnection` |
-| `Sqlite` | `SqliteApplicationDbContext` | `SqliteConnection` |
+| `Sqlite` | `SqliteApplicationDbContext` | `SqliteConnection` — kept for a fast, migration-free test bootstrap path only (`EnsureCreated()` under the Visual seed profile); no migration is attributed to it. `MySql`/`MySqlApplicationDbContext` removed 2026-09-07 (82.15) — it never had a working migration tree. |
 
-**DbSets (all 40 domain models mapped):** Member, User, Role, AlumniEvent, EventRegistration, EventTask, EventBudget, EventGallery, NewsPost, NewsCollaborator, JobOpportunity, FinancialRecord, PaymentHistory, MembershipDue, MembershipFeeConfig, MembershipHistory, AcademicRecord, ProfessionalRecord, ECPeriod, ECMember, Constitution, FamilyLinkRequest, MentorshipRequest, Poll, PollOption, PollVote, SocialAuthConfig, ActivityLog, Notification, ChatMessage, EmailTemplate, EmailLog, Otp, LookupItem, FileUpload, ContactMessage, PaymentConfiguration, SavedPaymentMethod, SpecialDayTheme, GamificationConfig
+**DbSets (all 53 domain models mapped, re-counted 2026-09-07):** Member, User, Role, AlumniEvent, EventRegistration, EventTask, EventBudget, EventExpense, EventGallery, EventPhoto, NewsPost, NewsCollaborator, JobOpportunity, FinancialRecord, PaymentHistory, MembershipDue, MembershipFeeConfig, MembershipHistory, AcademicRecord, ProfessionalRecord, ECPeriod, ECMember, Constitution, FamilyLinkRequest, MentorshipRequest, Poll, PollOption, PollVote, SocialAuthConfig, RefreshToken, ActivityLog, Notification, ChatMessage, EmailTemplate, EmailLog, Otp, LookupItem, FileUpload, ContactMessage, PaymentConfiguration, SavedPaymentMethod, SpecialDayTheme, GamificationConfig, Campaign, CampaignPledge, DonorRecognitionTier, AmendmentVote, ForumCategory, ForumTopic, ForumPost, OrganizationConfig, SiteContent, ErrorLog
 
 **Seed:** `GHCAA.Infrastructure/Data/Seed/` — test/dev data seeder. Loaded via
 `ApplicationDbContext.LoadSeed<T>(fileName)` (`internal static`, so runtime syncers reuse the same
@@ -950,7 +951,7 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 | `GovernanceController` | `/api/governance` | Public + Admin | `IGovernanceService` |
 | `NetworkingController` | `/api/networking` | Auth | `INetworkingService` |
 | `CommunicationController` | `/api/communication` | Admin | `ICommunicationService` |
-| `NotificationController` | `/api/notifications` | Auth | `INotificationService` |
+| `NotificationController` | `/api/notifications` (incl. `POST /notifications/device-token`, 82.53a) | Auth | `INotificationService`, `IDeviceTokenService` |
 | `MessagingController` | `/api/messaging` | Auth | `IChatService` |
 | `ActivityController` | `/api/activity` | Auth | `IActivityService` |
 | `FamilyLinkController` | `/api/family-links` | Auth | `IFamilyLinkService`, `IFamilyService` |
@@ -963,6 +964,7 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 | `ThemeController` | `/api/theme` | Public + Admin | `IThemeService` |
 | `HealthController` | `/api/health` | Public | `ApplicationDbContext` |
 | `MemberImportController` | `/api/import` | SuperAdmin | `IMemberImportService` |
+| `AdminErrorLogsController` | `/api/admin/error-logs` (WP45) | SuperAdmin | `IErrorLogService` |
 
 ---
 
@@ -984,7 +986,7 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 ## API Layer — Middleware Pipeline
 
 Order in `Program.cs`:
-1. `ExceptionMiddleware` — Global exception → 500 JSON
+1. `ExceptionMiddleware` — Global exception → 500 JSON, and persists the error via `IErrorLogService` (WP45)
 2. `SecurityHeadersMiddleware` — CSP, X-Frame-Options, etc.
 3. `AuditLogMiddleware` — Logs all mutating requests via `IActivityService`
 4. `RateLimiter` — Enforces `auth` / `registration` / `api` policies
@@ -1208,6 +1210,7 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `uploadPhoto()` | `(file) => Observable<any>` | `POST /profile/photo` |
 | `uploadSignature()` | `(file) => Observable<any>` | `POST /profile/signature` |
 | `getCertificate()` | `() => Observable<{dataUri: string}>` | `GET /profile/certificate` |
+| `changePassword()` | `(dto) => Observable<any>` | `POST /profile/change-password` (moved off `change-password.ts`'s direct `HttpClient` call, 82.7) |
 
 ---
 
@@ -1317,12 +1320,14 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `ContactService` | `contact.service.ts` | `submitMessage(dto)` |
 | `AlertService` | `alert.service.ts` | `success(msg)`, `error(msg)`, `info(msg)`, `warning(msg)` — toast notifications |
 | `NavService` | `nav.service.ts` | `activeRoute`, `sidebarCollapsed` — signal-based |
+| `HealthService` | `health.service.ts` | `check()` — moved `common/health/health.ts` off a direct `HttpClient` call (82.7) |
+| `ElectionsService` | `elections.service.ts` | moved `public/elections/elections.ts` off a direct `HttpClient` call (82.7) |
+| `ConfirmDialogService` | `confirm-dialog.service.ts` | `confirm({title, message, confirmLabel?, destructive?}) => Promise<boolean>` — backs the shared `<app-confirm-dialog>`, replacing `window.confirm()` across 22 files (82.45) |
 
 **Guards:** `auth.guard.ts` — exports `authGuard`, `adminGuard`, `superAdminGuard`
 
 **Interceptors:**
-- `auth.interceptor.ts` — Appends `Authorization: Bearer <token>` to all requests
-- `global-http.interceptor.ts` — Handles 401/403 redirects, error toasting via `AlertService`
+- `global-http.interceptor.ts` — attaches the bearer token, handles 401/403 redirects, error toasting via `AlertService`, and retries a transient GET failure once or twice with backoff (82.36). `auth.interceptor.ts` was a dead, unregistered duplicate of the bearer-attach logic — deleted 2026-09-07 (82.34).
 
 **Constants:** `app.constants.ts` — `API_ENDPOINTS` object with all endpoint URLs
 
@@ -1360,7 +1365,7 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `PaymentMethodSelector` | `payment-method-selector/` | `PaymentConfigService` |
 | `PaymentPortalComponent` | `payment-portal/` | `FinancialService`, `GatewaysService` |
 | `PaymentStatusComponent` | `payment-status/` | — |
-| `HealthComponent` | `health/` | HTTP direct to `/health` |
+| `HealthComponent` | `health/` | `HealthService` (moved off direct `HttpClient`, 82.7) |
 
 ### Member Portal Components (`src/app/member/`)
 | Component | Key Services |
@@ -1389,8 +1394,9 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `LedgerComponent` | `LedgerService` |
 | `AdminFeeConfigComponent` | `FinancialService` |
 | `AdminPaymentConfigComponent` | `PaymentConfigService` |
-| `AdminRolesComponent` | HTTP direct |
-| `AdminAuditComponent` | HTTP direct |
+| `AdminRolesComponent` | `AdminService` (moved off direct `HttpClient`, 82.7) |
+| `AdminAuditComponent` | `AdminService` (moved off direct `HttpClient`, 82.7) |
+| `AdminErrorLogs` | `AdminService.getErrorLogs()` (WP45; date/level/text filters, stack-trace row expansion, `superAdminGuard`) |
 
 ### Layout Components (`src/app/layouts/`)
 | Component | Purpose |
@@ -1438,6 +1444,7 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `/admin/payments` | `AdminPaymentConfig` | `authGuard + superAdminGuard` |
 | `/admin/roles` | `AdminRoles` | `authGuard + superAdminGuard` |
 | `/admin/audit` | `AdminAudit` | `authGuard + superAdminGuard` |
+| `/admin/error-logs` | `AdminErrorLogs` | `authGuard + superAdminGuard` (WP45) |
 
 ---
 
@@ -1472,8 +1479,8 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `saveDashboardLayout()` / `getDashboardLayout()` | `(bool) / () => Future<bool>` | Compact mode preference |
 | `saveProfile()` / `getProfile()` | `(Map) / () => Future<Map?>` | JSON offline cache |
 | `clearAll()` | `() => Future<void>` | Removes everything (token, creds, SharedPrefs) |
-| `saveCredentials()` / `getCredentials()` | Secure storage | For biometric fast-login (native only) |
-| `clearCredentials()` | `() => Future<void>` | |
+| `setBiometricEnabled()` / `isBiometricEnabled()` | `(bool) / () => Future<bool>` | Biometric fast-login opts in/out (82.40 — no password stored) |
+| `purgeLegacyBiometricCredentials()` | `() => Future<void>` | Scrubs any plaintext password an older build wrote to secure storage; never writes to those keys again |
 
 ---
 
@@ -1505,8 +1512,9 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `BiometricService` | `core/services/biometric_service.dart` | Fingerprint/Face ID via `local_auth` |
 | `DeviceInfoService` | `core/services/device_info_service.dart` | OS, model, app version |
 | `RegisterWizardProvider` | `features/auth/register_wizard_provider.dart` | Multi-step registration state via `StateNotifier` |
-| `PushNotificationService` | `features/notifications/push_notification_service.dart` | Firebase/local push notifications |
+| `PushNotificationService` | `features/notifications/push_notification_service.dart` | Firebase/local push notifications; POSTs the device token to `POST /notifications/device-token` on obtain/refresh and navigates via `go_router` on tap (82.41/82.53a) |
 | `DynamicThemeService` | `features/theme/dynamic_theme_service.dart` | Runtime theme switching |
+| `SessionManager` | `core/session/session_manager.dart` | Sole owner of the 15-minute inactivity timeout (82.39); expiry goes through `AuthService.logout()` for full cleanup |
 
 ---
 
@@ -1521,9 +1529,10 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 | Method | Signature | API | Notes |
 |---|---|---|---|
 | `login()` | `(identifier, password, {enableBiometric?}) => Future<String?>` | `POST /auth/login` | Returns `null` on success, error message on failure. Clears ALL previous session data before storing new credentials. |
+| `loginWithStoredToken()` | `() => Future<String?>` | `POST /auth/refresh-mobile` | Biometric re-login (82.40) — reuses the refresh token saved from the last real login rather than a stored password |
 | `register()` | `(Map data) => Future<String?>` | `POST /auth/register` | Builds `FormData` with photo, NID, paymentProof, academic history |
 | `forgotPassword()` | `(identifier) => Future<bool>` | `POST /auth/forgot-password` | |
-| `logout()` | `() => Future<void>` | — | Calls `_storage.clearAll()` |
+| `logout()` | `() => Future<void>` | — | Invalidates `notificationHubServiceProvider` (tears down the SignalR hub), `roleProvider`, `userProfileProvider` (82.38), then `_storage.clearAll()`. Called by `SessionManager` on inactivity expiry (82.39), not just a manual sign-out. |
 | `getRole()` | `() => Future<String?>` | — | From storage |
 | `updateProfile()` | `(Map data) => Future<bool>` | `PUT /profile` | |
 
@@ -1532,7 +1541,8 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 |---|---|---|
 | `roleProvider` | `FutureProvider<String?>` | Non-autoDispose; cached across navigations |
 | `userProfileProvider` | `FutureProvider<Map?>` | Non-autoDispose; fetches from API, falls back to offline cache |
-| `lastActivityProvider` | `StateNotifierProvider<ActivityNotifier, DateTime>` | Tracks last user interaction |
+
+`lastActivityProvider`/`ActivityNotifier` (a duplicate, 10-minute inactivity-timeout mechanism that lived in `main.dart`) were deleted 2026-09-07 (82.39) — `SessionManager` (15 minutes) is now the sole owner of session-timeout.
 
 **Utility:**
 - `profileCompletenessFields` — `const List<String>` of 11 canonical field names
@@ -1875,6 +1885,8 @@ with no callers (docs/TODO.md 80.4, 44.16).
 |---|---|---|
 | `AuthServiceTests` | `AuthServiceTests.cs` | `AuthService` |
 | `CommunicationServiceTests` | `CommunicationServiceTests.cs` | `CommunicationService` |
+| `DeviceTokenServiceTests` | `DeviceTokenServiceTests.cs` | `DeviceTokenService` (82.53a) |
+| `ErrorLogServiceTests` | `ErrorLogServiceTests.cs` | `ErrorLogService` (WP45) |
 | `EventServiceTests` | `EventServiceTests.cs` | `EventService` |
 | `FamilyLinkServiceTests` | `FamilyLinkServiceTests.cs` | `FamilyLinkService` |
 | `FinancialLedgerServiceTests` | `FinancialLedgerServiceTests.cs` | `FinancialLedgerService` |

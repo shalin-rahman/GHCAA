@@ -4,10 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { FamilyLinkService } from '../../core/services/family-link.service';
 import { MentorshipService } from '../../core/services/mentorship.service';
 import { NetworkingService } from '../../core/services/networking.service';
+import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { SEARCH_DEBOUNCE_MS } from '../../core/constants/app.constants';
+import { debounce } from '../../core/utils/debounce.util';
 
 type Tab = 'family' | 'mentorship';
 
@@ -24,6 +28,7 @@ export class MemberRequests implements OnInit {
   private networkingService = inject(NetworkingService);
   private notify = inject(NotificationService);
   private authService = inject(AuthService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   activeTab = signal<Tab>('family');
   loading = signal(true);
@@ -47,7 +52,7 @@ export class MemberRequests implements OnInit {
   // One shared in-flight-id guard for respond/cancel/remove: each acts on a single request
   // and reloads the whole list afterward, so they can't overlap each other either.
   processingId = signal<number | null>(null);
-  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+  private debouncedSearch = debounce(() => this.runSearch(), SEARCH_DEBOUNCE_MS);
 
   ngOnInit() {
     this.loadAll();
@@ -83,15 +88,12 @@ export class MemberRequests implements OnInit {
     this.showSendForm.set(false);
   }
 
-  // Debounced to match the pattern already used by common/directory: clears any pending
-  // timer before scheduling the next one, so fast typing doesn't pile up overlapping requests.
   search() {
-    if (this.searchTimer) clearTimeout(this.searchTimer);
     if (!this.searchQuery || this.searchQuery.trim().length < 2) {
       this.searchResults.set([]);
       return;
     }
-    this.searchTimer = setTimeout(() => this.runSearch(), 300);
+    this.debouncedSearch();
   }
 
   private runSearch() {
@@ -149,9 +151,15 @@ export class MemberRequests implements OnInit {
     });
   }
 
-  cancelFamily(requestId: number) {
+  async cancelFamily(requestId: number) {
     if (this.processingId() !== null) return;
-    if (!confirm('Cancel this request?')) return;
+    const ok = await firstValueFrom(this.confirmDialog.confirm({
+      title: 'Cancel request',
+      message: 'Cancel this request?',
+      confirmLabel: 'Cancel request',
+      danger: true
+    }));
+    if (!ok) return;
     this.processingId.set(requestId);
     this.familyLinkService.cancel(requestId).subscribe({
       next: () => { this.processingId.set(null); this.notify.success('Request cancelled.'); this.loadAll(); },
@@ -159,9 +167,15 @@ export class MemberRequests implements OnInit {
     });
   }
 
-  removeFamily(requestId: number) {
+  async removeFamily(requestId: number) {
     if (this.processingId() !== null) return;
-    if (!confirm('Remove this family link? This cannot be undone.')) return;
+    const ok = await firstValueFrom(this.confirmDialog.confirm({
+      title: 'Remove family link',
+      message: 'Remove this family link? This cannot be undone.',
+      confirmLabel: 'Remove',
+      danger: true
+    }));
+    if (!ok) return;
     this.processingId.set(requestId);
     this.familyLinkService.remove(requestId).subscribe({
       next: () => { this.processingId.set(null); this.notify.success('Family link removed.'); this.loadAll(); },

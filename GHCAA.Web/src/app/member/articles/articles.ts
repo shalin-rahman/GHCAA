@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NewsService } from '../../core/services/news.service';
 import { NewsPost, SubmissionStatus } from '../../core/models/business.models';
+import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import {
   ARTICLE_CATEGORIES,
   SUBMISSION_STATUS_MAP,
@@ -26,6 +28,7 @@ import { safeImageUrl } from '../../core/utils/image.util';
 export class MemberArticles implements OnInit {
   private newsService = inject(NewsService);
   private notify = inject(NotificationService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   mySubmissions = signal<NewsPost[]>([]);
   loading = signal(true);
@@ -158,17 +161,23 @@ export class MemberArticles implements OnInit {
   }
 
 
-  deleteArticle(id: number) {
+  async deleteArticle(id: number) {
     const article = this.mySubmissions().find(a => a.id === id);
     if (!article) return;
-    
+
     // Only allow deleting drafts or pending submissions. Approved ones are permanent.
     if (article.status === SUBMISSION_STATUS.APPROVED) {
         this.notify.warning('Published articles cannot be deleted directly. Contact admin.');
         return;
     }
 
-    if (!confirm('Are you sure you want to delete this submission?')) return;
+    const ok = await firstValueFrom(this.confirmDialog.confirm({
+      title: 'Delete submission',
+      message: 'Are you sure you want to delete this submission?',
+      confirmLabel: 'Delete',
+      danger: true
+    }));
+    if (!ok) return;
 
     this.newsService.deleteMySubmission(id).subscribe({
       next: () => {

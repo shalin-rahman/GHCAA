@@ -6,7 +6,8 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using GHCAA.Infrastructure.Options;
 using System.Net.Http;
 using BCrypt.Net;
 
@@ -18,7 +19,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly ITokenService _tokenService;
         private readonly ILogger<AuthService> _logger;
         private readonly IActivityService _activityService;
-        private readonly IConfiguration _configuration;
+        private readonly IOptions<AppSettingsOptions> _appSettings;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IEmailService _email;
         private readonly ICommunicationService _communicationService;
@@ -28,7 +29,7 @@ namespace GHCAA.Infrastructure.Services
             ITokenService tokenService,
             ILogger<AuthService> logger,
             IActivityService activityService,
-            IConfiguration configuration,
+            IOptions<AppSettingsOptions> appSettings,
             IHttpClientFactory httpClientFactory,
             IEmailService email,
             ICommunicationService communicationService,
@@ -38,7 +39,7 @@ namespace GHCAA.Infrastructure.Services
             _tokenService = tokenService;
             _logger = logger;
             _activityService = activityService;
-            _configuration = configuration;
+            _appSettings = appSettings;
             _httpClientFactory = httpClientFactory;
             _email = email;
             _communicationService = communicationService;
@@ -411,7 +412,7 @@ namespace GHCAA.Infrastructure.Services
             await _activityService.LogActivityAsync(member.Id, "Password Reset Requested",
                 "Member requested a password reset link.", cancellationToken: cancellationToken);
 
-            var clientUrl = _configuration[Constants.ConfigKeys.ClientUrl] ?? "http://localhost:4200";
+            var clientUrl = _appSettings.Value.ClientUrl;
             var resetUrl = $"{clientUrl}/reset-password?email={Uri.EscapeDataString(member.Email)}&token={token}";
 
             var dbTemplate = await _communicationService.GetTemplateByCodeAsync(Constants.TemplateCodes.PasswordReset, cancellationToken);

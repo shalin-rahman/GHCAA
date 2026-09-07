@@ -2,10 +2,10 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { Icon } from '../../common/icon/icon';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { OrgConfigService } from '../../core/services/org-config.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -17,7 +17,7 @@ import { OrgConfigService } from '../../core/services/org-config.service';
 export class ResetPassword {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private http = inject(HttpClient);
+  private authService = inject(AuthService);
   orgConfig = inject(OrgConfigService);
 
   email = '';
@@ -57,11 +57,7 @@ export class ResetPassword {
     this.loading.set(true);
     this.error.set('');
 
-    this.http.post('/api/auth/reset-password', {
-      email: this.email,
-      token: this.token,
-      newPassword: this.newPassword
-    }).subscribe({
+    this.authService.resetPassword(this.email, this.token, this.newPassword).subscribe({
       next: () => {
         this.success.set(true);
         this.loading.set(false);

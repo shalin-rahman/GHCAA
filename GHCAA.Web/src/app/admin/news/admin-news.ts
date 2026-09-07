@@ -5,7 +5,9 @@ import { ImgFallbackDirective } from '../../common/directives/img-fallback.direc
 import { NewsService } from '../../core/services/news.service';
 import { NewsPost, PostType } from '../../core/models/business.models';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
+import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { ARTICLE_CATEGORIES, getArticleCategoryLabel, POST_TYPE_TABS, matchesPostType, SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
@@ -21,6 +23,7 @@ import { SearchBarComponent } from '../../common/search-bar/search-bar.component
 export class AdminNews implements OnInit {
     private newsService = inject(NewsService);
     private notify = inject(NotificationService);
+    private confirmDialog = inject(ConfirmDialogService);
 
     categories = ARTICLE_CATEGORIES;
     newsList = signal<NewsPost[]>([]);
@@ -239,8 +242,15 @@ export class AdminNews implements OnInit {
         });
     }
 
-    deletePost(id: number) {
-        if (!confirm('Delete this post permanently?')) return;
+    async deletePost(id: number) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Delete post',
+            message: 'Delete this post permanently?',
+            confirmLabel: 'Delete',
+            danger: true
+        }));
+        if (!ok) return;
+
         this.newsService.deleteNews(id).subscribe({
             next: () => { 
                 this.notify.success('Post deleted.'); 

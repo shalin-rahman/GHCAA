@@ -4,10 +4,11 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace GHCAA.Tests.Services;
@@ -22,7 +23,7 @@ public class MemberServiceTests : TestBase
     private Mock<ILogger<MemberService>> _mockLogger = null!;
     private Mock<IActivityService> _mockActivityService = null!;
     private Mock<INotificationService> _mockNotificationService = null!;
-    private Mock<IConfiguration> _mockConfig = null!;
+    private IOptions<AppSettingsOptions> _appSettings = null!;
     private Mock<IGamificationService> _mockGamification = null!;
     private Mock<IFinancialService> _mockFinancialService = null!;
     private Mock<ITokenService> _mockTokenService = null!;
@@ -41,7 +42,7 @@ public class MemberServiceTests : TestBase
         _mockActivityService = new Mock<IActivityService>();
         _mockCommunication = new Mock<ICommunicationService>();
         _mockNotificationService = new Mock<INotificationService>();
-        _mockConfig = new Mock<IConfiguration>();
+        _appSettings = Options.Create(new AppSettingsOptions());
         _mockGamification = new Mock<IGamificationService>();
         _mockFinancialService = new Mock<IFinancialService>();
         _mockTokenService = new Mock<ITokenService>();
@@ -57,7 +58,7 @@ public class MemberServiceTests : TestBase
             _mockLogger.Object,
             _mockActivityService.Object,
             _mockNotificationService.Object,
-            _mockConfig.Object,
+            _appSettings,
             _mockGamification.Object,
             _mockFinancialService.Object,
             new Mock<IRealTimeService>().Object,
@@ -943,10 +944,19 @@ public class MemberServiceTests : TestBase
     {
         var member = new Member
         {
-            FullName = "M", FatherName = "F", MotherName = "Mo", Email = "snap@example.com", NID = "N",
-            MobileNo = "01700000001", PresentAddress = "A", PermanentAddress = "A",
-            EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0",
-            Status = Enums.MembershipStatus.Applied, MembershipType = Enums.MembershipType.General
+            FullName = "M",
+            FatherName = "F",
+            MotherName = "Mo",
+            Email = "snap@example.com",
+            NID = "N",
+            MobileNo = "01700000001",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0",
+            Status = Enums.MembershipStatus.Applied,
+            MembershipType = Enums.MembershipType.General
         };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();

@@ -35,22 +35,45 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
 
   Future<void> _checkBiometrics() async {
     final hasBio = await ref.read(biometricServiceProvider).isBiometricsAvailable();
-    final creds = await ref.read(storageServiceProvider).getCredentials();
-    if (hasBio && creds != null) {
+    final storage = ref.read(storageServiceProvider);
+    final biometricEnabled = await storage.isBiometricEnabled();
+    final refreshToken = await storage.getRefreshToken();
+    if (hasBio && biometricEnabled && refreshToken != null) {
       setState(() => _canBiometric = true);
     }
   }
 
+  // 82.40: re-authenticates through the stored refresh token instead of an autofilled
+  // password — see AuthService.loginWithStoredToken.
   Future<void> _handleBiometricLogin() async {
     final reason = AppLocalizations.of(context).translate('biometric_unlock_prompt');
     final success = await ref.read(biometricServiceProvider).authenticate(reason: reason);
-    if (success) {
-      final creds = await ref.read(storageServiceProvider).getCredentials();
-      if (creds != null) {
-        _identifierController.text = creds['username']!;
-        _passwordController.text = creds['password']!;
-        _handleLogin();
+    if (!success) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final error = await ref.read(authServiceProvider).loginWithStoredToken();
+      if (!mounted) return;
+
+      if (error == null) {
+        HapticFeedback.heavyImpact();
+        final role = await ref.read(roleProvider.future);
+        if (!mounted) return;
+        if (role.isStaffAdminRole) {
+          context.go('/admin_dashboard');
+        } else {
+          context.go('/dashboard');
+        }
+      } else {
+        HapticFeedback.vibrate();
+        setState(() => _errorMessage = error);
       }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

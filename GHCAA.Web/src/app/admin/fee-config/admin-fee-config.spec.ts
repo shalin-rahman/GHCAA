@@ -4,6 +4,7 @@ import { AdminFeeConfig } from './admin-fee-config';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { FinancialService } from '../../core/services/financial.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { of, throwError } from 'rxjs';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -12,6 +13,7 @@ describe('AdminFeeConfig Component', () => {
     let fixture: ComponentFixture<AdminFeeConfig>;
     let financialServiceMock: any;
     let notificationServiceMock: any;
+    let confirmDialogServiceMock: any;
 
     beforeEach(async () => {
         financialServiceMock = {
@@ -22,11 +24,16 @@ describe('AdminFeeConfig Component', () => {
 
         notificationServiceMock = createNotificationServiceMock();
 
+        confirmDialogServiceMock = {
+            confirm: vi.fn().mockReturnValue(of(true))
+        };
+
         await TestBed.configureTestingModule({
             imports: [AdminFeeConfig, HttpClientTestingModule, ReactiveFormsModule],
             providers: [
                 { provide: FinancialService, useValue: financialServiceMock },
-                { provide: NotificationService, useValue: notificationServiceMock }
+                { provide: NotificationService, useValue: notificationServiceMock },
+                { provide: ConfirmDialogService, useValue: confirmDialogServiceMock }
             ]
         }).compileComponents();
 
@@ -89,9 +96,8 @@ describe('AdminFeeConfig Component', () => {
         expect(notificationServiceMock.error).toHaveBeenCalledWith('Api Error');
     });
 
-    it('should show info on delete attempt', () => {
-        vi.spyOn(window, 'confirm').mockReturnValue(true);
-        component.deleteConfig(1);
+    it('should show info on delete attempt', async () => {
+        await component.deleteConfig(1);
         expect(notificationServiceMock.info).toHaveBeenCalled();
     });
 });

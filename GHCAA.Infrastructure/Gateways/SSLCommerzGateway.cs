@@ -3,10 +3,11 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
@@ -24,15 +25,15 @@ namespace GHCAA.Infrastructure.Gateways
         private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _db;
         private readonly ILogger<SSLCommerzGateway> _logger;
-        private readonly IConfiguration _config;
+        private readonly SslCommerzOptions _sslCommerzOptions;
         private readonly IOrgConfigService _orgConfig;
 
-        public SSLCommerzGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<SSLCommerzGateway> logger, IConfiguration config, IOrgConfigService orgConfig)
+        public SSLCommerzGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<SSLCommerzGateway> logger, IOptions<SslCommerzOptions> sslCommerzOptions, IOrgConfigService orgConfig)
         {
             _httpClient = httpClient;
             _db = db;
             _logger = logger;
-            _config = config;
+            _sslCommerzOptions = sslCommerzOptions.Value;
             _orgConfig = orgConfig;
         }
 
@@ -51,8 +52,8 @@ namespace GHCAA.Infrastructure.Gateways
             var org = await _orgConfig.GetConfigAsync();
 
             var isSandbox = config.IsSandbox;
-            var sandboxUrl = _config[Constants.ConfigKeys.SSLCommerzSandboxUrl] ?? "https://sandbox.sslcommerz.com";
-            var prodUrl = _config[Constants.ConfigKeys.SSLCommerzProductionUrl] ?? "https://securepay.sslcommerz.com";
+            var sandboxUrl = _sslCommerzOptions.SandboxUrl;
+            var prodUrl = _sslCommerzOptions.ProductionUrl;
             var url = isSandbox
                 ? $"{sandboxUrl.TrimEnd('/')}/gwprocess/v4/api.php"
                 : $"{prodUrl.TrimEnd('/')}/gwprocess/v4/api.php";
@@ -145,8 +146,8 @@ namespace GHCAA.Infrastructure.Gateways
             }
 
             var isSandbox = config.IsSandbox;
-            var sandboxUrl = _config[Constants.ConfigKeys.SSLCommerzSandboxUrl] ?? "https://sandbox.sslcommerz.com";
-            var prodUrl = _config[Constants.ConfigKeys.SSLCommerzProductionUrl] ?? "https://securepay.sslcommerz.com";
+            var sandboxUrl = _sslCommerzOptions.SandboxUrl;
+            var prodUrl = _sslCommerzOptions.ProductionUrl;
 
             var baseValidationUrl = isSandbox ? sandboxUrl : prodUrl;
             var validationUrl = $"{baseValidationUrl.TrimEnd('/')}/validator/api/validationserverAPI.php?val_id={valId}&store_id={config.GatewayPublicKey}&store_passwd={config.GatewaySecretKey}&format=json";

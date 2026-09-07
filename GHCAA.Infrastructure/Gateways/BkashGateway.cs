@@ -2,11 +2,12 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
-using Microsoft.Extensions.Configuration;
 
 namespace GHCAA.Infrastructure.Gateways
 {
@@ -21,14 +22,14 @@ namespace GHCAA.Infrastructure.Gateways
         private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _db;
         private readonly ILogger<BkashGateway> _logger;
-        private readonly IConfiguration _config;
+        private readonly BkashOptions _bkashOptions;
 
-        public BkashGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<BkashGateway> logger, IConfiguration config)
+        public BkashGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<BkashGateway> logger, IOptions<BkashOptions> bkashOptions)
         {
             _httpClient = httpClient;
             _db = db;
             _logger = logger;
-            _config = config;
+            _bkashOptions = bkashOptions.Value;
         }
 
         public Enums.PaymentGateway GatewayType => Enums.PaymentGateway.BkashGateway;
@@ -49,8 +50,8 @@ namespace GHCAA.Infrastructure.Gateways
 
                 // 2. Create Payment — use per-request headers to avoid DefaultRequestHeaders race (S4.1).
                 var baseUrl = config.IsSandbox
-                    ? _config["PaymentGateways:Bkash:SandboxUrl"] ?? "https://checkout.sandbox.bka.sh/v1.2.0-beta/checkout"
-                    : _config["PaymentGateways:Bkash:ProductionUrl"] ?? "https://checkout.pay.bka.sh/v1.2.0-beta/checkout";
+                    ? _bkashOptions.SandboxUrl
+                    : _bkashOptions.ProductionUrl;
 
                 var createPayload = new
                 {
@@ -109,8 +110,8 @@ namespace GHCAA.Infrastructure.Gateways
                 if (token == null) return false;
 
                 var baseUrl = config.IsSandbox
-                    ? _config["PaymentGateways:Bkash:SandboxUrl"] ?? "https://checkout.sandbox.bka.sh/v1.2.0-beta/checkout"
-                    : _config["PaymentGateways:Bkash:ProductionUrl"] ?? "https://checkout.pay.bka.sh/v1.2.0-beta/checkout";
+                    ? _bkashOptions.SandboxUrl
+                    : _bkashOptions.ProductionUrl;
 
                 var executePayload = new { paymentID = paymentId };
                 var executeMsg = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/payment/execute")
@@ -210,12 +211,12 @@ namespace GHCAA.Infrastructure.Gateways
         private async Task<string?> GetTokenAsync(Domain.Models.PaymentConfiguration config, CancellationToken cancellationToken)
         {
             var baseUrl = config.IsSandbox
-                ? _config["PaymentGateways:Bkash:SandboxUrl"] ?? "https://checkout.sandbox.bka.sh/v1.2.0-beta/checkout"
-                : _config["PaymentGateways:Bkash:ProductionUrl"] ?? "https://checkout.pay.bka.sh/v1.2.0-beta/checkout";
+                ? _bkashOptions.SandboxUrl
+                : _bkashOptions.ProductionUrl;
 
             var password = config.IsSandbox
-                ? _config["PaymentGateways:Bkash:SandboxPassword"] ?? "sandbox_pass"
-                : _config["PaymentGateways:Bkash:ProductionPassword"] ?? "";
+                ? _bkashOptions.SandboxPassword
+                : _bkashOptions.ProductionPassword;
 
             // S4.1: Use per-request HttpRequestMessage instead of mutating DefaultRequestHeaders.
             var payload = new { app_key = config.GatewayPublicKey, app_secret = config.GatewaySecretKey };
@@ -223,7 +224,7 @@ namespace GHCAA.Infrastructure.Gateways
             {
                 Content = System.Net.Http.Json.JsonContent.Create(payload)
             };
-            msg.Headers.Add("username", config.WalletNumber ?? _config["PaymentGateways:Bkash:Username"] ?? "sandbox_user");
+            msg.Headers.Add("username", config.WalletNumber ?? _bkashOptions.Username);
             msg.Headers.Add("password", password);
 
             var response = await _httpClient.SendAsync(msg, cancellationToken);

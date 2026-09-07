@@ -578,7 +578,7 @@ would change the shape of the system rather than the contents of a file.
 | ADR | Decision | Context | Consequence |
 | --- | --- | --- | --- |
 | ADR-01 | Adopt clean architecture with a compiler-enforced dependency rule | §6.2: layering by convention had already once failed silently | NFR-M1 becomes checkable; four-assembly ceremony for a single-maintainer project |
-| ADR-02 | Pool provider-specific `ApplicationDbContext` shim types, not the base type | EF's `IMigrationsAssembly` matches migrations to the pooled context's exact runtime type; pooling the base type made `GetMigrations()` return zero migrations on every provider, so the self-healing boot logic was a silent no-op everywhere | Migrations apply correctly on boot across PostgreSQL, MySQL and SQLite |
+| ADR-02 | Pool provider-specific `ApplicationDbContext` shim types, not the base type | EF's `IMigrationsAssembly` matches migrations to the pooled context's exact runtime type; pooling the base type made `GetMigrations()` return zero migrations on every provider, so the self-healing boot logic was a silent no-op everywhere | Migrations apply correctly on boot on PostgreSQL, the only provider with a migration tree; the MySQL shim was removed once an audit found it advertised support it never had (`docs/adr/0006-drop-mysql-provider.md`), and SQLite is kept only for a migration-free test-bootstrap path outside this boot logic |
 | ADR-03 | Never write live constitution publication through `HasData` | Seed data expressed as `HasData` reaches a populated database only through a migration, which pins revisable text to whichever migration carried it; the `EnsureCreated()`-built preprod database never received it at all | `ConstitutionSeeder.SyncAsync` runs at every boot; schema is handled separately by `MigrationBootstrapper` |
 | ADR-04 | Keep the manual payment path primary and leave gateway integration optional | §3.2, §8.9: the Association holds no merchant account and no gateway credentials | Permanent officer verification workload, quantified in §12.6, in exchange for holding no payment credential |
 | ADR-05 | Merge news and notices into one table discriminated by `PostType` | §6.5.2: identical shape apart from authorship rule | BR-03 enforced at the controller rather than by two schemas |
@@ -632,14 +632,14 @@ flowchart TB
       direction TB
       SVC[Service implementations]
       GW[4 payment gateway adapters]
-      DBC[3 DbContext provider shims]
+      DBC[2 DbContext provider shims]
     end
     subgraph DOM_L["GHCAA.Domain"]
-      ENT[49 entity sets, 28 enums]
+      ENT[53 entity sets, 28 enums]
     end
     subgraph STORE["Storage"]
       direction TB
-      DB[(PostgreSQL /<br/>MySQL / SQLite)]
+      DB[(PostgreSQL;<br/>SQLite - tests only)]
       FS[(wwwroot/uploads)]
       EXT[bKash / Nagad /<br/>SSLCommerz / DGePay]
     end

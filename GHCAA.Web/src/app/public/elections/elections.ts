@@ -1,10 +1,10 @@
 import { Component, OnInit, inject, signal, computed, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { OrgConfigService } from '../../core/services/org-config.service';
+import { ElectionsService } from '../../core/services/elections.service';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import {
     extractHeadings, renderFormMarkdown, renderMarkdownWithAnchors, MarkdownHeading
@@ -30,7 +30,7 @@ export interface FormStageGroup {
     styleUrl: './elections.scss'
 })
 export class ElectionsPage implements OnInit {
-    private http = inject(HttpClient);
+    private electionsService = inject(ElectionsService);
     private route = inject(ActivatedRoute);
     private destroyRef = inject(DestroyRef);
     private router = inject(Router);
@@ -169,7 +169,7 @@ export class ElectionsPage implements OnInit {
         this.openForm.set(null);
         this.loadError.set(false);
         this.loading.set(true);
-        this.http.get(this.downloadUrl(doc), { responseType: 'text' }).subscribe({
+        this.electionsService.getDocumentText(this.downloadUrl(doc)).subscribe({
             next: text => { this.source.set(text); this.loading.set(false); },
             error: () => { this.source.set(''); this.loadError.set(true); this.loading.set(false); }
         });

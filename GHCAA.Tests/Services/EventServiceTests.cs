@@ -91,8 +91,11 @@ public class EventServiceTests : TestBase
     {
         var dto = new CreateEventDto
         {
-            Title = "Notified Event", Description = "D", Location = "L",
-            StartDate = DateTime.UtcNow.AddDays(1), EndDate = DateTime.UtcNow.AddDays(2),
+            Title = "Notified Event",
+            Description = "D",
+            Location = "L",
+            StartDate = DateTime.UtcNow.AddDays(1),
+            EndDate = DateTime.UtcNow.AddDays(2),
             IsActive = true
         };
 
@@ -109,9 +112,13 @@ public class EventServiceTests : TestBase
     {
         var dto = new CreateEventDto
         {
-            Title = "Silent Event", Description = "D", Location = "L",
-            StartDate = DateTime.UtcNow.AddDays(1), EndDate = DateTime.UtcNow.AddDays(2),
-            IsActive = true, NotifyMembers = false
+            Title = "Silent Event",
+            Description = "D",
+            Location = "L",
+            StartDate = DateTime.UtcNow.AddDays(1),
+            EndDate = DateTime.UtcNow.AddDays(2),
+            IsActive = true,
+            NotifyMembers = false
         };
 
         await _service.CreateEventAsync(dto);
@@ -186,7 +193,13 @@ public class EventServiceTests : TestBase
 
         await _service.UpdateEventAsync(new UpdateEventDto
         {
-            Id = ev.Id, Title = "Existing Updated", Description = "D", StartDate = ev.StartDate, EndDate = ev.EndDate, Location = "L", IsActive = true
+            Id = ev.Id,
+            Title = "Existing Updated",
+            Description = "D",
+            StartDate = ev.StartDate,
+            EndDate = ev.EndDate,
+            Location = "L",
+            IsActive = true
         });
 
         _notificationMock.Verify(n => n.BroadcastNotificationAsync(
@@ -204,7 +217,14 @@ public class EventServiceTests : TestBase
 
         await _service.UpdateEventAsync(new UpdateEventDto
         {
-            Id = ev.Id, Title = "Existing Updated", Description = "D", StartDate = ev.StartDate, EndDate = ev.EndDate, Location = "L", IsActive = true, NotifyOnUpdate = true
+            Id = ev.Id,
+            Title = "Existing Updated",
+            Description = "D",
+            StartDate = ev.StartDate,
+            EndDate = ev.EndDate,
+            Location = "L",
+            IsActive = true,
+            NotifyOnUpdate = true
         });
 
         _notificationMock.Verify(n => n.BroadcastNotificationAsync(

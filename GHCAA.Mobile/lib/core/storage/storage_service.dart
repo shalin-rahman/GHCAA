@@ -9,8 +9,14 @@ final storageServiceProvider = Provider<StorageService>((ref) => StorageService(
 class StorageService {
   static const _jwtKey = 'jwt_token';
   static const _legacyJwtPrefsKey = 'jwt_token';
+  // 82.40: these two used to hold the member's raw username/password for biometric "fast
+  // login". Nothing writes to them any more (biometric re-login now reuses the refresh
+  // token below, the same device-bound, server-revocable credential the app already keeps),
+  // but the keys stay named here so purgeLegacyBiometricCredentials() can still find and
+  // delete them on a device that has an older build's plaintext password sitting in storage.
   static const _credUserKey = 'cred_user';
   static const _credPassKey = 'cred_pass';
+  static const _biometricEnabledKey = 'biometric_enabled';
   static const _refreshTokenKey = 'refresh_token';
   static const _legacyRefreshTokenPrefsKey = 'refresh_token';
 
@@ -139,26 +145,24 @@ class StorageService {
   Future<void> clearAll() async {
     await removeToken();
     await removeRefreshToken();
-    await clearCredentials();
+    await purgeLegacyBiometricCredentials();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await prefs.clear(); // also drops the biometric_enabled flag
   }
 
-  Future<void> saveCredentials(String username, String password) async {
-    if (kIsWeb) return; // Do not store passwords on web implicitly
-    await _secure.write(key: _credUserKey, value: username);
-    await _secure.write(key: _credPassKey, value: password);
+  Future<void> setBiometricEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_biometricEnabledKey, enabled);
   }
 
-  Future<Map<String, String>?> getCredentials() async {
-    if (kIsWeb) return null;
-    final user = await _secure.read(key: _credUserKey);
-    final pass = await _secure.read(key: _credPassKey);
-    if (user != null && pass != null) return {'username': user, 'password': pass};
-    return null;
+  Future<bool> isBiometricEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_biometricEnabledKey) ?? false;
   }
 
-  Future<void> clearCredentials() async {
+  /// Scrubs the plaintext username/password an older build may have written for biometric
+  /// fast login. Never writes to these keys — only deletes.
+  Future<void> purgeLegacyBiometricCredentials() async {
     if (kIsWeb) return;
     await _secure.delete(key: _credUserKey);
     await _secure.delete(key: _credPassKey);

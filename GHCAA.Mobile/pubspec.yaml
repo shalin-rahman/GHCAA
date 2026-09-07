@@ -58,6 +58,9 @@ dev_dependencies:
   mockito: ^5.4.4
   build_runner: ^2.4.9
   golden_toolkit: ^0.15.0
+  # Already resolved transitively via path_provider; declared directly so
+  # file_service_test.dart can swap PathProviderPlatform.instance for a fake.
+  path_provider_platform_interface: ^2.1.2
   integration_test:
     sdk: flutter
 

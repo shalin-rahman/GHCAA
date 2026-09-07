@@ -27,7 +27,7 @@ namespace GHCAA.Infrastructure.Data.Configurations
             // 82.16: a soft-deleted ledger row stays in the table as evidence but must not reach a
             // caller that did not deliberately ask for it. Every existing read of FinancialRecords
             // keeps working unchanged; only the delete path's meaning changed.
-            builder.HasQueryFilter(r => !r.IsDeleted);
+            builder.HasQueryFilter(r => !r.IsArchived);
         }
     }
 }

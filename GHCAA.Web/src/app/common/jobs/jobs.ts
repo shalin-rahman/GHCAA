@@ -3,12 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { JobService } from '../../core/services/job.service';
 import { Job } from '../../core/models/business.models';
+import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { AuthService } from '../../core/services/auth.service';
-import { getJobCategoryLabel, SUBMISSION_STATUS_MAP, LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { getJobCategoryLabel, SUBMISSION_STATUS_MAP, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS } from '../../core/constants/app.constants';
 import { LookupService } from '../../core/services/lookup.service';
 import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
+import { debounce } from '../../core/utils/debounce.util';
 
 @Component({
   selector: 'app-jobs',
@@ -20,6 +23,7 @@ import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 export class Jobs implements OnInit {
   private jobService = inject(JobService);
   private notify = inject(NotificationService);
+  private confirmDialog = inject(ConfirmDialogService);
   private lookupService = inject(LookupService);
 
   jobs = signal<Job[]>([]);
@@ -72,11 +76,10 @@ export class Jobs implements OnInit {
     });
   }
 
-  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+  private debouncedLoadJobs = debounce(() => this.loadJobs(), SEARCH_DEBOUNCE_MS);
 
   onSearch() {
-    if (this.searchTimer) clearTimeout(this.searchTimer);
-    this.searchTimer = setTimeout(() => this.loadJobs(), 300);
+    this.debouncedLoadJobs();
   }
 
   postJob() {
@@ -164,8 +167,15 @@ export class Jobs implements OnInit {
     return SUBMISSION_STATUS_MAP[status] || { label: 'Unknown', class: 'pending' };
   }
 
-  deleteJob(id: number) {
-    if (!confirm('Are you sure you want to remove this opportunity permanently?')) return;
+  async deleteJob(id: number) {
+    const ok = await firstValueFrom(this.confirmDialog.confirm({
+      title: 'Remove opportunity',
+      message: 'Are you sure you want to remove this opportunity permanently?',
+      confirmLabel: 'Remove',
+      danger: true
+    }));
+    if (!ok) return;
+
     this.jobService.deleteJob(id).subscribe({
         next: () => {
             this.notify.success('Post removed from community hub.');

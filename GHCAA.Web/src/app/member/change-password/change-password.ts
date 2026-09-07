@@ -1,11 +1,11 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { ProfileService } from '../../core/services/profile.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { API_ENDPOINTS, ROUTES } from '../../core/constants/app.constants';
+import { ROUTES } from '../../core/constants/app.constants';
 import { Icon } from '../../common/icon/icon';
 
 @Component({
@@ -16,7 +16,7 @@ import { Icon } from '../../common/icon/icon';
   styleUrl: './change-password.scss'
 })
 export class ChangePassword {
-  private http = inject(HttpClient);
+  private profileService = inject(ProfileService);
   private auth = inject(AuthService);
   private router = inject(Router);
   private notify = inject(NotificationService);
@@ -49,10 +49,7 @@ export class ChangePassword {
     this.loading.set(true);
     this.errorMessage.set('');
 
-    this.http.post(`${API_ENDPOINTS.PROFILE}/change-password`, {
-      oldPassword: this.model.oldPassword,
-      newPassword: this.model.newPassword
-    }).subscribe({
+    this.profileService.changePassword(this.model.oldPassword, this.model.newPassword).subscribe({
       next: () => {
         this.loading.set(false);
         // 29A.1: drop the forced flag so authGuard lets the user into the portal.

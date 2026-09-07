@@ -10571,6 +10571,15 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("FcmToken")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FcmTokenPlatform")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("FcmTokenUpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(200)

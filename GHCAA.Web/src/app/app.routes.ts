@@ -284,6 +284,11 @@ export const routes: Routes = [
                 canActivate: [superAdminGuard]
             },
             {
+                path: 'error-logs',
+                loadComponent: () => import('./admin/error-logs/admin-error-logs').then(m => m.AdminErrorLogs),
+                canActivate: [superAdminGuard]
+            },
+            {
                 path: 'article-approvals',
                 loadComponent: () => import('./admin/article-approval/article-approval').then(m => m.ArticleApproval)
             },

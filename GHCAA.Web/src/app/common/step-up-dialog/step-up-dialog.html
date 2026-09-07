@@ -1,10 +1,7 @@
 @if (stepUp.isOpen()) {
 <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="step-up-title">
     <div class="modal-box step-up-box">
-        <div class="modal-header">
-            <h3 id="step-up-title">Confirm it's you</h3>
-            <button type="button" class="close-btn" (click)="stepUp.cancel()" aria-label="Cancel verification">&times;</button>
-        </div>
+        <app-modal-header title="Confirm it's you" headingId="step-up-title" closeLabel="Cancel verification" (closed)="stepUp.cancel()"></app-modal-header>
 
         <div class="modal-content">
             <p class="text-main">

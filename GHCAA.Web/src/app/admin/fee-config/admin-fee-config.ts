@@ -1,8 +1,10 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { FinancialService } from '../../core/services/financial.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { FINANCIAL_CATEGORY_OPTIONS, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
@@ -18,6 +20,7 @@ import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 export class AdminFeeConfig implements OnInit {
   private financialService = inject(FinancialService);
   private notify = inject(NotificationService);
+  private confirmDialog = inject(ConfirmDialogService);
   private fb = inject(FormBuilder);
 
   configs = signal<any[]>([]);
@@ -130,11 +133,17 @@ export class AdminFeeConfig implements OnInit {
     });
   }
 
-  deleteConfig(id: number) {
-    if (confirm('Are you sure you want to delete this configuration? This might affect existing member billing logic.')) {
-        // Implementation for delete if backend supports it. For now, we can just deactivate.
-        this.notify.info('Direct deletion disabled to preserve financial integrity. Please deactivate instead.');
-    }
+  async deleteConfig(id: number) {
+    const ok = await firstValueFrom(this.confirmDialog.confirm({
+      title: 'Delete configuration',
+      message: 'Are you sure you want to delete this configuration? This might affect existing member billing logic.',
+      confirmLabel: 'Delete',
+      danger: true
+    }));
+    if (!ok) return;
+
+    // Implementation for delete if backend supports it. For now, we can just deactivate.
+    this.notify.info('Direct deletion disabled to preserve financial integrity. Please deactivate instead.');
   }
 
   getCategoryLabel(val: string) {

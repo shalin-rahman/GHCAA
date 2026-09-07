@@ -34,7 +34,7 @@ namespace GHCAA.Domain.Models
         // Deletes are soft for the same reason — a deleted payment is evidence too.
         public DateTime? UpdatedAt { get; set; }
         public int? UpdatedByAdminId { get; set; }
-        public bool IsDeleted { get; set; }
+        public bool IsArchived { get; set; }
         public DateTime? DeletedAt { get; set; }
         public int? DeletedByAdminId { get; set; }
 

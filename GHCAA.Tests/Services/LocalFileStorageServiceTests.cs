@@ -1,9 +1,11 @@
 using FluentAssertions;
 using GHCAA.Domain;
+using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -14,11 +16,20 @@ namespace GHCAA.Tests.Services;
 [TestFixture]
 public class LocalFileStorageServiceTests
 {
-    private IConfiguration _config = null!;
     private Mock<ILogger<LocalFileStorageService>> _mockLogger = null!;
     private Mock<IWebHostEnvironment> _mockWebHostEnvironment = null!;
     private LocalFileStorageService _service = null!;
     private string _testDirectory = null!;
+
+    // Binds through the real ConfigurationBinder (same path services.Configure<T> uses), so a
+    // value that can't convert to its property type throws here exactly like it would at
+    // IOptions<T>.Value in production, instead of silently keeping the property's default.
+    private static IOptions<FileStorageOptions> BuildOptions(Dictionary<string, string?> settings)
+    {
+        var config = new ConfigurationBuilder().AddInMemoryCollection(settings).Build();
+        var options = config.GetSection("FileStorage").Get<FileStorageOptions>() ?? new FileStorageOptions();
+        return Options.Create(options);
+    }
 
     [SetUp]
     public void Setup()
@@ -33,18 +44,16 @@ public class LocalFileStorageServiceTests
         _mockWebHostEnvironment.Setup(e => e.WebRootPath)
             .Returns(Path.Combine(Path.GetTempPath(), "GHCAATests", "wwwroot-" + Guid.NewGuid()));
 
-        var inMemorySettings = new Dictionary<string, string> {
+        var inMemorySettings = new Dictionary<string, string?> {
             {"FileStorage:BasePhysicalPath", _testDirectory},
             {"FileStorage:UploadsRelativePath", "uploads/members"},
             {"FileStorage:MaxFileSizeBytes", "1048576"},
             {"Storage:EnableCompression", "false"}
         };
 
-        _config = new ConfigurationBuilder()
-            .AddInMemoryCollection(inMemorySettings!)
-            .Build();
+        var options = BuildOptions(inMemorySettings);
 
-        _service = new LocalFileStorageService(_config, _mockLogger.Object, _mockWebHostEnvironment.Object);
+        _service = new LocalFileStorageService(options, _mockLogger.Object, _mockWebHostEnvironment.Object);
     }
 
     [TearDown]
@@ -261,11 +270,10 @@ public class LocalFileStorageServiceTests
     public void Constructor_WithCustomMaxFileSize_ShouldUseCustomValue()
     {
         // Arrange
-        var inMemorySettings = new Dictionary<string, string> {
+        var inMemorySettings = new Dictionary<string, string?> {
             {"FileStorage:MaxFileSizeBytes", "500000"}
         };
-        var testConfig = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings!).Build();
-        var service = new LocalFileStorageService(testConfig, _mockLogger.Object, _mockWebHostEnvironment.Object);
+        var service = new LocalFileStorageService(BuildOptions(inMemorySettings), _mockLogger.Object, _mockWebHostEnvironment.Object);
         var fileContent = new byte[600000]; // 600KB
         var stream = new MemoryStream(fileContent);
 
@@ -287,12 +295,11 @@ public class LocalFileStorageServiceTests
     public async Task SaveFileAsync_WithOversizedGalleryPhoto_ShouldResizeToMaxDimension()
     {
         // Arrange
-        var inMemorySettings = new Dictionary<string, string> {
+        var inMemorySettings = new Dictionary<string, string?> {
             {"FileStorage:BasePhysicalPath", _testDirectory},
             {"FileStorage:ImageCompression:MaxDimensionPx", "800"}
         };
-        var testConfig = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings!).Build();
-        var service = new LocalFileStorageService(testConfig, _mockLogger.Object, _mockWebHostEnvironment.Object);
+        var service = new LocalFileStorageService(BuildOptions(inMemorySettings), _mockLogger.Object, _mockWebHostEnvironment.Object);
         var stream = CreateJpeg(3000, 2000); // 3:2 landscape, both dims exceed the 800px cap
 
         // Act
@@ -322,20 +329,19 @@ public class LocalFileStorageServiceTests
     }
 
     [Test]
-    public void Constructor_WithInvalidMaxFileSize_ShouldUseDefaultValue()
+    public void Constructor_WithInvalidMaxFileSize_ShouldFailFastInsteadOfSilentlyDefaulting()
     {
-        // Arrange
-        var inMemorySettings = new Dictionary<string, string> {
+        // 82.17: MaxFileSizeBytes now binds through FileStorageOptions, so a value that can't
+        // convert to long surfaces as a binding error instead of the old int/long.TryParse
+        // fallback silently keeping the default — that silent-default behavior is exactly what
+        // 82.17 was written to remove.
+        var inMemorySettings = new Dictionary<string, string?> {
             {"FileStorage:MaxFileSizeBytes", "invalid"}
         };
-        var testConfig = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings!).Build();
-        var service = new LocalFileStorageService(testConfig, _mockLogger.Object, _mockWebHostEnvironment.Object);
 
-        // Act
-        var result = service;
+        var act = () => new LocalFileStorageService(BuildOptions(inMemorySettings), _mockLogger.Object, _mockWebHostEnvironment.Object);
 
-        // Assert
-        result.Should().NotBeNull();
+        act.Should().Throw<InvalidOperationException>();
     }
 
     // 82.51: BasePhysicalPath is the single knob both roots are computed from, so a future value
@@ -345,16 +351,15 @@ public class LocalFileStorageServiceTests
     public void Constructor_ThrowsWhenSecureRootResolvesInsideWebRoot()
     {
         // Arrange: BasePhysicalPath drives both roots, so this collides _secureRoot with WebRootPath.
-        var inMemorySettings = new Dictionary<string, string> {
+        var inMemorySettings = new Dictionary<string, string?> {
             {"FileStorage:BasePhysicalPath", _testDirectory},
             {"FileStorage:SecureRelativePath", ""}
         };
-        var testConfig = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings!).Build();
         var collidingWebHost = new Mock<IWebHostEnvironment>();
         collidingWebHost.Setup(e => e.WebRootPath).Returns(_testDirectory);
 
         // Act
-        var act = () => new LocalFileStorageService(testConfig, _mockLogger.Object, collidingWebHost.Object);
+        var act = () => new LocalFileStorageService(BuildOptions(inMemorySettings), _mockLogger.Object, collidingWebHost.Object);
 
         // Assert
         act.Should().Throw<InvalidOperationException>()

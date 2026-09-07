@@ -1,27 +1,23 @@
 <div class="admin-feature">
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Communications</h2>
-            <small>
-                @if (activeTab() === 'templates') {
-                    @if (templates().length) {
-                    Showing {{ filteredTemplates().length }} of {{ templates().length }} email templates
-                    } @else {
-                    Reusable email templates
-                    }
-                } @else if (activeTab() === 'logs') {
-                    @if (logs().length) {
-                    Showing {{ filteredLogs().length }} of {{ logs().length }} communication records
-                    } @else {
-                    Sent communication history
-                    }
+    <app-page-header title="Communications" [total]="1" emptySubtitle="Broadcast announcements and manage email ecosystem.">
+        <small subtitle>
+            @if (activeTab() === 'templates') {
+                @if (templates().length) {
+                Showing {{ filteredTemplates().length }} of {{ templates().length }} email templates
                 } @else {
-                    Broadcast announcements and manage email ecosystem.
+                Reusable email templates
                 }
-            </small>
-        </div>
-        <div class="header-actions"></div>
-    </div>
+            } @else if (activeTab() === 'logs') {
+                @if (logs().length) {
+                Showing {{ filteredLogs().length }} of {{ logs().length }} communication records
+                } @else {
+                Sent communication history
+                }
+            } @else {
+                Broadcast announcements and manage email ecosystem.
+            }
+        </small>
+    </app-page-header>
 
     <div class="tab-nav">
         <button [class.active]="activeTab() === 'send'" (click)="setTab('send')">
@@ -287,10 +283,7 @@
     @if (editingTemplate()) {
     <div class="modal-overlay" (click)="cancelEdit()">
         <div class="modal-box glass-card wide animate-pop" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-                <h3>{{ editingTemplate()?.id ? 'Edit' : 'Create' }} Template</h3>
-                <button class="close-btn" (click)="cancelEdit()">✕</button>
-            </div>
+            <app-modal-header [title]="(editingTemplate()?.id ? 'Edit' : 'Create') + ' Template'" (closed)="cancelEdit()"></app-modal-header>
             <div class="modal-body">
                 <div class="form-grid">
                     <div class="form-group">

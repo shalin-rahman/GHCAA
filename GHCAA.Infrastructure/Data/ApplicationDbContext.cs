@@ -240,6 +240,9 @@ namespace GHCAA.Infrastructure.Data
 
         // Config-Driven Framework
         public DbSet<OrganizationConfig> OrganizationConfigs { get; set; } = null!;
+
+        // 45.2: unhandled exceptions captured by ExceptionMiddleware.
+        public DbSet<ErrorLog> ErrorLogs { get; set; } = null!;
         public DbSet<SiteContent> SiteContents { get; set; } = null!;
 
 

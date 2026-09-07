@@ -80,8 +80,34 @@ jobs:
       - name: Restore Dependencies
         run: dotnet restore
 
+      # 82.50: --collect/--settings folded into the one test run instead of a second `dotnet test`,
+      # so coverage costs nothing extra. --settings excludes Migrations/bin/obj (see
+      # GHCAA.Tests/coverlet.runsettings) so the percentage isn't diluted by generated code.
       - name: Build and Run Tests
-        run: dotnet test GHCAA.Tests/GHCAA.Tests.csproj --configuration Release --no-restore
+        run: >
+          dotnet test GHCAA.Tests/GHCAA.Tests.csproj --configuration Release --no-restore
+          --collect:"XPlat Code Coverage" --settings GHCAA.Tests/coverlet.runsettings
+          --results-directory ./coverage
+
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.3.11
+
+      # ReportGenerator's own Html report already gives a searchable/filterable class list,
+      # click-to-sort columns, and a per-class drill-down with line-by-line coverage highlighting —
+      # exactly what 82.50 asked for, with no dashboard of our own to build or maintain.
+      - name: Generate Coverage Report
+        run: >
+          reportgenerator "-reports:coverage/**/coverage.cobertura.xml"
+          "-targetdir:coverage-report" -reporttypes:Html
+
+      # Published as a build artifact, not GitHub Pages: it's regenerated on every relevant run
+      # (no stale-snapshot risk), and an artifact needs no extra hosting setup.
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage-report
+          retention-days: 30
 
   api-contract:
     name: API Contract (Swagger snapshot)

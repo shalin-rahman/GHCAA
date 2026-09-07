@@ -78,7 +78,7 @@ public class FinancialAuditTrailTests : TestBase
             .FirstOrDefaultAsync(r => r.Id == record.Id);
 
         stillThere.Should().NotBeNull("a financial record must never be physically removed");
-        stillThere!.IsDeleted.Should().BeTrue();
+        stillThere!.IsArchived.Should().BeTrue();
         stillThere.DeletedByAdminId.Should().Be(ActingAdminId);
         stillThere.DeletedAt.Should().NotBeNull();
         stillThere.Amount.Should().Be(500m, "the deleted row keeps its values, or it is not evidence");
@@ -111,7 +111,7 @@ public class FinancialAuditTrailTests : TestBase
 
         // In production a fresh request gets a fresh scoped DbContext, so the second call's
         // FindAsync always runs a real query against the (now-filtered) DbSet and gets null there —
-        // record.IsDeleted is never actually read on that path. Without clearing the tracker here,
+        // record.IsArchived is never actually read on that path. Without clearing the tracker here,
         // this assertion would pass for the wrong reason: through the still-tracked, still-`false`
         // second delete, in a state production never reaches.
         _context.ChangeTracker.Clear();

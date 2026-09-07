@@ -94,10 +94,7 @@
 @if (showNewMessageModal()) {
 <div class="modal-overlay" (click)="closeNewMessage()">
     <div class="modal-box" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3>New Message</h3>
-            <button class="close-btn" (click)="closeNewMessage()">✕</button>
-        </div>
+        <app-modal-header title="New Message" (closed)="closeNewMessage()"></app-modal-header>
         <div class="modal-body">
             <div class="form-group search-group">
                 <label>To <span class="required-star">*</span></label>

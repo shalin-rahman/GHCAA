@@ -73,13 +73,13 @@ namespace GHCAA.Infrastructure.Services
         public async Task<FinancialRecord> AddRecordAsync(FinancialRecord record, CancellationToken cancellationToken = default)
         {
             // 82.32: the client posts a FinancialRecord body directly. Without this, an admin
-            // could set isDeleted/deletedByAdminId/updatedAt/updatedByAdminId on creation — forging
+            // could set isArchived/deletedByAdminId/updatedAt/updatedByAdminId on creation — forging
             // an attribution the whole point of 82.16 was to make trustworthy. CreatedByAdminId is
             // not reset here: the controller sets it from the caller's claim after binding, and
             // that assignment must win over whatever the client posted, not this one.
             record.UpdatedAt = null;
             record.UpdatedByAdminId = null;
-            record.IsDeleted = false;
+            record.IsArchived = false;
             record.DeletedAt = null;
             record.DeletedByAdminId = null;
 
@@ -125,9 +125,9 @@ namespace GHCAA.Infrastructure.Services
             // destroyed a record of money with no trace of its value or who removed it. The row
             // stays; FinancialRecordConfiguration's query filter hides it from ordinary reads, so
             // every existing caller behaves as before while the evidence survives.
-            if (record.IsDeleted) return false;
+            if (record.IsArchived) return false;
 
-            record.IsDeleted = true;
+            record.IsArchived = true;
             record.DeletedAt = DateTime.UtcNow;
             record.DeletedByAdminId = adminId;
 
@@ -149,7 +149,7 @@ namespace GHCAA.Infrastructure.Services
             // which would double-count against this same query once both existed.
             var memberPayments = await _db.PaymentHistories
                 .IgnoreQueryFilters()
-                .Where(p => p.Status == Enums.PaymentStatus.Completed && !p.IsDeleted && p.PaidAt.Year == year)
+                .Where(p => p.Status == Enums.PaymentStatus.Completed && !p.IsArchived && p.PaidAt.Year == year)
                 .ToListAsync(cancellationToken);
 
             var ledgerIncome = records.Where(r => r.RecordType == Enums.FinancialRecordType.Income).Sum(r => r.Amount);

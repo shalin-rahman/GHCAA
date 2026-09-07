@@ -10,7 +10,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'core/config/app_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
-import 'features/auth/auth_service.dart';
+import 'core/session/session_manager.dart';
 import 'features/notifications/push_notification_service.dart'; // Keep this import
 import 'core/widgets/no_internet_banner.dart';
 import 'core/services/app_localizations.dart';
@@ -145,23 +145,11 @@ class _HaragangianAppState extends ConsumerState<HaragangianApp> with WidgetsBin
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 82.39: SessionManager (sessionProvider) is the single inactivity-timeout owner now.
+    // Resuming from background just asks it to re-check immediately, since its own
+    // Timer.periodic can miss ticks that should have fired while the app was suspended.
     if (state == AppLifecycleState.resumed) {
-      _checkInactivity();
-    }
-  }
-
-  void _checkInactivity() async {
-    final lastActivity = ref.read(lastActivityProvider);
-    const limit = Duration(minutes: 10);
-    if (DateTime.now().difference(lastActivity) > limit) {
-      final auth = ref.read(authServiceProvider);
-      // Ensure we only logout if already authenticated
-      final role = await auth.getRole();
-      if (role != null) {
-        await auth.logout();
-      }
-    } else {
-      ref.read(lastActivityProvider.notifier).update();
+      ref.read(sessionProvider.notifier).checkNow();
     }
   }
 
@@ -183,7 +171,7 @@ class _HaragangianAppState extends ConsumerState<HaragangianApp> with WidgetsBin
     
     return Listener(
       behavior: HitTestBehavior.translucent,
-      onPointerDown: (_) => ref.read(lastActivityProvider.notifier).update(),
+      onPointerDown: (_) => ref.read(sessionProvider.notifier).userActivityDetected(),
       child: MaterialApp.router(
         title: AppConfig.appName,
         theme: theme,

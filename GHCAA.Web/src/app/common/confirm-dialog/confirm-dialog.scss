@@ -1,0 +1,13 @@
+/* Layout only — colours, surfaces and the modal shell come from the global tokens and the
+   shared .modal-overlay / .modal-box / .btn classes in styles.scss. */
+
+.confirm-dialog-box {
+    max-width: 440px;
+}
+
+.confirm-dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}

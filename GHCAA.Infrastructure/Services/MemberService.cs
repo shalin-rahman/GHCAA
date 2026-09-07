@@ -8,7 +8,8 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using GHCAA.Infrastructure.Options;
 using Microsoft.Extensions.Logging;
 
 namespace GHCAA.Infrastructure.Services
@@ -31,7 +32,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly ILogger<MemberService> _logger;
         private readonly IActivityService _activityService;
         private readonly INotificationService _notificationService;
-        private readonly IConfiguration _config;
+        private readonly IOptions<AppSettingsOptions> _appSettings;
         private readonly IGamificationService _gamification;
         private readonly IFinancialService _financialService;
         private readonly IRealTimeService _realTimeService;
@@ -49,7 +50,7 @@ namespace GHCAA.Infrastructure.Services
             ILogger<MemberService> logger,
             IActivityService activityService,
             INotificationService notificationService,
-            IConfiguration config,
+            IOptions<AppSettingsOptions> appSettings,
             IGamificationService gamification,
             IFinancialService financialService,
             IRealTimeService realTimeService,
@@ -66,7 +67,7 @@ namespace GHCAA.Infrastructure.Services
             _logger = logger;
             _activityService = activityService;
             _notificationService = notificationService;
-            _config = config;
+            _appSettings = appSettings;
             _gamification = gamification;
             _financialService = financialService;
             _realTimeService = realTimeService;

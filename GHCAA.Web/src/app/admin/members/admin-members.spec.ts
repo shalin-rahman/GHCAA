@@ -3,6 +3,7 @@ import { createNotificationServiceMock } from '../../core/testing/testing-utils'
 import { AdminMembers } from './admin-members';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { NavService } from '../../core/services/nav.service';
 import { LookupService } from '../../core/services/lookup.service';
 import { of } from 'rxjs';
@@ -29,6 +30,10 @@ describe('AdminMembers Component', () => {
 
         notificationServiceMock = createNotificationServiceMock();
 
+        const confirmDialogServiceMock = {
+            confirm: vi.fn().mockReturnValue(of(true))
+        };
+
         navServiceMock = {
             isSuperAdmin: signal(false) as any
         };
@@ -50,6 +55,7 @@ describe('AdminMembers Component', () => {
             providers: [
                 { provide: AdminService, useValue: adminServiceMock },
                 { provide: NotificationService, useValue: notificationServiceMock },
+                { provide: ConfirmDialogService, useValue: confirmDialogServiceMock },
                 { provide: NavService, useValue: navServiceMock },
                 { provide: Router, useValue: routerMock },
                 { provide: ActivatedRoute, useValue: activatedRouteMock },
@@ -80,7 +86,6 @@ describe('AdminMembers Component', () => {
     it('should call sendPasswordResetLink and notify success', () => {
         const member = { id: 100, fullName: 'Test User' };
         component.selectedMember.set(member);
-        vi.spyOn(window, 'confirm').mockReturnValue(true);
         component.sendResetLink(member.id);
         expect(adminServiceMock.sendPasswordResetLink).toHaveBeenCalledWith(member.id);
         expect(notificationServiceMock.success).toHaveBeenCalledWith('Success');

@@ -417,7 +417,7 @@ namespace GHCAA.Infrastructure.Services
             // Log activity
             await _activityService.LogActivityAsync(memberId, "Password Reset", "Admin initiated password reset email.", cancellationToken: cancellationToken);
 
-            var clientUrl = _config[Constants.ConfigKeys.ClientUrl] ?? "http://localhost:4200";
+            var clientUrl = _appSettings.Value.ClientUrl;
             var resetUrl = $"{clientUrl}/reset-password?email={Uri.EscapeDataString(member.Email)}&token={token}";
 
             // Try fetching PASSWORD_RESET template from DB first (database-first strategy)

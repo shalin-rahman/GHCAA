@@ -1,20 +1,21 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, OnInit, computed } from '@angular/core';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { AdminService } from '../../core/services/admin.service';
 
 @Component({
     selector: 'app-admin-audit',
     standalone: true,
     imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, LogoSpinnerComponent],
     templateUrl: './admin-audit.html',
-    styleUrl: './admin-audit.scss'
+    styleUrl: './admin-audit.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminAudit implements OnInit {
-    private http = inject(HttpClient);
+    private adminService = inject(AdminService);
 
     logs = signal<any[]>([]);
     loading = signal(true);
@@ -37,7 +38,7 @@ export class AdminAudit implements OnInit {
 
     loadLogs() {
         this.loading.set(true);
-        this.http.get<any[]>('/api/activity/admin/global').subscribe({
+        this.adminService.getGlobalActivityLog().subscribe({
             next: (data) => {
                 this.logs.set(data);
                 this.loading.set(false);

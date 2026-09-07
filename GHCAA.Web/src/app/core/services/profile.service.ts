@@ -80,4 +80,8 @@ export class ProfileService {
     getCertificate(): Observable<{ dataUri: string }> {
         return this.http.get<{ dataUri: string }>(`${this.apiUrl}/certificate`);
     }
+
+    changePassword(oldPassword: string, newPassword: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/change-password`, { oldPassword, newPassword });
+    }
 }

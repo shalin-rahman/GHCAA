@@ -3,9 +3,11 @@ using System.Text;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace GHCAA.Infrastructure.Services
 {
@@ -18,18 +20,20 @@ namespace GHCAA.Infrastructure.Services
         private readonly string _hashKey;
         private const int MaxOtpAttempts = 5;
 
-        public OtpService(ApplicationDbContext db, ICommunicationService communication, IConfiguration config, ILogger<OtpService> logger)
+        public OtpService(ApplicationDbContext db, ICommunicationService communication, IOptions<OtpSettingsOptions> otpSettings, IConfiguration config, ILogger<OtpService> logger)
         {
             _db = db;
             _communication = communication;
             _logger = logger;
-            _expiryMinutes = int.TryParse(config["OtpSettings:ExpiryMinutes"], out var v) ? v : 10;
+            _expiryMinutes = otpSettings.Value.ExpiryMinutes;
             // SECURITY AUDIT (2026-08-29): previously keyed on the email address, which is not a
             // secret — that made this an effectively unkeyed hash of a 6-digit code, brute-forceable
             // in microseconds from a DB dump. Reuses the JWT signing key as the HMAC secret (a real
             // server-side secret already required to be configured) rather than introduce a new
             // required config value; email still goes into the message for per-user domain separation.
-            _hashKey = config["OtpSettings:HashKey"] ?? config["Jwt:Key"]
+            // Jwt:Key stays a raw IConfiguration read here (not JwtOptions) because JwtOptions
+            // deliberately doesn't carry the signing secret — see its comment.
+            _hashKey = otpSettings.Value.HashKey ?? config["Jwt:Key"]
                 ?? throw new InvalidOperationException("OtpSettings:HashKey or Jwt:Key must be configured.");
         }
 

@@ -1,0 +1,95 @@
+<div class="admin-feature">
+    <app-page-header title="Error Logs" [total]="totalItems()"
+        emptySubtitle="Unhandled application errors captured by the API">
+        <small subtitle>Showing {{ logs().length }} of {{ totalItems() }} error records</small>
+        <button actions class="btn btn-secondary btn-sm" (click)="loadLogs()">
+            <span class="icon">🔄</span> Refresh
+        </button>
+    </app-page-header>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event); onFilterChange()"
+            placeholder="Search message, exception type, stack trace…"></app-search-bar>
+        <select [ngModel]="levelFilter()" (ngModelChange)="levelFilter.set($event); onFilterChange()"
+            class="status-select ml-2">
+            <option value="all">All Levels</option>
+            <option value="Error">Error</option>
+            <option value="Warning">Warning</option>
+        </select>
+        <input type="date" class="status-select ml-2" [ngModel]="fromDate()"
+            (ngModelChange)="fromDate.set($event); onFilterChange()" title="From date">
+        <input type="date" class="status-select ml-2" [ngModel]="toDate()"
+            (ngModelChange)="toDate.set($event); onFilterChange()" title="To date">
+    </div>
+
+    <div class="table-wrap">
+        @if (loading()) {
+        <div class="loading-state">
+            <app-logo-spinner [size]="48" [ripple]="false"></app-logo-spinner>
+            <p>Fetching error logs...</p>
+        </div>
+        } @else if (logs().length === 0) {
+        <div class="empty-state">
+            <span>✅</span>
+            <h3>No Error Logs Found</h3>
+            <p>Nothing matches your current filters — or nothing has gone wrong lately.</p>
+        </div>
+        } @else {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Occurred</th>
+                    <th>Level</th>
+                    <th>Message</th>
+                    <th>Source</th>
+                    <th>Request</th>
+                    <th>User</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (log of logs(); track log.id) {
+                <tr class="animate-fade-in">
+                    <td>{{ log.occurredAt | date:'dd-MM-yyyy HH:mm:ss' }}</td>
+                    <td><span class="status-badge" [class]="getLevelClass(log.level)">{{ log.level }}</span></td>
+                    <td class="message-cell">
+                        <span>{{ log.message }}</span>
+                        @if (log.exceptionType) {
+                        <small class="exception-type">{{ log.exceptionType }}</small>
+                        }
+                    </td>
+                    <td>{{ log.source || '—' }}</td>
+                    <td>
+                        @if (log.requestMethod || log.requestPath) {
+                        <code class="text-accent">{{ log.requestMethod }} {{ log.requestPath }}</code>
+                        } @else {
+                        —
+                        }
+                    </td>
+                    <td>{{ log.username || '—' }}</td>
+                    <td class="actions-cell">
+                        @if (log.stackTrace) {
+                        <button class="btn btn-outline btn-sm" (click)="toggleExpand(log.id)">
+                            {{ expandedId() === log.id ? 'Hide' : 'Stack Trace' }}
+                        </button>
+                        }
+                    </td>
+                </tr>
+                @if (expandedId() === log.id && log.stackTrace) {
+                <tr class="stack-trace-row">
+                    <td colspan="7">
+                        <pre class="stack-trace">{{ log.stackTrace }}</pre>
+                    </td>
+                </tr>
+                }
+                }
+            </tbody>
+        </table>
+
+        <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [totalItems]="totalItems()"
+            [pageSize]="pageSize()" (pageChange)="changePage($event)">
+        </app-pagination>
+        }
+    </div>
+</div>

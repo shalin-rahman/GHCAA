@@ -11,10 +11,13 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { ExportUtil } from '../../core/utils/export.util';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
+import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { NavService } from '../../core/services/nav.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { getEventStatusMeta } from '../../core/utils/date.util';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 
 // 82.32: `new Date(x).toISOString().slice(0, 16)` formats in UTC, but `<input type="datetime-local">`
 // always reads/writes local wall-clock time. Loading an event's UTC-formatted date into that input
@@ -31,7 +34,7 @@ function toLocalDateTimeInputValue(value: string | Date): string {
 @Component({
     selector: 'app-admin-events',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, ExportButtonsComponent, PaginationComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LogoSpinnerComponent],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, ExportButtonsComponent, PaginationComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LogoSpinnerComponent, ModalHeaderComponent],
     templateUrl: './admin-events.html',
     styleUrl: './admin-events.scss'
 })
@@ -39,6 +42,7 @@ export class AdminEvents implements OnInit {
     private eventsService = inject(EventsService);
     private fb = inject(FormBuilder);
     private notify = inject(NotificationService);
+    private confirmDialog = inject(ConfirmDialogService);
     public nav = inject(NavService);
     public orgConfigService = inject(OrgConfigService);
 
@@ -353,30 +357,41 @@ export class AdminEvents implements OnInit {
         this.loadAllEvents();
     }
 
-    deleteEvent(id: number) {
-        if (confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
-            this.eventsService.deleteEvent(id).subscribe({
-                next: () => {
-                    this.notify.success('Event removed from system');
-                    this.loadAllEvents();
-                },
-                error: () => this.notify.error('Failed to delete event')
+    async deleteEvent(id: number) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Delete event',
+            message: 'Are you sure you want to delete this event? This action cannot be undone.',
+            confirmLabel: 'Delete',
+            danger: true
+        }));
+        if (!ok) return;
 
-            });
-        }
+        this.eventsService.deleteEvent(id).subscribe({
+            next: () => {
+                this.notify.success('Event removed from system');
+                this.loadAllEvents();
+            },
+            error: () => this.notify.error('Failed to delete event')
+        });
     }
 
-    approveReg(regId: number, approve: boolean) {
+    async approveReg(regId: number, approve: boolean) {
         const action = approve ? 'approved' : 'rejected';
-        if (confirm(`Are you sure you want to ${action} this registration?`)) {
-            this.eventsService.approveRegistration(regId, approve).subscribe({
-                next: () => {
-                    this.notify.success(`Registration successfully ${action}`);
-                    this.loadAllRegistrations();
-                },
-                error: (err) => this.notify.error(err.error?.message || 'Action failed')
-            });
-        }
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: approve ? 'Approve registration' : 'Reject registration',
+            message: `Are you sure you want to ${action} this registration?`,
+            confirmLabel: approve ? 'Approve' : 'Reject',
+            danger: !approve
+        }));
+        if (!ok) return;
+
+        this.eventsService.approveRegistration(regId, approve).subscribe({
+            next: () => {
+                this.notify.success(`Registration successfully ${action}`);
+                this.loadAllRegistrations();
+            },
+            error: (err) => this.notify.error(err.error?.message || 'Action failed')
+        });
     }
 
     viewEvent(ev: AlumniEvent) {
@@ -406,13 +421,18 @@ export class AdminEvents implements OnInit {
         this.invitationData.set(null);
     }
 
-    sendEmail(regId: number) {
-        if (confirm('Send invitation email to this participant?')) {
-            this.eventsService.sendInvitationEmail(regId).subscribe({
-                next: () => this.notify.success('Invitation email sent!'),
-                error: () => this.notify.error('Failed to send email.')
-            });
-        }
+    async sendEmail(regId: number) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Send invitation',
+            message: 'Send invitation email to this participant?',
+            confirmLabel: 'Send'
+        }));
+        if (!ok) return;
+
+        this.eventsService.sendInvitationEmail(regId).subscribe({
+            next: () => this.notify.success('Invitation email sent!'),
+            error: () => this.notify.error('Failed to send email.')
+        });
     }
 
     openReceipt(path: string) {

@@ -3,20 +3,25 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminPollService, CreatePollDto } from '../../core/services/admin-poll.service';
 import { PollDto } from '../../core/services/poll.service';
+import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { Icon } from '../../common/icon/icon';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 
 @Component({
   selector: 'app-admin-polls',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, Icon],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, Icon, ModalHeaderComponent, PageHeaderComponent],
   templateUrl: './polls.html',
   styleUrl: './polls.scss'
 })
 export class AdminPolls implements OnInit {
   private pollService = inject(AdminPollService);
   private notify = inject(NotificationService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   polls = signal<PollDto[]>([]);
   loading = signal(false);
@@ -104,22 +109,28 @@ export class AdminPolls implements OnInit {
     });
   }
 
-  deletePoll(id: number) {
+  async deletePoll(id: number) {
     if (this.deletingId() !== null) return;
-    if (confirm('Are you sure you want to delete this poll?')) {
-      this.deletingId.set(id);
-      this.pollService.deletePoll(id).subscribe({
-        next: () => {
-          this.deletingId.set(null);
-          this.notify.success('Poll deleted.');
-          this.loadPolls();
-        },
-        error: () => {
-          this.deletingId.set(null);
-          this.notify.error('Failed to delete poll.');
-        }
-      });
-    }
+    const ok = await firstValueFrom(this.confirmDialog.confirm({
+      title: 'Delete poll',
+      message: 'Are you sure you want to delete this poll?',
+      confirmLabel: 'Delete',
+      danger: true
+    }));
+    if (!ok) return;
+
+    this.deletingId.set(id);
+    this.pollService.deletePoll(id).subscribe({
+      next: () => {
+        this.deletingId.set(null);
+        this.notify.success('Poll deleted.');
+        this.loadPolls();
+      },
+      error: () => {
+        this.deletingId.set(null);
+        this.notify.error('Failed to delete poll.');
+      }
+    });
   }
 
   private resetForm() {

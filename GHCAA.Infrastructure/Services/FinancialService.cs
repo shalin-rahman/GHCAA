@@ -13,7 +13,8 @@ using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using QuestPDF.Previewer;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using GHCAA.Infrastructure.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -27,7 +28,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly IFileStorageService _storage;
         private readonly IRealTimeService _realTime;
         private readonly ILogger<FinancialService> _logger;
-        private readonly IConfiguration _config;
+        private readonly IOptions<GeneralSettingsOptions> _generalSettings;
         private readonly IUserService _userService;
         private readonly IActivityService _activityService;
         private readonly IGamificationService _gamification;
@@ -41,7 +42,7 @@ namespace GHCAA.Infrastructure.Services
             IFileStorageService storage,
             IRealTimeService realTime,
             ILogger<FinancialService> logger,
-            IConfiguration config,
+            IOptions<GeneralSettingsOptions> generalSettings,
             IUserService userService,
             IActivityService activityService,
             IGamificationService gamification,
@@ -54,7 +55,7 @@ namespace GHCAA.Infrastructure.Services
             _storage = storage;
             _realTime = realTime;
             _logger = logger;
-            _config = config;
+            _generalSettings = generalSettings;
             _userService = userService;
             _activityService = activityService;
             _gamification = gamification;
@@ -246,8 +247,7 @@ namespace GHCAA.Infrastructure.Services
                     var expected = registration.Event?.RegistrationFee ?? registration.ContributionAmount ?? 0;
                     if (payment.Amount >= expected)
                     {
-                        var adminIdStr = _config["GeneralSettings:SystemAdminId"] ?? "1";
-                        int.TryParse(adminIdStr, out var adminId);
+                        var adminId = _generalSettings.Value.SystemAdminId;
 
                         registration.Status = Enums.EventRegistrationStatus.Approved;
                         registration.ApprovedAt = DateTime.UtcNow;
@@ -295,8 +295,7 @@ namespace GHCAA.Infrastructure.Services
                         // resolve it lazily to avoid a constructor DI cycle. If approval fails
                         // (member ineligible / transient error), log and leave the member Applied for
                         // manual admin review rather than half-approving.
-                        var adminIdStr = _config["GeneralSettings:SystemAdminId"] ?? "1";
-                        int.TryParse(adminIdStr, out var adminId);
+                        var adminId = _generalSettings.Value.SystemAdminId;
                         try
                         {
                             var memberService = _serviceProvider.GetRequiredService<IMemberService>();
@@ -530,7 +529,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<bool> DeletePaymentAsync(int paymentId, int adminId, CancellationToken cancellationToken = default)
         {
             var payment = await _db.PaymentHistories.FindAsync(new object[] { paymentId }, cancellationToken);
-            if (payment == null || payment.IsDeleted) return false;
+            if (payment == null || payment.IsArchived) return false;
 
             // Find any dues linked to this payment and reset them
             var linkedDues = await _db.MembershipDues
@@ -548,7 +547,7 @@ namespace GHCAA.Infrastructure.Services
             // dues above already reverses the payment's effect, so the row itself has no work left
             // to do except be evidence that it happened — which is exactly the reason not to
             // destroy it. PaymentHistoryConfiguration's query filter keeps it out of ordinary reads.
-            payment.IsDeleted = true;
+            payment.IsArchived = true;
             payment.DeletedAt = DateTime.UtcNow;
             payment.DeletedByAdminId = adminId;
 

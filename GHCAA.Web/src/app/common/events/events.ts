@@ -14,11 +14,12 @@ import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { ROUTES } from '../../core/constants/app.constants';
 import { getEventStatusMeta } from '../../core/utils/date.util';
 import { OrgConfigService } from '../../core/services/org-config.service';
+import { ModalHeaderComponent } from '../modal-header/modal-header.component';
 
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, PaymentPortalComponent, ImgFallbackDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, PaymentPortalComponent, ImgFallbackDirective, ModalHeaderComponent],
   templateUrl: './events.html',
   styleUrl: './events.scss'
 })

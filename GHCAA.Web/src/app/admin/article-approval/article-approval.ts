@@ -10,11 +10,12 @@ import { ARTICLE_CATEGORIES, SUBMISSION_STATUS_MAP } from '../../core/constants/
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 
 @Component({
   selector: 'app-article-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, ModalHeaderComponent],
   templateUrl: './article-approval.html',
   styleUrl: './article-approval.scss'
 })

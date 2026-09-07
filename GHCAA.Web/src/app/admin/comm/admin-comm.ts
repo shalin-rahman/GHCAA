@@ -2,25 +2,30 @@ import { Component, inject, signal, OnInit, computed, ViewChild, ElementRef, Des
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { AdminCommService, EmailTemplate, EmailLog, TEMPLATE_VARIABLES, MessageChannels } from '../../core/services/admin-comm.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { ActivatedRoute } from '@angular/router';
 import { MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
 import { LookupService } from '../../core/services/lookup.service';
 import { RichTextEditor } from '../../common/rich-text-editor/rich-text-editor';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 
 @Component({
     selector: 'app-admin-comm',
     standalone: true,
-    imports: [CommonModule, FormsModule, RichTextEditor, LogoSpinnerComponent, SearchBarComponent],
+    imports: [CommonModule, FormsModule, RichTextEditor, LogoSpinnerComponent, SearchBarComponent, ModalHeaderComponent, PageHeaderComponent],
     templateUrl: './admin-comm.html',
     styleUrl: './admin-comm.scss'
 })
 export class AdminComm implements OnInit {
     private commService = inject(AdminCommService);
     private notify = inject(NotificationService);
+    private confirmDialog = inject(ConfirmDialogService);
     private route = inject(ActivatedRoute);
     private destroyRef = inject(DestroyRef);
     private lookupService = inject(LookupService);
@@ -244,16 +249,22 @@ export class AdminComm implements OnInit {
         this.sendOptions.targetTypes = [];
     }
 
-    deleteTemplate(template: EmailTemplate) {
-        if (confirm(`Are you sure you want to delete the template '${template.code}'?`)) {
-            this.commService.deleteTemplate(template.id).subscribe({
-                next: () => {
-                    this.notify.success('Template deleted successfully.');
-                    this.loadTemplates();
-                },
-                error: () => this.notify.error('Failed to delete template.')
-            });
-        }
+    async deleteTemplate(template: EmailTemplate) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Delete template',
+            message: `Are you sure you want to delete the template '${template.code}'?`,
+            confirmLabel: 'Delete',
+            danger: true
+        }));
+        if (!ok) return;
+
+        this.commService.deleteTemplate(template.id).subscribe({
+            next: () => {
+                this.notify.success('Template deleted successfully.');
+                this.loadTemplates();
+            },
+            error: () => this.notify.error('Failed to delete template.')
+        });
     }
 
     toggleSelection(item: any, listName: 'targetYears' | 'targetTypes') {

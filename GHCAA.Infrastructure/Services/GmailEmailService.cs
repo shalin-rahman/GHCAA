@@ -1,28 +1,28 @@
 using GHCAA.Application.Interfaces;
+using GHCAA.Infrastructure.Options;
 using MailKit.Net.Smtp;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MimeKit;
 
 namespace GHCAA.Infrastructure.Services
 {
     public class GmailEmailService : IEmailService
     {
-        private readonly IConfiguration _config;
         private readonly ILogger<GmailEmailService> _logger;
         private readonly string _email;
         private readonly string _appPassword;
         private readonly string _host;
         private readonly int _port;
 
-        public GmailEmailService(IConfiguration config, ILogger<GmailEmailService> logger)
+        public GmailEmailService(IOptions<GmailSettingsOptions> options, ILogger<GmailEmailService> logger)
         {
-            _config = config;
             _logger = logger;
-            _email = _config["GmailSettings:Email"] ?? throw new ArgumentNullException("GmailSettings:Email");
-            _appPassword = _config["GmailSettings:AppPassword"] ?? throw new ArgumentNullException("GmailSettings:AppPassword");
-            _host = _config["GmailSettings:Host"] ?? "smtp.gmail.com";
-            _port = int.TryParse(_config["GmailSettings:Port"], out var p) ? p : 587;
+            var settings = options.Value;
+            _email = settings.Email ?? throw new ArgumentNullException("GmailSettings:Email");
+            _appPassword = settings.AppPassword ?? throw new ArgumentNullException("GmailSettings:AppPassword");
+            _host = settings.Host;
+            _port = settings.Port;
         }
 
         public async Task SendEmailAsync(string to, string subject, string htmlBody, CancellationToken cancellationToken = default)

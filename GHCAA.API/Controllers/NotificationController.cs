@@ -1,4 +1,5 @@
-﻿using GHCAA.Application.Interfaces;
+﻿using GHCAA.Application.DTOs;
+using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GHCAA.Application.Security;
@@ -13,12 +14,32 @@ namespace GHCAA.API.Controllers
     public class NotificationController : ControllerBase
     {
         private readonly INotificationService _notificationService;
+        private readonly IDeviceTokenService _deviceTokenService;
         private readonly ILogger<NotificationController> _logger;
 
-        public NotificationController(INotificationService notificationService, ILogger<NotificationController> logger)
+        public NotificationController(INotificationService notificationService, IDeviceTokenService deviceTokenService, ILogger<NotificationController> logger)
         {
             _notificationService = notificationService;
+            _deviceTokenService = deviceTokenService;
             _logger = logger;
+        }
+
+        // 82.53a: registers/refreshes the FCM token push_notification_service.dart sends on
+        // every app start and token rotation (82.41). Just persists it — sending a push is a
+        // separate, not-yet-built feature.
+        [HttpPost("device-token")]
+        public async Task<IActionResult> RegisterDeviceToken([FromBody] DeviceTokenDto dto, CancellationToken cancellationToken)
+        {
+            if (!TryGetMemberId(out var memberId))
+                return Unauthorized();
+
+            if (string.IsNullOrWhiteSpace(dto.Token))
+                return BadRequest("Token is required.");
+
+            var updated = await _deviceTokenService.RegisterTokenAsync(memberId, dto, cancellationToken);
+            if (!updated)
+                return NotFound();
+            return Ok();
         }
 
         [HttpGet]

@@ -2,10 +2,13 @@ import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
-import { HttpClient } from '@angular/common/http';
-import { API_ENDPOINTS, EC_ROLES, getECPositionName, getMembershipTypeLabel, getCategoryLabel } from '../../core/constants/app.constants';
+import { EC_ROLES, SEARCH_DEBOUNCE_MS, getECPositionName, getMembershipTypeLabel, getCategoryLabel } from '../../core/constants/app.constants';
+import { debounce } from '../../core/utils/debounce.util';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
+import { firstValueFrom } from 'rxjs';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
@@ -15,14 +18,14 @@ import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 @Component({
     selector: 'app-admin-governance',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ImgFallbackDirective],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ImgFallbackDirective, ModalHeaderComponent],
     templateUrl: './admin-governance.html',
     styleUrl: './admin-governance.scss'
 })
 export class AdminGovernance implements OnInit {
-    private http = inject(HttpClient);
     private adminService = inject(AdminService);
     private notify = inject(NotificationService);
+    private confirmDialog = inject(ConfirmDialogService);
 
     periods = signal<any[]>([]);
     selectedPeriod = signal<any>(null);
@@ -73,7 +76,7 @@ export class AdminGovernance implements OnInit {
 
     loadPeriods() {
         this.loading.set(true);
-        this.http.get<any[]>(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods`).subscribe({
+        this.adminService.getGovernancePeriods().subscribe({
             next: (data) => {
                 this.periods.set(data);
                 this.loading.set(false);
@@ -93,7 +96,7 @@ export class AdminGovernance implements OnInit {
     }
 
     loadCommittee(periodId: number) {
-        this.http.get<any[]>(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${periodId}/members`).subscribe({
+        this.adminService.getCommitteeMembers(periodId).subscribe({
             next: (data) => this.committeeMembers.set(data),
             // 29D.8: without this the committee list silently stayed empty on failure,
             // indistinguishable from a genuinely empty committee.
@@ -130,12 +133,13 @@ export class AdminGovernance implements OnInit {
 
         this.isSavingPeriod.set(true);
         const isEdit = !!data.id;
-        const api = isEdit ? `${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${data.id}` : `${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods`;
 
         // Format payload to ISO wire dates; empty dates are sent as null, avoiding ASP.NET 400 JSON conversion errors
         const payload = { ...data, startDate: toWireDate(data.startDate), endDate: toWireDate(data.endDate) };
-        const request = isEdit ? this.http.put(api, payload) : this.http.post(api, payload);
-        
+        const request = isEdit
+            ? this.adminService.updateGovernancePeriod(data.id, payload)
+            : this.adminService.createGovernancePeriod(payload);
+
         request.subscribe({
             next: () => {
                 this.notify.success(isEdit ? 'EC Period updated' : 'EC Period created');
@@ -150,9 +154,15 @@ export class AdminGovernance implements OnInit {
         });
     }
 
-    activatePeriod(id: number) {
-        if (!confirm('Activating this period will deactivate all others. Continue?')) return;
-        this.http.post(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${id}/activate`, {}).subscribe({
+    async activatePeriod(id: number) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Activate period',
+            message: 'Activating this period will deactivate all others. Continue?',
+            confirmLabel: 'Activate'
+        }));
+        if (!ok) return;
+
+        this.adminService.activateGovernancePeriod(id).subscribe({
             next: () => {
                 this.notify.success('Period activated');
                 this.loadPeriods();
@@ -161,15 +171,14 @@ export class AdminGovernance implements OnInit {
         });
     }
 
-    private searchTimer: ReturnType<typeof setTimeout> | null = null;
+    private debouncedMemberSearch = debounce((query: string) => this.runMemberSearch(query), SEARCH_DEBOUNCE_MS);
 
     searchMembers(query: string) {
-        if (this.searchTimer) clearTimeout(this.searchTimer);
         if (query.length < 2) {
             this.memberSearchResults.set([]);
             return;
         }
-        this.searchTimer = setTimeout(() => this.runMemberSearch(query), 300);
+        this.debouncedMemberSearch(query);
     }
 
     private runMemberSearch(query: string) {
@@ -213,7 +222,7 @@ export class AdminGovernance implements OnInit {
             return;
         }
 
-        this.http.post(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${period.id}/members`, data).subscribe({
+        this.adminService.assignCommitteeRole(period.id, data).subscribe({
             next: () => {
                 this.notify.success('Role assigned');
                 this.showAssignModal.set(false);
@@ -234,7 +243,7 @@ export class AdminGovernance implements OnInit {
         const ecMemberId = this.removingMemberId();
         if (ecMemberId == null) return;
         const notifyMember = this.removeNotifyMember();
-        this.http.delete(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/members/${ecMemberId}?notifyMember=${notifyMember}`).subscribe({
+        this.adminService.removeCommitteeMember(ecMemberId, notifyMember).subscribe({
             next: () => {
                 this.notify.success('Member removed');
                 this.removingMemberId.set(null);

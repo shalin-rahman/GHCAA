@@ -1,8 +1,10 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { ThemeService, SpecialDayTheme } from '../../core/services/theme.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
@@ -21,6 +23,7 @@ export class AdminThemes implements OnInit {
     private adminService = inject(AdminService);
     private themeService = inject(ThemeService);
     private notify = inject(NotificationService);
+    private confirmDialog = inject(ConfirmDialogService);
 
     themes = signal<SpecialDayTheme[]>([]);
     loading = signal(true);
@@ -123,8 +126,15 @@ export class AdminThemes implements OnInit {
         });
     }
 
-    deleteTheme(id: number) {
-        if (!confirm('Are you sure you want to delete this theme?')) return;
+    async deleteTheme(id: number) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Delete theme',
+            message: 'Are you sure you want to delete this theme?',
+            confirmLabel: 'Delete',
+            danger: true
+        }));
+        if (!ok) return;
+
         this.adminService.deleteTheme(id).subscribe({
             next: () => {
                 this.notify.success('Theme deleted');

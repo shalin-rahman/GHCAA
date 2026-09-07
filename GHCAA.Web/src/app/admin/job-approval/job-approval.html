@@ -60,10 +60,7 @@
 @if (selectedJob()) {
 <div class="modal-overlay" (click)="selectedJob.set(null)">
     <div class="modal-box large reveal-top" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3>Review Job Posting</h3>
-            <button class="close-btn" (click)="selectedJob.set(null)">×</button>
-        </div>
+        <app-modal-header title="Review Job Posting" (closed)="selectedJob.set(null)"></app-modal-header>
         <div class="modal-body custom-scrollbar">
             <div class="job-preview">
                 <div class="preview-meta mb-6 flex gap-4">

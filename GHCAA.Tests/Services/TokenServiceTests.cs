@@ -3,12 +3,14 @@ using System.Text;
 using FluentAssertions;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
 using NUnit.Framework;
@@ -30,8 +32,7 @@ namespace GHCAA.Tests.Services
         {
             _mockConfig = new Mock<IConfiguration>();
             _mockConfig.Setup(x => x["Jwt:Key"]).Returns(Key);
-            _mockConfig.Setup(x => x["Jwt:Issuer"]).Returns("GHCAA");
-            _mockConfig.Setup(x => x["Jwt:Audience"]).Returns("GHCAA");
+            var jwtOptions = Options.Create(new JwtOptions { Issuer = "GHCAA", Audience = "GHCAA" });
 
             _mockEnv = new Mock<IHostEnvironment>();
             _mockEnv.Setup(e => e.EnvironmentName).Returns(Environments.Production);
@@ -45,7 +46,7 @@ namespace GHCAA.Tests.Services
             _context = new ApplicationDbContext(options);
             _context.Database.EnsureCreated();
 
-            _service = new TokenService(_mockConfig.Object, _mockEnv.Object, NullLogger<TokenService>.Instance, _context);
+            _service = new TokenService(_mockConfig.Object, jwtOptions, _mockEnv.Object, NullLogger<TokenService>.Instance, _context);
         }
 
         [TearDown]
@@ -237,9 +238,8 @@ namespace GHCAA.Tests.Services
             var user = new User { Id = 1, Username = "admin" };
             var otherConfig = new Mock<IConfiguration>();
             otherConfig.Setup(x => x["Jwt:Key"]).Returns("a_completely_different_super_secret_key_of_32_chars_plus");
-            otherConfig.Setup(x => x["Jwt:Issuer"]).Returns("GHCAA");
-            otherConfig.Setup(x => x["Jwt:Audience"]).Returns("GHCAA");
-            var otherService = new TokenService(otherConfig.Object, _mockEnv.Object, NullLogger<TokenService>.Instance, _context);
+            var otherJwtOptions = Options.Create(new JwtOptions { Issuer = "GHCAA", Audience = "GHCAA" });
+            var otherService = new TokenService(otherConfig.Object, otherJwtOptions, _mockEnv.Object, NullLogger<TokenService>.Instance, _context);
             var forgedToken = otherService.CreateStepUpToken(user);
 
             // Never trust a step-up claim carried in from a token this service didn't sign —

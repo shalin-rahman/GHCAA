@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:screen_protector/screen_protector.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../core/utils/app_utils.dart';
 import '../../core/widgets/app_search_field.dart';
 import '../../features/financials/financial_service.dart';
@@ -47,14 +47,26 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
     super.dispose();
   }
 
+  // 82.33: the receipt endpoint is [Authorize]'d, so it can't be handed to launchUrl for the
+  // external browser to fetch (no auth header would go with it). Download it through the app's
+  // own Dio instance instead (the auth interceptor attaches the token) and hand the saved file
+  // to the share sheet, so the member can view or save it without an unauthenticated request
+  // ever leaving the device.
   Future<void> _downloadReceipt(int id) async {
     final url = await ref.read(financialServiceProvider).getReceiptUrl(id);
-    if (url != null) {
-      final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
-      }
+    if (url == null) return;
+
+    final file = await ref.read(fileServiceProvider).downloadToTempFile(url, fileName: 'ghcaa_receipt_$id.pdf');
+    if (!mounted) return;
+
+    if (file == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not download the receipt. Please try again.')),
+      );
+      return;
     }
+
+    await Share.shareXFiles([XFile(file.path)], text: 'GHCAA Payment Receipt');
   }
 
   Future<void> _initiatePayment(double amount, PaymentGateway gateway) async {

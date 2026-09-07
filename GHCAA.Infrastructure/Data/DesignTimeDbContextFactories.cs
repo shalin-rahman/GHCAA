@@ -35,20 +35,6 @@ namespace GHCAA.Infrastructure.Data
         }
     }
 
-    public class MySqlDesignTimeDbContextFactory : BaseDesignTimeDbContextFactory<MySqlApplicationDbContext>
-    {
-        public override MySqlApplicationDbContext CreateDbContext(string[] args)
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<MySqlApplicationDbContext>();
-            var conn = Configuration.GetConnectionString("MySqlConnection");
-            var mysqlVersion = new MySqlServerVersion(new Version(8, 0, 36));
-            optionsBuilder.UseMySql(conn, mysqlVersion, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
-
-            optionsBuilder.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
-            return new MySqlApplicationDbContext(optionsBuilder.Options);
-        }
-    }
-
     public class SqliteDesignTimeDbContextFactory : BaseDesignTimeDbContextFactory<SqliteApplicationDbContext>
     {
         public override SqliteApplicationDbContext CreateDbContext(string[] args)

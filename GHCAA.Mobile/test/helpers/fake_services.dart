@@ -8,6 +8,7 @@
 // return value differs by test (e.g. a dropdown fixture with a different
 // number of options) belongs in that test file instead, not here.
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:local_auth/local_auth.dart';
@@ -53,11 +54,11 @@ class FakeStorageService implements StorageService {
   @override
   Future<void> clearAll() async {}
   @override
-  Future<void> saveCredentials(String username, String password) async {}
+  Future<void> setBiometricEnabled(bool enabled) async {}
   @override
-  Future<Map<String, String>?> getCredentials() async => null;
+  Future<bool> isBiometricEnabled() async => false;
   @override
-  Future<void> clearCredentials() async {}
+  Future<void> purgeLegacyBiometricCredentials() async {}
   @override
   Future<void> saveRefreshToken(String token) async {}
   @override
@@ -69,6 +70,8 @@ class FakeStorageService implements StorageService {
 class FakeAuthService implements AuthService {
   @override
   Future<String?> login(String identifier, String password, {bool enableBiometric = false}) async => null;
+  @override
+  Future<String?> loginWithStoredToken() async => null;
   @override
   Future<void> logout() async {}
   @override
@@ -164,6 +167,10 @@ class FakeFileService implements FileService {
   Future<String?> uploadProfilePhoto(File file) async => 'mock/photo.png';
   @override
   Future<String?> uploadArticleImage(File file) async => 'mock/article.png';
+  @override
+  Future<Uint8List?> fetchAuthenticatedBytes(String pathOrUrl) async => null;
+  @override
+  Future<File?> downloadToTempFile(String pathOrUrl, {required String fileName}) async => null;
 }
 
 class FakeNetworkingService implements NetworkingService {

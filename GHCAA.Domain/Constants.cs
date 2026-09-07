@@ -94,5 +94,16 @@ namespace GHCAA.Domain
             public const string UnknownValue = "Unknown";
             public const string ImportPrefix = "IMPORT";
         }
+
+        // 45.2/45.6: ErrorLog levels and retention. Rows older than RetentionDays are opportunistically
+        // deleted from ErrorLogService's write path — see the comment there for why that's a cheaper
+        // fit here than a dedicated background job.
+        public static class ErrorLogs
+        {
+            public const string LevelError = "Error";
+            public const string LevelWarning = "Warning";
+            public const int RetentionDays = 90;
+            public const int MaxPageSize = 100;
+        }
     }
 }

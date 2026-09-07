@@ -7,6 +7,7 @@ import { RouterOutlet, Router, ActivatedRoute, NavigationEnd } from '@angular/ro
 import { Meta } from '@angular/platform-browser';
 import { ToastComponent } from './common/toast/toast';
 import { StepUpDialog } from './common/step-up-dialog/step-up-dialog';
+import { ConfirmDialog } from './common/confirm-dialog/confirm-dialog';
 import { OrgConfigService } from './core/services/org-config.service';
 import { interpolateOrgTemplate } from './core/utils/org-template';
 import { filter } from 'rxjs';
@@ -14,7 +15,7 @@ import { filter } from 'rxjs';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ToastComponent, StepUpDialog],
+  imports: [RouterOutlet, ToastComponent, StepUpDialog, ConfirmDialog],
   templateUrl: './app.html'
 })
 export class App {

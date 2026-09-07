@@ -1,9 +1,10 @@
 using FluentAssertions;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
+using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,7 @@ namespace GHCAA.Tests.Services
     {
         private Mock<ILogger<UserService>> _mockLogger = null!;
         private Mock<ITokenService> _mockTokenService = null!;
-        private Mock<IConfiguration> _mockConfig = null!;
+        private IOptions<AppSettingsOptions> _appSettings = null!;
         private UserService _service = null!;
 
         [SetUp]
@@ -23,8 +24,8 @@ namespace GHCAA.Tests.Services
         {
             _mockLogger = new Mock<ILogger<UserService>>();
             _mockTokenService = new Mock<ITokenService>();
-            _mockConfig = new Mock<IConfiguration>();
-            _service = new UserService(_context, _mockLogger.Object, _mockTokenService.Object, _mockConfig.Object);
+            _appSettings = Options.Create(new AppSettingsOptions());
+            _service = new UserService(_context, _mockLogger.Object, _mockTokenService.Object, _appSettings);
         }
 
         [Test]
@@ -164,14 +165,13 @@ namespace GHCAA.Tests.Services
             _mockTokenService.Verify(x => x.RevokeAllRefreshTokensAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
-        // SetUserActiveAsync/DeleteSystemAdminAsync's protected-username guard reads a real config
-        // section (AppSettings:ProtectedSuperAdmins), which a loose IConfiguration mock can't bind —
-        // these tests build a real one instead of using the fixture's _mockConfig.
+        // SetUserActiveAsync/DeleteSystemAdminAsync's protected-username guard reads
+        // AppSettings:ProtectedSuperAdmins — these tests need a specific list, so they build their
+        // own options instead of using the fixture's default _appSettings.
         private UserService ServiceWithProtectedUsernames(params string[] protectedUsernames)
         {
-            var pairs = protectedUsernames.Select((u, i) => new KeyValuePair<string, string?>($"AppSettings:ProtectedSuperAdmins:{i}", u));
-            var config = new ConfigurationBuilder().AddInMemoryCollection(pairs).Build();
-            return new UserService(_context, _mockLogger.Object, _mockTokenService.Object, config);
+            var options = Options.Create(new AppSettingsOptions { ProtectedSuperAdmins = protectedUsernames });
+            return new UserService(_context, _mockLogger.Object, _mockTokenService.Object, options);
         }
 
         [Category("FR-11")]

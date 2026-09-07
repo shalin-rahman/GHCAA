@@ -2,11 +2,12 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 
 namespace GHCAA.Infrastructure.Services
 {
@@ -14,13 +15,13 @@ namespace GHCAA.Infrastructure.Services
     {
         private readonly ApplicationDbContext _db;
         private readonly ICommunicationService _communication;
-        private readonly Microsoft.Extensions.Configuration.IConfiguration _config;
+        private readonly ContactUsSettingsOptions _contactSettings;
 
-        public ContactService(ApplicationDbContext db, ICommunicationService communication, Microsoft.Extensions.Configuration.IConfiguration config)
+        public ContactService(ApplicationDbContext db, ICommunicationService communication, IOptions<ContactUsSettingsOptions> contactSettings)
         {
             _db = db;
             _communication = communication;
-            _config = config;
+            _contactSettings = contactSettings.Value;
         }
 
         public async Task SubmitMessageAsync(ContactMessageDto dto, CancellationToken cancellationToken = default)
@@ -38,7 +39,7 @@ namespace GHCAA.Infrastructure.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             // Send notification to recipients
-            var recipients = _config.GetSection("ContactUsSettings:Recipients").Get<string[]>();
+            var recipients = _contactSettings.Recipients;
             if (recipients != null && recipients.Length > 0)
             {
                 var customVars = new Dictionary<string, string>

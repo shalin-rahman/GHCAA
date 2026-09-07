@@ -2,9 +2,10 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -26,16 +27,16 @@ namespace GHCAA.Infrastructure.Gateways
         private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _db;
         private readonly ILogger<DGePayGateway> _logger;
-        private readonly IConfiguration _config;
+        private readonly DGePayOptions _dgePayOptions;
         private string? _cachedToken;
         private DateTime _tokenExpiry = DateTime.MinValue;
 
-        public DGePayGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<DGePayGateway> logger, IConfiguration config)
+        public DGePayGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<DGePayGateway> logger, IOptions<DGePayOptions> dgePayOptions)
         {
             _httpClient = httpClient;
             _db = db;
             _logger = logger;
-            _config = config;
+            _dgePayOptions = dgePayOptions.Value;
         }
 
         public Enums.PaymentGateway GatewayType => Enums.PaymentGateway.DGePay;
@@ -59,8 +60,8 @@ namespace GHCAA.Infrastructure.Gateways
                 }
 
                 var baseUrl = dbConfig.IsSandbox
-                    ? _config["PaymentGateways:DGePay:SandboxUrl"] ?? "https://api-uat.dgepay.net/dipon/v3"
-                    : _config["PaymentGateways:DGePay:ProductionUrl"] ?? "https://api.dgepay.net/dipon/v3";
+                    ? _dgePayOptions.SandboxUrl
+                    : _dgePayOptions.ProductionUrl;
 
                 var clientId = dbConfig.GatewayPublicKey;
                 var clientSecret = dbConfig.GatewaySecretKey;
@@ -232,8 +233,8 @@ namespace GHCAA.Infrastructure.Gateways
                 if (string.IsNullOrEmpty(token)) return false;
 
                 var baseUrl = dbConfig.IsSandbox
-                    ? _config["PaymentGateways:DGePay:SandboxUrl"] ?? "https://api-uat.dgepay.net/dipon/v3"
-                    : _config["PaymentGateways:DGePay:ProductionUrl"] ?? "https://api.dgepay.net/dipon/v3";
+                    ? _dgePayOptions.SandboxUrl
+                    : _dgePayOptions.ProductionUrl;
 
                 var clientSecret = dbConfig.GatewaySecretKey;
                 var apiKey = dbConfig.WalletNumber;
@@ -275,8 +276,8 @@ namespace GHCAA.Infrastructure.Gateways
             if (dbConfig == null) return null;
 
             var baseUrl = dbConfig.IsSandbox
-                ? _config["PaymentGateways:DGePay:SandboxUrl"] ?? "https://api-uat.dgepay.net/dipon/v3"
-                : _config["PaymentGateways:DGePay:ProductionUrl"] ?? "https://api.dgepay.net/dipon/v3";
+                ? _dgePayOptions.SandboxUrl
+                : _dgePayOptions.ProductionUrl;
 
             var clientId = dbConfig.GatewayPublicKey;
             var clientSecret = dbConfig.GatewaySecretKey;

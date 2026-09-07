@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { AdminService } from '../../core/services/admin.service';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { ACADEMIC_CERTIFICATES, ACADEMIC_SUBJECTS, PROFESSIONAL_SECTORS, getStatusLabel, getStatusClass } from '../../core/constants/app.constants';
 import { LookupService } from '../../core/services/lookup.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
@@ -23,6 +25,7 @@ export class MemberApproval implements OnInit {
   private router = inject(Router);
   private notify = inject(NotificationService);
   private lookupService = inject(LookupService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   requests = signal<any[]>([]);
   pendingRequests = computed(() => {
@@ -112,42 +115,53 @@ export class MemberApproval implements OnInit {
     this.rejecting.set(false);
   }
 
-  approve(id: number) {
+  async approve(id: number) {
     if (this.processing()) return;
-    if (confirm('Verify this registry entry? This will officially induct the member and dispatch credentials.')) {
-      this.processing.set(true);
-      this.adminService.approveMember(id).subscribe({
-        next: () => {
-          this.processing.set(false);
-          this.notify.success('Registry verified. Member successfully inducted.');
-          this.selectedMember.set(null);
-          this.loadMembers();
-        },
-        error: () => {
-          this.processing.set(false);
-          this.notify.error('Failed to verify registry.');
-        }
-      });
-    }
+    const ok = await firstValueFrom(this.confirmDialog.confirm({
+      title: 'Verify registry entry',
+      message: 'Verify this registry entry? This will officially induct the member and dispatch credentials.',
+      confirmLabel: 'Verify'
+    }));
+    if (!ok) return;
+
+    this.processing.set(true);
+    this.adminService.approveMember(id).subscribe({
+      next: () => {
+        this.processing.set(false);
+        this.notify.success('Registry verified. Member successfully inducted.');
+        this.selectedMember.set(null);
+        this.loadMembers();
+      },
+      error: () => {
+        this.processing.set(false);
+        this.notify.error('Failed to verify registry.');
+      }
+    });
   }
 
-  confirmReject() {
+  async confirmReject() {
     if (this.processing() || !this.rejectionReason) return;
-    if (confirm('Permanently decline this registry filing? The applicant will be notified with your reason.')) {
-      this.processing.set(true);
-      this.adminService.rejectMember(this.selectedMember().id, this.rejectionReason).subscribe({
-        next: () => {
-          this.processing.set(false);
-          this.notify.success('Application declined. Record removed from active queue.');
-          this.selectedMember.set(null);
-          this.loadMembers();
-        },
-        error: () => {
-          this.processing.set(false);
-          this.notify.error('Failed to decline application.');
-        }
-      });
-    }
+    const ok = await firstValueFrom(this.confirmDialog.confirm({
+      title: 'Decline registry filing',
+      message: 'Permanently decline this registry filing? The applicant will be notified with your reason.',
+      confirmLabel: 'Decline',
+      danger: true
+    }));
+    if (!ok) return;
+
+    this.processing.set(true);
+    this.adminService.rejectMember(this.selectedMember().id, this.rejectionReason).subscribe({
+      next: () => {
+        this.processing.set(false);
+        this.notify.success('Application declined. Record removed from active queue.');
+        this.selectedMember.set(null);
+        this.loadMembers();
+      },
+      error: () => {
+        this.processing.set(false);
+        this.notify.error('Failed to decline application.');
+      }
+    });
   }
 
   contactMember(email: string) {

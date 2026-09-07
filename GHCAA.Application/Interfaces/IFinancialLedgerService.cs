@@ -17,7 +17,7 @@ namespace GHCAA.Application.Interfaces
         // as "not found" to a caller trying to edit it.
         Task<FinancialRecord?> UpdateRecordAsync(FinancialRecord record, int adminId, CancellationToken cancellationToken = default);
 
-        // Soft delete. The row survives with IsDeleted set and is hidden by the entity's query
+        // Soft delete. The row survives with IsArchived set and is hidden by the entity's query
         // filter; nothing removes a ledger row from the table.
         Task<bool> DeleteRecordAsync(int id, int adminId, CancellationToken cancellationToken = default);
 

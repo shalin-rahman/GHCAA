@@ -4,16 +4,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace GHCAA.Infrastructure.Services
 {
     public class GreenwebSmsService : ISmsService
     {
         private readonly HttpClient _httpClient;
-        private readonly IConfiguration _config;
         private readonly ILogger<GreenwebSmsService> _logger;
         private readonly ApplicationDbContext _db;
         private readonly string _token;
@@ -21,16 +21,15 @@ namespace GHCAA.Infrastructure.Services
 
         public GreenwebSmsService(
             HttpClient httpClient,
-            IConfiguration config,
+            IOptions<SmsSettingsOptions> options,
             ILogger<GreenwebSmsService> logger,
             ApplicationDbContext db)
         {
             _httpClient = httpClient;
-            _config = config;
             _logger = logger;
             _db = db;
-            _token = _config["SmsSettings:Token"] ?? string.Empty;
-            _baseUrl = _config["SmsSettings:BaseUrl"] ?? "https://api.greenweb.com.bd/api.php";
+            _token = options.Value.Token;
+            _baseUrl = options.Value.BaseUrl;
         }
 
         public async Task<bool> SendSmsAsync(string mobileNo, string message, CancellationToken cancellationToken = default)

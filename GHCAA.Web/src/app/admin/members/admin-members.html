@@ -222,11 +222,11 @@
             <div class="form-grid">
                 <!-- Personal Information -->
                 <div class="form-group">
-                    <label>Mobile Number <span class="required-star">*</span></label>
-                    <input type="text" [(ngModel)]="selectedMember().mobileNo" [readonly]="!isEditing()"
+                    <label for="admember-mobileInput">Mobile Number <span class="required-star">*</span></label>
+                    <input id="admember-mobileInput" type="text" [(ngModel)]="selectedMember().mobileNo" [readonly]="!isEditing()"
                         #mobileInput="ngModel" required pattern="01[3-9]\d{8}" maxlength="11"
                         [class.border-red-500]="isEditing() && mobileInput.invalid && mobileInput.touched">
-                    <div *ngIf="isEditing() && mobileInput.touched && mobileInput.invalid"
+                    <div *ngIf="isEditing() && mobileInput.touched && mobileInput.invalid" role="alert"
                         class="text-[10px] text-red-500 mt-1">
                         <span *ngIf="mobileInput.errors?.['required']">Mobile is required.</span>
                         <span *ngIf="mobileInput.errors?.['pattern']">Invalid Bangladeshi mobile (e.g.,
@@ -234,11 +234,11 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Email Address <span class="required-star">*</span></label>
-                    <input type="email" [(ngModel)]="selectedMember().email" [readonly]="!isEditing()"
+                    <label for="admember-emailInput">Email Address <span class="required-star">*</span></label>
+                    <input id="admember-emailInput" type="email" [(ngModel)]="selectedMember().email" [readonly]="!isEditing()"
                         #emailInput="ngModel" required email maxlength="150"
                         [class.border-red-500]="isEditing() && emailInput.invalid && emailInput.touched">
-                    <div *ngIf="isEditing() && emailInput.touched && emailInput.invalid"
+                    <div *ngIf="isEditing() && emailInput.touched && emailInput.invalid" role="alert"
                         class="text-[10px] text-red-500 mt-1">
                         <span *ngIf="emailInput.errors?.['required']">Email is required.</span>
                         <span *ngIf="emailInput.errors?.['email']">Invalid email format.</span>
@@ -246,19 +246,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Father's Name</label>
-                    <input type="text" [(ngModel)]="selectedMember().fatherName" [readonly]="!isEditing()"
+                    <label for="admember-fatherName">Father's Name</label>
+                    <input id="admember-fatherName" type="text" [(ngModel)]="selectedMember().fatherName" [readonly]="!isEditing()"
                         maxlength="250">
                 </div>
                 <div class="form-group">
-                    <label>Mother's Name</label>
-                    <input type="text" [(ngModel)]="selectedMember().motherName" [readonly]="!isEditing()"
+                    <label for="admember-motherName">Mother's Name</label>
+                    <input id="admember-motherName" type="text" [(ngModel)]="selectedMember().motherName" [readonly]="!isEditing()"
                         maxlength="250">
                 </div>
 
                 <div class="form-group">
-                    <label>Date of Birth</label>
-                    <input type="text" [(ngModel)]="selectedMember().dateOfBirth" [readonly]="!isEditing()"
+                    <label for="admember-dateOfBirth">Date of Birth</label>
+                    <input id="admember-dateOfBirth" type="text" [(ngModel)]="selectedMember().dateOfBirth" [readonly]="!isEditing()"
                         placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
                 </div>
                 <div class="form-group">
@@ -353,13 +353,13 @@
                 </div>
 
                 <div class="form-group full">
-                    <label>Present Address</label>
-                    <textarea [(ngModel)]="selectedMember().presentAddress" [readonly]="!isEditing()"></textarea>
+                    <label for="admember-presentAddress">Present Address</label>
+                    <textarea id="admember-presentAddress" [(ngModel)]="selectedMember().presentAddress" [readonly]="!isEditing()"></textarea>
                 </div>
 
                 <div class="form-group full">
-                    <label>Permanent Address</label>
-                    <textarea [(ngModel)]="selectedMember().permanentAddress" [readonly]="!isEditing()"></textarea>
+                    <label for="admember-permanentAddress">Permanent Address</label>
+                    <textarea id="admember-permanentAddress" [(ngModel)]="selectedMember().permanentAddress" [readonly]="!isEditing()"></textarea>
                 </div>
 
                 <!-- Emergency Contact Section -->
@@ -368,18 +368,18 @@
                     </h4>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="form-group">
-                            <label>Contact Name</label>
-                            <input type="text" [(ngModel)]="selectedMember().emergencyContactName"
+                            <label for="admember-emergencyContactName">Contact Name</label>
+                            <input id="admember-emergencyContactName" type="text" [(ngModel)]="selectedMember().emergencyContactName"
                                 [readonly]="!isEditing()" placeholder="Full Name">
                         </div>
                         <div class="form-group">
-                            <label>Relation</label>
-                            <input type="text" [(ngModel)]="selectedMember().emergencyContactRelation"
+                            <label for="admember-emergencyContactRelation">Relation</label>
+                            <input id="admember-emergencyContactRelation" type="text" [(ngModel)]="selectedMember().emergencyContactRelation"
                                 [readonly]="!isEditing()" placeholder="e.g. Spouse, Father">
                         </div>
                         <div class="form-group">
-                            <label>Phone Number</label>
-                            <input type="text" [(ngModel)]="selectedMember().emergencyContactPhone"
+                            <label for="admember-emergencyContactPhone">Phone Number</label>
+                            <input id="admember-emergencyContactPhone" type="text" [(ngModel)]="selectedMember().emergencyContactPhone"
                                 [readonly]="!isEditing()" placeholder="01xxxxxxxxx">
                         </div>
                     </div>
@@ -459,8 +459,8 @@
                             </label>
                         </div>
                         <div class="form-group">
-                            <label>Contribution Points</label>
-                            <input type="number" [(ngModel)]="selectedMember().contributionPoints">
+                            <label for="admember-contributionPoints">Contribution Points</label>
+                            <input id="admember-contributionPoints" type="number" [(ngModel)]="selectedMember().contributionPoints">
                         </div>
                     </div>
                 </div>
@@ -800,10 +800,7 @@
 @if (showImportModal()) {
 <div class="modal-overlay" (click)="showImportModal.set(false)">
     <div class="modal-box" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3>Enterprise Alumni Bulk Import</h3>
-            <button (click)="showImportModal.set(false)" class="close-btn">✕</button>
-        </div>
+        <app-modal-header title="Enterprise Alumni Bulk Import" (closed)="showImportModal.set(false)"></app-modal-header>
         <div class="modal-body">
             <div class="import-engine animate-fade-in">
                 <!-- Step 1: Asset Selection -->

@@ -1,9 +1,11 @@
 import { Component, input, output, signal, inject, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { RegistrationService } from '../../core/services/registration.service';
 import { FinancialService } from '../../core/services/financial.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
 @Component({
@@ -276,6 +278,7 @@ export class PaymentPortalComponent implements OnInit {
   private regService = inject(RegistrationService);
   private finService = inject(FinancialService);
   private authService = inject(AuthService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   selectedMethod = signal<any>(null);
   hasFile = false;
@@ -351,14 +354,20 @@ export class PaymentPortalComponent implements OnInit {
     this.methodSelected.emit(virtualMethod);
   }
 
-  removeSavedMethod(id: number, event: Event) {
+  async removeSavedMethod(id: number, event: Event) {
     event.stopPropagation();
-    if (confirm('Are you sure you want to remove this saved payment method?')) {
-        this.finService.deleteSavedMethod(id).subscribe({
-            next: () => this.loadSavedMethods(),
-            error: (err) => console.error('Failed to remove saved payment method', err)
-        });
-    }
+    const ok = await firstValueFrom(this.confirmDialog.confirm({
+        title: 'Remove payment method',
+        message: 'Are you sure you want to remove this saved payment method?',
+        confirmLabel: 'Remove',
+        danger: true
+    }));
+    if (!ok) return;
+
+    this.finService.deleteSavedMethod(id).subscribe({
+        next: () => this.loadSavedMethods(),
+        error: (err) => console.error('Failed to remove saved payment method', err)
+    });
   }
 
   getLogoByMethod(method: string): string {

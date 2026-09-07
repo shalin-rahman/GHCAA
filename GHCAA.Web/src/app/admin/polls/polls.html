@@ -1,17 +1,13 @@
 <div class="admin-polls-page animate-fade-in">
-    <div class="page-header">
-        <div>
-            <h1>Member Polls</h1>
-            <p>Manage feedback and association decisions</p>
-        </div>
-        <div class="tabs tab-nav view-toggle">
+    <app-page-header title="Member Polls" emptySubtitle="Manage feedback and association decisions">
+        <div actions class="tabs tab-nav view-toggle">
             <button type="button" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')">☰ Table</button>
             <button type="button" [class.active]="viewMode() === 'card'" (click)="viewMode.set('card')">▦ Card</button>
         </div>
-        <button class="btn btn-accent" (click)="showCreateModal.set(true)">
+        <button actions class="btn btn-accent" (click)="showCreateModal.set(true)">
             <app-icon name="plus" [size]="16"></app-icon> Create New Poll
         </button>
-    </div>
+    </app-page-header>
 
     <ng-container *ngIf="!loading(); else loader">
     <div class="glass-card table-wrap" *ngIf="viewMode() === 'table'">
@@ -113,10 +109,7 @@
     <!-- Results Modal (table view's "Results" action reuses the card view's option breakdown) -->
     <div class="modal-overlay" *ngIf="selectedPoll(); let poll" (click)="selectedPoll.set(null)">
         <div class="modal-card glass-card" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-                <h2>{{ poll.title }}</h2>
-                <button class="close-btn" (click)="selectedPoll.set(null)">&times;</button>
-            </div>
+            <app-modal-header [title]="poll.title" (closed)="selectedPoll.set(null)"></app-modal-header>
             <p class="description">{{ poll.description }}</p>
             <div class="stats">
                 <div class="stat">
@@ -145,10 +138,7 @@
     <!-- Create Modal -->
     <div class="modal-overlay" *ngIf="showCreateModal()" (click)="showCreateModal.set(false)">
         <div class="modal-card glass-card" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-                <h2>Create New Poll</h2>
-                <button class="close-btn" (click)="showCreateModal.set(false)">&times;</button>
-            </div>
+            <app-modal-header title="Create New Poll" (closed)="showCreateModal.set(false)"></app-modal-header>
 
             <form (ngSubmit)="onCreatePoll()">
                 <div class="form-group">

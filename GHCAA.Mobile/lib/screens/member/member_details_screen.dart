@@ -11,6 +11,7 @@ import '../../core/api/api_client.dart';
 import '../../features/auth/auth_service.dart';
 import '../../features/admin/admin_service.dart';
 import '../../features/networking/mentorship_service.dart';
+import '../../features/files/file_service.dart';
 import '../../core/widgets/logo_spinner.dart';
 
 final isAdminProvider = FutureProvider.autoDispose<bool>((ref) async {
@@ -306,15 +307,15 @@ class _MemberDetailsScreenState extends ConsumerState<MemberDetailsScreen> {
     );
   }
 
+  // 82.33: certificatePath/paymentProofPath live under secure_uploads/, served only through
+  // SecureFilesController's [Authorize]'d /api/secure-files/{filePath} route — not at
+  // apiBaseUrl+path directly (that route never existed, hence the old 404). Image.network
+  // also can't attach a bearer token, so fetch the bytes through the app's own Dio instance
+  // and render them from memory instead.
   void _viewNetworkImage(BuildContext context, String path) {
-    String fullUrl;
-    if (path.startsWith('http')) {
-      fullUrl = path;
-    } else {
-      final base = AppConfig.apiBaseUrl.endsWith('/') ? AppConfig.apiBaseUrl.substring(0, AppConfig.apiBaseUrl.length - 1) : AppConfig.apiBaseUrl;
-      final cleanP = path.startsWith('/') ? path.substring(1) : path;
-      fullUrl = '$base/$cleanP';
-    }
+    final isAbsolute = path.startsWith('http');
+    final cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    final fetchPath = isAbsolute ? path : '/secure-files/$cleanPath';
 
     showDialog(
       context: context,
@@ -326,18 +327,22 @@ class _MemberDetailsScreenState extends ConsumerState<MemberDetailsScreen> {
             InteractiveViewer(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                child: Image.network(
-                  fullUrl,
-                  fit: BoxFit.contain,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Center(child: LogoSpinner.small());
+                child: FutureBuilder<Uint8List?>(
+                  future: ref.read(fileServiceProvider).fetchAuthenticatedBytes(fetchPath),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return Center(child: LogoSpinner.small());
+                    }
+                    final bytes = snapshot.data;
+                    if (bytes == null || bytes.isEmpty) {
+                      return Container(
+                        padding: const EdgeInsets.all(20),
+                        color: Colors.black87,
+                        child: const Text('Security Dossier Image not found/accessible.', style: TextStyle(color: Colors.white70)),
+                      );
+                    }
+                    return Image.memory(bytes, fit: BoxFit.contain);
                   },
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    padding: const EdgeInsets.all(20),
-                    color: Colors.black87,
-                    child: const Text('Security Dossier Image not found/accessible.', style: TextStyle(color: Colors.white70)),
-                  ),
                 ),
               ),
             ),

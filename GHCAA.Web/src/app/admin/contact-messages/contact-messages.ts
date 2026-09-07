@@ -1,22 +1,26 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { ContactService } from '../../core/services/contact.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 
 @Component({
   selector: 'app-contact-messages',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ModalHeaderComponent],
   templateUrl: './contact-messages.html',
   styleUrl: './contact-messages.scss'
 })
 export class ContactMessages implements OnInit {
   private contactService = inject(ContactService);
   private notify = inject(NotificationService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   messages = signal<any[]>([]);
   loading = signal(true);
@@ -70,9 +74,15 @@ export class ContactMessages implements OnInit {
     });
   }
 
-  deleteMessage(msg: any) {
+  async deleteMessage(msg: any) {
     if (this.deletingId() !== null) return;
-    if (!confirm('Delete this enquiry permanently?')) return;
+    const ok = await firstValueFrom(this.confirmDialog.confirm({
+      title: 'Delete enquiry',
+      message: 'Delete this enquiry permanently?',
+      confirmLabel: 'Delete',
+      danger: true
+    }));
+    if (!ok) return;
     this.deletingId.set(msg.id);
     this.contactService.deleteMessage(msg.id).subscribe({
       next: () => {

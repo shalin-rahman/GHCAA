@@ -1,8 +1,10 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { SiteContentService } from '../../core/services/site-content.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { SiteContent, UpsertSiteContentDto } from '../../core/models/business.models';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
@@ -28,6 +30,7 @@ const emptyForm = (): UpsertSiteContentDto => ({
 export class AdminSiteContent implements OnInit {
     private service = inject(SiteContentService);
     private notify = inject(NotificationService);
+    private confirmDialog = inject(ConfirmDialogService);
 
     blocks = signal<SiteContent[]>([]);
     isLoading = signal(false);
@@ -121,8 +124,15 @@ export class AdminSiteContent implements OnInit {
         }).subscribe(() => this.load());
     }
 
-    deleteBlock(block: SiteContent) {
-        if (!confirm(`Delete content block "${block.title}"? This cannot be undone.`)) return;
+    async deleteBlock(block: SiteContent) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Delete content block',
+            message: `Delete content block "${block.title}"? This cannot be undone.`,
+            confirmLabel: 'Delete',
+            danger: true
+        }));
+        if (!ok) return;
+
         this.service.delete(block.id).subscribe(() => {
             this.notify.success('Content block deleted.');
             this.load();

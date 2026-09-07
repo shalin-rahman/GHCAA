@@ -8,11 +8,6 @@ namespace GHCAA.Infrastructure.Data
         public PgSqlApplicationDbContext(DbContextOptions<PgSqlApplicationDbContext> options) : base(options) { }
     }
 
-    public class MySqlApplicationDbContext : ApplicationDbContext
-    {
-        public MySqlApplicationDbContext(DbContextOptions<MySqlApplicationDbContext> options) : base(options) { }
-    }
-
     public class SqliteApplicationDbContext : ApplicationDbContext
     {
         public SqliteApplicationDbContext(DbContextOptions<SqliteApplicationDbContext> options) : base(options) { }

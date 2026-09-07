@@ -1,0 +1,34 @@
+.message-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    max-width: 420px;
+
+    span {
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    .exception-type {
+        color: var(--text-muted);
+        font-size: 0.7rem;
+        font-family: monospace;
+    }
+}
+
+.stack-trace-row td {
+    background: var(--surface-color);
+    padding: 0;
+}
+
+.stack-trace {
+    margin: 0;
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text-muted);
+    max-height: 300px;
+    overflow-y: auto;
+}

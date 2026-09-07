@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName, getCurrentECPosition, PROFESSIONAL_SECTORS, getBloodGroupName, MEMBERSHIP_TYPE_OPTIONS, LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { getECPositionName, getCurrentECPosition, PROFESSIONAL_SECTORS, getBloodGroupName, MEMBERSHIP_TYPE_OPTIONS, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS } from '../../core/constants/app.constants';
+import { debounce } from '../../core/utils/debounce.util';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
@@ -70,7 +71,7 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
 
     private currentPage = 1;
     private readonly PAGE_SIZE = 20;
-    private searchDebounce: any;
+    private debouncedSearch = debounce(() => this.doSearch(), SEARCH_DEBOUNCE_MS);
     private observer!: IntersectionObserver;
 
     @ViewChild('sentinel') set sentinel(element: ElementRef<HTMLElement>) {
@@ -100,7 +101,7 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
 
     ngOnDestroy() {
         if (this.observer) this.observer.disconnect();
-        if (this.searchDebounce) clearTimeout(this.searchDebounce);
+        this.debouncedSearch.cancel();
     }
 
     private setupIntersectionObserver(element: HTMLElement) {
@@ -125,8 +126,7 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
 
     /** Called when filters change — resets to page 1 */
     search() {
-        if (this.searchDebounce) clearTimeout(this.searchDebounce);
-        this.searchDebounce = setTimeout(() => this.doSearch(), 300);
+        this.debouncedSearch();
     }
 
     private doSearch() {

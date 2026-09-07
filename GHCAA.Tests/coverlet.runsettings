@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 82.50: without this, XPlat Code Coverage sweeps EF migration files and build output into the
+     denominator (that's how COVERAGE_SNAPSHOT_2026-05-26.md ended up with a 0.43% line-rate over
+     "1,002,454" total lines). Excluding Migrations/bin/obj keeps the percentage meaningful. -->
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Exclude>[GHCAA.Tests]*</Exclude>
+          <ExcludeByFile>**/Migrations/**/*.cs,**/bin/**/*.cs,**/obj/**/*.cs</ExcludeByFile>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

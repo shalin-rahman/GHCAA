@@ -43,11 +43,11 @@ namespace GHCAA.Infrastructure.Services
                 // Member is archived, on top of hiding soft-deleted rows. FinancialRecords carries
                 // no such filter, so archiving a member silently shrank the org-wide balance by
                 // everything they had already paid — money already received is not undone by the
-                // payer being archived later. IgnoreQueryFilters() restores that half; !IsDeleted is
+                // payer being archived later. IgnoreQueryFilters() restores that half; !IsArchived is
                 // reapplied by hand since that half of the filter is still correct here.
                 var memberPayments = await _db.PaymentHistories
                     .IgnoreQueryFilters()
-                    .Where(p => p.Status == Enums.PaymentStatus.Completed && !p.IsDeleted)
+                    .Where(p => p.Status == Enums.PaymentStatus.Completed && !p.IsArchived)
                     .SumAsync(p => p.Amount, cancellationToken);
 
                 balance = ledgerIncome + memberPayments - ledgerExpense;

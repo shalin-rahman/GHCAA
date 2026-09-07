@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { EC_ROLES, getECPositionName, getCurrentECPosition, getCurrentECPeriod, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, MEMBERSHIP_TYPE_OPTIONS, EC_ROLES_OPTIONS, getBloodGroupName, LOOKUP_GROUPS } from '../../core/constants/app.constants';
@@ -19,11 +20,12 @@ import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { toWireDate } from '../../core/utils/date.util';
 import { Icon } from '../../common/icon/icon';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 
 @Component({
   selector: 'app-admin-members',
   standalone: true,
-  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon],
+  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon, ModalHeaderComponent],
   providers: [DatePipe],
   templateUrl: './admin-members.html',
   styleUrl: './admin-members.scss'
@@ -31,6 +33,7 @@ import { Icon } from '../../common/icon/icon';
 export class AdminMembers implements OnInit {
   private adminService = inject(AdminService);
   private notify = inject(NotificationService);
+  private confirmDialog = inject(ConfirmDialogService);
   private router = inject(Router);
   private datePipe = inject(DatePipe);
   private lookupService = inject(LookupService);
@@ -292,24 +295,42 @@ export class AdminMembers implements OnInit {
   }
 
   archiveMember(id: number) {
-    if (!confirm('Archive this member? This action is reversible.')) return;
-    this.adminService.archiveMember(id).subscribe({
-      next: () => { this.notify.success('Member archived.'); this.loadMembers(); },
-      error: () => this.notify.error('Archive failed.')
+    this.confirmDialog.confirm({
+      title: 'Archive member',
+      message: 'Archive this member? This action is reversible.',
+      confirmLabel: 'Archive',
+      danger: true
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.adminService.archiveMember(id).subscribe({
+        next: () => { this.notify.success('Member archived.'); this.loadMembers(); },
+        error: () => this.notify.error('Archive failed.')
+      });
     });
   }
 
   restoreMember(id: number) {
-    if (!confirm('Restore this member from the archive?')) return;
-    this.adminService.restoreMember(id).subscribe({
-      next: () => { this.notify.success('Member restored.'); this.loadMembers(); },
-      error: () => this.notify.error('Restore failed.')
+    this.confirmDialog.confirm({
+      title: 'Restore member',
+      message: 'Restore this member from the archive?',
+      confirmLabel: 'Restore'
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.adminService.restoreMember(id).subscribe({
+        next: () => { this.notify.success('Member restored.'); this.loadMembers(); },
+        error: () => this.notify.error('Restore failed.')
+      });
     });
   }
 
   sendResetLink(id: number) {
-    if (!confirm('Send a password reset link to this member?')) return;
-    this.adminService.sendPasswordResetLink(id).subscribe({
+    this.confirmDialog.confirm({
+      title: 'Send reset link',
+      message: 'Send a password reset link to this member?',
+      confirmLabel: 'Send'
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.adminService.sendPasswordResetLink(id).subscribe({
       next: (res: any) => {
         if (res.resetUrl) {
             if (navigator.clipboard) {
@@ -324,8 +345,9 @@ export class AdminMembers implements OnInit {
         } else {
             this.notify.success(res.message || 'Password reset link sent.');
         }
-      },
-      error: (err: any) => this.notify.error(err.error?.message || 'Failed to send reset link.')
+        },
+        error: (err: any) => this.notify.error(err.error?.message || 'Failed to send reset link.')
+      });
     });
   }
 
@@ -774,24 +796,38 @@ export class AdminMembers implements OnInit {
   }
 
   deletePayment(paymentId: number) {
-    if (!confirm('Permanently delete this payment record? This will also mark linked dues as unpaid.')) return;
-    this.adminService.deletePayment(paymentId).subscribe({
-      next: () => {
-        this.notify.success('Payment deleted.');
-        this.loadPayments(this.selectedMember().id);
-      },
-      error: () => this.notify.error('Failed to delete payment.')
+    this.confirmDialog.confirm({
+      title: 'Delete payment record',
+      message: 'Permanently delete this payment record? This will also mark linked dues as unpaid.',
+      confirmLabel: 'Delete',
+      danger: true
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.adminService.deletePayment(paymentId).subscribe({
+        next: () => {
+          this.notify.success('Payment deleted.');
+          this.loadPayments(this.selectedMember().id);
+        },
+        error: () => this.notify.error('Failed to delete payment.')
+      });
     });
   }
 
   deleteECHistory(id: number) {
-    if (!confirm('Permanently delete this EC role history record?')) return;
-    this.adminService.deleteECMember(id).subscribe({
-      next: () => {
-        this.notify.success('EC History deleted.');
-        this.finalizeSave(); // Refresh data
-      },
-      error: () => this.notify.error('Failed to delete history.')
+    this.confirmDialog.confirm({
+      title: 'Delete EC role history',
+      message: 'Permanently delete this EC role history record?',
+      confirmLabel: 'Delete',
+      danger: true
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.adminService.deleteECMember(id).subscribe({
+        next: () => {
+          this.notify.success('EC History deleted.');
+          this.finalizeSave(); // Refresh data
+        },
+        error: () => this.notify.error('Failed to delete history.')
+      });
     });
   }
 

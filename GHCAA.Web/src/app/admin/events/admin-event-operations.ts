@@ -1,22 +1,26 @@
 import { Component, inject, signal, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { EventsService } from '../../core/services/events.service';
 import { AlumniEvent } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 import { Icon } from '../../common/icon/icon';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 
 @Component({
   selector: 'app-admin-event-operations',
   standalone: true,
-  imports: [CommonModule, FormsModule, Icon],
+  imports: [CommonModule, FormsModule, Icon, PageHeaderComponent],
   templateUrl: './admin-event-operations.html',
   styleUrl: './admin-event-operations.scss'
 })
 export class AdminEventOperations implements OnInit {
   private eventsService = inject(EventsService);
   private notify = inject(NotificationService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   @Input() event!: AlumniEvent;
 
@@ -98,22 +102,28 @@ export class AdminEventOperations implements OnInit {
     });
   }
 
-  deleteTask(taskId: number) {
+  async deleteTask(taskId: number) {
     if (this.deletingTaskId() !== null) return;
-    if (confirm('Delete this task?')) {
-      this.deletingTaskId.set(taskId);
-      this.eventsService.deleteTask(taskId).subscribe({
-        next: () => {
-          this.deletingTaskId.set(null);
-          this.notify.success('Task removed');
-          this.loadTasks();
-        },
-        error: () => {
-          this.deletingTaskId.set(null);
-          this.notify.error('Failed to remove task.');
-        }
-      });
-    }
+    const ok = await firstValueFrom(this.confirmDialog.confirm({
+      title: 'Delete task',
+      message: 'Delete this task?',
+      confirmLabel: 'Delete',
+      danger: true
+    }));
+    if (!ok) return;
+
+    this.deletingTaskId.set(taskId);
+    this.eventsService.deleteTask(taskId).subscribe({
+      next: () => {
+        this.deletingTaskId.set(null);
+        this.notify.success('Task removed');
+        this.loadTasks();
+      },
+      error: () => {
+        this.deletingTaskId.set(null);
+        this.notify.error('Failed to remove task.');
+      }
+    });
   }
 
   updateBudget() {
@@ -149,21 +159,27 @@ export class AdminEventOperations implements OnInit {
     });
   }
 
-  deleteExpense(expenseId: number) {
+  async deleteExpense(expenseId: number) {
     if (this.deletingExpenseId() !== null) return;
-    if (confirm('Delete this expense?')) {
-      this.deletingExpenseId.set(expenseId);
-      this.eventsService.deleteExpense(expenseId).subscribe({
-        next: () => {
-          this.deletingExpenseId.set(null);
-          this.notify.success('Expense removed');
-          this.loadBudget();
-        },
-        error: () => {
-          this.deletingExpenseId.set(null);
-          this.notify.error('Failed to remove expense.');
-        }
-      });
-    }
+    const ok = await firstValueFrom(this.confirmDialog.confirm({
+      title: 'Delete expense',
+      message: 'Delete this expense?',
+      confirmLabel: 'Delete',
+      danger: true
+    }));
+    if (!ok) return;
+
+    this.deletingExpenseId.set(expenseId);
+    this.eventsService.deleteExpense(expenseId).subscribe({
+      next: () => {
+        this.deletingExpenseId.set(null);
+        this.notify.success('Expense removed');
+        this.loadBudget();
+      },
+      error: () => {
+        this.deletingExpenseId.set(null);
+        this.notify.error('Failed to remove expense.');
+      }
+    });
   }
 }

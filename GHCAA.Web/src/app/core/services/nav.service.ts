@@ -64,6 +64,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     { path: '/admin/payments/fees', label: 'Fee Policy', icon: 'fee-policy', roles: ['SuperAdmin'], section: 'Finance & Tools' },
     { path: '/admin/roles', label: 'User Roles', icon: 'roles', roles: ['SuperAdmin'], section: 'Finance & Tools' },
     { path: '/admin/audit', label: 'Audit Logs', icon: 'audit', roles: ['SuperAdmin'], section: 'Finance & Tools' },
+    { path: '/admin/error-logs', label: 'Error Logs', icon: 'audit', roles: ['SuperAdmin'], section: 'Finance & Tools' },
     { path: '/admin/org-config', label: 'Org Config', icon: 'org-config', roles: ['SuperAdmin'], section: 'Finance & Tools' }
 ];
 

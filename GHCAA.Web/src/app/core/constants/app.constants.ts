@@ -1,3 +1,8 @@
+// 82.44: the shared debounce delay for live search inputs (governance member search, directory,
+// jobs, messages member picker, requests). Keep one value so every search field waits the same
+// amount of time before firing.
+export const SEARCH_DEBOUNCE_MS = 300;
+
 export const EC_ROLES = [
     'None',
     'President',
@@ -485,7 +490,8 @@ export const API_ENDPOINTS = {
         GOVERNANCE: '/api/admin/governance',
         CONTACT_MESSAGES: '/api/admin/contact-messages',
         SOCIAL_AUTH: '/api/admin/social-auth',
-        POLLS: '/api/admin/polls'
+        POLLS: '/api/admin/polls',
+        ERROR_LOGS: '/api/admin/error-logs'
     },
     PENDING: {
         ADMIN_SUMMARY: '/api/pending/admin/summary',
@@ -507,7 +513,12 @@ export const API_ENDPOINTS = {
         FACEBOOK: '/api/auth/facebook',
         REFRESH: '/api/auth/refresh',
         ME: '/api/auth/me',
-        LOGOUT: '/api/auth/logout'
+        LOGOUT: '/api/auth/logout',
+        RESET_PASSWORD: '/api/auth/reset-password'
+    },
+    ROLES: '/api/roles',
+    ACTIVITY: {
+        ADMIN_GLOBAL: '/api/activity/admin/global'
     },
     EVENTS: '/api/events',
     GALLERY: '/api/gallery',
