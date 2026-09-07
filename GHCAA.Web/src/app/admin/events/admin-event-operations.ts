@@ -9,11 +9,13 @@ import { ConfirmDialogService } from '../../core/services/confirm-dialog.service
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 import { Icon } from '../../common/icon/icon';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { OrgConfigService } from '../../core/services/org-config.service';
+import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
 @Component({
   selector: 'app-admin-event-operations',
   standalone: true,
-  imports: [CommonModule, FormsModule, Icon, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, Icon, PageHeaderComponent, AppCurrencyPipe],
   templateUrl: './admin-event-operations.html',
   styleUrl: './admin-event-operations.scss'
 })
@@ -21,6 +23,7 @@ export class AdminEventOperations implements OnInit {
   private eventsService = inject(EventsService);
   private notify = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
+  orgConfig = inject(OrgConfigService);
 
   @Input() event!: AlumniEvent;
 

@@ -26,7 +26,7 @@
                     <span class="year">{{ due.year }}</span>
                     <span class="type">Annual Fee</span>
                 </div>
-                <div class="amount">৳ {{ due.amount | number }}</div>
+                <div class="amount">{{ due.amount | appCurrency }}</div>
                 <div class="due-footer">
                     <button class="btn btn-accent btn-sm" (click)="openPayModal(due)">Pay Now</button>
                 </div>
@@ -76,7 +76,7 @@
                                     <span class="text-[10px] payment-date">{{ item.paidAt | date:'dd-MM-yyyy' }}</span>
                                 </td>
                                 <td>
-                                    <span class="font-black">৳{{ item.amount }}</span>
+                                    <span class="font-black">{{ item.amount | appCurrency }}</span>
                                 </td>
                                 <td>
                                     <span class="badge" [ngClass]="getStatusClass(item.status)">{{ getStatusLabel(item.status) }}</span>
@@ -145,7 +145,7 @@
             </div>
 
             <div class="form-group">
-                <label>Amount (৳)</label>
+                <label>Amount ({{ orgConfig.config()?.currency?.symbol }})</label>
                 <input type="number" [(ngModel)]="paymentForm.amount" placeholder="0.00">
             </div>
 

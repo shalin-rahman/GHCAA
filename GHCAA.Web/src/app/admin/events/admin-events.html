@@ -128,7 +128,7 @@
 
                 <div class="form-grid mb-8">
                     <div class="form-group">
-                        <label>Registration Fee (BDT)</label>
+                        <label>Registration Fee ({{ orgConfigService.config()?.currency?.code }})</label>
                         <input type="number" formControlName="registrationFee" placeholder="0.00">
                     </div>
                     <div class="form-group">
@@ -362,8 +362,8 @@
                         <td class="px-6 py-4 text-sm opacity-80">{{ reg.eventTitle }}</td>
                         <td class="px-6 py-4">
                             <div class="text-xs font-black">
-                                {{ (reg.contributionAmount || reg.eventFee || 0) > 0 ? (reg.contributionAmount ||
-                                reg.eventFee | currency:'BDT ':'code') : 'Free' }}
+                                {{ (reg.contributionAmount || reg.eventFee || 0) > 0 ? ((reg.contributionAmount ||
+                                reg.eventFee) | appCurrency:'1.0-0':'code') : 'Free' }}
                             </div>
                             <!-- Payment Method Badge -->
                             <div class="mt-1 flex items-center gap-1 opacity-60">
@@ -466,8 +466,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
                     <div class="data-field-box">
                         <h5>Fee Details</h5>
-                        <p>{{ ((ev?.registrationFee || 0) > 0) ? (ev?.registrationFee | currency:'BDT
-                            ':'symbol':'1.0-0') : 'Free Entry' }}</p>
+                        <p>{{ ((ev?.registrationFee || 0) > 0) ? (ev?.registrationFee | appCurrency) : 'Free Entry' }}</p>
                     </div>
                     <div class="data-field-box">
                         <h5>Registration Opens</h5>

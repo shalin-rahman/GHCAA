@@ -21,11 +21,12 @@ import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { toWireDate } from '../../core/utils/date.util';
 import { Icon } from '../../common/icon/icon';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
+import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
 @Component({
   selector: 'app-admin-members',
   standalone: true,
-  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon, ModalHeaderComponent],
+  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon, ModalHeaderComponent, AppCurrencyPipe],
   providers: [DatePipe],
   templateUrl: './admin-members.html',
   styleUrl: './admin-members.scss'

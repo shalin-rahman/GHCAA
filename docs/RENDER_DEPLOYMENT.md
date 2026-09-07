@@ -3,7 +3,8 @@
 > **One Render service** builds and serves **both** the .NET API and the Angular web app
 > from the same origin. The database is **Neon** Postgres.
 >
-> **SECURITY:** This file and `docs/deploy_connection.txt` contain live credentials.
+> **SECURITY:** This file and `docs/deploy_conn_Info.txt` (formerly `deploy_connection.txt`, renamed
+> 2026-09-07 — both names are now gitignored) contain live credentials.
 > After setup, **rotate the Neon password** and remove both files from the repo
 > (see [Step 7](#step-7--security-cleanup)).
 
@@ -28,7 +29,7 @@ You only need to do the dashboard/Git steps below. **No further code changes req
 - A **Neon** account/project (already created) → https://console.neon.tech
 - Push access to this GitHub repo
 - The two secret values (keep them handy):
-  - **Neon DATABASE_URL** (from `docs/deploy_connection.txt`, last line):
+  - **Neon DATABASE_URL** (from `docs/deploy_conn_Info.txt`):
     ```
     postgresql://neondb_owner:npg_keJCzc13FsIy@ep-green-fog-ax3l40f0-pooler.c-4.us-east-2.aws.neon.tech/GhcaaDB?sslmode=require&channel_binding=require
     ```
@@ -113,7 +114,7 @@ Click **Save Changes** — Render redeploys automatically.
 ## Step 4 — Get the Render deploy hook (for CI auto-deploy)
 
 1. Service → **Settings** → scroll to **Deploy Hook** → click the eye icon to reveal, then **Copy** the URL.
-   - Your current hook (already in `docs/deploy_connection.txt`, line 7):
+   - Your current hook (already in `docs/deploy_conn_Info.txt`, line 8):
      `https://api.render.com/deploy/srv-d9brj1t7vvec73cc5npg?key=QyJsiWt9fYM`
    - This URL is a **secret** — anyone with it can trigger a deploy. If it has ever been shared/committed,
      click **Regenerate hook** and use the new one (then update the GitHub secret below).
@@ -174,16 +175,20 @@ Once Render shows **Live**:
 
 ## Step 7 — Security cleanup (do this!)
 
-The repo currently commits live DB passwords in `docs/deploy_connection.txt`. After setup:
+**Status as of 2026-09-07:** half done. `docs/deploy_connection.txt` was removed from tracking, but its
+replacement — `docs/deploy_conn_Info.txt` — carries the same live Render Postgres password and was left
+untracked-but-not-ignored until this pass added both filenames to `.gitignore`. **Rotation has not
+happened.** See `docs/TODO.md` 47.10/48.2/48.13 (`ONHOLD`, P0/P1) — the credentials already committed in
+`deploy_connection.txt`'s git history are still exposed regardless of the working-tree rename, and
+rotating them needs dashboard access no session has.
 
 ```bash
 # 1. Rotate the Neon password in Neon Console → Roles → reset password,
-#    then update DATABASE_URL on Render + the GitHub secret.
+#    then update DATABASE_URL on Render + the GitHub secret. STILL OUTSTANDING.
 
-# 2. Stop tracking the secret files
-git rm --cached docs/deploy_connection.txt docs/RENDER_DEPLOYMENT.md
-echo "docs/deploy_connection.txt"     >> .gitignore
-echo "docs/RENDER_DEPLOYMENT.md"  >> .gitignore
+# 2. Stop tracking the secret files (docs/deploy_connection.txt done; RENDER_DEPLOYMENT.md itself not,
+#    since it's the doc you're reading — untrack it once you no longer need it as a live reference)
+git rm --cached docs/RENDER_DEPLOYMENT.md
 git commit -m "chore: stop tracking files containing DB credentials"
 git push
 ```

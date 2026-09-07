@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import '../config/org_config.dart';
 
 class AppUtils {
   static String formatDate(dynamic date) {
@@ -57,14 +58,18 @@ class AppUtils {
     return DateFormat('yyyy-MM-dd').format(dt);
   }
 
-  static String formatCurrency(dynamic amount) {
-    if (amount == null) return '৳0.00';
-    final numberFormat = NumberFormat.currency(symbol: '৳', decimalDigits: 2, locale: 'en_BD');
+  /// Formats [amount] using the active org's currency symbol. Callers read
+  /// the symbol from [OrgConfig] (via `orgCurrencyProvider`) rather than this
+  /// method assuming one — money shown here has to match whatever org is
+  /// configured, not just the org this app started life for.
+  static String formatCurrency(dynamic amount, OrgCurrency currency) {
+    if (amount == null) return '${currency.symbol}0.00';
+    final numberFormat = NumberFormat.currency(symbol: currency.symbol, decimalDigits: 2);
     try {
        double val = double.tryParse(amount.toString()) ?? 0;
        return numberFormat.format(val);
     } catch (_) {
-       return '৳$amount';
+       return '${currency.symbol}$amount';
     }
   }
 

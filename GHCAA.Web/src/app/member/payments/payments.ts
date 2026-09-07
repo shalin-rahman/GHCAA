@@ -14,11 +14,13 @@ import {
 } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
+import { OrgConfigService } from '../../core/services/org-config.service';
+import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
 @Component({
     selector: 'app-payments',
     standalone: true,
-    imports: [CommonModule, FormsModule, PaymentPortalComponent, LogoSpinnerComponent, ModalHeaderComponent],
+    imports: [CommonModule, FormsModule, PaymentPortalComponent, LogoSpinnerComponent, ModalHeaderComponent, AppCurrencyPipe],
     templateUrl: './payments.html',
     styleUrl: './payments.scss'
 })
@@ -26,6 +28,7 @@ export class Payments implements OnInit {
     private financialService = inject(FinancialService);
     private notify = inject(NotificationService);
     private confirmDialog = inject(ConfirmDialogService);
+    orgConfig = inject(OrgConfigService);
 
     history = signal<PaymentRecord[]>([]);
     dues = signal<MembershipDue[]>([]);

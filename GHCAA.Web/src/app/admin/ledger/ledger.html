@@ -17,15 +17,15 @@
     <div class="balance-cards" *ngIf="!showForm()">
         <div class="glass-card balance-card income">
             <small>Total Income</small>
-            <h3>৳ {{ summary()?.totalIncome | number }}</h3>
+            <h3>{{ summary()?.totalIncome | appCurrency }}</h3>
         </div>
         <div class="glass-card balance-card expense">
             <small>Total Expense</small>
-            <h3>৳ {{ summary()?.totalExpense | number }}</h3>
+            <h3>{{ summary()?.totalExpense | appCurrency }}</h3>
         </div>
         <div class="glass-card balance-card balance">
             <small>Current Balance</small>
-            <h3>৳ {{ summary()?.netBalance | number }}</h3>
+            <h3>{{ summary()?.netBalance | appCurrency }}</h3>
         </div>
     </div>
 
@@ -36,7 +36,7 @@
         <div class="income-breakdown-list">
             <div class="income-breakdown-item" *ngFor="let d of incomeByCategory()">
                 <span class="category-name">{{ getCategoryName(d.financialCategory) }}</span>
-                <span class="category-total">৳ {{ d.total | number }}</span>
+                <span class="category-total">{{ d.total | appCurrency }}</span>
             </div>
         </div>
     </div>
@@ -53,7 +53,7 @@
                         #dateM="ngModel" [class.border-red-500]="dateM.invalid && dateM.touched">
                 </div>
                 <div class="form-group">
-                    <label>Amount (৳) *</label>
+                    <label>Amount ({{ orgConfig.config()?.currency?.symbol }}) *</label>
                     <input type="number" [(ngModel)]="newRecord.amount" name="amount" required min="1">
                 </div>
                 <div class="form-group">
@@ -141,7 +141,7 @@
                         </span>
                     </td>
                     <td [ngClass]="tr.recordType === 'Income' ? 'credit' : 'debit'">
-                        <strong>{{ tr.recordType === 'Expense' ? '-' : '' }}৳{{ tr.amount | number }}</strong>
+                        <strong>{{ tr.recordType === 'Expense' ? '-' : '' }}{{ tr.amount | appCurrency }}</strong>
                     </td>
 
                 </tr>

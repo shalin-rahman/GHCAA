@@ -17,7 +17,7 @@
             <div class="progress-bar">
               <div class="progress-fill" [style.width.%]="progressPercent(c)"></div>
             </div>
-            <p class="progress-text">৳{{ c.amountReceived | number }} raised of ৳{{ c.targetAmount | number }} ({{ progressPercent(c) }}%)</p>
+            <p class="progress-text">{{ c.amountReceived | appCurrency }} raised of {{ c.targetAmount | appCurrency }} ({{ progressPercent(c) }}%)</p>
           </a>
         }
       </div>
@@ -33,13 +33,13 @@
       <div class="progress-bar large">
         <div class="progress-fill" [style.width.%]="progressPercent(campaign()!)"></div>
       </div>
-      <p class="progress-text">৳{{ campaign()!.amountReceived | number }} raised of ৳{{ campaign()!.targetAmount | number }} ({{ progressPercent(campaign()!) }}%)</p>
+      <p class="progress-text">{{ campaign()!.amountReceived | appCurrency }} raised of {{ campaign()!.targetAmount | appCurrency }} ({{ progressPercent(campaign()!) }}%)</p>
       <p class="story">{{ campaign()!.story }}</p>
 
       <section class="pledge-form">
         <h2>Make a Pledge</h2>
         <label>
-          Amount (৳)
+          Amount ({{ orgConfig.config()?.currency?.symbol }})
           <input type="number" min="1" [(ngModel)]="pledgeAmount" name="pledgeAmount" />
         </label>
         @if (!isMember()) {
@@ -79,7 +79,7 @@
               @for (d of tier.donors; track $index) {
                 <div class="donor-row">
                   <span class="donor-name">{{ d.displayName }}</span>
-                  <span class="donor-amount">৳{{ d.amountReceived | number }}</span>
+                  <span class="donor-amount">{{ d.amountReceived | appCurrency }}</span>
                 </div>
               }
             </div>
@@ -90,7 +90,7 @@
               @for (d of honourRoll()!.untiered; track $index) {
                 <div class="donor-row">
                   <span class="donor-name">{{ d.displayName }}</span>
-                  <span class="donor-amount">৳{{ d.amountReceived | number }}</span>
+                  <span class="donor-amount">{{ d.amountReceived | appCurrency }}</span>
                 </div>
               }
             </div>

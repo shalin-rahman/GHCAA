@@ -5,12 +5,13 @@ import { CampaignService } from '../../core/services/campaign.service';
 import { CampaignPledge } from '../../core/models/business.models';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { getPledgeStatusLabel, getPledgeStatusClass } from '../../core/constants/app.constants';
+import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
 // TODO 37.3: a member's own pledges and giving history.
 @Component({
     selector: 'app-giving',
     standalone: true,
-    imports: [CommonModule, RouterLink, LogoSpinnerComponent],
+    imports: [CommonModule, RouterLink, LogoSpinnerComponent, AppCurrencyPipe],
     templateUrl: './giving.html',
     styleUrl: './giving.scss'
 })

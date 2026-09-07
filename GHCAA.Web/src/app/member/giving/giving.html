@@ -6,7 +6,7 @@
   } @else if (pledges().length === 0) {
     <p class="empty-msg">You haven't made a pledge yet. <a routerLink="/campaigns">Browse open campaigns</a>.</p>
   } @else {
-    <p class="total-line">Total confirmed giving: <strong>৳{{ totalGiven() | number }}</strong></p>
+    <p class="total-line">Total confirmed giving: <strong>{{ totalGiven() | appCurrency }}</strong></p>
     <table class="giving-table">
       <thead>
         <tr>
@@ -20,8 +20,8 @@
         @for (p of pledges(); track p.id) {
           <tr>
             <td>{{ p.pledgedAt | date: 'mediumDate' }}</td>
-            <td>৳{{ p.amount | number }}</td>
-            <td>৳{{ p.amountReceived | number }}</td>
+            <td>{{ p.amount | appCurrency }}</td>
+            <td>{{ p.amountReceived | appCurrency }}</td>
             <td><span class="status-badge" [class]="getPledgeStatusClass(p.status)">{{ getPledgeStatusLabel(p.status) }}</span></td>
           </tr>
         }

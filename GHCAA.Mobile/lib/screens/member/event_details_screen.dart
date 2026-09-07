@@ -13,6 +13,7 @@ import '../../features/auth/auth_service.dart';
 import '../../features/events/events_service.dart';
 import '../../core/utils/app_utils.dart';
 import '../../core/config/app_config.dart';
+import '../../core/services/org_config_service.dart';
 
 final eventDetailsProvider = FutureProvider.family<Map<String, dynamic>?, int>((ref, eventId) async {
   try {
@@ -37,6 +38,7 @@ class EventDetailsScreen extends ConsumerWidget {
     final detailsAsync = ref.watch(eventDetailsProvider(eventId));
     final roleAsync = ref.watch(roleProvider);
     final isAdmin = roleAsync.value?.isStaffAdminRole ?? false;
+    final currency = ref.watch(orgCurrencyProvider);
 
     return AppScaffold(
       title: 'Event Details',
@@ -113,7 +115,7 @@ class EventDetailsScreen extends ConsumerWidget {
                        // for it above; these rows must be hidden too, not just the button.
                        if (event['requiresRegistration'] != false) ...[
                          _buildStatRow('Participants', '${event['participantCount'] ?? 0} listed'),
-                         _buildStatRow('Entry Fee', event['requiresPayment'] == false ? 'FREE' : AppUtils.formatCurrency(event['registrationFee'])),
+                         _buildStatRow('Entry Fee', event['requiresPayment'] == false ? 'FREE' : AppUtils.formatCurrency(event['registrationFee'], currency)),
                        ],
                        _buildStatRow('Non-Members', event['allowNonMembers'] == true ? 'ALLOWED' : 'MEMBERS ONLY'),
                        if (event['requiresRegistration'] != false) ...[
@@ -256,6 +258,7 @@ class EventDetailsScreen extends ConsumerWidget {
 
   void _showRegisterDialog(BuildContext context, WidgetRef ref, Map<String, dynamic> event) {
     final requiresPayment = event['requiresPayment'] == true;
+    final currency = ref.read(orgCurrencyProvider);
     final amountCtrl = TextEditingController();
     bool isSaving = false;
 
@@ -274,13 +277,13 @@ class EventDetailsScreen extends ConsumerWidget {
               Text('REGISTER FOR ${event['title']?.toUpperCase()}', style: const TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 12)),
               const SizedBox(height: 20),
               if (requiresPayment) ...[
-                const Text('Custom Contribution (Minimum: ৳10 for free events if opted, or fixed fee)', style: TextStyle(color: AppTheme.textSecondaryDark, fontSize: 10)),
+                Text('Custom Contribution (Minimum: ${currency.symbol}10 for free events if opted, or fixed fee)', style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 10)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: amountCtrl,
                   keyboardType: TextInputType.number,
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(labelText: 'Amount (৳)', labelStyle: TextStyle(color: AppTheme.royalGold), enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24))),
+                  decoration: InputDecoration(labelText: 'Amount (${currency.symbol})', labelStyle: const TextStyle(color: AppTheme.royalGold), enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24))),
                 ),
                 const SizedBox(height: 16),
               ] else ...[
@@ -297,7 +300,7 @@ class EventDetailsScreen extends ConsumerWidget {
                     final val = double.tryParse(amountCtrl.text) ?? 0;
                     final fee = event['registrationFee'] ?? 0;
                     if (fee == 0 && val < 10 && val > 0) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Contribution must be at least 10 BDT if provided.'), backgroundColor: Colors.orangeAccent));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Contribution must be at least ${currency.symbol}10 (${currency.code}) if provided.'), backgroundColor: Colors.orangeAccent));
                       return;
                     }
                   }

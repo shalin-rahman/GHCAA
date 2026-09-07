@@ -15,6 +15,7 @@ import '../../core/utils/app_utils.dart';
 import '../../core/widgets/app_search_field.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/services/org_config_service.dart';
 
 final eventSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
 
@@ -40,6 +41,8 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currency = ref.watch(orgCurrencyProvider);
+
     Future<void> processPayment(double amount, PaymentGateway gateway, String eventTitle) async {
       final gatewayService = ref.read(gatewayServiceProvider);
       final res = await gatewayService.initiate(
@@ -264,7 +267,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                                       const SizedBox(width: 8),
                                                       if ((num.tryParse('${ev['registrationFee']}') ?? 0) > 0)
                                                         Flexible(
-                                                          child: Text(AppUtils.formatCurrency(ev['registrationFee']), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.royalGold, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis),
+                                                          child: Text(AppUtils.formatCurrency(ev['registrationFee'], currency), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.royalGold, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis),
                                                         )
                                                       else
                                                         const Flexible(
@@ -328,6 +331,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
   }
 
   void _showCreateEvent(BuildContext context, WidgetRef ref) {
+    final currency = ref.read(orgCurrencyProvider);
     final titleCtrl = TextEditingController();
     final descCtrl = TextEditingController();
     final locCtrl = TextEditingController();
@@ -426,7 +430,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                     child: TextField(
                       controller: feeCtrl,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(labelText: 'Registration Fee (BDT)', prefixIcon: Icon(Icons.currency_exchange_rounded)),
+                      decoration: InputDecoration(labelText: 'Registration Fee (${currency.code})', prefixIcon: const Icon(Icons.currency_exchange_rounded)),
                     ),
                   ),
  

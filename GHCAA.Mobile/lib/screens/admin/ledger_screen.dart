@@ -7,6 +7,8 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../features/admin/admin_service.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/utils/app_utils.dart';
+import '../../core/services/org_config_service.dart';
 
 final adminLedgerRecordsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async => ref.read(adminServiceProvider).getLedgerRecords());
 final adminLedgerSummaryProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async => ref.read(adminServiceProvider).getLedgerSummary(DateTime.now().year));
@@ -34,6 +36,7 @@ class _AdminLedgerScreenState extends ConsumerState<AdminLedgerScreen> {
     final summaryAsync = ref.watch(adminLedgerSummaryProvider);
     final searchQuery = ref.watch(adminLedgerSearchQueryProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currency = ref.watch(orgCurrencyProvider);
 
     return AppScaffold(
       isAdmin: true,
@@ -47,8 +50,8 @@ class _AdminLedgerScreenState extends ConsumerState<AdminLedgerScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildStatTile(context, 'REVENUE', '৳ ${sum['totalRevenue'] ?? 0}'),
-                  _buildStatTile(context, 'EXPENSES', '৳ ${sum['totalExpenses'] ?? 0}', highlight: true),
+                  _buildStatTile(context, 'REVENUE', AppUtils.formatCurrency(sum['totalRevenue'] ?? 0, currency)),
+                  _buildStatTile(context, 'EXPENSES', AppUtils.formatCurrency(sum['totalExpenses'] ?? 0, currency), highlight: true),
                 ],
               ),
             ),
@@ -130,7 +133,7 @@ class _AdminLedgerScreenState extends ConsumerState<AdminLedgerScreen> {
                                       ),
                                       title: Text(record['description'] ?? 'Transaction Asset', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white)),
                                       subtitle: Text('${record['recordDate']?.split('T')[0] ?? 'Legacy Record'} | Member #${record['memberId']}', style: const TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark)),
-                                      trailing: Text('৳ ${record['amount']}', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: isRevenue ? Colors.greenAccent : Colors.white)),
+                                      trailing: Text(AppUtils.formatCurrency(record['amount'], currency), style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: isRevenue ? Colors.greenAccent : Colors.white)),
                                     ),
                                   ),
                                 );

@@ -136,7 +136,7 @@
     <div class="config-grid">
       <div class="form-group">
         <label>Currency Code</label>
-        <input type="text" [(ngModel)]="config.currency.code" name="currencyCode" maxlength="3" placeholder="BDT">
+        <input type="text" [(ngModel)]="config.currency.code" name="currencyCode" maxlength="3" [placeholder]="currencyCodeHint">
       </div>
       <div class="form-group">
         <label>Symbol</label>

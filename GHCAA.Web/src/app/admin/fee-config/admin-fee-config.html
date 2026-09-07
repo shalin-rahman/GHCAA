@@ -38,7 +38,7 @@
                         </span>
                     </td>
                     <td><span class="font-bold">{{ c.membershipType }}</span></td>
-                    <td class="amount font-mono text-accent">৳ {{ c.amount | number }}</td>
+                    <td class="amount font-mono text-accent">{{ c.amount | appCurrency }}</td>
                     <td><span class="text-xs">{{ c.effectiveDate | date:'dd-MM-yyyy' }}</span></td>
                     <td><span class="text-xs opacity-60">{{ c.effectiveTo ? (c.effectiveTo | date:'dd-MM-yyyy') :
                             'Indefinite' }}</span></td>
@@ -103,7 +103,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Amount (BDT) *</label>
+                    <label>Amount ({{ orgConfig.config()?.currency?.code }}) *</label>
                     <input type="number" formControlName="amount" placeholder="0.00" step="100"
                         [class.border-red-500]="form.get('amount')?.invalid && form.get('amount')?.touched">
                 </div>

@@ -136,7 +136,7 @@
                                 <label>Membership Tier</label>
                                 <p class="text-xs text-main">Assigned by the association office once your application is reviewed.</p>
                                 <div class="mt-2 text-xs font-bold text-accent" *ngIf="registrationFee() > 0">
-                                    <app-icon name="info-circle" [size]="14" class="mr-1"></app-icon> Applicable Registry Filing Fee: {{ registrationFee() | currency:'BDT ':'symbol':'1.0-0' }}
+                                    <app-icon name="info-circle" [size]="14" class="mr-1"></app-icon> Applicable Registry Filing Fee: {{ registrationFee() | appCurrency }}
                                 </div>
                             </div>
 

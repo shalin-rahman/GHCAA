@@ -7,6 +7,8 @@ import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Campaign, CampaignHonourRoll, CreatePledgePayload } from '../../core/models/business.models';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { OrgConfigService } from '../../core/services/org-config.service';
+import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
 // TODO 37.3: fundraising campaigns + donor honour roll. One component for both the list
 // (/campaigns) and a single campaign's page (/campaigns/:slug), same convention the Events
@@ -14,7 +16,7 @@ import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 @Component({
     selector: 'app-campaigns',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, LogoSpinnerComponent],
+    imports: [CommonModule, FormsModule, RouterLink, LogoSpinnerComponent, AppCurrencyPipe],
     templateUrl: './campaigns.html',
     styleUrl: './campaigns.scss'
 })
@@ -23,6 +25,7 @@ export class Campaigns implements OnInit {
     private route = inject(ActivatedRoute);
     private notify = inject(NotificationService);
     private auth = inject(AuthService);
+    orgConfig = inject(OrgConfigService);
 
     loading = signal(true);
     slug = signal<string | null>(null);

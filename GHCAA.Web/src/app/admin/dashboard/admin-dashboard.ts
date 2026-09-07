@@ -11,6 +11,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
 interface StatCard {
   icon: string;
@@ -31,7 +32,7 @@ interface PendingRow {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, ImgFallbackDirective, PageHeaderComponent],
+  imports: [CommonModule, RouterLink, DatePipe, ImgFallbackDirective, PageHeaderComponent, AppCurrencyPipe],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss'
 })
@@ -118,10 +119,6 @@ export class AdminDashboard implements OnInit {
       { label: 'Member applications', count: countOf(pending.members ?? pending.Members), link: '/admin/approvals' },
       { label: 'Event registrations', count: countOf(pending.eventRegistrations ?? pending.EventRegistrations), link: '/admin/events' },
     ].filter(row => row.count > 0);
-  }
-
-  formatBDT(value: number): string {
-    return `৳${value.toLocaleString('en-BD')}`;
   }
 
   // '' sentinel fallback (rather than the shared util's default logo) so the template's

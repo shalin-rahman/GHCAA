@@ -7,11 +7,12 @@ import { FinancialService } from '../../core/services/financial.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
+import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
 @Component({
   selector: 'app-payment-portal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImgFallbackDirective],
+  imports: [CommonModule, FormsModule, ImgFallbackDirective, AppCurrencyPipe],
   template: `
     <div class="payment-portal animate-fade-up">
       <!-- Tabs for Saved vs All -->
@@ -76,7 +77,7 @@ import { ImgFallbackDirective } from '../directives/img-fallback.directive';
                     </h4>
                     @if (amount() > 0) {
                         <div class="amount-badge px-3 py-1 bg-accent rounded-lg text-black font-black text-xs">
-                             Payable: {{ amount() | currency:'BDT ':'code':'1.0-0' }}
+                             Payable: {{ amount() | appCurrency:'1.0-0':'code' }}
                         </div>
                     }
                   </div>

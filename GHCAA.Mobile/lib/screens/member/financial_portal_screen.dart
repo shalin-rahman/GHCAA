@@ -8,6 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/utils/app_utils.dart';
+import '../../core/services/org_config_service.dart';
 import '../../core/widgets/app_search_field.dart';
 import '../../features/financials/financial_service.dart';
 import '../../features/financials/gateway_service.dart';
@@ -186,6 +187,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
   // Manual submission: show where to pay (admin-configured wallet/bank details), collect the
   // member's transaction reference + optional receipt, and POST to record-payment for verification.
   void _showManualPaymentForm(dynamic config, double amount) {
+    final currency = ref.read(orgCurrencyProvider);
     final txnController = TextEditingController();
     File? receipt;
     bool submitting = false;
@@ -246,7 +248,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                   children: [
                     Text(displayName.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: AppTheme.royalGold, letterSpacing: 1.2)),
                     const SizedBox(height: 4),
-                    Text('Payable: ${AppUtils.formatCurrency(amount)}', style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
+                    Text('Payable: ${AppUtils.formatCurrency(amount, currency)}', style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 20),
                     // Where to pay — display-only account details from the admin config.
                     _detailRow('Wallet Number', config['walletNumber']),
@@ -351,6 +353,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
     final duesAsync = ref.watch(duesProvider);
     final methodsAsync = ref.watch(savedMethodsProvider);
     final searchQuery = ref.watch(ledgerSearchQueryProvider).toLowerCase();
+    final currency = ref.watch(orgCurrencyProvider);
 
     return AppScaffold(
       title: 'Fees & Dues',
@@ -375,7 +378,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                   padding: const EdgeInsets.all(24.0),
                   child: Column(
                     children: [
-                      Text(AppUtils.formatCurrency(dues), style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1)),
+                      Text(AppUtils.formatCurrency(dues, currency), style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1)),
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity, 
@@ -506,7 +509,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                             Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                    Text(AppUtils.formatCurrency(item['amount']), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: AppTheme.royalGold)),
+                                    Text(AppUtils.formatCurrency(item['amount'], currency), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: AppTheme.royalGold)),
                                     const SizedBox(height: 4),
                                     GestureDetector(
                                         onTap: () {

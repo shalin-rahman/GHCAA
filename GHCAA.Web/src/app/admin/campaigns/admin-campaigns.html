@@ -22,7 +22,7 @@
           @for (c of filteredCampaigns(); track c.id) {
             <tr>
               <td>{{ c.title }}</td>
-              <td>৳{{ c.amountReceived | number }} / ৳{{ c.targetAmount | number }}</td>
+              <td>{{ c.amountReceived | appCurrency }} / {{ c.targetAmount | appCurrency }}</td>
               <td>{{ c.isActive ? 'Yes' : 'No' }}</td>
               <td>
                 <button (click)="openEditForm(c)" class="btn btn-sm">Edit</button>
@@ -38,7 +38,7 @@
       <h2>Donor Recognition Tiers</h2>
       <ul class="tier-list">
         @for (t of tiers(); track t.id) {
-          <li>{{ t.name }} — minimum ৳{{ t.minimumAmount | number }}</li>
+          <li>{{ t.name }} — minimum {{ t.minimumAmount | appCurrency }}</li>
         }
       </ul>
       <div class="tier-form">
@@ -55,7 +55,7 @@
       <label>Slug (used in the public URL) <input type="text" [(ngModel)]="form.slug" /></label>
       <label>Story <textarea [(ngModel)]="form.story" rows="6"></textarea></label>
       <label>Cover image path (optional) <input type="text" [(ngModel)]="form.coverImagePath" /></label>
-      <label>Target amount (৳) <input type="number" min="1" [(ngModel)]="form.targetAmount" /></label>
+      <label>Target amount ({{ orgConfig.config()?.currency?.symbol }}) <input type="number" min="1" [(ngModel)]="form.targetAmount" /></label>
       <label>Starts on <input type="date" [(ngModel)]="form.startsOn" /></label>
       <label>Ends on (optional) <input type="date" [(ngModel)]="form.endsOn" /></label>
       <label class="checkbox-row"><input type="checkbox" [(ngModel)]="form.isActive" /> Active (visible on the public site)</label>
@@ -84,8 +84,8 @@
             @for (p of pledges(); track p.id) {
               <tr>
                 <td>{{ p.donorName }} @if (p.isAnonymous) { <em>(anonymous publicly)</em> }</td>
-                <td>৳{{ p.amount | number }}</td>
-                <td>৳{{ p.amountReceived | number }}</td>
+                <td>{{ p.amount | appCurrency }}</td>
+                <td>{{ p.amountReceived | appCurrency }}</td>
                 <td><span class="status-badge" [class]="getPledgeStatusClass(p.status)">{{ getPledgeStatusLabel(p.status) }}</span></td>
                 <td>
                   @if (p.amountReceived === 0) {

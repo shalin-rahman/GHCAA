@@ -68,7 +68,7 @@
                                 <div class="val text-xs">
                                     <strong>
                                         @if (ev.requiresPayment && ev.registrationFee) {
-                                        {{ ev.registrationFee | currency:'BDT ':'symbol':'1.0-0' }}
+                                        {{ ev.registrationFee | appCurrency }}
                                         } @else if (ev.requiresPayment) {
                                         Contrib. Amount
                                         } @else {
@@ -187,7 +187,7 @@
                             <span class="text-xs font-black uppercase tracking-widest text-muted block mb-1">Fee
                                 Requirement</span>
                             <span class="text-lg font-black text-main">{{ selectedEvent()?.registrationFee |
-                                currency:'BDT ':'code' }}</span>
+                                appCurrency:'1.0-0':'code' }}</span>
                         </div>
 
                         <form [formGroup]="regForm" (ngSubmit)="submitRegistration()" class="space-y-6">

@@ -7,6 +7,8 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../features/admin/admin_service.dart';
+import '../../core/utils/app_utils.dart';
+import '../../core/services/org_config_service.dart';
 
 final feeConfigsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(adminServiceProvider).getFeeConfigs();
@@ -16,6 +18,7 @@ class FeeConfigScreen extends ConsumerWidget {
   const FeeConfigScreen({super.key});
 
   Future<void> _upsertFee(BuildContext context, WidgetRef ref, [dynamic existing]) async {
+    final currency = ref.read(orgCurrencyProvider);
     final amountCtrl = TextEditingController(text: existing != null ? existing['amount'].toString() : '');
     final category = existing != null ? existing['category'] : 0; // MembershipFee
     final type = existing != null ? existing['membershipType'] : 2; // General
@@ -32,7 +35,7 @@ class FeeConfigScreen extends ConsumerWidget {
                controller: amountCtrl, 
                keyboardType: TextInputType.number,
                style: const TextStyle(color: Colors.white),
-               decoration: const InputDecoration(labelText: 'Amount (BDT)', labelStyle: TextStyle(color: Colors.white38)),
+               decoration: InputDecoration(labelText: 'Amount (${currency.code})', labelStyle: const TextStyle(color: Colors.white38)),
              ),
              const SizedBox(height: 16),
              const Text('Policy metadata is governed by system roles.', style: TextStyle(color: Colors.white54, fontSize: 10)),
@@ -73,6 +76,7 @@ class FeeConfigScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final configsAsync = ref.watch(feeConfigsProvider);
+    final currency = ref.watch(orgCurrencyProvider);
 
     return AppScaffold(
       isAdmin: true,
@@ -103,7 +107,7 @@ class FeeConfigScreen extends ConsumerWidget {
                   child: ListTile(
                     title: Text(_getMembershipTypeName(fee['membershipType']), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     subtitle: Text(_getCategoryName(fee['category']), style: const TextStyle(color: Colors.white54, fontSize: 11)),
-                    trailing: Text('৳ ${fee['amount']}', style: const TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, fontSize: 18)),
+                    trailing: Text(AppUtils.formatCurrency(fee['amount'], currency), style: const TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, fontSize: 18)),
                     onTap: () {
                       HapticFeedback.lightImpact();
                       _upsertFee(context, ref, fee);

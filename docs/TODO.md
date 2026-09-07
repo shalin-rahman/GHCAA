@@ -2390,6 +2390,10 @@ via direct DB access — meaning that password has been sitting in git history, 
 since before it was even set live. The table cells are now redacted, but **`shalin`'s live password
 needs rotating again** (a second time, independent of the JWT-key/DB-password rotation in 48.2) —
 redacting the file doesn't undo ~2 months of git-history exposure.
+**State changed 2026-09-07, hold unaffected:** `docs/deploy_connection.txt` is no longer tracked (see
+48.2's own update) — but its replacement, `docs/deploy_conn_Info.txt`, repeats the same exposure pattern
+in the working tree and both are now gitignored. Doesn't change this item's own outstanding half: nothing
+about the `BUSINESS_REVIEW_PLAN.md` password rotation has happened.
 
 ## Round 2 — OWASP Top 10 gap-fill audit (2026-08-29, raised by user: "make sure OWASPs are covered")
 
@@ -3969,7 +3973,7 @@ data) without an explicit go-ahead; ~20 Angular templates and several Flutter sc
 independent of org config, with no shared currency pipe/service to route through — a systemic gap, not a
 one-line fix, tracked separately rather than force-fixed here.
 
-62.51 [TODO] **Priority: P3 | Depends on: 62.37 (found this).** No shared currency-formatting mechanism
+62.51 [DONE 2026-09-07] **Priority: P3 | Depends on: 62.37 (found this).** No shared currency-formatting mechanism
 exists on either client. Angular hardcodes `৳`/`BDT` directly in ~20 places (`admin-dashboard.ts`'s
 `formatBDT()`, `admin-campaigns`, `fee-config`, `events`, `ledger`, `payments`, `giving`,
 `payment-portal`, the org-config admin form placeholder). Flutter has the same pattern —
@@ -3977,6 +3981,20 @@ exists on either client. Angular hardcodes `৳`/`BDT` directly in ~20 places (`
 `event_details_screen.dart`) hardcode `৳`/`en_BD`/"BDT" independent of `OrgConfig`. **Acceptance:** one
 currency-formatting service/pipe per client, sourced from `OrgConfig.Currency`, adopted by every listed
 call site; a non-BDT profile renders its own currency code/symbol everywhere money is shown.
+**Resolved 2026-09-07:** Angular gained `formatCurrencyAmount()` (`core/utils/currency.util.ts`) plus a
+standalone `AppCurrencyPipe` (`appCurrency`) wrapping it, both sourced from the same `OrgConfigService`
+signal every component already reads. Flutter gained `orgCurrencyProvider` (mirroring the existing
+`orgBrandingProvider` pattern) and updated `AppUtils.formatCurrency()` to take the org's currency instead
+of hardcoding `৳`/`en_BD`. Adopted at every hardcoded site found on both clients — a repo-wide grep on
+each client turned up more than the items named above (Angular: `admin-events`/`admin-event-operations`,
+`common/events`; Flutter: `events_screen.dart`, `financial_portal_screen.dart`), all converted rather than
+left as stragglers, since a lingering hardcoded spot would defeat the "everywhere money is shown"
+acceptance line. Caught and fixed a latent bug along the way: `admin-events.html`'s
+`reg.contributionAmount || reg.eventFee | currency:...` only ever formatted `eventFee` because Angular's
+pipe operator binds at the lowest precedence — now `(reg.contributionAmount || reg.eventFee) | appCurrency`.
+Angular: 430/430 tests (78 files), build clean. Flutter: `flutter analyze` clean; test failures unchanged
+from the pre-existing baseline (58 golden-image diffs + 1 known unrelated `FakeRef`/`invalidate` gap from
+82.38) — nothing traced to this change.
 
 62.52 [TODO] **Priority: P4 | Depends on: 62.44 (found these).** Two Angular unit tests are coupled to
 the GHC profile's fixture data and fail under `ORG_PROFILE=default`, found while verifying 62.44:

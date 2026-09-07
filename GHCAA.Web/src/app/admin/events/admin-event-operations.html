@@ -79,7 +79,7 @@
             <div class="bg-indigo-500/10 p-6 rounded-2xl border border-indigo-500/20">
                 <p class="text-xs font-bold text-indigo-400 uppercase mb-1">Estimated Budget</p>
                 <div class="flex items-center gap-3">
-                    <span class="text-2xl font-bold text-slate-100">৳</span>
+                    <span class="text-2xl font-bold text-slate-100">{{ orgConfig.config()?.currency?.symbol }}</span>
                     <input type="number" [(ngModel)]="newBudget.estimatedTotal" (blur)="updateBudget()"
                            class="bg-transparent text-3xl font-bold text-slate-100 w-full focus:outline-none">
                 </div>
@@ -88,7 +88,7 @@
 
             <div class="bg-emerald-500/10 p-6 rounded-2xl border border-emerald-500/20">
                 <p class="text-xs font-bold text-emerald-400 uppercase mb-1">Actual Spend</p>
-                <p class="text-3xl font-bold text-slate-100">৳ {{ (budget()?.actualTotal || 0) | number:'1.2-2' }}</p>
+                <p class="text-3xl font-bold text-slate-100">{{ (budget()?.actualTotal || 0) | appCurrency:'1.2-2' }}</p>
                 <p class="text-xs text-slate-400 mt-2">Captured through expenses</p>
             </div>
 
@@ -99,7 +99,7 @@
                  [class.border-slate-500/20]="(budget()?.actualTotal || 0) <= (budget()?.estimatedTotal || 0)">
                 <p class="text-xs font-bold text-slate-400 uppercase mb-1">Remaining / Over</p>
                 <p class="text-3xl font-bold text-slate-100">
-                    ৳ {{ ((budget()?.estimatedTotal || 0) - (budget()?.actualTotal || 0)) | number:'1.2-2' }}
+                    {{ ((budget()?.estimatedTotal || 0) - (budget()?.actualTotal || 0)) | appCurrency:'1.2-2' }}
                 </p>
                 <p class="text-xs mt-2" [class.text-red-400]="(budget()?.actualTotal || 0) > (budget()?.estimatedTotal || 0)">
                     {{ (budget()?.actualTotal || 0) > (budget()?.estimatedTotal || 0) ? 'Over budget' : 'Under budget' }}
@@ -116,7 +116,7 @@
                            class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-slate-200">
                 </div>
                 <div>
-                    <input type="number" [(ngModel)]="newExpense.amount" placeholder="Amount (৳)" 
+                    <input type="number" [(ngModel)]="newExpense.amount" [placeholder]="'Amount (' + orgConfig.config()?.currency?.symbol + ')'"
                            class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-slate-200">
                 </div>
                 <div>
@@ -148,7 +148,7 @@
                         <td class="px-4 py-4 text-slate-400">{{ ex.spentAt | date:'dd-MM-yyyy' }}</td>
                         <td class="px-4 py-4 font-semibold text-slate-200">{{ ex.category }}</td>
                         <td class="px-4 py-4 text-slate-400 italic text-xs">{{ ex.note || '---' }}</td>
-                        <td class="px-4 py-4 text-right font-mono text-emerald-400 font-bold">৳ {{ ex.amount | number:'1.2-2' }}</td>
+                        <td class="px-4 py-4 text-right font-mono text-emerald-400 font-bold">{{ ex.amount | appCurrency:'1.2-2' }}</td>
                         <td class="px-4 py-4 text-right">
                             <button (click)="deleteExpense(ex.id)" [disabled]="deletingExpenseId() === ex.id" class="text-slate-600 hover:text-red-400 transition-all p-2">
                                 <app-icon name="close" [size]="14"></app-icon>

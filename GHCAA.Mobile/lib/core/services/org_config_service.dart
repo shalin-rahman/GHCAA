@@ -150,3 +150,14 @@ final orgBrandingProvider = Provider<OrgBranding>((ref) {
     error: (_, __) => OrgConfig.offlineDefaults.branding,
   );
 });
+
+/// Convenience provider: returns [OrgCurrency] for money formatting.
+final orgCurrencyProvider = Provider<OrgCurrency>((ref) {
+  final configAsync = ref.watch(orgConfigProvider);
+
+  return configAsync.when(
+    data: (config) => config.currency,
+    loading: () => OrgConfig.offlineDefaults.currency,
+    error: (_, __) => OrgConfig.offlineDefaults.currency,
+  );
+});

@@ -10,11 +10,13 @@ import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
+import { OrgConfigService } from '../../core/services/org-config.service';
+import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
 @Component({
   selector: 'app-admin-fee-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LogoSpinnerComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LogoSpinnerComponent, PageHeaderComponent, AppCurrencyPipe],
   templateUrl: './admin-fee-config.html',
   styleUrl: './admin-fee-config.scss'
 })
@@ -24,6 +26,7 @@ export class AdminFeeConfig implements OnInit {
   private confirmDialog = inject(ConfirmDialogService);
   private fb = inject(FormBuilder);
   private lookupService = inject(LookupService);
+  orgConfig = inject(OrgConfigService);
 
   configs = signal<any[]>([]);
   loading = signal(true);

@@ -5,6 +5,7 @@ import { OrgConfigService } from '../../core/services/org-config.service';
 import { OrgConfig, FeatureToggles } from '../../core/models/org-config.model';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { ORG_CONFIG_FALLBACK } from '../../core/config/org-config-fallback.generated';
 
 type TabKey = 'branding' | 'contact' | 'currency' | 'features' | 'workflow' | 'advanced';
 
@@ -37,6 +38,11 @@ export class AdminOrgConfig implements OnInit {
   errorMessage = '';
 
   readonly approvalModes = ['ManualReview', 'AutoApprove', 'PaymentGated'];
+
+  // Example text for the empty-state placeholder only — sourced from this build's own
+  // institution profile pack, not hardcoded to GHC/BDT, so a different profile's build
+  // hints at its own currency instead.
+  readonly currencyCodeHint = ORG_CONFIG_FALLBACK.currency.code;
 
   ngOnInit() {
     const current = this.configService.config();

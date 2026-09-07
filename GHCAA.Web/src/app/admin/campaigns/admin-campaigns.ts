@@ -8,18 +8,22 @@ import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { getPledgeStatusLabel, getPledgeStatusClass } from '../../core/constants/app.constants';
+import { OrgConfigService } from '../../core/services/org-config.service';
+import { formatCurrencyAmount } from '../../core/utils/currency.util';
+import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
 // TODO 37.3: admin — create/edit campaigns, confirm pledge receipts, manage donor tiers.
 @Component({
     selector: 'app-admin-campaigns',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, AppCurrencyPipe],
     templateUrl: './admin-campaigns.html',
     styleUrl: './admin-campaigns.scss'
 })
 export class AdminCampaigns implements OnInit {
     private campaignService = inject(CampaignService);
     private notify = inject(NotificationService);
+    orgConfig = inject(OrgConfigService);
     getPledgeStatusLabel = getPledgeStatusLabel;
     getPledgeStatusClass = getPledgeStatusClass;
 
@@ -142,7 +146,8 @@ export class AdminCampaigns implements OnInit {
 
     confirmReceipt(pledge: CampaignPledge) {
         if (this.confirmingReceipt()) return;
-        const amount = prompt(`Amount received for ${pledge.donorName}'s pledge of ৳${pledge.amount}?`, String(pledge.amount));
+        const formattedAmount = formatCurrencyAmount(pledge.amount, this.orgConfig.config()?.currency);
+        const amount = prompt(`Amount received for ${pledge.donorName}'s pledge of ${formattedAmount}?`, String(pledge.amount));
         if (!amount) return;
         const parsed = parseFloat(amount);
         if (isNaN(parsed) || parsed <= 0) {

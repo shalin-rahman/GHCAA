@@ -18,6 +18,7 @@ import { NavService } from '../../core/services/nav.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { getEventStatusMeta } from '../../core/utils/date.util';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
+import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
 // 82.32: `new Date(x).toISOString().slice(0, 16)` formats in UTC, but `<input type="datetime-local">`
 // always reads/writes local wall-clock time. Loading an event's UTC-formatted date into that input
@@ -34,7 +35,7 @@ function toLocalDateTimeInputValue(value: string | Date): string {
 @Component({
     selector: 'app-admin-events',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, ExportButtonsComponent, PaginationComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LogoSpinnerComponent, ModalHeaderComponent],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, ExportButtonsComponent, PaginationComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LogoSpinnerComponent, ModalHeaderComponent, AppCurrencyPipe],
     templateUrl: './admin-events.html',
     styleUrl: './admin-events.scss'
 })

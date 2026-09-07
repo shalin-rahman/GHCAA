@@ -12,17 +12,20 @@ import { ExportUtil } from '../../core/utils/export.util';
 import { getFinancialCategoryLabel } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { toWireDate, toDisplayDate, parseDisplayDate } from '../../core/utils/date.util';
+import { OrgConfigService } from '../../core/services/org-config.service';
+import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
 @Component({
   selector: 'app-ledger',
   standalone: true,
-  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent],
+  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, AppCurrencyPipe],
   templateUrl: './ledger.html',
   styleUrl: './ledger.scss'
 })
 export class Ledger implements OnInit {
   private ledgerService = inject(LedgerService);
   private notify = inject(NotificationService);
+  orgConfig = inject(OrgConfigService);
 
   transactions = signal<any[]>([]);
   summary = signal<LedgerSummary | null>(null);
