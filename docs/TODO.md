@@ -3996,14 +3996,58 @@ Angular: 430/430 tests (78 files), build clean. Flutter: `flutter analyze` clean
 from the pre-existing baseline (58 golden-image diffs + 1 known unrelated `FakeRef`/`invalidate` gap from
 82.38) — nothing traced to this change.
 
-62.52 [TODO] **Priority: P4 | Depends on: 62.44 (found these).** Two Angular unit tests are coupled to
-the GHC profile's fixture data and fail under `ORG_PROFILE=default`, found while verifying 62.44:
-`org-config.service.spec.ts`'s "falls back to built-in defaults" case hardcodes
-`expect(cfg.orgId).toBe('ghcaa')`, and `directory.spec.ts` asserts a `'Guest'` membership-type filter
-option that doesn't exist in the `default` profile's `MembershipTypes` (`["General"]` only, per 62.33's
-lookups-first change). **Acceptance:** both specs pass under either profile — either parametrize them the
-way 62.43 did for `config-regression.spec.ts`, or make their assertions profile-agnostic where the
-underlying behavior genuinely doesn't depend on which profile is active.
+62.52 [DONE 2026-09-08] **Priority: P4 | Depends on: 62.44 (found these).** Two Angular unit tests
+flagged as coupled to the GHC profile's fixture data while verifying 62.44.
+**`org-config.service.spec.ts`**, confirmed genuinely coupled and fixed: "falls back to built-in
+defaults" hardcoded `expect(cfg.orgId).toBe('ghcaa')`/`'GHCAA'`, but the fallback it exercises
+(`ORG_CONFIG_FALLBACK`, imported from `org-config-fallback.generated.ts`) is regenerated per
+`ORG_PROFILE` by `scripts/generate-org-config-fallback.mjs` — the real contract is "falls back to the
+generated defaults", not "falls back to GHC's specific defaults". Fixed by asserting against
+`ORG_CONFIG_FALLBACK`'s own fields instead of the literal, the same profile-agnostic approach 62.43
+used for `config-regression.spec.ts`.
+**`directory.spec.ts`, investigated and found NOT actually coupled**, correcting the original note:
+its `'Guest'` assertion checks `MEMBERSHIP_TYPE_OPTIONS`, a static hand-written TS constant in
+`app.constants.ts` (never touched by any profile-generation script), against a fully mocked
+`LookupService` — the test never reads real profile config at any point, so it passes identically
+under every `ORG_PROFILE` and needed no change. **Real gap found instead, tracked separately as
+62.54**: `MEMBERSHIP_TYPE_OPTIONS` is GHC's own membership hierarchy (Founding/Executive/.../Guest)
+hardcoded as the app-wide fallback used whenever the real `MembershipType` lookups table is empty —
+a `default`-profile deployment with an empty lookups table would show GHC's membership types instead
+of its own `["General"]` (`profiles/default/org-config.json:68`). Left unfixed here: making the
+fallback profile-derived is real feature work (the same class of scope 62.24 already declined to fold
+into a test-coupling fix), not a test change. **Verified:** both specs green,
+`npx vitest run` on both files, 18/18 passing.
+
+62.54 [TODO] **Priority: P4 | Depends on: none.** Found by 62.52, revised 2026-09-08 after checking
+the backend side: `MEMBERSHIP_TYPE_OPTIONS` (`GHCAA.Web/src/app/core/constants/app.constants.ts:364`)
+is GHC's specific membership hierarchy (Founding, Executive, ..., Guest), hardcoded as the fallback
+`directory.ts`/`getMembershipTypeLabel` use whenever the real `MembershipType` lookups table is empty.
+**Original framing was incomplete:** assumed the fix was "derive the fallback from the active
+profile's `MembershipTypes`" — but `OrgConfigService.cs:150` shows the backend's own `/api/config`
+`MembershipTypes` field is `Enum.GetNames<Enums.MembershipType>()`, the same shared
+`GHCAA.Domain.Enums.MembershipType` enum for every profile, not read from
+`profiles/<name>/org-config.json`'s `MembershipTypes` field at all. So `MembershipType` is a core
+domain concept (it's the actual column type on `Member`), not a white-labelable one — every profile
+gets the full seven-value enum from the API today, GHC's frontend fallback just happens to already
+match it. Making the *frontend* fallback profile-scoped alone, without the backend agreeing, would
+create a new inconsistency (API says 7 types, frontend fallback says 1) worse than today's harmless
+coincidence. **Real open question, not yet a fix:** is `profiles/*/org-config.json`'s `MembershipTypes`
+field (`["General"]` for `default`) used anywhere at all, or is it dead/vestigial config nobody reads?
+If dead, this item is much smaller than it looked (fix the frontend fallback alone, since there's
+nothing to keep in sync with). If it's meant to filter the shared enum down per institution, that's a
+real cross-cutting design decision (does an institution pick a subset of the shared hierarchy, or
+define its own?) — bigger than P4 scope, needs a decision before any code change.
+**Resolved 2026-09-08:** confirmed dead — `grep`'d every `.cs`/`.ts` file in the tree for
+`.MembershipTypes`; the only other hit is an unrelated same-named filter DTO field on
+`CommunicationController`. `OrgConfigDto.MembershipTypes` is declared, populated from
+`profiles/<name>/org-config.json`, and never read by anything. So the cross-cutting design question
+doesn't apply — there's no per-profile membership-type scoping anywhere in this codebase today, the
+frontend fallback matching the backend's shared enum is correct as-is, not a coincidence to fix. Left
+`[TODO]` rather than closing outright: the dead `MembershipTypes` field itself (in `OrgConfigDto.cs`
+and every `profiles/*/org-config.json`) is now a separate, smaller, genuinely one-line cleanup —
+remove the unused field, or leave it as a documented placeholder for the day someone actually wants
+per-institution membership-type scoping. Neither was asked for; noting the choice rather than picking
+one unprompted.
 
 ### PHASE F: ONBOARDING, OPS, PROOF
 
@@ -7565,6 +7609,73 @@ still carry the now-unused key, harmless but worth removing on a future pass). *
 build` clean; `dotnet ef database update` against a fresh throwaway Postgres container applies the full
 25-migration chain plus this one cleanly, ending `Done.`, with `\d "DataProtectionKeys"` confirming the
 `Id`/`FriendlyName`/`Xml` shape; `dotnet test` still 717/717 passing.
+
+82.53g [DONE 2026-09-07] **Priority: P4 | Depends on: none.** User asked for the Render build log to be
+free of warnings too, not just errors. `ng build --configuration preprod` printed ~19 `⚠ WARNING`
+lines per build, one per CommonJS module esbuild can't tree-shake: `core-js`'s polyfill modules,
+`raf` and `rgbcolor` (all pulled in transitively by `canvg`, itself pulled in by `jspdf` for the PDF
+export feature), and `html2canvas` (used directly by `jspdf` too). These are pre-existing, accepted
+dependencies — PDF export needs them — the warning exists only because esbuild can't statically
+analyse a CommonJS module's exports the way it can an ES module's, not because anything is broken.
+**Fix:** added `allowedCommonJsDependencies: ["core-js", "raf", "rgbcolor", "html2canvas"]` to
+`angular.json`'s build options — Angular's own documented mechanism for acknowledging a deliberate
+CommonJS dependency rather than silencing the warning class outright. **Verified:** `ng build
+--configuration preprod` — zero warning lines, same bundle output (chunk names/sizes unchanged);
+`npx vitest run` still 430/430.
+**Not in scope, found while checking:** `npm audit` also flags 2 vulnerabilities, neither a build
+warning and neither touched here. `xlsx`'s prototype-pollution/ReDoS advisory is already tracked as a
+deliberate, unresolved follow-up (48.9 — needs an out-of-npm CDN tarball install and export/import
+regression testing). `qs@6.15.3`'s moderate advisory is new: a devDependency-only transitive chain
+four levels deep (`@angular/cli` → `@modelcontextprotocol/sdk` → `express` → `qs`), never reaches the
+shipped bundle, and no newer `qs` release actually fixes it yet per the advisory — `npm audit fix`
+has nothing to do here.
+
+82.53h [PARTIAL 2026-09-08] **Priority: P0 | Depends on: none.** User authorized revisiting the
+migrations-off-limits constraint from 82.53d after the compiler-memory settings alone weren't enough
+(commit 1e0f7d8 OOM'd again with both `DOTNET_gcServer=0` and `MSBUILDDISABLENODEREUSE=1` already in
+place). Root cause confirmed: 31 migrations' `.Designer.cs` files, ~117MB of generated C#, each
+carrying a full point-in-time model snapshot rather than a diff.
+**Fix:** squashed all 31 migrations into one baseline (`20260907193705_InitialBaseline`), generated
+with `ORG_PROFILE=ghc` set (matters — this determines which profile's demo-data `HasData()` seeds get
+baked in; the first attempt without it silently used `default`'s tiny sample instead of GHC's real
+data and had to be redone). Migrations directory: 117MB → 9.17MB (~12.8x). Two more compiler-memory
+settings added alongside the squash: `/p:UseSharedCompilation=false` and `/p:BuildInParallel=false` on
+the `dotnet publish` line, plus `DOTNET_CLI_TELEMETRY_OPTOUT=1`/`DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1`.
+**Verification, done in an isolated git worktree (`git worktree add`) before ever touching the real
+migration files, against `aaadb` (a local Postgres DB the user brought fully up to date across all 31
+original migrations — a real stand-in for production's exact history, not a synthetic one):**
+- Schema: 539/539 columns, 124/124 indexes, 491/491 constraints identical between a fresh DB built
+  from just the baseline vs. one built from all 31 original migrations. The only difference on the
+  first pass — 2 missing indexes (`IX_ErrorLogs_Level`, `IX_ErrorLogs_OccurredAt`) — was because
+  those were added via raw `migrationBuilder.Sql("CREATE INDEX...")` in the original migration, never
+  via `modelBuilder.HasIndex()`, so a model-diff baseline can't regenerate them; added back into the
+  baseline by hand (with a comment explaining why) and reverified as an exact match.
+- Data: all 16 seeded tables checked row-for-row identical between the baseline-built DB and `aaadb`
+  — 631 Members/Users/UserRoles, 1213 PaymentHistories, 630 AcademicRecords, 620 ProfessionalRecords,
+  etc. Confirms `profiles/ghc/demo-data/*.json` is already a complete, exact mirror of production's
+  real historical data (not a thin sample) — checked at the user's request rather than assumed.
+- The historical raw-SQL `INSERT` seed of the single admin account and one Constitution row (also
+  invisible to a model-diff baseline) were confirmed non-issues: the admin account's model-level
+  `HasData()` covers an equivalent bootstrap row, and `ConstitutionSeeder.SyncAsync` reseeds the
+  Constitution at every boot regardless of migrations. Genuinely dropped from the baseline: the
+  631-real-alumni raw historical bulk insert — deliberate, user-approved ("okay to re-migration data,
+  no duplicated reseed") — production's live data is untouched by this either way (squashing only
+  changes what a *fresh* database gets, not existing rows), and this incidentally addresses part of
+  62.31's concern for any future fresh deployment.
+- Deployment safety rehearsed end to end: manually inserted one row into `aaadb`'s own
+  `__EFMigrationsHistory` for the new baseline ID (marking it "applied" without ever running its
+  `Up()`), then confirmed `dotnet ef database update` reports *"No migrations were applied. The
+  database is already up to date."* — proving the production deploy sequence below is safe rather
+  than assuming it.
+**Still open, needs the user to run one command against production before this deploys:** production's
+own `__EFMigrationsHistory` table still lists the 31 old migration IDs, none of which match the new
+baseline's ID — deploying the squashed code without this step first would make EF treat the baseline
+as a pending migration and try to run its `CREATE TABLE` operations for real, which would fail against
+tables that already exist. Required, in order: (1) against the **production** database, run
+`INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion") VALUES
+('20260907193705_InitialBaseline', '9.0.19');` — the exact statement rehearsed against `aaadb`; (2)
+confirm it; (3) only then deploy this commit. **Acceptance:** a real Render deploy completes without
+the OOM notice, and the app boots normally against the now-baselined production database.
 
 82.52 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** User request 2026-09-06: an admin
 "send notification: yes/no" toggle for EC member added/terminated/removed and event created/updated,

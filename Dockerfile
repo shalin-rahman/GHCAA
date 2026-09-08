@@ -51,16 +51,23 @@ WORKDIR /src
 # investigation that replaced this theory.
 COPY --from=web /web/package.json /tmp/.web-stage-done
 
-# GHCAA.Infrastructure/Data/Migrations is ~117MB of EF-generated C# across 25+ migrations (each
-# Designer.cs carries a full point-in-time model snapshot, not a diff) — see docs/book §11.5.4 for
-# the same corpus at 81MB causing an earlier OOM. Compiling that much generated code under the SDK
-# image's default server GC (which sizes heap segments per visible CPU core, not per actual need)
-# is the leading suspect for the 2026-09-07 OOM once concurrent-stage scheduling was ruled out.
-# These two settings are a safe, reversible way to test that theory without touching a single
-# migration file: workstation GC caps segment growth, and disabling MSBuild node reuse stops
-# VBCSCompiler worker processes from accumulating memory across the four project builds below.
+# GHCAA.Infrastructure/Data/Migrations was ~117MB of EF-generated C# across 31 migrations (each
+# Designer.cs carried a full point-in-time model snapshot, not a diff) — see docs/book §11.5.4 for
+# the same corpus at 81MB causing an earlier OOM, and docs/TODO.md 82.53d/82.53h for the full
+# investigation. Confirmed the leading cause of the 2026-09-07/2026-09-08 OOMs (neither of these
+# compiler-memory settings alone was enough — commit 1e0f7d8, built with both already in place,
+# still OOM'd at the same point). Root-caused rather than just mitigated: the 31 migrations were
+# squashed into one baseline (82.53h), taking the corpus to ~9MB. These settings stay anyway —
+# real, if smaller, safety margin, and cheap insurance against the corpus growing again over time.
+# Workstation GC caps heap-segment growth (server GC sizes segments per visible CPU core, not per
+# actual need). MSBUILDDISABLENODEREUSE stops MSBuild.exe worker nodes from persisting across
+# invocations. /p:UseSharedCompilation=false below additionally stops VBCSCompiler.exe, the
+# separate Roslyn compiler-server process, from staying resident and retaining state across the
+# four sequential project compiles.
 ENV DOTNET_gcServer=0
 ENV MSBUILDDISABLENODEREUSE=1
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+ENV DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 # Copy all .csproj files first (for layer caching)
 COPY ["GHCAA.API/GHCAA.API.csproj", "GHCAA.API/"]
@@ -92,7 +99,7 @@ WORKDIR "/src"
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 WORKDIR "/src"
-RUN dotnet publish "GHCAA.API/GHCAA.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false -maxcpucount:1
+RUN dotnet publish "GHCAA.API/GHCAA.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false -maxcpucount:1 /p:BuildInParallel=false /p:UseSharedCompilation=false
 
 FROM base AS final
 WORKDIR /app

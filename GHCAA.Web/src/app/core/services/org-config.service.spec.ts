@@ -5,6 +5,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { OrgConfigService } from './org-config.service';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { OrgConfig } from '../models/org-config.model';
+import { ORG_CONFIG_FALLBACK } from '../config/org-config-fallback.generated';
 
 // Highest fan-in Angular service in the app (18 consumers: layouts, guards, admin/public
 // pages, app.config.ts) — no spec existed before this, despite being the config-driven
@@ -45,7 +46,11 @@ describe('OrgConfigService', () => {
         expect(service.config()).toEqual(minimalConfig);
     });
 
-    it('loadConfig falls back to the built-in GHCAA defaults when the request fails', async () => {
+    it('loadConfig falls back to the built-in defaults when the request fails', async () => {
+        // Asserted against ORG_CONFIG_FALLBACK itself, not a hardcoded 'ghcaa'/'GHCAA' literal —
+        // that generated file's content depends on which profile ORG_PROFILE built with (62.52),
+        // so the real contract under test is "falls back to the generated defaults", not "falls
+        // back to GHC's specific defaults".
         const promise = service.loadConfig();
 
         httpMock.expectOne(API_ENDPOINTS.CONFIG).error(new ProgressEvent('network error'));
@@ -53,9 +58,9 @@ describe('OrgConfigService', () => {
         await promise;
         const cfg = service.config();
         expect(cfg).not.toBeNull();
-        expect(cfg!.orgId).toBe('ghcaa');
-        expect(cfg!.branding.shortName).toBe('GHCAA');
-        expect(cfg!.features.enableEvents).toBe(true);
+        expect(cfg!.orgId).toBe(ORG_CONFIG_FALLBACK.orgId);
+        expect(cfg!.branding.shortName).toBe(ORG_CONFIG_FALLBACK.branding.shortName);
+        expect(cfg!.features.enableEvents).toBe(ORG_CONFIG_FALLBACK.features.enableEvents);
     });
 
     it('loadConfig never rejects, even on failure, so app bootstrap is never blocked', async () => {
