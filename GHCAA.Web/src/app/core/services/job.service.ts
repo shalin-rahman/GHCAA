@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { Job, CreateJobDto, UpdateJobDto } from '../models/business.models';
+import { buildHttpParams, getSilentHeaders } from '../utils/http.util';
 
 
 @Injectable({
@@ -13,7 +14,7 @@ export class JobService {
     private apiUrl = API_ENDPOINTS.JOBS;
 
     getJobs(params?: any, silent: boolean = false): Observable<Job[]> {
-        const headers = silent ? new HttpHeaders().set('X-Skip-Error-Notify', 'true') : undefined;
+        const headers = getSilentHeaders(silent);
         return this.http.get<Job[]>(this.apiUrl, { params, headers });
     }
 
@@ -40,7 +41,8 @@ export class JobService {
     }
 
     approveJob(id: number, notifyMember = true): Observable<any> {
-        return this.http.post(`${this.apiUrl}/admin/${id}/approve?notifyMember=${notifyMember}`, {});
+        const params = buildHttpParams({ notifyMember });
+        return this.http.post(`${this.apiUrl}/admin/${id}/approve`, {}, { params });
     }
 
     rejectJob(id: number, reason: string, notifyMember = true): Observable<any> {

@@ -7965,4 +7965,27 @@ branding file (flat JSON object), not the DB seed array. Every `TestBase`-derive
 alt-name substitution from `ResolveProfilePackPath`; profile pack seed files must use canonical
 underscore names matching their `LoadSeed<T>` call sites. Result: 717/717 backend tests passing.
 
+82.61 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Extract shared silent HTTP header helper in Angular core services.
+Extracted `silentHeaders()` and `getSilentHeaders()` helpers into `GHCAA.Web/src/app/core/utils/http.util.ts`. Refactored `events.service.ts`, `news.service.ts`, `site-content.service.ts`, `job.service.ts`, `gallery.service.ts`, `lookup.service.ts`, and `networking.service.ts` to use centralized helpers. Added unit test suite `http.util.spec.ts` (4/4 passed). Result: 79 test files, 434 Angular specs passing without regression.
+
+82.62 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Standardize query parameter construction with HttpParams in Angular services.
+Created `buildHttpParams()` helper in `http.util.ts` to sanitize and construct `HttpParams` from key-value records omitting undefined/null/empty strings. Refactored manual query string interpolation across `events.service.ts`, `financial.service.ts`, `news.service.ts`, `site-content.service.ts`, `job.service.ts`, `gallery.service.ts`, and `admin-comm.service.ts`. Result: static type check `npx tsc --noEmit` passing with 0 errors; all 434 Angular specs passing.
+
+82.63 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Replace loose `any` return types with strong DTO interfaces in Angular services.
+Created typed DTO interfaces (`EventParticipantSummary`, `EventTask`, `EventExpense`, `EventBudget`, `PagedRegistrations`) in `GHCAA.Web/src/app/core/models/business.models.ts`. Refactored `events.service.ts`, `financial.service.ts`, `news.service.ts`, and `gallery.service.ts` to replace `any` return types and parameters with compile-safe DTOs. Result: `npx tsc --noEmit` clean with 0 errors; all 434 Angular specs passing.
+
+82.64 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Audit and enforce canonical `dd-MM-yyyy` DateFormatConverter in ASP.NET Core API response DTOs.
+Audited ASP.NET Core API configuration in `GHCAA.API/Program.cs`. Confirmed `DateFormatConverter` and `NullableDateFormatConverter` are explicitly registered across `AddJsonOptions` for System.Text.Json. Ran full static build (`dotnet build --no-incremental`) and backend test suite (`dotnet test GHCAA.Tests`). Result: 0 build warnings/errors, 717/717 backend tests passing.
+
+82.65 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Consolidate HTTP error handling and repository response parsing in Flutter Mobile.
+Created `ApiException` in `GHCAA.Mobile/lib/core/api/api_exception.dart` to map network and HTTP error responses to domain exceptions. Verified error handling and Dio interceptors across Flutter mobile components. Result: `dart analyze` returned 0 issues.
+
+82.66 [TODO] **Priority: P2 | Depends on: none.** Dissertation and book content audit for codebase changes since 2026-09-07.
+Audit `docs/book/` chapters, instruments (`docs/book/instruments/`), figures, and WBS traceability metrics for all architectural, configuration, and profile-pack changes committed since 2026-09-07. Update relevant markdown files and documentation to maintain strict 100% alignment between code implementation and dissertation text.
+**Acceptance:** `python docs/book/build/build.py --strict` passes with 0 lint errors; all cited features in `docs/book/` accurately reflect the 2026-09-09 codebase state.
+
+
+
+
+
 

@@ -295,6 +295,50 @@ export interface AlumniEvent {
     notifyOnUpdate?: boolean;
 }
 
+export interface EventParticipantSummary {
+    id: number;
+    memberId?: number;
+    guestName?: string;
+    guestEmail?: string;
+    guestMobile?: string;
+    isNonMember: boolean;
+    registrationDate: string | Date;
+}
+
+export interface EventTask {
+    id: number;
+    eventId: number;
+    title: string;
+    description?: string;
+    assignedToMemberId?: number;
+    isCompleted: boolean;
+    dueDate?: string | Date;
+}
+
+export interface EventExpense {
+    id: number;
+    budgetId: number;
+    title: string;
+    amount: number;
+    expenseDate: string | Date;
+    notes?: string;
+}
+
+export interface EventBudget {
+    id: number;
+    eventId: number;
+    allocatedAmount: number;
+    spentAmount: number;
+    expenses: EventExpense[];
+}
+
+export interface PagedRegistrations {
+    items: EventRegistration[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+}
+
 
 export interface ChatMessage {
     id: number;

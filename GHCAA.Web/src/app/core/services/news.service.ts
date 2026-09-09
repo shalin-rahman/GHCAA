@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { NewsPost, CreateNewsDto, UpdateNewsDto } from '../models/business.models';
+import { buildHttpParams, getSilentHeaders } from '../utils/http.util';
 
 
 @Injectable({
@@ -13,12 +14,9 @@ export class NewsService {
     private apiUrl = API_ENDPOINTS.NEWS;
 
     getNews(articleCategory?: string, silent: boolean = false, postType?: string): Observable<NewsPost[]> {
-        const params: string[] = [];
-        if (articleCategory) params.push(`articleCategory=${encodeURIComponent(articleCategory)}`);
-        if (postType) params.push(`postType=${encodeURIComponent(postType)}`);
-        const url = params.length ? `${this.apiUrl}?${params.join('&')}` : this.apiUrl;
-        const headers = silent ? new HttpHeaders().set('X-Skip-Error-Notify', 'true') : undefined;
-        return this.http.get<NewsPost[]>(url, { headers });
+        const params = buildHttpParams({ articleCategory, postType });
+        const headers = getSilentHeaders(silent);
+        return this.http.get<NewsPost[]>(this.apiUrl, { params, headers });
     }
 
     getNewsById(id: number): Observable<NewsPost> {
@@ -38,8 +36,8 @@ export class NewsService {
         return this.http.put<NewsPost>(`${this.apiUrl}/${id}`, dto);
     }
 
-    deleteNews(id: number): Observable<any> {
-        return this.http.delete(`${this.apiUrl}/${id}`);
+    deleteNews(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
 
     uploadImage(file: File): Observable<{ url: string, relativePath: string }> {

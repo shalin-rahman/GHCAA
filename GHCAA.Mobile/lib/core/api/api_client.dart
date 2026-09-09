@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/app_config.dart';
 import '../storage/storage_service.dart';
@@ -139,6 +140,8 @@ final dioProvider = Provider<Dio>((ref) {
           error: message,
           message: message,
         );
+
+        debugPrint('[ApiClient] API Error (${e.response?.statusCode}): ${e.requestOptions.method} ${e.requestOptions.path} => $message');
 
         return handler.next(friendlyException);
       },

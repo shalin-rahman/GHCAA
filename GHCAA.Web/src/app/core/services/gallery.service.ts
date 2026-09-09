@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { EventGallery, EventPhoto } from '../models/business.models';
+import { buildHttpParams, getSilentHeaders } from '../utils/http.util';
 
 
 @Injectable({
@@ -13,7 +14,7 @@ export class GalleryService {
     private apiUrl = API_ENDPOINTS.GALLERY;
 
     getGalleries(silent: boolean = false): Observable<EventGallery[]> {
-        const headers = silent ? new HttpHeaders().set('X-Skip-Error-Notify', 'true') : undefined;
+        const headers = getSilentHeaders(silent);
         return this.http.get<EventGallery[]>(this.apiUrl, { headers });
     }
 
@@ -93,19 +94,21 @@ export class GalleryService {
         return this.http.get<{ galleries: EventGallery[], photos: EventPhoto[] }>(`${this.apiUrl}/admin/pending`);
     }
 
-    approveGallery(id: number, notifyMember = true): Observable<any> {
-        return this.http.post(`${this.apiUrl}/admin/${id}/approve?notifyMember=${notifyMember}`, {});
+    approveGallery(id: number, notifyMember = true): Observable<void> {
+        const params = buildHttpParams({ notifyMember });
+        return this.http.post<void>(`${this.apiUrl}/admin/${id}/approve`, {}, { params });
     }
 
-    rejectGallery(id: number, reason: string, notifyMember = true): Observable<any> {
-        return this.http.post(`${this.apiUrl}/admin/${id}/reject`, { reason, notifyMember });
+    rejectGallery(id: number, reason: string, notifyMember = true): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/admin/${id}/reject`, { reason, notifyMember });
     }
 
-    approvePhoto(photoId: number, notifyMember = true): Observable<any> {
-        return this.http.post(`${this.apiUrl}/photos/${photoId}/approve?notifyMember=${notifyMember}`, {});
+    approvePhoto(photoId: number, notifyMember = true): Observable<void> {
+        const params = buildHttpParams({ notifyMember });
+        return this.http.post<void>(`${this.apiUrl}/photos/${photoId}/approve`, {}, { params });
     }
 
-    rejectPhoto(photoId: number, reason: string, notifyMember = true): Observable<any> {
-        return this.http.post(`${this.apiUrl}/photos/${photoId}/reject`, { reason, notifyMember });
+    rejectPhoto(photoId: number, reason: string, notifyMember = true): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/photos/${photoId}/reject`, { reason, notifyMember });
     }
 }

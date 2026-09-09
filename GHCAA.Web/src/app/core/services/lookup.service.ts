@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { API_ENDPOINTS, LOOKUP_GROUPS, MEMBERSHIP_TYPE_OPTIONS } from '../constants/app.constants';
+import { getSilentHeaders } from '../utils/http.util';
 
 export interface LookupOption {
     value: string;
@@ -83,7 +84,7 @@ export class LookupService {
 
     getLookups(lookupGroup?: string, silent: boolean = false): Observable<any[]> {
         const url = lookupGroup ? `${API_ENDPOINTS.LOOKUPS}/${lookupGroup}` : API_ENDPOINTS.LOOKUPS;
-        const headers = silent ? new HttpHeaders().set('X-Skip-Error-Notify', 'true') : undefined;
+        const headers = getSilentHeaders(silent);
         return this.http.get<any[]>(url, { headers });
     }
 
@@ -106,7 +107,7 @@ export class LookupService {
     }
 
     getStats(silent: boolean = false): Observable<any> {
-        const headers = silent ? new HttpHeaders().set('X-Skip-Error-Notify', 'true') : undefined;
+        const headers = getSilentHeaders(silent);
         return this.http.get<any>(`${API_ENDPOINTS.LOOKUPS}/stats`, { headers });
     }
 }

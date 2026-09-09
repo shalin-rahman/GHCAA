@@ -2,7 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
-import { PaymentStatus, FinancialCategory } from '../models/business.models';
+import { PaymentStatus, FinancialCategory, MembershipFeeConfig, CreateMembershipFeeConfig, UpdateMembershipFeeConfig } from '../models/business.models';
+import { buildHttpParams } from '../utils/http.util';
 
 
 /** Matches PaymentHistoryDto.cs */
@@ -72,21 +73,20 @@ export class FinancialService {
     }
 
     // Admin: Membership/Registration Fee Configs
-    getFeeConfigs(): Observable<any[]> {
-        return this.http.get<any[]>(`${this.apiUrl}/fees/config`);
+    getFeeConfigs(): Observable<MembershipFeeConfig[]> {
+        return this.http.get<MembershipFeeConfig[]>(`${this.apiUrl}/fees/config`);
     }
 
-    addFeeConfig(dto: any): Observable<any> {
-        return this.http.post<any>(`${this.apiUrl}/fees/config`, dto);
+    addFeeConfig(dto: CreateMembershipFeeConfig): Observable<MembershipFeeConfig> {
+        return this.http.post<MembershipFeeConfig>(`${this.apiUrl}/fees/config`, dto);
     }
 
-    updateFeeConfig(dto: any): Observable<any> {
-        return this.http.put<any>(`${this.apiUrl}/fees/config`, dto);
+    updateFeeConfig(dto: UpdateMembershipFeeConfig): Observable<MembershipFeeConfig> {
+        return this.http.put<MembershipFeeConfig>(`${this.apiUrl}/fees/config`, dto);
     }
 
     getApplicableFee(category: string, type: string, date?: string): Observable<{ amount: number }> {
-        let url = `${this.apiUrl}/fees/applicable?category=${category}&type=${type}`;
-        if (date) url += `&date=${date}`;
-        return this.http.get<{ amount: number }>(url);
+        const params = buildHttpParams({ category, type, date });
+        return this.http.get<{ amount: number }>(`${this.apiUrl}/fees/applicable`, { params });
     }
 }

@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
+import { buildHttpParams } from '../utils/http.util';
 
 export const MessageChannels = { Email: 'Email', Sms: 'Sms' } as const;
 export type MessageChannel = typeof MessageChannels[keyof typeof MessageChannels];
@@ -46,7 +47,8 @@ export class AdminCommService {
     private apiUrl = API_ENDPOINTS.ADMIN.COMMUNICATION;
 
     getLogs(count: number = 100): Observable<EmailLog[]> {
-        return this.http.get<EmailLog[]>(`${this.apiUrl}/logs?count=${count}`);
+        const params = buildHttpParams({ count });
+        return this.http.get<EmailLog[]>(`${this.apiUrl}/logs`, { params });
     }
 
     getTemplates(): Observable<EmailTemplate[]> {

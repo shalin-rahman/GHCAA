@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { SiteContent, UpsertSiteContentDto } from '../models/business.models';
+import { buildHttpParams, getSilentHeaders } from '../utils/http.util';
 
 @Injectable({ providedIn: 'root' })
 export class SiteContentService {
@@ -10,8 +11,9 @@ export class SiteContentService {
     private apiUrl = API_ENDPOINTS.SITE_CONTENT;
 
     getByGroup(group: string, silent: boolean = true): Observable<SiteContent[]> {
-        const headers = silent ? new HttpHeaders().set('X-Skip-Error-Notify', 'true') : undefined;
-        return this.http.get<SiteContent[]>(`${this.apiUrl}?group=${encodeURIComponent(group)}`, { headers });
+        const headers = getSilentHeaders(silent);
+        const params = buildHttpParams({ group });
+        return this.http.get<SiteContent[]>(this.apiUrl, { params, headers });
     }
 
     getAll(): Observable<SiteContent[]> {
