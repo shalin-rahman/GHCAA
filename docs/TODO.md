@@ -7980,8 +7980,9 @@ Audited ASP.NET Core API configuration in `GHCAA.API/Program.cs`. Confirmed `Dat
 82.65 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Consolidate HTTP error handling and repository response parsing in Flutter Mobile.
 Created `ApiException` in `GHCAA.Mobile/lib/core/api/api_exception.dart` to map network and HTTP error responses to domain exceptions. Verified error handling and Dio interceptors across Flutter mobile components. Result: `dart analyze` returned 0 issues.
 
-82.66 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Dissertation and book content audit for codebase changes since 2026-09-07.
-Audited `docs/book/` chapters and metric counts. Fixed banned vocabulary in `07-implementation.md:144` and synchronized commit counts in `04-methodology.md:55` and `11-project-management.md:44` to 265 commits as of 9 September 2026. Result: `python docs/book/build/build.py --strict` passes clean (`status: clean, ready to deliver`).
+82.66 [TODO] **Priority: P2 | Depends on: none.** Audit needed for project content in docs/book/ for changes after 2026-09-07 changes.
+Audit `docs/book/` chapters, instruments, and WBS traceability metrics for all architectural, configuration, and profile-pack changes committed since 2026-09-07. Update relevant chapters to reflect the latest codebase changes (e.g., PaymentCallbackOrchestrator, BasePaymentGateway, MemberImportModalComponent, mobile error handlers) and ensure strict synchronization with code implementation.
+**Acceptance:** `python docs/book/build/build.py --strict` passes with 0 lint errors; all cited features in `docs/book/` accurately reflect the current codebase state.
 
 
 82.67 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Decompose GatewaysController in ASP.NET Core API.
