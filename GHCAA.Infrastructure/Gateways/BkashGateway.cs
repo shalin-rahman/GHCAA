@@ -11,7 +11,7 @@ using System.Text.Json.Serialization;
 
 namespace GHCAA.Infrastructure.Gateways
 {
-    public class BkashGateway : IPaymentGatewayService
+    public class BkashGateway : BasePaymentGateway
     {
         // Keys used both when reading a callback/webhook payload and when VerifyCallbackAsync
         // writes the Execute-response fields back into the passed dictionary for ProcessWebhookAsync.
@@ -19,28 +19,22 @@ namespace GHCAA.Infrastructure.Gateways
         private const string MerchantInvoiceNumberKey = "merchantInvoiceNumber";
         private const string AmountKey = "amount";
 
-        private readonly HttpClient _httpClient;
-        private readonly ApplicationDbContext _db;
-        private readonly ILogger<BkashGateway> _logger;
         private readonly BkashOptions _bkashOptions;
 
         public BkashGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<BkashGateway> logger, IOptions<BkashOptions> bkashOptions)
+            : base(httpClient, db, logger)
         {
-            _httpClient = httpClient;
-            _db = db;
-            _logger = logger;
             _bkashOptions = bkashOptions.Value;
         }
 
-        public Enums.PaymentGateway GatewayType => Enums.PaymentGateway.BkashGateway;
+        public override Enums.PaymentGateway GatewayType => Enums.PaymentGateway.BkashGateway;
 
-        public async Task<PaymentGatewayResponseDto> InitiatePaymentAsync(PaymentGatewayInitiationDto dto, CancellationToken cancellationToken = default)
+        public override async Task<PaymentGatewayResponseDto> InitiatePaymentAsync(PaymentGatewayInitiationDto dto, CancellationToken cancellationToken = default)
         {
-            var config = await _db.PaymentConfigurations
-                .FirstOrDefaultAsync(p => p.Gateway == GatewayType && p.IsEnabled, cancellationToken);
+            var config = await GetActiveConfigurationAsync(cancellationToken);
 
             if (config == null)
-                return new PaymentGatewayResponseDto { Success = false, Message = "bKash configuration not found." };
+                return DisabledResponse("bKash");
 
             try
             {
@@ -92,15 +86,14 @@ namespace GHCAA.Infrastructure.Gateways
             }
         }
 
-        public async Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
+        public override async Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
         {
             if (!callbackData.TryGetValue(PaymentIdKey, out var paymentId) || string.IsNullOrEmpty(paymentId)) return false;
             // Accept both "success" and "Success" — bKash docs inconsistently use both forms.
             if (!callbackData.TryGetValue("status", out var status)
                 || !string.Equals(status, "success", StringComparison.OrdinalIgnoreCase)) return false;
 
-            var config = await _db.PaymentConfigurations
-                .FirstOrDefaultAsync(p => p.Gateway == GatewayType && p.IsEnabled, cancellationToken);
+            var config = await GetActiveConfigurationAsync(cancellationToken);
 
             if (config == null) return false;
 
@@ -136,7 +129,7 @@ namespace GHCAA.Infrastructure.Gateways
 
                     if (payment != null && Math.Abs(payment.Amount - executedAmount) > 0.01m)
                     {
-                        _logger.LogWarning("bKash amount mismatch for {TrxId}: expected {Expected}, got {Actual}",
+                        Logger.LogWarning("bKash amount mismatch for {TrxId}: expected {Expected}, got {Actual}",
                             result.MerchantInvoiceNumber, payment.Amount, executedAmount);
                         return false;
                     }
@@ -155,13 +148,13 @@ namespace GHCAA.Infrastructure.Gateways
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "bKash Execute Failed for PaymentID {PaymentID}", paymentId);
+                Logger.LogError(ex, "bKash Execute Failed for PaymentID {PaymentID}", paymentId);
                 return false;
             }
         }
 
         // 24.10: Verify X-APP-Key header before trusting any paymentID in the webhook body.
-        public async Task<PaymentWebhookResultDto> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+        public override async Task<PaymentWebhookResultDto> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
         {
             try
             {

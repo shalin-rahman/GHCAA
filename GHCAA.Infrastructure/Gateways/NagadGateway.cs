@@ -8,27 +8,20 @@ using Microsoft.Extensions.Configuration;
 
 namespace GHCAA.Infrastructure.Gateways
 {
-    public class NagadGateway : IPaymentGatewayService
+    public class NagadGateway : BasePaymentGateway
     {
-        private readonly HttpClient _httpClient;
-        private readonly ApplicationDbContext _db;
-        private readonly ILogger<NagadGateway> _logger;
         private readonly IConfiguration _config;
 
         public NagadGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<NagadGateway> logger, IConfiguration config)
+            : base(httpClient, db, logger)
         {
-            _httpClient = httpClient;
-            _db = db;
-            _logger = logger;
             _config = config;
         }
 
-        public Enums.PaymentGateway GatewayType => Enums.PaymentGateway.NagadGateway;
+        public override Enums.PaymentGateway GatewayType => Enums.PaymentGateway.NagadGateway;
 
-        public Task<PaymentGatewayResponseDto> InitiatePaymentAsync(PaymentGatewayInitiationDto dto, CancellationToken cancellationToken = default)
+        public override Task<PaymentGatewayResponseDto> InitiatePaymentAsync(PaymentGatewayInitiationDto dto, CancellationToken cancellationToken = default)
         {
-            // Nagad integration is multi-step (sensitive data encryption, order creation).
-            // Placeholder implementation.
             return Task.FromResult(new PaymentGatewayResponseDto
             {
                 Success = false,
@@ -36,12 +29,12 @@ namespace GHCAA.Infrastructure.Gateways
             });
         }
 
-        public Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
+        public override Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(false);
         }
 
-        public Task<PaymentWebhookResultDto> ProcessWebhookAsync(Stream stream, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+        public override Task<PaymentWebhookResultDto> ProcessWebhookAsync(Stream stream, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(PaymentWebhookResultDto.Invalid());
         }

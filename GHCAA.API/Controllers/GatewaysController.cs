@@ -1,4 +1,4 @@
-﻿using GHCAA.Application.DTOs;
+using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using System.Linq;
 using GHCAA.Domain;
@@ -15,8 +15,8 @@ namespace GHCAA.API.Controllers
     {
         private readonly IPaymentGatewayFactory _gatewayFactory;
         private readonly IFinancialService _financialService;
-        private readonly IMemberService _memberService;
         private readonly IEventService _eventService;
+        private readonly IPaymentCallbackOrchestrator _callbackOrchestrator;
         private readonly IPaymentConfigService _paymentConfigService;
         private readonly ILogger<GatewaysController> _logger;
         private readonly IConfiguration _config;
@@ -25,8 +25,8 @@ namespace GHCAA.API.Controllers
         public GatewaysController(
             IPaymentGatewayFactory gatewayFactory,
             IFinancialService financialService,
-            IMemberService memberService,
             IEventService eventService,
+            IPaymentCallbackOrchestrator callbackOrchestrator,
             IPaymentConfigService paymentConfigService,
             ILogger<GatewaysController> logger,
             IConfiguration config,
@@ -34,8 +34,8 @@ namespace GHCAA.API.Controllers
         {
             _gatewayFactory = gatewayFactory;
             _financialService = financialService;
-            _memberService = memberService;
             _eventService = eventService;
+            _callbackOrchestrator = callbackOrchestrator;
             _paymentConfigService = paymentConfigService;
             _logger = logger;
             _config = config;
@@ -199,7 +199,7 @@ namespace GHCAA.API.Controllers
                     : (decimal?)null;
                 // 24.13: Pass SSLCommerz's val_id as the idempotency key.
                 var valId = data.TryGetValue("val_id", out var vi) ? vi : null;
-                await HandleSuccessfulPayment(trunkTrxId, cancellationToken, amount, valId);
+                await _callbackOrchestrator.HandleSuccessfulPaymentAsync(trunkTrxId, cancellationToken, amount, valId);
                 return Redirect($"{GetClientUrl()}/payment/success?trxId={trunkTrxId}");
             }
 
@@ -227,7 +227,7 @@ namespace GHCAA.API.Controllers
             if (isValid)
             {
                 // 24.13: Pass bKash paymentID as the idempotency key.
-                await HandleSuccessfulPayment(trunkTrxId, cancellationToken, gatewayPaymentId: paymentID);
+                await _callbackOrchestrator.HandleSuccessfulPaymentAsync(trunkTrxId, cancellationToken, gatewayPaymentId: paymentID);
                 return Redirect($"{GetClientUrl()}/payment/success?trxId={trunkTrxId}");
             }
 
@@ -256,7 +256,7 @@ namespace GHCAA.API.Controllers
                     ? (decimal.TryParse(a, out var amt) ? amt : 0m)
                     : (decimal?)null;
 
-                await HandleSuccessfulPayment(trunkTrxId, cancellationToken, amount, gatewayPaymentId: trunkTrxId);
+                await _callbackOrchestrator.HandleSuccessfulPaymentAsync(trunkTrxId, cancellationToken, amount, gatewayPaymentId: trunkTrxId);
                 return Redirect($"{GetClientUrl()}/payment/success?trxId={trunkTrxId}");
             }
 
@@ -292,133 +292,14 @@ namespace GHCAA.API.Controllers
 
             if (result.IsValid && !string.IsNullOrEmpty(result.TransactionId))
             {
-                await HandleSuccessfulPayment(result.TransactionId, cancellationToken, result.ConfirmedAmount, result.GatewayPaymentId);
+                await _callbackOrchestrator.HandleSuccessfulPaymentAsync(result.TransactionId, cancellationToken, result.ConfirmedAmount, result.GatewayPaymentId);
                 return Ok(new { status = "success" });
             }
 
             return Problem(detail: "failed", statusCode: StatusCodes.Status400BadRequest);
         }
 
-        private async Task HandleSuccessfulPayment(string transactionId, CancellationToken cancellationToken, decimal? confirmedAmount = null, string? gatewayPaymentId = null)
-        {
-            // 24.13: Idempotency check — short-circuit if this gateway payment was already processed.
-            if (!string.IsNullOrEmpty(gatewayPaymentId))
-            {
-                var alreadyProcessed = await _financialService.IsGatewayPaymentAlreadyProcessedAsync(gatewayPaymentId, cancellationToken);
-                if (alreadyProcessed)
-                {
-                    _logger.LogInformation("Duplicate callback ignored for GatewayPaymentId {GwId}", gatewayPaymentId);
-                    return;
-                }
-            }
-
-            var payment = await _financialService.GetPaymentSnapshotByTransactionIdAsync(transactionId, cancellationToken);
-            if (payment == null || payment.Status == Enums.PaymentStatus.Completed) return;
-
-            // 24.13: Persist the gateway payment ID for future idempotency checks.
-            if (!string.IsNullOrEmpty(gatewayPaymentId))
-                await _financialService.StampGatewayPaymentIdAsync(payment.Id, gatewayPaymentId, cancellationToken);
-
-            // 29B.2 Security Check: whenever the gateway REPORTS an amount it must match the recorded
-            // amount — including a reported 0. The old `confirmedAmount > 0` guard let a 0 (or absent)
-            // amount skip verification entirely and silently complete an unverified payment. A null now
-            // means the gateway did not echo an amount at all (e.g. bKash's GET callback, whose amount is
-            // authenticated separately inside VerifyCallbackAsync); a value of 0 is treated as reported and
-            // will fail against any positive expected amount.
-            if (confirmedAmount.HasValue && Math.Abs(payment.Amount - confirmedAmount.Value) > 0.01m)
-            {
-                _logger.LogWarning("Payment amount mismatch for {TrxID}. Expected {E}, Received {R}. Mark as discrepancy.", transactionId, payment.Amount, confirmedAmount.Value);
-                await _financialService.UpdatePaymentStatusAsync(payment.Id, Enums.PaymentStatus.Failed, $"Amount mismatch detected. Paid: {confirmedAmount.Value}, Expected: {payment.Amount}", cancellationToken);
-                return;
-            }
-
-            // 1. Mark as Completed
-            await _financialService.UpdatePaymentStatusAsync(payment.Id, Enums.PaymentStatus.Completed, "Verified via Gateway Automatic Protocol", cancellationToken);
-
-            // 2. If it was an Event Registration, Auto-Approve the registration.
-            // 82.32: was a case-sensitive Contains("EVT-REG-") against free text, which missed a
-            // lowercase client-supplied reference even though FinancialCategory was already set
-            // correctly for exactly this payment (see InitiatePayment). FinancialCategory is now
-            // the authoritative check here; the Notes text is only used to recover which
-            // registration this payment was for.
-            if (payment.FinancialCategory == Enums.FinancialCategory.RegistrationFee)
-            {
-                var refPrefixIndex = payment.Notes?.IndexOf("Ref: ", StringComparison.OrdinalIgnoreCase) ?? -1;
-                // The reference itself never contains a space; anything from the first space
-                // onward is trailing text this format appends (" (Guest)", or free text a caller
-                // added), same as the original Split("EVT-REG-")[1].Split(" ")[0] this replaces.
-                var fullRef = refPrefixIndex >= 0
-                    ? payment.Notes!.Substring(refPrefixIndex + "Ref: ".Length).Split(' ')[0].Trim()
-                    : null;
-
-                var registration = string.IsNullOrEmpty(fullRef)
-                    ? null
-                    : await _eventService.GetRegistrationByPaymentReferenceAsync(fullRef, cancellationToken);
-
-                if (registration != null && registration.Status == Enums.EventRegistrationStatus.Pending && registration.Event != null)
-                {
-                    // Verify sufficient amount paid for the event
-                    var ev = registration.Event;
-                    var expectedAmount = (ev.RegistrationFee ?? 0) > 0 ? (ev.RegistrationFee ?? 0) : (registration.ContributionAmount ?? 0);
-                    if (payment.Amount >= expectedAmount)
-                    {
-                        var adminIdStr = _config[Constants.ConfigKeys.SystemAdminId] ?? "1";
-                        int.TryParse(adminIdStr, out var adminId);
-
-                        _logger.LogInformation("Auto-Approving Event Registration {Id} for reference {Ref}", registration.Id, fullRef);
-                        await _eventService.AutoApproveRegistrationAfterPaymentAsync(registration.Id, adminId, cancellationToken);
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Event registration {Id} under-paid: Expected {E}, Paid {P}", registration.Id, expectedAmount, payment.Amount);
-                    }
-                }
-            }
-
-            // 3. If it was a MEMBERSHIP fee for an 'Applied' member, Auto-Approve the member.
-            //    29B.3: Scope strictly to membership-fee payments. Event-registration payments also carry a
-            //    MemberId, so without this FinancialCategory guard a member paying an event fee would be
-            //    silently auto-inducted as a full member. Gateway-initiated payments always set the category
-            //    at initiation (see InitiatePayment), so this is a reliable discriminator on this code path.
-            if (payment.MemberId is int membershipPayerId && membershipPayerId > 0
-                && payment.FinancialCategory == Enums.FinancialCategory.MembershipFee)
-            {
-                var snapshot = await _memberService.GetMembershipSnapshotAsync(membershipPayerId, cancellationToken);
-                if (snapshot != null && snapshot.Value.Status == Enums.MembershipStatus.Applied)
-                {
-                    var membershipType = snapshot.Value.MembershipType;
-
-                    // 82.32: was an inline query missing IsActive, the Category filter and the
-                    // EffectiveTo upper bound — a disabled or expired fee row, or a differently
-                    // categorised row for the same MembershipType (e.g. an EventFee), could win by
-                    // being the most recent EffectiveDate. GetApplicableFeeAsync is the one query
-                    // every other fee lookup in the codebase uses; this path had drifted from it.
-                    var required = await _financialService.GetApplicableFeeAsync(
-                        Enums.FinancialCategory.MembershipFee, membershipType, DateTime.UtcNow, cancellationToken);
-
-                    // S4.3: Fail loudly when fee config is missing — do not silently default.
-                    if (required <= 0)
-                    {
-                        _logger.LogError("Auto-approval skipped for Member {Id}: no fee config found for type {Type}", membershipPayerId, membershipType);
-                        return;
-                    }
-                    if (payment.Amount >= required)
-                    {
-                        // S4.3: Fail loudly when SystemAdminId is not configured.
-                        var adminIdStr = _config[Constants.ConfigKeys.SystemAdminId]
-                            ?? throw new InvalidOperationException($"{Constants.ConfigKeys.SystemAdminId} is not configured.");
-                        int.TryParse(adminIdStr, out var adminId);
-
-                        _logger.LogInformation("Auto-Approving Member {MemberId} after successful gateway payment.", membershipPayerId);
-                        await _memberService.ApproveMemberAsync(membershipPayerId, adminId, cancellationToken);
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Member {Id} under-paid subscription: Required {R}, Paid {P}", membershipPayerId, required, payment.Amount);
-                    }
-                }
-            }
-        }
+        // Business orchestration moved to IPaymentCallbackOrchestrator (82.67).
 
         private string GetClientUrl()
         {

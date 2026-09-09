@@ -169,7 +169,7 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
                 next: (result) => {
                     this.currentPage = result.page;
                     this.totalItems.set(result.totalItems);
-                    this.hasMore.set(result.hasNextPage);
+                    this.hasMore.set(result.hasNextPage ?? (result.page < result.totalPages));
                     // Append new items
                     this.members.update(prev => [...prev, ...result.items]);
                     resolve(true);

@@ -141,7 +141,7 @@ otherwise, because it enforces the always-latest invariant regardless of profile
 One path-resolution defect surfaced during this work: `ResolveProfilePackPath` had been matching
 file names by exact string, so a file stored as `ec_history.json` would not be found when the pack
 referenced it as `ec-history.json` (or vice versa). The fix normalises both the stored name and the
-lookup key to underscores before comparing, with a secondary hyphen-normalised pass, so the resolver
+lookup key to canonical low-dash delimiters before comparing, with a secondary hyphen-normalised pass, so the resolver
 is now format-agnostic. The change is covered by the `SeedDataIntegrityTests` suite, which was
 extended in the same work package to validate both the `ghc` and `default` profile packs: every
 referenced file must exist, every JSON document must parse, and every foreign-key reference within

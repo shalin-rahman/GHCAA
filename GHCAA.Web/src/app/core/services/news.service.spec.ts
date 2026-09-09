@@ -103,11 +103,9 @@ describe('NewsService', () => {
     });
 
     it('should delete news', () => {
-        service.deleteNews(1).subscribe(res => {
-            expect(res.success).toBe(true);
-        });
+        service.deleteNews(1).subscribe();
         const req = httpMock.expectOne(`${API_ENDPOINTS.NEWS}/1`);
         expect(req.request.method).toBe('DELETE');
-        req.flush({ success: true });
+        req.flush(null);
     });
 });

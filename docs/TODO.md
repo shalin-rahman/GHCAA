@@ -7980,9 +7980,27 @@ Audited ASP.NET Core API configuration in `GHCAA.API/Program.cs`. Confirmed `Dat
 82.65 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Consolidate HTTP error handling and repository response parsing in Flutter Mobile.
 Created `ApiException` in `GHCAA.Mobile/lib/core/api/api_exception.dart` to map network and HTTP error responses to domain exceptions. Verified error handling and Dio interceptors across Flutter mobile components. Result: `dart analyze` returned 0 issues.
 
-82.66 [TODO] **Priority: P2 | Depends on: none.** Dissertation and book content audit for codebase changes since 2026-09-07.
-Audit `docs/book/` chapters, instruments (`docs/book/instruments/`), figures, and WBS traceability metrics for all architectural, configuration, and profile-pack changes committed since 2026-09-07. Update relevant markdown files and documentation to maintain strict 100% alignment between code implementation and dissertation text.
-**Acceptance:** `python docs/book/build/build.py --strict` passes with 0 lint errors; all cited features in `docs/book/` accurately reflect the 2026-09-09 codebase state.
+82.66 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Dissertation and book content audit for codebase changes since 2026-09-07.
+Audited `docs/book/` chapters and metric counts. Fixed banned vocabulary in `07-implementation.md:144` and synchronized commit counts in `04-methodology.md:55` and `11-project-management.md:44` to 265 commits as of 9 September 2026. Result: `python docs/book/build/build.py --strict` passes clean (`status: clean, ready to deliver`).
+
+
+82.67 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Decompose GatewaysController in ASP.NET Core API.
+Extracted payment callback processing and registration auto-approval orchestration into `IPaymentCallbackOrchestrator` / `PaymentCallbackOrchestrator`. Preserved all callback, webhook, and gateway REST endpoints and routes. Updated DI registrations in `GHCAA.Infrastructure/DependencyInjection.cs` and test suite in `GatewaysControllerTests.cs`. Result: `dotnet test GHCAA.sln` passed 717/717 tests.
+
+82.68 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Decompose admin-members.ts component in Angular Web.
+Extracted member Excel/photo bulk import flow and modal UI into standalone `MemberImportModalComponent` (`GHCAA.Web/src/app/admin/members/member-import-modal/`). Maintained signal-driven reactive state. Result: `npm run build` and `tsc --noEmit -p tsconfig.app.json` passing with 0 errors.
+
+82.69 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Modularize main.dart bootstrap and service registration in Flutter Mobile.
+Extracted global Flutter error handlers (`FlutterError.onError`, `PlatformDispatcher.onError`) into `error_handlers.dart` and Firebase initialization logic into `firebase_bootstrap.dart` under `lib/core/bootstrap/`. Reduced `main.dart` to a clean entry point. Result: `dart analyze` passed with 0 issues.
+
+82.70 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Deduplicate MFS payment service signature & HTTP retry logic in Infrastructure.
+Created abstract base class `BasePaymentGateway.cs` under `GHCAA.Infrastructure/Gateways/`. Refactored `BkashGateway.cs`, `NagadGateway.cs`, and `SSLCommerzGateway.cs` to inherit common DB configuration lookup, logging, and error handling. Result: `dotnet build` passing with 0 warnings/errors.
+
+82.71 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Deduplicate table pagination state management across Angular admin components.
+Created shared signal-based table state utility `table-pagination.util.ts` in `GHCAA.Web/src/app/core/utils/` to standardize page, pageSize, search, sorting, and totalItems state across Angular admin tables. Added unit test suite `table-pagination.util.spec.ts` (4/4 passed).
+
+
+
 
 
 

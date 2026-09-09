@@ -11,6 +11,7 @@ export interface PagedResult<T> {
     totalPages: number;
     page: number;
     pageSize: number;
+    hasNextPage?: boolean;
 }
 
 export interface MemberSummary {
@@ -32,6 +33,15 @@ export interface MemberSummary {
     companyName?: string;
     professionalSector?: string;
     photoUrl?: string;
+    photoPath?: string;
+    degree?: string;
+    subject?: string;
+    ecHistory?: any[];
+    rank?: number | string;
+    categoryBadge?: string;
+    isEmailPublic?: boolean;
+    isMobilePublic?: boolean;
+    isAddressPublic?: boolean;
     status: MembershipStatus;
     appliedDate: string;
     approvedDate?: string;

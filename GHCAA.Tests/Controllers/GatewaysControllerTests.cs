@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -27,6 +27,7 @@ namespace GHCAA.Tests.Controllers
         private Mock<IPaymentGatewayFactory> _gatewayFactoryMock = null!;
         private Mock<IFinancialService> _financialServiceMock = null!;
         private Mock<IMemberService> _memberServiceMock = null!;
+        private Mock<IPaymentCallbackOrchestrator> _callbackOrchestratorMock = null!;
         private Mock<ILogger<GatewaysController>> _loggerMock = null!;
         private IConfiguration _gatewayTestConfig = null!;
         private Mock<IOrgConfigService> _orgConfigMock = null!;
@@ -39,6 +40,12 @@ namespace GHCAA.Tests.Controllers
             _gatewayFactoryMock = new Mock<IPaymentGatewayFactory>();
             _financialServiceMock = new Mock<IFinancialService>();
             _memberServiceMock = new Mock<IMemberService>();
+            _callbackOrchestratorMock = new Mock<IPaymentCallbackOrchestrator>();
+            _callbackOrchestratorMock
+                .Setup(x => x.HandleSuccessfulPaymentAsync(
+                    It.IsAny<string>(), It.IsAny<CancellationToken>(),
+                    It.IsAny<decimal?>(), It.IsAny<string?>()))
+                .Returns(Task.CompletedTask);
             _loggerMock = new Mock<ILogger<GatewaysController>>();
 
             // 80.13: GatewaysController no longer touches ApplicationDbContext directly — the
@@ -108,8 +115,8 @@ namespace GHCAA.Tests.Controllers
             _controller = new GatewaysController(
                 _gatewayFactoryMock.Object,
                 _financialServiceMock.Object,
-                _memberServiceMock.Object,
                 eventService,
+                _callbackOrchestratorMock.Object,
                 paymentConfigService,
                 _loggerMock.Object,
                 _gatewayTestConfig,
@@ -274,10 +281,11 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(result, Is.InstanceOf<RedirectResult>());
 
-            var updatedReg = await _context.EventRegistrations.FirstOrDefaultAsync(r => r.Id == registrationId);
-            Assert.That(updatedReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
-
-            _financialServiceMock.Verify(x => x.UpdatePaymentStatusAsync(It.IsAny<int>(), Enums.PaymentStatus.Completed, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+            // Controller's job: call the orchestrator with the right transaction ID.
+            // Orchestrator internals (DB update, registration approval) are tested in orchestrator unit tests.
+            _callbackOrchestratorMock.Verify(
+                x => x.HandleSuccessfulPaymentAsync(txnId, It.IsAny<CancellationToken>(), It.IsAny<decimal?>(), It.IsAny<string?>()),
+                Times.Once);
         }
 
         [Test]
@@ -313,8 +321,11 @@ namespace GHCAA.Tests.Controllers
             var callbackData = new Dictionary<string, string> { { "status", "VALID" }, { "tran_id", txnId } };
             await _controller.SSLCommerzCallback(callbackData, CancellationToken.None);
 
-            var updatedReg = await _context.EventRegistrations.FirstOrDefaultAsync(r => r.PaymentReference == "EVT-REG-COMPLEX-99");
-            Assert.That(updatedReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
+            // Controller called the orchestrator — registration approval and payment status update
+            // are orchestrator internals not visible through the controller mock boundary.
+            _callbackOrchestratorMock.Verify(
+                x => x.HandleSuccessfulPaymentAsync(txnId, It.IsAny<CancellationToken>(), It.IsAny<decimal?>(), It.IsAny<string?>()),
+                Times.Once);
         }
 
         [Test]
@@ -360,8 +371,14 @@ namespace GHCAA.Tests.Controllers
             var updatedReg = await _context.EventRegistrations.FirstOrDefaultAsync(r => r.Id == registration.Id);
             Assert.That(updatedReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Pending));
 
-            _financialServiceMock.Verify(x => x.UpdatePaymentStatusAsync(payment.Id, Enums.PaymentStatus.Failed, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
-            _financialServiceMock.Verify(x => x.UpdatePaymentStatusAsync(It.IsAny<int>(), Enums.PaymentStatus.Completed, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+            // Controller passes the mismatched amount to the orchestrator; the orchestrator decides
+            // whether to mark it Failed. Verify the orchestrator was called with the reported amount.
+            _callbackOrchestratorMock.Verify(
+                x => x.HandleSuccessfulPaymentAsync(txnId, It.IsAny<CancellationToken>(), 999m, It.IsAny<string?>()),
+                Times.Once);
+            _financialServiceMock.Verify(
+                x => x.UpdatePaymentStatusAsync(It.IsAny<int>(), Enums.PaymentStatus.Completed, It.IsAny<string>(), It.IsAny<CancellationToken>()),
+                Times.Never);
         }
 
         [Test]
@@ -397,8 +414,9 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(result, Is.InstanceOf<RedirectResult>());
 
-            var updatedReg = await _context.EventRegistrations.FirstOrDefaultAsync(r => r.Id == registration.Id);
-            Assert.That(updatedReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
+            _callbackOrchestratorMock.Verify(
+                x => x.HandleSuccessfulPaymentAsync(txnId, It.IsAny<CancellationToken>(), It.IsAny<decimal?>(), It.IsAny<string?>()),
+                Times.Once);
         }
 
         // Regression coverage for docs/TODO.md 80.11: a webhook used to be dead-ended at a bool,
@@ -435,7 +453,9 @@ namespace GHCAA.Tests.Controllers
             var result = await _controller.GatewayWebhook("SSLCommerz", CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
-            _financialServiceMock.Verify(x => x.UpdatePaymentStatusAsync(payment.Id, Enums.PaymentStatus.Completed, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+            _callbackOrchestratorMock.Verify(
+                x => x.HandleSuccessfulPaymentAsync(trxId, It.IsAny<CancellationToken>(), 500m, It.IsAny<string?>()),
+                Times.Once);
         }
 
         [Test]

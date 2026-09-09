@@ -122,6 +122,7 @@ namespace GHCAA.Infrastructure
             services.AddScoped<IPaymentGatewayFactory, PaymentGatewayFactory>();
             services.AddScoped<IDatabaseHealthService, DatabaseHealthService>();
             services.AddScoped<IPaymentConfigService, PaymentConfigService>();
+            services.AddScoped<IPaymentCallbackOrchestrator, PaymentCallbackOrchestrator>();
             services.AddScoped<ISocialAuthConfigService, SocialAuthConfigService>();
 
             // Payment Gateways (HttpClient instances)

@@ -10,7 +10,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { EC_ROLES, getECPositionName, getCurrentECPosition, getCurrentECPeriod, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, EC_ROLES_OPTIONS, getBloodGroupName, LOOKUP_GROUPS } from '../../core/constants/app.constants';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { DatePipe } from '@angular/common';
-import * as XLSX from 'xlsx';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
@@ -22,11 +21,12 @@ import { toWireDate } from '../../core/utils/date.util';
 import { Icon } from '../../common/icon/icon';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
+import { MemberImportModalComponent } from './member-import-modal/member-import-modal.component';
 
 @Component({
   selector: 'app-admin-members',
   standalone: true,
-  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon, ModalHeaderComponent, AppCurrencyPipe],
+  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon, AppCurrencyPipe, MemberImportModalComponent],
   providers: [DatePipe],
   templateUrl: './admin-members.html',
   styleUrl: './admin-members.scss'
@@ -70,71 +70,6 @@ export class AdminMembers implements OnInit {
 
   // Import State
   showImportModal = signal(false);
-  isImporting = signal(false);
-  importFile = signal<File | null>(null);
-  photoFiles = signal<File[]>([]);
-  excelHeaders = signal<string[]>([]);
-  columnMapping: Record<string, string> = {
-    'FullName': '',
-    'Email': '',
-    'MobileNo': '',
-    'NID': '',
-    'GHCLastCertificatePassingYear': '',
-    'ID': ''
-  };
-
-  defaultValues: Record<string, string> = {};
-
-  systemProperties = [
-    // Personal
-    { value: 'FullName', label: 'Full Name' },
-    { value: 'FatherName', label: "Father's Name" },
-    { value: 'MotherName', label: "Mother's Name" },
-    { value: 'DateOfBirth', label: 'Date of Birth' },
-    { value: 'Gender', label: 'Gender' },
-    { value: 'BloodGroup', label: 'Blood Group' },
-    { value: 'NID', label: 'NID Number' },
-    { value: 'MobileNo', label: 'Mobile Number' },
-    { value: 'Email', label: 'Email Address' },
-    { value: 'PresentAddress', label: 'Present Address' },
-    { value: 'PermanentAddress', label: 'Permanent Address' },
-    { value: 'EmergencyContactName', label: 'Emergency Contact Name' },
-    { value: 'EmergencyContactRelation', label: 'Emergency Contact Relation' },
-    { value: 'EmergencyContactPhone', label: 'Emergency Contact Phone' },
-    // Academic — Highest
-    { value: 'HighestCertificate', label: 'Highest Certificate' },
-    { value: 'HighestCertificateGroup', label: 'Highest Certificate Group' },
-    { value: 'HighestCertificateSubject', label: 'Highest Certificate Subject' },
-    { value: 'HighestCertificatePassingYear', label: 'Highest Certificate Passing Year' },
-    { value: 'HSCAdmissionYear', label: 'HSC Admission Year' },
-    // Academic — GHC
-    { value: 'GHCLastCertificate', label: 'GHC Last Certificate' },
-    { value: 'GHCLastCertificateGroup', label: 'GHC Last Certificate Group' },
-    { value: 'GHCLastCertificateSubject', label: 'GHC Last Certificate Subject' },
-    { value: 'GHCLastCertificatePassingYear', label: 'GHC Passing Year (Batch)' },
-    { value: 'GHCAdmissionYear', label: 'GHC Admission Year' },
-    // Professional
-    { value: 'ProfessionalSector', label: 'Professional Sector' },
-    { value: 'Designation', label: 'Professional Designation' },
-    // Membership
-    { value: 'MembershipNumber', label: 'Membership Number' },
-    { value: 'MembershipType', label: 'Membership Type' },
-    { value: 'Category', label: 'Member Category' },
-    // System
-    { value: 'ID', label: 'System/External ID (For Photos)' },
-    // Privacy & Notifications
-    { value: 'IsMobilePublic', label: 'Expose Mobile' },
-    { value: 'IsEmailPublic', label: 'Expose Email' },
-    { value: 'IsAddressPublic', label: 'Expose Address' },
-    { value: 'IsNIDPublic', label: 'Expose NID' },
-    { value: 'IsFamilyPublic', label: 'Expose Family' },
-    { value: 'NotifyEventCreation', label: 'Notify Events' },
-    { value: 'NotifyRelevantUpdates', label: 'Notify Relevant News' },
-    // Status
-    { value: 'IsVerified', label: 'Verified Alumni (True/False)' },
-    { value: 'ContributionPoints', label: 'Merit Points' }
-  ];
-
   // Constants for dropdowns
   ecPositions = EC_ROLES_OPTIONS;
 
@@ -620,126 +555,8 @@ export class AdminMembers implements OnInit {
   
   getBloodGroupName = getBloodGroupName;
 
-  // --- Import Actions ---
   openImport() {
     this.showImportModal.set(true);
-    this.importFile.set(null);
-    this.photoFiles.set([]);
-    this.excelHeaders.set([]);
-  }
-
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.importFile.set(file);
-      this.extractHeaders(file);
-    }
-  }
-
-  onPhotosSelected(event: any) {
-    this.photoFiles.set(Array.from(event.target.files));
-  }
-
-  extractHeaders(file: File) {
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      try {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json<any>(firstSheet, { header: 1 });
-
-        if (jsonData.length > 0) {
-          // First row = headers
-          const headers = (jsonData[0] as any[]).filter((h: any) => h != null && String(h).trim() !== '').map((h: any) => String(h).trim());
-          this.excelHeaders.set(headers);
-
-          // Reset mappings
-          this.columnMapping = {};
-
-          // Auto-map by fuzzy matching
-          headers.forEach(h => {
-            const lower = h.toLowerCase();
-            if (lower.includes('participant name') || (lower.includes('full') && lower.includes('name')) || lower === 'name') this.columnMapping['FullName'] = h;
-            else if (lower.includes('father')) this.columnMapping['FatherName'] = h;
-            else if (lower.includes('mother')) this.columnMapping['MotherName'] = h;
-            else if (lower.includes('email') || lower.includes('e-mail')) this.columnMapping['Email'] = h;
-            else if (lower.includes('mobile') || lower.includes('phone') || lower.includes('cell')) this.columnMapping['MobileNo'] = h;
-            else if (lower === 'nid' || lower.includes('national id')) this.columnMapping['NID'] = h;
-            else if (lower.includes('batch') || lower.includes('passing year') || lower.includes('session') || lower === 'pass year') this.columnMapping['GHCLastCertificatePassingYear'] = h;
-            else if (lower.includes('batch') || lower.includes('passing year') || lower.includes('session') || lower === 'pass year') this.columnMapping['HighestCertificatePassingYear'] = h;
-            else if (lower.includes('designation') || lower.includes('position') || lower === 'profession') this.columnMapping['Designation'] = h;
-            else if (lower.includes('sector') || lower.includes('profession')) this.columnMapping['ProfessionalSector'] = h;
-            else if (lower.includes('blood')) this.columnMapping['BloodGroup'] = h;
-            else if (lower.includes('gender') || lower.includes('sex')) this.columnMapping['Gender'] = h;
-            else if (lower.includes('dob') || lower.includes('birth')) this.columnMapping['DateOfBirth'] = h;
-            else if (lower.includes('present') && lower.includes('address')) this.columnMapping['PresentAddress'] = h;
-            else if (lower.includes('permanent') && lower.includes('address')) this.columnMapping['PermanentAddress'] = h;
-            else if (lower.includes('address') && !lower.includes('present') && !lower.includes('permanent')) this.columnMapping['PresentAddress'] = h;
-            else if (lower.includes('district')) this.columnMapping['PermanentAddress'] = h;
-            else if (lower === 'id' || lower === 'sl' || lower === 'serial' || lower.includes('registration')) this.columnMapping['ID'] = h;
-            else if (lower.includes('membership') || lower.includes('registration')) this.columnMapping['MembershipNumber'] = h;
-            else if (lower.includes('membership') && lower.includes('type')) this.columnMapping['MembershipType'] = h;
-            else if (lower.includes('highest') || lower === 'last certificate') this.columnMapping['HighestCertificate'] = h;
-            else if (lower.includes('highest') && lower.includes('group') || lower === 'group') this.columnMapping['HighestCertificateGroup'] = h;
-            else if (lower.includes('highest') && lower.includes('subject') || lower === 'department') this.columnMapping['HighestCertificateSubject'] = h;
-            else if (lower.includes('certificate') && lower.includes('ghc')) this.columnMapping['GHCLastCertificate'] = h;
-            else if (lower.includes('emergency') && lower.includes('name')) this.columnMapping['EmergencyContactName'] = h;
-            else if (lower.includes('emergency') && lower.includes('relation')) this.columnMapping['EmergencyContactRelation'] = h;
-            else if (lower.includes('emergency') && lower.includes('phone')) this.columnMapping['EmergencyContactPhone'] = h;
-            else if (lower.includes('hsc') && lower.includes('admission')) this.columnMapping['HSCAdmissionYear'] = h;
-            else if (lower.includes('ghc') && lower.includes('admission')) this.columnMapping['GHCAdmissionYear'] = h;
-          });
-
-          this.notify.success(`Found ${headers.length} columns in the Excel file.`);
-        } else {
-          this.notify.warning('The Excel file appears to be empty.');
-          this.excelHeaders.set([]);
-        }
-      } catch (err) {
-        console.error('Excel parse error:', err);
-        this.notify.error('Failed to read Excel file. Please ensure it is a valid .xlsx file.');
-        this.excelHeaders.set([]);
-      }
-    };
-    reader.readAsArrayBuffer(file);
-  }
-
-  executeImport() {
-    const file = this.importFile();
-    if (!file) return;
-
-    this.isImporting.set(true);
-    const formData = new FormData();
-    formData.append('ExcelFile', file);
-    this.photoFiles().forEach(f => formData.append('Photos', f));
-
-    // Invert mapping for backend: ExcelColumnName -> SystemPropertyName
-    const invertedMapping: Record<string, string> = {};
-    Object.entries(this.columnMapping).forEach(([sysProp, excelCol]) => {
-      if (excelCol && excelCol !== 'undefined') {
-        invertedMapping[excelCol] = sysProp;
-      }
-    });
-
-    formData.append('ColumnMappingJson', JSON.stringify(invertedMapping));
-    formData.append('DefaultValuesJson', JSON.stringify(this.defaultValues));
-
-    this.adminService.importMembers(formData).subscribe({
-      next: (res: any) => {
-        this.notify.success(`Import Complete! Successfully added ${res.successCount} members.`);
-        if (res.failureCount > 0) {
-          this.notify.warning(`${res.failureCount} rows had issues. Please review the import file.`);
-        }
-        this.isImporting.set(false);
-        this.showImportModal.set(false);
-        this.loadMembers();
-      },
-      error: () => {
-        this.notify.error('Import failed. Please check file format.');
-        this.isImporting.set(false);
-      }
-    });
   }
 
   addAcademic() {

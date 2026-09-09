@@ -14,7 +14,7 @@ using System.Text;
 
 namespace GHCAA.Infrastructure.Gateways
 {
-    public class SSLCommerzGateway : IPaymentGatewayService
+    public class SSLCommerzGateway : BasePaymentGateway
     {
         // SSLCommerz's own field names, read from both the redirect callback form body and the
         // webhook body.
@@ -22,30 +22,24 @@ namespace GHCAA.Infrastructure.Gateways
         private const string AmountKey = "amount";
         private const string ValIdKey = "val_id";
 
-        private readonly HttpClient _httpClient;
-        private readonly ApplicationDbContext _db;
-        private readonly ILogger<SSLCommerzGateway> _logger;
         private readonly SslCommerzOptions _sslCommerzOptions;
         private readonly IOrgConfigService _orgConfig;
 
         public SSLCommerzGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<SSLCommerzGateway> logger, IOptions<SslCommerzOptions> sslCommerzOptions, IOrgConfigService orgConfig)
+            : base(httpClient, db, logger)
         {
-            _httpClient = httpClient;
-            _db = db;
-            _logger = logger;
             _sslCommerzOptions = sslCommerzOptions.Value;
             _orgConfig = orgConfig;
         }
 
-        public Enums.PaymentGateway GatewayType => Enums.PaymentGateway.SSLCommerz;
+        public override Enums.PaymentGateway GatewayType => Enums.PaymentGateway.SSLCommerz;
 
-        public async Task<PaymentGatewayResponseDto> InitiatePaymentAsync(PaymentGatewayInitiationDto dto, CancellationToken cancellationToken = default)
+        public override async Task<PaymentGatewayResponseDto> InitiatePaymentAsync(PaymentGatewayInitiationDto dto, CancellationToken cancellationToken = default)
         {
-            var config = await _db.PaymentConfigurations
-                .FirstOrDefaultAsync(p => p.Gateway == GatewayType && p.IsEnabled, cancellationToken);
+            var config = await GetActiveConfigurationAsync(cancellationToken);
 
             if (config == null)
-                return new PaymentGatewayResponseDto { Success = false, Message = "SSLCommerz configuration not found or disabled." };
+                return DisabledResponse("SSLCommerz");
 
             var storeId = config.GatewayPublicKey;
             var storePass = config.GatewaySecretKey;
@@ -126,22 +120,21 @@ namespace GHCAA.Infrastructure.Gateways
             return computed == expectedSign.ToLowerInvariant();
         }
 
-        public async Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
+        public override async Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
         {
             if (!callbackData.ContainsKey("status") || callbackData["status"] != "VALID") return false;
 
             var valId = callbackData.TryGetValue(ValIdKey, out var v) ? v : "";
             if (string.IsNullOrEmpty(valId)) return false;
 
-            var config = await _db.PaymentConfigurations
-                .FirstOrDefaultAsync(p => p.Gateway == GatewayType && p.IsEnabled, cancellationToken);
+            var config = await GetActiveConfigurationAsync(cancellationToken);
 
             if (config == null) return false;
 
             // 24.11: Verify the HMAC signature before trusting any val_id or amount in the callback.
             if (!VerifySign(callbackData, config.GatewaySecretKey ?? string.Empty))
             {
-                _logger.LogWarning("SSLCommerz callback rejected: verify_sign mismatch");
+                Logger.LogWarning("SSLCommerz callback rejected: verify_sign mismatch");
                 return false;
             }
 
@@ -154,19 +147,19 @@ namespace GHCAA.Infrastructure.Gateways
 
             try
             {
-                var response = await _httpClient.GetAsync(validationUrl, cancellationToken);
+                var response = await HttpClient.GetAsync(validationUrl, cancellationToken);
                 var result = await response.Content.ReadFromJsonAsync<SSLCommerzValidationResponse>(cancellationToken: cancellationToken);
 
                 return result?.status == "VALID" || result?.status == "AUTHENTICATED";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "SSLCommerz Verification Failed");
+                Logger.LogError(ex, "SSLCommerz Verification Failed");
                 return false;
             }
         }
 
-        public async Task<PaymentWebhookResultDto> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+        public override async Task<PaymentWebhookResultDto> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
         {
             try
             {

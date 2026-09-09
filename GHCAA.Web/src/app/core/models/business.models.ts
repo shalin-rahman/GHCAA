@@ -312,15 +312,19 @@ export interface EventTask {
     description?: string;
     assignedToMemberId?: number;
     isCompleted: boolean;
-    dueDate?: string | Date;
+    dueDate?: string | Date | null;
 }
 
 export interface EventExpense {
     id: number;
-    budgetId: number;
-    title: string;
+    budgetId?: number;
+    eventId?: number;
+    title?: string;
+    category?: string;
     amount: number;
-    expenseDate: string | Date;
+    expenseDate?: string | Date | null;
+    spentAt?: string | Date | null;
+    note?: string;
     notes?: string;
 }
 
@@ -328,8 +332,9 @@ export interface EventBudget {
     id: number;
     eventId: number;
     allocatedAmount: number;
-    spentAmount: number;
-    expenses: EventExpense[];
+    spentAmount?: number;
+    estimatedTotal?: number;
+    expenses?: EventExpense[];
 }
 
 export interface PagedRegistrations {
@@ -554,23 +559,23 @@ export interface MembershipHistory {
 
 export interface MembershipFeeConfig {
     id: number;
-    category: FinancialCategory;
-    membershipType: string;
-    amount: number;
-    effectiveDate: string | Date;
-    effectiveTo?: string | Date;
-    isActive: boolean;
-    description: string;
+    category?: FinancialCategory | string | null;
+    membershipType?: string | null;
+    amount?: number | null;
+    effectiveDate?: string | Date | null;
+    effectiveTo?: string | Date | null;
+    isActive?: boolean | null;
+    description?: string | null;
 }
 
 export interface CreateMembershipFeeConfig {
-    category: FinancialCategory;
-    membershipType: string;
-    amount: number;
-    effectiveDate: string | Date;
-    effectiveTo?: string | Date;
-    isActive: boolean;
-    description: string;
+    category?: FinancialCategory | string | null;
+    membershipType?: string | null;
+    amount?: number | null;
+    effectiveDate?: string | Date | null;
+    effectiveTo?: string | Date | null;
+    isActive?: boolean | null;
+    description?: string | null;
 }
 
 export interface UpdateMembershipFeeConfig extends Partial<CreateMembershipFeeConfig> {

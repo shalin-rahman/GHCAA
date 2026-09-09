@@ -1,0 +1,66 @@
+<div class="modal-overlay" (click)="closed.emit()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+        <app-modal-header title="Enterprise Alumni Bulk Import" (closed)="closed.emit()"></app-modal-header>
+        <div class="modal-body">
+            <div class="import-engine animate-fade-in">
+                <!-- Step 1: Asset Selection -->
+                <div class="step-card">
+                    <h4>Step 1: Resource Acquisition</h4>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="upload-zone p-8 border-2 border-dashed border-gold rounded-xl text-center cursor-pointer">
+                            <label class="block mb-4 font-black text-xs uppercase opacity-70">Excel Master Record (.xlsx)</label>
+                            <input type="file" accept=".xlsx" (change)="onFileSelected($event)" class="hidden" id="excelUpload">
+                            <button class="btn btn-secondary w-full" onclick="document.getElementById('excelUpload').click()">
+                                {{ importFile() ? '✅ ' + importFile()?.name : 'Select Spreadsheet' }}
+                            </button>
+                        </div>
+                        <div class="upload-zone p-8 border-2 border-dashed border-gold rounded-xl text-center cursor-pointer">
+                            <label class="block mb-4 font-black text-xs uppercase opacity-70">Identity Photo Cluster</label>
+                            <input type="file" multiple webkitdirectory directory accept="image/*"
+                                (change)="onPhotosSelected($event)" class="hidden" id="photoUpload">
+                            <button class="btn btn-secondary w-full" onclick="document.getElementById('photoUpload').click()">
+                                {{ photoFiles().length > 0 ? '✅ ' + photoFiles().length + ' Images' : 'Select Folder' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Protocol Mapping -->
+                @if (importFile() && excelHeaders().length > 0) {
+                <div class="step-card">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4>Step 2: Attribute Synchronisation</h4>
+                        <span class="text-xs italic opacity-40">Mapping global fields to Excel columns</span>
+                    </div>
+                    <div class="mapping-grid">
+                        @for (prop of systemProperties; track prop.value) {
+                        <div class="mapping-row">
+                            <span class="sys-prop">{{ prop.label }}</span>
+                            <select [(ngModel)]="columnMapping[prop.value]" class="w-full">
+                                <option [value]="''">-- Ignore Property --</option>
+                                @for (header of excelHeaders(); track $index) {
+                                <option [value]="header">{{ header }}</option>
+                                }
+                            </select>
+                            <input type="text" [(ngModel)]="defaultValues[prop.value]"
+                                placeholder="Default Override..." class="w-full">
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closed.emit()">Cancel Import</button>
+            <button class="btn btn-accent px-10 shadow-gold" [disabled]="!importFile() || isImporting()"
+                (click)="executeImport()">
+                @if (isImporting()) {
+                <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner> Importing...
+                } @else {
+                Import
+                }
+            </button>
+        </div>
+    </div>
+</div>
