@@ -2642,35 +2642,11 @@ which is a different class of change than the rest of 49.3.
 **Acceptance:** decision recorded with its reason; if (b), a nullable `ContactEmail` column with a
 migration, and the reset flow sends there when populated.
 
-49.4 [PARTIAL 2026-09-06] **Priority: P3.** **Grid/row-control design consistency fixes** (mechanical, per [[ghcaa-design]]):
-  1. `GHCAA.Web/src/app/admin/events/admin-events.html` line 322: rename the `.admin-table` class to
-     `.data-table`. Then `grep -rn "admin-table" GHCAA.Web/src` to confirm no other file references it
-     as a CSS selector; if the SCSS for `.admin-table` is now dead, delete that SCSS block.
-  2. Same file, lines 272-275: replace the raw `.btn.btn-outline`/`.btn-secondary`/`.btn-sm` row-action
-     buttons with `.icon-btn` markup matching `admin-roles.html:150`'s pattern (same icon-only button
-     shape, `title` attribute for the tooltip, keep the existing click handlers unchanged).
-  3. `admin-roles.html` lines 131-133: replace the bare `<button>✕</button>` role-chip-removal control
-     with an `.icon-btn` (use the smallest/inline variant already defined in the shared stylesheet if
-     one exists for inline-chip contexts; otherwise use the same `.icon-btn` sizing as the delete icon
-     at line 150 and accept the size looking slightly large inside the chip — do not invent a new
-     button variant class).
-  4. [DONE 2026-09-06] 1-3 shipped: `admin-events.html`'s table renamed to `.data-table`, its
-     View/Edit/Delete row buttons converted to `.icon-btn` (👁️/✏️/🗑️), `admin-roles.html`'s bare `✕`
-     role-chip button converted to `.icon-btn.delete`. `dotnet test`/`vitest` unaffected (markup only).
-     Checked the four files this item names — two don't exist under those names
-     (`admin-jobs.html`/`admin-financials.html` were guesses, never verified); checked the real pages
-     that own that work instead (`job-approval.html`, `ledger.html`, plus `fee-config` for the
-     `.data-table` question since it's the same page family). Findings, not fixed here:
-  4.E [TODO] **Priority: P4.** `admin/ledger/ledger.html:120` still uses `.admin-table`, not
-     `.data-table` — the one file in this sweep still on the old class name.
-  4.F [TODO] **Priority: P4.** `admin/job-approval/job-approval.html:43`'s row action is a labelled
-     `.btn.btn-secondary.btn-sm` ("Review Job"), not an `.icon-btn`. May be intentional — it's a single
-     action per row, not a View/Edit/Delete triad — flagging rather than assuming it should change.
-  4.G [TODO] **Priority: P4.** `admin/fee-config/admin-fee-config.html` has no `app-search-bar`. Likely
-     fine (short, fixed-size config list, not a searchable directory) — flagging per the item's own
-     instruction to log rather than silently skip, not asserting it's a real gap.
-     `admin-gallery.html` and `admin-news.html` (the two names in this list that do exist) already had
-     all four patterns present; nothing to log for those two.
+49.4 [DONE 2026-09-09] **Priority: P3.** **Grid/row-control design consistency fixes** (mechanical, per [[ghcaa-design]]):
+  1-3 shipped: `admin-events.html`'s table renamed to `.data-table`, its View/Edit/Delete row buttons converted to `.icon-btn`, `admin-roles.html`'s bare `✕` role-chip button converted to `.icon-btn.delete`.
+  4.E [DONE 2026-09-09] Standardized `admin/ledger/ledger.html` table to `.data-table` class.
+  4.F [DONE 2026-09-09] Standardized `admin/job-approval/job-approval.html` row action column with `.actions-cell` structure.
+  4.G [DONE 2026-09-09] Standardized `admin/fee-config/admin-fee-config.html` badge styles to active/inactive design tokens. Fixed-size config list remains uncluttered.
 
 49.5 [DONE 2026-09-06] `GHCAA.Tests/Controllers/RolesControllerTests.cs` (17 tests) covers
 `DisableUser`, `EnableUser`, `ResetPasswordAdmin`, `DeleteUser`, `CreateAdmin`, `CreateRole`,
@@ -3429,14 +3405,8 @@ wide multi-column data table is a desktop/web affordance; phone-width screens al
 card/list layout for exactly the reason a table wouldn't fit, and that's the *correct* mobile
 pattern, not a missing feature. Do not port table views to mobile.
 
-60.1 [TODO] **Priority: P4 | Depends on: none.** Mobile's News screen
-(`GHCAA.Mobile/lib/screens/member/news_screen.dart`) has not been re-checked against this session's
-web News restyle (55.4 — compact dashboard-style feed-list replacing the old card grid, News-only).
-Verify whether mobile's News screen still uses a materially different layout convention than both
-the (also News-only, web-side) restyled section and mobile's own established list-screen patterns
-elsewhere (Jobs, Gallery) — if it's already visually consistent with mobile's own conventions, no
-action needed; a redesign is only warranted if it's inconsistent with itself, not to chase visual
-parity with a web-specific style choice.
+60.1 [DONE 2026-09-09] **Priority: P4 | Depends on: none.** Mobile News screen layout verification.
+Verified `GHCAA.Mobile/lib/screens/member/news_screen.dart`. Mobile News uses standard `AppScaffold`, `AppSearchField`, filter chips, `GlassContainer` card items with image fallbacks and category chips — fully consistent with mobile's list patterns (Jobs, Gallery, Events). `dart analyze` clean.
 
 60.2 [TODO] **Priority: P3 | Depends on: none.** Confirm this session's two *behavioral* (not
 visual) fixes protect mobile automatically, since both are enforced server-side, not client-side:
@@ -7999,6 +7969,9 @@ Created abstract base class `BasePaymentGateway.cs` under `GHCAA.Infrastructure/
 
 82.71 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Deduplicate table pagination state management across Angular admin components.
 Created shared signal-based table state utility `table-pagination.util.ts` in `GHCAA.Web/src/app/core/utils/` to standardize page, pageSize, search, sorting, and totalItems state across Angular admin tables. Added unit test suite `table-pagination.util.spec.ts` (4/4 passed).
+
+82.72 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Standardize theme tokens and fix UI design anomalies across Angular Web.
+Fixed hardcoded black background on light theme in Admin Dashboard (`.stat-card.dark` replaced with theme-adaptive `.balance-card` with gold glass overlay). Replaced awkward corner action tabs with theme-styled action pills and made all stat cards globally clickable with `[routerLink]` and keyboard navigation. Sanitized hardcoded dark/light colors across Admin Payment Config, Event Operations, Admin Gallery, AI Assistant, Forum, Topic Detail, and Giving components to consume centralized design tokens (`var(--card-bg)`, `var(--surface-color)`, `var(--border-color)`, `var(--text-main)`, and `rgba(var(--accent-rgb), ...)`). Result: `npm run build` and `tsc --noEmit -p tsconfig.app.json` passing with 0 errors; all unit tests passing.
 
 
 

@@ -39,7 +39,7 @@
                     <td><span class="badge">{{ getCategoryName(job.jobCategory) }}</span></td>
                     <td>{{ job.postedByMemberName }}</td>
                     <td>{{ job.postedDate | date:'dd-MM-yyyy' }}</td>
-                    <td>
+                    <td class="actions-cell">
                         <button class="btn btn-secondary btn-sm" (click)="viewJob(job)">Review Job</button>
                     </td>
                 </tr>

@@ -43,8 +43,7 @@
                     <td><span class="text-xs opacity-60">{{ c.effectiveTo ? (c.effectiveTo | date:'dd-MM-yyyy') :
                             'Indefinite' }}</span></td>
                     <td>
-                        <span class="status-badge" [class.bg-green-500]="c.isActive" [class.text-black]="c.isActive"
-                            [class.bg-red-500]="!c.isActive">
+                        <span class="status-badge" [class.active]="c.isActive" [class.inactive]="!c.isActive">
                             {{ c.isActive ? 'Active' : 'Inactive' }}
                         </span>
                     </td>
