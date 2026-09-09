@@ -31,7 +31,7 @@
                             <input [type]="showPassword() ? 'text' : 'password'" formControlName="password"
                                 [class.border-red-500]="createForm.get('password')?.touched && createForm.get('password')?.invalid"
                                 placeholder="••••••••"
-                                style="background:rgba(var(--primary-rgb),0.05);border:1px solid var(--glass-border);color:var(--text-main)"
+                                style="background:var(--surface-subtle);border:1px solid var(--glass-border);color:var(--text-main)"
                                 class="w-full pr-12 rounded-lg px-4 py-2 outline-none focus:border-accent">
                             <button type="button"
                                 class="toggle-password absolute right-3 text-white/40 hover:text-accent transition-colors"
@@ -75,7 +75,7 @@
         <div class="flex gap-4 max-w-md">
             <input type="text" [ngModel]="customRoleName()" (ngModelChange)="customRoleName.set($event)"
                 placeholder="e.g. Content Editor"
-                style="background:rgba(var(--primary-rgb),0.05);border:1px solid var(--glass-border);color:var(--text-main)"
+                style="background:var(--surface-subtle);border:1px solid var(--glass-border);color:var(--text-main)"
                 class="flex-1 rounded-lg px-4 py-2 outline-none focus:border-accent">
             <button class="btn btn-primary" (click)="createCustomRole()"
                 [disabled]="creatingRole() || !customRoleName()">

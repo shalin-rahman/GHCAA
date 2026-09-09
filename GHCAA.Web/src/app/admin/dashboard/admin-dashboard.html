@@ -48,13 +48,13 @@
             <span class="action-btn">Manage →</span>
         </div>
 
-        <div class="glass-card stat-card ripple-effect accent" routerLink="/admin/approvals" tabindex="0" role="link" [attr.aria-label]="'View Pending Approvals: ' + (stats()?.applied || 0)">
+        <div class="glass-card stat-card ripple-effect" routerLink="/admin/approvals" tabindex="0" role="link" [attr.aria-label]="'View Pending Approvals: ' + (stats()?.applied || 0)">
             <div class="stat-icon">📝</div>
             <div class="stat-body">
                 <h3>{{ stats()?.applied || 0 }}</h3>
                 <p>Pending Approvals</p>
             </div>
-            <span class="action-btn accent">View All →</span>
+            <span class="action-btn">View All →</span>
         </div>
 
         <div class="glass-card stat-card ripple-effect" routerLink="/admin/members" tabindex="0" role="link" [attr.aria-label]="'View Inactive Members: ' + inactiveCount">
@@ -73,7 +73,7 @@
                 <h3>{{ stats()?.balance == null ? 'Restricted' : (stats()!.balance! | appCurrency) }}</h3>
                 <p>Net Fund Balance</p>
             </div>
-            <span class="action-btn gold">Ledger →</span>
+            <span class="action-btn">Ledger →</span>
         </div>
         }
 

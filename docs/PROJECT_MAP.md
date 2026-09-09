@@ -766,6 +766,7 @@ not block a build yet). For the full mechanism and where it stands, see
 | `IThemeService` | `ThemeService` | `GetActiveTheme()`, `SetTheme(id)`, `CreateTheme(dto)` |
 | `IInstitutionProfileProvider` | `InstitutionProfileProvider` | `ProfileName`, `OrgConfigDefaults` — reads `profiles/<ORG_PROFILE>/org-config.json`, resolved eagerly at boot. `AddSingleton`, not consumed anywhere yet (docs/TODO.md 62.1) |
 | `IRealTimeService` | `RealTimeService` (API) | `NotifyUserAsync(userId, event, data)`, `BroadcastAsync(...)` |
+| `IPaymentCallbackOrchestrator` | `PaymentCallbackOrchestrator` | `ProcessCallbackAsync(gateway, query, body, ct)` → unified callback validation & ledger update |
 | `IPaymentGatewayService` | `SSLCommerzGateway` | Gateways/ |
 | `IPaymentGatewayService` | `BkashGateway` | Gateways/ |
 | `IPaymentGatewayService` | `NagadGateway` | Gateways/ |
@@ -860,20 +861,22 @@ All services are registered as **Scoped** unless noted.
 | `IRealTimeService` | `RealTimeService` | API/Services/ |
 | `IErrorLogService` | `ErrorLogService` | Services/ (WP45; called from `ExceptionMiddleware`) |
 | `IDeviceTokenService` | `DeviceTokenService` | Services/ (82.53a; FCM token upsert/read for `NotificationController`) |
+| `IPaymentCallbackOrchestrator` | `PaymentCallbackOrchestrator` | Services/ (82.70; orchestrates gateway verification, ledger updates, and status transitions) |
 
 ---
 
 ## Infrastructure Layer — Payment Gateways
 
-All registered as **HttpClient** + **Scoped IPaymentGatewayService**.
+All registered as **HttpClient** + **Scoped IPaymentGatewayService**. Gateways inherit from `BasePaymentGateway` for unified configuration and HTTP handling.
 
 | Gateway | Class | `GatewayType` | Notes |
 |---|---|---|---|
-| SSLCommerz | `SSLCommerzGateway` | `SSLCommerz` | Full webhook + callback |
-| bKash | `BkashGateway` | `BkashGateway` | Token-based auth |
-| Nagad | `NagadGateway` | `NagadGateway` | Signature-based |
+| SSLCommerz | `SSLCommerzGateway` | `SSLCommerz` | Full webhook + callback; inherits `BasePaymentGateway` |
+| bKash | `BkashGateway` | `BkashGateway` | Token-based auth; inherits `BasePaymentGateway` |
+| Nagad | `NagadGateway` | `NagadGateway` | Signature-based; inherits `BasePaymentGateway` |
 
 **Factory:** `PaymentGatewayFactory` resolves gateway by `Enums.PaymentGateway` key.
+**Orchestrator:** `PaymentCallbackOrchestrator` (`IPaymentCallbackOrchestrator`) coordinates callbacks across all gateways.
 
 ---
 
@@ -1346,7 +1349,9 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 **Interceptors:**
 - `global-http.interceptor.ts` — attaches the bearer token, handles 401/403 redirects, error toasting via `AlertService`, and retries a transient GET failure once or twice with backoff (82.36). `auth.interceptor.ts` was a dead, unregistered duplicate of the bearer-attach logic — deleted 2026-09-07 (82.34).
 
-**Constants:** `app.constants.ts` — `API_ENDPOINTS` object with all endpoint URLs
+**Utilities (`src/app/core/utils/`):**
+- `table-pagination.util.ts` — `paginateArray<T>(items, currentPage, pageSize)` pure pagination slicing helper with boundary clamping (82.72).
+- `markdown.util.ts` — Markdown parsing and form rendering utility.
 
 ---
 
@@ -1399,6 +1404,7 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `AdminDashboardComponent` | `AdminService` |
 | `MemberApprovalComponent` | `AdminService` |
 | `AdminMembersComponent` | `AdminService`, `ProfileService` |
+| `MemberImportModalComponent` | `src/app/admin/members/member-import-modal/` — CSV bulk member upload modal dialog (82.71) |
 | `AdminGovernanceComponent` | `AdminService`, `NetworkingService` |
 | `AdminEventsComponent` | `EventsService` |
 | `AdminNewsComponent` | `NewsService` (manages News **and** Notices from one screen; PDF upload for notices) |
@@ -1525,6 +1531,9 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | Class | File | Purpose |
 |---|---|---|
 | `AppConfig` | `core/config/app_config.dart` | `apiBaseUrl`, environment flags |
+| `ApiException` | `core/api/api_exception.dart` | Structured API exception hierarchy for Dio interceptors and services (82.65) |
+| `setupGlobalErrorHandlers()` | `core/bootstrap/error_handlers.dart` | Modularized Flutter global uncaught error & platform dispatcher handlers (82.69) |
+| `initializeFirebase()` | `core/bootstrap/firebase_bootstrap.dart` | Modularized Firebase initialization and background messaging bootstrap (82.69) |
 | `GovernanceApi` | `core/api/governance_api.dart` | EC period/constitution API wrapper |
 | `BiometricService` | `core/services/biometric_service.dart` | Fingerprint/Face ID via `local_auth` |
 | `DeviceInfoService` | `core/services/device_info_service.dart` | OS, model, app version |

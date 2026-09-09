@@ -66,7 +66,7 @@
         right: 0;
         width: 100px;
         height: 100px;
-        background: radial-gradient(circle at top right, rgba(197, 160, 89, 0.1), transparent);
+        background: radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.1), transparent);
     }
 
     &.mentorship {
@@ -86,7 +86,7 @@
             text-transform: uppercase;
 
             &.cat {
-                background: rgba(0, 0, 0, 0.05);
+                background: var(--surface-subtle);
                 color: var(--text-muted);
             }
 

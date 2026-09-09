@@ -28,7 +28,7 @@ $campus-fallback: url('/assets/images/concept/artistic_campus_watercolor_1773859
         content: "";
         position: absolute;
         inset: 0;
-        background: radial-gradient(circle at center, rgba(197, 160, 89, 0.08) 0%, transparent 70%);
+        background: radial-gradient(circle at center, rgba(var(--accent-rgb), 0.08) 0%, transparent 70%);
         z-index: 1;
     }
 }

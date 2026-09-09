@@ -427,7 +427,7 @@ p {
 }
 
 .pill {
-  background: rgba(var(--primary-rgb), 0.03);
+  background: var(--surface-subtle);
   padding: 0.25rem 0.75rem;
   border-radius: 6px;
   font-size: 0.72rem;
@@ -557,7 +557,8 @@ p {
     }
 
     &::placeholder {
-      color: rgba(var(--primary-rgb), 0.25);
+      color: var(--text-muted);
+      opacity: 0.6;
       font-size: 0.85rem;
     }
   }
@@ -606,7 +607,7 @@ p {
       height: 19px;
       border: 2px solid var(--glass-border);
       border-radius: 5px;
-      background: rgba(var(--primary-rgb), 0.05);
+      background: var(--surface-subtle);
       cursor: pointer;
       position: relative;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -699,7 +700,7 @@ select.border-red-500 {
     height: 24px !important;
     border: 1px solid var(--glass-border) !important;
     border-radius: 20px !important;
-    background: rgba(var(--primary-rgb), 0.08) !important;
+    background: var(--surface-subtle) !important;
     cursor: pointer !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     flex-shrink: 0 !important;
@@ -729,7 +730,7 @@ select.border-red-500 {
     }
 
     &:hover:not(:checked) {
-      background: rgba(var(--primary-rgb), 0.12) !important;
+      background: var(--card-bg-hover) !important;
     }
   }
 
@@ -1408,9 +1409,9 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
 .border-accent\/50  { border-color: rgba(var(--accent-color-rgb), 0.50); }
 .border-white\/10   { border-color: rgba(255, 255, 255, 0.10); }
 .border-white\/20   { border-color: rgba(255, 255, 255, 0.20); }
-.border-primary\/5  { border-color: rgba(var(--primary-rgb), 0.05); }
-.border-primary\/10 { border-color: rgba(var(--primary-rgb), 0.10); }
-.border-primary\/30 { border-color: rgba(var(--primary-rgb), 0.30); }
+.border-primary\/5  { border-color: var(--card-border); }
+.border-primary\/10 { border-color: var(--border-color); }
+.border-primary\/30 { border-color: var(--glass-border); }
 .border-slate-200   { border-color: #e2e8f0; }
 .border-rose-200    { border-color: #fecdd3; }
 .border-emerald-200 { border-color: #a7f3d0; }
@@ -1449,8 +1450,8 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
 .text-white\/60  { color: rgba(255, 255, 255, 0.60); }
 .text-white\/90  { color: rgba(255, 255, 255, 0.90); }
 .text-main\/90   { color: color-mix(in srgb, var(--text-main) 90%, transparent); }
-.text-primary\/20 { color: rgba(var(--primary-rgb), 0.20); }
-.text-primary\/70 { color: rgba(var(--primary-rgb), 0.70); }
+.text-primary\/20 { color: var(--text-dim); }
+.text-primary\/70 { color: var(--text-muted); }
 .text-red-500\/50 { color: rgba(239, 68, 68, 0.50); }
 
 // Shadows (shadow-gold already defined above)
@@ -1560,7 +1561,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
   border-spacing: 0;
 
   thead th {
-    background: rgba(var(--primary-rgb), 0.03);
+    background: var(--surface-subtle);
     padding: 1.25rem 1.5rem;
     text-align: left;
     font-size: 11px;
@@ -1568,7 +1569,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
     text-transform: uppercase;
     letter-spacing: 2.5px;
     color: var(--text-muted);
-    border-bottom: 2px solid rgba(var(--primary-rgb), 0.05);
+    border-bottom: 2px solid var(--glass-border);
     white-space: nowrap;
   }
 
@@ -1608,7 +1609,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
   justify-content: center;
   padding: 5rem 2rem;
   text-align: center;
-  background: rgba(var(--primary-rgb), 0.02);
+  background: var(--surface-subtle);
   border: 1px dashed var(--glass-border);
   border-radius: var(--radius-lg);
   gap: 1.5rem;
@@ -2081,8 +2082,8 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
     }
 
     .close-btn {
-      background: rgba(var(--primary-rgb), 0.05);
-      border: none;
+      background: var(--surface-subtle);
+      border: 1px solid var(--glass-border);
       width: 40px;
       height: 40px;
       font-size: 1.1rem;
@@ -2168,7 +2169,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
       width: 100%;
       height: 2.75rem;
       padding: 0 3rem 0 3.25rem;
-      background: rgba(var(--primary-rgb), 0.05);
+      background: var(--surface-subtle);
       border: 1px solid var(--glass-border);
       border-radius: 12px;
       color: var(--text-main);

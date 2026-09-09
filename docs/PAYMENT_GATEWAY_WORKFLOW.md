@@ -16,31 +16,39 @@ All gateway credentials MUST be stored in the `PaymentConfigurations` table, NOT
 ### Seeding:
 Add the UAT/Production credentials to `GHCAA.Infrastructure/Data/Seed/payment_configurations.json`.
 
-## 2. Implementation Pattern (`IPaymentGatewayService`)
-Gateways must implement `IPaymentGatewayService` and be registered with an `HttpClient`.
+## 2. Implementation Pattern (`BasePaymentGateway` & `IPaymentGatewayService`)
+Gateways must inherit from `BasePaymentGateway` (which implements `IPaymentGatewayService`) and be registered with an `HttpClient`.
 
-### Dependencies:
-- `ApplicationDbContext`: Required to fetch credentials from the database.
-- `IConfiguration`: Used ONLY for environment-specific URLs (Sandbox vs Production) or non-sensitive global settings.
-- `HttpClient`: Always used for external API calls.
+### Base Class Capabilities:
+- `GetActiveConfigAsync()`: Automatically retrieves the active gateway configuration from `ApplicationDbContext`.
+- Standardizes sandbox / live URL resolution and credential retrieval.
 
 ### Code Structure:
 ```csharp
-public async Task<PaymentGatewayResponseDto> InitiatePaymentAsync(...) {
-    var dbConfig = await _db.PaymentConfigurations
-        .FirstOrDefaultAsync(p => p.Gateway == GatewayType && p.IsEnabled);
-    // Use dbConfig.GatewayPublicKey, dbConfig.GatewaySecretKey, etc.
+public class CustomGateway : BasePaymentGateway
+{
+    public CustomGateway(HttpClient http, ApplicationDbContext db, IConfiguration config, ILogger<CustomGateway> logger)
+        : base(http, db, config, logger, PaymentGateway.Custom)
+    {
+    }
+
+    public override async Task<PaymentGatewayResponseDto> InitiatePaymentAsync(PaymentInitiationDto dto, CancellationToken ct = default)
+    {
+        var dbConfig = await GetActiveConfigAsync(ct);
+        // Use dbConfig.GatewayPublicKey, dbConfig.GatewaySecretKey, etc.
+    }
 }
 ```
 
-## 3. Registration Workflow
+## 3. Registration & Callback Workflow
 1. **Enum**: Add the new gateway to `GHCAA.Domain.Enums.PaymentGateway`.
 2. **Infrastructure**:
-    - Add the gateway implementation in `GHCAA.Infrastructure/Gateways/`.
+    - Add the gateway implementation in `GHCAA.Infrastructure/Gateways/` inheriting `BasePaymentGateway`.
     - Register in `GHCAA.Infrastructure/DependencyInjection.cs` using `AddHttpClient<TGateway>()` and `AddScoped<IPaymentGatewayService, TGateway>()`.
-3. **Controller**:
-    - Add a callback endpoint in `GatewaysController.cs`.
-    - Ensure successful payments trigger `HandleSuccessfulPayment`.
+3. **Callback Handling (`IPaymentCallbackOrchestrator`)**:
+    - Centralized in `PaymentCallbackOrchestrator`.
+    - In `GatewaysController.cs`, delegate callback routing to `IPaymentCallbackOrchestrator.ProcessCallbackAsync(...)`.
+    - Handles verification, database ledger updates, member/event status transition, and redirect URL generation uniformly.
 4. **Mobile**:
     - Update `PaymentService` in Flutter.
     - Add the gateway icon/option to the payment selection screen.

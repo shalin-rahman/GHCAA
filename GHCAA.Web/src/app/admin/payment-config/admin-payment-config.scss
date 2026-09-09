@@ -23,7 +23,7 @@
   }
 
   input, textarea, select {
-      background: rgba(var(--primary-rgb), 0.04) !important;
+      background: var(--surface-subtle) !important;
       border: 1px solid var(--glass-border) !important;
       border-radius: 12px;
       padding: 1rem 1.25rem;
@@ -34,7 +34,7 @@
       appearance: none; // Reset native styling for select
 
       &:focus {
-          background: rgba(var(--primary-rgb), 0.08) !important;
+          background: var(--card-bg-hover) !important;
           border-color: var(--accent-color) !important;
           box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.1);
           outline: none;

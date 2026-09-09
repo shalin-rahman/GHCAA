@@ -57,15 +57,15 @@
     gap: 1rem;
     cursor: pointer;
     transition: 0.2s;
-    border-bottom: 1px solid rgba(var(--primary-rgb), 0.05);
+    border-bottom: 1px solid var(--glass-border);
 
     &:hover {
-        background: rgba(var(--primary-rgb), 0.05);
+        background: var(--card-bg-hover);
     }
 
     &.active {
-        background: rgba(var(--primary-rgb), 0.1);
-        border-left: 4px solid var(--primary-color);
+        background: rgba(var(--accent-rgb), 0.12);
+        border-left: 4px solid var(--accent-color);
     }
 }
 
@@ -145,7 +145,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(var(--primary-rgb), 0.03);
+    background: var(--surface-subtle);
 
     h3 {
         margin: 0;
@@ -214,74 +214,92 @@
 .chat-input-area {
     padding: 1.5rem 2rem;
     border-top: 1px solid var(--glass-border);
-}
-
-.input-container {
     display: flex;
-    align-items: center;
     gap: 1rem;
-    background: var(--bg-color);
-    border: 1px solid var(--glass-border);
-    padding: 0.5rem 1rem;
-    border-radius: 15px;
+    align-items: center;
 
     input {
         flex: 1;
-        background: transparent;
-        border: none;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        padding: 0.85rem 1.25rem;
+        border-radius: 30px;
         color: var(--text-main);
-        padding: 0.5rem;
-        font-size: 1rem;
-        font-family: inherit;
+        outline: none;
 
         &:focus {
-            outline: none;
-        }
-    }
-
-    .send-btn {
-        background: var(--primary-color);
-        border: none;
-        padding: 0.6rem;
-        border-radius: 50%;
-        color: var(--text-on-dark);
-        cursor: pointer;
-        transition: 0.3s;
-
-        &:hover {
-            transform: scale(1.1);
-        }
-
-        &:disabled {
-            opacity: 0.5;
-            cursor: default;
+            border-color: var(--accent-color);
         }
     }
 }
 
-.no-selection {
+.empty-chat {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
     color: var(--text-muted);
-    padding: 3rem;
+}
 
-    .illu {
-        font-size: 5rem;
-        margin-bottom: 2rem;
-        opacity: 0.2;
-    }
+.chat-search-container {
+    position: relative;
+    padding: 1rem;
 
-    h3 {
-        margin: 0 0 1rem;
+    .chat-search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border-radius: 8px;
+        border: 1px solid var(--glass-border);
+        background: var(--card-bg);
         color: var(--text-main);
+        font-size: 0.85rem;
+        outline: none;
+        transition: border-color 0.2s;
+
+        &:focus {
+            border-color: var(--accent-color);
+        }
     }
 
-    p {
-        max-width: 400px;
+    .chat-search-icon {
+        position: absolute;
+        left: 1.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.9rem;
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .chat-search-results {
+        position: absolute;
+        top: 100%;
+        left: 1rem;
+        right: 1rem;
+        background: var(--card-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        max-height: 250px;
+        overflow-y: auto;
+        z-index: 50;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--glass-border);
+            transition: background 0.2s;
+            font-size: 0.9rem;
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            &:hover {
+                background: var(--card-bg-hover);
+            }
+        }
     }
 }
 
@@ -321,7 +339,7 @@
             }
 
             &:hover {
-                background: rgba(var(--primary-rgb), 0.08);
+                background: var(--surface-subtle);
             }
         }
     }

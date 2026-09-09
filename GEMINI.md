@@ -35,6 +35,19 @@ GHCAA (Grand Hall Community Association App) is a full-stack platform:
 - Navigation via `go_router`.
 - API base URL from `AppConfig` — never hardcoded.
 
+### Centralized Theme & Reusable Component Rule (MANDATORY — Platform-Wide)
+- **100% Centralized Theme Tokens:** Never hardcode colors, backgrounds, or borders in individual components.
+- Angular: All surfaces, borders, text, and inputs MUST consume centralized design tokens from `styles.scss` (`var(--bg-color)`, `var(--surface-color)`, `var(--surface-subtle)`, `var(--card-bg)`, `var(--card-border)`, `var(--glass-bg)`, `var(--glass-border)`, `var(--accent-color)`, `var(--accent-rgb)`, `var(--text-main)`, `var(--text-muted)`).
+- Never use `rgba(var(--primary-rgb), ...)` for surfaces on dark backgrounds (which inverts to muddy black); use semantic tokens (`var(--surface-subtle)`, `var(--card-bg-hover)`).
+- Flutter Mobile: All widgets MUST consume `Theme.of(context)` / `AppColors` / `AppTheme` centralized tokens. No ad-hoc `Color(0x...)` or hardcoded component styling.
+- **Centralized Reusable Controls:** Common controls across all routes must strictly use shared components:
+  - Headers: `<app-page-header>`
+  - Pagination: `<app-pagination>` & `table-pagination.util.ts`
+  - Tables: Standard `.data-table` / `.table-wrap` structure
+  - Modals / Dialogs: `<app-confirm-dialog>` via `ConfirmDialogService`
+  - Search / Filters: `<app-search-bar>`, `.filter-bar`
+  - Empty states: `.empty-state` / `.empty-state-compact`
+
 ### Testing
 - E2E tests use temporary SQLite DBs — never touch production data.
 - Visual regression baseline must be regenerated after any UI change.

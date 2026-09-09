@@ -31,7 +31,7 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: radial-gradient(circle at center, rgba(197, 160, 89, 0.08) 0%, transparent 70%);
+        background: radial-gradient(circle at center, rgba(var(--accent-rgb), 0.08) 0%, transparent 70%);
         z-index: 1;
     }
 
@@ -228,7 +228,7 @@ body.dark-theme .hero {
         color: var(--accent-text);
 
         &:hover {
-            background: rgba(197, 160, 89, 0.1);
+            background: rgba(var(--accent-rgb), 0.1);
             transform: translateY(-5px);
         }
     }
@@ -245,7 +245,7 @@ body.dark-theme .hero {
     backdrop-filter: blur(10px);
     padding: 2rem 4rem;
     border-radius: 20px;
-    border: 1px solid rgba(197, 160, 89, 0.1);
+    border: 1px solid rgba(var(--accent-rgb), 0.1);
     width: fit-content;
     margin-left: auto;
     margin-right: auto;
@@ -279,7 +279,7 @@ body.dark-theme .hero {
     .stat-divider {
         width: 1px;
         height: 50px;
-        background: radial-gradient(circle at center, rgba(197, 160, 89, 0.4) 0%, transparent 100%);
+        background: radial-gradient(circle at center, rgba(var(--accent-rgb), 0.4) 0%, transparent 100%);
     }
 
     @media (max-width: 768px) {
@@ -359,7 +359,7 @@ body.dark-theme .hero {
         }
 
         &:hover {
-            background: rgba(197, 160, 89, 0.08);
+            background: rgba(var(--accent-rgb), 0.08);
             border-color: var(--accent-color);
             transform: translateX(8px);
             
@@ -397,7 +397,7 @@ body.dark-theme .hero {
     .column-logo {
         text-align: center;
         padding: 2rem;
-        background: radial-gradient(circle at center, rgba(197, 160, 89, 0.05) 0%, transparent 70%);
+        background: radial-gradient(circle at center, rgba(var(--accent-rgb), 0.05) 0%, transparent 70%);
     }
 
     .main-logo-unified {
@@ -448,7 +448,7 @@ body.dark-theme .hero {
             }
 
             &:hover {
-                background: rgba(197, 160, 89, 0.08);
+                background: rgba(var(--accent-rgb), 0.08);
                 border-color: var(--accent-color);
                 transform: translateX(8px);
                 
@@ -467,7 +467,7 @@ body.dark-theme .hero {
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid rgba(197, 160, 89, 0.25);
+            border: 2px solid rgba(var(--accent-rgb), 0.25);
             border-radius: 14px;
             font-size: 1.6rem;
             flex-shrink: 0;
@@ -483,7 +483,7 @@ body.dark-theme .hero {
     padding: 1.5rem 2rem;
     background: var(--section-bg);
     align-items: center;
-    border: 1px solid rgba(197, 160, 89, 0.1);
+    border: 1px solid rgba(var(--accent-rgb), 0.1);
 
     &:hover {
         border-color: var(--accent-color);
@@ -513,9 +513,9 @@ body.dark-theme .hero {
 
 .centered-logo-box {
     text-align: center;
-    background: radial-gradient(circle at center, rgba(197, 160, 89, 0.05) 0%, transparent 70%);
+    background: radial-gradient(circle at center, rgba(var(--accent-rgb), 0.05) 0%, transparent 70%);
     padding: 3rem;
-    border: 1px solid rgba(197, 160, 89, 0.1);
+    border: 1px solid rgba(var(--accent-rgb), 0.1);
     margin-bottom: 2rem;
 
     .logo-wrapper {
@@ -644,7 +644,7 @@ body.dark-theme .hero {
     transition: all 0.25s ease;
 
     &:hover {
-        background: rgba(197, 160, 89, 0.05);
+        background: rgba(var(--accent-rgb), 0.05);
         border-color: var(--accent-color);
         transform: translateX(5px);
     }
@@ -864,9 +864,9 @@ body.dark-theme .hero {
     }
 
     &:hover:not(.active) {
-        background: rgba(197, 160, 89, 0.05);
+        background: rgba(var(--accent-rgb), 0.05);
         transform: translateY(-3px);
-        border-color: rgba(197, 160, 89, 0.2);
+        border-color: rgba(var(--accent-rgb), 0.2);
     }
 }
 
@@ -1107,7 +1107,7 @@ body.dark-theme .hero {
 .event-mini-date {
     width: 65px;
     height: 65px;
-    background: rgba(197, 160, 89, 0.1);
+    background: rgba(var(--accent-rgb), 0.1);
     border: 1px solid var(--accent-color);
     display: flex;
     flex-direction: column;
@@ -1399,7 +1399,7 @@ body.dark-theme .hero {
             // Faint gold sheen reads as a card in BOTH themes: subtle warm
             // tint on white (light) and a soft glow on black (dark) instead
             // of a flat black / broken box.
-            background: linear-gradient(135deg, rgba(197, 160, 89, 0.12), rgba(197, 160, 89, 0.03));
+            background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.12), rgba(var(--accent-rgb), 0.03));
             border-style: dashed;
 
             .photo-placeholder {
@@ -1640,8 +1640,8 @@ body.dark-theme .hero {
     // invisible white-on-near-white text in light theme. Setting it explicitly on `p` (same
     // specificity as the global rule, loaded after it) keeps this variant properly theme-aware.
     &.dark {
-        background: rgba(197, 160, 89, 0.03);
-        border-color: rgba(197, 160, 89, 0.1);
+        background: rgba(var(--accent-rgb), 0.03);
+        border-color: rgba(var(--accent-rgb), 0.1);
         color: var(--text-dim);
         border-style: solid;
 

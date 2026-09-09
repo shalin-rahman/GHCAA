@@ -22,7 +22,7 @@
         letter-spacing: 0.1em;
         color: var(--text-muted);
         border-bottom: 1px solid var(--glass-border);
-        background: rgba(var(--primary-rgb), 0.03);
+        background: var(--surface-subtle);
     }
 
     td {
@@ -32,7 +32,7 @@
     }
 
     .theme-row:hover {
-        background: rgba(var(--primary-rgb), 0.03);
+        background: var(--card-bg-hover);
     }
 }
 
@@ -116,9 +116,9 @@
     /* 30.17: SCHEDULED (not started yet) / EXPIRED (past end date) variants alongside the
        existing LIVE (.active) / IDLE (default) states. */
     &.scheduled {
-        background: rgba(197, 160, 89, 0.12);
+        background: rgba(var(--accent-rgb), 0.12);
         color: var(--accent-gold-dark, #c5a059);
-        border: 1px solid rgba(197, 160, 89, 0.25);
+        border: 1px solid rgba(var(--accent-rgb), 0.25);
     }
 
     &.expired {
@@ -186,7 +186,7 @@
         }
 
         input, textarea {
-            background: rgba(var(--primary-rgb), 0.04) !important;
+            background: var(--surface-subtle) !important;
             border: 1px solid var(--glass-border) !important;
             border-radius: 12px;
             padding: 1rem 1.25rem;
@@ -197,7 +197,7 @@
             width: 100%;
 
             &:focus {
-                background: rgba(var(--primary-rgb), 0.08) !important;
+                background: var(--card-bg-hover) !important;
                 border-color: var(--accent-color) !important;
                 box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.1);
                 outline: none;
@@ -220,7 +220,7 @@
     display: flex;
     align-items: center;
     gap: 1.25rem;
-    background: rgba(var(--primary-rgb), 0.04);
+    background: var(--surface-subtle);
     padding: 0.6rem 1.25rem;
     border-radius: 12px;
     border: 1px solid var(--glass-border);

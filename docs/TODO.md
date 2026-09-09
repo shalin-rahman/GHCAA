@@ -7973,6 +7973,15 @@ Created shared signal-based table state utility `table-pagination.util.ts` in `G
 82.72 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Standardize theme tokens and fix UI design anomalies across Angular Web.
 Fixed hardcoded black background on light theme in Admin Dashboard (`.stat-card.dark` replaced with theme-adaptive `.balance-card` with gold glass overlay). Replaced awkward corner action tabs with theme-styled action pills and made all stat cards globally clickable with `[routerLink]` and keyboard navigation. Sanitized hardcoded dark/light colors across Admin Payment Config, Event Operations, Admin Gallery, AI Assistant, Forum, Topic Detail, and Giving components to consume centralized design tokens (`var(--card-bg)`, `var(--surface-color)`, `var(--border-color)`, `var(--text-main)`, and `rgba(var(--accent-rgb), ...)`). Result: `npm run build` and `tsc --noEmit -p tsconfig.app.json` passing with 0 errors; all unit tests passing.
 
+82.73 [TODO] **Priority: P1 | Depends on: none.** Comprehensive audit & remediation of dark/black theme tokens across all Angular Web components.
+Audit all SCSS and HTML templates across `GHCAA.Web/src/` to eliminate inverted `rgba(var(--primary-rgb), ...)` and hardcoded dark/light color smudges. Standardize all stat cards, action pills, icon containers, list items, badges, tables, and form inputs to strictly consume centralized CSS design tokens (`--surface-subtle`, `--card-bg`, `--card-border`, `--glass-bg`, `--glass-border`, `--accent-color`, `--accent-rgb`, `--text-main`, `--text-muted`). Ensure high-contrast obsidian-and-gold visual harmony on both light and black themes.
+**Acceptance:** `npm run build` and `type-check` pass with 0 errors; 0 inverted color usages on dark surfaces across all components.
+
+82.74 [TODO] **Priority: P2 | Depends on: 82.73.** Enforce reusable component consumption for all common controls across Angular Web.
+Audit and enforce centralized reusable components (`<app-page-header>`, `<app-pagination>`, `<app-confirm-dialog>`, `<app-theme-toggle>`, `<app-user-menu>`, `.data-table`, `.empty-state-compact`) across all public, member, and admin routes. Ensure no ad-hoc duplicate controls or inline modal/pagination implementations exist.
+**Acceptance:** All routes share standard reusable controls; all Angular unit tests pass.
+
+
 
 
 

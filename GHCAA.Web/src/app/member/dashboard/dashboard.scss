@@ -70,7 +70,7 @@
 
             .progress-container {
                 height: 8px;
-                background: rgba(var(--primary-rgb), 0.05);
+                background: var(--surface-subtle);
                 border-radius: 10px;
                 overflow: hidden;
 
@@ -101,7 +101,7 @@
             align-items: center;
             gap: 0.85rem;
             padding: 1.25rem;
-            background: rgba(0, 0, 0, 0.2);
+            background: var(--surface-subtle);
             border: 1px solid var(--card-border);
             border-radius: 16px;
             color: var(--text-muted);
@@ -120,7 +120,7 @@
 
             &:hover {
                 border-color: rgba(var(--accent-color-rgb), 0.4);
-                background: rgba(0, 0, 0, 0.3);
+                background: var(--card-bg-hover);
                 transform: translateY(-2px);
 
                 .step-arrow {
@@ -254,7 +254,7 @@
 
         .mini-progress {
             height: 3px;
-            background: rgba(var(--primary-rgb), 0.1);
+            background: var(--surface-subtle);
             border-radius: 2px;
             margin-top: 0.4rem;
             overflow: hidden;
@@ -324,14 +324,14 @@
     gap: 1rem;
     padding: 1rem 1.1rem;
     border-radius: 12px;
-    background: rgba(var(--primary-rgb), 0.3);
+    background: var(--surface-subtle);
     border: 1px solid var(--glass-border);
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     text-decoration: none;
     color: inherit;
 
     &:hover {
-        background: rgba(197, 160, 89, 0.05);
+        background: var(--card-bg-hover);
         border-color: var(--accent-color);
         transform: translateX(6px);
         box-shadow: 0 8px 20px rgba(0,0,0,0.2);
@@ -432,7 +432,7 @@
     .alert-item {
         cursor: pointer;
         &.unread {
-            background: rgba(197, 160, 89, 0.06) !important;
+            background: rgba(var(--accent-rgb), 0.06) !important;
             border-left: 3px solid var(--accent-color) !important;
             strong { color: var(--accent-text); }
         }
@@ -494,7 +494,7 @@
             display: flex; align-items: center; justify-content: center;
             font-weight: 900;
             color: var(--accent-text);
-            background: rgba(197, 160, 89, 0.1);
+            background: rgba(var(--accent-rgb), 0.1);
             font-size: 1.2rem;
         }
     }
