@@ -48,7 +48,7 @@
 
 // ── Buttons ───────────────────────────────────────────────────────────────────
 .btn-primary {
-  background: var(--primary-color, #2563eb);
+  background: var(--primary-color);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -56,23 +56,23 @@
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
   white-space: nowrap;
-  &:hover { background: #1d4ed8; }
+  &:hover { opacity: 0.9; transform: translateY(-1px); }
   &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 
 .btn-secondary {
   background: transparent;
-  color: var(--text-strong, #374151);
-  border: 1px solid var(--border-color, #d1d5db);
+  color: var(--text-strong);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 0.55rem 1.25rem;
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s;
-  &:hover { background: #f3f4f6; }
+  &:hover { background: var(--card-bg-hover); }
 }
 
 .link-btn {
@@ -288,19 +288,19 @@
 
     input, textarea {
       width: 100%;
-      border: 1px solid var(--border-color, #d1d5db);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 0.6rem 0.85rem;
       font-size: 0.9rem;
-      color: var(--text-strong, #111827);
-      background: var(--surface-color, #f9fafb);
+      color: var(--text-main);
+      background: var(--surface-color);
       box-sizing: border-box;
-      transition: border-color 0.15s;
+      transition: border-color 0.15s, background-color 0.15s;
 
       &:focus {
         outline: none;
-        border-color: var(--primary-color, #2563eb);
-        background: #fff;
+        border-color: var(--accent-color);
+        background: var(--card-bg);
       }
     }
 

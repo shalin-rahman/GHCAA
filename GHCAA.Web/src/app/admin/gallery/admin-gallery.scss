@@ -79,7 +79,7 @@
     .album-preview {
         height: 200px;
         position: relative;
-        background: #111;
+        background: var(--surface-color);
         overflow: hidden;
 
         img {

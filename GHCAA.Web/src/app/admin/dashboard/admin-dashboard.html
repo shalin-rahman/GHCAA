@@ -30,60 +30,60 @@
 
     <!-- Stats Grid -->
     <div class="stats-grid animate-fade-up">
-        <div class="glass-card stat-card ripple-effect">
+        <div class="glass-card stat-card ripple-effect" routerLink="/admin/members" tabindex="0" role="link" [attr.aria-label]="'Manage Total Alumni: ' + (stats()?.totalMembers || 0)">
             <div class="stat-icon">👥</div>
             <div class="stat-body">
                 <h3>{{ stats()?.totalMembers || 0 }}</h3>
                 <p>Total Alumni</p>
             </div>
-            <button class="action-btn" routerLink="/admin/members">Manage</button>
+            <span class="action-btn">Manage →</span>
         </div>
 
-        <div class="glass-card stat-card ripple-effect">
+        <div class="glass-card stat-card ripple-effect" routerLink="/admin/members" tabindex="0" role="link" [attr.aria-label]="'Manage Active Members: ' + (stats()?.active || 0)">
             <div class="stat-icon">✅</div>
             <div class="stat-body">
                 <h3>{{ stats()?.active || 0 }}</h3>
                 <p>Active Members</p>
             </div>
-            <button class="action-btn" routerLink="/admin/members">Manage</button>
+            <span class="action-btn">Manage →</span>
         </div>
 
-        <div class="glass-card stat-card ripple-effect accent">
+        <div class="glass-card stat-card ripple-effect accent" routerLink="/admin/approvals" tabindex="0" role="link" [attr.aria-label]="'View Pending Approvals: ' + (stats()?.applied || 0)">
             <div class="stat-icon">📝</div>
             <div class="stat-body">
                 <h3>{{ stats()?.applied || 0 }}</h3>
                 <p>Pending Approvals</p>
             </div>
-            <button class="action-btn" routerLink="/admin/approvals">View All</button>
+            <span class="action-btn accent">View All →</span>
         </div>
 
-        <div class="glass-card stat-card ripple-effect">
+        <div class="glass-card stat-card ripple-effect" routerLink="/admin/members" tabindex="0" role="link" [attr.aria-label]="'View Inactive Members: ' + inactiveCount">
             <div class="stat-icon">😴</div>
             <div class="stat-body">
                 <h3>{{ inactiveCount }}</h3>
                 <p>Inactive Members</p>
             </div>
-            <button class="action-btn" routerLink="/admin/members">View</button>
+            <span class="action-btn">View →</span>
         </div>
 
         @if (nav.isSuperAdmin()) {
-        <div class="glass-card stat-card ripple-effect dark">
+        <div class="glass-card stat-card ripple-effect balance-card" routerLink="/admin/ledger" tabindex="0" role="link" aria-label="View Net Fund Balance in Ledger">
             <div class="stat-icon">💰</div>
             <div class="stat-body">
                 <h3>{{ stats()?.balance == null ? 'Restricted' : (stats()!.balance! | appCurrency) }}</h3>
                 <p>Net Fund Balance</p>
             </div>
-            <button class="action-btn gold" routerLink="/admin/ledger">Ledger</button>
+            <span class="action-btn gold">Ledger →</span>
         </div>
         }
 
-        <div class="glass-card stat-card ripple-effect">
+        <div class="glass-card stat-card ripple-effect" routerLink="/admin/news" tabindex="0" role="link" [attr.aria-label]="'Manage Published Articles: ' + publishedArticleCount()">
             <div class="stat-icon">📰</div>
             <div class="stat-body">
                 <h3>{{ publishedArticleCount() }}</h3>
                 <p>Published Articles</p>
             </div>
-            <button class="action-btn" routerLink="/admin/news">Manage</button>
+            <span class="action-btn">Manage →</span>
         </div>
     </div>
 

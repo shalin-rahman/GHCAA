@@ -301,8 +301,8 @@
 
       &:focus {
         outline: none;
-        border-color: var(--primary-color, #2563eb);
-        background: #fff;
+        border-color: var(--accent-color);
+        background: var(--card-bg);
       }
     }
   }
@@ -314,9 +314,9 @@
 }
 
 .replying-to-banner {
-  background: rgba(var(--accent-color-rgb), 0.08);
-  border: 1px solid #dbeafe;
-  color: var(--primary-color, #1e40af);
+  background: rgba(var(--accent-rgb), 0.08);
+  border: 1px solid var(--glass-border);
+  color: var(--accent-text);
   padding: 0.5rem 0.85rem;
   border-radius: 6px;
   margin-bottom: 1rem;
@@ -335,7 +335,7 @@
   .btn-cancel-reply {
     background: none;
     border: none;
-    color: #ef4444;
+    color: var(--danger-color);
     font-size: 0.78rem;
     font-weight: 600;
     cursor: pointer;
@@ -349,9 +349,9 @@
 
 // ── Locked notice ─────────────────────────────────────────────────────────────
 .locked-thread-notice {
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  color: #4b5563;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
   padding: 0.85rem;
   border-radius: 8px;
   font-size: 0.88rem;

@@ -112,11 +112,25 @@
     gap: 1.1rem;
     position: relative;
     overflow: hidden;
-    transition: transform 0.25s, box-shadow 0.25s;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
 
     &:hover {
         transform: translateY(-4px);
-        box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+        box-shadow: 0 14px 32px rgba(0,0,0,0.12);
+
+        .action-btn {
+            background: var(--primary-color);
+            color: #fff;
+            transform: translateX(2px);
+
+            &.gold {
+                background: var(--gold-gradient);
+                color: #000;
+                border-color: transparent;
+            }
+        }
     }
 
     .stat-icon {
@@ -131,8 +145,8 @@
     .stat-body {
         flex: 1;
         min-width: 0;
-        h3 { font-size: 1.75rem; margin: 0; line-height: 1.1; font-weight: 900; }
-        p  { font-size: 0.75rem; margin: 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.65; }
+        h3 { font-size: 1.75rem; margin: 0; line-height: 1.1; font-weight: 900; color: var(--text-main); }
+        p  { font-size: 0.75rem; margin: 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.65; color: var(--text-muted); }
     }
 
     .stat-rate {
@@ -164,33 +178,49 @@
     }
 
     .action-btn {
-        /* 58.5: was opacity:0/translateY(6px) by default, only revealed on parent :hover — this
-           made a real, working routerLink invisible until hovered, which read as "the button
-           doesn't work" (especially on touch, where there's no hover-before-tap). Always visible
-           now, matching how every other action button in the app behaves. */
         position: absolute;
-        bottom: 0; right: 0;
-        background: var(--primary-color);
-        color: #fff;
-        border: none;
-        padding: 0.35rem 0.9rem;
-        font-size: 0.62rem;
-        font-weight: 900;
+        bottom: 0.75rem;
+        right: 0.9rem;
+        background: rgba(var(--primary-rgb), 0.05);
+        color: var(--text-muted);
+        border: 1px solid var(--card-border);
+        padding: 0.2rem 0.6rem;
+        font-size: 0.65rem;
+        font-weight: 800;
         text-transform: uppercase;
-        border-top-left-radius: 10px;
-        cursor: pointer;
-        transition: all 0.25s;
-        letter-spacing: 0.5px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        letter-spacing: 0.4px;
+        pointer-events: none;
 
-        &.gold { background: var(--gold-gradient); color: #000; }
+        &.accent {
+            background: rgba(var(--accent-rgb), 0.08);
+            border-color: rgba(var(--accent-rgb), 0.25);
+            color: var(--accent-text);
+        }
+
+        &.gold {
+            background: rgba(var(--accent-rgb), 0.12);
+            border-color: rgba(var(--accent-rgb), 0.35);
+            color: var(--accent-text);
+        }
     }
 
-    &.accent { border-left: 3px solid var(--accent-color); }
+    &.accent {
+        border-left: 3px solid var(--accent-color);
+    }
 
-    &.dark {
-        background: var(--primary-color);
-        * { color: #fff !important; }
-        .stat-icon { background: rgba(255,255,255,0.1); }
+    &.balance-card {
+        border-left: 3px solid var(--accent-color);
+        background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.08) 0%, var(--card-bg) 100%);
+
+        .stat-icon {
+            background: rgba(var(--accent-rgb), 0.12);
+        }
+
+        h3 {
+            color: var(--accent-text);
+        }
     }
 }
 

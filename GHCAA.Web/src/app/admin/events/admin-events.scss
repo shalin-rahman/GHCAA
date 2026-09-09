@@ -140,10 +140,10 @@
     height: 80px;
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: #000;
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
     flex-shrink: 0;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-sm);
 
     img {
         width: 100%;

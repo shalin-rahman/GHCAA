@@ -50,8 +50,8 @@
       cursor: pointer;
       
       option {
-          background: #111;
-          color: white;
+          background: var(--card-bg);
+          color: var(--text-main);
       }
   }
 }
