@@ -2,10 +2,10 @@
   {
     "Id": 1,
     "MemberId": 1,
-    "OrganizationName": "Sample Company",
-    "Designation": "Sample Role",
-    "Sector": "Sample Sector",
-    "Location": "",
+    "OrganizationName": "Tech Innovations Ltd",
+    "Designation": "Lead Architect",
+    "Sector": "Information Technology",
+    "Location": "Sample City",
     "StartDate": "2015-01-01T00:00:00Z",
     "EndDate": null,
     "IsCurrent": true
@@ -13,11 +13,33 @@
   {
     "Id": 2,
     "MemberId": 2,
-    "OrganizationName": "Sample Company",
-    "Designation": "Sample Role",
-    "Sector": "Sample Sector",
-    "Location": "",
+    "OrganizationName": "Global Finance Corp",
+    "Designation": "Operations Manager",
+    "Sector": "Banking & Finance",
+    "Location": "Sample Town",
     "StartDate": "2016-01-01T00:00:00Z",
+    "EndDate": null,
+    "IsCurrent": true
+  },
+  {
+    "Id": 3,
+    "MemberId": 3,
+    "OrganizationName": "Apex Capital Management",
+    "Designation": "Senior Financial Analyst",
+    "Sector": "Investment & Capital Markets",
+    "Location": "Sample Metro",
+    "StartDate": "2017-06-01T00:00:00Z",
+    "EndDate": null,
+    "IsCurrent": true
+  },
+  {
+    "Id": 4,
+    "MemberId": 4,
+    "OrganizationName": "PowerGrid Infrastructure",
+    "Designation": "Director of Operations",
+    "Sector": "Energy & Infrastructure",
+    "Location": "Sample Heights",
+    "StartDate": "2010-01-01T00:00:00Z",
     "EndDate": null,
     "IsCurrent": true
   }

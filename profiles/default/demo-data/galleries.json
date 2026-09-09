@@ -1,13 +1,24 @@
 [
   {
     "Id": 1,
-    "Title": "Sample Annual Reunion",
-    "Description": "Sample photo gallery for the sample reunion event.",
+    "Title": "Annual Alumni Reunion",
+    "Description": "Highlights and memories from the annual alumni gathering.",
     "EventDate": "2024-06-01T09:00:00Z",
     "CreatedAt": "2024-06-02T00:00:00Z",
     "CreatedByAdminId": 1,
     "IsActive": true,
     "IsFeatured": true,
-    "Location": "Sample Hall"
+    "Location": "Grand Convention Center"
+  },
+  {
+    "Id": 2,
+    "Title": "Executive Committee Inauguration",
+    "Description": "Official inauguration and oath ceremony for the 2024-2026 Executive Committee.",
+    "EventDate": "2024-01-10T14:00:00Z",
+    "CreatedAt": "2024-01-11T00:00:00Z",
+    "CreatedByAdminId": 1,
+    "IsActive": true,
+    "IsFeatured": false,
+    "Location": "Alumni Auditorium"
   }
 ]

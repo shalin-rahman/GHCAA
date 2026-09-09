@@ -1,19 +1,36 @@
 [
   {
     "Id": 1,
-    "Title": "Sample Annual Reunion",
-    "Description": "A sample event record showing how a reunion looks once an institution starts adding its own.",
-    "Location": "Sample Hall",
-    "RegistrationFee": 0.0,
+    "Title": "Annual Alumni Reunion 2025",
+    "Description": "Join fellow alumni for our premier annual reunion and networking dinner.",
+    "Location": "Grand Convention Center",
+    "RegistrationFee": 500.0,
     "IsActive": true,
     "ImageUrl": null,
     "CreatedAt": "2024-01-01T00:00:00+00:00",
     "AdminNote": null,
     "AllowNonMembers": true,
+    "RequiresPayment": true,
+    "StartDate": "2025-12-20T10:00:00+00:00",
+    "EndDate": "2025-12-20T18:00:00+00:00",
+    "RegistrationEndDate": "2025-12-15T23:59:59+00:00",
+    "RegistrationStartDate": "2025-10-01T00:00:00+00:00"
+  },
+  {
+    "Id": 2,
+    "Title": "Career Mentorship & Networking Forum",
+    "Description": "Interactive workshop connecting experienced alumni mentors with recent graduates.",
+    "Location": "Alumni Auditorium & Online",
+    "RegistrationFee": 0.0,
+    "IsActive": true,
+    "ImageUrl": null,
+    "CreatedAt": "2024-02-01T00:00:00+00:00",
+    "AdminNote": null,
+    "AllowNonMembers": true,
     "RequiresPayment": false,
-    "StartDate": "2024-06-01T09:00:00+00:00",
-    "EndDate": "2024-06-01T13:00:00+00:00",
-    "RegistrationEndDate": "2024-05-25T23:59:59+00:00",
-    "RegistrationStartDate": "2024-05-01T00:00:00+00:00"
+    "StartDate": "2025-11-15T15:00:00+00:00",
+    "EndDate": "2025-11-15T18:00:00+00:00",
+    "RegistrationEndDate": "2025-11-10T23:59:59+00:00",
+    "RegistrationStartDate": "2025-09-01T00:00:00+00:00"
   }
 ]

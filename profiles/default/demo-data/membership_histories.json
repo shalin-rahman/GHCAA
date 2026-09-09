@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "Id": 1,
+    "MemberId": 1,
+    "ChangedFrom": "Applied",
+    "ChangedTo": "Active",
+    "ChangedByAdminId": 1,
+    "ChangedAt": "2024-01-01T00:00:00Z",
+    "Reason": "Initial application approved by Executive Committee"
+  },
+  {
+    "Id": 2,
+    "MemberId": 2,
+    "ChangedFrom": "Applied",
+    "ChangedTo": "Active",
+    "ChangedByAdminId": 1,
+    "ChangedAt": "2024-02-01T00:00:00Z",
+    "Reason": "Verified educational credentials and approved"
+  },
+  {
+    "Id": 3,
+    "MemberId": 3,
+    "ChangedFrom": "Applied",
+    "ChangedTo": "Active",
+    "ChangedByAdminId": 1,
+    "ChangedAt": "2024-03-01T00:00:00Z",
+    "Reason": "Associate membership verified and activated"
+  },
+  {
+    "Id": 4,
+    "MemberId": 4,
+    "ChangedFrom": "Applied",
+    "ChangedTo": "Active",
+    "ChangedByAdminId": 1,
+    "ChangedAt": "2024-01-15T00:00:00Z",
+    "Reason": "Advisory council appointment and life patron activation"
+  }
+]

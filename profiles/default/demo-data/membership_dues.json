@@ -1,1 +1,52 @@
-[]
+[
+  {
+    "Id": 1,
+    "MemberId": 1,
+    "Year": 2024,
+    "Amount": 1000.0,
+    "DueDate": "2024-12-31T00:00:00Z",
+    "IsPaid": true,
+    "PaymentDate": "2024-01-15T00:00:00Z",
+    "PaymentHistoryId": 1
+  },
+  {
+    "Id": 2,
+    "MemberId": 2,
+    "Year": 2024,
+    "Amount": 1000.0,
+    "DueDate": "2024-12-31T00:00:00Z",
+    "IsPaid": true,
+    "PaymentDate": "2024-02-15T00:00:00Z",
+    "PaymentHistoryId": 2
+  },
+  {
+    "Id": 3,
+    "MemberId": 3,
+    "Year": 2024,
+    "Amount": 1000.0,
+    "DueDate": "2024-12-31T00:00:00Z",
+    "IsPaid": true,
+    "PaymentDate": "2024-03-01T00:00:00Z",
+    "PaymentHistoryId": 3
+  },
+  {
+    "Id": 4,
+    "MemberId": 2,
+    "Year": 2025,
+    "Amount": 1000.0,
+    "DueDate": "2025-12-31T00:00:00Z",
+    "IsPaid": false,
+    "PaymentDate": null,
+    "PaymentHistoryId": null
+  },
+  {
+    "Id": 5,
+    "MemberId": 3,
+    "Year": 2025,
+    "Amount": 1000.0,
+    "DueDate": "2025-12-31T00:00:00Z",
+    "IsPaid": false,
+    "PaymentDate": null,
+    "PaymentHistoryId": null
+  }
+]

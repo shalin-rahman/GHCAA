@@ -1,0 +1,11 @@
+[
+  {
+    "Id": 1,
+    "Version": "1.0",
+    "Content": "Sample Alumni Association (Establishment & Governance Handbook)\n\nArticle I: Name & Purpose\nSection 1: The official name of the organization shall be the Sample Alumni Association (SAA).\nSection 2: The motto of the Association shall be \"Sharing Heritage, Aligning Lives, Integrating Networks\".\nSection 3: The Association is a non-political, non-religious, philanthropic, and non-profit organization.\n\nArticle II: Membership Categories\n1. Founding Members: Pioneers who established the Association.\n2. Executive Members: Active alumni contributing to committee decisions.\n3. General Members: Verified alumni in good standing with voting rights.\n4. Associate Members: Enrolled ex-students with non-voting participation.\n5. Advisory Members: Institutional and community leaders providing policy guidance.\n\nArticle III: Executive Governance\nThe Executive Committee (EC) consists of elected officers serving 3-year terms, including President, General Secretary, Treasurer, and Office Secretaries. All decisions are governed by transparent voting and democratic oversight.\n\nArticle IV: Financial Transparency & Audit\n1. All funds shall be managed via official bank accounts operated jointly by authorized signatories.\n2. Annual financial reports and independent audits shall be presented at the Annual General Meeting (AGM).\n3. Immutable records and receipts are maintained for all income and expense categories.\n\nDocument Version: 1.0 | Effective Date: 01-01-2024",
+    "PdfUrl": null,
+    "EffectiveDate": "2024-01-01T00:00:00Z",
+    "IsActive": true,
+    "ChangeSummary": "Initial baseline constitution for Sample Alumni Association dev environment."
+  }
+]

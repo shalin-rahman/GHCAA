@@ -1,1 +1,50 @@
-[]
+[
+  {
+    "Id": 1,
+    "Year": 2024,
+    "RecordType": 0,
+    "FinancialCategory": 0,
+    "Date": "2024-01-15T00:00:00Z",
+    "Amount": 50000.0,
+    "Description": "Annual membership subscriptions collection",
+    "Reference": "DEP-2024-001",
+    "CreatedAt": "2024-01-15T00:00:00Z",
+    "CreatedByAdminId": 1
+  },
+  {
+    "Id": 2,
+    "Year": 2024,
+    "RecordType": 1,
+    "FinancialCategory": 3,
+    "Date": "2024-06-05T00:00:00Z",
+    "Amount": 25000.0,
+    "Description": "Hall rental and catering for Annual Reunion",
+    "Reference": "VCH-2024-001",
+    "CreatedAt": "2024-06-05T00:00:00Z",
+    "CreatedByAdminId": 1
+  },
+  {
+    "Id": 3,
+    "Year": 2025,
+    "RecordType": 0,
+    "FinancialCategory": 7,
+    "Date": "2025-02-10T00:00:00Z",
+    "Amount": 75000.0,
+    "Description": "Reunion ticket registrations collection",
+    "Reference": "GTW-2025-001",
+    "CreatedAt": "2025-02-10T00:00:00Z",
+    "CreatedByAdminId": 1
+  },
+  {
+    "Id": 4,
+    "Year": 2025,
+    "RecordType": 1,
+    "FinancialCategory": 4,
+    "Date": "2025-03-01T00:00:00Z",
+    "Amount": 5000.0,
+    "Description": "Portal domain and cloud hosting renewal",
+    "Reference": "INV-2025-001",
+    "CreatedAt": "2025-03-01T00:00:00Z",
+    "CreatedByAdminId": 1
+  }
+]

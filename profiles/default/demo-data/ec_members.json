@@ -7,5 +7,32 @@
     "StartDate": "2024-01-01T00:00:00+00:00",
     "EndDate": null,
     "ChangeReason": ""
+  },
+  {
+    "Id": 2,
+    "MemberId": 2,
+    "ECPeriodId": 1,
+    "Position": 3,
+    "StartDate": "2024-01-01T00:00:00+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 3,
+    "MemberId": 3,
+    "ECPeriodId": 1,
+    "Position": 7,
+    "StartDate": "2024-01-01T00:00:00+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 4,
+    "MemberId": 4,
+    "ECPeriodId": 1,
+    "Position": 14,
+    "StartDate": "2024-01-01T00:00:00+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
   }
 ]

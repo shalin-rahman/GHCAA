@@ -3,7 +3,21 @@
     "Id": 1,
     "EventGalleryId": 1,
     "PhotoPath": "/assets/logo.png",
-    "Caption": "Sample photo",
+    "Caption": "Opening keynote by the Association President",
     "UploadedAt": "2024-06-02T00:00:00Z"
+  },
+  {
+    "Id": 2,
+    "EventGalleryId": 1,
+    "PhotoPath": "/assets/logo.png",
+    "Caption": "Alumni group photo session",
+    "UploadedAt": "2024-06-02T00:00:00Z"
+  },
+  {
+    "Id": 3,
+    "EventGalleryId": 2,
+    "PhotoPath": "/assets/logo.png",
+    "Caption": "Executive Committee oath taking ceremony",
+    "UploadedAt": "2024-01-11T00:00:00Z"
   }
 ]

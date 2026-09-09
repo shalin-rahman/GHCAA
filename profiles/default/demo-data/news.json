@@ -1,8 +1,8 @@
 [
   {
     "Id": 1,
-    "Title": "Welcome to your alumni portal",
-    "Content": "This is a sample news post. Replace it once your institution starts publishing its own.",
+    "Title": "Welcome to the Alumni Association Portal",
+    "Content": "We are excited to launch our new interactive alumni portal featuring member directories, event registration, and dues tracking.",
     "PublishDate": "2024-01-01T00:00:00Z",
     "IsActive": true,
     "ImageUrl": null,
@@ -10,5 +10,17 @@
     "LastModified": null,
     "Status": 2,
     "ArticleCategory": 2
+  },
+  {
+    "Id": 2,
+    "Title": "Executive Committee Announces Annual General Meeting",
+    "Content": "The Executive Committee cordially invites all active members to participate in the upcoming Annual General Meeting and Alumni Reunion.",
+    "PublishDate": "2024-03-01T00:00:00Z",
+    "IsActive": true,
+    "ImageUrl": null,
+    "AuthorId": 1,
+    "LastModified": null,
+    "Status": 2,
+    "ArticleCategory": 0
   }
 ]

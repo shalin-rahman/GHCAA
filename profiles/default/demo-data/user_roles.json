@@ -1,4 +1,8 @@
 [
   { "RolesId": 2, "UsersId": 1 },
-  { "RolesId": 3, "UsersId": 2 }
+  { "RolesId": 3, "UsersId": 1 },
+  { "RolesId": 2, "UsersId": 2 },
+  { "RolesId": 3, "UsersId": 2 },
+  { "RolesId": 3, "UsersId": 3 },
+  { "RolesId": 3, "UsersId": 4 }
 ]

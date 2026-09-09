@@ -2,23 +2,56 @@
   {
     "Id": 1,
     "MemberId": 1,
-    "InstitutionName": "Sample Institution",
+    "InstitutionName": "Sample University",
     "Degree": "Bachelor",
-    "Subject": "Sample Subject",
+    "Subject": "Computer Science & Engineering",
     "AdmissionYear": 2008,
     "PassingYear": 2012,
     "IsGHC": true,
-    "Result": ""
+    "Result": "3.85"
   },
   {
     "Id": 2,
+    "MemberId": 1,
+    "InstitutionName": "Sample University",
+    "Degree": "Masters",
+    "Subject": "Software Engineering",
+    "AdmissionYear": 2013,
+    "PassingYear": 2015,
+    "IsGHC": false,
+    "Result": "3.90"
+  },
+  {
+    "Id": 3,
     "MemberId": 2,
-    "InstitutionName": "Sample Institution",
+    "InstitutionName": "Sample University",
     "Degree": "Bachelor",
-    "Subject": "Sample Subject",
+    "Subject": "Business Administration",
     "AdmissionYear": 2010,
     "PassingYear": 2014,
     "IsGHC": true,
-    "Result": ""
+    "Result": "3.75"
+  },
+  {
+    "Id": 4,
+    "MemberId": 3,
+    "InstitutionName": "Sample University",
+    "Degree": "Bachelor",
+    "Subject": "Economics",
+    "AdmissionYear": 2012,
+    "PassingYear": 2016,
+    "IsGHC": true,
+    "Result": "3.80"
+  },
+  {
+    "Id": 5,
+    "MemberId": 4,
+    "InstitutionName": "Sample University",
+    "Degree": "Bachelor",
+    "Subject": "Electrical & Electronic Engineering",
+    "AdmissionYear": 2005,
+    "PassingYear": 2009,
+    "IsGHC": true,
+    "Result": "3.95"
   }
 ]

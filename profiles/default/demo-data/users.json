@@ -1,8 +1,8 @@
 [
   {
     "Id": 1,
-    "Username": "demo.member1",
-    "PasswordHash": "$2a$11$C6UzMDM.H6dfI/f/IKcEeOZ0d3z1z3zP3z3z3z3z3z3z3z3z3z3z3",
+    "Username": "demo.admin",
+    "PasswordHash": "$2a$11$tfrb.BottApcx0P1UuM55erZh.o6IoP6hJyoWbsAKp1jM550S7LX2",
     "MemberId": 1,
     "CreatedAt": "2024-01-01T00:00:00Z",
     "IsActive": true,
@@ -13,9 +13,31 @@
   {
     "Id": 2,
     "Username": "demo.member2",
-    "PasswordHash": "$2a$11$C6UzMDM.H6dfI/f/IKcEeOZ0d3z1z3zP3z3z3z3z3z3z3z3z3z3z4",
+    "PasswordHash": "$2a$11$tfrb.BottApcx0P1UuM55erZh.o6IoP6hJyoWbsAKp1jM550S7LX2",
     "MemberId": 2,
     "CreatedAt": "2024-02-01T00:00:00Z",
+    "IsActive": true,
+    "IsArchived": false,
+    "ResetToken": null,
+    "ResetTokenExpiry": null
+  },
+  {
+    "Id": 3,
+    "Username": "demo.member3",
+    "PasswordHash": "$2a$11$tfrb.BottApcx0P1UuM55erZh.o6IoP6hJyoWbsAKp1jM550S7LX2",
+    "MemberId": 3,
+    "CreatedAt": "2024-03-01T00:00:00Z",
+    "IsActive": true,
+    "IsArchived": false,
+    "ResetToken": null,
+    "ResetTokenExpiry": null
+  },
+  {
+    "Id": 4,
+    "Username": "demo.member4",
+    "PasswordHash": "$2a$11$tfrb.BottApcx0P1UuM55erZh.o6IoP6hJyoWbsAKp1jM550S7LX2",
+    "MemberId": 4,
+    "CreatedAt": "2024-01-15T00:00:00Z",
     "IsActive": true,
     "IsArchived": false,
     "ResetToken": null,
