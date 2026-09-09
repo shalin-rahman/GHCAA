@@ -19,7 +19,9 @@ public class FinancialLedgerServiceTests : TestBase
 
         // GetSummaryAsync now also reads PaymentHistories (46.5); clear the seed fixture's rows so
         // income totals are deterministic instead of drifting with whatever demo data ships.
+        _context.MembershipDues.RemoveRange(_context.MembershipDues);
         _context.PaymentHistories.RemoveRange(_context.PaymentHistories);
+        _context.FinancialRecords.RemoveRange(_context.FinancialRecords);
         await _context.SaveChangesAsync();
     }
 

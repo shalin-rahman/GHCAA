@@ -23,3 +23,24 @@ npm-debug.log
 GHCAA.Web/dist
 GHCAA.Web/node_modules
 GHCAA.Web/.angular
+
+# Local test and mobile build output can be very large and is not needed by the API image.
+**/TestResults
+**/test-results
+GHCAA.Mobile
+GHCAA.Tests
+
+# Graph data and local build reports are development-only artifacts.
+graphify-out
+build_output
+build_output.txt
+build_current.txt
+build_errors.txt
+api_error.log
+api_stderr.txt
+api_stdout.txt
+seed_output.log
+
+# Deployment credentials must never enter the build context.
+**/.env*
+docs/deploy_conn_Info.txt

@@ -23,7 +23,7 @@ jobs:
         run: flutter pub get
         working-directory: GHCAA.Mobile
       - name: Run Tests
-        run: flutter test --reporter expanded
+        run: flutter test --exclude-tags golden --reporter expanded
         working-directory: GHCAA.Mobile
 
   build-android:

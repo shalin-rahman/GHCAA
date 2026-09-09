@@ -74,22 +74,31 @@ namespace GHCAA.Tests.Data
 
         private static string SeedDirectory() => Path.Combine(RepoRoot(), "GHCAA.Infrastructure", "Data", "Seed");
 
-        private static string SeedFilePath(string fileName) => DemoDataFiles.Contains(fileName)
-            ? Path.Combine(RepoRoot(), "profiles", "ghc", "demo-data", fileName)
+        private static string SeedFilePath(string fileName, string profile = "ghc") => DemoDataFiles.Contains(fileName)
+            ? Path.Combine(RepoRoot(), "profiles", profile, "demo-data", fileName)
             : Path.Combine(SeedDirectory(), fileName);
 
         [TestCaseSource(nameof(SeedFiles))]
         public void SeedFile_EveryJsonKey_MatchesARealEntityProperty((string File, Type EntityType) seed)
         {
-            var path = SeedFilePath(seed.File);
-            File.Exists(path).Should().BeTrue($"{seed.File} should exist under Data/Seed or profiles/ghc/demo-data");
+            ValidateSeedFileKeys(SeedFilePath(seed.File, "ghc"), seed.File, seed.EntityType);
+
+            if (DemoDataFiles.Contains(seed.File))
+            {
+                ValidateSeedFileKeys(SeedFilePath(seed.File, "default"), seed.File, seed.EntityType);
+            }
+        }
+
+        private static void ValidateSeedFileKeys(string path, string fileName, Type entityType)
+        {
+            File.Exists(path).Should().BeTrue($"{fileName} should exist at {path}");
 
             var json = File.ReadAllText(path);
             using var doc = JsonDocument.Parse(json);
-            doc.RootElement.ValueKind.Should().Be(JsonValueKind.Array, $"{seed.File} is expected to be a JSON array of {seed.EntityType.Name}");
+            doc.RootElement.ValueKind.Should().Be(JsonValueKind.Array, $"{fileName} is expected to be a JSON array of {entityType.Name}");
 
             var validNames = new HashSet<string>(
-                seed.EntityType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Select(p => p.Name),
                 StringComparer.OrdinalIgnoreCase);
 
@@ -104,7 +113,7 @@ namespace GHCAA.Tests.Data
             }
 
             unknownKeys.Should().BeEmpty(
-                $"every key in {seed.File} must match a public property on {seed.EntityType.Name} — " +
+                $"every key in {fileName} at {path} must match a public property on {entityType.Name} — " +
                 "System.Text.Json silently drops unmatched keys instead of failing, which is exactly " +
                 "how the 'Category' (should be 'ArticleCategory') bug reached production undetected.");
         }
@@ -119,7 +128,16 @@ namespace GHCAA.Tests.Data
         [TestCaseSource(nameof(SeedFiles))]
         public void SeedFile_EveryPathOrUrlValue_IsNotPunctuationPlaceholder((string File, Type EntityType) seed)
         {
-            var path = SeedFilePath(seed.File);
+            ValidateSeedFilePaths(SeedFilePath(seed.File, "ghc"), seed.File);
+
+            if (DemoDataFiles.Contains(seed.File))
+            {
+                ValidateSeedFilePaths(SeedFilePath(seed.File, "default"), seed.File);
+            }
+        }
+
+        private static void ValidateSeedFilePaths(string path, string fileName)
+        {
             var json = File.ReadAllText(path);
             using var doc = JsonDocument.Parse(json);
 
@@ -140,7 +158,7 @@ namespace GHCAA.Tests.Data
             }
 
             badValues.Should().BeEmpty(
-                $"every *Path/*Url value in {seed.File} must contain real content, not punctuation-only " +
+                $"every *Path/*Url value in {fileName} at {path} must contain real content, not punctuation-only " +
                 "placeholder text like \"...\" — this exact pattern reached both news.json and photos.json " +
                 "in production and only surfaced as a browser 404, not a deserialization failure.");
         }

@@ -101,7 +101,7 @@ describe('LandingGalleryPreview Component', () => {
 
     it('should not start a cycling timer when no album has more than one photo', () => {
         vi.useFakeTimers();
-        const setIntervalSpy = vi.spyOn(global, 'setInterval');
+        const setIntervalSpy = vi.spyOn(globalThis, 'setInterval');
         galleryServiceMock.getGalleries.mockReturnValue(of([albumWithPhotos(1, 1)]));
 
         fixture.detectChanges();
@@ -111,7 +111,7 @@ describe('LandingGalleryPreview Component', () => {
 
     it('should clear the cycling timer on destroy', () => {
         vi.useFakeTimers();
-        const clearIntervalSpy = vi.spyOn(global, 'clearInterval');
+        const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
         galleryServiceMock.getGalleries.mockReturnValue(of([albumWithPhotos(1, 2)]));
 
         fixture.detectChanges();

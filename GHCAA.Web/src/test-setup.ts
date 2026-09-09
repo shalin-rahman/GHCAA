@@ -12,19 +12,21 @@ if (!(TestBed as any).platform) {
 }
 
 // Mock window.matchMedia for JSDOM
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: (query: any) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: () => {},
-    removeListener: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => {},
-  }),
-});
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query: any) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => {},
+    }),
+  });
+}
 
 // Mock IntersectionObserver for JSDOM (used by infinite scroll)
 (globalThis as any).IntersectionObserver = class MockIntersectionObserver {

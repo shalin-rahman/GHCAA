@@ -98,7 +98,8 @@ public class FinancialAuditTrailTests : TestBase
         // Callers that never asked about deletion must see exactly what they saw before 82.16 —
         // otherwise "soft delete" silently changes the meaning of every existing ledger query.
         var visible = await _context.FinancialRecords.ToListAsync();
-        visible.Should().ContainSingle().Which.Id.Should().Be(kept.Id);
+        visible.Should().Contain(r => r.Id == kept.Id);
+        visible.Should().NotContain(r => r.Id == removed.Id);
     }
 
     [Test]

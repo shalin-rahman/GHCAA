@@ -87,9 +87,15 @@ namespace GHCAA.Infrastructure.Data
             {
                 var path = Path.Combine(profilesRoot, name, fileName);
                 if (File.Exists(path)) return path;
+                // No alt-name substitution here. Profile pack seed files must use the same
+                // underscore-based canonical name as the LoadSeed<T> call site.  The hyphen
+                // variant of some names (e.g. site-content.json) is an Angular build-time
+                // branding file — a flat object, not a seed array — and must not shadow the
+                // Data/Seed/ copy that LoadSeed<T> falls back to.
             }
 
             return null;
+
         }
 
         /// <summary>

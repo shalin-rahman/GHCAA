@@ -343,3 +343,14 @@ outside this item's scope; this classification only says where it *would* belong
 (env/code feature flag for beta gating; a new admin-and-self-service-editable preference table for
 notifications), consistent with WP28/62's existing pattern rather than a new mechanism.
 
+---
+
+## 14. Environment Configuration & Profile Alignment (docs/TODO.md 82.54)
+
+As of 2026-09-09, environment settings across API, Web, and Mobile have been standardized:
+- **Root API environments**: `.env` (local dev) and `.env.preprod` (Render reference template). Secrets are supplied via host environment variables in cloud hosting rather than committed files.
+- **Web**: Configuration is driven at build time via `angular.json` configurations (`development`, `preprod`, `production`), with `ORG_PROFILE` generating fallback assets via `generate-org-config-fallback.mjs`.
+- **Mobile**: Flutter environment keys (`BASE_API_URL`, `ENVIRONMENT`, `APP_VERSION`) are loaded via `flutter_dotenv`, with branding and terminology falling back to `OrgConfig.offlineDefaults`.
+- See `docs/ENV_REVIEW.md` for the full cross-platform environment variable registry.
+
+

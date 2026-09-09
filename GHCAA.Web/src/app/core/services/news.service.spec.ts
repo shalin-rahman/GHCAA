@@ -13,6 +13,7 @@ describe('NewsService', () => {
         title: 'Tech Update',
         content: 'Latest tech news.',
         articleCategory: 'Regular',
+        postType: 'Article' as any,
         status: 'Approved',
         isActive: true,
         authorName: 'Admin',

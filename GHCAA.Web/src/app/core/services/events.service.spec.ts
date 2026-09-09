@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { EventsService } from './events.service';
 import { AlumniEvent, EventRegistration } from '../models/business.models';
 import { API_ENDPOINTS } from '../constants/app.constants';
@@ -17,7 +18,8 @@ describe('EventsService', () => {
         location: 'Dhaka',
         isActive: true,
         requiresPayment: true,
-        allowNonMembers: false
+        allowNonMembers: false,
+        requiresRegistration: false
     };
 
     const mockRegistration: EventRegistration = {
@@ -34,7 +36,7 @@ describe('EventsService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
+            imports: [HttpClientTestingModule, RouterTestingModule],
             providers: [EventsService]
         });
         service = TestBed.inject(EventsService);

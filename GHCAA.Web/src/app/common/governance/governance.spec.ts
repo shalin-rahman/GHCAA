@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Governance } from './governance';
 import { NetworkingService } from '../../core/services/networking.service';

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { PaymentPortalComponent } from './payment-portal.component';

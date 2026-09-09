@@ -58,7 +58,6 @@ namespace GHCAA.Infrastructure.Data
                 }
 
                 await BaselineLegacyDatabaseAsync(ctx, logger, allMigrations);
-                return;
             }
 
             await SelfHealFalselyBaselinedMigrationsAsync(ctx, logger, applied);
@@ -97,6 +96,14 @@ namespace GHCAA.Infrastructure.Data
 
             foreach (var migrationId in applied)
             {
+                // InitialBaseline is a full-schema snapshot. A legacy database can contain most
+                // of its tables while still missing a few, so replaying it recreates the collision
+                // that caused the false baseline. Repair migrations handle those gaps incrementally.
+                if (migrationId.EndsWith("_InitialBaseline", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
                 if (!migrationsAssembly.Migrations.TryGetValue(migrationId, out var migrationType))
                 {
                     continue;
@@ -179,6 +186,14 @@ namespace GHCAA.Infrastructure.Data
             int baselined = 0, applied = 0;
             foreach (var id in allMigrations)
             {
+                if (id.EndsWith("_InitialBaseline", StringComparison.Ordinal))
+                {
+                    await ctx.Database.ExecuteSqlRawAsync(
+                        historyRepository.GetInsertScript(new HistoryRow(id, "9.0.0")));
+                    baselined++;
+                    continue;
+                }
+
                 try
                 {
                     await migrator.MigrateAsync(id);

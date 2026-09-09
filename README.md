@@ -286,11 +286,23 @@ Set the values above as environment variables in the host (Render, Docker, etc.)
 
 ### `ORG_PROFILE` (institution profile pack)
 
-Which institution this deployment is branded for. Leave it unset and everything behaves exactly as
-it does today (hardcoded GHC branding). Set it to a folder name under `profiles/` (e.g. `ghc`) to
-read branding, contact details, currency, and seed data from that folder's `org-config.json`
-instead. See `docs/INSTITUTION_ONBOARDING.md` before deploying this for a second institution — a
-known gap (real alumni data still baked into committed migrations) makes that unsafe right now.
+Which institution this deployment is branded for.
+- **Default Dev Environment (`ORG_PROFILE=default`)**: Boots with the minimal "Sample Alumni Association" profile (acronym `SAA`, prefix `MEM-`) with complete sample demo data populated across all domain entities.
+- **Custom Profile Pack (e.g., `ORG_PROFILE=ghc`)**: Reads branding, contact details, currency, and seed data from `profiles/<profile_name>/`.
+
+### Default Demo Accounts & Access Matrix
+
+When running in the default development environment (`ORG_PROFILE=default`), the following sample accounts are available out-of-the-box (Password Hash matches standard dev credential `$2a$11$tfrb...`):
+
+| Username | Role Access | Associated Member | Membership No | Sample Data / Notes |
+| --- | --- | --- | --- | --- |
+| `demo.admin` | `Admin`, `Member` | Ava Sample | `MEM-0000000001` | Executive Committee President, Founding Member |
+| `demo.member2` | `Admin`, `Member` | Ben Sample | `MEM-0000000002` | General Secretary, General Member |
+| `demo.member3` | `Member` | Clara Sample | `MEM-0000000003` | Treasurer, Associate Member |
+| `demo.member4` | `Member` | David Sample | `MEM-0000000004` | Life Patron / Advisory Council |
+
+*Note: On a fresh database with no SuperAdmin account, `ProtectedSuperAdminSeeder` automatically bootstraps the first SuperAdmin account on startup.*
+
 
 ---
 

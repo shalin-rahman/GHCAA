@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PaymentMethodSelectorComponent } from './payment-method-selector.component';
 import { PaymentConfigService } from '../../core/services/payment-config.service';

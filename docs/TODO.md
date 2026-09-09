@@ -7917,3 +7917,52 @@ done); 62.29, 62.30, 62.37, 62.39; 63.10, 63.18; 73.5 (FR half only — NFR/DC t
 62.31). None of these five need engineering time from a session; they need the user or a decision.
 **Not corrected here:** 52.5 was checked against a claim that its cited path had moved — the item does
 not actually cite a path, so there was nothing stale to fix; recorded so the same check is not repeated.
+
+82.54 [DONE 2026-09-09] **Priority: P1 | Depends on: none.** Cross-platform environment configuration
+review and standardization across API, Angular Web, and Flutter Mobile. Standardized root `.env` (local dev)
+and `.env.preprod` (Render reference template); deleted obsolete `.env.remote`. Removed stale/unbound keys
+(`JwtSettings__Secret`, `GeneralSettings__AssociationNamePrefix`, mobile `IMAGE_BASE_URL`, `GATEWAY_*`).
+Updated `.dockerignore` to wildcard `**/.env*` to prevent any secret bundling into container images.
+Produced comprehensive reference specification at `docs/ENV_REVIEW.md`.
+
+82.55 [DONE 2026-09-09] **Priority: P2 | Depends on: 82.54.** Lookup and configuration seeding alignment.
+Verified that domain lookups are seeded authoritatively via EF Core baseline migrations (`InitialBaseline`)
+and managed via admin CRUD API (`/api/lookups`), removing redundant boot-time seeder call. Ensured initial
+organization configuration seeds idempotently from the active profile (`profiles/<name>/org-config.json` or
+`profiles/default/org-config.json`) when starting against an empty database.
+
+82.56 [DONE 2026-09-09] **Priority: P2 | Depends on: none.** Flutter test suite tag categorization and CI
+workflow alignment. Annotated visual freeze / golden snapshot test files with `@Tags(['golden'])` matching
+`dart_test.yaml`. Updated `.github/workflows/ghcaa-ci-standard.yml`, `.github/workflows/ghcaa-ci-preprod.yml`,
+and `.github/workflows/mobile_deployment.yml` to run `flutter test --exclude-tags golden --reporter expanded`
+so core unit/service/widget tests run fast and deterministically across all operating systems without
+cross-platform font rendering diffs.
+
+82.57 [DONE 2026-09-09] **Priority: P2 | Depends on: 82.54, 82.55.** `Program.cs` modularization and
+refactoring. Extracted rate limiting policies, response compression, output caching, static files / SPA
+routing, and boot-time database migrations/seeding into dedicated extension methods under
+`GHCAA.API/Extensions/` (`RateLimitingExtensions.cs`, `CachingAndCompressionExtensions.cs`,
+`StaticFilesExtensions.cs`, `DatabaseBootstrapperExtensions.cs`). Reduced `Program.cs` from 577 to ~125 lines
+while strictly preserving middleware pipeline ordering and startup guarantees.
+
+82.58 [DONE 2026-09-09] **Priority: P1 | Depends on: 82.54, 82.55.** Default development environment and sample demo data population.
+Populated complete, coherent sample records across all 15 entity files under `profiles/default/demo-data/` (`members.json`, `users.json`, `user_roles.json`, `academic_records.json`, `professional_records.json`, `ec_periods.json`, `ec_members.json`, `events.json`, `news.json`, `galleries.json`, `photos.json`, `financial_records.json`, `membership_dues.json`, `payment_histories.json`). Enhanced `SeedDataIntegrityTests` to assert schema validity and non-placeholder content for both `ghc` and `default` profile packs. Documented demo accounts (`demo.admin`, `demo.member2`, `demo.member3`, `demo.member4`), access matrix, and profile capabilities in `README.md`, `docs/ENV_REVIEW.md`, and `docs/CONFIG_DRIVEN_FRAMEWORK.md`.
+82.59 [TODO] **Priority: P2 | Depends on: 82.58.** Election handbook profile-awareness audit.
+Investigate all markdown files under `GHCAA.Web/public/assets/elections/` (01–08) for hardcoded
+institutional references (institution name, contact details, specific role titles, election dates).
+Determine whether each reference should be (a) replaced with a template placeholder resolved at
+build time by `apply-brand.mjs`, (b) moved to `profiles/<name>/` as an overridable asset, or (c)
+left as GHC-specific policy text that is correct to be hardcoded. Update `brand-lint.mjs` patterns
+to catch any newly templated tokens. Mirror the same audit to `docs/Elections/` (01–08) which serve
+as the source-of-truth drafts. Add the `default` profile equivalents for any file moved to the
+profile pack.
+
+82.60 [DONE 2026-09-09] **Priority: P0 | Depends on: none.** Investigate and fix 460 backend test failures.
+Root cause: `ResolveProfilePackPath` applied a hyphen/underscore alt-name substitution that caused
+`site_content.json` to resolve to `profiles/default/site-content.json` — an Angular build-time
+branding file (flat JSON object), not the DB seed array. Every `TestBase`-derived test failed during
+`OnModelCreating` with `JsonException: cannot convert to List<SiteContent>`. Fix: removed the
+alt-name substitution from `ResolveProfilePackPath`; profile pack seed files must use canonical
+underscore names matching their `LoadSeed<T>` call sites. Result: 717/717 backend tests passing.
+
+

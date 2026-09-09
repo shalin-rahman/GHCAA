@@ -984,20 +984,36 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 
 ---
 
-## API Layer — Middleware Pipeline
+## API Layer — Middleware Pipeline & Extensions
 
-Order in `Program.cs`:
-1. `ExceptionMiddleware` — Global exception → 500 JSON, and persists the error via `IErrorLogService` (WP45)
-2. `SecurityHeadersMiddleware` — CSP, X-Frame-Options, etc.
-3. `AuditLogMiddleware` — Logs all mutating requests via `IActivityService`
-4. `RateLimiter` — Enforces `auth` / `registration` / `api` policies
-5. `WebSockets`
-6. `StaticFiles` — `wwwroot/` + `/api/uploads/` physical mapping
-7. `QueryStringTokenMiddleware` — Allows `?token=` auth for file downloads
-8. `Authentication` (JWT Bearer)
-9. `SecurityStampMiddleware` — Invalidates sessions on `SecurityStamp` change
-10. `Authorization`
-11. Controllers + SignalR hubs
+### Service Extensions (`GHCAA.API/Extensions/`)
+- `RateLimitingExtensions.cs` — `AddAppRateLimiting(...)`: Auth (per-IP), Refresh, Registration, PasswordReset, and Api policies
+- `CachingAndCompressionExtensions.cs` — `AddAppCachingAndCompression(...)`: Brotli/Gzip response compression + Output Cache policies (`PublicReference`, `PublicContent`)
+- `StaticFilesExtensions.cs` — `UseAppStaticFiles(...)` & `MapSpaFallback(...)`: Root static files (no-cache index.html), `/api/uploads` physical mapping, missing image placeholder fallback, and SPA deep-link catch-all
+- `DatabaseBootstrapperExtensions.cs` — `BootstrapDatabaseAsync(...)`: Startup EF migrations (`MigrationBootstrapper`), OrgConfig initial seed, Constitution seeder, Visual testing DB reset, and SuperAdmin account recovery
+- `ServiceExtensions.cs` — `AddJwtAuthentication(...)` & `AddAppAuthorization(...)`
+
+### Order in `Program.cs`:
+1. `ForwardedHeaders` — reverse proxy / TLS header resolution
+2. `CorrelationIdMiddleware` — Assigns correlation id for distributed tracking
+3. `ExceptionMiddleware` — Global exception → ProblemDetails RFC 7807 JSON
+4. `Cors` (`"AngularApp"`)
+5. `Swagger` / `SwaggerUI` (Development only)
+6. `ResponseCompression` & `OutputCache`
+7. `Hsts` / `HttpsRedirection` (Non-Development)
+8. `SecurityHeadersMiddleware` — CSP, X-Frame-Options, HSTS
+9. `AuditLogMiddleware` — Logs mutating requests via `IActivityService`
+10. `RateLimiter`
+11. `WebSockets`
+12. `StaticFiles` — `wwwroot/` + `/api/uploads/` physical mapping & image placeholder fallback
+13. `Authentication` (JWT Bearer / httpOnly cookie)
+14. `VisualTestAuthMiddleware` (Visual profile development only)
+15. `SecurityStampMiddleware` — Invalidates sessions on `SecurityStamp` change
+16. `XsrfMiddleware` — CSRF token protection for cookie-based clients
+17. `Authorization`
+18. Endpoints: `MapControllers().RequireRateLimiting("api")`, `/health`, SignalR hubs (`/api/hubs/chat`, `/api/hubs/notifications`)
+19. `MapSpaFallback` — SPA HTML5 deep-linking routing fallback
+20. `BootstrapDatabaseAsync` — Async database migration & initialization on startup
 
 ---
 

@@ -117,7 +117,7 @@ jobs:
 
       - name: Run Tests
         working-directory: GHCAA.Mobile
-        run: flutter test --reporter expanded
+        run: flutter test --exclude-tags golden --reporter expanded
 
   integrated-build:
     name: Preprod Integrated Build

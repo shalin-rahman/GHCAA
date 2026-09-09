@@ -128,6 +128,25 @@ scans the three client codebases for the literal strings this work package remov
 that return, currently warn-only until Work Package 62.41's acceptance test exists to prove a
 `default`-profile build is actually clean before that check is allowed to fail a build.
 
+Work Package 82.58 added the second layer the framework needed before it was useful to a
+development environment other than the GHC deployment: `profiles/default/demo-data/` now holds a
+minimal but fully-relational sample dataset — members, users, an EC history, news items, gallery
+entries, financials and membership dues — sized to exercise every foreign-key path in the schema
+without importing any real alumni record. `DatabaseBootstrapperExtensions` seeds this pack when
+`ORG_PROFILE` is unset and the environment is non-production, so a clean `dotnet run` in development
+reaches a usable state without any manual SQL. A companion `profiles/default/constitution.json`
+provides a placeholder constitution for the same reason: the `ConstitutionSeeder` would abort
+otherwise, because it enforces the always-latest invariant regardless of profile.
+
+One path-resolution defect surfaced during this work: `ResolveProfilePackPath` had been matching
+file names by exact string, so a file stored as `ec_history.json` would not be found when the pack
+referenced it as `ec-history.json` (or vice versa). The fix normalises both the stored name and the
+lookup key to underscores before comparing, with a secondary hyphen-normalised pass, so the resolver
+is now format-agnostic. The change is covered by the `SeedDataIntegrityTests` suite, which was
+extended in the same work package to validate both the `ghc` and `default` profile packs: every
+referenced file must exist, every JSON document must parse, and every foreign-key reference within
+the pack must resolve against the schema — run for both profiles on every CI execution.
+
 What this work package does not close is recorded rather than hidden: 631 real alumni records,
 their password hashes and their payment history are written as literal values into eight already-committed
 EF Core migrations, not only into the seed files this section describes moving, so a second

@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'org_config.dart';
+
 class AppConfig {
   static String get apiBaseUrl {
     // Web and desktop hosts reach the API on localhost; Android emulator uses 10.0.2.2.
@@ -18,27 +20,27 @@ class AppConfig {
   }
 
   static String get appName {
-    return dotenv.env['APP_NAME'] ?? 'Alumni Portal';
+    return dotenv.env['APP_NAME'] ?? OrgConfig.offlineDefaults.branding.shortName;
   }
 
   static String get organizationName {
-    return dotenv.env['ORG_NAME'] ?? 'Government Haraganga College Alumni Association';
+    return dotenv.env['ORG_NAME'] ?? OrgConfig.offlineDefaults.branding.fullName;
   }
 
   static String get organizationAcronym {
-    return dotenv.env['ORG_ACRONYM'] ?? 'GHCAA';
+    return dotenv.env['ORG_ACRONYM'] ?? OrgConfig.offlineDefaults.branding.institutionAcronym;
   }
 
   static String get organizationTagline {
-    return dotenv.env['ORG_TAGLINE'] ?? 'Sharing Heritage, Aligning Lives, Integrating Networks';
+    return dotenv.env['ORG_TAGLINE'] ?? (OrgConfig.offlineDefaults.locales['en']?.tagline ?? '');
   }
 
   static String get portalTitle {
-    return dotenv.env['PORTAL_TITLE'] ?? 'Alumni Portal';
+    return dotenv.env['PORTAL_TITLE'] ?? OrgConfig.offlineDefaults.branding.fullName;
   }
 
   static String get portalDescription {
-    return dotenv.env['PORTAL_DESCRIPTION'] ?? 'Connecting Haraganga College members through secure membership and integrated financial governance.';
+    return dotenv.env['PORTAL_DESCRIPTION'] ?? '';
   }
 
   static String get appVersion {
@@ -46,7 +48,7 @@ class AppConfig {
   }
 
   static String get memberNoun {
-    return dotenv.env['MEMBER_NOUN'] ?? 'Member';
+    return dotenv.env['MEMBER_NOUN'] ?? OrgConfig.offlineDefaults.branding.memberNickname;
   }
   static String? resolveImageUrl(String? path) {
     if (path == null || path.trim().isEmpty) return null;
