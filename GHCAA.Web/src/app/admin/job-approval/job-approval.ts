@@ -5,7 +5,7 @@ import { JobService } from '../../core/services/job.service';
 import { Job } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { getJobCategoryLabel } from '../../core/constants/app.constants';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { NotifyToggleComponent } from '../../common/notify-toggle/notify-toggle.component';
@@ -14,7 +14,7 @@ import { ModalHeaderComponent } from '../../common/modal-header/modal-header.com
 @Component({
   selector: 'app-job-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ModalHeaderComponent],
+  imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ModalHeaderComponent],
   templateUrl: './job-approval.html',
   styleUrl: './job-approval.scss'
 })

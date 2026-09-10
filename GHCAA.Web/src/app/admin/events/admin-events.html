@@ -235,10 +235,7 @@
                 placeholder="Search events by title or location…"></app-search-bar>
         </div>
         @if (loading()) {
-        <div class="loading-state py-20 text-center">
-            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-            <p>Loading events...</p>
-        </div>
+        <app-loading-panel label="Loading events..." [size]="64"></app-loading-panel>
         } @else {
         <div class="grid gap-4">
             @for (ev of filteredEvents(); track ev.id) {
@@ -316,10 +313,7 @@
         </div>
 
         @if (loadingRegistrations()) {
-        <div class="loading-state py-20 text-center">
-            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-            <p>Loading participations...</p>
-        </div>
+        <app-loading-panel label="Loading participations..." [size]="64"></app-loading-panel>
         } @else {
         <div class="glass-card table-container">
             <table class="data-table">

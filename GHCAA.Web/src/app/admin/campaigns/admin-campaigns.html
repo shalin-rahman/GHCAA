@@ -12,7 +12,7 @@
     <app-search-bar [value]="searchTerm()" (valueChange)="searchTerm.set($event)" placeholder="Search campaigns…" />
 
     @if (loading()) {
-      <div class="loading-wrap"><app-logo-spinner [size]="80" /></div>
+      <app-loading-panel label="Loading campaigns..." [size]="80"></app-loading-panel>
     } @else {
       <table class="data-table">
         <thead>
@@ -72,7 +72,7 @@
       <button (click)="closeDetail()" class="btn btn-sm">&larr; Back</button>
       <h2>Pledges — {{ selectedCampaign()!.title }}</h2>
       @if (pledgesLoading()) {
-        <div class="loading-wrap"><app-logo-spinner [size]="80" /></div>
+        <app-loading-panel label="Loading pledges..." [size]="80"></app-loading-panel>
       } @else if (pledges().length === 0) {
         <p class="empty-msg">No pledges yet.</p>
       } @else {

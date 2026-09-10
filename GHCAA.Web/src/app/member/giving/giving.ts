@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CampaignService } from '../../core/services/campaign.service';
 import { CampaignPledge } from '../../core/models/business.models';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { getPledgeStatusLabel, getPledgeStatusClass } from '../../core/constants/app.constants';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
@@ -11,7 +11,7 @@ import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 @Component({
     selector: 'app-giving',
     standalone: true,
-    imports: [CommonModule, RouterLink, LogoSpinnerComponent, AppCurrencyPipe],
+    imports: [CommonModule, RouterLink, LoadingPanelComponent, AppCurrencyPipe],
     templateUrl: './giving.html',
     styleUrl: './giving.scss'
 })

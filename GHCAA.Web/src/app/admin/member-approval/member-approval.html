@@ -14,10 +14,7 @@
 
     <div class="glass-card table-wrap">
         @if (loading()) {
-        <div class="loading-state py-20">
-            <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
-            <p>Gathering pending applications...</p>
-        </div>
+        <app-loading-panel [compact]="true" label="Gathering pending applications..." [size]="20"></app-loading-panel>
         } @else {
         <table class="data-table">
             <thead>

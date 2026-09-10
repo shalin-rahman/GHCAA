@@ -8,12 +8,7 @@
         </button>
     </app-page-header>
 
-    <div class="glass-card mb-8 p-6" *ngIf="loading()">
-        <div class="loading-state">
-            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-            <p class="opacity-50 text-center animate-pulse">Loading fee data...</p>
-        </div>
-    </div>
+    <app-loading-panel *ngIf="loading()" label="Loading fee data..." [size]="64"></app-loading-panel>
 
     <div class="table-wrap reveal-bottom" *ngIf="!loading()">
         <table class="data-table">

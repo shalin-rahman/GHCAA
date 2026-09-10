@@ -9,14 +9,14 @@ import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { ARTICLE_CATEGORIES, getArticleCategoryLabel, POST_TYPE_TABS, matchesPostType, SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 
 @Component({
     selector: 'app-admin-news',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
+    imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
     templateUrl: './admin-news.html',
     styleUrl: './admin-news.scss'
 })

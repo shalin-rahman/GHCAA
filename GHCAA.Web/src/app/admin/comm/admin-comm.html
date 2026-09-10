@@ -167,10 +167,7 @@
         </div>
 
         @if (loading()) {
-        <div class="loading-state py-20 text-center">
-            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-            <p>Loading email templates...</p>
-        </div>
+        <app-loading-panel label="Loading email templates..." [size]="64"></app-loading-panel>
         } @else {
         <div class="table-wrap">
             <table class="data-table">
@@ -227,10 +224,7 @@
         </div>
 
         @if (loading()) {
-        <div class="loading-state py-20 text-center">
-            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-            <p>Loading communication history...</p>
-        </div>
+        <app-loading-panel label="Loading communication history..." [size]="64"></app-loading-panel>
         } @else {
         <div class="table-wrap">
             <table class="data-table">

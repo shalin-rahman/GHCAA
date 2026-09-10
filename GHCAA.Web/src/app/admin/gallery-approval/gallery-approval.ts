@@ -5,7 +5,7 @@ import { ImgFallbackDirective } from '../../common/directives/img-fallback.direc
 import { GalleryService } from '../../core/services/gallery.service';
 import { EventGallery, EventPhoto } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { NotifyToggleComponent } from '../../common/notify-toggle/notify-toggle.component';
@@ -16,7 +16,7 @@ type PendingItem = { kind: 'album'; album: EventGallery } | { kind: 'photo'; pho
 @Component({
   selector: 'app-gallery-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, NotifyToggleComponent, ModalHeaderComponent],
+  imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, NotifyToggleComponent, ModalHeaderComponent],
   templateUrl: './gallery-approval.html',
   styleUrl: './gallery-approval.scss'
 })

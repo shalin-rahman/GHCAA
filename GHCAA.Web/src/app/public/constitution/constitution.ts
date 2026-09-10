@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConstitutionService, Constitution } from '../../core/services/constitution.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { escapeHtml, slugify } from '../../core/utils/markdown.util';
 
 /** One `Article N: Heading` block of the constitution body, for rendering and the in-page ToC. */
@@ -98,7 +98,7 @@ export function parseArticles(content: string): ConstitutionArticle[] {
 @Component({
     selector: 'app-constitution',
     standalone: true,
-    imports: [CommonModule, LogoSpinnerComponent],
+    imports: [CommonModule, LoadingPanelComponent],
     templateUrl: './constitution.html',
     styleUrl: './constitution.scss'
 })

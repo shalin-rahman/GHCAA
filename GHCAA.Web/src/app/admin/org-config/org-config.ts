@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { OrgConfig, FeatureToggles } from '../../core/models/org-config.model';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { ORG_CONFIG_FALLBACK } from '../../core/config/org-config-fallback.generated';
 
@@ -12,7 +12,7 @@ type TabKey = 'branding' | 'contact' | 'currency' | 'features' | 'workflow' | 'a
 @Component({
   selector: 'app-org-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent],
   templateUrl: './org-config.html',
   styleUrl: './org-config.scss'
 })

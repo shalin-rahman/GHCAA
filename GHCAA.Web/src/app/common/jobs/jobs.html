@@ -99,10 +99,7 @@
     <!-- Job Grid -->
     <div class="jobs-list">
         @if (loading()) {
-        <div class="loading-state">
-            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-            <p>Scanning for opportunities...</p>
-        </div>
+        <app-loading-panel label="Scanning for opportunities..." [size]="64"></app-loading-panel>
         } @else if (viewMode() === 'table') {
         <div class="glass-card table-wrap">
             <table class="data-table">

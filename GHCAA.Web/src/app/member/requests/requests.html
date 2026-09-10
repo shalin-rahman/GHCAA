@@ -50,10 +50,7 @@
     }
 
     @if (loading()) {
-    <div class="loading-state glass-card py-20 text-center">
-        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-        <p>Loading your requests...</p>
-    </div>
+    <app-loading-panel label="Loading your requests..." [size]="64"></app-loading-panel>
     } @else {
 
     @if (activeTab() === 'family') {

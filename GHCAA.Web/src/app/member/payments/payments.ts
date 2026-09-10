@@ -12,7 +12,7 @@ import {
     getPaymentStatusClass,
     getPaymentStatusLabel
 } from '../../core/constants/app.constants';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
@@ -20,7 +20,7 @@ import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 @Component({
     selector: 'app-payments',
     standalone: true,
-    imports: [CommonModule, FormsModule, PaymentPortalComponent, LogoSpinnerComponent, ModalHeaderComponent, AppCurrencyPipe],
+    imports: [CommonModule, FormsModule, PaymentPortalComponent, LoadingPanelComponent, ModalHeaderComponent, AppCurrencyPipe],
     templateUrl: './payments.html',
     styleUrl: './payments.scss'
 })

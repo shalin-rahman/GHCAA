@@ -13,7 +13,7 @@ import {
   getArticleCategoryLabel
 } from '../../core/constants/app.constants';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { safeImageUrl } from '../../core/utils/image.util';
@@ -21,7 +21,7 @@ import { safeImageUrl } from '../../core/utils/image.util';
 @Component({
   selector: 'app-member-articles',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, ImgFallbackDirective],
+  imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective],
   templateUrl: './articles.html',
   styleUrl: './articles.scss'
 })

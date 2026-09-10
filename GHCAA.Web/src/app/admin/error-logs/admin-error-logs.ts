@@ -5,12 +5,12 @@ import { AdminService } from '../../core/services/admin.service';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 
 @Component({
     selector: 'app-admin-error-logs',
     standalone: true,
-    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, PaginationComponent, LogoSpinnerComponent],
+    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, PaginationComponent, LoadingPanelComponent],
     templateUrl: './admin-error-logs.html',
     styleUrl: './admin-error-logs.scss'
 })

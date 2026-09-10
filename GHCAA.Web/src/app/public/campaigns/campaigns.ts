@@ -6,7 +6,7 @@ import { CampaignService } from '../../core/services/campaign.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Campaign, CampaignHonourRoll, CreatePledgePayload } from '../../core/models/business.models';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
@@ -16,7 +16,7 @@ import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 @Component({
     selector: 'app-campaigns',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, LogoSpinnerComponent, AppCurrencyPipe],
+    imports: [CommonModule, FormsModule, RouterLink, LoadingPanelComponent, AppCurrencyPipe],
     templateUrl: './campaigns.html',
     styleUrl: './campaigns.scss'
 })

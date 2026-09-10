@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PaymentConfigService, PaymentConfig } from '../../core/services/payment-config.service';
 import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
@@ -12,7 +12,7 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 @Component({
   selector: 'app-admin-payment-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, PageHeaderComponent, ImgFallbackDirective, LogoSpinnerComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, PageHeaderComponent, ImgFallbackDirective, LoadingPanelComponent],
   templateUrl: './admin-payment-config.html',
   styleUrl: './admin-payment-config.scss'
 })
@@ -186,5 +186,4 @@ export class AdminPaymentConfig implements OnInit {
            ['bkash', 'nagad', 'rocket', 'sslcommerz', 'visa', 'master', 'mastercard', 'card', 'visa-master'].includes(icon.toLowerCase().trim());
   }
 }
-
 

@@ -9,14 +9,14 @@ import { ConfirmDialogService } from '../../core/services/confirm-dialog.service
 import { AuthService } from '../../core/services/auth.service';
 import { getJobCategoryLabel, SUBMISSION_STATUS_MAP, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS } from '../../core/constants/app.constants';
 import { LookupService } from '../../core/services/lookup.service';
-import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 import { debounce } from '../../core/utils/debounce.util';
 
 @Component({
   selector: 'app-jobs',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent],
+  imports: [CommonModule, FormsModule, LoadingPanelComponent],
   templateUrl: './jobs.html',
   styleUrl: './jobs.scss'
 })

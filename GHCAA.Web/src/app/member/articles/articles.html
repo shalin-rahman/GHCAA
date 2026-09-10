@@ -17,10 +17,7 @@
         }
 
         @if (loading()) {
-        <div class="loading-state glass-card py-20 text-center">
-            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-            <p>Fetching your submissions...</p>
-        </div>
+        <app-loading-panel label="Fetching your submissions..." [size]="64"></app-loading-panel>
         } @else {
         <div class="grid">
             @for (article of mySubmissions(); track article.id) {

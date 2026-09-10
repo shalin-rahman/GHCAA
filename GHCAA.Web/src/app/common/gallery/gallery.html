@@ -47,9 +47,7 @@
         }
 
         @if (loadingAlbums()) {
-        <div class="loading-state">
-            <app-logo-spinner [size]="48" [ripple]="false"></app-logo-spinner>
-        </div>
+        <app-loading-panel [compact]="true" label="Loading your albums..." [size]="48"></app-loading-panel>
         } @else {
         <div class="my-albums-list">
             @for (album of myAlbums(); track album.id) {
@@ -145,10 +143,7 @@
     }
 
     @if (loading()) {
-    <div class="loading-state">
-        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-        <p>Developing memories...</p>
-    </div>
+    <app-loading-panel label="Developing memories..." [size]="64"></app-loading-panel>
     } @else {
     @if (!selectedGallery()) {
     <div class="tabs tab-nav view-toggle mb-6">

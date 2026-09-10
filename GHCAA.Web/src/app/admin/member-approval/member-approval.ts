@@ -9,14 +9,14 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { ACADEMIC_CERTIFICATES, ACADEMIC_SUBJECTS, PROFESSIONAL_SECTORS, getStatusLabel, getStatusClass } from '../../core/constants/app.constants';
 import { LookupService } from '../../core/services/lookup.service';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-member-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
+  imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
   templateUrl: './member-approval.html',
   styleUrl: './member-approval.scss'
 })
@@ -176,5 +176,4 @@ export class MemberApproval implements OnInit {
     return getStatusClass(status);
   }
 }
-
 

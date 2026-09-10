@@ -6,7 +6,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
-import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { safeImageUrl } from '../../core/utils/image.util';
 import { SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
@@ -15,7 +15,7 @@ import { OrgConfigService } from '../../core/services/org-config.service';
 @Component({
   selector: 'app-gallery',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, ImgFallbackDirective],
+  imports: [CommonModule, FormsModule, LoadingPanelComponent, ImgFallbackDirective],
   templateUrl: './gallery.html',
   styleUrl: './gallery.scss'
 })
@@ -202,5 +202,4 @@ export class Gallery implements OnInit {
     return safeImageUrl(path);
   }
 }
-
 

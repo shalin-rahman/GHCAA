@@ -8,13 +8,13 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { AdminService } from '../../core/services/admin.service';
 import { Icon } from '../../common/icon/icon';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 
 @Component({
     selector: 'app-admin-roles',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, PageHeaderComponent, SearchBarComponent, Icon, LogoSpinnerComponent, ModalHeaderComponent],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, PageHeaderComponent, SearchBarComponent, Icon, LoadingPanelComponent, ModalHeaderComponent],
     templateUrl: './admin-roles.html',
     styleUrl: './admin-roles.scss'
 })
@@ -219,5 +219,4 @@ export class AdminRoles implements OnInit {
         });
     }
 }
-
 

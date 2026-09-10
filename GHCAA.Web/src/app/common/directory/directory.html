@@ -82,10 +82,7 @@
     <!-- Results -->
     <div class="member-list">
         @if (loading()) {
-        <div class="loading-state">
-            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-            <p>Searching directory...</p>
-        </div>
+        <app-loading-panel label="Searching directory..." [size]="64"></app-loading-panel>
         } @else if (!isCompact && viewMode() === 'table') {
         <div class="glass-card table-wrap">
             <table class="data-table">

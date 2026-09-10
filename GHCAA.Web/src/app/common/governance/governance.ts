@@ -6,14 +6,14 @@ import { NetworkingService, MemberSummary } from '../../core/services/networking
 import { ConstitutionService, Constitution } from '../../core/services/constitution.service';
 import { getECPositionName, getECPositionForPeriod } from '../../core/constants/app.constants';
 import { formatPeriodRange } from '../../core/utils/date.util';
-import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
 @Component({
     // ... (rest of metadata)
     selector: 'app-governance',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, LogoSpinnerComponent, ImgFallbackDirective],
+    imports: [CommonModule, FormsModule, RouterLink, LoadingPanelComponent, ImgFallbackDirective],
     templateUrl: './governance.html',
     styleUrl: './governance.scss'
 })
@@ -146,6 +146,5 @@ export class Governance implements OnInit {
         return boardPositions.includes(pos);
     }
 }
-
 
 

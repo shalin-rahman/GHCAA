@@ -7,14 +7,14 @@ import { NotificationService } from '../../core/services/notification.service';
 import { getECPositionName, getCurrentECPosition, PROFESSIONAL_SECTORS, getBloodGroupName, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS } from '../../core/constants/app.constants';
 import { debounce } from '../../core/utils/debounce.util';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
-import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
     selector: 'app-directory',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent, ImgFallbackDirective],
+    imports: [CommonModule, FormsModule, LoadingPanelComponent, ImgFallbackDirective],
     templateUrl: './directory.html',
     styleUrl: './directory.scss'
 })

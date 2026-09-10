@@ -10,7 +10,7 @@ import { ActivatedRoute } from '@angular/router';
 import { LOOKUP_GROUPS } from '../../core/constants/app.constants';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { RichTextEditor } from '../../common/rich-text-editor/rich-text-editor';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
@@ -18,7 +18,7 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 @Component({
     selector: 'app-admin-comm',
     standalone: true,
-    imports: [CommonModule, FormsModule, RichTextEditor, LogoSpinnerComponent, SearchBarComponent, ModalHeaderComponent, PageHeaderComponent],
+    imports: [CommonModule, FormsModule, RichTextEditor, LoadingPanelComponent, SearchBarComponent, ModalHeaderComponent, PageHeaderComponent],
     templateUrl: './admin-comm.html',
     styleUrl: './admin-comm.scss'
 })
@@ -356,5 +356,4 @@ export class AdminComm implements OnInit {
         });
     }
 }
-
 

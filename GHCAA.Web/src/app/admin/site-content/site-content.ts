@@ -9,7 +9,7 @@ import { SiteContent, UpsertSiteContentDto } from '../../core/models/business.mo
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { RichTextEditor } from '../../common/rich-text-editor/rich-text-editor';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 
 const emptyForm = (): UpsertSiteContentDto => ({
     key: '',
@@ -23,7 +23,7 @@ const emptyForm = (): UpsertSiteContentDto => ({
 @Component({
     selector: 'app-admin-site-content',
     standalone: true,
-    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, RichTextEditor, LogoSpinnerComponent],
+    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, RichTextEditor, LoadingPanelComponent],
     templateUrl: './site-content.html',
     styleUrl: './site-content.scss'
 })

@@ -6,7 +6,7 @@ import { FinancialService } from '../../core/services/financial.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { FINANCIAL_CATEGORY_OPTIONS, LOOKUP_GROUPS } from '../../core/constants/app.constants';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
@@ -16,7 +16,7 @@ import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 @Component({
   selector: 'app-admin-fee-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LogoSpinnerComponent, PageHeaderComponent, AppCurrencyPipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LoadingPanelComponent, PageHeaderComponent, AppCurrencyPipe],
   templateUrl: './admin-fee-config.html',
   styleUrl: './admin-fee-config.scss'
 })

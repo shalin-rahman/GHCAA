@@ -6,10 +6,7 @@
     </div>
 
     @if (loading()) {
-    <div class="loading-state">
-        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-        <p>Curating your magazine...</p>
-    </div>
+    <app-loading-panel label="Curating your magazine..." [size]="64"></app-loading-panel>
     } @else {
     
     @if (articles().length > 0) {

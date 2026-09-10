@@ -5,13 +5,13 @@ import { NewsService } from '../../core/services/news.service';
 import { NewsPost, PostType } from '../../core/models/business.models';
 import { getArticleCategoryLabel, POST_TYPE_TABS, matchesPostType } from '../../core/constants/app.constants';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
-import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-news',
   standalone: true,
-  imports: [CommonModule, ImgFallbackDirective, LogoSpinnerComponent],
+  imports: [CommonModule, ImgFallbackDirective, LoadingPanelComponent],
   templateUrl: './news.html',
   styleUrl: './news.scss'
 })
@@ -88,5 +88,4 @@ export class News implements OnInit {
     }, 100);
   }
 }
-
 

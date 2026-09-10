@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { ContactService } from '../../core/services/contact.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
@@ -13,7 +13,7 @@ import { ModalHeaderComponent } from '../../common/modal-header/modal-header.com
 @Component({
   selector: 'app-contact-messages',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ModalHeaderComponent],
+  imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ModalHeaderComponent],
   templateUrl: './contact-messages.html',
   styleUrl: './contact-messages.scss'
 })

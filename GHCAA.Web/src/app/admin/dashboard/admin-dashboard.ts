@@ -11,6 +11,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
 interface StatCard {
@@ -32,7 +33,7 @@ interface PendingRow {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, ImgFallbackDirective, PageHeaderComponent, AppCurrencyPipe],
+  imports: [CommonModule, RouterLink, DatePipe, ImgFallbackDirective, PageHeaderComponent, LoadingPanelComponent, AppCurrencyPipe],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss'
 })

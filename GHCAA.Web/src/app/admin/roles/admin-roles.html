@@ -95,10 +95,7 @@
             }
         </div>
         @if (loading()) {
-        <div class="loading-state py-20 text-center">
-            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-            <p class="text-accent font-black animate-pulse">Syncing identity matrix...</p>
-        </div>
+        <app-loading-panel label="Syncing identity matrix..." [size]="64"></app-loading-panel>
         } @else {
         <table class="data-table">
             <thead>

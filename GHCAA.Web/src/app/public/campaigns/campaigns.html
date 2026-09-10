@@ -1,6 +1,6 @@
 <div class="campaigns-page">
   @if (loading()) {
-    <div class="loading-wrap"><app-logo-spinner [size]="80" /></div>
+    <app-loading-panel label="Loading campaigns..." [size]="80"></app-loading-panel>
   } @else if (!slug()) {
     <!-- List view -->
     <h1 class="page-title">Fundraising Campaigns</h1>

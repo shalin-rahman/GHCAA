@@ -9,10 +9,7 @@
 <div class="container main-content">
 
     @if (loading()) {
-    <div class="loading-state">
-        <app-logo-spinner />
-        <p>Loading the constitution…</p>
-    </div>
+    <app-loading-panel label="Loading the constitution…" [size]="64"></app-loading-panel>
     }
 
     @else if (pdfOnly()) {

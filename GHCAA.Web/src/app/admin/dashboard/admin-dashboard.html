@@ -6,14 +6,7 @@
     </app-page-header>
 
     @if (loading()) {
-    <div class="loading-grid">
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-    </div>
+    <app-loading-panel [size]="64" label="Loading dashboard..." />
     } @else {
 
     <!-- Pending Approvals Banner -->

@@ -4,7 +4,7 @@ import { SearchBarComponent } from '../../common/search-bar/search-bar.component
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { firstValueFrom } from 'rxjs';
 import { GalleryService } from '../../core/services/gallery.service';
 import { EventGallery, EventPhoto } from '../../core/models/business.models';
@@ -15,7 +15,7 @@ import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 @Component({
     selector: 'app-admin-gallery',
     standalone: true,
-    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LogoSpinnerComponent],
+    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LoadingPanelComponent],
     templateUrl: './admin-gallery.html',
     styleUrl: './admin-gallery.scss'
 })
@@ -273,5 +273,4 @@ export class AdminGallery implements OnInit {
         this.selectedGallery.set(null);
     }
 }
-
 

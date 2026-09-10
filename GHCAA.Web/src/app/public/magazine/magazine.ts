@@ -2,14 +2,14 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NewsService } from '../../core/services/news.service';
 import { NewsPost } from '../../core/models/business.models';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
   selector: 'app-magazine',
   standalone: true,
-  imports: [CommonModule, LogoSpinnerComponent, ImgFallbackDirective],
+  imports: [CommonModule, LoadingPanelComponent, ImgFallbackDirective],
   templateUrl: './magazine.html',
   styleUrl: './magazine.scss'
 })

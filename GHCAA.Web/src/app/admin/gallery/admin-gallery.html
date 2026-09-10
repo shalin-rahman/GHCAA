@@ -62,10 +62,7 @@
     </div>
 
     @if (loading()) {
-    <div class="loading-state full">
-        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-        <p>Gathering your visual legacy...</p>
-    </div>
+    <app-loading-panel label="Gathering your visual legacy..." [size]="64"></app-loading-panel>
     } @else if (filteredGalleries().length === 0) {
     <div class="empty-state full">
         <span>🖼️</span>

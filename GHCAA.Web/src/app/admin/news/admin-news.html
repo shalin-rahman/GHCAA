@@ -170,10 +170,7 @@
     <!-- News Table Section -->
     <div class="glass-card table-wrap">
         @if (loading()) {
-        <div class="loading-state">
-            <span>⌛</span>
-            <p>Loading news posts...</p>
-        </div>
+        <app-loading-panel label="Loading news posts..." [size]="64"></app-loading-panel>
         } @else if (filteredNews().length === 0) {
         <div class="empty-state">
             <span>📰</span>

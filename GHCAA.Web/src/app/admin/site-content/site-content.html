@@ -14,10 +14,7 @@
     </div>
 
     @if (isLoading()) {
-    <div class="loading-state py-20 text-center">
-        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-        <p>Loading content blocks…</p>
-    </div>
+    <app-loading-panel label="Loading content blocks…" [size]="64"></app-loading-panel>
     } @else {
     <div class="glass-card table-wrap">
         <table class="data-table">

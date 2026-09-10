@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal, OnInit, computed } from '@angular/core';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
@@ -9,7 +9,7 @@ import { AdminService } from '../../core/services/admin.service';
 @Component({
     selector: 'app-admin-audit',
     standalone: true,
-    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, LogoSpinnerComponent],
+    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, LoadingPanelComponent],
     templateUrl: './admin-audit.html',
     styleUrl: './admin-audit.scss',
     changeDetection: ChangeDetectionStrategy.OnPush

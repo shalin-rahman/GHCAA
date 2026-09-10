@@ -16,10 +16,7 @@
     <!-- Committee List -->
     <div class="committee-section">
         @if (loading()) {
-        <div class="loading-state py-20 text-center">
-            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-            <p>Loading committee records...</p>
-        </div>
+        <app-loading-panel label="Loading committee records..." [size]="64"></app-loading-panel>
         } @else {
         <div class="committee-grid">
             @for (member of committee(); track member.id) {

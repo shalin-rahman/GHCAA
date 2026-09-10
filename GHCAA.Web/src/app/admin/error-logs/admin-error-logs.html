@@ -25,10 +25,7 @@
 
     <div class="table-wrap">
         @if (loading()) {
-        <div class="loading-state">
-            <app-logo-spinner [size]="48" [ripple]="false"></app-logo-spinner>
-            <p>Fetching error logs...</p>
-        </div>
+        <app-loading-panel [compact]="true" [size]="48" label="Fetching error logs..." />
         } @else if (logs().length === 0) {
         <div class="empty-state">
             <span>✅</span>

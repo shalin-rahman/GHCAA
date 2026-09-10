@@ -5,10 +5,7 @@
   </app-page-header>
 
   @if (isLoading) {
-  <div class="loading-state py-20 text-center">
-    <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-    <p>Loading configuration…</p>
-  </div>
+  <app-loading-panel label="Loading configuration…" [size]="64"></app-loading-panel>
   } @else if (config) {
   <div class="tabs tab-nav">
     @for (tab of tabs; track tab.key) {

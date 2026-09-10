@@ -10,10 +10,7 @@
     </div>
 
     @if (loading()) {
-    <div class="loading-state">
-        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-        <p>Gathering financial history...</p>
-    </div>
+    <app-loading-panel label="Gathering financial history..." [size]="64"></app-loading-panel>
     } @else {
     <!-- Outstanding Dues -->
     <div class="section">

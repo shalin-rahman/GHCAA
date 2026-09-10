@@ -13,10 +13,7 @@
     </div>
   </app-page-header>
 
-  <div class="glass-card mb-8 p-6 text-center" *ngIf="loading()">
-      <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-      <p class="opacity-50 animate-pulse">Synchronizing financial logic networks...</p>
-  </div>
+  <app-loading-panel *ngIf="loading()" label="Synchronizing financial logic networks..." [size]="64"></app-loading-panel>
 
   <div class="table-wrap reveal-bottom" *ngIf="!loading()">
       <table class="data-table">

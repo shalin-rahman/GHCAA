@@ -9,7 +9,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { SEARCH_DEBOUNCE_MS } from '../../core/constants/app.constants';
 import { debounce } from '../../core/utils/debounce.util';
 
@@ -18,7 +18,7 @@ type Tab = 'family' | 'mentorship';
 @Component({
   selector: 'app-member-requests',
   standalone: true,
-  imports: [CommonModule, FormsModule, PageHeaderComponent, LogoSpinnerComponent],
+  imports: [CommonModule, FormsModule, PageHeaderComponent, LoadingPanelComponent],
   templateUrl: './requests.html',
   styleUrl: './requests.scss'
 })

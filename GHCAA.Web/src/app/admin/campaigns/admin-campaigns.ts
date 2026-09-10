@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CampaignService } from '../../core/services/campaign.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { Campaign, CampaignPledge, DonorRecognitionTier } from '../../core/models/business.models';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { getPledgeStatusLabel, getPledgeStatusClass } from '../../core/constants/app.constants';
@@ -16,7 +16,7 @@ import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 @Component({
     selector: 'app-admin-campaigns',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, AppCurrencyPipe],
+    imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, AppCurrencyPipe],
     templateUrl: './admin-campaigns.html',
     styleUrl: './admin-campaigns.scss'
 })

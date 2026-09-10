@@ -15,10 +15,7 @@
 
     <div class="glass-card audit-container">
         @if (loading()) {
-        <div class="loading-state">
-            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-            <p>Fetching activity stream...</p>
-        </div>
+        <app-loading-panel [size]="64" label="Fetching activity stream..." />
         } @else {
         <div class="audit-timeline">
             @for (log of filteredLogs(); track log.id) {
