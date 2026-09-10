@@ -105,7 +105,7 @@
             &.notice {
                 background: var(--gold-gradient);
                 border-color: transparent;
-                color: #000;
+                color: var(--text-main);
             }
         }
 
@@ -207,7 +207,7 @@
 
             &:hover {
                 background: var(--accent-color);
-                color: #000;
+                color: var(--text-main);
             }
         }
 
@@ -228,7 +228,7 @@
 
             .cat-tag {
                 background: var(--gold-gradient);
-                color: #000;
+                color: var(--text-main);
                 padding: 0.4rem 1.2rem;
                 border-radius: 20px;
                 font-weight: 950;

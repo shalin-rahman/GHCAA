@@ -65,7 +65,7 @@
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: rgba(0, 0, 0, 0.82);
+    background: color-mix(in srgb, var(--primary-color) 82%, transparent);
     color: var(--accent-text);
     padding: 0.4rem 0.8rem;
     border-radius: 20px;

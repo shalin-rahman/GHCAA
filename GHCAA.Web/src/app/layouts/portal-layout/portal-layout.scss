@@ -141,11 +141,11 @@
 
     &.active {
         background: var(--gold-gradient);
-        color: #000 !important;
+        color: var(--text-main) !important;
         box-shadow: var(--shadow-gold);
 
         .icon {
-            color: #000 !important;
+            color: var(--text-main) !important;
         }
     }
 
@@ -157,7 +157,7 @@
 
         &:hover {
             background: var(--accent-color);
-            color: #000;
+            color: var(--text-main);
         }
     }
 }
@@ -182,7 +182,7 @@
         align-items: center;
         justify-content: center;
         font-weight: 950;
-        color: #000;
+        color: var(--text-main);
     }
 
     .user-details {

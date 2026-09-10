@@ -91,8 +91,8 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     
-    &-primary { background: rgba(0, 200, 255, 0.1); color: #00c8ff; border: 1px solid rgba(0, 200, 255, 0.2); }
-    &-secondary { background: rgba(255, 170, 0, 0.1); color: #ffaa00; border: 1px solid rgba(255, 170, 0, 0.2); }
+    &-primary { background: color-mix(in srgb, var(--accent-color) 10%, transparent); color: var(--accent-text); border: 1px solid color-mix(in srgb, var(--accent-color) 20%, transparent); }
+    &-secondary { background: color-mix(in srgb, var(--accent-gold-bright) 10%, transparent); color: var(--accent-text); border: 1px solid color-mix(in srgb, var(--accent-gold-bright) 20%, transparent); }
 }
 
 .status-pill {
@@ -107,8 +107,8 @@
 
     &.active {
         background: rgba(76, 175, 80, 0.1);
-        color: #4caf50;
-        &::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: #4caf50; display: inline-block; }
+        color: var(--success-color);
+        &::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--success-color); display: inline-block; }
     }
     &.inactive {
         background: var(--card-bg);

@@ -33,13 +33,13 @@
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 1px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: var(--shadow-md);
             backdrop-filter: blur(8px);
 
-            &.draft { background: rgba(255, 255, 255, 0.2); color: #fff; }
-            &.pending { background: rgba(var(--accent-rgb), 0.9); color: #000; }
-            &.active { background: rgba(39, 174, 96, 0.9); color: #fff; }
-            &.terminated { background: rgba(214, 48, 49, 0.9); color: #fff; }
+            &.draft { background: var(--surface-subtle); color: var(--text-main); border: 1px solid var(--card-border); }
+            &.pending { background: rgba(var(--accent-rgb), 0.9); color: var(--text-on-dark); }
+            &.active { background: color-mix(in srgb, var(--success-color) 90%, transparent); color: var(--text-on-dark); }
+            &.terminated { background: color-mix(in srgb, var(--danger-color) 90%, transparent); color: var(--text-on-dark); }
         }
 
         .category-tag {
@@ -121,11 +121,11 @@
     .overlay {
         position: absolute;
         inset: 0;
-        background: rgba(0,0,0,0.4);
+        background: color-mix(in srgb, var(--primary-color) 40%, transparent);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #fff;
+        color: var(--text-on-dark);
         font-weight: 800;
         text-transform: uppercase;
         font-size: 0.7rem;

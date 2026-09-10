@@ -55,7 +55,7 @@
         .year {
             font-size: 1.5rem;
             font-weight: 800;
-            color: #f59e0b;
+            color: var(--accent-gold-bright);
         }
 
         .type {
@@ -81,7 +81,7 @@
         font-size: 3rem;
         display: block;
         margin-bottom: 1rem;
-        color: #10b981;
+        color: var(--success-color);
     }
 
     p {
@@ -126,17 +126,17 @@
 
     &.pending {
         background: rgba(245, 158, 11, 0.15);
-        color: #f59e0b;
+        color: var(--accent-gold-bright);
     }
 
     &.success {
         background: rgba(16, 185, 129, 0.15);
-        color: #10b981;
+        color: var(--success-color);
     }
 
     &.failed {
         background: rgba(239, 68, 68, 0.15);
-        color: #ef4444;
+        color: var(--danger-color);
     }
 }
 

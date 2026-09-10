@@ -1,0 +1,22 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^Set-Location GHCAA\\.Web; npm run type-check$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location GHCAA\\.Web; npx prettier --write src/app/admin/dashboard/admin-dashboard\\.scss; Set-Location \\.\\.; git diff --check; git status --short$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "npm run type-check": true,
+        "npx vitest": true,
+        "/^Set-Location 'GHCAA\\.Web'; npx vitest run src/app/admin/site-content/site-content\\.spec\\.ts src/app/admin/gallery/admin-gallery\\.spec\\.ts src/app/admin/roles/admin-roles\\.spec\\.ts src/app/admin/events/admin-events\\.spec\\.ts$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'GHCAA\\.Web'; npx vitest run src/app/admin/comm/admin-comm\\.spec\\.ts src/app/admin/member-approval/member-approval\\.spec\\.ts src/app/admin/news/admin-news\\.spec\\.ts$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

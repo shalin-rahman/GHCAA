@@ -353,7 +353,7 @@
 
     &.published {
       background: rgba(16, 185, 129, 0.12);
-      color: #10b981;
+      color: var(--success-color);
     }
 
     &.pending {
@@ -389,14 +389,14 @@
     .eday {
       font-size: 1rem;
       font-weight: 900;
-      color: #000;
+      color: var(--text-main);
       line-height: 1;
     }
     .emon {
       font-size: 0.55rem;
       font-weight: 900;
       text-transform: uppercase;
-      color: rgba(0, 0, 0, 0.65);
+      color: var(--text-muted);
       letter-spacing: 0.5px;
     }
   }

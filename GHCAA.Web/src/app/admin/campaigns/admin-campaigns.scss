@@ -13,7 +13,7 @@
 .tiers-section {
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--border-color, #e0e0e0);
+  border-top: 1px solid var(--border-color);
 }
 
 .tier-list {
@@ -23,7 +23,7 @@
 
   li {
     padding: 0.4rem 0;
-    border-bottom: 1px dashed var(--border-color, #e0e0e0);
+    border-bottom: 1px dashed var(--border-color);
   }
 }
 
@@ -73,7 +73,16 @@
   border-radius: 999px;
   font-size: 0.8rem;
 
-  &.success { background: #dcfce7; color: #166534; }
-  &.pending { background: #fef9c3; color: #854d0e; }
-  &.failed { background: #fee2e2; color: #991b1b; }
+  &.success {
+    background: color-mix(in srgb, var(--success-color) 12%, transparent);
+    color: var(--success-color);
+  }
+  &.pending {
+    background: color-mix(in srgb, var(--accent-gold-bright) 15%, transparent);
+    color: var(--accent-text);
+  }
+  &.failed {
+    background: color-mix(in srgb, var(--danger-color) 12%, transparent);
+    color: var(--danger-color);
+  }
 }

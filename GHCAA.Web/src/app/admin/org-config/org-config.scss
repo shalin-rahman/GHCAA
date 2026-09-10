@@ -71,13 +71,13 @@ textarea {
   border: 1px solid transparent;
 
   &.alert-success {
-    color: #10b981;
+    color: var(--success-color);
     background: rgba(16, 185, 129, 0.08);
     border-color: rgba(16, 185, 129, 0.3);
   }
 
   &.alert-error {
-    color: #ef4444;
+    color: var(--danger-color);
     background: rgba(239, 68, 68, 0.08);
     border-color: rgba(239, 68, 68, 0.3);
   }

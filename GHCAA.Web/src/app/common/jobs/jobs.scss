@@ -92,7 +92,7 @@
 
             &.mentor {
                 background: var(--gold-gradient);
-                color: #000;
+                color: var(--text-main);
             }
         }
     }
@@ -148,7 +148,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: #000;
+                color: var(--text-main);
                 font-size: 0.65rem;
                 font-weight: 900;
             }

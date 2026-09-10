@@ -79,7 +79,7 @@
         height: 100%;
         width: 100%;
         overflow: hidden;
-        background: #000;
+        background: var(--primary-color);
         border-right: 1px solid var(--glass-border);
 
         @media (max-width: 768px) {
@@ -105,7 +105,7 @@
             align-items: center;
             justify-content: center;
             background: rgba(0,0,0,0.4);
-            color: #fff;
+            color: var(--text-on-dark);
             
             .day {
                 font-size: 1.75rem;
@@ -483,7 +483,7 @@
             }
             &.pending {
                 background: rgba(241, 196, 15, 0.1);
-                color: #f1c40f;
+                color: var(--accent-gold-bright);
             }
         }
     }

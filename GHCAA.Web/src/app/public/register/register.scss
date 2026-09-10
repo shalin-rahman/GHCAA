@@ -24,7 +24,7 @@
     display: flex;
     flex-direction: column;
     gap: 5rem;
-    color: white;
+    color: var(--text-on-dark);
     position: relative;
     overflow: hidden;
 
@@ -35,7 +35,7 @@
         left: -50px;
         width: 300px;
         height: 300px;
-        background: radial-gradient(circle, rgba(var(--accent-color-rgb), 0.1) 0%, transparent 70%);
+        background: radial-gradient(circle, color-mix(in srgb, var(--accent-color) 10%, transparent) 0%, transparent 70%);
         pointer-events: none;
     }
 }
@@ -82,7 +82,7 @@
             
             .step-num {
                 border-color: var(--accent-color);
-                box-shadow: 0 0 15px rgba(var(--accent-color-rgb), 0.3);
+                box-shadow: 0 0 15px color-mix(in srgb, var(--accent-color) 30%, transparent);
             }
         }
     }
@@ -113,7 +113,7 @@
 .step-num {
     width: 42px;
     height: 42px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid color-mix(in srgb, var(--text-on-dark) 20%, transparent);
     border-radius: 14px;
     display: flex;
     align-items: center;
@@ -133,7 +133,7 @@
 .sidebar-help {
     margin-top: auto;
     padding-top: 2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid color-mix(in srgb, var(--text-on-dark) 10%, transparent);
     position: relative;
     z-index: 1;
 
@@ -207,14 +207,14 @@
 
     &:hover {
         border-color: var(--accent-color);
-        background: rgba(var(--accent-color-rgb), 0.03);
+        background: color-mix(in srgb, var(--accent-color) 3%, transparent);
         transform: scale(1.01);
     }
 
     &.has-file {
         border-style: solid;
         border-color: var(--success-color);
-        background: rgba(var(--success-color-rgb), 0.02);
+        background: color-mix(in srgb, var(--success-color) 2%, transparent);
     }
 
     input {
@@ -274,14 +274,14 @@
 
     &:hover {
         border-color: var(--accent-color);
-        background: rgba(var(--accent-color-rgb), 0.03);
+        background: color-mix(in srgb, var(--accent-color) 3%, transparent);
         transform: translateY(-4px);
         box-shadow: var(--shadow-md);
     }
 
     &.active {
         border-color: var(--accent-color);
-        background: rgba(var(--accent-color-rgb), 0.05);
+        background: color-mix(in srgb, var(--accent-color) 5%, transparent);
         box-shadow: var(--shadow-gold-small);
 
         .payment-check {
@@ -387,7 +387,7 @@
 
         &:focus {
             border-color: var(--accent-color);
-            box-shadow: 0 0 0 8px rgba(var(--accent-color-rgb), 0.1);
+            box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent-color) 10%, transparent);
         }
     }
 }

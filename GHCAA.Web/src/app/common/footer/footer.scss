@@ -1,5 +1,5 @@
 .footer {
-    background: #111111;
+    background: var(--primary-color);
     color: white;
     /* Footer is always dark in BOTH themes → keep gold text bright (undo the light-theme
        dark-gold swap that only makes sense on surfaces that go light). Central per-shell reset. */
@@ -37,12 +37,12 @@
 .bengali-motto {
     font-size: 0.85rem;
     opacity: 0.5;
-    color: #fff;
+    color: var(--text-on-dark);
 }
 
 .footer-links h4,
 .footer-contact h4 {
-    color: #fff;
+    color: var(--text-on-dark);
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 1.5px;
@@ -100,7 +100,7 @@
 
 .social-icon:hover {
     background: var(--accent-color);
-    color: #111;
+    color: var(--text-on-dark);
 }
 
 .footer-bottom {

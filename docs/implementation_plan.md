@@ -118,7 +118,20 @@ search, use the shared search bar and the 82.71 pagination state. Standardize
 search placement, debounce, loading, empty state, sorting, responsive
 overflow, and row actions. Tables that do not need search must record the
 reason in the tracker or implementation review rather than receiving a
-gratuitous control.
+gratuitous control. The initial inventory confirms that most operational
+tables already use `SearchBarComponent`; small fixed configuration tables,
+including fee and payment settings, are intentional no-search candidates.
+Polls, event operations, and any remaining data-heavy grids still require an
+explicit decision before this phase can close.
+
+Every color remediation in this plan must map a declaration to its semantic
+role first. Use the existing theme token or its RGB companion for success,
+danger, warning, accent, surface, border, and text states. Do not replace a
+literal with a token merely because the value looks similar. A replacement is
+valid only when it preserves contrast and intent in both existing themes and
+continues to respond correctly if either theme changes. Fixed colors are
+allowed only for documented paper/print surfaces, image overlays, logos, or
+other content that is intentionally independent of the site theme.
 
 ### Phase 4 - Reusable control and component extraction
 
@@ -192,6 +205,10 @@ breakpoints. Verify no new local theme system, duplicated shared control, or
 date-format regression was introduced. Update the tracker and project map
 only with verified results. Verify that every repeated control has either a
 shared implementation or a recorded reason to remain local.
+Current verified baseline: Angular type-check passes, the full Vitest suite
+passes with 81 files and 439 tests, affected loading-route tests pass, and
+Graphify was refreshed after the loading migrations. Production build retry
+and desktop/mobile light/dark browser checks remain open.
 The closure review must report each applicable layer from the matrix above and
 explicitly state when API, Flutter, tests, or architecture changes were not
 needed.

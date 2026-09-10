@@ -8,9 +8,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #050505;
+    background-color: var(--primary-color);
     background-image:
-        linear-gradient(rgba(5, 5, 5, 0.82), rgba(5, 5, 5, 0.88)),
+        linear-gradient(
+            color-mix(in srgb, var(--primary-color) 82%, transparent),
+            color-mix(in srgb, var(--primary-color) 88%, transparent)
+        ),
         url('/assets/images/campus/ghc-old-building.jpg'),
         url('/assets/images/concept/artistic_campus_watercolor_1773859737909.png');
     background-size: cover, cover, cover;
@@ -26,8 +29,8 @@
         width: 100%;
         height: 100%;
         background-image: 
-            radial-gradient(at 0% 0%, rgba(197, 160, 89, 0.15) 0, transparent 50%),
-            radial-gradient(at 100% 100%, rgba(197, 160, 89, 0.1) 0, transparent 50%);
+            radial-gradient(at 0% 0%, color-mix(in srgb, var(--accent-color) 15%, transparent) 0, transparent 50%),
+            radial-gradient(at 100% 100%, color-mix(in srgb, var(--accent-color) 10%, transparent) 0, transparent 50%);
         pointer-events: none;
     }
 
@@ -66,14 +69,12 @@
     width: 95%;
     max-width: 450px;
     padding: 3.5rem;
-    background: rgba(15, 15, 15, 0.6);
+    background: color-mix(in srgb, var(--primary-color) 60%, transparent);
     backdrop-filter: blur(30px) saturate(180%);
     -webkit-backdrop-filter: blur(30px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid color-mix(in srgb, var(--text-on-dark) 8%, transparent);
     border-radius: 28px;
-    box-shadow: 
-        0 40px 100px -20px rgba(0, 0, 0, 0.8),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    box-shadow: var(--shadow-lg), inset 0 0 0 1px color-mix(in srgb, var(--text-on-dark) 5%, transparent);
     z-index: 10;
     position: relative;
     animation: login-reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -115,9 +116,9 @@
         font-size: 2.2rem;
         font-weight: 900;
         letter-spacing: -0.05em;
-        color: #fff;
+        color: var(--text-on-dark);
         margin-bottom: 0.75rem;
-        background: linear-gradient(to bottom, #fff, #aaa);
+        background: linear-gradient(to bottom, var(--text-on-dark), var(--text-muted));
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -161,7 +162,7 @@
         right: 1rem;
         background: transparent;
         border: none;
-        color: rgba(255, 255, 255, 0.4);
+        color: color-mix(in srgb, var(--text-on-dark) 40%, transparent);
         cursor: pointer;
         padding: 0.5rem;
         font-size: 1.1rem;
@@ -183,23 +184,23 @@
 .form-control {
     width: 100%;
     padding: 1.15rem 1.5rem;
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: color-mix(in srgb, var(--text-on-dark) 3%, transparent) !important;
+    border: 1px solid color-mix(in srgb, var(--text-on-dark) 8%, transparent) !important;
     border-radius: 16px;
-    color: #fff !important;
+    color: var(--text-on-dark) !important;
     font-size: 1rem;
     font-weight: 500;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:focus {
-        background: rgba(255, 255, 255, 0.06) !important;
+        background: color-mix(in srgb, var(--text-on-dark) 6%, transparent) !important;
         border-color: var(--accent-color) !important;
         box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.15);
         outline: none;
     }
 
     &::placeholder {
-        color: rgba(255, 255, 255, 0.15);
+        color: color-mix(in srgb, var(--text-on-dark) 15%, transparent);
     }
 }
 
@@ -251,14 +252,14 @@
 }
 
 .error-msg {
-    background: rgba(239, 68, 68, 0.1);
-    color: #f87171;
+    background: color-mix(in srgb, var(--danger-color) 10%, transparent);
+    color: var(--danger-color);
     padding: 1rem;
     border-radius: 12px;
     font-size: 0.85rem;
     font-weight: 600;
     margin-bottom: 2rem;
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    border: 1px solid color-mix(in srgb, var(--danger-color) 20%, transparent);
     animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
 }
 
@@ -273,7 +274,7 @@
     display: flex;
     align-items: center;
     margin: 2.5rem 0;
-    color: rgba(255, 255, 255, 0.15);
+    color: color-mix(in srgb, var(--text-on-dark) 15%, transparent);
     font-size: 0.7rem;
     font-weight: 950;
     text-transform: uppercase;
@@ -283,7 +284,7 @@
         content: '';
         flex: 1;
         height: 1px;
-        background: rgba(255, 255, 255, 0.08);
+        background: color-mix(in srgb, var(--text-on-dark) 8%, transparent);
     }
 
     span {
@@ -298,9 +299,9 @@
 }
 
 .btn-social {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: color-mix(in srgb, var(--text-on-dark) 4%, transparent);
+    border: 1px solid color-mix(in srgb, var(--text-on-dark) 10%, transparent);
+    color: var(--text-on-dark);
     padding: 1.15rem;
     border-radius: 16px;
     font-size: 0.95rem;
@@ -318,8 +319,8 @@
     }
 
     &:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.2);
+        background: color-mix(in srgb, var(--text-on-dark) 8%, transparent);
+        border-color: color-mix(in srgb, var(--text-on-dark) 20%, transparent);
         transform: translateY(-2px);
     }
 

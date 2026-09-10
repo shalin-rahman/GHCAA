@@ -365,7 +365,7 @@ body.dark-theme .hero {
             
             .v-icon {
                 background: var(--accent-color);
-                color: #000;
+                color: var(--text-main);
                 transform: scale(1.1);
                 border-color: var(--accent-color);
             }
@@ -454,7 +454,7 @@ body.dark-theme .hero {
                 
                 .s-badge-mini {
                     background: var(--accent-color);
-                    color: #000;
+                    color: var(--text-main);
                     transform: scale(1.1);
                     border-color: var(--accent-color);
                 }
@@ -652,7 +652,7 @@ body.dark-theme .hero {
     .status-pill {
         padding: 0.25rem 0.75rem;
         background: var(--accent-color);
-        color: #000;
+        color: var(--text-main);
         font-size: 0.7rem;
         font-weight: 900;
         text-transform: uppercase;
@@ -785,7 +785,7 @@ body.dark-theme .hero {
             transform: translate(-50%, -50%);
             width: 10px;
             height: 10px;
-            background: #fff;
+            background: var(--card-bg);
             border: 2px solid var(--accent-color);
             border-radius: 50%;
         }
@@ -1067,7 +1067,7 @@ body.dark-theme .hero {
 
         .event-mini-date {
             background: var(--gold-gradient);
-            color: #000;
+            color: var(--text-main);
             transform: scale(1.05);
         }
     }
@@ -1162,7 +1162,7 @@ body.dark-theme .hero {
     border-radius: 50%;
     overflow: hidden;
     border: 2px solid rgba(197, 160, 89, 0.2);
-    background: #fff; /* Good for logos */
+    background: var(--card-bg);
 
     img {
         width: 100%;

@@ -118,7 +118,7 @@
 
         &:hover {
             background: var(--gold-gradient);
-            color: #000;
+            color: var(--text-main);
             border-color: var(--accent-color);
             transform: translateY(-5px);
             box-shadow: var(--shadow-gold);

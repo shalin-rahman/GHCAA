@@ -45,7 +45,7 @@
 
         .event-mini-date {
             background: var(--gold-gradient);
-            color: #000;
+            color: var(--text-main);
             border-color: transparent;
         }
     }
@@ -57,7 +57,7 @@
         border-radius: 8px;
         overflow: hidden;
         border: 1px solid rgba(197, 160, 89, 0.2);
-        background: #000;
+        background: var(--surface-subtle);
         flex-shrink: 0;
 
         img {
@@ -112,7 +112,7 @@
     /* Column 3: Info */
     .event-mini-info {
         h4 {
-            color: #fff;
+            color: var(--text-on-dark);
             font-size: 1.4rem;
             font-weight: 800;
             margin-bottom: 0.75rem;

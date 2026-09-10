@@ -41,9 +41,9 @@
         }
 
         &.border-red-500 {
-            border-color: #ef4444 !important;
+            border-color: var(--danger-color) !important;
             &:focus {
-                box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+                box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger-color) 10%, transparent);
             }
         }
 
@@ -100,24 +100,24 @@
     }
 
     &.pending {
-        background: rgba(245, 158, 11, 0.1);
-        color: #fbbf24;
-        border: 1px solid rgba(245, 158, 11, 0.2);
-        &::before { background: #fbbf24; }
+        background: color-mix(in srgb, var(--accent-gold-bright) 10%, transparent);
+        color: var(--accent-gold-bright);
+        border: 1px solid color-mix(in srgb, var(--accent-gold-bright) 20%, transparent);
+        &::before { background: var(--accent-gold-bright); }
     }
 
     &.approved {
-        background: rgba(16, 185, 129, 0.1);
-        color: #34d399;
-        border: 1px solid rgba(16, 185, 129, 0.2);
-        &::before { background: #34d399; }
+        background: color-mix(in srgb, var(--success-color) 10%, transparent);
+        color: var(--success-color);
+        border: 1px solid color-mix(in srgb, var(--success-color) 20%, transparent);
+        &::before { background: var(--success-color); }
     }
 
     &.rejected {
-        background: rgba(239, 68, 68, 0.1);
-        color: #f87171;
-        border: 1px solid rgba(239, 68, 68, 0.2);
-        &::before { background: #f87171; }
+        background: color-mix(in srgb, var(--danger-color) 10%, transparent);
+        color: var(--danger-color);
+        border: 1px solid color-mix(in srgb, var(--danger-color) 20%, transparent);
+        &::before { background: var(--danger-color); }
     }
 }
 
@@ -213,21 +213,21 @@
 
 /* Invitation Pass Stylings */
 .invitation-card {
-    background: #fff;
-    color: #1a1a1a;
+    background: var(--paper-bg);
+    color: var(--paper-ink);
     padding: 3rem;
     border-radius: 24px;
-    box-shadow: 0 40px 100px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-lg);
     position: relative;
     overflow: hidden;
     max-width: 800px;
     margin: 0 auto;
-    border: 1px solid #eee;
+    border: 1px solid var(--paper-hairline);
 
     &.print-target {
         @media print {
             box-shadow: none;
-            border: 1px solid #ccc;
+            border: 1px solid var(--paper-hairline);
             padding: 20px;
         }
     }
@@ -236,7 +236,7 @@
         display: flex;
         align-items: center;
         gap: 2rem;
-        border-bottom: 2px solid #f0f0f0;
+        border-bottom: 2px solid var(--paper-hairline);
         padding-bottom: 2rem;
         margin-bottom: 2rem;
 
@@ -250,13 +250,13 @@
             h1 {
                 font-size: 1.5rem;
                 font-weight: 950;
-                color: #065f46; // Forest green for legacy feel
+                color: var(--success-color);
                 margin: 0;
             }
             .subtitle {
                 font-size: 0.85rem;
                 font-weight: 800;
-                color: #059669;
+                color: var(--success-color);
                 text-transform: uppercase;
                 letter-spacing: 2px;
             }
@@ -270,8 +270,8 @@
 
             .badge {
                 display: inline-block;
-                background: #fef3c7;
-                color: #92400e;
+                background: color-mix(in srgb, var(--accent-gold-bright) 15%, var(--paper-bg));
+                color: var(--accent-gold-dark);
                 padding: 0.4rem 1.25rem;
                 border-radius: 100px;
                 font-size: 0.7rem;
@@ -283,7 +283,7 @@
             h2 {
                 font-size: 2.5rem;
                 font-weight: 950;
-                color: #111827;
+                color: var(--paper-ink);
                 letter-spacing: -2px;
             }
         }
@@ -292,7 +292,7 @@
             display: grid;
             grid-template-columns: 1.5fr 1fr;
             gap: 2rem;
-            background: #f9fafb;
+            background: var(--paper-band);
             padding: 2rem;
             border-radius: 16px;
             margin-bottom: 2rem;
@@ -303,13 +303,13 @@
                     font-size: 0.65rem;
                     font-weight: 800;
                     text-transform: uppercase;
-                    color: #6b7280;
+                    color: var(--paper-ink-soft);
                     margin-bottom: 0.5rem;
                 }
                 .val {
                     font-size: 1.25rem;
                     font-weight: 900;
-                    color: #111827;
+                    color: var(--paper-ink);
                 }
             }
         }
@@ -327,8 +327,8 @@
 
                 .icon { font-size: 1.5rem; }
                 .meta {
-                    label { display: block; font-size: 10px; font-weight: 800; color: #9ca3af; text-transform: uppercase; }
-                    strong { font-weight: 900; color: #374151; }
+                    label { display: block; font-size: 10px; font-weight: 800; color: var(--paper-ink-soft); text-transform: uppercase; }
+                    strong { font-weight: 900; color: var(--paper-ink); }
                 }
             }
         }
@@ -338,28 +338,28 @@
             justify-content: space-between;
             align-items: flex-end;
             padding-top: 2rem;
-            border-top: 1px dashed #e5e7eb;
+            border-top: 1px dashed var(--paper-hairline);
 
             .qr-placeholder {
                 .barcode {
                     display: flex;
                     gap: 3px;
                     height: 40px;
-                    .bar { background: #111827; height: 100%; border-radius: 1px; }
+                    .bar { background: var(--paper-ink); height: 100%; border-radius: 1px; }
                 }
             }
 
             .approval-seal {
                 text-align: center;
                 .seal {
-                    border: 4px double #059669;
-                    color: #059669;
+                    border: 4px double var(--success-color);
+                    color: var(--success-color);
                     padding: 0.5rem 1rem;
                     font-weight: 950;
                     font-size: 0.8rem;
                     transform: rotate(-5deg);
                 }
-                .seal-date { font-size: 0.7rem; color: #9ca3af; margin-top: 8px; font-weight: 800; }
+                .seal-date { font-size: 0.7rem; color: var(--paper-ink-soft); margin-top: 8px; font-weight: 800; }
             }
         }
     }
@@ -367,9 +367,9 @@
     .card-footer {
         margin-top: 3rem;
         text-align: center;
-        border-top: 2px solid #f9fafb;
+        border-top: 2px solid var(--paper-band);
         padding-top: 1.5rem;
-        p { font-size: 0.75rem; font-weight: 700; color: #9ca3af; }
+        p { font-size: 0.75rem; font-weight: 700; color: var(--paper-ink-soft); }
     }
 }
 @keyframes pulse-slow {

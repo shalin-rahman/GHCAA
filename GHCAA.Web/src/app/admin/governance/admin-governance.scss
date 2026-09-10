@@ -85,8 +85,8 @@
 }
 
 .active-badge {
-    background: rgba(16, 185, 129, 0.15);
-    color: #10b981;
+    background: color-mix(in srgb, var(--success-color) 15%, transparent);
+    color: var(--success-color);
     font-size: 0.65rem;
 }
 
@@ -165,7 +165,7 @@
         height: 36px;
         border-radius: 50%;
         background: var(--primary-color);
-        color: #fff;
+        color: var(--text-on-dark);
         display: flex;
         align-items: center;
         justify-content: center;

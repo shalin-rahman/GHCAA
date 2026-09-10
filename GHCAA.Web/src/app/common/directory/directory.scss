@@ -157,9 +157,9 @@
             border-radius: 50%;
             border: 2px solid var(--card-bg);
 
-            &.active { background: #10b981; }
-            &.inactive { background: #ef4444; }
-            &.applied { background: #f59e0b; }
+            &.active { background: var(--success-color); }
+            &.inactive { background: var(--danger-color); }
+            &.applied { background: var(--accent-gold-bright); }
         }
     }
 

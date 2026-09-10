@@ -8,7 +8,7 @@
 .forum-header {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  border-bottom: 1px solid var(--border-color);
 
   .forum-header-inner {
     display: flex;
@@ -21,12 +21,12 @@
   h1 {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-strong, #111827);
+    color: var(--text-strong);
     margin: 0 0 0.25rem;
   }
 
   .sub {
-    color: var(--text-muted, #6b7280);
+    color: var(--text-muted);
     font-size: 0.9rem;
     margin: 0;
   }
@@ -35,7 +35,7 @@
 .btn-back {
   background: none;
   border: none;
-  color: var(--primary-color, #2563eb);
+  color: var(--primary-color);
   font-size: 0.85rem;
   cursor: pointer;
   padding: 0 0 0.4rem;
@@ -49,7 +49,7 @@
 // ── Buttons ───────────────────────────────────────────────────────────────────
 .btn-primary {
   background: var(--primary-color);
-  color: #fff;
+  color: var(--text-on-dark);
   border: none;
   border-radius: 8px;
   padding: 0.55rem 1.25rem;
@@ -78,7 +78,7 @@
 .link-btn {
   background: none;
   border: none;
-  color: var(--primary-color, #2563eb);
+  color: var(--primary-color);
   cursor: pointer;
   font-size: inherit;
   padding: 0;
@@ -106,13 +106,13 @@
   align-items: center;
   padding: 3rem;
   gap: 0.75rem;
-  color: var(--text-muted, #6b7280);
+  color: var(--text-muted);
 
   .spinner {
     width: 36px;
     height: 36px;
-    border: 3px solid #e5e7eb;
-    border-top-color: var(--primary-color, #2563eb);
+    border: 3px solid var(--border-color);
+    border-top-color: var(--primary-color);
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
   }
@@ -130,15 +130,15 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: var(--card-bg, #fff);
-  border: 1px solid var(--border-color, #e5e7eb);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 1.1rem 1.25rem;
   cursor: pointer;
   transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
 
   &:hover {
-    border-color: var(--primary-color, #2563eb);
+    border-color: var(--primary-color);
     box-shadow: 0 4px 14px rgba(37,99,235,0.1);
     transform: translateY(-1px);
   }
@@ -155,13 +155,13 @@
     h3 {
       font-size: 1rem;
       font-weight: 600;
-      color: var(--text-strong, #111827);
+      color: var(--text-strong);
       margin: 0 0 0.2rem;
     }
 
     p {
       font-size: 0.85rem;
-      color: var(--text-muted, #6b7280);
+      color: var(--text-muted);
       margin: 0 0 0.4rem;
       white-space: nowrap;
       overflow: hidden;
@@ -172,15 +172,15 @@
       display: flex;
       gap: 0.4rem;
       font-size: 0.8rem;
-      color: var(--text-muted, #9ca3af);
+      color: var(--text-muted);
 
-      .dot { color: #d1d5db; }
+      .dot { color: var(--text-muted); }
     }
   }
 
   .cat-arrow {
     font-size: 1.4rem;
-    color: #d1d5db;
+    color: var(--text-muted);
     flex-shrink: 0;
   }
 }
@@ -195,15 +195,15 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: var(--card-bg, #fff);
-  border: 1px solid var(--border-color, #e5e7eb);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 0.9rem 1.1rem;
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
 
   &:hover {
-    border-color: var(--primary-color, #2563eb);
+    border-color: var(--primary-color);
     box-shadow: 0 2px 8px rgba(37,99,235,0.08);
   }
 
@@ -222,7 +222,7 @@
     h4 {
       font-size: 0.95rem;
       font-weight: 600;
-      color: var(--text-strong, #111827);
+      color: var(--text-strong);
       margin: 0 0 0.2rem;
       white-space: nowrap;
       overflow: hidden;
@@ -231,7 +231,7 @@
 
     .topic-meta {
       font-size: 0.8rem;
-      color: var(--text-muted, #6b7280);
+      color: var(--text-muted);
       margin: 0;
     }
   }
@@ -242,7 +242,7 @@
     gap: 0.2rem;
     text-align: right;
     font-size: 0.8rem;
-    color: var(--text-muted, #9ca3af);
+    color: var(--text-muted);
     flex-shrink: 0;
   }
 }
@@ -261,8 +261,8 @@
 
 // ── Create Topic Form ─────────────────────────────────────────────────────────
 .create-topic-card {
-  background: var(--card-bg, #fff);
-  border: 1px solid var(--border-color, #e5e7eb);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -270,7 +270,7 @@
   h3 {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--text-strong, #111827);
+    color: var(--text-strong);
     margin: 0 0 1.25rem;
   }
 
@@ -281,9 +281,9 @@
       display: block;
       font-size: 0.85rem;
       font-weight: 600;
-      color: var(--text-strong, #374151);
+      color: var(--text-strong);
       margin-bottom: 0.4rem;
-      .req { color: #ef4444; }
+      .req { color: var(--danger-color); }
     }
 
     input, textarea {
@@ -319,6 +319,6 @@
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  color: var(--text-muted, #6b7280);
+  color: var(--text-muted);
   font-size: 0.95rem;
 }

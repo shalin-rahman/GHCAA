@@ -17,7 +17,12 @@
     .sk-card {
         height: 100px;
         border-radius: 20px;
-        background: linear-gradient(90deg, var(--glass-bg) 25%, rgba(255,255,255,0.04) 50%, var(--glass-bg) 75%);
+        background: linear-gradient(
+            90deg,
+            var(--glass-bg) 25%,
+            color-mix(in srgb, var(--text-on-dark) 4%, transparent) 50%,
+            var(--glass-bg) 75%
+        );
         background-size: 200% 100%;
         animation: shimmer 1.5s infinite;
     }
@@ -130,14 +135,14 @@
             }
 
             &.done {
-                background: rgba(39, 174, 96, 0.1);
-                border-color: rgba(39, 174, 96, 0.2);
+                background: color-mix(in srgb, var(--success-color) 10%, transparent);
+                border-color: color-mix(in srgb, var(--success-color) 20%, transparent);
                 color: var(--success-color);
                 i { color: var(--success-color); opacity: 1; }
 
                 &:hover {
-                    border-color: rgba(39, 174, 96, 0.4);
-                    background: rgba(39, 174, 96, 0.16);
+                    border-color: color-mix(in srgb, var(--success-color) 40%, transparent);
+                    background: color-mix(in srgb, var(--success-color) 16%, transparent);
                 }
             }
         }
@@ -389,8 +394,8 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             flex-shrink: 0;
-            .eday { font-size: 1rem; font-weight: 900; color: #000; line-height: 1; }
-            .emon { font-size: 0.52rem; font-weight: 900; text-transform: uppercase; color: rgba(0,0,0,0.65); }
+            .eday { font-size: 1rem; font-weight: 900; color: var(--text-main); line-height: 1; }
+            .emon { font-size: 0.52rem; font-weight: 900; text-transform: uppercase; color: var(--text-muted); }
         }
     }
 }
@@ -414,7 +419,7 @@
         font-size: 0.68rem;
         font-weight: 900;
         background: var(--gold-gradient);
-        color: #000;
+        color: var(--text-main);
         padding: 0.2rem 0.6rem;
         border-radius: 20px;
         text-transform: uppercase;
