@@ -42,4 +42,17 @@ describe('AdminPolls', () => {
   it('should load all polls on init', () => {
     expect(adminPollServiceMock.getAllPolls).toHaveBeenCalled();
   });
+
+  it('filters polls by title, description, and status', () => {
+    component.polls.set([
+      { id: 1, title: 'Annual Reunion', description: 'Choose a venue', isActive: true, totalVotes: 2, options: [], createdAt: '2026-01-01' } as any,
+      { id: 2, title: 'Old Poll', description: 'Archive decision', isActive: false, totalVotes: 0, options: [], createdAt: '2026-01-02' } as any
+    ]);
+
+    component.searchQuery.set('archive');
+    expect(component.filteredPolls().map(poll => poll.id)).toEqual([2]);
+
+    component.searchQuery.set('active');
+    expect(component.filteredPolls().map(poll => poll.id)).toEqual([1]);
+  });
 });

@@ -14,17 +14,21 @@ import { CommonModule } from '@angular/common';
       </p>
 
       <nav class="pagination-nav">
-        <button (click)="onPrev()" [disabled]="currentPage === 1" class="page-btn nav-btn">←</button>
+        <button type="button" (click)="onPrev()" [disabled]="currentPage === 1"
+          class="page-btn nav-btn" aria-label="Previous page">←</button>
 
         <ng-container *ngFor="let page of visiblePages">
-          <button *ngIf="page !== -1" (click)="onPage(page)"
-            class="page-btn" [class.active]="page === currentPage">
+          <button type="button" *ngIf="page !== -1" (click)="onPage(page)"
+            class="page-btn" [class.active]="page === currentPage"
+            [attr.aria-current]="page === currentPage ? 'page' : null"
+            [attr.aria-label]="'Page ' + page">
             {{ page }}
           </button>
           <span *ngIf="page === -1" class="page-ellipsis">…</span>
         </ng-container>
 
-        <button (click)="onNext()" [disabled]="currentPage === totalPages" class="page-btn nav-btn">→</button>
+        <button type="button" (click)="onNext()" [disabled]="currentPage === totalPages"
+          class="page-btn nav-btn" aria-label="Next page">→</button>
       </nav>
     </div>
   `,
@@ -78,7 +82,7 @@ import { CommonModule } from '@angular/common';
 
     .page-btn:hover:not(:disabled) {
       background: var(--accent-color);
-      color: #000;
+      color: var(--accent-text);
       border-color: var(--accent-color);
     }
 
@@ -89,7 +93,7 @@ import { CommonModule } from '@angular/common';
 
     .page-btn.active {
       background: linear-gradient(135deg, var(--accent-color), var(--accent-gold-dark));
-      color: #000;
+      color: var(--accent-text);
       border-color: var(--accent-color);
       font-weight: 800;
       box-shadow: var(--shadow-gold);

@@ -25,13 +25,19 @@ import { FormsModule } from '@angular/forms';
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
       <input
-        type="text"
+        type="search"
         class="search-input"
+        [attr.aria-label]="ariaLabel"
         [ngModel]="value"
         (ngModelChange)="onInput($event)"
         [placeholder]="placeholder" />
       @if (value) {
-      <button class="clear-search" (click)="clear()" title="Clear search">×</button>
+      <button
+        type="button"
+        class="clear-search"
+        (click)="clear()"
+        [attr.aria-label]="clearLabel"
+        [title]="clearLabel">×</button>
       }
     </div>
   `,
@@ -48,6 +54,8 @@ import { FormsModule } from '@angular/forms';
 export class SearchBarComponent {
   @Input() value = '';
   @Input() placeholder = 'Search…';
+  @Input() ariaLabel = 'Search';
+  @Input() clearLabel = 'Clear search';
   @Output() valueChange = new EventEmitter<string>();
 
   onInput(v: string): void {

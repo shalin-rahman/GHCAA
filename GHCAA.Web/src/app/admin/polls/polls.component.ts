@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminPollService, CreatePollDto } from '../../core/services/admin-poll.service';
@@ -10,11 +10,12 @@ import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { Icon } from '../../common/icon/icon';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-admin-polls',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, Icon, ModalHeaderComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, Icon, ModalHeaderComponent, PageHeaderComponent, SearchBarComponent],
   templateUrl: './polls.html',
   styleUrl: './polls.scss'
 })
@@ -24,6 +25,25 @@ export class AdminPolls implements OnInit {
   private confirmDialog = inject(ConfirmDialogService);
 
   polls = signal<PollDto[]>([]);
+  searchQuery = signal('');
+  filteredPolls = computed(() => {
+    const query = this.searchQuery().trim().toLowerCase();
+    if (!query) return this.polls();
+
+    return this.polls().filter(poll => {
+      const searchableText = [
+        poll.title,
+        poll.description,
+        poll.allowMultipleChoice ? 'multiple choice' : 'single choice'
+      ].some(value => value?.toLowerCase().includes(query));
+      const statusMatch = query === 'active'
+        ? poll.isActive
+        : query === 'inactive'
+          ? !poll.isActive
+          : false;
+      return searchableText || statusMatch;
+    });
+  });
   loading = signal(false);
   showCreateModal = signal(false);
   // 58.2: table is the default view; card view (with the per-option progress bars) stays

@@ -110,6 +110,35 @@ For each candidate, check the applicable surfaces:
 This table is an applicability check, not a requirement to duplicate a Web
 component in Flutter or to add an API abstraction for a visual-only change.
 
+#### 82.74 audit result
+
+The reusable-control audit completed on 11 September 2026. Existing shared
+controls are in active use across the route layer:
+
+- `app-page-header` is used for admin list and management headers.
+- `app-search-bar` is used for searchable route filters.
+- `app-pagination` is used for paged data views.
+- `app-loading-panel` wraps the existing GHC logo spinner for route-level
+  loading.
+- `app-confirm-dialog` and `ConfirmDialogService` replace native confirmation
+  dialogs.
+- `app-modal-header`, `app-breadcrumb`, `app-payment-method-selector`,
+  `app-rich-text-editor`, `app-theme-toggle`, `app-user-menu`, and the shared
+  toast, icon, payment-status, and export controls remain the approved
+  reusable surfaces.
+
+The shared search control now exposes semantic search input and clear-button
+labels and uses `type="search"`. The shared pagination control now supplies
+button types, page/current-page semantics, previous/next labels, and
+theme-token text for accent states.
+
+Approved local exceptions are limited to content-specific cards, upload
+previews, image galleries, rich-text host layouts, payment gateway widgets,
+and controls whose surrounding markup carries feature-specific actions. These
+exceptions may use shared classes and tokens but do not justify a second
+theme or a second generic control. No API, database, or mobile contract
+changed in this pass.
+
 ### Phase 3 - Admin table and grid search
 
 `82.75` depends on 82.74. Inventory every admin table/grid and record whether
@@ -123,6 +152,20 @@ tables already use `SearchBarComponent`; small fixed configuration tables,
 including fee and payment settings, are intentional no-search candidates.
 Polls, event operations, and any remaining data-heavy grids still require an
 explicit decision before this phase can close.
+
+#### 82.75 audit result
+
+The admin polls screen now uses the shared search bar in both table and card
+views. Filtering is computed from title, description, choice type, and exact
+active/inactive status values, so an inactive poll is not returned for an
+`active` query merely because the word contains that substring. The focused
+poll tests cover title/description and status filtering. The remaining
+reviewed grids are intentional no-search cases: fee and payment configuration
+are fixed settings, themes are a small configuration list, and event-operation
+expense/task lists are scoped to the selected event. Existing operational
+tables retain their shared pagination, responsive table wrapper, loading,
+empty-state, and row-action patterns. No component-local theme or API
+contract was introduced.
 
 Every color remediation in this plan must map a declaration to its semantic
 role first. Use the existing theme token or its RGB companion for success,

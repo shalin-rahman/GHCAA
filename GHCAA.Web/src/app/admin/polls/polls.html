@@ -10,6 +10,10 @@
     </app-page-header>
 
     <ng-container *ngIf="!loading(); else loader">
+    <div class="filter-bar">
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+            placeholder="Search polls by title, description or status…"></app-search-bar>
+    </div>
     <div class="glass-card table-wrap" *ngIf="viewMode() === 'table'">
         <table class="data-table">
             <thead>
@@ -24,7 +28,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let poll of polls()">
+                <tr *ngFor="let poll of filteredPolls()">
                     <td class="title-cell">{{ poll.title }}</td>
                     <td>
                         <span class="status-badge" [class.active]="poll.isActive" [class.pending]="!poll.isActive">
@@ -47,10 +51,15 @@
                 </tr>
             </tbody>
         </table>
+        <div *ngIf="!filteredPolls().length" class="empty-state py-10">
+            <span>📊</span>
+            <h3>No matching polls</h3>
+            <p>Try a different search term.</p>
+        </div>
     </div>
 
     <div class="polls-grid" *ngIf="viewMode() === 'card'">
-        <div class="glass-card poll-card" *ngFor="let poll of polls()" [class.inactive]="!poll.isActive">
+        <div class="glass-card poll-card" *ngFor="let poll of filteredPolls()" [class.inactive]="!poll.isActive">
             <div class="poll-header">
                 <span class="status-badge" [class.active]="poll.isActive" [class.pending]="!poll.isActive">
                     {{ poll.isActive ? 'Active' : 'Inactive' }}
