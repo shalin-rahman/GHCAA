@@ -112,10 +112,7 @@
     <!-- Transaction Table -->
     <div class="glass-card table-section table-wrap" *ngIf="!showForm()">
         @if (loading()) {
-        <div class="loading-state">
-            <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
-            <p>Gathering financial legacy...</p>
-        </div>
+        <app-loading-panel label="Gathering financial legacy..." [size]="48"></app-loading-panel>
         } @else {
         <table class="data-table">
             <thead>

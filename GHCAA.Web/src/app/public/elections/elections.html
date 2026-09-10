@@ -53,8 +53,7 @@
 
         @if (loading()) {
         <div class="loading-state">
-            <app-logo-spinner />
-            <p>Loading document…</p>
+            <app-loading-panel label="Fetching your secure credentials..." [size]="64"></app-loading-panel>
         </div>
         }
 

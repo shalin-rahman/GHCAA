@@ -45,11 +45,12 @@ The following work is already complete and must not be reopened:
 - Existing upload validation and staged-upload work remains the behavior
   baseline. This plan standardizes its controls rather than changing upload
   rules.
-- The first implementation slice added `LoadingPanelComponent` and migrated
-  audit logs, error logs, the admin dashboard, admin contact messages, member
-  requests, member articles, and additional admin review/configuration screens
-  plus member/public content and financial screens while preserving the
-  existing logo spinner. It remains subject to the full migration and
+- The implementation slice added `LoadingPanelComponent` and migrated
+  route-level panels across admin, member, public, and common areas, including
+  audit/error logs, dashboards, review/configuration screens, members, themes,
+  ledger, digital ID, elections, directory, and gallery, while preserving the
+  existing logo spinner. Inline actions and upload progress indicators remain
+  direct spinner usages. The work remains subject to the full migration and
   verification phases below.
 
 The remaining gaps are broader than the original 82.73/82.74 wording:

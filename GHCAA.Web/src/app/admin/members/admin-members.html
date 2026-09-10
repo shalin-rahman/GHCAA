@@ -53,8 +53,7 @@
     <div class="table-wrap">
         @if (loading()) {
         <div class="loading-state">
-            <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
-            <p>Gathering member data...</p>
+            <app-loading-panel label="Gathering member data..." [size]="48"></app-loading-panel>
         </div>
         } @else if (allMembers().length === 0) {
         <div class="empty-state">

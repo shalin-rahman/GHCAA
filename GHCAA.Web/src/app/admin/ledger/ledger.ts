@@ -10,7 +10,7 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { ExportUtil } from '../../core/utils/export.util';
 import { getFinancialCategoryLabel } from '../../core/constants/app.constants';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { toWireDate, toDisplayDate, parseDisplayDate } from '../../core/utils/date.util';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
@@ -18,7 +18,7 @@ import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 @Component({
   selector: 'app-ledger',
   standalone: true,
-  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, AppCurrencyPipe],
+  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, AppCurrencyPipe],
   templateUrl: './ledger.html',
   styleUrl: './ledger.scss'
 })

@@ -4,7 +4,7 @@ import { ProfileService } from '../../core/services/profile.service';
 import { MemberProfile } from '../../core/models/business.models';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { getMembershipTypeLabel } from '../../core/constants/app.constants';
 import { OrgConfigService } from '../../core/services/org-config.service';
@@ -12,7 +12,7 @@ import { OrgConfigService } from '../../core/services/org-config.service';
 @Component({
   selector: 'app-digital-id',
   standalone: true,
-  imports: [CommonModule, LogoSpinnerComponent, ImgFallbackDirective],
+  imports: [CommonModule, LoadingPanelComponent, ImgFallbackDirective],
   templateUrl: './digital-id.html',
   styleUrl: './digital-id.scss'
 })
@@ -72,5 +72,4 @@ export class DigitalId implements OnInit {
     });
   }
 }
-
 

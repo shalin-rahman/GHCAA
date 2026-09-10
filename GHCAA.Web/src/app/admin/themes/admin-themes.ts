@@ -6,7 +6,7 @@ import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { ThemeService, SpecialDayTheme } from '../../core/services/theme.service';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { toWireDate, toDisplayDate, parseDisplayDate } from '../../core/utils/date.util';
 import { OrgConfigService } from '../../core/services/org-config.service';
@@ -16,7 +16,7 @@ export type ThemeStatus = 'SCHEDULED' | 'LIVE' | 'EXPIRED' | 'IDLE';
 @Component({
     selector: 'app-admin-themes',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent],
+    imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent],
     templateUrl: './admin-themes.html',
     styleUrl: './admin-themes.scss'
 })
@@ -167,5 +167,4 @@ export class AdminThemes implements OnInit {
         };
     }
 }
-
 

@@ -16,7 +16,7 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { ExportUtil } from '../../core/utils/export.util';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { toWireDate } from '../../core/utils/date.util';
 import { Icon } from '../../common/icon/icon';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
@@ -26,7 +26,7 @@ import { MemberImportModalComponent } from './member-import-modal/member-import-
 @Component({
   selector: 'app-admin-members',
   standalone: true,
-  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon, AppCurrencyPipe, MemberImportModalComponent],
+  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon, AppCurrencyPipe, MemberImportModalComponent],
   providers: [DatePipe],
   templateUrl: './admin-members.html',
   styleUrl: './admin-members.scss'

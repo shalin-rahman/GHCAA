@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal, computed, DestroyRef } from '@angula
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { ElectionsService } from '../../core/services/elections.service';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
@@ -25,7 +25,7 @@ export interface FormStageGroup {
 @Component({
     selector: 'app-elections',
     standalone: true,
-    imports: [CommonModule, RouterLink, LogoSpinnerComponent, ImgFallbackDirective],
+    imports: [CommonModule, RouterLink, LoadingPanelComponent, ImgFallbackDirective],
     templateUrl: './elections.html',
     styleUrl: './elections.scss'
 })
