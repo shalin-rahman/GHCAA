@@ -536,6 +536,55 @@ p {
     line-height: 1.2;
   }
 
+  /* Keep native date controls aligned with the themed form controls. */
+  input[type='date'],
+  input[type='datetime-local'] {
+    color-scheme: light;
+  }
+
+  body.dark-theme input[type='date'],
+  body.dark-theme input[type='datetime-local'] {
+    color-scheme: dark;
+  }
+
+  input[type='date'],
+  input[type='datetime-local'],
+  select {
+    color: var(--text-main);
+    background-color: var(--bg-color);
+    border-color: var(--border-color);
+  }
+
+  input[type='date']:focus,
+  input[type='datetime-local']:focus,
+  select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
+    outline: none;
+  }
+
+  .upload-surface {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px dashed var(--card-border);
+    border-radius: var(--radius-md);
+    background: var(--surface-subtle);
+    color: var(--text-main);
+  }
+
+  .upload-surface:focus-within,
+  .upload-surface:hover {
+    border-color: var(--accent-color);
+    background: var(--card-bg-hover);
+  }
+
+  .upload-surface input[type='file'] {
+    color: var(--text-muted);
+    max-width: 100%;
+  }
+
   input,
   select,
   textarea,

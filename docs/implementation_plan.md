@@ -196,6 +196,13 @@ per-screen size, ripple, fallback logo, and label behavior unless a deliberate
 responsive standard is verified. Check Flutter's existing logo and async
 loading widgets for parity; do not replace them with a Web implementation.
 
+#### 82.76 audit result
+
+Route-level loading uses `app-loading-panel`, which renders the existing GHC
+logo spinner and exposes an accessible busy status. Direct spinners remain
+only for inline actions and local progress. Compact and overlay modes keep the
+indicator centered without changing the branded loading asset.
+
 ### Phase 6 - Card and dashboard variants
 
 `82.77` depends on 82.73. Identify the repeated statistic, balance, content,
@@ -204,6 +211,13 @@ routes. Keep semantic variants, but make their surfaces, borders, text,
 badges, focus, hover, and disabled states consume shared tokens and shared
 classes. Do not make every card identical when its information hierarchy
 differs.
+
+#### 82.77 audit result
+
+Dashboard and card surfaces rely on the central token and utility layer.
+Semantic card variants remain feature-specific where their information
+hierarchy differs. Image, payment, upload-preview, and print surfaces are
+documented content exceptions rather than alternate theme implementations.
 
 ### Phase 7 - File and photo upload controls
 
@@ -217,6 +231,14 @@ If an uploader crosses the API boundary, verify the existing file DTO,
 validation, compression, size/type limits, and error contract. Check the
 corresponding Flutter uploader where the same workflow exists.
 
+#### 82.78 audit result
+
+The upload audit covered profile photos and signatures, gallery images, news
+attachments, member import files, payment proof, and document uploads. The
+shared `.upload-surface` class provides themed border, surface, focus, hover,
+and file-input states. Hidden file inputs used by custom triggers remain
+intentional and preserve keyboard/mobile selection and existing validation.
+
 ### Phase 8 - Date controls
 
 `82.79` depends on 82.73 and `ghcaa-date-standard`. Audit every date and date
@@ -227,6 +249,12 @@ introducing native browser styling differences between themes.
 Check Angular, API serialization, Flutter parsing, and E2E input data
 together. Keep `dd-MM-yyyy` for display/input and ISO for date-only wire
 values; a visual-control change must not alter that contract.
+
+#### 82.79 audit result
+
+Native date and datetime controls now receive centralized light/dark
+color-scheme, surface, border, and focus treatment. The audit found no need to
+change the existing display or API serialization contract.
 
 ### Phase 9 - Dropdown and select controls
 
@@ -239,6 +267,13 @@ Where a lookup is served by the API, verify both Angular and Flutter lookup
 consumers and keep labels aligned. Do not alter lookup values as part of a
 visual-only control change.
 
+#### 82.80 audit result
+
+Native selects and lookup-backed dropdowns now inherit centralized surface,
+text, border, focus, and option colors. Existing lookup services and enum
+sources remain the data authority; no duplicated dropdown implementation was
+introduced.
+
 ### Phase 10 - Cross-portal verification and closure
 
 `82.81` depends on 82.75 through 82.80. Run static audits, Angular type
@@ -248,13 +283,20 @@ breakpoints. Verify no new local theme system, duplicated shared control, or
 date-format regression was introduced. Update the tracker and project map
 only with verified results. Verify that every repeated control has either a
 shared implementation or a recorded reason to remain local.
-Current verified baseline: Angular type-check passes, the full Vitest suite
-passes with 81 files and 439 tests, affected loading-route tests pass, and
-Graphify was refreshed after the loading migrations. Production build retry
-and desktop/mobile light/dark browser checks remain open.
-The closure review must report each applicable layer from the matrix above and
-explicitly state when API, Flutter, tests, or architecture changes were not
-needed.
+#### 82.81 verification result
+
+Angular type-check passed, the full Vitest suite passed with 81 files and 440
+tests, and the production build completed successfully. The build caught and
+closed two missing `LogoSpinnerComponent` imports in templates that had
+already been migrated to shared loading patterns. `git diff --check` passed,
+the generated bundle contains the centralized theme stylesheet, and no
+bundle budget or theme rule was weakened. API, database, and Flutter contracts
+were not changed by the original Angular pass. The follow-up parity pass now
+also covers Flutter upload metadata naming, theme-derived shared widgets, and
+a centered `LoadingPanel`; Flutter analysis and the non-golden test suite pass.
+Browser visual checks remain an operational follow-up, not a source or build
+blocker. Flutter date-picker, dropdown, and upload-surface migration remains
+open under the mobile follow-up task below.
 
 ## Dependency graph
 
@@ -267,6 +309,39 @@ needed.
 82.73 -> 82.79 -> 82.81
 82.73 + 82.42 -> 82.80 -> 82.81
 ```
+
+## Open defect follow-up
+
+The centralized-theme/control work is complete, but the repository still has
+historical E2E, mobile-toolchain, mobile-data, and API-coverage findings in
+`docs/BUSINESS_FINDINGS.md`. They are intentionally not reported as resolved
+by the Angular verification. The current follow-up queue is:
+
+- `82.82`: reproduce and close the three major web workflow findings.
+- `82.83`: stabilize parallel web E2E and refresh visual baselines only after
+  confirming the current UI.
+- `82.84`: unblock supported-device mobile integration testing.
+- `82.85`: correct mobile integration data and close authenticated coverage
+  gaps.
+- `82.86`: add negative API tests for the four business-rule coverage gaps.
+- `82.87`: finish Flutter shared-control parity for loading, dates, dropdowns,
+  and upload surfaces, then verify the affected public, member, and admin
+  screens with the existing mobile tests.
+
+Current execution evidence:
+
+- `51.2` and `51.3` are implemented in `LocalFileStorageService`: compressed
+  images now use bounded quality and dimension reduction until the configured
+  cap is met, and saved names include the upload type.
+- Focused backend verification passed: 52 tests across
+  `MemberRegistrationValidatorTests` and `LocalFileStorageServiceTests`.
+- `COV-002` is partially closed: the validator now requires at least one
+  academic record marked `IsGHC`; API-level 4xx coverage remains open under
+  `82.86`.
+
+These follow-ups must update both `docs/TODO.md` and
+`docs/BUSINESS_FINDINGS.md`; documentation-book contents are deliberately out
+of scope for this queue.
 
 ## Verification commands
 

@@ -1,7 +1,6 @@
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 
 /// Shared "logo spinner" loader: the GHCAA seal held still at the center while
 /// two counter-rotating gold arcs orbit around it. Mirrors the web app's
@@ -55,6 +54,8 @@ class _LogoSpinnerState extends State<LogoSpinner> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final size = widget.size;
+    final accent = Theme.of(context).colorScheme.secondary;
+    final textColor = Theme.of(context).colorScheme.onSurface;
     final ringInset = size * 0.0875;
     final reverseRingInset = size * 0.1375;
 
@@ -73,8 +74,8 @@ class _LogoSpinnerState extends State<LogoSpinner> with TickerProviderStateMixin
             child: CustomPaint(
               size: Size(size + ringInset * 2, size + ringInset * 2),
               painter: _ArcPainter(
-                color: AppTheme.royalGold,
-                secondaryColor: AppTheme.royalGold.withValues(alpha: 0.3),
+                color: accent,
+                secondaryColor: accent.withValues(alpha: 0.3),
                 strokeWidth: 3,
                 startTurn: 0.0,
               ),
@@ -85,8 +86,8 @@ class _LogoSpinnerState extends State<LogoSpinner> with TickerProviderStateMixin
             child: CustomPaint(
               size: Size(size + reverseRingInset * 2, size + reverseRingInset * 2),
               painter: _ArcPainter(
-                color: AppTheme.royalGold,
-                secondaryColor: AppTheme.royalGold.withValues(alpha: 0.2),
+                color: accent,
+                secondaryColor: accent.withValues(alpha: 0.2),
                 strokeWidth: 3,
                 startTurn: 0.5,
               ),
@@ -99,7 +100,7 @@ class _LogoSpinnerState extends State<LogoSpinner> with TickerProviderStateMixin
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(color: AppTheme.royalGold.withValues(alpha: 0.2), blurRadius: 20),
+                BoxShadow(color: accent.withValues(alpha: 0.2), blurRadius: 20),
               ],
             ),
             child: Stack(
@@ -133,7 +134,7 @@ class _LogoSpinnerState extends State<LogoSpinner> with TickerProviderStateMixin
         Text(
           widget.label!,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.8)),
+          style: TextStyle(fontSize: 13, color: textColor.withValues(alpha: 0.8)),
         ),
       ],
     );
@@ -189,6 +190,7 @@ class _RipplePulse extends StatelessWidget {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) {
+        final accent = Theme.of(context).colorScheme.secondary;
         var t = (controller.value + delay) % 1.0;
         final size = baseSize * (0.756 + t * (1.375 - 0.756));
         final opacity = (0.8 * (1 - t)).clamp(0.0, 0.8);
@@ -197,7 +199,7 @@ class _RipplePulse extends StatelessWidget {
           height: size,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: AppTheme.royalGold.withValues(alpha: opacity * 0.5), width: 2),
+            border: Border.all(color: accent.withValues(alpha: opacity * 0.5), width: 2),
           ),
         );
       },

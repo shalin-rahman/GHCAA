@@ -206,7 +206,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                     itemCount: 6,
                     itemBuilder: (context, index) => Padding(
                       padding: const EdgeInsets.only(bottom: AppTheme.spaceM),
-                      child: SkeletonLoader.memberCard(),
+                      child: SkeletonLoader.memberCard(context),
                     ),
                   )
                 : RefreshIndicator(

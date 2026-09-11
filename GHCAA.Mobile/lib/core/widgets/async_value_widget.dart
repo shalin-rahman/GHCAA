@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
-import '../theme/app_theme.dart';
 import 'skeleton_loader.dart';
 
 class AsyncValueWidget<T> extends StatelessWidget {
@@ -42,15 +41,15 @@ class AsyncValueWidget<T> extends StatelessWidget {
                 Icon(
                   Icons.wifi_off_rounded, 
                   size: 64, 
-                  color: AppTheme.royalGold.withValues(alpha: 0.3)
+                  color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3)
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'SYNC INTERRUPTED', 
                   style: TextStyle(
                     letterSpacing: 1.5,
                     fontWeight: FontWeight.w900, 
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 14
                   )
                 ),
@@ -58,9 +57,9 @@ class AsyncValueWidget<T> extends StatelessWidget {
                 Text(
                   displayError, 
                   textAlign: TextAlign.center, 
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12, 
-                    color: AppTheme.textSecondaryDark,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
                     height: 1.5
                   )
                 ),

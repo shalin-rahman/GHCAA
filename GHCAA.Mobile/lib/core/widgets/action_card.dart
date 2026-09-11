@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../theme/app_theme.dart';
 import '../constants/app_constants.dart';
 import 'glass_container.dart';
 
@@ -34,10 +33,10 @@ class ActionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppTheme.royalGold.withValues(alpha: 0.1),
+                  color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 28, color: AppTheme.royalGold),
+                child: Icon(icon, size: 28, color: Theme.of(context).colorScheme.secondary),
               ),
               const SizedBox(height: 12),
               Text(

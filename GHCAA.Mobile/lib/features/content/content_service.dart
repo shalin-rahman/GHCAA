@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
+import '../../core/utils/upload_file_naming.dart';
 
 final newsServiceProvider = Provider<NewsService>((ref) => NewsService(ref.read(dioProvider)));
 final galleryServiceProvider = Provider<GalleryService>((ref) => GalleryService(ref.read(dioProvider)));
@@ -82,7 +83,7 @@ class NewsService {
 
       final formData = FormData.fromMap(data);
       if (photoPath != null && photoPath.isNotEmpty) {
-          formData.files.add(MapEntry('photo', await MultipartFile.fromFile(photoPath, filename: 'gallery_item.jpg')));
+          formData.files.add(MapEntry('photo', await MultipartFile.fromFile(photoPath, filename: UploadFileNaming.forType('galleryphoto', photoPath))));
       }
 
       final response = await _dio.post('/gallery', data: formData);

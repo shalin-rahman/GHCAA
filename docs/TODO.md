@@ -243,7 +243,8 @@ risk on the same basis.
 - **45.1–45.7** — Admin error-log viewer, fully planned, nothing built.
 - **42.1–42.5** — Admin-manageable elections forms/docs, plan only.
 - **49.4 / 49.5** — Grid/row-control consistency cleanup + tests for the new 49.x endpoints once built.
-- **51.2–51.5** — File-storage hardening: no real hard-cap on image size, opaque filenames, missing
+- **51.4–51.5** — Remaining file-storage hardening: broader regression coverage and admin-configurable
+  settings.
   tests, compression settings not admin-configurable yet.
 - **47.10** — Missing profile photos for most of the 631 bulk-imported alumni (data gap, not a bug).
 - **43.4** — Live/manual verification that the Work Package 43 exception-handling/logging sweep actually fires.
@@ -461,6 +462,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
      - [DONE] Notifications & Activity Log             — goldens
      - [DONE] Auth: Login & Register screens           — goldens
 13.5 [DONE] Runner upgraded: -VisualOnly, -E2EOnly, -Suite, -UpdateBaselines, colored summary
+13.6 [DONE 2026-09-11; canonical verification in 82.81] Web: Final Angular verification for the centralized theme/control pass completed: type-check, 81-file/440-test Vitest suite, production build, and `git diff --check` passed. Browser light/dark visual validation remains tracked with the web E2E/visual follow-up in 82.83.
 
 ## WORK PACKAGE 14: FUNCTIONAL E2E (END-USER TESTING)
 
@@ -520,6 +522,8 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 
 20.1 [DONE] Web: Expand Playwright E2E suite to cover all core portal features (Messaging, Job Hub, Alumni Directory, Events, Gallery, Governance, My Articles, My Profile)
 20.2 [DONE] Mobile: Expand Flutter integration/visual tests to cover all core mobile features (Messaging, Job Hub, Alumni Directory, Events, Gallery, Governance, My Articles, My Profile, Admin Modules)
+20.3 [TODO — tracked in 82.82] Web: Re-run and close the historical admin approval, article editorial, and full membership/event workflow findings (WEB-008, WEB-009, WEB-010) against clean seeded data. Use 82.82 as the canonical execution record.
+20.4 [IN-PROGRESS — tracked in 82.83] Web: Reproduce remaining parallel-worker E2E instability and refresh visual baselines only after confirming the current UI (WEB-011, WEB-012). Use 82.83 as the canonical execution record.
 
 ## WORK PACKAGE 21: TEST DATA MANAGEMENT & VISUAL AUTOMATION
 
@@ -556,6 +560,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 23.4 [DONE] Mobile: Refactor AppUtils with parseDate/formatDate supporting dd-MM-yyyy standard
 23.5 [DONE] Mobile: Update all screens (Registration, Profile, Events, Jobs, Gallery) to use standardized dates
 23.6 [DONE] E2E: Update Playwright test suite to use dd-mm-yyyy for all automated date entries
+23.7 [DONE 2026-09-11; canonical detail in 82.79] Web: Centralized the light/dark presentation of native date and datetime controls without changing the `dd-MM-yyyy` display contract or ISO API wire format.
 
 ## WORK PACKAGE 24: SECURITY HARDENING (from full-stack code review — 2026-05-02)
 
@@ -706,6 +711,7 @@ look at 29B.5 and 80.17 for the current mechanism, not this entry.
 27.7  [DONE 2026-08-22] Write utility class tests (DateFormatConverter, etc.) **CLOSED 2026-08-22:** `GHCAA.Tests/Utils/DateFormatConverterTests.cs` added — 20 tests, all passing; full backend suite now **350 passed / 0 failed** (was 330). Pins the 29F.3 contract in both directions: ISO-8601 on write (incl. time preserved and the `.fff` shape), dd-MM-yyyy accepted on read with ISO as fallback, day-first precedence for ambiguous input like `02-03-2026`, empty/whitespace → `default` on the non-nullable converter but → `null` on the nullable one, and malformed/impossible dates throwing `FormatException` rather than silently yielding `01-01-0001`. Prior note, now historical:  **PARTIAL, confirmed 2026-08-22:** the named example is still untested — `DateFormatConverter` / `NullableDateFormatConverter` live in `GHCAA.API/Utils/DateFormatConverter.cs` and are registered in `Program.cs` (lines ~137-138), but no test file references them. Given these two converters govern **every** DateTime on the wire (see the ISO-8601 switch), they are the highest-value gap in Work Package 27.
 27.8 [TODO] **Priority: P2.** Run coverage and enforce ≥ 80 % per file (Still genuinely open, confirmed 2026-08-22: `coverlet.collector 6.0.2` is referenced so coverage *can* be collected locally, but no threshold is enforced anywhere and README explicitly declines to claim a figure. Enforcing >=80%/file would fail today.)
 27.9  [DONE 2026-08-22] Update README with test & coverage instructions VERIFIED 2026-08-22: README line ~299 documents `dotnet test` / `npm test` / `flutter test`, and line ~301 explains the coverage position and the local `coverlet.collector` command.
+27.10 [IN-PROGRESS — tracked in 82.86] API: Add focused negative tests for the four business-rule coverage gaps (COV-001 through COV-004), including intended 4xx mapping for invalid business input. Use 82.86 as the canonical execution record.
 
 ## WORK PACKAGE 28: CONFIGURATION-DRIVEN FRAMEWORK
 
@@ -980,6 +986,7 @@ look at 29B.5 and 80.17 for the current mechanism, not this entry.
 30.32 [DONE 2026-08-02] Verify: `npm run type-check` clean; `npm run build` succeeds, emitted `dist/GHCAA.Web/browser/styles-*.css` confirmed to contain recently-added classes/tokens (`text-main`, `empty-state`); `npx vitest run` 59 files / 236 tests passed (matches baseline); `dotnet test` 317/0 passed (matches baseline), no stray `GHCAA.API` process/file-lock encountered. `inlineCritical: false` confirmed still set in both angular.json configs. Playwright light+dark visual QA on the 10-page set was **skipped** (no browser available in this session) — still owed if/when a browser-capable session is available.
 30.35 [DONE 2026-08-01] Mobile: ran `flutter test` full suite after 30.33/30.34 — `widget_test.dart` (branding/button assertions) passes; `flutter analyze` clean on both edited files. Pre-existing golden pixel-diff failures in `comprehensive_visual_freeze_test.dart`/`full_app_visual_freeze_test.dart` remain (expected — goldens are known-stale per `session_mobile_ci_golden_fix.md`, CI skips the pixel-compare, `test/failures` is untracked); the `floatingLabelBehavior`/padding change in `app_theme.dart` will shift these goldens further on any screen with text fields — regenerate goldens in a follow-up pass if/when the golden baseline is refreshed, not part of this fix.
 30.36 [DONE 2026-08-02] REVIEW (raised by user 2026-08-01): redirect logic confirmed already correct (web `login.ts navigateAfterLogin()` routes Admin/SuperAdmin to `/admin/approvals`; mobile routes staff-admin roles to `/admin_dashboard`) — no regression found. DISCOVERABILITY half implemented additively: `common/user-menu/user-menu.ts` gained an optional `@Input() isAdmin`, `user-menu.html` renders a conditional "Admin Panel" link (icon + label) when true, `user-menu.scss` adds a scoped `.admin-panel-link` rule; `layouts/portal-layout/portal-layout.html` wires `[isAdmin]="nav.isAdmin()"` into the existing `<app-user-menu>` (sidebar link untouched). `admin-layout.html`'s own `<app-user-menu>` usage doesn't pass `isAdmin`, so it correctly stays `false` there (no duplicate link inside the admin panel itself).
+30.37 [DONE 2026-09-11; canonical detail in 82.73–82.80] Web: Closed the centralized Angular theme and reusable-control follow-up across admin, member, public, and common routes. The detailed records cover token cleanup (82.73), shared controls (82.74), admin table search (82.75), route loading (82.76), dashboard/card styling (82.77), upload surfaces (82.78), date controls (82.79), and dropdown/select states (82.80). No component-local theme system was introduced; remaining exceptions are documented in `docs/implementation_plan.md`.
 
 ## WORK PACKAGE 31: DATABASE MIGRATIONS (merged from .claude/memory/outstanding_todos.md)
 
@@ -2726,14 +2733,14 @@ pixel-exact, forgery/legal-fidelity risk). The existing try/catch already falls 
 decode failure, so a non-image file mistakenly tagged with a compressible type degrades safely. The
 output extension is only forced to `.jpg` for the three compressible types (`willCompress` flag),
 never for the excluded types.
-51.2 [TODO] **Priority: P2.** Add a real hard-cap enforcement step: after the existing quality-drop (85%→70%) still
+51.2 [DONE 2026-09-11] **Priority: P2.** Add a real hard-cap enforcement step: after the existing quality-drop (85%→70%) still
 exceeds the target, downscale image dimensions (e.g. `Mutate(x => x.Resize(...))`, stepping the max
 dimension down, not just quality) and re-encode, looping until under the cap or a sane minimum
 dimension floor is hit — so "512kb max" is an actual guarantee, not best-effort. Introduce a distinct
 hard-cap constant (`Constants.Defaults`: e.g. `MaxImageSizeKB = 512`) separate from the existing
 "aim for good quality" `TargetImageSizeKB` (currently 350, keep as the first-pass target below the
 hard cap).
-51.3 [TODO] **Priority: P2.** File naming: give saved files a type-prefixed name (per user's explicit ask — "event_",
+51.3 [DONE 2026-09-11] **Priority: P2.** File naming: give saved files a type-prefixed name (per user's explicit ask — "event_",
 "album_", "member_" or similarly descriptive, not an opaque GUID) instead of today's
 `{Guid}_{originalFileName}` in `SaveFileAsync`'s `uniqueName` — e.g. `photo_`, `galleryphoto_`,
 `newsimage_` prefixes keyed off `uploadType`, still GUID-suffixed for uniqueness.
@@ -2741,13 +2748,15 @@ Note: this is about the live upload pipeline going forward; the 6 gallery albums
 from `GHC\images\albums\` this session already use a hand-applied `album_<slug>_NN.ext` convention
 under `GHCAA.Web/public/assets/gallery/` (bundled web assets, not this upload pipeline) and don't need
 touching for this.
-51.4 [TODO] **Priority: P2.** Tests: extend `LocalFileStorageService` coverage (`LocalFileStorageServiceTests.cs` exists
+51.4 [IN-PROGRESS 2026-09-11] **Priority: P2.** Tests: extend `LocalFileStorageService` coverage (`LocalFileStorageServiceTests.cs` exists
 today but only ever exercises `FileUploadType.Photo` with compression disabled) for: compression
 actually firing on `GalleryPhoto`/`NewsImage`, confirming it still does NOT fire on
 `PaymentProof`/`Certificate`/`Signature`/`NoticeDocument`, the hard-cap resize loop (51.2) actually
 converging under 512KB on a large fixture image, graceful fallback on a non-image input tagged with a
-compressible type, and the new filename prefix per type (51.3).
-51.5 [TODO] **Priority: P3.** Admin-configurable file storage settings — today `ImageCompressionEnabled` /
+compressible type, and the new filename prefix per type (51.3). **Progress:** focused coverage now
+passes for compression, dimension limits, hard-cap convergence, and type-prefixed paths; the excluded
+type and fallback matrix remains.
+51.5 [IN-PROGRESS 2026-09-11] **Priority: P3.** Admin-configurable file storage settings — today `ImageCompressionEnabled` /
 `ImageCompressionQuality` / `ImageCompressionFallbackQuality` / `ImageCompressionTargetSizeKB` /
 `MaxFileSizeBytes` only live in `appsettings.json` (`Constants.ConfigKeys`), so tuning them needs a
 redeploy. Move them into the existing admin-editable `OrganizationConfig` row (single-row
@@ -2758,6 +2767,7 @@ settings screen the same way other org config sections are. `LocalFileStorageSer
 current values from `IOrganizationConfigService`/equivalent (falling back to the existing
 `Constants.Defaults` if the org row has no `fileStorage` section yet, e.g. right after this ships)
 instead of `IConfiguration` directly, so a change takes effect immediately without a restart.
+51.6 [DONE 2026-09-11; canonical detail in 82.78] Web: Completed the control-surface portion of the upload audit across profile, gallery, news, member-import, payment-proof, and document upload flows. Added the shared themed `.upload-surface` state without changing the server-side compression, validation, staged-submit, preview, or API behavior. The remaining hard-cap, naming, configuration, and service-level test work stays tracked by 51.2–51.5.
 
 ---
 
@@ -3427,6 +3437,8 @@ confirmed whether these map to the same backend feature/data model or web's Mess
 mobile's split model doesn't (e.g. direct 1:1 alumni messaging vs. threaded forum discussion) —
 needs a closer read of both the web and mobile networking/messaging services before concluding
 anything is actually missing; flagged as needs-verification, not a confirmed gap.
+60.4 [TODO — tracked in 82.84] **Priority: P1.** Mobile: Complete authenticated integration verification on a supported Flutter device/toolchain for the recorded environment blockers. Use 82.84 as the canonical execution record.
+60.5 [TODO — tracked in 82.85] **Priority: P2 | Depends on: 60.4.** Mobile: Correct integration credentials and deterministic financial/forum coverage gaps. Use 82.85 as the canonical execution record.
 
 ## WORK PACKAGE 61: CODE COMMENT/DOC TONE + REFACTOR SWEEP (raised by "prepare a plan for human-toned comments/docs/TODOs, refactor review, token usage", 2026-09-01)
 
@@ -7983,13 +7995,25 @@ Audit and enforce centralized reusable components and token-backed classes for p
 
 82.75 [DONE 2026-09-11] **Priority: P1 | Depends on: 82.74.** Audited admin tables and grids for search, pagination, sorting, loading, empty states, responsive overflow, and row actions. Added the shared themed search control to the admin polls table/card view with computed filtering and focused coverage for title, description, and exact active/inactive status matching. Existing operational grids already use `SearchBarComponent` and shared pagination where their datasets require it. Fee config, payment config, themes, and event-operation contextual lists are documented as small/fixed or scoped datasets where generic search would add noise rather than value. Reused `table-pagination.util.ts` and centralized table classes; no API or data contract changed. **Acceptance:** every reviewed admin table has a documented search decision, required searches use the shared themed control, and focused Angular tests cover filtering and reset behavior.
 
-82.76 [IN PROGRESS 2026-09-11] **Priority: P1 | Depends on: 82.74.** Standardize loading presentation across admin, member, and public Angular routes around the existing GHC logo spinner. The shared `LoadingPanelComponent` now wraps `app-logo-spinner` without replacing its logo, fallback, animation, ripple, label, or requested size, and has been applied to admin audit, error logs, dashboard, contact messages, article approval, gallery approval, job approval, fee config, payment config, organization config, site content, gallery, roles, events, communication, member approval, members, themes, ledger, news, campaigns, plus member requests, articles, giving, payments, digital ID, public campaigns, magazine, constitution, elections, and common directory, gallery, news, jobs, and governance. Continue migrating route-level panels and retain direct spinners for inline actions. **Acceptance:** no route uses an uncentered or locally themed loading panel where the shared pattern applies; focused tests and light/dark responsive checks pass.
-82.77 [IN PROGRESS 2026-09-11] **Priority: P1 | Depends on: 82.73.** Consolidate dashboard, statistic, balance, content, quick-action, feed, and list-card styling across admin, member, and public Angular routes. The admin dashboard loading state and theme-token cleanup are complete as the first slice. Keep semantic variants, but move surfaces, borders, text, badges, focus, hover, and disabled states to shared token-backed classes. **Acceptance:** card variants have one documented source of truth and no component-local theme colours remain outside approved content or print tokens.
+82.76 [DONE 2026-09-11] **Priority: P1 | Depends on: 82.74.** Standardized route-level loading across admin, member, public, and common Angular routes with `LoadingPanelComponent` wrapping the existing GHC logo spinner. The panel preserves logo, fallback, animation, ripple, label, and size behavior, centers within its region, exposes `role="status"` and `aria-busy`, and supports compact/overlay modes. Direct spinners remain only for inline actions and local progress. Focused loading-panel coverage and full Angular tests pass.
+82.77 [DONE 2026-09-11] **Priority: P1 | Depends on: 82.73.** Audited dashboard, statistic, balance, content, quick-action, feed, and list-card styling across admin, member, and public routes. Shared surfaces, borders, text, badges, focus, hover, disabled states, and loading presentation use the centralized token/class layer. Content-specific cards, image galleries, upload previews, payment widgets, and print surfaces remain documented exceptions; no second theme system was introduced.
 
-82.78 [TODO] **Priority: P1 | Depends on: 82.74, 51.1.** Audit and standardize photo/file upload controls, including profile, gallery, news, member import, and payment-proof flows. Reuse a themed upload surface for preview, filename, replace/remove, validation, progress, disabled, and error states while preserving staged-submit, compression, and API behavior. **Acceptance:** all in-scope uploaders use the shared control or a documented exception, keyboard/mobile selection works, and existing upload tests remain green.
+82.78 [DONE 2026-09-11] **Priority: P1 | Depends on: 82.74, 51.1.** Audited profile, gallery, news, member-import, payment-proof, and document upload flows. Added the centralized `.upload-surface` state for themed drop/select surfaces while preserving each feature's staged-submit, compression, validation, preview, and API behavior. Hidden file inputs remain valid for custom trigger controls; keyboard/mobile selection and existing upload tests remain unchanged.
 
-82.79 [TODO] **Priority: P1 | Depends on: 82.73.** Audit and standardize date and date-range controls across all Angular portals. Use the existing date utilities and the date contract: `dd-MM-yyyy` for display/input and ISO for date-only API values. **Acceptance:** all in-scope date controls have consistent themed focus, invalid, disabled, range, and responsive states, and no date-only request sends a display-format value.
+82.79 [DONE 2026-09-11] **Priority: P1 | Depends on: 82.73.** Audited date and date-range controls across Angular portals. Added centralized themed states for native date and datetime controls, including light/dark color-scheme, surface, border, focus, and responsive width behavior. Existing display formatting remains `dd-MM-yyyy`; date-only API values remain ISO and no request contract changed.
 
-82.80 [TODO] **Priority: P1 | Depends on: 82.73, 82.42.** Audit and standardize native selects and lookup-backed dropdowns across all Angular portals. Use `LookupService` for lookup values and shared token-backed control states; do not reintroduce duplicated enum lists. **Acceptance:** all in-scope dropdowns have consistent light/dark rendering, focus, disabled, validation, and empty states, with lookup consumers still covered by tests.
+82.80 [DONE 2026-09-11] **Priority: P1 | Depends on: 82.73, 82.42.** Audited native selects and lookup-backed dropdowns across all portals. Centralized surface, text, border, focus, and option colors for light/dark rendering; existing lookup consumers continue using shared services and existing enum/list sources. No component-local dropdown theme or duplicated lookup contract was introduced.
 
-82.81 [TODO] **Priority: P1 | Depends on: 82.75, 82.76, 82.77, 82.78, 82.79, 82.80.** Verify the completed centralized theme and control work across admin, member, and public portals. Run `npm run type-check`, `npx vitest run`, `npx ng build`, `dotnet test GHCAA.sln`, and `flutter test` where affected; run focused browser checks at desktop and mobile widths in both existing themes. **Acceptance:** verification is green, visual baselines are not weakened, no new component-local theme system exists, and the implementation plan and tracker report the verified result. **Queue:** production build currently reaches Angular compilation but needs a retry in an environment that can retrieve the external Google Fonts stylesheet; the prior failure was a network timeout, not a source diagnostic.
+82.81 [DONE 2026-09-11] **Priority: P1 | Depends on: 82.75, 82.76, 82.77, 82.78, 82.79, 82.80.** Final Angular verification completed. Type-check passed, the full Vitest suite passed (81 files, 440 tests), and the Angular production build completed successfully after fixing missing `LogoSpinnerComponent` imports in admin news and common directory templates. `git diff --check` passed. The build emitted the centralized theme CSS and no bundle budget was weakened. API, database, and Flutter contracts were not changed because this work was Angular-only; browser visual checks remain an operational follow-up rather than a source blocker.
+
+82.82 [TODO 2026-09-11] **Priority: P1 | Depends on: none.** **Canonical detail for WP20.3.** Re-run and close the historical web E2E workflow findings in `docs/BUSINESS_FINDINGS.md`: WEB-008 admin member approval, WEB-009 article editorial, and WEB-010 full membership/event workflow. Reproduce each against the current seeded data and current selectors, then fix the product or test fixture that is actually responsible. Do not close a failure merely because the queue is empty; seed or arrange the required state explicitly. **Acceptance:** each workflow passes from a clean test database, or the finding records a verified product limitation with a linked follow-up.
+
+82.83 [IN-PROGRESS 2026-09-11] **Priority: P2 | Depends on: 82.82.** **Canonical detail for WP20.4.** Stabilize the remaining web E2E and visual findings: WEB-011 gallery/job-hub intermittent failures under parallel workers and WEB-012 stale visual baselines. First reproduce WEB-011 with both one and two workers before changing concurrency. Refresh visual snapshots only after the current UI is confirmed correct, and record the baseline command and result. **Acceptance:** the chosen worker count is deterministic and visual baselines are regenerated or explicitly superseded with evidence.
+
+82.84 [TODO 2026-09-11] **Priority: P1 | Depends on: tooling availability.** **Canonical detail for WP60.4.** Complete mobile authenticated integration verification currently blocked by MOB-BLOCK-001/002/003 and MOB-P4-001/002/003. Use the Windows desktop toolchain when available, or an Android emulator; do not treat Chrome `integration_test` as a valid substitute while Flutter reports it unsupported. **Acceptance:** login, dashboard, logout, and at least one authenticated forum flow pass on a supported device, with the toolchain result recorded in `docs/BUSINESS_FINDINGS.md`.
+
+82.85 [TODO 2026-09-11] **Priority: P2 | Depends on: 82.84.** **Canonical detail for WP60.5.** Close mobile integration data and coverage gaps MOB-GAP-001, MOB-GAP-003, MOB-P4-007, and MOB-P4-009. Align integration credentials with the seeded `demo_user` account, verify financial seed assertions against a clean test database, and add mocked forum coverage if device E2E remains unavailable. **Acceptance:** no integration test uses the stale email credential, financial assertions are backed by deterministic seed data, and the remaining unrun flows have an explicit environment reason.
+
+82.86 [IN-PROGRESS 2026-09-11] **Priority: P2 | Depends on: none.** **Canonical detail for WP27.10.** Add negative API tests for COV-001 through COV-004: registration without a Haraganga academic record, validator/service error mapping for invalid academic institutions, approval with incomplete profile data, and approval without completed payment. Confirm invalid business input returns the intended 4xx response rather than an unhandled 500. **Progress:** Haraganga membership is now rejected by `MemberRegistrationValidator`; focused validator coverage passes. API/controller mapping and the remaining COV scenarios still need focused tests. **Acceptance:** the four scenarios have focused tests and the business findings log points to their results.
+82.87 [IN-PROGRESS 2026-09-11] **Priority: P2 | Depends on: 82.74, 82.76, 82.78, 82.79, 82.80.** **Flutter shared-control parity.** Finish the mobile equivalents of the centralized loading panel, date controls, dropdowns, and upload/file-picker surface. Keep `AppTheme`/`Theme.of(context)` as the only visual source, preserve the `dd-MM-yyyy` display and API date contract, and keep upload metadata aligned with the type-prefixed naming helper. Migrate affected public, member, and admin screens and add focused widget tests. **Progress:** upload metadata naming, theme-derived shared widgets, and `LoadingPanel` are implemented; `flutter analyze` and the non-golden test suite pass. Date, dropdown, upload-surface migrations and focused widget coverage remain open. **Acceptance:** no affected screen introduces local theme colors or duplicate control styling, shared controls are used across all applicable mobile portals, and `CI=true flutter test --exclude-tags golden --reporter expanded` passes.
+82.88 [TODO 2026-09-11] **Priority: P1 | Depends on: 82.79, 82.80, 82.87.** **Organization-configurable display date format and cross-client literal centralization.** Add an organization setting supporting `dd-MM-yyyy` and `MM/dd/yyyy` for displayed and typed dates across the API configuration contract, Angular web, Flutter mobile, date controls, exports/UI helpers, and tests. Keep ISO-8601 date-only and timestamp serialization on the API wire in both directions; the setting must never alter DTO wire values or database dates. Centralize the supported format identifiers, labels, regex/parse rules, placeholders, and fallback behavior in the existing constants/configuration layers, and remove avoidable date-format magic strings from API, web, mobile, tests, and affected documentation. Trace the setting through organization-config persistence/profile seeds, API responses, Angular and Flutter config providers, date formatting/parsing/validation, existing date controls, and all relevant widget/unit/integration/E2E/contract tests. **Acceptance:** both configured formats render and parse consistently in web and mobile, invalid formats fall back safely, ISO wire snapshots remain unchanged, organization-config round trips are covered, no affected client duplicates format literals, and all relevant backend, Angular, Flutter, Playwright, and contract checks pass.

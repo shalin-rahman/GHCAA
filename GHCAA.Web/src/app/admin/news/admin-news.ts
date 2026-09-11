@@ -12,11 +12,12 @@ import { ARTICLE_CATEGORIES, getArticleCategoryLabel, POST_TYPE_TABS, matchesPos
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
     selector: 'app-admin-news',
     standalone: true,
-    imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
+    imports: [CommonModule, FormsModule, LoadingPanelComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
     templateUrl: './admin-news.html',
     styleUrl: './admin-news.scss'
 })

@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
+import '../../core/utils/upload_file_naming.dart';
 
 final financialServiceProvider = Provider<FinancialService>((ref) {
   return FinancialService(ref.read(dioProvider));
@@ -114,7 +115,7 @@ class FinancialService {
       if (receipt != null) {
         formData.files.add(MapEntry(
           'receipt',
-          await MultipartFile.fromFile(receipt.path, filename: receipt.path.split('/').last),
+          await MultipartFile.fromFile(receipt.path, filename: UploadFileNaming.forType('paymentproof', receipt.path)),
         ));
       }
       final response = await _dio.post('/financials/record-payment', data: formData);

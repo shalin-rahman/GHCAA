@@ -2,6 +2,24 @@
 
 Record every failed scenario, environment blocker, and coverage gap here.
 
+### Current triage — 2026-09-11
+
+The open rows below are historical findings, not fresh reproductions from the
+82.75–82.81 verification pass. They remain open until rerun against the
+current tree and deterministic test data. The follow-up work is tracked in
+`docs/TODO.md` as 82.82–82.86:
+
+- WEB-008, WEB-009, and WEB-010 are grouped under 82.82.
+- WEB-011 and WEB-012 are grouped under 82.83.
+- MOB-BLOCK-001/002/003 and MOB-P4-001/002/003 are grouped under 82.84.
+- MOB-GAP-001, MOB-GAP-003, MOB-P4-007, and MOB-P4-009 are grouped under 82.85.
+- COV-001 through COV-004 are grouped under 82.86. `OV-002` is not a
+  separate finding; references to it mean COV-002.
+
+No row is marked fixed from documentation alone. A row may move to
+**Verified** or **Fixed** only after the stated scenario is rerun and the
+evidence is recorded here.
+
 | ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
 |---|---|---|---|---|---|---|---|---|---|
 | *(template row — copy for new entries)* | | | | | | API/Web/Mobile | Blocker/Major/Minor | Open/Fixed/Wontfix | |
@@ -203,7 +221,7 @@ Automated evidence: **230/230 Vitest** pass; **43/53** functional Playwright E2E
 | WEB-008 | E2E workflow | Admin member approval | `admin-workflow.spec.ts` | Approve pending row | **Fail** — Approve button timeout | Web | Major | Open | Queue empty or UI selector mismatch |
 | WEB-009 | E2E workflow | Article editorial | `article-editorial.spec.ts` | Submit + approve article | **Fail** — article form selectors timeout | Web | Major | Open | |
 | WEB-010 | E2E workflow | Full membership + event | `full-membership-event-workflow.spec.ts` | Register → approve → event | **Fail** — registration step timeout (90s) | Web | Major | Open | |
-| WEB-011 | E2E UI | Gallery / Job Hub | `gallery.spec.ts`, `job-hub.spec.ts` | Headers visible | **Intermittent fail** under `--workers=2` | Web | Minor | Open | Templates correct; retry `--workers=1` |
+| WEB-011 | E2E UI | Gallery / Job Hub | `gallery.spec.ts`, `job-hub.spec.ts` | Headers visible | **Intermittent fail** under `--workers=2` | Web | Minor | Open | Reproduce with `--workers=1` and `--workers=2`; compare shared seed/state, then record the deterministic worker setting or fix the isolation defect. Tracked by TODO 82.83. |
 | WEB-012 | E2E visual | Snapshot freeze | `tests/visual/*` (~39 tests) | Match baselines | **Not verified** — baselines stale | Web | Minor | Open | `--update-snapshots` when UI stable |
 | WEB-PASS | E2E smoke | Admin + member portal | 43 specs in `tests/e2e` | Nav + data load | **Pass** | Web | — | Verified | admin-panels, directory, events, governance, polls, profile, payments, public, config |
 
@@ -226,9 +244,24 @@ Automated evidence: **230/230 Vitest** pass; **43/53** functional Playwright E2E
 | ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
 |---|---|---|---|---|---|---|---|---|---|
 | COV-001 | Registration | A1 Haraganga at register | Review `GHCAA.Tests` | Dedicated test: `RegisterAsync` rejects non-GHC academic history | Rule tested on **UpdateProfile** (`MemberService_LinkedIn_Tests.UpdateProfile_WithNoGHCRecord_ShouldThrowException`); no register-path test | API | Minor | Open | Consider adding test; service logic exists in `MemberService.RegisterAsync` L143–146 |
-| COV-002 | Registration | A1 FluentValidation gap | Review `MemberRegistrationValidator.cs` | Validator rejects non-GHC institutions | Validator only requires non-empty `AcademicHistory`; Haraganga enforced in service layer only | API | Minor | Open | API may return 500 instead of 400 if service throws before controller validation |
+| COV-002 | Registration | A1 FluentValidation gap | Review `MemberRegistrationValidator.cs` | Validator rejects non-GHC institutions | Validator now applies the same `IsGHC` or Haraganga-name rule as the registration service; API-level 4xx mapping is still unverified | API | Minor | In progress | Focused validator coverage passes; add controller/API negative coverage under TODO 82.86 |
 | COV-003 | Membership | A5 profile gate | Review `MemberServiceTests` | Test that `ApproveMemberAsync` throws when profile &lt; 100% | Tests manually set `IsProfileComplete=true`; no negative gate test | API | Minor | Open | Logic present in `ApproveMemberAsync` L362–365 |
 | COV-004 | Membership | A6 payment gate | Review `MemberServiceTests` | Test approval blocked without payment | Positive path only (payment seeded before approve) | API | Minor | Open | Logic present in `ApproveMemberAsync` L367–376 |
+
+---
+
+## Upload and file-storage defects
+
+These findings are distinct from the completed web upload-surface audit in TODO
+82.78 / 51.6. The remaining items affect the server-side upload pipeline and
+are tracked by TODO 51.2–51.5.
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| UPLOAD-001 | File storage | Image hard-cap enforcement | Upload a large compressible image after quality fallback | Saved image is at or below the configured 512 KB hard cap | Compression now uses bounded quality and dimension reduction until the configured cap is met | API/Infrastructure | Major | Resolved | Implemented and covered by focused file-storage tests. |
+| UPLOAD-002 | File storage | Descriptive upload naming | Save photo, gallery, news, and other supported uploads | Saved name includes a type prefix and remains unique | Saved names now use `{uploadType}_{guid}_{originalName}` while retaining uniqueness | API/Infrastructure | Minor | Resolved | Implemented and covered by focused file-storage tests. |
+| UPLOAD-003 | File storage | Compression and naming regression coverage | Run `LocalFileStorageService` tests across compressible and excluded upload types | Compression scope, hard-cap convergence, fallback, and naming are verified | Core compression, hard-cap, dimension, and naming paths are covered; excluded-type and fallback matrix remains | API/Infrastructure | Minor | In progress | Continue the focused matrix under TODO 51.4. |
+| UPLOAD-004 | File storage | Runtime configuration | Change compression and size settings from the admin configuration surface | New settings apply without redeployment or restart | Settings are read from application configuration and require redeployment | API/Infrastructure | Minor | Open | Move file-storage settings into the editable organization configuration with safe defaults. Tracked by TODO 51.5. |
 
 ---
 

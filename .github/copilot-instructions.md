@@ -144,14 +144,29 @@ Application interfaces from clients.
    `graphify explain`, or `graphify path` before broad source searches.
 2. Check `docs/TODO.md` and `PROJECT_MAP.md` when present before starting
    cross-layer work.
-3. Trace API changes through Domain/Application/Infrastructure/API and verify
-   both Angular and Flutter consumers.
-4. For theme or UI work, fix the shared token/control layer first, then inspect
+3. Treat every change as a cross-layer change until proven otherwise. Trace
+   retrieval and CRUD changes through persistence, application services and
+   DTOs, API controllers, Angular services/components, Flutter services/screens,
+   and the relevant tests. For API or business-rule changes, verify both client
+   implementations even when only one currently appears to consume the route.
+4. Update or add the relevant backend, web, mobile, integration, contract, or
+   visual tests for the behavior being changed. Run the smallest relevant
+   command from the table, then the related client checks. Do not claim a check
+   passed unless it was actually run.
+5. Update directly affected README/docs, `docs/TODO.md`, `PROJECT_MAP.md`, API
+   contract snapshots, or other maintained project documentation in the same
+   change when their information becomes stale. Do not leave documentation
+   synchronization for a later task.
+6. For multiple related tasks in one session, complete the cross-layer review,
+   test updates, documentation updates, and graph refresh after the final task
+   rather than repeatedly rewriting shared context between subtasks.
+7. Keep the working context efficient during long sessions: compact or
+   summarize completed investigation and preserve only actionable decisions,
+   affected files, unresolved risks, and verification results.
+8. For theme or UI work, fix the shared token/control layer first, then inspect
    affected screens for search, loading, pagination, responsive behavior, and
-   light/dark parity.
-5. Run the smallest relevant command from the table, then the related client
-   checks. Do not claim a check passed unless it was actually run.
-6. Keep user-owned git/deploy operations untouched: do not commit, push, merge,
+   light/dark parity in every relevant client.
+9. Keep user-owned git/deploy operations untouched: do not commit, push, merge,
    promote branches, or trigger deployment hooks.
-7. After modifying code, run `graphify update .` so the repository knowledge graph
-   stays current.
+10. After modifying code or project documentation, run `graphify update .` so the
+    repository knowledge graph stays current.

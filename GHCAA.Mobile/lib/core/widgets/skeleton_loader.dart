@@ -16,13 +16,13 @@ class SkeletonLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.white.withValues(alpha: 0.05),
-      highlightColor: Colors.white.withValues(alpha: 0.1),
+      baseColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
+      highlightColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
       child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: Colors.black,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(borderRadius),
         ),
       ),
@@ -51,12 +51,12 @@ class SkeletonLoader extends StatelessWidget {
     );
   }
 
-  static Widget memberCard() {
+  static Widget memberCard(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.02),
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(16),
       ),
       child: const Column(

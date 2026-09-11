@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../../core/utils/upload_file_naming.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
@@ -177,13 +178,13 @@ class AuthService {
       final formData = FormData.fromMap(data);
 
       if (photoPath != null && photoPath.isNotEmpty) {
-        formData.files.add(MapEntry('photo', await MultipartFile.fromFile(photoPath, filename: 'profile_photo.jpg')));
+        formData.files.add(MapEntry('photo', await MultipartFile.fromFile(photoPath, filename: UploadFileNaming.forType('photo', photoPath))));
       }
       if (nidPath != null && nidPath.isNotEmpty) {
-        formData.files.add(MapEntry('certificate', await MultipartFile.fromFile(nidPath, filename: 'academic_proof.jpg')));
+        formData.files.add(MapEntry('certificate', await MultipartFile.fromFile(nidPath, filename: UploadFileNaming.forType('certificate', nidPath))));
       }
       if (paymentPath != null && paymentPath.isNotEmpty) {
-        formData.files.add(MapEntry('paymentProof', await MultipartFile.fromFile(paymentPath, filename: 'payment_receipt.jpg')));
+        formData.files.add(MapEntry('paymentProof', await MultipartFile.fromFile(paymentPath, filename: UploadFileNaming.forType('paymentproof', paymentPath))));
       }
 
       if (academicHistory != null) {

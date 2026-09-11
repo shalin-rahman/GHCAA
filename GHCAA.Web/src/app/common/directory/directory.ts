@@ -10,11 +10,12 @@ import { LookupService, LookupOption } from '../../core/services/lookup.service'
 import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { OrgConfigService } from '../../core/services/org-config.service';
+import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 
 @Component({
     selector: 'app-directory',
     standalone: true,
-    imports: [CommonModule, FormsModule, LoadingPanelComponent, ImgFallbackDirective],
+    imports: [CommonModule, FormsModule, LoadingPanelComponent, LogoSpinnerComponent, ImgFallbackDirective],
     templateUrl: './directory.html',
     styleUrl: './directory.scss'
 })

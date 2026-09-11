@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../core/api/api_client.dart';
+import '../../core/utils/upload_file_naming.dart';
 
 final fileServiceProvider = Provider<FileService>((ref) {
   return FileService(ref.read(dioProvider));
@@ -31,7 +32,7 @@ class FileService {
 
   Future<String?> uploadProfilePhoto(File file) async {
     try {
-      String fileName = file.path.split('/').last;
+      final fileName = UploadFileNaming.forType('photo', file.path);
       FormData formData = FormData.fromMap({
         "photo": await MultipartFile.fromFile(file.path, filename: fileName),
       });
@@ -49,7 +50,7 @@ class FileService {
 
   Future<String?> uploadArticleImage(File file) async {
     try {
-      String fileName = file.path.split('/').last;
+      final fileName = UploadFileNaming.forType('newsimage', file.path);
       FormData formData = FormData.fromMap({
         "file": await MultipartFile.fromFile(file.path, filename: fileName),
       });

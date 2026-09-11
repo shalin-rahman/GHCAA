@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 
 /// 29E.4: onChanged used to fire on every keystroke, so search callsites re-fetched
 /// (network round-trip) per character typed. This now debounces the callback — the
@@ -54,7 +53,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
       controller: widget.controller,
       decoration: InputDecoration(
         hintText: widget.hintText,
-        prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.royalGold),
+        prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).colorScheme.secondary),
         suffixIcon: widget.controller.text.isNotEmpty
             ? IconButton(
                 icon: const Icon(Icons.close_rounded, size: 18),

@@ -87,12 +87,13 @@ namespace GHCAA.Infrastructure.Services
         {
             var safeFileName = Path.GetFileName(fileName);
             var prefix = uploadType.ToString().ToLower();
+            var storedFileName = $"{prefix}_{safeFileName}";
             var relativeRoot = IsSecureType(uploadType)
                     ? _options.SecureRelativePath
                     : _options.UploadsRelativePath;
 
-            // World-class nested structure: members/{id}/{type}/{fileName}
-            return Path.Combine(relativeRoot, memberId.ToString(), prefix, safeFileName).Replace("\\", "/");
+            // Keep stored paths grouped by member and upload type.
+            return Path.Combine(relativeRoot, memberId.ToString(), prefix, storedFileName).Replace("\\", "/");
         }
 
         public async Task<string> SaveFileAsync(Stream fileStream, string fileName, int memberId, Enums.FileUploadType uploadType, CancellationToken cancellationToken = default)
@@ -111,7 +112,7 @@ namespace GHCAA.Infrastructure.Services
             var targetDir = Path.Combine(rootPath, memberId.ToString(), prefix);
             Directory.CreateDirectory(targetDir);
 
-            var uniqueName = $"{Guid.NewGuid():N}_{safeFileName}";
+            var uniqueName = $"{prefix}_{Guid.NewGuid():N}_{safeFileName}";
             var willCompress = IsCompressibleImageType(uploadType) && IsCompressionEnabled;
             // Ensure .jpg extension for images we compress, since they're always re-encoded as JPEG
             if (willCompress)
@@ -139,20 +140,43 @@ namespace GHCAA.Infrastructure.Services
                         }));
                     }
 
-                    var encoder = new JpegEncoder { Quality = DefaultQuality };
+                    var targetBytes = TargetSizeKB * 1024L;
+                    var quality = Math.Clamp(DefaultQuality, 1, 100);
+                    var minimumQuality = Math.Clamp(FallbackQuality, 1, quality);
+                    using var encoded = new MemoryStream();
 
-                    using var ms = new MemoryStream();
-                    await image.SaveAsJpegAsync(ms, encoder, cancellationToken);
-
-                    // Check against target size
-                    if (ms.Length > (TargetSizeKB * 1024))
+                    while (true)
                     {
-                        encoder = new JpegEncoder { Quality = FallbackQuality };
+                        encoded.SetLength(0);
+                        encoded.Position = 0;
+                        await image.SaveAsJpegAsync(encoded, new JpegEncoder { Quality = quality }, cancellationToken);
+
+                        if (encoded.Length <= targetBytes)
+                            break;
+
+                        if (quality > minimumQuality)
+                        {
+                            quality = Math.Max(minimumQuality, quality - 10);
+                            continue;
+                        }
+
+                        if (Math.Max(image.Width, image.Height) <= 320)
+                        {
+                            throw new InvalidOperationException(
+                                $"Unable to encode {uploadType} within the configured image size cap of {TargetSizeKB} KB.");
+                        }
+
+                        image.Mutate(x => x.Resize(new ResizeOptions
+                        {
+                            Mode = ResizeMode.Max,
+                            Size = new Size(Math.Max(320, (int)(image.Width * 0.85)), Math.Max(320, (int)(image.Height * 0.85)))
+                        }));
+                        quality = Math.Clamp(DefaultQuality, 1, 100);
                     }
 
-                    await image.SaveAsJpegAsync(diskPath, encoder, cancellationToken);
+                    await File.WriteAllBytesAsync(diskPath, encoded.ToArray(), cancellationToken);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is not InvalidOperationException)
                 {
                     _logger.LogError(ex, "Failed to compress/save photo. Falling back to direct copy.");
                     if (fileStream.CanSeek) fileStream.Position = 0;

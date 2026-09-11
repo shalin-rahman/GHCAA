@@ -9,6 +9,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/widgets/confirm_dialog.dart';
 import '../../core/api/api_client.dart';
+import '../../core/utils/upload_file_naming.dart';
 import '../../features/auth/auth_service.dart';
 import '../../features/events/events_service.dart';
 import '../../core/utils/app_utils.dart';
@@ -352,7 +353,7 @@ class EventDetailsScreen extends ConsumerWidget {
     try {
       final dio = ref.read(dioProvider);
       final formData = FormData.fromMap({
-        'logo': await MultipartFile.fromFile(file.path, filename: 'event_logo.jpg'),
+        'logo': await MultipartFile.fromFile(file.path, filename: UploadFileNaming.forType('newsimage', file.path)),
       });
       final response = await dio.post('/events/admin/$eventId/logo', data: formData);
       if (response.statusCode == 200) {

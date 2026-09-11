@@ -91,7 +91,7 @@ public class LocalFileStorageServiceTests
         var result = _service.GetRelativeFilePath(memberId, uploadType, fileName);
 
         // Assert
-        result.Should().Be("uploads/members/123/photo/test.jpg");
+        result.Should().Be("uploads/members/123/photo/photo_test.jpg");
     }
 
     [Test]
@@ -103,10 +103,10 @@ public class LocalFileStorageServiceTests
 
         // Act & Assert
         _service.GetRelativeFilePath(memberId, Enums.FileUploadType.Certificate, fileName)
-            .Should().Be("secure_uploads/members/456/certificate/document.pdf");
+            .Should().Be("secure_uploads/members/456/certificate/certificate_document.pdf");
 
         _service.GetRelativeFilePath(memberId, Enums.FileUploadType.PaymentProof, fileName)
-            .Should().Be("secure_uploads/members/456/paymentproof/document.pdf");
+            .Should().Be("secure_uploads/members/456/paymentproof/paymentproof_document.pdf");
     }
 
     [Test]
@@ -123,7 +123,7 @@ public class LocalFileStorageServiceTests
 
         // Assert
         // Assert
-        result.Should().Be("uploads/members/789/photo/file.jpg");
+        result.Should().Be("uploads/members/789/photo/photo_file.jpg");
     }
 
     [Test]
@@ -306,10 +306,29 @@ public class LocalFileStorageServiceTests
         var relativePath = await service.SaveFileAsync(stream, "album.jpg", 1, Enums.FileUploadType.GalleryPhoto);
 
         // Assert
+        Path.GetFileName(relativePath).Should().StartWith("galleryphoto_");
         var fullPath = Path.Combine(_testDirectory, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
         using var saved = await Image.LoadAsync(fullPath);
         saved.Width.Should().Be(800);
         saved.Height.Should().Be(533); // 2000/3000 * 800, rounded by ImageSharp's Max resize mode
+    }
+
+    [Test]
+    public async Task SaveFileAsync_WithConfiguredImageCap_ShouldWriteWithinCap()
+    {
+        var inMemorySettings = new Dictionary<string, string?> {
+            {"FileStorage:BasePhysicalPath", _testDirectory},
+            {"FileStorage:ImageCompression:TargetSizeKB", "8"},
+            {"FileStorage:ImageCompression:MaxDimensionPx", "800"},
+            {"FileStorage:ImageCompression:FallbackQuality", "20"}
+        };
+        var service = new LocalFileStorageService(BuildOptions(inMemorySettings), _mockLogger.Object, _mockWebHostEnvironment.Object);
+        var stream = CreateJpeg(800, 800);
+
+        var relativePath = await service.SaveFileAsync(stream, "photo.jpg", 1, Enums.FileUploadType.Photo);
+
+        var fullPath = Path.Combine(_testDirectory, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+        new FileInfo(fullPath).Length.Should().BeLessThanOrEqualTo(8 * 1024);
     }
 
     [Test]
