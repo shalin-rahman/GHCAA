@@ -132,5 +132,70 @@ namespace GHCAA.Tests.OrgConfig
             // ...while genuinely admin-editable sections (Branding) are left untouched.
             fetchedConfig.Branding.ShortName.Should().Be("STILL_ADMIN_EDITABLE");
         }
+
+        [Test]
+        public async Task UpdateConfigAsync_RoundTripsSupportedDateFormat()
+        {
+            var dbContext = GetDbContext("TestDb_DateFormatRoundTrip");
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var config = await service.GetConfigAsync();
+
+            await service.UpdateConfigAsync(
+                config with { Localization = config.Localization with { DateFormat = "MM/dd/yyyy" } },
+                "admin-1");
+
+            (await service.GetConfigAsync()).Localization.DateFormat.Should().Be("MM/dd/yyyy");
+        }
+
+        [Test]
+        public async Task GetConfigAsync_DefaultsDateFormatToDdMmYyyy()
+        {
+            var dbContext = GetDbContext("TestDb_DateFormatDefault");
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+
+            (await service.GetConfigAsync()).Localization.DateFormat.Should().Be("dd-MM-yyyy");
+        }
+
+        [Test]
+        public async Task UpdateConfigAsync_InvalidDateFormat_FallsBackToDefault()
+        {
+            var dbContext = GetDbContext("TestDb_DateFormatInvalid");
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var config = await service.GetConfigAsync();
+
+            await service.UpdateConfigAsync(
+                config with { Localization = config.Localization with { DateFormat = "yyyy-MM-dd" } },
+                "admin-1");
+
+            (await service.GetConfigAsync()).Localization.DateFormat.Should().Be("dd-MM-yyyy");
+        }
+
+        [Test]
+        public async Task UpdateConfigAsync_DoesNotRewriteExistingDateValues()
+        {
+            var dbContext = GetDbContext("TestDb_DateValuesRemainStable");
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var storedStart = new DateTime(2024, 5, 17, 14, 35, 12, DateTimeKind.Utc);
+            var storedEnd = storedStart.AddHours(2);
+
+            dbContext.AlumniEvents.Add(new GHCAA.Domain.Models.AlumniEvent
+            {
+                Title = "Existing event",
+                Description = "Existing date values must survive display-format changes.",
+                Location = "Campus",
+                StartDate = storedStart,
+                EndDate = storedEnd
+            });
+            await dbContext.SaveChangesAsync();
+
+            var config = await service.GetConfigAsync();
+            await service.UpdateConfigAsync(
+                config with { Localization = config.Localization with { DateFormat = "MM/dd/yyyy" } },
+                "admin-1");
+
+            var eventRecord = await dbContext.AlumniEvents.SingleAsync();
+            eventRecord.StartDate.Should().Be(storedStart);
+            eventRecord.EndDate.Should().Be(storedEnd);
+        }
     }
 }

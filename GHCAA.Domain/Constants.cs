@@ -100,6 +100,21 @@ namespace GHCAA.Domain
             public const string SuperAdminBootstrapPasswordFileName = "superadmin-bootstrap-password.txt";
         }
 
+        public static class Localization
+        {
+            public const string DayMonthYearDateFormat = "dd-MM-yyyy";
+            public const string UsDateFormat = "MM/dd/yyyy";
+
+            public static string NormalizeDateFormat(string? value, string? fallback) =>
+                IsSupported(value)
+                    ? value!
+                    : IsSupported(fallback) ? fallback! : DayMonthYearDateFormat;
+
+            private static bool IsSupported(string? value) =>
+                string.Equals(value, DayMonthYearDateFormat, StringComparison.Ordinal)
+                || string.Equals(value, UsDateFormat, StringComparison.Ordinal);
+        }
+
         // 45.2/45.6: ErrorLog levels and retention. Rows older than RetentionDays are opportunistically
         // deleted from ErrorLogService's write path — see the comment there for why that's a cheaper
         // fit here than a dedicated background job.

@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { GalleryService } from '../../core/services/gallery.service';
 import { EventGallery } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
@@ -15,7 +16,7 @@ import { OrgConfigService } from '../../core/services/org-config.service';
 @Component({
   selector: 'app-gallery',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoadingPanelComponent, ImgFallbackDirective],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, ImgFallbackDirective],
   templateUrl: './gallery.html',
   styleUrl: './gallery.scss'
 })
@@ -202,4 +203,3 @@ export class Gallery implements OnInit {
     return safeImageUrl(path);
   }
 }
-

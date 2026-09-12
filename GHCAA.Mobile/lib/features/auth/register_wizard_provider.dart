@@ -118,8 +118,10 @@ class RegisterModel {
       fatherName: fatherName ?? this.fatherName,
       motherName: motherName ?? this.motherName,
       emergencyContactName: emergencyContactName ?? this.emergencyContactName,
-      emergencyContactRelation: emergencyContactRelation ?? this.emergencyContactRelation,
-      emergencyContactPhone: emergencyContactPhone ?? this.emergencyContactPhone,
+      emergencyContactRelation:
+          emergencyContactRelation ?? this.emergencyContactRelation,
+      emergencyContactPhone:
+          emergencyContactPhone ?? this.emergencyContactPhone,
       tShirtSize: tShirtSize ?? this.tShirtSize,
       academicHistory: academicHistory ?? this.academicHistory,
       profileImagePath: profileImagePath ?? this.profileImagePath,
@@ -133,9 +135,12 @@ class RegisterModel {
       hasAcceptedTerms: hasAcceptedTerms ?? this.hasAcceptedTerms,
       hasAcceptedGdpr: hasAcceptedGdpr ?? this.hasAcceptedGdpr,
       notifyEventCreation: notifyEventCreation ?? this.notifyEventCreation,
-      notifyParticipationApproval: notifyParticipationApproval ?? this.notifyParticipationApproval,
-      notifyRegistrationUpdate: notifyRegistrationUpdate ?? this.notifyRegistrationUpdate,
-      notifyRelevantUpdates: notifyRelevantUpdates ?? this.notifyRelevantUpdates,
+      notifyParticipationApproval:
+          notifyParticipationApproval ?? this.notifyParticipationApproval,
+      notifyRegistrationUpdate:
+          notifyRegistrationUpdate ?? this.notifyRegistrationUpdate,
+      notifyRelevantUpdates:
+          notifyRelevantUpdates ?? this.notifyRelevantUpdates,
       paymentMethodId: paymentMethodId ?? this.paymentMethodId,
       transactionId: transactionId ?? this.transactionId,
       institutionName: institutionName ?? this.institutionName,
@@ -156,8 +161,16 @@ class RegisterModel {
         'passingYear': int.tryParse(passingYear),
         'presentAddress': presentAddress,
         'permanentAddress': permanentAddress,
-        'academicHistory': academicHistory.isNotEmpty 
-            ? academicHistory 
+        'academicHistory': academicHistory.isNotEmpty
+            ? [
+                for (var i = 0; i < academicHistory.length; i++)
+                  {
+                    ...academicHistory[i],
+                    if (i == 0) 'InstitutionName': institutionName,
+                    if (i == 0) 'IsGHC': true,
+                    if (i > 0) 'IsGHC': false,
+                  }
+              ]
             : [
                 {
                   'InstitutionName': institutionName,
@@ -209,7 +222,8 @@ class RegisterState {
         'EmergencyContactRelation': model.emergencyContactRelation,
         'EmergencyContactPhone': model.emergencyContactPhone,
         'TShirtSize': model.tShirtSize,
-        'PassingYear': model.passingYear.isEmpty ? null : int.tryParse(model.passingYear),
+        'PassingYear':
+            model.passingYear.isEmpty ? null : int.tryParse(model.passingYear),
         'PresentAddress': model.presentAddress,
         'PermanentAddress': model.permanentAddress,
         'Degree': model.degree,
@@ -229,14 +243,24 @@ class RegisterState {
         'PaymentMethodId': model.paymentMethodId,
         'TransactionId': model.transactionId,
         'InstitutionName': model.institutionName,
-        'AcademicHistory': model.academicHistory.isNotEmpty 
-            ? model.academicHistory 
+        'AcademicHistory': model.academicHistory.isNotEmpty
+            ? [
+                for (var i = 0; i < model.academicHistory.length; i++)
+                  {
+                    ...model.academicHistory[i],
+                    if (i == 0) 'InstitutionName': model.institutionName,
+                    if (i == 0) 'IsGHC': true,
+                    if (i > 0) 'IsGHC': false,
+                  }
+              ]
             : [
                 {
                   'InstitutionName': model.institutionName,
                   'Degree': model.degree,
                   'Subject': model.subject,
-                  'PassingYear': model.passingYear.isEmpty ? null : int.tryParse(model.passingYear),
+                  'PassingYear': model.passingYear.isEmpty
+                      ? null
+                      : int.tryParse(model.passingYear),
                   'IsGHC': true,
                 }
               ],
@@ -273,7 +297,8 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
   /// Directly set the wizard to a specific step. Used by tests to bypass form
   /// validation and pre-seed the UI at the desired step (0-indexed).
   void setStep(int step) {
-    assert(step >= 0 && step < _totalSteps, 'Step must be 0–${_totalSteps - 1}');
+    assert(
+        step >= 0 && step < _totalSteps, 'Step must be 0–${_totalSteps - 1}');
     state = state.copyWith(currentStep: step);
   }
 

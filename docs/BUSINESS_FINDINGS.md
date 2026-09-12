@@ -9,12 +9,24 @@ The open rows below are historical findings, not fresh reproductions from the
 current tree and deterministic test data. The follow-up work is tracked in
 `docs/TODO.md` as 82.82–82.86:
 
+The 2026-09-11 mobile validation added current evidence: `flutter pub get`
+resolved the compatible dependency upgrades, the focused date/configuration
+tests passed, the focused shared-control widget file passed 4 tests, and the
+full non-golden Flutter suite passed. `flutter analyze --no-pub` reported no
+errors but retained 36 existing info-level lints. Authenticated Windows
+integration remains blocked before app execution because
+`flutter_secure_storage_windows` cannot find `atlstr.h` and the Firebase SDK
+archive reports ZIP decompression failure. These are host/toolchain blockers,
+not Dart application failures.
+
 - WEB-008, WEB-009, and WEB-010 are grouped under 82.82.
 - WEB-011 and WEB-012 are grouped under 82.83.
 - MOB-BLOCK-001/002/003 and MOB-P4-001/002/003 are grouped under 82.84.
 - MOB-GAP-001, MOB-GAP-003, MOB-P4-007, and MOB-P4-009 are grouped under 82.85.
 - COV-001 through COV-004 are grouped under 82.86. `OV-002` is not a
   separate finding; references to it mean COV-002.
+- Flutter shared-control parity is tracked by 82.87 through 82.92.
+- Mobile golden baseline refresh is intentionally separate under 82.93.
 
 No row is marked fixed from documentation alone. A row may move to
 **Verified** or **Fixed** only after the stated scenario is rerun and the
@@ -243,10 +255,10 @@ Automated evidence: **230/230 Vitest** pass; **43/53** functional Playwright E2E
 
 | ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
 |---|---|---|---|---|---|---|---|---|---|
-| COV-001 | Registration | A1 Haraganga at register | Review `GHCAA.Tests` | Dedicated test: `RegisterAsync` rejects non-GHC academic history | Rule tested on **UpdateProfile** (`MemberService_LinkedIn_Tests.UpdateProfile_WithNoGHCRecord_ShouldThrowException`); no register-path test | API | Minor | Open | Consider adding test; service logic exists in `MemberService.RegisterAsync` L143–146 |
-| COV-002 | Registration | A1 FluentValidation gap | Review `MemberRegistrationValidator.cs` | Validator rejects non-GHC institutions | Validator now applies the same `IsGHC` or Haraganga-name rule as the registration service; API-level 4xx mapping is still unverified | API | Minor | In progress | Focused validator coverage passes; add controller/API negative coverage under TODO 82.86 |
-| COV-003 | Membership | A5 profile gate | Review `MemberServiceTests` | Test that `ApproveMemberAsync` throws when profile &lt; 100% | Tests manually set `IsProfileComplete=true`; no negative gate test | API | Minor | Open | Logic present in `ApproveMemberAsync` L362–365 |
-| COV-004 | Membership | A6 payment gate | Review `MemberServiceTests` | Test approval blocked without payment | Positive path only (payment seeded before approve) | API | Minor | Open | Logic present in `ApproveMemberAsync` L367–376 |
+| COV-001 | Registration | A1 Haraganga at register | `MemberServiceTests.RegisterAsync_WithoutHaragangaAcademicRecord_ShouldRejectRegistration` | Dedicated test: `RegisterAsync` rejects non-GHC academic history | **Pass** — registration service rejects a non-GHC academic history before persistence | API | Minor | Verified | Service rule remains aligned with the validator and update-profile rule |
+| COV-002 | Registration | A1 FluentValidation gap | `MemberRegistrationValidatorTests.AcademicHistory_WhenNoHaragangaRecord_ShouldHaveValidationError` | Validator rejects non-GHC institutions | **Pass** — validator rejects the invalid institution; the API validation pipeline returns model-validation failures as 400 before the controller action | API | Minor | Verified | Keep the validator and registration service rule aligned |
+| COV-003 | Membership | A5 profile gate | `WorkflowTests.ApproveMember_RejectsIncompleteProfile` | Test that `ApproveMemberAsync` throws when profile &lt; 100% | **Pass** — approval throws and leaves the member in `Applied` status | API | Minor | Verified | Approval transaction is not committed |
+| COV-004 | Membership | A6 payment gate | `WorkflowTests.ApproveMember_RejectsMissingCompletedPayment` | Test approval blocked without payment | **Pass** — approval throws and leaves the member in `Applied` status | API | Minor | Verified | A completed registration or membership-fee payment is still required |
 
 ---
 

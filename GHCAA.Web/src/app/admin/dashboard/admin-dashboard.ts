@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { RouterLink } from '@angular/router';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { safeImageUrl } from '../../core/utils/image.util';
@@ -33,7 +34,7 @@ interface PendingRow {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, ImgFallbackDirective, PageHeaderComponent, LoadingPanelComponent, AppCurrencyPipe],
+  imports: [CommonModule, AppDatePipe, RouterLink, DatePipe, ImgFallbackDirective, PageHeaderComponent, LoadingPanelComponent, AppCurrencyPipe],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss'
 })

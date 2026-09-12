@@ -52,6 +52,11 @@ namespace GHCAA.Tests.Workflows
             var financialLoggerMock = new Mock<ILogger<FinancialService>>();
 
             var orgConfigMock = new Mock<IOrgConfigService>();
+            orgConfigMock.Setup(x => x.GetConfigAsync())
+                .ReturnsAsync(new OrgConfigDto
+                {
+                    Branding = new BrandingDto { InstitutionName = "Govt. Haraganga College" }
+                });
 
             _financialService = new FinancialService(
                 _context,
@@ -173,6 +178,83 @@ namespace GHCAA.Tests.Workflows
 
             var finalReg = _context.EventRegistrations.Find(eventReg.Id);
             Assert.That(finalReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
+        }
+
+        [Test]
+        public async Task ApproveMember_RejectsIncompleteProfile()
+        {
+            var member = await CreateAppliedMemberAsync("incomplete-profile@example.com");
+
+            var exception = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await _memberService.ApproveMemberAsync(
+                    member.Id, 1, CancellationToken.None));
+            Assert.That(exception!.Message, Is.EqualTo(
+                "Member profile must be 100% complete before approval."));
+            Assert.That((await _context.Members.FindAsync(member.Id))!.Status,
+                Is.EqualTo(Enums.MembershipStatus.Applied));
+        }
+
+        [Test]
+        public async Task ApproveMember_RejectsMissingCompletedPayment()
+        {
+            var member = await CreateAppliedMemberAsync("unpaid-member@example.com");
+            member.IsProfileComplete = true;
+            member.PhotoPath = "/uploads/test.jpg";
+            member.ProfessionalHistory = new List<ProfessionalRecord>
+            {
+                new ProfessionalRecord
+                {
+                    OrganizationName = "Test Org",
+                    Designation = "Developer",
+                    StartDate = new DateTime(2015, 1, 1),
+                    IsCurrent = true
+                }
+            };
+            await _context.SaveChangesAsync();
+
+            var exception = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await _memberService.ApproveMemberAsync(
+                    member.Id, 1, CancellationToken.None));
+            Assert.That(exception!.Message, Is.EqualTo(
+                "Member must complete the initial payment before approval."));
+            Assert.That((await _context.Members.FindAsync(member.Id))!.Status,
+                Is.EqualTo(Enums.MembershipStatus.Applied));
+        }
+
+        private async Task<Member> CreateAppliedMemberAsync(string email)
+        {
+            var registration = new MemberRegistrationDto
+            {
+                FullName = "Approval Test User",
+                Email = email,
+                MobileNo = "017" + Random.Shared.Next(10000000, 99999999),
+                NID = Random.Shared.NextInt64(1000000000, 9999999999).ToString(),
+                Gender = Enums.Gender.Male,
+                BloodGroup = Enums.BloodGroup.APositive,
+                FatherName = "Father",
+                MotherName = "Mother",
+                DateOfBirth = new DateTime(1990, 1, 1),
+                EmergencyContactName = "Emergency",
+                EmergencyContactRelation = "Sibling",
+                EmergencyContactPhone = "01700000000",
+                PresentAddress = "Dhaka",
+                PermanentAddress = "Dhaka",
+                AcademicHistory = new List<AcademicRecordDto>
+                {
+                    new AcademicRecordDto
+                    {
+                        InstitutionName = "Govt. Haraganga College",
+                        Degree = "HSC",
+                        Subject = "Science",
+                        PassingYear = 2020,
+                        IsGHC = true
+                    }
+                }
+            };
+
+            var memberId = await _memberService.RegisterAsync(
+                registration, null, null, null, CancellationToken.None);
+            return (await _context.Members.FindAsync(memberId))!;
         }
     }
 }

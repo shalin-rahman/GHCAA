@@ -7,6 +7,8 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/password_field.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/services/org_config_service.dart';
+import '../../core/widgets/org_logo.dart';
 import '../../features/auth/auth_service.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -85,6 +87,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final branding = ref.watch(orgBrandingProvider);
+    final localePack = ref.watch(localePackProvider);
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -108,15 +112,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     padding: const EdgeInsets.all(AppTheme.spaceS),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(AppTheme.radiusXL),
-                      child: Image.asset(
-                        'assets/logo.png',
+                      child: const OrgLogo(
                         height: 100,
                         width: 100,
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) => const Icon(
-                            Icons.account_balance_rounded,
-                            size: 60,
-                            color: AppTheme.royalGold),
                       ),
                     ),
                   ),
@@ -124,7 +122,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: AppTheme.spaceL),
                 FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text(AppConfig.organizationAcronym,
+                  child: Text(branding.institutionAcronym,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                           fontFamily: 'Outfit',
@@ -137,7 +135,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    AppConfig.organizationTagline.toUpperCase(),
+                    localePack.tagline.toUpperCase(),
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: AppTheme.royalGold,
@@ -147,7 +145,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: AppTheme.spaceM),
-                Text(AppConfig.organizationName,
+                Text(branding.fullName,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textSecondaryDark)),
                 const SizedBox(height: AppTheme.spaceXXL),

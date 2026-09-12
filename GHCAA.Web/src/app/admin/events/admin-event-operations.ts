@@ -1,5 +1,6 @@
 import { Component, inject, signal, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { EventsService } from '../../core/services/events.service';
@@ -15,7 +16,7 @@ import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 @Component({
   selector: 'app-admin-event-operations',
   standalone: true,
-  imports: [CommonModule, FormsModule, Icon, PageHeaderComponent, AppCurrencyPipe],
+  imports: [CommonModule, AppDatePipe, FormsModule, Icon, PageHeaderComponent, AppCurrencyPipe],
   templateUrl: './admin-event-operations.html',
   styleUrl: './admin-event-operations.scss'
 })

@@ -161,3 +161,14 @@ final orgCurrencyProvider = Provider<OrgCurrency>((ref) {
     error: (_, __) => OrgConfig.offlineDefaults.currency,
   );
 });
+
+/// The active display/input format. Wire serialization is independent of it.
+final orgDateFormatProvider = Provider<DateFormatConfig>((ref) {
+  final configAsync = ref.watch(orgConfigProvider);
+
+  return configAsync.when(
+    data: (config) => config.dateFormat,
+    loading: () => OrgConfig.offlineDefaults.dateFormat,
+    error: (_, __) => OrgConfig.offlineDefaults.dateFormat,
+  );
+});

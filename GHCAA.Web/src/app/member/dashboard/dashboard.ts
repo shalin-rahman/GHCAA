@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { RouterLink } from '@angular/router';
 import { AlertService } from '../../core/services/alert.service';
 import { ProfileService } from '../../core/services/profile.service';
@@ -15,7 +16,7 @@ import { getMembershipTypeLabel } from '../../core/constants/app.constants';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, Icon, ImgFallbackDirective],
+  imports: [CommonModule, AppDatePipe, RouterLink, DatePipe, Icon, ImgFallbackDirective],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })

@@ -13,8 +13,10 @@ interface ProfileFixture {
     schemaVersion: number;
     branding: { shortName: string; primaryColor: string };
     currency: { code: string; symbol: string; name: string };
+    enabledGatewayMethods: string[];
     features: { enableEvents: boolean };
     localization: {
+      dateFormat: 'dd-MM-yyyy' | 'MM/dd/yyyy';
       defaultLocale: string;
       locales: Record<string, { membershipTypeLabels: Record<string, string> }>;
     };
@@ -29,8 +31,10 @@ const PROFILES: ProfileFixture[] = [
       schemaVersion: 1,
       branding: { shortName: 'GHCAA', primaryColor: '#121212' },
       currency: { code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka' },
+      enabledGatewayMethods: [],
       features: { enableEvents: true },
       localization: {
+        dateFormat: 'dd-MM-yyyy',
         defaultLocale: 'en',
         locales: {
           en: { membershipTypeLabels: { Guest: 'Guest Member' } },
@@ -46,8 +50,10 @@ const PROFILES: ProfileFixture[] = [
       schemaVersion: 1,
       branding: { shortName: 'Alumni Association', primaryColor: '#121212' },
       currency: { code: 'USD', symbol: '$', name: 'US Dollar' },
+      enabledGatewayMethods: [],
       features: { enableEvents: true },
       localization: {
+        dateFormat: 'MM/dd/yyyy',
         defaultLocale: 'en',
         locales: {
           en: { membershipTypeLabels: { General: 'General' } },
@@ -90,6 +96,8 @@ for (const profile of PROFILES) {
       // Assert currency/locale — the part 62.37 checks downstream code against
       expect(config.currency.code).toBe(profile.config.currency.code);
       expect(config.currency.symbol).toBe(profile.config.currency.symbol);
+      expect(config.enabledGatewayMethods).toEqual(profile.config.enabledGatewayMethods);
+      expect(config.localization.dateFormat).toBe(profile.config.localization.dateFormat);
 
       // Assert localization required keys, scoped to what this profile actually ships
       expect(config.localization.defaultLocale).toBe(profile.config.localization.defaultLocale);
@@ -101,6 +109,44 @@ for (const profile of PROFILES) {
       for (const [key, label] of Object.entries(labels.membershipTypeLabels)) {
         expect(config.localization.locales[firstLocale].membershipTypeLabels[key]).toBe(label);
       }
+    });
+
+    test('persists the selected date format across a browser reload', async ({ page }) => {
+      let storedConfig = structuredClone(profile.config);
+      await page.route('**/api/config', async (route) => {
+        if (route.request().method() === 'PUT') {
+          storedConfig = await route.request().postDataJSON();
+          await route.fulfill({ status: 204, body: '' });
+          return;
+        }
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(storedConfig),
+        });
+      });
+
+      await page.goto('/');
+      await page.evaluate(async (dateFormat) => {
+        const response = await fetch('/api/config', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...await (await fetch('/api/config')).json(),
+            localization: { dateFormat, defaultLocale: 'en', locales: {} },
+          }),
+        });
+        if (!response.ok) throw new Error(`Config update failed: ${response.status}`);
+      }, profile.config.localization.dateFormat);
+
+      const configResponse = page.waitForResponse(
+        (request) => request.url().includes('/api/config') && request.request().method() === 'GET'
+      );
+      await page.reload();
+      const response = await configResponse;
+      expect((await response.json()).localization.dateFormat)
+        .toBe(profile.config.localization.dateFormat);
+      expect(storedConfig.localization.dateFormat).toBe(profile.config.localization.dateFormat);
     });
 
     test('admin can fetch config via UI route', async ({ page }) => {

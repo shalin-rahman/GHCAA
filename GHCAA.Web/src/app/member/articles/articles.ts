@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { NewsService } from '../../core/services/news.service';
 import { NewsPost, SubmissionStatus } from '../../core/models/business.models';
@@ -21,7 +22,7 @@ import { safeImageUrl } from '../../core/utils/image.util';
 @Component({
   selector: 'app-member-articles',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective],
   templateUrl: './articles.html',
   styleUrl: './articles.scss'
 })

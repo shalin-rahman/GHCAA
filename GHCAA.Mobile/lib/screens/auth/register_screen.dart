@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
+import '../../core/widgets/app_date_picker.dart';
+import '../../core/widgets/app_dropdown_field.dart';
+import '../../core/widgets/upload_surface.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/constants/app_constants.dart';
@@ -62,11 +66,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     final isActive = i <= currentStep;
                     return Expanded(
                       child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceXS),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: AppTheme.spaceXS),
                         height: AppTheme.spaceXS,
                         decoration: BoxDecoration(
                           color: isActive ? AppTheme.royalGold : Colors.white10,
-                          borderRadius: BorderRadius.circular(AppTheme.radiusXS / 2),
+                          borderRadius:
+                              BorderRadius.circular(AppTheme.radiusXS / 2),
                         ),
                       ),
                     );
@@ -92,22 +98,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: _isLoading
-                          ? Center(child: LogoSpinner.small())
-                          : ElevatedButton(
-                              onPressed: () async {
-                                if (_formKey.currentState!.validate()) {
-                                  if (!registerState.isLastStep) {
-                                    ref.read(registerWizardProvider.notifier).nextStep();
-                                  } else {
-                                    await _submitRegistration(registerState);
+                            ? Center(child: LogoSpinner.small())
+                            : ElevatedButton(
+                                onPressed: () async {
+                                  if (_formKey.currentState!.validate()) {
+                                    if (!registerState.isLastStep) {
+                                      ref
+                                          .read(registerWizardProvider.notifier)
+                                          .nextStep();
+                                    } else {
+                                      await _submitRegistration(registerState);
+                                    }
                                   }
-                                }
-                              },
-                              child: Text(
-                                registerState.isLastStep ? 'Finalize Registry' : 'Continue Assessment →',
-                                style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
+                                },
+                                child: Text(
+                                  registerState.isLastStep
+                                      ? 'Finalize Registry'
+                                      : 'Continue Assessment →',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 1),
+                                ),
                               ),
-                            ),
                       ),
                     ],
                   ),
@@ -123,10 +135,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   // ─── Step Router ─────────────────────────────────────────────────────────
   Widget _buildStepContent(BuildContext context, RegisterState state) {
     switch (state.currentStep) {
-      case 0: return _buildStep1Identity(context, state);
-      case 1: return _buildStep2Background(context, state);
-      case 2: return _buildStep3Registry(context, state);
-      default: return const SizedBox.shrink();
+      case 0:
+        return _buildStep1Identity(context, state);
+      case 1:
+        return _buildStep2Background(context, state);
+      case 2:
+        return _buildStep3Registry(context, state);
+      default:
+        return const SizedBox.shrink();
     }
   }
 
@@ -139,36 +155,47 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         _buildTextField(
           label: 'Full Legal Name (SSC/HSC Record) *',
           initialValue: state.data['FullName'],
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('FullName', v),
+          onChanged: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('FullName', v),
         ),
         _gap(),
         _buildTextField(
           label: "Father's Name *",
           initialValue: state.data['FatherName'],
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('FatherName', v),
+          onChanged: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('FatherName', v),
         ),
         _gap(),
         _buildTextField(
           label: "Mother's Name *",
           initialValue: state.data['MotherName'],
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('MotherName', v),
+          onChanged: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('MotherName', v),
         ),
         _gap(),
         _buildTextField(
           label: 'National ID (NID) *',
           initialValue: state.data['NID'],
           keyboardType: TextInputType.number,
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('NID', v),
+          onChanged: (v) =>
+              ref.read(registerWizardProvider.notifier).updateData('NID', v),
         ),
         _gap(),
         _buildTextField(
           label: 'Verified Mobile *',
           initialValue: state.data['MobileNo'],
           keyboardType: TextInputType.phone,
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('MobileNo', v),
+          onChanged: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('MobileNo', v),
           validator: (v) {
             if (v == null || v.isEmpty) return 'Mobile number is required';
-            if (!RegExp(r'^01[3-9]\d{8}$').hasMatch(v)) return 'Enter a valid BD mobile number (e.g. 017XXXXXXXX)';
+            if (!RegExp(r'^01[3-9]\d{8}$').hasMatch(v)) {
+              return 'Enter a valid BD mobile number (e.g. 017XXXXXXXX)';
+            }
             return null;
           },
         ),
@@ -177,43 +204,56 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           label: 'Primary Email (Login) *',
           initialValue: state.data['Email'],
           keyboardType: TextInputType.emailAddress,
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('Email', v),
+          onChanged: (v) =>
+              ref.read(registerWizardProvider.notifier).updateData('Email', v),
           validator: (v) {
             if (v == null || v.isEmpty) return 'Email is required';
-            if (!RegExp(r'^[\w.-]+@[\w.-]+\.\w+$').hasMatch(v)) return 'Enter a valid email address';
+            if (!RegExp(r'^[\w.-]+@[\w.-]+\.\w+$').hasMatch(v)) {
+              return 'Enter a valid email address';
+            }
             return null;
           },
         ),
         _buildDateField(
           label: 'Date Of Birth (Registry Record) *',
           value: state.data['DateOfBirth'],
-          onPicked: (v) => ref.read(registerWizardProvider.notifier).updateData('DateOfBirth', v),
+          onPicked: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('DateOfBirth', v),
         ),
         const Divider(color: Colors.white10),
         _buildAsyncDropdown(
           label: 'Blood Group *',
           group: LookupGroups.bloodGroup,
           value: state.data['BloodGroup'],
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('BloodGroup', v),
+          onChanged: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('BloodGroup', v),
         ),
         _gap(),
         _buildAsyncDropdown(
           label: 'T-Shirt Size *',
           group: 'TShirtSize',
           value: state.data['TShirtSize'],
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('TShirtSize', v),
+          onChanged: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('TShirtSize', v),
         ),
         _gap(),
         _buildTextField(
           label: 'Present Resident Address *',
           initialValue: state.data['PresentAddress'],
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('PresentAddress', v),
+          onChanged: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('PresentAddress', v),
         ),
         _gap(),
         _buildTextField(
           label: 'Permanent Family Residence *',
           initialValue: state.data['PermanentAddress'],
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('PermanentAddress', v),
+          onChanged: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('PermanentAddress', v),
         ),
       ],
     );
@@ -228,9 +268,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         _sectionTitle('Academic Records'),
         _buildTextField(
           label: 'Educational Institution *',
-          initialValue: state.data['InstitutionName'],
-          hintText: 'Default: ${ref.watch(orgBrandingProvider).institutionName}',
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('InstitutionName', v),
+          initialValue: ref.watch(orgBrandingProvider).institutionName,
+          hintText:
+              'Default: ${ref.watch(orgBrandingProvider).institutionName}',
+          readOnly: true,
+          onChanged: (_) {},
         ),
         _gap(),
         _buildAsyncDropdown(
@@ -239,7 +281,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           value: degree,
           onChanged: (v) {
             ref.read(registerWizardProvider.notifier).updateData('Degree', v);
-            ref.read(registerWizardProvider.notifier).updateData('Subject', null);
+            ref
+                .read(registerWizardProvider.notifier)
+                .updateData('Subject', null);
           },
         ),
         _gap(),
@@ -247,41 +291,53 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           label: 'Major Cluster / Subject *',
           group: degree == 'HSC' ? 'HSCSubject' : 'GeneralSubject',
           value: state.data['Subject'],
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('Subject', v),
+          onChanged: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('Subject', v),
         ),
         _gap(),
         _buildAsyncDropdown(
           label: 'Passing Year *',
           group: 'PassingYear',
           value: state.data['PassingYear']?.toString(),
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('PassingYear', int.tryParse(v ?? '')),
+          onChanged: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('PassingYear', int.tryParse(v ?? '')),
         ),
         const Divider(color: Colors.white10),
         _buildTextField(
           label: 'Current Profession / Designation',
           initialValue: state.data['Designation'],
           required: false,
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('Designation', v),
+          onChanged: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('Designation', v),
         ),
         _gap(),
         _sectionTitle('Emergency Protocol Personnel'),
         _buildTextField(
           label: 'Emergency Contact Person Legal Name *',
           initialValue: state.data['EmergencyContactName'],
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('EmergencyContactName', v),
+          onChanged: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('EmergencyContactName', v),
         ),
         _gap(),
         _buildTextField(
           label: 'Consanguinity / Relationship *',
           initialValue: state.data['EmergencyContactRelation'],
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('EmergencyContactRelation', v),
+          onChanged: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('EmergencyContactRelation', v),
         ),
         _gap(),
         _buildTextField(
           label: 'Direct Phone Channel *',
           initialValue: state.data['EmergencyContactPhone'],
           keyboardType: TextInputType.phone,
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('EmergencyContactPhone', v),
+          onChanged: (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('EmergencyContactPhone', v),
         ),
         const SizedBox(height: AppConstants.paddingExtraLarge),
         _sectionTitle('Registry Filing & Subscription'),
@@ -289,14 +345,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           label: 'Formal Profile Photo *',
           icon: Icons.person_outline,
           value: state.data['ProfileImagePath'],
-          onPicked: (path) => ref.read(registerWizardProvider.notifier).updateData('ProfileImagePath', path),
+          onPicked: (path) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('ProfileImagePath', path),
         ),
         _gap(),
         _buildPickerField(
           label: 'Academic Certificate Proof',
           icon: Icons.badge_outlined,
           value: state.data['NidPhotoPath'],
-          onPicked: (path) => ref.read(registerWizardProvider.notifier).updateData('NidPhotoPath', path),
+          onPicked: (path) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('NidPhotoPath', path),
         ),
       ],
     );
@@ -326,23 +386,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           builder: (context, snapshot) {
             final options = snapshot.data ?? [];
             final selectedValue = state.data['PaymentMethodId']?.toString();
-            final selectedMethod = options.firstWhere((o) => o['value'] == selectedValue, orElse: () => {});
+            final selectedMethod = options.firstWhere(
+                (o) => o['value'] == selectedValue,
+                orElse: () => {});
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                DropdownButtonFormField<String>(
-                  initialValue: options.any((o) => o['value'] == selectedValue) ? selectedValue : null,
-                  decoration: const InputDecoration(
-                    labelText: 'Payment Method *',
-                    border: OutlineInputBorder(),
-                  ),
-                  dropdownColor: AppTheme.midnightSurface,
-                  items: options.map((o) => DropdownMenuItem(value: o['value'], child: Text(o['label']!))).toList(),
+                AppDropdownField<String>(
+                  value: options.any((o) => o['value'] == selectedValue)
+                      ? selectedValue
+                      : null,
+                  labelText: 'Payment Method *',
+                  items: options
+                      .map((o) => DropdownMenuItem(
+                          value: o['value'], child: Text(o['label']!)))
+                      .toList(),
                   onChanged: (v) {
-                    ref.read(registerWizardProvider.notifier).updateData('PaymentMethodId', int.tryParse(v ?? '0'));
+                    ref
+                        .read(registerWizardProvider.notifier)
+                        .updateData('PaymentMethodId', int.tryParse(v ?? '0'));
                   },
-                  validator: (v) => (v == null || v == '0') ? 'Please select a payment method' : null,
+                  validator: (v) => (v == null || v == '0')
+                      ? 'Please select a payment method'
+                      : null,
                 ),
                 if (selectedMethod.isNotEmpty) ...[
                   const SizedBox(height: AppTheme.spaceS),
@@ -351,22 +418,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     decoration: BoxDecoration(
                       color: AppTheme.royalGold.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                      border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.2)),
+                      border: Border.all(
+                          color: AppTheme.royalGold.withValues(alpha: 0.2)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.info_outline, color: AppTheme.royalGold, size: 16),
+                            Icon(Icons.info_outline,
+                                color: AppTheme.royalGold, size: 16),
                             SizedBox(width: AppTheme.spaceS),
-                            Text('Payment Instructions', style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, fontSize: 12)),
+                            Text('Payment Instructions',
+                                style: TextStyle(
+                                    color: AppTheme.royalGold,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12)),
                           ],
                         ),
                         const SizedBox(height: AppTheme.spaceS),
                         Text(
-                          selectedMethod['instructions'] ?? 'Follow standard procedure.',
-                          style: const TextStyle(fontSize: 12, color: Colors.white70, height: 1.4),
+                          selectedMethod['instructions'] ??
+                              'Follow standard procedure.',
+                          style: const TextStyle(
+                              fontSize: 12, color: Colors.white70, height: 1.4),
                         ),
                       ],
                     ),
@@ -376,7 +451,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     _buildTextField(
                       label: 'Transaction ID / Reference *',
                       initialValue: state.data['TransactionId'],
-                      onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('TransactionId', v),
+                      onChanged: (v) => ref
+                          .read(registerWizardProvider.notifier)
+                          .updateData('TransactionId', v),
                     ),
                     _gap(),
                   ],
@@ -385,7 +462,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       label: 'Payment Receipt / Screenshot *',
                       icon: Icons.receipt_long_outlined,
                       value: state.data['PaymentProofPath'],
-                      onPicked: (path) => ref.read(registerWizardProvider.notifier).updateData('PaymentProofPath', path),
+                      onPicked: (path) => ref
+                          .read(registerWizardProvider.notifier)
+                          .updateData('PaymentProofPath', path),
                     ),
                     _gap(),
                   ],
@@ -410,10 +489,26 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             final preferences = snapshot.data?.isNotEmpty == true
                 ? snapshot.data!
                 : [
-                    {'value': 'NotifyEventCreation', 'label': 'Event Announcements', 'description': 'When new events are published'},
-                    {'value': 'NotifyParticipationApproval', 'label': 'Participation Approvals', 'description': 'Updates on event attendance status'},
-                    {'value': 'NotifyRegistrationUpdate', 'label': 'Registry Updates', 'description': 'Status changes on membership application'},
-                    {'value': 'NotifyRelevantUpdates', 'label': 'Official Bulletins', 'description': 'News and relevant alumni updates'},
+                    {
+                      'value': 'NotifyEventCreation',
+                      'label': 'Event Announcements',
+                      'description': 'When new events are published'
+                    },
+                    {
+                      'value': 'NotifyParticipationApproval',
+                      'label': 'Participation Approvals',
+                      'description': 'Updates on event attendance status'
+                    },
+                    {
+                      'value': 'NotifyRegistrationUpdate',
+                      'label': 'Registry Updates',
+                      'description': 'Status changes on membership application'
+                    },
+                    {
+                      'value': 'NotifyRelevantUpdates',
+                      'label': 'Official Bulletins',
+                      'description': 'News and relevant alumni updates'
+                    },
                   ];
 
             return Column(
@@ -422,11 +517,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 final currentVal = state.data[key] ?? true;
                 return SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: Text(p['label']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                  subtitle: Text(p['description'] ?? '', style: const TextStyle(fontSize: 11, color: Colors.white54)),
+                  title: Text(p['label']!,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 13)),
+                  subtitle: Text(p['description'] ?? '',
+                      style:
+                          const TextStyle(fontSize: 11, color: Colors.white54)),
                   value: currentVal is bool ? currentVal : true,
                   activeThumbColor: AppTheme.royalGold,
-                  onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData(key, v),
+                  onChanged: (v) => ref
+                      .read(registerWizardProvider.notifier)
+                      .updateData(key, v),
                 );
               }).toList(),
             );
@@ -434,33 +535,44 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ),
         const Divider(color: Colors.white10, height: AppTheme.spaceXXL),
         _sectionTitle('Constitution & Consent'),
-        const Center(child: Icon(Icons.gavel_rounded, size: 48, color: AppTheme.royalGold)),
+        const Center(
+            child:
+                Icon(Icons.gavel_rounded, size: 48, color: AppTheme.royalGold)),
         const SizedBox(height: AppTheme.spaceS),
         _buildConsentCheckbox(
           'I have read and understood the constitution and the Broadened Terms and Conditions of Registration, and I irrevocably agree to be bound by them.',
           state.data['HasAcceptedTerms'] ?? false,
-          (v) => ref.read(registerWizardProvider.notifier).updateData('HasAcceptedTerms', v),
+          (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('HasAcceptedTerms', v),
         ),
         _buildConsentCheckbox(
           "I explicitly consent to the Association's Data Privacy & GDPR protocols for processing my personal information as described in the directory and privacy sections.",
           state.data['HasAcceptedGdpr'] ?? false,
-          (v) => ref.read(registerWizardProvider.notifier).updateData('HasAcceptedGdpr', v),
+          (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('HasAcceptedGdpr', v),
         ),
         _buildConsentCheckbox(
           'I solemnly affirm that the data provided is accurate. I pledge to uphold the GHCAA Constitution and maintain association decorum.',
           state.data['HasAffirmed'] ?? false,
-          (v) => ref.read(registerWizardProvider.notifier).updateData('HasAffirmed', v),
+          (v) => ref
+              .read(registerWizardProvider.notifier)
+              .updateData('HasAffirmed', v),
         ),
       ],
     );
   }
 
-  Widget _buildConsentCheckbox(String label, bool value, Function(bool?) onChanged) {
+  Widget _buildConsentCheckbox(
+      String label, bool value, Function(bool?) onChanged) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppTheme.spaceS),
       child: CheckboxListTile(
         contentPadding: EdgeInsets.zero,
-        title: Text(label, style: const TextStyle(fontSize: 11, color: Colors.white70, height: 1.4)),
+        title: Text(label,
+            style: const TextStyle(
+                fontSize: 11, color: Colors.white70, height: 1.4)),
         value: value,
         activeColor: AppTheme.royalGold,
         controlAffinity: ListTileControlAffinity.leading,
@@ -471,9 +583,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   // ─── Helpers ─────────────────────────────────────────────────────────────
   Widget _sectionTitle(String title) => Padding(
-    padding: const EdgeInsets.only(bottom: AppConstants.paddingMedium),
-    child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
-  );
+        padding: const EdgeInsets.only(bottom: AppConstants.paddingMedium),
+        child: Text(title,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.white)),
+      );
 
   Widget _gap() => const Divider(color: Colors.white10);
 
@@ -486,37 +602,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(), style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold)),
+        Text(label.toUpperCase(),
+            style: const TextStyle(
+                color: AppTheme.royalGold,
+                fontSize: 10,
+                fontWeight: FontWeight.bold)),
         const SizedBox(height: AppTheme.spaceXS),
-        InkWell(
-          onTap: () async {
+        UploadSurface(
+          file: value == null ? null : File(value),
+          label: 'Tap to select file...',
+          onPick: () async {
             final file = await ref.read(fileServiceProvider).pickImage();
-            if (file != null) {
-              onPicked(file.path);
-            }
+            if (file != null) onPicked(file.path);
           },
-          borderRadius: BorderRadius.circular(AppTheme.radiusS),
-          child: Container(
-            padding: const EdgeInsets.all(AppTheme.spaceM),
-            decoration: BoxDecoration(
-              border: Border.all(color: value != null ? AppTheme.royalGold.withValues(alpha: 0.5) : Colors.white10),
-              borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            ),
-            child: Row(
-              children: [
-                Icon(icon, color: value != null ? AppTheme.royalGold : Colors.white30, size: 20),
-                const SizedBox(width: AppTheme.spaceM),
-                Expanded(
-                  child: Text(
-                    value != null ? value.split('/').last : 'Tap to select file...',
-                    style: TextStyle(color: value != null ? Colors.white : Colors.white30, fontSize: 13),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (value != null) const Icon(Icons.check_circle, color: Colors.greenAccent, size: 16),
-              ],
-            ),
-          ),
         ),
       ],
     );
@@ -532,10 +630,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       future: ref.read(dropdownDataProvider).getOptions(group),
       builder: (context, snapshot) {
         final options = snapshot.data ?? [];
-        final validValue = options.any((e) => e['value'] == value) ? value : null;
-        return DropdownButtonFormField<String>(
-          initialValue: validValue,
-          items: options.map((o) => DropdownMenuItem(value: o['value'], child: Text(o['label']!))).toList(),
+        final validValue =
+            options.any((e) => e['value'] == value) ? value : null;
+        return AppDropdownField<String>(
+          value: validValue,
+          items: options
+              .map((o) =>
+                  DropdownMenuItem(value: o['value'], child: Text(o['label']!)))
+              .toList(),
           onChanged: onChanged,
           validator: (v) => v == null ? 'Please select $label' : null,
         );
@@ -550,18 +652,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     String? hintText,
     TextInputType keyboardType = TextInputType.text,
     bool required = true,
+    bool readOnly = false,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
       initialValue: initialValue,
       decoration: InputDecoration(
-        labelText: label, 
+        labelText: label,
         hintText: hintText,
         border: InputBorder.none,
       ),
       keyboardType: keyboardType,
+      readOnly: readOnly,
       onChanged: onChanged,
-      validator: validator ?? (required ? (v) => (v == null || v.isEmpty) ? 'This field is required' : null : null),
+      validator: validator ??
+          (required
+              ? (v) =>
+                  (v == null || v.isEmpty) ? 'This field is required' : null
+              : null),
     );
   }
 
@@ -570,38 +678,42 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     String? value,
     required Function(String) onPicked,
   }) {
+    final dateFormat = ref.watch(orgDateFormatProvider);
     return InkWell(
       onTap: () async {
-        final date = await showDatePicker(
+        final date = await showAppDatePicker(
           context: context,
-          initialDate: value != null ? AppUtils.parseDate(value) ?? DateTime.now().subtract(const Duration(days: 365 * 25)) : DateTime.now().subtract(const Duration(days: 365 * 25)),
+          initialDate: value != null
+              ? AppUtils.parseDate(value, format: dateFormat.identifier) ??
+                  DateTime.now().subtract(const Duration(days: 365 * 25))
+              : DateTime.now().subtract(const Duration(days: 365 * 25)),
           firstDate: DateTime(1940),
           lastDate: DateTime.now().subtract(const Duration(days: 365 * 16)),
-          builder: (ctx, child) => Theme(
-            data: Theme.of(ctx).copyWith(
-              colorScheme: const ColorScheme.dark(primary: AppTheme.royalGold),
-            ),
-            child: child!,
-          ),
         );
         if (date != null) {
-          onPicked(AppUtils.formatDate(date));
+          onPicked(AppUtils.formatDate(date, format: dateFormat.identifier));
         }
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM, vertical: AppTheme.spaceM),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppTheme.spaceM, vertical: AppTheme.spaceM),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppTheme.radiusXS),
           border: Border.all(color: Colors.white24),
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today_outlined, size: 18, color: AppTheme.royalGold),
+            const Icon(Icons.calendar_today_outlined,
+                size: 18, color: AppTheme.royalGold),
             const SizedBox(width: AppTheme.spaceM),
             Expanded(
               child: Text(
-                value != null ? AppUtils.formatDate(value) : label,
-                style: TextStyle(color: value != null ? Colors.white : Colors.white54, fontSize: 13),
+                value != null
+                    ? AppUtils.formatDate(value, format: dateFormat.identifier)
+                    : label,
+                style: TextStyle(
+                    color: value != null ? Colors.white : Colors.white54,
+                    fontSize: 13),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -613,33 +725,48 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> _submitRegistration(RegisterState registerState) async {
     // Enforce terms acceptance before advancing
-    if (registerState.data['HasAcceptedTerms'] != true || registerState.data['HasAcceptedGdpr'] != true) {
+    if (registerState.data['HasAcceptedTerms'] != true ||
+        registerState.data['HasAcceptedGdpr'] != true) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please accept all terms and privacy policies to continue.'), backgroundColor: Colors.redAccent),
+        const SnackBar(
+            content: Text(
+                'Please accept all terms and privacy policies to continue.'),
+            backgroundColor: Colors.redAccent),
       );
       return;
     }
 
     setState(() => _isLoading = true);
     try {
-      final error = await ref.read(authServiceProvider).register(registerState.model.toJson());
+      final institutionName = ref.read(orgBrandingProvider).institutionName;
+      final model = registerState.model.copyWith(
+        institutionName: institutionName,
+      );
+      final error =
+          await ref.read(authServiceProvider).register(model.toJson());
       if (!mounted) return;
 
       if (error == null) {
         ref.read(registerWizardProvider.notifier).reset();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Application submitted! Check your email for verification.')),
+          const SnackBar(
+              content: Text(
+                  'Application submitted! Check your email for verification.')),
         );
         context.go('/login');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Submission failed: $error'), backgroundColor: Colors.redAccent),
+          SnackBar(
+              content: Text('Submission failed: $error'),
+              backgroundColor: Colors.redAccent),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Connection error: $e'), backgroundColor: Colors.redAccent),
+          SnackBar(
+              content: Text('Connection error: $e'),
+              backgroundColor: Colors.redAccent),
         );
       }
     } finally {

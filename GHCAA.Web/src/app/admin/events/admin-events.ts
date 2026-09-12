@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
@@ -35,7 +36,7 @@ function toLocalDateTimeInputValue(value: string | Date): string {
 @Component({
     selector: 'app-admin-events',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, ExportButtonsComponent, PaginationComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LoadingPanelComponent, ModalHeaderComponent, AppCurrencyPipe],
+    imports: [CommonModule, AppDatePipe, FormsModule, ReactiveFormsModule, ExportButtonsComponent, PaginationComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LoadingPanelComponent, ModalHeaderComponent, AppCurrencyPipe],
     templateUrl: './admin-events.html',
     styleUrl: './admin-events.scss'
 })
@@ -449,4 +450,3 @@ export class AdminEvents implements OnInit {
         this.activeReceiptUrl.set(null);
     }
 }
-

@@ -95,7 +95,7 @@
                         </div>
                     </td>
                     <td class="title-cell">{{ gallery.title }}</td>
-                    <td>{{ gallery.eventDate | date:'dd-MM-yyyy' }}</td>
+                    <td>{{ gallery.eventDate | appDate }}</td>
                     <td>{{ gallery.location || '—' }}</td>
                     <td>{{ gallery.photos.length }}</td>
                     <td>
@@ -153,7 +153,7 @@
                 </div>
 
                 <div class="album-meta">
-                    <div>📅 {{ gallery.eventDate | date:'dd-MM-yyyy' }}</div>
+                    <div>📅 {{ gallery.eventDate | appDate }}</div>
                     @if (gallery.location) {
                     <div>📍 {{ gallery.location }}</div>
                     }
@@ -183,7 +183,7 @@
         <div class="p-8 flex justify-between items-center border-b border-primary/10">
             <div class="header-info">
                 <h3 class="text-accent">{{ gallery.title }}</h3>
-                <small class="opacity-50">{{ gallery.eventDate | date:'dd-MM-yyyy' }} • {{ gallery.location }}</small>
+                <small class="opacity-50">{{ gallery.eventDate | appDate }} • {{ gallery.location }}</small>
             </div>
             <button (click)="closeDetail()" class="text-2xl opacity-50 hover:opacity-100">✕</button>
         </div>
@@ -214,7 +214,7 @@
                         <button (click)="removePhoto(photo.id)" class="remove-btn" title="Remove Photo">
                             ✕
                         </button>
-                        <small>{{ photo.uploadedAt | date:'dd-MM-yyyy' }}</small>
+                        <small>{{ photo.uploadedAt | appDate }}</small>
                     </div>
                 </div>
                 } @empty {

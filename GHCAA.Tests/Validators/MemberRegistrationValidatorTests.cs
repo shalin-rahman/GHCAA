@@ -67,7 +67,7 @@ public class MemberRegistrationValidatorTests
     #endregion
 
     [Test]
-    public void AcademicHistory_WhenNoHaragangaRecord_ShouldHaveValidationError()
+    public void AcademicHistory_WhenFirstRecordIsNotInstitutional_ShouldHaveValidationError()
     {
         var dto = CreateValidDto();
         dto.AcademicHistory[0].IsGHC = false;
@@ -76,11 +76,11 @@ public class MemberRegistrationValidatorTests
         var result = _validator.TestValidate(dto);
 
         result.ShouldHaveValidationErrorFor(x => x.AcademicHistory)
-            .WithErrorMessage("At least one academic record must be from Govt. Haraganga College");
+            .WithErrorMessage("The first academic record must be the institutional record.");
     }
 
     [Test]
-    public void AcademicHistory_WhenHaragangaRecordExists_ShouldNotHaveInstitutionValidationError()
+    public void AcademicHistory_WhenFirstRecordIsInstitutional_ShouldNotHaveValidationError()
     {
         var dto = CreateValidDto();
 
@@ -90,14 +90,15 @@ public class MemberRegistrationValidatorTests
     }
 
     [Test]
-    public void AcademicHistory_WhenInstitutionNameContainsHaraganga_ShouldNotRequireIsGhcFlag()
+    public void AcademicHistory_WhenFirstRecordIsNotInstitutionalEvenWithConfiguredName_ShouldHaveValidationError()
     {
         var dto = CreateValidDto();
         dto.AcademicHistory[0].IsGHC = false;
 
         var result = _validator.TestValidate(dto);
 
-        result.ShouldNotHaveValidationErrorFor(x => x.AcademicHistory);
+        result.ShouldHaveValidationErrorFor(x => x.AcademicHistory)
+            .WithErrorMessage("The first academic record must be the institutional record.");
     }
 
     #region FullName Tests

@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ContactService } from '../../core/services/contact.service';
@@ -13,7 +14,7 @@ import { ModalHeaderComponent } from '../../common/modal-header/modal-header.com
 @Component({
   selector: 'app-contact-messages',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ModalHeaderComponent],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ModalHeaderComponent],
   templateUrl: './contact-messages.html',
   styleUrl: './contact-messages.scss'
 })

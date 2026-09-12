@@ -248,13 +248,10 @@ namespace GHCAA.Infrastructure.Services
             member.NotifyCommitteeChanges = dto.NotifyCommitteeChanges;
 
             // Handle Academic History
-            if (dto.AcademicHistory != null && dto.AcademicHistory.Any())
+            if (dto.AcademicHistory != null)
             {
-                // Validation: At least one must be from Govt. Haraganga College
-                if (!dto.AcademicHistory.Any(a => a.IsGHC || (a.InstitutionName != null && a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase))))
-                {
-                    throw new InvalidOperationException("At least one academic record must be from Govt. Haraganga College.");
-                }
+                var institutionName = await GetConfiguredInstitutionNameAsync(cancellationToken);
+                EnforceInstitutionalAcademicRecord(dto.AcademicHistory, institutionName);
 
                 // Clear existing and replace with new history
                 member.AcademicHistory.Clear();
@@ -267,7 +264,7 @@ namespace GHCAA.Infrastructure.Services
                         Subject = a.Subject ?? "",
                         AdmissionYear = a.AdmissionYear,
                         PassingYear = a.PassingYear ?? 0,
-                        IsGHC = a.IsGHC || (a.InstitutionName != null && a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase)),
+                        IsGHC = a.IsGHC,
                         Result = a.Result
                     });
                 }

@@ -14,16 +14,20 @@ namespace GHCAA.Infrastructure.Services
     public class AssistantService : IAssistantService
     {
         private readonly ApplicationDbContext _db;
+        private readonly IOrgConfigService _orgConfigService;
 
-        public AssistantService(ApplicationDbContext db)
+        public AssistantService(ApplicationDbContext db, IOrgConfigService orgConfigService)
         {
             _db = db;
+            _orgConfigService = orgConfigService;
         }
 
         public async Task<AssistantResponseDto> AskAsync(string query, CancellationToken cancellationToken = default)
         {
             query = query.ToLower();
             var response = new AssistantResponseDto();
+            var institutionName =
+                (await _orgConfigService.GetConfigAsync()).Branding.InstitutionName;
 
             // Basic Intent Identification (Simulated NLP)
             bool isSearchAlumni = query.Contains("find") || query.Contains("search") || query.Contains("who") || query.Contains("alumni") || query.Contains("member");
@@ -50,7 +54,7 @@ namespace GHCAA.Infrastructure.Services
 
                 if (results.Any())
                 {
-                    response.Answer = $"I found {results.Count} members matching your criteria. Here are the top Haragangians:";
+                    response.Answer = $"I found {results.Count} members matching your criteria. Here are the top {institutionName} alumni:";
                     response.FoundMembers = results.Select(m => new MemberProfileDto
                     {
                         Id = m.Id,
@@ -68,7 +72,7 @@ namespace GHCAA.Infrastructure.Services
             }
             else if (query.Contains("help") || query.Contains("what can you do"))
             {
-                response.Answer = "I'm your Haraganga AI Assistant! You can ask me to find specific alumni, e.g., 'Find members from 2010' or 'Search for alumni in Corporate sector'. I can also help with association rules or governance if you have questions!";
+                response.Answer = $"I'm your {institutionName} alumni assistant. You can ask me to find specific alumni, e.g., 'Find members from 2010' or 'Search for alumni in Corporate sector'. I can also help with association rules or governance if you have questions!";
             }
             else
             {

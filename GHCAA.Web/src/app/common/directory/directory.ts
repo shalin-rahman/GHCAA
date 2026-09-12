@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, OnDestroy, Input, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
@@ -15,7 +16,7 @@ import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 @Component({
     selector: 'app-directory',
     standalone: true,
-    imports: [CommonModule, FormsModule, LoadingPanelComponent, LogoSpinnerComponent, ImgFallbackDirective],
+    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, LogoSpinnerComponent, ImgFallbackDirective],
     templateUrl: './directory.html',
     styleUrl: './directory.scss'
 })

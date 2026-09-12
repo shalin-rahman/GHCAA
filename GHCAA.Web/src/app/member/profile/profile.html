@@ -216,7 +216,7 @@
                 <div class="history-container">
                     @for (item of profile.academicHistory; track $index) {
                     <div class="history-item relative p-10 glass-card mb-4">
-                        <button type="button" (click)="removeAcademicRecord($index)" class="absolute top-6 right-6 btn btn-secondary btn-sm text-danger-color border-danger-color">
+                        <button type="button" *ngIf="!isInstitutionalAcademicRecord($index)" (click)="removeAcademicRecord($index)" class="absolute top-6 right-6 btn btn-secondary btn-sm text-danger-color border-danger-color">
                              Remove <app-icon name="trash" [size]="14"></app-icon>
                         </button>
                         
@@ -224,13 +224,14 @@
                             <div class="form-group full">
                                 <label>Institution / University Name *</label>
                                 <input type="text" [(ngModel)]="item.institutionName" [name]="'inst_' + $index" required maxlength="250"
+                                    [disabled]="isInstitutionalAcademicRecord($index)"
                                     #instMi="ngModel" [class.border-red-500]="instMi.invalid && instMi.touched" placeholder="e.g. Govt. Haraganga College">
                             </div>
                             <div class="input-group full py-2">
                                 <label class="premium-checkbox-label">
-                                    <input type="checkbox" [(ngModel)]="item.isGHC" [name]="'isGHC_' + $index">
+                                    <input type="checkbox" [(ngModel)]="item.isGHC" [name]="'isGHC_' + $index" [disabled]="isInstitutionalAcademicRecord($index)">
                                     <span class="checkmark"></span>
-                                    <span class="label-text">Is this from Govt. Haraganga College?</span>
+                                    <span class="label-text">Is this from {{ orgConfig.config()?.branding?.institutionName || 'the configured institution' }}?</span>
                                 </label>
                             </div>
                             
@@ -526,7 +527,7 @@
                     {{ h.admissionYear ? h.admissionYear + ' - ' : '' }}{{ h.passingYear }}
                 </div>
                 <div class="row-actions">
-                    <button type="button" (click)="removeAcademicRecord($index)" class="btn btn-secondary btn-sm text-danger-color !border-none !bg-transparent" title="Remove Record">
+                    <button type="button" *ngIf="$index > 0" (click)="removeAcademicRecord($index)" class="btn btn-secondary btn-sm text-danger-color !border-none !bg-transparent" title="Remove Record">
                         <app-icon name="trash" [size]="16"></app-icon>
                     </button>
                 </div>

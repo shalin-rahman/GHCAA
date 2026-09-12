@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GHCAA.Application.DTOs;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +12,43 @@ namespace GHCAA.Infrastructure.Services
 {
     public partial class MemberService
     {
+        private async Task<string> GetConfiguredInstitutionNameAsync(CancellationToken cancellationToken)
+        {
+            var name = (await _orgConfigService.GetConfigAsync()).Branding.InstitutionName?.Trim();
+            if (string.IsNullOrWhiteSpace(name))
+                throw new InvalidOperationException("The institution name is not configured.");
+
+            return name;
+        }
+
+        private static void EnforceInstitutionalAcademicRecord(
+            IList<AcademicRecordDto> academicHistory,
+            string institutionName)
+        {
+            if (academicHistory.Count == 0)
+                throw new InvalidOperationException("At least one academic record is required.");
+
+            var primary = academicHistory[0];
+            if (!string.Equals(primary.InstitutionName?.Trim(), institutionName, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    $"The first academic record must be for {institutionName}.");
+            }
+
+            if (academicHistory.Skip(1).Any(record =>
+                record.IsGHC ||
+                string.Equals(record.InstitutionName?.Trim(), institutionName, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException(
+                    "Only the first academic record may be the institutional record.");
+            }
+
+            primary.InstitutionName = institutionName;
+            primary.IsGHC = true;
+            foreach (var record in academicHistory.Skip(1))
+                record.IsGHC = false;
+        }
+
         private string? MaskPii(string? value, int visibleStart = 4, int visibleEnd = 2)
         {
             if (string.IsNullOrEmpty(value)) return value;

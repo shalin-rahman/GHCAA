@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
+import '../../core/widgets/app_dropdown_field.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/constants/app_constants.dart';
@@ -26,8 +27,11 @@ class _AdminCommState extends ConsumerState<AdminCommunicationHub> {
   bool _isLoading = false;
 
   Future<void> _broadcast() async {
-    if (_titleController.text.isEmpty || _bodyController.text.isEmpty || _targetValue == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('All fields are required')));
+    if (_titleController.text.isEmpty ||
+        _bodyController.text.isEmpty ||
+        _targetValue == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('All fields are required')));
       return;
     }
 
@@ -43,15 +47,17 @@ class _AdminCommState extends ConsumerState<AdminCommunicationHub> {
       };
 
       await dio.post('/admin/comm/send-custom', data: payload);
-      
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Message sent successfully.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Message sent successfully.')));
         _titleController.clear();
         _bodyController.clear();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: Colors.redAccent));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Error: $e'), backgroundColor: Colors.redAccent));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -69,18 +75,22 @@ class _AdminCommState extends ConsumerState<AdminCommunicationHub> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('BROADCAST MESSAGE', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, color: AppTheme.royalGold, letterSpacing: 1.5)),
+            const Text('BROADCAST MESSAGE',
+                style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 10,
+                    color: AppTheme.royalGold,
+                    letterSpacing: 1.5)),
             const SizedBox(height: 16),
             GlassContainer(
               child: Column(
                 children: [
-                  DropdownButtonFormField<String>(
-                    initialValue: _targetMethod,
-                    dropdownColor: AppTheme.midnightSurface,
-                    decoration: const InputDecoration(labelText: 'Recipient Batch/Type'),
+                  AppDropdownField<String>(
+                    value: _targetMethod,
+                    labelText: 'Recipient Batch/Type',
                     items: const [
-                       DropdownMenuItem(value: 'batch', child: Text('By Year')),
-                       DropdownMenuItem(value: 'type', child: Text('By Role')),
+                      DropdownMenuItem(value: 'batch', child: Text('By Year')),
+                      DropdownMenuItem(value: 'type', child: Text('By Role')),
                     ],
                     onChanged: (v) {
                       setState(() {
@@ -98,72 +108,106 @@ class _AdminCommState extends ConsumerState<AdminCommunicationHub> {
             GlassContainer(
               child: Column(
                 children: [
-                   TextField(
-                     controller: _titleController,
-                     style: const TextStyle(color: Colors.white),
-                     decoration: const InputDecoration(labelText: 'Broadcast Title'),
-                   ),
-                   const SizedBox(height: 16),
-                   TextField(
-                     controller: _bodyController,
-                     maxLines: 5,
-                     style: const TextStyle(color: Colors.white),
-                     decoration: const InputDecoration(labelText: 'Broadcast Content'),
-                   ),
-                   const SizedBox(height: 24),
-                   const Text('COMMUNICATION CHANNEL', style: TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                   const SizedBox(height: 12),
-                   FutureBuilder<List<Map<String, String>>>(
-                     future: ref.read(dropdownDataProvider).getOptions('BroadcastChannel'),
-                     builder: (context, snapshot) {
-                       final options = snapshot.data ?? [];
-                       if (options.isEmpty) {
-                         return SegmentedButton<String>(
-                           segments: const [
-                             ButtonSegment(value: 'push', label: Text('PUSH', style: TextStyle(fontSize: 10))),
-                             ButtonSegment(value: 'email', label: Text('EMAIL', style: TextStyle(fontSize: 10))),
-                           ],
-                           selected: {_selectedChannel},
-                           onSelectionChanged: (Set<String> newSelection) {
-                             if (newSelection.isNotEmpty) setState(() => _selectedChannel = newSelection.first);
-                           },
-                         );
-                       }
-                       return SizedBox(
-                         width: double.infinity,
-                         child: SegmentedButton<String>(
-                           segments: options.map((o) => ButtonSegment(
-                             value: o['value']!,
-                             label: Text(o['label']!, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                           )).toList(),
-                           selected: {_selectedChannel},
-                           onSelectionChanged: (Set<String> newSelection) {
-                             if (newSelection.isNotEmpty) setState(() => _selectedChannel = newSelection.first);
-                           },
-                           style: SegmentedButton.styleFrom(
-                             backgroundColor: Colors.white.withValues(alpha: 0.1),
-                             selectedBackgroundColor: AppTheme.deepCharcoal,
-                             selectedForegroundColor: AppTheme.royalGold,
-                             foregroundColor: Colors.white,
-                           ),
-                         ),
-                       );
-                     },
-                   ),
+                  TextField(
+                    controller: _titleController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration:
+                        const InputDecoration(labelText: 'Broadcast Title'),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _bodyController,
+                    maxLines: 5,
+                    style: const TextStyle(color: Colors.white),
+                    decoration:
+                        const InputDecoration(labelText: 'Broadcast Content'),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text('COMMUNICATION CHANNEL',
+                      style: TextStyle(
+                          color: AppTheme.royalGold,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2)),
+                  const SizedBox(height: 12),
+                  FutureBuilder<List<Map<String, String>>>(
+                    future: ref
+                        .read(dropdownDataProvider)
+                        .getOptions('BroadcastChannel'),
+                    builder: (context, snapshot) {
+                      final options = snapshot.data ?? [];
+                      if (options.isEmpty) {
+                        return SegmentedButton<String>(
+                          segments: const [
+                            ButtonSegment(
+                                value: 'push',
+                                label: Text('PUSH',
+                                    style: TextStyle(fontSize: 10))),
+                            ButtonSegment(
+                                value: 'email',
+                                label: Text('EMAIL',
+                                    style: TextStyle(fontSize: 10))),
+                          ],
+                          selected: {_selectedChannel},
+                          onSelectionChanged: (Set<String> newSelection) {
+                            if (newSelection.isNotEmpty) {
+                              setState(
+                                  () => _selectedChannel = newSelection.first);
+                            }
+                          },
+                        );
+                      }
+                      return SizedBox(
+                        width: double.infinity,
+                        child: SegmentedButton<String>(
+                          segments: options
+                              .map((o) => ButtonSegment(
+                                    value: o['value']!,
+                                    label: Text(o['label']!,
+                                        style: const TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold)),
+                                  ))
+                              .toList(),
+                          selected: {_selectedChannel},
+                          onSelectionChanged: (Set<String> newSelection) {
+                            if (newSelection.isNotEmpty) {
+                              setState(
+                                  () => _selectedChannel = newSelection.first);
+                            }
+                          },
+                          style: SegmentedButton.styleFrom(
+                            backgroundColor:
+                                Colors.white.withValues(alpha: 0.1),
+                            selectedBackgroundColor: AppTheme.deepCharcoal,
+                            selectedForegroundColor: AppTheme.royalGold,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 32),
             SizedBox(
-              width: double.infinity, 
-              height: 56,
-              child: ElevatedButton.icon(
-                onPressed: _isLoading ? null : _broadcast, 
-                icon: _isLoading ? SizedBox(width: 20, height: 20, child: LogoSpinner.small()) : const Icon(Icons.campaign, color: Colors.black),
-                label: const Text('SEND', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: 1)),
-                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
-              )
-            ),
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton.icon(
+                  onPressed: _isLoading ? null : _broadcast,
+                  icon: _isLoading
+                      ? SizedBox(
+                          width: 20, height: 20, child: LogoSpinner.small())
+                      : const Icon(Icons.campaign, color: Colors.black),
+                  label: const Text('SEND',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          color: Colors.black,
+                          letterSpacing: 1)),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.royalGold),
+                )),
           ],
         ),
       ),
@@ -176,11 +220,13 @@ class _AdminCommState extends ConsumerState<AdminCommunicationHub> {
       future: ref.read(dropdownDataProvider).getOptions(group),
       builder: (context, snapshot) {
         final options = snapshot.data ?? [];
-        return DropdownButtonFormField<String>(
-          initialValue: _targetValue,
-          dropdownColor: AppTheme.midnightSurface,
-          decoration: InputDecoration(labelText: _targetMethod == 'batch' ? 'Select Batch' : 'Select Type'),
-          items: options.map((o) => DropdownMenuItem(value: o['value'], child: Text(o['label']!))).toList(),
+        return AppDropdownField<String>(
+          value: _targetValue,
+          labelText: _targetMethod == 'batch' ? 'Select Batch' : 'Select Type',
+          items: options
+              .map((o) =>
+                  DropdownMenuItem(value: o['value'], child: Text(o['label']!)))
+              .toList(),
           onChanged: (v) => setState(() => _targetValue = v),
         );
       },
@@ -188,13 +234,15 @@ class _AdminCommState extends ConsumerState<AdminCommunicationHub> {
   }
 }
 
-final adminGalleriesProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
+final adminGalleriesProvider =
+    FutureProvider.autoDispose<List<dynamic>>((ref) async {
   final dio = ref.read(dioProvider);
   final response = await dio.get('/gallery/all');
   return response.data as List<dynamic>;
 });
 
-final adminGallerySearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
+final adminGallerySearchQueryProvider =
+    StateProvider.autoDispose<String>((ref) => "");
 
 class AdminCMS extends ConsumerWidget {
   const AdminCMS({super.key});
@@ -228,8 +276,14 @@ class AdminCMS extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppTheme.royalGold,
         onPressed: () => _showGalleryDialog(context, ref),
-        icon: const Icon(Icons.add_photo_alternate_outlined, color: Colors.black),
-        label: const Text('CREATE GALLERY', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1.5)),
+        icon:
+            const Icon(Icons.add_photo_alternate_outlined, color: Colors.black),
+        label: const Text('CREATE GALLERY',
+            style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w900,
+                fontSize: 10,
+                letterSpacing: 1.5)),
       ),
       child: Column(
         children: [
@@ -238,21 +292,30 @@ class AdminCMS extends ConsumerWidget {
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search gallery items...',
-                prefixIcon: const Icon(Icons.search, size: 20, color: AppTheme.royalGold),
+                prefixIcon: const Icon(Icons.search,
+                    size: 20, color: AppTheme.royalGold),
                 suffixIcon: searchQuery.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 20, color: Colors.white54),
-                      onPressed: () => ref.read(adminGallerySearchQueryProvider.notifier).state = "",
-                    )
-                  : null,
+                    ? IconButton(
+                        icon: const Icon(Icons.close_rounded,
+                            size: 20, color: Colors.white54),
+                        onPressed: () => ref
+                            .read(adminGallerySearchQueryProvider.notifier)
+                            .state = "",
+                      )
+                    : null,
                 filled: true,
-                fillColor: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                fillColor:
+                    isDark ? Colors.black.withValues(alpha: 0.2) : Colors.white,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: AppTheme.royalGold.withValues(alpha: 0.1))),
+                    borderSide: BorderSide(
+                        color: AppTheme.royalGold.withValues(alpha: 0.1))),
               ),
-              onChanged: (v) => ref.read(adminGallerySearchQueryProvider.notifier).state = v.toLowerCase(),
+              onChanged: (v) => ref
+                  .read(adminGallerySearchQueryProvider.notifier)
+                  .state = v.toLowerCase(),
             ),
           ),
           Expanded(
@@ -272,13 +335,18 @@ class AdminCMS extends ConsumerWidget {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             'Showing ${filtered.length} of ${galleries.length} media records',
-                            style: TextStyle(fontSize: 10, color: AppTheme.royalGold.withValues(alpha: 0.7), fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 10,
+                                color:
+                                    AppTheme.royalGold.withValues(alpha: 0.7),
+                                fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
                     Expanded(
                       child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
                         itemCount: filtered.length,
                         itemBuilder: (context, index) {
                           final g = filtered[index];
@@ -289,8 +357,13 @@ class AdminCMS extends ConsumerWidget {
                             if (path.startsWith('http')) {
                               photoUrl = path;
                             } else {
-                              final base = AppConfig.apiBaseUrl.endsWith('/') ? AppConfig.apiBaseUrl.substring(0, AppConfig.apiBaseUrl.length - 1) : AppConfig.apiBaseUrl;
-                              final cleanP = path.startsWith('/') ? path.substring(1) : path;
+                              final base = AppConfig.apiBaseUrl.endsWith('/')
+                                  ? AppConfig.apiBaseUrl.substring(
+                                      0, AppConfig.apiBaseUrl.length - 1)
+                                  : AppConfig.apiBaseUrl;
+                              final cleanP = path.startsWith('/')
+                                  ? path.substring(1)
+                                  : path;
                               photoUrl = '$base/$cleanP';
                             }
                           }
@@ -302,35 +375,59 @@ class AdminCMS extends ConsumerWidget {
                               child: Row(
                                 children: [
                                   Container(
-                                    width: 80, 
-                                    height: 60, 
+                                    width: 80,
+                                    height: 60,
                                     decoration: BoxDecoration(
-                                      color: AppTheme.royalGold.withValues(alpha: 0.1),
+                                      color: AppTheme.royalGold
+                                          .withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(8),
-                                      image: photoUrl != null 
-                                          ? DecorationImage(image: NetworkImage(photoUrl), fit: BoxFit.cover) 
+                                      image: photoUrl != null
+                                          ? DecorationImage(
+                                              image: NetworkImage(photoUrl),
+                                              fit: BoxFit.cover)
                                           : null,
                                     ),
-                                    child: photoUrl == null ? const Icon(Icons.image, color: AppTheme.royalGold) : null,
+                                    child: photoUrl == null
+                                        ? const Icon(Icons.image,
+                                            color: AppTheme.royalGold)
+                                        : null,
                                   ),
-                                  const SizedBox(width: AppConstants.paddingMedium),
+                                  const SizedBox(
+                                      width: AppConstants.paddingMedium),
                                   Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start, 
-                                      children: [
-                                        Text(g['title'] ?? 'Media Item', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white)), 
-                                        Text(g['eventDate'] != null ? g['eventDate'].split('T')[0] : 'Record', style: const TextStyle(fontSize: 10, color: Colors.white70))
-                                      ]
-                                    )
-                                  ),
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                        Text(g['title'] ?? 'Media Item',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13,
+                                                color: Colors.white)),
+                                        Text(
+                                            g['eventDate'] != null
+                                                ? g['eventDate'].split('T')[0]
+                                                : 'Record',
+                                            style: const TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.white70))
+                                      ])),
                                   IconButton(
-                                    icon: Icon(g['isActive'] == true ? Icons.visibility : Icons.visibility_off, size: 16, color: g['isActive'] == true ? AppTheme.royalGold : Colors.white30), 
-                                    onPressed: () => _toggleGallery(ref, g['id'])
-                                  ),
+                                      icon: Icon(
+                                          g['isActive'] == true
+                                              ? Icons.visibility
+                                              : Icons.visibility_off,
+                                          size: 16,
+                                          color: g['isActive'] == true
+                                              ? AppTheme.royalGold
+                                              : Colors.white30),
+                                      onPressed: () =>
+                                          _toggleGallery(ref, g['id'])),
                                   IconButton(
-                                    icon: const Icon(Icons.delete_outline, size: 16, color: Colors.redAccent), 
-                                    onPressed: () => _deleteGallery(ref, g['id'])
-                                  ),
+                                      icon: const Icon(Icons.delete_outline,
+                                          size: 16, color: Colors.redAccent),
+                                      onPressed: () =>
+                                          _deleteGallery(ref, g['id'])),
                                 ],
                               ),
                             ),
@@ -359,42 +456,66 @@ class AdminCMS extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.midnightSurface,
-        title: const Text('New Gallery', style: TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.bold)),
+        title: const Text('New Gallery',
+            style: TextStyle(
+                color: AppTheme.royalGold,
+                fontSize: 14,
+                fontWeight: FontWeight.bold)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: titleCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Gallery Title')),
-              TextField(controller: descCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Description')),
-              TextField(controller: dateCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Event Date (DD-MM-YYYY)')),
+              TextField(
+                  controller: titleCtrl,
+                  style: const TextStyle(color: Colors.white),
+                  decoration:
+                      const InputDecoration(labelText: 'Gallery Title')),
+              TextField(
+                  controller: descCtrl,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(labelText: 'Description')),
+              TextField(
+                  controller: dateCtrl,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                      labelText: 'Event Date (DD-MM-YYYY)')),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL', style: TextStyle(color: Colors.white54))),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('CANCEL',
+                  style: TextStyle(color: Colors.white54))),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
+            style:
+                ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
             onPressed: () async {
               try {
                 final dio = ref.read(dioProvider);
                 final payload = {
                   'title': titleCtrl.text,
                   'description': descCtrl.text,
-                  'eventDate': dateCtrl.text.isNotEmpty ? AppUtils.toWire(dateCtrl.text) : AppUtils.toWire(DateTime.now()),
+                  'eventDate': dateCtrl.text.isNotEmpty
+                      ? AppUtils.toWire(dateCtrl.text)
+                      : AppUtils.toWire(DateTime.now()),
                   'isActive': true,
                   'isFeatured': false,
                 };
-                
+
                 await dio.post('/gallery/admin', data: payload);
                 ref.invalidate(adminGalleriesProvider);
                 if (ctx.mounted) Navigator.pop(ctx);
               } catch (e) {
                 if (ctx.mounted) {
-                  ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Error: $e')));
+                  ScaffoldMessenger.of(ctx)
+                      .showSnackBar(SnackBar(content: Text('Error: $e')));
                 }
               }
             },
-            child: const Text('CREATE', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            child: const Text('CREATE',
+                style: TextStyle(
+                    color: Colors.black, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

@@ -47,6 +47,11 @@ public class MemberServiceTests : TestBase
         _mockFinancialService = new Mock<IFinancialService>();
         _mockTokenService = new Mock<ITokenService>();
         var mockOrgConfigService = new Mock<IOrgConfigService>();
+        mockOrgConfigService.Setup(x => x.GetConfigAsync())
+            .ReturnsAsync(new OrgConfigDto
+            {
+                Branding = new BrandingDto { InstitutionName = "Govt. Haraganga College" }
+            });
 
         _service = new MemberService(
             _context,
@@ -141,6 +146,21 @@ public class MemberServiceTests : TestBase
         payment.Should().NotBeNull();
         payment!.TransactionId.Should().Be(dto.TransactionId);
         payment.PaymentMethod.Should().Be(Enums.PaymentMethod.BKash);
+    }
+
+    [Test]
+    public async Task RegisterAsync_WithoutHaragangaAcademicRecord_ShouldRejectRegistration()
+    {
+        var dto = CreateValidDto();
+        dto.AcademicHistory[0].InstitutionName = "Other College";
+        dto.AcademicHistory[0].IsGHC = false;
+        dto.PaymentMethodId = (await _context.PaymentConfigurations
+            .FirstAsync(x => x.Method == Enums.PaymentMethod.BKash)).Id;
+
+        var act = async () => await _service.RegisterAsync(dto, null, null, null);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("The first academic record must be for Govt. Haraganga College.");
     }
 
     [Test]

@@ -6,7 +6,7 @@ description: "Pre-flight checklist and hard constraints for the GHCAA project (.
 # GHCAA Pre-Flight
 
 Read this before touching GHCAA. It encodes hard constraints and the specific traps that
-have burned time before. Details live in `.claude/memory/` — follow the `[[links]]`.
+have burned time before. If `.claude/memory/` is present, use its linked notes for detailed gotchas.
 
 ## Hard constraints (never violate)
 
@@ -57,4 +57,4 @@ have burned time before. Details live in `.claude/memory/` — follow the `[[lin
 - Visual/runtime QA of Angular pages: use the **`webapp-testing`** skill (Playwright) to serve
   the app and screenshot light + dark — this is how to clear the "needs running app/browser"
   blockers instead of deferring them.
-- Read `.claude/memory/MEMORY.md` first; it indexes everything above.
+- Read `.claude/memory/MEMORY.md` first when that file exists.

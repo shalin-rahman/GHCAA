@@ -6,8 +6,9 @@ import { OrgConfig, FeatureToggles } from '../../core/models/org-config.model';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { ORG_CONFIG_FALLBACK } from '../../core/config/org-config-fallback.generated';
+import { DATE_FORMATS, DATE_FORMAT_LABELS, DEFAULT_DATE_FORMAT } from '../../core/constants/app.constants';
 
-type TabKey = 'branding' | 'contact' | 'currency' | 'features' | 'workflow' | 'advanced';
+type TabKey = 'branding' | 'contact' | 'currency' | 'features' | 'workflow' | 'localization' | 'advanced';
 
 @Component({
   selector: 'app-org-config',
@@ -25,6 +26,7 @@ export class AdminOrgConfig implements OnInit {
     { key: 'currency', label: 'Currency' },
     { key: 'features', label: 'Features' },
     { key: 'workflow', label: 'Workflow' },
+    { key: 'localization', label: 'Localization' },
     { key: 'advanced', label: 'Advanced (JSON)' }
   ];
 
@@ -43,6 +45,8 @@ export class AdminOrgConfig implements OnInit {
   // institution profile pack, not hardcoded to GHC/BDT, so a different profile's build
   // hints at its own currency instead.
   readonly currencyCodeHint = ORG_CONFIG_FALLBACK.currency.code;
+  readonly DATE_FORMATS = DATE_FORMATS;
+  readonly DATE_FORMAT_LABELS = DATE_FORMAT_LABELS;
 
   ngOnInit() {
     const current = this.configService.config();
@@ -97,7 +101,10 @@ export class AdminOrgConfig implements OnInit {
           ...this.config.workflow,
           membershipTypes: this.membershipTypesCsv.split(',').map(t => t.trim()).filter(Boolean)
         },
-        localization: JSON.parse(this.localizationJson)
+        localization: {
+          ...JSON.parse(this.localizationJson),
+          dateFormat: this.config.localization?.dateFormat ?? 'dd-MM-yyyy'
+        }
       };
       await this.configService.updateConfig(payload);
       this.hydrate(payload);
@@ -112,7 +119,13 @@ export class AdminOrgConfig implements OnInit {
   private hydrate(cfg: OrgConfig) {
     this.config = structuredClone(cfg);
     this.config.contact.phoneNumbers ??= [];
-    this.localizationJson = JSON.stringify(cfg.localization ?? { locales: {} }, null, 2);
+    this.config.localization ??= { dateFormat: DEFAULT_DATE_FORMAT, locales: {} };
+    this.config.localization.dateFormat ??= DEFAULT_DATE_FORMAT;
+    this.localizationJson = JSON.stringify(
+      this.config.localization,
+      null,
+      2
+    );
     this.membershipTypesCsv = (cfg.workflow?.membershipTypes ?? []).join(', ');
   }
 }

@@ -11,7 +11,8 @@ import '../../core/widgets/logo_spinner.dart';
 import '../../features/messaging/chat_service.dart';
 import '../../features/auth/auth_service.dart';
 import '../../core/real_time/notification_hub_service.dart';
-import 'package:intl/intl.dart';
+import '../../core/utils/app_utils.dart';
+import '../../core/services/org_config_service.dart';
 
 class ChatsScreen extends ConsumerStatefulWidget {
   const ChatsScreen({super.key});
@@ -20,7 +21,8 @@ class ChatsScreen extends ConsumerStatefulWidget {
   ConsumerState<ChatsScreen> createState() => _ChatsScreenState();
 }
 
-class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProviderStateMixin {
+class _ChatsScreenState extends ConsumerState<ChatsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -80,7 +82,8 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM, vertical: AppTheme.spaceL),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppTheme.spaceM, vertical: AppTheme.spaceL),
           itemCount: conversations.length,
           itemBuilder: (context, index) {
             final conversation = conversations[index];
@@ -89,15 +92,25 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
               child: GlassContainer(
                 padding: EdgeInsets.zero,
                 child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM, vertical: AppTheme.spaceS),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppTheme.spaceM, vertical: AppTheme.spaceS),
                   onTap: () {
                     HapticFeedback.lightImpact();
                     context.push('/chat/${conversation['otherUserId']}');
                   },
-                  leading: _buildAvatar(conversation['otherUserPhoto'], conversation['otherUserName']),
-                  title: Text(conversation['otherUserName'] ?? 'Alumnus', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                  subtitle: Text(conversation['lastMessage'] ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
-                  trailing: _buildTimeAndUnread(conversation['lastMessageTime'], conversation['unreadCount']),
+                  leading: _buildAvatar(conversation['otherUserPhoto'],
+                      conversation['otherUserName']),
+                  title: Text(conversation['otherUserName'] ?? 'Alumnus',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.white)),
+                  subtitle: Text(conversation['lastMessage'] ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 12)),
+                  trailing: _buildTimeAndUnread(conversation['lastMessageTime'],
+                      conversation['unreadCount']),
                 ),
               ),
             );
@@ -113,7 +126,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
       data: (user) {
         final batch = user?['passingYear']?.toString() ?? 'N/A';
         final dept = user?['department'] ?? 'General';
-        
+
         return Column(
           children: [
             Padding(
@@ -121,17 +134,31 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
               child: GlassContainer(
                 child: Row(
                   children: [
-                    const Icon(Icons.group_work_outlined, color: AppTheme.royalGold),
+                    const Icon(Icons.group_work_outlined,
+                        color: AppTheme.royalGold),
                     const SizedBox(width: AppTheme.spaceM),
                     Expanded(
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('BATCH OF $batch ($dept)', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                        const Text('Live collaborative hub for your cohort.', style: TextStyle(fontSize: 10, color: Colors.white54)),
-                      ]),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('BATCH OF $batch ($dept)',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white)),
+                            const Text(
+                                'Live collaborative hub for your cohort.',
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.white54)),
+                          ]),
                     ),
-                    IconButton(icon: const Icon(Icons.refresh, color: AppTheme.royalGold, size: 20), onPressed: () {
-                        ref.read(notificationHubServiceProvider).joinBatch('BATCH-$batch');
-                    }),
+                    IconButton(
+                        icon: const Icon(Icons.refresh,
+                            color: AppTheme.royalGold, size: 20),
+                        onPressed: () {
+                          ref
+                              .read(notificationHubServiceProvider)
+                              .joinBatch('BATCH-$batch');
+                        }),
                   ],
                 ),
               ),
@@ -140,16 +167,19 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
               child: StreamBuilder<Map<String, dynamic>>(
                 stream: ref.read(notificationHubServiceProvider).batchMessages,
                 builder: (context, snapshot) {
-                   if (snapshot.hasData) {
-                     final msg = snapshot.data!;
-                     return ListView(
-                       padding: const EdgeInsets.all(AppTheme.spaceM),
-                       children: [
-                         _buildLiveMessage(msg['senderName'], msg['content'], msg['timestamp']),
-                       ],
-                     );
-                   }
-                   return _buildPlaceholderFeed('Batch chatter will appear here in real-time.', Icons.connect_without_contact);
+                  if (snapshot.hasData) {
+                    final msg = snapshot.data!;
+                    return ListView(
+                      padding: const EdgeInsets.all(AppTheme.spaceM),
+                      children: [
+                        _buildLiveMessage(msg['senderName'], msg['content'],
+                            msg['timestamp']),
+                      ],
+                    );
+                  }
+                  return _buildPlaceholderFeed(
+                      'Batch chatter will appear here in real-time.',
+                      Icons.connect_without_contact);
                 },
               ),
             ),
@@ -170,7 +200,10 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
             child: Row(children: [
               Icon(Icons.campaign_outlined, color: Colors.redAccent),
               SizedBox(width: AppTheme.spaceM),
-              Expanded(child: Text('OFFICIAL ALUMNI NOTICES', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1))),
+              Expanded(
+                  child: Text('OFFICIAL ALUMNI NOTICES',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, letterSpacing: 1))),
             ]),
           ),
         ),
@@ -179,15 +212,19 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
             stream: ref.read(notificationHubServiceProvider).notices,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                 final notice = snapshot.data!;
-                 return ListView(
-                   padding: const EdgeInsets.all(AppTheme.spaceM),
-                   children: [
-                     _buildLiveMessage('ASSOCIATION PRESS', notice['title'], notice['timestamp'], isNotice: true),
-                   ],
-                 );
-               }
-              return _buildPlaceholderFeed('Stay tuned for institutional announcements.', Icons.info_outline);
+                final notice = snapshot.data!;
+                return ListView(
+                  padding: const EdgeInsets.all(AppTheme.spaceM),
+                  children: [
+                    _buildLiveMessage('ASSOCIATION PRESS', notice['title'],
+                        notice['timestamp'],
+                        isNotice: true),
+                  ],
+                );
+              }
+              return _buildPlaceholderFeed(
+                  'Stay tuned for institutional announcements.',
+                  Icons.info_outline);
             },
           ),
         ),
@@ -195,20 +232,30 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildLiveMessage(String? sender, String? content, dynamic time, {bool isNotice = false}) {
+  Widget _buildLiveMessage(String? sender, String? content, dynamic time,
+      {bool isNotice = false}) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppTheme.spaceM, left: AppTheme.spaceM, right: AppTheme.spaceM),
+      margin: const EdgeInsets.only(
+          bottom: AppTheme.spaceM,
+          left: AppTheme.spaceM,
+          right: AppTheme.spaceM),
       child: GlassContainer(
         padding: const EdgeInsets.all(AppTheme.spaceM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(sender ?? 'System', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isNotice ? Colors.redAccent : AppTheme.royalGold)),
-              Text(_formatTime(time), style: const TextStyle(fontSize: 9, color: Colors.white24)),
+              Text(sender ?? 'System',
+                  style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: isNotice ? Colors.redAccent : AppTheme.royalGold)),
+              Text(_formatTime(time),
+                  style: const TextStyle(fontSize: 9, color: Colors.white24)),
             ]),
             const SizedBox(height: AppTheme.spaceS),
-            Text(content ?? '', style: const TextStyle(fontSize: 13, color: Colors.white70)),
+            Text(content ?? '',
+                style: const TextStyle(fontSize: 13, color: Colors.white70)),
           ],
         ),
       ),
@@ -222,25 +269,31 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
         children: [
           Icon(icon, size: 48, color: Colors.white10),
           const SizedBox(height: AppTheme.spaceM),
-          Text(message, style: const TextStyle(color: Colors.white24, fontSize: 13)),
+          Text(message,
+              style: const TextStyle(color: Colors.white24, fontSize: 13)),
         ],
       ),
     );
   }
-
 
   Widget _buildAvatar(String? url, String? name) {
     return Container(
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: Colors.black26, shape: BoxShape.circle,
+        color: Colors.black26,
+        shape: BoxShape.circle,
         border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.3)),
-        image: url != null ? DecorationImage(image: NetworkImage(url), fit: BoxFit.cover) : null,
+        image: url != null
+            ? DecorationImage(image: NetworkImage(url), fit: BoxFit.cover)
+            : null,
       ),
-      child: url == null 
-        ? Center(child: Text(name != null && name.isNotEmpty ? name[0] : '?', style: const TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold)))
-        : null,
+      child: url == null
+          ? Center(
+              child: Text(name != null && name.isNotEmpty ? name[0] : '?',
+                  style: const TextStyle(
+                      color: AppTheme.royalGold, fontWeight: FontWeight.bold)))
+          : null,
     );
   }
 
@@ -250,12 +303,22 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(_formatTime(time), style: TextStyle(fontSize: 10, color: AppTheme.royalGold.withValues(alpha: 0.8), fontWeight: FontWeight.bold)),
+        Text(_formatTime(time),
+            style: TextStyle(
+                fontSize: 10,
+                color: AppTheme.royalGold.withValues(alpha: 0.8),
+                fontWeight: FontWeight.bold)),
         if (unreadCount != null && unreadCount > 0)
           Container(
-            margin: const EdgeInsets.only(top: AppTheme.spaceXS), padding: const EdgeInsets.all(6),
-            decoration: const BoxDecoration(color: AppTheme.royalGold, shape: BoxShape.circle),
-            child: Text(unreadCount.toString(), style: const TextStyle(color: Colors.black, fontSize: 8, fontWeight: FontWeight.bold)),
+            margin: const EdgeInsets.only(top: AppTheme.spaceXS),
+            padding: const EdgeInsets.all(6),
+            decoration: const BoxDecoration(
+                color: AppTheme.royalGold, shape: BoxShape.circle),
+            child: Text(unreadCount.toString(),
+                style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold)),
           ),
       ],
     );
@@ -267,9 +330,14 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
       final dt = DateTime.parse(time.toString());
       final now = DateTime.now();
       if (dt.year == now.year && dt.month == now.month && dt.day == now.day) {
-        return DateFormat.Hm().format(dt);
+        return AppUtils.formatTime(dt);
       }
-      return DateFormat('dd-MM-yyyy').format(dt);
-    } catch (e) { return ''; }
+      return AppUtils.formatDate(
+        dt,
+        format: ref.watch(orgDateFormatProvider).identifier,
+      );
+    } catch (e) {
+      return '';
+    }
   }
 }

@@ -1,5 +1,7 @@
 namespace GHCAA.Application.DTOs
 {
+    using GHCAA.Domain;
+
     public record OrgConfigDto
     {
         public string OrgId { get; init; } = "default";
@@ -30,9 +32,7 @@ namespace GHCAA.Application.DTOs
         public string InstitutionName { get; init; } = string.Empty;
         public string InstitutionAcronym { get; init; } = string.Empty;
         public string MembershipNumberPrefix { get; init; } = string.Empty;
-        // Prefix for payment gateway transaction IDs. Kept separate from MembershipNumberPrefix:
-        // GHC has used a different string for each ("HARAGANGIAN-" vs "GHC-") since before this
-        // config existed, and merging them would change live transaction ID formatting.
+        // Keep payment and membership prefixes separate to preserve existing transaction IDs.
         public string TransactionPrefix { get; init; } = string.Empty;
         public string ApprovalSeal { get; init; } = string.Empty;
         /// <summary>Founding date as it is printed on letterhead — Constitution, Article I.</summary>
@@ -109,6 +109,9 @@ namespace GHCAA.Application.DTOs
 
     public record LocalizationDto
     {
+        // The selected format is organization data. Profile/bootstrap data supplies the initial
+        // value; the service normalizes missing or unsupported stored values.
+        public string? DateFormat { get; init; }
         public string DefaultLocale { get; init; } = "en";
         public List<string> SupportedLocales { get; init; } = ["en"];
         public Dictionary<string, LocalePackDto> Locales { get; init; } = [];

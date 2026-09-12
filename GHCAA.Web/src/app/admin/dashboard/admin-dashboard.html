@@ -1,6 +1,6 @@
 <div class="admin-feature">
     <app-page-header title="Dashboard" [total]="1" emptySubtitle="Live system overview">
-        <small subtitle>Live system overview — {{ now | date:'dd-MM-yyyy' }}</small>
+        <small subtitle>Live system overview — {{ now | appDate }}</small>
         <span actions class="pulse-line">Live System Status</span>
         <div actions class="pulse-dot"></div>
     </app-page-header>
@@ -107,7 +107,7 @@
                     <div class="news-feed-body">
                         <span class="news-category">{{ item.articleCategory || item.category || 'General' }}</span>
                         <strong>{{ item.title }}</strong>
-                        <small>{{ item.publishedAt || item.createdAt | date:'dd-MM-yyyy' }}</small>
+                        <small>{{ item.publishedAt || item.createdAt | appDate }}</small>
                     </div>
                     <div class="news-status-chip" [class]="newsStatus(item).class">
                         {{ newsStatus(item).label }}

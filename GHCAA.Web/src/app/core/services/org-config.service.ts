@@ -1,6 +1,6 @@
-import { Injectable, signal, inject, effect } from '@angular/core';
+import { Injectable, signal, inject, effect, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { API_ENDPOINTS } from '../constants/app.constants';
+import { API_ENDPOINTS, DEFAULT_DATE_FORMAT, normalizeDateFormat, DateFormat } from '../constants/app.constants';
 import { OrgConfig } from '../models/org-config.model';
 import { ORG_CONFIG_FALLBACK } from '../config/org-config-fallback.generated';
 import { tap, firstValueFrom } from 'rxjs';
@@ -11,6 +11,9 @@ import { tap, firstValueFrom } from 'rxjs';
 export class OrgConfigService {
   private http = inject(HttpClient);
   config = signal<OrgConfig | null>(null);
+  readonly dateFormat = computed<DateFormat>(() =>
+    normalizeDateFormat(this.config()?.localization?.dateFormat ?? DEFAULT_DATE_FORMAT)
+  );
 
   constructor() {
     // 1b: White-labeling — push tenant branding colors into the CSS custom

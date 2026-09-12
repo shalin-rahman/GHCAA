@@ -8,19 +8,19 @@ description: Use this skill for any high-level architectural decisions, cross-pl
 This skill encodes the master engineering standards for the Govt. Haraganga College Alumni Association (GHCAA) platform.
 
 ## Architecture & Layers
-- **Backend**: ASP.NET Core 8+ following Clean Architecture.
+- **Backend**: ASP.NET Core 9 following Clean Architecture.
   - `GHCAA.Domain`: POCO Models, Enums, Constants. No dependencies.
   - `GHCAA.Application`: Interfaces, DTOs, Mapping logic.
   - `GHCAA.Infrastructure`: EF Core, External Services (Email, SMS, Payment).
   - `GHCAA.API`: Controllers, Hubs, Middleware.
-- **Frontend Web**: Angular 17+ with Standalone Components.
+- **Frontend Web**: Angular 21 with Standalone Components and signals.
 - **Frontend Mobile**: Flutter 3.x with Riverpod for state management.
-- **Database**: PostgreSQL (Primary) / SQLite (Testing).
+- **Database**: PostgreSQL (production) / SQLite (local and test).
 
 ## Terminology & Business Rules
 - **Membership Numbers**: Use format `GHC-YYYY-XXXX` (e.g., GHC-2026-0001).
-- **Date Format**: System-wide standard is `dd-mm-yyyy`. 
-- **Soft Delete**: Use `IsArchived` flag for all primary entities.
+- **Dates**: Display and input use `dd-MM-yyyy`; API date-only values use ISO `yyyy-MM-dd`.
+- **Soft Delete**: Preserve each entity's established archive flag and global query filter. GHCAA uses `IsArchived`; do not introduce `IsDeleted` without a repository-wide migration plan.
 - **Privacy**: User privacy toggles (`IsMobilePublic`, `IsEmailPublic`, etc.) must be respected in DTO mapping.
 
 ## Cross-Platform Parity (Web & Mobile)
@@ -35,4 +35,4 @@ This skill encodes the master engineering standards for the Govt. Haraganga Coll
 ## Decision Tree
 - **Adding a new Model?** Add to `Domain`, update `Application` DTOs, then implement in `Infrastructure`.
 - **Changing a UI field?** Check `PROJECT_MAP.md` first to see which other layers are affected.
-- **Encountering a Date?** Always format as `dd-mm-yyyy`.
+- **Encountering a date?** Use `ghcaa-date-standard`: display and input use `dd-MM-yyyy`, while API requests and responses use ISO-8601.

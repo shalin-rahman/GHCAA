@@ -48,16 +48,20 @@ namespace GHCAA.Infrastructure.Services
                     ? JsonSerializer.Deserialize<OrgConfigDto>(record.ConfigJson, JsonOpts) ?? BuildDefaults()
                     : BuildDefaults();
 
-                // Localization copy has no admin UI to edit it deliberately (org-config admin form
-                // only touches Branding/Workflow/Features), but a stored config row round-trips the
-                // *entire* DTO on every admin save (UpdateConfigAsync serializes the whole object),
-                // so any Localization text captured into a row before a later source-code copy fix
-                // (e.g. a corrected Bengali tagline) stays permanently stale otherwise. Since this
-                // section is code-owned, always serve the current source value rather than trusting
-                // whatever happened to be persisted.
-                // 62.6: heal from the active source — the profile pack when one is selected, the
-                // hardcoded copy otherwise — rather than always from code.
-                dto = dto with { Localization = BuildDefaults().Localization };
+                // Keep profile-owned localization values current, while preserving the
+                // administrator-selected date format stored in the organization row.
+                var localizationDefaults = BuildDefaults().Localization;
+                var storedDateFormat = dto.Localization?.DateFormat;
+                var profileDateFormat = Constants.Localization.NormalizeDateFormat(
+                    localizationDefaults.DateFormat,
+                    Constants.Localization.DayMonthYearDateFormat);
+                dto = dto with
+                {
+                    Localization = localizationDefaults with
+                    {
+                        DateFormat = Constants.Localization.NormalizeDateFormat(storedDateFormat, profileDateFormat)
+                    }
+                };
 
                 // 62.11: appsettings is an override, not the source — only PortalBaseUrl has ever
                 // needed a per-environment value distinct from the profile pack (preprod uses
@@ -73,6 +77,19 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task UpdateConfigAsync(OrgConfigDto dto, string updatedByAdminId)
         {
+            var profileDateFormat = Constants.Localization.NormalizeDateFormat(
+                BuildDefaults().Localization.DateFormat,
+                Constants.Localization.DayMonthYearDateFormat);
+            dto = dto with
+            {
+                Localization = (dto.Localization ?? new LocalizationDto()) with
+                {
+                    DateFormat = Constants.Localization.NormalizeDateFormat(
+                        dto.Localization?.DateFormat,
+                        profileDateFormat)
+                }
+            };
+
             var record = await db.OrganizationConfigs.FirstOrDefaultAsync(x => x.OrgId == dto.OrgId)
                          ?? new OrganizationConfig { OrgId = dto.OrgId };
 
@@ -151,6 +168,7 @@ namespace GHCAA.Infrastructure.Services
             },
             Localization = new()
             {
+                DateFormat = "dd-MM-yyyy",
                 DefaultLocale = "en",
                 SupportedLocales = ["en", "bn"],
                 Locales = new Dictionary<string, LocalePackDto>

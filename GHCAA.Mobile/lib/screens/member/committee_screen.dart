@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
+import '../../core/widgets/app_dropdown_field.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../core/widgets/empty_state_widget.dart';
@@ -70,24 +71,20 @@ class _CommitteeScreenState extends ConsumerState<CommitteeScreen> {
                   const Text('GOVERNANCE TERM:', style: TextStyle(color: AppTheme.textSecondaryDark, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<int>(
-                        isExpanded: true,
-                        dropdownColor: AppTheme.midnightSurface,
-                        value: selectedPeriod ?? (periods.isNotEmpty ? periods.first['id'] : null),
-                        icon: const Icon(Icons.arrow_drop_down, color: AppTheme.royalGold),
-                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w900),
-                        items: periods.map<DropdownMenuItem<int>>((p) {
-                          return DropdownMenuItem<int>(
-                            value: p['id'] as int,
-                            child: Text(p['title'] ?? 'Registry Period', overflow: TextOverflow.ellipsis),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          HapticFeedback.lightImpact();
-                          ref.read(selectedECPeriodProvider.notifier).state = val;
-                        },
-                      ),
+                    child: AppDropdownField<int>(
+                      value: selectedPeriod ??
+                          (periods.isNotEmpty ? periods.first['id'] as int : null),
+                      items: periods.map<DropdownMenuItem<int>>((p) {
+                        return DropdownMenuItem<int>(
+                          value: p['id'] as int,
+                          child: Text(p['title'] ?? 'Registry Period',
+                              overflow: TextOverflow.ellipsis),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        HapticFeedback.lightImpact();
+                        ref.read(selectedECPeriodProvider.notifier).state = val;
+                      },
                     ),
                   ),
                 ],

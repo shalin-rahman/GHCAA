@@ -13,6 +13,7 @@ import '../../core/widgets/skeleton_loader.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/widgets/app_search_field.dart';
+import '../../core/widgets/app_dropdown_field.dart';
 
 final directorySearchQueryProvider = StateProvider<String>((ref) => '');
 
@@ -344,41 +345,32 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
   }
  
   Widget _buildFilterDropdown(String label, List<String> options) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: AppTheme.obsidianBlack,
-        borderRadius: BorderRadius.circular(AppTheme.radiusM),
-        border: Border.all(color: AppTheme.glassBorder),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: label == 'YEAR' ? _selectedBatch : (label == 'DEPT' ? _selectedDept : (label == 'TYPE' ? _selectedType : _selectedCategory)),
-          hint: Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 8, color: AppTheme.royalGold.withValues(alpha: 0.6))),
-          dropdownColor: AppTheme.deepCharcoal,
-          icon: const Icon(Icons.arrow_drop_down_rounded, color: AppTheme.royalGold, size: 20),
-          isExpanded: true,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
-          items: [
-            DropdownMenuItem(value: null, child: Text('ALL $label', style: const TextStyle(fontSize: 9))),
-            ...options.map((o) => DropdownMenuItem(value: o, child: Text(o, style: const TextStyle(fontSize: 9)))),
-          ],
-          onChanged: (v) {
-            setState(() {
-              if (label == 'YEAR') {
-                _selectedBatch = v;
-              } else if (label == 'DEPT') {
-                _selectedDept = v;
-              } else if (label == 'TYPE') {
-                _selectedType = v;
-              } else {
-                _selectedCategory = v;
-              }
-            });
-            _fetchAlumni(refresh: true);
-          },
-        ),
-      ),
+    final selected = label == 'YEAR'
+        ? _selectedBatch
+        : (label == 'DEPT'
+            ? _selectedDept
+            : (label == 'TYPE' ? _selectedType : _selectedCategory));
+    return AppDropdownField<String?>(
+      value: selected,
+      hintText: label,
+      items: [
+        DropdownMenuItem<String?>(value: null, child: Text('ALL $label')),
+        ...options.map((o) => DropdownMenuItem<String?>(value: o, child: Text(o))),
+      ],
+      onChanged: (v) {
+        setState(() {
+          if (label == 'YEAR') {
+            _selectedBatch = v;
+          } else if (label == 'DEPT') {
+            _selectedDept = v;
+          } else if (label == 'TYPE') {
+            _selectedType = v;
+          } else {
+            _selectedCategory = v;
+          }
+        });
+        _fetchAlumni(refresh: true);
+      },
     );
   }
  

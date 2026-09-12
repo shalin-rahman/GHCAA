@@ -327,6 +327,30 @@ by the Angular verification. The current follow-up queue is:
 - `82.87`: finish Flutter shared-control parity for loading, dates, dropdowns,
   and upload surfaces, then verify the affected public, member, and admin
   screens with the existing mobile tests.
+- `82.88`: add focused tests for the shared Flutter loading and theme controls.
+- `82.89`: add and migrate shared Flutter date controls and contract tests. The mobile
+  date-display audit is complete; organization-format regression remains under 82.94.
+  The selected organization format controls display/input; each screen field
+  chooses date-only or date-time behavior through the control's `includeTime`
+  property. Existing database values remain unchanged and ISO wire values
+  remain separate from display formatting.
+- `82.90`: add shared Flutter dropdown controls and lookup-alignment tests.
+  Completed with form-save support and migration of applicable public, member,
+  and admin consumers.
+- `82.91`: add a shared Flutter upload/file-picker surface and contract tests.
+  Completed for applicable upload presenters while keeping feature upload
+  services and metadata naming unchanged.
+- `82.92`: migrate the applicable public, member, and admin Flutter screens
+  to the shared controls and verify light/dark behavior. Dropdown and upload
+  migration is complete; remaining audited member dropdowns now use
+  `AppDropdownField`, and no direct screen-level date picker or dropdown
+  remains outside shared controls. Audited date consumers now receive the
+  active organization format. Cross-layer regression and date-mode
+  classification remain.
+- `82.94`: finish database-driven organization display-format parity across
+  API, Angular, Flutter, and tests. The Angular `appDate` pipe now routes all
+  audited date-only templates through the persisted organization format.
+- `82.93`: refresh mobile golden baselines as separate housekeeping work.
 
 Current execution evidence:
 
@@ -338,6 +362,8 @@ Current execution evidence:
 - `COV-002` is partially closed: the validator now requires at least one
   academic record marked `IsGHC`; API-level 4xx coverage remains open under
   `82.86`.
+- `82.88` is complete: the focused mobile widget test covers the shared
+  loading panel in dark and light themes, including its spinner and label.
 
 These follow-ups must update both `docs/TODO.md` and
 `docs/BUSINESS_FINDINGS.md`; documentation-book contents are deliberately out

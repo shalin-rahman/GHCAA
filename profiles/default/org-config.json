@@ -68,6 +68,7 @@
     "MembershipTypes": ["General"]
   },
   "Localization": {
+    "DateFormat": "dd-MM-yyyy",
     "DefaultLocale": "en",
     "SupportedLocales": ["en"],
     "Locales": {

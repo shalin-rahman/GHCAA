@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
+import '../../core/widgets/app_dropdown_field.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../features/auth/auth_service.dart';
@@ -77,6 +78,27 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     if (_data['dateOfBirth'] == null && _data['dob'] != null) {
       _data['dateOfBirth'] = _data['dob'];
     }
+    final history = _data['academicHistory'];
+    if (history is List && history.isNotEmpty) {
+      for (var i = 1; i < history.length; i++) {
+        final record = Map<String, dynamic>.from(history[i] as Map);
+        record['isGHC'] = false;
+        history[i] = record;
+      }
+
+    }
+  }
+
+  bool _isInstitutionalAcademicRecord(int index) {
+    final history = _data['academicHistory'];
+    if (history is! List || index != 0 || history.isEmpty) return false;
+    final record = history.first;
+    if (record is! Map) return false;
+    final configured = ref.read(orgBrandingProvider).institutionName.trim();
+    final stored = record['institutionName']?.toString().trim() ?? '';
+    return configured.isNotEmpty &&
+        stored.isNotEmpty &&
+        stored.toLowerCase() == configured.toLowerCase();
   }
 
   int? _intOrNull(dynamic v) {
@@ -108,24 +130,29 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         (deg != null && deg.isNotEmpty) ||
         (sub != null && sub.isNotEmpty);
     if (hasFlatAcademic) {
-      final rawList = out['academicHistory'] is List ? List<dynamic>.from(out['academicHistory'] as List) : <dynamic>[];
-      var acad = rawList.map((e) => Map<String, dynamic>.from(e as Map)).toList();
-      var idx = acad.indexWhere((e) => e['isGHC'] == true);
-      if (idx < 0 && acad.isNotEmpty) idx = 0;
+      final rawList = out['academicHistory'] is List
+          ? List<dynamic>.from(out['academicHistory'] as List)
+          : <dynamic>[];
+      var acad =
+          rawList.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      var idx = acad.isNotEmpty ? 0 : -1;
       if (idx >= 0) {
         final row = Map<String, dynamic>.from(acad[idx]);
         if (py != null) row['passingYear'] = py;
         if (deg != null && deg.isNotEmpty) row['degree'] = deg;
         if (sub != null && sub.isNotEmpty) row['subject'] = sub;
-        final inst = row['institutionName']?.toString() ?? '';
-        if (inst.isEmpty) row['institutionName'] = ref.read(orgBrandingProvider).institutionName;
+        row['institutionName'] = ref.read(orgBrandingProvider).institutionName;
         row['isGHC'] = true;
         // Ensure admissionYear is sensible if missing
         if (row['admissionYear'] == null && py != null && py > 1902) {
-           row['admissionYear'] = py - 2;
+          row['admissionYear'] = py - 2;
         }
         acad[idx] = row;
-      } else if (py != null && deg != null && sub != null && deg.isNotEmpty && sub.isNotEmpty) {
+      } else if (py != null &&
+          deg != null &&
+          sub != null &&
+          deg.isNotEmpty &&
+          sub.isNotEmpty) {
         acad.add({
           'institutionName': ref.read(orgBrandingProvider).institutionName,
           'degree': deg,
@@ -135,6 +162,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
           if (py > 1902) 'admissionYear': py - 2,
         });
       }
+      for (var i = 1; i < acad.length; i++) {
+        acad[i]['isGHC'] = false;
+      }
       out['academicHistory'] = acad;
     }
 
@@ -142,10 +172,14 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     final orgName = out['organizationName']?.toString() ?? '';
     final sector = out['professionalSector']?.toString();
     final loc = out['location']?.toString();
-    final hasFlatProf =
-        designation.isNotEmpty || orgName.isNotEmpty || (sector != null && sector.isNotEmpty) || (loc != null && loc.isNotEmpty);
+    final hasFlatProf = designation.isNotEmpty ||
+        orgName.isNotEmpty ||
+        (sector != null && sector.isNotEmpty) ||
+        (loc != null && loc.isNotEmpty);
     if (hasFlatProf) {
-      final rawP = out['professionalHistory'] is List ? List<dynamic>.from(out['professionalHistory'] as List) : <dynamic>[];
+      final rawP = out['professionalHistory'] is List
+          ? List<dynamic>.from(out['professionalHistory'] as List)
+          : <dynamic>[];
       var prof = rawP.map((e) => Map<String, dynamic>.from(e as Map)).toList();
       var idx = prof.indexWhere((e) => e['isCurrent'] == true);
       if (idx < 0 && prof.isNotEmpty) idx = 0;
@@ -170,17 +204,19 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         });
       }
       // Fix missing required fields for the backend DTO validation
-    out['professionalHistory'] = prof;
+      out['professionalHistory'] = prof;
     }
 
     // Fix missing required fields for the backend DTO validation (outside if blocks)
-    if (out['emergencyContactRelation'] == null || out['emergencyContactRelation'].toString().isEmpty) {
-        out['emergencyContactRelation'] = 'Other';
+    if (out['emergencyContactRelation'] == null ||
+        out['emergencyContactRelation'].toString().isEmpty) {
+      out['emergencyContactRelation'] = 'Other';
     }
-    if (out['emergencyContactPhone'] == null || out['emergencyContactPhone'].toString().isEmpty) {
-        out['emergencyContactPhone'] = out['mobileNo'] ?? '01XXXXXXXXX';
+    if (out['emergencyContactPhone'] == null ||
+        out['emergencyContactPhone'].toString().isEmpty) {
+      out['emergencyContactPhone'] = out['mobileNo'] ?? '01XXXXXXXXX';
     }
-    
+
     final acadList = out['academicHistory'] as List?;
     if (acadList != null) {
       out['academicHistory'] = acadList.map((e) {
@@ -191,7 +227,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         return m;
       }).toList();
     }
-    
+
     return _sanitizePayload(out);
   }
 
@@ -208,7 +244,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         final m = Map<String, dynamic>.from(e as Map);
         final pY = _intOrNull(m['passingYear']) ?? 0;
         if (pY < 1900) m['passingYear'] = DateTime.now().year;
-        if (m['admissionYear'] == null && pY > 1902) m['admissionYear'] = pY - 2;
+        if (m['admissionYear'] == null && pY > 1902) {
+          m['admissionYear'] = pY - 2;
+        }
         return m;
       }).toList();
     }
@@ -219,7 +257,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
-    final payload = _isAdmin ? _prepareAdminUpdatePayload() : _sanitizePayload(_data);
+    final payload =
+        _isAdmin ? _prepareAdminUpdatePayload() : _sanitizePayload(_data);
     setState(() => _isLoading = true);
     HapticFeedback.mediumImpact();
 
@@ -229,10 +268,13 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       if (id is! int) {
         success = false;
       } else {
-        success = await ref.read(adminServiceProvider).updateMember(id, payload);
+        success =
+            await ref.read(adminServiceProvider).updateMember(id, payload);
       }
     } else {
-      success = await ref.read(authServiceProvider).updateProfile(_sanitizePayload(Map<String, dynamic>.from(_data)));
+      success = await ref
+          .read(authServiceProvider)
+          .updateProfile(_sanitizePayload(Map<String, dynamic>.from(_data)));
     }
 
     if (mounted) {
@@ -250,7 +292,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         context.pop();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registry Error: Protocol rejected.'), backgroundColor: Colors.redAccent),
+          const SnackBar(
+              content: Text('Registry Error: Protocol rejected.'),
+              backgroundColor: Colors.redAccent),
         );
       }
     }
@@ -264,7 +308,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
 
     return AppScaffold(
       title: _isEditingOther ? 'Administrative Update' : 'Update Profile',
-      breadcrumb: _isEditingOther ? 'ADMIN > MEMBER EDIT' : 'PORTAL > MY PROFILE',
+      breadcrumb:
+          _isEditingOther ? 'ADMIN > MEMBER EDIT' : 'PORTAL > MY PROFILE',
       leading: IconButton(
         icon: const Icon(Icons.close, color: AppTheme.royalGold),
         onPressed: () {
@@ -276,8 +321,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         IconButton(
           onPressed: _isLoading ? null : _save,
           icon: _isLoading
-            ? SizedBox(width: 20, height: 20, child: LogoSpinner.small())
-            : const Icon(Icons.check_circle_outline, color: AppTheme.royalGold),
+              ? SizedBox(width: 20, height: 20, child: LogoSpinner.small())
+              : const Icon(Icons.check_circle_outline,
+                  color: AppTheme.royalGold),
         ),
       ],
       child: SingleChildScrollView(
@@ -293,7 +339,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
               GlassContainer(
                 child: Column(
                   children: [
-                    _buildTextField('FULL LEGAL NAME (SSC/HSC RECORD)', 'fullName', required: true),
+                    _buildTextField(
+                        'FULL LEGAL NAME (SSC/HSC RECORD)', 'fullName',
+                        required: true),
                     const Divider(color: Colors.white10),
                     _buildTextField("FATHER'S NAME", 'fatherName'),
                     const Divider(color: Colors.white10),
@@ -301,147 +349,221 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     const Divider(color: Colors.white10),
                     _buildDropdown('GENDER', 'gender', LookupGroups.gender),
                     const Divider(color: Colors.white10),
-                    _buildDropdown('BLOOD GROUP', 'bloodGroup', LookupGroups.bloodGroup),
+                    _buildDropdown(
+                        'BLOOD GROUP', 'bloodGroup', LookupGroups.bloodGroup),
                     const Divider(color: Colors.white10),
                     _buildTextField('NATIONAL ID (NID)', 'nid'),
-                    _buildTextField('DATE OF BIRTH (REGISTRY RECORD)', 'dateOfBirth'),
+                    _buildTextField(
+                        'DATE OF BIRTH (REGISTRY RECORD)', 'dateOfBirth'),
                     if (_isAdmin) ...[
                       const Divider(color: Colors.white10),
                       _buildTextField('MEMBERSHIP NUMBER', 'membershipNumber'),
                       const Divider(color: Colors.white10),
                       _buildDropdown('ADMIN ROLE', 'role', 'UserRole'),
                       const Divider(color: Colors.white10),
-                      _buildDropdown('USER STATUS', 'status', LookupGroups.userStatus),
+                      _buildDropdown(
+                          'USER STATUS', 'status', LookupGroups.userStatus),
                     ],
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-
               _buildSectionHeader('Contact Details'),
               GlassContainer(
                 child: Column(
                   children: [
-                    _buildTextField('VERIFIED MOBILE', 'mobileNo', required: true, keyboardType: TextInputType.phone),
+                    _buildTextField('VERIFIED MOBILE', 'mobileNo',
+                        required: true, keyboardType: TextInputType.phone),
                     const Divider(color: Colors.white10),
-                    _buildTextField('PRIMARY EMAIL (LOGIN)', 'email', required: true, keyboardType: TextInputType.emailAddress),
+                    _buildTextField('PRIMARY EMAIL (LOGIN)', 'email',
+                        required: true,
+                        keyboardType: TextInputType.emailAddress),
                     const Divider(color: Colors.white10),
-                    _buildTextField('PRESENT ADDRESS', 'presentAddress', maxLines: 2),
+                    _buildTextField('PRESENT ADDRESS', 'presentAddress',
+                        maxLines: 2),
                     const Divider(color: Colors.white10),
-                    _buildTextField('PERMANENT ADDRESS', 'permanentAddress', maxLines: 2),
+                    _buildTextField('PERMANENT ADDRESS', 'permanentAddress',
+                        maxLines: 2),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-
               _buildSectionHeader('Emergency Contact'),
               GlassContainer(
                 child: Column(
                   children: [
                     _buildTextField('CONTACT NAME', 'emergencyContactName'),
                     const Divider(color: Colors.white10),
-                    _buildDropdown('RELATION', 'emergencyContactRelation', 'RelationshipType'),
+                    _buildDropdown('RELATION', 'emergencyContactRelation',
+                        'RelationshipType'),
                     const Divider(color: Colors.white10),
-                    _buildTextField('PHONE NUMBER', 'emergencyContactPhone', keyboardType: TextInputType.phone),
+                    _buildTextField('PHONE NUMBER', 'emergencyContactPhone',
+                        keyboardType: TextInputType.phone),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-
               _buildSectionHeader('Academic History'),
               GlassContainer(
                 child: Column(
                   children: [
-                    ... (_data['academicHistory'] as List? ?? []).asMap().entries.map((entry) {
+                    ...(_data['academicHistory'] as List? ?? [])
+                        .asMap()
+                        .entries
+                        .map((entry) {
                       final i = entry.key;
                       return Column(
-                         children: [
-                            if (i > 0) const Divider(color: Colors.white10),
-                            Row(children: [
-                               Expanded(child: Text('RECORD #${i+1}', style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold))),
-                               TextButton.icon(
-                                 onPressed: () => setState(() => (_data['academicHistory'] as List).removeAt(entry.key)),
-                                 icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent, size: 14),
-                                 label: const Text('REMOVE', style: TextStyle(color: Colors.redAccent, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1)),
-                               ),
-                            ]),
-                            _buildHistoryTextField('INSTITUTION', 'academicHistory', i, 'institutionName'),
-                            const Divider(color: Colors.white10),
-                            _buildHistoryDropdown('DEGREE', 'academicHistory', i, 'degree', 'Degree'),
-                            const Divider(color: Colors.white10),
-                            _buildHistoryTextField('SUBJECT', 'academicHistory', i, 'subject'),
-                            const Divider(color: Colors.white10),
-                            _buildHistoryDropdown('PASSING', 'academicHistory', i, 'passingYear', 'PassingYear'),
-                         ],
+                        children: [
+                          if (i > 0) const Divider(color: Colors.white10),
+                          Row(children: [
+                            Expanded(
+                                child: Text('RECORD #${i + 1}',
+                                    style: const TextStyle(
+                                        color: AppTheme.royalGold,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold))),
+                            if (!_isInstitutionalAcademicRecord(i))
+                              TextButton.icon(
+                                onPressed: () => setState(() =>
+                                    (_data['academicHistory'] as List)
+                                        .removeAt(entry.key)),
+                                icon: const Icon(Icons.remove_circle_outline,
+                                    color: Colors.redAccent, size: 14),
+                                label: const Text('REMOVE',
+                                    style: TextStyle(
+                                        color: Colors.redAccent,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 1)),
+                              ),
+                          ]),
+                          _buildHistoryTextField('INSTITUTION',
+                              'academicHistory', i, 'institutionName',
+                              readOnly: _isInstitutionalAcademicRecord(i)),
+                          const Divider(color: Colors.white10),
+                          _buildHistoryDropdown('DEGREE', 'academicHistory', i,
+                              'degree', 'Degree'),
+                          const Divider(color: Colors.white10),
+                          _buildHistoryTextField(
+                              'SUBJECT', 'academicHistory', i, 'subject'),
+                          const Divider(color: Colors.white10),
+                          _buildHistoryDropdown('PASSING', 'academicHistory', i,
+                              'passingYear', 'PassingYear'),
+                        ],
                       );
                     }),
                     TextButton.icon(
                       onPressed: () => setState(() {
                         _data['academicHistory'] ??= [];
                         (_data['academicHistory'] as List).add({
-                          'institutionName': '', 'degree': '', 'subject': '', 'passingYear': DateTime.now().year, 'isGHC': false
+                          'institutionName': (_data['academicHistory'] as List)
+                                  .isEmpty
+                              ? ref.read(orgBrandingProvider).institutionName
+                              : '',
+                          'degree': '',
+                          'subject': '',
+                          'passingYear': DateTime.now().year,
+                          'isGHC': (_data['academicHistory'] as List).isEmpty
+                              ? true
+                              : false
                         });
                       }),
-                      icon: const Icon(Icons.add_circle_outline, color: AppTheme.royalGold, size: 18),
-                      label: const Text('ADD ACADEMIC RECORD', style: TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold)),
+                      icon: const Icon(Icons.add_circle_outline,
+                          color: AppTheme.royalGold, size: 18),
+                      label: const Text('ADD ACADEMIC RECORD',
+                          style: TextStyle(
+                              color: AppTheme.royalGold,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-
               _buildSectionHeader('Professional History'),
               GlassContainer(
                 child: Column(
                   children: [
-                    ... (_data['professionalHistory'] as List? ?? []).asMap().entries.map((entry) {
+                    ...(_data['professionalHistory'] as List? ?? [])
+                        .asMap()
+                        .entries
+                        .map((entry) {
                       final i = entry.key;
                       return Column(
-                         children: [
-                            if (i > 0) const Divider(color: Colors.white10),
-                            Row(children: [
-                               Expanded(child: Text('POSITION #${i+1}', style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold))),
-                               TextButton.icon(
-                                 onPressed: () => setState(() => (_data['professionalHistory'] as List).removeAt(entry.key)),
-                                 icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent, size: 14),
-                                 label: const Text('REMOVE', style: TextStyle(color: Colors.redAccent, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1)),
-                               ),
-                            ]),
-                            _buildHistoryTextField('ORGANIZATION', 'professionalHistory', i, 'organizationName'),
-                            const Divider(color: Colors.white10),
-                            _buildHistoryTextField('DESIGNATION', 'professionalHistory', i, 'designation'),
-                            const Divider(color: Colors.white10),
-                            _buildHistoryDropdown('SECTOR', 'professionalHistory', i, 'sector', 'ProfessionalSector'),
-                            const Divider(color: Colors.white10),
-                            _buildHistoryTextField('LOCATION', 'professionalHistory', i, 'location'),
-                            const Divider(color: Colors.white10),
-                            _buildHistoryToggle('CURRENT ROLE', 'professionalHistory', i, 'isCurrent'),
-                         ],
+                        children: [
+                          if (i > 0) const Divider(color: Colors.white10),
+                          Row(children: [
+                            Expanded(
+                                child: Text('POSITION #${i + 1}',
+                                    style: const TextStyle(
+                                        color: AppTheme.royalGold,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold))),
+                            TextButton.icon(
+                              onPressed: () => setState(() =>
+                                  (_data['professionalHistory'] as List)
+                                      .removeAt(entry.key)),
+                              icon: const Icon(Icons.remove_circle_outline,
+                                  color: Colors.redAccent, size: 14),
+                              label: const Text('REMOVE',
+                                  style: TextStyle(
+                                      color: Colors.redAccent,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 1)),
+                            ),
+                          ]),
+                          _buildHistoryTextField('ORGANIZATION',
+                              'professionalHistory', i, 'organizationName'),
+                          const Divider(color: Colors.white10),
+                          _buildHistoryTextField('DESIGNATION',
+                              'professionalHistory', i, 'designation'),
+                          const Divider(color: Colors.white10),
+                          _buildHistoryDropdown('SECTOR', 'professionalHistory',
+                              i, 'sector', 'ProfessionalSector'),
+                          const Divider(color: Colors.white10),
+                          _buildHistoryTextField(
+                              'LOCATION', 'professionalHistory', i, 'location'),
+                          const Divider(color: Colors.white10),
+                          _buildHistoryToggle('CURRENT ROLE',
+                              'professionalHistory', i, 'isCurrent'),
+                        ],
                       );
                     }),
                     TextButton.icon(
                       onPressed: () => setState(() {
                         _data['professionalHistory'] ??= [];
                         (_data['professionalHistory'] as List).add({
-                          'organizationName': '', 'designation': '', 'sector': 'Services', 'location': '', 'isCurrent': true, 'startDate': AppUtils.toWire(DateTime.now())
+                          'organizationName': '',
+                          'designation': '',
+                          'sector': 'Services',
+                          'location': '',
+                          'isCurrent': true,
+                          'startDate': AppUtils.toWire(DateTime.now())
                         });
                       }),
-                      icon: const Icon(Icons.add_circle_outline, color: AppTheme.royalGold, size: 18),
-                      label: const Text('ADD PROFESSIONAL RECORD', style: TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold)),
+                      icon: const Icon(Icons.add_circle_outline,
+                          color: AppTheme.royalGold, size: 18),
+                      label: const Text('ADD PROFESSIONAL RECORD',
+                          style: TextStyle(
+                              color: AppTheme.royalGold,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-              
               if (_isAdmin) ...[
                 _buildSectionHeader('Member Tier & Category'),
                 GlassContainer(
                   child: Column(
                     children: [
-                        _buildDropdown('MEMBERSHIP TYPE', 'membershipType', 'MembershipType'),
-                        const Divider(color: Colors.white10),
-                        _buildDropdown('SPECIAL CATEGORY', 'category', LookupGroups.memberCategory),
+                      _buildDropdown('MEMBERSHIP TYPE', 'membershipType',
+                          'MembershipType'),
+                      const Divider(color: Colors.white10),
+                      _buildDropdown('SPECIAL CATEGORY', 'category',
+                          LookupGroups.memberCategory),
                     ],
                   ),
                 ),
@@ -453,7 +575,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 GlassContainer(
                   child: Column(
                     children: [
-                      _buildReadOnlyRow('MEMBERSHIP TYPE', _data['membershipType']),
+                      _buildReadOnlyRow(
+                          'MEMBERSHIP TYPE', _data['membershipType']),
                       const Divider(color: Colors.white10),
                       _buildReadOnlyRow('SPECIAL CATEGORY', _data['category']),
                       const Padding(
@@ -468,24 +591,26 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 ),
                 const SizedBox(height: 24),
               ],
-
               _buildSectionHeader('Communication Preferences'),
               GlassContainer(
                 padding: EdgeInsets.zero,
                 child: Column(
                   children: [
-                    _buildToggle('NEW EVENT ANNOUNCEMENTS', 'notifyEventCreation'),
+                    _buildToggle(
+                        'NEW EVENT ANNOUNCEMENTS', 'notifyEventCreation'),
                     const Divider(color: Colors.white10, height: 1),
-                    _buildToggle('PARTICIPATION APPROVALS', 'notifyParticipationApproval'),
+                    _buildToggle('PARTICIPATION APPROVALS',
+                        'notifyParticipationApproval'),
                     const Divider(color: Colors.white10, height: 1),
-                    _buildToggle('REGISTRY UPDATE ALERTS', 'notifyRegistrationUpdate'),
+                    _buildToggle(
+                        'REGISTRY UPDATE ALERTS', 'notifyRegistrationUpdate'),
                     const Divider(color: Colors.white10, height: 1),
-                    _buildToggle('RELEVANT COMMUNITY UPDATES', 'notifyRelevantUpdates'),
+                    _buildToggle(
+                        'RELEVANT COMMUNITY UPDATES', 'notifyRelevantUpdates'),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-
               _buildSectionHeader('Privacy Settings'),
               GlassContainer(
                 padding: EdgeInsets.zero,
@@ -505,23 +630,23 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-
               if (_isAdmin) ...[
                 _buildSectionHeader('Verification & Gamification'),
                 GlassContainer(
-                   padding: EdgeInsets.zero,
-                   child: Column(
-                     children: [
-                        _buildToggle('VERIFIED ALUMNI (BLUE TICK)', 'isVerified'),
-                        const Divider(color: Colors.white10, height: 1),
-                        _buildTextField('CONTRIBUTION POINTS', 'contributionPoints', keyboardType: TextInputType.number),
-                     ],
-                   ),
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      _buildToggle('VERIFIED ALUMNI (BLUE TICK)', 'isVerified'),
+                      const Divider(color: Colors.white10, height: 1),
+                      _buildTextField(
+                          'CONTRIBUTION POINTS', 'contributionPoints',
+                          keyboardType: TextInputType.number),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 24),
               ],
               const SizedBox(height: 40),
-              
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -530,9 +655,12 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     backgroundColor: AppTheme.royalGold,
                     foregroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('SAVE CHANGES', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
+                  child: const Text('SAVE CHANGES',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w900, letterSpacing: 1)),
                 ),
               ),
               const SizedBox(height: 40),
@@ -546,19 +674,30 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 12),
-      child: Text(title.toUpperCase(), style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+      child: Text(title.toUpperCase(),
+          style: const TextStyle(
+              color: AppTheme.royalGold,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.5)),
     );
   }
 
   // 35.5: read-only field for values a member may see but not edit (e.g. membership tier).
   Widget _buildReadOnlyRow(String label, dynamic value) {
-    final text = (value == null || value.toString().isEmpty) ? 'Not assigned' : value.toString();
+    final text = (value == null || value.toString().isEmpty)
+        ? 'Not assigned'
+        : value.toString();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 10, fontWeight: FontWeight.bold)),
+          Text(label,
+              style: const TextStyle(
+                  color: AppTheme.textSecondaryDark,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           Text(text, style: const TextStyle(color: Colors.white, fontSize: 14)),
         ],
@@ -566,7 +705,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     );
   }
 
-  Widget _buildTextField(String label, String key, {bool required = false, TextInputType? keyboardType, int maxLines = 1}) {
+  Widget _buildTextField(String label, String key,
+      {bool required = false, TextInputType? keyboardType, int maxLines = 1}) {
     return TextFormField(
       initialValue: _data[key]?.toString(),
       keyboardType: keyboardType,
@@ -574,35 +714,40 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       style: const TextStyle(color: Colors.white, fontSize: 14),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 10, fontWeight: FontWeight.bold),
+        labelStyle: const TextStyle(
+            color: AppTheme.textSecondaryDark,
+            fontSize: 10,
+            fontWeight: FontWeight.bold),
         filled: false,
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
         contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       ),
-      validator: required ? (v) => (v == null || v.isEmpty) ? 'Required' : null : null,
+      validator:
+          required ? (v) => (v == null || v.isEmpty) ? 'Required' : null : null,
       onSaved: (v) => _data[key] = v,
     );
   }
 
-  Widget _buildDropdown(String label, String key, String group, {bool required = false}) {
+  Widget _buildDropdown(String label, String key, String group,
+      {bool required = false}) {
     return FutureBuilder<List<Map<String, String>>>(
       future: ref.read(dropdownDataProvider).getOptions(group),
       builder: (context, snapshot) {
         final options = snapshot.data ?? [];
-        return DropdownButtonFormField<String>(
-          initialValue: options.any((e) => e['value'] == _data[key]?.toString()) ? _data[key]?.toString() : null,
-          decoration: InputDecoration(
-            labelText: label,
-            labelStyle: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 10, fontWeight: FontWeight.bold),
-            border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          ),
-          dropdownColor: AppTheme.midnightSurface,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
-          items: options.map((o) => DropdownMenuItem(value: o['value'], child: Text(o['label']!))).toList(),
-          validator: required ? (v) => (v == null || v.isEmpty) ? 'Required' : null : null,
+        return AppDropdownField<String>(
+          value: options.any((e) => e['value'] == _data[key]?.toString())
+              ? _data[key]?.toString()
+              : null,
+          labelText: label,
+          items: options
+              .map((o) =>
+                  DropdownMenuItem(value: o['value'], child: Text(o['label']!)))
+              .toList(),
+          validator: required
+              ? (v) => (v == null || v.isEmpty) ? 'Required' : null
+              : null,
           onChanged: (v) => setState(() => _data[key] = v),
           onSaved: (v) => _data[key] = v,
         );
@@ -617,8 +762,12 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       if (photoPath.toString().startsWith('http')) {
         photoUrl = photoPath.toString();
       } else {
-        final base = AppConfig.apiBaseUrl.endsWith('/') ? AppConfig.apiBaseUrl.substring(0, AppConfig.apiBaseUrl.length - 1) : AppConfig.apiBaseUrl;
-        final cleanP = photoPath.toString().startsWith('/') ? photoPath.toString().substring(1) : photoPath.toString();
+        final base = AppConfig.apiBaseUrl.endsWith('/')
+            ? AppConfig.apiBaseUrl.substring(0, AppConfig.apiBaseUrl.length - 1)
+            : AppConfig.apiBaseUrl;
+        final cleanP = photoPath.toString().startsWith('/')
+            ? photoPath.toString().substring(1)
+            : photoPath.toString();
         photoUrl = '$base/$cleanP';
       }
     }
@@ -628,11 +777,13 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         onTap: () async {
           final file = await ref.read(fileServiceProvider).pickImage();
           if (file != null) {
-            final newPath = await ref.read(fileServiceProvider).uploadProfilePhoto(file);
+            final newPath =
+                await ref.read(fileServiceProvider).uploadProfilePhoto(file);
             if (newPath != null) {
               setState(() => _data['photoPath'] = newPath);
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo updated successfully.')));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Photo updated successfully.')));
               }
             }
           }
@@ -645,22 +796,26 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(color: AppTheme.royalGold, width: 2),
-                image: photoUrl != null 
-                  ? DecorationImage(image: NetworkImage(photoUrl), fit: BoxFit.cover)
-                  : null,
+                image: photoUrl != null
+                    ? DecorationImage(
+                        image: NetworkImage(photoUrl), fit: BoxFit.cover)
+                    : null,
                 color: Colors.black26,
               ),
-              child: photoUrl == null 
-                ? const Icon(Icons.person_outline, size: 50, color: AppTheme.royalGold)
-                : null,
+              child: photoUrl == null
+                  ? const Icon(Icons.person_outline,
+                      size: 50, color: AppTheme.royalGold)
+                  : null,
             ),
             Positioned(
               bottom: 0,
               right: 0,
               child: Container(
                 padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(color: AppTheme.royalGold, shape: BoxShape.circle),
-                child: const Icon(Icons.camera_alt_outlined, size: 16, color: Colors.black),
+                decoration: const BoxDecoration(
+                    color: AppTheme.royalGold, shape: BoxShape.circle),
+                child: const Icon(Icons.camera_alt_outlined,
+                    size: 16, color: Colors.black),
               ),
             ),
           ],
@@ -669,48 +824,60 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     );
   }
 
-  Widget _buildHistoryTextField(String label, String listKey, int index, String fieldKey) {
+  Widget _buildHistoryTextField(
+      String label, String listKey, int index, String fieldKey,
+      {bool readOnly = false}) {
     return TextFormField(
       initialValue: (_data[listKey] as List)[index][fieldKey]?.toString(),
       style: const TextStyle(color: Colors.white, fontSize: 13),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 9, fontWeight: FontWeight.bold),
+        labelStyle: const TextStyle(
+            color: AppTheme.textSecondaryDark,
+            fontSize: 9,
+            fontWeight: FontWeight.bold),
         border: InputBorder.none,
         contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       ),
+      readOnly: readOnly,
       onChanged: (v) => (_data[listKey] as List)[index][fieldKey] = v,
     );
   }
 
-  Widget _buildHistoryDropdown(String label, String listKey, int index, String fieldKey, String group) {
+  Widget _buildHistoryDropdown(
+      String label, String listKey, int index, String fieldKey, String group) {
     return FutureBuilder<List<Map<String, String>>>(
       future: ref.read(dropdownDataProvider).getOptions(group),
       builder: (context, snapshot) {
         final options = snapshot.data ?? [];
-        final currentVal = (_data[listKey] as List)[index][fieldKey]?.toString();
-        return DropdownButtonFormField<String>(
-          initialValue: options.any((e) => e['value'] == currentVal) ? currentVal : null,
-          decoration: InputDecoration(
-            labelText: label,
-            labelStyle: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 9, fontWeight: FontWeight.bold),
-            border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-          ),
-          dropdownColor: AppTheme.midnightSurface,
-          style: const TextStyle(color: Colors.white, fontSize: 13),
-          items: options.map((o) => DropdownMenuItem(value: o['value'], child: Text(o['label']!))).toList(),
-          onChanged: (v) => setState(() => (_data[listKey] as List)[index][fieldKey] = v),
+        final currentVal =
+            (_data[listKey] as List)[index][fieldKey]?.toString();
+        return AppDropdownField<String>(
+          value:
+              options.any((e) => e['value'] == currentVal) ? currentVal : null,
+          labelText: label,
+          items: options
+              .map((o) =>
+                  DropdownMenuItem(value: o['value'], child: Text(o['label']!)))
+              .toList(),
+          onChanged: (v) =>
+              setState(() => (_data[listKey] as List)[index][fieldKey] = v),
         );
       },
     );
   }
 
-  Widget _buildHistoryToggle(String label, String listKey, int index, String fieldKey) {
+  Widget _buildHistoryToggle(
+      String label, String listKey, int index, String fieldKey) {
     return SwitchListTile(
-      title: Text(label, style: const TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.bold)),
+      title: Text(label,
+          style: const TextStyle(
+              fontSize: 12,
+              color: Colors.white70,
+              fontWeight: FontWeight.bold)),
       value: (_data[listKey] as List)[index][fieldKey] ?? false,
-      onChanged: (v) => setState(() => (_data[listKey] as List)[index][fieldKey] = v),
+      onChanged: (v) =>
+          setState(() => (_data[listKey] as List)[index][fieldKey] = v),
       activeThumbColor: AppTheme.royalGold,
       contentPadding: EdgeInsets.zero,
     );
@@ -718,7 +885,11 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
 
   Widget _buildToggle(String label, String key) {
     return SwitchListTile(
-      title: Text(label, style: const TextStyle(fontSize: 13, color: Colors.white70, fontWeight: FontWeight.bold)),
+      title: Text(label,
+          style: const TextStyle(
+              fontSize: 13,
+              color: Colors.white70,
+              fontWeight: FontWeight.bold)),
       value: _data[key] ?? false,
       onChanged: (v) => setState(() => _data[key] = v),
       activeThumbColor: AppTheme.royalGold,

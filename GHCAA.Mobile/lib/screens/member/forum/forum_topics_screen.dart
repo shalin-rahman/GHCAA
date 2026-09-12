@@ -9,6 +9,7 @@ import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/logo_spinner.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../core/services/org_config_service.dart';
 import '../../../features/forum/forum_service.dart';
 
 final topicSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
@@ -35,6 +36,7 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
     final topicsAsync = ref.watch(forumTopicsProvider(widget.categoryId));
     final searchQuery = ref.watch(topicSearchQueryProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dateFormat = ref.watch(orgDateFormatProvider);
 
     return AppScaffold(
       title: 'Topics',
@@ -45,7 +47,8 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
           _showCreateTopicDialog(context, ref);
         },
         backgroundColor: AppTheme.royalGold,
-        icon: const Icon(Icons.add_comment_outlined, color: Colors.black, size: 20),
+        icon: const Icon(Icons.add_comment_outlined,
+            color: Colors.black, size: 20),
         label: const Text(
           'NEW TOPIC',
           style: TextStyle(
@@ -67,25 +70,35 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Search topics...',
-                      prefixIcon: const Icon(Icons.search, size: 20, color: AppTheme.royalGold),
-                      suffixIcon: _searchController.text.isNotEmpty 
-                        ? IconButton(
-                            icon: const Icon(Icons.cancel_rounded, size: 18, color: Colors.white24),
-                            onPressed: () {
-                              _searchController.clear();
-                              ref.read(topicSearchQueryProvider.notifier).state = "";
-                            },
-                          )
-                        : null,
+                      prefixIcon: const Icon(Icons.search,
+                          size: 20, color: AppTheme.royalGold),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.cancel_rounded,
+                                  size: 18, color: Colors.white24),
+                              onPressed: () {
+                                _searchController.clear();
+                                ref
+                                    .read(topicSearchQueryProvider.notifier)
+                                    .state = "";
+                              },
+                            )
+                          : null,
                       filled: true,
-                      fillColor: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      fillColor: isDark
+                          ? Colors.black.withValues(alpha: 0.2)
+                          : Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 14),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: AppTheme.royalGold.withValues(alpha: 0.1)),
+                        borderSide: BorderSide(
+                            color: AppTheme.royalGold.withValues(alpha: 0.1)),
                       ),
                     ),
-                    onChanged: (v) => ref.read(topicSearchQueryProvider.notifier).state = v.toLowerCase(),
+                    onChanged: (v) => ref
+                        .read(topicSearchQueryProvider.notifier)
+                        .state = v.toLowerCase(),
                   ),
                 ),
               ],
@@ -95,7 +108,8 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
             child: AsyncValueWidget<List<ForumTopic>>(
               value: topicsAsync,
               loadingMessage: 'Loading topics...',
-              onRetry: () => ref.invalidate(forumTopicsProvider(widget.categoryId)),
+              onRetry: () =>
+                  ref.invalidate(forumTopicsProvider(widget.categoryId)),
               data: (topics) {
                 final filtered = topics.where((t) {
                   return t.title.toLowerCase().contains(searchQuery) ||
@@ -111,11 +125,14 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
                   },
                   child: filtered.isEmpty
                       ? EmptyStateWidget(
-                          searchQuery.isEmpty ? 'No topics created in this category yet.' : 'No topics match your search.',
+                          searchQuery.isEmpty
+                              ? 'No topics created in this category yet.'
+                              : 'No topics match your search.',
                           icon: Icons.forum_outlined,
                         )
                       : ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
                           itemCount: filtered.length,
                           itemBuilder: (context, index) {
                             final topic = filtered[index];
@@ -129,16 +146,20 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
                                     HapticFeedback.lightImpact();
                                     context.push('/forum/topic/${topic.id}');
                                   },
-                                  borderRadius: BorderRadius.circular(AppTheme.radiusL),
+                                  borderRadius:
+                                      BorderRadius.circular(AppTheme.radiusL),
                                   child: Padding(
                                     padding: const EdgeInsets.all(16.0),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
                                             if (topic.isPinned) ...[
-                                              const Icon(Icons.push_pin, size: 14, color: AppTheme.royalGold),
+                                              const Icon(Icons.push_pin,
+                                                  size: 14,
+                                                  color: AppTheme.royalGold),
                                               const SizedBox(width: 6),
                                             ],
                                             Expanded(
@@ -155,7 +176,9 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
                                             ),
                                             if (topic.isLocked) ...[
                                               const SizedBox(width: 8),
-                                              const Icon(Icons.lock_outline, size: 14, color: Colors.white38),
+                                              const Icon(Icons.lock_outline,
+                                                  size: 14,
+                                                  color: Colors.white38),
                                             ],
                                           ],
                                         ),
@@ -171,18 +194,31 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
                                           ),
                                         ),
                                         const SizedBox(height: 14),
-                                        const Divider(color: Colors.white10, height: 1),
+                                        const Divider(
+                                            color: Colors.white10, height: 1),
                                         const SizedBox(height: 12),
                                         Row(
                                           children: [
                                             CircleAvatar(
                                               radius: 10,
-                                              backgroundColor: AppTheme.royalGold.withValues(alpha: 0.1),
-                                              backgroundImage: topic.authorPhotoUrl != null && topic.authorPhotoUrl!.isNotEmpty
-                                                  ? NetworkImage(topic.authorPhotoUrl!)
-                                                  : null,
-                                              child: topic.authorPhotoUrl == null || topic.authorPhotoUrl!.isEmpty
-                                                  ? const Icon(Icons.person, color: AppTheme.royalGold, size: 10)
+                                              backgroundColor: AppTheme
+                                                  .royalGold
+                                                  .withValues(alpha: 0.1),
+                                              backgroundImage:
+                                                  topic.authorPhotoUrl !=
+                                                              null &&
+                                                          topic.authorPhotoUrl!
+                                                              .isNotEmpty
+                                                      ? NetworkImage(
+                                                          topic.authorPhotoUrl!)
+                                                      : null,
+                                              child: topic.authorPhotoUrl ==
+                                                          null ||
+                                                      topic.authorPhotoUrl!
+                                                          .isEmpty
+                                                  ? const Icon(Icons.person,
+                                                      color: AppTheme.royalGold,
+                                                      size: 10)
                                                   : null,
                                             ),
                                             const SizedBox(width: 6),
@@ -195,12 +231,18 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
                                               ),
                                             ),
                                             const Spacer(),
-                                            _buildStat(Icons.visibility_outlined, '${topic.viewCount}'),
+                                            _buildStat(
+                                                Icons.visibility_outlined,
+                                                '${topic.viewCount}'),
                                             const SizedBox(width: 14),
-                                            _buildStat(Icons.comment_outlined, '${topic.replyCount}'),
+                                            _buildStat(Icons.comment_outlined,
+                                                '${topic.replyCount}'),
                                             const SizedBox(width: 14),
                                             Text(
-                                              AppUtils.formatDate(topic.createdAt),
+                                              AppUtils.formatDate(
+                                                topic.createdAt,
+                                                format: dateFormat.identifier,
+                                              ),
                                               style: const TextStyle(
                                                 color: Colors.white38,
                                                 fontSize: 9,
@@ -272,7 +314,8 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Topic Title',
                   labelStyle: TextStyle(color: Colors.white38, fontSize: 11),
-                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white10)),
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white10)),
                 ),
               ),
               const SizedBox(height: 12),
@@ -283,7 +326,8 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Topic Description / Question',
                   labelStyle: TextStyle(color: Colors.white38, fontSize: 11),
-                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white10)),
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white10)),
                 ),
               ),
             ],
@@ -291,7 +335,8 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
           actions: [
             TextButton(
               onPressed: isSubmitting ? null : () => Navigator.pop(ctx),
-              child: const Text('CANCEL', style: TextStyle(color: Colors.white54)),
+              child:
+                  const Text('CANCEL', style: TextStyle(color: Colors.white54)),
             ),
             ElevatedButton(
               onPressed: isSubmitting
@@ -323,14 +368,18 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
                         });
                         if (ctx.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Failed to create topic. Please try again.')),
+                            const SnackBar(
+                                content: Text(
+                                    'Failed to create topic. Please try again.')),
                           );
                         }
                       }
                     },
               child: isSubmitting
                   ? LogoSpinner.small()
-                  : const Text('POST TOPIC', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                  : const Text('POST TOPIC',
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold)),
             ),
           ],
         ),

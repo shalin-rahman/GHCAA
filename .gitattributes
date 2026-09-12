@@ -1,7 +1,9 @@
 ###############################################################################
-# Set default behavior to automatically normalize line endings.
+# Preserve each file's existing line endings.
+#
+# Do not let Git or checkout settings rewrite LF and CRLF files.
 ###############################################################################
-* text=auto
+* -text
 
 ###############################################################################
 # Set default behavior for command prompt diff.

@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, firstValueFrom } from 'rxjs';
 import { FinancialService, PaymentRecord, MembershipDue } from '../../core/services/financial.service';
@@ -20,7 +21,7 @@ import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 @Component({
     selector: 'app-payments',
     standalone: true,
-    imports: [CommonModule, FormsModule, PaymentPortalComponent, LoadingPanelComponent, ModalHeaderComponent, AppCurrencyPipe],
+    imports: [CommonModule, AppDatePipe, FormsModule, PaymentPortalComponent, LoadingPanelComponent, ModalHeaderComponent, AppCurrencyPipe],
     templateUrl: './payments.html',
     styleUrl: './payments.scss'
 })

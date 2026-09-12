@@ -105,7 +105,6 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page, request }) => {
   await page.locator('select[name="gender"]').selectOption('Male');
   await page.locator('select[name="bloodGroup"]').selectOption('APositive');
   await page.locator('select[name="tShirtSize"]').selectOption('L');
-  await page.locator('select[name="membershipType"]').selectOption('General');
 
   // Dynamic fee check - using innerText match as fallback for visual consistency
   await page.waitForFunction(() => document.body.innerText.match(/1[,.]?000|500/), { timeout: 10000 });
@@ -124,10 +123,12 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page, request }) => {
   await page.waitForSelector('text=Background & Milestones', { timeout: 15000 });
 
   // Academic Info — first record is pre-seeded with Haraganga College
-  await page.locator('select[name="deg_0"]').selectOption('HSC');
-  await page.locator('select[name="sub_0"]').selectOption('Science');
-  await page.locator('select[name="adm_0"]').selectOption('2006');
-  await page.locator('select[name="pass_0"]').selectOption('2008');
+  const academicSelects = page.locator('select').first();
+  await expect(academicSelects).toBeVisible({ timeout: 15000 });
+  await academicSelects.selectOption('HSC');
+  await page.locator('select').nth(1).selectOption('Science');
+  await page.locator('select').nth(2).selectOption('2006');
+  await page.locator('select').nth(3).selectOption('2008');
 
   // Professional History (Standard date format)
   await page.getByPlaceholder(/Employer Title/i).first().fill('GHCAA Test Corp');

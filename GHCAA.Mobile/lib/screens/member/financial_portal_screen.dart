@@ -10,6 +10,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/utils/app_utils.dart';
 import '../../core/services/org_config_service.dart';
 import '../../core/widgets/app_search_field.dart';
+import '../../core/widgets/upload_surface.dart';
 import '../../features/financials/financial_service.dart';
 import '../../features/financials/gateway_service.dart';
 import '../../features/files/file_service.dart';
@@ -17,18 +18,25 @@ import 'package:go_router/go_router.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
 
-final ledgerProvider = FutureProvider<List<dynamic>>((ref) async => ref.read(financialServiceProvider).getLedger());
-final duesProvider = FutureProvider<double>((ref) async => ref.read(financialServiceProvider).getOutstandingDues());
-final savedMethodsProvider = FutureProvider<List<dynamic>>((ref) async => ref.read(financialServiceProvider).getSavedMethods());
+final ledgerProvider = FutureProvider<List<dynamic>>(
+    (ref) async => ref.read(financialServiceProvider).getLedger());
+final duesProvider = FutureProvider<double>(
+    (ref) async => ref.read(financialServiceProvider).getOutstandingDues());
+final savedMethodsProvider = FutureProvider<List<dynamic>>(
+    (ref) async => ref.read(financialServiceProvider).getSavedMethods());
 // 29G.1: admin-configured, enabled payment methods (manual channels work without live gateway keys).
-final activePaymentConfigsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async => ref.read(financialServiceProvider).getActivePaymentConfigs());
-final ledgerSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
+final activePaymentConfigsProvider = FutureProvider.autoDispose<List<dynamic>>(
+    (ref) async =>
+        ref.read(financialServiceProvider).getActivePaymentConfigs());
+final ledgerSearchQueryProvider =
+    StateProvider.autoDispose<String>((ref) => "");
 
 class FinancialPortalScreen extends ConsumerStatefulWidget {
   const FinancialPortalScreen({super.key});
 
   @override
-  ConsumerState<FinancialPortalScreen> createState() => _FinancialPortalScreenState();
+  ConsumerState<FinancialPortalScreen> createState() =>
+      _FinancialPortalScreenState();
 }
 
 class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
@@ -57,17 +65,25 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
     final url = await ref.read(financialServiceProvider).getReceiptUrl(id);
     if (url == null) return;
 
-    final file = await ref.read(fileServiceProvider).downloadToTempFile(url, fileName: 'ghcaa_receipt_$id.pdf');
+    final file = await ref
+        .read(fileServiceProvider)
+        .downloadToTempFile(url, fileName: 'ghcaa_receipt_$id.pdf');
     if (!mounted) return;
 
     if (file == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not download the receipt. Please try again.')),
+        const SnackBar(
+            content: Text('Could not download the receipt. Please try again.')),
       );
       return;
     }
 
-    await Share.shareXFiles([XFile(file.path)], text: 'GHCAA Payment Receipt');
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path)],
+        text: 'GHCAA Payment Receipt',
+      ),
+    );
   }
 
   Future<void> _initiatePayment(double amount, PaymentGateway gateway) async {
@@ -80,22 +96,29 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
     );
 
     try {
-      final response = await ref.read(gatewayServiceProvider).initiate(amount, gateway, 'OUTSTANDING_DUES');
+      final response = await ref
+          .read(gatewayServiceProvider)
+          .initiate(amount, gateway, 'OUTSTANDING_DUES');
       if (mounted) Navigator.of(context).pop(); // Dismiss loading
 
       if (response.success && response.gatewayUrl != null) {
-        if (mounted) context.pushNamed('payment_web', extra: response.gatewayUrl);
+        if (mounted) {
+          context.pushNamed('payment_web', extra: response.gatewayUrl);
+        }
       } else {
         if (mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response.message ?? 'Failed to initiate payment')),
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text(response.message ?? 'Failed to initiate payment')),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -125,7 +148,12 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('SELECT PAYMENT METHOD', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: AppTheme.royalGold, letterSpacing: 1.5)),
+                    const Text('SELECT PAYMENT METHOD',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 12,
+                            color: AppTheme.royalGold,
+                            letterSpacing: 1.5)),
                     const SizedBox(height: 24),
                     ...methods.map((m) => Padding(
                           padding: const EdgeInsets.only(bottom: 12),
@@ -135,8 +163,11 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                   ],
                 );
               },
-              loading: () => const Padding(padding: EdgeInsets.all(40), child: Center(child: LogoSpinner(size: 100))),
-              error: (e, s) => Text('Error loading payment methods: $e', style: const TextStyle(color: Colors.redAccent)),
+              loading: () => const Padding(
+                  padding: EdgeInsets.all(40),
+                  child: Center(child: LogoSpinner(size: 100))),
+              error: (e, s) => Text('Error loading payment methods: $e',
+                  style: const TextStyle(color: Colors.redAccent)),
             ),
           );
         },
@@ -151,7 +182,8 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
       onTap: () {
         Navigator.pop(context);
         if (isOnline) {
-          _initiatePayment(amount, _gatewayFromString(m['gateway']?.toString()));
+          _initiatePayment(
+              amount, _gatewayFromString(m['gateway']?.toString()));
         } else {
           _showManualPaymentForm(m, amount);
         }
@@ -162,22 +194,30 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
           children: [
             (iconStr != null && iconStr.isNotEmpty)
                 ? Text(iconStr, style: const TextStyle(fontSize: 22))
-                : const Icon(Icons.account_balance_wallet_outlined, color: AppTheme.royalGold),
+                : const Icon(Icons.account_balance_wallet_outlined,
+                    color: AppTheme.royalGold),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(m['displayName'] ?? 'Payment', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                  Text(m['displayName'] ?? 'Payment',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14)),
                   if ((m['description'] as String?)?.isNotEmpty == true)
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
-                      child: Text(m['description'], style: const TextStyle(color: Colors.white38, fontSize: 10)),
+                      child: Text(m['description'],
+                          style: const TextStyle(
+                              color: Colors.white38, fontSize: 10)),
                     ),
                 ],
               ),
             ),
-            Icon(isOnline ? Icons.open_in_new : Icons.chevron_right, color: Colors.white24, size: 18),
+            Icon(isOnline ? Icons.open_in_new : Icons.chevron_right,
+                color: Colors.white24, size: 18),
           ],
         ),
       ),
@@ -200,7 +240,8 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (sheetContext) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(sheetContext).viewInsets.bottom),
+        padding: EdgeInsets.only(
+            bottom: MediaQuery.of(sheetContext).viewInsets.bottom),
         child: StatefulBuilder(
           builder: (context, setSheetState) {
             Future<void> pickReceipt() async {
@@ -211,18 +252,23 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
             Future<void> submit() async {
               final txn = txnController.text.trim();
               if (requiresReference && txn.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter the transaction / reference ID.')));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content:
+                        Text('Please enter the transaction / reference ID.')));
                 return;
               }
               if (requiresReceipt && receipt == null) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please attach your payment receipt.')));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Please attach your payment receipt.')));
                 return;
               }
               setSheetState(() => submitting = true);
               final ok = await ref.read(financialServiceProvider).recordPayment(
-                    transactionId: txn.isEmpty ? 'MANUAL-${config['method']}' : txn,
+                    transactionId:
+                        txn.isEmpty ? 'MANUAL-${config['method']}' : txn,
                     amount: amount,
-                    paymentMethod: config['method']?.toString() ?? 'ManualReceipt',
+                    paymentMethod:
+                        config['method']?.toString() ?? 'ManualReceipt',
                     financialCategory: 'MembershipFee',
                     notes: 'Paid via $displayName (pending verification)',
                     receipt: receipt,
@@ -231,7 +277,9 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
               setSheetState(() => submitting = false);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(ok ? 'Payment submitted for verification.' : 'Failed to submit payment. Please try again.'),
+                content: Text(ok
+                    ? 'Payment submitted for verification.'
+                    : 'Failed to submit payment. Please try again.'),
               ));
               if (ok) {
                 ref.invalidate(ledgerProvider);
@@ -246,9 +294,19 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(displayName.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: AppTheme.royalGold, letterSpacing: 1.2)),
+                    Text(displayName.toUpperCase(),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 13,
+                            color: AppTheme.royalGold,
+                            letterSpacing: 1.2)),
                     const SizedBox(height: 4),
-                    Text('Payable: ${AppUtils.formatCurrency(amount, currency)}', style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
+                    Text(
+                        'Payable: ${AppUtils.formatCurrency(amount, currency)}',
+                        style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold)),
                     const SizedBox(height: 20),
                     // Where to pay — display-only account details from the admin config.
                     _detailRow('Wallet Number', config['walletNumber']),
@@ -260,49 +318,53 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                     if ((config['instructions'] as String?)?.isNotEmpty == true)
                       Padding(
                         padding: const EdgeInsets.only(top: 8, bottom: 4),
-                        child: Text(config['instructions'], style: const TextStyle(color: Colors.white54, fontSize: 11, height: 1.4)),
+                        child: Text(config['instructions'],
+                            style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 11,
+                                height: 1.4)),
                       ),
                     const SizedBox(height: 20),
                     if (requiresReference) ...[
                       TextField(
                         controller: txnController,
-                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 13),
                         decoration: const InputDecoration(
                           labelText: 'Transaction ID / Reference *',
-                          labelStyle: TextStyle(color: Colors.white54, fontSize: 12),
+                          labelStyle:
+                              TextStyle(color: Colors.white54, fontSize: 12),
                         ),
                       ),
                       const SizedBox(height: 16),
                     ],
-                    // Receipt upload
-                    InkWell(
-                      onTap: submitting ? null : pickReceipt,
-                      child: GlassContainer(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        child: Row(
-                          children: [
-                            Icon(receipt != null ? Icons.check_circle_outline : Icons.upload_file_outlined, color: AppTheme.royalGold, size: 18),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                receipt != null ? receipt!.path.split('/').last : (requiresReceipt ? 'Attach receipt *' : 'Attach receipt (optional)'),
-                                style: const TextStyle(color: Colors.white70, fontSize: 12),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    UploadSurface(
+                      file: receipt,
+                      label: requiresReceipt
+                          ? 'Attach receipt *'
+                          : 'Attach receipt (optional)',
+                      enabled: !submitting,
+                      onPick: pickReceipt,
+                      onRemove: () => setSheetState(() => receipt = null),
                     ),
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: submitting ? null : submit,
-                        style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+                        style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16)),
                         child: submitting
-                            ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                            : const Text('SUBMIT PAYMENT', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1)),
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2, color: Colors.black))
+                            : const Text('SUBMIT PAYMENT',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 12,
+                                    letterSpacing: 1)),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -326,10 +388,19 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
         children: [
           SizedBox(
             width: 120,
-            child: Text(label.toUpperCase(), style: const TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+            child: Text(label.toUpperCase(),
+                style: const TextStyle(
+                    color: Colors.white38,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5)),
           ),
           Expanded(
-            child: Text(str, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+            child: Text(str,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -354,6 +425,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
     final methodsAsync = ref.watch(savedMethodsProvider);
     final searchQuery = ref.watch(ledgerSearchQueryProvider).toLowerCase();
     final currency = ref.watch(orgCurrencyProvider);
+    final dateFormat = ref.watch(orgDateFormatProvider);
 
     return AppScaffold(
       title: 'Fees & Dues',
@@ -378,81 +450,146 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                   padding: const EdgeInsets.all(24.0),
                   child: Column(
                     children: [
-                      Text(AppUtils.formatCurrency(dues, currency), style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1)),
+                      Text(AppUtils.formatCurrency(dues, currency),
+                          style: const TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 1)),
                       const SizedBox(height: 24),
                       SizedBox(
-                        width: double.infinity, 
-                        child: ElevatedButton(
-                          onPressed: dues > 0 ? () {
-                            HapticFeedback.mediumImpact();
-                            _showPaymentSheet(dues);
-                          } : null, 
-                          style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                          child: const Text('PAY OUTSTANDING', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1))
-                        )
-                      ),
+                          width: double.infinity,
+                          child: ElevatedButton(
+                              onPressed: dues > 0
+                                  ? () {
+                                      HapticFeedback.mediumImpact();
+                                      _showPaymentSheet(dues);
+                                    }
+                                  : null,
+                              style: ElevatedButton.styleFrom(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16)),
+                              child: const Text('PAY OUTSTANDING',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 12,
+                                      letterSpacing: 1)))),
                     ],
                   ),
                 ),
-                loading: () => const Center(child: Padding(padding: EdgeInsets.all(40), child: LogoSpinner(size: 120))),
-                error: (e, s) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.redAccent))),
+                loading: () => const Center(
+                    child: Padding(
+                        padding: EdgeInsets.all(40),
+                        child: LogoSpinner(size: 120))),
+                error: (e, s) => Center(
+                    child: Text('Error: $e',
+                        style: const TextStyle(color: Colors.redAccent))),
               ),
               const SizedBox(height: 32),
 
               // Saved Payment Methods (Flexibility)
               const Padding(
                 padding: EdgeInsets.only(left: 4, bottom: 12),
-                child: Text('SAVED PAYMENT METHODS', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, color: AppTheme.royalGold, letterSpacing: 1.5)),
+                child: Text('SAVED PAYMENT METHODS',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 10,
+                        color: AppTheme.royalGold,
+                        letterSpacing: 1.5)),
               ),
               methodsAsync.when(
                 data: (methods) => methods.isEmpty
-                  ? const GlassContainer(child: EmptyStateWidget('No saved payment methods', icon: Icons.credit_card_outlined))
-                  : Column(
-                      children: methods.map((m) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: GlassContainer(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          child: Row(
-                            children: [
-                              Icon(m['type'] == 'Card' ? Icons.credit_card_outlined : Icons.account_balance_wallet_outlined, size: 18, color: AppTheme.royalGold),
-                              const SizedBox(width: 12),
-                              Text(m['provider'] ?? 'SECURE METHOD', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
-                              const Spacer(),
-                              Text('**** ${m['lastFour'] ?? 'XXXX'}', style: const TextStyle(color: Colors.white54, fontSize: 12)),
-                              const SizedBox(width: 16),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 16),
-                                onPressed: _deletingMethodId == m['id'] ? null : () async {
-                                    setState(() => _deletingMethodId = m['id']);
-                                    try {
-                                      final success = await ref.read(financialServiceProvider).deleteSavedMethod(m['id']);
-                                      if (success) ref.invalidate(savedMethodsProvider);
-                                    } finally {
-                                      if (mounted) setState(() => _deletingMethodId = null);
-                                    }
-                                },
-                              )
-                            ],
-                          ),
-                        ),
-                      )).toList(),
-                    ),
+                    ? const GlassContainer(
+                        child: EmptyStateWidget('No saved payment methods',
+                            icon: Icons.credit_card_outlined))
+                    : Column(
+                        children: methods
+                            .map((m) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: GlassContainer(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 12),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                            m['type'] == 'Card'
+                                                ? Icons.credit_card_outlined
+                                                : Icons
+                                                    .account_balance_wallet_outlined,
+                                            size: 18,
+                                            color: AppTheme.royalGold),
+                                        const SizedBox(width: 12),
+                                        Text(m['provider'] ?? 'SECURE METHOD',
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.bold)),
+                                        const Spacer(),
+                                        Text('**** ${m['lastFour'] ?? 'XXXX'}',
+                                            style: const TextStyle(
+                                                color: Colors.white54,
+                                                fontSize: 12)),
+                                        const SizedBox(width: 16),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete_outline,
+                                              color: Colors.redAccent,
+                                              size: 16),
+                                          onPressed:
+                                              _deletingMethodId == m['id']
+                                                  ? null
+                                                  : () async {
+                                                      setState(() =>
+                                                          _deletingMethodId =
+                                                              m['id']);
+                                                      try {
+                                                        final success = await ref
+                                                            .read(
+                                                                financialServiceProvider)
+                                                            .deleteSavedMethod(
+                                                                m['id']);
+                                                        if (success) {
+                                                          ref.invalidate(
+                                                              savedMethodsProvider);
+                                                        }
+                                                      } finally {
+                                                        if (mounted) {
+                                                          setState(() =>
+                                                              _deletingMethodId =
+                                                                  null);
+                                                        }
+                                                      }
+                                                    },
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ))
+                            .toList(),
+                      ),
                 loading: () => const Center(child: LogoSpinner(size: 120)),
                 error: (e, s) => const SizedBox(),
               ),
               const SizedBox(height: 40),
-              
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(left: 4),
-                    child: Text('TRANSACTION HISTORY', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: AppTheme.royalGold, letterSpacing: 1.5)),
+                    child: Text('TRANSACTION HISTORY',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 11,
+                            color: AppTheme.royalGold,
+                            letterSpacing: 1.5)),
                   ),
                   if (ledgerAsync.hasValue && ledgerAsync.value!.isNotEmpty)
                     Text(
                       'Showing ${ledgerAsync.value!.length} Transactions',
-                      style: const TextStyle(fontSize: 9, color: AppTheme.royalGold, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 9,
+                          color: AppTheme.royalGold,
+                          fontWeight: FontWeight.bold),
                     ),
                 ],
               ),
@@ -461,7 +598,8 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
               AppSearchField(
                 controller: _searchController,
                 hintText: 'Search transactions...',
-                onChanged: (v) => ref.read(ledgerSearchQueryProvider.notifier).state = v,
+                onChanged: (v) =>
+                    ref.read(ledgerSearchQueryProvider.notifier).state = v,
                 onClear: () {
                   _searchController.clear();
                   ref.read(ledgerSearchQueryProvider.notifier).state = "";
@@ -472,61 +610,104 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
               ledgerAsync.when(
                 data: (items) {
                   final filtered = items.where((item) {
-                     final desc = (item['description'] ?? '').toString().toLowerCase();
-                     return desc.contains(searchQuery);
+                    final desc =
+                        (item['description'] ?? '').toString().toLowerCase();
+                    return desc.contains(searchQuery);
                   }).toList();
 
                   if (filtered.isEmpty) {
                     return EmptyStateWidget(
-                      searchQuery.isEmpty ? 'No transaction history found.' : 'No transactions match your search.',
+                      searchQuery.isEmpty
+                          ? 'No transaction history found.'
+                          : 'No transactions match your search.',
                       icon: Icons.receipt_long_outlined,
                     );
                   }
 
                   return Column(
-                    children: filtered.map((item) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: GlassContainer(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(color: AppTheme.royalGold.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                              child: const Icon(Icons.receipt_outlined, color: AppTheme.royalGold, size: 20),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(item['description'] ?? 'Alumni Contribution', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Colors.white, letterSpacing: -0.2)),
-                                  const SizedBox(height: 2),
-                                  Text(AppUtils.formatDate(item['date']), style: const TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.bold)),
-                                ],
+                    children: filtered
+                        .map((item) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: GlassContainer(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                          color: AppTheme.royalGold
+                                              .withValues(alpha: 0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                      child: const Icon(Icons.receipt_outlined,
+                                          color: AppTheme.royalGold, size: 20),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                              item['description'] ??
+                                                  'Alumni Contribution',
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.w900,
+                                                  fontSize: 13,
+                                                  color: Colors.white,
+                                                  letterSpacing: -0.2)),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                              AppUtils.formatDate(
+                                                item['date'],
+                                                format: dateFormat.identifier,
+                                              ),
+                                              style: const TextStyle(
+                                                  fontSize: 10,
+                                                  color: AppTheme
+                                                      .textSecondaryDark,
+                                                  fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
+                                    ),
+                                    Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                              AppUtils.formatCurrency(
+                                                  item['amount'], currency),
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.w900,
+                                                  fontSize: 13,
+                                                  color: AppTheme.royalGold)),
+                                          const SizedBox(height: 4),
+                                          GestureDetector(
+                                            onTap: () {
+                                              HapticFeedback.lightImpact();
+                                              _downloadReceipt(item['id']);
+                                            },
+                                            child: const Text('GET RECEIPT',
+                                                style: TextStyle(
+                                                    fontSize: 8.5,
+                                                    color: Colors.white38,
+                                                    decoration: TextDecoration
+                                                        .underline,
+                                                    fontWeight: FontWeight.w900,
+                                                    letterSpacing: 0.5)),
+                                          )
+                                        ]),
+                                  ],
+                                ),
                               ),
-                            ),
-                            Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                    Text(AppUtils.formatCurrency(item['amount'], currency), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: AppTheme.royalGold)),
-                                    const SizedBox(height: 4),
-                                    GestureDetector(
-                                        onTap: () {
-                                            HapticFeedback.lightImpact();
-                                            _downloadReceipt(item['id']);
-                                        },
-                                        child: const Text('GET RECEIPT', style: TextStyle(fontSize: 8.5, color: Colors.white38, decoration: TextDecoration.underline, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
-                                    )
-                                ]
-                            ),
-                          ],
-                        ),
-                      ),
-                    )).toList(),
+                            ))
+                        .toList(),
                   );
                 },
-                loading: () => const Center(child: Padding(padding: EdgeInsets.all(40), child: LogoSpinner(size: 120))),
+                loading: () => const Center(
+                    child: Padding(
+                        padding: EdgeInsets.all(40),
+                        child: LogoSpinner(size: 120))),
                 error: (e, s) => Center(child: Text('Error: $e')),
               ),
               const SizedBox(height: 40),

@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../../../core/pipes/app-date.pipe';
 import { RouterLink } from '@angular/router';
 import { NewsService } from '../../../../core/services/news.service';
 import { NewsPost } from '../../../../core/models/business.models';
@@ -7,7 +8,7 @@ import { NewsPost } from '../../../../core/models/business.models';
 @Component({
     selector: 'landing-news',
     standalone: true,
-    imports: [CommonModule, RouterLink],
+    imports: [CommonModule, AppDatePipe, RouterLink],
     templateUrl: './news-preview.html',
     styleUrl: './news-preview.scss',
 })
@@ -32,5 +33,4 @@ export class LandingNewsPreview implements OnInit {
         });
     }
 }
-
 

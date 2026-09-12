@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../core/config/app_config.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/app_localizations.dart';
+import '../../core/services/org_config_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
+import '../../core/widgets/org_logo.dart';
 
-class AboutScreen extends StatelessWidget {
+class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final branding = ref.watch(orgBrandingProvider);
+    final localePack = ref.watch(localePackProvider);
     return AppScaffold(
       title: 'Our Heritage',
       breadcrumb: 'Member Portal > Institution Heritage',
@@ -32,13 +36,12 @@ class AboutScreen extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(AppTheme.radiusXL + 8), // 24 + 8 = 32
-                  child: Image.asset('assets/logo.png', fit: BoxFit.contain,
-                      errorBuilder: (c, e, s) => const Center(child: Icon(Icons.school_outlined, color: AppTheme.royalGold, size: 60))),
+                  child: const OrgLogo(fit: BoxFit.contain),
                 ),
               ),
             ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
             const SizedBox(height: AppTheme.spaceXL),
-            Text(AppConfig.appName.toUpperCase(),
+            Text(branding.appName.toUpperCase(),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     fontSize: 22,
@@ -47,7 +50,10 @@ class AboutScreen extends StatelessWidget {
                     height: 1.2,
                     color: Colors.white)),
             const SizedBox(height: AppTheme.spaceS),
-            Text('ESTABLISHED 1971 | ${AppConfig.appVersion}',
+            Text(
+                branding.establishedOn.isEmpty
+                    ? localePack.orgName
+                    : 'ESTABLISHED ${branding.establishedOn}',
                 style: const TextStyle(
                     fontSize: 10,
                     color: AppTheme.royalGold,
@@ -56,7 +62,7 @@ class AboutScreen extends StatelessWidget {
             const SizedBox(height: AppTheme.spaceXXL),
             _buildInfoCard(
               'ASSOCIATION MISSION',
-              AppConfig.portalDescription,
+              localePack.tagline,
               Icons.auto_awesome_outlined,
             ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
             const SizedBox(height: AppTheme.spaceL),

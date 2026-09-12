@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { AdminService } from '../../core/services/admin.service';
@@ -16,7 +17,7 @@ export type ThemeStatus = 'SCHEDULED' | 'LIVE' | 'EXPIRED' | 'IDLE';
 @Component({
     selector: 'app-admin-themes',
     standalone: true,
-    imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent],
     templateUrl: './admin-themes.html',
     styleUrl: './admin-themes.scss'
 })
@@ -167,4 +168,3 @@ export class AdminThemes implements OnInit {
         };
     }
 }
-

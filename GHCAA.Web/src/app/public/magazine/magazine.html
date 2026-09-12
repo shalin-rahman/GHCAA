@@ -21,7 +21,7 @@
                         </div>
                         <div class="card-content">
                             <div class="meta">
-                                <span>{{ articles()[0].createdAt | date:'dd-MM-yyyy' }}</span>
+                                <span>{{ articles()[0].createdAt | appDate }}</span>
                                 <span class="dot"></span>
                                 <span>By {{ articles()[0].authorName }}</span>
                             </div>
@@ -42,7 +42,7 @@
                                 </div>
                                 <div class="card-content">
                                     <div class="meta">
-                                        <span>{{ article.createdAt | date:'dd-MM-yyyy' }}</span>
+                                        <span>{{ article.createdAt | appDate }}</span>
                                     </div>
                                     <h3>{{ article.title }}</h3>
                                     <p>{{ article.content | slice:0:120 }}...</p>
@@ -62,7 +62,7 @@
                         <div class="meta-large">
                             <span class="category">{{ selectedArticle()?.articleCategory }}</span>
                             <span class="dot"></span>
-                            <span>{{ selectedArticle()?.createdAt | date:'dd-MM-yyyy' }}</span>
+                            <span>{{ selectedArticle()?.createdAt | appDate }}</span>
                         </div>
                         <h1>{{ selectedArticle()?.title }}</h1>
                         <div class="author-info">

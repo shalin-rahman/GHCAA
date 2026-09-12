@@ -6,7 +6,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../features/messaging/chat_service.dart';
 import '../../core/services/app_localizations.dart';
-import 'package:intl/intl.dart';
+import '../../core/utils/app_utils.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
   final int otherUserId;
@@ -49,10 +49,14 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     HapticFeedback.lightImpact();
 
     try {
-      await ref.read(chatServiceProvider).sendDirectMessage(widget.otherUserId, text);
+      await ref
+          .read(chatServiceProvider)
+          .sendDirectMessage(widget.otherUserId, text);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to send: $e'), backgroundColor: Colors.redAccent));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Failed to send: $e'),
+            backgroundColor: Colors.redAccent));
       }
     }
   }
@@ -73,9 +77,11 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
               data: (history) {
                 if (!_isInit) {
                   _messages.clear();
-                  _messages.addAll(history.map((e) => Map<String, dynamic>.from(e)));
+                  _messages
+                      .addAll(history.map((e) => Map<String, dynamic>.from(e)));
                   _isInit = true;
-                  WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+                  WidgetsBinding.instance
+                      .addPostFrameCallback((_) => _scrollToBottom());
                 }
 
                 return StreamBuilder<Map<String, dynamic>>(
@@ -83,17 +89,20 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       final msg = snapshot.data!;
-                      if (msg['senderUserId'] == widget.otherUserId || msg['receiverUserId'] == widget.otherUserId) {
+                      if (msg['senderUserId'] == widget.otherUserId ||
+                          msg['receiverUserId'] == widget.otherUserId) {
                         if (!_messages.any((m) => m['id'] == msg['id'])) {
                           _messages.add(msg);
-                          WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+                          WidgetsBinding.instance
+                              .addPostFrameCallback((_) => _scrollToBottom());
                         }
                       }
                     }
 
                     return ListView.builder(
                       controller: _scrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 20),
                       itemCount: _messages.length,
                       itemBuilder: (context, index) {
                         final m = _messages[index];
@@ -118,25 +127,38 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         decoration: BoxDecoration(
-          color: isMe ? AppTheme.royalGold.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.05),
+          color: isMe
+              ? AppTheme.royalGold.withValues(alpha: 0.15)
+              : Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
             bottomLeft: Radius.circular(isMe ? 16 : 4),
             bottomRight: Radius.circular(isMe ? 4 : 16),
           ),
-          border: Border.all(color: isMe ? AppTheme.royalGold.withValues(alpha: 0.2) : Colors.white12),
+          border: Border.all(
+              color: isMe
+                  ? AppTheme.royalGold.withValues(alpha: 0.2)
+                  : Colors.white12),
         ),
         child: Column(
-          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment:
+              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(m['content'] ?? '', style: const TextStyle(color: Colors.white, fontSize: 14)),
+            Text(m['content'] ?? '',
+                style: const TextStyle(color: Colors.white, fontSize: 14)),
             const SizedBox(height: 4),
             Text(
               _formatTime(m['sentAt'] ?? m['createdAt']),
-              style: TextStyle(fontSize: 9, color: isMe ? AppTheme.royalGold.withValues(alpha: 0.7) : Colors.white38, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 9,
+                  color: isMe
+                      ? AppTheme.royalGold.withValues(alpha: 0.7)
+                      : Colors.white38,
+                  fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -146,7 +168,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
   Widget _buildInputArea() {
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.of(context).padding.bottom + 16),
+      padding: EdgeInsets.fromLTRB(
+          16, 8, 16, MediaQuery.of(context).padding.bottom + 16),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.3),
         border: const Border(top: BorderSide(color: Colors.white10)),
@@ -177,7 +200,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           IconButton(
             onPressed: _sendMessage,
             icon: const Icon(Icons.send_rounded, color: AppTheme.royalGold),
-            style: IconButton.styleFrom(backgroundColor: AppTheme.royalGold.withValues(alpha: 0.1)),
+            style: IconButton.styleFrom(
+                backgroundColor: AppTheme.royalGold.withValues(alpha: 0.1)),
           ),
         ],
       ),
@@ -188,7 +212,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     if (time == null) return '';
     try {
       final dt = DateTime.parse(time.toString());
-      return DateFormat.Hm().format(dt);
+      return AppUtils.formatTime(dt);
     } catch (e) {
       return '';
     }

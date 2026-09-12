@@ -47,7 +47,7 @@
                     <td><span class="pill" [class.notice]="post.postType === 'Notice'">{{ post.postType === 'Notice' ? 'Notice' : 'News' }}</span></td>
                     <td class="title-cell">{{ post.title }}</td>
                     <td>{{ getArticleCategoryLabel(post.articleCategory) }}</td>
-                    <td>{{ post.createdAt | date:'dd-MM-yyyy' }}</td>
+                    <td>{{ post.createdAt | appDate }}</td>
                     <td>{{ post.authorName }}</td>
                     <td class="actions-cell">
                         @if (post.attachmentUrl) {
@@ -74,7 +74,7 @@
                         {{ post.postType === 'Notice' ? 'Notice' : 'News' }}
                     </span>
                     <span class="cat">{{ getArticleCategoryLabel(post.articleCategory) }}</span>
-                    <span>{{ post.createdAt | date:'dd-MM-yyyy' }}</span>
+                    <span>{{ post.createdAt | appDate }}</span>
                 </div>
                 <h3>{{ post.title }}</h3>
                 <p>{{ post.content | slice:0:180 }}...</p>

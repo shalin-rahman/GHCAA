@@ -70,7 +70,7 @@
                                     <span class="text-[10px] font-mono text-muted">{{ item.transactionId }}</span>
                                 </td>
                                 <td>
-                                    <span class="text-[10px] payment-date">{{ item.paidAt | date:'dd-MM-yyyy' }}</span>
+                                    <span class="text-[10px] payment-date">{{ item.paidAt | appDate }}</span>
                                 </td>
                                 <td>
                                     <span class="font-black">{{ item.amount | appCurrency }}</span>

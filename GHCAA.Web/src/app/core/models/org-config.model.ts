@@ -7,12 +7,14 @@ export interface SocialLinks {
 }
 
 export interface OrgBranding {
+  appName: string;
   shortName: string;
   fullName: string;
   memberNickname: string;
   institutionName: string;
   institutionAcronym: string;
   membershipNumberPrefix: string;
+  transactionPrefix: string;
   approvalSeal: string;
   /** Founding date as printed on letterhead — Constitution, Article I. */
   establishedOn: string;
@@ -26,6 +28,7 @@ export interface OrgBranding {
 export interface OrgContact {
   supportEmail: string;
   importEmailBase: string;
+  emailDomain: string;
   registeredOffice: string;
   campusAddress: string;
   phoneNumbers: string[];
@@ -94,6 +97,7 @@ export interface LocalePack {
 }
 
 export interface OrgLocalization {
+  dateFormat?: import('../constants/app.constants').DateFormat;
   locales: Record<string, LocalePack>;
 }
 
@@ -103,6 +107,7 @@ export interface OrgConfig {
   branding: OrgBranding;
   contact: OrgContact;
   currency: OrgCurrency;
+  enabledGatewayMethods?: string[];
   features: FeatureToggles;
   workflow: OrgWorkflow;
   localization: OrgLocalization;

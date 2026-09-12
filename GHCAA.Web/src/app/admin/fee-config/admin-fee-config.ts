@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { FinancialService } from '../../core/services/financial.service';
@@ -16,7 +17,7 @@ import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 @Component({
   selector: 'app-admin-fee-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LoadingPanelComponent, PageHeaderComponent, AppCurrencyPipe],
+  imports: [CommonModule, AppDatePipe, FormsModule, ReactiveFormsModule, LoadingPanelComponent, PageHeaderComponent, AppCurrencyPipe],
   templateUrl: './admin-fee-config.html',
   styleUrl: './admin-fee-config.scss'
 })

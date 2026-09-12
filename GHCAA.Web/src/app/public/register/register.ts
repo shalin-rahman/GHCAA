@@ -91,7 +91,7 @@ export class Register implements OnDestroy {
     EmergencyContactRelation: '',
     EmergencyContactPhone: '',
     AcademicHistory: [
-      { institutionName: 'Govt. Haraganga College', degree: 'HSC', subject: 'None', admissionYear: null, passingYear: null, isGHC: true }
+      { institutionName: '', degree: 'HSC', subject: 'None', admissionYear: null, passingYear: null, isGHC: true }
     ],
     ProfessionalHistory: [
       { organizationName: '', designation: '', sector: '', location: '', startDate: '', isCurrent: false }
@@ -131,6 +131,10 @@ export class Register implements OnDestroy {
   otpCode = '';
 
   ngOnInit() {
+    const institutionName = this.orgConfig.config()?.branding?.institutionName;
+    if (institutionName) {
+      this.model.AcademicHistory[0].institutionName = institutionName;
+    }
     this.loadPaymentInfo();
     this.loadRegistrationFee();
     this.lookupService.getAcademicYears().subscribe(years => this.years = years);
@@ -261,6 +265,12 @@ export class Register implements OnDestroy {
 
     // Append Academic History as array
     this.model.AcademicHistory.forEach((item: any, i: number) => {
+      if (i === 0) {
+        item.institutionName = this.orgConfig.config()?.branding?.institutionName || item.institutionName;
+        item.isGHC = true;
+      } else {
+        item.isGHC = false;
+      }
       formData.append(`AcademicHistory[${i}].InstitutionName`, item.institutionName);
       formData.append(`AcademicHistory[${i}].Degree`, item.degree);
       formData.append(`AcademicHistory[${i}].Subject`, item.subject);
@@ -402,5 +412,3 @@ export class Register implements OnDestroy {
     }
   }
 }
-
-

@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'org_logo.dart';
 
 /// Shared "logo spinner" loader: the GHCAA seal held still at the center while
 /// two counter-rotating gold arcs orbit around it. Mirrors the web app's
@@ -112,11 +113,11 @@ class _LogoSpinnerState extends State<LogoSpinner> with TickerProviderStateMixin
                     colorFilter: ColorFilter.mode(Colors.black.withValues(alpha: 0.8), BlendMode.srcATop),
                     child: ImageFiltered(
                       imageFilter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-                      child: Image.asset('assets/logo.png', fit: BoxFit.contain),
+                      child: const OrgLogo(fit: BoxFit.contain),
                     ),
                   ),
                 ),
-                Image.asset('assets/logo.png', fit: BoxFit.contain),
+                const OrgLogo(fit: BoxFit.contain),
               ],
             ),
           ),

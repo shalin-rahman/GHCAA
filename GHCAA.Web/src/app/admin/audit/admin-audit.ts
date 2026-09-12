@@ -3,13 +3,14 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
 
 @Component({
     selector: 'app-admin-audit',
     standalone: true,
-    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, LoadingPanelComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, PageHeaderComponent, SearchBarComponent, LoadingPanelComponent],
     templateUrl: './admin-audit.html',
     styleUrl: './admin-audit.scss',
     changeDetection: ChangeDetectionStrategy.OnPush

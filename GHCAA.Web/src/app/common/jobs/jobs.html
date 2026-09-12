@@ -234,7 +234,7 @@
                             </div>
                             <div class="l-item" *ngIf="job.applicationDeadline">
                                 <span class="block text-[10px] text-muted uppercase font-bold">Closing Date</span>
-                                <span class="font-black">{{ job.applicationDeadline | date:'dd-MM-yyyy' }}</span>
+                                <span class="font-black">{{ job.applicationDeadline | appDate }}</span>
                             </div>
                         </div>
                     </div>

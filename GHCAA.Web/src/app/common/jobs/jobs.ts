@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { JobService } from '../../core/services/job.service';
 import { Job } from '../../core/models/business.models';
@@ -16,7 +17,7 @@ import { debounce } from '../../core/utils/debounce.util';
 @Component({
   selector: 'app-jobs',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoadingPanelComponent],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent],
   templateUrl: './jobs.html',
   styleUrl: './jobs.scss'
 })

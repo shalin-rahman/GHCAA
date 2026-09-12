@@ -11,7 +11,7 @@ namespace GHCAA.Tests.Utils
     /// (GHCAA.API/Program.cs), so they govern every DateTime crossing the wire, in both
     /// directions, for every endpoint. The contract pinned here is the one settled in 29F.3:
     ///   * WRITE = ISO-8601 ("yyyy-MM-ddTHH:mm:ss.fff") — unambiguous to `new Date(...)` and DatePipe.
-    ///   * READ  = dd-MM-yyyy accepted first (legacy clients / form input), ISO accepted as fallback.
+    ///   * READ  = supported display formats accepted first, ISO accepted as fallback.
     /// A regression back to dd-MM-yyyy on the write side breaks web and mobile simultaneously
     /// and is silent at compile time, which is why these tests exist.
     /// </summary>
@@ -60,6 +60,12 @@ namespace GHCAA.Tests.Utils
         public void Read_AcceptsLegacyDdMmYyyy()
         {
             Read<DateTime>("\"22-08-2026\"").Should().Be(new DateTime(2026, 8, 22));
+        }
+
+        [Test]
+        public void Read_AcceptsConfiguredUsDateFormat()
+        {
+            Read<DateTime>("\"08/22/2026\"").Should().Be(new DateTime(2026, 8, 22));
         }
 
         [Test]

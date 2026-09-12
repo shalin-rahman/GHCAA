@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
@@ -15,7 +16,7 @@ import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 @Component({
     selector: 'app-admin-gallery',
     standalone: true,
-    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LoadingPanelComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LoadingPanelComponent],
     templateUrl: './admin-gallery.html',
     styleUrl: './admin-gallery.scss'
 })
@@ -273,4 +274,3 @@ export class AdminGallery implements OnInit {
         this.selectedGallery.set(null);
     }
 }
-

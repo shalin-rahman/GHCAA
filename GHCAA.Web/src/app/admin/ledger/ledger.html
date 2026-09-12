@@ -128,7 +128,7 @@
             <tbody>
                 @for (tr of transactions(); track tr.id) {
                 <tr>
-                    <td>{{ tr.date | date:'dd-MM-yyyy' }}</td>
+                    <td>{{ tr.date | appDate }}</td>
                     <td class="reference-cell"><code>{{ tr.reference || '—' }}</code></td>
                     <td>{{ tr.description }}</td>
                     <td><span class="category-pill">{{ getCategoryName(tr.financialCategory) }}</span></td>

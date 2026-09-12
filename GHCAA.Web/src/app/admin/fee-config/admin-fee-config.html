@@ -34,8 +34,8 @@
                     </td>
                     <td><span class="font-bold">{{ c.membershipType }}</span></td>
                     <td class="amount font-mono text-accent">{{ c.amount | appCurrency }}</td>
-                    <td><span class="text-xs">{{ c.effectiveDate | date:'dd-MM-yyyy' }}</span></td>
-                    <td><span class="text-xs opacity-60">{{ c.effectiveTo ? (c.effectiveTo | date:'dd-MM-yyyy') :
+                    <td><span class="text-xs">{{ c.effectiveDate | appDate }}</span></td>
+                    <td><span class="text-xs opacity-60">{{ c.effectiveTo ? (c.effectiveTo | appDate) :
                             'Indefinite' }}</span></td>
                     <td>
                         <span class="status-badge" [class.active]="c.isActive" [class.inactive]="!c.isActive">

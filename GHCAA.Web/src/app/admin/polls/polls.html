@@ -38,7 +38,7 @@
                     <td>{{ poll.totalVotes }}</td>
                     <td>{{ poll.options.length }}</td>
                     <td>{{ poll.allowMultipleChoice ? 'Multiple Choice' : 'Single Choice' }}</td>
-                    <td>{{ poll.createdAt | date:'dd-MM-yyyy' }}</td>
+                    <td>{{ poll.createdAt | appDate }}</td>
                     <td class="actions-cell">
                         <button class="btn btn-outline btn-sm" (click)="selectedPoll.set(poll)">Results ↗</button>
                         <button class="icon-btn" (click)="toggleStatus(poll)" [title]="poll.isActive ? 'Deactivate' : 'Activate'">
@@ -101,7 +101,7 @@
             </div>
 
             <div class="poll-footer">
-                <span class="date">Created: {{ poll.createdAt | date:'dd-MM-yyyy' }}</span>
+                <span class="date">Created: {{ poll.createdAt | appDate }}</span>
                 <span class="type">{{ poll.allowMultipleChoice ? 'Multiple Choice' : 'Single Choice' }}</span>
             </div>
         </div>

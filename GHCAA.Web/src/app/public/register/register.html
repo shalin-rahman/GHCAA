@@ -197,7 +197,7 @@
                                 <div class="history-item relative p-10 glass-card">
                                     <div class="flex justify-between items-center mb-6">
                                         <h4 class="text-xs uppercase tracking-widest font-black text-accent opacity-60">Educational Milestone #{{ $index + 1 }}</h4>
-                                        <button type="button" *ngIf="model.AcademicHistory.length > 1" (click)="removeAcademic($index)" 
+                                        <button type="button" *ngIf="$index > 0" (click)="removeAcademic($index)"
                                             class="btn btn-secondary btn-sm text-danger-color border-danger-color">
                                             🗑️ Remove Record
                                         </button>
@@ -208,15 +208,15 @@
                                             <label>Institution / University Name *</label>
                                             <input type="text" [(ngModel)]="item.institutionName" [name]="'inst_' + $index" required maxlength="250"
                                                 #instM="ngModel" [class.border-red-500]="instM.invalid && instM.touched"
-                                                [disabled]="$index === 0 && model.AcademicHistory.length === 1"
+                                                [disabled]="$index === 0"
                                                 placeholder="Select or type institution">
                                         </div>
                                         <div class="input-group full py-2">
                                             <label class="premium-checkbox-label">
                                                 <input type="checkbox" [(ngModel)]="item.isGHC" [name]="'ghcCh_' + $index"
-                                                    [disabled]="$index === 0 && model.AcademicHistory.length === 1">
+                                                    [disabled]="$index === 0">
                                                 <span class="checkmark"></span>
-                                                <span class="label-text">Was this achieved at Govt. Haraganga College?</span>
+                                                <span class="label-text">Was this achieved at {{ orgConfig.config()?.branding?.institutionName || 'the configured institution' }}?</span>
                                             </label>
                                         </div>
                                         <div class="form-group">

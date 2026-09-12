@@ -277,7 +277,7 @@ namespace GHCAA.Infrastructure.Services
                             var cellValue = row.Cell(colIndex).Value.ToString().Trim();
                             if (map.Value.Equals("ID", StringComparison.OrdinalIgnoreCase))
                             { externalId = cellValue; continue; }
-                            SetPropertyValue(member, map.Value, cellValue);
+                            SetPropertyValue(member, map.Value, cellValue, orgConfig.Branding.InstitutionName);
                         }
                     }
 
@@ -285,7 +285,7 @@ namespace GHCAA.Infrastructure.Services
                     foreach (var def in defaultValues)
                     {
                         if (!string.IsNullOrEmpty(def.Value) && string.IsNullOrEmpty(GetPropertyValue(member, def.Key)))
-                            SetPropertyValue(member, def.Key, def.Value);
+                            SetPropertyValue(member, def.Key, def.Value, orgConfig.Branding.InstitutionName);
                     }
 
                     var rowTag = $"Row {row.RowNumber()}";
@@ -541,7 +541,7 @@ namespace GHCAA.Infrastructure.Services
             };
         }
 
-        private void SetPropertyValue(Member member, string propName, string value)
+        private void SetPropertyValue(Member member, string propName, string value, string institutionName)
         {
             if (string.IsNullOrEmpty(value)) return;
 
@@ -554,11 +554,11 @@ namespace GHCAA.Infrastructure.Services
                 case nameof(Member.FatherName): member.FatherName = value; break;
                 case nameof(Member.MotherName): member.MotherName = value; break;
                 case "GHCLastCertificatePassingYear":
-                    GetGhcRecord(member).PassingYear = int.TryParse(value, out var yr) ? yr : 0; break;
+                    GetGhcRecord(member, institutionName).PassingYear = int.TryParse(value, out var yr) ? yr : 0; break;
                 case "HSCAdmissionYear":
                     GetHscRecord(member).AdmissionYear = int.TryParse(value, out var yrHsc) ? yrHsc : 0; break;
                 case "GHCAdmissionYear":
-                    GetGhcRecord(member).AdmissionYear = int.TryParse(value, out var yrGhc) ? yrGhc : 0; break;
+                    GetGhcRecord(member, institutionName).AdmissionYear = int.TryParse(value, out var yrGhc) ? yrGhc : 0; break;
                 case nameof(Member.DateOfBirth):
                     if (DateTime.TryParse(value, out var dob))
                         member.DateOfBirth = DateTime.SpecifyKind(dob, DateTimeKind.Utc);
@@ -576,10 +576,10 @@ namespace GHCAA.Infrastructure.Services
                 case "HighestCertificateSubject":
                     GetHighestRecord(member).Subject = value; break;
                 case "GHCLastCertificate":
-                    GetGhcRecord(member).Degree = value; break;
+                    GetGhcRecord(member, institutionName).Degree = value; break;
                 case "GHCLastCertificateGroup":
                 case "GHCLastCertificateSubject":
-                    GetGhcRecord(member).Subject = value; break;
+                    GetGhcRecord(member, institutionName).Subject = value; break;
                 case nameof(Member.EmergencyContactName): member.EmergencyContactName = value; break;
                 case nameof(Member.EmergencyContactRelation): member.EmergencyContactRelation = value; break;
                 case nameof(Member.EmergencyContactPhone): member.EmergencyContactPhone = value; break;
@@ -595,12 +595,18 @@ namespace GHCAA.Infrastructure.Services
             }
         }
 
-        private AcademicRecord GetGhcRecord(Member member)
+        private AcademicRecord GetGhcRecord(Member member, string institutionName)
         {
             var record = member.AcademicHistory.FirstOrDefault(a => a.IsGHC);
             if (record == null)
             {
-                record = new AcademicRecord { IsGHC = true, InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "None" };
+                record = new AcademicRecord
+                {
+                    IsGHC = true,
+                    InstitutionName = institutionName,
+                    Degree = "HSC",
+                    Subject = "None"
+                };
                 member.AcademicHistory.Add(record);
             }
             return record;

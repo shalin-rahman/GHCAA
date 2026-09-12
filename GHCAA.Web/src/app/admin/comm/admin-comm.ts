@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit, computed, ViewChild, ElementRef, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { AdminCommService, EmailTemplate, EmailLog, TEMPLATE_VARIABLES, MessageChannels } from '../../core/services/admin-comm.service';
@@ -18,7 +19,7 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 @Component({
     selector: 'app-admin-comm',
     standalone: true,
-    imports: [CommonModule, FormsModule, RichTextEditor, LoadingPanelComponent, SearchBarComponent, ModalHeaderComponent, PageHeaderComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, RichTextEditor, LoadingPanelComponent, SearchBarComponent, ModalHeaderComponent, PageHeaderComponent],
     templateUrl: './admin-comm.html',
     styleUrl: './admin-comm.scss'
 })
@@ -356,4 +357,3 @@ export class AdminComm implements OnInit {
         });
     }
 }
-

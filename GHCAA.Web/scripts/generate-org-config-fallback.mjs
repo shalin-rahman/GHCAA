@@ -85,12 +85,14 @@ function buildFallback(cfg) {
         orgId: cfg.OrgId,
         schemaVersion: cfg.SchemaVersion,
         branding: {
+            appName: cfg.Branding.AppName,
             shortName: cfg.Branding.ShortName,
             fullName: cfg.Branding.FullName,
             memberNickname: cfg.Branding.MemberNickname,
             institutionName: cfg.Branding.InstitutionName,
             institutionAcronym: cfg.Branding.InstitutionAcronym,
             membershipNumberPrefix: cfg.Branding.MembershipNumberPrefix,
+            transactionPrefix: cfg.Branding.TransactionPrefix,
             approvalSeal: cfg.Branding.ApprovalSeal,
             establishedOn: cfg.Branding.EstablishedOn,
             logoUrl: cfg.Branding.LogoUrl,
@@ -101,6 +103,7 @@ function buildFallback(cfg) {
         contact: {
             supportEmail: cfg.Contact.SupportEmail,
             importEmailBase: cfg.Contact.ImportEmailBase,
+            emailDomain: cfg.Contact.EmailDomain ?? '',
             registeredOffice: cfg.Contact.RegisteredOffice,
             campusAddress: cfg.Contact.CampusAddress,
             phoneNumbers: cfg.Contact.PhoneNumbers ?? [],
@@ -140,7 +143,10 @@ function buildFallback(cfg) {
             adminEmailOnNewRegistration: !!cfg.Workflow.AdminEmailOnNewRegistration,
             membershipTypes: cfg.Workflow.MembershipTypes ?? []
         },
-        localization: { locales }
+        localization: {
+            dateFormat: cfg.Localization?.DateFormat,
+            locales
+        }
     };
 }
 

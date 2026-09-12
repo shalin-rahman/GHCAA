@@ -10,6 +10,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 import '../../core/config/app_config.dart';
 import '../../core/services/app_localizations.dart';
+import '../../core/services/org_config_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
@@ -39,21 +40,29 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(userProfileProvider);
-    
+    final branding = ref.watch(orgBrandingProvider);
+
     return AppScaffold(
-      title: 'Member Credentials',
-      breadcrumb: 'Executive Hub > Digital ID Card',
+      title: branding.appName.isEmpty ? 'Member Credentials' : branding.appName,
+      breadcrumb: '${branding.shortName} > Digital ID Card',
       child: profileAsync.when(
         data: (profile) {
           final data = profile;
-          if (data == null) return const Center(child: Text('Profile not found in registry.', style: TextStyle(color: Colors.white)));
-          
+          if (data == null) {
+            return const Center(
+                child: Text('Profile not found in registry.',
+                    style: TextStyle(color: Colors.white)));
+          }
+
           final photoPath = data['photoPath'];
-          final photoUrl = photoPath != null ? '${AppConfig.apiBaseUrl}/$photoPath'.replaceAll('//', '/') : null;
+          final photoUrl = photoPath != null
+              ? '${AppConfig.apiBaseUrl}/$photoPath'.replaceAll('//', '/')
+              : null;
 
           return Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL, vertical: AppTheme.spaceXL),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.spaceL, vertical: AppTheme.spaceXL),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -66,74 +75,125 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
                         children: [
                           Container(height: 14, color: AppTheme.royalGold),
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(AppTheme.spaceXL, AppTheme.spaceL, AppTheme.spaceXL, AppTheme.spaceXL),
+                            padding: const EdgeInsets.fromLTRB(
+                                AppTheme.spaceXL,
+                                AppTheme.spaceL,
+                                AppTheme.spaceXL,
+                                AppTheme.spaceXL),
                             child: Column(
                               children: [
-                                 Row(
-                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                   children: [
-                                     const Icon(Icons.school_outlined, size: 28, color: AppTheme.royalGold),
-                                     const SizedBox(width: AppTheme.spaceS),
-                                     Expanded(
-                                       child: FittedBox(
-                                         fit: BoxFit.scaleDown,
-                                         alignment: Alignment.centerRight,
-                                         child: Text(
-                                           AppLocalizations.of(context).translate('digital_id_pass_title'),
-                                           style: const TextStyle(
-                                             color: AppTheme.royalGold,
-                                             fontWeight: FontWeight.bold,
-                                             fontSize: 13,
-                                             letterSpacing: 1.2,
-                                           ),
-                                         ),
-                                       ),
-                                     ),
-                                   ],
-                                 ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Icon(Icons.school_outlined,
+                                        size: 28, color: AppTheme.royalGold),
+                                    const SizedBox(width: AppTheme.spaceS),
+                                    Expanded(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerRight,
+                                        child: Text(
+                                        branding.approvalSeal.isEmpty
+                                            ? AppLocalizations.of(context)
+                                                .translate('digital_id_pass_title')
+                                            : branding.approvalSeal,
+                                          style: const TextStyle(
+                                            color: AppTheme.royalGold,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13,
+                                            letterSpacing: 1.2,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                                 const SizedBox(height: AppTheme.spaceXL),
                                 Container(
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: AppTheme.royalGold, width: 2),
+                                    border: Border.all(
+                                        color: AppTheme.royalGold, width: 2),
                                   ),
                                   child: CircleAvatar(
                                     radius: 64,
                                     backgroundColor: Colors.black,
-                                    backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
-                                    child: photoUrl == null ? Text(data['fullName']?[0] ?? '?', style: const TextStyle(fontSize: 48, color: AppTheme.royalGold, fontWeight: FontWeight.w900)) : null,
+                                    backgroundImage: photoUrl != null
+                                        ? NetworkImage(photoUrl)
+                                        : null,
+                                    child: photoUrl == null
+                                        ? Text(data['fullName']?[0] ?? '?',
+                                            style: const TextStyle(
+                                                fontSize: 48,
+                                                color: AppTheme.royalGold,
+                                                fontWeight: FontWeight.w900))
+                                        : null,
                                   ),
                                 ),
                                 const SizedBox(height: AppTheme.spaceL),
-                                Text(data['fullName'] ?? 'N/A', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white, height: 1.2), textAlign: TextAlign.center),
+                                Text(data['fullName'] ?? 'N/A',
+                                    style: const TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.white,
+                                        height: 1.2),
+                                    textAlign: TextAlign.center),
                                 const SizedBox(height: AppTheme.spaceS),
-                                Text('${data['currentDesignation'] ?? 'Alumnus'} • BATCH ${data['passingYear'] ?? ''}', style: const TextStyle(fontSize: 13, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+                                Text(
+                                    '${data['currentDesignation'] ?? 'Alumnus'} • BATCH ${data['passingYear'] ?? ''}',
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        color: AppTheme.textSecondaryDark,
+                                        fontWeight: FontWeight.w500),
+                                    textAlign: TextAlign.center),
                                 const SizedBox(height: AppTheme.spaceXL),
                                 Container(
-                                  padding: const EdgeInsets.all(AppTheme.spaceXS),
-                                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppTheme.radiusM)),
+                                  padding:
+                                      const EdgeInsets.all(AppTheme.spaceXS),
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(
+                                          AppTheme.radiusM)),
                                   child: QrImageView(
-                                    data: data['membershipNumber']?.toString() ?? 'PENDING',
+                                    data:
+                                        data['membershipNumber']?.toString() ??
+                                            'PENDING',
                                     version: QrVersions.auto,
                                     size: 64,
                                     gapless: false,
-                                    eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Colors.black),
-                                    dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Colors.black),
+                                    eyeStyle: const QrEyeStyle(
+                                        eyeShape: QrEyeShape.square,
+                                        color: Colors.black),
+                                    dataModuleStyle: const QrDataModuleStyle(
+                                        dataModuleShape:
+                                            QrDataModuleShape.square,
+                                        color: Colors.black),
                                   ),
                                 ),
                                 const SizedBox(height: AppTheme.spaceL),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM, vertical: AppTheme.spaceS),
-                                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppTheme.radiusXS)),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: AppTheme.spaceM,
+                                      vertical: AppTheme.spaceS),
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(
+                                          AppTheme.radiusXS)),
                                   child: BarcodeWidget(
                                     barcode: Barcode.code128(),
-                                    data: data['membershipNumber']?.toString() ?? 'PENDING',
+                                    data:
+                                        data['membershipNumber']?.toString() ??
+                                            'PENDING',
                                     width: 140,
                                     height: 30,
                                     color: Colors.black,
                                     backgroundColor: Colors.transparent,
                                     drawText: true,
-                                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 2),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 10,
+                                        letterSpacing: 2),
                                   ),
                                 ),
                               ],
@@ -153,9 +213,16 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
                             HapticFeedback.lightImpact();
                             _handlePrint(data);
                           },
-                          icon: const Icon(Icons.file_download_outlined, size: 18), 
-                          label: const Text('PORTABLE PDF', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
-                          style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+                          icon: const Icon(Icons.file_download_outlined,
+                              size: 18),
+                          label: const Text('PORTABLE PDF',
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1)),
+                          style: ElevatedButton.styleFrom(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 14)),
                         ),
                       ),
                       const SizedBox(width: AppTheme.spaceM),
@@ -163,13 +230,23 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
                         child: OutlinedButton.icon(
                           onPressed: () {
                             HapticFeedback.lightImpact();
-                            Share.share('Alumni Registry ID: ${data['membershipNumber'] ?? 'Pending'}\n${data['fullName']}');
+                            SharePlus.instance.share(
+                              ShareParams(
+                                text:
+                                    'Alumni Registry ID: ${data['membershipNumber'] ?? 'Pending'}\n${data['fullName']}',
+                              ),
+                            );
                           },
-                          icon: const Icon(Icons.share_outlined, size: 18), 
-                          label: const Text('SHARE ID', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                          icon: const Icon(Icons.share_outlined, size: 18),
+                          label: const Text('SHARE ID',
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1)),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            side: const BorderSide(color: AppTheme.royalGold, width: 2),
+                            side: const BorderSide(
+                                color: AppTheme.royalGold, width: 2),
                           ),
                         ),
                       ),
@@ -185,7 +262,10 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
             padding: EdgeInsets.all(24.0),
             child: AspectRatio(
                 aspectRatio: 0.63,
-                child: SkeletonLoader(width: double.infinity, height: double.infinity, borderRadius: AppTheme.radiusXL)),
+                child: SkeletonLoader(
+                    width: double.infinity,
+                    height: double.infinity,
+                    borderRadius: AppTheme.radiusXL)),
           ),
         ),
         error: (e, s) => Center(child: Text('Error: $e')),
@@ -194,6 +274,7 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
   }
 
   Future<void> _handlePrint(Map<String, dynamic> data) async {
+    final branding = ref.read(orgBrandingProvider);
     final pdf = pw.Document();
 
     pdf.addPage(
@@ -212,21 +293,34 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
                 padding: const pw.EdgeInsets.all(30),
                 child: pw.Column(
                   children: [
-                    pw.Text(AppConfig.organizationName.toUpperCase(), textAlign: pw.TextAlign.center, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                    pw.Text(branding.fullName.toUpperCase(),
+                        textAlign: pw.TextAlign.center,
+                        style: pw.TextStyle(
+                            fontSize: 10, fontWeight: pw.FontWeight.bold)),
                     pw.SizedBox(height: 10),
                     pw.Divider(color: PdfColors.amber800),
                     pw.SizedBox(height: 20),
-                    pw.Text('OFFICIAL ID CARD', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700)),
+                    pw.Text('OFFICIAL ID CARD',
+                        style: const pw.TextStyle(
+                            fontSize: 8, color: PdfColors.grey700)),
                     pw.SizedBox(height: 30),
                     pw.Container(
                       width: 100,
                       height: 100,
-                      decoration: const pw.BoxDecoration(color: PdfColors.grey300, shape: pw.BoxShape.circle),
-                      child: pw.Center(child: pw.Text(data['fullName']?[0] ?? '?', style: pw.TextStyle(fontSize: 40, fontWeight: pw.FontWeight.bold))),
+                      decoration: const pw.BoxDecoration(
+                          color: PdfColors.grey300, shape: pw.BoxShape.circle),
+                      child: pw.Center(
+                          child: pw.Text(data['fullName']?[0] ?? '?',
+                              style: pw.TextStyle(
+                                  fontSize: 40,
+                                  fontWeight: pw.FontWeight.bold))),
                     ),
                     pw.SizedBox(height: 20),
-                    pw.Text(data['fullName'] ?? 'N/A', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-                    pw.Text(data['membershipNumber'] ?? 'PENDING', style: const pw.TextStyle(fontSize: 14)),
+                    pw.Text(data['fullName'] ?? 'N/A',
+                        style: pw.TextStyle(
+                            fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                    pw.Text(data['membershipNumber'] ?? 'PENDING',
+                        style: const pw.TextStyle(fontSize: 14)),
                     pw.SizedBox(height: 30),
                     pw.BarcodeWidget(
                       barcode: pw.Barcode.qrCode(),
@@ -235,7 +329,9 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
                       height: 80,
                     ),
                     pw.Spacer(),
-                    pw.Text('Valid for ${DateTime.now().year + 1}', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey)),
+                    pw.Text('Valid for ${DateTime.now().year + 1}',
+                        style: const pw.TextStyle(
+                            fontSize: 8, color: PdfColors.grey)),
                   ],
                 ),
               ),

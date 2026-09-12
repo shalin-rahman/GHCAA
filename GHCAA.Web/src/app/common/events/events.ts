@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { EventsService } from '../../core/services/events.service';
 import { AlumniEvent, EventRegistration, PaymentGateway } from '../../core/models/business.models';
@@ -20,7 +21,7 @@ import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, PaymentPortalComponent, ImgFallbackDirective, ModalHeaderComponent, AppCurrencyPipe],
+  imports: [CommonModule, AppDatePipe, FormsModule, ReactiveFormsModule, PaymentPortalComponent, ImgFallbackDirective, ModalHeaderComponent, AppCurrencyPipe],
   templateUrl: './events.html',
   styleUrl: './events.scss'
 })
@@ -396,5 +397,4 @@ export class Events implements OnInit {
     });
   }
 }
-
 

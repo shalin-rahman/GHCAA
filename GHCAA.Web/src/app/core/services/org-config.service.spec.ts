@@ -33,6 +33,23 @@ describe('OrgConfigService', () => {
 
     it('starts with no config until loadConfig resolves', () => {
         expect(service.config()).toBeNull();
+        expect(service.dateFormat()).toBe('dd-MM-yyyy');
+    });
+
+    it('normalizes unsupported and missing date formats to the safe default', async () => {
+        const promise = service.loadConfig();
+        httpMock.expectOne(API_ENDPOINTS.CONFIG).flush({
+            ...minimalConfig,
+            localization: { locales: {}, dateFormat: 'MM/dd/yyyy' }
+        });
+        await promise;
+        expect(service.dateFormat()).toBe('MM/dd/yyyy');
+
+        service.config.set({
+            ...minimalConfig,
+            localization: { locales: {}, dateFormat: 'yyyy-MM-dd' as never }
+        });
+        expect(service.dateFormat()).toBe('dd-MM-yyyy');
     });
 
     it('loadConfig fetches from the config endpoint and stores the result', async () => {

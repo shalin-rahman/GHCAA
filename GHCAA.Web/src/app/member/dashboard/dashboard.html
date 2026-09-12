@@ -146,7 +146,7 @@
                         <div class="text">
                             <strong>{{ item.title }}</strong>
                             <p>{{ item.summary || item.excerpt || 'Read the full article for details.' }}</p>
-                            <small>{{ item.publishedAt || item.createdAt | date:'dd-MM-yyyy' }}</small>
+                            <small>{{ item.publishedAt || item.createdAt | appDate }}</small>
                         </div>
                     </a>
                     } @empty {
@@ -222,7 +222,7 @@
                     <div class="alert-body">
                         <strong>{{ n.title }}</strong>
                         <p>{{ n.message }}</p>
-                        <small>{{ n.createdAt | date:'shortTime' }} • {{ n.createdAt | date:'dd-MM-yyyy' }}</small>
+                        <small>{{ n.createdAt | date:'shortTime' }} • {{ n.createdAt | appDate }}</small>
                     </div>
                 </div>
                 } @empty {

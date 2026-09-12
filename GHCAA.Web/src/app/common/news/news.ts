@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { NewsService } from '../../core/services/news.service';
 import { NewsPost, PostType } from '../../core/models/business.models';
 import { getArticleCategoryLabel, POST_TYPE_TABS, matchesPostType } from '../../core/constants/app.constants';
@@ -11,7 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 @Component({
   selector: 'app-news',
   standalone: true,
-  imports: [CommonModule, ImgFallbackDirective, LoadingPanelComponent],
+  imports: [CommonModule, AppDatePipe, ImgFallbackDirective, LoadingPanelComponent],
   templateUrl: './news.html',
   styleUrl: './news.scss'
 })
@@ -88,4 +89,3 @@ export class News implements OnInit {
     }, 100);
   }
 }
-

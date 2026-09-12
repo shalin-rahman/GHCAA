@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { JobService } from '../../core/services/job.service';
 import { Job } from '../../core/models/business.models';
@@ -14,7 +15,7 @@ import { ModalHeaderComponent } from '../../common/modal-header/modal-header.com
 @Component({
   selector: 'app-job-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ModalHeaderComponent],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ModalHeaderComponent],
   templateUrl: './job-approval.html',
   styleUrl: './job-approval.scss'
 })

@@ -321,11 +321,8 @@ namespace GHCAA.Infrastructure.Services
             // Sync Academic History
             if (dto.AcademicHistory != null)
             {
-                // Validation matching RegisterAsync
-                if (dto.AcademicHistory.Any() && !dto.AcademicHistory.Any(a => a.IsGHC || a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase)))
-                {
-                    throw new InvalidOperationException("At least one academic record must be from Govt. Haraganga College.");
-                }
+                var institutionName = await GetConfiguredInstitutionNameAsync(cancellationToken);
+                EnforceInstitutionalAcademicRecord(dto.AcademicHistory, institutionName);
 
                 member.AcademicHistory.Clear();
                 foreach (var a in dto.AcademicHistory)
@@ -337,7 +334,7 @@ namespace GHCAA.Infrastructure.Services
                         Subject = a.Subject,
                         AdmissionYear = a.AdmissionYear,
                         PassingYear = a.PassingYear ?? 0,
-                        IsGHC = a.IsGHC || a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase),
+                        IsGHC = a.IsGHC,
                         Result = a.Result
                     });
                 }

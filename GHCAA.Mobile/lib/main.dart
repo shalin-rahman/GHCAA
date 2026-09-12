@@ -96,7 +96,7 @@ class _AlumniAppState extends ConsumerState<AlumniApp> with WidgetsBindingObserv
       behavior: HitTestBehavior.translucent,
       onPointerDown: (_) => ref.read(sessionProvider.notifier).userActivityDetected(),
       child: MaterialApp.router(
-        title: AppConfig.appName,
+        title: branding.appName.isNotEmpty ? branding.appName : AppConfig.appName,
         theme: theme,
         darkTheme: theme,
         themeMode: ThemeMode.dark,

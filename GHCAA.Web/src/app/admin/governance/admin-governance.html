@@ -18,8 +18,8 @@
                 <div class="period-item" [class.active]="selectedPeriod()?.id === p.id" (click)="selectPeriod(p)">
                     <div class="p-info">
                         <span class="p-title">{{ p.title }}</span>
-                        <small class="p-dates">{{ p.startDate | date:'dd-MM-yyyy' }} — {{ p.endDate ? (p.endDate |
-                            date:'dd-MM-yyyy') : 'Present' }}</small>
+                        <small class="p-dates">{{ p.startDate | appDate }} — {{ p.endDate ? (p.endDate |
+                            appDate) : 'Present' }}</small>
                     </div>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
                         @if (p.isActive) {
@@ -59,9 +59,9 @@
                     </div>
                 </div>
                 <div class="period-meta">
-                    <span><strong>Term:</strong> {{ selectedPeriod().startDate | date:'dd-MM-yyyy' }} to {{ selectedPeriod().endDate
+                    <span><strong>Term:</strong> {{ selectedPeriod().startDate | appDate }} to {{ selectedPeriod().endDate
                         ?
-                        (selectedPeriod().endDate | date:'dd-MM-yyyy') : 'Ongoing' }}</span>
+                        (selectedPeriod().endDate | appDate) : 'Ongoing' }}</span>
                 </div>
             </div>
 
@@ -103,7 +103,7 @@
                                     }
                                 </div>
                             </td>
-                            <td>{{ em.startDate | date:'dd-MM-yyyy' }}</td>
+                            <td>{{ em.startDate | appDate }}</td>
                             <td>
                                 <button class="icon-btn delete" (click)="removeMember(em.id)"
                                     title="Remove">🗑️</button>

@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { NewsService } from '../../core/services/news.service';
@@ -17,7 +18,7 @@ import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 @Component({
     selector: 'app-admin-news',
     standalone: true,
-    imports: [CommonModule, FormsModule, LoadingPanelComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
+    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
     templateUrl: './admin-news.html',
     styleUrl: './admin-news.scss'
 })

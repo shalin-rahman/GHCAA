@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { EC_ROLES, SEARCH_DEBOUNCE_MS, getECPositionName, getMembershipTypeLabel, getCategoryLabel } from '../../core/constants/app.constants';
@@ -18,7 +19,7 @@ import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 @Component({
     selector: 'app-admin-governance',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ImgFallbackDirective, ModalHeaderComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ImgFallbackDirective, ModalHeaderComponent],
     templateUrl: './admin-governance.html',
     styleUrl: './admin-governance.scss'
 })
@@ -257,5 +258,4 @@ export class AdminGovernance implements OnInit {
         return getECPositionName(pos);
     }
 }
-
 

@@ -40,11 +40,8 @@ namespace GHCAA.Application.Validators
 
             RuleFor(x => x.AcademicHistory).NotEmpty().WithMessage("At least one academic record is required");
             RuleFor(x => x.AcademicHistory)
-                .Must(history => history != null && history.Any(record =>
-                    record.IsGHC ||
-                    (!string.IsNullOrWhiteSpace(record.InstitutionName)
-                        && record.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase))))
-                .WithMessage("At least one academic record must be from Govt. Haraganga College");
+                .Must(history => history != null && history.Count > 0 && history[0].IsGHC)
+                .WithMessage("The first academic record must be the institutional record.");
             RuleForEach(x => x.AcademicHistory).ChildRules(academic =>
             {
                 academic.RuleFor(a => a.InstitutionName).NotEmpty().MaximumLength(250);

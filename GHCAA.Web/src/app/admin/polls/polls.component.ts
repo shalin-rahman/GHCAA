@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { AdminPollService, CreatePollDto } from '../../core/services/admin-poll.service';
 import { PollDto } from '../../core/services/poll.service';
@@ -15,7 +16,7 @@ import { SearchBarComponent } from '../../common/search-bar/search-bar.component
 @Component({
   selector: 'app-admin-polls',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, Icon, ModalHeaderComponent, PageHeaderComponent, SearchBarComponent],
+  imports: [CommonModule, AppDatePipe, FormsModule, LogoSpinnerComponent, Icon, ModalHeaderComponent, PageHeaderComponent, SearchBarComponent],
   templateUrl: './polls.html',
   styleUrl: './polls.scss'
 })

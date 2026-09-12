@@ -32,8 +32,32 @@ export const LOOKUP_GROUPS = {
     PassingYear: 'PassingYear'
 } as const;
 
-export const DATE_FORMAT = 'dd-MM-yyyy';
-export const DATE_REGEX = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+export const DATE_FORMATS = {
+    DMY: 'dd-MM-yyyy',
+    MDY: 'MM/dd/yyyy'
+} as const;
+
+export type DateFormat = typeof DATE_FORMATS[keyof typeof DATE_FORMATS];
+
+export const DEFAULT_DATE_FORMAT: DateFormat = DATE_FORMATS.DMY;
+export const DATE_FORMAT = DEFAULT_DATE_FORMAT;
+export const DATE_FORMAT_LABELS: Record<DateFormat, string> = {
+    [DATE_FORMATS.DMY]: 'Day-Month-Year',
+    [DATE_FORMATS.MDY]: 'Month/Day/Year'
+};
+export const DATE_FORMAT_PLACEHOLDERS: Record<DateFormat, string> = {
+    [DATE_FORMATS.DMY]: 'dd-mm-yyyy',
+    [DATE_FORMATS.MDY]: 'mm/dd/yyyy'
+};
+export const DATE_FORMAT_REGEX: Record<DateFormat, RegExp> = {
+    [DATE_FORMATS.DMY]: /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/,
+    [DATE_FORMATS.MDY]: /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/
+};
+export const DATE_REGEX = DATE_FORMAT_REGEX[DEFAULT_DATE_FORMAT];
+
+export function normalizeDateFormat(value: unknown): DateFormat {
+    return value === DATE_FORMATS.MDY ? DATE_FORMATS.MDY : DEFAULT_DATE_FORMAT;
+}
 
 export const DEVELOPER_INFO = {
     name: 'md habibur rahman shalin',

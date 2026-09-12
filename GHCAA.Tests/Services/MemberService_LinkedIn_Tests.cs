@@ -45,6 +45,11 @@ public class MemberService_LinkedIn_Tests : TestBase
         _mockGamification = new Mock<IGamificationService>();
         _mockFinancialService = new Mock<IFinancialService>();
         var mockOrgConfigService = new Mock<IOrgConfigService>();
+        mockOrgConfigService.Setup(x => x.GetConfigAsync())
+            .ReturnsAsync(new OrgConfigDto
+            {
+                Branding = new BrandingDto { InstitutionName = "Govt. Haraganga College" }
+            });
 
         _service = new MemberService(
             _context,
@@ -108,7 +113,7 @@ public class MemberService_LinkedIn_Tests : TestBase
         // Act & Assert
         var act = async () => await _service.UpdateProfileAsync(member.Id, dto);
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("At least one academic record must be from Govt. Haraganga College.");
+            .WithMessage("The first academic record must be for Govt. Haraganga College.");
     }
 
     [Category("FR-04")]

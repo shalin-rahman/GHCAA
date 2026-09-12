@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { LedgerService } from '../../core/services/ledger.service';
 import { FinancialRecord, LedgerSummary } from '../../core/models/business.models';
@@ -18,7 +19,7 @@ import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 @Component({
   selector: 'app-ledger',
   standalone: true,
-  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, AppCurrencyPipe],
+  imports: [CommonModule, AppDatePipe, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, AppCurrencyPipe],
   templateUrl: './ledger.html',
   styleUrl: './ledger.scss'
 })

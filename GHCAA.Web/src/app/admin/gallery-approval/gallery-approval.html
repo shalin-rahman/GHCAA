@@ -39,7 +39,7 @@
                     </td>
                     <td>{{ album.ownerMemberId }}</td>
                     <td>{{ album.photos.length }}</td>
-                    <td>{{ album.createdAt | date:'dd-MM-yyyy' }}</td>
+                    <td>{{ album.createdAt | appDate }}</td>
                     <td>
                         <button class="btn btn-secondary btn-sm" (click)="viewAlbum(album)">Review Album</button>
                     </td>
@@ -75,7 +75,7 @@
                     </td>
                     <td>{{ photo.caption }}</td>
                     <td>{{ photo.uploadedByMemberId }}</td>
-                    <td>{{ photo.uploadedAt | date:'dd-MM-yyyy' }}</td>
+                    <td>{{ photo.uploadedAt | appDate }}</td>
                     <td>
                         <button class="btn btn-secondary btn-sm" (click)="viewPhoto(photo)">Review Photo</button>
                     </td>

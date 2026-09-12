@@ -29,40 +29,52 @@ class SocialLinks {
 }
 
 class OrgBranding {
+  final String appName;
   final String shortName;
   final String fullName;
   final String memberNickname;
   final String institutionName;
   final String institutionAcronym;
   final String membershipNumberPrefix;
+  final String transactionPrefix;
   final String approvalSeal;
+  final String establishedOn;
   final String logoUrl;
+  final String constitutionPdfUrl;
   final String primaryColor;
   final String accentColor;
 
   OrgBranding({
+    required this.appName,
     required this.shortName,
     required this.fullName,
     required this.memberNickname,
     required this.institutionName,
     required this.institutionAcronym,
     required this.membershipNumberPrefix,
+    required this.transactionPrefix,
     required this.approvalSeal,
+    required this.establishedOn,
     required this.logoUrl,
+    required this.constitutionPdfUrl,
     required this.primaryColor,
     required this.accentColor,
   });
 
   factory OrgBranding.fromJson(Map<String, dynamic> json) {
     return OrgBranding(
+      appName: json['appName'] ?? '',
       shortName: json['shortName'] ?? '',
       fullName: json['fullName'] ?? '',
       memberNickname: json['memberNickname'] ?? '',
       institutionName: json['institutionName'] ?? '',
       institutionAcronym: json['institutionAcronym'] ?? '',
       membershipNumberPrefix: json['membershipNumberPrefix'] ?? '',
+      transactionPrefix: json['transactionPrefix'] ?? '',
       approvalSeal: json['approvalSeal'] ?? '',
+      establishedOn: json['establishedOn'] ?? '',
       logoUrl: json['logoUrl'] ?? '',
+      constitutionPdfUrl: json['constitutionPdfUrl'] ?? '',
       primaryColor: json['primaryColor'] ?? '#121212',
       accentColor: json['accentColor'] ?? '#c5a059',
     );
@@ -72,6 +84,7 @@ class OrgBranding {
 class OrgContact {
   final String supportEmail;
   final String importEmailBase;
+  final String emailDomain;
   final String registeredOffice;
   final String campusAddress;
   final List<String> phoneNumbers;
@@ -82,6 +95,7 @@ class OrgContact {
   OrgContact({
     required this.supportEmail,
     required this.importEmailBase,
+    required this.emailDomain,
     required this.registeredOffice,
     required this.portalBaseUrl,
     required this.socialLinks,
@@ -94,9 +108,12 @@ class OrgContact {
     return OrgContact(
       supportEmail: json['supportEmail'] ?? '',
       importEmailBase: json['importEmailBase'] ?? '',
+      emailDomain: json['emailDomain'] ?? '',
       registeredOffice: json['registeredOffice'] ?? '',
       campusAddress: json['campusAddress'] ?? '',
-      phoneNumbers: (json['phoneNumbers'] as List?)?.map((e) => e.toString()).toList() ?? const [],
+      phoneNumbers:
+          (json['phoneNumbers'] as List?)?.map((e) => e.toString()).toList() ??
+              const [],
       mapEmbedUrl: json['mapEmbedUrl'] ?? '',
       portalBaseUrl: json['portalBaseUrl'] ?? '',
       socialLinks: SocialLinks.fromJson(json['socialLinks'] ?? {}),
@@ -142,6 +159,7 @@ class FeatureToggles {
   final bool requireDocumentUpload;
   final bool allowSelfRegistration;
   final bool allowNonMemberEventRegistration;
+  final bool enableFundraising;
 
   FeatureToggles({
     required this.enableEvents,
@@ -161,6 +179,7 @@ class FeatureToggles {
     required this.requireDocumentUpload,
     required this.allowSelfRegistration,
     required this.allowNonMemberEventRegistration,
+    required this.enableFundraising,
   });
 
   factory FeatureToggles.fromJson(Map<String, dynamic> json) {
@@ -181,7 +200,9 @@ class FeatureToggles {
       requirePaymentForMembership: json['requirePaymentForMembership'] ?? true,
       requireDocumentUpload: json['requireDocumentUpload'] ?? true,
       allowSelfRegistration: json['allowSelfRegistration'] ?? true,
-      allowNonMemberEventRegistration: json['allowNonMemberEventRegistration'] ?? true,
+      allowNonMemberEventRegistration:
+          json['allowNonMemberEventRegistration'] ?? true,
+      enableFundraising: json['enableFundraising'] ?? true,
     );
   }
 }
@@ -210,7 +231,15 @@ class OrgWorkflow {
       membershipTypes: (json['membershipTypes'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
-          ['Founding', 'Executive', 'General', 'Associate', 'Honorary', 'Advisory', 'Guest'],
+          [
+            'Founding',
+            'Executive',
+            'General',
+            'Associate',
+            'Honorary',
+            'Advisory',
+            'Guest'
+          ],
     );
   }
 }
@@ -309,6 +338,33 @@ class LocalePack {
   }
 }
 
+/// Supported user-facing date formats. Wire dates remain ISO-8601.
+class DateFormatConfig {
+  static const String ddMmYyyy = 'dd-MM-yyyy';
+  static const String mmDdYyyy = 'MM/dd/yyyy';
+
+  final String identifier;
+  final String label;
+  final String regex;
+
+  const DateFormatConfig._(this.identifier, this.label, this.regex);
+
+  static const DateFormatConfig ddMmYyyyConfig = DateFormatConfig._(ddMmYyyy,
+      'DD-MM-YYYY', r'^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$');
+  static const DateFormatConfig mmDdYyyyConfig = DateFormatConfig._(mmDdYyyy,
+      'MM/DD/YYYY', r'^(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])/\d{4}$');
+
+  static DateFormatConfig fromIdentifier(dynamic value) {
+    final normalized = value?.toString().trim();
+    if (normalized == mmDdYyyy ||
+        normalized?.toUpperCase() == 'MM_DD_YYYY' ||
+        normalized?.toUpperCase() == 'MM/DD/YYYY') {
+      return mmDdYyyyConfig;
+    }
+    return ddMmYyyyConfig;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Root OrgConfig
 // ---------------------------------------------------------------------------
@@ -318,9 +374,11 @@ class OrgConfig {
   final OrgBranding branding;
   final OrgContact contact;
   final OrgCurrency currency;
+  final List<String> enabledGatewayMethods;
   final FeatureToggles features;
   final OrgWorkflow workflow;
   final Map<String, LocalePack> locales;
+  final DateFormatConfig dateFormat;
 
   OrgConfig({
     required this.orgId,
@@ -328,15 +386,18 @@ class OrgConfig {
     required this.branding,
     required this.contact,
     required this.currency,
+    required this.enabledGatewayMethods,
     required this.features,
     required this.workflow,
     required this.locales,
+    required this.dateFormat,
   });
 
   factory OrgConfig.fromJson(Map<String, dynamic> json) {
     // The API returns locales nested under "localization.locales"
     final Map<String, dynamic> localizationJson = json['localization'] ?? {};
-    final Map<String, dynamic> localesJson = localizationJson['locales'] ?? json['locales'] ?? {};
+    final Map<String, dynamic> localesJson =
+        localizationJson['locales'] ?? json['locales'] ?? {};
     final Map<String, LocalePack> parsedLocales = {};
     localesJson.forEach((key, val) {
       if (val is Map<String, dynamic>) {
@@ -350,9 +411,18 @@ class OrgConfig {
       branding: OrgBranding.fromJson(json['branding'] ?? {}),
       contact: OrgContact.fromJson(json['contact'] ?? {}),
       currency: OrgCurrency.fromJson(json['currency'] ?? {}),
+      enabledGatewayMethods: (json['enabledGatewayMethods'] as List?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
       features: FeatureToggles.fromJson(json['features'] ?? {}),
       workflow: OrgWorkflow.fromJson(json['workflow'] ?? {}),
       locales: parsedLocales,
+      dateFormat: DateFormatConfig.fromIdentifier(
+        json['dateFormat'] ??
+            localizationJson['dateFormat'] ??
+            localizationJson['displayDateFormat'],
+      ),
     );
   }
 
@@ -364,20 +434,25 @@ class OrgConfig {
         orgId: 'default',
         schemaVersion: 1,
         branding: OrgBranding(
+          appName: 'Alumni Association',
           shortName: 'Alumni Association',
           fullName: 'Alumni Association',
           memberNickname: 'Member',
           institutionName: 'Institution',
           institutionAcronym: 'AA',
           membershipNumberPrefix: 'MEM-',
+          transactionPrefix: '',
           approvalSeal: 'APPROVED',
+          establishedOn: '',
           logoUrl: '/assets/logo.png',
+          constitutionPdfUrl: '',
           primaryColor: '#121212',
           accentColor: '#2f6f4f',
         ),
         contact: OrgContact(
           supportEmail: 'support@example.org',
           importEmailBase: 'member',
+          emailDomain: 'example.org',
           registeredOffice: '',
           campusAddress: '',
           phoneNumbers: const [],
@@ -386,6 +461,7 @@ class OrgConfig {
           socialLinks: SocialLinks(facebook: '#', whatsapp: '#', youtube: '#'),
         ),
         currency: OrgCurrency(code: 'USD', symbol: '\$', name: 'US Dollar'),
+        enabledGatewayMethods: const [],
         features: FeatureToggles(
           enableEvents: true,
           enableJobHub: true,
@@ -404,14 +480,24 @@ class OrgConfig {
           requireDocumentUpload: true,
           allowSelfRegistration: true,
           allowNonMemberEventRegistration: true,
+          enableFundraising: true,
         ),
         workflow: OrgWorkflow(
           memberApprovalMode: 'ManualReview',
           otpVerificationRequired: true,
           defaultMembershipType: 'General',
           adminEmailOnNewRegistration: true,
-          membershipTypes: ['Founding', 'Executive', 'General', 'Associate', 'Honorary', 'Advisory', 'Guest'],
+          membershipTypes: [
+            'Founding',
+            'Executive',
+            'General',
+            'Associate',
+            'Honorary',
+            'Advisory',
+            'Guest'
+          ],
         ),
+        dateFormat: DateFormatConfig.ddMmYyyyConfig,
         locales: {
           'en': LocalePack(
             orgName: 'Alumni Association',
@@ -431,10 +517,17 @@ class OrgConfig {
               'Guest': 'Guest Member',
             },
             memberCategoryLabels: {
-              'None': 'None', 'LifelongPatron': 'Lifelong Patron', 'Sponsor': 'Sponsor',
-              'Advisor': 'Advisor', 'Mentor': 'Mentor', 'Recruiter': 'Recruiter',
-              'Active': 'Active', 'Volunteer': 'Volunteer', 'Contributor': 'Contributor',
-              'Guest': 'Guest', 'Student': 'Student',
+              'None': 'None',
+              'LifelongPatron': 'Lifelong Patron',
+              'Sponsor': 'Sponsor',
+              'Advisor': 'Advisor',
+              'Mentor': 'Mentor',
+              'Recruiter': 'Recruiter',
+              'Active': 'Active',
+              'Volunteer': 'Volunteer',
+              'Contributor': 'Contributor',
+              'Guest': 'Guest',
+              'Student': 'Student',
             },
             ecRoleLabels: {},
             nav: NavLabels(

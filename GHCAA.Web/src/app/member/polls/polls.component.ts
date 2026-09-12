@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { PollService, PollDto } from '../../core/services/poll.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -9,7 +10,7 @@ import { Icon } from '../../common/icon/icon';
 @Component({
   selector: 'app-member-polls',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, Icon],
+  imports: [CommonModule, AppDatePipe, FormsModule, LogoSpinnerComponent, Icon],
   templateUrl: './polls.html',
   styleUrl: './polls.scss'
 })

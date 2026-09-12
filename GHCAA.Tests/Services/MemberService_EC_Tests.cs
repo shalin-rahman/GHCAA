@@ -41,6 +41,11 @@ namespace GHCAA.Tests.Services
             var gamification = new Mock<IGamificationService>();
             var financials = new Mock<IFinancialService>();
             var orgConfig = new Mock<IOrgConfigService>();
+            orgConfig.Setup(x => x.GetConfigAsync())
+                .ReturnsAsync(new OrgConfigDto
+                {
+                    Branding = new BrandingDto { InstitutionName = "Govt. Haraganga College" }
+                });
 
             _service = new MemberService(_context, storage.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, appSettings, gamification.Object, financials.Object, new Mock<IRealTimeService>().Object, orgConfig.Object, new Mock<ITokenService>().Object);
 
@@ -140,7 +145,19 @@ namespace GHCAA.Tests.Services
                 MembershipType = m.MembershipType,
                 Category = m.Category,
                 Status = m.Status,
-                IsVerified = m.IsVerified
+                IsVerified = m.IsVerified,
+                AcademicHistory = m.AcademicHistory
+                    .Select(a => new AcademicRecordDto
+                    {
+                        InstitutionName = a.InstitutionName,
+                        Degree = a.Degree,
+                        Subject = a.Subject,
+                        AdmissionYear = a.AdmissionYear,
+                        PassingYear = a.PassingYear,
+                        IsGHC = a.IsGHC,
+                        Result = a.Result
+                    })
+                    .ToList()
             };
         }
     }

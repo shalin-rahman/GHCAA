@@ -14,5 +14,5 @@ description: Standards for Angular web development within the GHCAA project.
 - **Constants**: Store magic strings and configuration in `src/app/core/constants/app.constants.ts`.
 
 ## 3. Forms & Dates
-- **Format**: Always use `dd-mm-yyyy` for date inputs.
-- **Validation**: Implement custom validators for the standard date format.
+- **Format**: Use `dd-MM-yyyy` for date inputs and display. Convert date-only values to ISO before sending them to the API.
+- **Validation**: Reuse `DATE_REGEX`, `parseDisplayDate`, and the existing date utilities instead of parsing `dd-MM-yyyy` with the JavaScript `Date` constructor.

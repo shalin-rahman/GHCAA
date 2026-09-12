@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { AdminService } from '../../core/services/admin.service';
@@ -26,7 +27,7 @@ import { MemberImportModalComponent } from './member-import-modal/member-import-
 @Component({
   selector: 'app-admin-members',
   standalone: true,
-  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon, AppCurrencyPipe, MemberImportModalComponent],
+  imports: [CommonModule, AppDatePipe, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon, AppCurrencyPipe, MemberImportModalComponent],
   providers: [DatePipe],
   templateUrl: './admin-members.html',
   styleUrl: './admin-members.scss'

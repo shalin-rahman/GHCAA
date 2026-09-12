@@ -13,6 +13,7 @@ import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { toWireDate } from '../../core/utils/date.util';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { Icon } from '../../common/icon/icon';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
     selector: 'app-profile',
@@ -32,6 +33,7 @@ export class Profile implements OnInit {
     private confirmDialog = inject(ConfirmDialogService);
     private datePipe = inject(DatePipe);
     private lookupService = inject(LookupService);
+    readonly orgConfig = inject(OrgConfigService);
 
     loading = signal(true);
     saving = signal(false);
@@ -117,6 +119,7 @@ export class Profile implements OnInit {
     }
 
     async removeAcademicRecord(index: number) {
+        if (this.isInstitutionalAcademicRecord(index)) return;
         const ok = await firstValueFrom(this.confirmDialog.confirm({
             title: 'Remove academic record',
             message: 'Remove this academic record?',
@@ -125,6 +128,16 @@ export class Profile implements OnInit {
         }));
         if (!ok) return;
         this.profile.academicHistory.splice(index, 1);
+    }
+
+    isInstitutionalAcademicRecord(index: number): boolean {
+        const record = this.profile.academicHistory?.[index];
+        const institutionName = this.orgConfig.config()?.branding?.institutionName;
+        return index === 0 &&
+            !!record &&
+            !!institutionName &&
+            record.institutionName?.trim().toLocaleLowerCase() ===
+                institutionName.trim().toLocaleLowerCase();
     }
 
     addProfessionalRecord() {

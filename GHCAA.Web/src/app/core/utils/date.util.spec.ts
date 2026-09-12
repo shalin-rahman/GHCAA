@@ -1,5 +1,25 @@
 import { describe, it, expect } from 'vitest';
-import { formatPeriodRange, getEventStatus, getEventStatusMeta } from './date.util';
+import { formatPeriodRange, getEventStatus, getEventStatusMeta, parseDisplayDate, toDisplayDate, toWireDate } from './date.util';
+import { DATE_FORMATS } from '../constants/app.constants';
+
+describe('configurable date formats', () => {
+    it('formats ISO date-only values without a timezone shift', () => {
+        expect(toDisplayDate('2025-01-02', DATE_FORMATS.DMY)).toBe('02-01-2025');
+        expect(toDisplayDate('2025-01-02', DATE_FORMATS.MDY)).toBe('01/02/2025');
+    });
+
+    it('parses both supported input formats as local dates', () => {
+        expect(parseDisplayDate('02-01-2025', DATE_FORMATS.DMY)?.getFullYear()).toBe(2025);
+        expect(parseDisplayDate('01/02/2025', DATE_FORMATS.MDY)?.getDate()).toBe(2);
+        expect(parseDisplayDate('31/02/2025', DATE_FORMATS.MDY)).toBeNull();
+    });
+
+    it('writes both display formats as ISO date-only values', () => {
+        expect(toWireDate('02-01-2025')).toBe('2025-01-02');
+        expect(toWireDate('01/02/2025')).toBe('2025-01-02');
+        expect(toWireDate('not a date')).toBeNull();
+    });
+});
 
 describe('formatPeriodRange', () => {
     it.each([

@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { NewsService } from '../../core/services/news.service';
 import { NewsPost } from '../../core/models/business.models';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
@@ -9,7 +10,7 @@ import { OrgConfigService } from '../../core/services/org-config.service';
 @Component({
   selector: 'app-magazine',
   standalone: true,
-  imports: [CommonModule, LoadingPanelComponent, ImgFallbackDirective],
+  imports: [CommonModule, AppDatePipe, LoadingPanelComponent, ImgFallbackDirective],
   templateUrl: './magazine.html',
   styleUrl: './magazine.scss'
 })

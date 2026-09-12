@@ -7,12 +7,14 @@ export const ORG_CONFIG_FALLBACK: OrgConfig = {
   "orgId": "ghcaa",
   "schemaVersion": 1,
   "branding": {
+    "appName": "GHCAA",
     "shortName": "GHCAA",
     "fullName": "Govt. Haraganga College Alumni Association",
     "memberNickname": "Haragangian",
     "institutionName": "Govt. Haraganga College",
     "institutionAcronym": "GHC",
     "membershipNumberPrefix": "GHC-",
+    "transactionPrefix": "HARAGANGIAN-",
     "approvalSeal": "GHC APPROVED",
     "establishedOn": "29 Nov 2025",
     "logoUrl": "/assets/logo.png",
@@ -23,6 +25,7 @@ export const ORG_CONFIG_FALLBACK: OrgConfig = {
   "contact": {
     "supportEmail": "haragangian@gmail.com",
     "importEmailBase": "haragangian",
+    "emailDomain": "haragangian.com",
     "registeredOffice": "Govt. Haraganga College Campus, Munshiganj, Bangladesh.",
     "campusAddress": "Govt. Haraganga College, Munshiganj-1500, Bangladesh.",
     "phoneNumbers": [
@@ -80,6 +83,7 @@ export const ORG_CONFIG_FALLBACK: OrgConfig = {
     ]
   },
   "localization": {
+    "dateFormat": "dd-MM-yyyy",
     "locales": {
       "en": {
         "orgName": "Govt. Haraganga College Alumni Association",

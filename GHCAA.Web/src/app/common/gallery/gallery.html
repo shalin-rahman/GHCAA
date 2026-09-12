@@ -170,7 +170,7 @@
                         <div class="table-thumb" [style.background-image]="'url(' + validImg(g.photos[0]?.photoPath) + ')'"></div>
                     </td>
                     <td class="title-cell">{{ g.title }}</td>
-                    <td>{{ g.eventDate | date:'dd-MM-yyyy' }}</td>
+                    <td>{{ g.eventDate | appDate }}</td>
                     <td>{{ g.location || '—' }}</td>
                     <td>{{ g.photos.length }}</td>
                     <td class="actions-cell">
@@ -196,7 +196,7 @@
             <div class="card-body">
                 <h3>{{ g.title }}</h3>
                 <div class="meta">
-                    <span>📅 {{ g.eventDate | date:'dd-MM-yyyy' }}</span>
+                    <span>📅 {{ g.eventDate | appDate }}</span>
                     <span>📍 {{ g.location }}</span>
                 </div>
             </div>
@@ -219,7 +219,7 @@
             <div>
                 <h2 class="text-2xl font-black text-accent uppercase tracking-tighter">{{ gallery?.title }}</h2>
                 <p class="text-xs uppercase font-black tracking-widest text-muted">
-                    {{ gallery?.eventDate | date:'dd-MM-yyyy' }} • {{ gallery?.location }}
+                    {{ gallery?.eventDate | appDate }} • {{ gallery?.location }}
                 </p>
             </div>
         </div>
