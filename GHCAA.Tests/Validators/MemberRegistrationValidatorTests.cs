@@ -101,6 +101,18 @@ public class MemberRegistrationValidatorTests
             .WithErrorMessage("The first academic record must be the institutional record.");
     }
 
+    [Test]
+    public void AcademicHistory_WhenEmpty_ShouldHaveValidationError()
+    {
+        var dto = CreateValidDto();
+        dto.AcademicHistory.Clear();
+
+        var result = _validator.TestValidate(dto);
+
+        result.ShouldHaveValidationErrorFor(x => x.AcademicHistory)
+            .WithErrorMessage("At least one academic record is required");
+    }
+
     #region FullName Tests
 
     [Test]

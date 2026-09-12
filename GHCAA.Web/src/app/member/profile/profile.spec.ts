@@ -54,6 +54,28 @@ describe('Profile Component', () => {
         expect(component.profile.academicHistory.length).toBe(initial + 1);
     });
 
+    describe('institutional academic record protection', () => {
+        beforeEach(() => {
+            component.profile.academicHistory = [
+                { institutionName: 'Govt. Haraganga College', isGHC: true },
+                { institutionName: 'Govt. Haraganga College', isGHC: false }
+            ];
+            component.orgConfig.config.set({
+                branding: { institutionName: 'Govt. Haraganga College' }
+            } as any);
+        });
+
+        it('protects only the first matching configured institution record', () => {
+            expect(component.isInstitutionalAcademicRecord(0)).toBe(true);
+            expect(component.isInstitutionalAcademicRecord(1)).toBe(false);
+        });
+
+        it('allows correction of a mismatched first record', () => {
+            component.profile.academicHistory[0].institutionName = 'Other College';
+            expect(component.isInstitutionalAcademicRecord(0)).toBe(false);
+        });
+    });
+
     describe('32.3 regression: profile response field mapping', () => {
         function loadWith(rawResponse: any) {
             TestBed.resetTestingModule();

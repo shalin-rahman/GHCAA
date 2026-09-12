@@ -103,6 +103,36 @@ void main() {
       expect(wizard.state.model.subject, 'Science');
     });
 
+    test('registration payload marks only the first academic record as institutional', () {
+      wizard.updateModel(
+        institutionName: 'Configured University',
+        academicHistory: [
+          {'institutionName': 'Configured University', 'isGHC': false},
+          {'institutionName': 'Other University', 'isGHC': true},
+        ],
+      );
+
+      final academicHistory = wizard.state.model.toJson()['academicHistory'] as List;
+      expect(academicHistory[0]['InstitutionName'], 'Configured University');
+      expect(academicHistory[0]['IsGHC'], isTrue);
+      expect(academicHistory[1]['institutionName'], 'Other University');
+      expect(academicHistory[1]['IsGHC'], isFalse);
+    });
+
+    test('registration payload creates the configured institution record when empty', () {
+      wizard.updateModel(
+        institutionName: 'Configured University',
+        degree: 'HSC',
+        subject: 'Science',
+        passingYear: '2015',
+      );
+
+      final academicHistory = wizard.state.model.toJson()['academicHistory'] as List;
+      expect(academicHistory, hasLength(1));
+      expect(academicHistory.single['InstitutionName'], 'Configured University');
+      expect(academicHistory.single['IsGHC'], isTrue);
+    });
+
     test('Step 2: media paths default to null and update via updateData', () {
       expect(wizard.state.model.profileImagePath, isNull);
       expect(wizard.state.model.nidPhotoPath, isNull);

@@ -149,7 +149,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Test]
-    public async Task RegisterAsync_WithoutHaragangaAcademicRecord_ShouldRejectRegistration()
+    public async Task RegisterAsync_WithoutConfiguredInstitutionAcademicRecord_ShouldRejectRegistration()
     {
         var dto = CreateValidDto();
         dto.AcademicHistory[0].InstitutionName = "Other College";
@@ -161,6 +161,41 @@ public class MemberServiceTests : TestBase
 
         await act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("The first academic record must be for Govt. Haraganga College.");
+    }
+
+    [Test]
+    public async Task RegisterAsync_WithEmptyAcademicHistory_ShouldRejectRegistration()
+    {
+        var dto = CreateValidDto();
+        dto.AcademicHistory.Clear();
+        dto.PaymentMethodId = (await _context.PaymentConfigurations
+            .FirstAsync(x => x.Method == Enums.PaymentMethod.BKash)).Id;
+
+        var act = async () => await _service.RegisterAsync(dto, null, null, null);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("Academic history is required. Add the configured institution as the first record.");
+    }
+
+    [Test]
+    public async Task RegisterAsync_WithLaterInstitutionalRecord_ShouldRejectRegistration()
+    {
+        var dto = CreateValidDto();
+        dto.AcademicHistory.Add(new AcademicRecordDto
+        {
+            InstitutionName = "Govt. Haraganga College",
+            Degree = "Bachelor",
+            Subject = "Science",
+            PassingYear = 2010,
+            IsGHC = false
+        });
+        dto.PaymentMethodId = (await _context.PaymentConfigurations
+            .FirstAsync(x => x.Method == Enums.PaymentMethod.BKash)).Id;
+
+        var act = async () => await _service.RegisterAsync(dto, null, null, null);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("Only the first academic record may be the institutional record.");
     }
 
     [Test]
