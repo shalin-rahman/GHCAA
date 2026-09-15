@@ -50,7 +50,58 @@ the surrounding argument fails without it.
 
 ## 7.10 Security Implementation
 
-*[Not written.]*
+This section describes three mechanisms and the difficulty each one answers. What each threatens and
+how it fits the wider control set is §8.3; this section is only the code and the reasoning behind it.
+Citations below were re-taken against commit `5f5ebfe4` on 15 September 2026.
+
+**Instant session revocation.** A JSON Web Token is normally valid until it expires, so an admin who
+disables an account, a user who changes a compromised password, or a security response that needs a
+session killed immediately all have to wait out the token's remaining lifetime unless something else
+checks state on every request. `SecurityStampMiddleware` (`GHCAA.API/Middleware/SecurityStampMiddleware.cs`,
+lines 22-50) is that check: it reads the `SecurityStamp` claim carried in the token, looks up the
+current value stored against the user, and returns 401 the moment the two disagree. The stamp itself
+is a random value rotated whenever something should end every existing session for that user —
+`AuthService.cs:494` on an explicit revocation, `UserService.cs:122` and `:156` on account changes,
+and `MemberService_Approval.cs:108, 174, 255, 361` at points in the approval workflow where a member's
+standing changes enough that old tokens should no longer be trusted. The cost is a database read on
+every authenticated request; the alternative — a short-lived access token with no stamp check — was
+rejected because it trades an instant revocation for a window of up to the token's lifetime during
+which a disabled account keeps working. No unit test instantiates `SecurityStampMiddleware` directly;
+the behaviour is exercised indirectly through `AuthControllerMutationTests.cs` and, on the client side,
+`GHCAA.Mobile/test/session_manager_test.dart`. A middleware-level test is not yet written.
+
+**Refresh-token reuse detection.** Rotating a refresh token on every use limits how long a stolen one
+stays useful, but rotation alone does not detect the theft: if an attacker captures a refresh token
+before its legitimate holder uses it, both parties now hold a valid-looking credential and the first
+one to redeem it invalidates the other's copy without anyone noticing which was which. `TokenService.RotateRefreshTokenAsync`
+(`GHCAA.Infrastructure/Services/TokenService.cs`, lines 136-180) closes that gap: if the presented
+token hashes to a row already marked revoked, that is not a stale request but a replay — the legitimate
+holder has already moved on to the token that replaced it — so the response is to revoke every refresh
+token belonging to that user (`RevokeAllRefreshTokensAsync`, lines 182-187) and rotate the security
+stamp in the same call, killing any access token already issued as well. The ticket that asked for this,
+82.18, is named in the code comment at line 144. `docs/ARCHITECTURE_AUDIT_2026-09.md` still describes
+this as missing at its line 255-273; that finding predates the fix and should not be read alongside the
+current `TokenService.cs` as if both were still true. `TokenServiceTests.cs` covers the reuse path
+directly: `RotateRefreshToken_ReplayOfARotatedToken_RevokesWholeFamilyAndRotatesStamp` (line 136),
+alongside `StoreAndRotateRefreshToken_ShouldRotateCorrectly` (line 103) and `RevokeAllRefreshTokens_ShouldMarkAllRevoked`
+(line 170).
+
+**Step-up re-authentication for destructive actions.** A session that is valid for browsing is not
+necessarily one that should be trusted to delete a user, change a role, or alter a financial record
+without asking again — an admin's browser left open at a shared desk is a real exposure the ordinary
+session model does not address. `RequireStepUpAttribute` (`GHCAA.API/Filters/RequireStepUpAttribute.cs`,
+lines 19-41) reads a `step_up_verified_at` claim (`StepUpClaim.cs`, line 15) set when the user last
+re-confirmed their identity, checks it against a time-to-live, and returns 403 with
+`Code = "STEP_UP_REQUIRED"` if the claim is missing or has expired. The filter is applied 15 times
+across six controllers: `RolesController` (`CreateAdmin`, `AssignRole`, `DeleteUser`, `DisableUser`,
+`EnableUser`, `ResetPasswordAdmin`), `AdminController` (`SyncMembers`, `ArchiveMember`, `BulkArchiveInactive`,
+`ResetPasswordAdmin`), `AdminGovernanceController` (`DeleteECMember`), `FinancialLedgerController`
+(`AddRecord`, `UpdateRecord`, `DeleteRecord`), and `PaymentConfigController` (`DeleteConfig`). The
+time-to-live was originally 30 days and was cut to 30 minutes (`StepUpClaim.cs`, lines 22-28) after a
+security review on 29 August 2026 concluded that a step-up claim good for a month gave away most of the
+protection a step-up check is meant to provide. `RequireStepUpAttributeTests.cs` covers the filter
+directly across six cases; `DestructiveStepUpActionsTests.cs` covers the controller/service contract
+for two of the delete actions it protects.
 
 ## 7.11 Document Generation
 
