@@ -349,10 +349,14 @@ def _todo_work_package_count():
     chapters phrase it ("eighty-two work packages" = numbering reached 82), not
     a count of distinct numbers in use, since renumbering can leave gaps.
     """
-    todo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "TODO.md")
+    docs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+    todo_path = os.path.join(docs_dir, "TODO.md")
     if not os.path.exists(todo_path):
         return None
     text = io.open(todo_path, encoding="utf-8").read()
+    archive_path = os.path.join(docs_dir, "TODO_ARCHIVE.md")
+    if os.path.exists(archive_path):
+        text += "\n" + io.open(archive_path, encoding="utf-8").read()
     numbers = [int(n) for n in re.findall(r"(?m)^(\d+)\.\d+[a-zA-Z]?\s*\[", text)]
     return max(numbers) if numbers else None
 

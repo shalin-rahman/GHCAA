@@ -41,12 +41,14 @@
 
             <!-- Wizard Body -->
             <div class="wizard-body">
+                @if (!submitted()) {
                 <div class="mobile-wizard-header show-mobile">
                     <span class="step-badge">Phase {{ currentStep() }} of 3</span>
                     <div class="progress-container">
                         <div class="p-bar" [style.width]="(currentStep() * 33.3) + '%'"></div>
                     </div>
                 </div>
+                }
 
                 @if (!submitted()) {
                 <form #regForm="ngForm" (submit)="onSubmit(regForm)" class="step-form">

@@ -52,6 +52,23 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 TODO = os.path.join(REPO, "docs", "TODO.md")
+TODO_ARCHIVE = os.path.join(REPO, "docs", "TODO_ARCHIVE.md")
+
+
+def _tracked_text():
+    """TODO.md plus the archive, for functions that count areas/items.
+
+    Closed work packages move to TODO_ARCHIVE.md to keep TODO.md lean
+    (see docs/TODO_ARCHIVE.md header). Tracker and remaining-hours counts
+    have to see both files, or an archived area's DONE items silently
+    drop out of the Chapter 11 tables. sync() stays TODO.md-only: it
+    writes marker comments back by byte offset, and those offsets only
+    make sense against the real file on disk.
+    """
+    text = io.open(TODO, encoding="utf-8").read()
+    if os.path.exists(TODO_ARCHIVE):
+        text += "\n" + io.open(TODO_ARCHIVE, encoding="utf-8").read()
+    return text
 
 # (id, activity, tracker work packages, paths, predecessors). Paths decide
 # the duration; the packages tie the activity to the tracker; predecessors are the
@@ -413,7 +430,7 @@ def remaining():
         artefacts += len([line for line in rest[:stop].splitlines()
                           if line.startswith(("- Figure ", "- Table ", "- Listings"))])
     items = collections.Counter()
-    text = io.open(TODO, encoding="utf-8").read()
+    text = _tracked_text()
     for entry in OPEN_ITEM.findall(text):
         found = PRIORITY.search(entry)
         items[found.group(1) if found else "none"] += 1
@@ -530,7 +547,7 @@ def tracker():
     component it belongs to, and for work that produced no commit, the dates and the packages
     it waited on.
     """
-    text = io.open(TODO, encoding="utf-8").read()
+    text = _tracked_text()
     heads = [(m.start(), m.group(1)) for m in AREA_HEAD.finditer(text)]
     tasks, done, arrival, stated = collections.Counter(), collections.Counter(), {}, {}
     for index, (pos, area) in enumerate(heads):

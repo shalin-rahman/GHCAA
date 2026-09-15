@@ -33,8 +33,8 @@ test.describe('Content & News Visual Freeze', () => {
   test('Content: Gallery grid should match baseline', async ({ page }) => {
     await page.goto('/portal/gallery');
     await page.waitForLoadState('networkidle');
-    // Wait for images to load
-    await page.waitForSelector('.gallery-card', { state: 'visible' });
+    // Wait for either gallery layout to render.
+    await page.waitForSelector('.gallery-card, .data-table tbody tr', { state: 'visible' });
     await page.waitForTimeout(1000);
     await expect(page).toHaveScreenshot('gallery-grid.png', { fullPage: true });
   });

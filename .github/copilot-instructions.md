@@ -138,6 +138,30 @@ Application interfaces from clients.
   needs a transparent `Material` ancestor; use the shared glass container when
   appropriate.
 
+## Comment, doc, and TODO tone
+
+Comments, doc-comments, markdown docs, and `docs/TODO.md` entries must read like
+a person wrote them: plain short sentences, no filler openers ("This function is
+responsible for..."), no restating what the code already says, no AI-tell
+phrasing ("updated per review"). A comment earns its place by explaining a
+gotcha, a non-obvious reason, or a caller assumption the code doesn't already
+convey. When a file is touched for any reason, clean up AI-sounding
+comments/docs you pass over in it, not just the lines you're actively changing
+— match the file's existing style when doing so.
+
+## Documentation book (docs/book/)
+
+`docs/book/` holds the project dissertation and is held to a stricter standard
+than the rest of `docs/`. Read `docs/book/README.md` before editing a chapter.
+After any change there, run `python docs/book/build/build.py --pdf --strict`;
+it must end `status : clean, ready to deliver`. After adding, removing, or
+moving a figure or table, run `python docs/book/build/renumber.py --apply`.
+`docs/DOCUMENTATION_BOOK_OUTLINE.md` and the chapter files are one structure
+seen twice — a section change in one needs the same change in the other in the
+same edit. Renumbering `docs/TODO.md` items also requires refreshing
+`docs/book/build/wbs.py`'s component-to-area map (`wbs.py --check`) and the
+tracker figures quoted in the outline's Chapter 11 block.
+
 ## Change workflow
 
 1. Read the relevant README/docs and inspect the graph with `graphify query`,

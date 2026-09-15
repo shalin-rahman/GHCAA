@@ -8,8 +8,10 @@ namespace GHCAA.Infrastructure.Services
     {
         private static readonly string[] ImageContentTypes = { "image/jpeg", "image/png", "image/webp" };
         private static readonly string[] DocumentContentTypes = { "image/jpeg", "image/png", "image/webp", "application/pdf" };
+        private static readonly string[] SpreadsheetContentTypes = { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" };
         private static readonly string[] ImageExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
         private static readonly string[] DocumentExtensions = { ".jpg", ".jpeg", ".png", ".webp", ".pdf" };
+        private static readonly string[] SpreadsheetExtensions = { ".xlsx" };
 
         public FileValidationResult Validate(Stream content, string fileName, string? contentType, long length, FileCategory category, long maxSizeBytes)
         {
@@ -19,7 +21,12 @@ namespace GHCAA.Infrastructure.Services
             if (length > maxSizeBytes)
                 return FileValidationResult.Fail($"File must be under {maxSizeBytes / (1024 * 1024)}MB.");
 
-            var allowed = category == FileCategory.Image ? ImageContentTypes : DocumentContentTypes;
+            var allowed = category switch
+            {
+                FileCategory.Image => ImageContentTypes,
+                FileCategory.Spreadsheet => SpreadsheetContentTypes,
+                _ => DocumentContentTypes
+            };
             var normalizedContentType = contentType?.ToLowerInvariant();
             if (string.IsNullOrEmpty(normalizedContentType) || !allowed.Contains(normalizedContentType))
                 return FileValidationResult.Fail("Unsupported file type.");
@@ -29,7 +36,12 @@ namespace GHCAA.Infrastructure.Services
             // FileUploadType.Photo to .jpg). Without this, a real JPEG uploaded as "x.html" with
             // Content-Type: image/jpeg passes every check above and is served back as text/html
             // from the app's own origin — an HTML-injection/phishing vector. Reject it here too.
-            var allowedExtensions = category == FileCategory.Image ? ImageExtensions : DocumentExtensions;
+            var allowedExtensions = category switch
+            {
+                FileCategory.Image => ImageExtensions,
+                FileCategory.Spreadsheet => SpreadsheetExtensions,
+                _ => DocumentExtensions
+            };
             var extension = Path.GetExtension(fileName)?.ToLowerInvariant();
             if (string.IsNullOrEmpty(extension) || !allowedExtensions.Contains(extension))
                 return FileValidationResult.Fail("Unsupported file extension.");
@@ -63,6 +75,9 @@ namespace GHCAA.Infrastructure.Services
                         && header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50;
                 case "application/pdf":
                     return bytesRead >= 4 && header[0] == 0x25 && header[1] == 0x50 && header[2] == 0x44 && header[3] == 0x46;
+                case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                    // .xlsx is a zip container - every zip-format file starts with this local-file-header signature.
+                    return bytesRead >= 4 && header[0] == 0x50 && header[1] == 0x4B && header[2] == 0x03 && header[3] == 0x04;
                 default:
                     return false;
             }

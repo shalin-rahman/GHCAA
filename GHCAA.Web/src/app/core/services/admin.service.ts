@@ -98,6 +98,10 @@ export class AdminService {
         return this.http.post(`${this.apiUrl}/${id}/approve`, {});
     }
 
+    revertMemberApproval(id: number): Observable<any> {
+        return this.http.post(`${this.apiUrl}/${id}/revert-approval`, {});
+    }
+
     rejectMember(id: number, reason: string): Observable<any> {
         return this.http.post(`${this.apiUrl}/${id}/reject`, { reason });
     }

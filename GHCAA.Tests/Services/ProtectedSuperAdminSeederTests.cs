@@ -122,6 +122,11 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task BootstrapFirstSuperAdminAsync_CreatesSuperAdmin_WhenDatabaseHasNone()
         {
+            // The seeded Users table already has a "shalin" row (TestBase runs the real
+            // users.json seed), so clear it to actually exercise the "database has none" case.
+            _context.Users.RemoveRange(_context.Users);
+            await _context.SaveChangesAsync();
+
             await ProtectedSuperAdminSeeder.BootstrapFirstSuperAdminAsync(
                 _context, new[] { "shalin" }, _userService, _mockLogger.Object);
 
@@ -134,6 +139,11 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task BootstrapFirstSuperAdminAsync_NoOps_WhenASuperAdminAlreadyExists()
         {
+            // The seeded Users table already has a "shalin" row; clear it so the only
+            // superadmin present is the one this test creates below.
+            _context.Users.RemoveRange(_context.Users);
+            await _context.SaveChangesAsync();
+
             var member = await CreateAndSaveTestMemberAsync("Existing Admin", "existing-admin@e.com", "222", "222");
             await CreateAndSaveTestUserAsync(member.Id, "existing-admin");
             await ProtectedSuperAdminSeeder.EnsureAsync(_context, new[] { "existing-admin" }, _mockLogger.Object);
@@ -164,6 +174,11 @@ namespace GHCAA.Tests.Services
             var passwordFilePath = Path.Combine(Path.GetTempPath(), $"superadmin-bootstrap-{Guid.NewGuid():N}.txt");
             try
             {
+                // The seeded Users table already has a "shalin" row, which would make the
+                // bootstrap no-op and never write the password file.
+                _context.Users.RemoveRange(_context.Users);
+                await _context.SaveChangesAsync();
+
                 await ProtectedSuperAdminSeeder.BootstrapFirstSuperAdminAsync(
                     _context, new[] { "shalin" }, _userService, _mockLogger.Object, passwordFilePath);
 

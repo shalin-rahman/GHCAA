@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using GHCAA.Infrastructure.Options;
+using System.Net;
 using System.Net.Http;
 using BCrypt.Net;
 
@@ -417,12 +418,16 @@ namespace GHCAA.Infrastructure.Services
 
             var dbTemplate = await _communicationService.GetTemplateByCodeAsync(Constants.TemplateCodes.PasswordReset, cancellationToken);
 
+            // FullName is member-supplied at registration - HTML-encode it before it lands in an
+            // email body, same as CommunicationService.SendEmailByCodeAsync does for template vars.
+            var encodedFullName = WebUtility.HtmlEncode(member.FullName);
+
             string subject, body;
             if (dbTemplate != null)
             {
-                subject = dbTemplate.Subject.Replace("{{FullName}}", member.FullName);
+                subject = dbTemplate.Subject.Replace("{{FullName}}", encodedFullName);
                 body = dbTemplate.Body
-                    .Replace("{{FullName}}", member.FullName)
+                    .Replace("{{FullName}}", encodedFullName)
                     .Replace("{{ResetUrl}}", resetUrl)
                     .Replace("{{MembershipNumber}}", member.MembershipNumber ?? "Pending");
             }
@@ -433,7 +438,7 @@ namespace GHCAA.Infrastructure.Services
                 body = $@"
                 <div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto;'>
                     <h2 style='color: #c5a059;'>Password Reset Requested</h2>
-                    <p>Hello <strong>{member.FullName}</strong>,</p>
+                    <p>Hello <strong>{encodedFullName}</strong>,</p>
                     <p>We received a request to reset the password on your {config.Branding.ShortName} account.</p>
                     <p>Please click the button below to set a new password. This link is valid for 24 hours.</p>
                     <div style='text-align: center; margin: 30px 0;'>

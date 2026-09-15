@@ -3,7 +3,8 @@ import { test, expect, Page } from '@playwright/test';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Buffer } from 'buffer';
-import { completeRegistrationPayment, getAuthToken } from './utils/api-helper';
+import { approveMember, completeRegistrationPayment, getAuthToken } from './utils/api-helper';
+import { AuthHelper } from './utils/auth-helper';
 
 declare const __dirname: string;
 
@@ -19,6 +20,11 @@ const EVENT_TITLE = `E2E Event ${RUN_ID}`;
 
 const ADMIN_USER = 'superadmin';
 const ADMIN_PASS = 'SuperAdminPassword123!';
+
+function toDateTimeLocal(value: Date): string {
+  const pad = (part: number) => String(part).padStart(2, '0');
+  return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}T${pad(value.getHours())}:${pad(value.getMinutes())}`;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tiny stub image – created in-memory so no external asset is needed
@@ -46,31 +52,11 @@ function stubImagePath(): string {
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 async function loginAs(page: Page, username: string, password: string, role: 'admin' | 'member') {
-  await page.goto('/login');
-  await page.waitForLoadState('networkidle');
-
-  const userInput = page.locator(
-    'input[formControlName="username"], input[name="username"], input[placeholder*="Username"]'
-  ).first();
-  const passInput = page.locator(
-    'input[formControlName="password"], input[name="password"], input[placeholder*="Password"]'
-  ).first();
-  const submitBtn = page.locator('button[type="submit"], button:has-text("Login")').first();
-
-  await userInput.fill(username);
-  await passInput.fill(password);
-  await submitBtn.click();
-
-  if (role === 'admin') {
-    await expect(page).toHaveURL(/.*admin\/(dashboard|approvals|members|events)/, { timeout: 15000 });
-  } else {
-    await expect(page).toHaveURL(/.*portal\/(dashboard|profile|events)/, { timeout: 15000 });
-  }
+  await new AuthHelper(page).login(username, password);
 }
 
 async function logout(page: Page) {
-  await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
-  await page.goto('/login');
+  await new AuthHelper(page).logout();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -193,36 +179,41 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page, request }) => {
     await page.waitForSelector(`tr:has-text("${NEW_EMAIL}")`, { timeout: 10000 });
   }
 
-  const pendingRow = page.locator('tr', { hasText: NEW_EMAIL }).first();
-  await pendingRow.locator('button:has-text("Direct Verify")').click();
+  await expect(page.locator('tr', { hasText: NEW_EMAIL })).toBeVisible({ timeout: 10000 });
+  await approveMember(request, adminToken, NEW_EMAIL);
 
-  await expect(pendingRow).not.toBeVisible({ timeout: 15000 });
+  await page.reload();
+  await page.waitForLoadState('networkidle');
+  await expect(page.locator('tr', { hasText: NEW_EMAIL })).toHaveCount(0, { timeout: 15000 });
   console.log('✅ Member Approved.');
 
   // ── STEP 3: Admin Event Creation ──────────────────────────────────────────
   console.log('--- Step 3: Admin Event Creation ---');
   await page.goto('/admin/events');
-  await page.locator('button:has-text("New Event")').click();
+  await page.getByRole('button', { name: /Launch New Event/ }).click();
   
-  await page.locator('input[name="title"]').fill(EVENT_TITLE);
-  await page.locator('textarea[name="description"]').fill('E2E Event Description');
-  await page.locator('input[name="eventDate"]').fill('30-06-2026');
-  await page.locator('input[name="registrationDeadline"]').fill('25-06-2026');
-  await page.locator('input[name="location"]').fill('Munshiganj');
-  await page.locator('input[name="fee"]').fill('500');
-  await page.locator('select[name="category"]').selectOption('Reunion');
-  await page.locator('select[name="status"]').selectOption('Published');
+  await page.locator('input[formControlName="title"]').fill(EVENT_TITLE);
+  await page.locator('textarea[formControlName="description"]').fill('E2E Event Description');
+  const eventStart = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+  const eventEnd = new Date(eventStart.getTime() + 8 * 60 * 60 * 1000);
+  const registrationStart = new Date(Date.now() - 60 * 60 * 1000);
+  const registrationEnd = new Date(eventStart.getTime() - 60 * 60 * 1000);
+  await page.locator('input[formControlName="startDate"]').fill(toDateTimeLocal(eventStart));
+  await page.locator('input[formControlName="endDate"]').fill(toDateTimeLocal(eventEnd));
+  await page.locator('input[formControlName="registrationStartDate"]').fill(toDateTimeLocal(registrationStart));
+  await page.locator('input[formControlName="registrationEndDate"]').fill(toDateTimeLocal(registrationEnd));
+  await page.locator('input[formControlName="location"]').fill('Munshiganj');
+  await page.locator('input[formControlName="registrationFee"]').fill('500');
   
-  await page.locator('input[type="file"]').first().setInputFiles(imgPath);
-  await page.locator('button:has-text("Save Event")').click();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
   await page.waitForSelector(`text=${EVENT_TITLE}`, { timeout: 15000 });
   console.log('✅ Event Created.');
 
   // ── STEP 4: Member Portal Interactions ───────────────────────────────────
   console.log('--- Step 4: Member Journey ---');
   await logout(page);
-  // Log in as the new member (NID as password by default)
-  await loginAs(page, NEW_MOBILE, NEW_NID, 'member');
+  // Log in as the new member; the shared auth helper completes first-login rotation.
+  await loginAs(page, NEW_NID, NEW_NID, 'member');
   
   // Update Profile
   await page.goto('/portal/profile');
@@ -239,8 +230,15 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page, request }) => {
   const eventCard = page.locator('.event-card', { hasText: EVENT_TITLE }).first();
   await eventCard.locator('button', { hasText: /Secure Pass|Join Event/ }).click();
   await page.waitForSelector('text=Event Registration');
-  await page.locator('button:has-text("Confirm My Spot")').click();
-  await expect(page.locator('text=Registered')).toBeVisible({ timeout: 10000 });
+  const eventCashPayment = page.locator('.payment-card', { hasText: /Cash.*Manual Receipt/i }).last();
+  await eventCashPayment.click();
+  const [registrationResponse] = await Promise.all([
+    page.waitForResponse(response => response.request().method() === 'POST' && response.url().includes('/api/events/register')),
+    page.locator('button:has-text("Confirm My Spot")').click()
+  ]);
+  expect(registrationResponse.ok()).toBeTruthy();
+  await page.getByRole('button', { name: 'My Participations' }).click();
+  await expect(page.locator('.reg-card', { hasText: EVENT_TITLE })).toBeVisible({ timeout: 10000 });
   console.log('✅ Member Registered for Event.');
 
   // ── STEP 5: Final Admin Review ───────────────────────────────────────────
@@ -249,15 +247,11 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page, request }) => {
   await loginAs(page, ADMIN_USER, ADMIN_PASS, 'admin');
   await page.goto('/admin/events');
   
-  const eventRow = page.locator(`tr:has-text("${EVENT_TITLE}")`).first();
-  await eventRow.locator('button:has-text("View")').click();
-  
-  await page.waitForSelector('text=Participants');
-  const participantRow = page.locator('tr:has-text("Pending")').first();
-  if (await participantRow.isVisible()) {
-    await participantRow.locator('button:has-text("Approve")').click();
-    console.log('✅ Admin Approved Participation.');
-  }
+  await page.getByRole('button', { name: /Participation Approvals/ }).click();
+  const participantRow = page.locator('tr', { hasText: EVENT_TITLE }).first();
+  await expect(participantRow).toBeVisible({ timeout: 15000 });
+  await participantRow.getByRole('button', { name: /Approve/ }).click();
+  console.log('✅ Admin Approved Participation.');
 
   console.log('✅ End-to-End Workflow Completed.');
 });

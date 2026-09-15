@@ -1,3 +1,11 @@
+# Repo reference
+
+`.github/copilot-instructions.md` holds the commands table, layer architecture, and
+per-client (backend/Angular/Flutter) conventions and change workflow shared by every
+AI tool working in this repo. Read it before cross-layer work; keep the two files in
+sync when either changes — this file adds Claude-specific rules on top rather than
+repeating that content.
+
 # Graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.

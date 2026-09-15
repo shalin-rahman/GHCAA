@@ -7,6 +7,7 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
 using Moq;
 using NUnit.Framework;
 
@@ -19,6 +20,9 @@ namespace GHCAA.Tests.Controllers
         private Mock<IUserService> _userServiceMock;
         private Mock<IIDCardService> _idCardServiceMock;
         private Mock<IFileValidationService> _fileValidationServiceMock;
+        private Mock<IAuthService> _authServiceMock;
+        private Mock<ITokenService> _tokenServiceMock;
+        private Mock<IWebHostEnvironment> _environmentMock;
         private ProfileController _controller;
 
         [SetUp]
@@ -28,10 +32,21 @@ namespace GHCAA.Tests.Controllers
             _userServiceMock = new Mock<IUserService>();
             _idCardServiceMock = new Mock<IIDCardService>();
             _fileValidationServiceMock = new Mock<IFileValidationService>();
+            _authServiceMock = new Mock<IAuthService>();
+            _tokenServiceMock = new Mock<ITokenService>();
+            _environmentMock = new Mock<IWebHostEnvironment>();
+            _environmentMock.Setup(x => x.EnvironmentName).Returns("Development");
             _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
                                        .Returns(FileValidationResult.Ok());
 
-            _controller = new ProfileController(_memberServiceMock.Object, _userServiceMock.Object, _idCardServiceMock.Object, _fileValidationServiceMock.Object);
+            _controller = new ProfileController(
+                _memberServiceMock.Object,
+                _userServiceMock.Object,
+                _authServiceMock.Object,
+                _idCardServiceMock.Object,
+                _fileValidationServiceMock.Object,
+                _tokenServiceMock.Object,
+                _environmentMock.Object);
 
             SetUserContext(_controller, 10, "Member", 1); // MemberId 10, UserId 1
             // Note: In old code NameIdentifier (UserId) was 1, and MemberId was 10.
@@ -69,6 +84,11 @@ namespace GHCAA.Tests.Controllers
             var dto = new ChangePasswordDto { OldPassword = "old", NewPassword = "new" };
             _userServiceMock.Setup(x => x.ChangePasswordAsync(1, "old", "new", It.IsAny<CancellationToken>()))
                             .ReturnsAsync(true);
+            _authServiceMock.Setup(x => x.GetUserWithRolesAsync(1, It.IsAny<CancellationToken>()))
+                            .ReturnsAsync(new GHCAA.Domain.Models.User { Id = 1, Username = "member", SecurityStamp = "stamp" });
+            _tokenServiceMock.Setup(x => x.CreateToken(It.IsAny<GHCAA.Domain.Models.User>()))
+                             .Returns("access-token");
+            _tokenServiceMock.Setup(x => x.GenerateRefreshToken()).Returns("refresh-token");
 
             var result = await _controller.ChangePassword(dto, CancellationToken.None);
 

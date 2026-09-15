@@ -305,6 +305,7 @@ export class Register implements OnDestroy {
         if (this.selectedPaymentMethod()?.isOnline) {
           this.initiateGateway(res.memberId);
         } else {
+          this.submitted.set(true);
           this.currentStep.set(4);
           this.notify.success('Registry filing submitted successfully. Please verify your email.');
         }

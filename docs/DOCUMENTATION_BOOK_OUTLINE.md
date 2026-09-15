@@ -583,7 +583,7 @@ matters more than the numbers themselves:
 | Class | Covers | What it can support |
 |---|---|---|
 | Git-dated | 17 code components, 8 documentation deliverables | dated and verifiable; a commit-day is a *lower bound* on effort, since reading, debugging and thinking leave no commit |
-| Tracker-dated | 82 work packages, 773 tasks, the arrival profile | dated in `docs/TODO.md`, and from Work Package 68 onwards each area states its own component and dates in a `wbs:` marker |
+| Tracker-dated | 82 work packages, 887 tasks, the arrival profile | dated in `docs/TODO.md` and `docs/TODO_ARCHIVE.md`, and from Work Package 68 onwards each area states its own component and dates in a `wbs:` marker |
 | Back-scheduled | P1 to P5, the research, specification and design that preceded the first commit | placed in the order the work had to happen, ending as the first commit lands on 9 February 2026. A reconstruction, and labelled as one wherever it appears |
 | Not yet written | installation, user and administrator manuals | future effort under the page budget, not completed work |
 | Calculated assumption | elicitation, interviews, review sessions, stakeholder discussion, incident response | **no commits exist**, so the duration is calculated from a stated rate and a measured quantity, and the arithmetic is printed with it. A reader who rejects the rate can redo the sum. These are labelled as assumptions everywhere they appear and are never presented as measurements |

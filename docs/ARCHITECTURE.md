@@ -101,7 +101,10 @@ The platform employs a **Sequential CI Pipeline** that ensures every code change
 ---
 
 > [!TIP]
-> **Data Integrity Constraint**: All member updates (including Admin updates) are governed by the `BaseMemberDto` validation. At least one `AcademicRecord` from the college is mandatory for any record to persist.
+> **Data Integrity Constraint**: Registration and member updates, including Admin updates, require
+> at least one `AcademicRecord`. The first record must use the configured institution name and is
+> stored with `IsGHC = true`. Later records must not use the configured institution name or
+> `IsGHC = true`. Clients protect the first matching record from editing and removal.
 
 > [!IMPORTANT]
 > **Mobile Connectivity**: Ensure `AppConfig.apiBaseUrl` in Flutter matches the Unified API Prefix configured in `Program.cs`.

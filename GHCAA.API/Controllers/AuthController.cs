@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using GHCAA.Domain;
 using GHCAA.API.Extensions;
 
@@ -97,9 +96,9 @@ namespace GHCAA.API.Controllers
             if (user == null || !user.IsActive || user.IsArchived) { ClearAuthCookies(); return Unauthorized(); }
 
             var newAccessToken = CreateRefreshedAccessToken(user);
-            SetCookie("access_token", newAccessToken, TimeSpan.FromMinutes(65));
-            SetCookie("refresh_token", newRefreshToken, TimeSpan.FromDays(7));
-            SetXsrfCookie(TimeSpan.FromDays(7));
+            this.SetAuthCookie(_env, "access_token", newAccessToken, TimeSpan.FromMinutes(65));
+            this.SetAuthCookie(_env, "refresh_token", newRefreshToken, TimeSpan.FromDays(7));
+            this.SetXsrfCookie(_env, TimeSpan.FromDays(7));
 
             return Ok(new { Token = newAccessToken });
         }
@@ -192,7 +191,7 @@ namespace GHCAA.API.Controllers
             // Re-issue the access token carrying the step-up claim. The refresh token is left
             // alone: this raises the current session's assurance level, it is not a new login.
             var stepUpToken = _tokenService.CreateStepUpToken(user);
-            SetCookie("access_token", stepUpToken, TimeSpan.FromMinutes(65));
+            this.SetAuthCookie(_env, "access_token", stepUpToken, TimeSpan.FromMinutes(65));
 
             return Ok(new { Token = stepUpToken });
         }
@@ -253,7 +252,7 @@ namespace GHCAA.API.Controllers
 
         private async Task SetAuthCookiesAsync(TokenResponseDto result, CancellationToken cancellationToken)
         {
-            SetCookie("access_token", result.Token, TimeSpan.FromMinutes(65));
+            this.SetAuthCookie(_env, "access_token", result.Token, TimeSpan.FromMinutes(65));
 
             var refreshToken = _tokenService.GenerateRefreshToken();
             // Resolve User.Id from the JWT claim we just created.
@@ -269,40 +268,12 @@ namespace GHCAA.API.Controllers
                     await _tokenService.StoreRefreshTokenAsync(user.Id, refreshToken, cancellationToken);
             }
 
-            SetCookie("refresh_token", refreshToken, TimeSpan.FromDays(7));
-            SetXsrfCookie(TimeSpan.FromDays(7));
+            this.SetAuthCookie(_env, "refresh_token", refreshToken, TimeSpan.FromDays(7));
+            this.SetXsrfCookie(_env, TimeSpan.FromDays(7));
 
             // Cookie-based (web) clients ignore this; mobile clients (no cookie
             // jar) persist it and send it back to /auth/refresh-mobile.
             result.RefreshToken = refreshToken;
-        }
-
-        private void SetCookie(string name, string value, TimeSpan maxAge)
-        {
-            Response.Cookies.Append(name, value, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = !_env.IsDevelopment(),
-                SameSite = SameSiteMode.Strict,
-                MaxAge = maxAge,
-                Path = "/"
-            });
-        }
-
-        // 1a: Readable (non-httpOnly) double-submit-cookie token. Angular's HttpClient
-        // reads this and echoes it back as the X-XSRF-TOKEN header; XsrfMiddleware
-        // validates the two match on state-changing requests.
-        private void SetXsrfCookie(TimeSpan maxAge)
-        {
-            var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
-            Response.Cookies.Append("XSRF-TOKEN", token, new CookieOptions
-            {
-                HttpOnly = false,
-                Secure = !_env.IsDevelopment(),
-                SameSite = SameSiteMode.Strict,
-                MaxAge = maxAge,
-                Path = "/"
-            });
         }
 
         private void ClearAuthCookies()

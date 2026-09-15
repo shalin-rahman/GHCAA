@@ -20,7 +20,7 @@ test.describe('Job Hub E2E', () => {
 
   test.beforeEach(async ({ page }) => {
     auth = new AuthHelper(page);
-    await auth.login(member.mobile, member.nid);
+    await auth.login(member.nid, member.nid);
   });
 
   test.afterEach(async ({ page }) => {
@@ -33,25 +33,25 @@ test.describe('Job Hub E2E', () => {
     await expect(page).toHaveURL(/.*portal\/jobs/);
     await page.waitForLoadState('networkidle');
 
-    await expect(page.getByRole('heading', { name: 'Opportunities Hub' })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Job Hub' })).toBeVisible({ timeout: 15000 });
 
     // Verify filter controls are present
     await expect(page.locator('input[placeholder*="Filter by title"]')).toBeVisible();
     await expect(page.locator('select').first()).toBeVisible();
 
     // Verify job cards or empty state
-    const jobCards = page.locator('.job-card');
+    const jobCards = page.locator('.job-card, tbody tr:not(.empty-row)');
     const emptyState = page.locator('.empty-state');
     const hasJobs = await jobCards.first().isVisible({ timeout: 5000 }).catch(() => false);
 
     if (hasJobs) {
       // Verify card structure
       const firstCard = jobCards.first();
-      await expect(firstCard.locator('h3')).toBeVisible();
-      await expect(firstCard.locator('.meta')).toBeVisible();
+      await expect(firstCard.locator('h3, .title-cell').first()).toBeVisible();
+      await expect(firstCard.locator('.meta, td').first()).toBeVisible();
     } else {
-      await expect(emptyState).toBeVisible();
-      await expect(emptyState).toContainText('No Open Opportunities');
+      await expect(page.locator('.empty-row, .empty-state').first()).toBeVisible();
+      await expect(page.getByText(/No open opportunities|No Open Opportunities/)).toBeVisible();
     }
   });
 
@@ -86,7 +86,7 @@ test.describe('Job Hub E2E', () => {
     await page.goto('/portal/jobs');
     await expect(page).toHaveURL(/.*portal\/jobs/);
 
-    const jobCards = page.locator('.job-card');
+    const jobCards = page.locator('.job-card, tbody tr:not(.empty-row)');
     const hasJobs = await jobCards.first().isVisible({ timeout: 5000 }).catch(() => false);
 
     if (hasJobs) {

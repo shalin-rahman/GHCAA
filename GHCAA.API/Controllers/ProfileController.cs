@@ -2,6 +2,7 @@
 using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,13 +19,26 @@ namespace GHCAA.API.Controllers
         private readonly IUserService _userService;
         private readonly IIDCardService _idCardService;
         private readonly IFileValidationService _fileValidationService;
+        private readonly IAuthService _authService;
+        private readonly ITokenService _tokenService;
+        private readonly IWebHostEnvironment _environment;
 
-        public ProfileController(IMemberService memberService, IUserService userService, IIDCardService idCardService, IFileValidationService fileValidationService)
+        public ProfileController(
+            IMemberService memberService,
+            IUserService userService,
+            IAuthService authService,
+            IIDCardService idCardService,
+            IFileValidationService fileValidationService,
+            ITokenService tokenService,
+            IWebHostEnvironment environment)
         {
             _memberService = memberService;
             _userService = userService;
+            _authService = authService;
             _idCardService = idCardService;
             _fileValidationService = fileValidationService;
+            _tokenService = tokenService;
+            _environment = environment;
         }
 
         [HttpGet]
@@ -65,6 +79,19 @@ namespace GHCAA.API.Controllers
             {
                 return Problem(detail: "Password change failed. Verify your old password.", statusCode: StatusCodes.Status400BadRequest);
             }
+
+            var user = await _authService.GetUserWithRolesAsync(userId, cancellationToken);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            var accessToken = _tokenService.CreateToken(user);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+            await _tokenService.StoreRefreshTokenAsync(user.Id, refreshToken, cancellationToken);
+            this.SetAuthCookie(_environment, "access_token", accessToken, TimeSpan.FromMinutes(65));
+            this.SetAuthCookie(_environment, "refresh_token", refreshToken, TimeSpan.FromDays(7));
+            this.SetXsrfCookie(_environment, TimeSpan.FromDays(7));
 
             return Ok(new { Message = "Password changed successfully" });
         }

@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:screen_protector/screen_protector.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
@@ -46,12 +45,12 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
   @override
   void initState() {
     super.initState();
-    ScreenProtector.preventScreenshotOn();
+    AppUtils.setScreenshotProtection(true);
   }
 
   @override
   void dispose() {
-    ScreenProtector.preventScreenshotOff();
+    AppUtils.setScreenshotProtection(false);
     _searchController.dispose();
     super.dispose();
   }

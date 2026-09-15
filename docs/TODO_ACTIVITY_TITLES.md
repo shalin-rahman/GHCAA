@@ -1,5 +1,7 @@
 ﻿# TODO activity title review
 
+**Superseded 2026-09-14 (see docs/TODO.md 82.102):** retired. This file only proposes alternate wording for titles that already exist in the tracker — no missing activity, no scope gap. Applying its ~860 rows of renames would touch every cross-reference to those work packages for a cosmetic gain, not worth the risk of a stale reference slipping through. Left on disk for reference; not to be treated as a live task list.
+
 This draft index lists each numbered activity in `docs/TODO.md`. It separates status, component, parent work package, dependencies, relevancy, estimate, and available dates. The source title is unchanged. Each suggested title is one concise sentence. `Not stated` means the tracker does not provide that detail.
 
 | Activity | Parent work package | Status | Component | Dependencies | Relevancy | Estimate | Dates | Existing title | Suggested title |

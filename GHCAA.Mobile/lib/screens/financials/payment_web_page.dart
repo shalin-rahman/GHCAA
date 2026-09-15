@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:screen_protector/screen_protector.dart';
+import '../../core/utils/app_utils.dart';
 
 class PaymentWebPage extends StatefulWidget {
   final String url;
@@ -17,7 +17,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   @override
   void initState() {
     super.initState();
-    ScreenProtector.preventScreenshotOn();
+    AppUtils.setScreenshotProtection(true);
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
@@ -42,7 +42,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
 
   @override
   void dispose() {
-    ScreenProtector.preventScreenshotOff();
+    AppUtils.setScreenshotProtection(false);
     super.dispose();
   }
 

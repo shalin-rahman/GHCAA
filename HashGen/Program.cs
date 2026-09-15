@@ -41,7 +41,7 @@ if (args.Length > 0 && args[0] == "--apply")
                 "LastUpdateDate", "MembershipType", "Category", "HasAcceptedTerms", "IsVerified",
                 "IsMobilePublic", "IsEmailPublic", "IsAddressPublic", "IsNIDPublic", "IsFamilyPublic",
                 "HasAcceptedGdpr", "IsProfileComplete", "ContributionPoints",
-                "NotifyEventCreation", "NotifyParticipationApproval", "NotifyRegistrationUpdate", "NotifyRelevantUpdates"
+                "NotifyEventCreation", "NotifyParticipationApproval", "NotifyRegistrationUpdate", "NotifyRelevantUpdates", "NotifyCommitteeChanges"
             )
             SELECT 9998, 'Demo User', 'Father', 'Mother', '1995-01-01', 0, 2,
                 '9999999999', '01999999999', 'demo_user@ghcaa.local', true, 'Munshiganj', 'Munshiganj',
@@ -50,7 +50,7 @@ if (args.Length > 0 && args[0] == "--apply")
                 NOW() AT TIME ZONE 'UTC', 3, 0, true, true,
                 false, false, false, false, false,
                 false, true, 0,
-                true, true, true, true
+                true, true, true, true, true
             WHERE NOT EXISTS (SELECT 1 FROM "Members" WHERE "Id" = 9998)
             """, conn);
         await createMember.ExecuteNonQueryAsync();

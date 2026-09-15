@@ -353,7 +353,7 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task GetPaymentOwnerMemberIdAsync_ReturnsNull_WhenPaymentDoesNotExist()
     {
-        var result = await _service.GetPaymentOwnerMemberIdAsync(999);
+        var result = await _service.GetPaymentOwnerMemberIdAsync(-1);
 
         result.Should().BeNull();
     }

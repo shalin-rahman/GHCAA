@@ -44,4 +44,44 @@ public class ChatServiceTests : TestBase
         var recentForSender = (await _service.GetRecentChatsAsync(senderUser.Id)).ToList();
         recentForSender.Should().ContainSingle();
     }
+
+    // 48.12: MarkAsReadAsync must only let the actual recipient mark a message read -
+    // otherwise any authenticated user could flip IsRead on someone else's message by guessing an id.
+    [Category("Security")]
+    [Test]
+    public async Task MarkAsReadAsync_WhenCallerIsRecipient_MarksReadAndReturnsTrue()
+    {
+        var senderMember = await CreateAndSaveTestMemberAsync("Read Sender", "read.sender@example.com", "01199990003", "NTCH0003");
+        var receiverMember = await CreateAndSaveTestMemberAsync("Read Receiver", "read.receiver@example.com", "01199990004", "NTCH0004");
+        var senderUser = await CreateAndSaveTestUserAsync(senderMember.Id, "read.sender.user");
+        var receiverUser = await CreateAndSaveTestUserAsync(receiverMember.Id, "read.receiver.user");
+
+        var message = await _service.SendMessageAsync(senderUser.Id, receiverUser.Id, "Please read this");
+
+        var updated = await _service.MarkAsReadAsync(message.Id, receiverUser.Id);
+
+        updated.Should().BeTrue();
+        var history = (await _service.GetChatHistoryAsync(senderUser.Id, receiverUser.Id)).ToList();
+        history.Should().ContainSingle(m => m.Id == message.Id && m.IsRead);
+    }
+
+    [Category("Security")]
+    [Test]
+    public async Task MarkAsReadAsync_WhenCallerIsNotRecipient_ReturnsFalseAndLeavesUnread()
+    {
+        var senderMember = await CreateAndSaveTestMemberAsync("Read Sender2", "read.sender2@example.com", "01199990005", "NTCH0005");
+        var receiverMember = await CreateAndSaveTestMemberAsync("Read Receiver2", "read.receiver2@example.com", "01199990006", "NTCH0006");
+        var strangerMember = await CreateAndSaveTestMemberAsync("Read Stranger", "read.stranger@example.com", "01199990007", "NTCH0007");
+        var senderUser = await CreateAndSaveTestUserAsync(senderMember.Id, "read.sender2.user");
+        var receiverUser = await CreateAndSaveTestUserAsync(receiverMember.Id, "read.receiver2.user");
+        var strangerUser = await CreateAndSaveTestUserAsync(strangerMember.Id, "read.stranger.user");
+
+        var message = await _service.SendMessageAsync(senderUser.Id, receiverUser.Id, "Not for the stranger");
+
+        var updated = await _service.MarkAsReadAsync(message.Id, strangerUser.Id);
+
+        updated.Should().BeFalse();
+        var history = (await _service.GetChatHistoryAsync(senderUser.Id, receiverUser.Id)).ToList();
+        history.Should().ContainSingle(m => m.Id == message.Id && !m.IsRead);
+    }
 }

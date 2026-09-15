@@ -429,11 +429,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             Icon(Icons.info_outline,
                                 color: AppTheme.royalGold, size: 16),
                             SizedBox(width: AppTheme.spaceS),
-                            Text('Payment Instructions',
-                                style: TextStyle(
-                                    color: AppTheme.royalGold,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12)),
+                            Expanded(
+                              child: Text('Payment Instructions',
+                                  style: TextStyle(
+                                      color: AppTheme.royalGold,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12)),
+                            ),
                           ],
                         ),
                         const SizedBox(height: AppTheme.spaceS),

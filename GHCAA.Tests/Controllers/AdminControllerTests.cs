@@ -76,6 +76,41 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
+        public async Task RevertMemberApproval_ReturnsOk_OnSuccess()
+        {
+            _memberServiceMock.Setup(x => x.RevertMemberApprovalAsync(100, 1, It.IsAny<CancellationToken>()))
+                              .ReturnsAsync(true);
+
+            var result = await _controller.RevertMemberApproval(100, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task RevertMemberApproval_ReturnsNotFound_WhenMemberMissing()
+        {
+            _memberServiceMock.Setup(x => x.RevertMemberApprovalAsync(100, 1, It.IsAny<CancellationToken>()))
+                              .ReturnsAsync(false);
+
+            var result = await _controller.RevertMemberApproval(100, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<NotFoundResult>());
+        }
+
+        [Test]
+        public async Task RevertMemberApproval_ReturnsBadRequest_WhenMemberNotActive()
+        {
+            _memberServiceMock.Setup(x => x.RevertMemberApprovalAsync(100, 1, It.IsAny<CancellationToken>()))
+                              .ThrowsAsync(new InvalidOperationException("Only active members can have approval reverted."));
+
+            var result = await _controller.RevertMemberApproval(100, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            var problemResult = result as ObjectResult;
+            Assert.That(problemResult!.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
+
+        [Test]
         public async Task ArchiveMember_ReturnsOk_OnSuccess()
         {
             _memberServiceMock.Setup(x => x.ArchiveMemberAsync(100, It.IsAny<CancellationToken>()))

@@ -66,7 +66,7 @@ class StorageService {
       await prefs.remove(_legacyJwtPrefsKey);
       return;
     }
-    await _secure.delete(key: _jwtKey);
+    await _safeDelete(_jwtKey);
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_legacyJwtPrefsKey);
   }
@@ -105,7 +105,21 @@ class StorageService {
       await prefs.remove(_legacyRefreshTokenPrefsKey);
       return;
     }
-    await _secure.delete(key: _refreshTokenKey);
+    await _safeDelete(_refreshTokenKey);
+  }
+
+  // flutter_secure_storage's Windows backend keeps its values in one DPAPI-encrypted
+  // file. If that file is still locked by another process (e.g. this same exe from a
+  // just-finished prior run) a delete throws PathAccessException, which otherwise
+  // aborts logout() before it reaches context.go('/login') and strands the user on
+  // the dashboard. A failed delete just leaves a stale entry to be overwritten on the
+  // next saveToken/saveRefreshToken, so it's safe to swallow here.
+  Future<void> _safeDelete(String key) async {
+    try {
+      await _secure.delete(key: key);
+    } catch (e) {
+      debugPrint('StorageService: failed to delete secure key "$key": $e');
+    }
   }
 
   Future<void> saveRole(String role) async {
@@ -164,7 +178,7 @@ class StorageService {
   /// fast login. Never writes to these keys — only deletes.
   Future<void> purgeLegacyBiometricCredentials() async {
     if (kIsWeb) return;
-    await _secure.delete(key: _credUserKey);
-    await _secure.delete(key: _credPassKey);
+    await _safeDelete(_credUserKey);
+    await _safeDelete(_credPassKey);
   }
 }

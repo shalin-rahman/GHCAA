@@ -24,11 +24,12 @@ Use during Phases 2–4. Mark `[x]` when verified on the relevant layer(s). Note
 
 ## A. Membership & Identity Lifecycle
 
-### A1 — Registration wizard validation (Haraganga college record required)
+### A1 — Registration wizard validation (configured institution record required)
 
 - [x] **A1.1–A1.4, A1.7** API unit tests pass (Phase 1)
-- [ ] **A1.5** Web 3-step wizard blocks step advance without GHC record (Web)
-- [ ] **A1.6** Mobile registration enforces same rule (Mobile)
+- [x] **A1.5** Web registration and profile flows use the configured institution record (Web)
+- [x] **A1.6** Mobile registration and profile flows enforce the same rule (Mobile)
+- [x] **A1.8** Empty history and later institutional records are rejected by focused service tests
 
 ### A2 — OTP / uniqueness (NID, Mobile, Email)
 

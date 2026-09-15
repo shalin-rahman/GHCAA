@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
@@ -16,6 +17,7 @@ import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel'
 })
 export class AdminErrorLogs implements OnInit {
     private adminService = inject(AdminService);
+    private notify = inject(NotificationService);
 
     logs = signal<any[]>([]);
     loading = signal(true);
@@ -55,9 +57,10 @@ export class AdminErrorLogs implements OnInit {
                 this.totalItems.set(res.totalItems || 0);
                 this.loading.set(false);
             },
-            error: () => {
+            error: (err) => {
                 this.logs.set([]);
                 this.loading.set(false);
+                this.notify.error(err.error?.detail || 'Could not load error logs.');
             }
         });
     }

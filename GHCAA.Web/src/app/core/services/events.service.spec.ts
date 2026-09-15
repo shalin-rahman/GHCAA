@@ -90,10 +90,11 @@ describe('EventsService', () => {
     it('should get my registrations', () => {
         service.getMyRegistrations().subscribe(res => {
             expect(res.length).toBe(1);
+            expect(res[0].eventTitle).toBe('Reunion');
         });
         const req = httpMock.expectOne(`${API_ENDPOINTS.EVENTS}/my-registrations`);
         expect(req.request.method).toBe('GET');
-        req.flush([mockRegistration]);
+        req.flush([{ ...mockRegistration, eventTitle: undefined, event: { title: 'Reunion' } }]);
     });
 
     it('should get all events for admin', () => {

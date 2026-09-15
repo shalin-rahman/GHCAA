@@ -5,7 +5,8 @@ namespace GHCAA.Application.Interfaces
     public enum FileCategory
     {
         Image,
-        Document
+        Document,
+        Spreadsheet
     }
 
     public class FileValidationResult

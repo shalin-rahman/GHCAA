@@ -12,6 +12,7 @@ namespace GHCAA.Application.Interfaces
         Task<bool> VerifyEmailAsync(string email, string code, CancellationToken cancellationToken = default);
         Task<bool> ResendOtpAsync(string email, CancellationToken cancellationToken = default);
         Task<ApproveMemberResultDto> ApproveMemberAsync(int memberId, int approvedByAdminId, CancellationToken cancellationToken = default);
+        Task<bool> RevertMemberApprovalAsync(int memberId, int adminId, CancellationToken cancellationToken = default);
         Task<MemberProfileDto?> GetProfileAsync(int memberId, bool isPrivileged = false, CancellationToken cancellationToken = default);
         Task<bool> UpdateProfileAsync(int memberId, UpdateProfileDto dto, CancellationToken cancellationToken = default);
         Task<object> GetDashboardStatsAsync(bool isPrivileged, CancellationToken cancellationToken = default);

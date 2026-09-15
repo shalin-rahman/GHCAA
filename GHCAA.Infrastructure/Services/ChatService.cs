@@ -54,14 +54,14 @@ namespace GHCAA.Infrastructure.Services
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task MarkAsReadAsync(int messageId, CancellationToken cancellationToken = default)
+        public async Task<bool> MarkAsReadAsync(int messageId, int userId, CancellationToken cancellationToken = default)
         {
             var message = await _db.ChatMessages.FindAsync(new object[] { messageId }, cancellationToken);
-            if (message != null)
-            {
-                message.IsRead = true;
-                await _db.SaveChangesAsync(cancellationToken);
-            }
+            if (message == null || message.ReceiverId != userId) return false;
+
+            message.IsRead = true;
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
         }
 
         public async Task<IEnumerable<object>> GetRecentChatsAsync(int userId, CancellationToken cancellationToken = default)

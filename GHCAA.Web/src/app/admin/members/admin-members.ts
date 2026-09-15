@@ -234,6 +234,24 @@ export class AdminMembers implements OnInit {
     });
   }
 
+  revertApproval(id: number) {
+    this.confirmDialog.confirm({
+      title: 'Revert approval?',
+      message: 'The member will return to Applied status and the member account will be disabled.',
+      confirmLabel: 'Revert approval',
+      danger: true
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
+      this.adminService.revertMemberApproval(id).subscribe({
+        next: () => {
+          this.notify.success('Member approval reverted.');
+          this.loadMembers();
+        },
+        error: err => this.notify.error(err.error?.detail || 'Could not revert member approval.')
+      });
+    });
+  }
+
   archiveMember(id: number) {
     this.confirmDialog.confirm({
       title: 'Archive member',

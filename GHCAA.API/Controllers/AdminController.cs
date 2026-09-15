@@ -118,6 +118,23 @@ namespace GHCAA.API.Controllers
             }
         }
 
+        [HttpPost("members/{id}/revert-approval")]
+        public async Task<IActionResult> RevertMemberApproval(int id, CancellationToken cancellationToken)
+        {
+            if (!int.TryParse(this.CurrentMemberIdRaw(), out var adminMemberId))
+                return Unauthorized();
+
+            try
+            {
+                var reverted = await _memberService.RevertMemberApprovalAsync(id, adminMemberId, cancellationToken);
+                return reverted ? Ok(new { Message = "Member approval reverted successfully." }) : NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
+        }
+
         [HttpPost("members/{id}/reject")]
         public async Task<IActionResult> RejectMember(int id, [FromBody] RejectMemberDto dto, CancellationToken cancellationToken)
         {

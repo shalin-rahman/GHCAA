@@ -15,6 +15,16 @@ HEAD = re.compile(r"^#+ *Work Package (\d+)[ \u2014:-]*(.*)$")
 # or "[DONE \u2014 see 40.11]", so the state word and that trailing text are two groups.
 ITEM = re.compile(r"^(\d+)\.(\d+[a-z]?) *\[(TODO|IN PROGRESS|BLOCKED|ONHOLD|PARTIAL|DONE)([^\]]*)\]\s*(.*)$")
 
+# Same shape as wbs.py's DEFECT pattern, applied per item instead of per work
+# package, so the tracker page can flag individual bug/defect entries.
+BUG_WORDS = re.compile(r"\b(bug|broken|500|error|fix before|live-site|crash|defect)\b", re.I)
+# "Must needed" isn't the P0 tier alone: an on-hold P0 still counts, and a P1/P2
+# item written as a breaking or blocking issue counts too, per the user's call
+# that urgency (not the priority label) decides this bucket.
+MUST_WORDS = re.compile(
+    r"\b(critical|breaking|break[s]?\b|immediate(ly)?|urgent|blocker|blocking|outage|"
+    r"data loss|security)\b", re.I)
+
 CATEGORY = {
     62: ("White-label", "Making one codebase serve any institution"),
     60: ("Mobile", "Flutter client parity with the web portal"),
@@ -70,7 +80,11 @@ def inline(s):
 
 
 def parse():
-    lines = (ROOT / "docs" / "TODO.md").read_text(encoding="utf-8").split("\n")
+    text = (ROOT / "docs" / "TODO.md").read_text(encoding="utf-8")
+    archive = ROOT / "docs" / "TODO_ARCHIVE.md"
+    if archive.exists():
+        text += "\n" + archive.read_text(encoding="utf-8")
+    lines = text.split("\n")
     titles, items = {}, []
     wp, wp_title = None, ""
     for i, line in enumerate(lines):
@@ -104,13 +118,16 @@ def parse():
         cat, cat_note = classify(num, blob)
         state = m.group(3)
         note = m.group(4).strip(" —-:")
+        pr_val = pr.group(1) if pr else "none"
         items.append(dict(
             id=f"{m.group(1)}.{m.group(2)}", wp=num, state=state,
             state_label=(f"{state} {note}".strip() if note else state),
             status=("closed" if state == "DONE" else "open"),
-            pr=pr.group(1) if pr else "none",
+            pr=pr_val,
             dep=dep_m.group(1).strip().rstrip(".").strip() if dep_m else "",
-            cat=cat, cat_note=cat_note, text=clean))
+            cat=cat, cat_note=cat_note, text=clean,
+            bug=bool(BUG_WORDS.search(blob)),
+            must=(pr_val == "P0" or bool(MUST_WORDS.search(blob)))))
     return titles, items
 
 
@@ -159,6 +176,7 @@ def main():
                 cards.append(
                     f'<article class="item" data-pr="{it["pr"]}" data-cat="{html.escape(c)}" '
                     f'data-status="{it["status"]}" data-state="{it["state"].lower().replace(" ", "-")}" '
+                    f'data-bug="{"1" if it["bug"] else "0"}" data-must="{"1" if it["must"] else "0"}" '
                     f'data-find="{html.escape((it["id"] + " " + it["text"]).lower())}">'
                     f'<div class="meta"><span class="pill {it["pr"]}">{it["pr"]}</span>'
                     f'<span class="id">{it["id"]}</span>{state}{dep}</div>'
@@ -187,11 +205,22 @@ def main():
     legend = "".join(f'<div><dt class="pill {p}">{p}</dt><dd>{PRIORITY_MEANING[p]}</dd></div>'
                      for p in PRIORITIES if totals[p])
 
+    # Must-needed and bug/defect are cross-cutting: they count every item that
+    # qualifies, open or on hold, since the ON HOLD state doesn't drop an item
+    # out of the must-needed bucket.
+    must_count = sum(1 for it in items if it["status"] == "open" and it["must"])
+    bug_count = sum(1 for it in items if it["status"] == "open" and it["bug"])
+    extra_filters = (
+        f'<button class="chip must" data-filter-must="1">'
+        f'<span>Must needed</span><em>{must_count}</em></button>'
+        f'<button class="chip bug" data-filter-bug="1">'
+        f'<span>Bug / defect</span><em>{bug_count}</em></button>')
+
     OUT.write_text(TEMPLATE.format(
         matrix="".join(rows), blocks="".join(blocks), filters=filters,
-        cat_filters=cat_filters, legend=legend, total=len(open_items),
-        closed=closed_total, p0=totals["P0"], p1=totals["P1"], untriaged=totals["none"],
-        packs=len({it["wp"] for it in open_items})), encoding="utf-8")
+        cat_filters=cat_filters, extra_filters=extra_filters, legend=legend,
+        total=len(open_items), closed=closed_total, p0=totals["P0"], p1=totals["P1"],
+        untriaged=totals["none"], packs=len({it["wp"] for it in open_items})), encoding="utf-8")
     print(f"wrote {OUT} ({OUT.stat().st_size // 1024} KB, "
           f"{len(open_items)} open, {closed_total} closed)")
 
@@ -265,6 +294,8 @@ tbody th {{ font-weight:400; }}
 .chip.P3[aria-pressed="true"] {{ background:var(--p3-bg); border-color:var(--p3); }}
 .chip.P4[aria-pressed="true"] {{ background:var(--p4-bg); border-color:var(--p4); }}
 .chip.none[aria-pressed="true"] {{ background:var(--pn-bg); border-color:var(--pn); }}
+.chip.must[aria-pressed="true"] {{ background:var(--p0-bg); border-color:var(--p0); }}
+.chip.bug[aria-pressed="true"] {{ background:var(--p1-bg); border-color:var(--p1); }}
 .sep {{ width:1px; align-self:stretch; background:var(--line); margin:0 4px; }}
 .seg {{ display:inline-flex; border:1px solid var(--line); border-radius:99px; overflow:hidden; }}
 .seg button {{ border:none; background:var(--surface); color:var(--ink-2); font:inherit; font-size:13px;
@@ -359,6 +390,7 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
     <button data-status="all" aria-pressed="false" type="button">All</button>
   </div>
   <span class="sep"></span>
+  {extra_filters}<span class="sep"></span>
   {filters}<span class="sep"></span>{cat_filters}
   <input type="search" id="q" placeholder="Search item text or number" aria-label="Search items">
   <button class="clear" id="clear" type="button">Reset</button>
@@ -371,6 +403,7 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
 <script>
 (function () {{
   var pr = new Set(), cat = new Set(), q = "", status = "open";
+  var mustOnly = false, bugOnly = false;
   var items = Array.prototype.slice.call(document.querySelectorAll(".item"));
   var chips = Array.prototype.slice.call(document.querySelectorAll(".chip"));
   var statusButtons = Array.prototype.slice.call(document.querySelectorAll("#status button"));
@@ -390,6 +423,8 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
       var ok = statusOk(el)
         && (!pr.size || pr.has(el.dataset.pr))
         && (!cat.size || cat.has(el.dataset.cat))
+        && (!mustOnly || el.dataset.must === "1")
+        && (!bugOnly || el.dataset.bug === "1")
         && (!q || el.dataset.find.indexOf(q) > -1);
       el.hidden = !ok;
       if (ok) shown++;
@@ -413,6 +448,12 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
   chips.forEach(function (c) {{
     c.setAttribute("aria-pressed", "false");
     c.addEventListener("click", function () {{
+      if (c.dataset.filterMust) {{
+        mustOnly = !mustOnly; c.setAttribute("aria-pressed", String(mustOnly)); apply(); return;
+      }}
+      if (c.dataset.filterBug) {{
+        bugOnly = !bugOnly; c.setAttribute("aria-pressed", String(bugOnly)); apply(); return;
+      }}
       var set = c.dataset.filterPr ? pr : cat;
       var key = c.dataset.filterPr || c.dataset.filterCat;
       if (set.has(key)) {{ set.delete(key); c.setAttribute("aria-pressed", "false"); }}
@@ -424,7 +465,7 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
     q = e.target.value.toLowerCase().trim(); apply();
   }});
   document.getElementById("clear").addEventListener("click", function () {{
-    pr.clear(); cat.clear(); q = ""; status = "open";
+    pr.clear(); cat.clear(); q = ""; status = "open"; mustOnly = false; bugOnly = false;
     document.getElementById("q").value = "";
     chips.forEach(function (c) {{ c.setAttribute("aria-pressed", "false"); }});
     statusButtons.forEach(function (o) {{ o.setAttribute("aria-pressed", String(o.dataset.status === "open")); }});

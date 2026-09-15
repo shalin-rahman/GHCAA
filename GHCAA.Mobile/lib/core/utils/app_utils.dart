@@ -1,7 +1,26 @@
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:screen_protector/screen_protector.dart';
 import '../config/org_config.dart';
 
 class AppUtils {
+  /// screen_protector only ships Android/iOS platform channels, so calling
+  /// it on desktop/web throws MissingPluginException. Screenshot blocking is
+  /// a mobile-only concern anyway, so swallow the failure there.
+  static Future<void> setScreenshotProtection(bool enabled) async {
+    try {
+      if (enabled) {
+        await ScreenProtector.preventScreenshotOn();
+      } else {
+        await ScreenProtector.preventScreenshotOff();
+      }
+    } on MissingPluginException {
+      // no-op: unsupported platform
+    } on PlatformException {
+      // no-op: unsupported platform
+    }
+  }
+
   static String formatTime(dynamic date) {
     if (date == null) return 'N/A';
     try {

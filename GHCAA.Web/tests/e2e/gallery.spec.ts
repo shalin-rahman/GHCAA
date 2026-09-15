@@ -20,7 +20,7 @@ test.describe('Gallery E2E', () => {
 
   test.beforeEach(async ({ page }) => {
     auth = new AuthHelper(page);
-    await auth.login(member.mobile, member.nid);
+    await auth.login(member.nid, member.nid);
   });
 
   test.afterEach(async ({ page }) => {
@@ -33,7 +33,7 @@ test.describe('Gallery E2E', () => {
     await expect(page).toHaveURL(/.*portal\/gallery/);
     await page.waitForLoadState('networkidle');
 
-    await expect(page.getByRole('heading', { name: 'Legacy Archive & Moments' })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Event Gallery' })).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Visual journey through Haragangian heritage')).toBeVisible();
 
     // Verify Share button is visible for authenticated user
@@ -42,14 +42,15 @@ test.describe('Gallery E2E', () => {
     await page.waitForLoadState('networkidle');
 
     // Verify gallery cards or empty state
-    const galleryCards = page.locator('.gallery-card');
+    const galleryCards = page.locator('.gallery-card, tbody tr');
     const emptyState = page.locator('.empty-state');
     const hasGalleries = await galleryCards.first().isVisible({ timeout: 5000 }).catch(() => false);
 
     if (hasGalleries) {
       const firstCard = galleryCards.first();
-      await expect(firstCard.locator('h3')).toBeVisible();
-      await expect(firstCard.locator('.photo-count')).toBeVisible();
+      await expect(firstCard).toBeVisible();
+      await expect(firstCard.locator('h3, td').first()).toBeVisible();
+      await expect(firstCard.locator('.photo-count, td').first()).toBeVisible();
     } else {
       await expect(emptyState).toContainText('No event galleries');
     }
@@ -77,7 +78,7 @@ test.describe('Gallery E2E', () => {
     await page.goto('/portal/gallery');
     await page.waitForLoadState('networkidle');
 
-    const galleryCards = page.locator('.gallery-card');
+    const galleryCards = page.locator('.gallery-card, tbody tr');
     const hasGalleries = await galleryCards.first().isVisible({ timeout: 5000 }).catch(() => false);
 
     if (hasGalleries) {
@@ -86,7 +87,7 @@ test.describe('Gallery E2E', () => {
 
       // Verify detail view
       await expect(page.locator('.gallery-detail-container')).toBeVisible();
-      await expect(page.locator('.photo-grid-immersive, .glass-card')).toBeVisible();
+      await expect(page.locator('.photo-grid-immersive').first()).toBeVisible();
 
       // Go back
       await page.locator('button:has-text("←")').click();

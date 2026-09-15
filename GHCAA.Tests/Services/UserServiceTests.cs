@@ -211,10 +211,10 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task SetUserActiveAsync_ProtectedUsername_ShouldReturnFalseAndLeaveUnchanged()
         {
-            var user = new User { Username = "shalin", PasswordHash = "x", MemberId = null, CreatedAt = DateTime.UtcNow, IsActive = true };
+            var user = new User { Username = "shalin_protected_test", PasswordHash = "x", MemberId = null, CreatedAt = DateTime.UtcNow, IsActive = true };
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
-            var service = ServiceWithProtectedUsernames("shalin", "superadmin");
+            var service = ServiceWithProtectedUsernames("shalin_protected_test", "superadmin_protected_test");
 
             var result = await service.SetUserActiveAsync(user.Id, false);
 
@@ -233,10 +233,10 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task DeleteSystemAdminAsync_ProtectedUsername_ShouldReturnFalseAndNotDelete()
         {
-            var user = new User { Username = "superadmin", PasswordHash = "x", MemberId = null, CreatedAt = DateTime.UtcNow, IsActive = true };
+            var user = new User { Username = "superadmin_protected_test", PasswordHash = "x", MemberId = null, CreatedAt = DateTime.UtcNow, IsActive = true };
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
-            var service = ServiceWithProtectedUsernames("shalin", "superadmin");
+            var service = ServiceWithProtectedUsernames("shalin_protected_test", "superadmin_protected_test");
 
             var result = await service.DeleteSystemAdminAsync(user.Id);
 

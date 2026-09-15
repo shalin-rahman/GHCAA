@@ -92,7 +92,7 @@ supply: no payment gateway credentials, no licence budget, no technical staff, a
 bandwidth-constrained membership, and a written constitution whose provisions the software must
 respect rather than reinterpret.
 
-The artefact is a clean-architecture ASP.NET Core 9 API exposing 284 endpoints across 38
+The artefact is a clean-architecture ASP.NET Core 9 API exposing 285 endpoints across 38
 controllers over 53 persisted entity sets, with an Angular 21 web client and a Flutter mobile
 client. Three design positions distinguish it. Constitutional rules are encoded as testable
 business rules traced to the article that mandates them, so that voting rights, committee
@@ -217,111 +217,111 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 6.13 Architecture Decision Records | 76 |
 | 6.14 Design Verification | 77 |
 | 6.15 Summary | 77 |
-| **PART III — CONSTRUCTION AND VALIDATION** | 86 |
-| **Chapter 7 — Implementation** | 87 |
-| 7.1 Development Environment, Toolchain and Reproducibility | 87 |
-| 7.2 Solution and Module Structure | 87 |
-| 7.3 Coding Standards, Conventions and Static Enforcement | 87 |
-| 7.4 Implementation of the Domain and Persistence Layers | 87 |
-| 7.5 Implementation of the Application and Business Services | 87 |
-| 7.6 Implementation of the API Layer | 87 |
-| 7.7 Implementation of the Web Client | 87 |
-| 7.8 Implementation of the Mobile Client | 87 |
-| 7.9 Real-Time Features | 87 |
-| 7.10 Security Implementation | 87 |
-| 7.11 Document Generation | 87 |
-| 7.12 Constitution Publication Pipeline | 87 |
-| 7.13 Third-Party Libraries: selection criteria | 87 |
-| 7.14 Software Configuration Management | 88 |
-| 7.15 Notable Implementation Challenges and Their Resolution | 88 |
-| 7.16 Institution Profile Packs and White-Label Configuration | 88 |
-| 7.17 Summary | 88 |
-| **Chapter 8 — Security, Privacy and Trust** | 89 |
-| 8.1 Security Objectives and Assumptions | 89 |
-| 8.2 Threat Modelling (STRIDE) | 89 |
-| 8.3 Authentication and Session Security | 89 |
-| 8.4 Authorisation Model and the Role–Permission Matrix | 89 |
-| 8.5 Input Validation and Output Sanitisation | 89 |
-| 8.6 File Upload Security | 89 |
-| 8.7 Transport, Header and Browser-Policy Security | 89 |
-| 8.8 Rate Limiting and Abuse Prevention | 89 |
-| 8.9 Payment-Related Risk and the No-Gateway-Keys Posture | 89 |
-| 8.10 Governance Integrity | 89 |
-| 8.11 Personal Data: Lawful Basis, Minimisation, Consent, Retention and Subject Rights | 89 |
-| 8.12 Audit Logging and Non-Repudiation | 89 |
-| 8.13 Conformance Assessment against OWASP ASVS | 89 |
-| 8.14 Residual Risks and Recommendations | 90 |
-| 8.15 Summary | 90 |
-| **Chapter 9 — Verification, Validation and Quality Assurance** | 91 |
-| 9.1 Verification and Validation Strategy and Test Levels | 91 |
-| 9.2 Software Quality Assurance Plan | 91 |
-| 9.3 Test-Case Design Techniques Applied | 91 |
-| 9.4 Unit Testing | 91 |
-| 9.5 Unit and Component Testing | 92 |
-| 9.6 Widget and Golden Testing | 92 |
-| 9.7 Integration Testing Strategy | 92 |
-| 9.8 System and End-to-End Testing | 92 |
-| 9.9 Regression Testing and Test Selection | 92 |
-| 9.10 Security Testing | 92 |
-| 9.11 Performance and Load Testing | 93 |
-| 9.12 Usability and Accessibility Testing | 93 |
-| 9.13 User Acceptance Testing | 93 |
-| 9.14 Product Metrics and Static Analysis | 93 |
-| 9.15 Defect Analysis | 93 |
-| 9.16 Threats to the Validity of the Evaluation | 93 |
-| 9.17 Summary | 93 |
-| **Chapter 10 — Deployment and Operations** | 94 |
-| 10.1 Deployment Architecture | 94 |
-| 10.2 Environment Topology and Configuration Differences | 94 |
-| 10.3 Containerisation Strategy | 94 |
-| 10.4 Continuous Integration and Continuous Deployment | 94 |
-| 10.5 Database Provisioning, Migration and Live Data Synchronisation | 94 |
-| 10.6 Configuration and Secret Management | 94 |
-| 10.7 Observability | 94 |
-| 10.8 Backup, Recovery and Business Continuity | 94 |
-| 10.9 Release and Rollback Procedure | 94 |
-| 10.10 Operational Cost Model and Sustainability under Institutional Budget Constraints | 94 |
-| 10.11 Maintenance Plan and Handover | 95 |
-| 10.12 Summary | 95 |
-| **Chapter 11 — Project Management** | 96 |
-| 11.0 The Four P's Applied | 96 |
-| 11.1 Process Model in Practice and its Deviations from Plan | 96 |
-| 11.2 Work Breakdown Structure | 96 |
-| 11.3 Scheduling, Task Network and Critical Path | 96 |
-| 11.4 Effort Estimation | 96 |
-| 11.5 How the Implementation Time Was Optimised | 97 |
-| 11.6 Progress Tracking and Earned Value | 97 |
-| 11.7 Team Structure and Responsibilities | 97 |
-| 11.8 Configuration and Change Management in Practice | 97 |
-| 11.9 Risk Monitoring Record | 97 |
-| 11.10 Quality Assurance Activities Performed | 98 |
-| 11.11 Lessons in Project Management | 98 |
-| 11.12 Summary | 98 |
-| **PART IV — EVALUATION AND CLOSURE** | 99 |
-| **Chapter 12 — Results, Evaluation and Discussion** | 100 |
-| 12.1 Overview of the Delivered Artefact | 100 |
-| 12.2 Functional Evaluation | 100 |
-| 12.3 Quality Evaluation against ISO/IEC 25010 | 100 |
-| 12.4 Performance Evaluation Results | 100 |
-| 12.5 Security Evaluation Results | 100 |
-| 12.6 Usability and Accessibility Evaluation Results | 100 |
-| 12.7 Stakeholder and Expert Evaluation | 100 |
-| 12.8 Answering the Research Questions | 100 |
-| 12.9 Discussion | 100 |
-| 12.10 Comparison against the Existing Manual System | 100 |
-| 12.11 Threats to Validity | 100 |
-| 12.12 Limitations of the Artefact | 100 |
-| 12.13 Reflection on the Design Science Contribution | 100 |
-| 12.14 Summary | 101 |
-| **Chapter 13 — Conclusion and Future Work** | 102 |
-| 13.1 Summary of the Work | 102 |
-| 13.2 Contributions Restated and Substantiated | 102 |
-| 13.3 Answers to the Research Questions, in Brief | 102 |
-| 13.4 Practical Implications for Similar Institutions | 102 |
-| 13.5 Lessons Learned | 102 |
-| 13.6 Future Work | 102 |
-| 13.7 Concluding Remarks | 102 |
-| **References** | 103 |
+| **PART III — CONSTRUCTION AND VALIDATION** | 87 |
+| **Chapter 7 — Implementation** | 88 |
+| 7.1 Development Environment, Toolchain and Reproducibility | 88 |
+| 7.2 Solution and Module Structure | 88 |
+| 7.3 Coding Standards, Conventions and Static Enforcement | 88 |
+| 7.4 Implementation of the Domain and Persistence Layers | 88 |
+| 7.5 Implementation of the Application and Business Services | 88 |
+| 7.6 Implementation of the API Layer | 88 |
+| 7.7 Implementation of the Web Client | 88 |
+| 7.8 Implementation of the Mobile Client | 88 |
+| 7.9 Real-Time Features | 88 |
+| 7.10 Security Implementation | 88 |
+| 7.11 Document Generation | 88 |
+| 7.12 Constitution Publication Pipeline | 88 |
+| 7.13 Third-Party Libraries: selection criteria | 88 |
+| 7.14 Software Configuration Management | 89 |
+| 7.15 Notable Implementation Challenges and Their Resolution | 89 |
+| 7.16 Institution Profile Packs and White-Label Configuration | 89 |
+| 7.17 Summary | 89 |
+| **Chapter 8 — Security, Privacy and Trust** | 90 |
+| 8.1 Security Objectives and Assumptions | 90 |
+| 8.2 Threat Modelling (STRIDE) | 90 |
+| 8.3 Authentication and Session Security | 90 |
+| 8.4 Authorisation Model and the Role–Permission Matrix | 90 |
+| 8.5 Input Validation and Output Sanitisation | 90 |
+| 8.6 File Upload Security | 90 |
+| 8.7 Transport, Header and Browser-Policy Security | 90 |
+| 8.8 Rate Limiting and Abuse Prevention | 90 |
+| 8.9 Payment-Related Risk and the No-Gateway-Keys Posture | 90 |
+| 8.10 Governance Integrity | 90 |
+| 8.11 Personal Data: Lawful Basis, Minimisation, Consent, Retention and Subject Rights | 90 |
+| 8.12 Audit Logging and Non-Repudiation | 90 |
+| 8.13 Conformance Assessment against OWASP ASVS | 90 |
+| 8.14 Residual Risks and Recommendations | 91 |
+| 8.15 Summary | 91 |
+| **Chapter 9 — Verification, Validation and Quality Assurance** | 92 |
+| 9.1 Verification and Validation Strategy and Test Levels | 92 |
+| 9.2 Software Quality Assurance Plan | 92 |
+| 9.3 Test-Case Design Techniques Applied | 92 |
+| 9.4 Unit Testing | 92 |
+| 9.5 Unit and Component Testing | 93 |
+| 9.6 Widget and Golden Testing | 93 |
+| 9.7 Integration Testing Strategy | 93 |
+| 9.8 System and End-to-End Testing | 93 |
+| 9.9 Regression Testing and Test Selection | 93 |
+| 9.10 Security Testing | 93 |
+| 9.11 Performance and Load Testing | 94 |
+| 9.12 Usability and Accessibility Testing | 94 |
+| 9.13 User Acceptance Testing | 94 |
+| 9.14 Product Metrics and Static Analysis | 94 |
+| 9.15 Defect Analysis | 94 |
+| 9.16 Threats to the Validity of the Evaluation | 94 |
+| 9.17 Summary | 94 |
+| **Chapter 10 — Deployment and Operations** | 95 |
+| 10.1 Deployment Architecture | 95 |
+| 10.2 Environment Topology and Configuration Differences | 95 |
+| 10.3 Containerisation Strategy | 95 |
+| 10.4 Continuous Integration and Continuous Deployment | 95 |
+| 10.5 Database Provisioning, Migration and Live Data Synchronisation | 95 |
+| 10.6 Configuration and Secret Management | 95 |
+| 10.7 Observability | 95 |
+| 10.8 Backup, Recovery and Business Continuity | 95 |
+| 10.9 Release and Rollback Procedure | 95 |
+| 10.10 Operational Cost Model and Sustainability under Institutional Budget Constraints | 95 |
+| 10.11 Maintenance Plan and Handover | 96 |
+| 10.12 Summary | 96 |
+| **Chapter 11 — Project Management** | 97 |
+| 11.0 The Four P's Applied | 97 |
+| 11.1 Process Model in Practice and its Deviations from Plan | 97 |
+| 11.2 Work Breakdown Structure | 97 |
+| 11.3 Scheduling, Task Network and Critical Path | 97 |
+| 11.4 Effort Estimation | 97 |
+| 11.5 How the Implementation Time Was Optimised | 98 |
+| 11.6 Progress Tracking and Earned Value | 98 |
+| 11.7 Team Structure and Responsibilities | 98 |
+| 11.8 Configuration and Change Management in Practice | 98 |
+| 11.9 Risk Monitoring Record | 98 |
+| 11.10 Quality Assurance Activities Performed | 99 |
+| 11.11 Lessons in Project Management | 99 |
+| 11.12 Summary | 99 |
+| **PART IV — EVALUATION AND CLOSURE** | 100 |
+| **Chapter 12 — Results, Evaluation and Discussion** | 101 |
+| 12.1 Overview of the Delivered Artefact | 101 |
+| 12.2 Functional Evaluation | 101 |
+| 12.3 Quality Evaluation against ISO/IEC 25010 | 101 |
+| 12.4 Performance Evaluation Results | 101 |
+| 12.5 Security Evaluation Results | 101 |
+| 12.6 Usability and Accessibility Evaluation Results | 101 |
+| 12.7 Stakeholder and Expert Evaluation | 101 |
+| 12.8 Answering the Research Questions | 101 |
+| 12.9 Discussion | 101 |
+| 12.10 Comparison against the Existing Manual System | 101 |
+| 12.11 Threats to Validity | 101 |
+| 12.12 Limitations of the Artefact | 101 |
+| 12.13 Reflection on the Design Science Contribution | 101 |
+| 12.14 Summary | 102 |
+| **Chapter 13 — Conclusion and Future Work** | 103 |
+| 13.1 Summary of the Work | 103 |
+| 13.2 Contributions Restated and Substantiated | 103 |
+| 13.3 Answers to the Research Questions, in Brief | 103 |
+| 13.4 Practical Implications for Similar Institutions | 103 |
+| 13.5 Lessons Learned | 103 |
+| 13.6 Future Work | 103 |
+| 13.7 Concluding Remarks | 103 |
+| **References** | 104 |
 
 ---
 
@@ -381,11 +381,11 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 6.6 | Entity–relationship diagram, governance sub-model | 81 |
 | 6.7 | Design class diagram: domain model | 81 |
 | 6.8 | Design class diagram: application interfaces and infrastructure services | 82 |
-| 6.9 | Component diagram with provided and required interfaces | 82 |
-| 6.10 | Middleware pipeline diagram | 83 |
-| 6.11 | Navigation and route map | 83 |
-| 6.12 | Site map and information architecture of the public site | 84 |
-| 6.13 | Architectural trade-off radar | 84 |
+| 6.9 | Component diagram with provided and required interfaces | 83 |
+| 6.10 | Middleware pipeline diagram | 84 |
+| 6.11 | Navigation and route map | 84 |
+| 6.12 | Site map and information architecture of the public site | 85 |
+| 6.13 | Architectural trade-off radar | 85 |
 
 *Figures for Chapters 4 to 13 are listed as those chapters are written.*
 
@@ -414,11 +414,11 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 5.3 | Process specifications for the Level-2 processes | 70 |
 | 5.4 | Data-store definitions (analysis level) | 70 |
 | 6.1 | ADR index | 77 |
-| 6.2 | Data dictionary (representative slice; the full dictionary is generated from the schema) | 85 |
-| 6.3 | API endpoint catalogue (by controller; the full catalogue is the generated OpenAPI document) | 85 |
-| 6.4 | Design pattern catalogue (selected entries; full catalogue is §6.12 in full) | 85 |
-| 6.5 | Quality-attribute scenario to architectural tactic mapping | 85 |
-| 6.6 | Anti-patterns detected and remediated | 85 |
+| 6.2 | Data dictionary (representative slice; the full dictionary is generated from the schema) | 86 |
+| 6.3 | API endpoint catalogue (by controller; the full catalogue is the generated OpenAPI document) | 86 |
+| 6.4 | Design pattern catalogue (selected entries; full catalogue is §6.12 in full) | 86 |
+| 6.5 | Quality-attribute scenario to architectural tactic mapping | 86 |
+| 6.6 | Anti-patterns detected and remediated | 86 |
 
 ---
 

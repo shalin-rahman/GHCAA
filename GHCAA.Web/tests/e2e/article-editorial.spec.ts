@@ -15,14 +15,15 @@ test.describe('Article Editorial E2E (Web)', () => {
 
     const adminToken = await getAuthToken(request, 'superadmin', 'SuperAdminPassword123!');
     await approveMember(request, adminToken, member.email);
-  });
+  }, { timeout: 120000 });
 
   test('Member submits article, Admin approves, it appears in News', async ({ page }) => {
+    test.slow();
     const auth = new AuthHelper(page);
     const testArticleTitle = `E2E Automated Article - ${Date.now()}`;
 
     // ==== STEP 1: Member submits article ====
-    await auth.login(member.mobile, member.nid);
+    await auth.login(member.nid, member.nid);
 
     await page.goto('/portal/articles');
     await expect(page).toHaveURL(/.*portal\/articles/);
@@ -39,7 +40,7 @@ test.describe('Article Editorial E2E (Web)', () => {
       ),
       page.getByRole('button', { name: /Submit for Approval/i }).click(),
     ]);
-    await expect(page.getByRole('heading', { name: 'Articles & Submissions' })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'My Articles' })).toBeVisible({ timeout: 10000 });
 
     await auth.logout();
 

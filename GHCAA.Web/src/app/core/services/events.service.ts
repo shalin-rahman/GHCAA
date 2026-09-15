@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { AlumniEvent, EventRegistration, EventParticipantSummary, EventTask, EventBudget, EventExpense, PagedRegistrations } from '../models/business.models';
 import { buildHttpParams, getSilentHeaders } from '../utils/http.util';
@@ -64,7 +64,12 @@ export class EventsService {
     }
 
     getMyRegistrations(): Observable<EventRegistration[]> {
-        return this.http.get<EventRegistration[]>(`${this.apiUrl}/my-registrations`);
+        return this.http.get<Array<EventRegistration & { event?: { title?: string } }>>(`${this.apiUrl}/my-registrations`).pipe(
+            map(registrations => registrations.map(registration => ({
+                ...registration,
+                eventTitle: registration.eventTitle || registration.event?.title || (registration.eventId ? `Event #${registration.eventId}` : 'Untitled event')
+            })))
+        );
     }
 
     getRegistrationForInvitation(id: number): Observable<EventRegistration> {

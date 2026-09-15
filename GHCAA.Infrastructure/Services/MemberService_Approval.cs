@@ -94,10 +94,21 @@ namespace GHCAA.Infrastructure.Services
                     // Award points for verification
                     await _gamification.AwardPointsAsync(memberId, "PROFILE_VERIFIED", metadata: "Initial approval", cancellationToken: cancellationToken);
 
-                    // 24.31: Create user account inside the transaction so Member(Active) and User are always atomic.
-                    // If CreateUserAccountAsync throws, the transaction rolls back and the member stays Applied.
                     cleanNid = member.NID.Replace(" ", "");
-                    await _userService.CreateUserAccountAsync(memberId, cleanNid, cleanNid, cancellationToken);
+                    var existingUser = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
+                    if (existingUser == null)
+                    {
+                        // Create the first account inside the transaction so Member(Active) and
+                        // User are always atomic.
+                        await _userService.CreateUserAccountAsync(memberId, cleanNid, cleanNid, cancellationToken);
+                    }
+                    else
+                    {
+                        existingUser.IsActive = true;
+                        existingUser.SecurityStamp = Guid.NewGuid().ToString("N");
+                        await _tokenService.RevokeAllRefreshTokensAsync(existingUser.Id, cancellationToken);
+                        await _db.SaveChangesAsync(cancellationToken);
+                    }
 
                     await transaction.CommitAsync(cancellationToken);
 
@@ -136,6 +147,66 @@ namespace GHCAA.Infrastructure.Services
                 MembershipNumber = membershipNumber,
                 DefaultPassword = defaultPassword
             };
+        }
+
+        public async Task<bool> RevertMemberApprovalAsync(int memberId, int adminId, CancellationToken cancellationToken = default)
+        {
+            // Same isolation as ApproveMemberAsync: the member/user rows and the refresh-token
+            // revocation must land together, or a failed SaveChangesAsync leaves tokens revoked
+            // with the member still showing Active.
+            using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+            try
+            {
+                var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+                if (member == null) return false;
+                if (member.Status != Enums.MembershipStatus.Active)
+                    throw new InvalidOperationException("Only active members can have approval reverted.");
+
+                member.Status = Enums.MembershipStatus.Applied;
+                member.IsVerified = false;
+                member.ApprovedDate = null;
+                member.ApprovedBy = null;
+
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
+                if (user != null)
+                {
+                    user.IsActive = false;
+                    user.SecurityStamp = Guid.NewGuid().ToString("N");
+                    await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
+                }
+
+                await _db.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+
+            // Outside the transaction and its catch block: a failure here must not trigger
+            // RollbackAsync on a transaction that's already committed.
+            await NotifyMemberOfApprovalRevertAsync(memberId, adminId, cancellationToken);
+            return true;
+        }
+
+        private async Task NotifyMemberOfApprovalRevertAsync(int memberId, int adminId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _notificationService.CreateNotificationAsync(memberId,
+                    "Membership approval reverted",
+                    "An administrator has reverted your membership approval. Your application has been moved back to pending review.",
+                    Enums.NotificationType.RegistrationUpdate, "/portal/dashboard", cancellationToken);
+
+                await _activityService.LogActivityAsync(memberId, "ApprovalReverted",
+                    $"Member approval reverted by Admin {adminId}.", adminId, cancellationToken: cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to notify member {MemberId} of approval revert", memberId);
+                // Notification failure doesn't undo an already-committed revert.
+            }
         }
 
         public async Task<bool> RejectMemberAsync(int id, int adminId, string reason, CancellationToken cancellationToken = default)

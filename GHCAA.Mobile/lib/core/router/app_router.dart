@@ -73,11 +73,21 @@ class AuthNotifier extends ChangeNotifier {
 
 final authNotifierProvider = Provider<AuthNotifier>((ref) => AuthNotifier(ref));
 
-final authStateProvider = StreamProvider<String?>((ref) {
+final authStateProvider = StreamProvider<String?>((ref) async* {
   final storage = ref.watch(storageServiceProvider);
-  // Keep the polling as a fallback/background check for expiry, 
-  // but we'll use AuthNotifier for immediate UI reaction.
-  return Stream.periodic(const Duration(seconds: 2)).asyncMap((_) => storage.getToken()).distinct();
+  // Stream.periodic doesn't fire until the first interval elapses, so a plain
+  // periodic stream leaves a 2s window where a fresh subscriber (e.g. right
+  // after logout invalidates this provider) still sees the old token. Yield
+  // the current value immediately, then fall back to polling for expiry.
+  String? last = await storage.getToken();
+  yield last;
+  await for (final _ in Stream.periodic(const Duration(seconds: 2))) {
+    final next = await storage.getToken();
+    if (next != last) {
+      last = next;
+      yield next;
+    }
+  }
 });
 
 final routerProvider = Provider<GoRouter>((ref) {

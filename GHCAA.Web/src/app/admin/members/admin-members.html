@@ -108,6 +108,10 @@
                         <button class="icon-btn approve" (click)="approveMember(member.id)"
                             title="Approve Member">✅</button>
                         }
+                        @if (member.status === 'Active' || member.status === 1) {
+                        <button class="icon-btn" (click)="revertApproval(member.id)"
+                            title="Revert approval">↩️</button>
+                        }
                         @if (nav.isSuperAdmin()) {
                         @if (member.isArchived) {
                         <button class="icon-btn" (click)="restoreMember(member.id)"

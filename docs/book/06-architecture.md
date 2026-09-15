@@ -202,8 +202,12 @@ and every migration added after its first successful boot was silently never app
 was not visible as an error; it surfaced on 27 August 2026 as HTTP 500 from `/api/jobs` and
 `/api/gallery`, because the columns those endpoints read had never been created. Schema management is
 now `MigrationBootstrapper.EnsureMigratedAsync`, called from `Program.cs` before anything else
-touches the database, and the twenty-one migrations of `GHCAA.Infrastructure/Data/Migrations` are the
-authority on the schema. On a database with no migration history it walks every migration in order
+touches the database, and `GHCAA.Infrastructure/Data/Migrations/PgSql` is the authority on the schema.
+The migration history was squashed on 8 September 2026 (`20260907193705_InitialBaseline`), so the
+folder now holds one migration carrying the full schema rather than the prior sequence built up
+migration by migration; the squash was rehearsed against a Postgres mirror of production before being
+applied, with a manual `__EFMigrationsHistory` insert marking the new baseline as already applied so
+existing databases are not re-run against it. On a database with no migration history it walks every migration in order
 and applies it for real; where the database reports that the object a migration creates already
 exists, that migration's effect predates migration tracking and it is marked applied without being
 re-run; any other failure aborts the boot rather than being swallowed. It also re-checks migrations
@@ -382,9 +386,14 @@ claim is measured, not asserted, in §9.14.3.
 
 ### 6.11.4 Open/closed
 
-Where it is achieved: a new payment gateway is added by implementing `IPaymentGatewayService` and
-registering it with `PaymentGatewayFactory`, without modifying any existing gateway, which is exactly
-how `DGePayGateway` was added alongside `SSLCommerzGateway`, `BkashGateway` and `NagadGateway`. Where
+Where it is achieved: a new payment gateway is added by implementing `IPaymentGatewayService` (directly,
+or through the shared `BasePaymentGateway` base class introduced after 2026-09-07 for the three gateways
+that share callback-verification logic) and registering it with `PaymentGatewayFactory`, without
+modifying any existing gateway, which is exactly how `DGePayGateway` was added alongside
+`SSLCommerzGateway`, `BkashGateway` and `NagadGateway`. `BkashGateway`, `NagadGateway` and
+`SSLCommerzGateway` now extend `BasePaymentGateway : IPaymentGatewayService`; `DGePayGateway` still
+implements the interface directly, since it does not share the callback-verification logic the base
+class factors out. Where
 it is not: `IFileStorageService` has exactly one implementation, `LocalFileStorageService`, so the
 interface's openness to a cloud-storage adapter is structural rather than demonstrated, and the
 abstraction's cost, an interface and a DI registration for a substitution that has never happened, is
@@ -628,7 +637,7 @@ flowchart TB
       HUB[2 SignalR hubs]
     end
     subgraph APP_L["GHCAA.Application"]
-      IFACE[44 service interfaces + DTOs]
+      IFACE[46 service interfaces + DTOs]
     end
     subgraph INF_L["GHCAA.Infrastructure"]
       direction TB
@@ -909,6 +918,16 @@ classDiagram
     DGePayGateway ..|> IPaymentGatewayService
     PaymentGatewayFactory --> IPaymentGatewayService : resolves
 ```
+
+The diagram shows the interface boundary all four gateways share; the concrete inheritance beneath
+it, after the 2026-09-08 refactor, is:
+
+| Gateway | Extends |
+| --- | --- |
+| `BkashGateway` | `BasePaymentGateway : IPaymentGatewayService` |
+| `NagadGateway` | `BasePaymentGateway : IPaymentGatewayService` |
+| `SSLCommerzGateway` | `BasePaymentGateway : IPaymentGatewayService` |
+| `DGePayGateway` | `IPaymentGatewayService` directly |
 
 ### Figure 6.9 — Component diagram with provided and required interfaces
 

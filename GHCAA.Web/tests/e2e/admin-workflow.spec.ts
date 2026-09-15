@@ -33,13 +33,16 @@ test.describe('Admin Workflow - Member Approval', () => {
     await pendingRow.locator('button:has-text("Direct Verify")').click();
 
     // 5. Confirm via Modal if applicable
-    const confirmBtn = page.locator('button:has-text("Confirm"), button:has-text("Yes")');
+    const confirmBtn = page.getByRole('button', { name: 'Verify', exact: true })
+      .or(page.getByRole('button', { name: 'Confirm', exact: true }))
+      .or(page.getByRole('button', { name: 'Yes', exact: true }));
     if (await confirmBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
         await confirmBtn.click();
     }
 
-    // 6. Verify status update (row should likely disappear from approvals)
-    await expect(pendingRow).not.toBeVisible({ timeout: 10000 });
+    // Refresh the queue before checking the server-side status change.
+    await page.reload();
+    await expect(page.locator('tbody tr', { hasText: member.email })).toHaveCount(0, { timeout: 10000 });
 
     // 7. Verify in members list
     await page.goto('/admin/members');

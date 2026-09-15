@@ -596,6 +596,144 @@ public class MemberServiceTests : TestBase
     }
 
     [Test]
+    public async Task RevertMemberApprovalAsync_ShouldResetApprovalAndInvalidateUserSessions()
+    {
+        var member = new Member
+        {
+            FullName = "Approved Member",
+            Email = "approved@example.com",
+            NID = "1111111111",
+            MobileNo = "01711111111",
+            FatherName = "Father",
+            MotherName = "Mother",
+            PresentAddress = "Address",
+            PermanentAddress = "Address",
+            EmergencyContactName = "Contact",
+            EmergencyContactRelation = "Relation",
+            EmergencyContactPhone = "01999999999",
+            Status = Enums.MembershipStatus.Active,
+            IsVerified = true,
+            MembershipNumber = "GHC2605001",
+            ApprovedDate = DateTime.UtcNow,
+            ApprovedBy = 7,
+            DateOfBirth = new DateTime(1990, 1, 1),
+            Gender = Enums.Gender.Male,
+            BloodGroup = Enums.BloodGroup.APositive
+        };
+        await _context.Members.AddAsync(member);
+        await _context.SaveChangesAsync();
+
+        var user = new User
+        {
+            Username = member.NID,
+            PasswordHash = "hash",
+            MemberId = member.Id,
+            IsActive = true,
+            SecurityStamp = "old-stamp"
+        };
+        await _context.Users.AddAsync(user);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.RevertMemberApprovalAsync(member.Id, 9);
+
+        result.Should().BeTrue();
+        var updatedMember = await _context.Members.FindAsync(member.Id);
+        updatedMember!.Status.Should().Be(Enums.MembershipStatus.Applied);
+        updatedMember.IsVerified.Should().BeFalse();
+        updatedMember.ApprovedDate.Should().BeNull();
+        updatedMember.ApprovedBy.Should().BeNull();
+
+        var updatedUser = await _context.Users.FindAsync(user.Id);
+        updatedUser!.IsActive.Should().BeFalse();
+        updatedUser.SecurityStamp.Should().NotBe("old-stamp");
+        _mockTokenService.Verify(
+            x => x.RevokeAllRefreshTokensAsync(user.Id, It.IsAny<CancellationToken>()),
+            Times.Once);
+        _mockNotificationService.Verify(
+            x => x.CreateNotificationAsync(member.Id, It.IsAny<string>(), It.IsAny<string>(),
+                Enums.NotificationType.RegistrationUpdate, It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Test]
+    public async Task RevertMemberApprovalAsync_WithUnknownMember_ShouldReturnFalse()
+    {
+        var result = await _service.RevertMemberApprovalAsync(memberId: 999_999, adminId: 9);
+
+        result.Should().BeFalse();
+        _mockTokenService.Verify(
+            x => x.RevokeAllRefreshTokensAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Test]
+    public async Task RevertMemberApprovalAsync_WithNonActiveMember_ShouldThrow()
+    {
+        var member = new Member
+        {
+            FullName = "Applied Member",
+            Email = "applied@example.com",
+            NID = "1111111112",
+            MobileNo = "01711111112",
+            FatherName = "Father",
+            MotherName = "Mother",
+            PresentAddress = "Address",
+            PermanentAddress = "Address",
+            EmergencyContactName = "Contact",
+            EmergencyContactRelation = "Relation",
+            EmergencyContactPhone = "01999999998",
+            Status = Enums.MembershipStatus.Applied,
+            DateOfBirth = new DateTime(1990, 1, 1),
+            Gender = Enums.Gender.Male,
+            BloodGroup = Enums.BloodGroup.APositive
+        };
+        await _context.Members.AddAsync(member);
+        await _context.SaveChangesAsync();
+
+        Func<Task> act = () => _service.RevertMemberApprovalAsync(member.Id, 9);
+
+        await act.Should().ThrowAsync<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task RevertMemberApprovalAsync_WithNoLinkedUser_ShouldStillRevertMember()
+    {
+        var member = new Member
+        {
+            FullName = "Approved Member No User",
+            Email = "approved-no-user@example.com",
+            NID = "1111111113",
+            MobileNo = "01711111113",
+            FatherName = "Father",
+            MotherName = "Mother",
+            PresentAddress = "Address",
+            PermanentAddress = "Address",
+            EmergencyContactName = "Contact",
+            EmergencyContactRelation = "Relation",
+            EmergencyContactPhone = "01999999997",
+            Status = Enums.MembershipStatus.Active,
+            IsVerified = true,
+            MembershipNumber = "GHC2605002",
+            ApprovedDate = DateTime.UtcNow,
+            ApprovedBy = 7,
+            DateOfBirth = new DateTime(1990, 1, 1),
+            Gender = Enums.Gender.Male,
+            BloodGroup = Enums.BloodGroup.APositive
+        };
+        await _context.Members.AddAsync(member);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.RevertMemberApprovalAsync(member.Id, 9);
+
+        result.Should().BeTrue();
+        var updatedMember = await _context.Members.FindAsync(member.Id);
+        updatedMember!.Status.Should().Be(Enums.MembershipStatus.Applied);
+        _mockTokenService.Verify(
+            x => x.RevokeAllRefreshTokensAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Test]
     public async Task ApproveMemberAsync_WithMultipleMembersSameYear_ShouldGenerateSequentialNumbers()
     {
         // Arrange
@@ -1004,7 +1142,7 @@ public class MemberServiceTests : TestBase
             MotherName = "Mo",
             Email = "snap@example.com",
             NID = "N",
-            MobileNo = "01700000001",
+            MobileNo = "01799999999",
             PresentAddress = "A",
             PermanentAddress = "A",
             EmergencyContactName = "E",

@@ -6,6 +6,12 @@ project(ghcaa_mobile LANGUAGES CXX)
 # the on-disk name of your application.
 set(BINARY_NAME "ghcaa_mobile")
 
+if(DEFINED ENV{VCToolsInstallDir})
+  include_directories("$ENV{VCToolsInstallDir}/atlmfc/include")
+else()
+  message(WARNING "VCToolsInstallDir is not set; ATL headers may be unavailable")
+endif()
+
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
 cmake_policy(VERSION 3.14...3.25)

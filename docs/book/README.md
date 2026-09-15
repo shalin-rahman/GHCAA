@@ -274,15 +274,17 @@ a log file, a test run, a commit range — so an examiner can check it. Figures 
 states what the code does, and where the two disagree the code is right.
 
 **Keeping the numbers true.** Repository figures quoted in the text go stale as the code moves. The
-ones in the book now were taken on 7 September 2026: 284 endpoint attributes across 38 controllers,
+ones in the book now were re-taken on 14 September 2026: 285 endpoint attributes across 38 controllers,
 54 `DbSet` properties (53 domain models plus `DataProtectionKeys`, a framework table added per
 `docs/adr/0007-data-protection-keys-in-database.md` — §6.3.2's "fifty-three entity sets" still means
 the domain models alone, since that count is about §5.7's analysis model, not every table the schema
-has), 29 enumerations, 44 service interfaces with 42
-implementations, 31 migrations (`dotnet ef migrations list` — a plain folder listing undercounts by 5,
-since the earliest migrations predate the `Migrations/PgSql/` subfolder), 717 passing backend tests,
-430 passing web tests, 3,363 lines of `styles.scss`. Re-take them before submission with the commands
-in `docs/PROJECT_MAP.md` and the two test suites, and correct the sentences that carry them.
+has), 30 enumerations, 46 service interfaces with 43
+implementations, 1 migration (`GHCAA.Infrastructure/Data/Migrations/PgSql/20260907193705_InitialBaseline.cs`
+— the prior 31-file history was squashed to this single baseline on 8 September 2026), 745 backend
+tests enumerated by `dotnet test --list-tests` (not re-run as a pass/fail suite for this count), 430
+passing web tests (not re-verified on this date), 3,468 lines of `styles.scss`. Re-take them before
+submission with the commands in `docs/PROJECT_MAP.md` and the two test suites, and correct the
+sentences that carry them.
 
 ## Before submission
 

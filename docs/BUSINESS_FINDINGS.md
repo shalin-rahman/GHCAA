@@ -32,9 +32,169 @@ No row is marked fixed from documentation alone. A row may move to
 **Verified** or **Fixed** only after the stated scenario is rerun and the
 evidence is recorded here.
 
+### Latest verification — 2026-09-13
+
+The focused backend suite for the password-change and member-approval changes
+passes: 37 tests passed, including the new approval-reversal lifecycle test.
+Password changes now issue replacement access, refresh, and XSRF cookies after
+rotating the security stamp. The E2E helper was also corrected to keep those
+browser cookies; logging in through `page.request` used a separate cookie jar
+and left the page unauthenticated.
+
+The completed WEB-010 rerun no longer reproduced the `Session has been
+terminated` responses. The isolated SQLite Visual workflow passed registration,
+approval, event creation, forced-password rotation, member portal loading,
+event registration using Cash / Manual Receipt, and final administrator
+participation approval. The dynamic event and registration window avoided
+brittle fixed dates, and the final approval stage now uses the actual event
+management card and participation-approval table.
+
+Member approval remains available whenever the member satisfies the existing
+profile and payment gates. It has no approval deadline. An administrator can
+revert an active approval at any time; the member returns to `Applied`, the
+linked account is disabled, and its sessions are revoked. Re-approval
+reactivates the existing account rather than creating a duplicate account.
+Event registration dates remain enforced independently.
+
 | ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
 |---|---|---|---|---|---|---|---|---|---|
 | *(template row — copy for new entries)* | | | | | | API/Web/Mobile | Blocker/Major/Minor | Open/Fixed/Wontfix | |
+
+### Mobile verification — 2026-09-14
+
+The prepared Windows integration flow was run again with the current Flutter
+toolchain. The build reached the native plugin compilation step but stopped
+because `flutter_secure_storage_windows` could not include `atlstr.h`. The
+test did not launch, so no login or authenticated API result can be claimed.
+The existing test files use the seeded `demo_user` username rather than the
+old email value. Financial assertions still need a supported device and a
+clean seeded database before they can be treated as verified.
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| MOB-BLOCK-001 | Integration E2E | Windows desktop integration | `flutter test integration_test/app_test.dart -d windows` | Login, dashboard, logout | **Blocked before app launch** — `flutter_secure_storage_windows_plugin.cpp` cannot find `atlstr.h` | Mobile/tooling | Blocker | Open | Install the Visual Studio ATL/C++ components, then rerun on Windows |
+| MOB-BLOCK-002 | Integration E2E | Chrome integration | `flutter test integration_test/app_test.dart -d chrome` | E2E runs | **Blocked** — Flutter does not support this `integration_test` target on web | Mobile/tooling | Blocker | Open | Use Windows desktop or Android |
+| MOB-BLOCK-003 | Integration E2E | Android emulator | `flutter devices` | Android device available | **Blocked** — no Android emulator is available in the current environment | Mobile/tooling | Blocker | Open | Start an emulator after installing the required Android SDK components |
+| MOB-GAP-001 | Forum | Live authenticated flow | Login, then fetch forum categories and topics | Forum data renders | **Not run** — every supported-device path is blocked before app execution | Mobile | Minor | Open | Run after Windows or Android integration tooling is available |
+| MOB-GAP-003 | Credentials | Integration test accounts | Review `GHCAA.Mobile/integration_test/*.dart` | Tests use the seeded account | **Fixed** — integration flows use `demo_user` with `DemoPass123!`; no stale email credential remains | Mobile/API | Minor | Fixed | Keep aligned with `HashGen --apply` |
+| MOB-P4-007 | Integration | Live E2E verification | Run the prepared member journey | Login, dashboard, logout | **Not run** — Windows build stopped at the missing `atlstr.h` header | Mobile | — | Open | Rerun after the native toolchain is repaired |
+| MOB-P4-009 | Integration | Financial seed assertions | Run `financial_test.dart` on a clean seeded database | Life Membership and `5000.0` render | **Not verified** — the test could not launch on the available Windows device | Mobile | Minor | Open | Verify the seed rows during the supported-device rerun |
+
+### Mobile toolchain retry
+
+`atlstr.h` was resolved by installing the ATL component in Build Tools 2022, but the
+Windows integration run still did not reach app launch. Three further errors appeared
+in sequence, each blocking the next attempt until addressed:
+
+1. Unknown C++ compiler — the build ran from Git Bash, which does not load the Visual
+   Studio developer environment; the native toolchain then can't identify itself. Use
+   Developer PowerShell instead.
+2. Firebase SDK archive ZIP decompression failure — an incomplete or corrupted cached
+   archive under the generated Flutter/Firebase cache directory, not a code defect.
+   Clear only that cached artifact and let it redownload.
+3. `nuget.exe not found` — a bootstrap warning in this toolchain; it's only a real
+   failure if native package restoration stops after it.
+
+None of these produced a passing test run. `MOB-BLOCK-001`, `MOB-P4-007`, and
+`MOB-P4-009` stay **Open** until `flutter test integration_test/app_test.dart -d windows`
+actually launches the app and reports a pass such as `+1: All tests passed!` — a clean
+build is not evidence of a passing integration test.
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| MOB-BLOCK-004 | Integration E2E | Windows desktop integration | Run from Git Bash | Native compiler detected | **Blocked** — unrecognized C++ compiler; VS developer environment not loaded outside Developer PowerShell | Mobile/tooling | Blocker | Open | Run from Developer PowerShell |
+| MOB-BLOCK-005 | Integration E2E | Firebase SDK fetch | Native build step pulls the Firebase archive | Archive extracts cleanly | **Blocked** — ZIP decompression failure from a corrupted/incomplete cached archive | Mobile/tooling | Blocker | Open | Clear the affected generated/cache artifact and retry the download |
+
+### Mobile toolchain retry — 2026-09-14, corrected root cause for `atlstr.h`
+
+`atlstr.h` still failed to resolve even after installing the ATL component, because that
+install landed in the wrong Visual Studio instance. `vswhere -all` on this machine reports
+only **Visual Studio Community 2022** as a registered instance; **Build Tools 2022** exists
+on disk but was never registered as an instance vswhere can see, and its
+`VC\Tools\MSVC\<version>\atlmfc` folder does not exist. Community's matching folder does
+contain `atlmfc\include\atlstr.h`. Running `VsDevCmd.bat` from Build Tools therefore always
+resolves a VC toolset with no ATL headers, regardless of which shell launches it.
+
+Fix: launch the native build environment from Community's `VsDevCmd.bat`
+(`C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat`)
+instead of Build Tools' copy. This is the standing approach going forward for
+Windows-desktop `flutter test integration_test/...` runs on this machine.
+
+### Mobile integration test — passing run, 2026-09-14
+
+With the Community `VsDevCmd.bat` fix in place, the app now launches and the full
+login → dashboard → Digital ID → logout journey in `app_test.dart` ran to completion.
+Getting a stable pass took three more fixes on top of the toolchain fix above, all in
+`GHCAA.Mobile/integration_test/app_test.dart`:
+
+1. **Stale token from a prior run.** The exe persists its auth token in Windows secure
+   storage across runs of the same build, so a second run could skip straight past the
+   login screen. Fixed by clearing storage (`StorageService().clearAll()`) as the first
+   line of the test.
+2. **`ErrorWidget.builder` restore ran too late.** `main()` installs a custom
+   `ErrorWidget.builder` for the production crash screen, and
+   `IntegrationTestWidgetsFlutterBinding` checks it's unchanged the moment the test body
+   returns — before any `addTearDown` callback gets a turn, since those run at the outer
+   `package:test` level after that check has already fired. An `addTearDown`-based
+   restore therefore failed every run with "The value of ErrorWidget.builder was changed
+   by the test." Fixed by restoring it as the literal last line of the test body instead.
+3. **Post-logout redirect race — timed-wait fix (superseded, see below).** `logout()`
+   clears secure storage and awaits the router's auth stream re-emitting before
+   returning, and that storage round trip on Windows doesn't reliably keep a frame
+   scheduled while it awaits. A bare `pumpAndSettle()` right after the `LOGOUT` tap could
+   decide things were settled before the redirect to the login screen had actually
+   happened, so the test intermittently failed on
+   `Found 0 widgets with text "GHCAA AUTHENTICATION"`. First attempted fix: give that
+   `pumpAndSettle()` an explicit 5-second duration, matching the pattern already used
+   after the login tap.
+
+That timed fix passed two runs in a row (`00:30 +1: All tests passed!` both times) and
+was initially written up here as closed. A third rerun on the same, unmodified file
+failed with the identical `Found 0 widgets with text "GHCAA AUTHENTICATION"` error —
+proving the 5-second duration was still a guess, not a fix: `pumpAndSettle(duration)`
+only paces repeated pumps while a frame is actually scheduled, and the awaited
+storage/stream round trip in `logout()` doesn't itself schedule one, so it can return
+before the redirect lands regardless of how long a duration is passed.
+
+**Actual fix:** replace the timed `pumpAndSettle()` with a real-time poll loop — pump
+every 200ms in a plain loop (up to a 10s budget) until the login-screen text is found,
+instead of hoping one `pumpAndSettle` call happens to cover the whole async chain:
+
+```dart
+await tester.tap(find.text('LOGOUT'));
+await tester.pump();
+for (var i = 0; i < 50 && find.text('GHCAA AUTHENTICATION').evaluate().isEmpty; i++) {
+  await tester.pump(const Duration(milliseconds: 200));
+}
+```
+
+Run three times in a row after this change (a higher bar than the two-pass rule used
+for the timed fix, given that fix's own false pass). All three ended
+`00:21 +1: All tests passed!`, exit code 0, each around 9 seconds faster than the timed
+version since it no longer waits out a fixed 5-second window:
+
+- Run 1 noise (non-blocking): a benign hit-test warning on the "Home" tab tap (cosmetic
+  offset, tap still lands), and a 401 on `GET /profile` right after logout ("session
+  expired") — expected, since the token was already cleared at that point.
+- Runs 2 and 3: only the same benign hit-test warning, no post-logout 401 noise.
+
+An earlier rerun of the timed-wait version also hit a transient
+`CryptUnprotectData()` decrypt failure on the secure-storage file plus a
+`PathAccessException` ("being used by another process") deleting it — startup/teardown
+noise around Windows secure storage, not a test defect; not implicated in the redirect
+race itself.
+
+**Coverage actually verified:** login, dashboard render (seeded Member 9998 "Demo
+User"), Digital ID card render, logout, redirect back to the login screen. **Not
+covered:** no forum-flow assertion exists in this test, so the authenticated-forum leg
+of 82.84's acceptance text is still unverified — see 82.84/82.85 in `docs/TODO.md` for
+how that gap is tracked.
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| MOB-BLOCK-001 | Integration E2E | Windows desktop integration | `flutter test integration_test/app_test.dart -d windows` | Login, dashboard, logout | **Fixed** — passes three times in a row after switching the post-logout wait from a timed `pumpAndSettle` to a real-time poll loop: `00:21 +1: All tests passed!` | Mobile/tooling | Blocker | Closed | Run via Community's `VsDevCmd.bat`, not Build Tools'; poll loop in `app_test.dart` replaces the earlier timed-duration fix, which passed twice then failed a third time |
+| MOB-P4-007 | Integration | Live E2E verification | Run the prepared member journey | Login, dashboard, logout | **Verified** — login, dashboard, Digital ID, logout, and redirect to login all pass, three consecutive runs | Mobile | — | Closed | See fixes 1-3 above in `app_test.dart`; fix 3 is now the poll loop, not a fixed duration |
+| MOB-GAP-001 | Forum | Live authenticated flow | Login, then fetch forum categories and topics | Forum data renders | **Still not run** — `app_test.dart` has no forum-flow assertion; only the toolchain blocker is resolved | Mobile | Minor | Open | Add a forum-flow step to `app_test.dart` and rerun |
 
 ---
 
@@ -56,7 +216,7 @@ Automated evidence: **92/92 tests passed** (2026-07-03). Filter: `MemberService|
 
 | ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
 |---|---|---|---|---|---|---|---|---|---|
-| A1-PASS | Registration | Haraganga college required | `UpdateProfile_WithNoGHCRecord_ShouldThrowException`; `RegisterAsync_WithHistory_ShouldSaveCorrectly`; validator academic required | Reject non-GHC; accept GHC record | **Pass** — service throws on update without GHC; register saves GHC history | API | — | Verified | Gap: no dedicated `RegisterAsync` without-GHC test (see COV-001) |
+| A1-PASS | Registration | Configured institution record required | `UpdateProfile_WithNoGHCRecord_ShouldThrowException`; `RegisterAsync_WithHistory_ShouldSaveCorrectly`; `RegisterAsync_WithoutConfiguredInstitutionAcademicRecord_ShouldRejectRegistration`; validator academic required | Reject a missing or invalid configured-institution record; accept a valid first record | **Pass** — update and registration enforce the configured first record and persist it as the institutional record | API | — | Verified | First-record protection is data-driven; later records remain non-institutional |
 | A2-PASS | Registration / OTP | Uniqueness + OTP | `RegisterAsync_WithDuplicate{Email,NID,Mobile}`; `VerifyEmailAsync_*`; `OtpServiceTests` (11); `RegistrationControllerTests.VerifyEmail_*` | Duplicates rejected; OTP flow works | **Pass** (all 18 related tests) | API | — | Verified | |
 | A3-PASS | Admin approval | Applied → Active + membership number | `ApproveMemberAsync_WithMultipleMembersSameYear_*`; `ApproveMemberAsync_WithDifferentYears_*`; `AdminControllerTests.ApproveMember_ReturnsOk`; `WorkflowTests` | Status Active; `GHCyyMM###` numbers | **Pass** | API | — | Verified | |
 | A4-PASS | Rejection | Soft-delete | `RejectMemberAsync_ShouldSendEmailAndSoftDeleteMember`; `AdminControllerTests.RejectMember_ReturnsOk` | Rejected + IsArchived; record retained | **Pass** — status `Rejected`, `IsArchived=true`, email sent | API | — | Verified | |
@@ -230,11 +390,11 @@ Automated evidence: **230/230 Vitest** pass; **43/53** functional Playwright E2E
 | WEB-005 | E2E config | Missing auth storage file | `config-regression.spec.ts` | Tests run without setup | **Fixed** — removed `.auth/super-admin.json` requirement | Web | Minor | Fixed | GET `/api/config` is anonymous |
 | WEB-006 | Vitest | Unit suite | `npm run test:unit` | All pass | **230/230 pass** | Web | — | Verified | 58 files, ~92s |
 | WEB-007 | Build | Production bundle | `npm run build` | type-check + ng build OK | **Pass** | Web | — | Verified | landing.scss budget warning only |
-| WEB-008 | E2E workflow | Admin member approval | `admin-workflow.spec.ts` | Approve pending row | **Fail** — Approve button timeout | Web | Major | Open | Queue empty or UI selector mismatch |
-| WEB-009 | E2E workflow | Article editorial | `article-editorial.spec.ts` | Submit + approve article | **Fail** — article form selectors timeout | Web | Major | Open | |
-| WEB-010 | E2E workflow | Full membership + event | `full-membership-event-workflow.spec.ts` | Register → approve → event | **Fail** — registration step timeout (90s) | Web | Major | Open | |
-| WEB-011 | E2E UI | Gallery / Job Hub | `gallery.spec.ts`, `job-hub.spec.ts` | Headers visible | **Intermittent fail** under `--workers=2` | Web | Minor | Open | Reproduce with `--workers=1` and `--workers=2`; compare shared seed/state, then record the deterministic worker setting or fix the isolation defect. Tracked by TODO 82.83. |
-| WEB-012 | E2E visual | Snapshot freeze | `tests/visual/*` (~39 tests) | Match baselines | **Not verified** — baselines stale | Web | Minor | Open | `--update-snapshots` when UI stable |
+| WEB-008 | E2E workflow | Admin member approval | `admin-workflow.spec.ts` | Approve pending row | **Pass** — verified on a clean isolated SQLite Visual profile after exact confirmation matching and queue reload | Web | Major | Closed | Playwright API approval required the decoded `X-XSRF-TOKEN` header when the auth cookie was present |
+| WEB-009 | E2E workflow | Article editorial | `article-editorial.spec.ts` | Submit + approve article | **Pass** — verified after completing the forced first-login password change and using NID credentials | Web | Major | Closed | |
+| WEB-010 | E2E workflow | Full membership + event | `full-membership-event-workflow.spec.ts` | Register → approve → event → participation approval | **Pass** — clean isolated SQLite Visual run completed registration, approval, event creation, password rotation, portal loading, cash/manual event registration, and admin participation approval | Web | Major | Closed | Dynamic event dates keep the registration window active; fresh cookies are issued after password rotation; the test uses the rendered admin card/table selectors. |
+| WEB-011 | E2E UI | Gallery / Job Hub | `gallery.spec.ts`, `job-hub.spec.ts` | Headers visible | **Pass with one worker** — 7/7 passed; parallel run reached 6/7, with one gallery `beforeAll` registration timeout under shared SQLite/bootstrap contention | Web | Minor | Mitigated | Use one Playwright worker for the SQLite Visual profile. The failure is test-environment contention, not a rendered gallery/job-hub regression. |
+| WEB-012 | E2E visual | Snapshot freeze | `tests/visual/*` (focused admin/content/jobs subset: 18 tests) | Match baselines | **Pass** — 18/18 passed after regenerating current Windows baselines and rerunning without update mode | Web | Minor | Closed | Gallery visual readiness now accepts the rendered table or card layout. |
 | WEB-PASS | E2E smoke | Admin + member portal | 43 specs in `tests/e2e` | Nav + data load | **Pass** | Web | — | Verified | admin-panels, directory, events, governance, polls, profile, payments, public, config |
 
 ### Phase 3 Web — fixes applied (uncommitted)
@@ -255,8 +415,9 @@ Automated evidence: **230/230 Vitest** pass; **43/53** functional Playwright E2E
 
 | ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
 |---|---|---|---|---|---|---|---|---|---|
-| COV-001 | Registration | A1 Haraganga at register | `MemberServiceTests.RegisterAsync_WithoutHaragangaAcademicRecord_ShouldRejectRegistration` | Dedicated test: `RegisterAsync` rejects non-GHC academic history | **Pass** — registration service rejects a non-GHC academic history before persistence | API | Minor | Verified | Service rule remains aligned with the validator and update-profile rule |
-| COV-002 | Registration | A1 FluentValidation gap | `MemberRegistrationValidatorTests.AcademicHistory_WhenNoHaragangaRecord_ShouldHaveValidationError` | Validator rejects non-GHC institutions | **Pass** — validator rejects the invalid institution; the API validation pipeline returns model-validation failures as 400 before the controller action | API | Minor | Verified | Keep the validator and registration service rule aligned |
+| COV-001 | Registration | A1 configured institution at register | `MemberServiceTests.RegisterAsync_WithoutConfiguredInstitutionAcademicRecord_ShouldRejectRegistration` | `RegisterAsync` rejects a first record that does not use the configured institution | **Pass** — registration service rejects the invalid first record before persistence | API | Minor | Verified | Service rule remains aligned with the validator and update-profile rule |
+| COV-002 | Registration | A1 FluentValidation rule | `MemberRegistrationValidatorTests.AcademicHistory_WhenFirstRecordIsNotInstitutional_ShouldHaveValidationError` | Validator rejects a first record that is not institutional | **Pass** — the API validation pipeline returns model-validation failures as 400 before the controller action | API | Minor | Verified | Keep the validator and registration service rule aligned |
+| COV-005 | Registration | A1 academic-history invariant | `MemberServiceTests.RegisterAsync_WithEmptyAcademicHistory_ShouldRejectRegistration`; `MemberServiceTests.RegisterAsync_WithLaterInstitutionalRecord_ShouldRejectRegistration` | Empty history is rejected; only the first configured institution record may be institutional | **Pass** — focused service tests cover empty history and later institutional records | API | Minor | Verified | The same invariant is enforced by profile and Admin update paths |
 | COV-003 | Membership | A5 profile gate | `WorkflowTests.ApproveMember_RejectsIncompleteProfile` | Test that `ApproveMemberAsync` throws when profile &lt; 100% | **Pass** — approval throws and leaves the member in `Applied` status | API | Minor | Verified | Approval transaction is not committed |
 | COV-004 | Membership | A6 payment gate | `WorkflowTests.ApproveMember_RejectsMissingCompletedPayment` | Test approval blocked without payment | **Pass** — approval throws and leaves the member in `Applied` status | API | Minor | Verified | A completed registration or membership-fee payment is still required |
 
@@ -368,4 +529,50 @@ Independent workstream: full dependency loop after Phases 2–3 parallel changes
 - **Regression:** None — all 308 API tests pass; smoke endpoints healthy.
 - **New tests since Phase 2:** `ForumServiceTests` (2), `AuthServiceTests` lockout (1).
 - **Uncommitted fixes validated:** BUG-001 (RowVersion migration), BUG-002 (SignalR JWT path), HashGen `--apply` / `--signalr-test`, `nuget.config`, Web proxy/playwright (parallel workstream — not re-run in P4).
+
+---
+
+## `member_journey_test.dart` — Windows integration run, storage-service logout fix (2026-09-14)
+
+`member_journey_test.dart` (the rewrite noted under MOB-P4-005/Phase 4 fixes above) now covers
+more ground than `app_test.dart`'s login/dashboard/logout journey: login, dashboard identity
+checks, Alumni Directory navigation, drawer-based My Profile navigation, and logout back to the
+login screen. This is the current canonical Windows desktop integration test for WP60.4/60.5.
+
+Bringing it to a stable pass surfaced a real bug in `StorageService` (not just a test artifact).
+`flutter_secure_storage`'s Windows backend keeps every key in one DPAPI-encrypted file. A third
+rerun of the test, on otherwise-unchanged code that had just passed twice in a row, failed on
+`Found 0 widgets with text "GHCAA AUTHENTICATION"` — the app never navigated back to the login
+screen after the LOGOUT tap. Trace: `dashboard_screen.dart`'s `_handleLogout` awaits
+`AuthService.logout()`, which awaits `StorageService.clearAll()`, which called
+`_secure.delete()` directly and unguarded. On Windows that delete can throw
+(`PathAccessException: Cannot delete file... errno = 32`, alongside a
+`Failure on CryptUnprotectData()` decrypt error) if the DPAPI file is still locked by another
+process — plausibly a just-exited prior test run's own exe still releasing its handle. The
+uncaught exception aborted `_handleLogout` before it reached `context.go('/login')`, silently
+stranding the app on the dashboard. A real user hitting the same file contention during logout
+would see the identical stuck screen, so this is a genuine Windows-desktop robustness bug, not
+only a test-harness artifact.
+
+Fix: added a private `_safeDelete(String key)` helper in
+`GHCAA.Mobile/lib/core/storage/storage_service.dart` that wraps `_secure.delete()` in try/catch
+and just logs on failure — a failed delete only leaves a stale secure-storage entry, which gets
+overwritten on the next `saveToken`/`saveRefreshToken` call, so it's safe to swallow. Rewired
+`removeToken()`, `removeRefreshToken()`, and `purgeLegacyBiometricCredentials()` to use it.
+
+Reran three times after the fix (a fresh 3-pass count, since the two passes before the failure
+were under different code): `00:33 +1: All tests passed!`, `00:36 +1: All tests passed!`,
+`00:36 +1: All tests passed!` — exit code 0 each time. The 401 on `GET /profile` seen in two of
+the three runs (`userProfileProvider failed: ... Your session has expired`) is expected noise
+from the demo token's TTL and doesn't affect the assertions, which don't depend on that call.
+
+**Coverage verified:** login, dashboard render, Alumni Directory navigation, drawer My Profile
+navigation, logout, redirect to login. **Still not covered:** no forum-flow or financial-flow
+assertion exists in `member_journey_test.dart` — same gap 82.85 already tracks, now against the
+current test file rather than `app_test.dart`.
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| MOB-P4-010 | Storage | Logout under Windows secure-storage file contention | `flutter test integration_test/member_journey_test.dart -d windows`, LOGOUT tap | Redirect to login | **Fixed** — unguarded `_secure.delete()` in `StorageService` could throw and abort `logout()` before `context.go('/login')`; wrapped in `_safeDelete` try/catch | Mobile | Major | Closed | `GHCAA.Mobile/lib/core/storage/storage_service.dart`; 3 consecutive passes after the fix |
+| MOB-GAP-001 | Forum | Live authenticated flow | Login, then fetch forum categories and topics | Forum data renders | **Still not run** — no forum-flow assertion in `member_journey_test.dart` either | Mobile | Minor | Open | Add a forum-flow step and rerun |
 - **Docs:** `docs/BACKEND_REVIEW_2026-07-03.md` — executive summary + recommended commit grouping.

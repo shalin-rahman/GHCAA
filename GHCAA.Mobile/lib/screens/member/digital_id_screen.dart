@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:screen_protector/screen_protector.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -12,6 +11,7 @@ import '../../core/config/app_config.dart';
 import '../../core/services/app_localizations.dart';
 import '../../core/services/org_config_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/app_utils.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/skeleton_loader.dart';
@@ -28,12 +28,12 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
   @override
   void initState() {
     super.initState();
-    ScreenProtector.preventScreenshotOn();
+    AppUtils.setScreenshotProtection(true);
   }
 
   @override
   void dispose() {
-    ScreenProtector.preventScreenshotOff();
+    AppUtils.setScreenshotProtection(false);
     super.dispose();
   }
 

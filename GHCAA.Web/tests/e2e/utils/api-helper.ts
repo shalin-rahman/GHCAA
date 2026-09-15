@@ -2,6 +2,16 @@ import { APIRequestContext } from '@playwright/test';
 
 const API_BASE = 'http://localhost:5087';
 
+async function authHeaders(request: APIRequestContext, token: string): Promise<Record<string, string>> {
+  const state = await request.storageState();
+  const xsrfCookie = state.cookies.find((cookie) => cookie.name === 'XSRF-TOKEN')?.value;
+  const xsrfToken = xsrfCookie ? decodeURIComponent(xsrfCookie) : undefined;
+  return {
+    Authorization: `Bearer ${token}`,
+    ...(xsrfToken ? { 'X-XSRF-TOKEN': xsrfToken } : {}),
+  };
+}
+
 export async function getAuthToken(
   request: APIRequestContext,
   username: string,
@@ -23,7 +33,7 @@ export async function completeRegistrationPayment(
   adminToken: string,
   memberEmail: string
 ): Promise<number> {
-  const headers = { Authorization: `Bearer ${adminToken}` };
+  const headers = await authHeaders(request, adminToken);
 
   const membersRes = await request.get(
     `${API_BASE}/api/admin/members?searchQuery=${encodeURIComponent(memberEmail)}&statusFilter=Applied&pageSize=5`,
@@ -62,7 +72,7 @@ export async function completeRegistrationPayment(
     { headers }
   );
   if (!patchRes.ok()) {
-    throw new Error(`Payment completion failed: ${patchRes.status()}`);
+    throw new Error(`Payment completion failed: ${patchRes.status()} ${await patchRes.text()}`);
   }
   return memberId;
 }
@@ -73,7 +83,7 @@ export async function findMemberIdByEmail(
   adminToken: string,
   memberEmail: string
 ): Promise<number> {
-  const headers = { Authorization: `Bearer ${adminToken}` };
+  const headers = await authHeaders(request, adminToken);
   const membersRes = await request.get(
     `${API_BASE}/api/admin/members?searchQuery=${encodeURIComponent(memberEmail)}&statusFilter=all&pageSize=5`,
     { headers }
@@ -103,7 +113,7 @@ export async function approveMember(
 
   // Acting admin is resolved from the bearer token server-side; no admin id in the body.
   const approveRes = await request.post(`${API_BASE}/api/admin/members/${memberId}/approve`, {
-    headers,
+    headers: await authHeaders(request, adminToken),
     data: {},
   });
   if (!approveRes.ok()) {

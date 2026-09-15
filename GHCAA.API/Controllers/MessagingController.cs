@@ -55,7 +55,12 @@ namespace GHCAA.API.Controllers
         [HttpPatch("read/{messageId}")]
         public async Task<IActionResult> MarkAsRead(int messageId, CancellationToken cancellationToken)
         {
-            await _chatService.MarkAsReadAsync(messageId, cancellationToken);
+            var userIdStr = this.CurrentUserIdRaw();
+            if (!int.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            var updated = await _chatService.MarkAsReadAsync(messageId, userId, cancellationToken);
+            if (!updated) return NotFound();
+
             return Ok(new { Message = "Marked as read" });
         }
 

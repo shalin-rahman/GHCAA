@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
+import '../../core/models/financial_models.dart';
 import '../../core/utils/upload_file_naming.dart';
 
 final financialServiceProvider = Provider<FinancialService>((ref) {
@@ -23,6 +24,10 @@ class FinancialService {
 
       // Map backend fields (paidAt, financialCategory) to mobile expectations (date, description)
       return history.map((item) {
+        // Parse-only, for the throw: a renamed/missing amount, paidAt or financialCategory
+        // should fail here instead of silently landing in the ledger as null/"Alumni
+        // Contribution". The map below is still built from the raw item, unchanged.
+        LedgerEntry.fromJson(Map<String, dynamic>.from(item as Map));
         return {
           ...item,
           'date': item['paidAt'],
@@ -44,8 +49,9 @@ class FinancialService {
       // turned every real balance into 0.0 with no error shown to the member.
       final response = await _dio.get('/financials/my-dues');
       final List<dynamic> dues = response.data as List<dynamic>;
-      final unpaid = dues.where((d) => d['isPaid'] != true);
-      return unpaid.fold<double>(0.0, (sum, d) => sum + ((d['amount'] ?? 0.0) as num).toDouble());
+      final parsed = dues.map((d) => DueItem.fromJson(Map<String, dynamic>.from(d as Map)));
+      final unpaid = parsed.where((d) => !d.isPaid);
+      return unpaid.fold<double>(0.0, (sum, d) => sum + d.amount);
     } catch (e) {
       debugPrint('FinancialService.getOutstandingDues failed: $e');
       return 0.0;

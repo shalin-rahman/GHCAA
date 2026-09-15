@@ -6,6 +6,9 @@ import '../../core/api/api_client.dart';
 import '../../core/services/device_info_service.dart';
 import '../../core/storage/storage_service.dart';
 import '../../core/real_time/notification_hub_service.dart';
+import '../../core/router/app_router.dart';
+import '../../core/models/auth_models.dart';
+import '../../core/models/member_profile.dart';
 
 
 final authServiceProvider = Provider<AuthService>((ref) {
@@ -38,18 +41,15 @@ class AuthService {
 
 
       if (response.statusCode == 200) {
-        final data = response.data;
-        final token = data['token'];
-        final refreshToken = data['refreshToken'];
-        final role = data['role'] ?? 'Member';
+        final parsed = LoginResponse.fromJson(Map<String, dynamic>.from(response.data));
 
         // SECURITY: Clear ALL previous session data before saving new credentials.
         // This prevents role/profile leakage when switching between admin and member accounts.
         await _storage.clearAll();
 
-        await _storage.saveToken(token);
-        if (refreshToken != null) await _storage.saveRefreshToken(refreshToken);
-        await _storage.saveRole(role);
+        await _storage.saveToken(parsed.token);
+        if (parsed.refreshToken != null) await _storage.saveRefreshToken(parsed.refreshToken!);
+        await _storage.saveRole(parsed.role);
         
         // 82.40: biometric re-login used to store the raw password here. It now just flips
         // this flag; loginWithStoredToken() below re-authenticates from the refresh token
@@ -92,13 +92,10 @@ class AuthService {
 
       final response = await _dio.post('/auth/refresh-mobile', data: {'refreshToken': refreshToken});
       if (response.statusCode == 200) {
-        final data = response.data;
-        final token = data['token'];
-        final newRefreshToken = data['refreshToken'];
-        if (token == null) return "Session refresh failed. Please log in with your password.";
+        final parsed = LoginResponse.fromJson(Map<String, dynamic>.from(response.data));
 
-        await _storage.saveToken(token);
-        if (newRefreshToken != null) await _storage.saveRefreshToken(newRefreshToken);
+        await _storage.saveToken(parsed.token);
+        if (parsed.refreshToken != null) await _storage.saveRefreshToken(parsed.refreshToken!);
 
         _ref.invalidate(roleProvider);
         _ref.invalidate(userProfileProvider);
@@ -141,15 +138,12 @@ class AuthService {
     try {
       final response = await _dio.post(path, data: data);
       if (response.statusCode == 200) {
-        final respData = response.data;
-        final token = respData['token'];
-        final refreshToken = respData['refreshToken'];
-        final role = respData['role'] ?? 'Member';
+        final parsed = LoginResponse.fromJson(Map<String, dynamic>.from(response.data));
 
         await _storage.clearAll();
-        await _storage.saveToken(token);
-        if (refreshToken != null) await _storage.saveRefreshToken(refreshToken);
-        await _storage.saveRole(role);
+        await _storage.saveToken(parsed.token);
+        if (parsed.refreshToken != null) await _storage.saveRefreshToken(parsed.refreshToken!);
+        await _storage.saveRole(parsed.role);
         
         return null; // Success
       }
@@ -230,6 +224,13 @@ class AuthService {
     _ref.invalidate(roleProvider);
     _ref.invalidate(userProfileProvider);
     await _storage.clearAll();
+    // Invalidating alone isn't enough: the new stream doesn't emit until its
+    // create callback actually runs, and callers navigate away right after
+    // this returns. Without awaiting the first value here, the router still
+    // reads the pre-logout cached token at that point and bounces the user
+    // straight back to the dashboard instead of the login screen.
+    _ref.invalidate(authStateProvider);
+    await _ref.read(authStateProvider.future);
   }
 
   Future<String?> getRole() async {
@@ -318,6 +319,12 @@ final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
     final response = await dio.get('/profile');
     if (response.statusCode == 200 && response.data != null) {
       final profile = Map<String, dynamic>.from(response.data);
+      // Parse-only, for the throw: profile_screen.dart and profile_edit_screen.dart
+      // still read the map directly (profile_edit_screen edits too many dynamic
+      // admin/list fields to be worth a rigid typed rewrite), so this call's only
+      // job is to fail loudly here if a required field drifted, before the raw map
+      // gets cached and handed to them.
+      MemberProfile.fromJson(profile);
       await storage.saveProfile(profile);
       return profile;
     }

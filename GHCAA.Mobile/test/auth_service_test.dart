@@ -42,7 +42,12 @@ class _FakeLoginAdapter implements HttpClientAdapter {
     if (options.path.contains('/profile')) {
       final isUserA = options.headers['Authorization'] == 'Bearer token-A';
       return ResponseBody.fromString(
-        jsonEncode({'fullName': isUserA ? 'User A' : 'User B'}),
+        jsonEncode({
+          'id': isUserA ? 1 : 2,
+          'fullName': isUserA ? 'User A' : 'User B',
+          'email': isUserA ? 'usera@ghcaa.test' : 'userb@ghcaa.test',
+          'mobileNo': isUserA ? '01700000001' : '01700000002',
+        }),
         200,
         headers: {
           Headers.contentTypeHeader: ['application/json'],
