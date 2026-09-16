@@ -347,7 +347,7 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 
 ## WORK PACKAGE 27: TEST COVERAGE IMPROVEMENT
 
-27.1  [IN-PROGRESS] Generate low‑coverage report (parse coverage.cobertura.xml)
+27.1  [IN-PROGRESS] Generate low‑coverage report (parse coverage.cobertura.xml). Reporting began 2026-09-16: Coverlet baseline is 59.99% lines and 39.61% branches (7,272/12,122 lines; 1,768/4,463 branches); latest Vitest V8 report is 42.25% lines and 28.44% branches across `src/app` (2,453/5,805 lines; 866/3,045 branches); Flutter LCOV baseline is 14.23% lines (1,392/9,781). All reports are retained by CI. `docs/TEST_COVERAGE_PLAN.md` defines the shared collection, test-selection and threshold method before any threshold is enforced.
 27.2  [DONE 2026-08-22] Add test project references for API, Application, Domain, Infrastructure VERIFIED 2026-08-22: `GHCAA.Tests.csproj` references all four projects (Application, Infrastructure, Domain, API).
 27.3  [DONE 2026-08-22] Write unit tests for Controllers (WebApplicationFactory) VERIFIED 2026-08-22: 18 controller test classes under `GHCAA.Tests/Controllers/` plus a shared `ControllerTestBase.cs`.
 27.4  [DONE 2026-08-22] Write unit tests for Handlers/Services (Moq) VERIFIED 2026-08-22: ~20 service test classes under `GHCAA.Tests/Services/`, with `Moq 4.20.72` + `FluentAssertions 6.12.2` referenced.
@@ -357,8 +357,8 @@ backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/33
 27.8 [TODO] **Priority: P2.** Run coverage and enforce ≥ 80 % per file (Still genuinely open, confirmed 2026-08-22: `coverlet.collector 6.0.2` is referenced so coverage *can* be collected locally, but no threshold is enforced anywhere and README explicitly declines to claim a figure. Enforcing >=80%/file would fail today.)
 27.9  [DONE 2026-08-22] Update README with test & coverage instructions VERIFIED 2026-08-22: README line ~299 documents `dotnet test` / `npm test` / `flutter test`, and line ~301 explains the coverage position and the local `coverlet.collector` command.
 27.10 [IN-PROGRESS — tracked in 82.86] API: Add focused negative tests for the four business-rule coverage gaps (COV-001 through COV-004), including intended 4xx mapping for invalid business input. Use 82.86 as the canonical execution record.
-
-## WORK PACKAGE 28: CONFIGURATION-DRIVEN FRAMEWORK
+27.11 [DONE 2026-09-16] **Priority: P1.** Fix a seed-data collision in `PollServiceTests.CreatePollMemberAsync`: its mobile-number pattern (`017000000{sequence:D2}`) collided with the pre-seeded `Visual/members.json` rows for `sequence` 1-4, throwing `SQLite Error 19: UNIQUE constraint failed: Members.MobileNo` on 9 of the 18 tests. `docs/TEST_COVERAGE_PLAN.md` had recorded this suite as "18/18 passed," which was false at the time it was written. Offset the mobile/membership-number generation by a constant clear of the seeded range. VERIFIED 2026-09-16: `dotnet test --filter "FullyQualifiedName~PollServiceTests"` now genuinely passes 18/18, and the full backend suite passes 790/790. **Depends on: none. Found during ad hoc review of another session's in-progress WP27 changes, not a new feature.**
+27.12 [TODO] **Priority: P2.** The `GHCAA.Tests/coverlet.runsettings` collector drops `GHCAA.Infrastructure` from the Cobertura report entirely when run against the Release configuration (`dotnet test -c Release --collect:"XPlat Code Coverage"` on 2026-09-16 produced only `GHCAA.API`, `GHCAA.Application` and `GHCAA.Domain` packages — 515/4,112 lines, nowhere near the 12,122-line denominator the 27.1 baseline cites). Since Infrastructure holds most of the service layer, any coverage percentage collected this way understates real coverage. Needs investigation into why Infrastructure isn't instrumented in Release (module resolution, missing PDBs, or a coverlet/MSBuild config gap) before the 27.1 baseline is refreshed again.
 
 > Reference doc: docs/CONFIG_DRIVEN_FRAMEWORK.md
 > DRY/SOLID review completed by Claude Opus on 2026-05-30.
@@ -1048,8 +1048,7 @@ suite (`dotnet test GHCAA.Tests/GHCAA.Tests.csproj`) is green at 564/564.
 path each), plus `DeleteUser`/`DisableUser`/`EnableUser`/`ResetPasswordAdmin` landed here too as part
 of 49.5. Folded into the same file/PR as instructed there.
 
-47.13.4 [TODO] **`AdminPollController`** (`DeletePoll`, `ToggleStatus` — `CreatePoll` already covered).
-New file or extend existing poll test coverage.
+47.13.4 [DONE 2026-09-16] **`AdminPollController`** (`DeletePoll`, `ToggleStatus` — `CreatePoll` already covered). Added one controller-contract test class instead of duplicating `PollServiceTests`: it covers the list response, propagation of the acting member claim on create, both active states, a missing toggle target, and both delete outcomes. Focused run: 7/7 passed.
 
 47.13.5 [DONE 2026-09-06] **`PaymentConfigController`** (`Create`, `Toggle`, `Delete` —
 `Update`/`SeedDefaults` already covered per the mutation-coverage audit). Added as part of 80.13's

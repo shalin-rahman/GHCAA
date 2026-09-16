@@ -159,6 +159,17 @@ jobs:
         working-directory: GHCAA.Web
         run: npm run test:unit -- --run
 
+      - name: Collect Web Coverage
+        working-directory: GHCAA.Web
+        run: npm run test:coverage
+
+      - name: Upload Web Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-coverage-report
+          path: GHCAA.Web/coverage
+          retention-days: 30
+
       - name: Build Check
         working-directory: GHCAA.Web
         run: npm run build
@@ -219,7 +230,14 @@ jobs:
 
       - name: Run Tests
         working-directory: GHCAA.Mobile
-        run: flutter test --exclude-tags golden --reporter expanded
+        run: flutter test --coverage --exclude-tags golden --reporter expanded
+
+      - name: Upload Mobile Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-coverage-report
+          path: GHCAA.Mobile/coverage/lcov.info
+          retention-days: 30
 
   integrated-build:
     name: Production-Grade Build

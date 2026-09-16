@@ -6,6 +6,13 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
     exclude: ['tests/e2e/**', 'tests/visual/**', 'node_modules/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text-summary', 'json-summary', 'lcov'],
+      reportsDirectory: './coverage',
+      include: ['src/app/**/*.ts'],
+      exclude: ['**/*.spec.ts', '**/*.test.ts'],
+    },
   },
   plugins: [
     {
