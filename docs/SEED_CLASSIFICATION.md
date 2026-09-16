@@ -55,7 +55,7 @@ The seeded `Members` insert carries these columns among others: `Email`, `Mobile
 
 ## Classification
 
-### Class 1 — Structural. Every institution needs these, unchanged.
+### Tier 1 — Shared Reference Data. Every institution needs these, unchanged.
 
 The application does not function without them; none of them names a person or an institution.
 
@@ -68,7 +68,7 @@ The application does not function without them; none of them names a person or a
 `GamificationConfig` is also seeded, inline in `OnModelCreating` rather than from a file, and belongs
 here.
 
-### Class 2 — Structural shape, institution-specific content.
+### Tier 2 — Profile Seed Data. Structural shape, institution-specific content.
 
 A new institution needs *a* row here, but not GHC's row. These are the seeds a profile pack should
 supply, per Work Package 62.33 to 62.36.
@@ -81,7 +81,7 @@ supply, per Work Package 62.33 to 62.36.
 | `themes.json` | 2 | Bengali special-day themes |
 | `constitution.json` | 1 | GHC's constitution v4.2, 38 KB of it |
 
-### Class 3 — Demonstration and history. A new institution should get none of it.
+### Tier 3 — Institution Data. Demonstration and history; a new institution should get none of it.
 
 An empty table is the correct state for a new institution on day one. Every row here is a record of
 something that happened at Gournadi College.
@@ -103,7 +103,7 @@ something that happened at Gournadi College.
 | `news.json` | 1 |
 | `ec_periods.json` | 1 |
 
-### Class 4 — Already empty. Nothing to do.
+### Tier 4 — Unused Seed. Already empty, nothing to do.
 
 `file_uploads.json`, `financial_records.json`, `membership_dues.json` and
 `membership_histories.json` are all empty arrays and already behave the way a new institution needs.
@@ -113,7 +113,7 @@ rows even though per-member fees are recorded correctly.
 
 ## What a new institution's first administrator account looks like
 
-There is no seeded system administrator in Class 1, and that is deliberate. Admin accounts come from
+There is no seeded system administrator in Tier 1, and that is deliberate. Admin accounts come from
 `ProtectedSuperAdminSeeder`, which runs at boot and reads its list from `appsettings.json` — not from a
 seed file and not from the database, so a new institution names its own first administrator in
 configuration. The 631 rows in `users.json` are member logins, not administrators.
@@ -123,8 +123,8 @@ configuration. The 631 rows in `users.json` are member logins, not administrator
 - **82.31** — remove the personal data from the committed migration chain. Not covered by 62.31, which
   addresses the seed file, nor by 62.32, which moves seed files between folders.
 - **62.31** — its stated remedy needs amending: anonymising `members.json` alone leaves the data in git.
-- **62.32** — the Class 3 list above is the exact set of files it moves to `profiles/ghc/demo-data/`.
+- **62.32** — the Tier 3 list above is the exact set of files it moves to `profiles/ghc/demo-data/`.
   It currently names most of them but misses `users.json` and `user_roles.json`, which are the two that
   carry the password hashes.
 - **62.38** — the onboarding document it produces should say plainly that a new institution starts with
-  Class 1 and Class 2 only, and that Class 3 tables are empty on day one.
+  Tier 1 and Tier 2 only, and that Tier 3 tables are empty on day one.

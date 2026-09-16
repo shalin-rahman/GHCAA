@@ -84,7 +84,7 @@ namespace GHCAA.Infrastructure.Services
                 await EnsureNoDuplicateMemberAsync(dto, cancellationToken);
 
                 var assignedType = await ResolveAssignedMembershipTypeAsync();
-                member = BuildMemberFromDto(dto, assignedType);
+                member = await BuildMemberFromDtoAsync(dto, assignedType, cancellationToken);
                 await AddAcademicHistoryAsync(member, dto.AcademicHistory, cancellationToken);
                 AddProfessionalHistory(member, dto.ProfessionalHistory);
 
@@ -159,7 +159,7 @@ namespace GHCAA.Infrastructure.Services
                 : Enums.MembershipType.General;
         }
 
-        private Member BuildMemberFromDto(MemberRegistrationDto dto, Enums.MembershipType assignedType)
+        private async Task<Member> BuildMemberFromDtoAsync(MemberRegistrationDto dto, Enums.MembershipType assignedType, CancellationToken cancellationToken)
         {
             var member = new Member
             {
@@ -205,20 +205,20 @@ namespace GHCAA.Infrastructure.Services
             }
 
             // Generate Membership Number: GHC + YY + MM + (last 3 digit max + 1)
-            member.MembershipNumber = GenerateMembershipNumber();
+            member.MembershipNumber = await GenerateMembershipNumberAsync(cancellationToken);
             return member;
         }
 
-        private string GenerateMembershipNumber()
+        private async Task<string> GenerateMembershipNumberAsync(CancellationToken cancellationToken)
         {
             var now = DateTime.UtcNow;
             var prefix = $"GHC{now:yyMM}";
 
             // 24.29: Order by Id (insertion order) to avoid lexicographic rollover at 999→1000.
-            var lastMember = _db.Members
+            var lastMember = await _db.Members
                 .Where(m => m.MembershipNumber != null && m.MembershipNumber.StartsWith(prefix))
                 .OrderByDescending(m => m.Id)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync(cancellationToken);
 
             int nextId = 1;
             if (lastMember?.MembershipNumber != null && lastMember.MembershipNumber.Length > prefix.Length)

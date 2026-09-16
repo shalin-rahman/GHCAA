@@ -12,12 +12,12 @@ class NetworkingService {
   NetworkingService(this._dio);
 
   Future<Map<String, dynamic>> searchAlumni({
-    String? query, 
-    String? batch, 
-    String? department, 
+    String? query,
+    String? batch,
+    String? department,
     String? membershipType,
     String? category,
-    int pageNumber = 1, 
+    String? cursor,
     int pageSize = 20
   }) async {
     try {
@@ -27,7 +27,7 @@ class NetworkingService {
         if (department?.isNotEmpty ?? false) 'subject': department,
         if (membershipType?.isNotEmpty ?? false) 'membershipType': membershipType,
         if (category?.isNotEmpty ?? false) 'category': category,
-        'page': pageNumber.toString(),
+        if (cursor?.isNotEmpty ?? false) 'cursor': cursor,
         'pageSize': pageSize.toString(),
       };
       final response = await _dio.get('/networking/search', queryParameters: params);

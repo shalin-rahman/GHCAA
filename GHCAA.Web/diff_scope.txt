@@ -1,0 +1,1140 @@
+diff --git a/GHCAA.API/Extensions/DatabaseBootstrapperExtensions.cs b/GHCAA.API/Extensions/DatabaseBootstrapperExtensions.cs
+index bf98f996..2bf4449b 100644
+--- a/GHCAA.API/Extensions/DatabaseBootstrapperExtensions.cs
++++ b/GHCAA.API/Extensions/DatabaseBootstrapperExtensions.cs
+@@ -44,6 +44,25 @@ namespace GHCAA.API.Extensions
+                 app.Logger.LogWarning(ex, "OrgConfig seed skipped — table may not exist yet. Run migrations first.");
+             }
+ 
++            // 2b. Seed Tier 3 data (docs/SEED_CLASSIFICATION.md) — one institution's own members,
++            // accounts and history. Idempotent: a table already holding rows is left untouched, so
++            // this is a no-op on GHC's own already-populated database and only does anything on a
++            // genuinely fresh install.
++            try
++            {
++                using var institutionDataScope = app.Services.CreateScope();
++                var institutionDataCtx = institutionDataScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
++                if (await institutionDataCtx.Database.CanConnectAsync())
++                {
++                    var realDataDirectory = app.Configuration[ConfigKeys.RealDataPath];
++                    await InstitutionDataSeeder.SyncAsync(institutionDataCtx, app.Logger, realDataDirectory);
++                }
++            }
++            catch (Exception ex)
++            {
++                app.Logger.LogWarning(ex, "Institution data seed skipped — table may not exist yet.");
++            }
++
+             // 3. Publish ratified constitution from Data/Seed/constitution.json (TODO 36.3)
+             try
+             {
+@@ -95,6 +114,30 @@ namespace GHCAA.API.Extensions
+             {
+                 app.Logger.LogWarning(ex, "Protected SuperAdmin restore skipped.");
+             }
++
++            // 6. Force a password reset on existing accounts — off by default. An admin turns this
++            // on for one deploy (e.g. after a credential exposure) and back off afterward; it isn't
++            // meant to stay on permanently. Only touches rows that don't already have the flag set,
++            // so leaving it on for more than one boot doesn't do anything further.
++            if (app.Configuration.GetValue<bool>(ConfigKeys.ForcePasswordResetOnBoot))
++            {
++                try
++                {
++                    using var passwordResetScope = app.Services.CreateScope();
++                    var passwordResetCtx = passwordResetScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
++                    if (await passwordResetCtx.Database.CanConnectAsync())
++                    {
++                        var affected = await passwordResetCtx.Users
++                            .Where(u => !u.MustChangePassword)
++                            .ExecuteUpdateAsync(s => s.SetProperty(u => u.MustChangePassword, true));
++                        app.Logger.LogWarning("ForcePasswordResetOnBoot is enabled — flagged {Count} account(s) for mandatory password reset.", affected);
++                    }
++                }
++                catch (Exception ex)
++                {
++                    app.Logger.LogWarning(ex, "Forced password reset skipped.");
++                }
++            }
+         }
+ 
+         private static void OverrideEFCoreMigratedData(ApplicationDbContext context)
+diff --git a/GHCAA.Application/DTOs/OrgConfigDto.cs b/GHCAA.Application/DTOs/OrgConfigDto.cs
+index e0f66abb..b58c11b4 100644
+--- a/GHCAA.Application/DTOs/OrgConfigDto.cs
++++ b/GHCAA.Application/DTOs/OrgConfigDto.cs
+@@ -16,6 +16,18 @@ namespace GHCAA.Application.DTOs
+         public FeatureToggleDto Features { get; init; } = new();
+         public WorkflowDto Workflow { get; init; } = new();
+         public LocalizationDto Localization { get; init; } = new();
++        // General governing-document registry (bylaws, policies, amendment PDFs). Separate from
++        // Branding.ConstitutionPdfUrl, which stays as the one link the public constitution page has
++        // always used — this is the broader list an admin can add to without touching that field.
++        public List<DocumentEntryDto> Documents { get; init; } = new();
++    }
++
++    public record DocumentEntryDto
++    {
++        public string Label { get; init; } = string.Empty;
++        public string Url { get; init; } = string.Empty;
++        public string Version { get; init; } = string.Empty;
++        public string Group { get; init; } = string.Empty;
+     }
+ 
+     public record BrandingDto
+@@ -104,7 +116,6 @@ namespace GHCAA.Application.DTOs
+         public bool OtpVerificationRequired { get; init; } = true;
+         public string DefaultMembershipType { get; init; } = "General";
+         public bool AdminEmailOnNewRegistration { get; init; } = true;
+-        public List<string> MembershipTypes { get; init; } = [];
+     }
+ 
+     public record LocalizationDto
+diff --git a/GHCAA.Domain/Constants.cs b/GHCAA.Domain/Constants.cs
+index c64fc336..dc5f4a45 100644
+--- a/GHCAA.Domain/Constants.cs
++++ b/GHCAA.Domain/Constants.cs
+@@ -58,10 +58,12 @@ namespace GHCAA.Domain
+             public const string ClientUrl = "AppSettings:ClientUrl";
+             public const string ProtectedSuperAdmins = "AppSettings:ProtectedSuperAdmins";
+             public const string SuperAdminBootstrapPasswordFilePath = "AppSettings:SuperAdminBootstrapPasswordFilePath";
++            public const string RealDataPath = "AppSettings:RealDataPath";
+             public const string SystemAdminId = "GeneralSettings:SystemAdminId";
+             public const string PortalBaseUrlOverride = "GeneralSettings:PortalBaseUrl";
+             public const string SSLCommerzSandboxUrl = "PaymentGateways:SSLCommerz:SandboxUrl";
+             public const string SSLCommerzProductionUrl = "PaymentGateways:SSLCommerz:ProductionUrl";
++            public const string ForcePasswordResetOnBoot = "AppSettings:ForcePasswordResetOnBoot";
+         }
+ 
+         public static class TemplateCodes
+diff --git a/GHCAA.Infrastructure/Services/MemberService.cs b/GHCAA.Infrastructure/Services/MemberService.cs
+index b6997732..1858a6f7 100644
+--- a/GHCAA.Infrastructure/Services/MemberService.cs
++++ b/GHCAA.Infrastructure/Services/MemberService.cs
+@@ -84,7 +84,7 @@ namespace GHCAA.Infrastructure.Services
+                 await EnsureNoDuplicateMemberAsync(dto, cancellationToken);
+ 
+                 var assignedType = await ResolveAssignedMembershipTypeAsync();
+-                member = BuildMemberFromDto(dto, assignedType);
++                member = await BuildMemberFromDtoAsync(dto, assignedType, cancellationToken);
+                 await AddAcademicHistoryAsync(member, dto.AcademicHistory, cancellationToken);
+                 AddProfessionalHistory(member, dto.ProfessionalHistory);
+ 
+@@ -159,7 +159,7 @@ namespace GHCAA.Infrastructure.Services
+                 : Enums.MembershipType.General;
+         }
+ 
+-        private Member BuildMemberFromDto(MemberRegistrationDto dto, Enums.MembershipType assignedType)
++        private async Task<Member> BuildMemberFromDtoAsync(MemberRegistrationDto dto, Enums.MembershipType assignedType, CancellationToken cancellationToken)
+         {
+             var member = new Member
+             {
+@@ -205,20 +205,20 @@ namespace GHCAA.Infrastructure.Services
+             }
+ 
+             // Generate Membership Number: GHC + YY + MM + (last 3 digit max + 1)
+-            member.MembershipNumber = GenerateMembershipNumber();
++            member.MembershipNumber = await GenerateMembershipNumberAsync(cancellationToken);
+             return member;
+         }
+ 
+-        private string GenerateMembershipNumber()
++        private async Task<string> GenerateMembershipNumberAsync(CancellationToken cancellationToken)
+         {
+             var now = DateTime.UtcNow;
+             var prefix = $"GHC{now:yyMM}";
+ 
+             // 24.29: Order by Id (insertion order) to avoid lexicographic rollover at 999→1000.
+-            var lastMember = _db.Members
++            var lastMember = await _db.Members
+                 .Where(m => m.MembershipNumber != null && m.MembershipNumber.StartsWith(prefix))
+                 .OrderByDescending(m => m.Id)
+-                .FirstOrDefault();
++                .FirstOrDefaultAsync(cancellationToken);
+ 
+             int nextId = 1;
+             if (lastMember?.MembershipNumber != null && lastMember.MembershipNumber.Length > prefix.Length)
+diff --git a/GHCAA.Infrastructure/Services/OrgConfigService.cs b/GHCAA.Infrastructure/Services/OrgConfigService.cs
+index eb11c419..b8e046be 100644
+--- a/GHCAA.Infrastructure/Services/OrgConfigService.cs
++++ b/GHCAA.Infrastructure/Services/OrgConfigService.cs
+@@ -162,9 +162,7 @@ namespace GHCAA.Infrastructure.Services
+             Workflow = new()
+             {
+                 MemberApprovalMode = "ManualReview",
+-                DefaultMembershipType = "General",
+-                // Derived from enum so adding/removing a type requires only one change in Enums.cs
+-                MembershipTypes = Enum.GetNames<Enums.MembershipType>().ToList()
++                DefaultMembershipType = "General"
+             },
+             Localization = new()
+             {
+@@ -314,6 +312,16 @@ namespace GHCAA.Infrastructure.Services
+                         }
+                     }
+                 }
++            },
++            Documents = new List<DocumentEntryDto>
++            {
++                new()
++                {
++                    Label = "GHCAA Constitution",
++                    Url = "/assets/GHCAA Constitution V4.2.pdf",
++                    Version = "4.2",
++                    Group = "Governance"
++                }
+             }
+         };
+     }
+diff --git a/GHCAA.Mobile/lib/core/config/org_config.dart b/GHCAA.Mobile/lib/core/config/org_config.dart
+index 648ddc91..128a12e3 100644
+--- a/GHCAA.Mobile/lib/core/config/org_config.dart
++++ b/GHCAA.Mobile/lib/core/config/org_config.dart
+@@ -212,14 +212,12 @@ class OrgWorkflow {
+   final bool otpVerificationRequired;
+   final String defaultMembershipType;
+   final bool adminEmailOnNewRegistration;
+-  final List<String> membershipTypes;
+ 
+   OrgWorkflow({
+     required this.memberApprovalMode,
+     required this.otpVerificationRequired,
+     required this.defaultMembershipType,
+     required this.adminEmailOnNewRegistration,
+-    required this.membershipTypes,
+   });
+ 
+   factory OrgWorkflow.fromJson(Map<String, dynamic> json) {
+@@ -228,18 +226,31 @@ class OrgWorkflow {
+       otpVerificationRequired: json['otpVerificationRequired'] ?? true,
+       defaultMembershipType: json['defaultMembershipType'] ?? 'General',
+       adminEmailOnNewRegistration: json['adminEmailOnNewRegistration'] ?? true,
+-      membershipTypes: (json['membershipTypes'] as List<dynamic>?)
+-              ?.map((e) => e.toString())
+-              .toList() ??
+-          [
+-            'Founding',
+-            'Executive',
+-            'General',
+-            'Associate',
+-            'Honorary',
+-            'Advisory',
+-            'Guest'
+-          ],
++    );
++  }
++}
++
++/// Governing-document registry entry (bylaws, policies, amendment PDFs).
++/// Matches DocumentEntryDto.cs / org-config.model.ts's DocumentEntry.
++class DocumentEntry {
++  final String label;
++  final String url;
++  final String version;
++  final String group;
++
++  DocumentEntry({
++    required this.label,
++    required this.url,
++    required this.version,
++    required this.group,
++  });
++
++  factory DocumentEntry.fromJson(Map<String, dynamic> json) {
++    return DocumentEntry(
++      label: json['label'] ?? '',
++      url: json['url'] ?? '',
++      version: json['version'] ?? '',
++      group: json['group'] ?? '',
+     );
+   }
+ }
+@@ -379,6 +390,7 @@ class OrgConfig {
+   final OrgWorkflow workflow;
+   final Map<String, LocalePack> locales;
+   final DateFormatConfig dateFormat;
++  final List<DocumentEntry> documents;
+ 
+   OrgConfig({
+     required this.orgId,
+@@ -391,6 +403,7 @@ class OrgConfig {
+     required this.workflow,
+     required this.locales,
+     required this.dateFormat,
++    this.documents = const [],
+   });
+ 
+   factory OrgConfig.fromJson(Map<String, dynamic> json) {
+@@ -423,6 +436,10 @@ class OrgConfig {
+             localizationJson['dateFormat'] ??
+             localizationJson['displayDateFormat'],
+       ),
++      documents: (json['documents'] as List<dynamic>?)
++              ?.map((e) => DocumentEntry.fromJson(e as Map<String, dynamic>))
++              .toList() ??
++          const [],
+     );
+   }
+ 
+@@ -487,17 +504,9 @@ class OrgConfig {
+           otpVerificationRequired: true,
+           defaultMembershipType: 'General',
+           adminEmailOnNewRegistration: true,
+-          membershipTypes: [
+-            'Founding',
+-            'Executive',
+-            'General',
+-            'Associate',
+-            'Honorary',
+-            'Advisory',
+-            'Guest'
+-          ],
+         ),
+         dateFormat: DateFormatConfig.ddMmYyyyConfig,
++        documents: const [],
+         locales: {
+           'en': LocalePack(
+             orgName: 'Alumni Association',
+diff --git a/GHCAA.Mobile/test/org_config_service_test.dart b/GHCAA.Mobile/test/org_config_service_test.dart
+index c8f0dcbd..5a81aca6 100644
+--- a/GHCAA.Mobile/test/org_config_service_test.dart
++++ b/GHCAA.Mobile/test/org_config_service_test.dart
+@@ -21,6 +21,14 @@ void main() {
+     'enabledGatewayMethods': ['Manual'],
+     'features': {'enableFundraising': false},
+     'localization': {'dateFormat': 'MM/dd/yyyy'},
++    'documents': [
++      {
++        'label': 'Network Bylaws',
++        'url': '/assets/bylaws.pdf',
++        'version': '1.0',
++        'group': 'Governance',
++      }
++    ],
+   };
+ 
+   setUp(() {
+@@ -47,10 +55,28 @@ void main() {
+     expect(config.enabledGatewayMethods, ['Manual']);
+     expect(config.features.enableFundraising, isFalse);
+     expect(config.dateFormat.identifier, DateFormatConfig.mmDdYyyy);
++    expect(config.documents, hasLength(1));
++    expect(config.documents.single.label, 'Network Bylaws');
++    expect(config.documents.single.group, 'Governance');
+     final prefs = await SharedPreferences.getInstance();
+     expect(prefs.getString('org_config_cache'), isNotEmpty);
+   });
+ 
++  test('defaults documents to an empty list when the field is absent',
++      () async {
++    final service = OrgConfigService(serviceDio((request) => Response(
++          requestOptions: request,
++          statusCode: 200,
++          data: {
++            'branding': {'appName': 'No Docs Association'},
++          },
++        )));
++
++    final config = await service.load();
++
++    expect(config.documents, isEmpty);
++  });
++
+   test('uses cached configuration when the network is unavailable', () async {
+     final prefs = await SharedPreferences.getInstance();
+     await prefs.setString('org_config_cache',
+diff --git a/GHCAA.Tests/Data/SeedDataIntegrityTests.cs b/GHCAA.Tests/Data/SeedDataIntegrityTests.cs
+index b2747a2c..9c7170b5 100644
+--- a/GHCAA.Tests/Data/SeedDataIntegrityTests.cs
++++ b/GHCAA.Tests/Data/SeedDataIntegrityTests.cs
+@@ -1,166 +1,166 @@
+-using System;
+-using System.Collections.Generic;
+-using System.IO;
+-using System.Linq;
+-using System.Reflection;
+-using System.Text.Json;
+-using FluentAssertions;
+-using GHCAA.Domain.Models;
+-using NUnit.Framework;
+-
+-namespace GHCAA.Tests.Data
+-{
+-    // Regression coverage for the "Category" vs "ArticleCategory" bug: LoadSeed<T> deserializes
+-    // with System.Text.Json's default options, which SILENTLY IGNORES any JSON key that doesn't
+-    // match a property on T (no exception, no warning) — so a stale/renamed field name in a seed
+-    // file never surfaces until someone notices the wrong data live. Every one of these files is
+-    // deserialized into a real EF entity at boot via ApplicationDbContext.LoadSeed<T>; this test
+-    // parses each file's raw JSON keys and asserts every one matches a real public property on
+-    // its target type (case-insensitively, matching System.Text.Json's own default matching),
+-    // so a future rename/typo fails a test instead of silently defaulting a column in production.
+-    [TestFixture]
+-    public class SeedDataIntegrityTests
+-    {
+-        private static readonly (string File, Type EntityType)[] SeedFiles =
+-        {
+-            ("lookups.json", typeof(LookupItem)),
+-            ("email_templates.json", typeof(EmailTemplate)),
+-            ("roles.json", typeof(Role)),
+-            ("members.json", typeof(Member)),
+-            ("users.json", typeof(User)),
+-            ("payment_histories.json", typeof(PaymentHistory)),
+-            ("fee_configs.json", typeof(MembershipFeeConfig)),
+-            ("payment_configurations.json", typeof(PaymentConfiguration)),
+-            ("ec_periods.json", typeof(ECPeriod)),
+-            ("ec_members.json", typeof(ECMember)),
+-            ("news.json", typeof(NewsPost)),
+-            ("events.json", typeof(AlumniEvent)),
+-            ("jobs.json", typeof(JobOpportunity)),
+-            ("themes.json", typeof(SpecialDayTheme)),
+-            ("galleries.json", typeof(EventGallery)),
+-            ("photos.json", typeof(EventPhoto)),
+-            ("academic_records.json", typeof(AcademicRecord)),
+-            ("professional_records.json", typeof(ProfessionalRecord)),
+-            ("membership_histories.json", typeof(MembershipHistory)),
+-            ("membership_dues.json", typeof(MembershipDue)),
+-            ("financial_records.json", typeof(FinancialRecord)),
+-            ("file_uploads.json", typeof(FileUpload)),
+-            ("saved_payment_methods.json", typeof(SavedPaymentMethod)),
+-            ("site_content.json", typeof(SiteContent)),
+-        };
+-
+-        // Class 3 files (docs/SEED_CLASSIFICATION.md) moved out of Data/Seed into the GHC profile
+-        // pack's demo-data folder — see Work Package 62.32. Everything else stays structural/Class 2
+-        // and is still read from Data/Seed.
+-        private static readonly HashSet<string> DemoDataFiles = new(StringComparer.OrdinalIgnoreCase)
+-        {
+-            "members.json", "users.json", "ec_periods.json", "ec_members.json", "news.json",
+-            "events.json", "galleries.json", "photos.json", "academic_records.json",
+-            "professional_records.json", "membership_histories.json", "membership_dues.json",
+-            "financial_records.json", "payment_histories.json",
+-        };
+-
+-        private static string RepoRoot()
+-        {
+-            var dir = AppDomain.CurrentDomain.BaseDirectory;
+-            for (var i = 0; i < 6; i++)
+-            {
+-                if (Directory.Exists(Path.Combine(dir, "GHCAA.Infrastructure")) && Directory.Exists(Path.Combine(dir, "profiles")))
+-                    return dir;
+-                dir = Path.GetFullPath(Path.Combine(dir, ".."));
+-            }
+-            throw new DirectoryNotFoundException("Could not locate the repo root (GHCAA.Infrastructure + profiles) from test output directory.");
+-        }
+-
+-        private static string SeedDirectory() => Path.Combine(RepoRoot(), "GHCAA.Infrastructure", "Data", "Seed");
+-
+-        private static string SeedFilePath(string fileName, string profile = "ghc") => DemoDataFiles.Contains(fileName)
+-            ? Path.Combine(RepoRoot(), "profiles", profile, "demo-data", fileName)
+-            : Path.Combine(SeedDirectory(), fileName);
+-
+-        [TestCaseSource(nameof(SeedFiles))]
+-        public void SeedFile_EveryJsonKey_MatchesARealEntityProperty((string File, Type EntityType) seed)
+-        {
+-            ValidateSeedFileKeys(SeedFilePath(seed.File, "ghc"), seed.File, seed.EntityType);
+-
+-            if (DemoDataFiles.Contains(seed.File))
+-            {
+-                ValidateSeedFileKeys(SeedFilePath(seed.File, "default"), seed.File, seed.EntityType);
+-            }
+-        }
+-
+-        private static void ValidateSeedFileKeys(string path, string fileName, Type entityType)
+-        {
+-            File.Exists(path).Should().BeTrue($"{fileName} should exist at {path}");
+-
+-            var json = File.ReadAllText(path);
+-            using var doc = JsonDocument.Parse(json);
+-            doc.RootElement.ValueKind.Should().Be(JsonValueKind.Array, $"{fileName} is expected to be a JSON array of {entityType.Name}");
+-
+-            var validNames = new HashSet<string>(
+-                entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+-                    .Select(p => p.Name),
+-                StringComparer.OrdinalIgnoreCase);
+-
+-            var unknownKeys = new List<string>();
+-            foreach (var record in doc.RootElement.EnumerateArray())
+-            {
+-                foreach (var prop in record.EnumerateObject())
+-                {
+-                    if (!validNames.Contains(prop.Name))
+-                        unknownKeys.Add(prop.Name);
+-                }
+-            }
+-
+-            unknownKeys.Should().BeEmpty(
+-                $"every key in {fileName} at {path} must match a public property on {entityType.Name} — " +
+-                "System.Text.Json silently drops unmatched keys instead of failing, which is exactly " +
+-                "how the 'Category' (should be 'ArticleCategory') bug reached production undetected.");
+-        }
+-
+-        // Regression coverage for the "PhotoPath": "..." bug (GHCAA.Infrastructure/Data/Seed/photos.json's
+-        // EventPhoto Id=1 live-DB row, mirroring the earlier news.json "ImageUrl": "..." incident): a
+-        // path/URL field can hold a syntactically valid JSON string that is still garbage — punctuation-only
+-        // placeholder text left over from manual data entry. Key-matching alone doesn't catch this since the
+-        // key is correct; this asserts every *Path/*Url string value is either null/empty or contains at
+-        // least one alphanumeric character, so a bare "..." placeholder fails fast in CI instead of only
+-        // surfacing as a live 404 in the browser.
+-        [TestCaseSource(nameof(SeedFiles))]
+-        public void SeedFile_EveryPathOrUrlValue_IsNotPunctuationPlaceholder((string File, Type EntityType) seed)
+-        {
+-            ValidateSeedFilePaths(SeedFilePath(seed.File, "ghc"), seed.File);
+-
+-            if (DemoDataFiles.Contains(seed.File))
+-            {
+-                ValidateSeedFilePaths(SeedFilePath(seed.File, "default"), seed.File);
+-            }
+-        }
+-
+-        private static void ValidateSeedFilePaths(string path, string fileName)
+-        {
+-            var json = File.ReadAllText(path);
+-            using var doc = JsonDocument.Parse(json);
+-
+-            var badValues = new List<string>();
+-            foreach (var record in doc.RootElement.EnumerateArray())
+-            {
+-                foreach (var prop in record.EnumerateObject())
+-                {
+-                    if (prop.Value.ValueKind != JsonValueKind.String) continue;
+-                    if (!prop.Name.EndsWith("Path", StringComparison.OrdinalIgnoreCase) &&
+-                        !prop.Name.EndsWith("Url", StringComparison.OrdinalIgnoreCase)) continue;
+-
+-                    var value = prop.Value.GetString();
+-                    if (string.IsNullOrEmpty(value)) continue;
+-                    if (!value.Any(char.IsLetterOrDigit))
+-                        badValues.Add($"{prop.Name}=\"{value}\"");
+-                }
+-            }
+-
+-            badValues.Should().BeEmpty(
+-                $"every *Path/*Url value in {fileName} at {path} must contain real content, not punctuation-only " +
+-                "placeholder text like \"...\" — this exact pattern reached both news.json and photos.json " +
+-                "in production and only surfaced as a browser 404, not a deserialization failure.");
+-        }
+-    }
+-}
++using System;
++using System.Collections.Generic;
++using System.IO;
++using System.Linq;
++using System.Reflection;
++using System.Text.Json;
++using FluentAssertions;
++using GHCAA.Domain.Models;
++using NUnit.Framework;
++
++namespace GHCAA.Tests.Data
++{
++    // Regression coverage for the "Category" vs "ArticleCategory" bug: LoadSeed<T> deserializes
++    // with System.Text.Json's default options, which SILENTLY IGNORES any JSON key that doesn't
++    // match a property on T (no exception, no warning) — so a stale/renamed field name in a seed
++    // file never surfaces until someone notices the wrong data live. Every one of these files is
++    // deserialized into a real EF entity at boot via ApplicationDbContext.LoadSeed<T>; this test
++    // parses each file's raw JSON keys and asserts every one matches a real public property on
++    // its target type (case-insensitively, matching System.Text.Json's own default matching),
++    // so a future rename/typo fails a test instead of silently defaulting a column in production.
++    [TestFixture]
++    public class SeedDataIntegrityTests
++    {
++        private static readonly (string File, Type EntityType)[] SeedFiles =
++        {
++            ("lookups.json", typeof(LookupItem)),
++            ("email_templates.json", typeof(EmailTemplate)),
++            ("roles.json", typeof(Role)),
++            ("members.json", typeof(Member)),
++            ("users.json", typeof(User)),
++            ("payment_histories.json", typeof(PaymentHistory)),
++            ("fee_configs.json", typeof(MembershipFeeConfig)),
++            ("payment_configurations.json", typeof(PaymentConfiguration)),
++            ("ec_periods.json", typeof(ECPeriod)),
++            ("ec_members.json", typeof(ECMember)),
++            ("news.json", typeof(NewsPost)),
++            ("events.json", typeof(AlumniEvent)),
++            ("jobs.json", typeof(JobOpportunity)),
++            ("themes.json", typeof(SpecialDayTheme)),
++            ("galleries.json", typeof(EventGallery)),
++            ("photos.json", typeof(EventPhoto)),
++            ("academic_records.json", typeof(AcademicRecord)),
++            ("professional_records.json", typeof(ProfessionalRecord)),
++            ("membership_histories.json", typeof(MembershipHistory)),
++            ("membership_dues.json", typeof(MembershipDue)),
++            ("financial_records.json", typeof(FinancialRecord)),
++            ("file_uploads.json", typeof(FileUpload)),
++            ("saved_payment_methods.json", typeof(SavedPaymentMethod)),
++            ("site_content.json", typeof(SiteContent)),
++        };
++
++        // Tier 3 files (docs/SEED_CLASSIFICATION.md) moved out of Data/Seed into the GHC profile
++        // pack's demo-data folder — see Work Package 62.32. Everything else stays structural/Tier 2
++        // and is still read from Data/Seed.
++        private static readonly HashSet<string> DemoDataFiles = new(StringComparer.OrdinalIgnoreCase)
++        {
++            "members.json", "users.json", "ec_periods.json", "ec_members.json", "news.json",
++            "events.json", "galleries.json", "photos.json", "academic_records.json",
++            "professional_records.json", "membership_histories.json", "membership_dues.json",
++            "financial_records.json", "payment_histories.json",
++        };
++
++        private static string RepoRoot()
++        {
++            var dir = AppDomain.CurrentDomain.BaseDirectory;
++            for (var i = 0; i < 6; i++)
++            {
++                if (Directory.Exists(Path.Combine(dir, "GHCAA.Infrastructure")) && Directory.Exists(Path.Combine(dir, "profiles")))
++                    return dir;
++                dir = Path.GetFullPath(Path.Combine(dir, ".."));
++            }
++            throw new DirectoryNotFoundException("Could not locate the repo root (GHCAA.Infrastructure + profiles) from test output directory.");
++        }
++
++        private static string SeedDirectory() => Path.Combine(RepoRoot(), "GHCAA.Infrastructure", "Data", "Seed");
++
++        private static string SeedFilePath(string fileName, string profile = "ghc") => DemoDataFiles.Contains(fileName)
++            ? Path.Combine(RepoRoot(), "profiles", profile, "demo-data", fileName)
++            : Path.Combine(SeedDirectory(), fileName);
++
++        [TestCaseSource(nameof(SeedFiles))]
++        public void SeedFile_EveryJsonKey_MatchesARealEntityProperty((string File, Type EntityType) seed)
++        {
++            ValidateSeedFileKeys(SeedFilePath(seed.File, "ghc"), seed.File, seed.EntityType);
++
++            if (DemoDataFiles.Contains(seed.File))
++            {
++                ValidateSeedFileKeys(SeedFilePath(seed.File, "default"), seed.File, seed.EntityType);
++            }
++        }
++
++        private static void ValidateSeedFileKeys(string path, string fileName, Type entityType)
++        {
++            File.Exists(path).Should().BeTrue($"{fileName} should exist at {path}");
++
++            var json = File.ReadAllText(path);
++            using var doc = JsonDocument.Parse(json);
++            doc.RootElement.ValueKind.Should().Be(JsonValueKind.Array, $"{fileName} is expected to be a JSON array of {entityType.Name}");
++
++            var validNames = new HashSet<string>(
++                entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
++                    .Select(p => p.Name),
++                StringComparer.OrdinalIgnoreCase);
++
++            var unknownKeys = new List<string>();
++            foreach (var record in doc.RootElement.EnumerateArray())
++            {
++                foreach (var prop in record.EnumerateObject())
++                {
++                    if (!validNames.Contains(prop.Name))
++                        unknownKeys.Add(prop.Name);
++                }
++            }
++
++            unknownKeys.Should().BeEmpty(
++                $"every key in {fileName} at {path} must match a public property on {entityType.Name} — " +
++                "System.Text.Json silently drops unmatched keys instead of failing, which is exactly " +
++                "how the 'Category' (should be 'ArticleCategory') bug reached production undetected.");
++        }
++
++        // Regression coverage for the "PhotoPath": "..." bug (GHCAA.Infrastructure/Data/Seed/photos.json's
++        // EventPhoto Id=1 live-DB row, mirroring the earlier news.json "ImageUrl": "..." incident): a
++        // path/URL field can hold a syntactically valid JSON string that is still garbage — punctuation-only
++        // placeholder text left over from manual data entry. Key-matching alone doesn't catch this since the
++        // key is correct; this asserts every *Path/*Url string value is either null/empty or contains at
++        // least one alphanumeric character, so a bare "..." placeholder fails fast in CI instead of only
++        // surfacing as a live 404 in the browser.
++        [TestCaseSource(nameof(SeedFiles))]
++        public void SeedFile_EveryPathOrUrlValue_IsNotPunctuationPlaceholder((string File, Type EntityType) seed)
++        {
++            ValidateSeedFilePaths(SeedFilePath(seed.File, "ghc"), seed.File);
++
++            if (DemoDataFiles.Contains(seed.File))
++            {
++                ValidateSeedFilePaths(SeedFilePath(seed.File, "default"), seed.File);
++            }
++        }
++
++        private static void ValidateSeedFilePaths(string path, string fileName)
++        {
++            var json = File.ReadAllText(path);
++            using var doc = JsonDocument.Parse(json);
++
++            var badValues = new List<string>();
++            foreach (var record in doc.RootElement.EnumerateArray())
++            {
++                foreach (var prop in record.EnumerateObject())
++                {
++                    if (prop.Value.ValueKind != JsonValueKind.String) continue;
++                    if (!prop.Name.EndsWith("Path", StringComparison.OrdinalIgnoreCase) &&
++                        !prop.Name.EndsWith("Url", StringComparison.OrdinalIgnoreCase)) continue;
++
++                    var value = prop.Value.GetString();
++                    if (string.IsNullOrEmpty(value)) continue;
++                    if (!value.Any(char.IsLetterOrDigit))
++                        badValues.Add($"{prop.Name}=\"{value}\"");
++                }
++            }
++
++            badValues.Should().BeEmpty(
++                $"every *Path/*Url value in {fileName} at {path} must contain real content, not punctuation-only " +
++                "placeholder text like \"...\" — this exact pattern reached both news.json and photos.json " +
++                "in production and only surfaced as a browser 404, not a deserialization failure.");
++        }
++    }
++}
+diff --git a/GHCAA.Tests/OrgConfig/golden/org-config-ghc.golden.json b/GHCAA.Tests/OrgConfig/golden/org-config-ghc.golden.json
+index c3273ff7..93660846 100644
+--- a/GHCAA.Tests/OrgConfig/golden/org-config-ghc.golden.json
++++ b/GHCAA.Tests/OrgConfig/golden/org-config-ghc.golden.json
+@@ -71,16 +71,7 @@
+     "MemberApprovalMode": "ManualReview",
+     "OtpVerificationRequired": true,
+     "DefaultMembershipType": "General",
+-    "AdminEmailOnNewRegistration": true,
+-    "MembershipTypes": [
+-      "Founding",
+-      "Executive",
+-      "General",
+-      "Associate",
+-      "Honorary",
+-      "Advisory",
+-      "Guest"
+-    ]
++    "AdminEmailOnNewRegistration": true
+   },
+   "Localization": {
+     "DateFormat": "dd-MM-yyyy",
+@@ -219,5 +210,13 @@
+         }
+       }
+     }
+-  }
++  },
++  "Documents": [
++    {
++      "Label": "GHCAA Constitution",
++      "Url": "/assets/GHCAA Constitution V4.2.pdf",
++      "Version": "4.2",
++      "Group": "Governance"
++    }
++  ]
+ }
+\ No newline at end of file
+diff --git a/GHCAA.Web/scripts/generate-org-config-fallback.mjs b/GHCAA.Web/scripts/generate-org-config-fallback.mjs
+index 453f4f94..8a78c23c 100644
+--- a/GHCAA.Web/scripts/generate-org-config-fallback.mjs
++++ b/GHCAA.Web/scripts/generate-org-config-fallback.mjs
+@@ -140,13 +140,18 @@ function buildFallback(cfg) {
+             memberApprovalMode: cfg.Workflow.MemberApprovalMode,
+             otpVerificationRequired: !!cfg.Workflow.OtpVerificationRequired,
+             defaultMembershipType: cfg.Workflow.DefaultMembershipType,
+-            adminEmailOnNewRegistration: !!cfg.Workflow.AdminEmailOnNewRegistration,
+-            membershipTypes: cfg.Workflow.MembershipTypes ?? []
++            adminEmailOnNewRegistration: !!cfg.Workflow.AdminEmailOnNewRegistration
+         },
+         localization: {
+             dateFormat: cfg.Localization?.DateFormat,
+             locales
+-        }
++        },
++        documents: (cfg.Documents ?? []).map(d => ({
++            label: d.Label,
++            url: d.Url,
++            version: d.Version,
++            group: d.Group
++        }))
+     };
+ }
+ 
+diff --git a/GHCAA.Web/src/app/admin/org-config/org-config.html b/GHCAA.Web/src/app/admin/org-config/org-config.html
+index 42760051..42017ffa 100644
+--- a/GHCAA.Web/src/app/admin/org-config/org-config.html
++++ b/GHCAA.Web/src/app/admin/org-config/org-config.html
+@@ -179,10 +179,6 @@
+         <label>Default Membership Type</label>
+         <input type="text" [(ngModel)]="config.workflow.defaultMembershipType" name="defaultMembershipType">
+       </div>
+-      <div class="form-group full-span">
+-        <label>Membership Types <small class="text-muted">(comma separated)</small></label>
+-        <input type="text" [(ngModel)]="membershipTypesCsv" name="membershipTypesCsv">
+-      </div>
+     </div>
+     <div class="toggle-grid">
+       <label class="toggle-row">
+diff --git a/GHCAA.Web/src/app/admin/org-config/org-config.ts b/GHCAA.Web/src/app/admin/org-config/org-config.ts
+index 4e46e147..5ac4d8b3 100644
+--- a/GHCAA.Web/src/app/admin/org-config/org-config.ts
++++ b/GHCAA.Web/src/app/admin/org-config/org-config.ts
+@@ -33,7 +33,6 @@ export class AdminOrgConfig implements OnInit {
+   activeTab = signal<TabKey>('branding');
+   config: OrgConfig | null = null;
+   localizationJson = '';
+-  membershipTypesCsv = '';
+   isSaving = false;
+   isLoading = false;
+   successMessage = '';
+@@ -97,10 +96,6 @@ export class AdminOrgConfig implements OnInit {
+           ...this.config.contact,
+           phoneNumbers: this.config.contact.phoneNumbers.map(p => p.trim()).filter(Boolean)
+         },
+-        workflow: {
+-          ...this.config.workflow,
+-          membershipTypes: this.membershipTypesCsv.split(',').map(t => t.trim()).filter(Boolean)
+-        },
+         localization: {
+           ...JSON.parse(this.localizationJson),
+           dateFormat: this.config.localization?.dateFormat ?? 'dd-MM-yyyy'
+@@ -126,6 +121,5 @@ export class AdminOrgConfig implements OnInit {
+       null,
+       2
+     );
+-    this.membershipTypesCsv = (cfg.workflow?.membershipTypes ?? []).join(', ');
+   }
+ }
+diff --git a/GHCAA.Web/src/app/admin/payment-config/admin-payment-config.scss b/GHCAA.Web/src/app/admin/payment-config/admin-payment-config.scss
+index 985fcbea..e26a6db1 100644
+--- a/GHCAA.Web/src/app/admin/payment-config/admin-payment-config.scss
++++ b/GHCAA.Web/src/app/admin/payment-config/admin-payment-config.scss
+@@ -42,8 +42,11 @@
+   }
+ 
+   select {
+-      /* Gold chevron: brand accent, visible on both light and dark selects (a data-URI cannot reference a CSS var) */
+-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23c5a059'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
++      /* Gold chevron: OrgConfigService writes --select-chevron-gold as a full url() value
++         keyed to the profile's --accent-color (a data-URI's stroke can't reference var()
++         directly, but a custom property holding the whole url() can). The literal fallback
++         here is GHC's own gold, used only before that effect has run. */
++      background-image: var(--select-chevron-gold, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23c5a059'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")) !important;
+       background-repeat: no-repeat !important;
+       background-position: right 1.25rem center !important;
+       background-size: 1.25rem !important;
+diff --git a/GHCAA.Web/src/app/core/config/org-config-fallback.generated.ts b/GHCAA.Web/src/app/core/config/org-config-fallback.generated.ts
+index 86715e25..e33ee983 100644
+--- a/GHCAA.Web/src/app/core/config/org-config-fallback.generated.ts
++++ b/GHCAA.Web/src/app/core/config/org-config-fallback.generated.ts
+@@ -71,16 +71,7 @@ export const ORG_CONFIG_FALLBACK: OrgConfig = {
+     "memberApprovalMode": "ManualReview",
+     "otpVerificationRequired": true,
+     "defaultMembershipType": "General",
+-    "adminEmailOnNewRegistration": true,
+-    "membershipTypes": [
+-      "Founding",
+-      "Executive",
+-      "General",
+-      "Associate",
+-      "Honorary",
+-      "Advisory",
+-      "Guest"
+-    ]
++    "adminEmailOnNewRegistration": true
+   },
+   "localization": {
+     "dateFormat": "dd-MM-yyyy",
+@@ -202,5 +193,13 @@ export const ORG_CONFIG_FALLBACK: OrgConfig = {
+         }
+       }
+     }
+-  }
++  },
++  "documents": [
++    {
++      "label": "GHCAA Constitution",
++      "url": "/assets/GHCAA Constitution V4.2.pdf",
++      "version": "4.2",
++      "group": "Governance"
++    }
++  ]
+ };
+diff --git a/GHCAA.Web/src/app/core/models/org-config.model.ts b/GHCAA.Web/src/app/core/models/org-config.model.ts
+index 6ce566a3..a766f407 100644
+--- a/GHCAA.Web/src/app/core/models/org-config.model.ts
++++ b/GHCAA.Web/src/app/core/models/org-config.model.ts
+@@ -69,7 +69,6 @@ export interface OrgWorkflow {
+   otpVerificationRequired: boolean;
+   defaultMembershipType: string;
+   adminEmailOnNewRegistration: boolean;
+-  membershipTypes: string[];
+ }
+ 
+ export interface NavLabels {
+@@ -111,4 +110,12 @@ export interface OrgConfig {
+   features: FeatureToggles;
+   workflow: OrgWorkflow;
+   localization: OrgLocalization;
++  documents?: DocumentEntry[];
++}
++
++export interface DocumentEntry {
++  label: string;
++  url: string;
++  version: string;
++  group: string;
+ }
+diff --git a/GHCAA.Web/src/app/core/services/org-config.service.spec.ts b/GHCAA.Web/src/app/core/services/org-config.service.spec.ts
+index d234285a..d3e5d2f0 100644
+--- a/GHCAA.Web/src/app/core/services/org-config.service.spec.ts
++++ b/GHCAA.Web/src/app/core/services/org-config.service.spec.ts
+@@ -1,8 +1,10 @@
+ import { TestBed } from '@angular/core/testing';
++import { ApplicationRef } from '@angular/core';
+ import { provideHttpClient } from '@angular/common/http';
+ import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+ import { OrgConfigService } from './org-config.service';
++import { ThemeService } from './theme.service';
+ import { API_ENDPOINTS } from '../constants/app.constants';
+ import { OrgConfig } from '../models/org-config.model';
+ import { ORG_CONFIG_FALLBACK } from '../config/org-config-fallback.generated';
+@@ -21,9 +23,20 @@ describe('OrgConfigService', () => {
+         features: { enableEvents: true, enableJobHub: false }
+     } as unknown as OrgConfig;
+ 
++    // Stubbed rather than the real ThemeService: the real one issues its own HTTP call
++    // from an afterNextRender guard, which would need its own httpMock.expectOne() in every
++    // test that ticks the ApplicationRef to flush OrgConfigService's branding effect.
++    const themeServiceStub = { theme: () => 'dark' as 'light' | 'dark' };
++
+     beforeEach(() => {
++        themeServiceStub.theme = () => 'dark';
+         TestBed.configureTestingModule({
+-            providers: [OrgConfigService, provideHttpClient(), provideHttpClientTesting()]
++            providers: [
++                OrgConfigService,
++                provideHttpClient(),
++                provideHttpClientTesting(),
++                { provide: ThemeService, useValue: themeServiceStub }
++            ]
+         });
+         service = TestBed.inject(OrgConfigService);
+         httpMock = TestBed.inject(HttpTestingController);
+@@ -63,6 +76,19 @@ describe('OrgConfigService', () => {
+         expect(service.config()).toEqual(minimalConfig);
+     });
+ 
++    it('loadConfig carries the documents registry through untouched', async () => {
++        const withDocuments = {
++            ...minimalConfig,
++            documents: [{ label: 'Bylaws', url: '/assets/bylaws.pdf', version: '1.0', group: 'Governance' }]
++        } as unknown as OrgConfig;
++
++        const promise = service.loadConfig();
++        httpMock.expectOne(API_ENDPOINTS.CONFIG).flush(withDocuments);
++        await promise;
++
++        expect(service.config()?.documents).toEqual(withDocuments.documents);
++    });
++
+     it('loadConfig falls back to the built-in defaults when the request fails', async () => {
+         // Asserted against ORG_CONFIG_FALLBACK itself, not a hardcoded 'ghcaa'/'GHCAA' literal —
+         // that generated file's content depends on which profile ORG_PROFILE built with (62.52),
+@@ -147,4 +173,74 @@ describe('OrgConfigService', () => {
+             expect(service.config()).not.toEqual(updated);
+         });
+     });
++
++    describe('branding color-token effect', () => {
++        const setConfigAndFlush = (branding: Partial<OrgConfig['branding']>) => {
++            service.config.set({ ...minimalConfig, branding: { ...minimalConfig.branding, ...branding } } as OrgConfig);
++            TestBed.inject(ApplicationRef).tick();
++        };
++
++        afterEach(() => {
++            // Undo cross-test document.documentElement pollution — setProperty/removeProperty
++            // calls in the effect persist on the real DOM element between tests otherwise.
++            const root = document.documentElement.style;
++            ['--primary-color', '--accent-color', '--accent-color-rgb', '--accent-rgb',
++                '--accent-gold-bright', '--accent-gold-dark', '--accent-text', '--shadow-gold',
++                '--gold-gradient', '--tier-founding', '--glass-border', '--select-chevron-gold']
++                .forEach(prop => root.removeProperty(prop));
++        });
++
++        it('does nothing before config has loaded', () => {
++            TestBed.inject(ApplicationRef).tick();
++            expect(document.documentElement.style.getPropertyValue('--accent-color')).toBe('');
++        });
++
++        it('sets the plain accent/primary tokens and their rgb tuple', () => {
++            setConfigAndFlush({ primaryColor: '#111111', accentColor: '#c5a059' });
++            const root = document.documentElement.style;
++            expect(root.getPropertyValue('--primary-color')).toBe('#111111');
++            expect(root.getPropertyValue('--accent-color')).toBe('#c5a059');
++            expect(root.getPropertyValue('--accent-color-rgb')).toBe('197, 160, 89');
++            expect(root.getPropertyValue('--accent-rgb')).toBe('197, 160, 89');
++        });
++
++        it('darkens --accent-gold-dark until it clears 4.5:1 against white', () => {
++            setConfigAndFlush({ accentColor: '#c5a059' });
++            const goldDark = document.documentElement.style.getPropertyValue('--accent-gold-dark');
++            expect(goldDark).not.toBe('#c5a059');
++            expect(goldDark).toMatch(/^#[0-9a-f]{6}$/);
++        });
++
++        it('uses the raw accent (not the AA-clamped one) for --accent-text/--tier-founding in dark theme', () => {
++            themeServiceStub.theme = () => 'dark';
++            setConfigAndFlush({ accentColor: '#c5a059' });
++            const root = document.documentElement.style;
++            expect(root.getPropertyValue('--accent-text')).toBe('#c5a059');
++            expect(root.getPropertyValue('--tier-founding')).toBe('#c5a059');
++        });
++
++        it('uses the AA-clamped values for --accent-text/--tier-founding in light theme', () => {
++            themeServiceStub.theme = () => 'light';
++            setConfigAndFlush({ accentColor: '#c5a059' });
++            const root = document.documentElement.style;
++            expect(root.getPropertyValue('--accent-text')).not.toBe('#c5a059');
++            expect(root.getPropertyValue('--tier-founding')).not.toBe('#c5a059');
++        });
++
++        it('removes the --glass-border override in dark theme, sets a tint in light theme', () => {
++            themeServiceStub.theme = () => 'dark';
++            setConfigAndFlush({ accentColor: '#c5a059' });
++            expect(document.documentElement.style.getPropertyValue('--glass-border')).toBe('');
++
++            themeServiceStub.theme = () => 'light';
++            setConfigAndFlush({ accentColor: '#c5a059' });
++            expect(document.documentElement.style.getPropertyValue('--glass-border')).toBe('rgba(197, 160, 89, 0.12)');
++        });
++
++        it('bakes the accent hex into the --select-chevron-gold data-URI', () => {
++            setConfigAndFlush({ accentColor: '#c5a059' });
++            const chevron = document.documentElement.style.getPropertyValue('--select-chevron-gold');
++            expect(chevron).toContain("stroke='%23c5a059'");
++        });
++    });
+ });
+diff --git a/GHCAA.Web/src/app/core/services/org-config.service.ts b/GHCAA.Web/src/app/core/services/org-config.service.ts
+index d114def0..b5da94c6 100644
+--- a/GHCAA.Web/src/app/core/services/org-config.service.ts
++++ b/GHCAA.Web/src/app/core/services/org-config.service.ts
+@@ -4,27 +4,70 @@ import { API_ENDPOINTS, DEFAULT_DATE_FORMAT, normalizeDateFormat, DateFormat } f
+ import { OrgConfig } from '../models/org-config.model';
+ import { ORG_CONFIG_FALLBACK } from '../config/org-config-fallback.generated';
+ import { tap, firstValueFrom } from 'rxjs';
++import { ThemeService } from './theme.service';
++import { adjustLightness, darkenForContrast, hexToRgb, rgbString } from '../utils/color-math';
+ 
+ @Injectable({
+   providedIn: 'root'
+ })
+ export class OrgConfigService {
+   private http = inject(HttpClient);
++  private themeService = inject(ThemeService);
+   config = signal<OrgConfig | null>(null);
+   readonly dateFormat = computed<DateFormat>(() =>
+     normalizeDateFormat(this.config()?.localization?.dateFormat ?? DEFAULT_DATE_FORMAT)
+   );
+ 
+   constructor() {
+-    // 1b: White-labeling — push tenant branding colors into the CSS custom
+-    // properties consumed throughout styles.scss whenever config resolves/changes.
++    // 1b: White-labeling — push tenant branding colors, and the gold tokens derived from
++    // them, into the CSS custom properties styles.scss consumes, whenever config or the
++    // light/dark theme changes. --accent-gold-dark/--tier-founding/--accent-text are AA
++    // text-contrast values, not plain tints, so they're darkened until they clear 4.5:1 (or
++    // 4.9:1 for the tier heading, matching the floor styles.scss's static values were tuned
++    // to) against a white card rather than derived by a fixed hue/lightness offset.
+     effect(() => {
+       const branding = this.config()?.branding;
+       if (!branding) return;
++      const theme = this.themeService.theme();
+ 
+       const root = document.documentElement.style;
+       if (branding.primaryColor) root.setProperty('--primary-color', branding.primaryColor);
+-      if (branding.accentColor) root.setProperty('--accent-color', branding.accentColor);
++      if (!branding.accentColor) return;
++
++      const accent = branding.accentColor;
++      root.setProperty('--accent-color', accent);
++      const accentRgb = rgbString(hexToRgb(accent));
++      root.setProperty('--accent-color-rgb', accentRgb);
++      root.setProperty('--accent-rgb', accentRgb);
++
++      const goldBright = adjustLightness(accent, 8);
++      const goldGradientDark = adjustLightness(accent, -12);
++      const goldTextDark = darkenForContrast(accent, '#ffffff', 4.5);
++      const tierFoundingLight = darkenForContrast(accent, '#ffffff', 4.9);
++
++      root.setProperty('--accent-gold-bright', goldBright);
++      root.setProperty('--accent-gold-dark', goldTextDark);
++      root.setProperty('--accent-text', theme === 'dark' ? accent : goldTextDark);
++      root.setProperty('--shadow-gold', `0 4px 15px rgba(${accentRgb}, 0.25)`);
++      root.setProperty('--gold-gradient', `linear-gradient(135deg, ${accent} 0%, ${goldBright} 50%, ${goldGradientDark} 100%)`);
++      root.setProperty('--tier-founding', theme === 'dark' ? accent : tierFoundingLight);
++
++      // --glass-border is accent-tinted only in light theme; dark theme's is an
++      // independent translucent-white card token (styles.scss:146), not a gold tint, so
++      // clear the inline override there and let that static rule apply again.
++      if (theme === 'dark') {
++        root.removeProperty('--glass-border');
++      } else {
++        root.setProperty('--glass-border', `rgba(${accentRgb}, 0.12)`);
++      }
++
++      // admin-payment-config.scss's select chevron: a data-URI's stroke color can't
++      // reference var(--accent-color) directly, so the whole url() value is computed here.
++      const accentHexNoHash = accent.replace('#', '');
++      root.setProperty(
++        '--select-chevron-gold',
++        `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23${accentHexNoHash}'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`
++      );
+     });
+   }
+ 
+diff --git a/profiles/default/org-config.json b/profiles/default/org-config.json
+index 6731bd32..d0f51c51 100644
+--- a/profiles/default/org-config.json
++++ b/profiles/default/org-config.json
+@@ -17,6 +17,7 @@
+     "PrimaryColor": "#121212",
+     "AccentColor": "#2f6f4f"
+   },
++  "Documents": [],
+   "Contact": {
+     "SupportEmail": "support@example.org",
+     "ImportEmailBase": "member",
+@@ -64,8 +65,7 @@
+     "MemberApprovalMode": "ManualReview",
+     "OtpVerificationRequired": true,
+     "DefaultMembershipType": "General",
+-    "AdminEmailOnNewRegistration": true,
+-    "MembershipTypes": ["General"]
++    "AdminEmailOnNewRegistration": true
+   },
+   "Localization": {
+     "DateFormat": "dd-MM-yyyy",
+diff --git a/profiles/ghc/org-config.json b/profiles/ghc/org-config.json
+index 3d709cfd..f3247fc8 100644
+--- a/profiles/ghc/org-config.json
++++ b/profiles/ghc/org-config.json
+@@ -17,6 +17,14 @@
+     "PrimaryColor": "#121212",
+     "AccentColor": "#c5a059"
+   },
++  "Documents": [
++    {
++      "Label": "GHCAA Constitution",
++      "Url": "/assets/GHCAA Constitution V4.2.pdf",
++      "Version": "4.2",
++      "Group": "Governance"
++    }
++  ],
+   "Contact": {
+     "SupportEmail": "haragangian@gmail.com",
+     "ImportEmailBase": "haragangian",
+@@ -67,16 +75,7 @@
+     "MemberApprovalMode": "ManualReview",
+     "OtpVerificationRequired": true,
+     "DefaultMembershipType": "General",
+-    "AdminEmailOnNewRegistration": true,
+-    "MembershipTypes": [
+-      "Founding",
+-      "Executive",
+-      "General",
+-      "Associate",
+-      "Honorary",
+-      "Advisory",
+-      "Guest"
+-    ]
++    "AdminEmailOnNewRegistration": true
+   },
+   "Localization": {
+     "DateFormat": "dd-MM-yyyy",

@@ -160,4 +160,73 @@ public class NetworkingServiceTests : TestBase
         result.Items.Should().NotContain(r => r.FullName == "Inactive Member");
         result.Items.Should().NotContain(r => r.FullName == "Archived Member");
     }
+
+    [Category("FR-05")]
+    [Test]
+    public async Task SearchMembersAsync_CursorPagination_ShouldPageThroughAllMembersOnce()
+    {
+        for (var i = 0; i < 5; i++)
+        {
+            var member = await CreateAndSaveTestMemberAsync($"Cursor Member {i:D2}", $"cursor{i}.nt@example.com", $"017{i:D8}", $"NTSTCUR{i:D3}");
+            member.Status = Enums.MembershipStatus.Active;
+        }
+        await _context.SaveChangesAsync();
+
+        var seen = new List<string>();
+        string? cursor = null;
+        var pagesFetched = 0;
+
+        do
+        {
+            var page = await _service.SearchMembersAsync(new MemberSearchFilterDto
+            {
+                Query = "Cursor Member",
+                PageSize = 2,
+                Cursor = cursor
+            });
+
+            seen.AddRange(page.Items.Select(i => i.FullName));
+            cursor = page.NextCursor;
+            pagesFetched++;
+        } while (cursor != null && pagesFetched < 10);
+
+        seen.Should().HaveCount(5);
+        seen.Distinct().Should().HaveCount(5, "cursor pagination must not repeat or skip a member across pages");
+        seen.Should().BeInAscendingOrder();
+    }
+
+    [Category("FR-05")]
+    [Test]
+    public async Task SearchMembersAsync_CursorPagination_EmptyResult_ShouldReturnNoItemsAndNoNextCursor()
+    {
+        var result = await _service.SearchMembersAsync(new MemberSearchFilterDto
+        {
+            Query = "No Member Matches This Query",
+            PageSize = 20
+        });
+
+        result.Items.Should().BeEmpty();
+        result.NextCursor.Should().BeNull();
+    }
+
+    [Category("FR-05")]
+    [Test]
+    public async Task SearchMembersAsync_InvalidCursor_ShouldFallBackToFirstPageInsteadOfThrowing()
+    {
+        var alpha = await CreateAndSaveTestMemberAsync("Bad Cursor Alpha", "bc.alpha.nt@example.com", "01100003001", "NTSTBC001");
+        alpha.Status = Enums.MembershipStatus.Active;
+        var beta = await CreateAndSaveTestMemberAsync("Bad Cursor Beta", "bc.beta.nt@example.com", "01100003002", "NTSTBC002");
+        beta.Status = Enums.MembershipStatus.Active;
+        await _context.SaveChangesAsync();
+
+        var result = await _service.SearchMembersAsync(new MemberSearchFilterDto
+        {
+            Query = "Bad Cursor",
+            PageSize = 20,
+            Cursor = "not-a-valid-base64-cursor!!"
+        });
+
+        result.Items.Should().HaveCount(2, "a stale/corrupt cursor should degrade to a first page, not fail the request");
+        result.Items.Select(i => i.FullName).Should().Contain(new[] { "Bad Cursor Alpha", "Bad Cursor Beta" });
+    }
 }

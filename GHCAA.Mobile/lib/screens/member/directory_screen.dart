@@ -32,11 +32,11 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
   String? _selectedDept;
   String? _selectedType;
   String? _selectedCategory;
-  int _pageNumber = 1;
   final int _pageSize = 20;
   bool _isLoadingMore = false;
   bool _hasMore = true;
   int _totalItems = 0;
+  String? _nextCursor;
 
   final TextEditingController _searchController = TextEditingController();
 
@@ -60,61 +60,62 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
 
   Future<void> _fetchAlumni({bool refresh = false}) async {
     if (refresh) {
-      _pageNumber = 1;
+      _nextCursor = null;
       _hasMore = true;
       _alumni = [];
       setState(() => _isLoading = true);
     } else {
       setState(() => _isLoading = true);
     }
-    
+
     final query = ref.read(directorySearchQueryProvider);
     final service = ref.read(networkingServiceProvider);
-    
+
     final result = await service.searchAlumni(
-      query: query, 
+      query: query,
       batch: _selectedBatch,
       department: _selectedDept,
       membershipType: _selectedType,
       category: _selectedCategory,
-      pageNumber: _pageNumber, 
+      cursor: null,
       pageSize: _pageSize
     );
-    
+
     if (mounted) {
       setState(() {
         _alumni = (result['items'] as List<dynamic>?) ?? [];
         _totalItems = (result['totalItems'] as int?) ?? _alumni.length;
-        _hasMore = _alumni.length < _totalItems;
+        _nextCursor = result['nextCursor'] as String?;
+        _hasMore = _nextCursor != null;
         _isLoading = false;
       });
     }
   }
 
   Future<void> _fetchMoreAlumni() async {
-    if (_isLoadingMore || !_hasMore) return;
+    if (_isLoadingMore || !_hasMore || _nextCursor == null) return;
     setState(() => _isLoadingMore = true);
-    
-    _pageNumber++;
+
     final query = ref.read(directorySearchQueryProvider);
     final service = ref.read(networkingServiceProvider);
-    
+
     final result = await service.searchAlumni(
-      query: query, 
+      query: query,
       batch: _selectedBatch,
       department: _selectedDept,
       membershipType: _selectedType,
       category: _selectedCategory,
-      pageNumber: _pageNumber, 
+      cursor: _nextCursor,
       pageSize: _pageSize
     );
-    
+
     if (mounted) {
       setState(() {
         final newItems = (result['items'] as List<dynamic>?) ?? [];
+        _nextCursor = result['nextCursor'] as String?;
         if (newItems.isNotEmpty) {
           _alumni.addAll(newItems);
-          _hasMore = _alumni.length < _totalItems;
+          _hasMore = _nextCursor != null;
         } else {
           _hasMore = false;
         }

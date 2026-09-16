@@ -5,6 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/app_config.dart';
 import '../storage/storage_service.dart';
+import 'retry_interceptor.dart';
+import '../utils/background_json.dart';
+import 'ssl_pinning_stub.dart' if (dart.library.io) 'ssl_pinning_io.dart' as ssl_pinning;
 
 bool _isRefreshing = false;
 final List<Completer<String?>> _refreshWaiters = [];
@@ -63,6 +66,18 @@ final dioProvider = Provider<Dio>((ref) {
       // Rely on Dio's default validateStatus (200-299) to ensure 4xx errors throw correctly and trigger catch blocks
     ),
   );
+
+  // 8.4: dio's default transformer decodes every response body with
+  // jsonDecode() on the calling isolate. List endpoints (directory, events,
+  // gallery, financial ledger) can return large enough payloads to jank the
+  // UI while that runs. decodeJsonInBackground hands the decode off to a
+  // background isolate once a payload crosses the size where that's worth
+  // the isolate hand-off cost.
+  dio.transformer = SyncTransformer(jsonDecodeCallback: decodeJsonInBackground);
+
+  // 7.16: no-op everywhere except a production build with a real pin
+  // configured (see ssl_pinning.dart) — dev and preprod are never affected.
+  ssl_pinning.configureDioCertificatePinning(dio, AppConfig.environment);
 
   final storage = ref.read(storageServiceProvider);
 
@@ -147,6 +162,12 @@ final dioProvider = Provider<Dio>((ref) {
       },
     ),
   );
+
+  // Added last so its onError runs first (Dio walks error interceptors in
+  // reverse of registration order) — it needs the raw exception/status to
+  // decide retryability, before the wrapper above rewrites it into a
+  // friendly message.
+  dio.interceptors.add(RetryInterceptor(dio: dio));
 
   return dio;
 });

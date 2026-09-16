@@ -141,12 +141,18 @@ function buildFallback(cfg) {
             otpVerificationRequired: !!cfg.Workflow.OtpVerificationRequired,
             defaultMembershipType: cfg.Workflow.DefaultMembershipType,
             adminEmailOnNewRegistration: !!cfg.Workflow.AdminEmailOnNewRegistration,
-            membershipTypes: cfg.Workflow.MembershipTypes ?? []
+            notificationChannel: cfg.Workflow.NotificationChannel
         },
         localization: {
             dateFormat: cfg.Localization?.DateFormat,
             locales
-        }
+        },
+        documents: (cfg.Documents ?? []).map(d => ({
+            label: d.Label,
+            url: d.Url,
+            version: d.Version,
+            group: d.Group
+        }))
     };
 }
 

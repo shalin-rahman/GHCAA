@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
+import { ApplicationRef } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { OrgConfigService } from './org-config.service';
+import { ThemeService } from './theme.service';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { OrgConfig } from '../models/org-config.model';
 import { ORG_CONFIG_FALLBACK } from '../config/org-config-fallback.generated';
@@ -21,9 +23,20 @@ describe('OrgConfigService', () => {
         features: { enableEvents: true, enableJobHub: false }
     } as unknown as OrgConfig;
 
+    // Stubbed rather than the real ThemeService: the real one issues its own HTTP call
+    // from an afterNextRender guard, which would need its own httpMock.expectOne() in every
+    // test that ticks the ApplicationRef to flush OrgConfigService's branding effect.
+    const themeServiceStub = { theme: () => 'dark' as 'light' | 'dark' };
+
     beforeEach(() => {
+        themeServiceStub.theme = () => 'dark';
         TestBed.configureTestingModule({
-            providers: [OrgConfigService, provideHttpClient(), provideHttpClientTesting()]
+            providers: [
+                OrgConfigService,
+                provideHttpClient(),
+                provideHttpClientTesting(),
+                { provide: ThemeService, useValue: themeServiceStub }
+            ]
         });
         service = TestBed.inject(OrgConfigService);
         httpMock = TestBed.inject(HttpTestingController);
@@ -61,6 +74,19 @@ describe('OrgConfigService', () => {
 
         await promise;
         expect(service.config()).toEqual(minimalConfig);
+    });
+
+    it('loadConfig carries the documents registry through untouched', async () => {
+        const withDocuments = {
+            ...minimalConfig,
+            documents: [{ label: 'Bylaws', url: '/assets/bylaws.pdf', version: '1.0', group: 'Governance' }]
+        } as unknown as OrgConfig;
+
+        const promise = service.loadConfig();
+        httpMock.expectOne(API_ENDPOINTS.CONFIG).flush(withDocuments);
+        await promise;
+
+        expect(service.config()?.documents).toEqual(withDocuments.documents);
     });
 
     it('loadConfig falls back to the built-in defaults when the request fails', async () => {
@@ -145,6 +171,76 @@ describe('OrgConfigService', () => {
             await promise;
 
             expect(service.config()).not.toEqual(updated);
+        });
+    });
+
+    describe('branding color-token effect', () => {
+        const setConfigAndFlush = (branding: Partial<OrgConfig['branding']>) => {
+            service.config.set({ ...minimalConfig, branding: { ...minimalConfig.branding, ...branding } } as OrgConfig);
+            TestBed.inject(ApplicationRef).tick();
+        };
+
+        afterEach(() => {
+            // Undo cross-test document.documentElement pollution — setProperty/removeProperty
+            // calls in the effect persist on the real DOM element between tests otherwise.
+            const root = document.documentElement.style;
+            ['--primary-color', '--accent-color', '--accent-color-rgb', '--accent-rgb',
+                '--accent-gold-bright', '--accent-gold-dark', '--accent-text', '--shadow-gold',
+                '--gold-gradient', '--tier-founding', '--glass-border', '--select-chevron-gold']
+                .forEach(prop => root.removeProperty(prop));
+        });
+
+        it('does nothing before config has loaded', () => {
+            TestBed.inject(ApplicationRef).tick();
+            expect(document.documentElement.style.getPropertyValue('--accent-color')).toBe('');
+        });
+
+        it('sets the plain accent/primary tokens and their rgb tuple', () => {
+            setConfigAndFlush({ primaryColor: '#111111', accentColor: '#c5a059' });
+            const root = document.documentElement.style;
+            expect(root.getPropertyValue('--primary-color')).toBe('#111111');
+            expect(root.getPropertyValue('--accent-color')).toBe('#c5a059');
+            expect(root.getPropertyValue('--accent-color-rgb')).toBe('197, 160, 89');
+            expect(root.getPropertyValue('--accent-rgb')).toBe('197, 160, 89');
+        });
+
+        it('darkens --accent-gold-dark until it clears 4.5:1 against white', () => {
+            setConfigAndFlush({ accentColor: '#c5a059' });
+            const goldDark = document.documentElement.style.getPropertyValue('--accent-gold-dark');
+            expect(goldDark).not.toBe('#c5a059');
+            expect(goldDark).toMatch(/^#[0-9a-f]{6}$/);
+        });
+
+        it('uses the raw accent (not the AA-clamped one) for --accent-text/--tier-founding in dark theme', () => {
+            themeServiceStub.theme = () => 'dark';
+            setConfigAndFlush({ accentColor: '#c5a059' });
+            const root = document.documentElement.style;
+            expect(root.getPropertyValue('--accent-text')).toBe('#c5a059');
+            expect(root.getPropertyValue('--tier-founding')).toBe('#c5a059');
+        });
+
+        it('uses the AA-clamped values for --accent-text/--tier-founding in light theme', () => {
+            themeServiceStub.theme = () => 'light';
+            setConfigAndFlush({ accentColor: '#c5a059' });
+            const root = document.documentElement.style;
+            expect(root.getPropertyValue('--accent-text')).not.toBe('#c5a059');
+            expect(root.getPropertyValue('--tier-founding')).not.toBe('#c5a059');
+        });
+
+        it('removes the --glass-border override in dark theme, sets a tint in light theme', () => {
+            themeServiceStub.theme = () => 'dark';
+            setConfigAndFlush({ accentColor: '#c5a059' });
+            expect(document.documentElement.style.getPropertyValue('--glass-border')).toBe('');
+
+            themeServiceStub.theme = () => 'light';
+            setConfigAndFlush({ accentColor: '#c5a059' });
+            expect(document.documentElement.style.getPropertyValue('--glass-border')).toBe('rgba(197, 160, 89, 0.12)');
+        });
+
+        it('bakes the accent hex into the --select-chevron-gold data-URI', () => {
+            setConfigAndFlush({ accentColor: '#c5a059' });
+            const chevron = document.documentElement.style.getPropertyValue('--select-chevron-gold');
+            expect(chevron).toContain("stroke='%23c5a059'");
         });
     });
 });

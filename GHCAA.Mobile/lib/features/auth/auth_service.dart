@@ -75,7 +75,7 @@ class AuthService {
           return "Server connection timed out.";
         }
       }
-      return "An unexpected error occurred. Please try again.";
+      return "Something went wrong. Try again.";
     }
     return "Login failed. Please check your credentials.";
   }
@@ -109,7 +109,7 @@ class AuthService {
         await _storage.clearAll();
         return "Your saved session has expired. Please log in with your password.";
       }
-      return "An unexpected error occurred. Please try again.";
+      return "Something went wrong. Try again.";
     }
     return "Session refresh failed. Please log in with your password.";
   }
@@ -152,7 +152,7 @@ class AuthService {
       if (e is DioException) {
         return e.response?.data?['message'] ?? e.response?.data?['error'] ?? "Authentication failed.";
       }
-      return "An unexpected error occurred.";
+      return "Something went wrong.";
     }
     return "Authentication failed.";
   }
@@ -199,7 +199,7 @@ class AuthService {
       if (e is DioException) {
         return e.response?.data?['message'] ?? e.response?.data?['error'] ?? "Data mismatch or connection error.";
       }
-      return "An unexpected error occurred.";
+      return "Something went wrong.";
     }
   }
 

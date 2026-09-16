@@ -515,7 +515,7 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen>
     final confirm = await showConfirmDialog(
       context,
       title: 'Remove Family Link?',
-      message: 'This will decouple your digital identity from this member.',
+      message: 'This will unlink your account from this member.',
       confirmLabel: 'Remove',
       destructive: true,
     );

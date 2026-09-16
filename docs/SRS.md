@@ -120,7 +120,7 @@ Supporting professional and personal connections within the network.
 
 * **Server-Side Optimization**: Automatic image compression (< 350KB) for member photos, gallery album photos, and news/event images (payment proofs, signatures, and certificates/documents are intentionally excluded for evidentiary/fidelity reasons); SVG-first document generation.
 * **Midnight Gold Aesthetic**: A premium design system with Glassmorphism, smooth micro-animations, and fast LCP (Largest Contentful Paint).
-* **Resiliency**: Frontend interceptors to handle partial API failures gracefully without crashing user sessions.
+* **Resiliency**: Frontend interceptors to handle partial API failures gracefully without crashing user sessions. On mobile, a `RetryInterceptor` retries timeouts, connection errors, and 5xx responses (capped at 3 attempts, exponential backoff) while leaving 4xx/auth failures alone, paired with a connectivity banner shown while offline.
 
 ---
 

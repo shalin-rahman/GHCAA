@@ -179,9 +179,14 @@
         <label>Default Membership Type</label>
         <input type="text" [(ngModel)]="config.workflow.defaultMembershipType" name="defaultMembershipType">
       </div>
-      <div class="form-group full-span">
-        <label>Membership Types <small class="text-muted">(comma separated)</small></label>
-        <input type="text" [(ngModel)]="membershipTypesCsv" name="membershipTypesCsv">
+      <div class="form-group">
+        <label>Notification Channel</label>
+        <select [(ngModel)]="config.workflow.notificationChannel" name="notificationChannel">
+          @for (channel of notificationChannels; track channel) {
+          <option [value]="channel">{{ humanize(channel) }}</option>
+          }
+        </select>
+        <small class="text-muted">Which channel member alerts (approvals, reminders) go out on.</small>
       </div>
     </div>
     <div class="toggle-grid">

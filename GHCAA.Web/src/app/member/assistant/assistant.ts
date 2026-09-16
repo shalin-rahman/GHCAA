@@ -65,7 +65,7 @@ export class Assistant {
                 this.typing.set(false);
                 const errorMsg: ChatMessage = {
                     id: Date.now() + 1,
-                    text: "I'm having trouble connecting to my neural core. Please check your connectivity or try again later.",
+                    text: "I'm having trouble connecting right now. Check your connection or try again later.",
                     isAi: true,
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 };

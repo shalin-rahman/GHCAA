@@ -53,7 +53,11 @@ jobs:
         run: flutter pub get
         working-directory: GHCAA.Mobile
       - name: Build AAB
-        run: flutter build appbundle --release
+        # 7.16: --obfuscate strips/renames Dart symbols in the shipped binary; --split-debug-info
+        # writes the symbol map that build needed to reverse a stack trace back to source, so it
+        # has to be archived here rather than thrown away, or a crash report from this exact build
+        # can never be symbolicated again.
+        run: flutter build appbundle --release --obfuscate --split-debug-info=build/debug-info
         working-directory: GHCAA.Mobile
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -63,6 +67,14 @@ jobs:
           # Consumed by `create-release` in this same run; the GitHub Release is the
           # durable copy and release assets do not count against the artifact quota.
           retention-days: 1
+      - name: Upload Debug Symbols
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-info
+          path: GHCAA.Mobile/build/debug-info
+          # Keep these longer than the .aab: they're the only way to symbolicate a crash report
+          # for this build later. Not consumed by another job in this run, so no 1-day trim.
+          retention-days: 90
       - name: Upload to Play Store
         uses: r0adkll/upload-google-play@v1
         with:
@@ -93,7 +105,8 @@ jobs:
         run: flutter pub get
         working-directory: GHCAA.Mobile
       - name: Build IPA
-        run: flutter build ipa --release --export-options-plist=ios/Runner/ExportOptions.plist
+        # 7.16: same obfuscation/debug-info split as the Android build above.
+        run: flutter build ipa --release --export-options-plist=ios/Runner/ExportOptions.plist --obfuscate --split-debug-info=build/debug-info
         working-directory: GHCAA.Mobile
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -103,6 +116,14 @@ jobs:
           # Consumed by `create-release` in this same run; the GitHub Release is the
           # durable copy and release assets do not count against the artifact quota.
           retention-days: 1
+      - name: Upload Debug Symbols
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-debug-info
+          path: GHCAA.Mobile/build/debug-info
+          # Keep these longer than the .ipa: they're the only way to symbolicate a crash report
+          # for this build later. Not consumed by another job in this run, so no 1-day trim.
+          retention-days: 90
       - name: Upload to TestFlight
         uses: apple-actions/upload-testflight-build@v1
         with:

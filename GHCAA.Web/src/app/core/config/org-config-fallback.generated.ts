@@ -72,15 +72,7 @@ export const ORG_CONFIG_FALLBACK: OrgConfig = {
     "otpVerificationRequired": true,
     "defaultMembershipType": "General",
     "adminEmailOnNewRegistration": true,
-    "membershipTypes": [
-      "Founding",
-      "Executive",
-      "General",
-      "Associate",
-      "Honorary",
-      "Advisory",
-      "Guest"
-    ]
+    "notificationChannel": "Both"
   },
   "localization": {
     "dateFormat": "dd-MM-yyyy",
@@ -202,5 +194,13 @@ export const ORG_CONFIG_FALLBACK: OrgConfig = {
         }
       }
     }
-  }
+  },
+  "documents": [
+    {
+      "label": "GHCAA Constitution",
+      "url": "/assets/GHCAA Constitution V4.2.pdf",
+      "version": "4.2",
+      "group": "Governance"
+    }
+  ]
 };

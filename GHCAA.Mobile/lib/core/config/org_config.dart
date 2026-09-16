@@ -212,14 +212,12 @@ class OrgWorkflow {
   final bool otpVerificationRequired;
   final String defaultMembershipType;
   final bool adminEmailOnNewRegistration;
-  final List<String> membershipTypes;
 
   OrgWorkflow({
     required this.memberApprovalMode,
     required this.otpVerificationRequired,
     required this.defaultMembershipType,
     required this.adminEmailOnNewRegistration,
-    required this.membershipTypes,
   });
 
   factory OrgWorkflow.fromJson(Map<String, dynamic> json) {
@@ -228,18 +226,31 @@ class OrgWorkflow {
       otpVerificationRequired: json['otpVerificationRequired'] ?? true,
       defaultMembershipType: json['defaultMembershipType'] ?? 'General',
       adminEmailOnNewRegistration: json['adminEmailOnNewRegistration'] ?? true,
-      membershipTypes: (json['membershipTypes'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [
-            'Founding',
-            'Executive',
-            'General',
-            'Associate',
-            'Honorary',
-            'Advisory',
-            'Guest'
-          ],
+    );
+  }
+}
+
+/// Governing-document registry entry (bylaws, policies, amendment PDFs).
+/// Matches DocumentEntryDto.cs / org-config.model.ts's DocumentEntry.
+class DocumentEntry {
+  final String label;
+  final String url;
+  final String version;
+  final String group;
+
+  DocumentEntry({
+    required this.label,
+    required this.url,
+    required this.version,
+    required this.group,
+  });
+
+  factory DocumentEntry.fromJson(Map<String, dynamic> json) {
+    return DocumentEntry(
+      label: json['label'] ?? '',
+      url: json['url'] ?? '',
+      version: json['version'] ?? '',
+      group: json['group'] ?? '',
     );
   }
 }
@@ -379,6 +390,7 @@ class OrgConfig {
   final OrgWorkflow workflow;
   final Map<String, LocalePack> locales;
   final DateFormatConfig dateFormat;
+  final List<DocumentEntry> documents;
 
   OrgConfig({
     required this.orgId,
@@ -391,6 +403,7 @@ class OrgConfig {
     required this.workflow,
     required this.locales,
     required this.dateFormat,
+    this.documents = const [],
   });
 
   factory OrgConfig.fromJson(Map<String, dynamic> json) {
@@ -423,6 +436,10 @@ class OrgConfig {
             localizationJson['dateFormat'] ??
             localizationJson['displayDateFormat'],
       ),
+      documents: (json['documents'] as List<dynamic>?)
+              ?.map((e) => DocumentEntry.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 
@@ -444,7 +461,7 @@ class OrgConfig {
           transactionPrefix: '',
           approvalSeal: 'APPROVED',
           establishedOn: '',
-          logoUrl: '/assets/logo.png',
+          logoUrl: '', // empty -> OrgLogo renders the bundled asset directly, no network hit before real config loads
           constitutionPdfUrl: '',
           primaryColor: '#121212',
           accentColor: '#2f6f4f',
@@ -487,17 +504,9 @@ class OrgConfig {
           otpVerificationRequired: true,
           defaultMembershipType: 'General',
           adminEmailOnNewRegistration: true,
-          membershipTypes: [
-            'Founding',
-            'Executive',
-            'General',
-            'Associate',
-            'Honorary',
-            'Advisory',
-            'Guest'
-          ],
         ),
         dateFormat: DateFormatConfig.ddMmYyyyConfig,
+        documents: const [],
         locales: {
           'en': LocalePack(
             orgName: 'Alumni Association',

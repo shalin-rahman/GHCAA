@@ -68,9 +68,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      setState(() => _errorMessage = 'An unexpected error occurred: $e');
+      setState(() => _errorMessage = 'Something went wrong: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('An unexpected error occurred during login.')),
+        const SnackBar(content: Text('Something went wrong. Try logging in again.')),
       );
     } finally {
       if (context.mounted) {

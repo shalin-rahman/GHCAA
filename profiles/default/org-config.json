@@ -17,6 +17,7 @@
     "PrimaryColor": "#121212",
     "AccentColor": "#2f6f4f"
   },
+  "Documents": [],
   "Contact": {
     "SupportEmail": "support@example.org",
     "ImportEmailBase": "member",
@@ -65,7 +66,7 @@
     "OtpVerificationRequired": true,
     "DefaultMembershipType": "General",
     "AdminEmailOnNewRegistration": true,
-    "MembershipTypes": ["General"]
+    "NotificationChannel": "Both"
   },
   "Localization": {
     "DateFormat": "dd-MM-yyyy",

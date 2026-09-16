@@ -84,7 +84,7 @@ institution. `IInstitutionProfileProvider`/`InstitutionProfileProvider` in Infra
 - `OrgConfigService.BuildDefaults()`. The pack only drives config once `ORG_PROFILE` is explicitly
   set. Left unset, the service keeps the hardcoded GHC defaults it always had (see
   `OrgConfigDto`/`OrgConfigService` further down, in Infrastructure Layer — Services).
-- `ApplicationDbContext.LoadSeed`. Sends Class 1/2/3 seed files (see
+- `ApplicationDbContext.LoadSeed`. Sends Tier 1/2/3 seed files (see
   `docs/SEED_CLASSIFICATION.md`) to the active profile's `demo-data/` folder or root, falling back
   to `Data/Seed/` if nothing profile-specific exists.
 - `GHCAA.Web`'s `scripts/apply-brand.mjs`, `generate-org-config-fallback.mjs`, and
@@ -1619,7 +1619,7 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 
 | Method | Signature | API |
 |---|---|---|
-| `searchAlumni()` | `({query?, batch?, department?, membershipType?, category?, pageNumber?, pageSize?}) => Future<Map>` | `GET /networking/search` |
+| `searchAlumni()` | `({query?, batch?, department?, membershipType?, category?, cursor?, pageSize?}) => Future<Map>` | `GET /networking/search` (keyset pagination on `(FullName, Id)`; a stale/invalid `cursor` falls back to page 1 server-side) |
 | `getProfile()` | `() => Future<Map?>` | `GET /profile` |
 | `getECPeriods()` | `() => Future<List>` | `GET /networking/periods` |
 | `getExecutiveCommittee()` | `({periodId?}) => Future<List>` | `GET /networking/committee` |
@@ -2056,7 +2056,7 @@ assert on exported pure functions rather than rendered templates.
 | Add a new service method | Interface (`I*Service.cs`) → Implementation (`*Service.cs`) → Controller action → Web `*.service.ts` method → Mobile `*_service.dart` method → Add test in `Services/*Tests.cs` → **this map** |
 | Add a new enum value | `Enums.cs` → switch statements in services → `business.models.ts` type alias → Mobile enum/string handling → **this map** |
 | Add a new domain model | `Domain/Models/` → `ApplicationDbContext.cs` (DbSet) → Migration → DTO → Interface → Service impl → Controller → Web TS model + service → Mobile Dart service → `TestBase.cs` helper? → **this map** |
-| Add a new API endpoint | Controller → Web `*.service.ts` → Mobile `*_service.dart` → Controller test + Service test → **this map** |
+| Add a new API endpoint | Controller → Web `*.service.ts` → Mobile `*_service.dart` → Controller test + Service test → **this map** → log it in `docs/API_CONTRACT_REGISTRY.md` |
 | Change payment gateway config | `PaymentConfiguration.cs` → `PaymentConfigController.cs` → `GatewaysController.cs` → `DependencyInjection.cs` → Web `payment-config.service.ts` → Mobile `gateway_service.dart` → **this map** |
 | Add a SignalR event | Hub `.cs` → `IRealTimeService.cs` → `RealTimeService.cs` → Web `chat.service.ts` / `notification.service.ts` → Mobile `chat_service.dart` SignalR handler → **this map** |
 | Add a new Angular route | `app.routes.ts` → New component + HTML + spec.ts → Guard (if protected) → **this map** |

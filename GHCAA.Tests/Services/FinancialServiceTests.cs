@@ -319,7 +319,8 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task DeletePaymentAsync_ShouldRemovePaymentAndLogActivity()
     {
-        var p = new PaymentHistory { MemberId = 1, TransactionId = "DEL-T1", Amount = 100, Status = Enums.PaymentStatus.Completed, PaidAt = DateTime.UtcNow };
+        var member = await CreateMinimalMemberAsync("DelPay1");
+        var p = new PaymentHistory { MemberId = member.Id, TransactionId = "DEL-T1", Amount = 100, Status = Enums.PaymentStatus.Completed, PaidAt = DateTime.UtcNow };
         _context.PaymentHistories.Add(p);
         await _context.SaveChangesAsync();
 
@@ -376,7 +377,8 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task IsGatewayPaymentAlreadyProcessedAsync_ReturnsTrue_OnlyWhenCompletedWithMatchingGatewayId()
     {
-        var payment = new PaymentHistory { MemberId = 1, Amount = 100, TransactionId = "T2", PaidAt = DateTime.UtcNow, GatewayPaymentId = "gw-1", Status = Enums.PaymentStatus.Completed };
+        var member = await CreateMinimalMemberAsync("GwCheck1");
+        var payment = new PaymentHistory { MemberId = member.Id, Amount = 100, TransactionId = "T2", PaidAt = DateTime.UtcNow, GatewayPaymentId = "gw-1", Status = Enums.PaymentStatus.Completed };
         _context.PaymentHistories.Add(payment);
         await _context.SaveChangesAsync();
 
@@ -404,7 +406,8 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task StampGatewayPaymentIdAsync_PersistsGatewayPaymentId()
     {
-        var payment = new PaymentHistory { MemberId = 1, Amount = 100, TransactionId = "T4", PaidAt = DateTime.UtcNow };
+        var member = await CreateMinimalMemberAsync("StampGw1");
+        var payment = new PaymentHistory { MemberId = member.Id, Amount = 100, TransactionId = "T4", PaidAt = DateTime.UtcNow };
         _context.PaymentHistories.Add(payment);
         await _context.SaveChangesAsync();
 

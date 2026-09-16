@@ -1,7 +1,11 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import '../theme/app_theme.dart';
+import '../../features/auth/auth_service.dart';
+import '../../features/support/support_service.dart';
 
 /// Installs the three Flutter/platform error handlers.
 ///
@@ -43,6 +47,8 @@ void setupErrorHandlers() {
               style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
               child: const Text('DIAGNOSE & REPORT', style: TextStyle(color: Colors.black)),
             ),
+            const SizedBox(height: 12),
+            AdminReportButton(exception: details.exception, stack: details.stack),
           ],
         ),
       ),
@@ -64,4 +70,66 @@ void setupErrorHandlers() {
     debugPrint('Uncaught Flutter framework error: ${details.exceptionAsString()}');
     defaultFlutterOnError?.call(details);
   };
+}
+
+/// Sends the crashing error to the in-app Administrator inbox via the same
+/// /contact pathway the support screen uses (12.5). Separate from the
+/// "DIAGNOSE & REPORT" button above, which only reaches Sentry.
+class AdminReportButton extends ConsumerStatefulWidget {
+  const AdminReportButton({super.key, required this.exception, this.stack});
+
+  final Object exception;
+  final StackTrace? stack;
+
+  @override
+  ConsumerState<AdminReportButton> createState() => _AdminReportButtonState();
+}
+
+enum _ReportState { idle, sending, sent, failed }
+
+class _AdminReportButtonState extends ConsumerState<AdminReportButton> {
+  _ReportState _state = _ReportState.idle;
+
+  String _stackSummary() {
+    final lines = (widget.stack?.toString() ?? '').split('\n');
+    return lines.take(5).join('\n');
+  }
+
+  Future<void> _send() async {
+    setState(() => _state = _ReportState.sending);
+
+    // Best-effort: use the cached member profile if one is already loaded.
+    // The error widget can render before or without an authenticated session,
+    // so this falls back to a generic sender rather than failing outright.
+    final profile = ref.read(userProfileProvider).valueOrNull;
+    final fullName = profile?['fullName'] as String? ?? 'Mobile App User';
+    final email = profile?['email'] as String? ?? 'mobile-error-report@ghcaa.local';
+
+    final success = await ref.read(supportServiceProvider).sendErrorReport(
+          fullName: fullName,
+          email: email,
+          errorSummary: widget.exception.toString(),
+          stackSummary: _stackSummary(),
+          platformInfo: '${Platform.operatingSystem} ${Platform.operatingSystemVersion}',
+        );
+
+    if (!mounted) return;
+    setState(() => _state = success ? _ReportState.sent : _ReportState.failed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final label = switch (_state) {
+      _ReportState.idle => 'SEND REPORT TO ADMINISTRATOR',
+      _ReportState.sending => 'SENDING...',
+      _ReportState.sent => 'REPORT SENT',
+      _ReportState.failed => 'FAILED — TAP TO RETRY',
+    };
+
+    return OutlinedButton(
+      onPressed: _state == _ReportState.sending || _state == _ReportState.sent ? null : _send,
+      style: OutlinedButton.styleFrom(side: const BorderSide(color: AppTheme.royalGold)),
+      child: Text(label, style: const TextStyle(color: AppTheme.royalGold)),
+    );
+  }
 }

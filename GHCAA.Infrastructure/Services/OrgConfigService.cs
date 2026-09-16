@@ -162,9 +162,7 @@ namespace GHCAA.Infrastructure.Services
             Workflow = new()
             {
                 MemberApprovalMode = "ManualReview",
-                DefaultMembershipType = "General",
-                // Derived from enum so adding/removing a type requires only one change in Enums.cs
-                MembershipTypes = Enum.GetNames<Enums.MembershipType>().ToList()
+                DefaultMembershipType = "General"
             },
             Localization = new()
             {
@@ -313,6 +311,16 @@ namespace GHCAA.Infrastructure.Services
                             FeeReminder = "GHCAA সদস্যপদ ফি স্মারক"
                         }
                     }
+                }
+            },
+            Documents = new List<DocumentEntryDto>
+            {
+                new()
+                {
+                    Label = "GHCAA Constitution",
+                    Url = "/assets/GHCAA Constitution V4.2.pdf",
+                    Version = "4.2",
+                    Group = "Governance"
                 }
             }
         };

@@ -21,6 +21,14 @@ void main() {
     'enabledGatewayMethods': ['Manual'],
     'features': {'enableFundraising': false},
     'localization': {'dateFormat': 'MM/dd/yyyy'},
+    'documents': [
+      {
+        'label': 'Network Bylaws',
+        'url': '/assets/bylaws.pdf',
+        'version': '1.0',
+        'group': 'Governance',
+      }
+    ],
   };
 
   setUp(() {
@@ -47,8 +55,26 @@ void main() {
     expect(config.enabledGatewayMethods, ['Manual']);
     expect(config.features.enableFundraising, isFalse);
     expect(config.dateFormat.identifier, DateFormatConfig.mmDdYyyy);
+    expect(config.documents, hasLength(1));
+    expect(config.documents.single.label, 'Network Bylaws');
+    expect(config.documents.single.group, 'Governance');
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getString('org_config_cache'), isNotEmpty);
+  });
+
+  test('defaults documents to an empty list when the field is absent',
+      () async {
+    final service = OrgConfigService(serviceDio((request) => Response(
+          requestOptions: request,
+          statusCode: 200,
+          data: {
+            'branding': {'appName': 'No Docs Association'},
+          },
+        )));
+
+    final config = await service.load();
+
+    expect(config.documents, isEmpty);
   });
 
   test('uses cached configuration when the network is unavailable', () async {

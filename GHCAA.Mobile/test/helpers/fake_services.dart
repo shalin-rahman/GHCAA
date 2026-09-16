@@ -175,7 +175,7 @@ class FakeFileService implements FileService {
 
 class FakeNetworkingService implements NetworkingService {
   @override
-  Future<Map<String, dynamic>> searchAlumni({String? query, String? batch, String? department, String? membershipType, String? category, int pageNumber = 1, int pageSize = 20}) async => {'items': [], 'totalItems': 0};
+  Future<Map<String, dynamic>> searchAlumni({String? query, String? batch, String? department, String? membershipType, String? category, String? cursor, int pageSize = 20}) async => {'items': [], 'totalItems': 0};
   @override
   Future<Map<String, dynamic>?> getProfile() async => null;
   @override
@@ -283,6 +283,14 @@ class FakeSupportService implements SupportService {
   Future<bool> checkSystemHealth() async => true;
   @override
   Future<bool> contactSupport(String message) async => true;
+  @override
+  Future<bool> sendErrorReport({
+    required String fullName,
+    required String email,
+    required String errorSummary,
+    required String stackSummary,
+    required String platformInfo,
+  }) async => true;
 }
 
 class FakeRolesService implements RolesService {

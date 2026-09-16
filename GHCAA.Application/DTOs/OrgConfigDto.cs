@@ -16,6 +16,18 @@ namespace GHCAA.Application.DTOs
         public FeatureToggleDto Features { get; init; } = new();
         public WorkflowDto Workflow { get; init; } = new();
         public LocalizationDto Localization { get; init; } = new();
+        // General governing-document registry (bylaws, policies, amendment PDFs). Separate from
+        // Branding.ConstitutionPdfUrl, which stays as the one link the public constitution page has
+        // always used — this is the broader list an admin can add to without touching that field.
+        public List<DocumentEntryDto> Documents { get; init; } = new();
+    }
+
+    public record DocumentEntryDto
+    {
+        public string Label { get; init; } = string.Empty;
+        public string Url { get; init; } = string.Empty;
+        public string Version { get; init; } = string.Empty;
+        public string Group { get; init; } = string.Empty;
     }
 
     public record BrandingDto
@@ -104,7 +116,9 @@ namespace GHCAA.Application.DTOs
         public bool OtpVerificationRequired { get; init; } = true;
         public string DefaultMembershipType { get; init; } = "General";
         public bool AdminEmailOnNewRegistration { get; init; } = true;
-        public List<string> MembershipTypes { get; init; } = [];
+        // Which channel member-facing alerts go out on. "Both" matches the behavior before this
+        // setting existed (in-app notification always fires; email and SMS were never gated).
+        public string NotificationChannel { get; init; } = "Both";
     }
 
     public record LocalizationDto

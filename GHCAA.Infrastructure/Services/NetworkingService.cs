@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
@@ -84,15 +87,40 @@ namespace GHCAA.Infrastructure.Services
             var page = Math.Max(filter.Page, 1);
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
-            var members = await query
+            var sortedQuery = query
                 .Include(m => m.ECMembers)
                 .ThenInclude(em => em.ECPeriod)
                 .Include(m => m.AcademicHistory)
                 .Include(m => m.ProfessionalHistory)
                 .OrderBy(m => m.FullName)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync(cancellationToken);
+                .ThenBy(m => m.Id);
+
+            // Cursor-based (keyset) pagination: the sort key is (FullName, Id), so a cursor is
+            // "everything after this name+id pair". This replaces OFFSET/Skip, whose cost grows
+            // with page depth because the DB still has to walk and discard every earlier row.
+            // A missing or corrupt Cursor value (stale client, tampered query param) falls back
+            // to the first page instead of erroring — a dead cursor shouldn't 400 the screen.
+            var cursorRequested = !string.IsNullOrWhiteSpace(filter.Cursor);
+            IQueryable<Member> pageQuery = sortedQuery;
+            if (cursorRequested && TryDecodeCursor(filter.Cursor, out var cursorName, out var cursorId))
+            {
+                pageQuery = pageQuery.Where(m =>
+                    m.FullName.CompareTo(cursorName) > 0 ||
+                    (m.FullName == cursorName && m.Id > cursorId));
+            }
+            else if (!cursorRequested)
+            {
+                // No cursor supplied: honor legacy page-number pagination for callers that
+                // haven't moved to cursors yet (e.g. the professional hub screen).
+                pageQuery = pageQuery.Skip((page - 1) * pageSize);
+            }
+
+            // Fetch one extra row so HasNextPage/NextCursor reflect whether more data actually
+            // exists, rather than being inferred from a possibly-stale TotalItems count.
+            var fetched = await pageQuery.Take(pageSize + 1).ToListAsync(cancellationToken);
+            var hasMore = fetched.Count > pageSize;
+            var members = hasMore ? fetched.Take(pageSize).ToList() : fetched;
+            var nextCursor = hasMore ? EncodeCursor(members[^1].FullName, members[^1].Id) : null;
 
             return new PagedResult<MemberSummaryDto>
             {
@@ -100,9 +128,40 @@ namespace GHCAA.Infrastructure.Services
                 TotalItems = totalItems,
                 TotalPages = totalPages,
                 Page = page,
-                PageSize = pageSize
+                PageSize = pageSize,
+                NextCursor = nextCursor
             };
         }
+
+        private static string EncodeCursor(string fullName, int id)
+        {
+            var json = JsonSerializer.Serialize(new CursorPayload(fullName, id));
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+        }
+
+        private static bool TryDecodeCursor(string? cursor, out string fullName, out int id)
+        {
+            fullName = string.Empty;
+            id = 0;
+            if (string.IsNullOrWhiteSpace(cursor)) return false;
+
+            try
+            {
+                var json = Encoding.UTF8.GetString(Convert.FromBase64String(cursor));
+                var payload = JsonSerializer.Deserialize<CursorPayload>(json);
+                if (payload == null || string.IsNullOrEmpty(payload.FullName)) return false;
+
+                fullName = payload.FullName;
+                id = payload.Id;
+                return true;
+            }
+            catch (Exception ex) when (ex is FormatException or JsonException)
+            {
+                return false;
+            }
+        }
+
+        private sealed record CursorPayload(string FullName, int Id);
 
         public async Task<IEnumerable<MemberSummaryDto>> GetExecutiveCommitteeAsync(int? periodId = null, CancellationToken cancellationToken = default)
         {

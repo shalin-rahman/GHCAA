@@ -42,8 +42,11 @@
   }
 
   select {
-      /* Gold chevron: brand accent, visible on both light and dark selects (a data-URI cannot reference a CSS var) */
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23c5a059'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
+      /* Gold chevron: OrgConfigService writes --select-chevron-gold as a full url() value
+         keyed to the profile's --accent-color (a data-URI's stroke can't reference var()
+         directly, but a custom property holding the whole url() can). The literal fallback
+         here is GHC's own gold, used only before that effect has run. */
+      background-image: var(--select-chevron-gold, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23c5a059'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")) !important;
       background-repeat: no-repeat !important;
       background-position: right 1.25rem center !important;
       background-size: 1.25rem !important;

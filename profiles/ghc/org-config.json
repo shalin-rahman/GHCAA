@@ -17,6 +17,14 @@
     "PrimaryColor": "#121212",
     "AccentColor": "#c5a059"
   },
+  "Documents": [
+    {
+      "Label": "GHCAA Constitution",
+      "Url": "/assets/GHCAA Constitution V4.2.pdf",
+      "Version": "4.2",
+      "Group": "Governance"
+    }
+  ],
   "Contact": {
     "SupportEmail": "haragangian@gmail.com",
     "ImportEmailBase": "haragangian",
@@ -68,15 +76,7 @@
     "OtpVerificationRequired": true,
     "DefaultMembershipType": "General",
     "AdminEmailOnNewRegistration": true,
-    "MembershipTypes": [
-      "Founding",
-      "Executive",
-      "General",
-      "Associate",
-      "Honorary",
-      "Advisory",
-      "Guest"
-    ]
+    "NotificationChannel": "Both"
   },
   "Localization": {
     "DateFormat": "dd-MM-yyyy",

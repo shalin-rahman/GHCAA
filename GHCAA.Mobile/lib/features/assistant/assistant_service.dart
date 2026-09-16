@@ -19,6 +19,6 @@ class AssistantService {
       debugPrint('AssistantService.ask failed: $e');
       return 'The assistant is temporarily offline. Please try again later.';
     }
-    return 'I am currently unable to process your request. Please try again.';
+    return "I can't answer that right now. Try again.";
   }
 }

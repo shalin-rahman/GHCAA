@@ -120,7 +120,7 @@ export class MemberApproval implements OnInit {
     if (this.processing()) return;
     const ok = await firstValueFrom(this.confirmDialog.confirm({
       title: 'Verify registry entry',
-      message: 'Verify this registry entry? This will officially induct the member and dispatch credentials.',
+      message: 'Verify this member? This will approve them and send their login details.',
       confirmLabel: 'Verify'
     }));
     if (!ok) return;

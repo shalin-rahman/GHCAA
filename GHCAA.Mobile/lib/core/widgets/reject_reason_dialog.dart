@@ -35,7 +35,7 @@ Future<({String reason, bool notify})?> showRejectReasonWithNotifyDialog(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Please provide a reason for rejection. This will be visible to the submitter.', style: TextStyle(color: Colors.white70, height: 1.4, fontSize: 12)),
+            const Text('Give a reason for rejecting this. The submitter will see it.', style: TextStyle(color: Colors.white70, height: 1.4, fontSize: 12)),
             const SizedBox(height: AppTheme.spaceM),
             TextField(
               controller: reasonCtrl,

@@ -136,7 +136,7 @@ function handleError(
     }
 
     const skipNotify = req.headers.has('X-Skip-Error-Notify');
-    let errorMessage = 'An unexpected error occurred';
+    let errorMessage = 'Something went wrong';
 
     if (error.error instanceof ErrorEvent) {
         errorMessage = `Error: ${error.error.message}`;

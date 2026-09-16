@@ -71,7 +71,7 @@ export class MemberImportModalComponent {
         }
       } catch (err) {
         console.error('Excel parse error:', err);
-        this.notify.error('Failed to read Excel file. Please ensure it is a valid .xlsx file.');
+        this.notify.error("Couldn't read that file. Check that it's a valid .xlsx file.");
         this.excelHeaders.set([]);
       }
     };

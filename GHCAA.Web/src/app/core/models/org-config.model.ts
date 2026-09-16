@@ -69,7 +69,8 @@ export interface OrgWorkflow {
   otpVerificationRequired: boolean;
   defaultMembershipType: string;
   adminEmailOnNewRegistration: boolean;
-  membershipTypes: string[];
+  /** 'Sms' | 'Email' | 'Both' — which channel member alerts go out on. */
+  notificationChannel: string;
 }
 
 export interface NavLabels {
@@ -111,4 +112,12 @@ export interface OrgConfig {
   features: FeatureToggles;
   workflow: OrgWorkflow;
   localization: OrgLocalization;
+  documents?: DocumentEntry[];
+}
+
+export interface DocumentEntry {
+  label: string;
+  url: string;
+  version: string;
+  group: string;
 }

@@ -12,15 +12,17 @@ namespace GHCAA.Infrastructure.Data
         private static string GetSeedPath(string fileName)
             => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "Seed", fileName);
 
-        // Class 3 seed files per docs/SEED_CLASSIFICATION.md — one institution's own members,
+        // Tier 3 seed files per docs/SEED_CLASSIFICATION.md — one institution's own members,
         // events and payment history, not something every institution starts with. These live
-        // under profiles/<name>/demo-data/ instead of Data/Seed/.
+        // under profiles/<name>/demo-data/ instead of Data/Seed/. This list must match
+        // InstitutionDataSeeder.Registry exactly — that registry, not this set, is the source of
+        // truth for which files are Tier 3; see docs/SEED_CLASSIFICATION.md.
         private static readonly HashSet<string> DemoDataFiles = new(StringComparer.OrdinalIgnoreCase)
         {
             "members.json", "users.json", "user_roles.json", "ec_members.json", "ec_periods.json",
-            "events.json", "galleries.json", "news.json", "financial_records.json",
+            "events.json", "galleries.json", "news.json",
             "academic_records.json", "professional_records.json", "photos.json",
-            "payment_histories.json", "membership_dues.json", "membership_histories.json",
+            "payment_histories.json", "jobs.json", "saved_payment_methods.json",
         };
 
         // Walks up from a starting directory looking for a "profiles" folder. Needed because
@@ -62,15 +64,38 @@ namespace GHCAA.Infrastructure.Data
             return null;
         }
 
-        // Class 1/2 seed files per docs/SEED_CLASSIFICATION.md — structural rows every institution
-        // needs (lookups, email templates) or institution-specific content a profile pack may want
-        // to supply its own copy of (site content, themes, constitution). Unlike demo-data these
-        // live directly under profiles/<name>/, not a demo-data subfolder. No profile pack ships its
-        // own copy of any of these yet, so this always falls through to the existing Data/Seed/ file
-        // below — it only starts mattering once WP62.33-62.36 add per-profile copies.
+        /// <summary>
+        /// The demo-data folder the active ORG_PROFILE would resolve to, if the profiles tree can
+        /// be found at all. Used by <see cref="InstitutionDataSeeder"/> to warn about a Tier 3 file
+        /// sitting on disk with no entry in its registry — the same drift that let 62.32 miss
+        /// users.json/user_roles.json the first time.
+        /// </summary>
+        internal static string? FindActiveDemoDataDirectory()
+        {
+            var orgProfile = Environment.GetEnvironmentVariable("ORG_PROFILE");
+            var profileName = string.IsNullOrWhiteSpace(orgProfile) ? "default" : orgProfile;
+
+            var profilesRoot = FindProfilesRoot(AppDomain.CurrentDomain.BaseDirectory)
+                ?? FindProfilesRoot(Directory.GetCurrentDirectory());
+            if (profilesRoot == null) return null;
+
+            var path = Path.Combine(profilesRoot, profileName, "demo-data");
+            return Directory.Exists(path) ? path : null;
+        }
+
+        // Tier 1/2 seed files per docs/SEED_CLASSIFICATION.md — institution-specific content a
+        // profile pack may want to supply its own copy of (site content, themes, constitution).
+        // Unlike demo-data these live directly under profiles/<name>/, not a demo-data subfolder.
+        // No profile pack ships its own copy of any of these yet, so this always falls through to
+        // the existing Data/Seed/ file below — it only starts mattering once WP62.33-62.36 add
+        // per-profile copies.
+        //
+        // lookups.json is deliberately NOT here: dropdown categories are shared application
+        // taxonomy, the same set for every institution, not something a profile should be able to
+        // override — it always loads from Data/Seed/lookups.json regardless of ORG_PROFILE.
         private static readonly HashSet<string> ProfilePackFiles = new(StringComparer.OrdinalIgnoreCase)
         {
-            "lookups.json", "email_templates.json", "site_content.json", "themes.json", "constitution.json",
+            "email_templates.json", "site_content.json", "themes.json", "constitution.json",
         };
 
         private static string? ResolveProfilePackPath(string fileName)
@@ -111,7 +136,7 @@ namespace GHCAA.Infrastructure.Data
             // Keeps test data (Shalin Rahman, etc.) out of the production database snapshot.
             // EF.IsDesignTime is true only inside `dotnet ef`. The old assembly-scan heuristic also
             // fired during ordinary test runs (the test assembly references the Design package
-            // transitively), which routed Visual-profile test factories through the Class 3
+            // transitively), which routed Visual-profile test factories through the Tier 3
             // profile-pack path instead of Seed/Visual once real member data moved out of Data/Seed
             // into profiles/ghc/demo-data — breaking the FamilyLinkRequests fallback that expects
             // Member 200/201 to exist.
@@ -161,9 +186,19 @@ namespace GHCAA.Infrastructure.Data
                 }
             }
 
+            return LoadSeedFromPath<T>(path);
+        }
+
+        /// <summary>
+        /// Reads and deserializes one seed file at an already-resolved path. Shared tail end of
+        /// <see cref="LoadSeed{T}"/>, and also used directly by <see cref="InstitutionDataSeeder"/> for
+        /// an operator-supplied real-data override path that bypasses profile resolution entirely.
+        /// </summary>
+        internal static List<T> LoadSeedFromPath<T>(string path)
+        {
             if (!File.Exists(path)) return new List<T>();
 
-            Console.WriteLine($"[SEED] Loading {fileName} from: {path}");
+            Console.WriteLine($"[SEED] Loading from: {path}");
             var json = File.ReadAllText(path);
             var items = System.Text.Json.JsonSerializer.Deserialize<List<T>>(json) ?? new List<T>();
 
@@ -306,34 +341,12 @@ namespace GHCAA.Infrastructure.Data
             var familyLinks = LoadSeed<FamilyLinkRequest>("family_links.json");
             if (familyLinks.Any()) modelBuilder.Entity<FamilyLinkRequest>().HasData(familyLinks);
 
-            // PROGRAMMATIC SEEDING FOR VISUAL TEST PROFILE
-            var profile = Environment.GetEnvironmentVariable("ASP_SEED_PROFILE");
-            var isDesign = AppDomain.CurrentDomain.FriendlyName.Contains("ef") ||
-                           AppDomain.CurrentDomain.GetAssemblies().Any(a => a.FullName?.Contains("Microsoft.EntityFrameworkCore.Design") == true);
-
-            if (profile == "Visual" && !isDesign && !familyLinks.Any())
-            {
-                modelBuilder.Entity<FamilyLinkRequest>().HasData(
-                    new FamilyLinkRequest
-                    {
-                        Id = 9991,
-                        RequesterId = 200,
-                        TargetMemberId = 1,
-                        Status = Enums.FamilyLinkStatus.Accepted,
-                        Relationship = Enums.RelationshipType.Other,
-                        RequestedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                    },
-                    new FamilyLinkRequest
-                    {
-                        Id = 9992,
-                        RequesterId = 2,
-                        TargetMemberId = 200,
-                        Status = Enums.FamilyLinkStatus.Accepted,
-                        Relationship = Enums.RelationshipType.Other,
-                        RequestedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                    }
-                );
-            }
+            // The two Visual-profile FamilyLinkRequest rows (Member 200 <-> 1 and 200 <-> 2) used
+            // to be seeded here via HasData. HasData runs as part of EnsureCreated's own schema
+            // script, before DatabaseBootstrapperExtensions ever gets a chance to load Members from
+            // members.json, so the FK to Members always failed on a fresh Visual database. They're
+            // seeded programmatically in DatabaseBootstrapperExtensions.BootstrapDatabaseAsync
+            // instead, after Members exist.
 
             // Seed Gamification Configs
             modelBuilder.Entity<GamificationConfig>().HasData(
@@ -347,28 +360,9 @@ namespace GHCAA.Infrastructure.Data
             var roles = LoadSeed<Role>("roles.json");
             if (roles.Any()) modelBuilder.Entity<Role>().HasData(roles);
 
-            // Seed Members from JSON
-            var members = LoadSeed<Member>("members.json");
-            if (members.Any()) modelBuilder.Entity<Member>().HasData(members);
-
-            // Seed users from JSON
-            var users = LoadSeed<User>("users.json");
-            if (users.Any()) modelBuilder.Entity<User>().HasData(users);
-
-            // Seed Payment Histories
-            var payments = LoadSeed<PaymentHistory>("payment_histories.json");
-            if (payments.Any()) modelBuilder.Entity<PaymentHistory>().HasData(payments);
-
-            // Seed many-to-many Roles for Users (UserRoles junction table)
-            var userRoles = LoadSeed<Dictionary<string, object>>("user_roles.json");
-            if (userRoles.Any())
-            {
-                modelBuilder.Entity("UserRoles").HasData(userRoles.Select(ur => new
-                {
-                    RolesId = int.Parse(ur["RolesId"]?.ToString() ?? "0"),
-                    UsersId = int.Parse(ur["UsersId"]?.ToString() ?? "0")
-                }).ToList());
-            }
+            // Members, Users and UserRoles are Tier 3 (docs/SEED_CLASSIFICATION.md) — one
+            // institution's own accounts, not schema. Seeded at runtime by InstitutionDataSeeder
+            // instead of HasData, so this data never lands in a committed migration again.
 
             // Seed Membership Fees from JSON
             var feeConfigs = LoadSeed<MembershipFeeConfig>("fee_configs.json");
@@ -378,43 +372,15 @@ namespace GHCAA.Infrastructure.Data
             var paymentConfigs = LoadSeed<PaymentConfiguration>("payment_configurations.json");
             if (paymentConfigs.Any()) modelBuilder.Entity<PaymentConfiguration>().HasData(paymentConfigs);
 
-            // Seed EC Period and Members from JSON
-            var ecPeriods = LoadSeed<ECPeriod>("ec_periods.json");
-            if (ecPeriods.Any()) modelBuilder.Entity<ECPeriod>().HasData(ecPeriods);
-
-            var ecMembers = LoadSeed<ECMember>("ec_members.json");
-            if (ecMembers.Any()) modelBuilder.Entity<ECMember>().HasData(ecMembers);
-
-            // Seed News from JSON
-            var news = LoadSeed<NewsPost>("news.json");
-            if (news.Any()) modelBuilder.Entity<NewsPost>().HasData(news);
-
-            // Seed Events from JSON
-            var events = LoadSeed<AlumniEvent>("events.json");
-            if (events.Any()) modelBuilder.Entity<AlumniEvent>().HasData(events);
-
-            // Seed Jobs from JSON
-            var jobs = LoadSeed<JobOpportunity>("jobs.json");
-            if (jobs.Any()) modelBuilder.Entity<JobOpportunity>().HasData(jobs);
+            // EC Periods/Members, News, Events and Jobs are Tier 3 — seeded at runtime by
+            // InstitutionDataSeeder, not HasData (see the note above Members).
 
             // Seed Themes from JSON
             var themes = LoadSeed<SpecialDayTheme>("themes.json");
             if (themes.Any()) modelBuilder.Entity<SpecialDayTheme>().HasData(themes);
 
-            // Seed Gallery and Photos from JSON
-            var galleries = LoadSeed<EventGallery>("galleries.json");
-            if (galleries.Any()) modelBuilder.Entity<EventGallery>().HasData(galleries);
-
-            var photos = LoadSeed<EventPhoto>("photos.json");
-            if (photos.Any()) modelBuilder.Entity<EventPhoto>().HasData(photos);
-
-            // Seed Academic Records from JSON
-            var academic = LoadSeed<AcademicRecord>("academic_records.json");
-            if (academic.Any()) modelBuilder.Entity<AcademicRecord>().HasData(academic);
-
-            // Seed Professional Records from JSON
-            var professional = LoadSeed<ProfessionalRecord>("professional_records.json");
-            if (professional.Any()) modelBuilder.Entity<ProfessionalRecord>().HasData(professional);
+            // Galleries, Photos, Academic Records and Professional Records are Tier 3 —
+            // seeded at runtime by InstitutionDataSeeder, not HasData (see the note above Members).
 
             // Seed Membership Histories from JSON
             var histories = LoadSeed<MembershipHistory>("membership_histories.json");
@@ -436,9 +402,8 @@ namespace GHCAA.Infrastructure.Data
             var constitutions = LoadSeed<Constitution>("constitution.json");
             if (constitutions.Any()) modelBuilder.Entity<Constitution>().HasData(constitutions);
 
-            // Seed Saved Payment Methods from JSON
-            var savedMethods = LoadSeed<SavedPaymentMethod>("saved_payment_methods.json");
-            if (savedMethods.Any()) modelBuilder.Entity<SavedPaymentMethod>().HasData(savedMethods);
+            // Saved Payment Methods are Tier 3 — seeded at runtime by InstitutionDataSeeder, not
+            // HasData (see the note above Members).
 
             // Seed CMS content blocks (About/Contact) from JSON
             var siteContent = LoadSeed<SiteContent>("site_content.json");

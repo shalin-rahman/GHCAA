@@ -2,7 +2,9 @@
 
 GHCAA is a full-stack alumni association platform. Treat the API, web client, and
 mobile client as one product: changes to a shared API contract or business rule
-must be checked against both clients.
+must be checked against both clients. Log every endpoint change (new route, new
+field, deprecated field) in `docs/API_CONTRACT_REGISTRY.md`, noting which client
+picked it up — see that file for the format.
 
 ## Commands
 

@@ -33,13 +33,13 @@ export class AdminOrgConfig implements OnInit {
   activeTab = signal<TabKey>('branding');
   config: OrgConfig | null = null;
   localizationJson = '';
-  membershipTypesCsv = '';
   isSaving = false;
   isLoading = false;
   successMessage = '';
   errorMessage = '';
 
   readonly approvalModes = ['ManualReview', 'AutoApprove', 'PaymentGated'];
+  readonly notificationChannels = ['Both', 'Email', 'Sms'];
 
   // Example text for the empty-state placeholder only — sourced from this build's own
   // institution profile pack, not hardcoded to GHC/BDT, so a different profile's build
@@ -97,10 +97,6 @@ export class AdminOrgConfig implements OnInit {
           ...this.config.contact,
           phoneNumbers: this.config.contact.phoneNumbers.map(p => p.trim()).filter(Boolean)
         },
-        workflow: {
-          ...this.config.workflow,
-          membershipTypes: this.membershipTypesCsv.split(',').map(t => t.trim()).filter(Boolean)
-        },
         localization: {
           ...JSON.parse(this.localizationJson),
           dateFormat: this.config.localization?.dateFormat ?? 'dd-MM-yyyy'
@@ -119,6 +115,7 @@ export class AdminOrgConfig implements OnInit {
   private hydrate(cfg: OrgConfig) {
     this.config = structuredClone(cfg);
     this.config.contact.phoneNumbers ??= [];
+    this.config.workflow.notificationChannel ??= 'Both';
     this.config.localization ??= { dateFormat: DEFAULT_DATE_FORMAT, locales: {} };
     this.config.localization.dateFormat ??= DEFAULT_DATE_FORMAT;
     this.localizationJson = JSON.stringify(
@@ -126,6 +123,5 @@ export class AdminOrgConfig implements OnInit {
       null,
       2
     );
-    this.membershipTypesCsv = (cfg.workflow?.membershipTypes ?? []).join(', ');
   }
 }

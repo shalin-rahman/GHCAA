@@ -49,8 +49,8 @@ namespace GHCAA.Tests.Data
             ("site_content.json", typeof(SiteContent)),
         };
 
-        // Class 3 files (docs/SEED_CLASSIFICATION.md) moved out of Data/Seed into the GHC profile
-        // pack's demo-data folder — see Work Package 62.32. Everything else stays structural/Class 2
+        // Tier 3 files (docs/SEED_CLASSIFICATION.md) moved out of Data/Seed into the GHC profile
+        // pack's demo-data folder — see Work Package 62.32. Everything else stays structural/Tier 2
         // and is still read from Data/Seed.
         private static readonly HashSet<string> DemoDataFiles = new(StringComparer.OrdinalIgnoreCase)
         {

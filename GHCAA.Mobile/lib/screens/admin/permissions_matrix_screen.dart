@@ -524,7 +524,7 @@ class _PermissionsMatrixScreenState
       context,
       title: 'Delete Custom Role?',
       message:
-          'This will permanently remove the "$roleName" role. Members assigned this role will lose associated permissions.',
+          'This will permanently remove the "$roleName" role. Members with this role will lose those permissions.',
       confirmLabel: 'Delete',
       destructive: true,
     );
