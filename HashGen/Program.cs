@@ -105,6 +105,22 @@ if (args.Length > 0 && args[0] == "--apply")
         Console.WriteLine($"forum category seeded: {await seedForum.ExecuteNonQueryAsync()} row(s)");
     }
 
+    // Gives financial_test.dart a real, deterministic ledger row for the demo
+    // member instead of a mocked one. Status=1 is PaymentStatus.Completed,
+    // FinancialCategory=0 is MembershipFee, PaymentMethod=0 is ManualReceipt
+    // (see GHCAA.Domain.Enums). The API serializes FinancialCategory as its
+    // enum name ("MembershipFee"), not a free-text description, so that's
+    // what the mobile ledger screen actually renders.
+    await using (var seedPayment = new NpgsqlCommand("""
+        INSERT INTO "PaymentHistories" ("MemberId", "TransactionId", "Amount", "PaidAt", "Status", "FinancialCategory", "PaymentMethod", "IsArchived")
+        SELECT @memberId, 'DEMO-SEED-0001', 5000, NOW() AT TIME ZONE 'UTC', 1, 0, 0, false
+        WHERE NOT EXISTS (SELECT 1 FROM "PaymentHistories" WHERE "MemberId" = @memberId)
+        """, conn))
+    {
+        seedPayment.Parameters.AddWithValue("memberId", memberId);
+        Console.WriteLine($"payment history seeded: {await seedPayment.ExecuteNonQueryAsync()} row(s)");
+    }
+
     Console.WriteLine("Done.");
 }
 else if (args.Length > 0 && args[0] == "--signalr-test")

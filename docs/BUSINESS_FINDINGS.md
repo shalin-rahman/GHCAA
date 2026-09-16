@@ -567,12 +567,48 @@ the three runs (`userProfileProvider failed: ... Your session has expired`) is e
 from the demo token's TTL and doesn't affect the assertions, which don't depend on that call.
 
 **Coverage verified:** login, dashboard render, Alumni Directory navigation, drawer My Profile
-navigation, logout, redirect to login. **Still not covered:** no forum-flow or financial-flow
-assertion exists in `member_journey_test.dart` — same gap 82.85 already tracks, now against the
-current test file rather than `app_test.dart`.
+navigation, logout, redirect to login. **Still not covered (at the time):** no forum-flow or
+financial-flow assertion existed yet in `member_journey_test.dart` — closed below under 82.85.
 
 | ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
 |---|---|---|---|---|---|---|---|---|---|
 | MOB-P4-010 | Storage | Logout under Windows secure-storage file contention | `flutter test integration_test/member_journey_test.dart -d windows`, LOGOUT tap | Redirect to login | **Fixed** — unguarded `_secure.delete()` in `StorageService` could throw and abort `logout()` before `context.go('/login')`; wrapped in `_safeDelete` try/catch | Mobile | Major | Closed | `GHCAA.Mobile/lib/core/storage/storage_service.dart`; 3 consecutive passes after the fix |
 | MOB-GAP-001 | Forum | Live authenticated flow | Login, then fetch forum categories and topics | Forum data renders | **Still not run** — no forum-flow assertion in `member_journey_test.dart` either | Mobile | Minor | Open | Add a forum-flow step and rerun |
 - **Docs:** `docs/BACKEND_REVIEW_2026-07-03.md` — executive summary + recommended commit grouping.
+
+### 82.85: financial and forum flow coverage closed (2026-09-16)
+
+The old `financial_test.dart` asserted `'Life Membership'`, `'5000.0'`, and
+`'Annual Reunion 2026'`. None of these could ever have rendered: `FinancialCategory`
+(`GHCAA.Domain/Enums.cs`) has no "Life Membership" value, and
+`financial_service.dart`'s `getLedger()` only ever produces the raw `financialCategory`
+enum name, `notes`, or the literal fallback `'Alumni Contribution'` as a description —
+never free text like that. Amounts always go through `AppUtils.formatCurrency`, which
+renders two decimals and a thousands separator, so a bare `'5000.0'` could never appear
+either. There was also no deterministic payment row seeded for the demo member at all,
+so even a corrected assertion would have had nothing real to match.
+
+Fix: extended `HashGen/Program.cs`'s `--apply` seed with one idempotent
+`PaymentHistories` insert (`WHERE NOT EXISTS`, same style as the existing forum-category
+seed) for the resolved demo member — `MembershipFee` category, amount 5000, status
+Completed. Rewrote `financial_test.dart` to log in, open Financials from the dashboard
+grid (`'Payments'`), and assert on what the pipeline actually renders: `'MembershipFee'`
+and a `'5,000.00'` substring (matching the numeric part since the currency symbol is
+org-config-dependent, not hardcoded). Also fixed a hit-test failure during the rewrite:
+the dashboard grid extends past the default test window height, so `'Payments'` needed
+`tester.ensureVisible()` before the tap, not a viewport change.
+
+Added a forum-flow step to `member_journey_test.dart` between the existing My Profile
+check and the logout step: opens the drawer, taps `'Discussions'`, and asserts
+`'General Discussion'` — the one category `HashGen --apply` guarantees exists.
+
+Both ran on the real Windows desktop device against the live seeded `GHCAADB_v2`:
+`flutter test integration_test/financial_test.dart -d windows` → `+1: All tests passed!`;
+`flutter test integration_test/member_journey_test.dart -d windows` → `+1: All tests
+passed!` (a transient 401 on `GET /profile` logged mid-run is the same known token-TTL
+noise as MOB-P4-010's rerun, unrelated to these assertions).
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| MOB-GAP-001 | Forum | Live authenticated flow | `flutter test integration_test/member_journey_test.dart -d windows`, drawer → Discussions | Forum category renders | **Fixed** — `'General Discussion'` renders after the new forum-flow step | Mobile | Minor | Closed | `GHCAA.Mobile/integration_test/member_journey_test.dart` |
+| MOB-P4-009 | Integration | Financial seed assertions | `flutter test integration_test/financial_test.dart -d windows` | Seeded ledger row renders | **Fixed** — rewrote the test's assertions to match the real rendering pipeline (`'MembershipFee'`, `'5,000.00'`) and added the missing deterministic seed row | Mobile | Minor | Closed | `HashGen/Program.cs`, `GHCAA.Mobile/integration_test/financial_test.dart` |

@@ -1097,24 +1097,26 @@ The remaining use cases are in `docs/SRS.md`.
 
 The columns are requirement, constitutional source where applicable, use case, design element,
 implementation artefact and test case. A representative extract follows; the full matrix appears as
-Appendix B and is closed in §12.2. It is maintained by hand, with the consequence stated in §3.9.
+Appendix B and is closed in §12.2. The first five columns are the analyst's reading of each
+requirement and are maintained by hand, with the consequence stated in §3.9. The Test column is
+regenerated from the `[Category("FR-NN")]` / `[Category("DC-NN")]` tags actually present in
+GHCAA.Tests by `docs/book/build/traceability.py`, whose `--check` mode fails the build if this
+table is edited out of step with those tags.
 
 | Req | DC / clause | Use case | Design element (Ch. 5–6) | Implementation artefact (Ch. 7) | Test (Ch. 9) |
 | --- | --- | --- | --- | --- | --- |
-| FR-01 | — | UC-01 | Registration sequence, §5.5 | Registration endpoint and application service | Wizard validation and duplicate-identity tests |
-| FR-02 | DC-08 | UC-01, UC-02 | Membership state machine, §5.3 | Membership status transitions | State-transition suite |
-| FR-03 | — | UC-04 (profile) | Masking projection, §8.7 | Field-visibility model and directory projection | Masked-projection tests |
-| FR-19 | DC-14 | UC-02 | Approval flow, §5.5 | Obligation raising on approval | Approval-side-effect tests |
-| FR-21 | DC-14 | UC-04 | Ledger model, §5.4 | Payment and verification records | Attribution and immutability tests |
-| FR-25 | DC-14 | UC-04 | Append-only rule, §5.6 | Receipt generation; amendment refusal | Compensating-entry tests |
-| FR-32 | DC-16 | UC-07 | Version resolution, §5.6 | Always-current reader | Effective-date resolution tests |
-| FR-33 | DC-16 | UC-07 | Supersede-not-delete rule, §5.6 | Version synchronisation at start-up | History-retention tests |
-| FR-36 | DC-03 | UC-09 | Eligibility rule, §5.6 | Voting eligibility guard | Tier and standing refusal tests |
-| FR-37 | DC-13 | UC-08, UC-09 | Threshold reporting, §5.6 | Count and threshold report | Two-thirds computation tests |
-| FR-38 | DC-03, DC-12 | UC-10 | Roll derivation, §5.4 | Voter-roll query | Roll composition tests |
-| FR-44 | DC-14 | UC-02, UC-04 | Archival deletion, §6.9 | Global filter on archived records | Exclusion and recovery tests |
-| NFR-M1 | — | — | Dependency rule, §6.4 | Layer boundaries | Architecture test, §9.4 |
-| NFR-S5 | DC-07 | UC-02 | Session invalidation, §8.5 | Security-stamp check per request | Revocation timing test |
+| FR-01 | — | UC-01 | Registration sequence, §5.5 | Registration endpoint and application service | RegisterAsync_WithValidData_ShouldCreateMemberAndPaymentHistory (+1 more) |
+| FR-02 | DC-08 | UC-01, UC-02 | Membership state machine, §5.3 | Membership status transitions | GetStatusAsync_WithInvalidMemberId_ShouldThrowException (+2 more) |
+| FR-03 | — | UC-04 (profile) | Masking projection, §8.7 | Field-visibility model and directory projection | GetProfileAsync_WithNonPrivilegedAccess_ShouldReturnMaskedProfile (+2 more) |
+| FR-19 | DC-14 | UC-02 | Approval flow, §5.5 | Obligation raising on approval | no tagged test (gap) |
+| FR-21 | DC-14 | UC-04 | Ledger model, §5.4 | Payment and verification records | RecordPaymentAsync_ShouldAddPaymentAndReturnDto |
+| FR-25 | DC-14 | UC-04 | Append-only rule, §5.6 | Receipt generation; amendment refusal | DeletePaymentAsync_ShouldRemovePaymentAndLogActivity (+3 more) |
+| FR-32 | DC-16 | UC-07 | Version resolution, §5.6 | Always-current reader | GetActiveConstitutionAsync_ReturnsLatestByEffectiveDate_NotInsertionOrder |
+| FR-33 | DC-16 | UC-07 | Supersede-not-delete rule, §5.6 | Version synchronisation at start-up | ActivateConstitutionAsync_SupersedesPreviousVersion_WithoutDeletingIt |
+| FR-36 | DC-03 | UC-09 | Eligibility rule, §5.6 | Voting eligibility guard | VoteOnConstitutionAsync_AcceptsVotingTierMember (+1 more) |
+| FR-37 | DC-13 | UC-08, UC-09 | Threshold reporting, §5.6 | Count and threshold report | no tagged test (gap) |
+| FR-44 | DC-14 | UC-02, UC-04 | Archival deletion, §6.9 | Global filter on archived records | DeletePaymentAsync_ShouldRemovePaymentAndLogActivity (+5 more) |
+| NFR-S5 | DC-07 | UC-02 | Session invalidation, §8.5 | Security-stamp check per request | RotateRefreshToken_ReplayOfARotatedToken_RevokesWholeFamilyAndRotatesStamp (+1 more) |
 
 ### Table 3.5 — MoSCoW prioritisation and negotiation outcome
 

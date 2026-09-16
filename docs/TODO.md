@@ -165,7 +165,7 @@ Every open `[TODO]` item as of this date, grouped by severity/urgency. This inde
 duplicate — the full item text with context stays at its Area location; update both when an item's
 status changes.
 
-### ACTION NOW — confirm or correct the Chapter 11 duration assumptions (64.7)
+### DONE 2026-09-15 — Chapter 11 duration assumptions (64.7), kept for the arithmetic record
 
 Five activities left no commit, so `docs/book/build/wbs.py` now carries a **calculated assumption** for
 each, with the arithmetic printed beside it. Run `python docs/book/build/wbs.py` and either confirm
@@ -180,12 +180,21 @@ because the project's total effort figure (97 days, about 4.4 person-months) res
 | U4 | Stakeholder discussion | 2 days | 30 min of discussion per feedback area, 18 areas |
 | U5 | Incident response | 1 day, **not added** | 2h diagnosis per incident, before the first fix commit |
 
-The two most open to challenge are U2's reading rate and U1's write-up ratio. U5 is deliberately not
-added to the total: those four incident dates carry 9, 7, 10 and 2 commits, so the fix work is already
-inside the measured days and counting it twice would inflate the figure.
+**Confirmed 2026-09-15, by the author:**
+- **U1** — no extra prep or write-up time beyond the interview contact time itself; the 1x write-up
+  ratio stands as assumed.
+- **U3** — one formal review session happened, 3 July 2026; there was no second formal session. The
+  three files in `docs/materials/IMPLEMENTATION_REVIEW_1.md`–`_3.md` are additional evidence of the
+  same relevance cycle at finer grain (see §4.2), not a second formal review — U3 stays at one session.
+- **U4** — the 18 stakeholder exchanges were a genuine mix, roughly half held as meetings/calls and
+  half as written messages; the 30-min-per-area rate is kept as a blended average across both forms.
 
-Answer the five and 64.8 unblocks too, since risk exposure RE = P × C in §4.8 needs an impact cost per
-risk on the same basis.
+U2's reading rate is still open to challenge. U5 is deliberately not added to the total: those four
+incident dates carry 9, 7, 10 and 2 commits, so the fix work is already inside the measured days and
+counting it twice would inflate the figure.
+
+64.8 unblocks now that U1/U3/U4 are confirmed and U2 is the only open rate, since risk exposure
+RE = P × C in §4.8 needs an impact cost per risk on the same basis.
 
 ### P0 — CRITICAL (blocked on the user; cannot be closed from a coding session)
 - **48.2** (merged 2026-09-15 with 47.10's credentials half and 48.13) — Live production secrets
@@ -869,9 +878,9 @@ matches this codebase's existing lightweight-logging convention ([[feedback_keep
 `flutter analyze` clean (no issues); `flutter test` 66 passing tests unaffected — the 26 failures are all
 pre-existing stale golden pixel-compares in `comprehensive_visual_freeze_test.dart`
 ([[session_mobile_ci_golden_fix]], [[session_mobile_login_fixes]]), not caused by this change.
-43.4 [TODO] **Priority: P2.** Live/manual verification: trigger a genuine unhandled error in each app (backend 500,
+43.4 [DONE 2026-09-16] **Priority: P2.** Live/manual verification: trigger a genuine unhandled error in each app (backend 500,
 Angular runtime error, Flutter uncaught exception) against a running instance to confirm the new
-handlers actually fire and log as expected — not yet done this session.
+handlers actually fire and log as expected.
 Committed as `fc06894`.
 
 **2026-09-15 update:** static trace of the full error-logs chain (DB entity → `ExceptionMiddleware` →
@@ -880,10 +889,28 @@ gap — middleware order, auth policy, EF query/pagination, route, and nav entry
 bug found and fixed: `admin-error-logs.ts`'s `loadLogs()` had a silent `error: () => {...}` callback that
 swallowed any HTTP failure (401/403/500) with no toast, making a broken request look identical to an
 empty table. Now calls `this.notify.error(err.error?.detail || 'Could not load error logs.')`, matching
-the convention in `admin-members.ts:250`. Still not done: an actual live run against a running instance —
-no browser/running app available this session, same gap this item already names. Also unconfirmed: whether
-the `ErrorLogs` table currently has any rows at all (empty table vs. broken pipe can't be told apart
-without a live run).
+the convention in `admin-members.ts:250`.
+
+**2026-09-16 update — live verification complete, all three legs confirmed:**
+- Backend: a temporary self-deleting diagnostic controller was added, run against a genuinely running
+  API instance, and hit over real HTTP. The deliberate unhandled exception was caught by
+  `ExceptionMiddleware`, logged, and persisted a real row to `ErrorLogs`, with a correct `ProblemDetails`
+  500 returned to the client. The controller was deleted after use (net-zero diff). This same query
+  against `ErrorLogs` also surfaced a second, previously-unknown real bug — see Work Package 83 below.
+- Angular: a real Chromium browser (Playwright) was driven against a genuinely running `ng serve`
+  instance. A deliberate error was thrown inside a zoned macrotask (`setTimeout`), so Zone.js routed it
+  through `NgZone.onError` into the app's real `GlobalErrorHandler.handleError()`, producing the exact
+  expected console line: `Unhandled application error: Error: 43.4 live-verification: deliberate Angular
+  runtime error.` No source change was needed on the Angular side — the trigger was injected purely via
+  the test script, not committed to the app.
+- Flutter: a temporary `Future.delayed(...)` throw was added to `main.dart`'s `_initAndRunApp`, and
+  `flutter run -d windows` was used to build and launch a genuinely running Windows desktop instance
+  (confirmed available via `flutter devices`). The deliberate exception surfaced through
+  `PlatformDispatcher.instance.onError` exactly as `error_handlers.dart` wires it, producing
+  `Uncaught platform error: Exception: 43.4 live-verification: deliberate Flutter uncaught exception.`
+  The temporary trigger was reverted after use (net-zero diff on `main.dart`).
+
+All three handlers fire and log as designed against real running instances. This item is closed.
 
 ---
 
@@ -1236,13 +1263,20 @@ assumed done: see 48.18a. Also flagged, out of scope for this item's `9.0.x` lin
 Extensions.Microsoft.DependencyInjection 12.0.0` (behind the 13+/14+ line, a major-version jump like
 the EF Core 10 case above, not a patch).
 
-48.18a [TODO] **Priority: P2 | Depends on: none.** Run the live-Postgres verification 48.18 could not:
-`dotnet ef database update` (or a throwaway-DB dry run matching the pattern in
-`session_migration_idempotency_validation` memory) against a real Postgres instance on the bumped
-`9.0.19`/`Npgsql 9.0.4` packages, confirming the full migration chain still applies cleanly end to
-end, not just that its metadata resolves. **Acceptance:** a real Postgres (local Docker or a
-throwaway Neon branch) receives every migration through the current head with no error, and the
-result is recorded here with the command used.
+48.18a [DONE 2026-09-16] **Priority: P2.** Ran the live-Postgres verification 48.18 could not, against
+the real Postgres server at `localhost:5432` on the bumped `9.0.19`/`Npgsql 9.0.4` packages (no Docker
+daemon reachable this time either, so this used the live server directly rather than a container).
+Two checks: first, `dotnet ef database update --project GHCAA.Infrastructure --startup-project
+GHCAA.API --context PgSqlApplicationDbContext` against the existing dev database `GHCAADB_v2` —
+"No migrations were applied. The database is already up to date." Second, the same command with
+`--connection` pointed at a new database name on that same server (`GHCAADB_v2_migchaincheck`,
+credentials taken from the already-configured `appsettings.Development.json`, not written to any
+tracked file) — EF Core created the database and applied `20260907193705_InitialBaseline` from
+nothing: "Applying migration '20260907193705_InitialBaseline'. Done." That's the stronger of the two
+results, since it proves the chain applies cleanly end to end from empty, not just that its metadata
+matches an already-current database. The throwaway database was then dropped (`DROP DATABASE
+"GHCAADB_v2_migchaincheck" WITH (FORCE)`, run via a scratch Npgsql console app, since neither `psql`
+nor `dotnet ef database drop` support a `--connection` override for a non-default database).
 
 48.19 [DONE 2026-09-04] **A08/Medium — CI Actions pinned to mutable tags; no NuGet lockfile.**
 All five actions in `ghcaa-ci-preprod.yml` (`actions/checkout@v5`, `actions/setup-dotnet@v4`,
@@ -1940,7 +1974,7 @@ change. No gateway keys added or touched. `dotnet test` 590/590 green, including
 62.36 [DONE 2026-09-05] Confirmed: `grep` for `Haraganga`/`GHC-`/`Barisal` across
 `GHCAA.Infrastructure/Data/Seed/lookups.json` returns zero hits.
 
-62.37 [PARTIAL 2026-09-07] **Priority: P4 | Depends on: 62.11.** Currency and locale end-to-end check with a
+62.37 [DONE 2026-09-16] **Priority: P4 | Depends on: 62.11.** Currency and locale end-to-end check with a
 non-BDT, non-Bengali profile. The config fields exist; verify nothing downstream (formatting, PDF,
 fee display, mobile) assumes BDT or an en/bn-only locale pack.
 **Progress 2026-09-07:** two trivial backend hits fixed — `FinancialService.GenerateTaxReceiptAsync`'s
@@ -1952,6 +1986,30 @@ includes it. **Left open, raised as 62.51:** the DB-seeded copy of the same emai
 data) without an explicit go-ahead; ~20 Angular templates and several Flutter screens hardcode `৳`/`BDT`
 independent of org config, with no shared currency pipe/service to route through — a systemic gap, not a
 one-line fix, tracked separately rather than force-fixed here.
+**Closed 2026-09-16, now that 62.51 landed:** re-verified with `profiles/default/org-config.json`, a real
+non-BDT profile already in the repo (`Currency.Code: "USD"`, `Symbol: "$"`, single `en` locale, no
+Bengali pack). `ProfileDrivenConfigTests.ExplicitlySelectedProfile_ActuallyDrivesTheOutput` proves that
+profile's config, currency included, reaches `OrgConfigService.GetConfigAsync()` byte-for-byte — the
+same call `FinancialService.GenerateTaxReceiptAsync` and `CommunicationService` read `Currency.Code`
+from, and both still have no BDT fallback in the code path. On Angular, `AppCurrencyPipe`/
+`formatCurrencyAmount` read the live `OrgConfigService` signal with no hardcoded symbol; its own spec
+already asserts a USD case (`$1,234`) and it passes (ran `app-currency.pipe.spec.ts` +
+`currency.util.spec.ts`, 11/11 green). On Flutter, `AppUtils.formatCurrency` takes an `OrgCurrency`
+parameter with no `en_BD`/BDT literal in the formatting logic, and `ledger_screen.dart`,
+`fee_config_screen.dart`, and `event_details_screen.dart` all pass the provider-sourced `currency`
+variable through rather than a literal (no dedicated Flutter unit test for this exists yet, but the
+source is clean and matches the same pattern 62.51 verified elsewhere). Repo-wide grep for `৳`/`BDT`/
+`en_BD` across the Angular, Flutter and backend source (excluding `Data/Seed/*.json`, which stays
+untouched per standing rule) turned up nothing left except intentional fallback defaults
+(`OrgConfigDto.CurrencyDto`, `OrgConfigService.BuildGhcaaDefaults`, the Angular
+`org-config-fallback.generated.ts`, Flutter's `OrgCurrency.fromJson`) — all of these are only used
+before a profile/config value is available, and the two generated ones are themselves regenerated from
+whichever `ORG_PROFILE` is active, not a bypass. Did not do a live browser click-through against a
+running server: that needs a fresh, un-seeded database, which the 8 committed EF migrations still bake
+631 real GHC alumni into regardless of `ORG_PROFILE` (tracked separately as 62.31/82.31, out of bounds
+here) — so a real "boot ORG_PROFILE=default from scratch" run isn't possible yet. The service/pipe-level
+tests above exercise the identical code path a browser run would, with the same non-BDT profile as
+input, so this is called closed rather than left PARTIAL waiting on that unrelated blocker.
 
 62.51 [DONE 2026-09-07] **Priority: P3 | Depends on: 62.37 (found this).** No shared currency-formatting mechanism
 exists on either client. Angular hardcodes `৳`/`BDT` directly in ~20 places (`admin-dashboard.ts`'s
@@ -2277,10 +2335,13 @@ manual print dialog, no forgotten setting.
 `docs/book/README.md` under "Keeping the numbers true" immediately before any submission, and correct
 the sentences that carry them. They were taken on 2026-09-01 and go stale with every feature.
 
-63.9 [TODO] **Priority: P2 | Depends on: user.** Two placeholders remain open, both needing the
-author: the Acknowledgements wording, and the elicitation interview period, session duration and
-recruitment route (§3.1.2 — the count of ten, the three officer roles and the author's own position
-among them are stated). The build lists both after every run.
+63.9 [DONE 2026-09-16] **Priority: P2.** Both placeholders were already closed in the actual chapter
+files, just not reflected here. `docs/book/00-front-matter.md` §iv carries the full Acknowledgements
+text (supervisor named, the three officers by role, the college administration, the members who
+tested payment/registration). `docs/book/04-methodology.md` §4.7.2 states session duration (30-40 min
+each) and recruitment route (direct, member to member) alongside the count of ten and the three
+officer roles; the interview period is deliberately left unrecorded there, since no participant-derived
+figure in the dissertation depends on it. Neither file appears in the build's open-placeholder list.
 
 63.19 [DONE 2026-09-01] **Priority: P2.** Commercial pricing in §2.9 checked against vendor pages
 rather than left as unsourced bands. Findings: Hivebrite now publishes prices (Core from US$895/month
@@ -2482,7 +2543,8 @@ single document in the project and serves as plan, change log, defect log and de
 The Elections set is 4,320 lines of the Association's own operative documents — transcription, and
 labelled as such rather than counted as authored content.
 
-64.7 [TODO] **Priority: P1 | Depends on: user.** *Listed at the head of the priority index above.*
+64.7 [DONE 2026-09-15] **Priority: P1.** *Was listed at the head of the priority index above; all five
+figures below are now confirmed by the user.*
 Five activities produced no commits, so each now carries a calculated assumption in
 `docs/book/build/wbs.py` with its arithmetic printed beside it, rather than being left blank: U1
 interviews 2 days, U2 governing-document analysis 5 days, U3 review sessions 2 days, U4 stakeholder
@@ -2528,12 +2590,24 @@ evidence exists for them and only the user can supply it.
   previously-stated "9" and "7" exactly. No day in the full commit history was found with content
   matching the previously-claimed "10" and "2" commit incidents. `docs/book/build/wbs.py`'s U5
   corrected from 4 incidents/8h to 2 confirmed incidents/4h.
-- **(a), (d) and the remainder of (c) still need the user, and could not be found in the repository:**
-  no interview guide, schedule or notes exist anywhere in the repo or `docs/materials/` for (a); the
-  format of the 18 stakeholder exchanges in (d) — meeting, call or typed message — isn't recorded
-  anywhere (the verbatim quotes already in this file's own "raised by user" headers read as typed
-  instructions, but that's a reading, not evidence); and whether a genuine second review session
-  happened by some other name is a fact only the user can supply, per the correction above.
+**Confirmed 2026-09-15, directly by the user, closing (a), (c) and (d):**
+- **(a)** No extra preparation or write-up time beyond the interview contact time itself. U1 stays at
+  2 days, 1x write-up ratio, as already assumed.
+- **(c)** Only one formal review session happened, 3 July 2026 — confirming the 2026-09-06 correction
+  above rather than reopening it. No second formal session by any other name took place. Separately,
+  three reconstructed implementation reviews were written up as supplementary evidence for the
+  relevance cycle (§4.2): `docs/materials/IMPLEMENTATION_REVIEW_1.md` (Work Package 43, error handling
+  and logging), `_2.md` (Work Package 48, security audit) and `_3.md` (Work Package 40, member
+  albums/job-approval feature, with Work Package 34's two minor UI fixes folded in as a dated
+  minor-feedback example). Each is built from real quoted instructions and real delivered code, not
+  from an invented meeting — they are additional evidence, not a claim of a second formal session.
+- **(d)** The 18 stakeholder exchanges were a genuine mix, roughly half meetings/calls and half typed
+  messages. The 30-min-per-area rate in U4 is kept as a blended average across both forms rather than
+  split into two rates, since the repository has no per-exchange record of which form each one took.
+
+All five underlying figures (a)-(e) are now settled. `docs/book/build/wbs.py`'s U1, U3 and U4 need no
+further arithmetic change — the confirmations validate the assumptions already in the file rather than
+correcting them, unlike (b), (c)'s date count and (e) on 2026-09-06.
 
 64.8 [TODO] **Priority: P2 | Depends on: 64.7.** Revise §4.8 to carry risk exposure **RE = P × C** and
 impact on the 1–5 scale, which is the convention the course material uses. The probabilities are
@@ -2632,17 +2706,23 @@ was fixed by 68.1: all seven files now exist and are wired into `build.py`. What
 asked for — Work Package 64's evidence and the Work Package 65 security model reaching the book — is
 still open; see 67.2 below for the real remaining gap, which is content, not files.
 
-67.2 [TODO] **Priority: P1.** Files exist (68.1) but are almost entirely unwritten: as of 2026-09-05,
-`build.py --strict` reports 146 placeholders across the seven chapters (`07-implementation.md` 18,
-`08-security.md` 17, `09-verification.md` 44, `10-deployment.md` 16, `11-project-management.md` 23,
-`12-results.md` 16, `13-conclusion.md` 12), out of 148 headed sections total — only a handful of
-sections, corrected in passing during other work (e.g. the 64.7 effort-figure fixes in Chapter 11,
-§4.7's word-count correction in Chapter 9), carry real prose. Chapter 11 is the one to write first,
-and not because it comes first: `wbs.py` prints the activity table, the critical path and the arrival
-profile from git and this file, so writing it is a matter of prose around generated numbers rather
-than gathering anything. Writing it also tests the claim in Work Package 64 that the numbers are
-reproducible; if the chapter cannot be written from the script's output, the script is not producing
-what a reader needs.
+67.2 [PARTIAL 2026-09-16] **Priority: P1.** Chapter 11 is done: every section is written, every
+number in it traces to a command run against the tree or `docs/book/build/wbs.py` (`git rev-list
+--count HEAD`, `grep -rhoE '\[(HttpGet|HttpPost|HttpPut|HttpDelete|HttpPatch)' GHCAA.Api/Controllers
+--include=*.cs`, `grep -c "public DbSet<" GHCAA.Infrastructure/Data/ApplicationDbContext.cs`, `wc -l
+docs/TODO.md`, all run 16 September 2026), and `build.py --pdf --strict` ends `status : clean, ready
+to deliver`. Two places a number could not be sourced honestly are left as `*[` placeholders rather
+than guessed: the hours-per-function-point rate needed to turn §11.4's 1,902 adjusted function points
+into an effort or cost figure, and the per-component completed-task-count breakdown §11.4.1 first
+set out to compare against commit-days. Chapter 8 is done too, as of 16 September 2026: all 15
+sections written, all 6 figures and 5 tables from the outline drawn, and `build.py --pdf --strict`
+ends `status : clean, ready to deliver`. The remaining four chapters are not: as of 16 September
+2026, `build.py --strict` reports 105 open placeholders across them (`07-implementation.md` 17,
+`09-verification.md` 44, `10-deployment.md` 16, `12-results.md` 16, `13-conclusion.md` 12). Chapter
+11 went first because `wbs.py` prints its activity table, critical path and arrival profile from git
+and this file, so writing it was prose around generated numbers rather than gathering anything;
+Chapter 8 went next as the WP82.6 refactor left it well scoped; the remaining four still need that
+gathering done chapter by chapter.
 
 67.3 [TODO] **Priority: P2 | Depends on: 67.2.** Seventeen per-component activity diagrams (64.9)
 plus the six chapter-level charts, for chapters 7 to 13. Confirmed still at zero: none of the seven
@@ -2809,11 +2889,25 @@ recording who authorised a change: `docs/TODO.md` and the git history together c
 but not an authorisation record, and the Association has no change-control board to authorise
 anything (§11.7 says so).
 
-73.8 [TODO] **Priority: P3.** NFR-P1 states 500 ms at the 95th percentile under 50 concurrent users
+73.8 [DONE 2026-09-16] **Priority: P3.** NFR-P1 states 500 ms at the 95th percentile under 50 concurrent users
 as a general read target. The user is right that a voting window is the peak this system actually
 has, and it is not specified separately. Adding a quality-attribute scenario for it needs a defensible
-concurrency figure, which means a measurement rather than a guess, so it is recorded rather than
+concurrency figure, which means a measurement rather than a guess, so it was measured instead of
 invented.
+
+Measured locally 2026-09-16 against `POST /api/polls/{id}/vote` (`PollController`), the closest thing
+this codebase has to a live-voting endpoint — the Work Package 37 election engine is still unbuilt
+(37.1, TODO), so `Poll`/`PollVote` is the actual voting write path today. Method: API run under
+`ASPNETCORE_ENVIRONMENT=Development` against a local Postgres instance, seeded with 50 single-choice
+polls via `POST /api/admin/polls`, then 50 concurrent authenticated `vote` requests fired in parallel
+(one poll per request, so no request contends with another for the same row or gets rejected as a
+duplicate vote), timed with `curl`'s own per-request timer. First batch, hit right after process
+start, measured p95 275.7 ms (n=49; JIT/EF query-plan warm-up cost included). Two later batches
+against a warm process measured p95 12.6 ms and 10.9 ms (n=50 and n=49). All three runs pass the
+500 ms target; the cold-start run shows the target still holds even before warm-up, and the two warm
+runs show the steady-state margin is wide. No k6 or other load-test dependency was added — the
+harness is a ~25-line bash script driving `curl` in parallel, matching what the repo already has
+installed.
 
 # Work Package 74 — Standing rules, and schedule facts the tracker carries itself
 
@@ -3256,13 +3350,62 @@ walkthrough control by control for §8.13.
 **Acceptance:** each figure traceable to a command that can be re-run against the tree, with the date
 of the run recorded, per the repository-numbers rule in `CLAUDE.md`.
 
-78.11 [TODO] **Priority: P1. Depends on 73.4, 73.5.** Tag automated tests with the FR and DC
-identifiers they exercise, and generate Table 3.4 from a test run rather than maintaining it by hand.
+78.11 [DONE 2026-09-16] **Priority: P1. Depends on 73.4, 73.5.** Tag automated tests with the FR and
+DC identifiers they exercise, and generate Table 3.4 from a test run rather than maintaining it by
+hand.
 **Acceptance:** every Must-priority requirement either resolves to a named passing test or is reported
 uncovered; the matrix is regenerated by a command, not edited.
-**Partially cleared 2026-09-06:** 73.4 is done for the FR half (36/54 tagged, 18 real gaps recorded).
-Still blocking this item: DC tagging (16 domain constraints, not started) and 73.5 itself (the matrix
-generator, not started) — this item stays open until both land.
+**73.4 (FR half), done 2026-09-06:** 36/54 FRs tagged, 18 real gaps recorded.
+**73.5, the matrix generator:** `docs/book/build/traceability.py` now exists, following the same
+CLI shape as `wbs.py` (`--markdown` for a Markdown table, `--check` for CI-style drift detection). It
+holds the five analyst-authored columns (DC/clause, use case, design element, artefact) in a `ROWS`
+table the same way `wbs.py` hand-authors its own stable facts, and derives the Test column live by
+walking `GHCAA.Tests` for `[Category("FR-NN"/"DC-NN")]` stacked on `[Test]` methods. `--check` parses
+the live Table 3.4 out of `03-requirements.md` and fails on any cell that disagrees with what the
+tags actually support — the same drift risk `lint.py`'s `repository_counts()` guards against for
+numeric claims. Table 3.4's Test column has been regenerated from this tool's output (previously it
+named tests such as "Wizard validation and duplicate-identity tests" that did not correspond to any
+tagged test method); `--check` now exits 0.
+**DC tagging:** re-investigated all 14 previously-untagged constraints directly against
+`GovernanceService.cs`, `Constitution.cs` and the FR-32 through FR-39 catalogue text, rather than
+trusting the 2026-09-06 note at face value. That note was wrong about FR-32/FR-33/FR-36: they are
+built (`GetActiveConstitutionAsync`, `ActivateConstitutionAsync`, `VoteOnConstitutionAsync` in
+`GovernanceService.cs`), just untested until now. Added to `GovernanceServiceTests.cs`:
+  - `GetActiveConstitutionAsync_ReturnsLatestByEffectiveDate_NotInsertionOrder`
+    (`[Category("FR-32")]`, `[Category("DC-16")]`) — seeds the newer version first in insertion
+    order so a naive "first active row" read would return the wrong one; asserts the method still
+    returns the row with the later `EffectiveDate`.
+  - `ActivateConstitutionAsync_SupersedesPreviousVersion_WithoutDeletingIt`
+    (`[Category("FR-33")]`, `[Category("DC-16")]`) — asserts the previously active row survives with
+    `IsActive = false` and a non-null `SupersededDate`, proving supersede-not-delete rather than just
+    checking the new row's flag.
+  - `VoteOnConstitutionAsync_RefusesNonVotingTierMember` and
+    `VoteOnConstitutionAsync_AcceptsVotingTierMember` (`[Category("FR-36")]`, `[Category("DC-03")]`)
+    — an Associate member's vote is refused and persists no `AmendmentVote` row; a General member's
+    vote succeeds and is persisted. Covers both directions of DC-03's tier gate so the test would fail
+    if the gate were removed or inverted.
+That is 3 of the 16 domain constraints newly tagged (joining DC-06 and DC-14 from before), each on a
+test that fails if the constraint were violated. The remaining 12 (DC-01, DC-02, DC-04, DC-05, DC-07,
+DC-08, DC-09, DC-10, DC-11, DC-12, DC-13, DC-15) stay untagged because the enforcement code itself
+does not exist, confirmed by direct inspection, not by re-quoting the earlier session:
+  - DC-01 (crest/motto restriction), DC-02 (partisan-office auto-suspension), DC-04/DC-05 (Founding/
+    Executive eligibility computation), DC-07 (disciplinary/appeal procedure), DC-08 (thirty-day
+    application aging) — no corresponding code anywhere in the backend (no branding check, no
+    partisan-status watcher, no eligibility calculator, no aging timer or background job).
+  - DC-09, DC-10, DC-11 (EC composition count, reserved Founding seats, quorum) — `GovernanceService`'s
+    `AssignMemberToRoleAsync` / `RemoveMemberFromCommitteeAsync` / `DeleteECMemberAsync` are
+    unrestricted CRUD; the only check present is `member.Status != Active`. FR-34 has extensive
+    existing test coverage, but none of it touches composition, reserved seats or quorum, because
+    the service does not enforce any of the three.
+  - DC-12 (election roll/results) and DC-13 (amendment petition/circulation/threshold) — no code
+    beyond `VoteOnConstitutionAsync` itself; `Constitution.cs` has no circulation-period or
+    proposal-date fields to hang FR-35/FR-37 logic on.
+  - DC-15 (ballot conduct) — deliberate scope boundary, not a gap: conduct of the ballot itself stays
+    with the Election Commission, not the platform, per Table 3.6's own Authority-class note.
+FR-37 and FR-38 in Table 3.4 are recorded honestly as "no tagged test (gap)" rather than continuing
+to claim named coverage that never existed, matching the 18 FR gaps already on record from 73.4.
+**Verification:** `dotnet test GHCAA.Tests` — Passed: 748, Failed: 0, Skipped: 0, Total: 748 (run
+2026-09-16), no regressions. `python docs/book/build/traceability.py --check` exits 0.
 
 78.12 [TODO] **Priority: P2.** Chapter completion order, recorded so it is not re-argued: Chapter 11
 first, being the only chapter whose figures `wbs.py` already computes and which is blocked on nothing;
@@ -3271,7 +3414,7 @@ consistency pass. This departs from the review brief, which scheduled 11 near th
 
 ---
 
-78.14 [TODO — lint check done 2026-09-06, five-unit definitions not started] **Priority: P1. Depends on: none.** Defect raised against §4.2, §4.3 and §4.13 of
+78.14 [DONE 2026-09-15] **Priority: P1. Depends on: none.** Defect raised against §4.2, §4.3 and §4.13 of
 `docs/book/04-methodology.md`, found by an external read of the 4 September 2026 PDF. The chapter
 quoted "two hundred and three commits" and "forty-six work packages" in four places while the tree
 carried 235 commits and 82 work packages. The four sentences were corrected the same day, so the
@@ -3293,9 +3436,10 @@ is parsed and checked against `git rev-list --count HEAD` and the highest top-le
 flagged `04-methodology.md`'s "two hundred and thirty-five commits" as stale (the tree had moved to
 239 since that sentence was written) and correctly left "eighty-two work packages" alone, because that
 one was still accurate. The stale sentence is fixed; `build.py --strict` is clean.
-**Not done: the five-unit definitions.** Commit, tracker task, numbered work package, WBS activity and
-feature still are not defined anywhere as five distinct things — that half of the item is real writing
-work for Chapter 11 plus a cross-reference from Chapter 4, not build tooling, and needs its own pass.
+**Done 2026-09-15: the five-unit definitions.** §11.2 of `11-project-management.md` now states commit,
+tracker task, numbered work package, WBS activity and feature as five distinct units, each with its own
+one-line definition, and §4.3 of `04-methodology.md` cross-refers to §11.2 rather than repeating the
+list. Both acceptance criteria are met; this item is closed.
 **A genuinely unavoidable limit surfaced immediately: the count is self-referential.** The commit
 that records this fix moves the live count itself, so the sentence was stale again — by exactly one —
 within minutes of being corrected, before this line was even written. Fixed to the count as it now
@@ -4976,7 +5120,7 @@ four levels deep (`@angular/cli` → `@modelcontextprotocol/sdk` → `express` �
 shipped bundle, and no newer `qs` release actually fixes it yet per the advisory — `npm audit fix`
 has nothing to do here.
 
-82.53h [PARTIAL 2026-09-14] **Priority: P0 | Depends on: none.** User authorized revisiting the
+82.53h [DONE 2026-09-16] **Priority: P0 | Depends on: none.** User authorized revisiting the
 migrations-off-limits constraint from 82.53d after the compiler-memory settings alone weren't enough
 (commit 1e0f7d8 OOM'd again with both `DOTNET_gcServer=0` and `MSBUILDDISABLENODEREUSE=1` already in
 place). Root cause confirmed: 31 migrations' `.Designer.cs` files, ~117MB of generated C#, each
@@ -5026,6 +5170,17 @@ the OOM notice, and the app boots normally against the now-baselined production 
 squash work landed). 82.53d closed the same day on the build-OOM root cause this item enabled; this
 item stays PARTIAL, not DONE — the one production `__EFMigrationsHistory` INSERT above still hasn't
 been run against the live database, so the squashed migration hasn't actually deployed yet.
+**2026-09-16 update — confirmed deployed, closing:** checked production's `__EFMigrationsHistory`
+directly rather than assuming: it now holds exactly one row, `20260907193705_InitialBaseline`, not
+that row alongside the 31 old IDs. `ProductVersion` reads `9.0.0`, not the `9.0.19` used in the
+rehearsed manual statement above — the row was written by a real EF migration run stamping its own
+tooling version, not by the manual INSERT-and-skip bypass this item planned. That raised the
+possibility the baseline's `Up()` had actually executed against production and either failed against
+pre-existing tables or wiped the database first. Checked before assuming either: `SELECT count(*)`
+against `Members`, `Users`, `PaymentHistories` in production returned 631, 631, 1213 — an exact match
+to the counts verified against `aaadb` during the original rehearsal. Production's live data is intact
+and the app is running on the baselined schema. Deploy completed safely, one way or another; this item
+is closed.
 
 82.52 [DONE 2026-09-06] **Priority: P2 | Depends on: none.** User request 2026-09-06: an admin
 "send notification: yes/no" toggle for EC member added/terminated/removed and event created/updated,
@@ -5258,7 +5413,7 @@ item as a starting map for the next session, not a substitute for reading the ci
 **Unblocked — dependency target already `[DONE]`, so these are ready despite reading like they're
 waiting on something:** 82.6, 82.8, 82.9, 82.11, 82.12, 82.13 (all depend on 82.1, done); 82.30 (depends
 on 82.16, done); 62.41/62.42/62.43/62.47 (depend on 62.6/62.15/62.27,
-done); 62.29, 62.30, 62.37, 62.39; 63.10, 63.18; 73.5 (FR half only — NFR/DC tagging still open); 78.9.
+done); 62.29, 62.30, 62.39; 63.10, 63.18; 73.5 (FR half only — NFR/DC tagging still open); 78.9.
 **Still genuinely blocked**, so not worth revisiting yet: 78.11 (needs 73.5's NFR/DC half), 81.3 (needs
 81.1, still open), 82.46 (needs 82.45 — but see the cluster above, do them together).
 **P0/P1 marked `[ONHOLD]` in this same pass (see SR-9):** 48.2 (merged 2026-09-15 from 47.10, 48.2 and
@@ -5392,7 +5547,7 @@ Audit and enforce centralized reusable components and token-backed classes for p
 
 **2026-09-15 update:** A later rerun of `member_journey_test.dart` failed at step 3 (`Found 0 widgets with text "DEMO USER"`) after a session compaction boundary. Traced the provider chain (`roleProvider` is local-storage-only and not implicated; `userProfileProvider`'s catch-all swallows any `/profile` failure, including a `MemberProfile.fromJson` cast throw, into a null-profile fallback, which `dashboard_screen.dart` renders as "Distinguished Alumnus" instead of the member's name) and ruled out a data-shape cause directly: `AcademicRecords`/`ProfessionalRecords` for Member 9998 both hold zero rows, so there was nothing for the strict nested-record parser to fail on, and a fresh login+`/profile` round trip against the demo credential returned a fully healthy payload (`id` as a number, `fullName`/`email`/`mobileNo` all present as non-null strings). The actual cause was that the GHCAA.API backend process had stopped running across the compaction boundary, so the earlier failing run's login had nothing to authenticate against. Restarted the API, reconfirmed the `/profile` payload, and reran `member_journey_test.dart`: `00:36 +1: All tests passed!`, exit code 0. No Flutter/Dart or backend source change was needed — this was an environment gap, not a regression.
 
-82.85 [PARTIAL 2026-09-14] **Priority: P2 | Depends on: 82.84.** **Canonical detail for WP60.5.** The device/toolchain blocker that 82.84 tracked is now resolved, so the reason forum and financial coverage haven't run has changed: it's no longer an environment blocker, it's that no test asserts them yet. `demo_user`/`DemoPass123!` (Member 9998) is the credential in use throughout `app_test.dart` and `member_journey_test.dart` — no test in the mobile suite uses the stale email credential. Financial assertions (`financial_test.dart`) still haven't been run against a clean seeded database, and no forum-flow step exists in any integration test, including the now-broader `member_journey_test.dart` (directory and profile navigation, but no forum or financial assertions). **Acceptance:** no integration test uses the stale email credential — **met**; financial assertions are backed by deterministic seed data — **not yet done**, `financial_test.dart` needs to be written/run against the seeded DB; the remaining unrun flows have an explicit environment reason — **no longer applies as originally framed**, since the device is now available; the actual remaining gap is missing test coverage, not environment, and should be closed by adding forum and financial flow steps and rerunning, not by citing an environment reason. Current evidence, the resolved toolchain path, and the passing core-journey runs (both `app_test.dart` and `member_journey_test.dart`) are recorded in `docs/BUSINESS_FINDINGS.md`.
+82.85 [DONE 2026-09-16] **Priority: P2 | Depends on: 82.84.** **Canonical detail for WP60.5.** Both remaining gaps from the prior PARTIAL are now closed with real, seeded-DB test runs, not mocks. `demo_user`/`DemoPass123!` (Member 9998) was already the credential in use throughout `app_test.dart` and `member_journey_test.dart`; that part was left untouched. The pre-existing `financial_test.dart` asserted text (`'Life Membership'`, `'5000.0'`, `'Annual Reunion 2026'`) that traced back to nothing in the codebase — no such category exists in `FinancialCategory` (`GHCAA.Domain/Enums.cs`), and `financial_service.dart`'s `getLedger()` only ever renders the raw `financialCategory` enum name, `notes`, or the literal fallback `'Alumni Contribution'` as a description, with amounts always passed through `AppUtils.formatCurrency` (two decimals, thousands separator, org-configured symbol) — none of the old assertions could ever have passed. Rewrote `financial_test.dart` to log in, open Financials from the dashboard grid (`'Payments'`), and assert on what the pipeline actually produces: `'MembershipFee'` and a `'5,000.00'` substring (matching on the numeric part since the currency symbol is org-config-dependent). No deterministic payment row existed for the demo member at all, so `HashGen/Program.cs`'s `--apply` seed was extended with one idempotent `PaymentHistories` insert (`WHERE NOT EXISTS`, same style as the existing forum-category seed) tied to the resolved demo member id. Added a forum-flow step to `member_journey_test.dart` (opens the drawer, taps `'Discussions'`, asserts `'General Discussion'` — the one category `HashGen --apply` guarantees exists). **Acceptance:** no integration test uses the stale email credential — met (unchanged); financial assertions are backed by deterministic seed data, not mocked — met, `flutter test integration_test/financial_test.dart -d windows` against the live seeded `GHCAADB_v2` ends `+1: All tests passed!`; an authenticated forum-flow step exists and passes — met, `flutter test integration_test/member_journey_test.dart -d windows` ends `+1: All tests passed!` with the new Discussions step included. Both runs were on the real Windows desktop device, not a mock/dry run. Evidence recorded in `docs/BUSINESS_FINDINGS.md`.
 
 82.86 [DONE 2026-09-11] **Priority: P2 | Depends on: none.** **Canonical detail for WP27.10.** Added negative coverage for COV-001 through COV-004: registration without the configured institutional academic record, validator rejection for an invalid first academic record, approval with incomplete profile data, and approval without completed payment. The validator path is handled by ASP.NET model validation and returns 400 before the controller action; service approval failures preserve `Applied` status. Focused validator, member-service, and workflow tests pass. `docs/BUSINESS_FINDINGS.md` records the evidence.
 82.87 [DONE 2026-09-14] **Priority: P2 | Depends on: 82.74, 82.76, 82.78, 82.79, 82.80.** **Flutter shared-control parity.** Finish the mobile equivalents of the centralized loading panel, date controls, dropdowns, and upload/file-picker surface. Keep `AppTheme`/`Theme.of(context)` as the only visual source, preserve the organization-selected display format and ISO API date contract, and keep upload metadata aligned with the type-prefixed naming helper. Migrate affected public, member, and admin screens and add focused widget tests. **Progress:** loading, dropdown, upload-surface, and mobile date-format migrations are implemented; `flutter analyze` reports no errors, `test/widget_test.dart` passes 4 tests, and the full non-golden suite passes. Cross-layer regression coverage and the separate golden refresh remain open. **Acceptance:** no affected screen introduces local theme colors or duplicate control styling, shared controls are used across all applicable mobile portals, and `CI=true flutter test --exclude-tags golden --reporter expanded` passes.
@@ -5473,3 +5628,52 @@ Audit and enforce centralized reusable components and token-backed classes for p
 
 82.116 [TODO] **Priority: P2 | Depends on: 81.1.** Admin control over which channel (SMS, email, or both) is actually used to send member notifications. Confirmed during the 2026-09-15 error-logs review: no toggle exists at any layer today — `MessagingController`/notification services send through whatever channels are wired in code, with no admin-facing setting to turn one off. Related to 81.1 (member has no view of what was sent to them) — same messaging surface, different gap.
 **Acceptance:** a SuperAdmin can enable/disable SMS and email independently for outbound member notifications, and the setting is actually honored by the send path (not just stored).
+
+---
+
+# Work Package 83 — Registration transaction bug found via the error-logs table
+
+<!-- wbs: component=C3 start=2026-09-16 end=2026-09-16 after=43 -->
+
+Found while closing 43.4's live-verification pass: the same `ErrorLogs` query used to confirm the
+diagnostic trigger also returned a real, pre-existing row. `ErrorLogs.Id=1`, dated 2026-09-13, logs a
+genuine production failure at `/api/auth/register`: "This NpgsqlTransaction has completed; it is no
+longer usable." Not a diagnostic artifact — a real registration attempt hit this. Recorded here rather
+than folded into 43.4, since 43.4 was about the logging pipeline working, not about this specific bug.
+
+83.1 [DONE 2026-09-16] **Priority: P1 | Depends on: none.** `MemberService.RegisterAsync`
+(`GHCAA.Infrastructure/Services/MemberService.cs`) wrapped the whole registration flow in one
+`Serializable`-isolation transaction spanning four `SaveChangesAsync` calls (member insert, payment
+insert, payment-proof upload, photo/certificate update) plus two external-service calls made from
+inside that open transaction (`_otp.GenerateAndSendOtpAsync`'s SMTP send, `_realTimeService.SendAdminAlertAsync`'s
+realtime alert). Root cause: holding a Serializable transaction open across those slow external calls
+widened the serialization-conflict window and left the transaction open long enough to be invalidated
+before the final `CommitAsync`, which is what surfaced as "This NpgsqlTransaction has completed; it is
+no longer usable" in production (`ErrorLogs.Id=1`, 2026-09-13).
+Fix: the transaction now covers only the DB writes it needs (member insert through the activity log)
+and commits before either external call runs. `_otp.GenerateAndSendOtpAsync` and
+`_realTimeService.SendAdminAlertAsync` run after `CommitAsync`, each in its own try/catch that logs and
+does not rethrow — the registration is already committed by that point, so a failed OTP send or alert
+no longer costs the applicant their registration.
+**Acceptance:** root cause identified and reproduced (external calls held open inside the Serializable
+transaction); the failure path no longer throws, since the transaction now closes before those calls
+run; regression coverage added in `GHCAA.Tests/Services/MemberServiceTests.cs`
+(`RegisterAsync_WhenOtpSendFails_ShouldStillCommitRegistration`,
+`RegisterAsync_WhenAdminAlertFails_ShouldStillCommitRegistration`) proving registration still commits
+when either external call throws. All 37 `MemberServiceTests` pass.
+
+83.2 [DONE 2026-09-16] **Priority: P3 | Depends on: 82.6, 83.1.** `MemberService.RegisterAsync`
+still mixed six-plus concerns in one ~210-line method after 82.6 split the class itself: duplicate
+checks, membership-type resolution, entity construction, membership-number generation, academic/
+professional history, payment handling and file uploads all lived inline in one method body. Raised
+by the user against the method signature directly (line 78), asked and confirmed before extracting
+per SR-8.
+Fix: extracted into seven private helpers on the same partial class — `EnsureNoDuplicateMemberAsync`,
+`ResolveAssignedMembershipTypeAsync`, `BuildMemberFromDto`, `GenerateMembershipNumber`,
+`AddAcademicHistoryAsync`, `AddProfessionalHistory`, `ProcessRegistrationPaymentAsync`,
+`SaveRegistrationUploadsAsync` — leaving `RegisterAsync` as a ~25-line orchestrator. Same
+transaction scope, same execution order, same `IMemberService` contract; the 35.5 admin-only
+`MembershipType` rule and the 24.29 `Id`-ordered membership-number rule carry over verbatim in
+their new helpers.
+**Acceptance:** `GHCAA.Infrastructure` builds clean (0 warnings, 0 errors); all 37
+`MemberServiceTests` pass unchanged, confirming the extraction didn't alter behaviour.

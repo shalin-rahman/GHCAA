@@ -43,6 +43,7 @@ public class FinancialAuditTrailTests : TestBase
 
     [Category("FR-25")]
     [Category("FR-43")]
+    [Category("DC-14")]
     [Test]
     public async Task UpdateRecord_RecordsWhoChangedItAndWhen()
     {
@@ -63,6 +64,7 @@ public class FinancialAuditTrailTests : TestBase
 
     [Category("FR-25")]
     [Category("FR-44")]
+    [Category("DC-14")]
     [Test]
     public async Task DeleteRecord_KeepsTheRow_AndRecordsWhoDeletedIt()
     {
@@ -86,6 +88,7 @@ public class FinancialAuditTrailTests : TestBase
 
     [Category("FR-25")]
     [Category("FR-44")]
+    [Category("DC-14")]
     [Test]
     public async Task DeletedRecord_DisappearsFromOrdinaryReads()
     {

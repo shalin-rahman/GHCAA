@@ -198,6 +198,7 @@ public class MemberServiceTests : TestBase
             .WithMessage("Only the first academic record may be the institutional record.");
     }
 
+    [Category("DC-06")]
     [Test]
     public async Task RegisterAsync_ShouldAssignDefaultMembershipType_NotAClientSuppliedOne()
     {
@@ -341,6 +342,62 @@ public class MemberServiceTests : TestBase
 
         // Assert
         _mockOtp.Verify(x => x.GenerateAndSendOtpAsync(dto.Email, It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    // 83.1: OTP send and the admin realtime alert used to run inside the registration's Serializable
+    // transaction, and a failure there could surface as "This NpgsqlTransaction has completed" instead
+    // of the registration going through. Both calls now run after commit, so a failure in either must
+    // not roll back or fail the registration itself.
+    [Test]
+    public async Task RegisterAsync_WhenOtpSendFails_ShouldStillCommitRegistration()
+    {
+        var dto = CreateValidDto();
+        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(dto.Email, It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("SMTP unreachable"));
+
+        var memberId = await _service.RegisterAsync(dto, null, null, null);
+
+        memberId.Should().BeGreaterThan(0);
+        var saved = await _context.Members.FindAsync(memberId);
+        saved.Should().NotBeNull();
+        saved!.Status.Should().Be(Enums.MembershipStatus.Applied);
+    }
+
+    [Test]
+    public async Task RegisterAsync_WhenAdminAlertFails_ShouldStillCommitRegistration()
+    {
+        var dto = CreateValidDto();
+        var mockRealTime = new Mock<IRealTimeService>();
+        mockRealTime.Setup(x => x.SendAdminAlertAsync(It.IsAny<string>(), It.IsAny<object>()))
+            .ThrowsAsync(new InvalidOperationException("Realtime hub unreachable"));
+
+        var mockOrgConfigService = new Mock<IOrgConfigService>();
+        mockOrgConfigService.Setup(x => x.GetConfigAsync())
+            .ReturnsAsync(new OrgConfigDto { Branding = new BrandingDto { InstitutionName = "Govt. Haraganga College" } });
+
+        var service = new MemberService(
+            _context,
+            _mockStorage.Object,
+            _mockOtp.Object,
+            _mockEmail.Object,
+            _mockUserService.Object,
+            _mockCommunication.Object,
+            _mockLogger.Object,
+            _mockActivityService.Object,
+            _mockNotificationService.Object,
+            _appSettings,
+            _mockGamification.Object,
+            _mockFinancialService.Object,
+            mockRealTime.Object,
+            mockOrgConfigService.Object,
+            _mockTokenService.Object
+        );
+
+        var memberId = await service.RegisterAsync(dto, null, null, null);
+
+        memberId.Should().BeGreaterThan(0);
+        var saved = await _context.Members.FindAsync(memberId);
+        saved.Should().NotBeNull();
     }
 
     [Category("FR-02")]

@@ -83,6 +83,7 @@ public class FinancialServiceTests : TestBase
 
     [Category("FR-21")]
     [Category("FR-22")]
+    [Category("DC-14")]
     [Test]
     public async Task RecordPaymentAsync_ShouldAddPaymentAndReturnDto()
     {
@@ -314,6 +315,7 @@ public class FinancialServiceTests : TestBase
 
     [Category("FR-25")]
     [Category("FR-44")]
+    [Category("DC-14")]
     [Test]
     public async Task DeletePaymentAsync_ShouldRemovePaymentAndLogActivity()
     {

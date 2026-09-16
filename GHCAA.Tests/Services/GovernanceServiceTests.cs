@@ -261,6 +261,145 @@ namespace GHCAA.Tests.Services
             updated.EndDate!.Value.Kind.Should().Be(DateTimeKind.Utc);
         }
 
+        [Category("FR-32")]
+        [Category("DC-16")]
+        [Test]
+        public async Task GetActiveConstitutionAsync_ReturnsLatestByEffectiveDate_NotInsertionOrder()
+        {
+            // Arrange: insert the newer row first, so a naive "first active row found" read
+            // would return the wrong one. DC-16 requires the latest ratified version by
+            // effective date, not by row order.
+            var newer = new Constitution
+            {
+                Version = "v5.0",
+                Content = "newer",
+                ChangeSummary = "test",
+                EffectiveDate = DateTime.UtcNow,
+                IsActive = true
+            };
+            var older = new Constitution
+            {
+                Version = "v4.2",
+                Content = "older",
+                ChangeSummary = "test",
+                EffectiveDate = DateTime.UtcNow.AddYears(-1),
+                IsActive = true
+            };
+            _context.Constitutions.Add(newer);
+            _context.Constitutions.Add(older);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _service.GetActiveConstitutionAsync();
+
+            // Assert
+            result.Should().NotBeNull();
+            result!.Version.Should().Be("v5.0");
+        }
+
+        [Category("FR-33")]
+        [Category("DC-16")]
+        [Test]
+        public async Task ActivateConstitutionAsync_SupersedesPreviousVersion_WithoutDeletingIt()
+        {
+            // Arrange
+            var previous = new Constitution
+            {
+                Version = "v4.2",
+                Content = "old",
+                ChangeSummary = "test",
+                EffectiveDate = DateTime.UtcNow.AddYears(-1),
+                IsActive = true
+            };
+            var next = new Constitution
+            {
+                Version = "v5.0",
+                Content = "new",
+                ChangeSummary = "test",
+                EffectiveDate = DateTime.UtcNow,
+                IsActive = false
+            };
+            _context.Constitutions.Add(previous);
+            _context.Constitutions.Add(next);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _service.ActivateConstitutionAsync(next.Id);
+
+            // Assert: DC-16 is supersede-not-delete, so the previous version must still be
+            // in the table, just no longer active.
+            result.Should().BeTrue();
+            var storedPrevious = await _context.Constitutions.FindAsync(previous.Id);
+            storedPrevious.Should().NotBeNull();
+            storedPrevious!.IsActive.Should().BeFalse();
+            storedPrevious.SupersededDate.Should().NotBeNull();
+
+            var storedNext = await _context.Constitutions.FindAsync(next.Id);
+            storedNext!.IsActive.Should().BeTrue();
+            storedNext.SupersededDate.Should().BeNull();
+        }
+
+        [Category("FR-36")]
+        [Category("DC-03")]
+        [Test]
+        public async Task VoteOnConstitutionAsync_RefusesNonVotingTierMember()
+        {
+            // Arrange: DC-03 restricts amendment voting to Founding, Executive and General
+            // members. Associate is not one of those tiers, so the vote must be refused and
+            // nothing persisted.
+            var member = CreateMinimalMember("Associate Voter");
+            member.MembershipType = Enums.MembershipType.Associate;
+            _context.Members.Add(member);
+            var constitution = new Constitution
+            {
+                Version = "v5.0",
+                Content = "current",
+                ChangeSummary = "test",
+                EffectiveDate = DateTime.UtcNow,
+                IsActive = true
+            };
+            _context.Constitutions.Add(constitution);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _service.VoteOnConstitutionAsync(constitution.Id, member.Id, isFor: true, comments: null);
+
+            // Assert
+            result.Should().BeFalse();
+            (await _context.AmendmentVotes.AnyAsync(v => v.MemberId == member.Id)).Should().BeFalse();
+        }
+
+        [Category("FR-36")]
+        [Category("DC-03")]
+        [Test]
+        public async Task VoteOnConstitutionAsync_AcceptsVotingTierMember()
+        {
+            // Arrange: General is one of the three voting tiers DC-03 names.
+            var member = CreateMinimalMember("General Voter");
+            member.MembershipType = Enums.MembershipType.General;
+            _context.Members.Add(member);
+            var constitution = new Constitution
+            {
+                Version = "v5.0",
+                Content = "current",
+                ChangeSummary = "test",
+                EffectiveDate = DateTime.UtcNow,
+                IsActive = true
+            };
+            _context.Constitutions.Add(constitution);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _service.VoteOnConstitutionAsync(constitution.Id, member.Id, isFor: true, comments: "Agreed");
+
+            // Assert
+            result.Should().BeTrue();
+            var vote = await _context.AmendmentVotes.FirstOrDefaultAsync(v => v.MemberId == member.Id);
+            vote.Should().NotBeNull();
+            vote!.ConstitutionId.Should().Be(constitution.Id);
+            vote.IsFor.Should().BeTrue();
+        }
+
         private Member CreateMinimalMember(string name)
         {
             return new Member

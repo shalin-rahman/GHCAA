@@ -89,6 +89,22 @@ void main() {
 
       expect(find.text('My Profile'), findsOneWidget);
 
+      // 5b. Forum Navigation via drawer (HashGen --apply seeds exactly one
+      // ForumCategory, 'General Discussion', when the table starts empty)
+      await tester.tap(find.text('Home'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.menu_rounded));
+      await tester.pump();
+      for (var i = 0; i < 50 && find.text('Discussions').evaluate().isEmpty; i++) {
+        await tester.pump(const Duration(milliseconds: 200));
+      }
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Discussions'));
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      expect(find.text('General Discussion'), findsOneWidget);
+
       // 6. Logout Flow (return to dashboard first)
       await tester.tap(find.text('Home'));
       await tester.pumpAndSettle();
