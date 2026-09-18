@@ -522,7 +522,8 @@ export const API_ENDPOINTS = {
         CONTACT_MESSAGES: '/api/admin/contact-messages',
         SOCIAL_AUTH: '/api/admin/social-auth',
         POLLS: '/api/admin/polls',
-        ERROR_LOGS: '/api/admin/error-logs'
+        ERROR_LOGS: '/api/admin/error-logs',
+        DEV_TRACKER: '/api/admin/dev-tracker'
     },
     PENDING: {
         ADMIN_SUMMARY: '/api/pending/admin/summary',

@@ -195,5 +195,106 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
+
+        [Test]
+        public async Task UploadPhoto_ReturnsOk_OnSuccess()
+        {
+            var file = Mock.Of<IFormFile>(f => f.FileName == "photo.jpg" && f.Length == 1024);
+            _fileStorageMock.Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), "photo.jpg", 10, It.IsAny<GHCAA.Domain.Enums.FileUploadType>(), It.IsAny<CancellationToken>()))
+                            .ReturnsAsync("/uploads/gallery/photo.jpg");
+
+            var result = await _controller.UploadPhoto(file, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task UploadPhoto_ReturnsBadRequest_WhenValidationFails()
+        {
+            _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
+                                       .Returns(FileValidationResult.Fail("File too large."));
+            var file = Mock.Of<IFormFile>(f => f.FileName == "photo.jpg" && f.Length == 1024);
+
+            var result = await _controller.UploadPhoto(file, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result).StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
+
+        [Test]
+        public async Task ToggleActive_ReturnsOk_WithFlippedFlag()
+        {
+            var gallery = new EventGallery { Id = 5, IsActive = true };
+            _galleryServiceMock.Setup(x => x.GetGalleryByIdAsync(5, It.IsAny<CancellationToken>())).ReturnsAsync(gallery);
+            _galleryServiceMock.Setup(x => x.UpdateEventGalleryAsync(gallery, It.IsAny<CancellationToken>())).ReturnsAsync(gallery);
+
+            var result = await _controller.ToggleActive(5, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            Assert.That(gallery.IsActive, Is.False);
+        }
+
+        [Test]
+        public async Task ToggleActive_ReturnsNotFound_WhenGalleryMissing()
+        {
+            _galleryServiceMock.Setup(x => x.GetGalleryByIdAsync(99, It.IsAny<CancellationToken>())).ReturnsAsync((EventGallery?)null);
+
+            var result = await _controller.ToggleActive(99, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<NotFoundResult>());
+        }
+
+        [Test]
+        public async Task ToggleFeatured_ReturnsOk_WithFlippedFlag()
+        {
+            var gallery = new EventGallery { Id = 5, IsFeatured = false };
+            _galleryServiceMock.Setup(x => x.GetGalleryByIdAsync(5, It.IsAny<CancellationToken>())).ReturnsAsync(gallery);
+            _galleryServiceMock.Setup(x => x.UpdateEventGalleryAsync(gallery, It.IsAny<CancellationToken>())).ReturnsAsync(gallery);
+
+            var result = await _controller.ToggleFeatured(5, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            Assert.That(gallery.IsFeatured, Is.True);
+        }
+
+        [Test]
+        public async Task ToggleFeatured_ReturnsNotFound_WhenGalleryMissing()
+        {
+            _galleryServiceMock.Setup(x => x.GetGalleryByIdAsync(99, It.IsAny<CancellationToken>())).ReturnsAsync((EventGallery?)null);
+
+            var result = await _controller.ToggleFeatured(99, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<NotFoundResult>());
+        }
+
+        [Test]
+        public async Task SubmitMemberPhoto_ReturnsCreatedAtAction_OnSuccess()
+        {
+            var file = Mock.Of<IFormFile>(f => f.FileName == "photo.jpg" && f.Length == 1024);
+            var gallery = new EventGallery { Id = 7 };
+            _fileStorageMock.Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), "photo.jpg", 10, It.IsAny<GHCAA.Domain.Enums.FileUploadType>(), It.IsAny<CancellationToken>()))
+                            .ReturnsAsync("/uploads/gallery/photo.jpg");
+            _galleryServiceMock.Setup(x => x.CreateMemberAlbumAsync(10, "My Album", null, It.IsAny<CancellationToken>()))
+                               .ReturnsAsync(gallery);
+            _galleryServiceMock.Setup(x => x.AddMemberPhotoToAlbumAsync(10, 7, "/uploads/gallery/photo.jpg", null, It.IsAny<CancellationToken>()))
+                               .ReturnsAsync(new EventPhoto());
+
+            var result = await _controller.SubmitMemberPhoto("My Album", null, file, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<CreatedAtActionResult>());
+        }
+
+        [Test]
+        public async Task SubmitMemberPhoto_ReturnsBadRequest_WhenValidationFails()
+        {
+            _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
+                                       .Returns(FileValidationResult.Fail("Unsupported format."));
+            var file = Mock.Of<IFormFile>(f => f.FileName == "photo.jpg" && f.Length == 1024);
+
+            var result = await _controller.SubmitMemberPhoto("My Album", null, file, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result).StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        }
     }
 }

@@ -11,6 +11,16 @@ import {
 } from '../models/business.models';
 
 
+export interface DevTrackerItem {
+    id: string;
+    status: string;
+    priority: string;
+    dependsOn: string | null;
+    summary: string;
+    workPackageNumber: number;
+    workPackageTitle: string;
+}
+
 export interface MemberApprovalRequest {
     id: number;
     fullName: string;
@@ -235,6 +245,12 @@ export class AdminService {
         if (fromDate) params += `&fromDate=${encodeURIComponent(fromDate)}`;
         if (toDate) params += `&toDate=${encodeURIComponent(toDate)}`;
         return this.http.get<any>(`${API_ENDPOINTS.ADMIN.ERROR_LOGS}${params}`);
+    }
+
+    // 82.115: Developer Options tracker — reads the open (TODO/PARTIAL) docs/TODO.md items.
+    getDevTrackerItems(priority: string = 'all'): Observable<DevTrackerItem[]> {
+        const params = priority && priority !== 'all' ? `?priority=${encodeURIComponent(priority)}` : '';
+        return this.http.get<DevTrackerItem[]>(`${API_ENDPOINTS.ADMIN.DEV_TRACKER}${params}`);
     }
 
     // System users and roles

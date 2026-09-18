@@ -113,4 +113,7 @@ COPY --from=web /web/dist/GHCAA.Web/browser ./wwwroot
 # Institution profile pack (docs/WHITE_LABEL_PLAN.md, docs/TODO.md Work Package 62) — data, not
 # code, so it's copied as-is rather than published through the .csproj.
 COPY profiles/ ./profiles/
+# 82.115: the admin Developer Options tracker reads this file at runtime. Only the one file is
+# copied, not all of docs/ (which also carries the dissertation PDFs) — no reason to bloat the image.
+COPY docs/TODO.md ./docs/TODO.md
 ENTRYPOINT ["dotnet", "GHCAA.API.dll"]

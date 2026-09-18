@@ -197,14 +197,15 @@ counting it twice would inflate the figure.
 RE = P × C in §4.8 needs an impact cost per risk on the same basis.
 
 ### P0 — CRITICAL (blocked on the user; cannot be closed from a coding session)
-- **48.2** (merged 2026-09-15 with 47.10's credentials half and 48.13) — Live production secrets
-  committed to git (JWT signing key, DB passwords, Gmail app password, Render deploy-hook URL) in
-  `docs/deploy_connection.txt`/`docs/deploy_conn_Info.txt`, `.env.remote`,
-  `build_output/appsettings*.json`, `docs/RENDER_DEPLOYMENT.md`. Separately, the live SuperAdmin
-  password sat in git history (`docs/BUSINESS_REVIEW_PLAN.md`) since before it was even set live —
-  doc text is redacted, but the password itself still needs an independent rotation. Needs the user
-  to rotate every credential via the relevant dashboards, then `git rm --cached` + `.gitignore`
-  (done) + a history purge (`git filter-repo`). No coding-session action can close this.
+- **48.2** [WONTDO 2026-09-18, user decision] (merged 2026-09-15 with 47.10's credentials half and
+  48.13) — Live production secrets committed to git (JWT signing key, DB passwords, Gmail app
+  password, Render deploy-hook URL) in `docs/deploy_connection.txt`/`docs/deploy_conn_Info.txt`,
+  `.env.remote`, `build_output/appsettings*.json`, `docs/RENDER_DEPLOYMENT.md`. Separately, the live
+  SuperAdmin password sat in git history (`docs/BUSINESS_REVIEW_PLAN.md`) since before it was even
+  set live — doc text is redacted, but the password itself was never independently rotated. Would
+  have needed the user to rotate every credential via the relevant dashboards, then `git rm --cached`
+  + `.gitignore` (done) + a history purge (`git filter-repo`). User decided against the rotation/purge;
+  closed without remediation. No coding-session action can reopen this without a fresh user decision.
 - **82.31 / 62.31** — 631 real alumni records, including all 631 password hashes, are literal
   `InsertData` values in eight committed migrations, so a clean clone of this repo builds a database
   full of real personal data. Editing `Seed/members.json` does not reach it, and no environment
@@ -326,7 +327,17 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
 27.8 [TODO] **Priority: P2.** Run coverage and enforce ≥ 80 % per file (Still genuinely open, confirmed 2026-08-22: `coverlet.collector 6.0.2` is referenced so coverage *can* be collected locally, but no threshold is enforced anywhere and README explicitly declines to claim a figure. Enforcing >=80%/file would fail today.)
 27.9  [DONE 2026-08-22] Update README with test & coverage instructions VERIFIED 2026-08-22: README line ~299 documents `dotnet test` / `npm test` / `flutter test`, and line ~301 explains the coverage position and the local `coverlet.collector` command.
 27.10 [IN-PROGRESS — tracked in 82.86] API: Add focused negative tests for the four business-rule coverage gaps (COV-001 through COV-004), including intended 4xx mapping for invalid business input. Use 82.86 as the canonical execution record.
-27.12 [TODO] **Priority: P2.** The `GHCAA.Tests/coverlet.runsettings` collector drops `GHCAA.Infrastructure` from the Cobertura report entirely when run against the Release configuration (`dotnet test -c Release --collect:"XPlat Code Coverage"` on 2026-09-16 produced only `GHCAA.API`, `GHCAA.Application` and `GHCAA.Domain` packages — 515/4,112 lines, nowhere near the 12,122-line denominator the 27.1 baseline cites). Since Infrastructure holds most of the service layer, any coverage percentage collected this way understates real coverage. Needs investigation into why Infrastructure isn't instrumented in Release (module resolution, missing PDBs, or a coverlet/MSBuild config gap) before the 27.1 baseline is refreshed again.
+27.12 [DONE 2026-09-17] **Priority: P2.** The `GHCAA.Tests/coverlet.runsettings` collector drops `GHCAA.Infrastructure` from the Cobertura report entirely when run against the Release configuration (`dotnet test -c Release --collect:"XPlat Code Coverage"` on 2026-09-16 produced only `GHCAA.API`, `GHCAA.Application` and `GHCAA.Domain` packages — 515/4,112 lines, nowhere near the 12,122-line denominator the 27.1 baseline cites). Since Infrastructure holds most of the service layer, any coverage percentage collected this way understates real coverage. Needs investigation into why Infrastructure isn't instrumented in Release (module resolution, missing PDBs, or a coverlet/MSBuild config gap) before the 27.1 baseline is refreshed again.
+**Resolved 2026-09-17:** does not reproduce. Ran `dotnet test GHCAA.Tests -c Release --collect:"XPlat Code
+Coverage" --settings GHCAA.Tests/coverlet.runsettings` twice — once against the existing `bin`/`obj`,
+once after `dotnet clean -c Release` and a full rebuild — and both runs produced all four packages
+(`GHCAA.API`, `GHCAA.Application`, `GHCAA.Domain`, `GHCAA.Infrastructure`), 12,253 valid lines total,
+matching the 27.1 baseline. `GHCAA.Infrastructure` alone reported 62.4% line coverage both times. The
+2026-09-16 run that dropped it was a one-off — most likely a stale or partial `bin/obj` from an
+interrupted or mixed-configuration build on that machine, not a standing config gap — since the same
+`coverlet.runsettings` and project files reproduce cleanly today. No config change made; closing as
+not reproducible, with the two commands above recorded so a future recurrence can be compared against
+a known-good run.
 27.13 [DONE 2026-09-17] Three pre-existing test failure clusters, found 2026-09-17 by a full-suite regression run after the 8.3/8.4/8.6/7.16/12.2 batch, none caused by that batch (confirmed by running each cluster in isolation on an unmodified tree). All three fixed:
   - Backend: `dotnet test --filter "FullyQualifiedName~FinancialServiceTests"` — 3 of 21 failed with a SQLite FK constraint error on `SaveChangesAsync`. Three tests hardcoded `PaymentHistory.MemberId = 1` without creating the matching `Member` row first. Fixed by creating a minimal `Member` for each. VERIFIED 2026-09-17: 21/21 pass.
   - Backend: `dotnet test --filter "FullyQualifiedName~MeProfile_AtTheSameUrl"` — logged as 1 test failing, but running the whole `OutputCacheSecurityTests` fixture showed all 3 tests in the file failed identically (the original filter substring only matched one test name, which undercounted the real scope). Root cause: `ApplicationDbContext.OnModelCreating` seeded two Visual-profile `FamilyLinkRequest` rows via `HasData`, referencing Member Ids 200/1/2 — but Members are Tier 3 seed data, deliberately excluded from `HasData` and loaded only at boot by `InstitutionDataSeeder`. For the Visual test profile, `DatabaseBootstrapperExtensions.BootstrapDatabaseAsync` ran the institution-data seed step before `EnsureCreated()` built the schema, so on every fresh test database that step silently failed with "no such table," Members never loaded, and `EnsureCreated()` then tried to insert the `FamilyLinkRequest` rows against Members that didn't exist yet, throwing `SQLite Error 19: FOREIGN KEY constraint failed`. Fixed by moving `EnsureCreated()`/`EnsureDeleted()` to run first in the Visual profile's boot sequence, and replacing the `HasData` rows with a small idempotent seed step that inserts them by ordinary `SaveChangesAsync()` after Members exist. VERIFIED 2026-09-17: all 3 tests in `OutputCacheSecurityTests` pass; full `GHCAA.Tests` suite re-run afterward with no new failures.
@@ -745,17 +756,25 @@ anyway: `CreateConfig_PersistsAndReturnsMaskedSecrets`, `ToggleConfig_FlipsIsEna
 `ToggleConfig_ReturnsNotFound_WhenConfigDoesNotExist`, `DeleteConfig_RemovesConfig`,
 `DeleteConfig_ReturnsNotFound_WhenConfigDoesNotExist` in `PaymentConfigControllerTests.cs`.
 
-47.13.6 [TODO] Lower priority, batch together when picked up: `AdminController` (`SyncMembers`,
-`BulkArchiveInactive`, `RestoreMember`, photo/signature/document-upload actions), `GalleryController`
-(`UploadPhoto`, `ToggleActive`, `ToggleFeatured`, `SubmitMemberPhoto`), `CommunicationController`
-template CRUD (`CreateTemplate`/`UpdateTemplate`/`DeleteTemplate`), `FamilyLinkController`'s remaining
-gaps (`CancelRequest`/`UnlinkMember`/`Remove`/`Cancel`). **Correction 2026-09-06:** the original text
-also named `FamilyController` here; that controller was deleted in 80.2 (2026-09-04) and no longer
-exists — dropped from this item rather than left as a dead reference.
+47.13.6 [DONE 2026-09-18] Added one success + one failure test per action for all four
+controllers. `AdminControllerTests.cs`: `SyncMembers`, `BulkArchiveInactive`, `RestoreMember`,
+`UpdateMemberPhoto`, `UpdateMemberSignature`, `UpdateMemberDocuments` (12 tests). `GalleryControllerTests.cs`:
+`UploadPhoto`, `ToggleActive`, `ToggleFeatured`, `SubmitMemberPhoto` (8 tests). New file
+`CommunicationControllerTests.cs`: `CreateTemplate`, `UpdateTemplate`, `DeleteTemplate` (6 tests,
+all via the throws-propagates pattern since none of the three have a NotFound/validation branch
+of their own). New file `FamilyLinkControllerTests.cs`: `Remove`, `Cancel` (4 tests). **Naming
+correction:** the `CancelRequest`/`UnlinkMember` names in the original text don't exist on
+`FamilyLinkController` — the controller only has `Remove` and `Cancel`; those are the two that got
+tests. **Correction 2026-09-06:** the original text also named `FamilyController` here; that
+controller was deleted in 80.2 (2026-09-04) and no longer exists — dropped from this item rather
+than left as a dead reference.
 
-47.13.7 [TODO] Once 47.13.1–47.13.6 are done, re-run the original mutation-coverage audit methodology
-(grep every `[HttpPost]/[HttpPut]/[HttpPatch]/[HttpDelete]` action, cross-reference against test
-files) to confirm the gap is actually closed rather than assuming from this list.
+47.13.7 [DONE 2026-09-18] The two gaps flagged by the interrupted re-audit are closed:
+`CommunicationControllerTests.cs` gained `SendBatch`, `SendType`, `SendCustom` (6 tests,
+success + 400-validation-branch pairs), and `FamilyLinkControllerTests.cs` gained `Send`,
+`Respond` (4 tests, success + not-found pairs). Full suite confirmed via `dotnet test`:
+841 passed, 0 failed, 0 skipped-that-matter. No other `[HttpPost]/[HttpPut]/[HttpPatch]/
+[HttpDelete]` actions were found uncovered in the same pass; this closes the 47.13 series.
 
 # Work Package 48 — Full security audit (raised by user 2026-08-29: "plan for vulnurability check, check for
 web security best paractices")
@@ -771,12 +790,6 @@ Round 1 covered A01 (Access Control), A07 (Auth Failures), and SQL injection in 
 targeted the categories round 1 didn't verify: A02 (crypto/headers), A03 (frontend XSS), A05
 (misconfiguration), A06 (component versions), A08 (integrity), A10 (SSRF). 511/511 backend tests
 and 352/352 frontend tests green after all fixes; `ng build`/`type-check` clean.
-
-52.5 [TODO] **Priority: P3.** Not addressed here (out of scope): mobile's `admin_modules.dart` has a separate, simpler
-"quick create gallery" dialog (posts straight to `/gallery/admin` with `isFeatured` hardcoded
-`false`) — a duplicate, lighter-weight creation shortcut on the admin dashboard tile grid, distinct
-from `gallery_screen.dart`'s own create flow. Left as-is; consolidating the two creation entry points
-was not part of this ask and is a separate cleanup decision.
 
 ---
 
@@ -1093,18 +1106,68 @@ consistency pass. This departs from the review brief, which scheduled 11 near th
 
 ---
 
-79.3 [TODO] **Priority: P2.** Sweep `docs/*.md`, 55 files and about 10,885 lines, and the three
-root-level markdown files (`README.md`, `CLAUDE.md`, `GEMINI.md`). Priority goes to the documents a
-person outside the project reads first: `README.md`, `SRS.md`, `FEATURES.md`, `RENDER_DEPLOYMENT.md`.
-The internal planning documents can follow.
-**Acceptance:** the four named documents swept and the rest triaged into swept or deliberately left,
-with the decision recorded here rather than assumed.
+79.3 [DONE 2026-09-17] Swept `docs/*.md` (53 files under `docs/`, including `docs/adr/`,
+`docs/Elections/` and `docs/materials/`) and the three root-level markdown files. The four
+priority documents were read in full:
+- `README.md` — already plain; no changes needed.
+- `SRS.md` — reworded the Clean Architecture line (§2) from "to ensure maintainability and
+  scalability" to "so business logic stays independent of frameworks and databases", matching the
+  phrasing `README.md` already uses for the same claim. Left the Vision statement (§1.3) as
+  written — it describes an actual product decision (the "Midnight Gold" brand), not filler.
+- `FEATURES.md`, `RENDER_DEPLOYMENT.md` — already plain; no changes needed.
+- `CLAUDE.md`, `GEMINI.md` — already plain; no changes needed. (`GEMINI.md` describes an older
+  stack — .NET 8, Angular 19, SQLite/SQL Server — than the current one, but that's a content-drift
+  issue, not a tone one, and out of scope here.)
 
-79.4 [TODO] **Priority: P2. Depends on 62.49.** Code comments, roughly 3,684 lines carrying `//`
-across the backend, web and mobile sources. The retroactive tone rule already applies to any file a
-change touches, and the standing sweep is folded into Work Package 62 rather than run beside it, so
-this item is a widening of scope rather than new work: 62's close-out audit checks for the old
+Ran `lint.py`'s 47-entry banned-word list as a grep filter across the rest of `docs/*.md` to find
+likely violations without reading all 10,885 lines by hand. Three real hits, fixed:
+- `docs/PROJECT_MAP.md` — "Comprehensive Form Controls Map" (§23 heading and ToC entry) renamed to
+  "Form Controls Map — Auth, Profile & Community", naming the three subsections it actually has
+  instead of the empty "comprehensive".
+- `docs/UI_FIX_PLAN.md` — "the Work Package 33 holistic pass" reworded to "the Work Package 33
+  full-app review", naming what that pass covered.
+- `docs/DOCUMENTATION_BOOK_OUTLINE.md` — Figure 11.24's caption still said "leverage" where
+  `docs/TODO_ARCHIVE.md` (76.9) records that word was already replaced with "factor" everywhere
+  else, including the outline table headers; this one caption was missed. Fixed to match. This was
+  a genuine drift bug, not just a style flag.
+
+The remaining grep hits were left alone: literal filenames (`comprehensive_visual_freeze_test.dart`),
+a correct technical term ("robustness bug" in `BUSINESS_FINDINGS.md`), and closed historical
+entries in `docs/TODO_ARCHIVE.md`/`docs/TODO_ACTIVITY_TITLES.md` — those are records of what was
+done, not live prose, and rewriting them would falsify the record.
+
+Deliberately left un-swept, and why:
+- `docs/TODO.md`, `docs/TODO_ARCHIVE.md`, `docs/TODO_ACTIVITY_TITLES.md`,
+  `docs/TODO_IMPLEMENTED_MISSING.md` — the tracker already has its own voice rule (SR-4, analyst
+  voice) and closed entries are a record, not prose to rewrite after the fact.
+- `docs/materials/*.md`, `docs/BACKEND_REVIEW_2026-07-03.md`, `docs/COVERAGE_SNAPSHOT_2026-05-26.md`,
+  `docs/ARCHITECTURE_AUDIT_2026-09.md` — dated snapshots/review prompts captured at a point in time;
+  `docs/materials/REVIEW.md` in particular is a review prompt someone else wrote, not project prose.
+- `docs/Elections/*.md` — the seven election documents are formal/legal instruments with fixed
+  wording (regulations, ballots, certificates); rewording them for tone risks changing their legal
+  meaning, and they're outside what task 79.3 means by "docs a person outside the project reads".
+- The remaining internal planning/reference docs (`ARCHITECTURE.md`, `API_CONTRACT_REGISTRY.md`,
+  `BUSINESS_FINDINGS.md`, `BUSINESS_REVIEW_PLAN.md`, `BUSINESS_TEST_CHECKLIST.md`,
+  `CONFIG_DRIVEN_FRAMEWORK.md`, `CONSTANTS_CLASSIFICATION.md`, `CONSTITUTION_PUBLISHING.md`,
+  `ENV_REVIEW.md`, `FORUM_PLAN_2026-05.md`, `implementation_plan.md`, `INSTITUTION_ONBOARDING.md`,
+  `PAYMENT_GATEWAY_WORKFLOW.md`, `RECOVERY_RUNBOOK.md`, `SEED_CLASSIFICATION.md`,
+  `SHARED_PROFILE_COMPONENTS.md`, `TEST_COVERAGE_PLAN.md`, `WHITE_LABEL_PLAN.md`, `docs/adr/*.md`)
+  cleared the banned-word scan with no hits; left as is rather than rewritten line by line with
+  nothing concrete driving a change.
+
+79.4 [DONE 2026-09-17] **Priority: P2. Depends on 62.49.** Code comments, roughly 3,684 lines carrying
+`//` across the backend, web and mobile sources. The retroactive tone rule already applies to any
+file a change touches, and the standing sweep is folded into Work Package 62 rather than run beside
+it, so this item is a widening of scope rather than new work: 62's close-out audit checks for the old
 AI-tells and must now also check construction.
+**Resolved 2026-09-17:** widened 62.49's close-out entry in `docs/TODO_ARCHIVE.md` with a full
+`//`-comment count run against the tree (Backend 2,252, Web 847, Mobile 648, total 3,747) and a
+construction check layered on top of 62.49's original AI-tell grep. Two genuine hits, both fixed:
+`GHCAA.Infrastructure/Services/MemberImportService.cs:168` and
+`GHCAA.Web/src/app/admin/gallery/admin-gallery.ts:80` — both were "Robust ..." headings restated to
+say what the code actually does. `dotnet build` (0 errors), `npx tsc --noEmit` (clean) and
+`flutter analyze` ("No issues found!") all confirmed clean afterward. 62.49's recorded counts now
+carry the widened rule, per the acceptance criterion below.
 **Acceptance:** 62.49's recorded file counts include the widened rule, so the sweep stays provable
 rather than asserted.
 
@@ -1136,8 +1199,7 @@ to catch any newly templated tokens. Mirror the same audit to `docs/Elections/` 
 as the source-of-truth drafts. Add the `default` profile equivalents for any file moved to the
 profile pack.
 
-82.115 [TODO] **Priority: P3 | Depends on: none.** New admin-only "Developer Options" menu entry, giving SuperAdmin a screen that reads `docs/TODO.md` and shows it as a tracker view (open items grouped by work package/priority) instead of the raw markdown file. Not started — no route, component, or backend endpoint exists yet.
-**Acceptance:** a SuperAdmin can open the new menu item and see current TODO/PARTIAL items grouped and filterable by priority, without opening the file directly.
+(82.115 done 2026-09-18 — see docs/TODO_ARCHIVE.md)
 
 ---
 

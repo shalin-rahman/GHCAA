@@ -694,7 +694,7 @@ seventeen nodes with nine edges converging on the web client would print at abou
 - Figure 11.21 — Float distribution across the seventeen components
 - Figure 11.22 — Two estimates compared per component: commit-days against task counts
 - Figure 11.23 — Effort distribution by stream and component, against the 40‑20‑40 allocation
-- Figure 11.24 — Where the implementation time went: nominal 703 days reduced by each leverage in turn to 280, with the 69 days outstanding shown separately
+- Figure 11.24 — Where the implementation time went: nominal 703 days reduced by each factor in turn to 280, with the 69 days outstanding shown separately
 - Table 11.1 — Activity list: ID, activity, duration, ES, EF, LS, LF, float, predecessors, tracker areas, evidence class
 - Table 11.2 — Function-point count: EI, EO, EQ, ILF and EIF with complexity weighting, from the delivered system
 - Table 11.3 — TDI over the fourteen general system characteristics, and the VAF it yields

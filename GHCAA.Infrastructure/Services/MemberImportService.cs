@@ -165,7 +165,7 @@ namespace GHCAA.Infrastructure.Services
 
             var rows = rowsUsed.Skip(1); // Skip header
 
-            // Robust Header Extraction: Handle duplicates by taking the first occurrence
+            // Duplicate header names: keep the first occurrence, ignore the rest
             var headers = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             var headerRow = worksheet.Row(1);
             foreach (var cell in headerRow.CellsUsed())

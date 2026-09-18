@@ -26,7 +26,7 @@
 20. [Web (Angular) — Test Specs](#web-angular--test-specs)
 21. [Cross-Layer Dependency Matrix](#cross-layer-dependency-matrix)
 22. [Cross-Layer Event Form Controls](#cross-layer-event-form-controls)
-23. [Comprehensive Form Controls Map](#comprehensive-form-controls-map)
+23. [Form Controls Map — Auth, Profile & Community](#form-controls-map--auth-profile--community)
 24. [Update Protocol (Mandatory)](#update-protocol-mandatory)
 
 ---
@@ -2113,7 +2113,7 @@ Mapped in `AdminEventOperations` (Web).
 
 ---
 
-## 23. Comprehensive Form Controls Map
+## 23. Form Controls Map — Auth, Profile & Community
 
 ### Authentication & Authorization
 | Feature | Web Module | Mobile Screen | Form Controls / Payload Keys |

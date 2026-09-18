@@ -24,7 +24,7 @@ A "Midnight Gold" branded experience that reflects the association's prestige an
 
 ## 2. System Architecture & Tech Stack
 
-The platform follows **Clean Architecture** principles to ensure maintainability and scalability.
+The platform follows **Clean Architecture** principles so business logic stays independent of frameworks and databases.
 
 | Layer               | Technology            | Role                                         |
 | :------------------ | :-------------------- | :------------------------------------------- |

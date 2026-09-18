@@ -289,6 +289,11 @@ export const routes: Routes = [
                 canActivate: [superAdminGuard]
             },
             {
+                path: 'dev-tracker',
+                loadComponent: () => import('./admin/dev-tracker/admin-dev-tracker').then(m => m.AdminDevTracker),
+                canActivate: [superAdminGuard]
+            },
+            {
                 path: 'article-approvals',
                 loadComponent: () => import('./admin/article-approval/article-approval').then(m => m.ArticleApproval)
             },

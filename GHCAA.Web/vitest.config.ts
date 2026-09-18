@@ -8,7 +8,9 @@ export default defineConfig({
     exclude: ['tests/e2e/**', 'tests/visual/**', 'node_modules/**'],
     coverage: {
       provider: 'v8',
-      reporter: ['text-summary', 'json-summary', 'lcov'],
+      // 82.53b: 'html' gives the same browsable, per-file drill-down report the
+      // .NET coverage job already publishes (ReportGenerator's Html output).
+      reporter: ['text-summary', 'json-summary', 'lcov', 'html'],
       reportsDirectory: './coverage',
       include: ['src/app/**/*.ts'],
       exclude: ['**/*.spec.ts', '**/*.test.ts'],

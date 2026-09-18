@@ -28,6 +28,7 @@ MUST_WORDS = re.compile(
 CATEGORY = {
     62: ("White-label", "Making one codebase serve any institution"),
     60: ("Mobile", "Flutter client parity with the web portal"),
+    37: ("Feature", "Product work requested by the Association"),
     42: ("Feature", "Product work requested by the Association"),
     45: ("Feature", "Product work requested by the Association"),
     46: ("Feature", "Product work requested by the Association"),

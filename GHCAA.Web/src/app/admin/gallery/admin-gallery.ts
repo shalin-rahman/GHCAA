@@ -77,7 +77,7 @@ export class AdminGallery implements OnInit {
         this.loading.set(true);
         this.galleryService.getAllGalleries().subscribe({
             next: (data: any[]) => {
-                // Robust mapping for case-insensitive property access
+                // API can return either casing for these fields, so check both
                 const mapped = (data || []).map((g: any) => {
                     const result: any = { ...g };
                     // Handle photos casing

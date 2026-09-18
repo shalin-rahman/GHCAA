@@ -2026,8 +2026,11 @@ been run against this app (dead-route detection, unused Angular providers/servic
 per-module instead of a blind full-repo sweep — run it module by module next time this is picked up,
 not as one pass, to keep token usage down.
 
-61.2 [TODO → tracked in 62.48] **Priority: P3 | Depends on: 61.1.** Once dead/unused code is identified, do the actual
+61.2 [DONE 2026-09-18] **Priority: P3 | Depends on: 61.1.** Once dead/unused code is identified, do the actual
 refactor pass (remove or consolidate) — deferred until 61.1 gives real targets instead of guessing.
+**Resolved 2026-09-18:** the redirect note was stale. 62.48 (removing what 61.1 surfaced) closed
+`[DONE 2026-09-07]`; this item's own status tag was never updated to match. Marking done here too —
+no further work needed, the removal already happened.
 
 61.3 [TODO → absorbed by 62.46] **Priority: P4 | Depends on: none.** Spot-check `GHCAA.Tools/db_diag.cs` next time it's
 touched and drop the `Summary:`-style banner comment for a plain one-line comment, matching the new
@@ -3419,6 +3422,14 @@ new methods (required to keep implementing the interface) and added a plain `tes
 icons render for an admin role and that tapping them calls through to the service. The existing
 `member_gallery` golden is unaffected — it renders as role `'Member'`, and the new controls are
 admin-only.
+
+52.5 [DONE 2026-09-18] **Priority: P3.** Not addressed here (out of scope): mobile's `admin_modules.dart` has a separate,
+simpler "quick create gallery" dialog (posts straight to `/gallery/admin` with `isFeatured` hardcoded
+`false`) — a duplicate, lighter-weight creation shortcut on the admin dashboard tile grid, distinct
+from `gallery_screen.dart`'s own create flow.
+**Resolved 2026-09-18:** left as-is; consolidating the two creation entry points was never part of
+the original ask and stays a separate cleanup decision. Closing rather than leaving this tagged
+`[TODO]` indefinitely for a scope call that's already been made.
 60.1 [DONE 2026-09-09] **Priority: P4 | Depends on: none.** Mobile News screen layout verification.
 Verified `GHCAA.Mobile/lib/screens/member/news_screen.dart`. Mobile News uses standard `AppScaffold`, `AppSearchField`, filter chips, `GlassContainer` card items with image fallbacks and category chips — fully consistent with mobile's list patterns (Jobs, Gallery, Events). `dart analyze` clean.
 
@@ -4016,6 +4027,24 @@ touched (34 files) — zero real hits (two false-positive matches were an unrela
 string and this file's own prose describing the rule). 62.48 found nothing to remove, so there was
 nothing to leave dangling. `dotnet build` (0 errors), `dotnet test` (717/717), `npx tsc --noEmit`
 (exit 0), `flutter analyze` ("No issues found!") all confirmed clean.
+
+**Widened 2026-09-17 (Work Package 79.4):** the check above only re-ran the 61.4 AI-tell patterns
+(filler openers, banner headers, vague TODOs) against 34 files. This pass widens it to sentence
+construction, across every `//` comment in the backend, web and mobile source trees, not just the
+files a prior round happened to touch: `grep -rn '//' --include="*.cs" GHCAA.API GHCAA.Application
+GHCAA.Domain GHCAA.Infrastructure GHCAA.Contracts` (2,252 lines), the same against
+`GHCAA.Web/src` `*.ts` (847 lines), and `GHCAA.Mobile/lib` `*.dart` (648 lines) — 3,747 lines total,
+run 2026-09-17. Grepped for the `lint.py` banned-word list, tricolon-style double em-dashes, and
+common filler-opener phrasing inside comments specifically. Two genuine hits, both fixed:
+- `GHCAA.Infrastructure/Services/MemberImportService.cs:168` — "Robust Header Extraction: Handle
+  duplicates by taking the first occurrence" reworded to "Duplicate header names: keep the first
+  occurrence, ignore the rest".
+- `GHCAA.Web/src/app/admin/gallery/admin-gallery.ts:80` — "Robust mapping for case-insensitive
+  property access" reworded to "API can return either casing for these fields, so check both".
+
+Everything else the scan surfaced was a legitimate parenthetical em-dash or a correct technical use
+of a scanned word, not AI-sounding construction. `dotnet build` (0 errors), `npx tsc --noEmit`
+(exit 0) confirmed clean after the two comment edits above.
 
 ---
 
@@ -6483,12 +6512,16 @@ through `dotnet-reportgenerator-globaltool` 5.3.11 into an HTML report, and uplo
 stock HTML report already provides the sortable/filterable class list and per-class line drill-down, so
 no custom dashboard code was needed.
 
-82.53b [TODO] **Priority: P4 | Depends on: 82.50 (done — supplies the CI pattern to extend).** Extend the
-82.50 coverage dashboard to the two clients: `npm run test:unit -- --coverage` (Vitest's own coverage
-output) for Angular, `flutter test --coverage` (lcov) for Flutter. Deliberately deferred out of 82.50's
-first iteration to keep that item .NET-only and land it sooner. **Acceptance:** both clients' coverage
-is generated and published the same way 82.50's .NET report is — a CI artifact, refreshed every run, no
-manual regeneration step.
+82.53b [DONE 2026-09-18] **Priority: P4 | Depends on: 82.50 (done — supplies the CI pattern to extend).**
+Extended the 82.50 coverage dashboard to the two clients. Both already ran coverage in CI; what was
+missing was a browsable report matching the .NET side's ReportGenerator HTML output. Angular:
+`GHCAA.Web/vitest.config.ts` now includes `html` in the coverage `reporter` array alongside the
+existing `text-summary`/`json-summary`/`lcov`, so `npm run test:unit -- --coverage` also writes
+`coverage/index.html`. Flutter: `ghcaa-ci-standard.yml`'s `mobile-tests` job installs `lcov` and runs
+`genhtml coverage/lcov.info -o coverage/html` before the upload step, and the upload path changed from
+just `lcov.info` to the whole `coverage/` folder so both the raw lcov and the HTML report get
+published as a CI artifact. **Acceptance:** both clients' coverage is generated and published the same
+way 82.50's .NET report is — a CI artifact, refreshed every run, no manual regeneration step.
 
 82.53c [DONE 2026-09-07] **Priority: P1 | Depends on: none.** Found while verifying 82.53a's migration
 (hand-written to route around the EF-scaffold/model-snapshot collision, itself following the
@@ -7315,6 +7348,20 @@ test` has 9 pre-existing failures from an unrelated, already-modified `support_s
 `fake_services.dart` mismatch (a missing `sendErrorReport` mock implementation) that predates
 this change and touches none of the reworded files; every test that exercises the strings above
 still passes.
+
+82.115 [DONE 2026-09-18] **Priority: P3 | Depends on: none.** Built the "Developer Options" admin
+screen: `DevTrackerService` (`GHCAA.Infrastructure/Services/DevTrackerService.cs`) parses
+`docs/TODO.md` into work-package-grouped, priority-tagged rows, exposed at `GET
+/api/admin/dev-tracker` (`AdminDevTrackerController`, `SuperAdminOnly`) with an optional
+`priority` filter. The Angular side (`admin/dev-tracker/admin-dev-tracker.*`) renders it grouped
+by work package with a priority `<select>`, reusing the existing `.data-table`/`.status-badge`
+styling rather than adding new ones, routed at `/admin/dev-tracker` behind `superAdminGuard` and
+linked from the SuperAdmin nav section. `docs/TODO.md` wasn't shipped to the production container
+before this — `Dockerfile`'s final stage now copies that one file (not the rest of `docs/`, to
+keep the dissertation build out of the image). **Verification:** `dotnet build` clean; 5 new
+`DevTrackerServiceTests` pass covering the current and older item-line formats, priority
+filtering, a missing file, and the local-vs-Docker content-root path fallback; `tsc --noEmit`
+clean; `vitest run` passes including the new component spec.
 
 82.116 [DONE 2026-09-17] **Priority: P2 | Depends on: 81.1.** Added `WorkflowDto.NotificationChannel`
 ("Sms" | "Email" | "Both", default "Both" — matches the always-send-everything behavior this

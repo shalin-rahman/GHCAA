@@ -232,11 +232,20 @@ jobs:
         working-directory: GHCAA.Mobile
         run: flutter test --coverage --exclude-tags golden --reporter expanded
 
+      # 82.53b: genhtml turns the raw lcov.info into the same kind of browsable,
+      # per-file drill-down report ReportGenerator already gives the .NET job.
+      - name: Install lcov
+        run: sudo apt-get update && sudo apt-get install -y lcov
+
+      - name: Generate Coverage Report
+        working-directory: GHCAA.Mobile
+        run: genhtml coverage/lcov.info -o coverage/html
+
       - name: Upload Mobile Coverage Report
         uses: actions/upload-artifact@v4
         with:
           name: mobile-coverage-report
-          path: GHCAA.Mobile/coverage/lcov.info
+          path: GHCAA.Mobile/coverage
           retention-days: 30
 
   integrated-build:
