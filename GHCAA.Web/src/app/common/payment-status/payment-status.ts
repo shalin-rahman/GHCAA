@@ -26,8 +26,8 @@ import { OrgConfigService } from '../../core/services/org-config.service';
             
             <p class="text-muted mb-8 leading-relaxed">
                 {{ isSuccess() 
-                    ? 'Your payment went through. We\'re updating your records now.'
-                    : 'We couldn\'t verify your payment. Check your balance or try a different wallet.' }}
+                    ? "Your payment went through. We're updating your records now."
+                    : "We couldn't verify your payment. Check your balance or try a different wallet." }}
             </p>
 
             <div class="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 text-left space-y-3">
