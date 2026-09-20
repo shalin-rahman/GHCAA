@@ -244,6 +244,9 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
 - **82.14** — The same audit did not cover the Angular or Flutter clients (two research streams
   returned nothing). `docs/ARCHITECTURE_AUDIT_2026-09.md` is a backend review until this closes.
   82.32's client bug sweep is not a substitute — see its note there.
+- **84.1–84.3** — State-transition tables, a validation matrix, and endpoint contract tables, scoped
+  from an external review of the 001 specification baseline. Drafted in
+  `docs/specs/002-workflow-contracts-and-validation/`.
 
 ### P2 — MEDIUM (real, no urgency signal)
 - **42.1–42.5** — Admin-manageable elections forms/docs, plan only.
@@ -273,6 +276,10 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
   payloads, the configuration and constants classifications, and the missing decision records and
   recovery runbook. (82.10, whether to generate clients from OpenAPI, is decided and closed: rejected.)
 - **61.3** — Drop the `Summary:`-style comment banner in `GHCAA.Tools/db_diag.cs` next time that file is touched.
+- **84.4 / 84.5** — Web/Mobile client parity table and the authorization-policy/error-code catalogs;
+  both depend on 84.3 existing first.
+- **84.6 / 84.7** — Election ballot workflow scope and white-label second-institution deployability —
+  product decisions for the project owner, not documentation tasks.
 
 
 <!-- Closed Work Packages (1, 2, 3, 4, 5, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 29, 30, 31, 32, 33, 35, 36, 38, 39, 41, 44, 45, 46, 50, 51, 53, 54, 55, 56, 57, 58, 59, 61, 66, 68, 69, 70, 71, 80) moved to docs/TODO_ARCHIVE.md on 2026-09-15 to keep this file lean. wbs.py reads both files for tracker counts. -->
@@ -1212,4 +1219,55 @@ diagnostic trigger also returned a real, pre-existing row. `ErrorLogs.Id=1`, dat
 genuine production failure at `/api/auth/register`: "This NpgsqlTransaction has completed; it is no
 longer usable." Not a diagnostic artifact — a real registration attempt hit this. Recorded here rather
 than folded into 43.4, since 43.4 was about the logging pipeline working, not about this specific bug.
+
+---
+
+# Work Package 84 — Workflow contracts, validation, and endpoint detail from the specification review
+
+<!-- wbs: component=C17 start=2026-09-21 end=2026-09-21 after=73 -->
+
+Raised by an external review of `docs/specs/001-platform-baseline`'s evidence files. The review's
+specific claims trace to gaps the baseline already records: no centralized state-transition table for
+events, news/article approval, jobs, mentorship, payments, or polls; no single validation matrix
+across write DTOs; and no exhaustive endpoint contract table for the API surface. The scope is drafted
+in `docs/specs/002-workflow-contracts-and-validation/`, per baseline task T018, which keeps new
+specification work in its own numbered directory rather than editing 001.
+
+84.1 [TODO] **Priority: P1 | Depends on: none.** Build the state-transition table set (events
+registration, news/article approval, job moderation, mentorship, payments, polls, governance periods)
+from the actual enums and services, per `docs/specs/002-workflow-contracts-and-validation/spec.md`
+Story 1. **Acceptance:** one table per domain, each enum value and transition traced to its triggering
+endpoint/service method and required role, with unreachable values marked rather than omitted.
+
+84.2 [TODO] **Priority: P1 | Depends on: none.** Build a validation matrix covering every write DTO
+accepted by a POST/PUT/PATCH action across `GHCAA.API`, per spec.md Story 2. **Acceptance:** one row
+per DTO field, recording whether the rule lives in a FluentValidation validator, a controller check,
+or a database constraint, with fields carrying no enforced rule flagged rather than assumed safe.
+
+84.3 [TODO] **Priority: P1 | Depends on: none.** Build an endpoint contract table per controller
+(route, method, request/response DTO with key-field nullability, success/failure status codes,
+authorization policy, pagination shape), per spec.md Story 3. **Acceptance:** every controller action
+has a row, and the pagination column states offset or cursor per
+`docs/specs/001-platform-baseline/contracts/api-cross-layer.md`.
+
+84.4 [TODO] **Priority: P2 | Depends on: 84.3.** Build the Web/Mobile client parity table by
+cross-referencing each endpoint from 84.3 against actual client call sites, per spec.md Story 4.
+**Acceptance:** every endpoint row states whether Web calls it, whether Mobile calls it, and any
+observed difference in how each client reads the response.
+
+84.5 [TODO] **Priority: P3 | Depends on: 84.3.** Build the authorization-policy and problem-details
+error-code catalogs from source and existing tests, per spec.md Story 5. **Acceptance:** every
+`[Authorize]` policy/role combination in use is listed with its endpoints, and every problem-details
+error code actually returned is cataloged.
+
+84.6 [TODO] **Priority: P3 | Depends on: none — product decision, not a documentation task.** Decide
+whether the election process gets a persisted ballot workflow beyond constitution voting, or stays as
+static build-time documents (`implementation-inventory.md` lines 139–140). No item in this Work
+Package should assume an answer until the project owner decides.
+
+84.7 [TODO] **Priority: P3 | Depends on: none — product decision, not a documentation task.** Decide
+whether removing the committed-migration-data blocker for white-label second-institution deployment is
+in scope, or whether white-label stays a single-institution profile-pack mechanism
+(`implementation-inventory.md` lines 135–136). No item in this Work Package should assume an answer
+until the project owner decides.
 
