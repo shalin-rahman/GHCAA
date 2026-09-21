@@ -65,4 +65,12 @@ describe('NavService', () => {
         expect(sections[0].name).toBe('Overview');
         expect(sections.find(s => s.name === 'Finance & Tools')).toBeDefined();
     });
+
+    it('should expose election navigation to members and administrators', () => {
+        authServiceMock.currentUser.mockReturnValue({ role: 'Member' });
+        expect(service.portalNavItems().some(i => i.path === '/portal/election')).toBe(true);
+
+        authServiceMock.currentUser.mockReturnValue({ role: 'Admin' });
+        expect(service.adminNavItems().some(i => i.path === '/admin/elections')).toBe(true);
+    });
 });

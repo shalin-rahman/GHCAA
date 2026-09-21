@@ -27,6 +27,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
     { path: '/portal/messages', label: 'Messaging', icon: 'messages', section: 'Community' },
     { path: '/portal/forum', label: 'Discussions', icon: 'forum', feature: 'enableForum', section: 'Community' },
     { path: '/portal/governance', label: 'Governance', icon: 'governance', section: 'Community' },
+    { path: '/portal/election', label: 'Association Election', icon: 'governance', section: 'Community' },
     { path: '/portal/requests', label: 'My Requests', icon: 'messages', section: 'Community' },
     { path: '/portal/directory', label: 'Alumni Directory', icon: 'directory', feature: 'enablePublicDirectory', section: 'Directory' },
     { path: '/portal/gallery', label: 'Event Gallery', icon: 'gallery', feature: 'enableGallery', section: 'Directory' },
@@ -56,6 +57,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     { path: '/admin/job-approvals', label: 'Job Review', icon: 'job-approvals', section: 'Content' },
     { path: '/admin/contact-messages', label: 'Portal Enquiries', icon: 'contact-messages', section: 'Content' },
     { path: '/admin/polls', label: 'Polls', icon: 'polls', section: 'Content' },
+    { path: '/admin/elections', label: 'Elections', icon: 'governance', section: 'Content' },
     { path: '/admin/themes', label: 'Special Themes', icon: 'themes', section: 'Content' },
     { path: '/admin/campaigns', label: 'Fundraising Campaigns', icon: 'ledger', feature: 'enableFundraising', section: 'Content' },
 
