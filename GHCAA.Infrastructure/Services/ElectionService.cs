@@ -20,10 +20,14 @@ public sealed class ElectionService(ApplicationDbContext db) : IElectionService
     {
         var election = new Election
         {
-            Title = request.Title, ECPeriodId = request.ECPeriodId, CreatedBy = request.CreatedBy,
-            AnnouncedOn = DateTime.UtcNow, NominationOpensOn = request.NominationOpensOn.ToUniversalTime(),
+            Title = request.Title,
+            ECPeriodId = request.ECPeriodId,
+            CreatedBy = request.CreatedBy,
+            AnnouncedOn = DateTime.UtcNow,
+            NominationOpensOn = request.NominationOpensOn.ToUniversalTime(),
             NominationClosesOn = request.NominationClosesOn.ToUniversalTime(),
-            PollingOpensOn = request.PollingOpensOn.ToUniversalTime(), PollingClosesOn = request.PollingClosesOn.ToUniversalTime()
+            PollingOpensOn = request.PollingOpensOn.ToUniversalTime(),
+            PollingClosesOn = request.PollingClosesOn.ToUniversalTime()
         };
         _db.Elections.Add(election);
         await _db.SaveChangesAsync(ct);
