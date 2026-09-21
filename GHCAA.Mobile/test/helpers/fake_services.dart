@@ -290,6 +290,7 @@ class FakeSupportService implements SupportService {
     required String errorSummary,
     required String stackSummary,
     required String platformInfo,
+    String? logTail,
   }) async => true;
 }
 

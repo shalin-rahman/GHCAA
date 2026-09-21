@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../core/logging/log_capture_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
@@ -95,9 +97,37 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                 style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 18)),
               ),
             ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _shareLogs,
+                icon: const Icon(Icons.description_outlined, size: 18),
+                label: const Text('SHARE DIAGNOSTIC LOGS', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1)),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  side: const BorderSide(color: AppTheme.royalGold),
+                  foregroundColor: AppTheme.royalGold,
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  // 12.4: hands the raw rotating log file (12.3) to the OS share sheet, for
+  // cases where the truncated tail in an error report isn't enough context.
+  Future<void> _shareLogs() async {
+    final file = await ref.read(logCaptureServiceProvider).logFileForSharing();
+    if (!mounted) return;
+    if (file == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No diagnostic logs have been recorded yet.')),
+      );
+      return;
+    }
+    await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], text: 'GHCAA mobile app diagnostic log'));
   }
 }

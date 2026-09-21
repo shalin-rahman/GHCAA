@@ -48,6 +48,54 @@ a gap someone still needs to close.
 
 ## Log
 
+### 2026-09-21 — /api/elections
+- Change: added the persisted election engine resource and election summary response.
+- Reason: Work Package 37.1 creates elections and exposes their current phase.
+- Web: implemented in `GHCAA.Web/src/app/core/services/elections.service.ts` and election routes/surfaces.
+- Mobile: implemented in `GHCAA.Mobile/lib/features/elections/election_service.dart` and the member election route.
+
+### 2026-09-21 — /api/elections/{id}/phase, /api/elections/{id}/voter-roll/freeze
+- Change: added phase transition and frozen voter-roll endpoints.
+- Reason: Work Package 37.1 requires an auditable eligibility snapshot.
+- Web: phase and voter-roll calls are implemented in the election service; administrative surfaces consume the lifecycle routes.
+- Mobile: the typed election service exposes the shared election contract; voter-roll administration remains an administrative API concern.
+
+### 2026-09-21 — /api/elections/{id}/seats, /api/elections/{id}/officers
+- Change: added election seat and officer assignment endpoints.
+- Reason: Work Package 37.1 needs position capacity and named returning, polling, and scrutiny officers.
+- Web: administrative election surface consumes seat and officer calls.
+- Mobile: not exposed in the member surface; the shared typed service remains compatible with the contract.
+
+### 2026-09-21 — /api/elections/{id}/nominations
+- Change: added nomination listing and submission endpoints.
+- Reason: Work Package 37.1 covers nomination, proposer/seconder eligibility, and candidate status.
+- Web: nomination listing and submission are implemented in the member and admin election surfaces.
+- Mobile: nomination listing and submission are represented by the typed election service; member UI currently focuses on voting.
+
+### 2026-09-21 — /api/elections/nominations/{nominationId}/scrutiny, /api/elections/nominations/{nominationId}/withdraw
+- Change: added scrutiny decision and withdrawal endpoints.
+- Reason: Work Package 37.1 requires officer decisions and withdrawal before the final candidate list.
+- Web: scrutiny and withdrawal calls are implemented in the admin/member election services.
+- Mobile: typed service support is present; officer-only scrutiny remains outside the member UI.
+
+### 2026-09-21 — /api/elections/{id}/vote
+- Change: added secret-ballot vote recording. The request identifies the voter only through the authenticated member claim; the ballot vote has no member foreign key.
+- Reason: Work Package 37.1 requires one vote per frozen eligible voter without linking voter identity to the selected candidate.
+- Web: member voting surface sends the authenticated request contract.
+- Mobile: member election screen and typed election service send the same vote contract.
+
+### 2026-09-21 — /api/elections/{id}/count, /api/elections/{id}/declare
+- Change: added count, tie, winner, and declaration endpoints.
+- Reason: Work Package 37.1 requires persisted results, recount-safe replacement of result rows, and EC roster updates on declaration.
+- Web: public results and admin counting/declaration surfaces consume these routes.
+- Mobile: typed result support is present; counting and declaration remain administrative operations.
+
+### 2026-09-21 — /api/elections/{id}/documents/{formCode}
+- Change: added fixed-layout A4 PDF generation for the approved ER election forms, sourced from the persisted election record and carrying election reference, form code, generation time, page number, evidence state, and verification QR data.
+- Reason: Work Package 37.1e requires completed official records rather than raw Markdown handbook downloads.
+- Web: `ElectionsService.getOfficialDocument` downloads the PDF blob.
+- Mobile: `ElectionService.downloadOfficialDocument` downloads the same PDF contract.
+
 ### 2026-09-17 — /networking/search, /networking/directory
 - Change: added an optional `cursor` param to `MemberSearchFilterDto` and a
   populated `NextCursor` on `PagedResult<T>`. Sending a cursor switches the

@@ -23,6 +23,10 @@ numbered directory instead.
 
 The white-label second-institution question remains out of scope here because
 it is a separate product decision. The election question is resolved below.
+Active and archived delivery status is reconciled in
+[evidence/todo-alignment.md](./evidence/todo-alignment.md); an active TODO
+item is not treated as implemented merely because it is named by a
+specification.
 
 ## User stories
 
@@ -92,31 +96,40 @@ codes actually returned, both derived from source and existing tests.
 
 ## Decision: election ballot workflow (84.6)
 
-**Decision: keep the election process as static build-time documents for the
-current product scope. Do not build a persisted candidate/ballot workflow as
-part of Work Package 84.**
+**Decision: develop a persisted online election engine, following the existing
+election-engine scope already recorded in Work Package 37.1.**
 
-This decision is based on the implementation:
+The current implementation contains static election regulations, operational
+manuals, ballot/counting certificates, and forms, plus persisted constitution
+amendment voting. Those assets are retained as supporting governance
+documents, not treated as a substitute for an election engine.
 
-- The Web application contains static election regulation, operational manual,
-  conduct, ballot, counting, certificate, and form documents under its public
-  election assets.
-- The API exposes governance-period and constitution endpoints, but no
-  persisted election, candidate, ballot, tally, result, or election-audit
-  aggregate.
-- The persisted voting workflow currently implemented is constitution
-  amendment voting. It validates the active constitution, restricts voters to
-  supported membership types, prevents a member from voting twice for the same
-  constitution, and stores the vote.
-- Web and Mobile governance surfaces consume governance and constitution
-  behavior; no client-side persisted election ballot flow is present.
+The election engine is implemented as active Work Package 37.1 work and must
+meet the following persisted workflow scope before that work package can be
+closed:
 
-Therefore, the specification shall treat election documents as static
-operational artifacts with organization-configured presentation where
-implemented. It shall not imply online elections, candidate nomination,
-ballot issuance, vote counting, result publication, recount, or persisted
-election audit records. A future online-election feature requires a new
-product specification covering those workflows.
+- Election creation, scheduling, and explicit phase control from announcement
+  through archival.
+- Election seats, appointed election officers, and a frozen voter-roll
+  snapshot.
+- Candidate nomination, proposer/seconder eligibility, scrutiny decisions,
+  withdrawal, and final candidate lists.
+- Secret-ballot issuance and vote storage separated from the member identity
+  recorded on the voter roll.
+- Duplicate-vote prevention, polling closure, counting, rejected ballots,
+  recount handling, result publication, and immutable audit history.
+- Declaration that writes elected members into the applicable executive
+  committee period.
+- Generated election forms/PDFs with verification data.
+- Feature-flagged public, member, and administrator Web surfaces, with Mobile
+  parity where the existing backlog requires it.
+
+This decision does not make Work Package 84 the implementation owner. It
+records the product decision and leaves implementation acceptance with Work
+Package 37.1. The existing constitution amendment vote remains
+its own workflow and must not be conflated with election ballots. The current
+static election documents remain the legal and operational reference material
+until the engine is implemented and adopted.
 
 ## Open question (product decision, not a documentation task)
 

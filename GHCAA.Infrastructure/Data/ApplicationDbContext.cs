@@ -274,6 +274,15 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<Poll> Polls { get; set; } = null!;
         public DbSet<PollOption> PollOptions { get; set; } = null!;
         public DbSet<PollVote> PollVotes { get; set; } = null!;
+        public DbSet<Election> Elections { get; set; } = null!;
+        public DbSet<ElectionSeat> ElectionSeats { get; set; } = null!;
+        public DbSet<ElectionOfficer> ElectionOfficers { get; set; } = null!;
+        public DbSet<VoterRoll> VoterRolls { get; set; } = null!;
+        public DbSet<Nomination> Nominations { get; set; } = null!;
+        public DbSet<ScrutinyDecision> ScrutinyDecisions { get; set; } = null!;
+        public DbSet<Ballot> Ballots { get; set; } = null!;
+        public DbSet<BallotVote> BallotVotes { get; set; } = null!;
+        public DbSet<ElectionResult> ElectionResults { get; set; } = null!;
 
         // Forum Module
         public DbSet<ForumCategory> ForumCategories { get; set; } = null!;

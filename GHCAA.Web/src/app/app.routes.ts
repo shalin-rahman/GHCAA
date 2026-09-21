@@ -54,6 +54,11 @@ export const routes: Routes = [
                 title: 'Elections & Governance | {branding.shortName}'
             },
             {
+                path: 'elections/results',
+                loadComponent: () => import('./public/elections/election-results').then(m => m.ElectionResults),
+                title: 'Election Results | {branding.shortName}'
+            },
+            {
                 path: 'gallery',
                 loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery),
                 canActivate: [featureGuard('enableGallery')],
@@ -200,6 +205,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./member/polls/polls.component').then(m => m.MemberPolls)
             },
             {
+                path: 'election',
+                loadComponent: () => import('./member/election/election').then(m => m.MemberElection)
+            },
+            {
                 path: 'forum',
                 loadComponent: () => import('./member/forum/forum').then(m => m.Forum),
                 canActivate: [featureGuard('enableForum')]
@@ -312,6 +321,10 @@ export const routes: Routes = [
             {
                 path: 'polls',
                 loadComponent: () => import('./admin/polls/polls.component').then(m => m.AdminPolls)
+            },
+            {
+                path: 'elections',
+                loadComponent: () => import('./admin/elections/admin-elections').then(m => m.AdminElections)
             },
             {
                 path: 'site-content',

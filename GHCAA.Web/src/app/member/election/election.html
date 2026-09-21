@@ -1,0 +1,31 @@
+<section class="page-section animate-fade-in">
+    <header class="page-header">
+        <h1>Association election</h1>
+        <p>Choose one candidate for each position.</p>
+    </header>
+
+    <div *ngIf="loading()" class="empty-state"><app-logo-spinner [size]="48" [ripple]="false"></app-logo-spinner><p>Loading election...</p></div>
+    <div *ngIf="error()" class="empty-state"><h2>Election unavailable</h2><p>Try again later.</p></div>
+    <div *ngIf="!loading() && !error() && !election()" class="empty-state"><h2>No election is open</h2><p>The election commission has not opened voting.</p></div>
+    <div *ngIf="election() as current" class="stack gap-6">
+        <div class="glass-card" *ngIf="submitted() || current.hasVoted">
+            <h2>Ballot recorded</h2><p>Your vote has been recorded. Results will be published after certification.</p>
+        </div>
+        <div class="glass-card" *ngFor="let position of current.positions">
+            <h2>{{ position.title }}</h2>
+            <p class="text-muted" *ngIf="position.description">{{ position.description }}</p>
+            <div class="stack gap-2">
+                <button type="button" class="btn btn-outline text-left" *ngFor="let candidate of candidates(position.id)"
+                    [class.btn-primary]="isSelected(position.id, candidate.id)"
+                    [disabled]="current.hasVoted || submitted()"
+                    (click)="choose(position.id, candidate.id, position.seats)">
+                    {{ candidate.name }}
+                    <span class="text-muted" *ngIf="candidate.statement"> — {{ candidate.statement }}</span>
+                </button>
+            </div>
+        </div>
+        <button class="btn btn-accent" [disabled]="current.hasVoted || submitted() || submitting()" (click)="submit()">
+            {{ submitting() ? 'Submitting...' : 'Submit ballot' }}
+        </button>
+    </div>
+</section>

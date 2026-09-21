@@ -51,6 +51,7 @@ import '../../screens/member/chat_room_screen.dart';
 import '../../screens/member/governance_screen.dart';
 import '../../core/widgets/main_shell.dart';
 import '../../features/polls/polls_screen.dart';
+import '../../screens/member/election_screen.dart';
 import '../../screens/member/forum/forum_categories_screen.dart';
 import '../../screens/member/forum/forum_topics_screen.dart';
 import '../../screens/member/forum/forum_topic_detail_screen.dart';
@@ -176,6 +177,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/mentorship', name: 'mentorship', builder: (context, state) => const MentorshipHubScreen()),
           GoRoute(path: '/professionals', name: 'professionals', builder: (context, state) => const ProfessionalHubScreen()),
           GoRoute(path: '/polls', name: 'polls', builder: (context, state) => const PollsScreen()),
+          GoRoute(path: '/election', name: 'election', builder: (context, state) => const ElectionScreen()),
           GoRoute(path: '/forum', name: 'forum', builder: (context, state) => const ForumCategoriesScreen()),
           GoRoute(
             path: '/forum/topics/:id',

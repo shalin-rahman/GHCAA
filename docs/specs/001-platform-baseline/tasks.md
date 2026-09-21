@@ -26,19 +26,22 @@ These tasks do not authorize application changes.
   `evidence/implementation-inventory.md`.
 - [x] T008 Produce an endpoint and workflow-level catalog from the actual
   backend, Web, Mobile, and test code, marking unverifiable details as gaps.
+- [x] T009 Compare the baseline with active and archived TODO work and record
+  the implemented/planned status boundary in the 002 evidence alignment
+  review.
 
 ## Phase 2: Required repository checks
 
-- [x] T009 Run `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --configuration
+- [x] T010 Run `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --configuration
   Release`.
-- [x] T010 Run `cd GHCAA.Web; npm run type-check`.
-- [x] T011 Run `cd GHCAA.Web; npm run test:unit`.
-- [x] T012 Run `cd GHCAA.Mobile; flutter analyze`.
-- [x] T013 Run `cd GHCAA.Mobile; flutter test --exclude-tags golden --reporter
+- [x] T011 Run `cd GHCAA.Web; npm run type-check`.
+- [x] T012 Run `cd GHCAA.Web; npm run test:unit`.
+- [x] T013 Run `cd GHCAA.Mobile; flutter analyze`.
+- [x] T014 Run `cd GHCAA.Mobile; flutter test --exclude-tags golden --reporter
   expanded`.
-- [x] T014 Run the API snapshot comparison used by
+- [x] T015 Run the API snapshot comparison used by
   `.github/workflows/ghcaa-ci-standard.yml`.
-- [x] T015 Run `graphify update .` after the specification artifacts are
+- [x] T016 Run `graphify update .` after the specification artifacts are
   created.
 
 ## Phase 3: Maintenance rules

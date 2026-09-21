@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import '../theme/app_theme.dart';
+import '../logging/log_capture_service.dart';
 import '../../features/auth/auth_service.dart';
 import '../../features/support/support_service.dart';
+
+final _logCaptureForErrorHandlers = LogCaptureService();
 
 /// Installs the three Flutter/platform error handlers.
 ///
@@ -60,6 +64,7 @@ void setupErrorHandlers() {
   // would silently drop Sentry's crash classification and filtering.
   PlatformDispatcher.instance.onError = (error, stack) {
     debugPrint('Uncaught platform error: $error');
+    unawaited(_logCaptureForErrorHandlers.logEvent('Uncaught platform error: $error'));
     return false; // let Sentry's chained default handler also run
   };
 
@@ -68,6 +73,7 @@ void setupErrorHandlers() {
   final defaultFlutterOnError = FlutterError.onError;
   FlutterError.onError = (FlutterErrorDetails details) {
     debugPrint('Uncaught Flutter framework error: ${details.exceptionAsString()}');
+    unawaited(_logCaptureForErrorHandlers.logEvent('Flutter framework error: ${details.exceptionAsString()}'));
     defaultFlutterOnError?.call(details);
   };
 }
@@ -105,12 +111,15 @@ class _AdminReportButtonState extends ConsumerState<AdminReportButton> {
     final fullName = profile?['fullName'] as String? ?? 'Mobile App User';
     final email = profile?['email'] as String? ?? 'mobile-error-report@ghcaa.local';
 
+    final logTail = await ref.read(logCaptureServiceProvider).tail();
+
     final success = await ref.read(supportServiceProvider).sendErrorReport(
           fullName: fullName,
           email: email,
           errorSummary: widget.exception.toString(),
           stackSummary: _stackSummary(),
           platformInfo: '${Platform.operatingSystem} ${Platform.operatingSystemVersion}',
+          logTail: logTail,
         );
 
     if (!mounted) return;

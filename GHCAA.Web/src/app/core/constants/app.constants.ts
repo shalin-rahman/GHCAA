@@ -601,6 +601,28 @@ export const API_ENDPOINTS = {
         BASE: '/api/polls',
         ACTIVE: '/api/polls/active'
     },
+    // Work Package 37.1 election routes.
+    ELECTIONS: {
+        BASE: '/api/elections',
+        CURRENT: '/api/elections/current',
+        RESULTS: (id: number) => `/api/elections/${id}/results`,
+        BALLOT: (id: number) => `/api/elections/${id}/ballot`,
+        NOMINATIONS: (id: number) => `/api/elections/${id}/nominations`,
+        SCRUTINY: (id: number) => `/api/elections/nominations/${id}/scrutiny`,
+        WITHDRAW: (id: number) => `/api/elections/nominations/${id}/withdraw`,
+        VOTE: (id: number) => `/api/elections/${id}/vote`,
+        PHASE: (id: number) => `/api/elections/${id}/phase`,
+        FREEZE_VOTER_ROLL: (id: number) => `/api/elections/${id}/voter-roll/freeze`,
+        COUNT: (id: number) => `/api/elections/${id}/count`,
+        DECLARE: (id: number) => `/api/elections/${id}/declare`,
+        DOCUMENT: (id: number, formCode: string) => `/api/elections/${id}/documents/${formCode}`
+    },
+    ADMIN_ELECTIONS: {
+        BASE: '/api/admin/elections',
+        PUBLISH: (id: number) => `/api/admin/elections/${id}/publish`,
+        CLOSE: (id: number) => `/api/admin/elections/${id}/close`,
+        CANDIDATES: (id: number) => `/api/admin/elections/${id}/candidates`
+    },
     CONFIG: '/api/config',
     FORUM: '/api/forum',
     HEALTH: '/healthz'

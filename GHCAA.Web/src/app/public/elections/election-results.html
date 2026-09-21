@@ -1,0 +1,15 @@
+<section class="page-section animate-fade-in">
+    <header class="page-header"><h1>Election results</h1><p>Certified results from the association election.</p></header>
+    <div *ngIf="loading()" class="empty-state"><app-logo-spinner [size]="48" [ripple]="false"></app-logo-spinner><p>Loading results...</p></div>
+    <div *ngIf="error()" class="empty-state"><h2>Results unavailable</h2><p>Try again later.</p></div>
+    <div *ngIf="!loading() && !error() && !summary()" class="empty-state"><h2>Results are not published</h2><p>Certified results will appear here.</p></div>
+    <div *ngIf="summary() as result" class="stack gap-6">
+        <div class="glass-card"><h2>{{ result.election.title }}</h2><p>{{ result.totalVotes }} ballots • {{ result.turnoutPercentage }}% turnout</p></div>
+        <div class="glass-card" *ngFor="let position of result.election.positions">
+            <h2>{{ position.title }}</h2>
+            <div class="stack gap-2" *ngFor="let item of resultsFor(position.id)">
+                <div class="flex justify-between"><span>{{ item.candidateName }} <strong *ngIf="item.elected">Elected</strong></span><span>{{ item.votes }} votes</span></div>
+            </div>
+        </div>
+    </div>
+</section>

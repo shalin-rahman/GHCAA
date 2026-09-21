@@ -330,10 +330,11 @@ governance/admin registry/permissions/theme screens are implemented. Tests:
 `GovernanceServiceTests`, `RolesControllerTests`, `ThemeServiceTests`,
 `OrgConfigServiceTests`, `OrgConfigControllerTests`, golden/profile config tests,
 and governance controller tests. Election regulations, operational manuals,
-ballot/counting certificates, and forms remain static build-time documents.
-The controllers expose no persisted candidate, ballot, tally, result, or
-election-audit workflow; the concrete persisted vote flow is constitution
-amendment voting only.
+ballot/counting certificates, and forms currently remain static build-time
+documents. The controllers expose no persisted candidate, ballot, tally, result,
+or election-audit workflow; the concrete persisted vote flow is constitution
+amendment voting only. The product decision is to develop a persisted online
+election engine as follow-on work.
 
 ### Lookups, health, imports, and operational administration
 

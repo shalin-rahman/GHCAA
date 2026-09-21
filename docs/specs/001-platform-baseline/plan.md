@@ -110,3 +110,8 @@ It expands each implemented domain into actors, routes, contracts,
 validation, authorization, state transitions, client surfaces, failures, and
 tests. Details that cannot be verified from code are marked as gaps rather
 than inferred from external documentation.
+
+The status boundary against active and archived delivery work is recorded in
+the [TODO alignment review](../002-workflow-contracts-and-validation/evidence/todo-alignment.md).
+Active TODO items are not presented as completed platform behavior, while
+archived items are treated as historical evidence only.

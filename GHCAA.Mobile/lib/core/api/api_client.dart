@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/app_config.dart';
+import '../logging/log_capture_service.dart';
 import '../storage/storage_service.dart';
 import 'retry_interceptor.dart';
 import '../utils/background_json.dart';
@@ -80,6 +81,7 @@ final dioProvider = Provider<Dio>((ref) {
   ssl_pinning.configureDioCertificatePinning(dio, AppConfig.environment);
 
   final storage = ref.read(storageServiceProvider);
+  final logCapture = ref.read(logCaptureServiceProvider);
 
   dio.interceptors.add(
     InterceptorsWrapper(
@@ -157,6 +159,12 @@ final dioProvider = Provider<Dio>((ref) {
         );
 
         debugPrint('[ApiClient] API Error (${e.response?.statusCode}): ${e.requestOptions.method} ${e.requestOptions.path} => $message');
+        unawaited(logCapture.logApiError(
+          method: e.requestOptions.method,
+          path: e.requestOptions.path,
+          statusCode: e.response?.statusCode,
+          message: message,
+        ));
 
         return handler.next(friendlyException);
       },
