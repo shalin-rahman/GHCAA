@@ -587,7 +587,7 @@ export class AdminMembers implements OnInit {
         subject: '',
         admissionYear: new Date().getFullYear() - 4,
         passingYear: new Date().getFullYear(),
-        isGHC: false,
+        isOrgProfile: false,
         result: ''
       });
       return { ...m };

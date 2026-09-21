@@ -115,7 +115,7 @@ namespace GHCAA.Tests.Workflows
                 PermanentAddress = "Dhaka",
                 AcademicHistory = new List<AcademicRecordDto>
                 {
-                    new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2020, IsGHC = true }
+                    new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2020, IsOrgProfile = true }
                 }
             };
 
@@ -247,7 +247,7 @@ namespace GHCAA.Tests.Workflows
                         Degree = "HSC",
                         Subject = "Science",
                         PassingYear = 2020,
-                        IsGHC = true
+                        IsOrgProfile = true
                     }
                 }
             };

@@ -251,7 +251,7 @@ namespace GHCAA.Infrastructure.Services
                     Subject = a.Subject,
                     AdmissionYear = a.AdmissionYear,
                     PassingYear = a.PassingYear ?? 0,
-                    IsGHC = a.IsGHC,
+                    IsOrgProfile = a.IsOrgProfile,
                     Result = a.Result
                 });
             }

@@ -415,7 +415,7 @@ namespace GHCAA.Tests.Services
                 EmergencyContactName = "EC",
                 EmergencyContactRelation = "Brother",
                 EmergencyContactPhone = "01800000000",
-                AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } },
+                AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsOrgProfile = true } },
                 DateOfBirth = new DateTime(1990, 1, 1),
                 Gender = Enums.Gender.Male,
                 BloodGroup = Enums.BloodGroup.APositive,

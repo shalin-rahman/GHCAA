@@ -360,7 +360,7 @@ Current execution evidence:
 - Focused backend verification passed: 52 tests across
   `MemberRegistrationValidatorTests` and `LocalFileStorageServiceTests`.
 - `COV-002` is partially closed: the validator now requires at least one
-  academic record marked `IsGHC`; API-level 4xx coverage remains open under
+  academic record marked `IsOrgProfile`; API-level 4xx coverage remains open under
   `82.86`.
 - `82.88` is complete: the focused mobile widget test covers the shared
   loading panel in dark and light themes, including its spinner and label.

@@ -88,7 +88,7 @@ void main() {
     test('Step 2: academic and career fields persist correctly', () {
       wizard.updateModel(
         academicHistory: [
-          {'institutionName': 'Govt. Haraganga College', 'degree': 'HSC', 'passingYear': '2015', 'isGHC': true},
+          {'institutionName': 'Govt. Haraganga College', 'degree': 'HSC', 'passingYear': '2015', 'isOrgProfile': true},
         ],
         passingYear: '2015',
         degree: 'HSC',
@@ -107,16 +107,16 @@ void main() {
       wizard.updateModel(
         institutionName: 'Configured University',
         academicHistory: [
-          {'institutionName': 'Configured University', 'isGHC': false},
-          {'institutionName': 'Other University', 'isGHC': true},
+          {'institutionName': 'Configured University', 'isOrgProfile': false},
+          {'institutionName': 'Other University', 'isOrgProfile': true},
         ],
       );
 
       final academicHistory = wizard.state.model.toJson()['academicHistory'] as List;
       expect(academicHistory[0]['InstitutionName'], 'Configured University');
-      expect(academicHistory[0]['IsGHC'], isTrue);
+      expect(academicHistory[0]['IsOrgProfile'], isTrue);
       expect(academicHistory[1]['institutionName'], 'Other University');
-      expect(academicHistory[1]['IsGHC'], isFalse);
+      expect(academicHistory[1]['IsOrgProfile'], isFalse);
     });
 
     test('registration payload creates the configured institution record when empty', () {
@@ -130,7 +130,7 @@ void main() {
       final academicHistory = wizard.state.model.toJson()['academicHistory'] as List;
       expect(academicHistory, hasLength(1));
       expect(academicHistory.single['InstitutionName'], 'Configured University');
-      expect(academicHistory.single['IsGHC'], isTrue);
+      expect(academicHistory.single['IsOrgProfile'], isTrue);
     });
 
     test('Step 2: media paths default to null and update via updateData', () {

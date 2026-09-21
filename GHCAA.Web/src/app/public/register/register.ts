@@ -91,7 +91,7 @@ export class Register implements OnDestroy {
     EmergencyContactRelation: '',
     EmergencyContactPhone: '',
     AcademicHistory: [
-      { institutionName: '', degree: 'HSC', subject: 'None', admissionYear: null, passingYear: null, isGHC: true }
+      { institutionName: '', degree: 'HSC', subject: 'None', admissionYear: null, passingYear: null, isOrgProfile: true }
     ],
     ProfessionalHistory: [
       { organizationName: '', designation: '', sector: '', location: '', startDate: '', isCurrent: false }
@@ -112,7 +112,7 @@ export class Register implements OnDestroy {
   }
 
   addAcademic() {
-    this.model.AcademicHistory.push({ institutionName: '', degree: '', subject: '', admissionYear: null, passingYear: null, isGHC: false });
+    this.model.AcademicHistory.push({ institutionName: '', degree: '', subject: '', admissionYear: null, passingYear: null, isOrgProfile: false });
   }
 
   removeAcademic(idx: number) {
@@ -267,16 +267,16 @@ export class Register implements OnDestroy {
     this.model.AcademicHistory.forEach((item: any, i: number) => {
       if (i === 0) {
         item.institutionName = this.orgConfig.config()?.branding?.institutionName || item.institutionName;
-        item.isGHC = true;
+        item.isOrgProfile = true;
       } else {
-        item.isGHC = false;
+        item.isOrgProfile = false;
       }
       formData.append(`AcademicHistory[${i}].InstitutionName`, item.institutionName);
       formData.append(`AcademicHistory[${i}].Degree`, item.degree);
       formData.append(`AcademicHistory[${i}].Subject`, item.subject);
       formData.append(`AcademicHistory[${i}].AdmissionYear`, item.admissionYear || '');
       formData.append(`AcademicHistory[${i}].PassingYear`, item.passingYear || '');
-      formData.append(`AcademicHistory[${i}].IsGHC`, item.isGHC.toString());
+      formData.append(`AcademicHistory[${i}].IsOrgProfile`, item.isOrgProfile.toString());
     });
 
     // Append Professional History as array

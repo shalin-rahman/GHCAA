@@ -167,8 +167,8 @@ class RegisterModel {
                   {
                     ...academicHistory[i],
                     if (i == 0) 'InstitutionName': institutionName,
-                    if (i == 0) 'IsGHC': true,
-                    if (i > 0) 'IsGHC': false,
+                    if (i == 0) 'IsOrgProfile': true,
+                    if (i > 0) 'IsOrgProfile': false,
                   }
               ]
             : [
@@ -177,7 +177,7 @@ class RegisterModel {
                   'Degree': degree,
                   'Subject': subject,
                   'PassingYear': int.tryParse(passingYear),
-                  'IsGHC': true,
+                  'IsOrgProfile': true,
                 }
               ],
         'bloodGroup': bloodGroup,
@@ -249,8 +249,8 @@ class RegisterState {
                   {
                     ...model.academicHistory[i],
                     if (i == 0) 'InstitutionName': model.institutionName,
-                    if (i == 0) 'IsGHC': true,
-                    if (i > 0) 'IsGHC': false,
+                    if (i == 0) 'IsOrgProfile': true,
+                    if (i > 0) 'IsOrgProfile': false,
                   }
               ]
             : [
@@ -261,7 +261,7 @@ class RegisterState {
                   'PassingYear': model.passingYear.isEmpty
                       ? null
                       : int.tryParse(model.passingYear),
-                  'IsGHC': true,
+                  'IsOrgProfile': true,
                 }
               ],
       };

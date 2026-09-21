@@ -281,7 +281,7 @@ namespace GHCAA.Infrastructure.Services
             var members = await _db.Members
                 .Include(m => m.AcademicHistory)
                 .Include(m => m.ProfessionalHistory)
-                .Where(m => m.AcademicHistory.Any(a => a.IsGHC && passingYears.Contains(a.PassingYear)) && !m.IsArchived)
+                .Where(m => m.AcademicHistory.Any(a => a.IsOrgProfile && passingYears.Contains(a.PassingYear)) && !m.IsArchived)
                 .ToListAsync(cancellationToken);
 
             foreach (var member in members)
@@ -332,7 +332,7 @@ namespace GHCAA.Infrastructure.Services
             var members = await _db.Members
                 .Include(m => m.AcademicHistory)
                 .Include(m => m.ProfessionalHistory)
-                .Where(m => m.AcademicHistory.Any(a => a.IsGHC && passingYears.Contains(a.PassingYear)) && !m.IsArchived)
+                .Where(m => m.AcademicHistory.Any(a => a.IsOrgProfile && passingYears.Contains(a.PassingYear)) && !m.IsArchived)
                 .ToListAsync(cancellationToken);
 
             foreach (var member in members)
@@ -493,7 +493,7 @@ namespace GHCAA.Infrastructure.Services
                 vars["AppliedDate"] = member.AppliedDate.ToString("dd MMM yyyy");
                 vars["ApprovedDate"] = member.ApprovedDate?.ToString("dd MMM yyyy") ?? "N/A";
 
-                var ghc = member.AcademicHistory.FirstOrDefault(a => a.IsGHC);
+                var ghc = member.AcademicHistory.FirstOrDefault(a => a.IsOrgProfile);
                 var hsc = member.AcademicHistory.FirstOrDefault(a => a.Degree == "HSC");
                 var prof = member.ProfessionalHistory.FirstOrDefault(p => p.IsCurrent);
 

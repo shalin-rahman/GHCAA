@@ -63,7 +63,7 @@ namespace GHCAA.Tests
                 HasAcceptedTerms = true,
                 AcademicHistory = new List<AcademicRecord>
                 {
-                    new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = passingYear, IsGHC = true }
+                    new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = passingYear, IsOrgProfile = true }
                 }
             };
             await _context.Members.AddAsync(member);

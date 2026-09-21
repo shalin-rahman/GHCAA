@@ -83,12 +83,12 @@ public class NetworkingServiceTests : TestBase
         // Setup scenarios: 
         var jane = await CreateAndSaveTestMemberAsync("Jane Doe", "jane.nt@example.com", "01100000091", "1234567891");
         jane.Status = Enums.MembershipStatus.Active;
-        jane.AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 1938, IsGHC = true } };
+        jane.AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 1938, IsOrgProfile = true } };
         jane.ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "TechCo", Designation = "Developer", Sector = "IT", IsCurrent = true, StartDate = DateTime.UtcNow.AddYears(-1) } };
 
         var john = await CreateAndSaveTestMemberAsync("John Smith", "john.nt@example.com", "01100000092", "1234567892");
         john.Status = Enums.MembershipStatus.Active;
-        john.AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "Hons", Subject = "Business", PassingYear = 1940, IsGHC = true } };
+        john.AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "Hons", Subject = "Business", PassingYear = 1940, IsOrgProfile = true } };
         john.ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "BankCorp", Designation = "Manager", Sector = "Banking-NT-Test", IsCurrent = true, StartDate = DateTime.UtcNow.AddYears(-2) } };
 
         await _context.SaveChangesAsync();
@@ -121,7 +121,7 @@ public class NetworkingServiceTests : TestBase
         president.Status = Enums.MembershipStatus.Active;
         president.AcademicHistory = new List<AcademicRecord>
         {
-            new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "Honours", Subject = "Political Science", PassingYear = 2005, IsGHC = true }
+            new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "Honours", Subject = "Political Science", PassingYear = 2005, IsOrgProfile = true }
         };
 
         var period = new ECPeriod { Title = "Batch Test Period", StartDate = DateTime.UtcNow, IsActive = true };

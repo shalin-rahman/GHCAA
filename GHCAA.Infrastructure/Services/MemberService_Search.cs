@@ -208,7 +208,7 @@ namespace GHCAA.Infrastructure.Services
                 }
 
                 // Enhanced Summary Data from normalized tables
-                var ghcRecord = member.AcademicHistory?.FirstOrDefault(a => a.IsGHC);
+                var ghcRecord = member.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile);
                 if (ghcRecord != null)
                 {
                     dto.GHCLastCertificatePassingYear = ghcRecord.PassingYear;
@@ -334,7 +334,7 @@ namespace GHCAA.Infrastructure.Services
                         Subject = a.Subject,
                         AdmissionYear = a.AdmissionYear,
                         PassingYear = a.PassingYear ?? 0,
-                        IsGHC = a.IsGHC,
+                        IsOrgProfile = a.IsOrgProfile,
                         Result = a.Result
                     });
                 }

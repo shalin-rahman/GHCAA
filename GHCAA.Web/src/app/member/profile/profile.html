@@ -229,7 +229,7 @@
                             </div>
                             <div class="input-group full py-2">
                                 <label class="premium-checkbox-label">
-                                    <input type="checkbox" [(ngModel)]="item.isGHC" [name]="'isGHC_' + $index" [disabled]="isInstitutionalAcademicRecord($index)">
+                                    <input type="checkbox" [(ngModel)]="item.isOrgProfile" [name]="'isOrgProfile_' + $index" [disabled]="isInstitutionalAcademicRecord($index)">
                                     <span class="checkmark"></span>
                                     <span class="label-text">Is this from {{ orgConfig.config()?.branding?.institutionName || 'the configured institution' }}?</span>
                                 </label>
@@ -515,12 +515,12 @@
         @if (profile.academicHistory && profile.academicHistory.length > 0) {
         <div class="history-list">
             @for (h of profile.academicHistory; track $index) {
-            <div class="history-row" [class.primary]="h.isGHC">
+            <div class="history-row" [class.primary]="h.isOrgProfile">
                 <div class="row-main">
                     <span class="row-title">{{ h.degree }} {{ getMajorDisplay(h.degree, h.subject) }}</span>
                     <div class="row-sub">
                         <span>{{ h.institutionName }}</span>
-                        @if (h.isGHC) { <span class="badge-info !text-[9px]">Primary Registry</span> }
+                        @if (h.isOrgProfile) { <span class="badge-info !text-[9px]">Primary Registry</span> }
                     </div>
                 </div>
                 <div class="row-period">

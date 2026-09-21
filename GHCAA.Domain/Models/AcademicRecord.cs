@@ -23,7 +23,7 @@ namespace GHCAA.Domain.Models
         public int? AdmissionYear { get; set; }
         public int PassingYear { get; set; }
 
-        public bool IsGHC { get; set; } // Flag for Govt. Haraganga College
+        public bool IsOrgProfile { get; set; } // Flag for Govt. Haraganga College
         public string? Result { get; set; }
         public string? CertificatePath { get; set; }
 

@@ -46,7 +46,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<bool>("IsGHC")
+                    b.Property<bool>("IsOrgProfile")
                         .HasColumnType("boolean");
 
                     b.Property<int>("MemberId")

@@ -48,6 +48,19 @@ a gap someone still needs to close.
 
 ## Log
 
+### 2026-09-21 — AcademicRecordDto / AcademicRecords.IsOrgProfile
+- Change: renamed the academic institution flag from `IsGHC`/`isGHC` to
+  `IsOrgProfile`/`isOrgProfile` across the Domain, API, database, Web, and
+  Mobile contracts.
+- Reason: the flag identifies the active organisation profile and must not be
+  tied to one institution name.
+- Compatibility: the PostgreSQL migration renames the column without changing
+  boolean values. The API accepts legacy `isGHC` input during rollout but
+  emits only `isOrgProfile`.
+- Web: updated registration, member profile, approval, and typed model surfaces.
+- Mobile: updated registration, profile editing, typed profile parsing, and
+  payloads.
+
 ### 2026-09-21 — /api/communications/me, /api/admin/comm/member/{memberId}
 - Change: added paginated member communication history and an admin per-member log view, including channel, delivery status, message detail, and targeted/broadcast scope.
 - Reason: Work Package 81.1–81.3 makes outbound email and SMS visibility explicit without exposing another member's records.

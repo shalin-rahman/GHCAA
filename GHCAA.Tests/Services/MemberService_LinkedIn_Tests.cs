@@ -106,7 +106,7 @@ public class MemberService_LinkedIn_Tests : TestBase
         {
             AcademicHistory = new List<AcademicRecordDto>
             {
-                new AcademicRecordDto { InstitutionName = "Other University", Degree = "BSc", Subject="CS", PassingYear = 2020, IsGHC = false }
+                new AcademicRecordDto { InstitutionName = "Other University", Degree = "BSc", Subject="CS", PassingYear = 2020, IsOrgProfile = false }
             }
         };
 
@@ -129,8 +129,8 @@ public class MemberService_LinkedIn_Tests : TestBase
         {
             AcademicHistory = new List<AcademicRecordDto>
             {
-                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject="S", PassingYear = 2010, IsGHC = true },
-                new AcademicRecordDto { InstitutionName = "Another Uni", Degree = "BSc", Subject="CS", PassingYear = 2015, IsGHC = false }
+                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject="S", PassingYear = 2010, IsOrgProfile = true },
+                new AcademicRecordDto { InstitutionName = "Another Uni", Degree = "BSc", Subject="CS", PassingYear = 2015, IsOrgProfile = false }
             },
             ProfessionalHistory = new List<ProfessionalRecordDto>
             {
@@ -179,7 +179,7 @@ public class MemberService_LinkedIn_Tests : TestBase
             //             ProfessionalSector="IT", Designation="Dev",
             AcademicHistory = new List<AcademicRecordDto>
             {
-                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject="S", PassingYear = 2010, IsGHC = true }
+                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject="S", PassingYear = 2010, IsOrgProfile = true }
             }
         };
 

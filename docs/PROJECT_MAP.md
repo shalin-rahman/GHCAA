@@ -1083,7 +1083,7 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 | `Member` | `id, fullName, email, mobileNo, status, membershipType, category, photoPath?, signaturePath?, academicHistory?, professionalHistory?, ecHistory?, paymentHistories?, contributionPoints?, rank?, profileCompletionPercentage?` | `MemberProfileDto` |
 | `MemberProfile` | All of `Member` + `fatherName, motherName, dateOfBirth, gender, bloodGroup, nid, emergencyContact*, tShirtSize, isNIDPublic, presentAddress, permanentAddress, isMobilePublic, isEmailPublic, isAddressPublic, hasAcceptedTerms, ecHistory?` | `MemberProfileDto` (full) |
 | `MemberSearchFilter` | `query?, passingYear?, bloodGroup?, professionalSector?, designation?, category?` | `MemberSearchFilterDto` |
-| `AcademicRecord` | `id?, institutionName, degree, subject, admissionYear?, passingYear, isGHC, result?, certificatePath?` | `AcademicRecordDto` |
+| `AcademicRecord` | `id?, institutionName, degree, subject, admissionYear?, passingYear, isOrgProfile, result?, certificatePath?` | `AcademicRecordDto` |
 | `ProfessionalRecord` | `id?, organizationName, designation, sector?, location?, startDate, endDate?, isCurrent` | `ProfessionalRecordDto` |
 | `ECHistoryRecord` | `periodTitle, position, startDate, endDate?, changeReason?, isCurrent` | `ECHistoryDto` |
 | `PaymentHistory` | `id, memberId, transactionId, amount, paidAt, status, financialCategory, notes?, paymentMethod, receiptPath?` | `PaymentHistoryDto` |
@@ -2119,7 +2119,7 @@ Mapped in `AdminEventOperations` (Web).
 | Feature | Web Module | Mobile Screen | Form Controls / Payload Keys |
 |---|---|---|---|
 | **Login** | `Login` | `LoginScreen` | `username` (Web) / `identifier` (Mobile), `password`, `enableBiometric` (Mobile only). |
-| **Member Registration** | `Register` | `RegisterScreen` | **Personal:** `FullName`, `FatherName`, `MotherName`, `DateOfBirth`, `Gender`, `BloodGroup`, `NID`, `MobileNo`, `Email`, `PresentAddress`, `PermanentAddress`, `TShirtSize`. <br> **Background:** `AcademicHistory` (List: `institutionName`, `degree`, `subject`, `admissionYear`, `passingYear`, `isGHC`), `ProfessionalHistory` (List: `organizationName`, `designation`, `sector`, `location`, `startDate`, `endDate`, `isCurrent`). <br> **Contact:** `EmergencyContactName`, `EmergencyContactRelation`, `EmergencyContactPhone`. <br> **Registry:** `MembershipType`, `PaymentMethodId`, `TransactionId`, `HasAcceptedTerms`, `HasAcceptedGdpr`, `HasAffirmed`. <br> **Files:** `photo`, `certificate`, `paymentProof`. |
+| **Member Registration** | `Register` | `RegisterScreen` | **Personal:** `FullName`, `FatherName`, `MotherName`, `DateOfBirth`, `Gender`, `BloodGroup`, `NID`, `MobileNo`, `Email`, `PresentAddress`, `PermanentAddress`, `TShirtSize`. <br> **Background:** `AcademicHistory` (List: `institutionName`, `degree`, `subject`, `admissionYear`, `passingYear`, `isOrgProfile`), `ProfessionalHistory` (List: `organizationName`, `designation`, `sector`, `location`, `startDate`, `endDate`, `isCurrent`). <br> **Contact:** `EmergencyContactName`, `EmergencyContactRelation`, `EmergencyContactPhone`. <br> **Registry:** `MembershipType`, `PaymentMethodId`, `TransactionId`, `HasAcceptedTerms`, `HasAcceptedGdpr`, `HasAffirmed`. <br> **Files:** `photo`, `certificate`, `paymentProof`. |
 | **Email Verification** | `Register.verify()` | `AuthService` | `otpCode`. |
 
 ### Member Profile Management

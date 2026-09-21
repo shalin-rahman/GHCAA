@@ -107,7 +107,7 @@ $body += Add-Field "AcademicHistory[0].Degree" "HSC"
 $body += Add-Field "AcademicHistory[0].Subject" "Science"
 $body += Add-Field "AcademicHistory[0].AdmissionYear" "2005"
 $body += Add-Field "AcademicHistory[0].PassingYear" "2007"
-$body += Add-Field "AcademicHistory[0].IsGHC" "true"
+$body += Add-Field "AcademicHistory[0].IsOrgProfile" "true"
 # Professional History
 $body += Add-Field "ProfessionalHistory[0].OrganizationName" "Tech Company Ltd"
 $body += Add-Field "ProfessionalHistory[0].Designation" "Software Engineer"

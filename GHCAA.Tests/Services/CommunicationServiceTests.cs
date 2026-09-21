@@ -93,8 +93,8 @@ public class CommunicationServiceTests : TestBase
         var year = 1942;
         var members = new List<Member>
         {
-            new Member { FullName = "A", Email = "a@e.com", NID = "1", MobileNo = "0", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", AcademicHistory = new List<AcademicRecord> { new AcademicRecord { IsGHC = true, PassingYear = year, InstitutionName = "GHC", Degree = "HSC", Subject = "Science" } } },
-            new Member { FullName = "B", Email = "b@e.com", NID = "2", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", AcademicHistory = new List<AcademicRecord> { new AcademicRecord { IsGHC = true, PassingYear = year, InstitutionName = "GHC", Degree = "HSC", Subject = "Science" } } }
+            new Member { FullName = "A", Email = "a@e.com", NID = "1", MobileNo = "0", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", AcademicHistory = new List<AcademicRecord> { new AcademicRecord { IsOrgProfile = true, PassingYear = year, InstitutionName = "GHC", Degree = "HSC", Subject = "Science" } } },
+            new Member { FullName = "B", Email = "b@e.com", NID = "2", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", AcademicHistory = new List<AcademicRecord> { new AcademicRecord { IsOrgProfile = true, PassingYear = year, InstitutionName = "GHC", Degree = "HSC", Subject = "Science" } } }
         };
         _context.Members.AddRange(members);
         _context.EmailTemplates.Add(new EmailTemplate { Code = "BATCH", Subject = "S", Body = "B", Description = "Batch test template" });
@@ -115,8 +115,8 @@ public class CommunicationServiceTests : TestBase
         var year = 1942;
         var members = new List<Member>
         {
-            new Member { FullName = "2005-A", Email = "2005a@e.com", NID = "1", MobileNo = "0", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", AcademicHistory = new List<AcademicRecord> { new AcademicRecord { IsGHC = true, PassingYear = year, InstitutionName = "GHC", Degree = "HSC", Subject = "Science" } } },
-            new Member { FullName = "2010-B", Email = "2010b@e.com", NID = "2", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", AcademicHistory = new List<AcademicRecord> { new AcademicRecord { IsGHC = true, PassingYear = 2010, InstitutionName = "GHC", Degree = "HSC", Subject = "Science" } } }
+            new Member { FullName = "2005-A", Email = "2005a@e.com", NID = "1", MobileNo = "0", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", AcademicHistory = new List<AcademicRecord> { new AcademicRecord { IsOrgProfile = true, PassingYear = year, InstitutionName = "GHC", Degree = "HSC", Subject = "Science" } } },
+            new Member { FullName = "2010-B", Email = "2010b@e.com", NID = "2", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", AcademicHistory = new List<AcademicRecord> { new AcademicRecord { IsOrgProfile = true, PassingYear = 2010, InstitutionName = "GHC", Degree = "HSC", Subject = "Science" } } }
         };
         _context.Members.AddRange(members);
         await _context.SaveChangesAsync();
@@ -246,7 +246,7 @@ public class CommunicationServiceTests : TestBase
             EmergencyContactName = "E",
             EmergencyContactRelation = "R",
             EmergencyContactPhone = "0",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { IsGHC = true, PassingYear = year, InstitutionName = "GHC", Degree = "HSC", Subject = "Science" } }
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { IsOrgProfile = true, PassingYear = year, InstitutionName = "GHC", Degree = "HSC", Subject = "Science" } }
         };
         _context.Members.Add(member);
         _context.EmailTemplates.Add(new EmailTemplate { Code = "XSS_TEST", Subject = "S", Body = "Hello {{FullName}}", Description = "XSS test" });

@@ -84,9 +84,9 @@ namespace GHCAA.Infrastructure.Services
 
                 // Summary Data for easier display
                 CategoryBadge = member.Category.ToString(),
-                PassingYear = member.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.PassingYear,
-                Degree = member.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.Degree,
-                Subject = member.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.Subject,
+                PassingYear = member.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile)?.PassingYear,
+                Degree = member.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile)?.Degree,
+                Subject = member.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile)?.Subject,
                 Designation = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Designation,
                 OrganizationName = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.OrganizationName,
                 ProfessionalSector = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Sector,
@@ -101,7 +101,7 @@ namespace GHCAA.Infrastructure.Services
                     Subject = a.Subject,
                     AdmissionYear = a.AdmissionYear,
                     PassingYear = a.PassingYear,
-                    IsGHC = a.IsGHC,
+                    IsOrgProfile = a.IsOrgProfile,
                     Result = a.Result,
                     CertificatePath = a.CertificatePath
                 }).ToList() ?? new List<AcademicRecordDto>(),
@@ -186,7 +186,7 @@ namespace GHCAA.Infrastructure.Services
                 Subject = a.Subject,
                 AdmissionYear = a.AdmissionYear,
                 PassingYear = a.PassingYear,
-                IsGHC = a.IsGHC,
+                IsOrgProfile = a.IsOrgProfile,
                 Result = a.Result
             }).OrderByDescending(a => a.PassingYear).ToList() ?? new();
 
@@ -265,7 +265,7 @@ namespace GHCAA.Infrastructure.Services
                         Subject = a.Subject ?? "",
                         AdmissionYear = a.AdmissionYear,
                         PassingYear = a.PassingYear ?? 0,
-                        IsGHC = a.IsGHC,
+                        IsOrgProfile = a.IsOrgProfile,
                         Result = a.Result
                     });
                 }

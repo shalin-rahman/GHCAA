@@ -7,7 +7,7 @@
     "Subject": "None",
     "AdmissionYear": 2013,
     "PassingYear": 2015,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -18,7 +18,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -29,7 +29,7 @@
     "Subject": "Science",
     "AdmissionYear": 1999,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -40,7 +40,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1996,
     "PassingYear": 1998,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -51,7 +51,7 @@
     "Subject": "Science",
     "AdmissionYear": 1982,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -62,7 +62,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1988,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -73,7 +73,7 @@
     "Subject": "Science",
     "AdmissionYear": 1982,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -84,7 +84,7 @@
     "Subject": "None",
     "AdmissionYear": 0,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -95,7 +95,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1981,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -106,7 +106,7 @@
     "Subject": "Science",
     "AdmissionYear": 2002,
     "PassingYear": 2004,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -117,7 +117,7 @@
     "Subject": "Science",
     "AdmissionYear": 1991,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -128,7 +128,7 @@
     "Subject": "Botany",
     "AdmissionYear": 2007,
     "PassingYear": 2012,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -139,7 +139,7 @@
     "Subject": "English",
     "AdmissionYear": 2004,
     "PassingYear": 2006,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -150,7 +150,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1969,
     "PassingYear": 1973,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -161,7 +161,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1986,
     "PassingYear": 1990,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -172,7 +172,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2003,
     "PassingYear": 2005,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -183,7 +183,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2022,
     "PassingYear": 2024,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -194,7 +194,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -205,7 +205,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -216,7 +216,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -227,7 +227,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -238,7 +238,7 @@
     "Subject": "Science",
     "AdmissionYear": 1982,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -249,7 +249,7 @@
     "Subject": "Science",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -260,7 +260,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -271,7 +271,7 @@
     "Subject": "Science",
     "AdmissionYear": 1983,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -282,7 +282,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -293,7 +293,7 @@
     "Subject": "None",
     "AdmissionYear": 1994,
     "PassingYear": 1998,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -304,7 +304,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2005,
     "PassingYear": 2007,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -315,7 +315,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1995,
     "PassingYear": 1999,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -326,7 +326,7 @@
     "Subject": "Science",
     "AdmissionYear": 1982,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -337,7 +337,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -348,7 +348,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1985,
     "PassingYear": 1987,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -359,7 +359,7 @@
     "Subject": "None",
     "AdmissionYear": 0,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -370,7 +370,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 2000,
     "PassingYear": 2002,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -381,7 +381,7 @@
     "Subject": "Science",
     "AdmissionYear": 1982,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -392,7 +392,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -403,7 +403,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1984,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -414,7 +414,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -425,7 +425,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2004,
     "PassingYear": 2008,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -436,7 +436,7 @@
     "Subject": "Science",
     "AdmissionYear": 1984,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -447,7 +447,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2000,
     "PassingYear": 2002,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -458,7 +458,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -469,7 +469,7 @@
     "Subject": "Science",
     "AdmissionYear": 1999,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -480,7 +480,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -491,7 +491,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2000,
     "PassingYear": 2004,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -502,7 +502,7 @@
     "Subject": "None",
     "AdmissionYear": 1970,
     "PassingYear": 1974,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -513,7 +513,7 @@
     "Subject": "None",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -524,7 +524,7 @@
     "Subject": "Science",
     "AdmissionYear": 1992,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -535,7 +535,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 2005,
     "PassingYear": 2007,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -546,7 +546,7 @@
     "Subject": "Science",
     "AdmissionYear": 1997,
     "PassingYear": 1999,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -557,7 +557,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2005,
     "PassingYear": 2007,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -568,7 +568,7 @@
     "Subject": "Science",
     "AdmissionYear": 1983,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -579,7 +579,7 @@
     "Subject": "None",
     "AdmissionYear": 1993,
     "PassingYear": 1997,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -590,7 +590,7 @@
     "Subject": "Science",
     "AdmissionYear": 1980,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -601,7 +601,7 @@
     "Subject": "Science",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -612,7 +612,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -623,7 +623,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1990,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -634,7 +634,7 @@
     "Subject": "Science",
     "AdmissionYear": 1972,
     "PassingYear": 1974,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -645,7 +645,7 @@
     "Subject": "Science",
     "AdmissionYear": 1982,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -656,7 +656,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1982,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -667,7 +667,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1980,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -678,7 +678,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1977,
     "PassingYear": 1981,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -689,7 +689,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1986,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -700,7 +700,7 @@
     "Subject": "Science",
     "AdmissionYear": 1983,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -711,7 +711,7 @@
     "Subject": "Science",
     "AdmissionYear": 1982,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -722,7 +722,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2023,
     "PassingYear": 2025,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -733,7 +733,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2012,
     "PassingYear": 2014,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -744,7 +744,7 @@
     "Subject": "None",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -755,7 +755,7 @@
     "Subject": "Science",
     "AdmissionYear": 1980,
     "PassingYear": 1982,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -766,7 +766,7 @@
     "Subject": "Science",
     "AdmissionYear": 1986,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -777,7 +777,7 @@
     "Subject": "Science",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -788,7 +788,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -799,7 +799,7 @@
     "Subject": "Science",
     "AdmissionYear": 1980,
     "PassingYear": 1982,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -810,7 +810,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -821,7 +821,7 @@
     "Subject": "Science",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -832,7 +832,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1981,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -843,7 +843,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2014,
     "PassingYear": 2016,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -854,7 +854,7 @@
     "Subject": "Science",
     "AdmissionYear": 2004,
     "PassingYear": 2006,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -865,7 +865,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2003,
     "PassingYear": 2008,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -876,7 +876,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2012,
     "PassingYear": 2014,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -887,7 +887,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1991,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -898,7 +898,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -909,7 +909,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1980,
     "PassingYear": 1982,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -920,7 +920,7 @@
     "Subject": "Science",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -931,7 +931,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1991,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -942,7 +942,7 @@
     "Subject": "Science",
     "AdmissionYear": 1982,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -953,7 +953,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1982,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -964,7 +964,7 @@
     "Subject": "Science",
     "AdmissionYear": 1982,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -975,7 +975,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -986,7 +986,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -997,7 +997,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1968,
     "PassingYear": 1972,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1008,7 +1008,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1985,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1019,7 +1019,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2003,
     "PassingYear": 2005,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1030,7 +1030,7 @@
     "Subject": "Science",
     "AdmissionYear": 1987,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1041,7 +1041,7 @@
     "Subject": "Science",
     "AdmissionYear": 1987,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1052,7 +1052,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 1999,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1063,7 +1063,7 @@
     "Subject": "Science",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1074,7 +1074,7 @@
     "Subject": "Physics",
     "AdmissionYear": 1996,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1085,7 +1085,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2009,
     "PassingYear": 2011,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1096,7 +1096,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2005,
     "PassingYear": 2007,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1107,7 +1107,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2005,
     "PassingYear": 2007,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1118,7 +1118,7 @@
     "Subject": "Science",
     "AdmissionYear": 1970,
     "PassingYear": 1972,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1129,7 +1129,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1972,
     "PassingYear": 1974,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1140,7 +1140,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1151,7 +1151,7 @@
     "Subject": "None",
     "AdmissionYear": 1997,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1162,7 +1162,7 @@
     "Subject": "Bangla",
     "AdmissionYear": 1997,
     "PassingYear": 1999,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1173,7 +1173,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1184,7 +1184,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1996,
     "PassingYear": 1998,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1195,7 +1195,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2001,
     "PassingYear": 2003,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1206,7 +1206,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1217,7 +1217,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2009,
     "PassingYear": 2011,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1228,7 +1228,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1239,7 +1239,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 2006,
     "PassingYear": 2008,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1250,7 +1250,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1261,7 +1261,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1982,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1272,7 +1272,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2003,
     "PassingYear": 2005,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1283,7 +1283,7 @@
     "Subject": "Science",
     "AdmissionYear": 1983,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1294,7 +1294,7 @@
     "Subject": "Botany",
     "AdmissionYear": 2006,
     "PassingYear": 2008,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1305,7 +1305,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1994,
     "PassingYear": 1996,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1316,7 +1316,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1983,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1327,7 +1327,7 @@
     "Subject": "Management",
     "AdmissionYear": 2019,
     "PassingYear": 2021,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1338,7 +1338,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 2012,
     "PassingYear": 2017,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1349,7 +1349,7 @@
     "Subject": "Science",
     "AdmissionYear": 1994,
     "PassingYear": 1996,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1360,7 +1360,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2006,
     "PassingYear": 2008,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1371,7 +1371,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2005,
     "PassingYear": 2009,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1382,7 +1382,7 @@
     "Subject": "None",
     "AdmissionYear": 2005,
     "PassingYear": 2009,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1393,7 +1393,7 @@
     "Subject": "Physics",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1404,7 +1404,7 @@
     "Subject": "Science",
     "AdmissionYear": 1977,
     "PassingYear": 1979,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1415,7 +1415,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1426,7 +1426,7 @@
     "Subject": "Botany",
     "AdmissionYear": 2011,
     "PassingYear": 2013,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1437,7 +1437,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1448,7 +1448,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2012,
     "PassingYear": 2014,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1459,7 +1459,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1983,
     "PassingYear": 1987,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1470,7 +1470,7 @@
     "Subject": "Science",
     "AdmissionYear": 1980,
     "PassingYear": 1982,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1481,7 +1481,7 @@
     "Subject": "Science",
     "AdmissionYear": 1980,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1492,7 +1492,7 @@
     "Subject": "Mathematics",
     "AdmissionYear": 2010,
     "PassingYear": 2015,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1503,7 +1503,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1514,7 +1514,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2001,
     "PassingYear": 2003,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1525,7 +1525,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1986,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1536,7 +1536,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 1994,
     "PassingYear": 1996,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1547,7 +1547,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1990,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1558,7 +1558,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1969,
     "PassingYear": 1973,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1569,7 +1569,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1982,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1580,7 +1580,7 @@
     "Subject": "English",
     "AdmissionYear": 2005,
     "PassingYear": 2010,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1591,7 +1591,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2003,
     "PassingYear": 2005,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1602,7 +1602,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1613,7 +1613,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1987,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1624,7 +1624,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1982,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1635,7 +1635,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1646,7 +1646,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1657,7 +1657,7 @@
     "Subject": "Botany",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1668,7 +1668,7 @@
     "Subject": "Sociology",
     "AdmissionYear": 2010,
     "PassingYear": 2012,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1679,7 +1679,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1987,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1690,7 +1690,7 @@
     "Subject": "Science",
     "AdmissionYear": 1977,
     "PassingYear": 1979,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1701,7 +1701,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2003,
     "PassingYear": 2007,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1712,7 +1712,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1978,
     "PassingYear": 1982,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1723,7 +1723,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1990,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1734,7 +1734,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1997,
     "PassingYear": 1999,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1745,7 +1745,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1985,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1756,7 +1756,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1767,7 +1767,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1778,7 +1778,7 @@
     "Subject": "Science",
     "AdmissionYear": 1977,
     "PassingYear": 1979,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1789,7 +1789,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1982,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1800,7 +1800,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1978,
     "PassingYear": 1982,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1811,7 +1811,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1988,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1822,7 +1822,7 @@
     "Subject": "Science",
     "AdmissionYear": 1985,
     "PassingYear": 1987,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1833,7 +1833,7 @@
     "Subject": "Science",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1844,7 +1844,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1981,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1855,7 +1855,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1964,
     "PassingYear": 1966,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1866,7 +1866,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1877,7 +1877,7 @@
     "Subject": "Botany",
     "AdmissionYear": 1997,
     "PassingYear": 1999,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1888,7 +1888,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1985,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1899,7 +1899,7 @@
     "Subject": "Science",
     "AdmissionYear": 1983,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1910,7 +1910,7 @@
     "Subject": "Science",
     "AdmissionYear": 1980,
     "PassingYear": 1982,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1921,7 +1921,7 @@
     "Subject": "Science",
     "AdmissionYear": 2000,
     "PassingYear": 2002,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1932,7 +1932,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1990,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1943,7 +1943,7 @@
     "Subject": "Science",
     "AdmissionYear": 1978,
     "PassingYear": 1982,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1954,7 +1954,7 @@
     "Subject": "Science",
     "AdmissionYear": 1977,
     "PassingYear": 1981,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1965,7 +1965,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 2004,
     "PassingYear": 2006,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1976,7 +1976,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 2005,
     "PassingYear": 2007,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1987,7 +1987,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1988,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -1998,7 +1998,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1991,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2009,7 +2009,7 @@
     "Subject": "Economics",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2020,7 +2020,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1980,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2031,7 +2031,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1985,
     "PassingYear": 1987,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2042,7 +2042,7 @@
     "Subject": "Science",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2053,7 +2053,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1987,
     "PassingYear": 1991,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2064,7 +2064,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2004,
     "PassingYear": 2006,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2075,7 +2075,7 @@
     "Subject": "Accounting",
     "AdmissionYear": -2,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2086,7 +2086,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1981,
     "PassingYear": 1983,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2097,7 +2097,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1992,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2108,7 +2108,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1982,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2119,7 +2119,7 @@
     "Subject": "Science",
     "AdmissionYear": 1983,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2130,7 +2130,7 @@
     "Subject": "Science",
     "AdmissionYear": 1990,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2141,7 +2141,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 2004,
     "PassingYear": 2006,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2152,7 +2152,7 @@
     "Subject": "Science",
     "AdmissionYear": 1976,
     "PassingYear": 1978,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2163,7 +2163,7 @@
     "Subject": "Science",
     "AdmissionYear": 1996,
     "PassingYear": 1998,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2174,7 +2174,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1992,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2185,7 +2185,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2196,7 +2196,7 @@
     "Subject": "Science",
     "AdmissionYear": 1977,
     "PassingYear": 1979,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2207,7 +2207,7 @@
     "Subject": "Botany",
     "AdmissionYear": 2007,
     "PassingYear": 2009,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2218,7 +2218,7 @@
     "Subject": "Science",
     "AdmissionYear": 1982,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2229,7 +2229,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1991,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2240,7 +2240,7 @@
     "Subject": "Science",
     "AdmissionYear": 1986,
     "PassingYear": 1990,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2251,7 +2251,7 @@
     "Subject": "Science",
     "AdmissionYear": 1977,
     "PassingYear": 1979,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2262,7 +2262,7 @@
     "Subject": "Science",
     "AdmissionYear": 1968,
     "PassingYear": 1970,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2273,7 +2273,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1978,
     "PassingYear": 1982,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2284,7 +2284,7 @@
     "Subject": "None",
     "AdmissionYear": 1998,
     "PassingYear": 2002,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2295,7 +2295,7 @@
     "Subject": "Science",
     "AdmissionYear": 2015,
     "PassingYear": 2017,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2306,7 +2306,7 @@
     "Subject": "Science",
     "AdmissionYear": 2015,
     "PassingYear": 2017,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2317,7 +2317,7 @@
     "Subject": "Science",
     "AdmissionYear": 1981,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2328,7 +2328,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1982,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2339,7 +2339,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1977,
     "PassingYear": 1979,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2350,7 +2350,7 @@
     "Subject": "Science",
     "AdmissionYear": 2020,
     "PassingYear": 2022,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2361,7 +2361,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1977,
     "PassingYear": 1981,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2372,7 +2372,7 @@
     "Subject": "Science",
     "AdmissionYear": 1983,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2383,7 +2383,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2000,
     "PassingYear": 2005,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2394,7 +2394,7 @@
     "Subject": "None",
     "AdmissionYear": 2000,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2405,7 +2405,7 @@
     "Subject": "Science",
     "AdmissionYear": 1973,
     "PassingYear": 1975,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2416,7 +2416,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1990,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2427,7 +2427,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1979,
     "PassingYear": 1981,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2438,7 +2438,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2449,7 +2449,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1991,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2460,7 +2460,7 @@
     "Subject": "Science",
     "AdmissionYear": 1986,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2471,7 +2471,7 @@
     "Subject": "Science",
     "AdmissionYear": 1982,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2482,7 +2482,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2000,
     "PassingYear": 2005,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2493,7 +2493,7 @@
     "Subject": "Science",
     "AdmissionYear": 1978,
     "PassingYear": 1980,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2504,7 +2504,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1982,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2515,7 +2515,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1982,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2526,7 +2526,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2006,
     "PassingYear": 2008,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2537,7 +2537,7 @@
     "Subject": "None",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2548,7 +2548,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2559,7 +2559,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1986,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2570,7 +2570,7 @@
     "Subject": "Science",
     "AdmissionYear": 1999,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2581,7 +2581,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1978,
     "PassingYear": 1982,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2592,7 +2592,7 @@
     "Subject": "Science",
     "AdmissionYear": 1986,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2603,7 +2603,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2000,
     "PassingYear": 2002,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2614,7 +2614,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2008,
     "PassingYear": 2010,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2625,7 +2625,7 @@
     "Subject": "Science",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2636,7 +2636,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 2020,
     "PassingYear": 2022,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2647,7 +2647,7 @@
     "Subject": "Science",
     "AdmissionYear": 1978,
     "PassingYear": 1980,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2658,7 +2658,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2669,7 +2669,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2680,7 +2680,7 @@
     "Subject": "Science",
     "AdmissionYear": 1979,
     "PassingYear": 1981,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2691,7 +2691,7 @@
     "Subject": "Science",
     "AdmissionYear": 2003,
     "PassingYear": 2005,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2702,7 +2702,7 @@
     "Subject": "Economics",
     "AdmissionYear": 1990,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2713,7 +2713,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2003,
     "PassingYear": 2008,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2724,7 +2724,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1999,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2735,7 +2735,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1977,
     "PassingYear": 1979,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2746,7 +2746,7 @@
     "Subject": "Science",
     "AdmissionYear": 1973,
     "PassingYear": 1975,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2757,7 +2757,7 @@
     "Subject": "Science",
     "AdmissionYear": -4,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2768,7 +2768,7 @@
     "Subject": "Science",
     "AdmissionYear": 1974,
     "PassingYear": 1976,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2779,7 +2779,7 @@
     "Subject": "Science",
     "AdmissionYear": 1977,
     "PassingYear": 1981,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2790,7 +2790,7 @@
     "Subject": "Science",
     "AdmissionYear": 1978,
     "PassingYear": 1980,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2801,7 +2801,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1977,
     "PassingYear": 1979,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2812,7 +2812,7 @@
     "Subject": "Chemistry",
     "AdmissionYear": 1998,
     "PassingYear": 2003,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2823,7 +2823,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2834,7 +2834,7 @@
     "Subject": "Economics",
     "AdmissionYear": 2004,
     "PassingYear": 2009,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2845,7 +2845,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2012,
     "PassingYear": 2014,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2856,7 +2856,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2016,
     "PassingYear": 2018,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2867,7 +2867,7 @@
     "Subject": "Science",
     "AdmissionYear": 1975,
     "PassingYear": 1977,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2878,7 +2878,7 @@
     "Subject": "Botany",
     "AdmissionYear": 2019,
     "PassingYear": 2024,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2889,7 +2889,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2011,
     "PassingYear": 2013,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2900,7 +2900,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2001,
     "PassingYear": 2003,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2911,7 +2911,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2922,7 +2922,7 @@
     "Subject": "Science",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2933,7 +2933,7 @@
     "Subject": "Humanities",
     "AdmissionYear": -2,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2944,7 +2944,7 @@
     "Subject": "Botany",
     "AdmissionYear": 2010,
     "PassingYear": 2015,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2955,7 +2955,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1987,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2966,7 +2966,7 @@
     "Subject": "Science",
     "AdmissionYear": 1987,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2977,7 +2977,7 @@
     "Subject": "Botany",
     "AdmissionYear": 2005,
     "PassingYear": 2010,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2988,7 +2988,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -2999,7 +2999,7 @@
     "Subject": "None",
     "AdmissionYear": 1999,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3010,7 +3010,7 @@
     "Subject": "None",
     "AdmissionYear": 1991,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3021,7 +3021,7 @@
     "Subject": "Science",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3032,7 +3032,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1982,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3043,7 +3043,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3054,7 +3054,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2022,
     "PassingYear": 2024,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3065,7 +3065,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1983,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3076,7 +3076,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3087,7 +3087,7 @@
     "Subject": "Botany",
     "AdmissionYear": 1999,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3098,7 +3098,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1968,
     "PassingYear": 1970,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3109,7 +3109,7 @@
     "Subject": "Science",
     "AdmissionYear": 1997,
     "PassingYear": 1999,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3120,7 +3120,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3131,7 +3131,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2001,
     "PassingYear": 2003,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3142,7 +3142,7 @@
     "Subject": "Science",
     "AdmissionYear": -4,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3153,7 +3153,7 @@
     "Subject": "Science",
     "AdmissionYear": 1983,
     "PassingYear": 1987,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3164,7 +3164,7 @@
     "Subject": "Science",
     "AdmissionYear": 1986,
     "PassingYear": 1990,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3175,7 +3175,7 @@
     "Subject": "Science",
     "AdmissionYear": 1981,
     "PassingYear": 1983,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3186,7 +3186,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1980,
     "PassingYear": 1982,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3197,7 +3197,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3208,7 +3208,7 @@
     "Subject": "Science",
     "AdmissionYear": 1992,
     "PassingYear": 1996,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3219,7 +3219,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3230,7 +3230,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3241,7 +3241,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3252,7 +3252,7 @@
     "Subject": "Physics",
     "AdmissionYear": 2017,
     "PassingYear": 2019,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3263,7 +3263,7 @@
     "Subject": "Science",
     "AdmissionYear": 2006,
     "PassingYear": 2008,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3274,7 +3274,7 @@
     "Subject": "None",
     "AdmissionYear": 1982,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3285,7 +3285,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3296,7 +3296,7 @@
     "Subject": "None",
     "AdmissionYear": 2000,
     "PassingYear": 2004,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3307,7 +3307,7 @@
     "Subject": "Science",
     "AdmissionYear": 1992,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3318,7 +3318,7 @@
     "Subject": "Science",
     "AdmissionYear": 1975,
     "PassingYear": 1977,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3329,7 +3329,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1975,
     "PassingYear": 1977,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3340,7 +3340,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 1994,
     "PassingYear": 1999,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3351,7 +3351,7 @@
     "Subject": "Science",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3362,7 +3362,7 @@
     "Subject": "Science",
     "AdmissionYear": 1985,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3373,7 +3373,7 @@
     "Subject": "Science",
     "AdmissionYear": 1980,
     "PassingYear": 1982,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3384,7 +3384,7 @@
     "Subject": "Science",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3395,7 +3395,7 @@
     "Subject": "Science",
     "AdmissionYear": 1992,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3406,7 +3406,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 1997,
     "PassingYear": 1999,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3417,7 +3417,7 @@
     "Subject": "Economics",
     "AdmissionYear": 2006,
     "PassingYear": 2011,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3428,7 +3428,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3439,7 +3439,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1991,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3450,7 +3450,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1965,
     "PassingYear": 1969,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3461,7 +3461,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2000,
     "PassingYear": 2002,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3472,7 +3472,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3483,7 +3483,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": -4,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3494,7 +3494,7 @@
     "Subject": "Botany",
     "AdmissionYear": 2004,
     "PassingYear": 2006,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3505,7 +3505,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1992,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3516,7 +3516,7 @@
     "Subject": "Science",
     "AdmissionYear": 1999,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3527,7 +3527,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1999,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3538,7 +3538,7 @@
     "Subject": "Science",
     "AdmissionYear": 1980,
     "PassingYear": 1982,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3549,7 +3549,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3560,7 +3560,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1990,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3571,7 +3571,7 @@
     "Subject": "Science",
     "AdmissionYear": 1992,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3582,7 +3582,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1983,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3593,7 +3593,7 @@
     "Subject": "Humanities",
     "AdmissionYear": -2,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3604,7 +3604,7 @@
     "Subject": "Science",
     "AdmissionYear": 1987,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3615,7 +3615,7 @@
     "Subject": "Science",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3626,7 +3626,7 @@
     "Subject": "Science",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3637,7 +3637,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3648,7 +3648,7 @@
     "Subject": "Management",
     "AdmissionYear": 2018,
     "PassingYear": 2020,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3659,7 +3659,7 @@
     "Subject": "Science",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3670,7 +3670,7 @@
     "Subject": "Science",
     "AdmissionYear": 1989,
     "PassingYear": 1991,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3681,7 +3681,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1971,
     "PassingYear": 1973,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3692,7 +3692,7 @@
     "Subject": "Management",
     "AdmissionYear": 2002,
     "PassingYear": 2007,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3703,7 +3703,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 2013,
     "PassingYear": 2015,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3714,7 +3714,7 @@
     "Subject": "None",
     "AdmissionYear": 0,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3725,7 +3725,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1977,
     "PassingYear": 1981,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3736,7 +3736,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1983,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3747,7 +3747,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2005,
     "PassingYear": 2009,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3758,7 +3758,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3769,7 +3769,7 @@
     "Subject": "None",
     "AdmissionYear": 0,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3780,7 +3780,7 @@
     "Subject": "None",
     "AdmissionYear": -4,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3791,7 +3791,7 @@
     "Subject": "Science",
     "AdmissionYear": 1985,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3802,7 +3802,7 @@
     "Subject": "None",
     "AdmissionYear": 1995,
     "PassingYear": 1999,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3813,7 +3813,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3824,7 +3824,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2017,
     "PassingYear": 2019,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3835,7 +3835,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1990,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3846,7 +3846,7 @@
     "Subject": "Science",
     "AdmissionYear": 1976,
     "PassingYear": 1978,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3857,7 +3857,7 @@
     "Subject": "Science",
     "AdmissionYear": 1983,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3868,7 +3868,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2010,
     "PassingYear": 2012,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3879,7 +3879,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1978,
     "PassingYear": 1980,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3890,7 +3890,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1991,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3901,7 +3901,7 @@
     "Subject": "Science",
     "AdmissionYear": 1977,
     "PassingYear": 1979,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3912,7 +3912,7 @@
     "Subject": "Science",
     "AdmissionYear": 2020,
     "PassingYear": 2022,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3923,7 +3923,7 @@
     "Subject": "Science",
     "AdmissionYear": 1975,
     "PassingYear": 1977,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3934,7 +3934,7 @@
     "Subject": "Science",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3945,7 +3945,7 @@
     "Subject": "Science",
     "AdmissionYear": 1986,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3956,7 +3956,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1991,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3967,7 +3967,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1991,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3978,7 +3978,7 @@
     "Subject": "None",
     "AdmissionYear": 1988,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -3989,7 +3989,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 2015,
     "PassingYear": 2017,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4000,7 +4000,7 @@
     "Subject": "Science",
     "AdmissionYear": 1974,
     "PassingYear": 1976,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4011,7 +4011,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1991,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4022,7 +4022,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 1998,
     "PassingYear": 2003,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4033,7 +4033,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1982,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4044,7 +4044,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2004,
     "PassingYear": 2006,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4055,7 +4055,7 @@
     "Subject": "Science",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4066,7 +4066,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2000,
     "PassingYear": 2005,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4077,7 +4077,7 @@
     "Subject": "None",
     "AdmissionYear": 1992,
     "PassingYear": 1996,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4088,7 +4088,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2008,
     "PassingYear": 2010,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4099,7 +4099,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2019,
     "PassingYear": 2024,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4110,7 +4110,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4121,7 +4121,7 @@
     "Subject": "Science",
     "AdmissionYear": 1999,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4132,7 +4132,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4143,7 +4143,7 @@
     "Subject": "None",
     "AdmissionYear": 2015,
     "PassingYear": 2015,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4154,7 +4154,7 @@
     "Subject": "None",
     "AdmissionYear": 2011,
     "PassingYear": 2013,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4165,7 +4165,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4176,7 +4176,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4187,7 +4187,7 @@
     "Subject": "None",
     "AdmissionYear": 1995,
     "PassingYear": 1999,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4198,7 +4198,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2000,
     "PassingYear": 2002,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4209,7 +4209,7 @@
     "Subject": "Science",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4220,7 +4220,7 @@
     "Subject": "Science",
     "AdmissionYear": 1982,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4231,7 +4231,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2003,
     "PassingYear": 2007,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4242,7 +4242,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1991,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4253,7 +4253,7 @@
     "Subject": "Management",
     "AdmissionYear": -2,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4264,7 +4264,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2010,
     "PassingYear": 2012,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4275,7 +4275,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1966,
     "PassingYear": 1968,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4286,7 +4286,7 @@
     "Subject": "Bangla",
     "AdmissionYear": 2008,
     "PassingYear": 2010,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4297,7 +4297,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1987,
     "PassingYear": 1991,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4308,7 +4308,7 @@
     "Subject": "Botany",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4319,7 +4319,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2014,
     "PassingYear": 2016,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4330,7 +4330,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1988,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4341,7 +4341,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1973,
     "PassingYear": 1975,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4352,7 +4352,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4363,7 +4363,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2000,
     "PassingYear": 2002,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4374,7 +4374,7 @@
     "Subject": "Economics",
     "AdmissionYear": 2004,
     "PassingYear": 2009,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4385,7 +4385,7 @@
     "Subject": "Science",
     "AdmissionYear": 1994,
     "PassingYear": 1996,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4396,7 +4396,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4407,7 +4407,7 @@
     "Subject": "Bangla",
     "AdmissionYear": 2015,
     "PassingYear": 2017,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4418,7 +4418,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4429,7 +4429,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2008,
     "PassingYear": 2010,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4440,7 +4440,7 @@
     "Subject": "Science",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4451,7 +4451,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1992,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4462,7 +4462,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1993,
     "PassingYear": 1997,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4473,7 +4473,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4484,7 +4484,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 2002,
     "PassingYear": 2004,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4495,7 +4495,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2000,
     "PassingYear": 2002,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4506,7 +4506,7 @@
     "Subject": "Science",
     "AdmissionYear": 1986,
     "PassingYear": 1990,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4517,7 +4517,7 @@
     "Subject": "Political Science",
     "AdmissionYear": -2,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4528,7 +4528,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2005,
     "PassingYear": 2007,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4539,7 +4539,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2021,
     "PassingYear": 2023,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4550,7 +4550,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1986,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4561,7 +4561,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1995,
     "PassingYear": 1997,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4572,7 +4572,7 @@
     "Subject": "None",
     "AdmissionYear": 1991,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4583,7 +4583,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2014,
     "PassingYear": 2016,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4594,7 +4594,7 @@
     "Subject": "Science",
     "AdmissionYear": 1987,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4605,7 +4605,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1988,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4616,7 +4616,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1981,
     "PassingYear": 1983,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4627,7 +4627,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4638,7 +4638,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1987,
     "PassingYear": 1991,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4649,7 +4649,7 @@
     "Subject": "Science",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4660,7 +4660,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1987,
     "PassingYear": 1991,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4671,7 +4671,7 @@
     "Subject": "English",
     "AdmissionYear": 1994,
     "PassingYear": 1996,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4682,7 +4682,7 @@
     "Subject": "Science",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4693,7 +4693,7 @@
     "Subject": "Science",
     "AdmissionYear": 1985,
     "PassingYear": 1987,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4704,7 +4704,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4715,7 +4715,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1991,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4726,7 +4726,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4737,7 +4737,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1982,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4748,7 +4748,7 @@
     "Subject": "Science",
     "AdmissionYear": 1987,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4759,7 +4759,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1991,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4770,7 +4770,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1983,
     "PassingYear": 1987,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4781,7 +4781,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2003,
     "PassingYear": 2005,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4792,7 +4792,7 @@
     "Subject": "Science",
     "AdmissionYear": -2,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4803,7 +4803,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 2012,
     "PassingYear": 2014,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4814,7 +4814,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1990,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4825,7 +4825,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4836,7 +4836,7 @@
     "Subject": "Botany",
     "AdmissionYear": 2002,
     "PassingYear": 2004,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4847,7 +4847,7 @@
     "Subject": "Economics",
     "AdmissionYear": 2000,
     "PassingYear": 2005,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4858,7 +4858,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1996,
     "PassingYear": 1998,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4869,7 +4869,7 @@
     "Subject": "Science",
     "AdmissionYear": 1979,
     "PassingYear": 1983,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4880,7 +4880,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1988,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4891,7 +4891,7 @@
     "Subject": "Management",
     "AdmissionYear": 2013,
     "PassingYear": 2018,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4902,7 +4902,7 @@
     "Subject": "None",
     "AdmissionYear": 2007,
     "PassingYear": 2011,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4913,7 +4913,7 @@
     "Subject": "Physics",
     "AdmissionYear": 2000,
     "PassingYear": 2002,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4924,7 +4924,7 @@
     "Subject": "Science",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4935,7 +4935,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 2015,
     "PassingYear": 2020,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4946,7 +4946,7 @@
     "Subject": "Economics",
     "AdmissionYear": 2015,
     "PassingYear": 2020,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4957,7 +4957,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2014,
     "PassingYear": 2019,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4968,7 +4968,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4979,7 +4979,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -4990,7 +4990,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1978,
     "PassingYear": 1982,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5001,7 +5001,7 @@
     "Subject": "Science",
     "AdmissionYear": 1970,
     "PassingYear": 1972,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5012,7 +5012,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2001,
     "PassingYear": 2003,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5023,7 +5023,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2002,
     "PassingYear": 2004,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5034,7 +5034,7 @@
     "Subject": "Science",
     "AdmissionYear": 1976,
     "PassingYear": 1978,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5045,7 +5045,7 @@
     "Subject": "Science",
     "AdmissionYear": 1978,
     "PassingYear": 1980,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5056,7 +5056,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1963,
     "PassingYear": 1967,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5067,7 +5067,7 @@
     "Subject": "Science",
     "AdmissionYear": 1964,
     "PassingYear": 1968,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5078,7 +5078,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1980,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5089,7 +5089,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2002,
     "PassingYear": 2004,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5100,7 +5100,7 @@
     "Subject": "None",
     "AdmissionYear": -4,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5111,7 +5111,7 @@
     "Subject": "Science",
     "AdmissionYear": 1986,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5122,7 +5122,7 @@
     "Subject": "Botany",
     "AdmissionYear": 1999,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5133,7 +5133,7 @@
     "Subject": "Management",
     "AdmissionYear": 2002,
     "PassingYear": 2007,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5144,7 +5144,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2008,
     "PassingYear": 2010,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5155,7 +5155,7 @@
     "Subject": "Science",
     "AdmissionYear": 2020,
     "PassingYear": 2022,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5166,7 +5166,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1995,
     "PassingYear": 1997,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5177,7 +5177,7 @@
     "Subject": "Science",
     "AdmissionYear": 1989,
     "PassingYear": 1991,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5188,7 +5188,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5199,7 +5199,7 @@
     "Subject": "Economics",
     "AdmissionYear": 2006,
     "PassingYear": 2011,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5210,7 +5210,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1995,
     "PassingYear": 1997,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5221,7 +5221,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2004,
     "PassingYear": 2009,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5232,7 +5232,7 @@
     "Subject": "Botany",
     "AdmissionYear": 2010,
     "PassingYear": 2012,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5243,7 +5243,7 @@
     "Subject": "English",
     "AdmissionYear": 2004,
     "PassingYear": 2006,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5254,7 +5254,7 @@
     "Subject": "Science",
     "AdmissionYear": 1986,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5265,7 +5265,7 @@
     "Subject": "Science",
     "AdmissionYear": 1996,
     "PassingYear": 1998,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5276,7 +5276,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1992,
     "PassingYear": 1996,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5287,7 +5287,7 @@
     "Subject": "Botany",
     "AdmissionYear": 2003,
     "PassingYear": 2008,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5298,7 +5298,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1991,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5309,7 +5309,7 @@
     "Subject": "Science",
     "AdmissionYear": 1973,
     "PassingYear": 1975,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5320,7 +5320,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5331,7 +5331,7 @@
     "Subject": "Science",
     "AdmissionYear": 1983,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5342,7 +5342,7 @@
     "Subject": "Bangla",
     "AdmissionYear": 1997,
     "PassingYear": 1999,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5353,7 +5353,7 @@
     "Subject": "Science",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5364,7 +5364,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1993,
     "PassingYear": 1997,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5375,7 +5375,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2010,
     "PassingYear": 2012,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5386,7 +5386,7 @@
     "Subject": "Geography & Environment",
     "AdmissionYear": 2017,
     "PassingYear": 2022,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5397,7 +5397,7 @@
     "Subject": "Science",
     "AdmissionYear": 1987,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5408,7 +5408,7 @@
     "Subject": "Science",
     "AdmissionYear": 1957,
     "PassingYear": 1959,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5419,7 +5419,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1985,
     "PassingYear": 1987,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5430,7 +5430,7 @@
     "Subject": "None",
     "AdmissionYear": 0,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5441,7 +5441,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5452,7 +5452,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2019,
     "PassingYear": 2021,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5463,7 +5463,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5474,7 +5474,7 @@
     "Subject": "None",
     "AdmissionYear": 2013,
     "PassingYear": 2017,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5485,7 +5485,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1988,
     "PassingYear": 1990,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5496,7 +5496,7 @@
     "Subject": "Physics",
     "AdmissionYear": 1999,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5507,7 +5507,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2014,
     "PassingYear": 2016,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5518,7 +5518,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5529,7 +5529,7 @@
     "Subject": "Humanities",
     "AdmissionYear": -2,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5540,7 +5540,7 @@
     "Subject": "None",
     "AdmissionYear": 0,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5551,7 +5551,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1984,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5562,7 +5562,7 @@
     "Subject": "None",
     "AdmissionYear": 1989,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5573,7 +5573,7 @@
     "Subject": "Science",
     "AdmissionYear": 1973,
     "PassingYear": 1975,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5584,7 +5584,7 @@
     "Subject": "Science",
     "AdmissionYear": 1997,
     "PassingYear": 1999,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5595,7 +5595,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2005,
     "PassingYear": 2009,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5606,7 +5606,7 @@
     "Subject": "Science",
     "AdmissionYear": 1996,
     "PassingYear": 1998,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5617,7 +5617,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1995,
     "PassingYear": 1997,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5628,7 +5628,7 @@
     "Subject": "Physics",
     "AdmissionYear": 2002,
     "PassingYear": 2004,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5639,7 +5639,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1998,
     "PassingYear": 2002,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5650,7 +5650,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2003,
     "PassingYear": 2005,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5661,7 +5661,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1987,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5672,7 +5672,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1998,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5683,7 +5683,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1986,
     "PassingYear": 1990,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5694,7 +5694,7 @@
     "Subject": "Botany",
     "AdmissionYear": 2017,
     "PassingYear": 2022,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5705,7 +5705,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 1998,
     "PassingYear": 2003,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5716,7 +5716,7 @@
     "Subject": "Botany",
     "AdmissionYear": 2007,
     "PassingYear": 2009,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5727,7 +5727,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1996,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5738,7 +5738,7 @@
     "Subject": "Science",
     "AdmissionYear": 1992,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5749,7 +5749,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1982,
     "PassingYear": 1986,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5760,7 +5760,7 @@
     "Subject": "Science",
     "AdmissionYear": 1992,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5771,7 +5771,7 @@
     "Subject": "Physics",
     "AdmissionYear": 1992,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5782,7 +5782,7 @@
     "Subject": "None",
     "AdmissionYear": 0,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5793,7 +5793,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1971,
     "PassingYear": 1973,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5804,7 +5804,7 @@
     "Subject": "None",
     "AdmissionYear": 0,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5815,7 +5815,7 @@
     "Subject": "Science",
     "AdmissionYear": 1983,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5826,7 +5826,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1984,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5837,7 +5837,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1986,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5848,7 +5848,7 @@
     "Subject": "Science",
     "AdmissionYear": 1975,
     "PassingYear": 1979,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5859,7 +5859,7 @@
     "Subject": "Science",
     "AdmissionYear": 1986,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5870,7 +5870,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 1997,
     "PassingYear": 1999,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5881,7 +5881,7 @@
     "Subject": "Science",
     "AdmissionYear": 1965,
     "PassingYear": 1967,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5892,7 +5892,7 @@
     "Subject": "None",
     "AdmissionYear": 1998,
     "PassingYear": 2002,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5903,7 +5903,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1973,
     "PassingYear": 1977,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5914,7 +5914,7 @@
     "Subject": "Economics",
     "AdmissionYear": 2002,
     "PassingYear": 2007,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5925,7 +5925,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2013,
     "PassingYear": 2017,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5936,7 +5936,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2007,
     "PassingYear": 2009,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5947,7 +5947,7 @@
     "Subject": "Science",
     "AdmissionYear": 1981,
     "PassingYear": 1985,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5958,7 +5958,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5969,7 +5969,7 @@
     "Subject": "Political Science",
     "AdmissionYear": 2005,
     "PassingYear": 2007,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5980,7 +5980,7 @@
     "Subject": "Accounting",
     "AdmissionYear": 2008,
     "PassingYear": 2010,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -5991,7 +5991,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1990,
     "PassingYear": 1994,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6002,7 +6002,7 @@
     "Subject": "Science",
     "AdmissionYear": 1965,
     "PassingYear": 1967,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6013,7 +6013,7 @@
     "Subject": "Science",
     "AdmissionYear": 1985,
     "PassingYear": 1987,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6024,7 +6024,7 @@
     "Subject": "Science",
     "AdmissionYear": 1986,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6035,7 +6035,7 @@
     "Subject": "Science",
     "AdmissionYear": 2017,
     "PassingYear": 2019,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6046,7 +6046,7 @@
     "Subject": "Science",
     "AdmissionYear": 2000,
     "PassingYear": 2002,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6057,7 +6057,7 @@
     "Subject": "None",
     "AdmissionYear": 1996,
     "PassingYear": 2000,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6068,7 +6068,7 @@
     "Subject": "None",
     "AdmissionYear": 2012,
     "PassingYear": 2016,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6079,7 +6079,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1988,
     "PassingYear": 1992,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6090,7 +6090,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1986,
     "PassingYear": 1990,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6101,7 +6101,7 @@
     "Subject": "Science",
     "AdmissionYear": 1974,
     "PassingYear": 1976,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6112,7 +6112,7 @@
     "Subject": "None",
     "AdmissionYear": 2006,
     "PassingYear": 2010,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6123,7 +6123,7 @@
     "Subject": "None",
     "AdmissionYear": -4,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6134,7 +6134,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 2010,
     "PassingYear": 2012,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6145,7 +6145,7 @@
     "Subject": "Science",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6156,7 +6156,7 @@
     "Subject": "Science",
     "AdmissionYear": 2002,
     "PassingYear": 2004,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6167,7 +6167,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1982,
     "PassingYear": 1984,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6178,7 +6178,7 @@
     "Subject": "Science",
     "AdmissionYear": 1993,
     "PassingYear": 1995,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6189,7 +6189,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1985,
     "PassingYear": 1987,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6200,7 +6200,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1976,
     "PassingYear": 1980,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6211,7 +6211,7 @@
     "Subject": "Science",
     "AdmissionYear": 1973,
     "PassingYear": 1975,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6222,7 +6222,7 @@
     "Subject": "None",
     "AdmissionYear": 2001,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6233,7 +6233,7 @@
     "Subject": "Zoology",
     "AdmissionYear": 1999,
     "PassingYear": 2004,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6244,7 +6244,7 @@
     "Subject": "None",
     "AdmissionYear": 0,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6255,7 +6255,7 @@
     "Subject": "Business Studies",
     "AdmissionYear": 1991,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6266,7 +6266,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1986,
     "PassingYear": 1988,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6277,7 +6277,7 @@
     "Subject": "Humanities",
     "AdmissionYear": -2,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6288,7 +6288,7 @@
     "Subject": "Science",
     "AdmissionYear": 1987,
     "PassingYear": 1989,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6299,7 +6299,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 2000,
     "PassingYear": 2002,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6310,7 +6310,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2012,
     "PassingYear": 2014,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6321,7 +6321,7 @@
     "Subject": "Science",
     "AdmissionYear": 1997,
     "PassingYear": 1999,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6332,7 +6332,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1991,
     "PassingYear": 1993,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6343,7 +6343,7 @@
     "Subject": "Botany",
     "AdmissionYear": 2003,
     "PassingYear": 2005,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6354,7 +6354,7 @@
     "Subject": "None",
     "AdmissionYear": 0,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6365,7 +6365,7 @@
     "Subject": "Social Work",
     "AdmissionYear": 2009,
     "PassingYear": 2011,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6376,7 +6376,7 @@
     "Subject": "None",
     "AdmissionYear": 0,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6387,7 +6387,7 @@
     "Subject": "None",
     "AdmissionYear": 0,
     "PassingYear": 0,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6398,7 +6398,7 @@
     "Subject": "Science",
     "AdmissionYear": 1999,
     "PassingYear": 2001,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   },
   {
@@ -6409,7 +6409,7 @@
     "Subject": "Humanities",
     "AdmissionYear": 1972,
     "PassingYear": 1974,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": ""
   }
 ]

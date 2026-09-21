@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace GHCAA.Application.DTOs
 {
@@ -27,7 +28,22 @@ namespace GHCAA.Application.DTOs
         [Range(1900, 2100, ErrorMessage = "Passing year must be between 1900 and 2100.")]
         public int? PassingYear { get; set; }
 
-        public bool IsGHC { get; set; }
+        public bool IsOrgProfile { get; set; }
+
+        // Accept older clients while they move to IsOrgProfile.
+        [JsonPropertyName("isGHC")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? LegacyIsGhc
+        {
+            get => null;
+            set
+            {
+                if (value.HasValue)
+                {
+                    IsOrgProfile = value.Value;
+                }
+            }
+        }
 
         [MaxLength(100, ErrorMessage = "Result must not exceed 100 characters.")]
         public string? Result { get; set; }

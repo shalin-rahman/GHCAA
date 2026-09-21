@@ -215,7 +215,7 @@
                                         </div>
                                         <div class="input-group full py-2">
                                             <label class="premium-checkbox-label">
-                                                <input type="checkbox" [(ngModel)]="item.isGHC" [name]="'ghcCh_' + $index"
+                                                <input type="checkbox" [(ngModel)]="item.isOrgProfile" [name]="'ghcCh_' + $index"
                                                     [disabled]="$index === 0">
                                                 <span class="checkmark"></span>
                                                 <span class="label-text">Was this achieved at {{ orgConfig.config()?.branding?.institutionName || 'the configured institution' }}?</span>

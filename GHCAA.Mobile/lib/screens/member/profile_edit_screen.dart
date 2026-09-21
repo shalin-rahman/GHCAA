@@ -82,7 +82,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     if (history is List && history.isNotEmpty) {
       for (var i = 1; i < history.length; i++) {
         final record = Map<String, dynamic>.from(history[i] as Map);
-        record['isGHC'] = false;
+        record['isOrgProfile'] = false;
         history[i] = record;
       }
 
@@ -142,7 +142,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         if (deg != null && deg.isNotEmpty) row['degree'] = deg;
         if (sub != null && sub.isNotEmpty) row['subject'] = sub;
         row['institutionName'] = ref.read(orgBrandingProvider).institutionName;
-        row['isGHC'] = true;
+        row['isOrgProfile'] = true;
         // Ensure admissionYear is sensible if missing
         if (row['admissionYear'] == null && py != null && py > 1902) {
           row['admissionYear'] = py - 2;
@@ -158,12 +158,12 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
           'degree': deg,
           'subject': sub,
           'passingYear': py,
-          'isGHC': true,
+          'isOrgProfile': true,
           if (py > 1902) 'admissionYear': py - 2,
         });
       }
       for (var i = 1; i < acad.length; i++) {
-        acad[i]['isGHC'] = false;
+        acad[i]['isOrgProfile'] = false;
       }
       out['academicHistory'] = acad;
     }
@@ -463,7 +463,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                           'degree': '',
                           'subject': '',
                           'passingYear': DateTime.now().year,
-                          'isGHC': (_data['academicHistory'] as List).isEmpty
+                          'isOrgProfile': (_data['academicHistory'] as List).isEmpty
                               ? true
                               : false
                         });

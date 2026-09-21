@@ -74,9 +74,9 @@ namespace GHCAA.Infrastructure.Services
                 var row = i + 2;
 
                 // Academics
-                var ghc = m.AcademicHistory.FirstOrDefault(a => a.IsGHC);
+                var ghc = m.AcademicHistory.FirstOrDefault(a => a.IsOrgProfile);
                 var hsc = m.AcademicHistory.FirstOrDefault(a => a.Degree == "HSC");
-                var highest = m.AcademicHistory.FirstOrDefault(a => !a.IsGHC && a.Degree != "HSC")
+                var highest = m.AcademicHistory.FirstOrDefault(a => !a.IsOrgProfile && a.Degree != "HSC")
                             ?? m.AcademicHistory.OrderByDescending(x => x.PassingYear).FirstOrDefault();
 
                 // Professional
@@ -521,7 +521,7 @@ namespace GHCAA.Infrastructure.Services
                 nameof(Member.FatherName) => member.FatherName,
                 nameof(Member.MotherName) => member.MotherName,
                 nameof(Member.DateOfBirth) => member.DateOfBirth.ToString("yyyy-MM-dd"),
-                "GHCLastCertificatePassingYear" => member.AcademicHistory.FirstOrDefault(a => a.IsGHC)?.PassingYear.ToString(),
+                "GHCLastCertificatePassingYear" => member.AcademicHistory.FirstOrDefault(a => a.IsOrgProfile)?.PassingYear.ToString(),
                 nameof(Member.MembershipNumber) => member.MembershipNumber,
                 "Designation" => member.ProfessionalHistory.FirstOrDefault(p => p.IsCurrent)?.Designation,
                 "ProfessionalSector" => member.ProfessionalHistory.FirstOrDefault(p => p.IsCurrent)?.Sector,
@@ -530,11 +530,11 @@ namespace GHCAA.Infrastructure.Services
                 nameof(Member.EmergencyContactName) => member.EmergencyContactName,
                 nameof(Member.EmergencyContactRelation) => member.EmergencyContactRelation,
                 nameof(Member.EmergencyContactPhone) => member.EmergencyContactPhone,
-                "HighestCertificate" => member.AcademicHistory.FirstOrDefault(a => !a.IsGHC)?.Degree,
-                "HighestCertificateGroup" => member.AcademicHistory.FirstOrDefault(a => !a.IsGHC)?.Subject,
-                "GHCLastCertificate" => member.AcademicHistory.FirstOrDefault(a => a.IsGHC)?.Degree,
-                "HSCAdmissionYear" => member.AcademicHistory.FirstOrDefault(a => !a.IsGHC && a.Degree == "HSC")?.AdmissionYear.ToString(),
-                "GHCAdmissionYear" => member.AcademicHistory.FirstOrDefault(a => a.IsGHC)?.AdmissionYear.ToString(),
+                "HighestCertificate" => member.AcademicHistory.FirstOrDefault(a => !a.IsOrgProfile)?.Degree,
+                "HighestCertificateGroup" => member.AcademicHistory.FirstOrDefault(a => !a.IsOrgProfile)?.Subject,
+                "GHCLastCertificate" => member.AcademicHistory.FirstOrDefault(a => a.IsOrgProfile)?.Degree,
+                "HSCAdmissionYear" => member.AcademicHistory.FirstOrDefault(a => !a.IsOrgProfile && a.Degree == "HSC")?.AdmissionYear.ToString(),
+                "GHCAdmissionYear" => member.AcademicHistory.FirstOrDefault(a => a.IsOrgProfile)?.AdmissionYear.ToString(),
                 nameof(Member.TShirtSize) => member.TShirtSize,
                 nameof(Member.Category) => member.Category.ToString(),
                 _ => null
@@ -597,12 +597,12 @@ namespace GHCAA.Infrastructure.Services
 
         private AcademicRecord GetGhcRecord(Member member, string institutionName)
         {
-            var record = member.AcademicHistory.FirstOrDefault(a => a.IsGHC);
+            var record = member.AcademicHistory.FirstOrDefault(a => a.IsOrgProfile);
             if (record == null)
             {
                 record = new AcademicRecord
                 {
-                    IsGHC = true,
+                    IsOrgProfile = true,
                     InstitutionName = institutionName,
                     Degree = "HSC",
                     Subject = "None"
@@ -617,7 +617,7 @@ namespace GHCAA.Infrastructure.Services
             var record = member.AcademicHistory.FirstOrDefault(a => a.Degree == "HSC");
             if (record == null)
             {
-                record = new AcademicRecord { IsGHC = false, InstitutionName = "Unknown", Degree = "HSC", Subject = "None" };
+                record = new AcademicRecord { IsOrgProfile = false, InstitutionName = "Unknown", Degree = "HSC", Subject = "None" };
                 member.AcademicHistory.Add(record);
             }
             return record;
@@ -626,10 +626,10 @@ namespace GHCAA.Infrastructure.Services
         private AcademicRecord GetHighestRecord(Member member)
         {
             // If they are updating highest, we might just assume it's a non-GHC one or create new
-            var record = member.AcademicHistory.FirstOrDefault(a => !a.IsGHC && a.Degree != "HSC");
+            var record = member.AcademicHistory.FirstOrDefault(a => !a.IsOrgProfile && a.Degree != "HSC");
             if (record == null)
             {
-                record = new AcademicRecord { IsGHC = false, InstitutionName = "Unknown", Degree = "Other", Subject = "None" };
+                record = new AcademicRecord { IsOrgProfile = false, InstitutionName = "Unknown", Degree = "Other", Subject = "None" };
                 member.AcademicHistory.Add(record);
             }
             return record;

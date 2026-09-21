@@ -13,7 +13,7 @@ class AcademicRecord {
   final String degree;
   final String subject;
   final int passingYear;
-  final bool isGHC;
+  final bool isOrgProfile;
   final Map<String, dynamic> raw;
 
   AcademicRecord({
@@ -21,7 +21,7 @@ class AcademicRecord {
     required this.degree,
     required this.subject,
     required this.passingYear,
-    this.isGHC = false,
+    this.isOrgProfile = false,
     required this.raw,
   });
 
@@ -31,7 +31,7 @@ class AcademicRecord {
       degree: json['degree'] as String,
       subject: json['subject'] as String,
       passingYear: json['passingYear'] as int,
-      isGHC: json['isGHC'] as bool? ?? false,
+      isOrgProfile: json['isOrgProfile'] as bool? ?? false,
       raw: json,
     );
   }

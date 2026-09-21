@@ -7948,7 +7948,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "isGHC": {
+          "isOrgProfile": {
             "type": "boolean"
           },
           "result": {
@@ -8006,7 +8006,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "isGHC": {
+          "isOrgProfile": {
             "type": "boolean"
           },
           "result": {

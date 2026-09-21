@@ -298,6 +298,8 @@ system being "intuitive".
 | NFR-R2 | A daily backup of the production database shall be taken and its restoration verified at least quarterly. Criterion: restoration drill recorded in §10.8. |
 | NFR-R3 | No single user action shall be capable of destroying a membership or financial record; archival deletion per FR-44 shall be the only deletion available through the interface. |
 | NFR-R4 | A failed external dependency, being mail delivery or file storage, shall degrade the affected function only and shall not prevent authentication or read access. |
+| NFR-R5 | A vote cast by an eligible voter shall be recorded at most once, even where the casting request is submitted more than once for the same voter and election. Criterion: the vote is only ever marked cast by a single conditional database update scoped to an unvoted voter roll row, so a second submission for the same voter finds no row left to update; verified in `ElectionServiceTests.CastVoteAsync_RejectsReplayAfterTheFirstVote`, which exercises a first-then-second sequential resubmission rather than two literally simultaneous requests. |
+| NFR-R6 | The mobile client shall retain a rotating on-device log of recent API errors and notable app events, so that a crash or failed request can be diagnosed from the device that produced it. Criterion: the log is capped at 256 KB, dropping the oldest half of its content once the cap is crossed rather than truncating silently, and its tail is attached to the in-app error report sent to the administrator. |
 
 **Security** *(Functionality, security sub-characteristic)*
 
@@ -333,7 +335,7 @@ system being "intuitive".
 
 Each scenario is stated in the six-part form of Bass, Clements and Kazman: source, stimulus,
 artefact, environment, response, response measure [13]. These are the scenarios carried into the
-utility tree of Figure 3.10 and into the design verification of §6.14. Ten are given here; the
+utility tree of Figure 3.10 and into the design verification of §6.14. Eleven are given here; the
 remainder are in `docs/SRS.md`.
 
 | ID | NFR | Source | Stimulus | Artefact | Environment | Response | Response measure |
@@ -348,6 +350,7 @@ remainder are in `docs/SRS.md`.
 | QAS-08 | NFR-F2 | Examiner | Asks which code enforces the constitutional restriction on who may vote | Source and specification | Review | A single traced location is produced | Trace from Art. III §B to DC-03 to FR-36 to a named test |
 | QAS-09 | NFR-R2 | Maintainer | Loses the production database | Backup and restore procedure | Disaster | Service restored from backup | ≤ 4 hours; ≤ 24 hours of data lost |
 | QAS-10 | NFR-U1 | Member using a screen reader | Completes registration | Web client | Assistive technology | Registration completed unaided | No level AA violation on the registration route |
+| QAS-11 | NFR-R5 | Voter | Resubmits a vote for an election already voted in | Election API, voter roll | Production | Second submission is rejected; the first vote stands unchanged | 0 ballots with more than one recorded vote per voter per election |
 
 QAS-08 is not a conventional quality scenario and is included deliberately. Auditability of the rule
 trace is treated here as a first-class quality attribute, because it is the property that
@@ -614,9 +617,9 @@ unknown at specification time, which was itself one of the problems the project 
 
 ## 3.13 Summary
 
-Fifty-four functional requirements, thirty-four non-functional requirements across the eight ISO/IEC
+Fifty-four functional requirements, thirty-six non-functional requirements across the eight ISO/IEC
 25010 characteristics, sixteen domain constraints traced to constitutional and electoral sources, and
-ten quality-attribute scenarios carried forward for architectural evaluation. Thirty-eight
+eleven quality-attribute scenarios carried forward for architectural evaluation. Thirty-eight
 requirements are Must, of which a substantial proportion are constitutionally mandated and were therefore not open to
 negotiation. Three stakeholder conflicts were resolved and recorded, in each case against the
 convenient option and in favour of the constitution or the member. The line the specification draws
@@ -950,7 +953,7 @@ flowchart LR
     R[Requirements]
     R --> F["Functionality<br/>FR-01…FR-54, NFR-F1…F2, NFR-S1…S8"]
     R --> Us["Usability<br/>NFR-U1…U5"]
-    R --> Re["Reliability<br/>NFR-R1…R4"]
+    R --> Re["Reliability<br/>NFR-R1…R6"]
     R --> Pe["Performance<br/>NFR-P1…P5"]
     R --> Su["Supportability<br/>NFR-M1…M4, NFR-C1…C3, NFR-Po1…Po3"]
     R --> Plus["+ Constraints"]

@@ -57,8 +57,8 @@ describe('Profile Component', () => {
     describe('institutional academic record protection', () => {
         beforeEach(() => {
             component.profile.academicHistory = [
-                { institutionName: 'Govt. Haraganga College', isGHC: true },
-                { institutionName: 'Govt. Haraganga College', isGHC: false }
+                { institutionName: 'Govt. Haraganga College', isOrgProfile: true },
+                { institutionName: 'Govt. Haraganga College', isOrgProfile: false }
             ];
             component.orgConfig.config.set({
                 branding: { institutionName: 'Govt. Haraganga College' }

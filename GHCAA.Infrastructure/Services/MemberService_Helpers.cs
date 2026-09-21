@@ -36,7 +36,7 @@ namespace GHCAA.Infrastructure.Services
             }
 
             if (academicHistory.Skip(1).Any(record =>
-                record.IsGHC ||
+                record.IsOrgProfile ||
                 string.Equals(record.InstitutionName?.Trim(), institutionName, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new InvalidOperationException(
@@ -44,9 +44,9 @@ namespace GHCAA.Infrastructure.Services
             }
 
             primary.InstitutionName = institutionName;
-            primary.IsGHC = true;
+            primary.IsOrgProfile = true;
             foreach (var record in academicHistory.Skip(1))
-                record.IsGHC = false;
+                record.IsOrgProfile = false;
         }
 
         private string? MaskPii(string? value, int visibleStart = 4, int visibleEnd = 2)
@@ -79,7 +79,7 @@ namespace GHCAA.Infrastructure.Services
             if (member.BloodGroup != Enums.BloodGroup.Unknown) completedFields++;
             if (!string.IsNullOrEmpty(member.PhotoPath)) completedFields++;
 
-            var hasGhc = member.AcademicHistory?.Any(a => a.IsGHC && a.PassingYear > 0) ?? false;
+            var hasGhc = member.AcademicHistory?.Any(a => a.IsOrgProfile && a.PassingYear > 0) ?? false;
             if (hasGhc) completedFields++;
 
             var hasProfessional = member.ProfessionalHistory?.Any() ?? false;

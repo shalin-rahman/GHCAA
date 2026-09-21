@@ -74,7 +74,7 @@ public class FinancialServiceTests : TestBase
             EmergencyContactName = "E",
             EmergencyContactRelation = "R",
             EmergencyContactPhone = "0",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsOrgProfile = true } }
         };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();

@@ -1,6 +1,7 @@
 using FluentValidation.TestHelper;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Validators;
+using System.Text.Json;
 
 namespace GHCAA.Tests.Validators;
 
@@ -35,7 +36,7 @@ public class MemberRegistrationValidatorTests
             EmergencyContactPhone = "01812345678",
             AcademicHistory = new System.Collections.Generic.List<AcademicRecordDto>
             {
-                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true }
+                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsOrgProfile = true }
             },
             HasAcceptedTerms = true,
             HasAcceptedGdpr = true,
@@ -70,7 +71,7 @@ public class MemberRegistrationValidatorTests
     public void AcademicHistory_WhenFirstRecordIsNotInstitutional_ShouldHaveValidationError()
     {
         var dto = CreateValidDto();
-        dto.AcademicHistory[0].IsGHC = false;
+        dto.AcademicHistory[0].IsOrgProfile = false;
         dto.AcademicHistory[0].InstitutionName = "Other College";
 
         var result = _validator.TestValidate(dto);
@@ -90,10 +91,28 @@ public class MemberRegistrationValidatorTests
     }
 
     [Test]
+    public void AcademicRecordDto_WhenLegacyJsonFieldIsProvided_ShouldMapToCanonicalField()
+    {
+        var dto = JsonSerializer.Deserialize<AcademicRecordDto>(
+            """{"institutionName":"Govt. Haraganga College","degree":"HSC","subject":"Science","passingYear":2005,"isGHC":true}""");
+
+        Assert.That(dto, Is.Not.Null);
+        Assert.That(dto!.IsOrgProfile, Is.True);
+
+        var response = JsonSerializer.Serialize(dto, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+
+        Assert.That(response, Does.Contain("\"isOrgProfile\":true"));
+        Assert.That(response, Does.Not.Contain("isGHC"));
+    }
+
+    [Test]
     public void AcademicHistory_WhenFirstRecordIsNotInstitutionalEvenWithConfiguredName_ShouldHaveValidationError()
     {
         var dto = CreateValidDto();
-        dto.AcademicHistory[0].IsGHC = false;
+        dto.AcademicHistory[0].IsOrgProfile = false;
 
         var result = _validator.TestValidate(dto);
 

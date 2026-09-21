@@ -62,7 +62,7 @@ namespace GHCAA.Infrastructure.Services
             }
 
             if (filter.PassingYear.HasValue)
-                query = query.Where(m => m.AcademicHistory.Any(a => a.IsGHC && a.PassingYear == filter.PassingYear.Value));
+                query = query.Where(m => m.AcademicHistory.Any(a => a.IsOrgProfile && a.PassingYear == filter.PassingYear.Value));
 
             if (!string.IsNullOrEmpty(filter.BloodGroup))
                 query = query.Where(m => m.BloodGroup.ToString() == filter.BloodGroup);
@@ -242,7 +242,7 @@ namespace GHCAA.Infrastructure.Services
                     Subject = a.Subject,
                     AdmissionYear = a.AdmissionYear,
                     PassingYear = a.PassingYear,
-                    IsGHC = a.IsGHC,
+                    IsOrgProfile = a.IsOrgProfile,
                     Result = a.Result
                 }).ToList(),
                 ProfessionalHistory = m.ProfessionalHistory.Select(p => new ProfessionalRecordDto
@@ -270,9 +270,9 @@ namespace GHCAA.Infrastructure.Services
 
                 // Summary Data for easier display
                 CategoryBadge = m.Category.ToString(),
-                GHCLastCertificatePassingYear = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.PassingYear,
-                GHCLastCertificate = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.Degree,
-                GHCLastCertificateSubject = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.Subject,
+                GHCLastCertificatePassingYear = m.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile)?.PassingYear,
+                GHCLastCertificate = m.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile)?.Degree,
+                GHCLastCertificateSubject = m.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile)?.Subject,
                 Designation = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Designation,
                 OrganizationName = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.OrganizationName,
                 ProfessionalSector = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Sector,
@@ -381,7 +381,7 @@ namespace GHCAA.Infrastructure.Services
             };
 
             // Enhanced Summary Data from normalized tables
-            var ghcRecord = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC);
+            var ghcRecord = m.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile);
             if (ghcRecord != null)
             {
                 dto.GHCLastCertificatePassingYear = ghcRecord.PassingYear;

@@ -40,7 +40,7 @@ namespace GHCAA.Application.Validators
 
             RuleFor(x => x.AcademicHistory).NotEmpty().WithMessage("At least one academic record is required");
             RuleFor(x => x.AcademicHistory)
-                .Must(history => history != null && history.Count > 0 && history[0].IsGHC)
+                .Must(history => history != null && history.Count > 0 && history[0].IsOrgProfile)
                 .WithMessage("The first academic record must be the institutional record.");
             RuleForEach(x => x.AcademicHistory).ChildRules(academic =>
             {

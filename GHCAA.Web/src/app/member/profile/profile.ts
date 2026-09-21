@@ -114,7 +114,7 @@ export class Profile implements OnInit {
             degree: 'HSC',
             subject: 'None',
             passingYear: new Date().getFullYear(),
-            isGHC: false
+            isOrgProfile: false
         });
     }
 
@@ -202,7 +202,7 @@ export class Profile implements OnInit {
 
     getGHCHistory() {
         if (!this.profile.academicHistory) return null;
-        const ghc = this.profile.academicHistory.filter((a: any) => a.isGHC);
+        const ghc = this.profile.academicHistory.filter((a: any) => a.isOrgProfile);
         if (ghc.length === 0) return null;
         return ghc.sort((a: any, b: any) => (b.passingYear || 0) - (a.passingYear || 0))[0];
     }

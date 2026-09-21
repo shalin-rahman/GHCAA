@@ -154,7 +154,7 @@ namespace GHCAA.Tests.Services
                         Subject = a.Subject,
                         AdmissionYear = a.AdmissionYear,
                         PassingYear = a.PassingYear,
-                        IsGHC = a.IsGHC,
+                        IsOrgProfile = a.IsOrgProfile,
                         Result = a.Result
                     })
                     .ToList()

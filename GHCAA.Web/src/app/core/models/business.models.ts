@@ -467,7 +467,7 @@ export interface AcademicRecord {
     subject: string;
     admissionYear?: number;
     passingYear: number;
-    isGHC: boolean;
+    isOrgProfile: boolean;
     result?: string;
     certificatePath?: string;
 }

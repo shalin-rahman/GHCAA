@@ -575,7 +575,7 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
 > ballot and must not be overloaded into one.
 >
 > **Evidence, people.** `Member` has no batch/session/graduation field at all — cohort identity
-> lives on `AcademicRecord` (`AdmissionYear`, `PassingYear`, `IsGHC`, `Degree`, `Subject`), which
+> lives on `AcademicRecord` (`AdmissionYear`, `PassingYear`, `IsOrgProfile`, `Degree`, `Subject`), which
 > is where every batch query in this Area must read from. There is no obituary, chapter, or
 > oral-history model, and no i18n: `GHCAA.Web/package.json` carries neither `@angular/localize`
 > nor `ngx-translate`, and every string in the app is hardcoded English in a template.
@@ -645,7 +645,7 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
 
 37.4 [TODO] **Priority: P3.** **Batch cohorts and reunions as first-class objects.** Today a batch exists only as `AcademicRecord.PassingYear` — there is no cohort page, no cohort representative and no reunion.
   - **Models.** `BatchCohort` (`Id`, `PassingYear`, `Title`, `Story?`, `CoverImagePath?`, `RepresentativeMemberId?`, `IsActive`); `Reunion` (`Id`, `BatchCohortId?` — null means an all-alumni reunion, `AlumniEventId`, `Theme`, `SouvenirUrl?`) built **on top of** the existing `AlumniEvent` + `EventRegistration` + `EventBudget` stack rather than beside it — a reunion is an event with cohort identity, and duplicating registration logic would be the mistake here.
-  - **Membership is derived, not stored.** Cohort membership = `AcademicRecord` rows with `IsGHC == true` and the matching `PassingYear`. Do not add a `BatchYear` column to `Member`; it would immediately disagree with `AcademicRecord` for anyone holding two GHC records.
+  - **Membership is derived, not stored.** Cohort membership = `AcademicRecord` rows with `IsOrgProfile == true` and the matching `PassingYear`. Do not add a `BatchYear` column to `Member`; it would immediately disagree with `AcademicRecord` for anyone holding two GHC records.
   - **Ledger tie-in.** Reunion fees collected through `EventRegistration` post as `FinancialCategory.ReunionFee`, finally giving that enum value a producer.
   - **Service/API/UI.** `IBatchService` + `BatchService`; `BatchesController` at `api/batches` with `GET api/batches/public` and `GET api/batches/{year}` `[AllowAnonymous]`. Flag `enableReunions`. Public `/batches` (year grid) + `/batches/:year`, member `portal/my-batch`, admin `admin/batches`. New `API_ENDPOINTS.BATCHES` block.
   - **Tests.** NUnit: a member with two GHC `AcademicRecord` rows appears in both cohorts; non-GHC records excluded. Vitest: year-grid grouping, empty-cohort `EmptyStateWidget` path.
@@ -1286,3 +1286,32 @@ whether removing the committed-migration-data blocker for white-label second-ins
 in scope, or whether white-label stays a single-institution profile-pack mechanism
 (`implementation-inventory.md` lines 135–136). No item in this Work Package should assume an answer
 until the project owner decides.
+
+---
+
+# Work Package 85 — NFR catalogue currency for vote integrity and mobile diagnostics
+
+<!-- wbs: component=C17 start=2026-09-21 end=2026-09-21 after=12,37 -->
+
+Raised while grounding a book-content request in the actual codebase. Two features were built and
+verified but never carried into the Chapter 3 NFR catalogue: the election engine's atomic vote-cast
+update (Work Package 37) and the mobile client's rotating on-device diagnostic log (Work Package 12.3).
+The requirements model had drifted behind delivered behaviour.
+
+85.1 [DONE] **Priority: P2 | Depends on: none.** Add NFR-R5 (vote-cast integrity) and NFR-R6 (mobile
+diagnostic log capture) to `docs/book/03-requirements.md`'s Reliability subsection, sourced from
+`ElectionService.CastVoteAsync`'s single conditional `ExecuteUpdateAsync` and
+`LogCaptureService`'s 256 KB oldest-half-drop rotation. NFR-R5's wording states the verified scope
+precisely: the atomicity of the conditional update is the actual guarantee; the existing test
+(`CastVoteAsync_RejectsReplayAfterTheFirstVote`) exercises sequential resubmission, not two literally
+simultaneous requests, and the entry does not claim otherwise. **Acceptance:** both rows added; done.
+
+85.2 [DONE] **Priority: P3 | Depends on: 85.1.** Update Figure 3.11's classification-tree Reliability
+range label, add QAS-11 for NFR-R5 to the quality-attribute scenario table, and update §3.13's stated
+NFR and QAS totals so the summary counts match the catalogue. **Acceptance:** figure label, QAS-11 row,
+and totals updated in the same edit as 85.1; done.
+
+85.3 [DONE] **Priority: P3 | Depends on: 85.1.** Append `"85"` to Work Package C17's tracked area list
+in `docs/book/build/wbs.py`. **Acceptance:** done; `python docs/book/build/build.py --pdf --strict` was
+run afterward and reported no new drift beyond the pre-existing stale commit/work-package counts in
+04-methodology.md, 07-implementation.md and 11-project-management.md, which predate this change.

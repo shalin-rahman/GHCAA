@@ -92,7 +92,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactPhone = "01812345678",
             AcademicHistory = new List<AcademicRecordDto>
             {
-                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true }
+                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsOrgProfile = true }
             },
             PaymentMethodId = 1,
             TransactionId = "TEST-TXN-123"
@@ -153,7 +153,7 @@ public class MemberServiceTests : TestBase
     {
         var dto = CreateValidDto();
         dto.AcademicHistory[0].InstitutionName = "Other College";
-        dto.AcademicHistory[0].IsGHC = false;
+        dto.AcademicHistory[0].IsOrgProfile = false;
         dto.PaymentMethodId = (await _context.PaymentConfigurations
             .FirstAsync(x => x.Method == Enums.PaymentMethod.BKash)).Id;
 
@@ -187,7 +187,7 @@ public class MemberServiceTests : TestBase
             Degree = "Bachelor",
             Subject = "Science",
             PassingYear = 2010,
-            IsGHC = false
+            IsOrgProfile = false
         });
         dto.PaymentMethodId = (await _context.PaymentConfigurations
             .FirstAsync(x => x.Method == Enums.PaymentMethod.BKash)).Id;
@@ -501,7 +501,7 @@ public class MemberServiceTests : TestBase
         // as the dashboard "Complete Your Profile" checklist (Identity & Photo / GHC History /
         // Professional Info / Registration Payment), each worth 25%.
         var member = await CreateAndSaveTestMemberAsync("Checklist Member", "checklist@example.com", "01712345600", "1234500000");
-        // Test member factory seeds one IsGHC academic record already, so GHC History (25%) is done.
+        // Test member factory seeds one IsOrgProfile academic record already, so GHC History (25%) is done.
         member.PhotoPath = null; // Identity & Photo requires a photo -> not done
         await _context.SaveChangesAsync();
 
@@ -561,7 +561,7 @@ public class MemberServiceTests : TestBase
             PhotoPath = "uploads/members/1/photo/new.jpg",
             AcademicHistory = new List<AcademicRecordDto>
             {
-                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "Bachelor", Subject = "Science", PassingYear = 2007, IsGHC = true }
+                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "Bachelor", Subject = "Science", PassingYear = 2007, IsOrgProfile = true }
             },
             ProfessionalHistory = new List<ProfessionalRecordDto>
             {
@@ -808,7 +808,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } },
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsOrgProfile = true } },
             IsProfileComplete = true,
             PhotoPath = "test.jpg",
             DateOfBirth = new DateTime(1990, 1, 1),
@@ -830,7 +830,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } },
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsOrgProfile = true } },
             IsProfileComplete = true,
             PhotoPath = "test.jpg",
             DateOfBirth = new DateTime(1990, 1, 1),
@@ -879,7 +879,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "E",
             EmergencyContactRelation = "R",
             EmergencyContactPhone = "0",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } },
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsOrgProfile = true } },
             IsProfileComplete = true,
             PhotoPath = "test.jpg",
             DateOfBirth = new DateTime(1990, 1, 1),
@@ -901,7 +901,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "E",
             EmergencyContactRelation = "R",
             EmergencyContactPhone = "0",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2008, IsGHC = true } },
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2008, IsOrgProfile = true } },
             IsProfileComplete = true,
             PhotoPath = "test.jpg",
             DateOfBirth = new DateTime(1990, 1, 1),
@@ -946,7 +946,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "E",
             EmergencyContactRelation = "R",
             EmergencyContactPhone = "0",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } },
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsOrgProfile = true } },
             IsProfileComplete = true,
             PhotoPath = "test.jpg",
             DateOfBirth = new DateTime(1990, 1, 1),
@@ -987,7 +987,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "E",
             EmergencyContactRelation = "R",
             EmergencyContactPhone = "0",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } }
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsOrgProfile = true } }
         };
         await _context.Members.AddAsync(member);
         await _context.SaveChangesAsync();
@@ -1027,7 +1027,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "E",
             EmergencyContactRelation = "R",
             EmergencyContactPhone = "0",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } }
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsOrgProfile = true } }
         };
         await _context.Members.AddAsync(member);
         await _context.SaveChangesAsync();
@@ -1067,7 +1067,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "E",
             EmergencyContactRelation = "R",
             EmergencyContactPhone = "0",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } }
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsOrgProfile = true } }
         };
         await _context.Members.AddAsync(member);
         await _context.SaveChangesAsync();
@@ -1111,7 +1111,7 @@ public class MemberServiceTests : TestBase
             NotifyRelevantUpdates = false,
             AcademicHistory = new List<AcademicRecordDto>
             {
-                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "Bachelor", Subject = "Science", PassingYear = 2007, IsGHC = true }
+                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "Bachelor", Subject = "Science", PassingYear = 2007, IsOrgProfile = true }
             },
             ProfessionalHistory = new List<ProfessionalRecordDto>
             {

@@ -7,7 +7,7 @@
     "Subject": "Computer Science & Engineering",
     "AdmissionYear": 2008,
     "PassingYear": 2012,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": "3.85"
   },
   {
@@ -18,7 +18,7 @@
     "Subject": "Software Engineering",
     "AdmissionYear": 2013,
     "PassingYear": 2015,
-    "IsGHC": false,
+    "IsOrgProfile": false,
     "Result": "3.90"
   },
   {
@@ -29,7 +29,7 @@
     "Subject": "Business Administration",
     "AdmissionYear": 2010,
     "PassingYear": 2014,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": "3.75"
   },
   {
@@ -40,7 +40,7 @@
     "Subject": "Economics",
     "AdmissionYear": 2012,
     "PassingYear": 2016,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": "3.80"
   },
   {
@@ -51,7 +51,7 @@
     "Subject": "Electrical & Electronic Engineering",
     "AdmissionYear": 2005,
     "PassingYear": 2009,
-    "IsGHC": true,
+    "IsOrgProfile": true,
     "Result": "3.95"
   }
 ]
