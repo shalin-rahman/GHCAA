@@ -32,11 +32,21 @@ export interface EmailLog {
     id: number;
     recipientEmail: string;
     subject: string;
+    body: string;
     sentDate: string;
     status: string;
     templateCode?: string;
     targetAudience?: string;
     errorMessage?: string;
+    channel?: string;
+    deliveryScope?: string;
+}
+
+export interface CommunicationLogPage {
+    items: EmailLog[];
+    page: number;
+    pageSize: number;
+    totalCount: number;
 }
 
 @Injectable({
@@ -49,6 +59,11 @@ export class AdminCommService {
     getLogs(count: number = 100): Observable<EmailLog[]> {
         const params = buildHttpParams({ count });
         return this.http.get<EmailLog[]>(`${this.apiUrl}/logs`, { params });
+    }
+
+    getMemberLogs(memberId: number, page = 1, pageSize = 25): Observable<CommunicationLogPage> {
+        const params = buildHttpParams({ page, pageSize });
+        return this.http.get<CommunicationLogPage>(`${this.apiUrl}/member/${memberId}`, { params });
     }
 
     getTemplates(): Observable<EmailTemplate[]> {

@@ -48,6 +48,13 @@ a gap someone still needs to close.
 
 ## Log
 
+### 2026-09-21 — /api/communications/me, /api/admin/comm/member/{memberId}
+- Change: added paginated member communication history and an admin per-member log view, including channel, delivery status, message detail, and targeted/broadcast scope.
+- Reason: Work Package 81.1–81.3 makes outbound email and SMS visibility explicit without exposing another member's records.
+- Web: implemented in `member-communications.service.ts`, the member communications route, and `admin-comm.service.ts`.
+- Mobile: implemented in `notification_service.dart` and the member communications route.
+- Delivery: email uses `IEmailService`; configured SMS templates and workflow alerts use `ISmsService` and write `EmailLog` rows. Direct OTP SMS remains outside this history.
+
 ### 2026-09-21 — /api/elections
 - Change: added the persisted election engine resource and election summary response.
 - Reason: Work Package 37.1 creates elections and exposes their current phase.

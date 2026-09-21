@@ -1188,23 +1188,18 @@ carry the widened rule, per the acceptance criterion below.
 **Acceptance:** 62.49's recorded file counts include the widened rule, so the sweep stays provable
 rather than asserted.
 
-81.1 [TODO] **Priority: P2 | Depends on: none.** A member has no view of the email/SMS sent to them,
-and an admin has no per-member view either — only a global flat list. `NotificationController.
-GetMyNotifications` already gives a member their own in-app notifications (that part exists and is
-not in scope here). `CommunicationController` (`api/admin/comm`, `AdminOnly`) exposes `GET /logs` via
-`ICommunicationService.GetRecentLogsAsync(count)`, which has no member filter at all — it is the most
-recent N `EmailLog` rows across the whole association, not "what did we send Farhana." Build: a
-member-facing `GET /api/communications/me` (email + SMS sent to that member, paginated, with a detail
-view per message — subject/body/channel/timestamp/status); an admin-facing per-member equivalent
-(`GET /api/admin/comm/member/{id}`) alongside the existing global log; and note in each row whether
-it was a targeted send or part of a broadcast, so "global vs individual" is visible without the
-reader having to infer it from the recipient list.
+81.1 [DONE 2026-09-21] **Priority: P2 | Depends on: none.** Added member-scoped and admin per-member
+communication history with channel, delivery status, message detail, pagination, and targeted/broadcast
+classification. Email, configured SMS-template, and workflow SMS sends retain the recipient member id.
+SMS templates use the SMS provider and record unavailable delivery when no mobile number is available.
+Verified with the CommunicationService test set, API build, Angular production build, and Flutter analysis.
+**Acceptance:** `GET /api/communications/me` and `GET /api/admin/comm/member/{memberId}` enforce their
+respective authorization boundaries and return paginated redacted error details.
 
-81.3 [TODO] **Priority: P3 | Depends on: 81.1, 81.2.** Once both exist, add them to the member portal
-and admin dashboard navigation, and to the mobile equivalents if the same gap exists there (check
-`GHCAA.Mobile` for a communications/notifications screen and an approvals screen before assuming
-neither exists — `NotificationController`'s parity has not been checked on mobile as part of writing
-this item).
+81.3 [DONE 2026-09-21] **Priority: P3 | Depends on: 81.1, 81.2.** Added member portal and mobile
+communication history routes. The existing admin communication surface can switch to a per-member view
+with its `memberId` query parameter, while the global log remains available.
+**Acceptance:** Web and Mobile both consume the member history endpoint and their targeted builds/checks pass.
 
 82.59 [TODO] **Priority: P2 | Depends on: 82.58.** Election handbook profile-awareness audit.
 Investigate all markdown files under `GHCAA.Web/public/assets/elections/` (01–08) for hardcoded

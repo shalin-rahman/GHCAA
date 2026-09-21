@@ -5,6 +5,25 @@ import '../../core/api/api_client.dart';
 
 final notificationServiceProvider = Provider<NotificationService>((ref) => NotificationService(ref.read(dioProvider)));
 
+class CommunicationLog {
+  final int id;
+  final String channel;
+  final String subject;
+  final String body;
+  final DateTime sentDate;
+  final String status;
+  final String deliveryScope;
+
+  CommunicationLog.fromJson(Map<String, dynamic> json)
+      : id = json['id'] as int,
+        channel = json['channel'] as String? ?? 'Email',
+        subject = json['subject'] as String? ?? '',
+        body = json['body'] as String? ?? '',
+        sentDate = DateTime.parse(json['sentDate'] as String),
+        status = json['status'] as String? ?? 'Unavailable',
+        deliveryScope = json['deliveryScope'] as String? ?? 'Targeted';
+}
+
 class NotificationService {
   final Dio _dio;
   NotificationService(this._dio);
@@ -26,6 +45,17 @@ class NotificationService {
     } catch (e) {
       debugPrint('NotificationService.markAsRead failed: $e');
       return false;
+    }
+  }
+
+  Future<List<CommunicationLog>> getMyCommunications({int page = 1, int pageSize = 25}) async {
+    try {
+      final response = await _dio.get('/communications/me', queryParameters: {'page': page, 'pageSize': pageSize});
+      final items = (response.data['items'] as List<dynamic>? ?? const []);
+      return items.map((item) => CommunicationLog.fromJson(item as Map<String, dynamic>)).toList();
+    } catch (e) {
+      debugPrint('NotificationService.getMyCommunications failed: $e');
+      rethrow;
     }
   }
 }

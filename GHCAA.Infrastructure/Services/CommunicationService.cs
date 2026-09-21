@@ -19,6 +19,7 @@ namespace GHCAA.Infrastructure.Services
     {
         private readonly ApplicationDbContext _db;
         private readonly IEmailService _emailService;
+        private readonly ISmsService _smsService;
         private readonly ILogger<CommunicationService> _logger;
 
         private static readonly List<EmailTemplate> DefaultTemplates = new()
@@ -111,10 +112,16 @@ namespace GHCAA.Infrastructure.Services
 
         private readonly IOrgConfigService _orgConfigService;
 
-        public CommunicationService(ApplicationDbContext db, IEmailService emailService, ILogger<CommunicationService> logger, IOrgConfigService orgConfigService)
+        public CommunicationService(
+            ApplicationDbContext db,
+            IEmailService emailService,
+            ISmsService smsService,
+            ILogger<CommunicationService> logger,
+            IOrgConfigService orgConfigService)
         {
             _db = db;
             _emailService = emailService;
+            _smsService = smsService;
             _logger = logger;
             _orgConfigService = orgConfigService;
         }
@@ -196,6 +203,37 @@ namespace GHCAA.Infrastructure.Services
                 .ToListAsync(cancellationToken);
         }
 
+        public Task<CommunicationLogPageDto> GetMemberLogsAsync(int memberId, int page, int pageSize, CancellationToken cancellationToken = default)
+            => GetLogsForMemberAsync(memberId, page, pageSize, cancellationToken);
+
+        public Task<CommunicationLogPageDto> GetAdminMemberLogsAsync(int memberId, int page, int pageSize, CancellationToken cancellationToken = default)
+            => GetLogsForMemberAsync(memberId, page, pageSize, cancellationToken);
+
+        private async Task<CommunicationLogPageDto> GetLogsForMemberAsync(int memberId, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            page = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+            var query = _db.EmailLogs.AsNoTracking()
+                .Where(log => log.RecipientMemberId == memberId)
+                .OrderByDescending(log => log.SentDate);
+            var totalCount = await query.CountAsync(cancellationToken);
+            var items = await query.Skip((page - 1) * pageSize).Take(pageSize)
+                .Select(log => new CommunicationLogDto
+                {
+                    Id = log.Id,
+                    Channel = log.Channel,
+                    Subject = log.Subject,
+                    Body = log.Body,
+                    SentDate = log.SentDate,
+                    Status = log.Status,
+                    DeliveryScope = log.DeliveryScope,
+                    TargetAudience = log.TargetAudience,
+                    ErrorMessage = log.Status == "Failed" ? log.ErrorMessage : null
+                })
+                .ToListAsync(cancellationToken);
+            return new CommunicationLogPageDto { Items = items, Page = page, PageSize = pageSize, TotalCount = totalCount };
+        }
+
         public async Task SendIndividualEmailAsync(int memberId, string templateCode, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members
@@ -227,7 +265,15 @@ namespace GHCAA.Infrastructure.Services
             string subject = ReplacePlaceholders(template.Subject, vars, encodeHtml);
             string body = ReplacePlaceholders(template.Body, vars, encodeHtml);
 
-            await SendAndLogEmailAsync(to, subject, body, templateCode, "Templated", cancellationToken);
+            await SendAndLogAsync(
+                template.Channel == MessageChannel.Sms ? member?.MobileNo ?? string.Empty : to,
+                subject,
+                body,
+                templateCode,
+                "Templated",
+                member?.Id,
+                template.Channel,
+                cancellationToken);
         }
 
         public async Task SendBatchEmailAsync(IEnumerable<int> passingYears, string templateCode, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default)
@@ -240,7 +286,7 @@ namespace GHCAA.Infrastructure.Services
 
             foreach (var member in members)
             {
-                await SendTemplatedEmailAsync(member.Email, member, templateCode, customVars, cancellationToken);
+                await SendTemplatedEmailAsync(member, templateCode, customVars, cancellationToken);
             }
         }
 
@@ -254,7 +300,7 @@ namespace GHCAA.Infrastructure.Services
 
             foreach (var member in members)
             {
-                await SendTemplatedEmailAsync(member.Email, member, templateCode, customVars, cancellationToken);
+                await SendTemplatedEmailAsync(member, templateCode, customVars, cancellationToken);
             }
         }
 
@@ -268,14 +314,15 @@ namespace GHCAA.Infrastructure.Services
                         .Include(m => m.AcademicHistory)
                         .Include(m => m.ProfessionalHistory)
                         .FirstOrDefaultAsync(m => m.Email == email, cancellationToken);
-                    await SendTemplatedEmailAsync(email, member, templateCode, customVars, cancellationToken);
+                    await SendTemplatedEmailAsync(member, templateCode, customVars, cancellationToken, email);
                 }
             }
             else
             {
                 foreach (var email in emails)
                 {
-                    await SendAndLogEmailAsync(email, subject ?? "", htmlBody ?? "", null, "Manual List", cancellationToken);
+                    var member = await _db.Members.FirstOrDefaultAsync(m => m.Email == email, cancellationToken);
+                    await SendAndLogAsync(email, subject ?? "", htmlBody ?? "", null, "Manual List", member?.Id, MessageChannel.Email, cancellationToken);
                 }
             }
         }
@@ -290,7 +337,7 @@ namespace GHCAA.Infrastructure.Services
 
             foreach (var member in members)
             {
-                await SendAndLogEmailAsync(member.Email, subject, htmlBody, null, $"Batch: {string.Join(", ", passingYears)}", cancellationToken);
+                await SendAndLogAsync(member.Email, subject, htmlBody, null, $"Batch: {string.Join(", ", passingYears)}", member.Id, MessageChannel.Email, cancellationToken);
             }
         }
 
@@ -304,7 +351,7 @@ namespace GHCAA.Infrastructure.Services
 
             foreach (var member in members)
             {
-                await SendAndLogEmailAsync(member.Email, subject, htmlBody, null, $"Types: {string.Join(", ", membershipTypes)}", cancellationToken);
+                await SendAndLogAsync(member.Email, subject, htmlBody, null, $"Types: {string.Join(", ", membershipTypes)}", member.Id, MessageChannel.Email, cancellationToken);
             }
         }
 
@@ -316,15 +363,20 @@ namespace GHCAA.Infrastructure.Services
                 .FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             if (member == null) throw new KeyNotFoundException("Member not found");
 
-            await SendAndLogEmailAsync(member.Email, subject, htmlBody, null, "Single Member", cancellationToken);
+            await SendAndLogAsync(member.Email, subject, htmlBody, null, "Single Member", member.Id, MessageChannel.Email, cancellationToken);
         }
 
-        private async Task SendTemplatedEmailAsync(string to, Member? member, string templateCode, Dictionary<string, string>? customVars, CancellationToken cancellationToken)
+        private async Task SendTemplatedEmailAsync(
+            Member? member,
+            string templateCode,
+            Dictionary<string, string>? customVars,
+            CancellationToken cancellationToken,
+            string? fallbackRecipient = null)
         {
             var template = await GetTemplateByCodeAsync(templateCode, cancellationToken);
             if (template == null)
             {
-                _logger.LogWarning("Email template {TemplateCode} not found. Skipping email to {To}.", templateCode, to);
+                _logger.LogWarning("Communication template {TemplateCode} not found. Skipping delivery.", templateCode);
                 return;
             }
 
@@ -339,32 +391,73 @@ namespace GHCAA.Infrastructure.Services
             string subject = ReplacePlaceholders(template.Subject, vars, encodeHtml);
             string body = ReplacePlaceholders(template.Body, vars, encodeHtml);
 
-            await SendAndLogEmailAsync(to, subject, body, templateCode, "Templated Broadcast", cancellationToken);
+            var recipient = template.Channel == MessageChannel.Sms
+                ? member?.MobileNo ?? string.Empty
+                : member?.Email ?? fallbackRecipient ?? string.Empty;
+
+            await SendAndLogAsync(
+                recipient,
+                subject,
+                body,
+                templateCode,
+                "Templated Broadcast",
+                member?.Id,
+                template.Channel,
+                cancellationToken);
         }
 
-        private async Task SendAndLogEmailAsync(string to, string subject, string body, string? templateCode, string targetAudience, CancellationToken cancellationToken)
+        private async Task SendAndLogAsync(
+            string recipient,
+            string subject,
+            string body,
+            string? templateCode,
+            string targetAudience,
+            int? recipientMemberId,
+            MessageChannel channel,
+            CancellationToken cancellationToken)
         {
             var log = new EmailLog
             {
-                RecipientEmail = to,
+                RecipientEmail = recipient,
                 Subject = subject,
                 Body = body,
                 TemplateCode = templateCode,
                 TargetAudience = targetAudience,
+                RecipientMemberId = recipientMemberId,
+                DeliveryScope = targetAudience is "Single Member" or "Templated" ? "Targeted" : "Broadcast",
                 SentDate = DateTime.UtcNow,
+                Channel = channel.ToString(),
                 Status = "Sent"
             };
 
             try
             {
-                var fullBody = body + await GetEmailFooterAsync();
-                await _emailService.SendEmailAsync(to, subject, fullBody, cancellationToken);
+                if (channel == MessageChannel.Sms)
+                {
+                    if (string.IsNullOrWhiteSpace(recipient))
+                    {
+                        log.Status = "Unavailable";
+                    }
+                    else
+                    {
+                        var sent = await _smsService.SendSmsAsync(recipient, body, cancellationToken);
+                        if (!sent)
+                        {
+                            log.Status = "Unavailable";
+                        }
+                    }
+                }
+                else
+                {
+                    var fullBody = body + await GetEmailFooterAsync();
+                    await _emailService.SendEmailAsync(recipient, subject, fullBody, cancellationToken);
+                }
             }
             catch (Exception ex)
             {
                 log.Status = "Failed";
                 log.ErrorMessage = ex.Message;
-                _logger.LogError(ex, "Failed to send email to {To}", to);
+                _logger.LogError(ex, "Failed to send {Channel} communication to {Recipient}", channel, recipient);
             }
 
             _db.EmailLogs.Add(log);

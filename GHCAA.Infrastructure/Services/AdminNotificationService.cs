@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
+using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -67,10 +68,32 @@ namespace GHCAA.Infrastructure.Services
                     try
                     {
                         await _email.SendEmailAsync(admin.Email, title, html, cancellationToken);
+                        _db.EmailLogs.Add(new EmailLog
+                        {
+                            RecipientEmail = admin.Email,
+                            RecipientMemberId = admin.MemberId,
+                            Subject = title,
+                            Body = message,
+                            Channel = "Email",
+                            Status = "Sent",
+                            DeliveryScope = "Targeted",
+                            TargetAudience = "Approval workflow"
+                        });
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // Best-effort: email failures should not block the notification flow.
+                        _db.EmailLogs.Add(new EmailLog
+                        {
+                            RecipientEmail = admin.Email,
+                            RecipientMemberId = admin.MemberId,
+                            Subject = title,
+                            Body = message,
+                            Channel = "Email",
+                            Status = "Failed",
+                            ErrorMessage = ex.Message,
+                            DeliveryScope = "Targeted",
+                            TargetAudience = "Approval workflow"
+                        });
                     }
                 }
 
@@ -78,14 +101,38 @@ namespace GHCAA.Infrastructure.Services
                 {
                     try
                     {
-                        await _sms.SendAlertSmsAsync(admin.MemberId, message, cancellationToken);
+                        var sent = await _sms.SendAlertSmsAsync(admin.MemberId, message, cancellationToken);
+                        _db.EmailLogs.Add(new EmailLog
+                        {
+                            RecipientEmail = admin.Email,
+                            RecipientMemberId = admin.MemberId,
+                            Subject = title,
+                            Body = message,
+                            Channel = "Sms",
+                            Status = sent ? "Sent" : "Unavailable",
+                            DeliveryScope = "Targeted",
+                            TargetAudience = "Approval workflow"
+                        });
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // Best-effort: same as the email branch above.
+                        _db.EmailLogs.Add(new EmailLog
+                        {
+                            RecipientEmail = admin.Email,
+                            RecipientMemberId = admin.MemberId,
+                            Subject = title,
+                            Body = message,
+                            Channel = "Sms",
+                            Status = "Failed",
+                            ErrorMessage = ex.Message,
+                            DeliveryScope = "Targeted",
+                            TargetAudience = "Approval workflow"
+                        });
                     }
                 }
             }
+
+            await _db.SaveChangesAsync(cancellationToken);
         }
     }
 }

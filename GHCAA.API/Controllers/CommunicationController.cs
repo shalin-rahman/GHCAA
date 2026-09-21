@@ -39,6 +39,13 @@ namespace GHCAA.API.Controllers
             return Ok(logs);
         }
 
+        [HttpGet("member/{memberId:int}")]
+        public async Task<IActionResult> GetMemberLogs(int memberId, [FromQuery] int page = 1, [FromQuery] int pageSize = 25, CancellationToken cancellationToken = default)
+        {
+            var logs = await _commService.GetAdminMemberLogsAsync(memberId, page, pageSize, cancellationToken);
+            return Ok(logs);
+        }
+
         [HttpPut("templates/{id}")]
         public async Task<IActionResult> UpdateTemplate(int id, [FromBody] EmailTemplate template, CancellationToken cancellationToken)
         {

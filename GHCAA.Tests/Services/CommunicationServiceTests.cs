@@ -18,6 +18,7 @@ namespace GHCAA.Tests.Services;
 public class CommunicationServiceTests : TestBase
 {
     private Mock<IEmailService> _mockEmail = null!;
+    private Mock<ISmsService> _mockSms = null!;
     private Mock<ILogger<CommunicationService>> _mockLogger = null!;
     private Mock<IOrgConfigService> _mockOrgConfig = null!;
     private CommunicationService _service = null!;
@@ -28,6 +29,7 @@ public class CommunicationServiceTests : TestBase
     public void Setup()
     {
         _mockEmail = new Mock<IEmailService>();
+        _mockSms = new Mock<ISmsService>();
         _mockLogger = new Mock<ILogger<CommunicationService>>();
         _mockOrgConfig = new Mock<IOrgConfigService>();
 
@@ -38,7 +40,7 @@ public class CommunicationServiceTests : TestBase
         };
         _mockOrgConfig.Setup(x => x.GetConfigAsync()).ReturnsAsync(_mockConfig);
 
-        _service = new CommunicationService(_context, _mockEmail.Object, _mockLogger.Object, _mockOrgConfig.Object);
+        _service = new CommunicationService(_context, _mockEmail.Object, _mockSms.Object, _mockLogger.Object, _mockOrgConfig.Object);
     }
 
     [Test]
@@ -187,6 +189,46 @@ public class CommunicationServiceTests : TestBase
     }
 
     [Test]
+    public async Task SendIndividualEmailAsync_ShouldDispatchSmsTemplateToMemberMobileAndLogChannel()
+    {
+        var member = new Member
+        {
+            FullName = "SMS Recipient",
+            Email = "sms@example.com",
+            MobileNo = "01700000000",
+            NID = "sms-nid",
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0"
+        };
+        _context.Members.Add(member);
+        _context.EmailTemplates.Add(new EmailTemplate
+        {
+            Code = "SMS_TEMPLATE",
+            Channel = MessageChannel.Sms,
+            Subject = "Ignored for SMS",
+            Body = "Hello {{FullName}}",
+            Description = "SMS test template"
+        });
+        await _context.SaveChangesAsync();
+        _mockSms.Setup(x => x.SendSmsAsync("01700000000", "Hello SMS Recipient", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        await _service.SendIndividualEmailAsync(member.Id, "SMS_TEMPLATE");
+
+        _mockSms.Verify(x => x.SendSmsAsync("01700000000", "Hello SMS Recipient", It.IsAny<CancellationToken>()), Times.Once);
+        _mockEmail.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        var log = await _context.EmailLogs.SingleAsync();
+        log.Channel.Should().Be(nameof(MessageChannel.Sms));
+        log.RecipientMemberId.Should().Be(member.Id);
+        log.Status.Should().Be("Sent");
+    }
+
+    [Test]
     public async Task SendTemplatedEmailAsync_ShouldHtmlEncodeMemberSuppliedValues()
     {
         // A member with markup in FullName must not have it injected raw into the email HTML.
@@ -288,5 +330,40 @@ public class CommunicationServiceTests : TestBase
         var result = await _service.ResolveTemplateTextAsync("NO_SUCH_TEMPLATE_CODE");
 
         result.Should().BeNull();
+    }
+
+    [Test]
+    public async Task GetMemberLogsAsync_ReturnsOnlyMemberRowsWithPagingAndRedactsSuccessfulErrors()
+    {
+        _context.EmailLogs.AddRange(
+            new EmailLog
+            {
+                RecipientEmail = "member@example.com",
+                RecipientMemberId = 7,
+                Subject = "Targeted",
+                Body = "Body",
+                Channel = "Email",
+                Status = "Sent",
+                DeliveryScope = "Targeted",
+                SentDate = DateTime.UtcNow.AddMinutes(-1)
+            },
+            new EmailLog
+            {
+                RecipientEmail = "other@example.com",
+                RecipientMemberId = 8,
+                Subject = "Other",
+                Body = "Other",
+                Channel = "Email",
+                Status = "Sent",
+                DeliveryScope = "Broadcast"
+            });
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetMemberLogsAsync(7, 1, 25);
+
+        result.TotalCount.Should().Be(1);
+        result.Items.Should().ContainSingle();
+        result.Items[0].DeliveryScope.Should().Be("Targeted");
+        result.Items[0].ErrorMessage.Should().BeNull();
     }
 }

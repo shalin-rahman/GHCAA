@@ -196,6 +196,13 @@ and verify authorization and error states in Web and Mobile tests.
    **Then** the message shall no longer count as unread.
 3. **Given** a user is unauthorized or disconnected, **When** a message action
    fails, **Then** the client shall show an explicit recoverable state.
+4. **Given** a member has received an outbound email or SMS, **When** the
+   member opens communication history, **Then** only that member's paginated
+   records shall be returned with channel, status, scope, content, and
+   timestamp.
+5. **Given** a configured communication template uses the SMS channel, **When**
+   delivery is requested, **Then** the SMS provider shall be used and the
+   delivery result shall be logged as sent, failed, or unavailable.
 
 ### User Story 8 - Read and administer governance and public content (Priority: P2)
 
@@ -224,6 +231,11 @@ communication templates, and polls through their API and client tests.
    shall retain their approval path.
 6. **Given** a poll is expired, **When** a member attempts to vote, **Then**
    voting shall be closed while permitted results remain readable.
+7. **Given** an election is in a controlled phase, **When** an authorized
+   actor performs a valid lifecycle action, **Then** the persisted election
+   workflow shall enforce the phase, eligibility, officer, and one-vote rules.
+8. **Given** a member submits a ballot, **When** the vote is stored, **Then**
+   the ballot shall not contain the member identity recorded on the voter roll.
 
 ### User Story 9 - Use the rule-based assistant and support channels (Priority: P3)
 

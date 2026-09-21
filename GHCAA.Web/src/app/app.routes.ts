@@ -166,6 +166,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./member/messages/messages').then(m => m.Messages)
             },
             {
+                path: 'communications',
+                loadComponent: () => import('./member/communications/communications').then(m => m.MemberCommunications)
+            },
+            {
                 path: 'assistant',
                 loadComponent: () => import('./member/assistant/assistant').then(m => m.Assistant)
             },

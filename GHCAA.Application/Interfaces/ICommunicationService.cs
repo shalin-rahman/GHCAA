@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using GHCAA.Application.DTOs;
 using GHCAA.Domain.Models;
 
 namespace GHCAA.Application.Interfaces
@@ -14,6 +15,8 @@ namespace GHCAA.Application.Interfaces
         Task<EmailTemplate> CreateTemplateAsync(EmailTemplate template, CancellationToken cancellationToken = default);
         Task DeleteTemplateAsync(int id, CancellationToken cancellationToken = default);
         Task<IEnumerable<EmailLog>> GetRecentLogsAsync(int count = 100, CancellationToken cancellationToken = default);
+        Task<CommunicationLogPageDto> GetMemberLogsAsync(int memberId, int page, int pageSize, CancellationToken cancellationToken = default);
+        Task<CommunicationLogPageDto> GetAdminMemberLogsAsync(int memberId, int page, int pageSize, CancellationToken cancellationToken = default);
 
         // Sending logic
         Task SendIndividualEmailAsync(int memberId, string templateCode, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default);

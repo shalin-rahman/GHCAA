@@ -259,6 +259,8 @@ class FakeNotificationService implements NotificationService {
   @override
   Future<List<dynamic>> getMyNotifications() async => [];
   @override
+  Future<List<CommunicationLog>> getMyCommunications({int page = 1, int pageSize = 25}) async => [];
+  @override
   Future<bool> markAsRead(int id) async => true;
 }
 

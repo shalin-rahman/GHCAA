@@ -104,9 +104,8 @@ manuals, ballot/counting certificates, and forms, plus persisted constitution
 amendment voting. Those assets are retained as supporting governance
 documents, not treated as a substitute for an election engine.
 
-The election engine is implemented as active Work Package 37.1 work and must
-meet the following persisted workflow scope before that work package can be
-closed:
+The election engine was implemented as Work Package 37.1 on 2026-09-21 and
+meets the following persisted workflow scope:
 
 - Election creation, scheduling, and explicit phase control from announcement
   through archival.
@@ -125,11 +124,11 @@ closed:
   parity where the existing backlog requires it.
 
 This decision does not make Work Package 84 the implementation owner. It
-records the product decision and leaves implementation acceptance with Work
-Package 37.1. The existing constitution amendment vote remains
+records the product decision; implementation acceptance is recorded in
+Work Package 37.1 evidence. The existing constitution amendment vote remains
 its own workflow and must not be conflated with election ballots. The current
 static election documents remain the legal and operational reference material
-until the engine is implemented and adopted.
+for detailed form wording and institutional adoption.
 
 ## Open question (product decision, not a documentation task)
 

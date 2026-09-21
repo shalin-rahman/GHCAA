@@ -258,12 +258,13 @@ data, is what a future integration would inherit unless it is changed first.
 
 ## 8.10 Governance Integrity
 
-§2.7 sets the boundary this section enforces in the code: the platform supports governance and does
-not conduct a binding election. It maintains the authoritative voter roll, publishes the constitution
-and its amendment history, and runs constitutional amendment voting and non-binding member polls,
-where the outcome is a recorded expression of the membership rather than the transfer of an office.
-It does not seal a ballot, count votes for an office, or declare a winner — those remain the Election
-Commission's manual procedure, set out in the Association's own election documents.
+§2.7 sets the boundary this section enforces in the code: the platform supports governance and now
+contains a persisted election workflow, but it does not claim that the software alone makes an
+institutional election legally binding. It maintains the authoritative voter roll, publishes the
+constitution and its amendment history, and runs constitutional amendment voting and non-binding
+member polls. Work Package 37.1 also stores election phases, seats, officers, nominations, secret
+ballots, counts and declarations. Legal form wording and institutional adoption remain under the
+Election Commission's election documents.
 
 The code matches that stated scope rather than exceeding it. `PollVote`
 (`GHCAA.Domain/Models/PollVote.cs`) records a member id, a poll option id and a timestamp against each
@@ -274,9 +275,15 @@ mechanism over the vote record: a poll result rests on the same protection as an
 (§8.12) — an authorised, audited administrative account rather than a mathematically verifiable
 count. Under the single-maintainer, single-database-account assumption of §8.1, that is a real
 limitation, and it is the reason §2.7 gives for keeping these features as sentiment and internal
-decision-making tools rather than presenting them as a secure-election system. No feature in the
-current codebase claims otherwise: there is no ballot-sealing, no independent tally verification, and
-no cryptographic receipt a voter could use to confirm their vote was counted as cast.
+decision-making tools rather than presenting them as a secure-election system. The election engine adds phase checks, frozen-roll eligibility, conditional one-vote updates and
+serializable transaction handling. It still has no cryptographic receipt, independent tally
+verification, or proof that would make the software a secure-election system on its own.
+
+Communication history follows the same minimisation rule. Member history is filtered from the
+authenticated member claim, while administrators use the protected per-member route. The log stores
+the intended recipient member, channel, scope and outcome so delivery can be audited. Successful
+rows do not return failure details. Direct OTP SMS remains a separate provider path and is not yet
+included in member communication history.
 
 ## 8.11 Personal Data: Lawful Basis, Minimisation, Consent, Retention and Subject Rights
 

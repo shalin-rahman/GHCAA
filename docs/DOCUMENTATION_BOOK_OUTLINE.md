@@ -392,7 +392,8 @@ followed is stated in §2.2.
 - **7.2** Solution and Module Structure
 - **7.3** Coding Standards, Conventions and Static Enforcement
 - **7.4** Implementation of the Domain and Persistence Layers
-- **7.5** Implementation of the Application and Business Services
+- **7.5** Implementation of the Application and Business Services — persisted election workflow,
+  communication delivery logging, channel-aware email/SMS dispatch, and member-scoped history
 - **7.6** Implementation of the API Layer
 - **7.7** Implementation of the Web Client
 - **7.8** Implementation of the Mobile Client
@@ -434,7 +435,8 @@ followed is stated in §2.2.
 - **8.7** Transport, Header and Browser-Policy Security
 - **8.8** Rate Limiting and Abuse Prevention
 - **8.9** Payment-Related Risk and the No-Gateway-Keys Posture — the security rationale for manual verification and its accepted operational cost
-- **8.10** Governance Integrity — the scope of the voting features as sentiment and internal decision-making rather than as a secure-election system, with reference to §2.7
+- **8.10** Governance Integrity — the persisted election workflow, its separation from a secure-election
+  claim, and the remaining institutional adoption boundary, with reference to §2.7
 - **8.11** Personal Data: Lawful Basis, Minimisation, Consent, Retention and Subject Rights
 - **8.12** Audit Logging and Non-Repudiation
 - **8.13** Conformance Assessment against OWASP ASVS

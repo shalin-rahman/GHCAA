@@ -84,6 +84,7 @@ export class AdminComm implements OnInit {
     });
 
     logSearch = signal('');
+    memberLogId = signal<number | null>(null);
     filteredLogs = computed(() => {
         const q = this.logSearch().toLowerCase();
         return this.logs().filter(l =>
@@ -111,6 +112,8 @@ export class AdminComm implements OnInit {
                     this.isManualMessage = true;
                 }
             }
+            const memberId = Number(params['memberId']);
+            this.memberLogId.set(Number.isInteger(memberId) && memberId > 0 ? memberId : null);
         });
     }
 
@@ -140,17 +143,28 @@ export class AdminComm implements OnInit {
 
     loadLogs() {
         this.loading.set(true);
+        if (this.memberLogId()) {
+            this.commService.getMemberLogs(this.memberLogId()!).subscribe({
+                next: data => this.finishLogLoad(data.items),
+                error: err => this.failLogLoad(err)
+            });
+            return;
+        }
         this.commService.getLogs().subscribe({
-            next: (data) => {
-                this.logs.set(data);
-                this.loading.set(false);
-            },
-            error: (err) => {
-                this.loading.set(false);
-                this.notify.error('Failed to load email logs.');
-                console.error('Error loading logs:', err);
-            }
+            next: data => this.finishLogLoad(data),
+            error: err => this.failLogLoad(err)
         });
+    }
+
+    private finishLogLoad(data: EmailLog[]): void {
+        this.logs.set(data);
+        this.loading.set(false);
+    }
+
+    private failLogLoad(err: unknown): void {
+        this.loading.set(false);
+        this.notify.error('Failed to load email logs.');
+        console.error('Error loading logs:', err);
     }
 
     switchToManual() {

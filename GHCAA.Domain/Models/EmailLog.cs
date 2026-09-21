@@ -22,13 +22,25 @@ namespace GHCAA.Domain.Models
 
         public DateTime SentDate { get; set; } = DateTime.UtcNow;
 
-        [MaxLength(100)]
-        public string Status { get; set; } = "Sent"; // Sent, Failed
+        [Required]
+        [MaxLength(20)]
+        public string Channel { get; set; } = "Email";
+
+        [Required]
+        [MaxLength(20)]
+        public string Status { get; set; } = "Sent";
 
         public string? ErrorMessage { get; set; }
 
+        public int? RecipientMemberId { get; set; }
+
         public int? InitiatedByMemberId { get; set; } // Who triggered the broadcast
 
-        public string? TargetAudience { get; set; } // batch: 2024, type: General, custom: list
+        [MaxLength(500)]
+        public string? TargetAudience { get; set; }
+
+        [Required]
+        [MaxLength(20)]
+        public string DeliveryScope { get; set; } = "Targeted";
     }
 }

@@ -133,6 +133,20 @@ client type, which is what let the fix in §7.15 move those calls out of the tra
 boundary and the external call were already two separate seams in the code, not one that had to be
 created for the fix.
 
+The same boundary now carries the communication visibility work. `CommunicationService` resolves a
+template, substitutes member and organisation variables, selects the configured channel, and writes
+one `EmailLog` row for the attempted delivery. Email goes through `IEmailService`; SMS templates go
+through `ISmsService`. The log records the recipient member, channel, targeted or broadcast scope,
+status and timestamp. A missing mobile number or provider refusal is recorded as `Unavailable`, while
+an exception is recorded as `Failed`. The member history query takes its member ID from the caller's
+authenticated claims at the API boundary, so the client cannot substitute another member's ID.
+Direct OTP SMS still uses the provider interface directly and is not part of this history.
+
+Work Package 37.1 uses the same application-service boundary for its persisted election workflow.
+The service enforces phase transitions, frozen voter-roll eligibility, officer permissions, candidate
+rules, secret-ballot separation and one-vote concurrency controls before writing election state.
+Generated election documents use the reusable document service and the active organisation profile.
+
 ## 7.6 Implementation of the API Layer
 
 `GHCAA.API/Controllers` holds 38 controllers exposing 285 endpoint action attributes
@@ -528,4 +542,3 @@ charts for Chapters 7-13 to a separate, later work item, and a status matrix for
 need to cross-reference the WBS component mapping Chapter 11 already builds rather than duplicate
 it. Both are left as open work rather than filled with a diagram or table that does not carry real
 information.
-

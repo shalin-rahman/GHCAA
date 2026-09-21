@@ -162,7 +162,9 @@ only a limitation.
 | FR-26 | The system shall maintain posts of two kinds, news and notice, with a common structure and differing authorship rules. | D (Art. IV), I | M |
 | FR-27 | The system shall permit members to submit news items for editorial approval, and shall refuse any member submission of kind notice; notices shall be creatable only by an authorised officer. | D (Art. IV), I | M |
 | FR-28 | The system shall permit an officer to publish, unpublish, pin, edit and archive posts, retaining the archived record rather than deleting it. | I | M |
-| FR-29 | The system shall permit an officer to compose and dispatch a communication to a selected segment of the membership, where a segment may be defined by tier, status, batch or event participation, and shall record what was sent, to how many recipients and when. | C, I | S |
+| FR-29 | The system shall permit an officer to compose and dispatch an email or SMS communication to a selected segment of the membership, where a segment may be defined by tier, status, batch or event participation, and shall record the channel, recipient member, delivery status, scope and time. | C, I | S |
+| FR-29a | The system shall let a member view only the member's own paginated outbound communication history, including channel, status, scope, message detail and delivery time. | I | S |
+| FR-29b | The system shall record unavailable and failed provider outcomes without exposing failure detail on successful history rows. | I | S |
 | FR-30 | The system shall deliver in-application notifications for events material to a member, including application decision, payment verification, event promotion from the waiting list, and notices. | I | S |
 | FR-31 | The system shall provide member-to-member and member-to-officer messaging in real time, subject to the privacy settings of FR-03. | I, C | C |
 
@@ -183,7 +185,7 @@ button.
 | FR-36 | The system shall admit a vote on an amendment proposal only from a member who is a voting member in good standing at the time of voting, shall admit exactly one vote per eligible member, and shall record the eligibility determination together with the vote. | D (Art. III §B, Art. V) | M |
 | FR-37 | The system shall report an amendment vote as the count of votes cast for and against, the number of eligible voters, and whether the two-thirds threshold was met, and shall not itself declare the amendment adopted. | D (Art. VIII) | M |
 | FR-38 | The system shall maintain the roll of members eligible to vote at a forthcoming election, derived from tier and standing, and shall make that roll available to the Election Commission in a form that can be published and challenged. | D (Art. V), election regulations | M |
-| FR-39 | The system shall publish candidate information and election results supplied by the Election Commission, and shall not conduct balloting or counting for elected office. | D (Art. V), election regulations | M |
+| FR-39 | The system shall support a persisted election workflow for authorized administration, including a frozen voter roll, nominations, secret ballots, counting and declaration, while detailed legal form wording and institutional adoption remain governed by the Election Commission's election documents. | D (Art. V), election regulations, I | M |
 | FR-40 | The system shall support non-binding member polls, open to a configurable eligibility set, reporting counts only. | I | C |
 
 The relationship between FR-36, FR-37 and FR-39 is the substance of this project's answer to RQ3.

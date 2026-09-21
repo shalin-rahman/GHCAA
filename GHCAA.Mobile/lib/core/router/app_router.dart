@@ -21,6 +21,7 @@ import '../../screens/member/news_screen.dart';
 import '../../screens/member/news_details_screen.dart';
 import '../../screens/member/gallery_screen.dart';
 import '../../screens/member/notification_screen.dart';
+import '../../screens/member/communications_screen.dart';
 import '../../screens/member/member_activity_history_screen.dart';
 import '../../screens/member/family_link_screen.dart';
 import '../../screens/member/support_screen.dart';
@@ -167,6 +168,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/gallery', name: 'gallery', builder: (context, state) => const GalleryScreen()),
           GoRoute(path: '/committee', name: 'governance', builder: (context, state) => const GovernanceScreen()),
           GoRoute(path: '/notifications', name: 'notifications', builder: (context, state) => const NotificationScreen()),
+          GoRoute(path: '/communications', name: 'communications', builder: (context, state) => const CommunicationsScreen()),
           GoRoute(path: '/activity', name: 'activity', builder: (context, state) => const MemberActivityHistoryScreen()),
           GoRoute(path: '/family', name: 'family', builder: (context, state) => const FamilyLinkScreen()),
           GoRoute(path: '/support', name: 'support', builder: (context, state) => const SupportScreen()),

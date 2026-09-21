@@ -525,6 +525,7 @@ export const API_ENDPOINTS = {
         ERROR_LOGS: '/api/admin/error-logs',
         DEV_TRACKER: '/api/admin/dev-tracker'
     },
+    MEMBER_COMMUNICATIONS: '/api/communications/me',
     PENDING: {
         ADMIN_SUMMARY: '/api/pending/admin/summary',
         MY_SUMMARY: '/api/pending/me/summary'

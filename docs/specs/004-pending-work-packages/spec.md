@@ -3,9 +3,9 @@
 ## Status
 
 This specification defines the remaining active backlog recorded in
-`docs/TODO.md` as of 2026-09-21. It is a delivery specification, not a claim
-that any item is implemented. Existing code, generated contracts, and tests
-remain authoritative when implementation begins.
+`docs/TODO.md` as of 2026-09-21. Items marked complete below are retained as
+implementation evidence and are not delivery work. Existing code, generated
+contracts, and tests remain authoritative.
 
 ## Scope
 
@@ -52,6 +52,39 @@ is synchronized, migrations are verified against a non-empty database when
 tables change, and `graphify update .` completes.
 
 ## Requirements by backlog item
+
+## Completed implementation boundaries
+
+### 37.1 Persisted election engine
+
+Work Package 37.1 is implemented across the Domain, Application,
+Infrastructure, API, Web, Mobile, migration, and test layers. The delivered
+workflow persists elections, seats, officers, frozen voter rolls,
+nominations, scrutiny, withdrawal, candidate lists, polling, secret ballots,
+counting, declaration, results, audit history, and generated election PDFs.
+Authenticated claims provide actor identity. Ballot records do not store the
+voter's member ID. Conditional updates and serializable transactions prevent
+duplicate voting under replay and concurrent requests.
+
+The generated forms provide the shared official A4 layout and verification
+data. Detailed legal field completeness remains the scope of the form-content
+backlog and is not implied by this engine delivery.
+
+### 81.1–81.3 Member communication visibility
+
+The communication visibility work is implemented. `EmailLog` now carries the
+recipient member ID, channel, delivery scope, status, and bounded failure
+metadata. `GET /api/communications/me` filters by the authenticated member;
+`GET /api/admin/comm/member/{memberId}` is administrator-only. Both return
+paginated DTOs. Email and workflow SMS delivery are logged, and configured SMS
+templates now use `ISmsService` rather than the email provider. Missing or
+unavailable SMS delivery is recorded as `Unavailable`; provider exceptions are
+recorded as `Failed`.
+
+Angular and Flutter consume the member endpoint. The Angular and Flutter
+surfaces show channel, scope, status, body, and delivery time. OTP SMS sent
+directly through `ISmsService.SendOtpSmsAsync` remains outside this history
+until it is routed through a logging boundary.
 
 ### 6.2 Alumni referrals
 

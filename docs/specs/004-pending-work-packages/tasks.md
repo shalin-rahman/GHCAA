@@ -31,7 +31,9 @@
       reconciliation.
 - [ ] Implement 37.9 derived impact metrics and privacy-safe public projection.
 - [ ] Implement 37.10 report generation and export verification.
-- [ ] Implement 81.1–81.3 member communication visibility.
+- [x] Implement 81.1–81.3 member communication visibility. Completed 2026-09-21:
+      member and admin paginated history, email/SMS channel and delivery status
+      logging, Web and Mobile member surfaces, and provider-failure coverage.
 
 ## Election content
 
