@@ -1,10 +1,9 @@
-import { createAuthServiceMock } from '../../core/testing/testing-utils';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Login } from './login';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { provideRouter } from '@angular/router';
 
 describe('Login Component', () => {
@@ -13,12 +12,13 @@ describe('Login Component', () => {
     let authServiceMock: any;
     let notificationServiceMock: any;
     let router: Router;
-    const mockForm = { 
-        invalid: false, 
-        control: { markAllAsTouched: vi.fn() } 
+    const mockForm = {
+        invalid: false,
+        control: { markAllAsTouched: vi.fn() }
     };
 
-    beforeEach(async () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
         authServiceMock = {
             login: vi.fn(),
             getSocialProviders: vi.fn().mockReturnValue(of([]))
@@ -28,7 +28,9 @@ describe('Login Component', () => {
             info: vi.fn(),
             error: vi.fn()
         };
+    });
 
+    beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [Login],
             providers: [
@@ -45,8 +47,34 @@ describe('Login Component', () => {
         fixture.detectChanges();
     });
 
+    afterEach(() => {
+        vi.runOnlyPendingTimers();
+        vi.useRealTimers();
+    });
+
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should start a sequential login status and hide it on success', () => {
+        authServiceMock.login.mockReturnValue(new Observable(subscriber => {
+            setTimeout(() => subscriber.next({ role: 'User' }), 1500);
+            return () => undefined;
+        }));
+        component.credentials = { username: 'user', password: 'password' };
+
+        component.onLogin(mockForm);
+
+        expect(component.loading()).toBe(true);
+        expect(component.loginStatus()).toBeTruthy();
+        expect(component.loginStatus()).toBe('Connecting');
+
+        vi.advanceTimersByTime(1200);
+        expect(component.loginStatus()).not.toBe('Connecting');
+
+        vi.advanceTimersByTime(500);
+        expect(component.loading()).toBe(false);
+        expect(component.loginStatus()).toBeNull();
     });
 
     it('should navigate to admin portal for admin role', () => {
@@ -67,5 +95,17 @@ describe('Login Component', () => {
         authServiceMock.login.mockReturnValue(throwError(() => ({ error: { message: 'Invalid username or password.' } })));
         component.onLogin(mockForm);
         expect(component.errorMessage()).toBe('Invalid username or password.');
+    });
+
+    it('should stop the login flow and show a timeout error after 8 seconds', () => {
+        authServiceMock.login.mockReturnValue(new Observable(() => undefined));
+        component.credentials = { username: 'slowuser', password: 'password' };
+
+        component.onLogin(mockForm);
+        vi.advanceTimersByTime(8000);
+
+        expect(component.loading()).toBe(false);
+        expect(component.loginStatus()).toBeNull();
+        expect(component.errorMessage()).toBe('Login timed out. Please try again.');
     });
 });

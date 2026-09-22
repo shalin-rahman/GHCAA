@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectorRef, signal, OnInit } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -10,6 +10,15 @@ import { ImgFallbackDirective } from '../../common/directives/img-fallback.direc
 import { ROUTES } from '../../core/constants/app.constants';
 import { OrgConfigService } from '../../core/services/org-config.service';
 
+const AUTH_STATUS_SEQUENCE = [
+  'Connecting', 'Validating', 'Reading', 'Parsing', 'Encrypting', 'Transmitting',
+  'Ingesting', 'Intercepting', 'Decrypting', 'Salting', 'Hashing', 'Querying',
+  'Matching', 'Verifying', 'Authorizing', 'Generating', 'Signing', 'Issuing',
+  'Caching', 'Redirecting'
+];
+const AUTH_STATUS_INTERVAL_MS = 1200;
+const AUTH_TIMEOUT_MS = 8000;
+
 declare var google: any;
 declare var FB: any;
 
@@ -20,7 +29,7 @@ declare var FB: any;
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
-export class Login implements OnInit {
+export class Login implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -31,10 +40,16 @@ export class Login implements OnInit {
   credentials: LoginDto = { username: '', password: '' };
   loading = signal(false);
   errorMessage = signal('');
+  loginStatus = signal<string | null>(null);
   showPassword = signal(false);
   socialProviders = signal<any[]>([]);
   // 29D.8: where to send the user after a successful login (set by authGuard).
   private returnUrl: string | null = null;
+  private loginStatusTimer: number | null = null;
+  private authTimeoutTimer: number | null = null;
+  private loginAttemptId = 0;
+  private loginSequence: string[] = [];
+  private loginSequenceIndex = 0;
 
   ngOnInit() {
     this.loadSocialProviders();
@@ -45,6 +60,79 @@ export class Login implements OnInit {
     if (params.get('expired')) {
       this.errorMessage.set('Your session expired. Please sign in again to continue.');
     }
+  }
+
+  ngOnDestroy() {
+    this.clearLoginProgress();
+    this.loginAttemptId += 1;
+  }
+
+  private buildLoginSequence(): string[] {
+    const minLength = 6;
+    const maxLength = 7;
+    const totalLength = minLength + Math.floor(Math.random() * (maxLength - minLength + 1));
+    const backupPool = AUTH_STATUS_SEQUENCE.filter(status => status !== 'Connecting');
+    const startIndex = Math.floor(Math.random() * (backupPool.length - (totalLength - 1) + 1));
+
+    return ['Connecting', ...backupPool.slice(startIndex, startIndex + totalLength - 1)];
+  }
+
+  private clearLoginProgress(): void {
+    if (this.loginStatusTimer !== null) {
+      window.clearInterval(this.loginStatusTimer);
+      this.loginStatusTimer = null;
+    }
+
+    if (this.authTimeoutTimer !== null) {
+      window.clearTimeout(this.authTimeoutTimer);
+      this.authTimeoutTimer = null;
+    }
+
+    this.loginSequence = [];
+    this.loginSequenceIndex = 0;
+    this.loginStatus.set(null);
+  }
+
+  private startLoginProgress(attemptId: number): void {
+    this.clearLoginProgress();
+    this.loginAttemptId = attemptId;
+    this.loginSequence = this.buildLoginSequence();
+    this.loginSequenceIndex = 0;
+    this.loginStatus.set(this.loginSequence[0]);
+    this.loading.set(true);
+    this.errorMessage.set('');
+
+    this.loginStatusTimer = window.setInterval(() => {
+      if (this.loginAttemptId !== attemptId) {
+        this.clearLoginProgress();
+        return;
+      }
+
+      this.loginSequenceIndex += 1;
+      const nextStatus = this.loginSequence[this.loginSequenceIndex];
+      if (nextStatus) {
+        this.loginStatus.set(nextStatus);
+      } else {
+        this.loginStatus.set(this.loginSequence[this.loginSequence.length - 1]);
+      }
+    }, AUTH_STATUS_INTERVAL_MS);
+
+    this.authTimeoutTimer = window.setTimeout(() => {
+      if (this.loginAttemptId !== attemptId) {
+        return;
+      }
+
+      this.loginAttemptId += 1;
+      this.clearLoginProgress();
+      this.loading.set(false);
+      this.errorMessage.set('Login timed out. Please try again.');
+    }, AUTH_TIMEOUT_MS);
+  }
+
+  private finishLoginProgress(): void {
+    this.loginAttemptId += 1;
+    this.clearLoginProgress();
+    this.loading.set(false);
   }
 
   loadSocialProviders() {
@@ -115,27 +203,37 @@ export class Login implements OnInit {
   }
 
   handleGoogleLogin(idToken: string) {
-    this.loading.set(true);
+    const attemptId = this.loginAttemptId + 1;
+    this.startLoginProgress(attemptId);
     this.auth.googleLogin(idToken).subscribe({
-      next: (user) => this.handleAuthSuccess(user),
-      error: (err) => this.handleAuthError(err)
+      next: (user) => this.handleAuthSuccess(user, attemptId),
+      error: (err) => this.handleAuthError(err, attemptId)
     });
   }
 
   loginWithFacebook() {
+    if (this.loading()) {
+      return;
+    }
+
     FB.login((response: any) => {
       if (response.authResponse) {
-        this.loading.set(true);
+        const attemptId = this.loginAttemptId + 1;
+        this.startLoginProgress(attemptId);
         this.auth.facebookLogin(response.authResponse.accessToken).subscribe({
-          next: (user) => this.handleAuthSuccess(user),
-          error: (err) => this.handleAuthError(err)
+          next: (user) => this.handleAuthSuccess(user, attemptId),
+          error: (err) => this.handleAuthError(err, attemptId)
         });
       }
     }, { scope: 'public_profile,email' });
   }
 
-  private handleAuthSuccess(user: User) {
-    this.loading.set(false);
+  private handleAuthSuccess(user: User, attemptId: number) {
+    if (this.loginAttemptId !== attemptId) {
+      return;
+    }
+
+    this.finishLoginProgress();
     this.navigateAfterLogin(user);
   }
 
@@ -153,8 +251,12 @@ export class Login implements OnInit {
     }
   }
 
-  private handleAuthError(err: any) {
-    this.loading.set(false);
+  private handleAuthError(err: any, attemptId: number) {
+    if (this.loginAttemptId !== attemptId) {
+      return;
+    }
+
+    this.finishLoginProgress();
     this.errorMessage.set(err.error?.message || 'Authentication failed. Please try again.');
   }
 
@@ -163,21 +265,31 @@ export class Login implements OnInit {
   }
 
   onLogin(form: any) {
-    if (form.invalid) {
-      form.control.markAllAsTouched();
+    if (form.invalid || this.loading()) {
+      if (form.invalid) {
+        form.control.markAllAsTouched();
+      }
       return;
     }
 
-    this.loading.set(true);
-    this.errorMessage.set('');
+    const attemptId = this.loginAttemptId + 1;
+    this.startLoginProgress(attemptId);
 
     this.auth.login(this.credentials).subscribe({
       next: (user) => {
-        this.loading.set(false);
+        if (this.loginAttemptId !== attemptId) {
+          return;
+        }
+
+        this.finishLoginProgress();
         this.navigateAfterLogin(user);
       },
       error: (err) => {
-        this.loading.set(false);
+        if (this.loginAttemptId !== attemptId) {
+          return;
+        }
+
+        this.finishLoginProgress();
         this.errorMessage.set(err.error?.message || 'Invalid username or password.');
       }
     });

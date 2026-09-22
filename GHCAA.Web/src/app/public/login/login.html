@@ -41,7 +41,15 @@
             </div>
 
             <button type="submit" class="btn btn-accent w-full" [disabled]="loginForm.invalid || loading()">
-                {{ loading() ? 'Authenticating...' : 'Login' }}
+                <span *ngIf="loading() && loginStatus(); else loginButtonLabel" class="login-status-wrap" aria-live="polite" aria-busy="true">
+                    <span class="login-status-text">{{ loginStatus() }}</span>
+                    <span class="login-status-dots" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </span>
+                <ng-template #loginButtonLabel>Login</ng-template>
             </button>
 
             <div class="social-login-separator" *ngIf="socialProviders().length > 0">
@@ -49,10 +57,10 @@
             </div>
 
             <div class="social-login-buttons" *ngIf="socialProviders().length > 0">
-                <button *ngIf="isProviderEnabled('Google')" type="button" class="btn btn-social btn-google" (click)="loginWithGoogle()">
+                <button *ngIf="isProviderEnabled('Google')" type="button" class="btn btn-social btn-google" (click)="loginWithGoogle()" [disabled]="loading()">
                     <app-icon name="google" [size]="16"></app-icon> Continue with Google
                 </button>
-                <button *ngIf="isProviderEnabled('Facebook')" type="button" class="btn btn-social btn-facebook" (click)="loginWithFacebook()">
+                <button *ngIf="isProviderEnabled('Facebook')" type="button" class="btn btn-social btn-facebook" (click)="loginWithFacebook()" [disabled]="loading()">
                     <app-icon name="facebook" [size]="16"></app-icon> Continue with Facebook
                 </button>
             </div>
