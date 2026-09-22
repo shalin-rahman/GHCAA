@@ -345,11 +345,11 @@ one.
 
 ## 7.14 Software Configuration Management
 
-The repository carries 292 commits on `HEAD` and six local branches: `dev`, `preprod`,
+The repository carries 295 commits on `HEAD` and six local branches: `dev`, `preprod`,
 `release-1`, `release-2`, `release-3_b4_generic_N_refactor` and `release-4_white_paper`, plus
 `dev-mobile` and `mobile_app` that exist only on the remote. `dev` is the integration branch;
 `preprod` (the branch this chapter was written from) trails `dev` by a `git rev-list --count dev..preprod`
-count of 52, which is the gap between what has been merged to `dev` and
+count of 68, which is the gap between what has been merged to `dev` and
 what has actually been promoted toward the staging environment described in §10. The
 `release-N` branches are not conventional long-lived release trains — their names
 (`release-3_b4_generic_N_refactor`, `release-4_white_paper`) read as snapshots taken before a

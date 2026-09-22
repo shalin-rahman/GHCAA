@@ -56,7 +56,7 @@ was rejected and why.
 The **design cycle** is the inner loop of building and evaluating, repeated across the increments
 Chapter 7 reports and gated, in every increment, by the verification discipline described in §4.4.
 This is the cycle that ran most often. It is also the cycle for which the repository itself is the
-clearest evidence, since every one of the two hundred and ninety-two commits between 9 February and
+clearest evidence, since every one of the two hundred and ninety-five commits between 9 February and
 22 September 2026 is a turn of it.
 
 ## 4.3 Mapping Design Science Activities to the Work Performed
@@ -69,13 +69,13 @@ document.
 | --- | --- | --- |
 | Problem identification and motivation | Observation of the paper-based application, cash-and-ledger collection and Facebook-circulated constitution described in §1.2 | §1.2, §1.3 |
 | Definition of objectives for a solution | The eight objectives of §1.6, each traced to a research question | §1.6 |
-| Design and development | Eighty-six numbered work packages recorded as they were opened, most of them triggered by a stakeholder request rather than by the author's own plan; forty-nine mapped entities, thirty-six API controllers and two client applications delivered across them | `docs/TODO.md`; Chs. 5–7 |
+| Design and development | Eighty-seven numbered work packages recorded as they were opened, most of them triggered by a stakeholder request rather than by the author's own plan; forty-nine mapped entities, thirty-six API controllers and two client applications delivered across them | `docs/TODO.md`; Chs. 5–7 |
 | Demonstration | The artefact running against a seeded database, exercised in the formal technical review sessions of §3.12 and deployed to the pre-production environment of Chapter 10 | §3.12, Ch. 10 |
 | Evaluation | Executed against the plan declared in §4.5 | Ch. 9, Ch. 12 |
 | Communication | This dissertation, and the documentation corpus in `docs/` that a successor maintainer would read first | Whole document |
 
 The "design and development" row understates nothing by omission and nothing by exaggeration: the
-eighty-six work packages are `docs/TODO.md`'s own numbering, several of them opened explicitly "raised by
+eighty-seven work packages are `docs/TODO.md`'s own numbering, several of them opened explicitly "raised by
 user" on a dated request, which is the clearest documentary evidence available that the relevance
 cycle kept running throughout construction rather than only at the requirements stage. This chapter
 and Chapter 11 count the same project by five different units — commit, tracker task, work package,
@@ -112,7 +112,7 @@ change in response to what the working software reveals [53], [54].
 
 What was actually followed is incremental and evolutionary delivery in the sense Lehman describes
 software's continuing growth and increasing complexity as inherent to a live system rather than as a
-process failure [55]: eighty-six work packages, opened as problems were found or requested, each closed
+process failure [55]: eighty-seven work packages, opened as problems were found or requested, each closed
 against a gate rather than against a date. The gate is stated plainly in `docs/TODO.md`'s own
 verification standard: "no task marked done until its test passes", and the phased remediation plans
 in `docs/FORUM_PLAN_2026-05.md` end each phase with an explicit gate line, for example `dotnet test` (API),

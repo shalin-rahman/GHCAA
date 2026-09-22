@@ -134,7 +134,7 @@ CODE = [
      ["GHCAA.API/Middleware", "GHCAA.Application/Security",
       "GHCAA.API/Controllers/SecureFilesController.cs",
       "GHCAA.API/Controllers/RolesController.cs"], ["C2"]),
-    ("C13", "Web client", ["11", "26", "30", "33", "53", "54", "56", "58"],
+    ("C13", "Web client", ["11", "26", "30", "33", "53", "54", "56", "58", "87"],
      ["GHCAA.Web/src"],
      ["C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11"]),
     ("C14", "Mobile client", ["1", "8", "60"], ["GHCAA.Mobile/lib"],

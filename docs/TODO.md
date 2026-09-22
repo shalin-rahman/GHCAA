@@ -1376,3 +1376,26 @@ repository-count finding.
 09-verification.md, 10-deployment.md, 11-project-management.md, 12-results.md and 13-conclusion.md.
 Closing those needs real dissertation evidence (verification runs, deployment records, results data)
 that cannot be produced by a documentation-sync pass, and is a separate, larger piece of work.
+
+---
+
+# Work Package 87 — Login authentication progress status
+
+<!-- wbs: component=C13 start=2026-09-22 end=2026-09-22 after=86 -->
+
+Two commits (894567f3, 6eec298a) shipped a new public login flow — `docs/specs/007-login-authentication-status/spec.md`
+and `plan.md`, plus `login.html`/`login.scss`/`login.spec.ts`/`login.ts` — with no matching tracker
+entry, found during a routine review of recent implementations against `docs/TODO.md`.
+
+87.1 [DONE] **Priority: P3 | Depends on: none.** Replace the static `Authenticating...` label with a
+timed sequence of technical-sounding status verbs (`Connecting`, `Validating`, `Hashing`, etc., a
+6-to-7-item subset chosen per attempt) shown in strict forward order while the request is pending, each
+transition a 1.2s crossfade using the login page's existing theme tokens and button styling. Submit and
+social-login buttons stay disabled for the duration to block duplicate requests.
+**Acceptance:** done; `docs/specs/007-login-authentication-status/spec.md` FR-1/FR-2/FR-3.
+
+87.2 [DONE] **Priority: P3 | Depends on: 87.1.** Lifecycle safety: an 8-second timeout stops the
+sequence, restores the idle form, and shows `Login timed out. Please try again.` if the request hangs;
+`ngOnDestroy` clears the interval and timeout timers so no callback fires after the component is gone;
+the progress indicator and label both return to their idle state immediately on success or failure.
+**Acceptance:** done; `npx vitest run src/app/public/login/login.spec.ts` (6 passed, run 2026-09-22).
