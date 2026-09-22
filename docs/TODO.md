@@ -213,6 +213,12 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
   code moves. `docs/SEED_CLASSIFICATION.md` has the per-file breakdown.
 
 ### P1 — HIGH (security surface / explicitly time-sensitive / blocking other work)
+- **88.1–88.5** — The May 2026 alumni batch's delivery mechanism (a dedicated EF migration) no longer
+  exists in the tree after the WP62 seed refactor; `InstitutionDataSeeder`'s empty-table-only model
+  can't deliver it to a live DB either. Extending the existing bulk-import feature into an idempotent,
+  atomic, PaymentHistory-covering path instead, plus a preview grid so bad rows get caught before
+  commit, per `docs/specs/008-idempotent-member-batch-import/`.
+  Not started; 88.4 needs a reachable dev/preprod database that isn't available from a coding session.
 - **47.13.3–47.13.7** — Mutation-coverage remediation, remaining after 47.13.1/47.13.2 closed
   2026-09-04 (`AuthController` non-Login actions incl. the step-up endpoints, 20 tests; `LookupsController`
   full CRUD, 12 tests; backend suite 532→564, zero regressions).
@@ -1399,3 +1405,57 @@ sequence, restores the idle form, and shows `Login timed out. Please try again.`
 `ngOnDestroy` clears the interval and timeout timers so no callback fires after the component is gone;
 the progress indicator and label both return to their idle state immediately on success or failure.
 **Acceptance:** done; `npx vitest run src/app/public/login/login.spec.ts` (6 passed, run 2026-09-22).
+
+# Work Package 88 — Idempotent delivery path for the May 2026 alumni batch
+
+Raised by the user 2026-09-22, who suspected Work Package 46.1 "reverted while migration re-factored."
+Confirmed: 46.1-46.5 stay correctly `[DONE]` in `docs/TODO_ARCHIVE.md` for the work they describe, but
+their delivery mechanism no longer exists in the tree. The dedicated EF migration
+(`AddMay2026AlumniRegistrationBatch`) was never committed to tracked history, and the WP62 white-label
+work replaced the migration-based seed with `InstitutionDataSeeder`, which seeds a table only when it
+is completely empty — so on any real deployment, where `Members` already has rows, the 47-member batch
+never reaches the live database even though `profiles/ghc/demo-data/members.json` still holds all 631
+rows. Scope and design in `docs/specs/008-idempotent-member-batch-import/`.
+
+The user separately flagged that 88.4's real-DB verification happens only after a commit — an admin
+should be able to catch and fix a bad row before anything is written. 88.5 adds that preview step.
+
+88.1 [TODO] **Priority: P1 | Depends on: none.** Extend the existing admin bulk-import feature
+(`MemberImportController` / `MemberImportService`) — which already upserts Member rows by NID/email —
+to accept `.csv` directly, enforce a unique `MembershipNumber` index, and cascade its idempotency check
+to AcademicRecord, ProfessionalRecord, PaymentHistory (not currently touched by the importer), User,
+and UserRoles: each related row inserted only when a matching one is not already present for that
+member. Per `docs/specs/008-idempotent-member-batch-import/spec.md` FR-1 through FR-3.
+**Acceptance:** not started.
+
+88.2 [TODO] **Priority: P1 | Depends on: 88.1.** Wrap the whole import run in a single database
+transaction so a write failure partway through rolls back every change from that run, replacing the
+current two-phase save that can leave a Member row committed with its related rows missing. Extend the
+import response with per-table insert/update/skip counts so a real run is its own DB-state
+verification. Per spec FR-4/FR-5.
+**Acceptance:** not started.
+
+88.3 [TODO] **Priority: P1 | Depends on: 88.1, 88.2.** Add an integration test (`GHCAA.Tests/Services/
+MemberImportServiceTests.cs`, existing `TestBase` SQLite fixture) that seeds a member with a full set
+of related rows, runs the import twice, and asserts the second run reports zero inserts everywhere with
+identical row counts before and after; add a companion test proving a forced mid-batch write failure
+leaves nothing committed.
+**Acceptance:** not started.
+
+88.4 [TODO] **Priority: P1 | Depends on: 88.1, 88.2, 88.3.** Run the extended import against a real
+database (not the seed JSON) seeded from `profiles/ghc/demo-data/`, using the row counts from the
+database itself, before and after two consecutive runs, to confirm no duplication. This step needs a
+reachable dev or preprod database and cannot be completed from a sandboxed session — record the actual
+counts here once run.
+**Acceptance:** not started.
+
+88.5 [TODO] **Priority: P1 | Depends on: 88.1.** Add a preview (dry-run) endpoint and an editable
+preview grid to the import flow, so an admin sees and fixes bad cells before anything is written
+instead of only after a failed commit. The endpoint runs the same mapping/validation/idempotency
+checks as a real import but writes nothing, returning per-row, per-cell errors (row index + column
+key, not a flat message list). The grid marks each invalid cell at its exact location, lets the admin
+edit it in place, and blocks commit while any row is still invalid. No reusable grid/table component
+exists in `GHCAA.Web` today, so this also adds one as a generic component (rows, columns, per-cell
+errors in; cell-edit and commit events out) for other bulk-data features to reuse later, rather than a
+one-off built only for member import. Per spec FR-6.
+**Acceptance:** not started.

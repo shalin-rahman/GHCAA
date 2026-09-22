@@ -2,7 +2,7 @@ using GHCAA.Application.DTOs;
 
 namespace GHCAA.Application.Interfaces
 {
-    // TODO 37.3: fundraising campaigns + donor honour roll.
+    // TODO 37.8: fundraising campaigns + donor honour roll.
     public interface ICampaignService
     {
         Task<IEnumerable<CampaignDto>> GetPublicCampaignsAsync(CancellationToken cancellationToken = default);

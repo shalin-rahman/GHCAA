@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace GHCAA.Domain.Models
 {
-    // TODO 37.3: a fundraising campaign with a public page and a live progress bar.
+    // TODO 37.8: a fundraising campaign with a public page and a live progress bar.
     public class Campaign
     {
         public int Id { get; set; }
