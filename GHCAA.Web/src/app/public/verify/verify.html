@@ -1,0 +1,21 @@
+<main class="verify-page">
+  <section class="verify-card surface">
+    <p class="eyebrow">CREDENTIAL VERIFICATION</p>
+    <h1>Verify a credential</h1>
+    <form (ngSubmit)="verify()">
+      <label for="credential-code">Short code</label>
+      <input id="credential-code" name="shortCode" [(ngModel)]="shortCode"
+        maxlength="10" autocomplete="off" placeholder=" ten-character code">
+      <button class="btn btn-accent" type="submit" [disabled]="loading()">
+        {{ loading() ? 'Checking...' : 'Verify' }}
+      </button>
+    </form>
+    <p class="error-msg" *ngIf="error()">{{ error() }}</p>
+    <article class="verification-result" *ngIf="result() as credential">
+      <h2>{{ credential.valid ? 'Credential valid' : 'Credential revoked' }}</h2>
+      <p *ngIf="credential.memberName">{{ credential.memberName }}</p>
+      <p>{{ credential.status }}</p>
+      <p *ngIf="credential.issuedOn">Issued {{ credential.issuedOn | date:'dd-MM-yyyy' }}</p>
+    </article>
+  </section>
+</main>

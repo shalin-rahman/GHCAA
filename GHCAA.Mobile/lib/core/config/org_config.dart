@@ -160,6 +160,8 @@ class FeatureToggles {
   final bool allowSelfRegistration;
   final bool allowNonMemberEventRegistration;
   final bool enableFundraising;
+  final bool enableScholarships;
+  final bool enableLegacyArchive;
 
   FeatureToggles({
     required this.enableEvents,
@@ -180,6 +182,8 @@ class FeatureToggles {
     required this.allowSelfRegistration,
     required this.allowNonMemberEventRegistration,
     required this.enableFundraising,
+    required this.enableScholarships,
+    required this.enableLegacyArchive,
   });
 
   factory FeatureToggles.fromJson(Map<String, dynamic> json) {
@@ -203,6 +207,8 @@ class FeatureToggles {
       allowNonMemberEventRegistration:
           json['allowNonMemberEventRegistration'] ?? true,
       enableFundraising: json['enableFundraising'] ?? true,
+      enableScholarships: json['enableScholarships'] ?? false,
+      enableLegacyArchive: json['enableLegacyArchive'] ?? false,
     );
   }
 }
@@ -498,6 +504,8 @@ class OrgConfig {
           allowSelfRegistration: true,
           allowNonMemberEventRegistration: true,
           enableFundraising: true,
+          enableScholarships: false,
+          enableLegacyArchive: false,
         ),
         workflow: OrgWorkflow(
           memberApprovalMode: 'ManualReview',

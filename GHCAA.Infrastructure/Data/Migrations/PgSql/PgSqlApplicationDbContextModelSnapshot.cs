@@ -220,6 +220,106 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.ToTable("AmendmentVotes");
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.ArchiveCollection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreatedByMemberId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("Decade")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<int>("ModerationState")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PublicationState")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ArchiveCollections");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ArchiveItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ArchiveCollectionId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreatedByMemberId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("Decade")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("FileUploadId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("LinkedMemberId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("MediaUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<int>("ModerationState")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Narrator")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("PublicationState")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Summary")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("Transcript")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArchiveCollectionId");
+
+                    b.HasIndex("FileUploadId");
+
+                    b.HasIndex("LinkedMemberId");
+
+                    b.HasIndex("Transcript");
+
+                    b.HasIndex("PublicationState", "ModerationState");
+
+                    b.ToTable("ArchiveItems");
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.Ballot", b =>
                 {
                     b.Property<int>("Id")
@@ -856,7 +956,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "OTP_EMAIL",
                             Description = "OTP verification email",
-                            LastUpdated = new DateTime(2026, 9, 21, 3, 22, 41, 704, DateTimeKind.Utc).AddTicks(4955),
+                            LastUpdated = new DateTime(2026, 9, 22, 15, 59, 15, 174, DateTimeKind.Utc).AddTicks(9685),
                             Subject = "{{OrgShortName}} Verification Code: {{OtpCode}}",
                             Variables = "['FullName', 'OtpCode']"
                         },
@@ -867,7 +967,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "WELCOME_EMAIL",
                             Description = "Welcome email",
-                            LastUpdated = new DateTime(2026, 9, 21, 3, 22, 41, 705, DateTimeKind.Utc).AddTicks(1924),
+                            LastUpdated = new DateTime(2026, 9, 22, 15, 59, 15, 176, DateTimeKind.Utc).AddTicks(2185),
                             Subject = "Welcome to {{OrgName}}!",
                             Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
                         },
@@ -878,7 +978,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PASSWORD_RESET",
                             Description = "Password reset email",
-                            LastUpdated = new DateTime(2026, 9, 21, 3, 22, 41, 705, DateTimeKind.Utc).AddTicks(2065),
+                            LastUpdated = new DateTime(2026, 9, 22, 15, 59, 15, 176, DateTimeKind.Utc).AddTicks(2365),
                             Subject = "{{OrgShortName}} Account Password Reset",
                             Variables = "['FullName', 'ResetUrl']"
                         },
@@ -889,7 +989,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "APPLICATION_REJECTED",
                             Description = "Application rejection email",
-                            LastUpdated = new DateTime(2026, 9, 21, 3, 22, 41, 705, DateTimeKind.Utc).AddTicks(2483),
+                            LastUpdated = new DateTime(2026, 9, 22, 15, 59, 15, 176, DateTimeKind.Utc).AddTicks(2732),
                             Subject = "Update on your {{OrgShortName}} Membership Application",
                             Variables = "['FullName', 'Reason']"
                         },
@@ -900,7 +1000,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PAYMENT_RECEIVED",
                             Description = "Payment received acknowledgment",
-                            LastUpdated = new DateTime(2026, 9, 21, 3, 22, 41, 705, DateTimeKind.Utc).AddTicks(2572),
+                            LastUpdated = new DateTime(2026, 9, 22, 15, 59, 15, 176, DateTimeKind.Utc).AddTicks(2851),
                             Subject = "Payment Received: {{Amount}} BDT",
                             Variables = "['FullName', 'Amount', 'TrxID']"
                         },
@@ -911,7 +1011,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PAYMENT_STATUS_UPDATED",
                             Description = "Payment status update email",
-                            LastUpdated = new DateTime(2026, 9, 21, 3, 22, 41, 705, DateTimeKind.Utc).AddTicks(2638),
+                            LastUpdated = new DateTime(2026, 9, 22, 15, 59, 15, 176, DateTimeKind.Utc).AddTicks(2950),
                             Subject = "Payment Status Updated: {{Status}}",
                             Variables = "['FullName', 'TrxID', 'Status']"
                         },
@@ -922,7 +1022,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "FAMILY_LINK_REQUEST",
                             Description = "Family link request email",
-                            LastUpdated = new DateTime(2026, 9, 21, 3, 22, 41, 705, DateTimeKind.Utc).AddTicks(2692),
+                            LastUpdated = new DateTime(2026, 9, 22, 15, 59, 15, 176, DateTimeKind.Utc).AddTicks(3040),
                             Subject = "New Family Link Request from {{RequesterName}}",
                             Variables = "['FullName', 'RequesterName', 'Relationship', 'ProfileUrl']"
                         },
@@ -933,7 +1033,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "FAMILY_LINK_ACCEPTED",
                             Description = "Family link acceptance confirmation",
-                            LastUpdated = new DateTime(2026, 9, 21, 3, 22, 41, 705, DateTimeKind.Utc).AddTicks(2754),
+                            LastUpdated = new DateTime(2026, 9, 22, 15, 59, 15, 176, DateTimeKind.Utc).AddTicks(3147),
                             Subject = "Family Link Request Accepted",
                             Variables = "['FullName', 'TargetName']"
                         });
@@ -1569,6 +1669,51 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Name = "Mentoring a Fellow Alumni",
                             Points = 200
                         });
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.IssuedCredential", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CredentialType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ExpiresOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("IssuedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("RevokedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RevokedReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("ShortCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId");
+
+                    b.HasIndex("ShortCode")
+                        .IsUnique();
+
+                    b.ToTable("IssuedCredentials");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.JobOpportunity", b =>
@@ -3776,6 +3921,257 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.ToTable("SavedPaymentMethods");
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.ScholarshipApplication", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicantEmail")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
+
+                    b.Property<string>("ApplicantName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ApplicantPhone")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Class")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("GuardianName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("HouseholdIncome")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("InstitutionName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MeritStatement")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("NeedStatement")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("ReferenceCode")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<int>("ScholarshipCallId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReferenceCode")
+                        .IsUnique();
+
+                    b.HasIndex("ScholarshipCallId");
+
+                    b.ToTable("ScholarshipApplications");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ScholarshipAward", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("AwardedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DisbursementStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("FinancialRecordId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ScholarshipApplicationId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FinancialRecordId")
+                        .IsUnique()
+                        .HasFilter("\"FinancialRecordId\" IS NOT NULL");
+
+                    b.HasIndex("ScholarshipApplicationId")
+                        .IsUnique();
+
+                    b.ToTable("ScholarshipAwards");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ScholarshipCall", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<decimal>("AwardAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("ClosesOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EligibilityCriteria")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("OpensOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ScholarshipFundId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SlotCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScholarshipFundId");
+
+                    b.ToTable("ScholarshipCalls");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ScholarshipDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("FileUploadId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ScholarshipApplicationId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FileUploadId");
+
+                    b.HasIndex("ScholarshipApplicationId", "FileUploadId")
+                        .IsUnique();
+
+                    b.ToTable("ScholarshipDocuments");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ScholarshipFund", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("NamedAfter")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<decimal>("TargetAmount")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ScholarshipFunds");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ScholarshipReview", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comments")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<decimal>("MeritScore")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("NeedScore")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("ReviewedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ReviewerMemberId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ScholarshipApplicationId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReviewerMemberId");
+
+                    b.HasIndex("ScholarshipApplicationId", "ReviewerMemberId")
+                        .IsUnique();
+
+                    b.ToTable("ScholarshipReviews");
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.ScrutinyDecision", b =>
                 {
                     b.Property<int>("Id")
@@ -4220,6 +4616,31 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Navigation("Member");
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.ArchiveItem", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.ArchiveCollection", "Collection")
+                        .WithMany("Items")
+                        .HasForeignKey("ArchiveCollectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GHCAA.Domain.Models.FileUpload", "FileUpload")
+                        .WithMany()
+                        .HasForeignKey("FileUploadId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("GHCAA.Domain.Models.Member", "LinkedMember")
+                        .WithMany()
+                        .HasForeignKey("LinkedMemberId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Collection");
+
+                    b.Navigation("FileUpload");
+
+                    b.Navigation("LinkedMember");
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.Ballot", b =>
                 {
                     b.HasOne("GHCAA.Domain.Models.Election", "Election")
@@ -4514,6 +4935,17 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.IssuedCredential", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Member");
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.JobOpportunity", b =>
                 {
                     b.HasOne("GHCAA.Domain.Models.Member", "PostedBy")
@@ -4711,6 +5143,84 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Navigation("Member");
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.ScholarshipApplication", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.ScholarshipCall", "ScholarshipCall")
+                        .WithMany("Applications")
+                        .HasForeignKey("ScholarshipCallId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ScholarshipCall");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ScholarshipAward", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.FinancialRecord", "FinancialRecord")
+                        .WithMany()
+                        .HasForeignKey("FinancialRecordId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GHCAA.Domain.Models.ScholarshipApplication", "ScholarshipApplication")
+                        .WithOne("Award")
+                        .HasForeignKey("GHCAA.Domain.Models.ScholarshipAward", "ScholarshipApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FinancialRecord");
+
+                    b.Navigation("ScholarshipApplication");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ScholarshipCall", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.ScholarshipFund", "ScholarshipFund")
+                        .WithMany("Calls")
+                        .HasForeignKey("ScholarshipFundId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ScholarshipFund");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ScholarshipDocument", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.FileUpload", "FileUpload")
+                        .WithMany()
+                        .HasForeignKey("FileUploadId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GHCAA.Domain.Models.ScholarshipApplication", "ScholarshipApplication")
+                        .WithMany("Documents")
+                        .HasForeignKey("ScholarshipApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FileUpload");
+
+                    b.Navigation("ScholarshipApplication");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ScholarshipReview", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.Member", "ReviewerMember")
+                        .WithMany()
+                        .HasForeignKey("ReviewerMemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GHCAA.Domain.Models.ScholarshipApplication", "ScholarshipApplication")
+                        .WithMany("Reviews")
+                        .HasForeignKey("ScholarshipApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReviewerMember");
+
+                    b.Navigation("ScholarshipApplication");
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.ScrutinyDecision", b =>
                 {
                     b.HasOne("GHCAA.Domain.Models.Nomination", null)
@@ -4767,6 +5277,11 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ArchiveCollection", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.Ballot", b =>
@@ -4850,6 +5365,25 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Navigation("Options");
 
                     b.Navigation("Votes");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ScholarshipApplication", b =>
+                {
+                    b.Navigation("Award");
+
+                    b.Navigation("Documents");
+
+                    b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ScholarshipCall", b =>
+                {
+                    b.Navigation("Applications");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ScholarshipFund", b =>
+                {
+                    b.Navigation("Calls");
                 });
 #pragma warning restore 612, 618
         }

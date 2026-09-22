@@ -134,7 +134,9 @@ function buildFallback(cfg) {
             requireDocumentUpload: !!cfg.Features.RequireDocumentUpload,
             allowSelfRegistration: !!cfg.Features.AllowSelfRegistration,
             allowNonMemberEventRegistration: !!cfg.Features.AllowNonMemberEventRegistration,
-            enableFundraising: !!cfg.Features.EnableFundraising
+            enableFundraising: !!cfg.Features.EnableFundraising,
+            enableScholarships: !!cfg.Features.EnableScholarships,
+            enableLegacyArchive: !!cfg.Features.EnableLegacyArchive
         },
         workflow: {
             memberApprovalMode: cfg.Workflow.MemberApprovalMode,

@@ -1,0 +1,47 @@
+<main class="scholarships-page">
+  @if (loading()) {
+    <app-loading-panel label="Loading scholarship calls..." [size]="80"></app-loading-panel>
+  } @else {
+    <h1>Scholarship Programme</h1>
+    <p class="intro">Apply for an open scholarship call and check an existing application by reference.</p>
+    @if (calls().length === 0) { <p class="empty-state">No scholarship calls are open right now.</p> }
+    <section class="call-grid" aria-label="Open scholarship calls">
+      @for (call of calls(); track call.id) {
+        <article class="call-card">
+          <h2>{{ call.academicYear }}</h2>
+          <p>{{ call.eligibilityCriteria }}</p>
+          <p><strong>{{ call.slotCount }}</strong> places · Award {{ call.awardAmount | number:'1.0-2' }}</p>
+          <button type="button" (click)="chooseCall(call)">Apply for this call</button>
+        </article>
+      }
+    </section>
+    @if (selectedCall(); as call) {
+      <section id="scholarship-application" class="surface">
+        <h2>Application for {{ call.academicYear }}</h2>
+        <div class="form-grid">
+          <label>Name <input [(ngModel)]="application.applicantName" /></label>
+          <label>Email <input type="email" [(ngModel)]="application.applicantEmail" /></label>
+          <label>Phone <input [(ngModel)]="application.applicantPhone" /></label>
+          <label>Institution <input [(ngModel)]="application.institutionName" /></label>
+          <label>Class <input [(ngModel)]="application.class" /></label>
+          <label>Guardian name <input [(ngModel)]="application.guardianName" /></label>
+          <label>Household income <input type="number" [(ngModel)]="application.householdIncome" /></label>
+          <label>Need statement <textarea [(ngModel)]="application.needStatement"></textarea></label>
+          <label>Merit statement <textarea [(ngModel)]="application.meritStatement"></textarea></label>
+        </div>
+        <button type="button" (click)="submitApplication()" [disabled]="submitting()">{{ submitting() ? 'Submitting...' : 'Submit application' }}</button>
+      </section>
+    }
+    <section class="surface status-panel">
+      <h2>Check application status</h2>
+      <div class="form-grid">
+        <label>Reference code <input [(ngModel)]="referenceCode" /></label>
+        <label>Email <input type="email" [(ngModel)]="statusEmail" /></label>
+      </div>
+      <button type="button" (click)="lookupStatus()" [disabled]="lookingUp()">{{ lookingUp() ? 'Checking...' : 'Check status' }}</button>
+      @if (status(); as result) {
+        <p class="status-result"><strong>{{ result.referenceCode }}</strong>: {{ result.status }} · Submitted {{ result.submittedAt | date:'dd-MM-yyyy' }}</p>
+      }
+    </section>
+  }
+</main>

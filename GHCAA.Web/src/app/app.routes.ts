@@ -96,6 +96,30 @@ export const routes: Routes = [
                 ]
             },
             {
+                path: 'scholarships',
+                loadComponent: () => import('./public/scholarships/scholarships').then(m => m.Scholarships),
+                canActivate: [featureGuard('enableScholarships')],
+                title: 'Scholarships | {branding.shortName}',
+                data: { description: 'Apply for scholarships and check an application status.' }
+            },
+            {
+                path: 'verify',
+                children: [
+                    { path: '', loadComponent: () => import('./public/verify/verify').then(m => m.Verify) },
+                    { path: ':shortCode', loadComponent: () => import('./public/verify/verify').then(m => m.Verify) }
+                ]
+            },
+            {
+                path: 'legacy',
+                canActivate: [featureGuard('enableLegacyArchive')],
+                title: 'Oral History Archive | {branding.shortName}',
+                data: { description: 'Approved oral histories and community memories from {branding.fullName}.' },
+                children: [
+                    { path: '', loadComponent: () => import('./public/legacy/legacy').then(m => m.LegacyPage) },
+                    { path: 'item/:id', loadComponent: () => import('./public/legacy/legacy').then(m => m.LegacyPage) }
+                ]
+            },
+            {
                 path: 'news',
                 loadComponent: () => import('./common/news/news').then(m => m.News),
                 title: 'News & Notices | {branding.shortName}',

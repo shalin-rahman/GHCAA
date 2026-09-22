@@ -561,6 +561,8 @@ export const API_ENDPOINTS = {
     PROFILE: '/api/profile',
     FINANCIALS: '/api/financials',
     CAMPAIGNS: '/api/campaigns',
+    SCHOLARSHIPS: '/api/scholarships',
+    ARCHIVE: '/api/archive',
     MESSAGING: {
         RECENT: '/api/messaging/recent',
         HISTORY: '/api/messaging/history',

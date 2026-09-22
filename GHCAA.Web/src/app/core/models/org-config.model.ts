@@ -62,6 +62,8 @@ export interface FeatureToggles {
   allowSelfRegistration: boolean;
   allowNonMemberEventRegistration: boolean;
   enableFundraising: boolean;
+  enableScholarships: boolean;
+  enableLegacyArchive: boolean;
 }
 
 export interface OrgWorkflow {

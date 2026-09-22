@@ -305,6 +305,50 @@ The assistant runs entirely on internal data with a rule-based engine — it has
 
 ---
 
+## 8. Alumni Programs & Verification
+
+### 8.1 Scholarship & Student-Aid Programme
+- **Business description**: Fund → open call → application → blind review → award → disbursement, for scholarships given to schoolchildren (not association members) out of named endowment funds.
+- **User roles**: Public (apply, check status), Member (reviewer queue for panel members), Admin/SuperAdmin (funds, calls, shortlist, award, disburse).
+- **Inputs / outputs**:
+  - Screens: `/scholarships` (call listing, apply form, status check), `portal/scholarships` (reviewer queue), `admin/scholarships` (funds, calls, shortlist, award, disburse).
+  - API: `api/scholarships` — public apply and `GET api/scholarships/status/{referenceCode}` are anonymous; member review-queue and admin fund/call/award/disburse endpoints require auth.
+  - Key fields: `ScholarshipFund`, `ScholarshipCall`, `ScholarshipApplication` (identified by `ReferenceCode` + email, not a Member record), `ScholarshipDocument`, `ScholarshipReview`, `ScholarshipAward`.
+- **Validations & rules**:
+  - Applicants are not members: the public application form never creates `Member`/`User` rows.
+  - Blind review is enforced at the query layer — `GetApplicationForReviewAsync` projects a DTO that omits `ApplicantName`, `ApplicantEmail`, `ApplicantPhone` and `GuardianName`, exposing only `ReferenceCode`.
+  - Marking an award `Paid` writes an idempotent `FinancialRecord` (`RecordType = Expense`, `FinancialCategory = Grant`) and stores its id back on `ScholarshipAward.FinancialRecordId`.
+  - A flag column `enableScholarships` exists on `OrgConfigDto`/profile packs, but it is not wired to any runtime feature-flag mechanism — none exists project-wide yet.
+- **Dependencies**: `IScholarshipService`/`ScholarshipService`, existing `FileUpload` + `IFileValidationService` path for supporting documents (no new upload plumbing), Financial Ledger service.
+
+### 8.2 Oral-History / Legacy Archive
+- **Business description**: Recorded memories and testimony from senior alumni, organized into published collections with a searchable transcript for each item.
+- **User roles**: Public (read published items), Member (submit items), Admin (curation and moderation).
+- **Inputs / outputs**:
+  - Screen: `/legacy` (collections → item with transcript), member submission form, admin curation queue.
+  - API: `api/archive` — `GET api/archive/public` and `GET api/archive/items/{id}` are anonymous; submission and curation endpoints require auth.
+  - Key fields: `ArchiveCollection`, `ArchiveItem` (`Transcript`, `MediaFileUploadId` or `ExternalMediaUrl`, `DecadeTag`).
+- **Validations & rules**:
+  - An item must carry at least one of `FileUploadId`, `MediaUrl` or `Transcript` to be accepted; a submission with none of the three is rejected.
+  - Unpublished items never appear in the public read endpoints.
+  - Flag `enableLegacyArchive` exists on `OrgConfigDto`/profile packs but is not wired to any runtime feature-flag mechanism — none exists project-wide yet.
+- **Dependencies**: `IArchiveService`/`ArchiveService`, `FileUpload` + `IFileStorageService` for the upload path (external-link path is the default, upload is opt-in).
+
+### 8.3 Public Credential Verification
+- **Business description**: Anyone holding a printed ID card or certificate can confirm it is genuine by scanning its QR code or entering its short code.
+- **User roles**: Public (verify), Admin (revoke).
+- **Inputs / outputs**:
+  - Screen: `/verify/:code` plus a code-entry form at `/verify`, rendering a valid / revoked / unknown verdict; admin revocation action on the member detail page.
+  - API: `GET api/verify/{shortCode}`, anonymous, rate-limited via `RateLimitPolicies.CredentialVerification`.
+  - Key fields: `IssuedCredential` — a 10-character unambiguous-alphabet `ShortCode` (`^[A-HJ-NP-Z2-9]{10}$`), unique per credential.
+- **Validations & rules**:
+  - The response DTO (`CredentialVerificationDto`) carries only `Valid`, `MemberName`, `MembershipType`, `IssuedOn`, `Status` — no email, phone, address or member id, since the endpoint is publicly enumerable by design.
+  - Every generated ID card or certificate records an `IssuedCredential` and embeds a QR code pointing at `/verify/{shortCode}`.
+  - Flag `enableCredentialVerification` exists on `OrgConfigDto`/profile packs but is not wired to any runtime feature-flag mechanism — none exists project-wide yet.
+- **Dependencies**: `IIDCardService` (extended, not a new parallel service) + `CredentialCodeGenerator`, existing `QRCoder` helper, `LoginRateLimitMiddleware` rate-limit pattern.
+
+---
+
 ## Portal Architecture & Scopes
 
 The platform is divided into three operational scopes, each tailored to a distinct set of users.

@@ -14,6 +14,69 @@ export type JobCategory = 'IT' | 'Finance' | 'Engineering' | 'Marketing' | 'Educ
 export type SubmissionStatus = 'Draft' | 'Pending' | 'Approved' | 'Rejected';
 export type ArticleCategory = 'Event' | 'Magazine' | 'Regular';
 
+export type ScholarshipApplicationStatus =
+    'Draft' | 'Submitted' | 'UnderReview' | 'Shortlisted' | 'Awarded' | 'Rejected' | 'Withdrawn' | number;
+export type DisbursementStatus = 'Pending' | 'Approved' | 'Paid' | 'Cancelled' | number;
+
+export interface ScholarshipFund {
+    id: number;
+    name: string;
+    description: string;
+    namedAfter?: string;
+    targetAmount: number;
+    isActive: boolean;
+}
+
+export interface ScholarshipCall {
+    id: number;
+    scholarshipFundId: number;
+    academicYear: string;
+    opensOn: string | Date;
+    closesOn: string | Date;
+    slotCount: number;
+    awardAmount: number;
+    eligibilityCriteria: string;
+    isActive: boolean;
+}
+
+export interface CreateScholarshipApplication {
+    applicantName: string;
+    applicantEmail: string;
+    applicantPhone: string;
+    institutionName: string;
+    class: string;
+    guardianName: string;
+    householdIncome: number;
+    needStatement: string;
+    meritStatement: string;
+}
+
+export interface ScholarshipApplication {
+    id: number;
+    scholarshipCallId: number;
+    applicantName: string;
+    applicantEmail: string;
+    applicantPhone: string;
+    institutionName: string;
+    class: string;
+    guardianName: string;
+    householdIncome: number;
+    needStatement: string;
+    meritStatement: string;
+    status: ScholarshipApplicationStatus;
+    submittedAt: string | Date;
+    referenceCode: string;
+}
+
+export interface ScholarshipStatus {
+    referenceCode: string;
+    status: ScholarshipApplicationStatus;
+    academicYear: string;
+    submittedAt: string | Date;
+    awardAmount?: number;
+    disbursementStatus?: DisbursementStatus;
+}
+
 export enum PaymentGateway {
     None = 0,
     Stripe = 1,

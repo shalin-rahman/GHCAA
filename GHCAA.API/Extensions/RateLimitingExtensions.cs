@@ -67,6 +67,30 @@ namespace GHCAA.API.Extensions
                     });
                 });
 
+                options.AddPolicy<string>(RateLimitPolicies.ScholarshipStatus, httpContext =>
+                {
+                    var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                    var key = isTestEnv ? "__test__" : ip;
+                    return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+                    {
+                        Window = TimeSpan.FromMinutes(15),
+                        PermitLimit = isTestEnv ? 1000 : 10,
+                        QueueLimit = 0
+                    });
+
+                    options.AddPolicy<string>(RateLimitPolicies.CredentialVerification, httpContext =>
+                    {
+                        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                        var key = isTestEnv ? "__test__" : ip;
+                        return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+                        {
+                            Window = TimeSpan.FromMinutes(15),
+                            PermitLimit = isTestEnv ? 1000 : 30,
+                            QueueLimit = 0
+                        });
+                    });
+                });
+
                 // General API Policy: (100 requests per 1 minute)
                 options.AddFixedWindowLimiter(RateLimitPolicies.Api, opt =>
                 {

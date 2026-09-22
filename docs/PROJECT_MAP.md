@@ -419,6 +419,15 @@ not block a build yet). For the full mechanism and where it stands, see
 | `SavedPaymentMethod` | FK → Member; `Method`, `AccountNumber` |
 | `SpecialDayTheme` | `Name`, `Date`, `CssClass`, `IsActive` |
 | `GamificationConfig` | `PointsPerAction`, Rules |
+| `ScholarshipFund` | `NamedAfter?` (links to a memorial fund), `TargetAmount`, `IsActive` |
+| `ScholarshipCall` | FK → ScholarshipFund; `AcademicYear`, `OpensOn`/`ClosesOn`, `SlotCount`, `AwardAmount` |
+| `ScholarshipApplication` | FK → ScholarshipCall; identified by `ReferenceCode` + email, not a Member; `Status` (`ScholarshipApplicationStatus`) |
+| `ScholarshipDocument` | FK → ScholarshipApplication + FileUpload; `DocumentType` |
+| `ScholarshipReview` | FK → ScholarshipApplication + reviewer Member; `NeedScore`, `MeritScore`, `Comments` |
+| `ScholarshipAward` | FK → ScholarshipApplication; `Amount`, `DisbursementStatus`, `FinancialRecordId?` |
+| `ArchiveCollection` | `Title`, `Description`, `IsPublished`, `SortOrder` |
+| `ArchiveItem` | FK → ArchiveCollection; `Transcript?`, `MediaFileUploadId?`, `ExternalMediaUrl?`, `DecadeTag`, requires at least one of the three media fields |
+| `IssuedCredential` | FK → Member; `CredentialType`, unique 10-char `ShortCode` (`^[A-HJ-NP-Z2-9]{10}$`), `IsRevoked` |
 
 ---
 
@@ -454,6 +463,11 @@ not block a build yet). For the full mechanism and where it stands, see
 | `VolunteerRole` | EventOrganizer, GuestManagement, ContentCreator, Mentor, TechnicalSupport, Other |
 | `NotificationType` | EventCreation, ParticipationApproval, RegistrationUpdate, GeneralSystem, DirectMessage |
 | `SocialProvider` | Google, Facebook |
+| `ScholarshipApplicationStatus` | Draft, Submitted, UnderReview, Shortlisted, Awarded, Rejected, Withdrawn |
+| `DisbursementStatus` | Pending, Approved, Paid, Cancelled |
+| `ArchivePublicationState` | Draft, Published, Archived |
+| `ArchiveModerationState` | Pending, Approved, Rejected |
+| `CredentialType` | MembershipCertificate, IdCard, ElectionDocument |
 
 ### Constants (`GHCAA.Domain.Constants`)
 
@@ -760,8 +774,10 @@ not block a build yet). For the full mechanism and where it stands, see
 | `IAssistantService` | `AssistantService` | `SendMessageAsync(prompt, history)` → AI response |
 | `ISmsService` | `GreenwebSmsService` | `SendSmsAsync(number, message)` |
 | `IEmailService` | `GmailEmailService` | `SendAsync(to, subject, html)` |
-| `IIDCardService` | `IDCardService` | `GenerateIdCardPdfAsync(memberId)` → `byte[]` |
+| `IIDCardService` | `IDCardService` | `GenerateIdCardPdfAsync(memberId)` → `byte[]`; extended (WP37.8) with `VerifyCredentialAsync(shortCode)` → `CredentialVerificationDto?` and `RevokeCredentialAsync(credentialId, reason)` |
 | `IGamificationService` | `GamificationService` | `AddPoints`, `GetLeaderboard`, `GetConfig` |
+| `IScholarshipService` | `ScholarshipService` | Fund/call CRUD, `ApplyAsync`, `GetStatusAsync(referenceCode)`, `GetApplicationForReviewAsync` (blind-review projection), `AwardAsync`, `DisburseAsync` |
+| `IArchiveService` | `ArchiveService` | Collection CRUD, `SubmitItemAsync`, `GetPublicCollectionsAsync`, `GetPublicItemAsync(id)`, curation/moderation actions |
 | `IMemberImportService` | `MemberImportService` | `ImportFromCsvAsync(stream)` |
 | `IThemeService` | `ThemeService` | `GetActiveTheme()`, `SetTheme(id)`, `CreateTheme(dto)` |
 | `IInstitutionProfileProvider` | `InstitutionProfileProvider` | `ProfileName`, `OrgConfigDefaults` — reads `profiles/<ORG_PROFILE>/org-config.json`, resolved eagerly at boot. `AddSingleton`, not consumed anywhere yet (docs/TODO.md 62.1) |
@@ -814,6 +830,9 @@ not block a build yet). For the full mechanism and where it stands, see
 | `TokenResponseDto` | JWT login response |
 | `PollDto` / `PollOptionDto` | Poll data |
 | `CreatePollDto` / `PollVoteDto` | Poll creation / voting |
+| `ScholarshipDtos` (fund/call/application/review/award) | Scholarship programme; the review-queue DTO omits applicant identity fields |
+| `ArchiveDtos` (collection/item) | Oral-history archive CRUD and public reads |
+| `CredentialVerificationDto` | `IIDCardService.VerifyCredentialAsync` response — `{ Valid, MemberName, MembershipType, IssuedOn, Status }` only |
 
 ---
 
@@ -862,6 +881,8 @@ All services are registered as **Scoped** unless noted.
 | `IErrorLogService` | `ErrorLogService` | Services/ (WP45; called from `ExceptionMiddleware`) |
 | `IDeviceTokenService` | `DeviceTokenService` | Services/ (82.53a; FCM token upsert/read for `NotificationController`) |
 | `IPaymentCallbackOrchestrator` | `PaymentCallbackOrchestrator` | Services/ (82.70; orchestrates gateway verification, ledger updates, and status transitions) |
+| `IScholarshipService` | `ScholarshipService` | Services/ (WP37.2) |
+| `IArchiveService` | `ArchiveService` | Services/ (WP37.6) |
 
 ---
 
@@ -890,8 +911,8 @@ All registered as **HttpClient** + **Scoped IPaymentGatewayService**. Gateways i
 | `PgSql` (default) | `PgSqlApplicationDbContext` | `PgSqlConnection` or `DATABASE_URL` env |
 | `Sqlite` | `SqliteApplicationDbContext` | `SqliteConnection` — kept for a fast, migration-free test bootstrap path only (`EnsureCreated()` under the Visual seed profile); no migration is attributed to it. `MySql`/`MySqlApplicationDbContext` removed 2026-09-07 (82.15) — it never had a working migration tree. |
 
-**DbSets (53 domain models mapped, plus `DataProtectionKeys` — a framework table, not a domain model —
-added 2026-09-07, 82.53f):** Member, User, Role, AlumniEvent, EventRegistration, EventTask, EventBudget, EventExpense, EventGallery, EventPhoto, NewsPost, NewsCollaborator, JobOpportunity, FinancialRecord, PaymentHistory, MembershipDue, MembershipFeeConfig, MembershipHistory, AcademicRecord, ProfessionalRecord, ECPeriod, ECMember, Constitution, FamilyLinkRequest, MentorshipRequest, Poll, PollOption, PollVote, SocialAuthConfig, RefreshToken, ActivityLog, Notification, ChatMessage, EmailTemplate, EmailLog, Otp, LookupItem, FileUpload, ContactMessage, PaymentConfiguration, SavedPaymentMethod, SpecialDayTheme, GamificationConfig, Campaign, CampaignPledge, DonorRecognitionTier, AmendmentVote, ForumCategory, ForumTopic, ForumPost, OrganizationConfig, SiteContent, ErrorLog — plus `DataProtectionKeys` (`Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey`, 54th DbSet total)
+**DbSets (62 domain models mapped, plus `DataProtectionKeys` — a framework table, not a domain model —
+added 2026-09-07, 82.53f):** Member, User, Role, AlumniEvent, EventRegistration, EventTask, EventBudget, EventExpense, EventGallery, EventPhoto, NewsPost, NewsCollaborator, JobOpportunity, FinancialRecord, PaymentHistory, MembershipDue, MembershipFeeConfig, MembershipHistory, AcademicRecord, ProfessionalRecord, ECPeriod, ECMember, Constitution, FamilyLinkRequest, MentorshipRequest, Poll, PollOption, PollVote, SocialAuthConfig, RefreshToken, ActivityLog, Notification, ChatMessage, EmailTemplate, EmailLog, Otp, LookupItem, FileUpload, ContactMessage, PaymentConfiguration, SavedPaymentMethod, SpecialDayTheme, GamificationConfig, Campaign, CampaignPledge, DonorRecognitionTier, AmendmentVote, ForumCategory, ForumTopic, ForumPost, OrganizationConfig, SiteContent, ErrorLog, ScholarshipFund, ScholarshipCall, ScholarshipApplication, ScholarshipDocument, ScholarshipReview, ScholarshipAward, ArchiveCollection, ArchiveItem, IssuedCredential — plus `DataProtectionKeys` (`Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey`, 63rd DbSet total)
 
 **Seed:** `GHCAA.Infrastructure/Data/Seed/` — test/dev data seeder. Loaded via
 `ApplicationDbContext.LoadSeed<T>(fileName)` (`internal static`, so runtime syncers reuse the same
@@ -969,6 +990,9 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 | `HealthController` | `/api/health` | Public | `ApplicationDbContext` |
 | `MemberImportController` | `/api/import` | SuperAdmin | `IMemberImportService` |
 | `AdminErrorLogsController` | `/api/admin/error-logs` (WP45) | SuperAdmin | `IErrorLogService` |
+| `ScholarshipsController` | `/api/scholarships` (WP37.2) | Public (apply/status) + Member (review queue) + Admin (funds/calls/award/disburse) | `IScholarshipService` |
+| `ArchiveController` | `/api/archive` (WP37.6) | Public (collection/item reads) + Member (submission) + Admin (curation/moderation) | `IArchiveService` |
+| `CredentialVerificationController` | `/api/verify/{shortCode}` (WP37.8) | Public / RateLimit: `RateLimitPolicies.CredentialVerification` | `IIDCardService` |
 
 ---
 

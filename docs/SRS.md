@@ -105,6 +105,12 @@ Supporting professional and personal connections within the network.
 * **3.6.7 Contact Details Configuration**: On-campus address, phone numbers, support email, social links, and an optional map embed URL are held in organisation configuration and edited by SuperAdmin, giving web and mobile a single source of truth. The map URL is admin-supplied and therefore allow-list validated before being embedded.
 * **3.6.8 Member Polls & Voting**: Admin-managed polling system for sentiment analysis and formal association decisions. Supports single/multiple choice, expiry dates, and real-time result visualization for members.
 
+### 3.7 Alumni Programs & Verification
+
+* **3.7.1 Scholarship & Student-Aid Programme**: Fund → call → application → blind review → award → disbursement workflow for scholarships to schoolchildren. Applicants are identified by a `ReferenceCode` and email, not a Member account. Review queries return a DTO that omits applicant identity, so reviewers cannot obtain it from the API. A paid award writes an idempotent `FinancialRecord` (`Expense`/`Grant`), linking the disbursement to the ledger.
+* **3.7.2 Oral-History / Legacy Archive**: Published collections of recorded alumni testimony, each item carrying a transcript, an uploaded media file, or a link to externally hosted media — at least one of the three is required. The transcript is the searchable, printable product; audio/video is optional.
+* **3.7.3 Public Credential Verification**: A publicly reachable, rate-limited endpoint that confirms whether an issued ID card, certificate, or election document is genuine from its QR code or short code, returning only a minimal valid/revoked verdict with no contact or identifying data.
+
 ---
 
 ## 4. Non-Functional Requirements (NFR)

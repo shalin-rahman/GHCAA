@@ -65,7 +65,9 @@ export const ORG_CONFIG_FALLBACK: OrgConfig = {
     "requireDocumentUpload": true,
     "allowSelfRegistration": true,
     "allowNonMemberEventRegistration": true,
-    "enableFundraising": true
+    "enableFundraising": true,
+    "enableScholarships": true,
+    "enableLegacyArchive": true
   },
   "workflow": {
     "memberApprovalMode": "ManualReview",

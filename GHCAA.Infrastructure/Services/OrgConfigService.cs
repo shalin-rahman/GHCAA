@@ -158,7 +158,7 @@ namespace GHCAA.Infrastructure.Services
             },
             Currency = new() { Code = "BDT", Symbol = "৳", Name = "Bangladeshi Taka" },
             EnabledGatewayMethods = new List<string> { "SSLCommerz", "BkashGateway", "DGePay" },
-            Features = new(),
+            Features = new() { EnableScholarships = true, EnableLegacyArchive = true },
             Workflow = new()
             {
                 MemberApprovalMode = "ManualReview",

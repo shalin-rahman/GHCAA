@@ -59,7 +59,9 @@
     "RequireDocumentUpload": false,
     "AllowSelfRegistration": true,
     "AllowNonMemberEventRegistration": true,
-    "EnableFundraising": false
+    "EnableFundraising": false,
+    "EnableScholarships": false,
+    "EnableLegacyArchive": false
   },
   "Workflow": {
     "MemberApprovalMode": "ManualReview",

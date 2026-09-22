@@ -17,7 +17,7 @@ const AUTH_STATUS_SEQUENCE = [
   'Caching', 'Redirecting'
 ];
 const AUTH_STATUS_INTERVAL_MS = 1200;
-const AUTH_TIMEOUT_MS = 30000;
+const AUTH_TIMEOUT_MS = 8000;
 
 declare var google: any;
 declare var FB: any;

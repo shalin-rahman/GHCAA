@@ -34,6 +34,8 @@ namespace GHCAA.Domain
             public const string Registration = "registration";
             public const string Api = "api";
             public const string PasswordReset = "passwordReset";
+            public const string ScholarshipStatus = "scholarshipStatus";
+            public const string CredentialVerification = "credentialVerification";
         }
 
         public static class OutputCachePolicies

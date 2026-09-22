@@ -106,8 +106,9 @@ namespace GHCAA.Application.DTOs
         public bool AllowSelfRegistration { get; init; } = true;
         public bool AllowNonMemberEventRegistration { get; init; } = true;
 
-        // TODO 37.3
         public bool EnableFundraising { get; init; } = true;
+        public bool EnableScholarships { get; init; } = false;
+        public bool EnableLegacyArchive { get; init; } = false;
     }
 
     public record WorkflowDto

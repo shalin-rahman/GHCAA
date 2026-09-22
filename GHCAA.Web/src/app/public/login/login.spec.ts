@@ -97,17 +97,17 @@ describe('Login Component', () => {
         expect(component.errorMessage()).toBe('Invalid username or password.');
     });
 
-    it('should keep waiting for the server before timing out after 30 seconds', () => {
+    it('should stop safely when the server does not respond within 8 seconds', () => {
         authServiceMock.login.mockReturnValue(new Observable(() => undefined));
         component.credentials = { username: 'slowuser', password: 'password' };
 
         component.onLogin(mockForm);
-        vi.advanceTimersByTime(29000);
+        vi.advanceTimersByTime(7999);
 
         expect(component.loading()).toBe(true);
         expect(component.errorMessage()).toBe('');
 
-        vi.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1);
 
         expect(component.loading()).toBe(false);
         expect(component.loginStatus()).toBeNull();

@@ -56,6 +56,8 @@ import '../../screens/member/election_screen.dart';
 import '../../screens/member/forum/forum_categories_screen.dart';
 import '../../screens/member/forum/forum_topics_screen.dart';
 import '../../screens/member/forum/forum_topic_detail_screen.dart';
+import '../../screens/member/legacy_archive_screen.dart';
+import '../../screens/credential_verification_screen.dart';
 
 class AuthNotifier extends ChangeNotifier {
   final Ref _ref;
@@ -100,7 +102,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: authNotifier,
     redirect: (context, state) {
       final token = authNotifier.token;
-      final isLoggingIn = state.uri.path == '/login' || state.uri.path == '/register' || state.uri.path == '/forgot-password' || state.uri.path == '/';
+      final isLoggingIn = state.uri.path == '/login' || state.uri.path == '/register' || state.uri.path == '/forgot-password' || state.uri.path == '/' || state.uri.path == '/verify' || state.uri.path.startsWith('/verify/');
       
       if (token == null && !isLoggingIn) {
         return '/login';
@@ -127,6 +129,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/login', name: 'login', builder: (context, state) => const LoginScreen()),
       GoRoute(path: '/register', name: 'register', builder: (context, state) => const RegisterScreen()),
       GoRoute(path: '/forgot-password', name: 'forgot-password', builder: (context, state) => const ForgotPasswordScreen()),
+      GoRoute(
+        path: '/verify',
+        name: 'verify',
+        builder: (context, state) => const CredentialVerificationScreen(),
+      ),
+      GoRoute(
+        path: '/verify/:shortCode',
+        name: 'verify_code',
+        builder: (context, state) => CredentialVerificationScreen(
+          initialCode: state.pathParameters['shortCode'],
+        ),
+      ),
       
       ShellRoute(
         builder: (context, state, child) => MainShell(child: child),
@@ -160,6 +174,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => PaymentWebPage(url: state.extra as String),
           ),
           GoRoute(path: '/news', name: 'news', builder: (context, state) => const NewsScreen()),
+          GoRoute(path: '/legacy', name: 'legacy', builder: (context, state) => const LegacyArchiveScreen()),
           GoRoute(
             path: '/news/:id',
             name: 'news_details',

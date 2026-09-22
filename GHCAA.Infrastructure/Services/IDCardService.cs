@@ -4,7 +4,10 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
+using GHCAA.Application.DTOs;
 using GHCAA.Domain;
+using GHCAA.Domain.Models;
+using static GHCAA.Domain.Enums;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using QRCoder;
@@ -36,10 +39,35 @@ namespace GHCAA.Infrastructure.Services
             return $"data:image/png;base64,{Convert.ToBase64String(qrCodeAsPngByteArr)}";
         }
 
-        public async Task<string> GenerateIDCardDataUriAsync(int memberId, CancellationToken cancellationToken = default)
+        private async Task<(Member Member, IssuedCredential Credential, string VerifyUrl)> IssueCredentialAsync(
+            int memberId, CredentialType type, CancellationToken cancellationToken)
         {
             var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             if (member == null) throw new KeyNotFoundException("Member not found");
+
+            IssuedCredential credential;
+            do
+            {
+                credential = new IssuedCredential
+                {
+                    MemberId = memberId,
+                    CredentialType = type,
+                    ShortCode = CredentialCodeGenerator.Create(),
+                    IssuedOn = DateTime.UtcNow
+                };
+            } while (await _db.IssuedCredentials.AnyAsync(x => x.ShortCode == credential.ShortCode, cancellationToken));
+
+            _db.IssuedCredentials.Add(credential);
+            await _db.SaveChangesAsync(cancellationToken);
+            var org = await _orgConfigService.GetConfigAsync();
+            var verifyUrl = $"{org.Contact.PortalBaseUrl.TrimEnd('/')}/verify/{credential.ShortCode}";
+            return (member, credential, verifyUrl);
+        }
+
+        public async Task<string> GenerateIDCardDataUriAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            var issued = await IssueCredentialAsync(memberId, CredentialType.IdCard, cancellationToken);
+            var member = issued.Member;
 
             var org = await _orgConfigService.GetConfigAsync();
             var accentColor = org.Branding.AccentColor;
@@ -56,8 +84,7 @@ namespace GHCAA.Infrastructure.Services
                 }
             }
 
-            var verifyUrl = $"{org.Contact.PortalBaseUrl}/verify/{member.MembershipNumber ?? member.Id.ToString()}";
-            var qrBase64 = GetQrDataUri(verifyUrl).Replace("data:image/png;base64,", "");
+            var qrBase64 = GetQrDataUri(issued.VerifyUrl).Replace("data:image/png;base64,", "");
 
             var photoElement = !string.IsNullOrEmpty(photoBase64)
                 ? $"<image href='data:image/jpeg;base64,{photoBase64}' x='230' y='50' width='90' height='90' clip-path='inset(0% round 10px)'/>"
@@ -91,14 +118,13 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<string> GenerateCertificateDataUriAsync(int memberId, CancellationToken cancellationToken = default)
         {
-            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
-            if (member == null) throw new KeyNotFoundException("Member not found");
+            var issued = await IssueCredentialAsync(memberId, CredentialType.MembershipCertificate, cancellationToken);
+            var member = issued.Member;
 
             var org = await _orgConfigService.GetConfigAsync();
             var accentColor = org.Branding.AccentColor;
 
-            var verifyUrl = $"{org.Contact.PortalBaseUrl}/verify/{member.MembershipNumber ?? member.Id.ToString()}";
-            var qrBase64 = GetQrDataUri(verifyUrl).Replace("data:image/png;base64,", "");
+            var qrBase64 = GetQrDataUri(issued.VerifyUrl).Replace("data:image/png;base64,", "");
 
             var svg = $@"<svg width='800' height='550' viewBox='0 0 800 550' xmlns='http://www.w3.org/2000/svg'>
                 <rect width='100%' height='100%' fill='#fffaf0'/>
@@ -125,14 +151,14 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<byte[]> GenerateIDCardPdfAsync(int memberId, CancellationToken cancellationToken = default)
         {
-            var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
-            if (member == null) throw new KeyNotFoundException();
+            var issued = await IssueCredentialAsync(memberId, CredentialType.IdCard, cancellationToken);
+            var member = issued.Member;
 
             var org = await _orgConfigService.GetConfigAsync();
             var accentColor = org.Branding.AccentColor;
             var primaryColor = org.Branding.PrimaryColor;
 
-            var verifyUrl = $"{org.Contact.PortalBaseUrl}/verify/{member.MembershipNumber ?? member.Id.ToString()}";
+            var verifyUrl = issued.VerifyUrl;
 
             var document = Document.Create(container =>
             {
@@ -183,13 +209,13 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<byte[]> GenerateCertificatePdfAsync(int memberId, CancellationToken cancellationToken = default)
         {
-            var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
-            if (member == null) throw new KeyNotFoundException();
+            var issued = await IssueCredentialAsync(memberId, CredentialType.MembershipCertificate, cancellationToken);
+            var member = issued.Member;
 
             var org = await _orgConfigService.GetConfigAsync();
             var accentColor = org.Branding.AccentColor;
 
-            var verifyUrl = $"{org.Contact.PortalBaseUrl}/verify/{member.MembershipNumber ?? member.Id.ToString()}";
+            var verifyUrl = issued.VerifyUrl;
 
             var document = Document.Create(container =>
             {
@@ -238,6 +264,35 @@ namespace GHCAA.Infrastructure.Services
             });
 
             return document.GeneratePdf();
+        }
+
+        public async Task<CredentialVerificationDto?> VerifyCredentialAsync(string shortCode, CancellationToken cancellationToken = default)
+        {
+            var credential = await _db.IssuedCredentials.AsNoTracking()
+                .Include(x => x.Member)
+                .FirstOrDefaultAsync(x => x.ShortCode == shortCode, cancellationToken);
+            if (credential == null) return null;
+
+            var valid = !credential.IsRevoked && (credential.ExpiresOn is null || credential.ExpiresOn > DateTime.UtcNow);
+            return new CredentialVerificationDto
+            {
+                Valid = valid,
+                MemberName = credential.Member?.FullName,
+                MembershipType = credential.Member?.MembershipType,
+                IssuedOn = credential.IssuedOn,
+                Status = credential.IsRevoked ? "Revoked" : valid ? "Valid" : "Expired"
+            };
+        }
+
+        public async Task<bool> RevokeCredentialAsync(string shortCode, string reason, CancellationToken cancellationToken = default)
+        {
+            var credential = await _db.IssuedCredentials.FirstOrDefaultAsync(x => x.ShortCode == shortCode, cancellationToken);
+            if (credential == null) return false;
+            credential.IsRevoked = true;
+            credential.RevokedReason = reason;
+            credential.RevokedOn = DateTime.UtcNow;
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
         }
     }
 }

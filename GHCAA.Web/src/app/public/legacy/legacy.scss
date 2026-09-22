@@ -1,0 +1,27 @@
+.legacy-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3rem 1.25rem 5rem;
+  color: var(--text-main);
+}
+
+.archive-header { margin-bottom: 2rem; }
+.archive-header h1 { margin: .25rem 0 .75rem; }
+.eyebrow, .meta { color: var(--accent-color); font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; }
+.search-bar { margin-bottom: 2rem; }
+.search-bar label { display: block; margin-bottom: .5rem; color: var(--text-muted); }
+.search-bar div { display: flex; gap: .75rem; }
+.search-bar input { flex: 1; min-width: 0; }
+.collection-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+.collection-card { padding: 1.25rem; }
+.collection-card h2 { margin: .4rem 0 .75rem; }
+.muted { color: var(--text-muted); }
+.archive-state { padding: 2rem; text-align: center; }
+.archive-record { max-width: 760px; margin: 2rem auto 0; padding: 2rem; }
+.archive-record audio { width: 100%; margin: 1rem 0; }
+.summary { font-size: 1.1rem; }
+.transcript { white-space: pre-wrap; line-height: 1.7; }
+.back-link { color: var(--accent-color); }
+@media (max-width: 600px) {
+  .search-bar div { flex-direction: column; }
+}

@@ -1,0 +1,53 @@
+<main class="legacy-page">
+  @if (loading()) {
+    <app-loading-panel label="Loading the oral-history archive..." [size]="72"></app-loading-panel>
+  } @else if (error()) {
+    <section class="archive-state surface">
+      <h1>Archive unavailable</h1>
+      <p>We could not load the archive right now. Please try again.</p>
+      <button class="btn btn-accent" type="button" (click)="retry()">Try again</button>
+    </section>
+  } @else if (itemId() && item()) {
+    <a class="back-link" routerLink="/legacy">&larr; All archive collections</a>
+    <article class="archive-record surface">
+      <p class="eyebrow">ORAL HISTORY</p>
+      <h1>{{ item()!.narrator }}</h1>
+      @if (item()!.decade) { <p class="meta">{{ item()!.decade }}s</p> }
+      @if (item()!.mediaUrl) {
+        <audio controls [src]="item()!.mediaUrl">Your browser does not support audio playback.</audio>
+      }
+      @if (item()!.summary) { <p class="summary">{{ item()!.summary }}</p> }
+      @if (item()!.transcript) {
+        <h2>Transcript</h2>
+        <p class="transcript">{{ item()!.transcript }}</p>
+      }
+    </article>
+  } @else {
+    <header class="archive-header">
+      <p class="eyebrow">ORAL HISTORY ARCHIVE</p>
+      <h1>Stories from our shared past</h1>
+      <p>Read and listen to approved memories preserved by the association.</p>
+    </header>
+    <form class="search-bar" (ngSubmit)="loadCollections()">
+      <label for="archive-search">Search the archive</label>
+      <div>
+        <input id="archive-search" name="search" [(ngModel)]="search" placeholder="Search by collection title" />
+        <button class="btn btn-accent" type="submit">Search</button>
+      </div>
+    </form>
+    @if (collections().length === 0) {
+      <p class="archive-state empty-state">No archive collections matched your search.</p>
+    } @else {
+      <section class="collection-grid" aria-label="Archive collections">
+        @for (collection of collections(); track collection.id) {
+          <article class="collection-card surface">
+            <p class="meta">{{ collection.decade ? collection.decade + 's' : 'Community history' }}</p>
+            <h2>{{ collection.title }}</h2>
+            @if (collection.description) { <p>{{ collection.description }}</p> }
+            <p class="muted">Approved oral-history records</p>
+          </article>
+        }
+      </section>
+    }
+  }
+</main>

@@ -48,6 +48,36 @@ a gap someone still needs to close.
 
 ## Log
 
+### 2026-09-22 — /api/verify/{shortCode}
+- Change: added an anonymous, rate-limited credential verification endpoint and an
+  admin-only credential revocation endpoint. Generated ID cards and membership
+  certificates now persist a high-entropy 10-character credential code and embed
+  its verification URL in the QR.
+- Reason: Work Package 37.8 public credential verification.
+- Web: implemented in `core/services/credential-verification.service.ts` and
+  the public `/verify` route/page.
+- Mobile: implemented in `features/credentials/credential_verification_service.dart`,
+  `screens/credential_verification_screen.dart`, and the public `/verify` routes.
+
+### 2026-09-22 — /api/archive
+- Change: added approved-only public collection and item routes, transcript search,
+  admin incomplete-record listing and moderation, and authenticated item submission.
+- Reason: Work Package 37.6 oral-history archive backend/API.
+- Web: implemented in `core/services/archive.service.ts` and the `/legacy` public route/page.
+- Mobile: implemented in `features/archive/archive_service.dart` and
+  `screens/member/legacy_archive_screen.dart`.
+
+### 2026-09-22 — /api/scholarships public application and status routes
+- Change: added typed public scholarship funds/calls, application submission, and
+  reference/email status lookup support for the existing scholarship API.
+- Reason: Work Package 37.2 adds the public application journey.
+- Web: implemented in `core/services/scholarship.service.ts` and the
+  `/scholarships` public route/page.
+- Mobile: implemented in `features/scholarships/scholarship_service.dart` and
+  its typed models. The mobile app has no matching public scholarship route or
+  screen, so this package exposes the calls for a later surface without
+  inventing one in WP37.2.
+
 ### 2026-09-21 — AcademicRecordDto / AcademicRecords.IsOrgProfile
 - Change: renamed the academic institution flag from `IsGHC`/`isGHC` to
   `IsOrgProfile`/`isOrgProfile` across the Domain, API, database, Web, and

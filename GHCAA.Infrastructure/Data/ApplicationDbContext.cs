@@ -228,6 +228,7 @@ namespace GHCAA.Infrastructure.Data
             : base(options) { }
 
         public DbSet<Member> Members { get; set; } = null!;
+        public DbSet<IssuedCredential> IssuedCredentials { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<FileUpload> FileUploads { get; set; } = null!;
         public DbSet<Role> Roles { get; set; } = null!;
@@ -243,6 +244,8 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<ActivityLog> ActivityLogs { get; set; } = null!;
         public DbSet<EventGallery> EventGalleries { get; set; } = null!;
         public DbSet<EventPhoto> EventPhotos { get; set; } = null!;
+        public DbSet<ArchiveCollection> ArchiveCollections { get; set; } = null!;
+        public DbSet<ArchiveItem> ArchiveItems { get; set; } = null!;
         public DbSet<ChatMessage> ChatMessages { get; set; } = null!;
         public DbSet<MembershipFeeConfig> MembershipFeeConfigs { get; set; } = null!;
         public DbSet<ContactMessage> ContactMessages { get; set; } = null!;
@@ -283,6 +286,12 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<Ballot> Ballots { get; set; } = null!;
         public DbSet<BallotVote> BallotVotes { get; set; } = null!;
         public DbSet<ElectionResult> ElectionResults { get; set; } = null!;
+        public DbSet<ScholarshipFund> ScholarshipFunds { get; set; } = null!;
+        public DbSet<ScholarshipCall> ScholarshipCalls { get; set; } = null!;
+        public DbSet<ScholarshipApplication> ScholarshipApplications { get; set; } = null!;
+        public DbSet<ScholarshipDocument> ScholarshipDocuments { get; set; } = null!;
+        public DbSet<ScholarshipReview> ScholarshipReviews { get; set; } = null!;
+        public DbSet<ScholarshipAward> ScholarshipAwards { get; set; } = null!;
 
         // Forum Module
         public DbSet<ForumCategory> ForumCategories { get; set; } = null!;
