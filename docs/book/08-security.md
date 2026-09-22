@@ -114,6 +114,24 @@ independently of role, before either masking the response (§8.11) or refusing i
 states that the check exists and where the two roles it depends on are defined, not that it has been
 measured — that measurement belongs to Chapter 9.
 
+**Communication history is scoped the same way.** `EmailLog` carries a `RecipientMemberId`, added
+alongside `Channel` and `DeliveryScope` in the migration
+`20260921032243_AddCommunicationVisibility.cs`, so that every logged email or SMS names the member it
+was sent to. `MemberCommunicationsController.GetMine` (`GHCAA.API/Controllers/MemberCommunicationsController.cs`,
+lines 13-21) never takes a member id from the request: it reads the caller's own id off the
+authenticated token through `CurrentMemberIdRaw()` and passes that value into
+`CommunicationService.GetLogsForMemberAsync` (`GHCAA.Infrastructure/Services/CommunicationService.cs`,
+lines 212-235), whose query filters `EmailLogs` on `RecipientMemberId == memberId` before it ever
+reaches the database. A member therefore has no parameter to alter to reach another member's
+communications, and the endpoint the mobile and web history screens call is `GET
+/api/communications/me`, not a member-id route. The one place a communication log can be fetched by an
+arbitrary member id is `CommunicationController.GetMemberLogs`
+(`GHCAA.API/Controllers/CommunicationController.cs`, lines 42-46), which sits under the controller's
+`[Authorize(Policy = Constants.Policies.AdminOnly)]` attribute and is unreachable by a plain `Member`
+token. The two facts together, own-identity scoping on the member route and role gating on the admin
+route, are what NFR-S9 requires and what makes a member's outbound-communication history a
+member-only view rather than a membership-wide one.
+
 **Design consequence.** Two roles rather than a finer-grained permission table is a deliberate choice
 recorded as one of the anti-patterns considered and remediated in §6.12.7: a permission-per-feature
 matrix was judged unnecessary complexity for an association run by one maintainer, at the cost that a

@@ -632,6 +632,7 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
   - **Service/API.** `IElectionService` in `GHCAA.Application/Interfaces` + `GHCAA.Infrastructure/Services/ElectionService.cs` (no DI registration needed). `ElectionsController` at `api/elections`, `[Authorize]` at class level; `GET api/elections/public` and `GET api/elections/{id}/candidates` are `[AllowAnonymous]` (the candidate list is a published document); nomination, scrutiny and casting are member- or officer-scoped. Casting must reject any phase other than `Polling` server-side.
   - **UI.** Flag `enableElections`. The existing public `/elections` page gains a live banner when an election is not `Archived`. Member `portal/elections` — nominate, withdraw, view candidates, cast. Admin `admin/elections` — create, appoint officers, freeze roll, scrutinise, advance phase, count, declare, download ER PDFs. New `API_ENDPOINTS.ELECTIONS` block.
   - **Tests.** NUnit: roll freeze excludes Associate/Honorary/Advisory; proposer ≠ candidate; double vote rejected; cast outside `Polling` rejected; declaration writes `ECMember`; **a ballot row cannot be joined back to a member**. Vitest: phase-driven UI state, closed-nomination guard.
+  - **37.1f Navigation [DONE 2026-09-22].** The engine had no drawer or sidebar entry, so a member or admin who knew the routes could reach `/portal/election` and `/admin/elections` but nobody else could find them. Added `Association Election` (member, Community section) and `Elections` (admin, Content section) to `nav.service.ts`, plus the matching mobile drawer entries. Verified: `npx vitest run src/app/core/services/nav.service.spec.ts` (5 passed).
 
 37.2 [TODO] **Priority: P4.** Specified in
 `docs/specs/003-alumni-programs-and-verification/spec.md` Story 4.
@@ -1315,3 +1316,63 @@ and totals updated in the same edit as 85.1; done.
 in `docs/book/build/wbs.py`. **Acceptance:** done; `python docs/book/build/build.py --pdf --strict` was
 run afterward and reported no new drift beyond the pre-existing stale commit/work-package counts in
 04-methodology.md, 07-implementation.md and 11-project-management.md, which predate this change.
+
+---
+
+# Work Package 86 — Book sync after the election-navigation, communication-visibility and
+organisation-profile commits
+
+<!-- wbs: component=C17 start=2026-09-22 end=2026-09-22 after=85 -->
+
+A routine review of recent implementations against the book turned up the drift 85.3 had flagged and
+left for later: 04-methodology.md, 07-implementation.md and 11-project-management.md were still
+quoting a 279-commit, 83-work-package snapshot from 16 September, and README.md's Contents table
+stopped at Chapter 6 and claimed Chapters 7-13 were unwritten, though all of them existed on disk with
+substantial content. Two shipped features also had no requirements-catalogue entry: the
+organisation-profile rename (Work Package 62-line) and member-facing communication visibility.
+
+86.1 [DONE] **Priority: P3 | Depends on: 85.** Re-source the repository counts against the tree
+(`git rev-list --count HEAD` = 292 commits; `wbs.py --check` = 85 work packages, 901 tracker tasks, as
+of 22 September 2026) and correct every quote of the stale 279/83/886 figures in 04-methodology.md,
+07-implementation.md and 11-project-management.md, including the reactive/planned percentage
+breakdown in 11-project-management.md, rebuilt from `wbs.py`'s actual current category split rather
+than rescaled by hand. **Acceptance:** done; no `279`, `83 work packages`, or `eighty-three` instance
+remains in the three files.
+
+86.2 [DONE] **Priority: P3 | Depends on: none.** Correct README.md's Contents table and its "Chapters
+7-13 not yet written" claim, which had gone stale as soon as those chapters were drafted. Row titles
+were read from each chapter's own first heading, not invented, and the status line describes them
+honestly as drafted with open placeholders, not as finished or missing. **Acceptance:** done.
+
+86.3 [DONE] **Priority: P3 | Depends on: none.** Add FR-55 (organisation-profile identification,
+sourced from `docs/specs/005-academic-organisation-profile-flag/spec.md` and `AcademicRecord.cs`) and
+NFR-S9 (communication-history access scoped to the caller's own token, verified against
+`MemberCommunicationsController.GetMine` and `CommunicationService.GetLogsForMemberAsync`) to
+03-requirements.md, and a matching access-control paragraph to 08-security.md §8.4 naming the same
+evidence. Election navigation (commit 975a65a1) was checked and needs no new FR: it only wires
+existing pages into the drawer/sidebar, and FR-38/FR-39 already cover the election engine underneath.
+**Acceptance:** done; §3.8 and §3.13's Should-count and FR/NFR totals were updated in the same change
+so they reconcile against FR-01 to FR-55; `build.py --strict` introduced no new finding from either
+file.
+
+86.4 [DONE] **Priority: P4 | Depends on: none.** Confirmed the 5 "captions with no artefact beneath
+them" (Table 3.1, 3.2, 3.3, 3.5, 3.6) that `build.py --strict` lists are deliberate index-style
+captions in `lint.py`'s `ALLOWED_ORPHANS`, not a defect — the underlying data lives split across
+several per-subsystem tables rather than one physical table, so no edit was made. **Acceptance:** done;
+recorded here so the next review doesn't re-raise it as a gap.
+
+86.5 [DONE] **Priority: P4 | Depends on: 86.1.** Writing this work package added four tracker tasks of
+its own, which moved the live count from the 85/901 figure 86.1 had just sourced to 86 work packages /
+905 tasks before this file was even closed. Re-ran `wbs.py --check` after adding 86.1-86.4 and corrected
+04-methodology.md (eighty-five to eighty-six, two instances) and 11-project-management.md (85 to 86
+work packages, 901 to 905 tasks, and the reactive/planned split recomputed against the new totals: 57 of
+86 (66%) reactive, 32 feedback (37%), 16 defect (19%), 9 review-finding (10%); 680 of 905 tasks (75%)
+reactive, 299 feedback (33%), 252 review-finding (28%), 129 defect (14%)) to match. Appended `"86"` to
+Work Package C17's tracked area list in `docs/book/build/wbs.py`, matching 85.3's precedent. **Acceptance:**
+done; `python docs/book/build/build.py --strict` reports `status: clean, ready to deliver` with no
+repository-count finding.
+
+**Not carried into this work package:** the 96 open `*[` placeholders across 07-implementation.md,
+09-verification.md, 10-deployment.md, 11-project-management.md, 12-results.md and 13-conclusion.md.
+Closing those needs real dissertation evidence (verification runs, deployment records, results data)
+that cannot be produced by a documentation-sync pass, and is a separate, larger piece of work.

@@ -20,12 +20,22 @@ state that only the author knows how to finish.
 | `04-methodology.md` | Part II, Chapter 4 — Research methodology |
 | `05-system-analysis.md` | Part II, Chapter 5 — System analysis and behavioural modelling |
 | `06-architecture.md` | Part II, Chapter 6 — System architecture and design |
+| `07-implementation.md` | Part III, Chapter 7 — Implementation |
+| `08-security.md` | Part III, Chapter 8 — Security, Privacy and Trust |
+| `09-verification.md` | Part III, Chapter 9 — Verification, Validation and Quality Assurance |
+| `10-deployment.md` | Part III, Chapter 10 — Deployment and Operations |
+| `11-project-management.md` | Part III, Chapter 11 — Project Management |
+| `12-results.md` | Part IV, Chapter 12 — Results, Evaluation and Discussion |
+| `13-conclusion.md` | Part IV, Chapter 13 — Conclusion and Future Work |
 | `99-references.md` | IEEE numbered bibliography and the Association's governing documents |
 
-Chapters 7-13 (Part III construction/validation and Part IV evaluation/closure) are not yet written;
-see `docs/DOCUMENTATION_BOOK_OUTLINE.md` for their planned structure. Nothing in the written chapters
-points at a figure, table or section number inside an unwritten chapter: forward pointers are to the
-chapter, never to a numbered artefact that does not exist yet.
+Chapters 7-13 (Part III construction/validation and Part IV evaluation/closure) are drafted, not
+blank: each one exists on disk and several carry hundreds of lines of finished prose. What they still
+carry is open `*[` placeholders — a figure not yet drawn, a table not yet filled, a section left for a
+later pass — and `build.py --strict` fails on each one until it is closed. See
+`docs/DOCUMENTATION_BOOK_OUTLINE.md` for the structure each chapter is being filled against. Nothing in
+the written chapters points at a figure, table or section number inside a placeholder that does not
+exist yet.
 
 The bound order is fixed by the `CHAPTERS` list at the top of `build/build.py`. Adding a chapter means
 adding its filename there; the builder does not glob the directory, so a stray draft cannot wander

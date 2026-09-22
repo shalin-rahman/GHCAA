@@ -91,6 +91,14 @@ participation and governance, because one diagram of all seventeen classes print
 | FR-05 | The system shall provide a directory searchable by name, batch, academic session, subject, profession and location, returning only fields the owning member has disclosed, except to administrative users. | I, C | M |
 | FR-06 | The system shall issue each active member a digital identity card bearing the membership number, photograph, tier and a machine-readable code that resolves to a verification endpoint. | I, C | S |
 | FR-07 | The system shall present each member his own standing, comprising membership number, tier, status, dues raised, dues settled and outstanding balance. | I, O | M |
+| FR-55 | The system shall identify the institution-defining academic record through a flag evaluated against the active organisation profile, rather than a name specific to one institution, preserving the existing true/false meaning and the first-record rule of FR-04, and shall accept the field's legacy name from a client not yet updated, mapping it to the same stored value. | R | S |
+
+FR-55 is the specification for the `IsGHC`-to-`IsOrgProfile` rename recorded in
+`docs/specs/005-academic-organisation-profile-flag/spec.md`, which sets out the white-label
+motivation: the college-specific name does not describe a profile-selected organisation once a
+second institution is deployed. The rename touches the Domain model, the Application DTO, the
+PostgreSQL column and both clients, but it changes no stored value and no predicate; FR-04's rule
+still governs which record is required, only under a portable name.
 
 Registration completeness is a gate rather than advice. Thirteen particulars must be present before
 an application is submissible: full name, email address, mobile number, date of birth, gender,
@@ -173,6 +181,13 @@ official act of the Association under Article IV; a news item is content. Allowi
 publish something indistinguishable from an official notice would misrepresent the Association's
 voice, so the refusal is enforced at the point of submission and is not merely a permission on a
 button.
+
+FR-29a and FR-29b are the specification for the member communication visibility work recorded in
+`docs/specs/004-pending-work-packages/spec.md` (items 81.1-81.3): a member's own outbound
+communication history, distinguishing queued, sent, failed and unavailable provider states, without
+exposing provider failure detail on a row that succeeded. The access-control property this depends
+on, that a member can retrieve only rows addressed to himself, is stated as NFR-S9 and its
+implementation is described in §8.4.
 
 ### 3.3.6 Governance
 
@@ -313,6 +328,7 @@ system being "intuitive".
 | NFR-S6 | No resource shall be retrievable by a user not entitled to it by role or ownership. Criterion: the authorisation test suite of §9.9 exercises each protected endpoint with an unentitled principal. |
 | NFR-S7 | Uploaded files shall be validated by declared type, actual content signature and size, stored outside the web root, and served only through an authorising endpoint. |
 | NFR-S8 | Member-supplied rich text shall be sanitised on the server before storage. |
+| NFR-S9 | A member's request for his own communication history shall be scoped to that member's identity as carried in his own authenticated token, never by a client-supplied member identifier, and the equivalent view of another member's history shall be reachable only under the administrative authorisation policy. |
 
 **Maintainability** *(Supportability)*
 
@@ -402,12 +418,12 @@ the documentation affected is updated in the same change rather than later.
 ## 3.8 Requirements Prioritisation
 
 Table 3.5 records the prioritisation and what was negotiated to reach it. The counts are over
-FR-01 to FR-54 as they stand at the time of writing:
+FR-01 to FR-55 as they stand at the time of writing:
 
 | Priority | Count | Basis |
 | --- | --- | --- |
 | Must | 38 | Either constitutionally mandated, or the Association cannot operate without it |
-| Should | 9 | Substantial value; deferrable by one increment without operational failure |
+| Should | 10 | Substantial value; deferrable by one increment without operational failure |
 | Could | 7 | Desirable; first to be dropped under schedule pressure |
 | Won't (this release) | 8 | Explicitly excluded, recorded so that the exclusion is a decision rather than an omission |
 
@@ -617,7 +633,7 @@ unknown at specification time, which was itself one of the problems the project 
 
 ## 3.13 Summary
 
-Fifty-four functional requirements, thirty-six non-functional requirements across the eight ISO/IEC
+Fifty-five functional requirements, thirty-seven non-functional requirements across the eight ISO/IEC
 25010 characteristics, sixteen domain constraints traced to constitutional and electoral sources, and
 eleven quality-attribute scenarios carried forward for architectural evaluation. Thirty-eight
 requirements are Must, of which a substantial proportion are constitutionally mandated and were therefore not open to
@@ -994,8 +1010,8 @@ flowchart LR
 ### Table 3.1 — Functional requirement catalogue
 
 The catalogue is given in full in the tables of §3.3, which carry the ID, statement, source and
-priority for each of FR-01 to FR-54 grouped by subsystem, and is not repeated here. The RQ linkage
-is as follows: FR-01 to FR-31 and FR-41 to FR-54 answer RQ1 as the characterisation of the
+priority for each of FR-01 to FR-55 grouped by subsystem, and is not repeated here. The RQ linkage
+is as follows: FR-01 to FR-31 and FR-41 to FR-55 answer RQ1 as the characterisation of the
 requirement set; FR-19 to FR-25 additionally bear on RQ2 through the manual-payment design position;
 FR-32 to FR-40 answer RQ3.
 

@@ -42,15 +42,15 @@ would misdescribe it.
 
 ## 11.1 Process Model in Practice and its Deviations from Plan
 
-`docs/book/build/wbs.py`, run on 16 September 2026, classifies every one of the 83 work packages
-`docs/TODO.md` has raised, and every one of the 886 tracker tasks under them, by how it arrived: planned
+`docs/book/build/wbs.py`, run on 22 September 2026, classifies every one of the 86 work packages
+`docs/TODO.md` has raised, and every one of the 905 tracker tasks under them, by how it arrived: planned
 before the work started, or reactively, as stakeholder feedback, a review finding or a defect.
 
-Counted by work package, 29 (35%) were planned and 54 (65%) were not: 32 (39%) arrived as feedback
-from a stakeholder, 14 (17%) as a defect, and 8 (10%) as a finding from one of the review sessions of
-§3.12 or the September 2026 architecture audit. Counted by task the reactive share is larger still: 654
-of 886 tasks (74%) arrived after the work they belong to had already started, most of them as feedback
-(299 tasks, 34%) or as review findings (252 tasks, 28%), with defects a smaller share (103 tasks, 12%)
+Counted by work package, 29 (34%) were planned and 57 (66%) were not: 32 (37%) arrived as feedback
+from a stakeholder, 16 (19%) as a defect, and 9 (10%) as a finding from one of the review sessions of
+§3.12 or the September 2026 architecture audit. Counted by task the reactive share is larger still: 680
+of 905 tasks (75%) arrived after the work they belong to had already started, most of them as feedback
+(299 tasks, 33%) or as review findings (252 tasks, 28%), with defects a smaller share (129 tasks, 14%)
 than the package count alone suggests, because most defects closed in one or two tasks each while a
 handful of review sessions each seeded dozens.
 
@@ -84,8 +84,8 @@ defined once, here, and used by name everywhere else in the book:
   packages, and a work package can deliver only part of a feature — the two lists are not the same
   shape.
 
-`docs/TODO.md` had 83 numbered work packages holding 886 tracker tasks between them, tied to 17 WBS
-activities and 279 commits, as of 16 September 2026 (`git rev-list --count HEAD`) — five different
+`docs/TODO.md` had 86 numbered work packages holding 905 tracker tasks between them, tied to 17 WBS
+activities and 292 commits, as of 22 September 2026 (`git rev-list --count HEAD`) — five different
 counts of one project, each answering a different question about it.
 
 Five streams, one of them carrying no commit at all: the back-scheduled P1–P5 research and design
@@ -159,8 +159,8 @@ much room the record shows they had.
 | C14 Mobile client | 7 | 20 | 27 | 38 | 45 | 18 | C3, C4, C5 | 40 | 30 |
 | C12 Security and hardening | 2 | 11 | 13 | 32 | 34 | 21 | C2 | 47 | 45 |
 
-*Source: `python docs/book/build/wbs.py`, run 16 September 2026, against `docs/TODO.md` and the git
-history at HEAD (279 commits). ES/EF/LS/LF are in working days from the first commit; "active days"
+*Source: `python docs/book/build/wbs.py`, run 22 September 2026, against `docs/TODO.md` and the git
+history at HEAD (292 commits). ES/EF/LS/LF are in working days from the first commit; "active days"
 counts distinct calendar days on which the component received a commit, not working days.*
 
 Two things stand out reading it this way rather than in sequence. Float correlates with how self-
