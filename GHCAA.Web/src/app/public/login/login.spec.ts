@@ -97,12 +97,17 @@ describe('Login Component', () => {
         expect(component.errorMessage()).toBe('Invalid username or password.');
     });
 
-    it('should stop the login flow and show a timeout error after 8 seconds', () => {
+    it('should keep waiting for the server before timing out after 30 seconds', () => {
         authServiceMock.login.mockReturnValue(new Observable(() => undefined));
         component.credentials = { username: 'slowuser', password: 'password' };
 
         component.onLogin(mockForm);
-        vi.advanceTimersByTime(8000);
+        vi.advanceTimersByTime(29000);
+
+        expect(component.loading()).toBe(true);
+        expect(component.errorMessage()).toBe('');
+
+        vi.advanceTimersByTime(1000);
 
         expect(component.loading()).toBe(false);
         expect(component.loginStatus()).toBeNull();

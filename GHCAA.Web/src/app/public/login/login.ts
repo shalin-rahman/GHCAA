@@ -17,7 +17,7 @@ const AUTH_STATUS_SEQUENCE = [
   'Caching', 'Redirecting'
 ];
 const AUTH_STATUS_INTERVAL_MS = 1200;
-const AUTH_TIMEOUT_MS = 8000;
+const AUTH_TIMEOUT_MS = 30000;
 
 declare var google: any;
 declare var FB: any;
@@ -299,5 +299,3 @@ export class Login implements OnInit, OnDestroy {
     this.notify.info('Password reset is currently handled by the Admin Desk. Please contact your batch representative or email help@ghcaa.com.');
   }
 }
-
-
