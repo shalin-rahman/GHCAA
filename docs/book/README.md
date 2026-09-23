@@ -284,17 +284,19 @@ a log file, a test run, a commit range — so an examiner can check it. Figures 
 states what the code does, and where the two disagree the code is right.
 
 **Keeping the numbers true.** Repository figures quoted in the text go stale as the code moves. The
-ones in the book now were re-taken on 14 September 2026: 285 endpoint attributes across 38 controllers,
-54 `DbSet` properties (53 domain models plus `DataProtectionKeys`, a framework table added per
-`docs/adr/0007-data-protection-keys-in-database.md` — §6.3.2's "fifty-three entity sets" still means
-the domain models alone, since that count is about §5.7's analysis model, not every table the schema
-has), 30 enumerations, 46 service interfaces with 43
+`DbSet`, entity and enumeration counts, and the endpoint/controller counts, were re-taken on
+23 September 2026 against the Election module and the Work Package 37.2/37.6/37.8 landing described
+in §6.3.1, §7.5, §7.6 and §7.11: 72 `DbSet` properties (71 domain models plus `DataProtectionKeys`, a
+framework table added per `docs/adr/0007-data-protection-keys-in-database.md` — §6.3.2's
+"seventy-one entity sets" still means the domain models alone, since that count is about §5.7's
+analysis model, not every table the schema has), 38 enumerations, and 333 endpoint attributes across
+45 controllers. The remaining figures were last taken on 14 September 2026 and have not been
+re-verified since: 46 service interfaces with 43
 implementations, 1 migration (`GHCAA.Infrastructure/Data/Migrations/PgSql/20260907193705_InitialBaseline.cs`
-— the prior 31-file history was squashed to this single baseline on 8 September 2026), 745 backend
-tests enumerated by `dotnet test --list-tests` (not re-run as a pass/fail suite for this count), 430
-passing web tests (not re-verified on this date), 3,468 lines of `styles.scss`. Re-take them before
-submission with the commands in `docs/PROJECT_MAP.md` and the two test suites, and correct the
-sentences that carry them.
+— the prior 31-file history was squashed to this single baseline on 8 September 2026), 3,468 lines of
+`styles.scss`. The test totals (859/859 backend tests, 511/511 web tests) were re-taken on
+23 September 2026. Re-take the rest before submission with the commands in `docs/PROJECT_MAP.md` and
+the two test suites, and correct the sentences that carry them.
 
 ## Before submission
 

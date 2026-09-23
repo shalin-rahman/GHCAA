@@ -64,11 +64,11 @@ with `find` and `wc -l`, excluding `bin/` and `obj/`):
 | GHCAA.Application | 96 | 2,924 |
 | GHCAA.Infrastructure (excluding EF migrations) | 105 | 14,488 |
 | GHCAA.Infrastructure — EF migrations (`Data/Migrations`) | 3 | 157,079 |
-| GHCAA.API | 59 | 6,269 |
+| GHCAA.API | 73 | 6,917 |
 | GHCAA.Export | 1 | 121 |
 | GHCAA.Tools | 3 | 107 |
 | GHCAA.Tests | 87 | 15,723 |
-| GHCAA.Web (`src/**/*.ts`) | 242 | 24,597 |
+| GHCAA.Web (`src/**/*.ts`) | 268 | 26,601 |
 | GHCAA.Mobile (`lib/**/*.dart`) | 126 | 25,159 |
 
 The migrations row is split out because it is not hand-written code: `20260907193705_InitialBaseline.cs`,
@@ -96,8 +96,8 @@ with no project-specific rule added on top of that default set at the time of wr
 
 ## 7.4 Implementation of the Domain and Persistence Layers
 
-`ApplicationDbContext` declares 54 `public DbSet<...>` properties (`grep -c "public DbSet<" GHCAA.Infrastructure/Data/ApplicationDbContext.cs`),
-53 of them domain models and the 54th `DataProtectionKeys`, a framework table `docs/adr/0007-data-protection-keys-in-database.md`
+`ApplicationDbContext` declares 72 `public DbSet<...>` properties (`grep -c "public DbSet<" GHCAA.Infrastructure/Data/ApplicationDbContext.cs`),
+71 of them domain models and the 72nd `DataProtectionKeys`, a framework table `docs/adr/0007-data-protection-keys-in-database.md`
 records adding so that ASP.NET Core's data-protection keys survive a Render redeploy rather than being
 regenerated — and, before that fix, silently invalidating every session and every value the application
 had encrypted with the previous key. The schema's migration history is a single file: the prior 31-migration
@@ -147,14 +147,32 @@ The service enforces phase transitions, frozen voter-roll eligibility, officer p
 rules, secret-ballot separation and one-vote concurrency controls before writing election state.
 Generated election documents use the reusable document service and the active organisation profile.
 
+Work Package 37.2 carries the scholarship and student-aid programme through the same fund/call/
+application/award shape the rest of the domain uses for a multi-stage workflow. A reviewer scoring
+an application through `ScholarshipService` never sees the applicant's name or member record — the
+review projection is built without that join, so blinding is a property of the query rather than a
+UI field left off the screen. Awarding a scholarship writes a `FinancialRecord` Grant entry through
+the same idempotency guard `FinancialLedgerController` already enforces elsewhere (§7.10), so a retried
+disbursement request cannot double-pay an award.
+
+Work Package 37.6 is the oral-history and legacy archive: `ArchiveCollection` groups a set of
+`ArchiveItem` records, each one a transcript, recording or scanned document rather than a media file
+treated as an end in itself. The public `/legacy` page on the Angular client reuses the document-hero
+and document-prose shell §7.16's profile packs already style, rather than introducing a parallel
+public-page layout for archive content.
+
 ## 7.6 Implementation of the API Layer
 
-`GHCAA.API/Controllers` holds 38 controllers exposing 285 endpoint action attributes
-(`grep -rhoE '\[(HttpGet|HttpPost|HttpPut|HttpDelete|HttpPatch)' GHCAA.API/Controllers --include=*.cs | wc -l`),
-against 6,269 lines across 59 files in the project as a whole, which puts controllers themselves at
-roughly 16 lines per endpoint on average once routing attributes, `[Authorize]` and `[RequireStepUp]`
-decoration, model binding and the call into the corresponding service are counted — thin by design, since
-the layer's job is request/response translation and authorisation, not business logic. Two real-time
+`GHCAA.API/Controllers` holds 45 controllers exposing 333 endpoint action attributes
+(`grep -rhoE '\[(HttpGet|HttpPost|HttpPut|HttpDelete|HttpPatch)' GHCAA.API/Controllers --include=*.cs | wc -l`,
+re-run 23 September 2026), against 6,917 lines across 73 files in the project as a whole, which puts
+controllers themselves at roughly 16 lines per endpoint on average once routing attributes,
+`[Authorize]` and `[RequireStepUp]` decoration, model binding and the call into the corresponding
+service are counted — thin by design, since the layer's job is request/response translation and
+authorisation, not business logic. `ArchiveController`, `ScholarshipsController` and
+`CredentialVerificationController` (Work Packages 37.6, 37.2 and 37.8) follow the same shape as the
+rest of the layer: routing and authorisation only, with the archive lookup, blind-review scoring and
+short-code verification itself left to their respective application services. Two real-time
 hubs live in the same project rather than a separate one (`Hubs/ChatHub.cs`, `Hubs/NotificationHub.cs`),
 covered in §7.9.
 
@@ -164,9 +182,11 @@ response status code convention, neither of which the application layer has a re
 
 ## 7.7 Implementation of the Web Client
 
-`GHCAA.Web/src` is 242 TypeScript files and 24,597 lines, of which 94 components are declared
-`standalone: true` — Angular's module-free component style, used throughout rather than mixed with
-`NgModule`-declared components. `styles.scss` is 3,468 lines, the shared token and utility layer §8.5's
+`GHCAA.Web/src` is 268 TypeScript files and 26,601 lines (re-counted 23 September 2026), of which 102
+components are declared `standalone: true` — Angular's module-free component style, used throughout
+rather than mixed with `NgModule`-declared components. The public `/legacy` and `/scholarships` pages
+(Work Packages 37.6 and 37.2) and their `ArchiveService`/`ScholarshipService` HTTP clients account for
+part of that growth. `styles.scss` is 3,468 lines, the shared token and utility layer §8.5's
 theme audit and the design-system skill both work against; component-scoped styles sit alongside it
 rather than replacing it, which is also the source of the scoping bugs recorded in §7.15 and the
 `:host-context()` pattern those bugs led to.
@@ -253,29 +273,54 @@ for two of the delete actions it protects.
 
 ## 7.11 Document Generation
 
-`IDCardService` (`GHCAA.Infrastructure/Services/IDCardService.cs`, 243 lines) generates every
+`IDCardService` (`GHCAA.Infrastructure/Services/IDCardService.cs`, 298 lines) generates every
 printable member artefact: an ID card, a membership certificate, and a PDF version of each. Its
-constructor (line 22) takes only `ApplicationDbContext` and `IOrgConfigService`, so a card carries
+constructor (line 25) takes only `ApplicationDbContext` and `IOrgConfigService`, so a card carries
 no state of its own beyond what those two sources supply at the moment it is requested — there is
 no separate "card record" to keep in sync with the member row it describes.
 
 Four public methods split along two axes: card or certificate, and data-URI (for on-screen preview
 in the Angular and Flutter clients) or PDF (for download and printing). `GenerateIDCardDataUriAsync`
-(line 39) and `GenerateCertificateDataUriAsync` (line 92) return an inline PNG; `GenerateIDCardPdfAsync`
-(line 126) and `GenerateCertificatePdfAsync` (line 184) build the same layout through QuestPDF's
-fluent API (`Document.Create(container => ...)` at lines 137 and 194, `document.GeneratePdf()` at
-lines 181 and 240) and return raw bytes. All four build the same verification URL before anything
-else —
-`` $"{org.Contact.PortalBaseUrl}/verify/{member.MembershipNumber ?? member.Id.ToString()}" `` at
-lines 59, 100, 135 and 192 — encode it with QRCoder at error-correction level Q (`QRCodeGenerator.ECCLevel.Q`,
-present at every call site), and embed the code in the artefact. A card printed today points at a
-URL the portal can still answer tomorrow, because the QR payload is a route, not a snapshot of the
-member's data at generation time; only the destination page reads current state.
+(line 67) and `GenerateCertificateDataUriAsync` (line 119) return an inline PNG; `GenerateIDCardPdfAsync`
+(line 152) and `GenerateCertificatePdfAsync` (line 210) build the same layout through QuestPDF's
+fluent API and return raw bytes. All four now call a shared private method first,
+`IssueCredentialAsync` (lines 42-65), rather than each building its own verification URL from the
+member's own data.
 
-The duplication across the four methods (rebuilding `verifyUrl`, re-running the QR encode, laying
-out the same header/footer) has not been factored into a shared template as of this writing. It is
-a candidate for the deferred `GHCAA.Export` restructuring the outline does not require this chapter
-to resolve.
+Work Package 37.8 replaced what that URL used to be. A card generated before this work package
+pointed its QR code at `/verify/{member.MembershipNumber}` — a value read straight off the member's
+own record, which meant it never expired, could not be revoked without changing the member's
+membership number, and was guessable from any other document that carried the same number.
+`IssueCredentialAsync` instead generates a 10-character code (`CredentialCodeGenerator.Create()`,
+line 55), retries on collision against `IssuedCredentials` until it lands on a code nobody already
+holds (lines 49-58), and persists an `IssuedCredential` row — member, credential type, short code,
+issue timestamp — before returning a verify URL built from that code, not from the member row
+(`{PortalBaseUrl}/verify/{ShortCode}`, line 63). Generating a new card or certificate issues a new
+credential rather than reusing the last one, so an old printout's QR code and a freshly generated
+one point at different, independently revocable rows even for the same member.
+
+`GET api/verify/{shortCode}` (`CredentialVerificationController.Verify`, lines 18-27) is the page
+that URL resolves to. It rejects anything that is not exactly 10 characters before touching the
+database, then calls `IDCardService.VerifyCredentialAsync` (`IDCardService.cs`, line 269), which
+looks the code up, checks it is not revoked and has not passed its expiry if one is set, and returns
+`CredentialVerificationDto { Valid, MemberName, MembershipType, IssuedOn, Status }` — nothing else
+from the member record. The endpoint carries `[AllowAnonymous]`, since the whole point is that
+someone checking a printed card has no account to log into, but the response never exposes an
+address, contact detail or raw member ID; anyone who fails validation, tries a code that never
+existed, or hits an expired or revoked one is told the same amount (`Valid: false`, or a 404 for an
+unrecognised code) as everyone else. A separate endpoint, `POST api/verify/{shortCode}/revoke`
+(`CredentialVerificationController.Revoke`, lines 29-36), lets an admin invalidate one credential
+with a required reason; it is not reachable without the admin policy the controller applies to it.
+
+QR encoding itself is unchanged from before this work package: QRCoder at error-correction level Q
+(`QRCodeGenerator.ECCLevel.Q`), embedded in the artefact at the same four call sites. What changed
+is only what the code resolves to.
+
+`IssueCredentialAsync` also closes part of the duplication the four generation methods used to carry
+independently — building the verify URL and issuing the underlying credential now happens once,
+rather than once per method. The remaining duplication (laying out the same header/footer per
+artefact type) has not been factored into a shared template as of this writing; it is a candidate for
+the deferred `GHCAA.Export` restructuring the outline does not require this chapter to resolve.
 
 ## 7.12 Constitution Publication Pipeline
 
@@ -345,7 +390,7 @@ one.
 
 ## 7.14 Software Configuration Management
 
-The repository carries 295 commits on `HEAD` and six local branches: `dev`, `preprod`,
+The repository carries 299 commits on `HEAD` and six local branches: `dev`, `preprod`,
 `release-1`, `release-2`, `release-3_b4_generic_N_refactor` and `release-4_white_paper`, plus
 `dev-mobile` and `mobile_app` that exist only on the remote. `dev` is the integration branch;
 `preprod` (the branch this chapter was written from) trails `dev` by a `git rev-list --count dev..preprod`

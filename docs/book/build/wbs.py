@@ -82,7 +82,7 @@ CODE = [
       "GHCAA.Infrastructure/Services/AuthService.cs",
       "GHCAA.Infrastructure/Services/OtpService.cs",
       "GHCAA.Infrastructure/Services/TokenService.cs"], ["C1"]),
-    ("C3", "Registry and membership", ["2", "32", "35", "46", "49", "83"],
+    ("C3", "Registry and membership", ["2", "32", "35", "46", "49", "83", "88"],
      ["GHCAA.Infrastructure/Services/MemberService.cs",
       "GHCAA.API/Controllers/ProfileController.cs",
       "GHCAA.API/Controllers/AdminController.cs",

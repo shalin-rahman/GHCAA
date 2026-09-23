@@ -48,6 +48,12 @@ a gap someone still needs to close.
 
 ## Log
 
+### 2026-09-22 — /api/admin/elections
+- Change: added the admin election list, create, publish, close, and candidate-management routes expected by the Angular admin screen. The list returns the admin election shape used by the dashboard, and the admin lifecycle actions move elections through the documented voting phases.
+- Reason: the web admin UI was calling `/api/admin/elections` while the API only exposed the public `/api/elections` route family, so the missing route surface caused 404s.
+- Web: implemented in `GHCAA.Web/src/app/core/services/elections.service.ts` and `GHCAA.Web/src/app/admin/elections/admin-elections.ts`.
+- Mobile: not required; `GHCAA.Mobile/lib/features/elections/election_service.dart` already uses the public `/elections` contract and remains compatible without any admin-route change.
+
 ### 2026-09-22 — /api/verify/{shortCode}
 - Change: added an anonymous, rate-limited credential verification endpoint and an
   admin-only credential revocation endpoint. Generated ID cards and membership

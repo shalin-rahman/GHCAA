@@ -325,6 +325,16 @@ behaved differently for a public versus a masked field regardless of `IsEmailPub
 unprivileged caller infer a member's contact details existed even when they were not disclosed, so the
 search predicate itself, not only the returned value, respects the visibility flag.
 
+Work Package 37.2's scholarship review and Work Package 37.8's public credential check apply the same
+default-non-disclosure rule at the query level rather than in a view. `ScholarshipService`'s
+reviewer-facing projection does not join the applicant's member record, so a reviewer scoring an
+application has no member name, contact detail or membership history to see, blind by construction
+rather than by a field a screen happens not to render. `CredentialVerificationController.Verify`
+(§7.11) is reachable by anyone with a card's QR code and no account, so its response is built from
+the same minimisation discipline in the other direction: `CredentialVerificationDto` carries only
+`Valid`, `MemberName`, `MembershipType`, `IssuedOn` and `Status`, with no address, contact detail or
+member ID, whether the code is valid, expired, revoked or unrecognised.
+
 **Consent.** `Member` also carries `HasAcceptedTerms`, `HasAcceptedGdpr` and `GdprAcceptedAt`. The
 public registration form (`GHCAA.Web/src/app/public/register/register.html`, lines 396-413) presents
 these as two required checkboxes before submission: acceptance of the Association's registration

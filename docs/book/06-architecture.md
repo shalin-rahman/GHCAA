@@ -55,7 +55,7 @@ Figure 6.2 draws the four layers and the single direction dependencies are permi
 
 ### 6.3.1 Domain layer
 
-`GHCAA.Domain` holds the fifty-three entity sets enumerated in §5.7, the twenty-nine enumerations
+`GHCAA.Domain` holds the seventy-one entity sets enumerated in §5.7, the thirty-eight enumerations
 of `Enums.cs`, and constants. Figure 6.7 draws the membership, payment, event and governance
 classes at design level, with the attributes and multiplicities the analysis model of Figure 3.8
 left out. It references nothing else in the solution, which is the dependency rule's
@@ -123,14 +123,14 @@ stamp can be checked, and must be checked before authorisation decides what it m
 
 ### 6.5.1 Conceptual, logical and physical progression
 
-The conceptual model is Figure 3.8; the logical model is the fifty-three mapped entity sets of §5.7,
-forty of which have a Fluent API configuration class under
+The conceptual model is Figure 3.8; the logical model is the seventy-one mapped entity sets of §5.7,
+forty-five of which have a Fluent API configuration class under
 `GHCAA.Infrastructure/Data/Configurations/` rather than attribute-only mapping, which keeps
-persistence concerns out of the domain classes themselves; the remaining thirteen are mapped by EF
+persistence concerns out of the domain classes themselves; the remaining twenty-six are mapped by EF
 Core's conventions alone, which is a gap rather than a decision and is recorded as such; the physical model is whichever of the two schemas in §6.5.4 the running environment
 selects. Figures 6.3 to 6.8 draw that schema as four sub-models, being identity and records, standing and
 money, events and participation, and governance, each with its keys and cardinalities. They are split
-this way rather than drawn as one diagram because one diagram of fifty-three tables cannot be printed
+this way rather than drawn as one diagram because one diagram of seventy-one tables cannot be printed
 at a size anyone can read; the content, communication and configuration tables are in the generated
 schema documentation.
 
@@ -188,7 +188,7 @@ more honest record of the cost than a tidy retrospective claim would be.
 
 ### 6.5.5 Data dictionary
 
-Table 6.2 gives a representative slice of the fifty-three mapped entities; the full dictionary is
+Table 6.2 gives a representative slice of the seventy-one mapped entities; the full dictionary is
 generated from the schema and delivered beside this dissertation.
 
 ### 6.5.6 Seeding and runtime data-synchronisation strategy
@@ -646,7 +646,7 @@ flowchart TB
       DBC[2 DbContext provider shims]
     end
     subgraph DOM_L["GHCAA.Domain"]
-      ENT[53 entity sets, 29 enums]
+      ENT[71 entity sets, 38 enums]
     end
     subgraph STORE["Storage"]
       direction TB

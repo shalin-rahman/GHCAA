@@ -42,8 +42,8 @@ would misdescribe it.
 
 ## 11.1 Process Model in Practice and its Deviations from Plan
 
-`docs/book/build/wbs.py`, run on 22 September 2026, classifies every one of the 87 work packages
-`docs/TODO.md` has raised, and every one of the 908 tracker tasks under them, by how it arrived: planned
+`docs/book/build/wbs.py`, run on 23 September 2026, classifies every one of the 88 work packages
+`docs/TODO.md` has raised, and every one of the 913 tracker tasks under them, by how it arrived: planned
 before the work started, or reactively, as stakeholder feedback, a review finding or a defect.
 
 Counted by work package, 29 (33%) were planned and 58 (67%) were not: 32 (37%) arrived as feedback
@@ -84,8 +84,8 @@ defined once, here, and used by name everywhere else in the book:
   packages, and a work package can deliver only part of a feature — the two lists are not the same
   shape.
 
-`docs/TODO.md` had 87 numbered work packages holding 908 tracker tasks between them, tied to 17 WBS
-activities and 295 commits, as of 22 September 2026 (`git rev-list --count HEAD`) — five different
+`docs/TODO.md` had 88 numbered work packages holding 913 tracker tasks between them, tied to 17 WBS
+activities and 299 commits, as of 23 September 2026 (`git rev-list --count HEAD`) — five different
 counts of one project, each answering a different question about it.
 
 Five streams, one of them carrying no commit at all: the back-scheduled P1–P5 research and design
@@ -110,11 +110,11 @@ estimate to compare them against, because no network existed before the code did
 
 The critical path is C1 (Persistence and migrations) → C2 (Authentication and access) → C3 (Registry
 and membership) → C5 (Events and attendance) → C8 (Gallery and albums) → C13 (Web client) → C15
-(Quality and testing) → C17 (Standards, docs and dissertation), 56 working days end to end. Against
-that, 78 working days are evidenced by a code commit somewhere in the project (§11.1), and the first
-commit to the last spans 9 February to 22 September 2026, 226 elapsed calendar days. Fifty-six
-planned days, seventy-eight worked days, two-hundred-and-twenty-six elapsed days: the three numbers
-diverge for different reasons. The gap between 56 and 78 is components running in parallel, which a
+(Quality and testing) → C17 (Standards, docs and dissertation), 57 working days end to end. Against
+that, 79 working days are evidenced by a code commit somewhere in the project (§11.1), and the first
+commit to the last spans 9 February to 23 September 2026, 227 elapsed calendar days. Fifty-seven
+planned days, seventy-nine worked days, two-hundred-and-twenty-seven elapsed days: the three numbers
+diverge for different reasons. The gap between 57 and 79 is components running in parallel, which a
 single maintainer cannot actually do at the same moment, so total work exceeds the shortest possible
 path through it. The gap between 78 and 226 is availability rather than dependency — a volunteer
 project fits around a full-time job, and nothing in the network says a day off is a defect.
@@ -141,26 +141,26 @@ much room the record shows they had.
 
 | Component | Duration (days) | ES | EF | LS | LF | Float | Predecessors | Commits | Active days |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| C1 Persistence and migrations | 8 | 0 | 8 | 0 | 8 | 0 | — | 17 | 14 |
-| C2 Authentication and access | 3 | 8 | 11 | 8 | 11 | 0 | C1 | 67 | 67 |
-| C3 Registry and membership | 6 | 11 | 17 | 11 | 17 | 0 | C1, C2 | 30 | 30 |
-| C5 Events and attendance | 3 | 17 | 20 | 17 | 20 | 0 | C3 | 6 | 6 |
-| C8 Gallery and albums | 1 | 20 | 21 | 20 | 21 | 0 | C5 | 29 | 27 |
-| C13 Web client | 14 | 21 | 35 | 21 | 35 | 0 | C3–C11 | 90 | 90 |
-| C15 Quality and testing | 12 | 35 | 47 | 35 | 47 | 0 | C12, C13 | 67 | 61 |
-| C17 Standards, docs and dissertation | 9 | 47 | 56 | 47 | 56 | 0 | C15, C16, C14 | 163 | 139 |
-| C4 Payments and finance | 3 | 17 | 20 | 18 | 21 | 1 | C3 | 9 | 9 |
-| C6 Governance and elections | 2 | 17 | 19 | 19 | 21 | 2 | C3 | 54 | 40 |
-| C9 Careers and job board | 2 | 17 | 19 | 19 | 21 | 2 | C3 | 2 | 1 |
-| C10 Networking, forum and messaging | 2 | 17 | 19 | 19 | 21 | 2 | C3 | 20 | 20 |
-| C7 Content and communication | 3 | 11 | 14 | 18 | 21 | 7 | C2 | 15 | 15 |
-| C16 Deployment and operations | 4 | 35 | 39 | 43 | 47 | 8 | C13 | 10 | 10 |
-| C11 Configuration and white-label | 3 | 8 | 11 | 18 | 21 | 10 | C1 | 66 | 60 |
-| C14 Mobile client | 8 | 20 | 28 | 39 | 47 | 19 | C3, C4, C5 | 40 | 33 |
-| C12 Security and hardening | 2 | 11 | 13 | 33 | 35 | 22 | C2 | 47 | 45 |
+| C1 Persistence and migrations | 9 | 0 | 9 | 0 | 9 | 0 | — | 17 | 14 |
+| C2 Authentication and access | 3 | 9 | 12 | 9 | 12 | 0 | C1 | 67 | 67 |
+| C3 Registry and membership | 6 | 12 | 18 | 12 | 18 | 0 | C1, C2 | 30 | 30 |
+| C5 Events and attendance | 3 | 18 | 21 | 18 | 21 | 0 | C3 | 6 | 6 |
+| C8 Gallery and albums | 1 | 21 | 22 | 21 | 22 | 0 | C5 | 29 | 27 |
+| C13 Web client | 14 | 22 | 36 | 22 | 36 | 0 | C3–C11 | 90 | 90 |
+| C15 Quality and testing | 12 | 36 | 48 | 36 | 48 | 0 | C12, C13 | 67 | 61 |
+| C17 Standards, docs and dissertation | 9 | 48 | 57 | 48 | 57 | 0 | C15, C16, C14 | 163 | 139 |
+| C4 Payments and finance | 3 | 18 | 21 | 19 | 22 | 1 | C3 | 9 | 9 |
+| C6 Governance and elections | 2 | 18 | 20 | 20 | 22 | 2 | C3 | 54 | 43 |
+| C9 Careers and job board | 2 | 18 | 20 | 20 | 22 | 2 | C3 | 2 | 1 |
+| C10 Networking, forum and messaging | 2 | 18 | 20 | 20 | 22 | 2 | C3 | 20 | 20 |
+| C7 Content and communication | 3 | 12 | 15 | 19 | 22 | 7 | C2 | 15 | 15 |
+| C16 Deployment and operations | 4 | 36 | 40 | 44 | 48 | 8 | C13 | 10 | 10 |
+| C11 Configuration and white-label | 3 | 9 | 12 | 19 | 22 | 10 | C1 | 66 | 60 |
+| C14 Mobile client | 8 | 21 | 29 | 40 | 48 | 19 | C3, C4, C5 | 40 | 33 |
+| C12 Security and hardening | 2 | 12 | 14 | 34 | 36 | 22 | C2 | 47 | 45 |
 
-*Source: `python docs/book/build/wbs.py`, run 22 September 2026, against `docs/TODO.md` and the git
-history at HEAD (295 commits). ES/EF/LS/LF are in working days from the first commit; "active days"
+*Source: `python docs/book/build/wbs.py`, run 23 September 2026, against `docs/TODO.md` and the git
+history at HEAD (299 commits). ES/EF/LS/LF are in working days from the first commit; "active days"
 counts distinct calendar days on which the component received a commit, not working days.*
 
 Two things stand out reading it this way rather than in sequence. Float correlates with how self-
@@ -192,18 +192,18 @@ in advance, because no function-point count was made before the code existed. Th
 measurement of what was built, not an independent estimate of what it should have cost — a distinction
 §11.4.2 returns to.
 
-`GHCAA.Api/Controllers` carries 285 endpoint attributes across 38 controller files
+`GHCAA.Api/Controllers` carries 333 endpoint attributes across 45 controller files
 (`grep -rhoE '\[(HttpGet|HttpPost|HttpPut|HttpDelete|HttpPatch)' GHCAA.Api/Controllers --include=*.cs`,
-16 September 2026): 123 `HttpGet`, 113 `HttpPost`, 18 `HttpPut`, 25 `HttpDelete`, 6 `HttpPatch`. IFPUG
+23 September 2026): 141 `HttpGet`, 138 `HttpPost`, 20 `HttpPut`, 28 `HttpDelete`, 6 `HttpPatch`. IFPUG
 counts external inputs (EI), outputs (EO) and inquiries (EQ) separately by whether a transaction
 changes stored data, derives new data or only retrieves it, which needs reading each endpoint's body
 to classify. That was not done here in this pass; instead every data-modifying verb (POST, PUT,
-PATCH, DELETE — 162 endpoints) is counted as an EI, and every GET (123 endpoints) as an EQ, treating
+PATCH, DELETE — 192 endpoints) is counted as an EI, and every GET (141 endpoints) as an EQ, treating
 none as a distinct EO. That is a simplification, stated as one: it undercounts wherever a GET performs
 a real calculation rather than a plain lookup, and it is the reason this section's function-point
 total is a lower bound on the standard method's own count, not the count itself.
 
-`ApplicationDbContext.cs` declares 54 `DbSet<>` properties (`grep -c "public DbSet<"
+`ApplicationDbContext.cs` declares 72 `DbSet<>` properties (`grep -c "public DbSet<"
 GHCAA.Infrastructure/Data/ApplicationDbContext.cs`), each an internal logical file (ILF). The system
 integrates seven external interfaces (EIF): four payment gateways (Bkash, DGePay, Nagad, SSLCommerz,
 confirmed via `GHCAA.Infrastructure/Gateways/`), one SMS gateway (`GreenwebSmsService.cs`), one email
@@ -216,11 +216,11 @@ contract of its own. Table 11.2 turns these four counts into an unadjusted funct
 
 | Element type | Count | IFPUG average weight | Function points |
 | --- | --- | --- | --- |
-| External input (EI) | 162 | 4 | 648 |
-| External inquiry (EQ) | 123 | 4 | 492 |
-| Internal logical file (ILF) | 54 | 10 | 540 |
+| External input (EI) | 192 | 4 | 768 |
+| External inquiry (EQ) | 141 | 4 | 564 |
+| Internal logical file (ILF) | 72 | 10 | 720 |
 | External interface file (EIF) | 7 | 7 | 49 |
-| **Unadjusted function points (UFP)** | | | **1,729** |
+| **Unadjusted function points (UFP)** | | | **2,101** |
 
 No external output (EO) is counted, for the reason stated above. Every weight used is IFPUG's
 "average" complexity band rather than a low or high band assigned per element, because assigning
@@ -253,10 +253,10 @@ lists all fourteen ratings and the total degree of influence they sum to.
 | 14 | Facilitate change | 4 | Organisation settings and provider adapters are configuration-driven |
 | | **Total degree of influence (TDI)** | **45** | |
 
-VAF = 0.65 + 0.01 × TDI = 0.65 + 0.45 = 1.10. Adjusted function points, AFP = UFP × VAF = 1,729 ×
-1.10 ≈ 1,902.
+VAF = 0.65 + 0.01 × TDI = 0.65 + 0.45 = 1.10. Adjusted function points, AFP = UFP × VAF = 2,101 ×
+1.10 ≈ 2,311.
 
-Converting 1,902 AFP into an effort or cost figure needs a productivity factor — hours per function
+Converting 2,311 AFP into an effort or cost figure needs a productivity factor — hours per function
 point for a comparable system and process — and this project has no independent source for one: it is
 a team of one working from a personal component library, which is not the population any published
 productivity table describes. *[A hours-per-function-point figure, cited to a source that applies to
@@ -289,7 +289,7 @@ working habit, not about component size.
 
 ### 11.4.2 The estimate against the actual
 
-The function-point count above (1,729 unadjusted, 1,902 adjusted) is a size figure: it describes how
+The function-point count above (2,101 unadjusted, 2,311 adjusted) is a size figure: it describes how
 large the delivered system is by a standard method, counted from what actually exists. §11.1 and
 §11.5 report a different kind of figure: 148 days of effort the record can evidence, and 345 days the
 same work would represent built without this project's particular reuse. These are not directly
@@ -308,9 +308,9 @@ found.
 ## 11.5 How the Implementation Time Was Optimised
 
 A reader who reaches this point already has the scale: one unpaid maintainer, seven months, a system
-of 285 endpoints, 54 entities, two clients and (§9's own count, cross-referenced there) several hundred
+of 333 endpoints, 71 entities, two clients and (§9's own count, cross-referenced there) several hundred
 automated tests. The honest answer to how that got built is not that the work was small — §11.4 puts
-its unadjusted size at 1,729 function points. It is that four things compounded: what the framework
+its unadjusted size at 2,101 function points. It is that four things compounded: what the framework
 generated rather than a person writing it, what the project's own screens reused from each other, what
 the author's earlier projects supplied intact, and what tooling drafted for review rather than for
 authorship. This section prices each of the four instead of asserting that they mattered.
@@ -356,7 +356,7 @@ judgement.
 binding and dependency injection, and Angular's CLI-generated component and module boilerplate,
 produce working code from a declaration rather than from typed lines — this factor is judged, not
 measured line by line, but it is a conservative one against a codebase where the scaffolded proportion
-is visibly large: 46 service interfaces and their EF-backed implementations, 54 entities each with a
+is visibly large: 46 service interfaces and their EF-backed implementations, 71 entities each with a
 generated migration, and every Angular component's routing and module wiring.
 
 **Reuse of shared components within the project, ×0.85.** A screen built from an existing shared
@@ -571,12 +571,12 @@ measurement precisely because it does not claim to be an effort prediction it ca
 ## 11.12 Summary
 
 This chapter counted the same project five different ways and did not let the counts agree by
-force. The critical path is 56 working days; 78 are evidenced by a commit; 226 elapsed on the
+force. The critical path is 57 working days; 79 are evidenced by a commit; 227 elapsed on the
 calendar between the first and the last. The delivered codebase, priced at conventional rates with no
 reduction, represents 860 working days; four reductions, three of them judged and one measured, bring
-that to 345; the record can evidence 148. Seventy-five per cent of the tracker's 908 tasks arrived
+that to 345; the record can evidence 148. Seventy-five per cent of the tracker's 913 tasks arrived
 after the work they belong to had already started. A function-point count of the delivered system,
-simplified and stated as such, comes to 1,729 unadjusted points, and could not be converted to an
+simplified and stated as such, comes to 2,101 unadjusted points, and could not be converted to an
 effort or cost figure without a productivity rate this project has no defensible source for — recorded
 here as an open gap rather than filled with an invented one. Defect removal efficiency, from an
 evidenced 20 pre-delivery findings against 2 post-delivery incidents, is about 0.91, computed by a
