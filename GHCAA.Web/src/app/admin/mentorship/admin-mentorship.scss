@@ -1,0 +1,22 @@
+.status-badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+
+  &.success {
+    background: color-mix(in srgb, var(--success-color) 12%, transparent);
+    color: var(--success-color);
+  }
+  &.pending {
+    background: color-mix(in srgb, var(--accent-gold-bright) 15%, transparent);
+    color: var(--accent-text);
+  }
+  &.failed {
+    background: color-mix(in srgb, var(--danger-color) 12%, transparent);
+    color: var(--danger-color);
+  }
+  &.refunded {
+    background: color-mix(in srgb, var(--accent-color) 15%, transparent);
+    color: var(--accent-color);
+  }
+}

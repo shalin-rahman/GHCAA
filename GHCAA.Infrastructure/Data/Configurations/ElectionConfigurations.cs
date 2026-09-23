@@ -91,6 +91,17 @@ public sealed class BallotVoteConfiguration : IEntityTypeConfiguration<BallotVot
     }
 }
 
+public sealed class SeatVoteConfiguration : IEntityTypeConfiguration<SeatVote>
+{
+    public void Configure(EntityTypeBuilder<SeatVote> b)
+    {
+        b.HasKey(x => x.Id);
+        b.HasIndex(x => new { x.ElectionId, x.ElectionSeatId, x.MemberId }).IsUnique();
+        b.HasOne(x => x.Election).WithMany().HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne<ElectionSeat>().WithMany().HasForeignKey(x => x.ElectionSeatId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
 public sealed class ElectionResultConfiguration : IEntityTypeConfiguration<ElectionResult>
 {
     public void Configure(EntityTypeBuilder<ElectionResult> b)

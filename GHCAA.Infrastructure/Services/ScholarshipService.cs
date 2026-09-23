@@ -28,11 +28,19 @@ public sealed class ScholarshipService : IScholarshipService
             throw new InvalidOperationException("This scholarship call is not accepting applications.");
         var application = new ScholarshipApplication
         {
-            ScholarshipCallId = callId, ApplicantName = dto.ApplicantName.Trim(), ApplicantEmail = dto.ApplicantEmail.Trim(),
-            ApplicantPhone = dto.ApplicantPhone.Trim(), InstitutionName = dto.InstitutionName.Trim(), Class = dto.Class.Trim(),
-            GuardianName = dto.GuardianName.Trim(), HouseholdIncome = dto.HouseholdIncome, NeedStatement = dto.NeedStatement.Trim(),
-            MeritStatement = dto.MeritStatement.Trim(), Status = Enums.ScholarshipApplicationStatus.Submitted,
-            SubmittedAt = now, ReferenceCode = await CreateReferenceCodeAsync(cancellationToken)
+            ScholarshipCallId = callId,
+            ApplicantName = dto.ApplicantName.Trim(),
+            ApplicantEmail = dto.ApplicantEmail.Trim(),
+            ApplicantPhone = dto.ApplicantPhone.Trim(),
+            InstitutionName = dto.InstitutionName.Trim(),
+            Class = dto.Class.Trim(),
+            GuardianName = dto.GuardianName.Trim(),
+            HouseholdIncome = dto.HouseholdIncome,
+            NeedStatement = dto.NeedStatement.Trim(),
+            MeritStatement = dto.MeritStatement.Trim(),
+            Status = Enums.ScholarshipApplicationStatus.Submitted,
+            SubmittedAt = now,
+            ReferenceCode = await CreateReferenceCodeAsync(cancellationToken)
         };
         _db.ScholarshipApplications.Add(application);
         await _db.SaveChangesAsync(cancellationToken);
@@ -46,9 +54,12 @@ public sealed class ScholarshipService : IScholarshipService
         if (application == null || application.ScholarshipCall == null) return null;
         return new ScholarshipStatusDto
         {
-            ReferenceCode = application.ReferenceCode, Status = application.Status,
-            AcademicYear = application.ScholarshipCall.AcademicYear, SubmittedAt = application.SubmittedAt,
-            AwardAmount = application.Award?.Amount, DisbursementStatus = application.Award?.DisbursementStatus
+            ReferenceCode = application.ReferenceCode,
+            Status = application.Status,
+            AcademicYear = application.ScholarshipCall.AcademicYear,
+            SubmittedAt = application.SubmittedAt,
+            AwardAmount = application.Award?.Amount,
+            DisbursementStatus = application.Award?.DisbursementStatus
         };
     }
 
@@ -120,9 +131,15 @@ public sealed class ScholarshipService : IScholarshipService
         var now = DateTime.UtcNow;
         var record = new FinancialRecord
         {
-            Year = now.Year, RecordType = Enums.FinancialRecordType.Expense, FinancialCategory = Enums.FinancialCategory.Grant,
-            Date = now, Amount = award.Amount, Description = $"Scholarship grant - {award.ScholarshipApplication.ReferenceCode}",
-            Reference = award.ScholarshipApplication.ReferenceCode, CreatedAt = now, CreatedByAdminId = adminId
+            Year = now.Year,
+            RecordType = Enums.FinancialRecordType.Expense,
+            FinancialCategory = Enums.FinancialCategory.Grant,
+            Date = now,
+            Amount = award.Amount,
+            Description = $"Scholarship grant - {award.ScholarshipApplication.ReferenceCode}",
+            Reference = award.ScholarshipApplication.ReferenceCode,
+            CreatedAt = now,
+            CreatedByAdminId = adminId
         };
         _db.FinancialRecords.Add(record);
         award.FinancialRecord = record; award.DisbursementStatus = Enums.DisbursementStatus.Paid;

@@ -778,3 +778,36 @@ export interface CampaignHonourRoll {
     tiers: HonourRollTier[];
     untiered: HonourRollEntry[];
 }
+
+export type MentorshipStatus = 'Pending' | 'Accepted' | 'Declined' | 'Completed';
+
+export interface MentorshipPerson {
+    id: number;
+    fullName: string;
+    photoPath?: string;
+    membershipNumber?: string;
+}
+
+export interface MentorshipRequestDto {
+    id: number;
+    domain?: string;
+    message?: string;
+    status: MentorshipStatus;
+    requestedAt: string;
+    respondedAt?: string;
+    responseNote?: string;
+    mentor?: MentorshipPerson;
+    requester?: MentorshipPerson;
+}
+
+// GetAllForAdminAsync's projection: no respondedAt/responseNote, and either party can be null
+// (deleted/inactive member) so the admin grid can't assume both sides always render.
+export interface MentorshipAdminRow {
+    id: number;
+    domain?: string;
+    message?: string;
+    status: MentorshipStatus;
+    requestedAt: string;
+    requester?: { id: number; fullName: string };
+    mentor?: { id: number; fullName: string };
+}

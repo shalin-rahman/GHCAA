@@ -185,6 +185,18 @@ export const PLEDGE_STATUS_MAP: Record<string | number, { label: string, class: 
     4: { label: 'Cancelled', class: 'failed' }
 };
 
+// MentorshipStatus { Pending, Accepted, Declined, Completed } (GHCAA.Domain/Models/MentorshipRequest.cs).
+export const MENTORSHIP_STATUS_MAP: Record<string | number, { label: string, class: string }> = {
+    Pending: { label: 'Pending', class: 'pending' },
+    0: { label: 'Pending', class: 'pending' },
+    Accepted: { label: 'Accepted', class: 'success' },
+    1: { label: 'Accepted', class: 'success' },
+    Declined: { label: 'Declined', class: 'failed' },
+    2: { label: 'Declined', class: 'failed' },
+    Completed: { label: 'Completed', class: 'refunded' },
+    3: { label: 'Completed', class: 'refunded' }
+};
+
 export const SUBMISSION_STATUS = {
     DRAFT: 'Draft',
     PENDING: 'Pending',
@@ -351,6 +363,26 @@ export function getPledgeStatusClass(status: string | number | null | undefined)
     if (match) return match.class;
     if (typeof status === 'string' && /^\d+$/.test(status)) {
         return PLEDGE_STATUS_MAP[parseInt(status, 10)]?.class || '';
+    }
+    return '';
+}
+
+export function getMentorshipStatusLabel(status: string | number | null | undefined): string {
+    if (status === null || status === undefined) return 'Unknown';
+    const match = MENTORSHIP_STATUS_MAP[status];
+    if (match) return match.label;
+    if (typeof status === 'string' && /^\d+$/.test(status)) {
+        return MENTORSHIP_STATUS_MAP[parseInt(status, 10)]?.label || status;
+    }
+    return String(status);
+}
+
+export function getMentorshipStatusClass(status: string | number | null | undefined): string {
+    if (status === null || status === undefined) return '';
+    const match = MENTORSHIP_STATUS_MAP[status];
+    if (match) return match.class;
+    if (typeof status === 'string' && /^\d+$/.test(status)) {
+        return MENTORSHIP_STATUS_MAP[parseInt(status, 10)]?.class || '';
     }
     return '';
 }

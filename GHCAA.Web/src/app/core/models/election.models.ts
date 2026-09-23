@@ -135,7 +135,6 @@ export interface NominationViewDto {
 export interface ScrutinyDto {
     accepted: boolean;
     reason?: string;
-    officerMemberId: number;
 }
 
 export interface CastVoteDto {

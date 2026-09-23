@@ -133,6 +133,11 @@
                 <button class="btn btn-outline btn-sm" [disabled]="processingId() === r.id" (click)="respondMentorship(r.id, false)">Decline</button>
             </div>
             }
+            @if (r.status === 'Accepted') {
+            <div class="row-actions">
+                <button class="btn btn-outline btn-sm" [disabled]="processingId() === r.id" (click)="completeMentorship(r.id)">Mark Complete</button>
+            </div>
+            }
         </div>
         }
         }
@@ -147,8 +152,13 @@
         <div class="request-row">
             <div class="text">
                 <strong>{{ r.mentor?.fullName }}</strong> @if (r.domain) { — <em>{{ r.domain }}</em> }
-                <span class="status-badge" [class]="r.status?.toLowerCase()">{{ r.status }}</span>
+                <span class="status-badge" [class]="getMentorshipStatusClass(r.status)">{{ r.status }}</span>
             </div>
+            @if (r.status === 'Accepted') {
+            <div class="row-actions">
+                <button class="btn btn-outline btn-sm" [disabled]="processingId() === r.id" (click)="completeMentorship(r.id)">Mark Complete</button>
+            </div>
+            }
         </div>
         }
         }

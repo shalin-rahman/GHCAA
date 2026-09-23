@@ -85,7 +85,6 @@ export const routes: Routes = [
                 ]
             },
             {
-                // TODO 37.3: fundraising campaigns + donor honour roll.
                 path: 'campaigns',
                 canActivate: [featureGuard('enableFundraising')],
                 title: 'Fundraising Campaigns | {branding.shortName}',
@@ -203,7 +202,6 @@ export const routes: Routes = [
                 canActivate: [featureGuard('enableGallery')]
             },
             {
-                // TODO 37.3: member's own pledges + giving history.
                 path: 'giving',
                 loadComponent: () => import('./member/giving/giving').then(m => m.Giving),
                 canActivate: [featureGuard('enableFundraising')]
@@ -279,9 +277,12 @@ export const routes: Routes = [
                 loadComponent: () => import('./admin/gallery/admin-gallery').then(m => m.AdminGallery)
             },
             {
-                // TODO 37.3: create/edit campaigns, confirm pledge receipts, manage donor tiers.
                 path: 'campaigns',
                 loadComponent: () => import('./admin/campaigns/admin-campaigns').then(m => m.AdminCampaigns)
+            },
+            {
+                path: 'mentorship',
+                loadComponent: () => import('./admin/mentorship/admin-mentorship').then(m => m.AdminMentorship)
             },
             {
                 path: 'comm',

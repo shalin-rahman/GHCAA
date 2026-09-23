@@ -31,7 +31,8 @@ describe('MemberRequests Component', () => {
             getReceived: vi.fn().mockReturnValue(of([])),
             getSent: vi.fn().mockReturnValue(of([])),
             send: vi.fn().mockReturnValue(of({})),
-            respond: vi.fn().mockReturnValue(of({}))
+            respond: vi.fn().mockReturnValue(of({})),
+            markComplete: vi.fn().mockReturnValue(of({}))
         };
         networkingServiceMock = {
             searchMembers: vi.fn().mockReturnValue(of({ items: [] }))
@@ -113,6 +114,19 @@ describe('MemberRequests Component', () => {
     it('respondFamily shows an error notification when the API call fails', () => {
         familyLinkServiceMock.respond.mockReturnValue(throwError(() => new Error('boom')));
         component.respondFamily(5, true);
+        expect(notificationServiceMock.error).toHaveBeenCalled();
+    });
+
+    it('completeMentorship calls MentorshipService.markComplete and reloads the lists', () => {
+        component.completeMentorship(7);
+        expect(mentorshipServiceMock.markComplete).toHaveBeenCalledWith(7);
+        expect(notificationServiceMock.success).toHaveBeenCalled();
+        expect(mentorshipServiceMock.getReceived).toHaveBeenCalledTimes(2);
+    });
+
+    it('completeMentorship shows an error notification when the API call fails', () => {
+        mentorshipServiceMock.markComplete.mockReturnValue(throwError(() => new Error('boom')));
+        component.completeMentorship(7);
         expect(notificationServiceMock.error).toHaveBeenCalled();
     });
 });

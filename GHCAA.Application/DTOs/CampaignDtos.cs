@@ -5,8 +5,6 @@ using GHCAA.Domain;
 
 namespace GHCAA.Application.DTOs
 {
-    // TODO 37.8: fundraising campaigns + donor honour roll.
-
     public class CampaignDto
     {
         public int Id { get; set; }

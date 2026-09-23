@@ -61,6 +61,7 @@ class AppDrawer extends ConsumerWidget {
                           _buildSection(context, localePack.myAccount, [
                             _MenuItem(Icons.badge_outlined, 'My Profile', '/profile'),
                             _MenuItem(Icons.receipt_long_outlined, 'Payments', '/financials'),
+                            _MenuItem(Icons.volunteer_activism_outlined, 'Fundraising Campaigns', '/campaigns'),
                           ]),
                           _buildSection(context, localePack.community, [
                             _MenuItem(Icons.people_outline, 'Alumni Directory', '/directory'),
@@ -71,6 +72,7 @@ class AppDrawer extends ConsumerWidget {
                             _MenuItem(Icons.chat_bubble_outline, 'Messages', '/messages'),
                             _MenuItem(Icons.family_restroom_outlined, 'Family Links', '/family'),
                             _MenuItem(Icons.forum_outlined, 'Discussions', '/forum'),
+                            _MenuItem(Icons.handshake_outlined, 'Mentorship Hub', '/mentorship'),
                           ]),
                           _buildSection(context, localePack.mediaAndTools, [
                             _MenuItem(Icons.newspaper_outlined, 'News', '/news'),

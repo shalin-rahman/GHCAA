@@ -27,6 +27,9 @@ import '../../screens/member/family_link_screen.dart';
 import '../../screens/member/support_screen.dart';
 import '../../screens/member/articles_screen.dart';
 import '../../screens/member/mentorship_hub_screen.dart';
+import '../../screens/member/campaigns_screen.dart';
+import '../../screens/member/campaign_detail_screen.dart';
+import '../../screens/member/my_pledges_screen.dart';
 import '../../screens/member/professional_hub_screen.dart';
 import '../../screens/member/submit_article_screen.dart';
 import '../../screens/member/magazine_screen.dart';
@@ -192,6 +195,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/magazine', name: 'magazine', builder: (context, state) => const MagazineScreen()),
           GoRoute(path: '/about', name: 'about', builder: (context, state) => const AboutScreen()),
           GoRoute(path: '/mentorship', name: 'mentorship', builder: (context, state) => const MentorshipHubScreen()),
+          GoRoute(path: '/campaigns', name: 'campaigns', builder: (context, state) => const CampaignsScreen()),
+          GoRoute(path: '/campaigns/my-pledges', name: 'campaigns_my_pledges', builder: (context, state) => const MyPledgesScreen()),
+          GoRoute(
+            path: '/campaigns/:slug',
+            name: 'campaign_detail',
+            builder: (context, state) => CampaignDetailScreen(slug: state.pathParameters['slug']!),
+          ),
           GoRoute(path: '/professionals', name: 'professionals', builder: (context, state) => const ProfessionalHubScreen()),
           GoRoute(path: '/polls', name: 'polls', builder: (context, state) => const PollsScreen()),
           GoRoute(path: '/election', name: 'election', builder: (context, state) => const ElectionScreen()),

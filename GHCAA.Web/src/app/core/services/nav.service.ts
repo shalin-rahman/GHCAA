@@ -60,6 +60,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     { path: '/admin/elections', label: 'Elections', icon: 'governance', section: 'Content' },
     { path: '/admin/themes', label: 'Special Themes', icon: 'themes', section: 'Content' },
     { path: '/admin/campaigns', label: 'Fundraising Campaigns', icon: 'ledger', feature: 'enableFundraising', section: 'Content' },
+    { path: '/admin/mentorship', label: 'Mentorship Requests', icon: 'governance', section: 'Content' },
 
     { path: '/admin/ledger', label: 'Financial Ledger', icon: 'ledger', roles: ['SuperAdmin'], section: 'Finance & Tools' },
     { path: '/admin/payments', label: 'Payment Settings', icon: 'payment-settings', roles: ['SuperAdmin'], section: 'Finance & Tools' },

@@ -18,15 +18,27 @@ namespace GHCAA.Infrastructure.Services
 
         private static ArchiveCollectionDto CollectionDto(ArchiveCollection x) => new()
         {
-            Id = x.Id, Title = x.Title, Description = x.Description, Decade = x.Decade,
-            PublicationState = x.PublicationState, ModerationState = x.ModerationState
+            Id = x.Id,
+            Title = x.Title,
+            Description = x.Description,
+            Decade = x.Decade,
+            PublicationState = x.PublicationState,
+            ModerationState = x.ModerationState
         };
         private static ArchiveItemDto ItemDto(ArchiveItem x) => new()
         {
-            Id = x.Id, ArchiveCollectionId = x.ArchiveCollectionId, Narrator = x.Narrator,
-            Transcript = x.Transcript, Summary = x.Summary, Decade = x.Decade,
-            LinkedMemberId = x.LinkedMemberId, FileUploadId = x.FileUploadId, MediaUrl = x.MediaUrl,
-            PublicationState = x.PublicationState, ModerationState = x.ModerationState, CreatedAt = x.CreatedAt
+            Id = x.Id,
+            ArchiveCollectionId = x.ArchiveCollectionId,
+            Narrator = x.Narrator,
+            Transcript = x.Transcript,
+            Summary = x.Summary,
+            Decade = x.Decade,
+            LinkedMemberId = x.LinkedMemberId,
+            FileUploadId = x.FileUploadId,
+            MediaUrl = x.MediaUrl,
+            PublicationState = x.PublicationState,
+            ModerationState = x.ModerationState,
+            CreatedAt = x.CreatedAt
         };
         private static IQueryable<ArchiveItem> Approved(IQueryable<ArchiveItem> query) =>
             query.Where(x => x.PublicationState == Enums.ArchivePublicationState.Published &&
@@ -40,23 +52,39 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrWhiteSpace(search)) q = q.Where(x => x.Title.Contains(search) || x.Description!.Contains(search));
             return await q.OrderBy(x => x.Title).Select(x => new ArchiveCollectionDto
             {
-                Id = x.Id, Title = x.Title, Description = x.Description, Decade = x.Decade,
-                PublicationState = x.PublicationState, ModerationState = x.ModerationState
+                Id = x.Id,
+                Title = x.Title,
+                Description = x.Description,
+                Decade = x.Decade,
+                PublicationState = x.PublicationState,
+                ModerationState = x.ModerationState
             }).ToListAsync(ct);
         }
         public async Task<IReadOnlyList<ArchiveCollectionDto>> GetAdminCollectionsAsync(CancellationToken ct = default)
             => await _db.ArchiveCollections.OrderByDescending(x => x.CreatedAt).Select(x => new ArchiveCollectionDto
             {
-                Id = x.Id, Title = x.Title, Description = x.Description, Decade = x.Decade,
-                PublicationState = x.PublicationState, ModerationState = x.ModerationState
+                Id = x.Id,
+                Title = x.Title,
+                Description = x.Description,
+                Decade = x.Decade,
+                PublicationState = x.PublicationState,
+                ModerationState = x.ModerationState
             }).ToListAsync(ct);
         public async Task<ArchiveItemDto?> GetPublicItemAsync(int id, CancellationToken ct = default)
             => await Approved(_db.ArchiveItems).Where(x => x.Id == id).Select(x => new ArchiveItemDto
             {
-                Id = x.Id, ArchiveCollectionId = x.ArchiveCollectionId, Narrator = x.Narrator,
-                Transcript = x.Transcript, Summary = x.Summary, Decade = x.Decade,
-                LinkedMemberId = x.LinkedMemberId, FileUploadId = x.FileUploadId, MediaUrl = x.MediaUrl,
-                PublicationState = x.PublicationState, ModerationState = x.ModerationState, CreatedAt = x.CreatedAt
+                Id = x.Id,
+                ArchiveCollectionId = x.ArchiveCollectionId,
+                Narrator = x.Narrator,
+                Transcript = x.Transcript,
+                Summary = x.Summary,
+                Decade = x.Decade,
+                LinkedMemberId = x.LinkedMemberId,
+                FileUploadId = x.FileUploadId,
+                MediaUrl = x.MediaUrl,
+                PublicationState = x.PublicationState,
+                ModerationState = x.ModerationState,
+                CreatedAt = x.CreatedAt
             }).SingleOrDefaultAsync(ct);
         public async Task<IReadOnlyList<ArchiveItemDto>> GetAdminItemsAsync(string? search, CancellationToken ct = default)
         {
@@ -64,10 +92,18 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrWhiteSpace(search)) q = q.Where(x => (x.Transcript ?? "").Contains(search) || x.Narrator.Contains(search) || (x.Summary ?? "").Contains(search));
             return await q.OrderByDescending(x => x.CreatedAt).Select(x => new ArchiveItemDto
             {
-                Id = x.Id, ArchiveCollectionId = x.ArchiveCollectionId, Narrator = x.Narrator,
-                Transcript = x.Transcript, Summary = x.Summary, Decade = x.Decade,
-                LinkedMemberId = x.LinkedMemberId, FileUploadId = x.FileUploadId, MediaUrl = x.MediaUrl,
-                PublicationState = x.PublicationState, ModerationState = x.ModerationState, CreatedAt = x.CreatedAt
+                Id = x.Id,
+                ArchiveCollectionId = x.ArchiveCollectionId,
+                Narrator = x.Narrator,
+                Transcript = x.Transcript,
+                Summary = x.Summary,
+                Decade = x.Decade,
+                LinkedMemberId = x.LinkedMemberId,
+                FileUploadId = x.FileUploadId,
+                MediaUrl = x.MediaUrl,
+                PublicationState = x.PublicationState,
+                ModerationState = x.ModerationState,
+                CreatedAt = x.CreatedAt
             }).ToListAsync(ct);
         }
         public async Task<ArchiveCollectionDto> CreateCollectionAsync(ArchiveCollectionDto dto, int memberId, CancellationToken ct = default)

@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GHCAA.Infrastructure.Services
 {
-    // TODO 37.8: fundraising campaigns + donor honour roll.
     public class CampaignService : ICampaignService
     {
         private readonly ApplicationDbContext _db;

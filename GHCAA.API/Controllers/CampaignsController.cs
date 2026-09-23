@@ -9,7 +9,6 @@ using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
-    // TODO 37.8: fundraising campaigns + donor honour roll.
     [ApiController]
     [Route("api/campaigns")]
     public class CampaignsController : ControllerBase

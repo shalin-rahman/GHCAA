@@ -2,17 +2,34 @@
 
 ## Scope and dependency order
 
-This specification defines the concrete implementation scope for 37.8, 37.2, and 37.6 in dependency order.
+This specification defines the concrete implementation scope for 37.3, 37.2, and 37.6 in dependency order.
+
+**Numbering note (2026-09-23):** this section was originally written against tracker item
+"37.8," which `docs/TODO.md` now assigns to Credential Verification (built separately,
+`[DONE]`). Campaigns is `docs/TODO.md` item **37.3** — the slot the FinancialRecord-back-linking
+trio (37.2 Scholarships, 37.3 Campaigns, 37.4 Batch cohorts/reunions) already implied. This
+section is renumbered below to match; no requirement content changed, only the label.
 
 The recommended execution order is:
 
-1. 37.8 Fundraising campaigns
+1. 37.3 Fundraising campaigns
 2. 37.2 Scholarship and student aid
 3. 37.6 Oral-history archive
 
 This order keeps the shared finance, public-content, and admin flows stable before the higher-variance archive and scholarship features are built. Fundraising is the first dependency because it establishes the payment ledger and public donor projection pattern that the scholarship award flow later reuses. Scholarship logic then provides the business rule model for funding, review, and disbursement that the wider alumni-programme work expects. The archive remains last because it depends on the existing public-content storage, moderation, and profile-aware publish rules, but it does not create the shared financial flow that the other two features need.
 
-## 37.8 Fundraising campaigns
+## 37.3 Fundraising campaigns
+
+### Status (2026-09-23)
+
+Built, not a ground-up implementation task. `Campaign`/`CampaignPledge` domain models,
+`ICampaignService`/`CampaignService`, a 12-route `CampaignsController`, admin, public,
+and member giving-history Angular pages are all committed (`f960d216`) and covered by
+`CampaignServiceTests.cs`. The tables are already in the `InitialBaseline` migration —
+no new EF migration is needed. What remains — tracked as `docs/TODO.md` item 37.3 — is
+Flutter mobile coverage only. The requirements below describe what was built and remain
+the acceptance bar for the missing piece; they are not a request to rebuild the backend
+or web UI.
 
 ### Goal
 
@@ -130,12 +147,12 @@ The platform shall support moderated oral-history collections and items with tra
 
 ## Implementation plan
 
-### Phase 1 — 37.8 (start here)
+### Phase 1 — 37.3 (start here)
 
-- Confirm the existing fundraising services, controller routes, and admin/public Angular surfaces are consistent with the 37.8 contract.
-- Reconcile the tracker item number to the implementation code comments and naming.
-- Validate the backend service and controller tests for campaign create, pledge, and receipt-confirmation idempotency.
-- Check the public member giving flow and the admin campaign management flow before broadening into scholarship or archive work.
+- Confirmed 2026-09-23: the existing fundraising services, controller routes, and admin/public Angular surfaces are consistent with the 37.3 contract.
+- Tracker item number reconciled to the implementation: this section and `docs/TODO.md` now both read 37.3. The stale `// TODO 37.8` code comment that appeared in five files (`Campaign.cs`, `CampaignsController.cs`, `ICampaignService.cs`, `CampaignService.cs`, `CampaignDtos.cs`) has been removed — the feature they describe is built, so the comment was not a TODO any more, and the remaining rollout work is tracked in `docs/TODO.md` 37.3 instead.
+- Backend service and controller tests for campaign create, pledge, and receipt-confirmation idempotency already exist in `CampaignServiceTests.cs` — do not duplicate.
+- Remaining before this phase can close: the Flutter mobile counterpart to the already-built public browse/pledge and member giving-history flows. No new migration is needed — `Campaign`/`CampaignPledge` are already in `InitialBaseline`.
 
 ### Phase 2 — 37.2
 
@@ -153,6 +170,6 @@ The platform shall support moderated oral-history collections and items with tra
 
 ## Dependency summary
 
-- 37.8 must be stable before 37.2 because scholarship funding and award posting rely on the same donation/financial ledger conventions.
+- 37.3 must be stable before 37.2 because scholarship funding and award posting rely on the same donation/financial ledger conventions.
 - 37.2 should be completed before the broader alumni programmes and public report work so the payment path across campaigns and scholarships is consistent.
 - 37.6 is planned after the financial and application flows because it is content-centric and not a prerequisite of the funding flow.

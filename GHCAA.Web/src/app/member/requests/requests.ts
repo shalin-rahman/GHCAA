@@ -10,7 +10,7 @@ import { ConfirmDialogService } from '../../core/services/confirm-dialog.service
 import { AuthService } from '../../core/services/auth.service';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
-import { SEARCH_DEBOUNCE_MS } from '../../core/constants/app.constants';
+import { SEARCH_DEBOUNCE_MS, getMentorshipStatusClass } from '../../core/constants/app.constants';
 import { debounce } from '../../core/utils/debounce.util';
 
 type Tab = 'family' | 'mentorship';
@@ -29,6 +29,8 @@ export class MemberRequests implements OnInit {
   private notify = inject(NotificationService);
   private authService = inject(AuthService);
   private confirmDialog = inject(ConfirmDialogService);
+
+  getMentorshipStatusClass = getMentorshipStatusClass;
 
   activeTab = signal<Tab>('family');
   loading = signal(true);
@@ -198,6 +200,15 @@ export class MemberRequests implements OnInit {
     this.mentorshipService.respond(id, accept).subscribe({
       next: () => { this.processingId.set(null); this.notify.success(accept ? 'Request accepted.' : 'Request declined.'); this.loadAll(); },
       error: () => { this.processingId.set(null); this.notify.error('Failed to respond'); }
+    });
+  }
+
+  completeMentorship(id: number) {
+    if (this.processingId() !== null) return;
+    this.processingId.set(id);
+    this.mentorshipService.markComplete(id).subscribe({
+      next: () => { this.processingId.set(null); this.notify.success('Marked as completed.'); this.loadAll(); },
+      error: () => { this.processingId.set(null); this.notify.error('Failed to mark as completed'); }
     });
   }
 }
