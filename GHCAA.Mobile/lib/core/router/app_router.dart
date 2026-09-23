@@ -195,6 +195,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/professionals', name: 'professionals', builder: (context, state) => const ProfessionalHubScreen()),
           GoRoute(path: '/polls', name: 'polls', builder: (context, state) => const PollsScreen()),
           GoRoute(path: '/election', name: 'election', builder: (context, state) => const ElectionScreen()),
+          GoRoute(path: '/messages', name: 'messages', builder: (context, state) => const ChatsScreen()),
           GoRoute(path: '/forum', name: 'forum', builder: (context, state) => const ForumCategoriesScreen()),
           GoRoute(
             path: '/forum/topics/:id',

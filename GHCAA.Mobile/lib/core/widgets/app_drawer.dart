@@ -68,6 +68,7 @@ class AppDrawer extends ConsumerWidget {
                             _MenuItem(Icons.work_outline, 'Job Hub', '/jobs'),
                             _MenuItem(Icons.account_tree_outlined, 'Committee', '/committee'),
                             _MenuItem(Icons.how_to_vote_outlined, 'Association Election', '/election'),
+                            _MenuItem(Icons.chat_bubble_outline, 'Messages', '/messages'),
                             _MenuItem(Icons.family_restroom_outlined, 'Family Links', '/family'),
                             _MenuItem(Icons.forum_outlined, 'Discussions', '/forum'),
                           ]),

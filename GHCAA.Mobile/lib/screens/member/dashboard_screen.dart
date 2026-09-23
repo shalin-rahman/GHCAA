@@ -209,6 +209,10 @@ class DashboardScreen extends ConsumerWidget {
                         _buildActionCard(context, Icons.history_outlined,
                             'Activity Log', 'Logs', '/activity',
                             isCompact: isCompact),
+                        _buildActionCard(context, Icons.chat_bubble_outline,
+                            'Messages', 'Inbox', '/messages',
+                            isCompact: isCompact,
+                            accentColor: Colors.cyanAccent),
                         _buildActionCard(
                             context,
                             Icons.notifications_active_outlined,
