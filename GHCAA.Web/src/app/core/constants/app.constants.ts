@@ -1,20 +1,27 @@
+import { ELECTION_PHASE_LABELS, NOMINATION_STATUS_LABELS } from '../models/election.models';
+
 // 82.44: the shared debounce delay for live search inputs (governance member search, directory,
 // jobs, messages member picker, requests). Keep one value so every search field waits the same
 // amount of time before firing.
 export const SEARCH_DEBOUNCE_MS = 300;
 
+// Mirrors GHCAA.Domain's ECPosition enum order exactly — index N here must equal enum value N,
+// since getECPositionName() below indexes into this array by the numeric position value.
 export const EC_ROLES = [
     'None',
     'President',
     'Vice President',
     'General Secretary',
     'Office Secretary',
+    'Joint Secretary 1',
+    'Joint Secretary 2',
+    'Treasurer',
+    'Media, Cultural & Sports Secretary',
     'Organizational Secretary',
-    'Information and Technology Secretary',
-    'Law Secretary',
-    'Media Cultural & Sports Secretary',    
+    'Information & Technology Secretary',
     'Member-1',
     'Member-2',
+    'Law Secretary',
     'Immediate Past President',
     'Institutional Representative'
 ] as const;
@@ -29,7 +36,8 @@ export const LOOKUP_GROUPS = {
     Gender: 'Gender',
     BloodGroup: 'BloodGroup',
     JobCategory: 'JobCategory',
-    PassingYear: 'PassingYear'
+    PassingYear: 'PassingYear',
+    ECPosition: 'ECPosition'
 } as const;
 
 export const DATE_FORMATS = {
@@ -217,6 +225,15 @@ export const SUBMISSION_STATUS_MAP: Record<string | number, { label: string, cla
 
 export type ECPositionType = typeof EC_ROLES[number];
 
+// Index here must equal GHCAA.Domain's ECPosition enum member order, since string enum names
+// below are looked up in this same order rather than reformatted with a regex.
+const EC_POSITION_ENUM_NAMES = [
+    'None', 'President', 'VicePresident', 'GeneralSecretary', 'OfficeSecretary',
+    'JointSecretary1', 'JointSecretary2', 'Treasurer', 'MediaCulturalAndSportsSecretary',
+    'OrganizationalSecretary', 'InformationAndTechnologySecretary', 'Member1', 'Member2',
+    'LawSecretary', 'ImmediatePastPresident', 'InstitutionalRepresentative'
+] as const;
+
 export function getECPositionName(pos: number | string): string {
     if (pos === null || pos === undefined || pos === 'None' || pos === '0' || pos === 0) return 'None';
 
@@ -229,8 +246,10 @@ export function getECPositionName(pos: number | string): string {
         return EC_ROLES[parseInt(pos)] || 'Member';
     }
 
-    // If it's a string from the enum name, try to format it with spaces
-    // e.g. MediaCulturalAndSportsSecretary -> Media Cultural And Sports Secretary
+    const index = EC_POSITION_ENUM_NAMES.indexOf(pos as typeof EC_POSITION_ENUM_NAMES[number]);
+    if (index !== -1) return EC_ROLES[index];
+
+    // Unknown string — fall back to a spaced-out version rather than showing raw PascalCase.
     return pos.replace(/([A-Z])/g, ' $1').trim();
 }
 
@@ -387,6 +406,48 @@ export function getMentorshipStatusClass(status: string | number | null | undefi
     return '';
 }
 
+// ElectionPhase / NominationStatus are always sent as their string enum name (Election.models.ts).
+const ELECTION_PHASE_CLASS_MAP: Record<string, string> = {
+    Announced: 'pending',
+    Nomination: 'pending',
+    Scrutiny: 'pending',
+    Withdrawal: 'pending',
+    CandidateList: 'pending',
+    Campaign: 'pending',
+    Polling: 'success',
+    Counting: 'pending',
+    Declared: 'success',
+    Archived: 'failed'
+};
+
+const NOMINATION_STATUS_CLASS_MAP: Record<string, string> = {
+    Submitted: 'pending',
+    UnderScrutiny: 'pending',
+    Accepted: 'success',
+    Rejected: 'failed',
+    Withdrawn: 'failed'
+};
+
+export function getElectionPhaseLabel(phase: string | null | undefined): string {
+    if (!phase) return 'Unknown';
+    return ELECTION_PHASE_LABELS[phase as keyof typeof ELECTION_PHASE_LABELS] || phase;
+}
+
+export function getElectionPhaseClass(phase: string | null | undefined): string {
+    if (!phase) return '';
+    return ELECTION_PHASE_CLASS_MAP[phase] || '';
+}
+
+export function getNominationStatusLabel(status: string | null | undefined): string {
+    if (!status) return 'Unknown';
+    return NOMINATION_STATUS_LABELS[status as keyof typeof NOMINATION_STATUS_LABELS] || status;
+}
+
+export function getNominationStatusClass(status: string | null | undefined): string {
+    if (!status) return '';
+    return NOMINATION_STATUS_CLASS_MAP[status] || '';
+}
+
 // Work Package 35: the single source for rendering a MembershipType. Accepts either the numeric
 // enum ordinal or the enum name, because the API sends both shapes depending on endpoint.
 // Never inline a copy of this list in a component — that is exactly how index 6 came to be
@@ -404,8 +465,6 @@ export function getBloodGroupName(bg: string | undefined | null): string {
     const option = BLOOD_GROUP_OPTIONS.find(o => o.value === bg);
     return option ? option.label : bg;
 }
-
-export const EC_ROLES_OPTIONS = EC_ROLES.map((label, index) => ({ value: index, label }));
 
 // 82.42: MEMBERSHIP_STATUS_OPTIONS and MEMBER_CATEGORY_OPTIONS removed — admin-members.ts and
 // directory.ts now get these from LookupService.getOptions(LOOKUP_GROUPS.MembershipStatus /
@@ -640,8 +699,6 @@ export const API_ENDPOINTS = {
     ELECTIONS: {
         BASE: '/api/elections',
         CURRENT: '/api/elections/current',
-        RESULTS: (id: number) => `/api/elections/${id}/results`,
-        BALLOT: (id: number) => `/api/elections/${id}/ballot`,
         NOMINATIONS: (id: number) => `/api/elections/${id}/nominations`,
         SCRUTINY: (id: number) => `/api/elections/nominations/${id}/scrutiny`,
         WITHDRAW: (id: number) => `/api/elections/nominations/${id}/withdraw`,

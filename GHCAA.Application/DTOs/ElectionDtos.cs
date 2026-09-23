@@ -12,7 +12,7 @@ public record ElectionSeatDto(ECPosition Position, int SeatCount);
 public record ElectionOfficerDto(int MemberId, ElectionRole Role);
 public record ElectionSeatRequestDto(ECPosition Position, int SeatCount = 1);
 public record NominationDto(int ElectionSeatId, int CandidateMemberId, int ProposerMemberId, int SeconderMemberId, string Statement, string? PhotoPath);
-public record ScrutinyDto(bool Accepted, string? Reason, int OfficerMemberId);
+public record ScrutinyDto(bool Accepted, string? Reason);
 public record CastVoteDto(int ElectionSeatId, int NominationId, string? SerialNumber);
 public record ElectionSummaryDto(int Id, string Title, ElectionPhase Phase, int ECPeriodId, int VoterCount, int EligibleVoterCount);
 public record AdminElectionPositionDto(int Id, string Title, string? Description, int Seats);

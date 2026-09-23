@@ -5,35 +5,22 @@ using System.Threading.Tasks;
 using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
-using GHCAA.Domain.Models;
-using GHCAA.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using static GHCAA.Domain.Enums;
+using static GHCAA.Domain.Constants;
 
 namespace GHCAA.API.Controllers;
 
 [ApiController]
 [Route("api/admin/elections")]
-[Authorize(Roles = "Admin,SuperAdmin")]
+[Authorize(Policy = Policies.AdminOnly)]
 [GHCAA.API.Filters.RequireStepUp]
-public sealed class AdminElectionsController(
-    IElectionService service,
-    ApplicationDbContext db) : ControllerBase
+public sealed class AdminElectionsController(IElectionService service) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken ct)
-    {
-        var elections = await db.Elections
-            .AsNoTracking()
-            .Include(x => x.Seats)
-            .Include(x => x.VoterRoll)
-            .OrderByDescending(x => x.AnnouncedOn)
-            .ToListAsync(ct);
-
-        return Ok(elections.Select(ToAdminElection).ToArray());
-    }
+        => Ok(await service.ListAdminElectionsAsync(ct));
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateAdminElectionRequest request, CancellationToken ct)
@@ -65,14 +52,14 @@ public sealed class AdminElectionsController(
             await service.AddSeatAsync(created.Id, new ElectionSeatRequestDto(parsed, Math.Max(1, position.Seats)), ct);
         }
 
-        return Ok(await BuildAdminElectionAsync(created.Id, ct));
+        return Ok(await service.GetAdminElectionAsync(created.Id, ct));
     }
 
     [HttpPost("{id:int}/publish")]
     public async Task<IActionResult> Publish(int id, CancellationToken ct)
     {
         var updated = await service.SetPhaseAsync(id, ElectionPhase.Nomination, ct)
-            ? await BuildAdminElectionAsync(id, ct)
+            ? await service.GetAdminElectionAsync(id, ct)
             : null;
 
         return updated is null ? BadRequest("Election is not ready to publish.") : Ok(updated);
@@ -82,7 +69,7 @@ public sealed class AdminElectionsController(
     public async Task<IActionResult> Close(int id, CancellationToken ct)
     {
         var updated = await service.SetPhaseAsync(id, ElectionPhase.Counting, ct)
-            ? await BuildAdminElectionAsync(id, ct)
+            ? await service.GetAdminElectionAsync(id, ct)
             : null;
 
         return updated is null ? BadRequest("Election is not ready to close.") : Ok(updated);
@@ -91,80 +78,21 @@ public sealed class AdminElectionsController(
     [HttpPost("{id:int}/candidates")]
     public async Task<IActionResult> AddCandidate(int id, [FromBody] SaveCandidateRequest request, CancellationToken ct)
     {
-        if (!await db.ElectionSeats.AnyAsync(x => x.ElectionId == id && x.Id == request.PositionId, ct))
-            return NotFound();
+        var (success, error, election) = await service.AddCandidateAsync(id, request, ct);
+        if (!success)
+            return error == "duplicate-candidate" ? Conflict("This member is already a candidate for this seat.") : NotFound();
 
-        db.Nominations.Add(new Nomination
-        {
-            ElectionId = id,
-            ElectionSeatId = request.PositionId,
-            CandidateMemberId = request.MemberId,
-            ProposerMemberId = request.MemberId,
-            SeconderMemberId = request.MemberId,
-            Statement = request.Statement ?? string.Empty,
-            Status = NominationStatus.Accepted,
-            SubmittedAt = DateTime.UtcNow,
-        });
-
-        await db.SaveChangesAsync(ct);
-        return Ok(await BuildAdminElectionAsync(id, ct));
+        return Ok(election);
     }
 
     [HttpDelete("{id:int}/candidates/{candidateId:int}")]
     public async Task<IActionResult> RemoveCandidate(int id, int candidateId, CancellationToken ct)
     {
-        var nomination = await db.Nominations.FirstOrDefaultAsync(x => x.ElectionId == id && x.Id == candidateId, ct);
-        if (nomination is null)
-            return NotFound();
+        var (success, error) = await service.RemoveCandidateAsync(id, candidateId, ct);
+        if (!success)
+            return error == "has-votes" ? Conflict("This candidate already has votes recorded and cannot be removed.") : NotFound();
 
-        db.Nominations.Remove(nomination);
-        await db.SaveChangesAsync(ct);
         return Ok();
-    }
-
-    private async Task<AdminElectionDto> BuildAdminElectionAsync(int id, CancellationToken ct)
-    {
-        var election = await db.Elections
-            .AsNoTracking()
-            .Include(x => x.Seats)
-            .Include(x => x.VoterRoll)
-            .FirstOrDefaultAsync(x => x.Id == id, ct);
-
-        if (election is null)
-            throw new InvalidOperationException("Election was not found.");
-
-        return ToAdminElection(election);
-    }
-
-    private static AdminElectionDto ToAdminElection(Election election)
-    {
-        var positions = election.Seats
-            .OrderBy(x => x.Id)
-            .Select(x => new AdminElectionPositionDto(
-                x.Id,
-                SeatTitle(x.Position),
-                null,
-                x.SeatCount))
-            .ToArray();
-
-        return new AdminElectionDto(
-            election.Id,
-            election.Title,
-            null,
-            election.Phase,
-            election.AnnouncedOn,
-            election.NominationOpensOn,
-            election.NominationClosesOn,
-            election.ScrutinyOn,
-            election.WithdrawalClosesOn,
-            election.PollingOpensOn,
-            election.PollingClosesOn,
-            election.DeclaredOn,
-            election.IsActive,
-            positions,
-            Array.Empty<AdminElectionCandidateDto>(),
-            election.VoterRoll.Count(x => x.IsEligible),
-            election.VoterRoll.Any(x => x.VotedAt.HasValue));
     }
 
     private static ECPosition ParsePosition(string value)

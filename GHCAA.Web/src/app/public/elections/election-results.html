@@ -1,14 +1,14 @@
 <section class="page-section animate-fade-in">
     <header class="page-header"><h1>Election results</h1><p>Certified results from the association election.</p></header>
     <div *ngIf="loading()" class="empty-state"><app-logo-spinner [size]="48" [ripple]="false"></app-logo-spinner><p>Loading results...</p></div>
+    <div *ngIf="forbidden()" class="empty-state"><h2>Results not yet available</h2><p>An election officer needs to run the official count before results appear here.</p></div>
     <div *ngIf="error()" class="empty-state"><h2>Results unavailable</h2><p>Try again later.</p></div>
-    <div *ngIf="!loading() && !error() && !summary()" class="empty-state"><h2>Results are not published</h2><p>Certified results will appear here.</p></div>
-    <div *ngIf="summary() as result" class="stack gap-6">
-        <div class="glass-card"><h2>{{ result.election.title }}</h2><p>{{ result.totalVotes }} ballots • {{ result.turnoutPercentage }}% turnout</p></div>
-        <div class="glass-card" *ngFor="let position of result.election.positions">
-            <h2>{{ position.title }}</h2>
-            <div class="stack gap-2" *ngFor="let item of resultsFor(position.id)">
-                <div class="flex justify-between"><span>{{ item.candidateName }} <strong *ngIf="item.elected">Elected</strong></span><span>{{ item.votes }} votes</span></div>
+    <div *ngIf="!loading() && !forbidden() && !error() && !results()" class="empty-state"><h2>No election to report on</h2><p>Certified results will appear here once an election is counted.</p></div>
+    <div *ngIf="results() as items" class="stack gap-6">
+        <div class="glass-card" *ngFor="let item of items">
+            <div class="flex justify-between">
+                <span>Seat {{ item.electionSeatId }} · Nomination {{ item.nominationId }} <strong *ngIf="item.isElected"> — Elected</strong><span *ngIf="item.isTie"> (tie)</span></span>
+                <span>{{ item.voteCount }} votes</span>
             </div>
         </div>
     </div>

@@ -567,9 +567,10 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
 > `FinancialCategory { MembershipFee, RegistrationFee, Donation, Event, Maintenance, Salary,
 > Utilities, ReunionFee, Sponsorship, Grant, Refund, Other }`. Four of those values —
 > `Donation`, `ReunionFee`, `Sponsorship`, `Grant` — **exist only as ledger labels an admin can
-> pick when hand-entering a `FinancialRecord`.** There is no campaign, no donor, no pledge, no
-> scholarship, no reunion and no grant application anywhere in the 45 files under
-> `GHCAA.Domain/Models/`. The ledger can *record* philanthropy; the product cannot *conduct* it.
+> pick when hand-entering a `FinancialRecord`.** There is no scholarship, no reunion and no grant
+> application anywhere in the 45 files under `GHCAA.Domain/Models/`. The ledger can *record*
+> philanthropy; the product cannot *conduct* most of it — the one exception is `Campaign`/
+> `CampaignPledge` (37.3), which already exists and is a rollout gap, not a modelling gap.
 >
 > **Evidence, elections.** Work Package 36 shipped seven election documents as read-only markdown and 18
 > blank ER-forms split out of the handbook. The only election-adjacent tables are `ECPeriod`
@@ -639,6 +640,14 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
   - **UI.** Flag `enableElections`. The existing public `/elections` page gains a live banner when an election is not `Archived`. Member `portal/elections` — nominate, withdraw, view candidates, cast. Admin `admin/elections` — create, appoint officers, freeze roll, scrutinise, advance phase, count, declare, download ER PDFs. New `API_ENDPOINTS.ELECTIONS` block.
   - **Tests.** NUnit: roll freeze excludes Associate/Honorary/Advisory; proposer ≠ candidate; double vote rejected; cast outside `Polling` rejected; declaration writes `ECMember`; **a ballot row cannot be joined back to a member**. Vitest: phase-driven UI state, closed-nomination guard.
   - **37.1f Navigation [DONE 2026-09-22].** The engine had no drawer or sidebar entry, so a member or admin who knew the routes could reach `/portal/election` and `/admin/elections` but nobody else could find them. Added `Association Election` (member, Community section) and `Elections` (admin, Content section) to `nav.service.ts`, plus the matching mobile drawer entries. Verified: `npx vitest run src/app/core/services/nav.service.spec.ts` (5 passed).
+  - **37.1g Post-ship defect fixes [DONE 2026-09-24].** A code-review pass on the shipped engine found three critical and one major defect, all now fixed:
+    - `AdminElectionsController` was querying `ApplicationDbContext` directly instead of going through `IElectionService`, breaking the layering rule that controllers never touch the DbContext. Refactored `Publish`/`Close`/candidate add-remove to call service methods (`GetAdminElectionAsync`, `AddCandidateAsync`, `RemoveCandidateAsync`); the duplicate `BuildAdminElectionAsync`/`ToAdminElection`/`SeatTitle` helpers were deleted from the controller since that logic already lives in `ElectionService`.
+    - `Scrutinise` in `ElectionsController` trusted the officer's member id from the request body instead of the auth claim, letting any caller record a scrutiny decision under someone else's identity. Now reads `officerMemberId` from `CurrentMemberIdRaw()`.
+    - The double-vote guard was a single `VoterRoll.VotedAt` column, which blocked a legitimate second vote for a different seat in the same election, not just a replay for the same seat. Replaced with a new `SeatVote` table (`ElectionId`, `ElectionSeatId`, `MemberId`, `VotedAt`, unique index on the triple) as the actual compare-and-set target; `VoterRoll.VotedAt` stays as a first-vote-only informational flag. Migration `20260923184652_AddSeatVotes`.
+    - `SetPhaseAsync` allowed re-entering the current phase, which could re-trigger phase-transition side effects. Added a same-phase no-op guard.
+    - Also folded in while touching these files: migrated the remaining raw `[Authorize(Roles = "Admin,SuperAdmin")]` attributes on `ElectionsController` to `[Authorize(Policy = Policies.AdminOnly)]` (exact same role set, matches the policy already used on `AdminElectionsController`).
+    - Verified: `dotnet build` clean; `dotnet test --filter "FullyQualifiedName~ElectionServiceTests"` (4/4, including a new `CastVoteAsync_AllowsVotingForDifferentSeatsInTheSameElection` regression test).
+  - **37.1h Election module client redesign (web + mobile) [PLANNED, depends on 37.1g].** A follow-up review of the Angular and Flutter election clients (not covered by 37.1g, which was backend-only) found the Angular member voting page calls three routes that don't exist on the backend at all (`GET /elections/current`, `GET /elections/{id}/results`, `POST /elections/{id}/ballot`), so voting through the web UI is broken in production today. Also found: two parallel, half-wired Angular model/service families (an unused-but-correct per-seat DTO set alongside a used-but-wrong whole-election set); no in-flight guard on Angular admin `publish`/`close`; a Flutter provider that reaches into a service's private field and swallows all errors; no per-seat voted tracking on either client; no Flutter admin election screen despite most of the service methods existing unused; dead `createdBy`-in-body code on both clients mirroring the identity-spoofing pattern already fixed server-side in 37.1g. Full spec at `docs/specs/011-election-module-redesign/spec.md`. Staged: (1) spec — this item; (2) backend `GET /elections/current` addition; (3) Angular rebuild against the real per-seat API, reusing the campaigns module's `saving`-signal pattern; (4) Flutter fixes + new admin election screen modeled on `governance_registry_screen.dart`; (5) doc sync + full three-client test run. Sequenced to stay inside the user's stated weekly usage cap — stage 2 (Angular, the currently-broken client) is prioritized over stage 4 (Flutter admin screen), and this item's status will be updated per stage actually completed rather than left ambiguous if the session stops early.
 
 37.2 [DONE] **Priority: P4.** Specified in
 `docs/specs/003-alumni-programs-and-verification/spec.md` Story 4.
@@ -650,6 +659,15 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
   - **Service/API/UI.** `IScholarshipService` + `ScholarshipService`; `ScholarshipsController` at `api/scholarships`. Flag `enableScholarships`. Public `/scholarships` (call listing + apply + status check), member `portal/scholarships` (reviewer queue for panel members), admin `admin/scholarships` (funds, calls, shortlist, award, disburse). New `API_ENDPOINTS.SCHOLARSHIPS` block.
   - **Tests.** NUnit: review DTO carries no identifying field; application rejected outside the `OpensOn`–`ClosesOn` window; award → paid writes exactly one `Grant` `FinancialRecord` and is idempotent on repeat. Vitest: apply-form validation, status lookup with an unknown code.
 **Acceptance:** done; `ScholarshipServiceTests` covers the blind-review projection, the call-window rejection and the idempotent `Grant` disbursement; `scholarship.service.spec.ts` covers apply-form validation and the unknown-code status lookup. `enableScholarships` is not wired to any feature-flag mechanism, since none exists project-wide yet; the flag column exists in `OrgConfigDto`/profile packs for when one lands. Verified 2026-09-23 against the WP37.11 gate (`dotnet test`: 859/859; `npx vitest run`: 511/511; `npm run type-check` and `npx ng build`: clean).
+
+37.3 [DONE] **Priority: P2.** **Fundraising campaigns — complete the rollout.** Unlike the rest of this Area, this item is not a ground-up build: `Campaign`/`CampaignPledge` models, `ICampaignService`/`CampaignService`, a 12-route `CampaignsController` (public browse/pledge, member `my-pledges`, admin CRUD + donor tiers + pledge-receipt confirmation), an admin Angular page (`admin-campaigns.ts`), a public Angular page (`campaigns.ts`), and a member giving-history page (`member/giving/giving.ts`) are all already committed (`f960d216`) and covered by `CampaignServiceTests.cs`. What is missing is Flutter mobile coverage, not the web feature.
+  - **Reuse — do not rebuild.** `ICampaignService`, `CampaignsController`, and all three existing Angular pages (public, admin, member giving-history) are done. `ConfirmPledgeReceiptAsync` is already idempotent (confirming an already-confirmed pledge does not write a second `FinancialRecord`) — that is the pattern 37.2's disbursement and 37.4's reunion fees follow, not the other way round.
+  - **Migration: already done.** `Campaign`/`CampaignPledge` are already in the `InitialBaseline` migration, so they exist on a migrated database, not only under `EnsureCreated()`. No new migration is needed for this item.
+  - **Web: already done.** `member/giving/giving.ts` (route `member/giving`, `git log` shows it landed in `f960d216` alongside the rest of the feature) already calls `GET api/campaigns/my-pledges` and renders pledge history with a running total. No Angular work remains.
+  - **Mobile.** [DONE 2026-09-23] `lib/features/campaigns/` (`campaign_service.dart` + typed models) and three screens — `campaigns_screen.dart` (public browse), `campaign_detail_screen.dart` (detail, honour roll, pledge form), `my_pledges_screen.dart` — follow the Scholarship mobile pattern (typed `fromJson`/`toJson`, `Provider<CampaignService>`, no try/catch in the service). Routed at `/campaigns`, `/campaigns/my-pledges`, `/campaigns/:slug`; drawer entry added under My Account. This also added the drawer entry for Mentorship Hub (`/mentorship`), a pre-existing navigation gap noticed while adding Campaigns.
+  - **Missing: docs.** `docs/FEATURES.md` has zero mentions of Campaigns despite being shipped — add a section. [DONE 2026-09-23] The stale `// TODO 37.8` comment (real 37.8 is Credential Verification) was removed from all five files it appeared in (`Campaign.cs`, `CampaignsController.cs`, `ICampaignService.cs`, `CampaignService.cs`, `CampaignDtos.cs`) rather than renumbered, since the feature it described is already built.
+  - **Tests.** [DONE 2026-09-23] `test/campaign_service_test.dart` — 4 cases (public list, get-by-slug, honour roll tiers/untiered, submit pledge + my-pledges), all passing. Backend and admin/public/member Angular tests already exist and are not duplicated here.
+**Acceptance:** done; the web feature was already shipped in `f960d216`, and the remaining gap — Flutter mobile coverage — is now built and routed, closing the item. Verified 2026-09-23: `flutter test test/campaign_service_test.dart` (4/4 passing) and `flutter analyze` on all new/changed files (no issues found).
 
 37.4 [TODO] **Priority: P3.** **Batch cohorts and reunions as first-class objects.** Today a batch exists only as `AcademicRecord.PassingYear` — there is no cohort page, no cohort representative and no reunion.
   - **Models.** `BatchCohort` (`Id`, `PassingYear`, `Title`, `Story?`, `CoverImagePath?`, `RepresentativeMemberId?`, `IsActive`); `Reunion` (`Id`, `BatchCohortId?` — null means an all-alumni reunion, `AlumniEventId`, `Theme`, `SouvenirUrl?`) built **on top of** the existing `AlumniEvent` + `EventRegistration` + `EventBudget` stack rather than beside it — a reunion is an event with cohort identity, and duplicating registration logic would be the mistake here.
@@ -1461,4 +1479,84 @@ edit it in place, and blocks commit while any row is still invalid. No reusable 
 exists in `GHCAA.Web` today, so this also adds one as a generic component (rows, columns, per-cell
 errors in; cell-edit and commit events out) for other bulk-data features to reuse later, rather than a
 one-off built only for member import. Per spec FR-6.
+**Acceptance:** not started.
+
+---
+
+# Work Package 89 — Mentorship web UI (raised by user 2026-09-23: "campaigns, ad-hoc reporting, and mentoring are the three genuine feature gaps")
+
+Raised alongside Work Package 90 while checking whether campaigns, ad-hoc reporting and mentoring
+were genuinely missing. Mentoring is not: `MentorshipRequest`, `IMentorshipService`, a 6-route
+`MentorshipController` (send/sent/received/respond/complete/admin-all, class-level `[Authorize]`)
+and a full Flutter screen (`lib/screens/member/mentorship_hub_screen.dart`) are already committed
+and the tables are in `InitialBaseline` (properly migrated). Only Angular web has no consuming page —
+`core/services/mentorship.service.ts` exists and is unused.
+
+89.1 [DONE] **Priority: P2 | Depends on: none.** Admin oversight page at `admin/mentorship` against
+the existing `GET api/mentorship/admin/all` route — list all requests with status, requester, mentor.
+No new backend.
+**Acceptance:** `admin-mentorship.ts`/`.html`/`.scss` built and routed at `/admin/mentorship`, nav
+entry added under Content section, vitest spec covers load + search filter.
+
+89.2 [DONE] **Priority: P2 | Depends on: none.** Member mentorship UI: the send-request form and
+sent/received lists already existed on the combined `member/requests` page (built for family links,
+tabbed to include mentorship) — the only missing action was mark-complete, added as `completeMentorship()`
+wired to the existing `mentorship.service.ts` and the existing `MentorshipController` routes. No
+separate `portal/mentorship` page was needed; extending the existing combined page matches how family
+links and mentorship were already sharing it.
+**Acceptance:** "Mark Complete" button added to both received and sent mentorship rows when
+`status === 'Accepted'`; `completeMentorship()` calls `MentorshipService.markComplete` and reloads.
+
+89.3 [DONE] **Priority: P2 | Depends on: 89.1, 89.2.** `MENTORSHIP` already existed in
+`API_ENDPOINTS`; no separate `ADMIN_MENTORSHIP` block was needed since the admin list reuses the same
+base path (`/admin/all` suffix). `mentorship.service.ts` was typed properly (`MentorshipRequestDto`,
+`MentorshipAdminRow`) and gained `getAllForAdmin()`/`markComplete()`; `MENTORSHIP_STATUS_MAP` +
+`getMentorshipStatusLabel`/`getMentorshipStatusClass` added to `app.constants.ts`, mirroring the
+`PLEDGE_STATUS_MAP` convention.
+**Acceptance:** `npm run type-check` passes clean.
+
+89.4 [DONE] **Priority: P3 | Depends on: 89.1, 89.2.** Correct `docs/FEATURES.md` (~line 167), which
+currently describes Mentorship only as a `JobCategory` enum value — add a section for the real
+request/respond/complete workflow that ships in this item.
+**Acceptance:** see below, same change.
+
+89.5 [DONE] **Priority: P2 | Depends on: 89.1, 89.2.** Vitest specs for both new pages (send/respond/
+complete flow, admin list rendering). Backend and mobile tests already exist and are not duplicated.
+**Acceptance:** `admin-mentorship.spec.ts` (3 tests: create, load, filter) and 2 new tests added to
+`requests.spec.ts` (`completeMentorship` success/error) — 14/14 passing, `npm run test:unit`.
+
+---
+
+# Work Package 90 — Ad-hoc reporting for admins (raised by user 2026-09-23: "campaigns, ad-hoc reporting, and mentoring are the three genuine feature gaps")
+
+The one of the three that is a genuine gap: no `IReportService`, no `ReportsController`, no
+report-builder entity anywhere in the codebase. Admin-only internal tool — no public, member or
+mobile surface, matching every other admin-only backend tool in this repo. Spec:
+`docs/specs/010-ad-hoc-reporting/spec.md`.
+
+90.1 [TODO] **Priority: P3 | Depends on: none.** `SavedReport` model
+(`Id`, `Name`, `EntityType`, `FiltersJson`, `ColumnsJson`, `CreatedBy`, `CreatedAt`) in
+`GHCAA.Domain/Models/`, `SavedReportConfiguration`, migration `AddSavedReports`.
+**Acceptance:** not started.
+
+90.2 [TODO] **Priority: P3 | Depends on: 90.1.** `IReportService` (`GetEntityFields`, `RunReport`,
+`SaveReport`, `GetSavedReports`, `ExportToExcel`) + `ReportService`, composing EF `IQueryable` per
+entity — no raw SQL — with a validator that rejects any filter field not on that entity's whitelist.
+Export reuses whatever Excel package `MemberImportService.cs`/`FileValidationService.cs` already
+reference; no new Excel dependency.
+**Acceptance:** not started.
+
+90.3 [TODO] **Priority: P3 | Depends on: 90.2.** `AdminReportsController` at `api/admin/reports`,
+`[Authorize(Roles = "Admin,SuperAdmin")]` matching the `AdminOnly` pattern in
+`CampaignsController`/`MentorshipController`.
+**Acceptance:** not started.
+
+90.4 [TODO] **Priority: P3 | Depends on: 90.3.** Admin-only Angular page `admin/reports` — entity
+picker, filter form, `.data-table` result grid (reuse the Directory table/card pattern), export
+button — plus `core/services/report.service.ts` and an `ADMIN_REPORTS` block in `API_ENDPOINTS`.
+**Acceptance:** not started.
+
+90.5 [TODO] **Priority: P3 | Depends on: 90.2, 90.3.** NUnit tests (`GHCAA.Tests/Services/
+ReportServiceTests.cs`): filter whitelist rejection, saved-report round trip, export row count. Vitest
+spec for the report builder component. FR-tag both per `feedback_fr_nfr_tag_new_tests`.
 **Acceptance:** not started.

@@ -119,12 +119,14 @@ CODE = [
     ("C9", "Careers and job board", ["6"],
      ["GHCAA.API/Controllers/JobHubController.cs",
       "GHCAA.Infrastructure/Services/JobHubService.cs"], ["C3"]),
-    ("C10", "Networking, forum and messaging", ["10", "18"],
+    ("C10", "Networking, forum and messaging", ["10", "18", "89"],
      ["GHCAA.API/Controllers/ForumController.cs",
       "GHCAA.API/Controllers/MessagingController.cs",
       "GHCAA.API/Controllers/NetworkingController.cs",
+      "GHCAA.API/Controllers/MentorshipController.cs",
       "GHCAA.Infrastructure/Services/ForumService.cs",
-      "GHCAA.Infrastructure/Services/ChatService.cs"], ["C3"]),
+      "GHCAA.Infrastructure/Services/ChatService.cs",
+      "GHCAA.Infrastructure/Services/MentorshipService.cs"], ["C3"]),
     ("C11", "Configuration and white-label", ["28", "62"],
      ["GHCAA.API/Controllers/OrgConfigController.cs",
       "GHCAA.API/Controllers/ThemeController.cs",
@@ -145,6 +147,10 @@ CODE = [
      ["Dockerfile", ".github", "docs/RENDER_DEPLOYMENT.md"], ["C13"]),
     ("C17", "Standards, docs and dissertation", ["12", "23", "61", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75", "76", "77", "84", "85", "86"],
      ["docs"], ["C15", "C16", "C14"]),
+    ("C18", "Ad-hoc reporting", ["90"],
+     ["GHCAA.API/Controllers/AdminReportsController.cs",
+      "GHCAA.Infrastructure/Services/ReportService.cs",
+      "GHCAA.Domain/Models/SavedReport.cs"], ["C3", "C4"]),
 ]
 
 # The documentation deliverables, measured the same way.

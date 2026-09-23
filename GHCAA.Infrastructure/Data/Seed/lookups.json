@@ -804,5 +804,125 @@
     "Description": "Official communication via verified inbox.",
     "IsActive": true,
     "DisplayOrder": 302
+  },
+  {
+    "Id": 4001,
+    "LookupGroup": "ECPosition",
+    "Value": "President",
+    "Label": "President",
+    "IsActive": true,
+    "DisplayOrder": 1
+  },
+  {
+    "Id": 4002,
+    "LookupGroup": "ECPosition",
+    "Value": "VicePresident",
+    "Label": "Vice President",
+    "IsActive": true,
+    "DisplayOrder": 2
+  },
+  {
+    "Id": 4003,
+    "LookupGroup": "ECPosition",
+    "Value": "GeneralSecretary",
+    "Label": "General Secretary",
+    "IsActive": true,
+    "DisplayOrder": 3
+  },
+  {
+    "Id": 4004,
+    "LookupGroup": "ECPosition",
+    "Value": "OfficeSecretary",
+    "Label": "Office Secretary",
+    "IsActive": true,
+    "DisplayOrder": 4
+  },
+  {
+    "Id": 4005,
+    "LookupGroup": "ECPosition",
+    "Value": "JointSecretary1",
+    "Label": "Joint Secretary 1",
+    "IsActive": true,
+    "DisplayOrder": 5
+  },
+  {
+    "Id": 4006,
+    "LookupGroup": "ECPosition",
+    "Value": "JointSecretary2",
+    "Label": "Joint Secretary 2",
+    "IsActive": true,
+    "DisplayOrder": 6
+  },
+  {
+    "Id": 4007,
+    "LookupGroup": "ECPosition",
+    "Value": "Treasurer",
+    "Label": "Treasurer",
+    "IsActive": true,
+    "DisplayOrder": 7
+  },
+  {
+    "Id": 4008,
+    "LookupGroup": "ECPosition",
+    "Value": "MediaCulturalAndSportsSecretary",
+    "Label": "Media, Cultural & Sports Secretary",
+    "IsActive": true,
+    "DisplayOrder": 8
+  },
+  {
+    "Id": 4009,
+    "LookupGroup": "ECPosition",
+    "Value": "OrganizationalSecretary",
+    "Label": "Organizational Secretary",
+    "IsActive": true,
+    "DisplayOrder": 9
+  },
+  {
+    "Id": 4010,
+    "LookupGroup": "ECPosition",
+    "Value": "InformationAndTechnologySecretary",
+    "Label": "Information & Technology Secretary",
+    "IsActive": true,
+    "DisplayOrder": 10
+  },
+  {
+    "Id": 4011,
+    "LookupGroup": "ECPosition",
+    "Value": "Member1",
+    "Label": "Member-1",
+    "IsActive": true,
+    "DisplayOrder": 11
+  },
+  {
+    "Id": 4012,
+    "LookupGroup": "ECPosition",
+    "Value": "Member2",
+    "Label": "Member-2",
+    "IsActive": true,
+    "DisplayOrder": 12
+  },
+  {
+    "Id": 4013,
+    "LookupGroup": "ECPosition",
+    "Value": "LawSecretary",
+    "Label": "Law Secretary",
+    "IsActive": true,
+    "DisplayOrder": 13
+  },
+  {
+    "Id": 4014,
+    "LookupGroup": "ECPosition",
+    "Value": "ImmediatePastPresident",
+    "Label": "Immediate Past President",
+    "IsActive": true,
+    "DisplayOrder": 14
+  },
+  {
+    "Id": 4015,
+    "LookupGroup": "ECPosition",
+    "Value": "InstitutionalRepresentative",
+    "Label": "Institutional Representative",
+    "IsActive": true,
+    "DisplayOrder": 15
   }
 ]

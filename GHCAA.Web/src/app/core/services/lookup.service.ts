@@ -67,6 +67,23 @@ const LOOKUP_FALLBACKS: Record<string, LookupOption[]> = {
         { value: 'PublicSector', label: 'Govt. & Public Sector' },
         { value: 'Mentorship', label: 'Mentorship & Career Guidance' },
         { value: 'Other', label: 'Other Opportunities' }
+    ],
+    [LOOKUP_GROUPS.ECPosition]: [
+        { value: 'President', label: 'President' },
+        { value: 'VicePresident', label: 'Vice President' },
+        { value: 'GeneralSecretary', label: 'General Secretary' },
+        { value: 'OfficeSecretary', label: 'Office Secretary' },
+        { value: 'JointSecretary1', label: 'Joint Secretary 1' },
+        { value: 'JointSecretary2', label: 'Joint Secretary 2' },
+        { value: 'Treasurer', label: 'Treasurer' },
+        { value: 'MediaCulturalAndSportsSecretary', label: 'Media, Cultural & Sports Secretary' },
+        { value: 'OrganizationalSecretary', label: 'Organizational Secretary' },
+        { value: 'InformationAndTechnologySecretary', label: 'Information & Technology Secretary' },
+        { value: 'Member1', label: 'Member-1' },
+        { value: 'Member2', label: 'Member-2' },
+        { value: 'LawSecretary', label: 'Law Secretary' },
+        { value: 'ImmediatePastPresident', label: 'Immediate Past President' },
+        { value: 'InstitutionalRepresentative', label: 'Institutional Representative' }
     ]
 };
 

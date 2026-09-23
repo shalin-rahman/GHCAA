@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ElectionsService } from '../../core/services/elections.service';
-import { ElectionResult, ElectionSummary } from '../../core/models/election.models';
+import { ElectionResultDto } from '../../core/models/election.models';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
@@ -12,21 +13,24 @@ import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 })
 export class ElectionResults {
     private readonly elections = inject(ElectionsService);
-    summary = signal<ElectionSummary | null>(null);
+    results = signal<ElectionResultDto[] | null>(null);
     loading = signal(true);
     error = signal(false);
-
-    resultsFor(positionId: number): ElectionResult[] {
-        return this.summary()?.results.filter(result => result.positionId === positionId) ?? [];
-    }
+    forbidden = signal(false);
 
     constructor() {
         this.elections.getCurrent().subscribe({
             next: election => {
                 if (!election) { this.loading.set(false); return; }
-                this.elections.getResults(election.id).subscribe({
-                    next: result => { this.summary.set(result); this.loading.set(false); },
-                    error: () => { this.error.set(true); this.loading.set(false); }
+                // /count is admin-only — an anonymous or non-admin caller sees the 401/403 branch below,
+                // not a results table, until an admin has actually run the count.
+                this.elections.count(election.id).subscribe({
+                    next: result => { this.results.set(result); this.loading.set(false); },
+                    error: (err: HttpErrorResponse) => {
+                        if (err.status === 401 || err.status === 403) this.forbidden.set(true);
+                        else this.error.set(true);
+                        this.loading.set(false);
+                    }
                 });
             },
             error: () => { this.error.set(true); this.loading.set(false); }

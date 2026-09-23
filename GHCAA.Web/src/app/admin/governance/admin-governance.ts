@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
-import { EC_ROLES, SEARCH_DEBOUNCE_MS, getECPositionName, getMembershipTypeLabel, getCategoryLabel } from '../../core/constants/app.constants';
+import { LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS, getECPositionName, getMembershipTypeLabel, getCategoryLabel } from '../../core/constants/app.constants';
+import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { debounce } from '../../core/utils/debounce.util';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 import { firstValueFrom } from 'rxjs';
@@ -27,6 +28,7 @@ export class AdminGovernance implements OnInit {
     private adminService = inject(AdminService);
     private notify = inject(NotificationService);
     private confirmDialog = inject(ConfirmDialogService);
+    private lookupService = inject(LookupService);
 
     periods = signal<any[]>([]);
     selectedPeriod = signal<any>(null);
@@ -40,7 +42,7 @@ export class AdminGovernance implements OnInit {
 
     // Assign Member
     showAssignModal = signal(false);
-    assignData = signal<any>({ memberId: null, position: 8, reason: '', notifyMember: false });
+    assignData = signal<any>({ memberId: null, position: '', reason: '', notifyMember: false });
     searchQuery = signal('');
     memberSearchResults = signal<any[]>([]);
     isSearching = signal(false);
@@ -59,7 +61,8 @@ export class AdminGovernance implements OnInit {
         );
     });
 
-    ecPositions = EC_ROLES.map((label, index) => ({ value: index, label }));
+    // 82.42: sourced from the ECPosition lookup group instead of a local index-based copy of EC_ROLES.
+    ecPositions: LookupOption[] = [];
 
     getImageUrl(path: string | null | undefined): string {
         if (!path) return '';
@@ -73,6 +76,7 @@ export class AdminGovernance implements OnInit {
 
     ngOnInit() {
         this.loadPeriods();
+        this.lookupService.getOptions(LOOKUP_GROUPS.ECPosition).subscribe(opts => this.ecPositions = opts);
     }
 
     loadPeriods() {
@@ -228,7 +232,7 @@ export class AdminGovernance implements OnInit {
                 this.notify.success('Role assigned');
                 this.showAssignModal.set(false);
                 this.loadCommittee(period.id);
-                this.assignData.set({ memberId: null, position: 8, reason: '', notifyMember: false });
+                this.assignData.set({ memberId: null, position: '', reason: '', notifyMember: false });
                 this.searchQuery.set('');
             },
             error: (err) => this.notify.error(err.error?.message || 'Assignment failed')
@@ -254,7 +258,7 @@ export class AdminGovernance implements OnInit {
         });
     }
 
-    getRoleName(pos: number) {
+    getRoleName(pos: number | string) {
         return getECPositionName(pos);
     }
 }

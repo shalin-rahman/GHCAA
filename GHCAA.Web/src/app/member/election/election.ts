@@ -1,69 +1,83 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ElectionsService } from '../../core/services/elections.service';
-import { Election, ElectionBallot, ElectionCandidate } from '../../core/models/election.models';
+import { CastVoteDto, ElectionSummaryDto, NominationViewDto } from '../../core/models/election.models';
 import { NotificationService } from '../../core/services/notification.service';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { getElectionPhaseLabel } from '../../core/constants/app.constants';
+
+export interface SeatBallot {
+    seatId: number;
+    nominations: NominationViewDto[];
+}
 
 @Component({
     selector: 'app-member-election',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent],
+    imports: [CommonModule, LoadingPanelComponent, PageHeaderComponent],
     templateUrl: './election.html'
 })
 export class MemberElection {
     private readonly elections = inject(ElectionsService);
     private readonly notify = inject(NotificationService);
+    getElectionPhaseLabel = getElectionPhaseLabel;
 
-    election = signal<Election | null>(null);
+    election = signal<ElectionSummaryDto | null>(null);
     loading = signal(true);
-    submitting = signal(false);
-    submitted = signal(false);
     error = signal(false);
-    selected = signal<Record<number, number[]>>({});
+    votedSeatIds = signal<number[]>([]);
+    votingSeatId = signal<number | null>(null);
+
+    private nominations = signal<NominationViewDto[]>([]);
+
+    seatBallots = computed<SeatBallot[]>(() => {
+        const bySeat = new Map<number, NominationViewDto[]>();
+        for (const nomination of this.nominations()) {
+            if (nomination.status !== 'Accepted') continue;
+            const list = bySeat.get(nomination.electionSeatId) ?? [];
+            list.push(nomination);
+            bySeat.set(nomination.electionSeatId, list);
+        }
+        return Array.from(bySeat.entries())
+            .sort(([a], [b]) => a - b)
+            .map(([seatId, nominations]) => ({ seatId, nominations }));
+    });
 
     constructor() {
         this.elections.getCurrent().subscribe({
-            next: value => { this.election.set(value); this.loading.set(false); },
+            next: election => {
+                this.election.set(election);
+                if (!election) { this.loading.set(false); return; }
+                this.elections.getNominations(election.id).subscribe({
+                    next: nominations => { this.nominations.set(nominations); this.loading.set(false); },
+                    error: () => { this.error.set(true); this.loading.set(false); }
+                });
+            },
             error: () => { this.error.set(true); this.loading.set(false); }
         });
     }
 
-    candidates(positionId: number): ElectionCandidate[] {
-        return this.election()?.candidates.filter(candidate => candidate.positionId === positionId) ?? [];
+    hasVoted(seatId: number): boolean {
+        return this.votedSeatIds().includes(seatId);
     }
 
-    isSelected(positionId: number, candidateId: number): boolean {
-        return this.selected()[positionId]?.includes(candidateId) ?? false;
-    }
-
-    choose(positionId: number, candidateId: number, seats: number): void {
-        const current = this.selected()[positionId] ?? [];
-        const next = current.includes(candidateId)
-            ? current.filter(id => id !== candidateId)
-            : seats === 1 ? [candidateId] : current.length < seats ? [...current, candidateId] : current;
-        this.selected.set({ ...this.selected(), [positionId]: next });
-    }
-
-    submit(): void {
+    vote(seatId: number, nominationId: number): void {
         const election = this.election();
-        if (!election || this.submitting()) return;
-        if (election.positions.some(position => (this.selected()[position.id]?.length ?? 0) !== position.seats)) {
-            this.notify.warning('Select one candidate for each available seat.');
-            return;
-        }
-        const ballot: ElectionBallot = {
-            electionId: election.id,
-            selections: election.positions.map(position => ({
-                positionId: position.id,
-                candidateIds: this.selected()[position.id] ?? []
-            }))
-        };
-        this.submitting.set(true);
-        this.elections.submitBallot(election.id, ballot).subscribe({
-            next: () => { this.submitting.set(false); this.submitted.set(true); this.notify.success('Your ballot was submitted.'); },
-            error: () => { this.submitting.set(false); this.notify.error('The ballot could not be submitted.'); }
+        if (!election || this.votingSeatId() !== null || this.hasVoted(seatId)) return;
+
+        const dto: CastVoteDto = { electionSeatId: seatId, nominationId, serialNumber: undefined };
+        this.votingSeatId.set(seatId);
+        this.elections.castVote(election.id, dto).subscribe({
+            next: () => {
+                this.votingSeatId.set(null);
+                this.votedSeatIds.set([...this.votedSeatIds(), seatId]);
+                this.notify.success('Your vote was recorded.');
+            },
+            error: () => {
+                this.votingSeatId.set(null);
+                this.notify.error('The vote could not be recorded.');
+            }
         });
     }
 }

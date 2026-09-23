@@ -1,19 +1,69 @@
 <section class="page-section animate-fade-in">
-    <header class="page-header flex justify-between items-center"><div><h1>Elections</h1><p>Create and run the association election.</p></div><button class="btn btn-accent" (click)="showForm.set(!showForm())">{{ showForm() ? 'Close' : 'New election' }}</button></header>
-    <div *ngIf="showForm()" class="glass-card stack gap-4">
-        <div class="form-group"><label for="election-title">Title</label><input id="election-title" [(ngModel)]="form.title"></div>
-        <div class="form-group"><label for="election-description">Description</label><textarea id="election-description" [(ngModel)]="form.description"></textarea></div>
-        <div class="glass-card" *ngFor="let position of form.positions; let i = index">
-            <div class="form-group"><label [for]="'position-' + i">Position</label><input [id]="'position-' + i" [(ngModel)]="position.title"></div>
-            <div class="form-group"><label [for]="'seats-' + i">Seats</label><input [id]="'seats-' + i" type="number" min="1" [(ngModel)]="position.seats"></div>
-            <button class="btn btn-secondary btn-sm" *ngIf="(form.positions?.length ?? 0) > 1" (click)="removePosition(i)">Remove position</button>
-        </div>
-        <div class="flex gap-2"><button class="btn btn-secondary" (click)="addPosition()">Add position</button><button class="btn btn-primary" [disabled]="saving()" (click)="create()">{{ saving() ? 'Saving...' : 'Create election' }}</button></div>
+    <app-page-header title="Elections" [total]="elections().length" emptySubtitle="Create and run the association election">
+        <small subtitle>{{ elections().length }} election(s)</small>
+        <button actions class="btn btn-accent" (click)="showForm.set(!showForm())">{{ showForm() ? 'Close' : 'New election' }}</button>
+    </app-page-header>
+
+    <div class="tabs">
+        <button (click)="switchTab('elections')" [class.active]="activeTab() === 'elections'">Elections</button>
+        <button (click)="switchTab('nominations')" [class.active]="activeTab() === 'nominations'">Nominations &amp; scrutiny</button>
     </div>
-    <app-search-bar placeholder="Search elections" (valueChange)="search.set($event)"></app-search-bar>
-    <div *ngIf="loading()" class="empty-state"><app-logo-spinner [size]="48" [ripple]="false"></app-logo-spinner><p>Loading elections...</p></div>
-    <div *ngIf="!loading() && filtered().length === 0" class="empty-state"><h2>No elections found</h2><p>Create an election to begin.</p></div>
-    <div class="glass-card" *ngFor="let election of filtered()">
-        <div class="flex justify-between items-center"><div><h2>{{ election.title }}</h2><p class="text-muted">{{ phaseLabel[election.phase] }} · {{ election.positions.length }} positions</p></div><div class="flex gap-2"><button class="btn btn-primary btn-sm" *ngIf="election.phase === 'Announced'" (click)="publish(election)">Publish</button><button class="btn btn-secondary btn-sm" *ngIf="election.phase === 'Polling'" (click)="close(election)">Close</button></div></div>
+
+    <div *ngIf="activeTab() === 'elections'" class="tab-content animate-fade-in">
+        <div *ngIf="showForm()" class="glass-card stack gap-4">
+            <div class="form-group"><label for="election-title">Title</label><input id="election-title" [(ngModel)]="form.title"></div>
+            <div class="form-group"><label for="election-description">Description</label><textarea id="election-description" [(ngModel)]="form.description"></textarea></div>
+            <div class="glass-card" *ngFor="let position of form.positions; let i = index">
+                <div class="form-group"><label [for]="'position-' + i">Position</label><input [id]="'position-' + i" [(ngModel)]="position.title"></div>
+                <div class="form-group"><label [for]="'seats-' + i">Seats</label><input [id]="'seats-' + i" type="number" min="1" [(ngModel)]="position.seats"></div>
+                <button class="btn btn-secondary btn-sm" *ngIf="(form.positions?.length ?? 0) > 1" (click)="removePosition(i)">Remove position</button>
+            </div>
+            <div class="flex gap-2"><button class="btn btn-secondary" (click)="addPosition()">Add position</button><button class="btn btn-primary" [disabled]="saving()" (click)="create()">{{ saving() ? 'Saving...' : 'Create election' }}</button></div>
+        </div>
+        <app-search-bar placeholder="Search elections" (valueChange)="search.set($event)"></app-search-bar>
+        <div *ngIf="loading()" class="empty-state"><app-logo-spinner [size]="48" [ripple]="false"></app-logo-spinner><p>Loading elections...</p></div>
+        <div *ngIf="!loading() && filtered().length === 0" class="empty-state"><h2>No elections found</h2><p>Create an election to begin.</p></div>
+        <div class="glass-card" *ngFor="let election of filtered()">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2>{{ election.title }}</h2>
+                    <p class="text-muted"><span class="status-badge" [class]="getElectionPhaseClass(election.phase)">{{ getElectionPhaseLabel(election.phase) }}</span> · {{ election.positions.length }} positions</p>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-primary btn-sm" *ngIf="election.phase === 'Announced'" [disabled]="publishingId() === election.id" (click)="publish(election)">{{ publishingId() === election.id ? 'Publishing...' : 'Publish' }}</button>
+                    <button class="btn btn-secondary btn-sm" *ngIf="election.phase === 'Polling'" [disabled]="closingId() === election.id" (click)="close(election)">{{ closingId() === election.id ? 'Closing...' : 'Close' }}</button>
+                </div>
+            </div>
+            <div class="stack gap-2" *ngIf="election.candidates.length > 0">
+                <div class="flex justify-between items-center" *ngFor="let candidate of election.candidates">
+                    <span>{{ candidate.name }} — {{ candidate.positionTitle }}</span>
+                    <button class="btn btn-secondary btn-sm" [disabled]="removingCandidateId() === candidate.id" (click)="removeCandidate(election, candidate.id)">{{ removingCandidateId() === candidate.id ? 'Removing...' : 'Remove' }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="activeTab() === 'nominations'" class="tab-content animate-fade-in">
+        <div class="form-group">
+            <label for="scrutiny-election">Election</label>
+            <select id="scrutiny-election" [ngModel]="selectedElectionId()" (ngModelChange)="selectElectionForScrutiny($event)">
+                <option *ngFor="let election of elections()" [ngValue]="election.id">{{ election.title }}</option>
+            </select>
+        </div>
+        <div *ngIf="nominationsLoading()" class="empty-state"><app-logo-spinner [size]="48" [ripple]="false"></app-logo-spinner><p>Loading nominations...</p></div>
+        <div *ngIf="!nominationsLoading() && nominations().length === 0" class="empty-state"><h2>No nominations</h2><p>Nominations will appear here once submitted.</p></div>
+        <div class="glass-card" *ngFor="let nomination of nominations()">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p>Seat {{ nomination.electionSeatId }} — candidate member {{ nomination.candidateMemberId }}</p>
+                    <p class="text-muted">{{ nomination.statement }}</p>
+                    <span class="status-badge" [class]="getNominationStatusClass(nomination.status)">{{ getNominationStatusLabel(nomination.status) }}</span>
+                </div>
+                <div class="flex gap-2" *ngIf="nomination.status === 'Submitted' || nomination.status === 'UnderScrutiny'">
+                    <button class="btn btn-primary btn-sm" [disabled]="scrutinisingId() === nomination.id" (click)="scrutinise(nomination, true)">Accept</button>
+                    <button class="btn btn-secondary btn-sm" [disabled]="scrutinisingId() === nomination.id" (click)="scrutinise(nomination, false)">Reject</button>
+                </div>
+            </div>
+        </div>
     </div>
 </section>

@@ -49,7 +49,7 @@ describe('AdminGovernance Component', () => {
     // assignment and removal, so an admin's choice per action actually reaches the backend.
     it('assignRole posts notifyMember:false by default', () => {
         component.selectedPeriod.set({ id: 1 });
-        component.assignData.set({ memberId: 5, position: 8, reason: '', notifyMember: false });
+        component.assignData.set({ memberId: 5, position: 'President', reason: '', notifyMember: false });
 
         component.assignRole();
 
@@ -61,7 +61,7 @@ describe('AdminGovernance Component', () => {
 
     it('assignRole posts notifyMember:true when the admin opts in', () => {
         component.selectedPeriod.set({ id: 1 });
-        component.assignData.set({ memberId: 5, position: 8, reason: '', notifyMember: true });
+        component.assignData.set({ memberId: 5, position: 'President', reason: '', notifyMember: true });
 
         component.assignRole();
 

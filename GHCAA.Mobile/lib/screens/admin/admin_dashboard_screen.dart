@@ -81,6 +81,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboardScreen> {
               style: TextStyle(letterSpacing: 1.5, fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.royalGold)),
             const SizedBox(height: 12),
             GlassTile(icon: Icons.groups_outlined, title: 'EXECUTIVE COMMITTEE', subtitle: 'Manage Institutional Periods', onTap: () => context.go('/admin/governance')),
+            GlassTile(icon: Icons.how_to_vote_outlined, title: 'ELECTIONS', subtitle: 'Run nominations, polling & results', onTap: () => context.go('/admin/elections')),
             GlassTile(icon: Icons.collections, title: 'CONTENT MANAGEMENT', subtitle: 'Manage news & gallery assets', onTap: () => context.go('/admin/cms')),
             GlassTile(icon: Icons.support_agent, title: 'CONTACT MESSAGES', subtitle: 'Global support queue', onTap: () => context.go('/admin/messages')),
           ],

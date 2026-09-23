@@ -107,6 +107,16 @@ public class BallotVote
     public Ballot? Ballot { get; set; }
 }
 
+public class SeatVote
+{
+    public int Id { get; set; }
+    public int ElectionId { get; set; }
+    public int ElectionSeatId { get; set; }
+    public int MemberId { get; set; }
+    public DateTime VotedAt { get; set; }
+    public Election? Election { get; set; }
+}
+
 public class ElectionResult
 {
     public int Id { get; set; }

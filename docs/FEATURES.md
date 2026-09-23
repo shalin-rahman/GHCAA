@@ -164,8 +164,19 @@ The platform operates without live payment-gateway credentials. All payment meth
 - **Business description**: Internal portal for sharing and applying for job opportunities within the alumni network.
 - **User roles**: Member.
 - **Inputs / outputs**: Screen `/portal/jobs`; API `GET /api/jobs`, `POST /api/jobs`.
-- **Display**: defaults to a `.data-table` view (Table/Card toggle); this is also where "Mentorship" category postings live (2026-08-31).
+- **Display**: defaults to a `.data-table` view (Table/Card toggle); "Mentorship" is also a Job Hub posting category for job-style listings, separate from the dedicated request/respond workflow in 4.2a (2026-08-31).
 - **Dependencies**: Job Hub service.
+
+### 4.2a Mentorship Requests
+- **Business description**: A direct request/respond/complete workflow between members, separate from the Job Hub's "Mentorship" posting category above — a member sends a mentorship request to another member, the recipient accepts or declines, and either side can mark it complete. Backend, API, mobile, and Angular web are all live end-to-end (`docs/TODO.md` Work Package 89).
+- **User roles**: Member (send, respond, complete), Admin (oversight list of all requests).
+- **Inputs / outputs**:
+  - Mobile: `lib/screens/member/mentorship_hub_screen.dart` (send, view sent/received, respond, complete).
+  - Web (member): `/portal/requests`, the combined family-links/mentorship page (`member/requests`) — mentorship tab has send-request form, sent/received lists, respond and mark-complete actions.
+  - Web (admin): `/admin/mentorship` — oversight list of all requests (requester, mentor, domain, status), filterable by search.
+  - API: `api/mentorship` — `send`, `sent`, `received`, `respond`, `complete`, and `admin/all`, all behind class-level `[Authorize]`.
+  - Key fields: `MentorshipRequest` (requester, mentor, status, timestamps).
+- **Dependencies**: `IMentorshipService`/`MentorshipService`, `MentorshipService` (Angular), `PageHeaderComponent`/`SearchBarComponent`/`LoadingPanelComponent`.
 
 ### 4.3 Direct Peer Messaging
 - **Business description**: Secure real-time channel for members to network without exposing private contact data.
@@ -320,6 +331,20 @@ The assistant runs entirely on internal data with a rule-based engine — it has
   - Marking an award `Paid` writes an idempotent `FinancialRecord` (`RecordType = Expense`, `FinancialCategory = Grant`) and stores its id back on `ScholarshipAward.FinancialRecordId`.
   - A flag column `enableScholarships` exists on `OrgConfigDto`/profile packs, but it is not wired to any runtime feature-flag mechanism — none exists project-wide yet.
 - **Dependencies**: `IScholarshipService`/`ScholarshipService`, existing `FileUpload` + `IFileValidationService` path for supporting documents (no new upload plumbing), Financial Ledger service.
+
+### 8.1a Fundraising Campaigns
+- **Business description**: Named giving campaigns (a target amount, a story, a live window) that the public can browse and pledge to, with admin-confirmed receipts feeding the same financial ledger as scholarships and reunion fees. Built (`f960d216`), including the member giving-history page and Flutter mobile (browse, detail/pledge, my-pledges); see `docs/TODO.md` item 37.3.
+- **User roles**: Public (browse, pledge), Member (pledge, view own giving history), Admin (create/edit campaigns, confirm receipts, manage donor tiers).
+- **Inputs / outputs**:
+  - Screens: `/campaigns` (public browse + detail by slug), `admin/campaigns` (create, edit, confirm receipts, donor tiers), `member/giving` (own pledge history against `GET api/campaigns/my-pledges`, already built). Mobile: `campaigns_screen.dart` (browse), `campaign_detail_screen.dart` (detail, honour roll, pledge form), `my_pledges_screen.dart`.
+  - API: `api/campaigns` — public list/detail/pledge are anonymous; `my-pledges` requires a member; admin CRUD, tier, and receipt-confirmation routes require admin auth.
+  - Key fields: `Campaign` (title, slug, story, cover image, target amount, active window), `CampaignPledge` (amount, message, optional member linkage, anonymous flag).
+- **Validations & rules**:
+  - Progress is calculated from confirmed cash received, not from unconfirmed pledges.
+  - Confirming a pledge's receipt writes exactly one linked `FinancialRecord`; repeated confirmation attempts do not create a second ledger row (the same idempotent-confirmation pattern 8.1's award-disbursement flow uses).
+  - Anonymous donors show as `Anonymous` in public honour-roll projections; private donor contact fields never appear in public output.
+  - `Campaign`/`CampaignPledge` are already in `InitialBaseline`, so the tables exist on a migrated database too. The app still boots via `EnsureCreated()` rather than `MigrateAsync()` — that's `docs/TODO.md` item 37.0, a separate unbuilt swap — but no new Campaigns migration is needed once it lands.
+- **Dependencies**: `ICampaignService`/`CampaignService`, Financial Ledger service (`ConfirmPledgeReceiptAsync`).
 
 ### 8.2 Oral-History / Legacy Archive
 - **Business description**: Recorded memories and testimony from senior alumni, organized into published collections with a searchable transcript for each item.

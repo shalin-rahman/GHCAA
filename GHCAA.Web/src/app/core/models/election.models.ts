@@ -22,14 +22,14 @@ export const NOMINATION_STATUS_LABELS: Record<NominationStatus, string> = {
     Withdrawn: 'Withdrawn'
 };
 
-export interface ElectionPosition {
+export interface AdminElectionPositionDto {
     id: number;
     title: string;
     description?: string;
     seats: number;
 }
 
-export interface ElectionCandidate {
+export interface AdminElectionCandidateDto {
     id: number;
     memberId: number;
     name: string;
@@ -39,7 +39,7 @@ export interface ElectionCandidate {
     positionTitle: string;
 }
 
-export interface Election {
+export interface AdminElectionDto {
     id: number;
     title: string;
     description?: string;
@@ -53,38 +53,10 @@ export interface Election {
     pollingClosesOn?: string;
     declaredOn?: string;
     isActive: boolean;
-    positions: ElectionPosition[];
-    candidates: ElectionCandidate[];
+    positions: AdminElectionPositionDto[];
+    candidates: AdminElectionCandidateDto[];
     eligibleVoterCount?: number;
     hasVoted: boolean;
-}
-
-export interface ElectionBallotSelection {
-    positionId: number;
-    candidateIds: number[];
-}
-
-export interface ElectionBallot {
-    electionId: number;
-    selections: ElectionBallotSelection[];
-    submittedAt?: string;
-}
-
-export interface ElectionResult {
-    positionId: number;
-    positionTitle: string;
-    candidateId: number;
-    candidateName: string;
-    votes: number;
-    percentage: number;
-    elected: boolean;
-}
-
-export interface ElectionSummary {
-    election: Election;
-    results: ElectionResult[];
-    totalVotes: number;
-    turnoutPercentage: number;
 }
 
 export interface CreateElectionRequest {
@@ -94,9 +66,8 @@ export interface CreateElectionRequest {
     nominationClosesOn: string;
     pollingOpensOn: string;
     pollingClosesOn: string;
-    createdBy: number;
     description?: string;
-    positions?: Array<Pick<ElectionPosition, 'title' | 'description' | 'seats'>>;
+    positions?: Array<Pick<AdminElectionPositionDto, 'title' | 'description' | 'seats'>>;
 }
 
 export interface SaveCandidateRequest {
@@ -129,7 +100,6 @@ export interface NominationViewDto {
     candidateMemberId: number;
     status: NominationStatus;
     statement: string;
-    photoPath?: string;
 }
 
 export interface ScrutinyDto {

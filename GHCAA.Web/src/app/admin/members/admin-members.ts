@@ -8,7 +8,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { EC_ROLES, getECPositionName, getCurrentECPosition, getCurrentECPeriod, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, EC_ROLES_OPTIONS, getBloodGroupName, LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { getECPositionName, getCurrentECPosition, getCurrentECPeriod, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, getBloodGroupName, LOOKUP_GROUPS } from '../../core/constants/app.constants';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { DatePipe } from '@angular/common';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
@@ -71,10 +71,8 @@ export class AdminMembers implements OnInit {
 
   // Import State
   showImportModal = signal(false);
-  // Constants for dropdowns
-  ecPositions = EC_ROLES_OPTIONS;
-
-  // 82.42: these six populate from /lookups/{group} via LookupService, filled in loadLookupOptions().
+  // 82.42: these seven populate from /lookups/{group} via LookupService, filled in loadLookupOptions().
+  ecPositions: LookupOption[] = [];
   memberCategories: LookupOption[] = [];
   statusOptions: LookupOption[] = [];
   genderOptions: LookupOption[] = [];
@@ -121,6 +119,7 @@ export class AdminMembers implements OnInit {
     this.lookupService.getOptions(LOOKUP_GROUPS.Gender).subscribe(opts => this.genderOptions = opts);
     this.lookupService.getOptions(LOOKUP_GROUPS.BloodGroup).subscribe(opts => this.bloodGroupOptions = opts);
     this.lookupService.getOptions(LOOKUP_GROUPS.MembershipType).subscribe(opts => this.membershipTypes = opts);
+    this.lookupService.getOptions(LOOKUP_GROUPS.ECPosition).subscribe(opts => this.ecPositions = opts);
     this.lookupService.getAcademicYears().subscribe(years => this.yearsList = years);
   }
 
@@ -628,7 +627,7 @@ export class AdminMembers implements OnInit {
     const activePeriod = this.ecPeriods().find(p => p.isActive);
     this.selectedMember().ecHistory.unshift({
       periodTitle: activePeriod ? activePeriod.title : '',
-      position: 0, // None
+      position: 'None',
       startDate: this.datePipe.transform(new Date(), 'dd-MM-yyyy') || '',
       isCurrent: true,
       changeReason: ''

@@ -6,7 +6,7 @@ import { ProfileService } from '../../core/services/profile.service';
 import { MemberProfile } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
-import { getECPositionName, getCurrentECPosition, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, getBloodGroupName, TSHIRT_SIZES, LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { getECPositionName, getCurrentECPosition, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, getBloodGroupName, TSHIRT_SIZES, LOOKUP_GROUPS } from '../../core/constants/app.constants';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { DatePipe } from '@angular/common';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
@@ -27,7 +27,6 @@ export class Profile implements OnInit {
     getECPositionName = getECPositionName;
     getCurrentECPosition = getCurrentECPosition;
     getBloodGroupName = getBloodGroupName;
-    ecRoles = EC_ROLES;
     private profileService = inject(ProfileService);
     private notify = inject(NotificationService);
     private confirmDialog = inject(ConfirmDialogService);

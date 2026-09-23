@@ -42,6 +42,7 @@ import '../../screens/admin/fee_config_screen.dart';
 import '../../screens/admin/contact_messages_screen.dart';
 import '../../screens/admin/admin_dashboard_screen.dart';
 import '../../screens/admin/governance_registry_screen.dart';
+import '../../screens/admin/election_management_screen.dart';
 import '../../screens/admin/article_approval_screen.dart';
 import '../../screens/admin/gallery_approval_screen.dart';
 import '../../screens/admin/job_approval_screen.dart';
@@ -228,6 +229,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/messages', name: 'admin_messages', builder: (context, state) => const ContactMessagesScreen()),
           GoRoute(path: '/admin/gatekeeper', name: 'admin_gatekeeper', builder: (context, state) => const GatekeeperScreen()),
           GoRoute(path: '/admin/governance', name: 'admin_governance', builder: (context, state) => const AdminGovernanceScreen()),
+          GoRoute(path: '/admin/elections', name: 'admin_elections', builder: (context, state) => const ElectionManagementScreen()),
           GoRoute(path: '/admin/articles', name: 'admin_articles', builder: (context, state) => const ArticleApprovalScreen()),
           GoRoute(path: '/admin/gallery-approvals', name: 'admin_gallery_approvals', builder: (context, state) => const GalleryApprovalScreen()),
           GoRoute(path: '/admin/job-approvals', name: 'admin_job_approvals', builder: (context, state) => const JobApprovalScreen()),

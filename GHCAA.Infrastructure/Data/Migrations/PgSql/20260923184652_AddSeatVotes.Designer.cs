@@ -3,6 +3,7 @@ using System;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 {
     [DbContext(typeof(PgSqlApplicationDbContext))]
-    partial class PgSqlApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260923184652_AddSeatVotes")]
+    partial class AddSeatVotes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -956,7 +959,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "OTP_EMAIL",
                             Description = "OTP verification email",
-                            LastUpdated = new DateTime(2026, 9, 23, 19, 41, 59, 531, DateTimeKind.Utc).AddTicks(9149),
+                            LastUpdated = new DateTime(2026, 9, 23, 18, 46, 50, 893, DateTimeKind.Utc).AddTicks(9703),
                             Subject = "{{OrgShortName}} Verification Code: {{OtpCode}}",
                             Variables = "['FullName', 'OtpCode']"
                         },
@@ -967,7 +970,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "WELCOME_EMAIL",
                             Description = "Welcome email",
-                            LastUpdated = new DateTime(2026, 9, 23, 19, 41, 59, 532, DateTimeKind.Utc).AddTicks(6494),
+                            LastUpdated = new DateTime(2026, 9, 23, 18, 46, 50, 894, DateTimeKind.Utc).AddTicks(9024),
                             Subject = "Welcome to {{OrgName}}!",
                             Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
                         },
@@ -978,7 +981,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PASSWORD_RESET",
                             Description = "Password reset email",
-                            LastUpdated = new DateTime(2026, 9, 23, 19, 41, 59, 532, DateTimeKind.Utc).AddTicks(6608),
+                            LastUpdated = new DateTime(2026, 9, 23, 18, 46, 50, 894, DateTimeKind.Utc).AddTicks(9179),
                             Subject = "{{OrgShortName}} Account Password Reset",
                             Variables = "['FullName', 'ResetUrl']"
                         },
@@ -989,7 +992,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "APPLICATION_REJECTED",
                             Description = "Application rejection email",
-                            LastUpdated = new DateTime(2026, 9, 23, 19, 41, 59, 532, DateTimeKind.Utc).AddTicks(6809),
+                            LastUpdated = new DateTime(2026, 9, 23, 18, 46, 50, 894, DateTimeKind.Utc).AddTicks(9464),
                             Subject = "Update on your {{OrgShortName}} Membership Application",
                             Variables = "['FullName', 'Reason']"
                         },
@@ -1000,7 +1003,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PAYMENT_RECEIVED",
                             Description = "Payment received acknowledgment",
-                            LastUpdated = new DateTime(2026, 9, 23, 19, 41, 59, 532, DateTimeKind.Utc).AddTicks(6886),
+                            LastUpdated = new DateTime(2026, 9, 23, 18, 46, 50, 894, DateTimeKind.Utc).AddTicks(9571),
                             Subject = "Payment Received: {{Amount}} BDT",
                             Variables = "['FullName', 'Amount', 'TrxID']"
                         },
@@ -1011,7 +1014,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PAYMENT_STATUS_UPDATED",
                             Description = "Payment status update email",
-                            LastUpdated = new DateTime(2026, 9, 23, 19, 41, 59, 532, DateTimeKind.Utc).AddTicks(6948),
+                            LastUpdated = new DateTime(2026, 9, 23, 18, 46, 50, 894, DateTimeKind.Utc).AddTicks(9652),
                             Subject = "Payment Status Updated: {{Status}}",
                             Variables = "['FullName', 'TrxID', 'Status']"
                         },
@@ -1022,7 +1025,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "FAMILY_LINK_REQUEST",
                             Description = "Family link request email",
-                            LastUpdated = new DateTime(2026, 9, 23, 19, 41, 59, 532, DateTimeKind.Utc).AddTicks(7006),
+                            LastUpdated = new DateTime(2026, 9, 23, 18, 46, 50, 894, DateTimeKind.Utc).AddTicks(9728),
                             Subject = "New Family Link Request from {{RequesterName}}",
                             Variables = "['FullName', 'RequesterName', 'Relationship', 'ProfileUrl']"
                         },
@@ -1033,7 +1036,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "FAMILY_LINK_ACCEPTED",
                             Description = "Family link acceptance confirmation",
-                            LastUpdated = new DateTime(2026, 9, 23, 19, 41, 59, 532, DateTimeKind.Utc).AddTicks(7065),
+                            LastUpdated = new DateTime(2026, 9, 23, 18, 46, 50, 894, DateTimeKind.Utc).AddTicks(9813),
                             Subject = "Family Link Request Accepted",
                             Variables = "['FullName', 'TargetName']"
                         });
@@ -2728,141 +2731,6 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Label = "EMAIL",
                             LookupGroup = "BroadcastChannel",
                             Value = "email"
-                        },
-                        new
-                        {
-                            Id = 4001,
-                            DisplayOrder = 1,
-                            IsActive = true,
-                            Label = "President",
-                            LookupGroup = "ECPosition",
-                            Value = "President"
-                        },
-                        new
-                        {
-                            Id = 4002,
-                            DisplayOrder = 2,
-                            IsActive = true,
-                            Label = "Vice President",
-                            LookupGroup = "ECPosition",
-                            Value = "VicePresident"
-                        },
-                        new
-                        {
-                            Id = 4003,
-                            DisplayOrder = 3,
-                            IsActive = true,
-                            Label = "General Secretary",
-                            LookupGroup = "ECPosition",
-                            Value = "GeneralSecretary"
-                        },
-                        new
-                        {
-                            Id = 4004,
-                            DisplayOrder = 4,
-                            IsActive = true,
-                            Label = "Office Secretary",
-                            LookupGroup = "ECPosition",
-                            Value = "OfficeSecretary"
-                        },
-                        new
-                        {
-                            Id = 4005,
-                            DisplayOrder = 5,
-                            IsActive = true,
-                            Label = "Joint Secretary 1",
-                            LookupGroup = "ECPosition",
-                            Value = "JointSecretary1"
-                        },
-                        new
-                        {
-                            Id = 4006,
-                            DisplayOrder = 6,
-                            IsActive = true,
-                            Label = "Joint Secretary 2",
-                            LookupGroup = "ECPosition",
-                            Value = "JointSecretary2"
-                        },
-                        new
-                        {
-                            Id = 4007,
-                            DisplayOrder = 7,
-                            IsActive = true,
-                            Label = "Treasurer",
-                            LookupGroup = "ECPosition",
-                            Value = "Treasurer"
-                        },
-                        new
-                        {
-                            Id = 4008,
-                            DisplayOrder = 8,
-                            IsActive = true,
-                            Label = "Media, Cultural & Sports Secretary",
-                            LookupGroup = "ECPosition",
-                            Value = "MediaCulturalAndSportsSecretary"
-                        },
-                        new
-                        {
-                            Id = 4009,
-                            DisplayOrder = 9,
-                            IsActive = true,
-                            Label = "Organizational Secretary",
-                            LookupGroup = "ECPosition",
-                            Value = "OrganizationalSecretary"
-                        },
-                        new
-                        {
-                            Id = 4010,
-                            DisplayOrder = 10,
-                            IsActive = true,
-                            Label = "Information & Technology Secretary",
-                            LookupGroup = "ECPosition",
-                            Value = "InformationAndTechnologySecretary"
-                        },
-                        new
-                        {
-                            Id = 4011,
-                            DisplayOrder = 11,
-                            IsActive = true,
-                            Label = "Member-1",
-                            LookupGroup = "ECPosition",
-                            Value = "Member1"
-                        },
-                        new
-                        {
-                            Id = 4012,
-                            DisplayOrder = 12,
-                            IsActive = true,
-                            Label = "Member-2",
-                            LookupGroup = "ECPosition",
-                            Value = "Member2"
-                        },
-                        new
-                        {
-                            Id = 4013,
-                            DisplayOrder = 13,
-                            IsActive = true,
-                            Label = "Law Secretary",
-                            LookupGroup = "ECPosition",
-                            Value = "LawSecretary"
-                        },
-                        new
-                        {
-                            Id = 4014,
-                            DisplayOrder = 14,
-                            IsActive = true,
-                            Label = "Immediate Past President",
-                            LookupGroup = "ECPosition",
-                            Value = "ImmediatePastPresident"
-                        },
-                        new
-                        {
-                            Id = 4015,
-                            DisplayOrder = 15,
-                            IsActive = true,
-                            Label = "Institutional Representative",
-                            LookupGroup = "ECPosition",
-                            Value = "InstitutionalRepresentative"
                         });
                 });
 

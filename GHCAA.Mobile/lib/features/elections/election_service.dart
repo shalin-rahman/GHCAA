@@ -20,6 +20,27 @@ const electionPhaseLabels = <String, String>{
   'Archived': 'Archived',
 };
 
+// Matches the backend ElectionPhase enum order (GHCAA.Domain.Enums), used to
+// work out the next phase for the admin "advance phase" action.
+const electionPhaseOrder = <String>[
+  'Announced',
+  'Nomination',
+  'Scrutiny',
+  'Withdrawal',
+  'CandidateList',
+  'Campaign',
+  'Polling',
+  'Counting',
+  'Declared',
+  'Archived',
+];
+
+String? nextElectionPhase(String phase) {
+  final index = electionPhaseOrder.indexOf(phase);
+  if (index == -1 || index >= electionPhaseOrder.length - 1) return null;
+  return electionPhaseOrder[index + 1];
+}
+
 const nominationStatusLabels = <String, String>{
   'Submitted': 'Submitted',
   'UnderScrutiny': 'Under scrutiny',
@@ -96,20 +117,72 @@ class Nomination {
       );
 }
 
+class AdminElection {
+  final int id;
+  final String title;
+  final String? description;
+  final String phase;
+  final DateTime? announcedOn;
+  final DateTime? nominationOpensOn;
+  final DateTime? nominationClosesOn;
+  final DateTime? pollingOpensOn;
+  final DateTime? pollingClosesOn;
+  final DateTime? declaredOn;
+  final bool isActive;
+  final int eligibleVoterCount;
+
+  const AdminElection({
+    required this.id,
+    required this.title,
+    this.description,
+    required this.phase,
+    this.announcedOn,
+    this.nominationOpensOn,
+    this.nominationClosesOn,
+    this.pollingOpensOn,
+    this.pollingClosesOn,
+    this.declaredOn,
+    required this.isActive,
+    required this.eligibleVoterCount,
+  });
+
+  factory AdminElection.fromJson(Map<String, dynamic> json) => AdminElection(
+        id: json['id'] as int,
+        title: json['title'] as String? ?? '',
+        description: json['description'] as String?,
+        phase: json['phase']?.toString() ?? 'Announced',
+        announcedOn: AppUtils.parseDate(json['announcedOn'] as String?),
+        nominationOpensOn:
+            AppUtils.parseDate(json['nominationOpensOn'] as String?),
+        nominationClosesOn:
+            AppUtils.parseDate(json['nominationClosesOn'] as String?),
+        pollingOpensOn: AppUtils.parseDate(json['pollingOpensOn'] as String?),
+        pollingClosesOn:
+            AppUtils.parseDate(json['pollingClosesOn'] as String?),
+        declaredOn: AppUtils.parseDate(json['declaredOn'] as String?),
+        isActive: json['isActive'] as bool? ?? false,
+        eligibleVoterCount: json['eligibleVoterCount'] as int? ?? 0,
+      );
+}
+
 class ElectionService {
   final Dio _dio;
   ElectionService(this._dio);
 
-  Future<ElectionSummary> create({
+  // Creates through the admin console endpoint (`api/admin/elections`) —
+  // there is no bare `POST /elections` route on the backend. The server
+  // derives the creating officer from the auth claim, so no identity field
+  // goes in the body.
+  Future<AdminElection> create({
     required String title,
     required int ecPeriodId,
     required DateTime nominationOpensOn,
     required DateTime nominationClosesOn,
     required DateTime pollingOpensOn,
     required DateTime pollingClosesOn,
-    required int createdBy,
+    String? description,
   }) async {
-    final response = await _dio.post('/elections', data: {
+    final response = await _dio.post('/admin/elections', data: {
       'title': title,
       'ecPeriodId': ecPeriodId,
       'nominationOpensOn':
@@ -118,8 +191,22 @@ class ElectionService {
           AppUtils.toWire(nominationClosesOn, includeTime: true),
       'pollingOpensOn': AppUtils.toWire(pollingOpensOn, includeTime: true),
       'pollingClosesOn': AppUtils.toWire(pollingClosesOn, includeTime: true),
-      'createdBy': createdBy,
+      if (description != null && description.isNotEmpty)
+        'description': description,
     });
+    return AdminElection.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<List<AdminElection>> listAdmin() async {
+    final response = await _dio.get('/admin/elections');
+    return (response.data as List)
+        .map((item) => AdminElection.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<ElectionSummary?> getCurrent() async {
+    final response = await _dio.get('/elections/current');
+    if (response.statusCode == 204 || response.data == null) return null;
     return ElectionSummary.fromJson(response.data as Map<String, dynamic>);
   }
 
@@ -180,13 +267,11 @@ class ElectionService {
 
 final currentElectionProvider =
     FutureProvider.autoDispose<ElectionSummary?>((ref) async {
+  final service = ref.read(electionServiceProvider);
   try {
-    final service = ref.read(electionServiceProvider);
-    final response = await service._dio.get('/elections/current');
-    return response.data == null
-        ? null
-        : ElectionSummary.fromJson(response.data as Map<String, dynamic>);
-  } catch (_) {
-    return null;
+    return await service.getCurrent();
+  } on DioException catch (e) {
+    service.logFailure('getCurrent', e);
+    rethrow;
   }
 });

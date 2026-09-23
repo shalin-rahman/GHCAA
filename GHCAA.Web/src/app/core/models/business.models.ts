@@ -168,7 +168,7 @@ export interface ECMember {
     id: number;
     ecPeriodId: number;
     memberId: number;
-    position: ECPosition | number;
+    position: ECPosition;
     startDate: string | Date;
     endDate?: string | Date;
     changeReason?: string;

@@ -40,6 +40,16 @@ public sealed class ElectionService(ApplicationDbContext db) : IElectionService
         return e == null ? null : ToSummary(e, e.VoterRoll.Count, e.VoterRoll.Count(x => x.IsEligible));
     }
 
+    public async Task<ElectionSummaryDto?> GetCurrentAsync(CancellationToken ct = default)
+    {
+        var e = await _db.Elections
+            .Include(x => x.VoterRoll)
+            .Where(x => x.Phase != ElectionPhase.Announced && x.Phase != ElectionPhase.Declared && x.Phase != ElectionPhase.Archived)
+            .OrderByDescending(x => x.AnnouncedOn)
+            .FirstOrDefaultAsync(ct);
+        return e == null ? null : ToSummary(e, e.VoterRoll.Count, e.VoterRoll.Count(x => x.IsEligible));
+    }
+
     public async Task<int> AddSeatAsync(int id, ElectionSeatRequestDto request, CancellationToken ct = default)
     {
         var election = await _db.Elections.FindAsync([id], ct);
@@ -63,7 +73,7 @@ public sealed class ElectionService(ApplicationDbContext db) : IElectionService
     public async Task<bool> SetPhaseAsync(int id, ElectionPhase phase, CancellationToken ct = default)
     {
         var e = await _db.Elections.FindAsync([id], ct);
-        if (e == null || phase < e.Phase || phase > ElectionPhase.Archived || (int)phase > (int)e.Phase + 1) return false;
+        if (e == null || phase == e.Phase || phase < e.Phase || phase > ElectionPhase.Archived || (int)phase > (int)e.Phase + 1) return false;
         if (phase == ElectionPhase.Polling && !await _db.VoterRolls.AnyAsync(x => x.ElectionId == id, ct)) return false;
         if (phase == ElectionPhase.Counting && DateTime.UtcNow < e.PollingClosesOn) return false;
         if (phase == ElectionPhase.Declared && !await _db.ElectionResults.AnyAsync(x => x.ElectionId == id, ct)) return false;
@@ -108,16 +118,16 @@ public sealed class ElectionService(ApplicationDbContext db) : IElectionService
         return ToNomination(n);
     }
 
-    public async Task<bool> DecideNominationAsync(int nominationId, ScrutinyDto request, CancellationToken ct = default)
+    public async Task<bool> DecideNominationAsync(int nominationId, int officerMemberId, ScrutinyDto request, CancellationToken ct = default)
     {
         var n = await _db.Nominations.Include(x => x.Election).FirstOrDefaultAsync(x => x.Id == nominationId, ct);
         if (n == null || n.Status is NominationStatus.Withdrawn) return false;
         if (n.Election?.Phase != ElectionPhase.Scrutiny) return false;
-        if (!await _db.ElectionOfficers.AnyAsync(x => x.ElectionId == n.ElectionId && x.MemberId == request.OfficerMemberId &&
+        if (!await _db.ElectionOfficers.AnyAsync(x => x.ElectionId == n.ElectionId && x.MemberId == officerMemberId &&
             (x.Role == ElectionRole.ReturningOfficer || x.Role == ElectionRole.AssistantReturningOfficer || x.Role == ElectionRole.Scrutineer), ct))
             return false;
         n.Status = request.Accepted ? NominationStatus.Accepted : NominationStatus.Rejected;
-        _db.ScrutinyDecisions.Add(new ScrutinyDecision { NominationId = nominationId, OfficerMemberId = request.OfficerMemberId, Accepted = request.Accepted, Reason = request.Reason, DecidedAt = DateTime.UtcNow });
+        _db.ScrutinyDecisions.Add(new ScrutinyDecision { NominationId = nominationId, OfficerMemberId = officerMemberId, Accepted = request.Accepted, Reason = request.Reason, DecidedAt = DateTime.UtcNow });
         await _db.SaveChangesAsync(ct);
         return true;
     }
@@ -142,14 +152,20 @@ public sealed class ElectionService(ApplicationDbContext db) : IElectionService
         if (nomination == null) return false;
         await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
         var votedAt = DateTime.UtcNow;
-        var marked = await _db.VoterRolls.Where(x => x.Id == voter.Id && x.VotedAt == null)
-            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.VotedAt, votedAt), ct);
-        if (marked != 1) return false;
-        voter.VotedAt = votedAt;
+        _db.SeatVotes.Add(new SeatVote { ElectionId = id, ElectionSeatId = request.ElectionSeatId, MemberId = memberId, VotedAt = votedAt });
+        if (voter.VotedAt == null) voter.VotedAt = votedAt;
         var ballot = new Ballot { ElectionId = id, ElectionSeatId = request.ElectionSeatId, SerialNumber = request.SerialNumber ?? Guid.NewGuid().ToString("N"), IssuedAt = DateTime.UtcNow };
         _db.Ballots.Add(ballot);
         _db.BallotVotes.Add(new BallotVote { Ballot = ballot, NominationId = nomination.Id, CastAt = DateTime.UtcNow });
-        await _db.SaveChangesAsync(ct);
+        try
+        {
+            await _db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException)
+        {
+            await transaction.RollbackAsync(ct);
+            return false;
+        }
         await transaction.CommitAsync(ct);
         return true;
     }
@@ -182,6 +198,119 @@ public sealed class ElectionService(ApplicationDbContext db) : IElectionService
 
     public async Task<IReadOnlyList<NominationViewDto>> GetNominationsAsync(int id, CancellationToken ct = default) =>
         (await _db.Nominations.Where(x => x.ElectionId == id).OrderBy(x => x.ElectionSeatId).ToListAsync(ct)).Select(ToNomination).ToList();
+
+    public async Task<IReadOnlyList<AdminElectionDto>> ListAdminElectionsAsync(CancellationToken ct = default)
+    {
+        var elections = await _db.Elections.AsNoTracking()
+            .Include(x => x.Seats)
+            .Include(x => x.VoterRoll)
+            .OrderByDescending(x => x.AnnouncedOn)
+            .ToListAsync(ct);
+        return elections.Select(ToAdminElection).ToArray();
+    }
+
+    public async Task<AdminElectionDto?> GetAdminElectionAsync(int id, CancellationToken ct = default)
+    {
+        var election = await _db.Elections.AsNoTracking()
+            .Include(x => x.Seats)
+            .Include(x => x.VoterRoll)
+            .FirstOrDefaultAsync(x => x.Id == id, ct);
+        return election is null ? null : ToAdminElection(election);
+    }
+
+    public async Task<(bool Success, string? Error, AdminElectionDto? Election)> AddCandidateAsync(int id, SaveCandidateRequest request, CancellationToken ct = default)
+    {
+        if (!await _db.ElectionSeats.AnyAsync(x => x.ElectionId == id && x.Id == request.PositionId, ct))
+            return (false, "seat-not-found", null);
+
+        _db.Nominations.Add(new Nomination
+        {
+            ElectionId = id,
+            ElectionSeatId = request.PositionId,
+            CandidateMemberId = request.MemberId,
+            ProposerMemberId = request.MemberId,
+            SeconderMemberId = request.MemberId,
+            Statement = request.Statement ?? string.Empty,
+            Status = NominationStatus.Accepted,
+            SubmittedAt = DateTime.UtcNow,
+        });
+
+        try
+        {
+            await _db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException)
+        {
+            return (false, "duplicate-candidate", null);
+        }
+
+        return (true, null, await GetAdminElectionAsync(id, ct));
+    }
+
+    public async Task<(bool Success, string? Error)> RemoveCandidateAsync(int id, int candidateId, CancellationToken ct = default)
+    {
+        var nomination = await _db.Nominations.FirstOrDefaultAsync(x => x.ElectionId == id && x.Id == candidateId, ct);
+        if (nomination is null) return (false, "not-found");
+
+        _db.Nominations.Remove(nomination);
+        try
+        {
+            await _db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException)
+        {
+            return (false, "has-votes");
+        }
+
+        return (true, null);
+    }
+
+    private static AdminElectionDto ToAdminElection(Election election)
+    {
+        var positions = election.Seats
+            .OrderBy(x => x.Id)
+            .Select(x => new AdminElectionPositionDto(x.Id, SeatTitle(x.Position), null, x.SeatCount))
+            .ToArray();
+
+        return new AdminElectionDto(
+            election.Id,
+            election.Title,
+            null,
+            election.Phase,
+            election.AnnouncedOn,
+            election.NominationOpensOn,
+            election.NominationClosesOn,
+            election.ScrutinyOn,
+            election.WithdrawalClosesOn,
+            election.PollingOpensOn,
+            election.PollingClosesOn,
+            election.DeclaredOn,
+            election.IsActive,
+            positions,
+            Array.Empty<AdminElectionCandidateDto>(),
+            election.VoterRoll.Count(x => x.IsEligible),
+            election.VoterRoll.Any(x => x.VotedAt.HasValue));
+    }
+
+    private static string SeatTitle(ECPosition position) => position switch
+    {
+        ECPosition.President => "President",
+        ECPosition.VicePresident => "Vice President",
+        ECPosition.GeneralSecretary => "General Secretary",
+        ECPosition.OfficeSecretary => "Office Secretary",
+        ECPosition.JointSecretary1 => "Joint Secretary 1",
+        ECPosition.JointSecretary2 => "Joint Secretary 2",
+        ECPosition.Treasurer => "Treasurer",
+        ECPosition.MediaCulturalAndSportsSecretary => "Media Cultural & Sports Secretary",
+        ECPosition.OrganizationalSecretary => "Organizational Secretary",
+        ECPosition.InformationAndTechnologySecretary => "Information and Technology Secretary",
+        ECPosition.Member1 => "Member 1",
+        ECPosition.Member2 => "Member 2",
+        ECPosition.LawSecretary => "Law Secretary",
+        ECPosition.ImmediatePastPresident => "Immediate Past President",
+        ECPosition.InstitutionalRepresentative => "Institutional Representative",
+        _ => position.ToString(),
+    };
 
     private static ElectionSummaryDto ToSummary(Election e, int count, int eligible) => new(e.Id, e.Title, e.Phase, e.ECPeriodId, count, eligible);
     private static NominationViewDto ToNomination(Nomination n) => new(n.Id, n.ElectionSeatId, n.CandidateMemberId, n.Status, n.Statement);

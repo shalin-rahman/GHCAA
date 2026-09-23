@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import {
-    CastVoteDto, CreateElectionRequest, Election, ElectionBallot, ElectionPhase,
-    ElectionResult, ElectionResultDto, ElectionSummary, ElectionSummaryDto,
+    AdminElectionDto, CastVoteDto, CreateElectionRequest, ElectionPhase,
+    ElectionResultDto, ElectionSummaryDto,
     NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto
 } from '../models/election.models';
 
@@ -17,48 +17,36 @@ export class ElectionsService {
         return this.http.get(url, { responseType: 'text' });
     }
 
-    getCurrent(): Observable<Election | null> {
-        return this.http.get<Election | null>(API_ENDPOINTS.ELECTIONS.CURRENT);
+    getCurrent(): Observable<ElectionSummaryDto | null> {
+        return this.http.get<ElectionSummaryDto | null>(API_ENDPOINTS.ELECTIONS.CURRENT);
     }
 
-    getById(id: number): Observable<Election> {
-        return this.http.get<Election>(`${API_ENDPOINTS.ELECTIONS.BASE}/${id}`);
+    getById(id: number): Observable<ElectionSummaryDto> {
+        return this.http.get<ElectionSummaryDto>(`${API_ENDPOINTS.ELECTIONS.BASE}/${id}`);
     }
 
-    getResults(id: number): Observable<ElectionSummary> {
-        return this.http.get<ElectionSummary>(API_ENDPOINTS.ELECTIONS.RESULTS(id));
+    getAdminElections(): Observable<AdminElectionDto[]> {
+        return this.http.get<AdminElectionDto[]>(API_ENDPOINTS.ADMIN_ELECTIONS.BASE);
     }
 
-    submitBallot(id: number, ballot: ElectionBallot): Observable<void> {
-        return this.http.post<void>(API_ENDPOINTS.ELECTIONS.BALLOT(id), ballot);
+    create(request: CreateElectionRequest): Observable<AdminElectionDto> {
+        return this.http.post<AdminElectionDto>(API_ENDPOINTS.ADMIN_ELECTIONS.BASE, request);
     }
 
-    getAdminElections(): Observable<Election[]> {
-        return this.http.get<Election[]>(API_ENDPOINTS.ADMIN_ELECTIONS.BASE);
+    publish(id: number): Observable<AdminElectionDto> {
+        return this.http.post<AdminElectionDto>(API_ENDPOINTS.ADMIN_ELECTIONS.PUBLISH(id), {});
     }
 
-    create(request: CreateElectionRequest): Observable<Election> {
-        return this.http.post<Election>(API_ENDPOINTS.ADMIN_ELECTIONS.BASE, request);
+    close(id: number): Observable<AdminElectionDto> {
+        return this.http.post<AdminElectionDto>(API_ENDPOINTS.ADMIN_ELECTIONS.CLOSE(id), {});
     }
 
-    publish(id: number): Observable<Election> {
-        return this.http.post<Election>(API_ENDPOINTS.ADMIN_ELECTIONS.PUBLISH(id), {});
-    }
-
-    close(id: number): Observable<Election> {
-        return this.http.post<Election>(API_ENDPOINTS.ADMIN_ELECTIONS.CLOSE(id), {});
-    }
-
-    addCandidate(id: number, request: SaveCandidateRequest): Observable<Election> {
-        return this.http.post<Election>(API_ENDPOINTS.ADMIN_ELECTIONS.CANDIDATES(id), request);
+    addCandidate(id: number, request: SaveCandidateRequest): Observable<AdminElectionDto> {
+        return this.http.post<AdminElectionDto>(API_ENDPOINTS.ADMIN_ELECTIONS.CANDIDATES(id), request);
     }
 
     removeCandidate(electionId: number, candidateId: number): Observable<void> {
         return this.http.delete<void>(`${API_ENDPOINTS.ADMIN_ELECTIONS.CANDIDATES(electionId)}/${candidateId}`);
-    }
-
-    createElection(request: CreateElectionRequest): Observable<ElectionSummaryDto> {
-        return this.http.post<ElectionSummaryDto>(API_ENDPOINTS.ELECTIONS.BASE, request);
     }
 
     setPhase(id: number, phase: ElectionPhase): Observable<void> {
