@@ -85,6 +85,49 @@ no Flutter admin election screen at all, despite `create`, `setPhase`, `freezeVo
   `LogoSpinner`. No new shared status-badge or busy-button widget — neither exists anywhere in
   the app; match the established per-screen convention instead.
 
+## EC seat/position configurability (org-scoped)
+
+Problem statement already recorded as `docs/specs/018-governance-elections-polls/spec.md`
+ENH-009 — not repeated in full here. Summary: `ECPosition` is a fixed C# enum
+(`GHCAA.Domain/Enums.cs`), so the 15-seat GHC committee shape is compiled into the binary.
+`Lookups`/`LOOKUP_GROUPS.ECPosition` already moved the *display labels* out of code (see
+`SeedEcPositionLookup` migration), but the *set* of seats an institution runs is still fixed —
+another institution with a different EC structure needs a code change and redeploy to represent
+it, which is the same class of problem WP62 already solved for `MembershipType` via
+`membership-tiers.json` (label/policy layer over a fixed enum, not a string-key rewrite — see
+`session_area62_genericization_plan.md`, "enum int values fixed" listed there as an accepted
+non-breaking trap, not something every enum needs to escape).
+
+This spec applies the same pattern to `ECPosition`, not a bigger one:
+
+- **Backend.** A new org-scoped election-position config (reusing the `Lookups`/`OrgConfig`
+  mechanism, not a new table type): per organization, which `ECPosition` enum values are active,
+  their display order, and default `SeatCount`. `AdminElectionsController.Create`'s
+  `ParsePosition` free-text matching (ENH-009's other half) validates against this org's active
+  list instead of matching against every enum name regardless of org. A new
+  `GET /api/elections/positions` (or an addition to the existing `/api/config` payload) returns
+  the caller's org's active positions with labels and order, so clients build seat pickers from
+  config instead of assuming "always these 15."
+- **Not in scope.** Renaming the underlying enum values, or letting an org invent a position name
+  that isn't one of the enum's defined values — that still needs a code change, same as
+  `MembershipType`. Scoping it further than "which of the existing positions apply, in what
+  order, how many seats" would be a bigger structural change than this budget-capped pass covers,
+  and would break with the codebase's own established precedent for this exact kind of enum.
+- **Angular.** `admin/elections/admin-elections.ts`'s seat-creation UI and
+  `common/governance/governance.ts` (which per ENH-003 already duplicates the GHC position order
+  in two places) both build their position list from the new config endpoint instead of a
+  hardcoded array — fixing ENH-003 and ENH-009 with the same source-of-truth change.
+- **Flutter.** `election_management_screen.dart`'s seat-creation form and
+  `governance_registry_screen.dart` read the same config endpoint rather than a hardcoded list,
+  if either currently hardcodes one — verify against current code before assuming, since
+  `election_management_screen.dart` may already exist per `docs/specs/018-.../spec.md`'s FR-027
+  evidence row.
+- **Tests.** `GHCAA.Tests`: `ParsePosition` rejects a position outside the caller's org's active
+  list; the new positions endpoint returns the seeded GHC 15 for the GHC org config. Vitest: the
+  Angular seat-creation component builds its picker from the config response, not a literal
+  array. `flutter test`: the same for the Flutter seat-creation form, if it doesn't already read
+  from config.
+
 ## Non-functional requirements
 
 - No client calls a backend route that doesn't exist.
@@ -109,6 +152,10 @@ no Flutter admin election screen at all, despite `create`, `setPhase`, `freezeVo
 6. A Flutter admin can create an election, advance its phase, and declare results through the
    new admin screen.
 7. `dotnet test`, `npm run test:unit`, and `flutter test` all pass with no regressions.
+8. An org's active EC positions, their order, and default seat counts come from config for both
+   clients' seat-creation UI — no client hardcodes "the 15 GHC positions," and
+   `AdminElectionsController.ParsePosition` rejects a position not in the caller's org's active
+   list rather than matching against the full enum.
 
 ## Evidence
 

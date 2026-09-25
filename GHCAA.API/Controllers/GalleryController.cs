@@ -37,15 +37,14 @@ namespace GHCAA.API.Controllers
             var validation = _fileValidationService.ValidateFormFile(file, FileCategory.Image, 10 * 1024 * 1024);
             if (!validation.IsValid) return Problem(detail: validation.ErrorMessage, statusCode: StatusCodes.Status400BadRequest);
 
-            var memberIdClaim = this.CurrentMemberIdRaw();
-            if (!int.TryParse(memberIdClaim, out var memberId))
+            // User id, not member id: a system admin has no member link and would get a 401.
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var uploaderId))
             {
-                // Fallback to simpler user ID claim if needed, but Admin should have MemberId
                 return Unauthorized();
             }
 
             using var stream = file.OpenReadStream();
-            var path = await _fileStorage.SaveFileAsync(stream, file.FileName, memberId, Domain.Enums.FileUploadType.GalleryPhoto, cancellationToken);
+            var path = await _fileStorage.SaveFileAsync(stream, file.FileName, uploaderId,Domain.Enums.FileUploadType.GalleryPhoto, cancellationToken);
 
             // Return single path string or object
             return Ok(new { Path = path });

@@ -32,7 +32,8 @@ namespace GHCAA.Tests.Controllers
             _controller = new GalleryController(_galleryServiceMock.Object, _fileStorageMock.Object, _fileValidationServiceMock.Object);
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
-                new Claim("MemberId", "10")
+                new Claim("MemberId", "10"),
+                new Claim(ClaimTypes.NameIdentifier, "10")
             }, "TestAuthentication"));
 
             _controller.ControllerContext = new ControllerContext
@@ -206,6 +207,30 @@ namespace GHCAA.Tests.Controllers
             var result = await _controller.UploadPhoto(file, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task UploadPhoto_ReturnsOk_ForSystemAdminWithNoMemberLink()
+        {
+            _controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, "1") }, "TestAuthentication"));
+            var file = Mock.Of<IFormFile>(f => f.FileName == "photo.jpg" && f.Length == 1024);
+            _fileStorageMock.Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), "photo.jpg", 1, It.IsAny<GHCAA.Domain.Enums.FileUploadType>(), It.IsAny<CancellationToken>()))
+                            .ReturnsAsync("/uploads/gallery/photo.jpg");
+
+            var result = await _controller.UploadPhoto(file, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task UploadPhoto_ReturnsUnauthorized_WhenUserIdClaimMissing()
+        {
+            _controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("MemberId", "10") }, "TestAuthentication"));
+            var file = Mock.Of<IFormFile>(f => f.FileName == "photo.jpg" && f.Length == 1024);
+
+            var result = await _controller.UploadPhoto(file, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<UnauthorizedResult>());
         }
 
         [Test]

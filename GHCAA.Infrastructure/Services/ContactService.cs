@@ -4,6 +4,7 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Threading;
@@ -16,12 +17,14 @@ namespace GHCAA.Infrastructure.Services
         private readonly ApplicationDbContext _db;
         private readonly ICommunicationService _communication;
         private readonly ContactUsSettingsOptions _contactSettings;
+        private readonly ILogger<ContactService> _logger;
 
-        public ContactService(ApplicationDbContext db, ICommunicationService communication, IOptions<ContactUsSettingsOptions> contactSettings)
+        public ContactService(ApplicationDbContext db, ICommunicationService communication, IOptions<ContactUsSettingsOptions> contactSettings, ILogger<ContactService> logger)
         {
             _db = db;
             _communication = communication;
             _contactSettings = contactSettings.Value;
+            _logger = logger;
         }
 
         public async Task SubmitMessageAsync(ContactMessageDto dto, CancellationToken cancellationToken = default)
@@ -56,9 +59,10 @@ namespace GHCAA.Infrastructure.Services
                     {
                         await _communication.SendEmailByCodeAsync(email, "PORTAL_ENQUIRY", customVars, null, cancellationToken);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // Log failure but don't block submission
+                        // The message is already saved, so a mail failure must not fail the request.
+                        _logger.LogWarning(ex, "Contact enquiry {MessageId} could not be emailed to {Recipient}.", msg.Id, email);
                     }
                 }
             }

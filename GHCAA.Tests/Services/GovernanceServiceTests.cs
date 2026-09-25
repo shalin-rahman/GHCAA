@@ -400,6 +400,73 @@ namespace GHCAA.Tests.Services
             vote.IsFor.Should().BeTrue();
         }
 
+        [Category("FR-36")]
+        [Test]
+        public async Task VoteOnConstitutionAsync_ReturnsFalse_WhenConcurrentVoteWinsTheUniqueIndex()
+        {
+            var member = CreateMinimalMember("Racing Voter");
+            member.MembershipType = Enums.MembershipType.General;
+            _context.Members.Add(member);
+            var constitution = new Constitution
+            {
+                Version = "v6.0",
+                Content = "current",
+                ChangeSummary = "test",
+                EffectiveDate = DateTime.UtcNow,
+                IsActive = true
+            };
+            _context.Constitutions.Add(constitution);
+            await _context.SaveChangesAsync();
+
+            // The competing vote lands after the alreadyVoted check but before this save,
+            // which is the window two simultaneous requests share.
+            var connection = _context.Database.GetDbConnection();
+            var racer = new CompetingVoteInterceptor(connection, constitution.Id, member.Id);
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlite(connection)
+                .AddInterceptors(racer)
+                .Options;
+            await using var racingContext = new ApplicationDbContext(options);
+            var service = new GovernanceService(racingContext, _notificationService.Object);
+
+            var result = await service.VoteOnConstitutionAsync(constitution.Id, member.Id, isFor: true, comments: null);
+
+            result.Should().BeFalse();
+            racer.Fired.Should().BeTrue();
+            (await _context.AmendmentVotes.CountAsync(v => v.MemberId == member.Id)).Should().Be(1);
+        }
+
+        private sealed class CompetingVoteInterceptor : Microsoft.EntityFrameworkCore.Diagnostics.SaveChangesInterceptor
+        {
+            private readonly System.Data.Common.DbConnection _connection;
+            private readonly int _constitutionId;
+            private readonly int _memberId;
+            public bool Fired { get; private set; }
+
+            public CompetingVoteInterceptor(System.Data.Common.DbConnection connection, int constitutionId, int memberId)
+            {
+                _connection = connection;
+                _constitutionId = constitutionId;
+                _memberId = memberId;
+            }
+
+            public override async ValueTask<Microsoft.EntityFrameworkCore.Diagnostics.InterceptionResult<int>> SavingChangesAsync(
+                Microsoft.EntityFrameworkCore.Diagnostics.DbContextEventData eventData,
+                Microsoft.EntityFrameworkCore.Diagnostics.InterceptionResult<int> result,
+                CancellationToken cancellationToken = default)
+            {
+                if (!Fired)
+                {
+                    Fired = true;
+                    var options = new DbContextOptionsBuilder<ApplicationDbContext>().UseSqlite(_connection).Options;
+                    await using var other = new ApplicationDbContext(options);
+                    other.AmendmentVotes.Add(new AmendmentVote { ConstitutionId = _constitutionId, MemberId = _memberId, IsFor = false, VotedAt = DateTime.UtcNow });
+                    await other.SaveChangesAsync(cancellationToken);
+                }
+                return result;
+            }
+        }
+
         private Member CreateMinimalMember(string name)
         {
             return new Member

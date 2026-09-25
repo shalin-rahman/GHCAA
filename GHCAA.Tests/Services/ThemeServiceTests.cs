@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using FluentAssertions;
+using GHCAA.Application.DTOs;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Caching.Memory;
@@ -33,7 +34,7 @@ public class ThemeServiceTests : TestBase
     {
         var start = DateTime.UtcNow.Date;
         var end = start.AddDays(7);
-        var theme = new SpecialDayTheme
+        var theme = new SpecialDayThemeSaveDto
         {
             Title = "Victory Day",
             StartDate = start,
@@ -74,9 +75,8 @@ public class ThemeServiceTests : TestBase
 
         var newStart = DateTime.UtcNow.Date.AddDays(10);
         var newEnd = newStart.AddDays(5);
-        var update = new SpecialDayTheme
+        var update = new SpecialDayThemeSaveDto
         {
-            Id = existing.Id,
             Title = "New Theme",
             StartDate = newStart,
             EndDate = newEnd,
@@ -85,7 +85,9 @@ public class ThemeServiceTests : TestBase
             IsEnabled = true
         };
 
-        await _service.UpdateThemeAsync(update);
+        var updated = await _service.UpdateThemeAsync(existing.Id, update);
+
+        updated.Should().BeTrue();
 
         var saved = await _context.SpecialDayThemes.FindAsync(existing.Id);
         saved!.Title.Should().Be("New Theme");
@@ -94,6 +96,23 @@ public class ThemeServiceTests : TestBase
         saved.BackgroundColor.Should().Be("#111111");
         saved.TextColor.Should().Be("#eeeeee");
         saved.IsEnabled.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task UpdateThemeAsync_ReturnsFalse_WhenThemeMissing()
+    {
+        var updated = await _service.UpdateThemeAsync(999, new SpecialDayThemeSaveDto { Title = "X", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow });
+
+        updated.Should().BeFalse();
+    }
+
+    // 84.30: create ignores a posted Id so a client cannot pick the primary key.
+    [Test]
+    public async Task CreateThemeAsync_IgnoresPostedId()
+    {
+        var result = await _service.CreateThemeAsync(new SpecialDayThemeSaveDto { Id = 777, Title = "X", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow });
+
+        result.Id.Should().NotBe(777);
     }
 
     // 30.30: GetActiveThemeAsync must honour the theme's date window server-side (not just the

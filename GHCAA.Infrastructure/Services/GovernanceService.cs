@@ -321,7 +321,16 @@ namespace GHCAA.Infrastructure.Services
             };
 
             _db.AmendmentVotes.Add(vote);
-            await _db.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateException)
+            {
+                // A concurrent request for the same member won the unique index on
+                // (ConstitutionId, MemberId). Report it the same way as the alreadyVoted check.
+                return false;
+            }
             return true;
         }
 

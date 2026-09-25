@@ -56,7 +56,15 @@ namespace GHCAA.API.Controllers
             var memberId = GetMemberId();
             if (memberId == 0) return Unauthorized();
 
-            var topic = await _forumService.CreateTopicAsync(dto, memberId);
+            ForumTopicDto topic;
+            try
+            {
+                topic = await _forumService.CreateTopicAsync(dto, memberId);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
             return CreatedAtAction(nameof(GetTopic), new { topicId = topic.Id }, topic);
         }
 
@@ -70,8 +78,18 @@ namespace GHCAA.API.Controllers
             var memberId = GetMemberId();
             if (memberId == 0) return Unauthorized();
 
-            var post = await _forumService.CreatePostAsync(dto, memberId);
-            return Ok(post);
+            try
+            {
+                return Ok(await _forumService.CreatePostAsync(dto, memberId));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
         }
 
         [HttpDelete("topics/{topicId}")]

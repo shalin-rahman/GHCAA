@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using FluentAssertions;
 using GHCAA.Application.DTOs;
@@ -152,6 +155,71 @@ namespace GHCAA.Tests.Services
             var reloaded = await _context.ForumPosts.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == post.Id);
             reloaded.Should().NotBeNull();
             reloaded!.IsActive.Should().BeFalse();
+        }
+
+        // These used to be bare Exceptions, which ExceptionMiddleware turned into a 500.
+        [Category("FR-44")]
+        [Test]
+        public async Task CreateTopicAsync_ThrowsInvalidOperation_WhenCategoryInactive()
+        {
+            var member = await CreateAndSaveTestMemberAsync();
+            var category = new ForumCategory { Name = "Closed", SortOrder = 1, IsActive = false };
+            _context.ForumCategories.Add(category);
+            await _context.SaveChangesAsync();
+
+            Func<Task> act = () => _service.CreateTopicAsync(new CreateForumTopicDto { CategoryId = category.Id, Title = "T", Content = "C" }, member.Id);
+
+            await act.Should().ThrowAsync<InvalidOperationException>();
+        }
+
+        [Category("FR-44")]
+        [Test]
+        public async Task CreatePostAsync_ThrowsKeyNotFound_WhenTopicMissing()
+        {
+            var member = await CreateAndSaveTestMemberAsync();
+
+            Func<Task> act = () => _service.CreatePostAsync(new CreateForumPostDto { TopicId = 999, Content = "C" }, member.Id);
+
+            await act.Should().ThrowAsync<KeyNotFoundException>();
+        }
+
+        [Category("FR-44")]
+        [Test]
+        public async Task CreatePostAsync_ThrowsInvalidOperation_WhenTopicLocked()
+        {
+            var member = await CreateAndSaveTestMemberAsync();
+            var category = new ForumCategory { Name = "Open", SortOrder = 1, IsActive = true };
+            _context.ForumCategories.Add(category);
+            await _context.SaveChangesAsync();
+            var topic = new ForumTopic { CategoryId = category.Id, Title = "T", Content = "C", AuthorId = member.Id, CreatedAt = DateTime.UtcNow, IsActive = true, IsLocked = true };
+            _context.ForumTopics.Add(topic);
+            await _context.SaveChangesAsync();
+
+            Func<Task> act = () => _service.CreatePostAsync(new CreateForumPostDto { TopicId = topic.Id, Content = "C" }, member.Id);
+
+            await act.Should().ThrowAsync<InvalidOperationException>();
+        }
+
+        [Category("FR-44")]
+        [TestCase(0, "Title", "Body")]
+        [TestCase(1, "", "Body")]
+        [TestCase(1, "Title", "")]
+        public void CreateForumTopicDto_FailsValidation_OnMissingInput(int categoryId, string title, string content)
+        {
+            var dto = new CreateForumTopicDto { CategoryId = categoryId, Title = title, Content = content };
+
+            Validator.TryValidateObject(dto, new ValidationContext(dto), new List<ValidationResult>(), true).Should().BeFalse();
+        }
+
+        [Category("FR-44")]
+        [Test]
+        public void ForumDtos_FailValidation_WhenOverLength()
+        {
+            var topic = new CreateForumTopicDto { CategoryId = 1, Title = new string('x', 201), Content = "Body" };
+            var post = new CreateForumPostDto { TopicId = 1, Content = new string('x', 10001) };
+
+            Validator.TryValidateObject(topic, new ValidationContext(topic), new List<ValidationResult>(), true).Should().BeFalse();
+            Validator.TryValidateObject(post, new ValidationContext(post), new List<ValidationResult>(), true).Should().BeFalse();
         }
     }
 }

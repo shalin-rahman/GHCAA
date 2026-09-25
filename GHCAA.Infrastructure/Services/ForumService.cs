@@ -125,7 +125,7 @@ namespace GHCAA.Infrastructure.Services
         {
             var category = await _context.ForumCategories.FindAsync(dto.CategoryId);
             if (category == null || !category.IsActive)
-                throw new Exception("Invalid or inactive category.");
+                throw new InvalidOperationException("Invalid or inactive category.");
 
             var topic = new ForumTopic
             {
@@ -147,10 +147,10 @@ namespace GHCAA.Infrastructure.Services
         {
             var topic = await _context.ForumTopics.FindAsync(dto.TopicId);
             if (topic == null || !topic.IsActive)
-                throw new Exception("Topic not found or is inactive.");
+                throw new KeyNotFoundException("Topic not found or is inactive.");
 
             if (topic.IsLocked)
-                throw new Exception("Topic is locked and cannot receive new posts.");
+                throw new InvalidOperationException("Topic is locked and cannot receive new posts.");
 
             var post = new ForumPost
             {

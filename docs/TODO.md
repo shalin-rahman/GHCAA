@@ -647,7 +647,8 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
     - `SetPhaseAsync` allowed re-entering the current phase, which could re-trigger phase-transition side effects. Added a same-phase no-op guard.
     - Also folded in while touching these files: migrated the remaining raw `[Authorize(Roles = "Admin,SuperAdmin")]` attributes on `ElectionsController` to `[Authorize(Policy = Policies.AdminOnly)]` (exact same role set, matches the policy already used on `AdminElectionsController`).
     - Verified: `dotnet build` clean; `dotnet test --filter "FullyQualifiedName~ElectionServiceTests"` (4/4, including a new `CastVoteAsync_AllowsVotingForDifferentSeatsInTheSameElection` regression test).
-  - **37.1h Election module client redesign (web + mobile) [PLANNED, depends on 37.1g].** A follow-up review of the Angular and Flutter election clients (not covered by 37.1g, which was backend-only) found the Angular member voting page calls three routes that don't exist on the backend at all (`GET /elections/current`, `GET /elections/{id}/results`, `POST /elections/{id}/ballot`), so voting through the web UI is broken in production today. Also found: two parallel, half-wired Angular model/service families (an unused-but-correct per-seat DTO set alongside a used-but-wrong whole-election set); no in-flight guard on Angular admin `publish`/`close`; a Flutter provider that reaches into a service's private field and swallows all errors; no per-seat voted tracking on either client; no Flutter admin election screen despite most of the service methods existing unused; dead `createdBy`-in-body code on both clients mirroring the identity-spoofing pattern already fixed server-side in 37.1g. Full spec at `docs/specs/011-election-module-redesign/spec.md`. Staged: (1) spec — this item; (2) backend `GET /elections/current` addition; (3) Angular rebuild against the real per-seat API, reusing the campaigns module's `saving`-signal pattern; (4) Flutter fixes + new admin election screen modeled on `governance_registry_screen.dart`; (5) doc sync + full three-client test run. Sequenced to stay inside the user's stated weekly usage cap — stage 2 (Angular, the currently-broken client) is prioritized over stage 4 (Flutter admin screen), and this item's status will be updated per stage actually completed rather than left ambiguous if the session stops early.
+  - **37.1h Election module client redesign (web + mobile) [DONE 2026-09-25, depends on 37.1g].** Stages 1-4 shipped in commit `e7bafbfd` (`feat: election enngineering`): backend `GET /elections/current` + `GetCurrentAsync`, Angular model/service consolidation and admin/member/results rebuilds, new Flutter `screens/admin/election_management_screen.dart`, `ElectionServiceTests.cs`. Confirmed by diffing `e7bafbfd --stat` against this item's stage list and against `docs/specs/018-governance-elections-polls/spec.md`'s as-built FR evidence table (2026-09-25 audit) — not left as an assumption. A follow-up review of the Angular and Flutter election clients (not covered by 37.1g, which was backend-only) found the Angular member voting page calls three routes that don't exist on the backend at all (`GET /elections/current`, `GET /elections/{id}/results`, `POST /elections/{id}/ballot`), so voting through the web UI is broken in production today. Also found: two parallel, half-wired Angular model/service families (an unused-but-correct per-seat DTO set alongside a used-but-wrong whole-election set); no in-flight guard on Angular admin `publish`/`close`; a Flutter provider that reaches into a service's private field and swallows all errors; no per-seat voted tracking on either client; no Flutter admin election screen despite most of the service methods existing unused; dead `createdBy`-in-body code on both clients mirroring the identity-spoofing pattern already fixed server-side in 37.1g. Full spec at `docs/specs/011-election-module-redesign/spec.md`. Staged: (1) spec — this item; (2) backend `GET /elections/current` addition; (3) Angular rebuild against the real per-seat API, reusing the campaigns module's `saving`-signal pattern; (4) Flutter fixes + new admin election screen modeled on `governance_registry_screen.dart`; (5) doc sync + full three-client test run. Sequenced to stay inside the user's stated weekly usage cap — stage 2 (Angular, the currently-broken client) is prioritized over stage 4 (Flutter admin screen), and this item's status will be updated per stage actually completed rather than left ambiguous if the session stops early.
+    - **37.1h-1 EC positions must come from org config, not the 15-GHC assumption [PLANNED, unblocked — 37.1h stages 2-4 shipped in e7bafbfd].** User instruction 2026-09-25: the 15-position committee is a GHC fact, not a platform one — another institution's EC shape has to come from configuration, never be assumed fixed. This is the same gap independently found and recorded as ENH-009 in `docs/specs/018-governance-elections-polls/spec.md` (reverse-engineered as-built baseline, 2026-09-25): `ECPosition` display labels already moved to `Lookups` (`SeedEcPositionLookup` migration), but the *set* of seats is still a fixed enum, and `AdminElectionsController.ParsePosition` free-text-matches against every enum value regardless of org. Design (added to spec 011, not a new spec — see "EC seat/position configurability" section there): org-scoped active-position list (which enum values, order, default seat count) sourced from `Lookups`/`OrgConfig`, same pattern WP62 already used for `MembershipType` via `membership-tiers.json`; new `GET /api/elections/positions` (or an `/api/config` addition); both clients' seat-creation UI reads it instead of a hardcoded list, also closing ENH-003 (governance.ts's duplicated position-order array) with the same source-of-truth change. Explicitly not in scope: letting an org invent a position name outside the enum's defined values — that still needs a code change, consistent with the "enum int values fixed" trap already accepted for `MembershipType`. Sequenced after 37.1h's stages 2-4 (fixing the currently-broken production voting flow stays higher priority than this architectural gap) inside the same 80%-of-week budget cap; stops cleanly and is marked `deferred` here if the cap is reached first.
 
 37.2 [DONE] **Priority: P4.** Specified in
 `docs/specs/003-alumni-programs-and-verification/spec.md` Story 4.
@@ -1314,6 +1315,179 @@ whether removing the committed-migration-data blocker for white-label second-ins
 in scope, or whether white-label stays a single-institution profile-pack mechanism
 (`implementation-inventory.md` lines 135–136). No item in this Work Package should assume an answer
 until the project owner decides.
+
+84.8 [DONE 2026-09-25] **Priority: P2 | Depends on: none.** Write one as-built spec per domain, derived
+from code, in `docs/specs/012-*` to `docs/specs/020-*`. Each spec has user stories, testable FRs,
+an Evidence table mapping each FR to route, service, Angular file, Flutter file and test, a Gaps list,
+and an Enhancements list of modularisation, reuse and configuration findings. **Acceptance:** every
+controller in `GHCAA.API/Controllers` appears in exactly one domain spec, every Evidence path exists,
+and the FR count equals the Evidence row count in each spec.
+
+84.9 [TODO] **Priority: P2 | Depends on: 84.8.** Turn `docs/specs/001-platform-baseline/spec.md` into
+the index for the domain specs. Keep its cross-layer requirements, key entities and outcomes. Replace
+its ten stories with a table naming the domain spec that now owns each story, list specs 002 to 011,
+and add a roll-up of every domain spec's Enhancements items. **Acceptance:** each of the ten old
+stories links to one domain spec, and the roll-up count matches the Enhancements items across 012
+to 020.
+
+84.10 [TODO] **Priority: P1 | Depends on: none.** `RolesController.CreateRole` and `RemoveRole` carry
+no `[RequireStepUp]`, while every other account-changing action in that controller does
+(`GHCAA.API/Controllers/RolesController.cs` lines 81 and 97). Found while writing spec 012, the spec
+for membership, login and roles. **Acceptance:** both actions require step-up, or the spec records
+why they are exempt, and a controller test pins the choice.
+
+84.11 [TODO] **Priority: P1 | Depends on: none.** The mobile assistant never reaches the API with a
+query. `GHCAA.Mobile/lib/features/assistant/assistant_service.dart` line 14 posts `{'question': ...}`,
+but `AssistantQueryDto` in `GHCAA.API/Controllers/AssistantController.cs` binds `Query`, so every
+mobile request arrives empty and gets a 400. Found while writing spec 019, the assistant spec.
+**Acceptance:** mobile sends the field the API binds, and a mobile test pins the request body.
+
+84.12 [TODO] **Priority: P2 | Depends on: none.** `GHCAA.Infrastructure/Services/AssistantService.cs`
+lines 40 to 52 read a year and a sector from the query, but the `Where` filters that use them are
+commented out, so any query returns the first ten members in table order. **Acceptance:** the
+filters apply, or the dead parsing is removed and spec 019 says so, with a service test either way.
+
+84.13 [TODO] **Priority: P3 | Depends on: none.** `FinancialService.ProcessGatewayPaymentAsync` has
+no production caller (its own comment at `GHCAA.Infrastructure/Services/FinancialService.cs` line
+267 says so) and duplicates `PaymentCallbackOrchestrator`. Found while writing spec 015, the payments
+spec. **Acceptance:** the method is removed or wired in, and no gateway test loses coverage.
+
+84.14 [TODO] **Priority: P2 | Depends on: none.** `NagadGateway` is registered in DI but every
+`InitiatePaymentAsync` call fails with "coming soon" (`GHCAA.Infrastructure/Gateways/NagadGateway.cs`
+line 23), while Nagad can still be chosen from payment
+config. **Acceptance:** Nagad is hidden until built, or built, and spec 015 records which.
+
+84.15 [DONE 2026-09-26] **Priority: P2 | Depends on: none.** `GovernanceService.VoteOnConstitutionAsync`
+checks for a previous vote with a plain `AnyAsync` and no transaction. Election and poll votes use
+a Serializable transaction. The unique index in `AmendmentVoteConfiguration.cs` line 23 still stops
+a double count, but the losing request of a concurrent pair gets an unhandled `DbUpdateException`
+instead of the "already voted" reply. **Acceptance:** a concurrent second vote returns the same
+"already voted" result as a sequential one, with a test. Spec 018 ENH-001 has the detail.
+**Done:** the save now catches `DbUpdateException` and returns false, the same as the already-voted check. `VoteOnConstitutionAsync_ReturnsFalse_WhenConcurrentVoteWinsTheUniqueIndex` forces the race with a save interceptor and failed before the fix.
+
+84.16 [TODO] **Priority: P2 | Depends on: none.** Web and mobile drive different parts of the
+election engine. Web admin calls only `api/admin/elections`. Mobile calls only `api/elections` and
+has no seat, officer, publish, close or candidate calls. Neither client can run an election end to
+end. **Acceptance:** one client can take an election from draft to declared, or spec 011 (the
+election redesign) records which client owns which step. Spec 018 Gaps has the call lists.
+
+84.17 [TODO] **Priority: P3 | Depends on: none.** `CreateAdminElectionRequest.CreatedBy`
+(`ElectionDtos.cs` line 8) is never read, because `AdminElectionsController.Create` takes the member
+id from the auth claim. **Acceptance:** the field is removed from the DTO and both clients, or its
+use is documented.
+
+84.18 [TODO] **Priority: P2 | Depends on: 84.8.** Review each entity feature against what a
+standard association platform offers, using the domain specs 012 to 020 as the baseline. Each
+missing feature is listed with its domain, the users it serves and whether it fits an alumni
+association. **Acceptance:** a gap table in the 001 index, with each accepted gap raised as its own
+item.
+
+84.19 [TODO] **Priority: P2 | Depends on: 84.8, 84.18.** Meetings module, built as its own entity
+module. It covers a meeting, its invitees with RSVP, an ordered agenda, minutes, and action items.
+It is justified because EC governance runs on meetings and `governance.html` line 135 already tells
+members that minutes are archived, but no meeting or minutes entity exists in any layer. Admin and
+EC roles manage meetings from web and mobile. It reuses the invite and RSVP pattern from events
+where spec 014 (events, news, gallery and content) shows one. **Acceptance:** an approved spec under
+docs/specs before any code.
+
+84.20 [TODO] **Priority: P3 | Depends on: 84.19.** Tasks and notes. A task with an owner, due date
+and status is justified only as a meeting action item or an EC work item, so it lands inside or
+next to the meetings module rather than as a general task manager. Standalone notes add little
+beside meeting minutes. They stay out unless the 84.18 review finds a real user for them.
+**Acceptance:** the decision on a separate module or part of 84.19 is recorded in the 84.19 spec.
+
+84.21 [TODO] **Priority: P3 | Depends on: none.** `FamilyService.cs` holds a second family-link
+workflow (send, respond, cancel, list, unlink) beside `FamilyLinkService`. `FamilyLinkController`
+calls only `FamilyService.SearchByNameAsync`, and no other caller was found. **Acceptance:** search
+moves to `FamilyLinkService` and the unused methods go, or a caller is named. Spec 013 (profile,
+family and identity files) ENH-001 has the detail.
+
+84.22 [TODO] **Priority: P3 | Depends on: none.** `FamilyLinkService.GetFamilyAsync` hides a
+private family from admins too, because the admin override named in the comment at line 176 was
+never added. **Acceptance:** the admin rule is decided and, if allowed, built with a test.
+
+84.23 [TODO] **Priority: P3 | Depends on: none.** Two client gaps from spec 013. Mobile has no
+signature upload, although `POST api/profile/signature` exists. The backend PDF routes
+`id-card/pdf` and `certificate/pdf` have no caller in either client, since mobile builds its PDF
+itself in `digital_id_screen.dart`. **Acceptance:** mobile gets signature upload or the gap is
+accepted, and the PDF routes are either used or removed.
+
+84.24 [DONE 2026-09-26] **Priority: P2 | Depends on: none.** Mobile job edit
+(`job_details_screen.dart` line 150) sends only title and description to `PUT api/jobs/{id}`. The
+body binds to `CreateJobDto`, whose non-nullable `CompanyName`, `Location` and `Requirements` are
+implicitly required, so the edit should always come back 400. If validation ever lets it through,
+`JobHubService.UpdateJobAsync` would blank those fields instead. Not yet run to confirm.
+**Acceptance:** a mobile edit succeeds and keeps the other fields, with a test. Spec 016
+(networking and careers) Gaps has the detail.
+**Done:** the edit sheet now sends the loaded job back with title and description swapped in, through `buildJobUpdateBody` in `job_details_screen.dart`, with `notifyMembers` false. Covered by `test/job_update_body_test.dart`. The API route was already correct, so it is unchanged.
+
+84.25 [TODO] **Priority: P3 | Depends on: none.** Networking and careers test and validation gaps.
+`MentorshipController` has no controller tests, so its 401, 400 and 409 branches and the AdminOnly
+list are untested. `CreateJobDto` has no FluentValidation validator. **Acceptance:** both exist.
+
+84.26 [DONE 2026-09-26] **Priority: P2 | Depends on: none.** `GalleryController.UploadPhoto` is AdminOnly but
+reads the actor with `CurrentMemberIdRaw()` and returns 401 when it does not parse
+(`GalleryController.cs` lines 34 to 44). System-admin users have no Member link, so they cannot
+upload gallery photos. **Acceptance:** the upload resolves the actor by user id, as
+`NewsController.UploadImage` does, with a test for a member-less admin. Spec 014 (events, news,
+gallery and content) ENH-001 lists the same fallback in three other controllers.
+**Done:** `UploadPhoto` reads the user id claim, as `NewsController.UploadImage` does. `UploadPhoto_ReturnsOk_ForSystemAdminWithNoMemberLink` pins it.
+
+84.27 [TODO] **Priority: P2 | Depends on: none.** `ArchiveController` has no test file and no web
+admin screen, so archive moderation is reachable only from the API and mobile. **Acceptance:**
+controller tests exist and web admins can moderate archive items, or spec 014 records that mobile
+owns it.
+
+84.28 [TODO] **Priority: P3 | Depends on: none.** `POST api/news/upload-image` lets any member
+store 10 MB images with no quota, and the file is not tied to an article, so a draft abandoned
+after upload leaves the file behind. **Acceptance:** a per-member limit or cleanup rule, with a
+test.
+
+84.29 [TODO] **Priority: P3 | Depends on: none.** `AdminController` serves `GET stats` and
+`GET analytics` from the same `GetDashboardStatsAsync` call with the same arguments (lines 31 to
+43). `ActivityController` has no controller tests for any of its three routes. **Acceptance:** one
+route stays, or the second gets its own data, and activity routes have tests. Spec 020 (platform
+and operations) Gaps has the detail.
+
+84.30 [DONE 2026-09-26] **Priority: P3 | Depends on: none.** `ThemeController.CreateTheme` and `UpdateTheme`
+(lines 40 and 48) bind the `SpecialDayTheme` domain entity straight from the request body. The
+routes are AdminOnly, so the over-posting risk is low, but it breaks the DTO rule every other
+controller follows. **Acceptance:** a theme DTO in GHCAA.Application.
+**Done:** create and update bind `SpecialDayThemeSaveDto`. Create ignores a posted Id, and update loads the row and returns 404 when it is missing, where it used to throw a concurrency error. The web payload shape is unchanged.
+
+84.31 [TODO] **Priority: P3 | Depends on: none.** Two spec folders share number 010:
+`010-ad-hoc-reporting` and `010-election-engine-fixes`. **Acceptance:** one is renumbered and every
+link to it is updated, or the clash is accepted and noted in the 001 index.
+
+84.32 [DONE 2026-09-26] **Priority: P2 | Depends on: none.** `ForumService` throws a bare `Exception` for
+business-rule failures (bad category, missing or locked topic, lines 128 to 153). The error
+middleware turns that into a 500. **Acceptance:** these cases return 400 or 404 with the message,
+and a test covers a post to a locked topic.
+**Done:** the three input failures now throw `InvalidOperationException` or `KeyNotFoundException`, and `ForumController` maps them to 400 and 404. "Created but could not be retrieved" stays a 500 on purpose.
+
+84.33 [DONE 2026-09-26] **Priority: P3 | Depends on: none.** `CreateForumTopicDto` and `CreateForumPostDto`
+(ForumDtos.cs lines 46 to 58) have no length or non-empty rules, so an empty title or content is
+accepted. **Acceptance:** a validator rejects empty and over-length input, with tests.
+**Done:** DataAnnotations on both DTOs. Ids must be positive, Title is required up to 200 (the entity limit), and Content is required up to 10000. Content has no entity limit, so 10000 is a judgement call.
+
+84.34 [DONE 2026-09-26] **Priority: P3 | Depends on: none.** `ContactService.SubmitMessageAsync` swallows
+the notification-email failure in an empty catch (lines 59 to 62), though the comment says it
+logs it. **Acceptance:** the failure is logged as a warning and submission still succeeds.
+**Done:** the catch logs a warning with the message id and recipient. `ContactServiceTests` checks the message is still saved and the warning is written.
+
+84.35 [TODO] **Priority: P2 | Depends on: none.** The strict book build fails on 7 repository
+counts (run 2026-09-25). Chapters 4, 7 and 11 quote 299 commits and 88 work packages, and the tree
+gives 304 and 90, after Work Packages 89 and 90 were added. **Acceptance:** every figure `wbs.py`
+quotes is re-sourced with its date, not only the two that failed, and
+`build.py --pdf --strict` reports no count drift.
+
+84.36 [TODO] **Priority: P2 | Depends on: none.** FluentValidation validators are registered with
+`AddValidatorsFromAssemblyContaining`, but no controller, filter or service ever runs them, so
+rules such as those in `ElectionValidators` are only exercised by unit tests. Request validation
+that actually runs is DataAnnotations through `[ApiController]`. Found while fixing 84.33, the forum
+DTO validation. **Acceptance:** either wire the validators into the request pipeline, with a test
+that a bad request gets a 400 from a validator rule, or remove them and move any rule that matters
+onto the DTO.
 
 ---
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using GHCAA.Application.DTOs;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
@@ -37,7 +38,7 @@ namespace GHCAA.API.Controllers
 
         [Authorize(Policy = Constants.Policies.AdminOnly)]
         [HttpPost]
-        public async Task<ActionResult<SpecialDayTheme>> CreateTheme(SpecialDayTheme theme)
+        public async Task<ActionResult<SpecialDayTheme>> CreateTheme([FromBody] SpecialDayThemeSaveDto theme)
         {
             var created = await _themeService.CreateThemeAsync(theme);
             return CreatedAtAction(nameof(GetAllThemes), new { id = created.Id }, created);
@@ -45,11 +46,10 @@ namespace GHCAA.API.Controllers
 
         [Authorize(Policy = Constants.Policies.AdminOnly)]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTheme(int id, SpecialDayTheme theme)
+        public async Task<IActionResult> UpdateTheme(int id, [FromBody] SpecialDayThemeSaveDto theme)
         {
             if (id != theme.Id) return Problem(statusCode: StatusCodes.Status400BadRequest);
-            await _themeService.UpdateThemeAsync(theme);
-            return NoContent();
+            return await _themeService.UpdateThemeAsync(id, theme) ? NoContent() : NotFound();
         }
 
         [Authorize(Policy = Constants.Policies.AdminOnly)]

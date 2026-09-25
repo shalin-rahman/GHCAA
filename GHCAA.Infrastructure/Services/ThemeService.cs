@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GHCAA.Application.DTOs;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +14,9 @@ namespace GHCAA.Infrastructure.Services
     {
         Task<SpecialDayTheme?> GetActiveThemeAsync();
         Task<List<SpecialDayTheme>> GetAllThemesAsync();
-        Task<SpecialDayTheme> CreateThemeAsync(SpecialDayTheme theme);
-        Task UpdateThemeAsync(SpecialDayTheme theme);
+        Task<SpecialDayTheme> CreateThemeAsync(SpecialDayThemeSaveDto dto);
+        // False when no theme has this id.
+        Task<bool> UpdateThemeAsync(int id, SpecialDayThemeSaveDto dto);
         Task DeleteThemeAsync(int id);
     }
 
@@ -69,19 +71,40 @@ namespace GHCAA.Infrastructure.Services
             return await _context.SpecialDayThemes.OrderByDescending(t => t.StartDate).ToListAsync();
         }
 
-        public async Task<SpecialDayTheme> CreateThemeAsync(SpecialDayTheme theme)
+        public async Task<SpecialDayTheme> CreateThemeAsync(SpecialDayThemeSaveDto dto)
         {
             _cache.Remove(CacheKey); // Invalidate cache on change
+            var theme = new SpecialDayTheme();
+            Apply(dto, theme);
             _context.SpecialDayThemes.Add(theme);
             await _context.SaveChangesAsync();
             return theme;
         }
 
-        public async Task UpdateThemeAsync(SpecialDayTheme theme)
+        public async Task<bool> UpdateThemeAsync(int id, SpecialDayThemeSaveDto dto)
         {
+            var theme = await _context.SpecialDayThemes.FindAsync(id);
+            if (theme == null) return false;
+
             _cache.Remove(CacheKey); // Invalidate cache on change
-            _context.Entry(theme).State = EntityState.Modified;
+            Apply(dto, theme);
             await _context.SaveChangesAsync();
+            return true;
+        }
+
+        private static void Apply(SpecialDayThemeSaveDto dto, SpecialDayTheme theme)
+        {
+            theme.Title = dto.Title;
+            theme.StartDate = dto.StartDate;
+            theme.EndDate = dto.EndDate;
+            theme.BackgroundColor = dto.BackgroundColor;
+            theme.TextColor = dto.TextColor;
+            theme.AnnouncementText = dto.AnnouncementText ?? string.Empty;
+            theme.AnimationStyle = string.IsNullOrWhiteSpace(dto.AnimationStyle) ? "Fade" : dto.AnimationStyle;
+            theme.ImageUrl = dto.ImageUrl ?? string.Empty;
+            theme.SidebarColor = dto.SidebarColor ?? string.Empty;
+            theme.EnableGradientFading = dto.EnableGradientFading;
+            theme.IsEnabled = dto.IsEnabled;
         }
 
         public async Task DeleteThemeAsync(int id)

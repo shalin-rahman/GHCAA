@@ -147,7 +147,7 @@ class JobDetailsScreen extends ConsumerWidget {
                   setStateModal(() => saving = true);
                   try {
                     final dio = ref.read(dioProvider);
-                    await dio.put('/jobs/$jobId', data: {'title': titleCtrl.text, 'description': descCtrl.text});
+                    await dio.put('/jobs/$jobId', data: buildJobUpdateBody(job, titleCtrl.text, descCtrl.text));
                     ref.invalidate(jobDetailsProvider(jobId));
                     if (ctx.mounted) Navigator.pop(ctx);
                     if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Job posting updated.')));
@@ -190,3 +190,19 @@ class JobDetailsScreen extends ConsumerWidget {
     }
   }
 }
+
+// PUT api/jobs/{id} binds the full CreateJobDto, so a body with only the edited fields is
+// rejected with a 400 (CompanyName, Location and Requirements are required). Send the loaded
+// job back with the two edited fields swapped in.
+Map<String, dynamic> buildJobUpdateBody(Map<String, dynamic> job, String title, String description) => {
+      'title': title,
+      'companyName': job['companyName'],
+      'location': job['location'],
+      'description': description,
+      'requirements': job['requirements'],
+      'applicationEmail': job['applicationEmail'],
+      'applicationLink': job['applicationLink'],
+      'applicationDeadline': job['applicationDeadline'],
+      'jobCategory': job['jobCategory'],
+      'notifyMembers': false,
+    };

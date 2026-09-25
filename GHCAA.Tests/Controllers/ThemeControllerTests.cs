@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GHCAA.API.Controllers;
+using GHCAA.Application.DTOs;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,16 @@ namespace GHCAA.Tests.Controllers
             SidebarColor = "#2f3e46",
             EnableGradientFading = true,
             IsEnabled = true
+        };
+
+        private static SpecialDayThemeSaveDto MakeDto(int id = 1) => new SpecialDayThemeSaveDto
+        {
+            Id = id,
+            Title = "Eid Theme",
+            StartDate = DateTime.UtcNow.AddDays(-1),
+            EndDate = DateTime.UtcNow.AddDays(1),
+            BackgroundColor = "#1a2a3a",
+            TextColor = "#fdf51c"
         };
 
         [SetUp]
@@ -83,7 +94,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task CreateTheme_ReturnsCreatedWithNewTheme()
         {
-            var input = MakeTheme(0);
+            var input = MakeDto(0);
             var saved = MakeTheme(5);
             _themeServiceMock.Setup(s => s.CreateThemeAsync(input)).ReturnsAsync(saved);
 
@@ -98,8 +109,8 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task UpdateTheme_WithMatchingId_ReturnsNoContent()
         {
-            var theme = MakeTheme(3);
-            _themeServiceMock.Setup(s => s.UpdateThemeAsync(theme)).Returns(Task.CompletedTask);
+            var theme = MakeDto(3);
+            _themeServiceMock.Setup(s => s.UpdateThemeAsync(3, theme)).ReturnsAsync(true);
 
             var result = await _controller.UpdateTheme(3, theme);
 
@@ -107,9 +118,20 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
+        public async Task UpdateTheme_ReturnsNotFound_WhenThemeMissing()
+        {
+            var theme = MakeDto(4);
+            _themeServiceMock.Setup(s => s.UpdateThemeAsync(4, theme)).ReturnsAsync(false);
+
+            var result = await _controller.UpdateTheme(4, theme);
+
+            Assert.That(result, Is.InstanceOf<NotFoundResult>());
+        }
+
+        [Test]
         public async Task UpdateTheme_WithMismatchedId_ReturnsBadRequest()
         {
-            var theme = MakeTheme(3);
+            var theme = MakeDto(3);
 
             var result = await _controller.UpdateTheme(99, theme);
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace GHCAA.Application.DTOs
 {
@@ -45,15 +46,22 @@ namespace GHCAA.Application.DTOs
 
     public class CreateForumTopicDto
     {
+        [Range(1, int.MaxValue, ErrorMessage = "A category is required.")]
         public int CategoryId { get; set; }
+        // Matches ForumTopic.Title [MaxLength(200)].
+        [Required(AllowEmptyStrings = false), MaxLength(200, ErrorMessage = "Title must be 200 characters or fewer.")]
         public string Title { get; set; } = string.Empty;
+        [Required(AllowEmptyStrings = false), MaxLength(10000, ErrorMessage = "Content must be 10000 characters or fewer.")]
         public string Content { get; set; } = string.Empty;
     }
 
     public class CreateForumPostDto
     {
+        [Range(1, int.MaxValue, ErrorMessage = "A topic is required.")]
         public int TopicId { get; set; }
+        [Required(AllowEmptyStrings = false), MaxLength(10000, ErrorMessage = "Content must be 10000 characters or fewer.")]
         public string Content { get; set; } = string.Empty;
+        [Range(1, int.MaxValue)]
         public int? ParentPostId { get; set; }
     }
 }
