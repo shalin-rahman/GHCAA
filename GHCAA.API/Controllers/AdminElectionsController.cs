@@ -47,7 +47,7 @@ public sealed class AdminElectionsController(IElectionService service) : Control
 
             var parsed = ParsePosition(position.Title);
             if (parsed == ECPosition.None)
-                return BadRequest($"Position '{position.Title}' is not supported.");
+                return Problem(detail: $"Position '{position.Title}' is not supported.", statusCode: StatusCodes.Status400BadRequest);
 
             await service.AddSeatAsync(created.Id, new ElectionSeatRequestDto(parsed, Math.Max(1, position.Seats)), ct);
         }
@@ -62,7 +62,7 @@ public sealed class AdminElectionsController(IElectionService service) : Control
             ? await service.GetAdminElectionAsync(id, ct)
             : null;
 
-        return updated is null ? BadRequest("Election is not ready to publish.") : Ok(updated);
+        return updated is null ? Problem(detail: "Election is not ready to publish.", statusCode: StatusCodes.Status400BadRequest) : Ok(updated);
     }
 
     [HttpPost("{id:int}/close")]
@@ -72,7 +72,7 @@ public sealed class AdminElectionsController(IElectionService service) : Control
             ? await service.GetAdminElectionAsync(id, ct)
             : null;
 
-        return updated is null ? BadRequest("Election is not ready to close.") : Ok(updated);
+        return updated is null ? Problem(detail: "Election is not ready to close.", statusCode: StatusCodes.Status400BadRequest) : Ok(updated);
     }
 
     [HttpPost("{id:int}/candidates")]
@@ -80,7 +80,7 @@ public sealed class AdminElectionsController(IElectionService service) : Control
     {
         var (success, error, election) = await service.AddCandidateAsync(id, request, ct);
         if (!success)
-            return error == "duplicate-candidate" ? Conflict("This member is already a candidate for this seat.") : NotFound();
+            return error == "duplicate-candidate" ? Problem(detail: "This member is already a candidate for this seat.", statusCode: StatusCodes.Status409Conflict) : NotFound();
 
         return Ok(election);
     }
@@ -90,7 +90,7 @@ public sealed class AdminElectionsController(IElectionService service) : Control
     {
         var (success, error) = await service.RemoveCandidateAsync(id, candidateId, ct);
         if (!success)
-            return error == "has-votes" ? Conflict("This candidate already has votes recorded and cannot be removed.") : NotFound();
+            return error == "has-votes" ? Problem(detail: "This candidate already has votes recorded and cannot be removed.", statusCode: StatusCodes.Status409Conflict) : NotFound();
 
         return Ok();
     }

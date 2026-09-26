@@ -129,5 +129,20 @@ namespace GHCAA.Domain
             public const int RetentionDays = 90;
             public const int MaxPageSize = 100;
         }
+
+        // 84.45: machine-readable codes on ProblemDetails.Extensions["code"], for clients that need
+        // to branch on the failure rather than just show its text. Only failures a client actually
+        // reacts to get a code — everything else stays a plain Problem(detail:, statusCode:).
+        public static class ErrorCodes
+        {
+            public const string StepUpRequired = "STEP_UP_REQUIRED";
+            public const string AlreadyVoted = "ALREADY_VOTED";
+            public const string OtpInvalid = "OTP_INVALID";
+            public const string PaymentMethodDisabled = "PAYMENT_METHOD_DISABLED";
+            public const string PaymentFailed = "PAYMENT_FAILED";
+            public const string RateLimited = "RATE_LIMITED";
+            public const string Unauthenticated = "UNAUTHENTICATED";
+            public const string Forbidden = "FORBIDDEN";
+        }
     }
 }

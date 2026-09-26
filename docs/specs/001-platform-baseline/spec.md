@@ -63,6 +63,7 @@ repeat them.
 | [010](../010-ad-hoc-reporting/spec.md) | Ad-hoc reporting for admins |
 | [010](../010-election-engine-fixes/spec.md) | Election engine and post-ship fixes |
 | [011](../011-election-module-redesign/spec.md) | Election module client redesign |
+| [021](../021-pluggable-feature-modules/spec.md) | Pluggable feature modules (deferred, Work Package 91) |
 
 Two folders share the number 010. Tracker item 84.31 in docs/TODO.md decides whether one is
 renumbered.
@@ -77,7 +78,7 @@ The nine domain specs hold 55 ENH items: 6 at P1, 25 at P2 and 24 at P3. One of 
 | Payment options and fees hard-coded in a client | 012 ENH-004 (web registration fee of 500), 015 ENH-006 and ENH-007 (mobile event payment sheet lists two gateways) | Read the fee and the active gateway list from OrgConfig and PaymentConfig, as the mobile financial portal already does |
 | Membership rules hard-coded | 018 ENH-007 (voting membership types), 018 ENH-008 and ENH-009 (form codes, seat names) | Move them into OrgConfig so another organisation can change them |
 | Upload size limits written as literals | 013 ENH-004, 014 ENH-005, 020 ENH-005 | One upload policy in configuration, read by every upload route |
-| Listing, request and admin approval built again per entity | 014 ENH-002 (events and gallery), 015 ENH-003 and ENH-004 (campaigns and scholarships), 016 ENH-003 (mentorship), 017 ENH-002 | A shared module shape: entity, request, approval state, admin queue. Build it when the next module (84.19 meetings) needs it, not before |
+| Listing, request and admin approval built again per entity | 014 ENH-002 (events and gallery), 015 ENH-003 and ENH-004 (campaigns and scholarships), 016 ENH-003 (mentorship), 017 ENH-002 | A shared module shape: entity, request, approval state, admin queue. Build it when the next module (84.19 meetings) needs it, not before. Spec 021 records the later step of shipping modules as packages |
 | The same logic copied inside one domain | 013 ENH-001 (two family services), 018 ENH-002 and ENH-003, 020 ENH-001 (admin stats twice) | Delete the unused copy |
 | No shared client component | 018 ENH-006 (ballot), 017 ENH-004 | Build a shared Angular component and Flutter widget the first time a second screen needs it |
 

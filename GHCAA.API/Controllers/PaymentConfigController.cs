@@ -55,7 +55,7 @@ namespace GHCAA.API.Controllers
             var configs = await _paymentConfigService.GetAllAsync(cancellationToken);
 
             // Obfuscate secrets for non-superadmins
-            if (!User.IsInRole("SuperAdmin"))
+            if (!User.IsInRole(Constants.Roles.SuperAdmin))
             {
                 foreach (var config in configs)
                 {
@@ -84,7 +84,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> UpdateConfig(int id, [FromBody] PaymentConfiguration config, CancellationToken cancellationToken)
         {
             // Only SuperAdmin can update gateway secrets
-            var updated = await _paymentConfigService.UpdateAsync(id, config, allowSecretUpdate: User.IsInRole("SuperAdmin"), cancellationToken);
+            var updated = await _paymentConfigService.UpdateAsync(id, config, allowSecretUpdate: User.IsInRole(Constants.Roles.SuperAdmin), cancellationToken);
             if (updated == null) return NotFound();
             return Ok(MaskSecrets(updated));
         }

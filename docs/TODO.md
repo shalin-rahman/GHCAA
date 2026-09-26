@@ -253,8 +253,12 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
 - **84.1–84.3** — State-transition tables, a validation matrix, and endpoint contract tables, scoped
   from an external review of the 001 specification baseline. Drafted in
   `docs/specs/002-workflow-contracts-and-validation/`.
+- **84.41 / 84.42** — `Forbid(string)` on the receipt download returns a 500 instead of a 403, and the
+  mobile admin screens call step-up routes with no step-up flow. Both found by 84.5.
 
 ### P2 — MEDIUM (real, no urgency signal)
+- **84.43 / 84.44** — 18 string error bodies undo 82.4's single error shape, and no test checks the
+  policy attributes. Both found by 84.5.
 - **42.1–42.5** — Admin-manageable elections forms/docs, plan only.
 - **51.4–51.5** — Remaining file-storage hardening: broader regression coverage and admin-configurable
   settings.
@@ -282,8 +286,9 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
   payloads, the configuration and constants classifications, and the missing decision records and
   recovery runbook. (82.10, whether to generate clients from OpenAPI, is decided and closed: rejected.)
 - **61.3** — Drop the `Summary:`-style comment banner in `GHCAA.Tools/db_diag.cs` next time that file is touched.
-- **84.4 / 84.5** — Web/Mobile client parity table and the authorization-policy/error-code catalogs;
-  both depend on 84.3 existing first.
+- **84.4** — Web/Mobile client parity table; depends on 84.3 existing first. (84.5, the
+  authorization and error catalogs, is done.)
+- **84.45** — Role-name literals in `IsInRole` checks, and the open question of error codes and 429/401/403 bodies.
 - **84.6 / 84.7** — Election ballot workflow scope and white-label second-institution deployability —
   product decisions for the project owner, not documentation tasks.
 
@@ -1299,10 +1304,18 @@ cross-referencing each endpoint from 84.3 against actual client call sites, per 
 **Acceptance:** every endpoint row states whether Web calls it, whether Mobile calls it, and any
 observed difference in how each client reads the response.
 
-84.5 [TODO] **Priority: P3 | Depends on: 84.3.** Build the authorization-policy and problem-details
+84.5 [DONE 2026-09-26] **Priority: P3 | Depends on: 84.3.** Build the authorization-policy and problem-details
 error-code catalogs from source and existing tests, per spec.md Story 5. **Acceptance:** every
 `[Authorize]` policy/role combination in use is listed with its endpoints, and every problem-details
 error code actually returned is cataloged.
+Written to `docs/specs/002-workflow-contracts-and-validation/evidence/authorization-catalog.md` and
+`evidence/error-catalog.md` (T014 in that spec's tasks.md). A script read the route, policy, step-up and
+rate-limit attributes on every action and controller in `GHCAA.API/Controllers`. It found 334 routes,
+the same as the number of `[Http*]` attributes: 64 anonymous, 79 any signed-in user, 7 MemberOnly, 152
+AdminOnly and 32 SuperAdminOnly. 29 need step-up and 24 widen access with an in-body `IsInRole` check.
+No route relies on the fallback policy alone. The API returns one machine-readable error code,
+`STEP_UP_REQUIRED`; every other error is a status plus free text, so the error catalog lists those
+statuses and texts. The gaps found are 84.41 to 84.45.
 
 84.6 [DONE] **Priority: P3 | Depends on: none — product decision, not a documentation task.**
 Decision accepted: develop a persisted online election engine scoped by Work Package 37.1, retain static
@@ -1477,7 +1490,9 @@ logs it. **Acceptance:** the failure is logged as a warning and submission still
 
 84.35 [TODO] **Priority: P2 | Depends on: none.** The strict book build fails on 7 repository
 counts (run 2026-09-25). Chapters 4, 7 and 11 quote 299 commits and 88 work packages, and the tree
-gives 304 and 90, after Work Packages 89 and 90 were added. **Acceptance:** every figure `wbs.py`
+gives 304 and 90, after Work Packages 89 and 90 were added. On 2026-09-26 Work Package 91
+moved the tree to 306 commits and 91 work packages, and `wbs.py` now reports 61 of 91 work packages
+and 733 of 963 tasks as reactive. **Acceptance:** every figure `wbs.py`
 quotes is re-sourced with its date, not only the two that failed, and
 `build.py --pdf --strict` reports no count drift.
 
@@ -1513,6 +1528,67 @@ to tell how old its data was. `tracker_page.py` now stamps the build time under 
 Reload button. The button reloads the latest published copy only. A static page cannot read
 `docs/TODO.md`, so new tracker changes still need `tracker_page.py` run and the page republished.
 **Acceptance:** the page shows "Built from docs/TODO.md on <date>" and the button reloads it.
+
+84.41 [TODO] **Priority: P1 | Depends on: none.** `FinancialsController.DownloadReceipt` returns
+`Forbid("You can only download your own receipts.")` (`GHCAA.API/Controllers/FinancialsController.cs:102`).
+`Forbid(string)` takes an authentication scheme name, not a message. No scheme has that name, so ASP.NET
+throws and a member asking for someone else's receipt gets a 500, not a 403. The access is still
+refused, so no receipt leaks, but the error log fills and the client shows a server error. The unit
+test `DownloadReceipt_NonAdminDoesNotOwnPayment_ReturnsForbid` only checks the result type, so it
+passes. Found by 84.5. **Acceptance:** the action returns
+`Problem(detail: ..., statusCode: 403)`, and a test asserts the status code, not only the type.
+
+84.42 [TODO] **Priority: P1 | Depends on: none.** The mobile app has no step-up flow. Nothing in
+`GHCAA.Mobile/lib` reads `STEP_UP_REQUIRED` or calls `/auth/step-up`, yet the mobile admin screens call
+routes marked `[RequireStepUp]`: `POST /roles/users` and `POST /roles/assign`
+(`features/admin/roles_service.dart:27` and `:62`) and `POST /admin/elections`
+(`features/elections/election_service.dart:185`). Read from source only, not tried on a device: these
+actions should always fail on mobile with a 403. The web client handles it in
+`global-http.interceptor.ts:70`. Found by 84.5. **Acceptance:** confirm the failure on a device first.
+Then either add a mobile step-up prompt that verifies and retries, or hide the step-up actions on
+mobile. A test covers whichever is chosen.
+
+84.43 [TODO] **Priority: P2 | Depends on: none.** The single error shape set by 82.4 has slipped. 18
+controller results send a plain string body again: `BadRequest`, `Conflict`, `Unauthorized` and
+`NotFound` with a literal, plus `NotFound(ex.Message)` at `ForumController.cs:87`. They are in
+AdminElections, Elections, CredentialVerification, Events, Financials, Forum, Governance and
+Notification. The web client reads `detail` and then `title`, so these messages never reach the user.
+The three mobile readers also disagree on field order: `api_client.dart:128` reads detail, title,
+message; `api_exception.dart:21` reads message, title, detail; `auth_service.dart:153` reads message,
+error. Found by 84.5; see `evidence/error-catalog.md` sections 4 and 5. **Acceptance:** the grep in
+82.4's acceptance finds no string body, and the mobile readers read the same fields in the same order.
+
+84.44 [TODO] **Priority: P2 | Depends on: none.** No test checks the policy attributes. The controller
+tests call actions directly, so a dropped `[Authorize(Policy = ...)]` on an admin action would fall
+back to "any signed-in user" and every test would still pass. `DestructiveStepUpActionsTests` checks
+results but not that `[RequireStepUp]` is present. Found by 84.5. **Acceptance:** one reflection test
+reads every controller action's effective policy and step-up flag and compares them with an expected
+list, taken from `evidence/authorization-catalog.md`. Changing a policy then means changing that list
+on purpose.
+
+84.45 [TODO] **Priority: P3 | Depends on: none.** Role names are literal strings in the in-body
+`IsInRole("Admin")` and `IsInRole("SuperAdmin")` checks on 24 routes and in `NotificationHub.cs:21`
+and `:41`. `Constants.Roles` in `GHCAA.Domain/Constants.cs` already holds both names, and a renamed
+role would stop matching without any error. Also open, as a decision rather than a fix: error codes
+beyond `STEP_UP_REQUIRED` (for example a `code` extension on ProblemDetails), and bodies for 429 and
+the framework 401 and 403, which are empty today. Found by 84.5. **Acceptance:** a grep for
+`IsInRole("` in `GHCAA.API` finds nothing, and the error-code question has a recorded yes or no.
+
+84.46 [DONE 2026-09-27] **Priority: P0 | Depends on: none.** `Program.cs` attached the `Api` rate-limit
+policy to `MapControllers()` with `.RequireRateLimiting(RateLimitPolicies.Api)`. That convention adds
+its `EnableRateLimitingAttribute` to an endpoint's metadata after MVC's own attribute-derived metadata,
+and the rate limiter resolves the *last* matching attribute in that list — so the blanket 100/min `Api`
+policy silently overrode every controller's own `[EnableRateLimiting]` attribute app-wide. `Auth`,
+`Refresh`, `Registration`, `PasswordReset`, `ScholarshipStatus` and `CredentialVerification` were all
+dead policies; every route actually ran under the 100/min limit, including `/api/auth/login`, so
+brute-force throttling on login was 10x looser than configured. Found while writing the 429 test for
+84.45: 11 bogus logins against a supposed 10/min limit never tripped 429. Confirmed no controller
+opts into `Api` by attribute, so nothing depended on the old wiring. **Fix:** converted `Api` from a
+named policy to `options.GlobalLimiter` in `RateLimitingExtensions.cs`, which runs alongside an
+endpoint's own policy instead of replacing it, and removed the `.RequireRateLimiting()` call from
+`Program.cs`. **Acceptance:** `LoginRoute_AfterExceedingAuthLimit_Returns429WithRateLimitedCode` in
+`ErrorResponseShapeTests.cs` trips 429 on the 11th bogus login; full `dotnet test` run shows no
+regressions.
 
 ---
 
@@ -1758,4 +1834,48 @@ button — plus `core/services/report.service.ts` and an `ADMIN_REPORTS` block i
 90.5 [TODO] **Priority: P3 | Depends on: 90.2, 90.3.** NUnit tests (`GHCAA.Tests/Services/
 ReportServiceTests.cs`): filter whitelist rejection, saved-report round trip, export row count. Vitest
 spec for the report builder component. FR-tag both per `feedback_fr_nfr_tag_new_tests`.
+**Acceptance:** not started.
+
+# Work Package 91 — Pluggable feature modules (raised by user 2026-09-26: "i wanted features modules to be as reusable package/modules with relevant UI, API, and App ... these may not be developed for now but may be later these will be needed")
+<!-- wbs: component=C11 start=2026-09-26 end=2026-09-26 after=62 -->
+
+Deferred on purpose. Each feature today is spread across Domain, Infrastructure, API, Web and
+Mobile, so none of it can be installed in another app on its own. Spec
+`docs/specs/021-pluggable-feature-modules/spec.md` records the module shape (a .NET library, an
+Angular library and a Flutter package per feature), the host contracts a module may call, and the
+candidate order. The book's §6.2, where the modular monolith was chosen, still holds: a module is a
+package the monolith loads, not a separate service. Nothing past 91.2 starts until a real second app
+asks for a module, because building for an imagined consumer is the speculative abstraction §6.11.12
+trades away.
+
+91.1 [DONE 2026-09-26] **Priority: P3 | Depends on: none.** Write spec 021 and link it from spec 001's
+feature-spec table. **Acceptance:** spec exists with module shape, host contracts, candidates, FRs and
+the open decisions marked `[NEEDS CLARIFICATION]`.
+
+91.2 [DONE 2026-09-26] **Priority: P3 | Depends on: 91.1.** The four open decisions in spec 021 are
+answered by the user: in-repo project references (no package feed), a `modules/` folder in this repo,
+a private licence (own apps only), and a school or club portal as the first consumer. That makes the
+pilot one of polls, events with RSVP or gallery. **Acceptance:** answers recorded in spec 021 under
+"Decisions taken".
+
+91.3 [ONHOLD 2026-09-26, deferred until the school or club portal project starts] **Priority: P3 | Depends on: 91.2, WP62.** Move the host contracts into a small shared
+contracts package. Current user is an extension class in `GHCAA.API/Extensions/CurrentUserExtensions.cs`,
+not an interface, so it needs one. The others (`IOrgConfigService`, `INotificationService`,
+`IPaymentGatewayService`, `IFileStorageService`) already exist in `GHCAA.Application/Interfaces`.
+**Acceptance:** not started.
+
+91.4 [ONHOLD 2026-09-26, deferred until a second app needs a module] **Priority: P3 | Depends on: 91.3.** Extract the pilot module (polls, events or gallery,
+whichever the portal needs first) into three packages, load it back into GHCAA, and delete the in-repo copy. Migrations must
+not drop or recreate the existing tables, and must run on SQLite and PostgreSQL. The pilot's existing tests
+move with it so coverage does not drop.
+**Acceptance:** not started.
+
+91.5 [ONHOLD 2026-09-26, deferred until a second app needs a module] **Priority: P3 | Depends on: 91.4.** Prove the pilot in an empty host app with stub
+contracts (spec 021 SC-001), and add a module on/off flag to OrgConfig Features. A new Features flag
+needs the DTO, `BuildGhcaaDefaults()` and the golden snapshot changed together.
+**Acceptance:** not started.
+
+91.6 [ONHOLD 2026-09-26, deferred until a second app needs a module] **Priority: P3 | Depends on: 91.5.** Extract the remaining candidates one at a time,
+only when a consumer asks: gallery, events with RSVP, mentorship, campaigns and scholarships,
+elections, and meetings once 84.19 is built.
 **Acceptance:** not started.

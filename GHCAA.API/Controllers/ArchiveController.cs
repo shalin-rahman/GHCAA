@@ -65,7 +65,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> CreateItem([FromBody] ArchiveItemDto dto, CancellationToken ct)
         {
             if (!TryMemberId(out var memberId)) return Unauthorized();
-            if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
+            if (!User.IsInRole(Constants.Roles.Admin) && !User.IsInRole(Constants.Roles.SuperAdmin))
             {
                 dto.PublicationState = Enums.ArchivePublicationState.Draft;
                 dto.ModerationState = Enums.ArchiveModerationState.Pending;

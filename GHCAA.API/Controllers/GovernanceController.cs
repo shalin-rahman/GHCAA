@@ -31,7 +31,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> GetCurrentEC(CancellationToken cancellationToken)
         {
             var period = await _governanceService.GetActivePeriodAsync(cancellationToken);
-            if (period == null) return NotFound("No active EC period found.");
+            if (period == null) return Problem(detail: "No active EC period found.", statusCode: StatusCodes.Status404NotFound);
 
             var members = await _governanceService.GetCommitteeMembersAsync(period.Id, cancellationToken);
             return Ok(new { Period = period, Members = members });

@@ -39,7 +39,7 @@ namespace GHCAA.API.Controllers
                 return Problem(detail: "Invalid user session", statusCode: StatusCodes.Status400BadRequest);
             }
 
-            var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
+            var isAdmin = User.IsInRole(Constants.Roles.Admin) || User.IsInRole(Constants.Roles.SuperAdmin);
             var result = await _jobService.PostJobAsync(job, memberId, isAdmin, cancellationToken);
             return Ok(result);
         }
@@ -53,7 +53,7 @@ namespace GHCAA.API.Controllers
                 return Problem(detail: "Invalid user session", statusCode: StatusCodes.Status400BadRequest);
             }
 
-            var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
+            var isAdmin = User.IsInRole(Constants.Roles.Admin) || User.IsInRole(Constants.Roles.SuperAdmin);
             var success = await _jobService.UpdateJobAsync(id, job, memberId, isAdmin, cancellationToken);
 
             if (!success) return Forbid();
@@ -75,7 +75,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> DeactivateJob(int id, CancellationToken cancellationToken)
         {
             var memberIdClaim = this.CurrentMemberIdRaw();
-            var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
+            var isAdmin = User.IsInRole(Constants.Roles.Admin) || User.IsInRole(Constants.Roles.SuperAdmin);
 
             var job = await _jobService.GetJobByIdAsync(id, cancellationToken);
             if (job == null) return NotFound();

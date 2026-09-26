@@ -136,7 +136,7 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
-        public async Task DownloadReceipt_NonAdminDoesNotOwnPayment_ReturnsForbid()
+        public async Task DownloadReceipt_NonAdminDoesNotOwnPayment_Returns403Problem()
         {
             SetUserContext(_controller, memberId: 10, role: "Member");
             _financialServiceMock.Setup(x => x.GetPaymentOwnerMemberIdAsync(5, It.IsAny<CancellationToken>()))
@@ -144,7 +144,12 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.DownloadReceipt(5, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<ForbidResult>());
+            // 84.41: Forbid(string) used to throw at runtime because it takes a scheme name, not
+            // a message. The fix returns a ProblemDetails 403 instead.
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            var obj = (ObjectResult)result;
+            Assert.That(obj.StatusCode, Is.EqualTo(403));
+            Assert.That(((ProblemDetails)obj.Value!).Detail, Is.EqualTo("You can only download your own receipts."));
         }
 
         [Test]

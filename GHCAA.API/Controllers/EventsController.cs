@@ -87,7 +87,7 @@ namespace GHCAA.API.Controllers
 
             if (!memberId.HasValue && !isGuestFullfilled)
             {
-                return Unauthorized("A member account is required for this registration.");
+                return Problem(detail: "A member account is required for this registration.", statusCode: StatusCodes.Status401Unauthorized);
             }
 
             UploadedFileDto? receiptDto = null;
@@ -119,7 +119,7 @@ namespace GHCAA.API.Controllers
             var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
-                if (User.IsInRole("SuperAdmin"))
+                if (User.IsInRole(Constants.Roles.SuperAdmin))
                     return Ok(new List<object>());
 
                 return Problem(detail: "User is not associated with a member account.", statusCode: StatusCodes.Status400BadRequest);
@@ -136,7 +136,7 @@ namespace GHCAA.API.Controllers
             var registration = await _eventService.GetRegistrationByIdAsync(id, cancellationToken);
             if (registration == null) return NotFound();
 
-            bool isAdmin = User.IsInRole("Admin");
+            bool isAdmin = User.IsInRole(Constants.Roles.Admin);
             var memberIdClaim = this.CurrentMemberIdRaw();
 
             if (!isAdmin)

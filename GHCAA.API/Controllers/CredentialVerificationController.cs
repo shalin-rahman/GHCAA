@@ -29,7 +29,7 @@ namespace GHCAA.API.Controllers
         [HttpPost("{shortCode}/revoke"), Authorize(Policy = Policies.AdminOnly)]
         public async Task<IActionResult> Revoke(string shortCode, [FromBody] RevokeCredentialRequest request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(request.Reason)) return BadRequest("A revocation reason is required.");
+            if (string.IsNullOrWhiteSpace(request.Reason)) return Problem(detail: "A revocation reason is required.", statusCode: StatusCodes.Status400BadRequest);
             return await _idCardService.RevokeCredentialAsync(shortCode, request.Reason.Trim(), cancellationToken)
                 ? NoContent()
                 : NotFound();

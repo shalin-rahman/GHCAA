@@ -173,7 +173,13 @@ app.UseMiddleware<XsrfMiddleware>();
 app.UseAuthorization();
 
 // Endpoints
-app.MapControllers().RequireRateLimiting(RateLimitPolicies.Api);
+// The Api policy used to be attached here via RequireRateLimiting, but that convention runs
+// after MVC's own attribute metadata and wins the endpoint's policy lookup either way, so every
+// controller's own [EnableRateLimiting] (Auth, Refresh, Registration, PasswordReset,
+// ScholarshipStatus, CredentialVerification) was silently shadowed by the blanket 100/min limit.
+// It's now a GlobalLimiter in RateLimitingExtensions.cs, which runs alongside a route's own
+// policy instead of replacing it.
+app.MapControllers();
 app.MapHealthChecks("/health").AllowAnonymous();
 app.MapHub<GHCAA.API.Hubs.ChatHub>("/api/hubs/chat");
 app.MapHub<GHCAA.API.Hubs.NotificationHub>("/api/hubs/notifications");

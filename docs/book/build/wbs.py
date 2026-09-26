@@ -127,7 +127,7 @@ CODE = [
       "GHCAA.Infrastructure/Services/ForumService.cs",
       "GHCAA.Infrastructure/Services/ChatService.cs",
       "GHCAA.Infrastructure/Services/MentorshipService.cs"], ["C3"]),
-    ("C11", "Configuration and white-label", ["28", "62"],
+    ("C11", "Configuration and white-label", ["28", "62", "91"],
      ["GHCAA.API/Controllers/OrgConfigController.cs",
       "GHCAA.API/Controllers/ThemeController.cs",
       "GHCAA.Infrastructure/Services/OrgConfigService.cs",

@@ -211,7 +211,7 @@ namespace GHCAA.API.Controllers
                           ?? (await _galleryService.GetMemberAlbumsAsync(memberId, cancellationToken)).FirstOrDefault(g => g.Id == id);
             if (gallery == null) return NotFound();
 
-            var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
+            var isAdmin = User.IsInRole(Constants.Roles.Admin) || User.IsInRole(Constants.Roles.SuperAdmin);
             if (gallery.OwnerMemberId != memberId && !isAdmin) return Forbid();
 
             var validation = _fileValidationService.ValidateFormFile(file, FileCategory.Image, 10 * 1024 * 1024);

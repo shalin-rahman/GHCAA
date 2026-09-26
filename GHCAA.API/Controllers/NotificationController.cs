@@ -34,7 +34,7 @@ namespace GHCAA.API.Controllers
                 return Unauthorized();
 
             if (string.IsNullOrWhiteSpace(dto.Token))
-                return BadRequest("Token is required.");
+                return Problem(detail: "Token is required.", statusCode: StatusCodes.Status400BadRequest);
 
             var updated = await _deviceTokenService.RegisterTokenAsync(memberId, dto, cancellationToken);
             if (!updated)

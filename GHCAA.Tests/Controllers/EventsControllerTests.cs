@@ -80,6 +80,21 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
+        public async Task RegisterForEventJson_NoMemberAndNotGuest_Returns401Problem()
+        {
+            SetUserContext(_controller, null, "Member");
+            var dto = new RegisterForEventDto { EventId = 1, PaymentReference = "123" };
+
+            var result = await _controller.RegisterForEventJson(dto, CancellationToken.None);
+
+            var obj = result as ObjectResult;
+            Assert.That(obj, Is.Not.Null);
+            Assert.That(obj!.StatusCode, Is.EqualTo(401));
+            Assert.That(((ProblemDetails)obj.Value!).Detail, Is.EqualTo("A member account is required for this registration."));
+            _eventServiceMock.Verify(x => x.RegisterForEventAsync(It.IsAny<RegisterForEventDto>(), It.IsAny<int>(), It.IsAny<UploadedFileDto>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Test]
         public async Task GetMyRegistrations_ReturnsOk()
         {
             _eventServiceMock.Setup(x => x.GetRegistrationsByMemberAsync(10, It.IsAny<CancellationToken>()))

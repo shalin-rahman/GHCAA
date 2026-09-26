@@ -47,7 +47,7 @@ public sealed class ElectionsController(
     [Authorize(Policy = Policies.AdminOnly)]
     [GHCAA.API.Filters.RequireStepUp]
     public async Task<IActionResult> SetPhase(int id, [FromBody] ElectionPhase phase, CancellationToken ct)
-        => await service.SetPhaseAsync(id, phase, ct) ? Ok() : BadRequest("Invalid phase transition.");
+        => await service.SetPhaseAsync(id, phase, ct) ? Ok() : Problem(detail: "Invalid phase transition.", statusCode: StatusCodes.Status400BadRequest);
 
     /// <summary>FR-37.1a: adds a seat to an election.</summary>
     [HttpPost("{id:int}/seats")]
@@ -61,7 +61,7 @@ public sealed class ElectionsController(
     [Authorize(Policy = Policies.AdminOnly)]
     [GHCAA.API.Filters.RequireStepUp]
     public async Task<IActionResult> AssignOfficer(int id, ElectionOfficerDto request, CancellationToken ct)
-        => await service.AssignOfficerAsync(id, request, ct) ? Ok() : Conflict("Officer assignment already exists or member is inactive.");
+        => await service.AssignOfficerAsync(id, request, ct) ? Ok() : Problem(detail: "Officer assignment already exists or member is inactive.", statusCode: StatusCodes.Status409Conflict);
 
     /// <summary>FR-37.1a: freezes the auditable voter-roll snapshot.</summary>
     [HttpPost("{id:int}/voter-roll/freeze")]
@@ -110,7 +110,7 @@ public sealed class ElectionsController(
     public async Task<IActionResult> Vote(int id, CastVoteDto request, CancellationToken ct)
     {
         var claim = this.CurrentMemberIdRaw();
-        return int.TryParse(claim, out var memberId) && await service.CastVoteAsync(id, memberId, request, ct) ? Ok() : BadRequest("Vote could not be recorded.");
+        return int.TryParse(claim, out var memberId) && await service.CastVoteAsync(id, memberId, request, ct) ? Ok() : Problem(detail: "Vote could not be recorded.", statusCode: StatusCodes.Status400BadRequest);
     }
 
     /// <summary>FR-37.1d: counts accepted nominations after polling closes.</summary>
@@ -123,7 +123,7 @@ public sealed class ElectionsController(
     [HttpPost("{id:int}/declare")]
     [Authorize(Policy = Policies.AdminOnly)]
     [GHCAA.API.Filters.RequireStepUp]
-    public async Task<IActionResult> Declare(int id, CancellationToken ct) => await service.DeclareAsync(id, ct) ? Ok() : BadRequest("Election is not ready for declaration.");
+    public async Task<IActionResult> Declare(int id, CancellationToken ct) => await service.DeclareAsync(id, ct) ? Ok() : Problem(detail: "Election is not ready for declaration.", statusCode: StatusCodes.Status400BadRequest);
 
     /// <summary>FR-37.1e: generates a completed official election form from persisted records.</summary>
     [HttpGet("{id:int}/documents/{formCode}")]

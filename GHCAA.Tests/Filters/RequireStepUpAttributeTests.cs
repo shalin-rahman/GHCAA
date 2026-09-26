@@ -128,9 +128,8 @@ public class RequireStepUpAttributeTests
         await new RequireStepUpAttribute().OnActionExecutionAsync(context, () =>
             Task.FromResult<ActionExecutedContext>(null!));
 
-        var payload = context.Result.Should().BeOfType<ObjectResult>().Subject.Value;
-        payload.Should().NotBeNull();
-        payload!.GetType().GetProperty("Code")!.GetValue(payload)
-            .Should().Be(RequireStepUpAttribute.ErrorCode);
+        var payload = context.Result.Should().BeOfType<ObjectResult>().Subject.Value
+            .Should().BeOfType<ProblemDetails>().Subject;
+        payload.Extensions["code"].Should().Be(RequireStepUpAttribute.ErrorCode);
     }
 }

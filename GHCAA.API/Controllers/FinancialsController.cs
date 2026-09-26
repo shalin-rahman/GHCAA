@@ -38,7 +38,7 @@ namespace GHCAA.API.Controllers
             var memberIdClaim = this.CurrentMemberIdRaw();
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
-                if (User.IsInRole("SuperAdmin"))
+                if (User.IsInRole(Constants.Roles.SuperAdmin))
                     return Ok(new List<GHCAA.Application.DTOs.PaymentHistoryDto>());
 
                 return Problem(detail: "Invalid user session", statusCode: StatusCodes.Status400BadRequest);
@@ -89,17 +89,19 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> DownloadReceipt(int paymentId, CancellationToken cancellationToken)
         {
             // Security check: If not admin, verify ownership
-            if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
+            if (!User.IsInRole(Constants.Roles.Admin) && !User.IsInRole(Constants.Roles.SuperAdmin))
             {
                 var memberIdClaim = this.CurrentMemberIdRaw();
                 if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
                 {
-                    return Unauthorized("Invalid session.");
+                    return Problem(detail: "Invalid session.", statusCode: StatusCodes.Status401Unauthorized);
                 }
 
                 var ownerMemberId = await _financialService.GetPaymentOwnerMemberIdAsync(paymentId, cancellationToken);
                 if (ownerMemberId == null) return NotFound();
-                if (ownerMemberId != memberId) return Forbid("You can only download your own receipts.");
+                // Forbid(string) treats its argument as an auth scheme name, not a message, and
+                // throws at runtime when no such scheme is registered (84.41).
+                if (ownerMemberId != memberId) return Problem(detail: "You can only download your own receipts.", statusCode: StatusCodes.Status403Forbidden);
             }
 
             var pdfBytes = await _financialService.GenerateTaxReceiptAsync(paymentId, cancellationToken);
@@ -113,7 +115,7 @@ namespace GHCAA.API.Controllers
             int memberId;
             if (memberIdClaim == null || !int.TryParse(memberIdClaim, out memberId))
             {
-                if (User.IsInRole("SuperAdmin"))
+                if (User.IsInRole(Constants.Roles.SuperAdmin))
                     return Ok(new List<object>());
 
                 // 82.32: was `int.Parse(...NameIdentifier)!.Value`, which crashed with a 500 for
@@ -123,7 +125,7 @@ namespace GHCAA.API.Controllers
                 // it is reached routinely, not only on a malformed token.
                 var userIdClaim = this.CurrentUserIdRaw();
                 if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
-                    return Unauthorized("Invalid session.");
+                    return Problem(detail: "Invalid session.", statusCode: StatusCodes.Status401Unauthorized);
 
                 memberId = await _financialService.GetMemberIdForUserAsync(userId, cancellationToken) ?? 0;
             }
@@ -180,7 +182,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> GetMembershipHistory(int memberId, CancellationToken cancellationToken)
         {
             // If not admin, can only see own history
-            if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
+            if (!User.IsInRole(Constants.Roles.Admin) && !User.IsInRole(Constants.Roles.SuperAdmin))
             {
                 var myMemberId = this.CurrentMemberIdRaw();
                 if (myMemberId != memberId.ToString()) return Forbid();

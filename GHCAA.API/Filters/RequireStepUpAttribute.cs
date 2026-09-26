@@ -1,4 +1,6 @@
+using GHCAA.API.Extensions;
 using GHCAA.Application.Security;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
@@ -9,12 +11,13 @@ namespace GHCAA.API.Filters
     /// 7.13: Requires a recent OTP step-up on top of the caller's normal role authorization.
     /// Applied to destructive/financial/identity admin actions so a stolen or left-open admin
     /// session cannot execute them without access to the account's email inbox.
-    /// Returns 403 with Code = STEP_UP_REQUIRED, which the Angular interceptor uses to prompt.
+    /// Returns 403 as ProblemDetails with Extensions["code"] = STEP_UP_REQUIRED, which the
+    /// Angular interceptor and the mobile client both key off to prompt for the code.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public sealed class RequireStepUpAttribute : Attribute, IAsyncActionFilter
     {
-        public const string ErrorCode = "STEP_UP_REQUIRED";
+        public const string ErrorCode = Constants.ErrorCodes.StepUpRequired;
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
@@ -41,6 +44,9 @@ namespace GHCAA.API.Filters
         }
 
         private static ObjectResult Denied(string message) =>
-            new(new { Code = ErrorCode, Message = message }) { StatusCode = StatusCodes.Status403Forbidden };
+            new(ProblemExtensions.BuildProblemDetails(ErrorCode, message, StatusCodes.Status403Forbidden))
+            {
+                StatusCode = StatusCodes.Status403Forbidden
+            };
     }
 }

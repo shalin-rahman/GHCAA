@@ -41,5 +41,20 @@ namespace GHCAA.Tests.Controllers
             Assert.That(await controller.Verify("short", CancellationToken.None), Is.TypeOf<NotFoundResult>());
             service.Verify(x => x.VerifyCredentialAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
         }
+
+        [Test]
+        public async Task Revoke_MissingReason_Returns400Problem()
+        {
+            var service = new Mock<IIDCardService>();
+            var controller = new CredentialVerificationController(service.Object);
+
+            var result = await controller.Revoke("ABCDEFG234", new RevokeCredentialRequest { Reason = "  " }, CancellationToken.None);
+
+            var obj = result as ObjectResult;
+            Assert.That(obj, Is.Not.Null);
+            Assert.That(obj!.StatusCode, Is.EqualTo(400));
+            Assert.That(((ProblemDetails)obj.Value!).Detail, Is.EqualTo("A revocation reason is required."));
+            service.Verify(x => x.RevokeCredentialAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
     }
 }

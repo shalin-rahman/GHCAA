@@ -67,8 +67,10 @@ These tasks do not authorize application changes.
 
 - [ ] T013 Cross-reference each endpoint against Web and Mobile call sites to
   build the client parity table.
-- [ ] T014 Build the authorization-policy catalog and the problem-details
-  error-code catalog from source and existing tests.
+- [x] T014 Build the authorization-policy catalog and the problem-details
+  error-code catalog from source and existing tests. Done 2026-09-26:
+  [evidence/authorization-catalog.md](./evidence/authorization-catalog.md) and
+  [evidence/error-catalog.md](./evidence/error-catalog.md).
 
 ## Phase 5: Verification
 

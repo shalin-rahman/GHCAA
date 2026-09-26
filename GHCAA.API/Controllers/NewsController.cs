@@ -116,7 +116,7 @@ namespace GHCAA.API.Controllers
             if (!int.TryParse(authorIdClaim, out var authorId)) return Unauthorized();
 
             // Ensure status is Pending if submitted by member, or Draft if requested
-            if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
+            if (!User.IsInRole(Constants.Roles.Admin) && !User.IsInRole(Constants.Roles.SuperAdmin))
             {
                 if (dto.PostType == Enums.PostType.Notice)
                     return Forbid();

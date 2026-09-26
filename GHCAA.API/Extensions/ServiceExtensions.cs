@@ -3,6 +3,7 @@ using GHCAA.Application.Security;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
@@ -63,6 +64,46 @@ namespace GHCAA.API.Extensions
                         }
 
                         return Task.CompletedTask;
+                    },
+
+                    // 84.45: a missing/expired token used to fall through to the default
+                    // challenge handler, which writes an empty 401 body. Give it the same
+                    // ProblemDetails+code shape as the rest of the API.
+                    OnChallenge = async context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/problem+json";
+
+                        var problemDetailsService = context.HttpContext.RequestServices
+                            .GetRequiredService<IProblemDetailsService>();
+                        await problemDetailsService.WriteAsync(new ProblemDetailsContext
+                        {
+                            HttpContext = context.HttpContext,
+                            ProblemDetails = ProblemExtensions.BuildProblemDetails(
+                                Constants.ErrorCodes.Unauthenticated,
+                                "Authentication is required to access this resource.",
+                                StatusCodes.Status401Unauthorized)
+                        });
+                    },
+
+                    // Fires when an authenticated user fails a role/policy check — same empty-body
+                    // gap as OnChallenge above.
+                    OnForbidden = async context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        context.Response.ContentType = "application/problem+json";
+
+                        var problemDetailsService = context.HttpContext.RequestServices
+                            .GetRequiredService<IProblemDetailsService>();
+                        await problemDetailsService.WriteAsync(new ProblemDetailsContext
+                        {
+                            HttpContext = context.HttpContext,
+                            ProblemDetails = ProblemExtensions.BuildProblemDetails(
+                                Constants.ErrorCodes.Forbidden,
+                                "You do not have permission to access this resource.",
+                                StatusCodes.Status403Forbidden)
+                        });
                     }
                 };
             });

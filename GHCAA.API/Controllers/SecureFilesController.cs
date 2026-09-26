@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using GHCAA.Application.Interfaces;
 using GHCAA.Application.Security;
 using GHCAA.API.Extensions;
+using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
 {
@@ -29,7 +30,7 @@ namespace GHCAA.API.Controllers
             var normalizedPath = filePath.TrimStart('/');
 
             // Check if user is SuperAdmin or Admin
-            bool isAdmin = User.IsInRole("SuperAdmin") || User.IsInRole("Admin");
+            bool isAdmin = User.IsInRole(Constants.Roles.SuperAdmin) || User.IsInRole(Constants.Roles.Admin);
 
             // Find the file in the database to get the owner
             var fileUpload = await _fileUploads.GetByFilePathAsync(normalizedPath, cancellationToken);

@@ -1,3 +1,4 @@
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
@@ -18,7 +19,7 @@ namespace GHCAA.API.Hubs
             }
 
             // Join specialized groups based on role
-            if (Context.User?.IsInRole("Admin") == true || Context.User?.IsInRole("SuperAdmin") == true)
+            if (Context.User?.IsInRole(Constants.Roles.Admin) == true || Context.User?.IsInRole(Constants.Roles.SuperAdmin) == true)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, "Admins");
             }
@@ -38,7 +39,7 @@ namespace GHCAA.API.Hubs
 
         public async Task SendGeneralNotice(string title, string content)
         {
-            if (Context.User?.IsInRole("Admin") == true || Context.User?.IsInRole("SuperAdmin") == true)
+            if (Context.User?.IsInRole(Constants.Roles.Admin) == true || Context.User?.IsInRole(Constants.Roles.SuperAdmin) == true)
             {
                 await Clients.All.SendAsync("ReceiveNotice", new { Title = title, Content = content, Timestamp = System.DateTime.UtcNow });
             }

@@ -1,6 +1,7 @@
 using System.Threading.RateLimiting;
 using GHCAA.Domain;
 using static GHCAA.Domain.Constants;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace GHCAA.API.Extensions
@@ -15,6 +16,24 @@ namespace GHCAA.API.Extensions
             services.AddRateLimiter(options =>
             {
                 options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+                // 84.45: a rejected request used to get an empty 429 body. Give it the same
+                // ProblemDetails+code shape as the rest of the API.
+                options.OnRejected = async (context, cancellationToken) =>
+                {
+                    context.HttpContext.Response.ContentType = "application/problem+json";
+
+                    var problemDetailsService = context.HttpContext.RequestServices
+                        .GetRequiredService<IProblemDetailsService>();
+                    await problemDetailsService.WriteAsync(new ProblemDetailsContext
+                    {
+                        HttpContext = context.HttpContext,
+                        ProblemDetails = ProblemExtensions.BuildProblemDetails(
+                            Constants.ErrorCodes.RateLimited,
+                            "Too many requests. Please try again later.",
+                            StatusCodes.Status429TooManyRequests)
+                    });
+                };
 
                 // SECURITY AUDIT (2026-08-29): Relaxed limits should only depend on Development,
                 // never on ASP_SEED_PROFILE alone.
@@ -77,27 +96,46 @@ namespace GHCAA.API.Extensions
                         PermitLimit = isTestEnv ? 1000 : 10,
                         QueueLimit = 0
                     });
+                });
 
-                    options.AddPolicy<string>(RateLimitPolicies.CredentialVerification, httpContext =>
+                // This was nested inside the ScholarshipStatus lambda above (after its return, so
+                // dead code — CS0162 flagged it and CredentialVerificationController's
+                // [EnableRateLimiting] was pointing at a policy that never got registered, which
+                // throws at request time). Pulled out to its own top-level AddPolicy call.
+                options.AddPolicy<string>(RateLimitPolicies.CredentialVerification, httpContext =>
+                {
+                    var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                    var key = isTestEnv ? "__test__" : ip;
+                    return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
                     {
-                        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-                        var key = isTestEnv ? "__test__" : ip;
-                        return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
-                        {
-                            Window = TimeSpan.FromMinutes(15),
-                            PermitLimit = isTestEnv ? 1000 : 30,
-                            QueueLimit = 0
-                        });
+                        Window = TimeSpan.FromMinutes(15),
+                        PermitLimit = isTestEnv ? 1000 : 30,
+                        QueueLimit = 0
                     });
                 });
 
-                // General API Policy: (100 requests per 1 minute)
-                options.AddFixedWindowLimiter(RateLimitPolicies.Api, opt =>
+                // General API Policy: (100 requests per 1 minute), applied to every request as a
+                // GlobalLimiter rather than a named policy attached via RequireRateLimiting on
+                // MapControllers(). That attachment used to sit in Program.cs as endpoint metadata,
+                // and ASP.NET Core's rate limiter resolves the *last* EnableRateLimitingAttribute
+                // in an endpoint's metadata list — since RequireRateLimiting's convention runs after
+                // MVC's own attribute-derived metadata, it silently won every time, so the six
+                // narrower [EnableRateLimiting] policies below it (Auth, Refresh, Registration,
+                // PasswordReset, ScholarshipStatus, CredentialVerification) never actually applied;
+                // every route ran under this 100/min limit instead. A GlobalLimiter runs alongside
+                // whatever named policy an endpoint declares rather than replacing it, so both this
+                // baseline and a route's own tighter policy apply together.
+                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
                 {
-                    opt.Window = TimeSpan.FromMinutes(1);
-                    opt.PermitLimit = isTestEnv ? 10000 : 100;
-                    opt.QueueLimit = 2;
-                    opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                    var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                    var key = isTestEnv ? "__test__" : ip;
+                    return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+                    {
+                        Window = TimeSpan.FromMinutes(1),
+                        PermitLimit = isTestEnv ? 10000 : 100,
+                        QueueLimit = 2,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                    });
                 });
             });
 

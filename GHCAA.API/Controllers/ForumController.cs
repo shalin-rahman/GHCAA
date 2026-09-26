@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using GHCAA.Application.Security;
 using GHCAA.API.Extensions;
+using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
 {
@@ -37,7 +38,7 @@ namespace GHCAA.API.Controllers
         public async Task<ActionResult<ForumTopicDto>> GetTopic(int topicId)
         {
             var topic = await _forumService.GetTopicByIdAsync(topicId);
-            if (topic == null) return NotFound("Topic not found.");
+            if (topic == null) return Problem(detail: "Topic not found.", statusCode: StatusCodes.Status404NotFound);
 
             return Ok(topic);
         }
@@ -84,7 +85,7 @@ namespace GHCAA.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
             catch (InvalidOperationException ex)
             {
@@ -98,7 +99,7 @@ namespace GHCAA.API.Controllers
             var memberId = GetMemberId();
             if (memberId == 0) return Unauthorized();
 
-            var isSuperAdmin = User.IsInRole("SuperAdmin");
+            var isSuperAdmin = User.IsInRole(Constants.Roles.SuperAdmin);
 
             await _forumService.DeleteTopicAsync(topicId, memberId, isSuperAdmin);
             return NoContent();
@@ -110,7 +111,7 @@ namespace GHCAA.API.Controllers
             var memberId = GetMemberId();
             if (memberId == 0) return Unauthorized();
 
-            var isSuperAdmin = User.IsInRole("SuperAdmin");
+            var isSuperAdmin = User.IsInRole(Constants.Roles.SuperAdmin);
 
             await _forumService.DeletePostAsync(postId, memberId, isSuperAdmin);
             return NoContent();

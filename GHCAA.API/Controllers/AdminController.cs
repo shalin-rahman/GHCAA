@@ -31,7 +31,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("stats")]
         public async Task<IActionResult> GetStats(CancellationToken cancellationToken)
         {
-            var isPrivileged = User.IsInRole("SuperAdmin");
+            var isPrivileged = User.IsInRole(Constants.Roles.SuperAdmin);
             var stats = await _memberService.GetDashboardStatsAsync(isPrivileged, cancellationToken);
             return Ok(stats);
         }
@@ -39,7 +39,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("analytics")]
         public async Task<IActionResult> GetAnalytics(CancellationToken cancellationToken)
         {
-            var isPrivileged = User.IsInRole("SuperAdmin");
+            var isPrivileged = User.IsInRole(Constants.Roles.SuperAdmin);
             var stats = await _memberService.GetDashboardStatsAsync(isPrivileged, cancellationToken);
             return Ok(stats);
         }
@@ -64,12 +64,12 @@ namespace GHCAA.API.Controllers
             CancellationToken cancellationToken = default)
         {
             // Standard Admins cannot see archived records
-            if (includeArchived && !User.IsInRole("SuperAdmin"))
+            if (includeArchived && !User.IsInRole(Constants.Roles.SuperAdmin))
             {
                 return Forbid();
             }
 
-            var isPrivileged = User.IsInRole("SuperAdmin");
+            var isPrivileged = User.IsInRole(Constants.Roles.SuperAdmin);
             var result = await _memberService.GetAllMembersAsync(page, pageSize, searchQuery, statusFilter, categoryFilter, membershipTypeFilter, includeArchived, isPrivileged, cancellationToken);
             return Ok(result);
         }
@@ -77,7 +77,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("members/{id}")]
         public async Task<IActionResult> GetMemberById(int id, CancellationToken cancellationToken)
         {
-            var isPrivileged = User.IsInRole("SuperAdmin");
+            var isPrivileged = User.IsInRole(Constants.Roles.SuperAdmin);
             var profile = await _memberService.GetProfileAsync(id, isPrivileged: true, cancellationToken);
             if (profile == null) return NotFound();
             return Ok(profile);
@@ -204,7 +204,7 @@ namespace GHCAA.API.Controllers
             // to one they control and self-serve a password reset (see ResetPasswordAdmin below).
             try
             {
-                var isPrivileged = User.IsInRole("SuperAdmin");
+                var isPrivileged = User.IsInRole(Constants.Roles.SuperAdmin);
                 var success = await _memberService.AdminUpdateMemberAsync(id, dto, adminId, isPrivileged, cancellationToken);
                 if (!success) return NotFound();
                 return Ok(new { Message = "Member updated by admin successfully" });
@@ -291,7 +291,7 @@ namespace GHCAA.API.Controllers
         {
             try
             {
-                var isPrivileged = User.IsInRole("SuperAdmin");
+                var isPrivileged = User.IsInRole(Constants.Roles.SuperAdmin);
                 var result = await _memberService.SendAdminPasswordResetLinkAsync(id, isPrivileged, cancellationToken);
                 if (!result.Success) return Problem(detail: "Member or user account not found. Please ensure the member is approved and active.", statusCode: StatusCodes.Status404NotFound);
                 return Ok(new
