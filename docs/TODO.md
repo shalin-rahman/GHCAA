@@ -253,12 +253,12 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
 - **84.1–84.3** — State-transition tables, a validation matrix, and endpoint contract tables, scoped
   from an external review of the 001 specification baseline. Drafted in
   `docs/specs/002-workflow-contracts-and-validation/`.
-- **84.41 / 84.42** — `Forbid(string)` on the receipt download returns a 500 instead of a 403, and the
-  mobile admin screens call step-up routes with no step-up flow. Both found by 84.5.
+- **84.42** — Mobile admin screens call step-up routes with no step-up flow. Found by 84.5.
+  (84.41, the same-area `Forbid(string)` 500, is done.)
 
 ### P2 — MEDIUM (real, no urgency signal)
-- **84.43 / 84.44** — 18 string error bodies undo 82.4's single error shape, and no test checks the
-  policy attributes. Both found by 84.5.
+- **84.43** — Mobile error readers still disagree on field order. Found by 84.5. (Its
+  controller-side string-body half is done; so is 84.44, the policy-attribute reflection test.)
 - **42.1–42.5** — Admin-manageable elections forms/docs, plan only.
 - **51.4–51.5** — Remaining file-storage hardening: broader regression coverage and admin-configurable
   settings.
@@ -288,7 +288,7 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
 - **61.3** — Drop the `Summary:`-style comment banner in `GHCAA.Tools/db_diag.cs` next time that file is touched.
 - **84.4** — Web/Mobile client parity table; depends on 84.3 existing first. (84.5, the
   authorization and error catalogs, is done.)
-- **84.45** — Role-name literals in `IsInRole` checks, and the open question of error codes and 429/401/403 bodies.
+- **84.45** — The open question of error codes and 429/401/403 bodies. (Its role-literal half is done.)
 - **84.6 / 84.7** — Election ballot workflow scope and white-label second-institution deployability —
   product decisions for the project owner, not documentation tasks.
 
@@ -1529,14 +1529,14 @@ Reload button. The button reloads the latest published copy only. A static page 
 `docs/TODO.md`, so new tracker changes still need `tracker_page.py` run and the page republished.
 **Acceptance:** the page shows "Built from docs/TODO.md on <date>" and the button reloads it.
 
-84.41 [TODO] **Priority: P1 | Depends on: none.** `FinancialsController.DownloadReceipt` returns
-`Forbid("You can only download your own receipts.")` (`GHCAA.API/Controllers/FinancialsController.cs:102`).
-`Forbid(string)` takes an authentication scheme name, not a message. No scheme has that name, so ASP.NET
-throws and a member asking for someone else's receipt gets a 500, not a 403. The access is still
-refused, so no receipt leaks, but the error log fills and the client shows a server error. The unit
-test `DownloadReceipt_NonAdminDoesNotOwnPayment_ReturnsForbid` only checks the result type, so it
-passes. Found by 84.5. **Acceptance:** the action returns
-`Problem(detail: ..., statusCode: 403)`, and a test asserts the status code, not only the type.
+84.41 [DONE 2026-09-27] **Priority: P1 | Depends on: none.** `FinancialsController.DownloadReceipt` used
+`Forbid("You can only download your own receipts.")` (was `GHCAA.API/Controllers/FinancialsController.cs:102`).
+`Forbid(string)` takes an authentication scheme name, not a message, so this threw at runtime. Fixed:
+the action now returns `Problem(detail: "You can only download your own receipts.", statusCode: 403)`
+(`FinancialsController.cs:104`), and `DownloadReceipt_NonAdminDoesNotOwnPayment_Returns403Problem` in
+`FinancialsControllerTests.cs:139` asserts the status code and the `Detail` value, not just the result
+type. **Acceptance met:** action returns `Problem(detail: ..., statusCode: 403)`; test asserts the
+status code, not only the type.
 
 84.42 [TODO] **Priority: P1 | Depends on: none.** The mobile app has no step-up flow. Nothing in
 `GHCAA.Mobile/lib` reads `STEP_UP_REQUIRED` or calls `/auth/step-up`, yet the mobile admin screens call
@@ -1548,31 +1548,33 @@ actions should always fail on mobile with a 403. The web client handles it in
 Then either add a mobile step-up prompt that verifies and retries, or hide the step-up actions on
 mobile. A test covers whichever is chosen.
 
-84.43 [TODO] **Priority: P2 | Depends on: none.** The single error shape set by 82.4 has slipped. 18
-controller results send a plain string body again: `BadRequest`, `Conflict`, `Unauthorized` and
-`NotFound` with a literal, plus `NotFound(ex.Message)` at `ForumController.cs:87`. They are in
-AdminElections, Elections, CredentialVerification, Events, Financials, Forum, Governance and
-Notification. The web client reads `detail` and then `title`, so these messages never reach the user.
-The three mobile readers also disagree on field order: `api_client.dart:128` reads detail, title,
-message; `api_exception.dart:21` reads message, title, detail; `auth_service.dart:153` reads message,
-error. Found by 84.5; see `evidence/error-catalog.md` sections 4 and 5. **Acceptance:** the grep in
-82.4's acceptance finds no string body, and the mobile readers read the same fields in the same order.
+84.43 [TODO] **Priority: P2 | Depends on: none.** Controller side fixed 2026-09-27: the grep in 82.4's
+acceptance (literal-string `BadRequest`/`Conflict`/`Unauthorized`/`NotFound` bodies) now finds nothing
+in AdminElections, Elections, CredentialVerification, Events, Financials, Forum, Governance or
+Notification; `ForumController.cs:87` returns `Problem(detail: ex.Message, statusCode: 404)`, not
+`NotFound(ex.Message)`. Still open: the three mobile readers disagree on field order.
+`api_client.dart:128` reads `detail`, `title`, `message` (matches the ProblemDetails shape 82.4 set);
+`api_exception.dart:21` reads `message`, `title`, `detail` (reversed); `auth_service.dart:153` and `:200`
+read only `message`, `error` and never look at `detail`/`title` at all. Found by 84.5; see
+`evidence/error-catalog.md` sections 4 and 5. **Acceptance:** the mobile readers read the same fields
+in the same order as `api_client.dart` (server-supplied `detail`/`title` first).
 
-84.44 [TODO] **Priority: P2 | Depends on: none.** No test checks the policy attributes. The controller
-tests call actions directly, so a dropped `[Authorize(Policy = ...)]` on an admin action would fall
-back to "any signed-in user" and every test would still pass. `DestructiveStepUpActionsTests` checks
-results but not that `[RequireStepUp]` is present. Found by 84.5. **Acceptance:** one reflection test
-reads every controller action's effective policy and step-up flag and compares them with an expected
-list, taken from `evidence/authorization-catalog.md`. Changing a policy then means changing that list
-on purpose.
+84.44 [DONE 2026-09-27] No test checked the policy attributes. The controller tests call actions
+directly, so a dropped `[Authorize(Policy = ...)]` on an admin action would fall back to "any
+signed-in user" and every test would still pass. `DestructiveStepUpActionsTests` checks results but
+not that `[RequireStepUp]` is present. Found by 84.5. Added
+`GHCAA.Tests/Controllers/AuthorizationPolicyReflectionTests.cs`: reflects over every `ControllerBase`
+action in `GHCAA.API`, resolves its effective policy/`[AllowAnonymous]`/`[RequireStepUp]` (method
+overrides class), and compares against a 321-entry expected table taken from
+`evidence/authorization-catalog.md`. Fails on drift, on an action missing from the table, and on a
+table entry with no matching action. Full suite green at 886 tests (was 885).
 
-84.45 [TODO] **Priority: P3 | Depends on: none.** Role names are literal strings in the in-body
-`IsInRole("Admin")` and `IsInRole("SuperAdmin")` checks on 24 routes and in `NotificationHub.cs:21`
-and `:41`. `Constants.Roles` in `GHCAA.Domain/Constants.cs` already holds both names, and a renamed
-role would stop matching without any error. Also open, as a decision rather than a fix: error codes
-beyond `STEP_UP_REQUIRED` (for example a `code` extension on ProblemDetails), and bodies for 429 and
-the framework 401 and 403, which are empty today. Found by 84.5. **Acceptance:** a grep for
-`IsInRole("` in `GHCAA.API` finds nothing, and the error-code question has a recorded yes or no.
+84.45 [TODO] **Priority: P3 | Depends on: none.** Role-literal half fixed 2026-09-27: a grep for
+`IsInRole("` in `GHCAA.API` finds nothing; the 24 routes and `NotificationHub.cs:22,42` now all use
+`Constants.Roles.Admin`/`Constants.Roles.SuperAdmin`. Still open, as a decision rather than a fix:
+error codes beyond `STEP_UP_REQUIRED` (for example a `code` extension on ProblemDetails), and bodies for
+429 and the framework 401 and 403, which are empty today. Found by 84.5. **Acceptance:** the error-code
+question has a recorded yes or no.
 
 84.46 [DONE 2026-09-27] **Priority: P0 | Depends on: none.** `Program.cs` attached the `Api` rate-limit
 policy to `MapControllers()` with `.RequireRateLimiting(RateLimitPolicies.Api)`. That convention adds
