@@ -126,6 +126,12 @@ convention and definition of done, are stated once in §3.7 and enforced at ever
 than only at a phase boundary; this is what the incremental choice cost in process overhead and what
 it bought in resilience to interruption.
 
+Specification-driven development in the Spec Kit sense came late to this lifecycle. The first spec
+was committed on 21 September 2026, when most of the platform already existed, so for most work
+packages the spec was written from the code rather than the code from the spec. §3.13, on the Spec
+Kit artefacts, states what that produced and why it is reported as a record of the built system
+rather than as the process that built it.
+
 ## 4.5 Evaluation Strategy
 
 This is the point of the chapter. Everything below is a commitment made before any measurement in

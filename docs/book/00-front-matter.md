@@ -1,6 +1,6 @@
 # GHCAA Alumni Association Platform
 
-## Design, Construction and Evaluation of a Governance-Aware Alumni Management Platform for a Resource-Constrained Institution
+## Design, Development and Evaluation of a Specification-Driven, Reusable Alumni Management Platform for Resource-Constrained Institutions
 
 ---
 
@@ -10,7 +10,7 @@
 
 ## i. Title Page
 
-**Title.** Design, Construction and Evaluation of a Governance-Aware Alumni Management Platform for a Resource-Constrained Institution: The GHCAA Case
+**Title.** Design, Development and Evaluation of a Specification-Driven, Reusable Alumni Management Platform for Resource-Constrained Institutions: The GHCAA Case
 
 **Subject of the study.** The Govt. Haraganga College Alumni Association (HARAGANGIAN), Bangladesh
 
@@ -181,7 +181,8 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 3.10 Domain Constraints | 33 |
 | 3.11 Feasibility Analysis | 34 |
 | 3.12 Requirements Validation and Formal Technical Review | 34 |
-| 3.13 Summary | 35 |
+| 3.13 Specification-Driven Development and the Spec Kit Artefacts | 35 |
+| 3.14 Summary | 35 |
 | **PART II — METHOD AND DESIGN** | 47 |
 | **Chapter 4 — Research Methodology** | 48 |
 | 4.1 Research Paradigm and Philosophical Position | 48 |
@@ -416,6 +417,7 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 3.6 | Domain constraints, their class and their constitutional article | 45 |
 | 3.7 | Feasibility summary | 45 |
 | 3.8 | Specification defects found by the formal technical review | 46 |
+| 3.9 | As-built domain specifications under docs/specs | 46 |
 | 4.1 | Metric definitions | 50 |
 | 4.2 | RMMM table | 52 |
 | 4.3 | Evaluation plan | 57 |

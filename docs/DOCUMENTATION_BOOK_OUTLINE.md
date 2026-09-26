@@ -194,7 +194,8 @@ followed is stated in §2.2.
 - **3.10** Domain Constraints — constitutional and electoral rules the software must not violate, each classified as deterministic, state, evidence, procedural or authority, which fixes what the software is permitted to do with it and supplies the answer to RQ3 in §12.8, where the research questions are answered
 - **3.11** Feasibility Analysis — technical, economic, operational, schedule, legal and ethical
 - **3.12** Requirements Validation and Formal Technical Review
-- **3.13** Summary
+- **3.13** Specification-Driven Development and the Spec Kit Artefacts — the specification constitution, the twenty-one spec folders under `docs/specs/`, the as-built domain specs 012 to 020 with their Evidence and Gaps sections, and the limit that they were reverse-engineered from code already written
+- **3.14** Summary
 
 **Figures and tables**
 
@@ -209,6 +210,7 @@ followed is stated in §2.2.
 - Table 3.2 — Non-functional requirement catalogue by ISO 25010 characteristic, with measurable acceptance criteria
 - Table 3.3 — Use-case descriptions (actor, preconditions, main flow, alternates, exceptions, postconditions) for the ten highest-value cases; the remainder in `docs/SRS.md`
 - Table 3.4 — Requirements Traceability Matrix: requirement → use case → design element → implementation artefact → test case, carried forward and closed in Chapter 12
+- Table 3.9 — As-built domain specifications under `docs/specs/`: user stories, functional requirements and open clarifications per domain
 
 ---
 

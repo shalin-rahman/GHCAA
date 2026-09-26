@@ -1489,6 +1489,31 @@ DTO validation. **Acceptance:** either wire the validators into the request pipe
 that a bad request gets a 400 from a validator rule, or remove them and move any rule that matters
 onto the DTO.
 
+84.37 [DONE 2026-09-26] **Priority: P1 | Depends on: none.** The project title changed to "Design,
+Development and Evaluation of a Specification-Driven, Reusable Alumni Management Platform for
+Resource-Constrained Institutions". **Done:** the heading and title page in
+`docs/book/00-front-matter.md` carry it. A grep found no other copy in the book, the outline or the
+build scripts. The proposal still has its own older wording, see 84.39.
+
+84.38 [DONE 2026-09-26] **Priority: P1 | Depends on: 84.8.** The book had no account of the Spec Kit
+specs. **Done:** new §3.13 in `docs/book/03-requirements.md` covers the specification constitution,
+the 21 spec folders, the as-built domain specs 012 to 020 (Table 3.9: 47 user stories, 312 FRs, 20
+open clarifications, counted 26 Sep 2026), and the limit that the specs were written after the code.
+The old summary is now §3.14. A paragraph in §4.4 points to it, and reference [77] cites Spec Kit.
+The outline and front-matter lists match. The strict build passes except for the count drift in 84.35.
+
+84.39 [TODO] **Priority: P2 | Depends on: 84.37, 84.38.** The proposal
+(`docs/proposal-docs/FINAL_PROPOSAL_AND_PRESENTATION.md`) needs the new title and a requirements
+engineering and SDD paragraph. The text is drafted and waiting for the author to review it. The file
+is left unedited until they approve. **Acceptance:** the approved text is in the proposal's title,
+its Development approach section and Slide 7.
+
+84.40 [DONE 2026-09-26] **Priority: P3 | Depends on: none.** The published tracker page had no way
+to tell how old its data was. `tracker_page.py` now stamps the build time under the header and adds a
+Reload button. The button reloads the latest published copy only. A static page cannot read
+`docs/TODO.md`, so new tracker changes still need `tracker_page.py` run and the page republished.
+**Acceptance:** the page shows "Built from docs/TODO.md on <date>" and the button reloads it.
+
 ---
 
 # Work Package 85 — NFR catalogue currency for vote integrity and mobile diagnostics

@@ -232,6 +232,8 @@ https://www.paidmembershipspro.com/pricing/. Accessed: 1 Sep. 2026.
 [76] OWASP Foundation, "OWASP Top 10:2025." [Online]. Available: https://owasp.org/Top10/2025/.
 Accessed: 1 Sep. 2026.
 
+[77] GitHub, "Spec Kit," version 1.0.9.dev0. [Online]. Available: https://github.com/github/spec-kit.
+
 ---
 
 ## Governing documents of the Association

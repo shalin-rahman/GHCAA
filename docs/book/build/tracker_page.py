@@ -5,6 +5,7 @@ the file. Run it again after any tracker change and republish.
 """
 import html
 import re
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -221,7 +222,8 @@ def main():
         matrix="".join(rows), blocks="".join(blocks), filters=filters,
         cat_filters=cat_filters, extra_filters=extra_filters, legend=legend,
         total=len(open_items), closed=closed_total, p0=totals["P0"], p1=totals["P1"],
-        untriaged=totals["none"], packs=len({it["wp"] for it in open_items})), encoding="utf-8")
+        untriaged=totals["none"], packs=len({it["wp"] for it in open_items}),
+        generated=datetime.now().strftime("%d %b %Y, %H:%M")), encoding="utf-8")
     print(f"wrote {OUT} ({OUT.stat().st_size // 1024} KB, "
           f"{len(open_items)} open, {closed_total} closed)")
 
@@ -297,6 +299,11 @@ tbody th {{ font-weight:400; }}
 .chip.none[aria-pressed="true"] {{ background:var(--pn-bg); border-color:var(--pn); }}
 .chip.must[aria-pressed="true"] {{ background:var(--p0-bg); border-color:var(--p0); }}
 .chip.bug[aria-pressed="true"] {{ background:var(--p1-bg); border-color:var(--p1); }}
+.fresh {{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:14px;
+  font-size:13px; color:var(--ink-3); }}
+.reload {{ padding:4px 12px; cursor:pointer; border:1px solid var(--accent); border-radius:var(--radius);
+  background:var(--accent-soft); color:var(--ink); font:inherit; font-size:13px; }}
+.reload:hover {{ background:var(--surface); }}
 .sep {{ width:1px; align-self:stretch; background:var(--line); margin:0 4px; }}
 .seg {{ display:inline-flex; border:1px solid var(--line); border-radius:99px; overflow:hidden; }}
 .seg button {{ border:none; background:var(--surface); color:var(--ink-2); font:inherit; font-size:13px;
@@ -366,6 +373,10 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
     <div><b>{p0}</b><span>P0 blocking</span></div>
     <div><b>{p1}</b><span>P1 next</span></div>
     <div><b>{untriaged}</b><span>never triaged</span></div>
+  </div>
+  <div class="fresh">
+    <span>Built from <code>docs/TODO.md</code> on {generated}</span>
+    <button class="reload" type="button" onclick="location.reload()">Reload</button>
   </div>
 </header>
 

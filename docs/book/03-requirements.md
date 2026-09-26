@@ -631,7 +631,62 @@ requirements FR-38 and FR-39 are validated against documents rather than against
 volume assumptions behind NFR-P1 and NFR-P5 are estimates, since the true membership size was
 unknown at specification time, which was itself one of the problems the project set out to solve.
 
-## 3.13 Summary
+## 3.13 Specification-Driven Development and the Spec Kit Artefacts
+
+The requirements in §3.3 and §3.4 are written at the level an examiner or an officer of the
+Association reads. A second, finer specification sits beside them in the repository under
+`docs/specs/`, written with GitHub's Spec Kit [77]. Spec Kit makes the specification the main
+artefact of development. A feature starts as a written spec, is clarified, becomes a plan and a task
+list, and is then implemented, and the spec stays in the repository as the statement the code is
+checked against. This section records how the approach was used here, what it produced, and where
+the use falls short of the method.
+
+The toolkit is installed at version 1.0.9.dev0 under `docs/specs/.specify`, with the commands
+specify, clarify, plan, tasks, analyze, checklist, implement, converge, constitution and
+taskstoissues. Its governing file is a specification constitution at
+`docs/specs/.specify/memory/constitution.md`. This is not the Association's Constitution v4.2 of
+§3.10, where the domain constraints come from. It is a short set of five engineering principles
+that every spec must respect: preserve the existing product contract, trace shared behaviour across
+all clients, keep boundaries clear, treat security and privacy as requirements, and verify with
+repository checks. The second and fifth principles shape the specs most. A requirement that touches
+shared data has to name its effect on the API, the web client and the mobile client, and a claim
+about behaviour has to point at a file or a test rather than at an intention.
+
+There are twenty-one spec folders under twenty numbers. Number 010 was issued twice, which is
+tracked as TODO 84.31 rather than quietly renumbered. The folders fall into three groups. Spec 001
+is the index: it keeps the cross-layer requirements and measurable outcomes, and points each user
+story at the spec that now owns it. Specs 002 to 011 each cover one feature or change, among them
+the idempotent member import (008), campaigns, scholarships and the archive (009), ad-hoc reporting
+(010) and the election module redesign (011). Specs 012 to 020 are as-built domain specs, one per
+domain, and between them they place each of the 45 API controllers in exactly one spec. Table 3.9
+lists them.
+
+Each domain spec follows the Spec Kit template: prioritised user stories with acceptance scenarios,
+edge cases, functional requirements in the "shall" form numbered locally from FR-001, key entities
+and measurable success criteria. Two sections are added to the template. An Evidence table maps
+each requirement to its controller, service, Angular route, Flutter screen and test. A Gaps section
+lists every requirement with no test, and any behaviour the code leaves unclear is marked
+`[NEEDS CLARIFICATION]` rather than guessed. The local FR numbers are not the FR-1 to FR-55 of
+Table 3.1. The book's catalogue states what the platform must do, and each subsection of §3.3
+corresponds to one or more domain specs that state the same ground as requirements small enough to
+be tested one at a time.
+
+The limit has to be stated plainly. Spec Kit was adopted late. The first specs were committed on
+21 September 2026 and the domain specs on 26 September 2026, after most of the platform had been
+built. For most of the system the order the method prescribes was reversed: the code came first, and
+the spec was reverse-engineered from it in a fixed reading order of entities, DTOs and validators,
+services, controllers, clients and tests. The domain specs are therefore a record of what the
+platform does, not evidence that a specification drove its construction, and this dissertation does
+not claim the second. What the late adoption does give is the trace of §3.9 started from the other
+end. An Evidence row begins at a requirement and names the code and the test, and a Gaps entry makes
+an untested requirement visible instead of leaving it to be found. Writing the specs also found real
+defects. Seven were fixed and tested on 26 September 2026 under TODO 84.15, 84.24, 84.26, 84.30,
+84.32, 84.33 and 84.34, among them a race that let a concurrent duplicate vote surface as a server
+error and a gallery upload that refused system administrators. An eighth, TODO 84.36, is still open:
+the FluentValidation validators are registered but never run on a request, so the rules they state
+are not enforced at the boundary.
+
+## 3.14 Summary
 
 Fifty-five functional requirements, thirty-seven non-functional requirements across the eight ISO/IEC
 25010 characteristics, sixteen domain constraints traced to constitutional and electoral sources, and
@@ -642,6 +697,10 @@ convenient option and in favour of the constitution or the member. The line the 
 between what the software decides and what a human must decide, visible in DC-04, DC-07 and DC-15,
 is the specification's principal contribution to the answer to RQ3, and Chapter 5 turns it into
 modelled rules.
+
+Beside that catalogue, nine as-built domain specs under `docs/specs/` restate the platform as 312
+smaller requirements, each with its evidence or a recorded gap, as §3.13 describes. They were
+written after the code rather than before it, and are reported as a record of the built system.
 
 ---
 
@@ -1173,3 +1232,21 @@ there. Classes follow the set stated in §3.12.
 | COV-003 | Omission | FR-01's thirteen mandatory particulars were specified as a completeness rule, but the specification did not state what should happen on an attempt to approve an incomplete application | Approval precondition stated explicitly; negative case remains untested and is logged as such |
 | COV-004 | Omission | The registration fee was specified as payable before approval without stating the effect of its absence at the moment of approval | Same treatment as COV-003; gate specified, negative case logged as open |
 | P3-F2 | Omission | Idle-session expiry was implemented in both clients and in neither the specification nor the API. No requirement stated whether inactivity is a client concern or a server one | Not resolved. Carried as a known gap for the reason given in §3.12 |
+
+### Table 3.9 — As-built domain specifications under docs/specs
+
+Counts taken on 26 September 2026 from each `spec.md`: distinct FR identifiers, `### User Story`
+headings, and lines carrying a `NEEDS CLARIFICATION` marker.
+
+| Spec | Domain | User stories | Functional requirements | Open clarifications |
+| --- | --- | --- | --- | --- |
+| 012 | Membership lifecycle and authentication | 8 | 33 | 2 |
+| 013 | Profile, family and identity files | 6 | 22 | 4 |
+| 014 | Events, news, gallery and content | 5 | 40 | 2 |
+| 015 | Payments and finance | 5 | 66 | 1 |
+| 016 | Networking and careers | 3 | 28 | 1 |
+| 017 | Communication | 6 | 31 | 3 |
+| 018 | Governance, elections and polls | 5 | 40 | 2 |
+| 019 | Assistant | 2 | 7 | 2 |
+| 020 | Platform and operations | 7 | 45 | 3 |
+| | Total | 47 | 312 | 20 |
