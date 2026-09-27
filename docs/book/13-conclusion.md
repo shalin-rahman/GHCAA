@@ -8,43 +8,40 @@ happen next.
 **What it must not repeat.** No new evidence appears here. Anything that would need to be defended
 belongs in the chapter that carries its evidence, and is cited from here rather than restated.
 
-## 13.1 Summary of the Work
+## 13.1 Summary of the Work and its Contributions
+
+The research questions are answered in §12.6, Answering the Research Questions, and the answers
+are not repeated here.
 
 *[Not written.]*
 
-## 13.2 Contributions Restated and Substantiated
+*[Not written.]*
+
+## 13.2 Practical Implications for Similar Institutions
 
 *[Not written.]*
 
-## 13.3 Answers to the Research Questions, in Brief
-
-*[Not written.]*
-
-## 13.4 Practical Implications for Similar Institutions
-
-*[Not written.]*
-
-## 13.5 Lessons Learned
+## 13.3 Lessons Learned
 
 *[Not written. Brief: technical, methodological and organisational]*
 
-## 13.6 Future Work
+## 13.4 Future Work
 
 *[Not written.]*
 
-### 13.6.1 Near-term functional roadmap
+### 13.4.1 Near-term functional roadmap
 
 *[Not written.]*
 
-### 13.6.2 Technical debt and reengineering priorities
+### 13.4.2 Technical debt and reengineering priorities
 
 *[Not written.]*
 
-### 13.6.3 Research directions opened by this work
+### 13.4.3 Research directions opened by this work
 
 *[Not written.]*
 
-## 13.7 Concluding Remarks
+## 13.5 Concluding Remarks
 
 *[Not written.]*
 

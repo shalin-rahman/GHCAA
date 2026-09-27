@@ -130,10 +130,18 @@ h4 {
   text-align: center;
   break-before: page;
   page-break-before: always;
-  margin: 40mm 0 0;
-  font-size: 16pt;
+  margin: 0 0 0.6em;
+  font-size: 13pt;
   letter-spacing: 0.14em;
   border: 0;
+}
+
+/* The Part heading heads the first page of its first chapter instead of
+   taking a page of its own. Four divider pages were four pages of the
+   100-page budget. */
+.part-title + h1 {
+  break-before: avoid;
+  page-break-before: avoid;
 }
 
 /* ---------- body text ---------- */
@@ -230,7 +238,7 @@ table {
   border-collapse: collapse;
   width: 100%;
   font-size: 9pt;
-  line-height: 1.28;
+  line-height: 1.2;
   text-align: left;
   hyphens: auto;
   margin: 0 auto;
@@ -242,14 +250,14 @@ tr { break-inside: avoid; page-break-inside: avoid; }
 table thead th {
   border-top: 1pt solid var(--rule);
   border-bottom: 0.6pt solid var(--rule);
-  padding: 1.6mm 2mm;
+  padding: 1mm 2mm;
   font-weight: bold;
   vertical-align: bottom;
 }
 
 table tbody td {
   border: 0;
-  padding: 1.3mm 2mm;
+  padding: 0.7mm 2mm;
   vertical-align: top;
 }
 

@@ -1,5 +1,8 @@
 # Pending Work Packages Delivery Plan
 
+> **Superseded for ordering by `docs/BACKLOG_EXECUTION_PLAN.md` (2026-09-27).** That plan sets the
+> current order. It also marks 62.42 as blocked, although this list treats it as ready.
+
 ## Delivery order
 
 1. Close evidence and contract work first: 84.4, 84.5, 60.2, 60.3, 73.5,

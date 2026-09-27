@@ -123,7 +123,7 @@ imports from `file://` and Mermaid is an ES module.
 
 Before printing, the same browser measures the page and refuses to print if the diagrams did not all
 draw, naming the ones that failed. That check exists because a Mermaid syntax error used to leave a
-figure printed as a box of source, which is easy to miss in an eighty-page document.
+figure printed as a box of source, which is easy to miss in a hundred-page document.
 
 To print by hand instead — open the HTML in Chrome or Edge and use Save as PDF, paper size A4,
 margins Default, scale 100%, headers and footers off. Wait for the diagrams to draw first: the body
@@ -139,7 +139,8 @@ wider than anything the screen preview can show, so its scale has to be calculat
 
 - portrait figures fit 174 x 224 mm (the A4 text block, less room for the caption)
 - landscape figures fit 257 x 148 mm
-- a diagram smaller than its box is enlarged, but never by more than half again
+- a diagram smaller than its box is left at its natural size, never enlarged, to hold the
+  page budget set in the outline (under 100 pages, Chapter 1 to References)
 
 `--audit` then reports any figure or table that still does not work on paper, in five kinds:
 

@@ -1,5 +1,8 @@
 # GHCAA UI fix plan
 
+> **Status: delivered (Work Package 30, closed).** Every task below shipped. The closed items are
+> in `docs/TODO_ARCHIVE.md` under Work Package 30. Read this file as a record, not as open work.
+
 Scope: the ~30 issues raised for the Admin panel, Member portal, and public landing.
 Guiding rule (from `ghcaa-design`): **fix centrally in `GHCAA.Web/src/styles.scss` or a shared
 component — never per page.** Every issue below has been traced to a file; issues that repeat

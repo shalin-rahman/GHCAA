@@ -132,7 +132,7 @@ CODE = [
       "GHCAA.API/Controllers/ThemeController.cs",
       "GHCAA.Infrastructure/Services/OrgConfigService.cs",
       "GHCAA.Infrastructure/Services/ThemeService.cs"], ["C1"]),
-    ("C12", "Security and hardening", ["7", "43", "45", "48"],
+    ("C12", "Security and hardening", ["7", "43", "45", "48", "92"],
      ["GHCAA.API/Middleware", "GHCAA.Application/Security",
       "GHCAA.API/Controllers/SecureFilesController.cs",
       "GHCAA.API/Controllers/RolesController.cs"], ["C2"]),
@@ -351,7 +351,7 @@ REUSE = [
      "designed again. The recency is what makes the factor credible: those projects are .NET Core, "
      "Angular and Flutter, the same technology generation as this platform, so the material "
      "carried over as working code rather than as a design to be reimplemented. This is an accumulated asset, not a windfall: it is the reason the platform "
-     "was affordable, and the reason §12.11 records that the affordability does not transfer to an "
+     "was affordable, and the reason §12.9 records that the affordability does not transfer to an "
      "association without such a person"),
     ("AI-assisted and rapid development tooling", 0.70,
      "drafts generated, then reviewed and corrected",
@@ -821,7 +821,7 @@ def report(markdown=False):
         print(bar + sep.join(["Open tracker items, %s" % priority, str(count),
                               "%.1f h each" % rate, "%.0f" % (count * rate)]) + end)
     days_left = hours_left / HOURS_PER_WORKDAY
-    print("\nThe item rates cover the fix and the test that pins it together, because §3.7's "
+    print("\nThe item rates cover the fix and the test that pins it together, because §3.5's "
           "definition of\ndone requires both: a defect closes against a test that would fail if it "
           "came back. Writing the\ntest is not a separate line here for that reason.")
     print("\nstill to do                   : %.0f hours, %.0f working days" % (hours_left, days_left))

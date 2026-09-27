@@ -213,6 +213,10 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
   code moves. `docs/SEED_CLASSIFICATION.md` has the per-file breakdown.
 
 ### P1 — HIGH (security surface / explicitly time-sensitive / blocking other work)
+- **37.1i–37.1n** — Election ballot secrecy (review 2026-09-27). The ballot can be joined back to
+  the voter by time, key order, transaction id and the audit log; count can run during polling; the
+  vote screen has no names, review or receipt. 37.1i to 37.1k are P0 in their own entries and must
+  ship before the next live election. Spec 023.
 - **88.1–88.5** — The May 2026 alumni batch's delivery mechanism (a dedicated EF migration) no longer
   exists in the tree after the WP62 seed refactor; `InstitutionDataSeeder`'s empty-table-only model
   can't deliver it to a live DB either. Extending the existing bulk-import feature into an idempotent,
@@ -257,6 +261,12 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
   (84.41, the same-area `Forbid(string)` 500, is done.)
 
 ### P2 — MEDIUM (real, no urgency signal)
+- **37.1o–37.1q** — Election rules: multi-place seats, tie rule, recount, consent, officer
+  conflict, filled ER forms. Spec 023 Phase 3. 37.1o waits on the tie-rule decision.
+- **92.1–92.5** — No approval flow can be switched off or given to another role; all are
+  hardcoded AdminOnly. Spec 022 first.
+- **67.5** — Book under 100 pages, Chapter 1 to References. Layout done; prose pass waits on the
+  author's merge and cut confirmations. (P1 in its own entry.)
 - **84.43** — Mobile error readers still disagree on field order. Found by 84.5. (Its
   controller-side string-body half is done; so is 84.44, the policy-attribute reflection test.)
 - **42.1–42.5** — Admin-manageable elections forms/docs, plan only.
@@ -489,10 +499,10 @@ a known-good run.
 > DEPENDS ON: 28.29
 > 28.31 [DONE 2026-08-22] Cleanup: Add RowVersion/xmin concurrency token to OrganizationConfig entity VERIFIED 2026-08-22: `OrganizationConfig.cs` has `public byte[] RowVersion` and `OrganizationConfigConfiguration.cs` marks it `IsConcurrencyToken()`, with migration `20260703123040_AddOrganizationConfigRowVersion`. The config comment records **why `IsRowVersion()` was not used**: it left the column NULL on insert and tripped a Postgres 23502 not-null violation, so a plain concurrency token was chosen for cross-provider safety with no xmin dependency.
 > Prevents last-write-wins on concurrent SuperAdmin edits
-> 28.32 [TODO] Angular: Install ngx-translate for UI-layer strings (form labels, buttons, page titles) (Still genuinely open, confirmed 2026-08-22: no `ngx-translate` entry in `GHCAA.Web/package.json`.)
+> 28.32 [TODO] Angular: UI-layer string translation (form labels, buttons, page titles) **SUPERSEDED 2026-09-27 by 37.7**: 37.7 rules out `ngx-translate`/`@angular/localize` (`feedback_keep_lightweight`) and specifies a flat-dict + signal + pipe instead. Close this item when 37.7 lands; do not install ngx-translate.
 > Separate from OrgConfigService locale packs which cover org terminology
-> RELATES TO: 8.8 (Mobile i18n)
-> 28.33 [TODO] Mobile: Add Flutter intl + .arb files for UI-layer strings **PARTIAL, confirmed 2026-08-22:** `intl: ^0.20.2` and `flutter_localizations` are already in `pubspec.yaml`, but there is **no `lib/l10n/` directory and no `.arb` files** — the dependency is in place and the extraction work is not started.
+> RELATES TO: 37.7 (Angular bilingual UI), 8.8 (Mobile i18n)
+> 28.33 [TODO] Mobile: Add Flutter intl + .arb files for UI-layer strings **PARTIAL, confirmed 2026-08-22:** `intl: ^0.20.2` and `flutter_localizations` are already in `pubspec.yaml`, but there is **no `lib/l10n/` directory and no `.arb` files** — the dependency is in place and the extraction work is not started. **CONFLICT noted 2026-09-27:** `app_localizations.dart` already ships a working flat `en`/`bn` dict + Riverpod toggle (the mechanism 8.8 actually wants) with only ~25 keys covered. Whoever picks this up decides once: extend that dict (cheaper, mirrors 37.7's Angular approach) or migrate to `.arb`/`intl_utils` — do not do both. Recommendation: extend the existing dict and close 28.33 as superseded by that decision, consistent with 28.32's resolution.
 > RELATES TO: 8.8 [TODO] i18n: Unified Localization (English + Bengali)
 
 ## WORK PACKAGE 34: ADMIN-MANAGED SITE CONTENT + MERGED NEWS & NOTICE BOARD (raised by user 2026-08-02)
@@ -654,6 +664,16 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
     - Verified: `dotnet build` clean; `dotnet test --filter "FullyQualifiedName~ElectionServiceTests"` (4/4, including a new `CastVoteAsync_AllowsVotingForDifferentSeatsInTheSameElection` regression test).
   - **37.1h Election module client redesign (web + mobile) [DONE 2026-09-25, depends on 37.1g].** Stages 1-4 shipped in commit `e7bafbfd` (`feat: election enngineering`): backend `GET /elections/current` + `GetCurrentAsync`, Angular model/service consolidation and admin/member/results rebuilds, new Flutter `screens/admin/election_management_screen.dart`, `ElectionServiceTests.cs`. Confirmed by diffing `e7bafbfd --stat` against this item's stage list and against `docs/specs/018-governance-elections-polls/spec.md`'s as-built FR evidence table (2026-09-25 audit) — not left as an assumption. A follow-up review of the Angular and Flutter election clients (not covered by 37.1g, which was backend-only) found the Angular member voting page calls three routes that don't exist on the backend at all (`GET /elections/current`, `GET /elections/{id}/results`, `POST /elections/{id}/ballot`), so voting through the web UI is broken in production today. Also found: two parallel, half-wired Angular model/service families (an unused-but-correct per-seat DTO set alongside a used-but-wrong whole-election set); no in-flight guard on Angular admin `publish`/`close`; a Flutter provider that reaches into a service's private field and swallows all errors; no per-seat voted tracking on either client; no Flutter admin election screen despite most of the service methods existing unused; dead `createdBy`-in-body code on both clients mirroring the identity-spoofing pattern already fixed server-side in 37.1g. Full spec at `docs/specs/011-election-module-redesign/spec.md`. Staged: (1) spec — this item; (2) backend `GET /elections/current` addition; (3) Angular rebuild against the real per-seat API, reusing the campaigns module's `saving`-signal pattern; (4) Flutter fixes + new admin election screen modeled on `governance_registry_screen.dart`; (5) doc sync + full three-client test run. Sequenced to stay inside the user's stated weekly usage cap — stage 2 (Angular, the currently-broken client) is prioritized over stage 4 (Flutter admin screen), and this item's status will be updated per stage actually completed rather than left ambiguous if the session stops early.
     - **37.1h-1 EC positions must come from org config, not the 15-GHC assumption [PLANNED, unblocked — 37.1h stages 2-4 shipped in e7bafbfd].** User instruction 2026-09-25: the 15-position committee is a GHC fact, not a platform one — another institution's EC shape has to come from configuration, never be assumed fixed. This is the same gap independently found and recorded as ENH-009 in `docs/specs/018-governance-elections-polls/spec.md` (reverse-engineered as-built baseline, 2026-09-25): `ECPosition` display labels already moved to `Lookups` (`SeedEcPositionLookup` migration), but the *set* of seats is still a fixed enum, and `AdminElectionsController.ParsePosition` free-text-matches against every enum value regardless of org. Design (added to spec 011, not a new spec — see "EC seat/position configurability" section there): org-scoped active-position list (which enum values, order, default seat count) sourced from `Lookups`/`OrgConfig`, same pattern WP62 already used for `MembershipType` via `membership-tiers.json`; new `GET /api/elections/positions` (or an `/api/config` addition); both clients' seat-creation UI reads it instead of a hardcoded list, also closing ENH-003 (governance.ts's duplicated position-order array) with the same source-of-truth change. Explicitly not in scope: letting an org invent a position name outside the enum's defined values — that still needs a code change, consistent with the "enum int values fixed" trap already accepted for `MembershipType`. Sequenced after 37.1h's stages 2-4 (fixing the currently-broken production voting flow stays higher priority than this architectural gap) inside the same 80%-of-week budget cap; stops cleanly and is marked `deferred` here if the cap is reached first.
+  - **Election standards review, 2026-09-27.** User asked that votes stay anonymous, that a voter can print their ballot, and that the engine be checked against normal election practice. Findings and requirements are in `docs/specs/023-election-ballot-secrecy-and-standards/spec.md`, phases in its `plan.md`. Open decisions: D1 receipt content (recommended: marked ballot plus tracking code, printable only on the confirmation screen), D2 tie rule (must match the constitution), D3 start date (before the next live election).
+  - **37.1i Ballot cannot be linked back to the voter [TODO] Priority: P0 | Depends on: none.** `CastVoteAsync` writes `SeatVote`, `Ballot` and `BallotVote` in one transaction with the same `UtcNow` and int identity keys, and `AuditLogMiddleware` logs each vote with user and time. Any of the four joins the ballot to the member, so the secret ballot claimed in 37.1c does not hold. The client can also pick the ballot serial (`ElectionService.cs:157`). Fix per spec 023 FR-001 to FR-004 and FR-010: holding table plus shuffled batch writer, GUID keys, no ballot time, server-made tracking code, vote audit entry with date only, correct the `ElectionsController.Vote` doc comment. Needs a migration and a `security-reviewer` pass.
+  - **37.1j Whole-ballot submit and step-up before voting [TODO] Priority: P0 | Depends on: 37.1i.** Votes go in one seat per request, so a dropped connection leaves a half-cast ballot, and voting needs no OTP step-up. Spec 023 FR-005, FR-006.
+  - **37.1k Phase guards on count, declare and candidates [TODO] Priority: P0 | Depends on: none.** `CountAsync` runs in any phase, so the tally can be read during polling. `SetPhaseAsync(Declared)` skips the `ECMember` rows that `DeclareAsync` writes. Admin add and remove candidate work in any phase, and add skips the roll check and scrutiny. Spec 023 FR-007 to FR-009.
+  - **37.1l Vote screen shows names, abstain, review and server voted state [TODO] Priority: P1 | Depends on: 37.1j.** Web shows "Seat {{seatId}}", casts on one click, has no abstain, and forgets the voted state on reload. Mobile has the same flow. Spec 023 FR-011 to FR-014; spec 011 criteria 9 to 11 and 14.
+  - **37.1m Printable receipt and published tracking codes [TODO] Priority: P1 | Depends on: 37.1i, 37.1l, decision D1.** No receipt exists. Web print stylesheet with `window.print()`, mobile PDF on the device, both built on the client only. Tracking-code list published after close with no choices. Spec 023 FR-015, FR-016 and its receipt and print standard.
+  - **37.1n Public results endpoint [TODO] Priority: P1 | Depends on: 37.1k.** `election-results.ts:25-27` calls the admin-only `POST /count`, so members and the public see nothing. New public read, Declared or Archived only, with zero-vote candidates, abstentions, spoiled ballots and turnout. Spec 023 FR-017.
+  - **37.1o Multi-place seats and tie rule [TODO] Priority: P2 | Depends on: 37.1k, decision D2.** `CountAsync` elects one candidate and ignores `SeatCount`; a tie elects no one. Spec 023 FR-018, FR-019.
+  - **37.1p Recount, candidate consent, officer conflict, spoiled and unopposed seats [TODO] Priority: P2 | Depends on: 37.1k.** None of these rules exist in code. Spec 023 FR-020 to FR-024. The unopposed rule and the recount window need the constitution checked first.
+  - **37.1q ER forms filled from records [TODO] Priority: P2 | Depends on: 37.1o.** The 16 ER forms are skeleton PDFs; ER-23, the count sheet, has no counts. Spec 023 FR-025.
 
 37.2 [DONE] **Priority: P4.** Specified in
 `docs/specs/003-alumni-programs-and-verification/spec.md` Story 4.
@@ -760,7 +780,7 @@ seeder/static content.
 
 # Work Package 43 — Application-wide exception handling & logging audit (raised by user 2026-08-27: "make sure entire application have propers exception handling with logging. best error management")
 
-47.13 [TODO] **Priority: P2.** **Mutation (POST/PUT/DELETE) coverage remediation — task breakdown.** 47.9 closed the top
+47.13 [DONE 2026-09-18] **Priority: P2.** **Mutation (POST/PUT/DELETE) coverage remediation — task breakdown.** 47.9 closed the top
 2 items (`RolesController.DeleteUser`, `AdminGovernanceController.DeleteECMember`). Remaining ~35%,
 broken into independently-completable tasks below. Common approach for all of them: one new
 `GHCAA.Tests/Controllers/*Tests.cs` file per controller, mocking the underlying service interface
@@ -1041,7 +1061,9 @@ Chapter 8 went next as the WP82.6 refactor left it well scoped; the remaining fo
 gathering done chapter by chapter.
 
 67.3 [TODO] **Priority: P2 | Depends on: 67.2.** Seventeen per-component activity diagrams (64.9)
-plus the six chapter-level charts, for chapters 7 to 13. Confirmed still at zero: none of the seven
+plus the six chapter-level charts, for chapters 7 to 13. Author decided on 2026-09-27 to keep all
+seventeen, drawn left-to-right with single-line box labels so each one costs as little height as
+possible (see 67.5). Confirmed still at zero: none of the seven
 new chapter files contains a single ```mermaid``` block (all 57 existing diagrams belong to chapters 1
 to 6). They cannot be drawn before the surrounding prose exists to hold them, and under Work Package 66
 every one of them has to survive the overprint and clipping checks, which the two quadrant charts and
@@ -1053,6 +1075,56 @@ are not stale: each was collected for a chapter in Part III or IV. The build rep
 while those parts are unwritten, and `--final` is the gate that stops accepting that excuse. Do not
 delete a reference to quieten the report; write the chapter that uses it, or remove it deliberately
 with the reason recorded here.
+
+67.5 [IN PROGRESS] **Priority: P1 | Depends on: none; 67.2 and 67.3 must be written to it.** The book
+has to print in under 100 pages from Chapter 1 to the References (decided 2026-09-27, replacing the
+150 to 200 page volume). Per-chapter budget is in the outline's "Page budget" block. Measured 102
+counted pages on 2026-09-27, with four chapters still stubs. Done so far: Part divider pages dropped,
+diagram enlargement capped at natural size, table rows compacted, tables over six rows allowed to
+split with the header repeated (`build.py`, `ieee-print.css`). Still open: about 14 pages of prose
+tightening, section merges under one heading naming both, and any cuts, each cut agreed by name with
+the author first. The whole pass also has to read as human-written and clear `lint.py` and `prose.py`.
+Decisions taken with the author on 2026-09-27: all 24 merges approved (M1 to M24, listed in 67.7).
+Cuts approved: 9.16 folds into 12.11, Threats to Validity; 13.3 becomes a one-line pointer to
+§12.8, where the research questions are answered. Kept: the chapter Summary sections and 1.11,
+Structure of the Dissertation. No figure is cut. Instead, tall figures are redrawn to run
+left-to-right with each box label on one line. The first four named are Fig. 1.2 (stakeholder
+onion), Fig. 1.4 (research question, objective and chapter map), Fig. 2.1 (study selection flow)
+and Fig. 2.2 (concept map of the reviewed literature). Every other diagram of the same tall shape
+gets the same treatment. Figs. 3.11, 3.12, 5.1 and 5.19 get the single-line redraw first, and the
+author sees the result before deciding whether any of them goes. Each redraw still has to fit one A4
+page with labels at 7pt or larger and no overlaps, and the build's diagram audit is the check.
+
+67.6 [DONE 2026-09-27] **Priority: P1 | Depends on: none; do before the 67.5 prose pass.** Page and word counts
+per chapter were measured by hand twice on 2026-09-27, and every edit in 67.5 needs them again. Add
+`docs/book/build/pages.py`: reads the built PDF, prints pages per chapter against the outline's
+budget table and words per section, and exits non-zero when the counted range passes 99. Wire it
+into `build.py --strict` so the budget is checked like the other rules. Budget figures come from the
+outline, not a second copy in code. **Acceptance:** `test_pages.py` covers a chapter over budget, a
+missing chapter and the total; `--strict` fails when the budget is broken.
+**Done:** `pages.py` and `test_pages.py` (14 tests) are in, and `build.py --pdf` runs the check on
+single-column builds. First count: 102 pages against 99. Writing it turned up a regression from
+dropping the Part dividers: `folios.body_start` fell back to page 1, so the contents page numbers
+all pointed at the contents itself. It now finds the first page that opens with a Part heading,
+and `test_pages.py` covers both layouts. The contents numbers in `00-front-matter.md` stay wrong
+until the next `--pdf` build refills them.
+
+67.7 [PARTIAL 2026-09-27] **Priority: P1 | Depends on: none; merge list confirmed 2026-09-27.** The 24 confirmed
+merges: 3.4+3.5, 3.6+3.7, 3.8+3.9, 3.11+3.12, 4.5+4.6, 5.3+5.4, 5.7+5.8, 6.4+6.6, 6.8+6.9,
+6.11+6.12, 6.13+6.14, 7.7+7.8+7.9, 8.5+8.6, 8.7+8.8, 8.13+8.14, 9.4+9.5, 9.7+9.8, 9.14+9.15,
+10.1+10.2+10.3, 10.5+10.6, 10.8+10.9, 10.10+10.11, 12.4+12.5+12.6, 13.1+13.2. Numbers are as of that
+date; apply them from the end of each chapter backwards so earlier numbers stay valid. Each one changes the heading, renumbers the later sections in the chapter and the
+outline, and rewrites every "§n.m" reference across the book. Add
+`docs/book/build/merge_sections.py`: dry run by default, `--apply` to write, one merge per call
+("3.11+3.12 'Feasibility Analysis and Requirements Validation'"). It moves no body text; joining the
+prose stays a manual edit. **Acceptance:** tests for a merge in the middle and at the end of a
+chapter, and for a cross-reference in another chapter; `build.py --strict` clean after a real merge.
+**Progress 2026-09-27:** the script is in, with 9 tests (the ninth checks that a CRLF file stays
+CRLF and an LF file stays LF). All 24 merges are applied to the chapters, the outline and wbs.py.
+6.4+6.6 was done by swapping 6.5 and 6.6 first, so Interface Design now sits above Data Design and
+the merged section is 6.4, Component and Interface Design. renumber.py rebuilt the contents, and
+`build.py --strict` reports no outline drift and no lint finding. Still open: the prose join at each
+dropped heading, which belongs to the 67.5 pass, and a `--pdf` build to refill the contents folios.
 
 72.4 [TODO] **Priority: P3.** Watch the first Dependabot run. Five ecosystems opening at once
 produces a burst even with the caps, and the grouping rules are a guess until they have been seen
@@ -1492,7 +1564,8 @@ logs it. **Acceptance:** the failure is logged as a warning and submission still
 counts (run 2026-09-25). Chapters 4, 7 and 11 quote 299 commits and 88 work packages, and the tree
 gives 304 and 90, after Work Packages 89 and 90 were added. On 2026-09-26 Work Package 91
 moved the tree to 306 commits and 91 work packages, and `wbs.py` now reports 61 of 91 work packages
-and 733 of 963 tasks as reactive. **Acceptance:** every figure `wbs.py`
+and 733 of 963 tasks as reactive. On 2026-09-27 the tree gave 308 commits, and Work Package 92
+makes it 92 work packages. **Acceptance:** every figure `wbs.py`
 quotes is re-sourced with its date, not only the two that failed, and
 `build.py --pdf --strict` reports no count drift.
 
@@ -1881,3 +1954,66 @@ needs the DTO, `BuildGhcaaDefaults()` and the golden snapshot changed together.
 only when a consumer asks: gallery, events with RSVP, mentorship, campaigns and scholarships,
 elections, and meetings once 84.19 is built.
 **Acceptance:** not started.
+
+# Work Package 92 — Configurable approval workflows (raised by user 2026-09-27: "if all available workflow approvals aren't configurable (enable/disable, with approval roles assignment) update relevant plan for that")
+<!-- wbs: component=C12 start=2026-09-27 end=2026-09-27 after=84 -->
+
+Audit on 2026-09-27 found no approval flow that can be switched off or given to a different role at
+runtime. Every approve and reject endpoint carries `[Authorize(Policy = Constants.Policies.AdminOnly)]`,
+which `ServiceExtensions.cs:119` resolves to SuperAdmin or Admin. `RolesController` can create a
+custom role, but that role opens no approval endpoint, because no policy reads it. The OrgConfig
+`Features` flags (`OrgConfigDto.cs:91-111`) turn a whole module on or off, not its approval step.
+One setting already exists: `MemberApprovalMode` (`OrgConfigDto.cs:116`, Auto or ManualReview,
+default ManualReview) shows in the web and mobile org-config screens, but no service reads it, so
+changing it does nothing.
+
+| Flow | Approve/reject | Today |
+|---|---|---|
+| Member registration | `AdminController.cs:95`, `:139` | always on, AdminOnly; `MemberApprovalMode` is saved but never read |
+| Event registration | `EventsController.cs:226`; auto-approved after a gateway payment (`PaymentCallbackOrchestrator.cs:105`) | always on, AdminOnly |
+| Gallery album and photo | `GalleryController.cs:240-264` | always on, AdminOnly |
+| Job posting | `JobHubController.cs:102`, `:110` | always on, AdminOnly |
+| News article | `NewsController.cs:137`, `:146` | always on, AdminOnly |
+| Election nomination | `ElectionsController.cs:90` | always on, AdminOnly |
+| Manual payment verification | `FinancialsController.cs:80-84` (`PATCH update-status/{id}`) | always on, AdminOnly |
+| Member import batch | `MemberImportController.cs` | AdminOnly |
+
+Out of scope: family-link requests (the recipient decides, not an approver role) and constitution
+amendments (a vote, not an approval). Scholarship applications have no approval step in code yet;
+when one is built it joins this mechanism rather than hardcoding
+AdminOnly. The pending-approvals queue (`PendingApprovalsController.cs:49`) has to follow the same
+settings. Related: WP40 added the gallery and job approvals; 84.1 holds the state-transition tables
+these flows must keep matching; 91.5 is the module flag, a different switch.
+
+92.1 [TODO] **Priority: P2 | Depends on: none.** Write spec 022 for configurable approvals. It has to
+settle four things with the user before any code: where the settings live (an `Approvals` section in
+OrgConfig, or its own table); what "off" means for each flow (create as approved, or skip the queue
+but keep an audit row); whether SuperAdmin can always approve regardless of the list (the protected
+SuperAdmin rule says yes); and whether member import stays SuperAdmin/Admin only. **Acceptance:** spec
+exists with the flow table above and the four answers recorded under "Decisions taken".
+
+92.2 [TODO] **Priority: P2 | Depends on: 92.1.** Backend. One settings record per flow: enabled, and
+the roles that may approve, defaulting to today's behaviour (enabled, SuperAdmin and Admin) so
+nothing changes on deploy. The member-registration entry takes over `MemberApprovalMode` rather than
+adding a second switch: Auto maps to off, ManualReview to on, and the registration path reads it. Flow keys and defaults go in `Constants`, not as literals. Replace
+`AdminOnly` on each approve and reject endpoint with a requirement that reads the flow's roles, kept
+behind an interface so it can move with the modules in WP91. When a flow is off, the create path
+sets the approved state and writes the audit entry. SuperAdmin-only endpoint to read and change the
+settings, with each change audited. **Acceptance:** unit tests per flow for on, off, an allowed role, a
+refused role and the default settings; the reflection-based authorization policy tests updated;
+SQLite and PostgreSQL migrations both apply.
+
+92.3 [TODO] **Priority: P2 | Depends on: 92.2.** Web admin. A SuperAdmin settings screen listing each
+flow with an on/off switch and a role picker fed from the roles `RolesController` returns, built from
+the existing admin form and toggle components. Approve and reject buttons, and the pending-approvals
+queue, show only flows the current user may approve. **Acceptance:** component tests for the screen
+and for the hidden buttons; a live check that a custom role given one flow sees only that flow's queue.
+
+92.4 [TODO] **Priority: P3 | Depends on: 92.2.** Mobile. Check which approval actions the Flutter app
+shows and gate them on the same settings, so a user never sees a button the API will refuse.
+**Acceptance:** widget tests for a shown and a hidden action.
+
+92.5 [TODO] **Priority: P3 | Depends on: 92.2.** Docs. Add the FR and NFR entries, update the spec 002
+state-transition tables, `business_flow` notes, `PROJECT_MAP.md`, and the book's role–permission
+matrix (§8.4, Authorisation Model) and Fig. 8.3. **Acceptance:** `build.py --pdf --strict` clean for the
+book changes.

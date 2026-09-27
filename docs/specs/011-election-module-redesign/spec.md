@@ -157,6 +157,19 @@ This spec applies the same pattern to `ECPosition`, not a bigger one:
    `AdminElectionsController.ParsePosition` rejects a position not in the caller's org's active
    list rather than matching against the full enum.
 
+Added 2026-09-27 from spec 023, election ballot secrecy and standards (Phase 2 there):
+
+9. Both clients show seats by position title and candidates by name, not by seat id.
+10. Both clients take a whole ballot with an abstain choice per seat, show a review page, and
+    send one request on confirm.
+11. Voted state is read from the server on load, so a reload or a second device shows "You
+    have voted".
+12. After voting, the confirmation screen offers a receipt to print (web) or save as PDF
+    (mobile). The receipt is built on the client and cannot be fetched from the server later.
+13. The results page reads a public results endpoint, not the admin-only `/count`. Criterion 2
+    above is replaced by this one when spec 023 Phase 2 ships.
+14. Flutter no longer sends a ballot serial number.
+
 ## Evidence
 
 To be filled in as each stage lands — see `docs/TODO.md` item 37.1h for stage-by-stage status.

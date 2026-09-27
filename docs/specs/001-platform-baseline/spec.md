@@ -64,6 +64,7 @@ repeat them.
 | [010](../010-election-engine-fixes/spec.md) | Election engine and post-ship fixes |
 | [011](../011-election-module-redesign/spec.md) | Election module client redesign |
 | [021](../021-pluggable-feature-modules/spec.md) | Pluggable feature modules (deferred, Work Package 91) |
+| [023](../023-election-ballot-secrecy-and-standards/spec.md) | Election ballot secrecy and standards (draft, Work Package 37 items 37.1i to 37.1q) |
 
 Two folders share the number 010. Tracker item 84.31 in docs/TODO.md decides whether one is
 renumbered.

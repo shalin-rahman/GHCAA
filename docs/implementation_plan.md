@@ -1,5 +1,9 @@
 # Implementation Plan - Centralized Theme and Shared Control Completion
 
+> **Status: delivered (Work Package 82, items 82.71 to 82.79, closed).** The closed items are in
+> `docs/TODO_ARCHIVE.md`. The approved-exceptions list below is still the reference for why those
+> screens keep their own styles.
+
 ## Scope
 
 Complete the remaining work after commit `035e890` and its follow-up

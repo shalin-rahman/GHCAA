@@ -2,7 +2,9 @@
 
 Beyond code/build/tests, this plan validates **whether the product behaves correctly for alumni, admins, and the association's business rules**.
 
-**Repo:** `C:\Users\u1074139\workstation\Study\gh`  
+> **Status: audit snapshot of 2026-07-03.** Findings and their fixes are tracked in `docs/TODO.md`
+> and `docs/TODO_ARCHIVE.md`; check there before treating a finding here as open.
+
 **Last updated:** 2026-07-03 (Phase 3 Web E2E)
 
 ---

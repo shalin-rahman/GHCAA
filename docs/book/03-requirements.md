@@ -4,11 +4,11 @@ This chapter is written to the structure of ISO/IEC/IEEE 29148 [21]. Requirement
 "shall" form, each with an identifier, a source and a priority, and each traceable forward through
 the design and test artefacts in Table 3.4. Quality requirements are classified by ISO/IEC 25010
 characteristic [6] and cross-referenced to FURPS+ [23], and each is restated as a quality-attribute
-scenario in §3.5 so that it can be tested rather than merely asserted.
+scenario in §3.4 so that it can be tested rather than merely asserted.
 
 One property of this specification distinguishes it from a conventional one. A substantial part of
 the requirement set is not negotiable with the stakeholders, because it is dictated by the
-Association's constitution and its election documents. Those constraints are collected in §3.10 and
+Association's constitution and its election documents. Those constraints are collected in §3.7 and
 carry DC identifiers, and every functional requirement they govern cites the article and section
 concerned. Where a stakeholder wish conflicted with a constitutional clause, the clause won; §3.2
 records the three occasions on which that happened.
@@ -22,8 +22,8 @@ value R marks the few that arrived after elicitation had closed, as dated reques
 any of them.
 
 How each source was worked, who took part, how they were chosen and what instruments were used are
-part of the research method, and are set out in §4.7. The ethical position, both on the people who
-took part and on the live member data the platform holds, is in §4.9. This chapter takes the
+part of the research method, and are set out in §4.6. The ethical position, both on the people who
+took part and on the live member data the platform holds, is in §4.8. This chapter takes the
 elicitation output as given and specifies from it.
 
 ## 3.2 Requirements Analysis and Negotiation
@@ -37,7 +37,7 @@ contact details, on the reasonable argument that a directory nobody can use is n
 Several members, asked directly, objected to their mobile number being visible to a membership of
 several hundred people they do not all know. The resolution was a masked projection by default with
 per-field opt-in disclosure controlled by the owning member, specified in FR-03 and FR-05 and
-implemented as the masking protocol in §8.11, on personal data. Officers retain unmasked access for administrative
+implemented as the masking protocol in §8.9, on personal data. Officers retain unmasked access for administrative
 purposes, which is itself logged. This satisfies neither party completely and is recorded as such.
 
 **Automatic termination for non-payment against Article X.** An early requirement, offered by an
@@ -57,21 +57,21 @@ banking relationship it has not yet established, and would in the interim have h
 collections through an individual's personal account, which is the arrangement the project exists to
 end. The resolution was to design the manual path as primary, with proof upload and officer
 verification, and to leave the gateway abstraction in place but unconfigured so that adoption later
-is a configuration change and not a redesign. The reasoning is set out in full in §8.9, and the
+is a configuration change and not a redesign. The reasoning is set out in full in §8.7, and the
 consequence, which is a permanent administrative burden of some minutes per payment, is quantified
-in §12.6 rather than glossed.
+in §12.4 rather than glossed.
 
 Two further analysis outcomes are worth recording. Requirements arriving as solutions were rewritten
 as needs; the request for "a Facebook login button" became FR-10, stated as a requirement to reduce
 the credential burden at first contact, which admits other means. And several requested features
-were classified as out of scope rather than deferred, so that the MoSCoW table in §3.8 does not
+were classified as out of scope rather than deferred, so that the MoSCoW table in §3.6 does not
 carry items that were never going to be built.
 
 ## 3.3 Requirements Specification
 
 The requirement catalogue is Table 3.1 and the non-functional catalogue Table 3.2; both are set as
 the tables of §3.3 and §3.4 rather than repeated at the end of the chapter.
-Priorities use MoSCoW as in §3.8: M must, S should, C could, W won't in this release. The Source
+Priorities use MoSCoW as in §3.6: M must, S should, C could, W won't in this release. The Source
 column records D for document analysis with the clause cited where applicable, I for interview, O for
 observation, C for competitor analysis, and R for a dated stakeholder request recorded in the project
 tracker `docs/TODO.md` after the original elicitation had closed.
@@ -160,7 +160,7 @@ paper ledger lacked.
 The payment channels the Association actually uses are mobile financial services, principally bKash
 and Nagad, bank transfer, and cash received by an officer. In every case the money moves outside the
 platform. What the platform holds is the member's claim, the evidence and the officer's verification.
-It holds no payment credential of any kind, and §8.9 argues that this is a security position and not
+It holds no payment credential of any kind, and §8.7 argues that this is a security position and not
 only a limitation.
 
 ### 3.3.5 News, Notices and Communication
@@ -206,8 +206,8 @@ implementation is described in §8.4.
 The relationship between FR-36, FR-37 and FR-39 is the substance of this project's answer to RQ3.
 The system decides eligibility, which is a question of fact traceable to Article III Section B and to
 the standing computation of FR-24, and it records the count. It does not declare adoption, and it
-does not touch the ballot for office at all. The reasoning is in §2.7, the mechanism in §5.6, and
-the defence in §8.10.
+does not touch the ballot for office at all. The reasoning is in §2.7, the mechanism in §5.5, and
+the defence in §8.8.
 
 ### 3.3.7 Administration, Configuration and Site Content
 
@@ -251,7 +251,7 @@ I for that reason: what survives is the request and the date, not the discussion
 requirements were specified from the request and then implemented, rather than reconstructed from the
 shipped code afterwards.
 
-## 3.4 Non-Functional Requirements
+## 3.4 Non-Functional Requirements and Quality-Attribute Scenarios
 
 Classified by ISO/IEC 25010:2011 characteristic [6], with the FURPS+ category in brackets for
 cross-reference [23]; Figure 3.11 shows the classification as a tree, and Figure 3.12 the goal model
@@ -299,8 +299,8 @@ system being "intuitive".
 
 | ID | Requirement and acceptance criterion |
 | --- | --- |
-| NFR-U1 | The system shall meet WCAG 2.1 level AA for all member-facing pages [24]. Criterion: automated audit clean, plus manual keyboard and contrast checks recorded in §9.11. |
-| NFR-U2 | Registration shall be completable on a handset in a single sitting by a member without assistance. Criterion: task completion rate and time reported in §12.6. |
+| NFR-U1 | The system shall meet WCAG 2.1 level AA for all member-facing pages [24]. Criterion: automated audit clean, plus manual keyboard and contrast checks recorded in §9.9. |
+| NFR-U2 | Registration shall be completable on a handset in a single sitting by a member without assistance. Criterion: task completion rate and time reported in §12.4. |
 | NFR-U3 | The system shall obtain a System Usability Scale score of at least 68, the published average, from member participants [33]. |
 | NFR-U4 | Every error presented to a user shall state what happened and what to do next, and shall not expose an internal identifier, stack trace or provider message. |
 | NFR-U5 | All member-facing text shall support Bengali content and shall render Bengali script correctly in all clients, including generated documents. |
@@ -310,7 +310,7 @@ system being "intuitive".
 | ID | Requirement and acceptance criterion |
 | --- | --- |
 | NFR-R1 | Monthly availability of the production service shall be at least 99 percent, excluding announced maintenance. |
-| NFR-R2 | A daily backup of the production database shall be taken and its restoration verified at least quarterly. Criterion: restoration drill recorded in §10.8. |
+| NFR-R2 | A daily backup of the production database shall be taken and its restoration verified at least quarterly. Criterion: restoration drill recorded in §10.5. |
 | NFR-R3 | No single user action shall be capable of destroying a membership or financial record; archival deletion per FR-44 shall be the only deletion available through the interface. |
 | NFR-R4 | A failed external dependency, being mail delivery or file storage, shall degrade the affected function only and shall not prevent authentication or read access. |
 | NFR-R5 | A vote cast by an eligible voter shall be recorded at most once, even where the casting request is submitted more than once for the same voter and election. Criterion: the vote is only ever marked cast by a single conditional database update scoped to an unvoted voter roll row, so a second submission for the same voter finds no row left to update; verified in `ElectionServiceTests.CastVoteAsync_RejectsReplayAfterTheFirstVote`, which exercises a first-then-second sequential resubmission rather than two literally simultaneous requests. |
@@ -325,7 +325,7 @@ system being "intuitive".
 | NFR-S3 | Authentication attempts shall be limited to 5 per minute per source, registration to 10 per 5 minutes, and general API access to 100 per minute. |
 | NFR-S4 | National identity number, mobile number and email address shall each be unique across members, enforced in the database and not only in application code. |
 | NFR-S5 | A change of a member's credentials, roles or status shall invalidate all outstanding sessions for that member within one request. |
-| NFR-S6 | No resource shall be retrievable by a user not entitled to it by role or ownership. Criterion: the authorisation test suite of §9.9 exercises each protected endpoint with an unentitled principal. |
+| NFR-S6 | No resource shall be retrievable by a user not entitled to it by role or ownership. Criterion: the authorisation test suite of §9.7 exercises each protected endpoint with an unentitled principal. |
 | NFR-S7 | Uploaded files shall be validated by declared type, actual content signature and size, stored outside the web root, and served only through an authorising endpoint. |
 | NFR-S8 | Member-supplied rich text shall be sanitised on the server before storage. |
 | NFR-S9 | A member's request for his own communication history shall be scoped to that member's identity as carried in his own authenticated token, never by a client-supplied member identifier, and the equivalent view of another member's history shall be reachable only under the administrative authorisation policy. |
@@ -335,7 +335,7 @@ system being "intuitive".
 | ID | Requirement and acceptance criterion |
 | --- | --- |
 | NFR-M1 | The dependency rule shall hold: no compile-time dependency shall point from an inner layer to an outer one. Criterion: architecture test in §9.4 fails the build on violation. |
-| NFR-M2 | A routine change of the kind catalogued in §9.14, being the addition of a field to an existing entity end to end, shall be completable by the maintainer within one working session. |
+| NFR-M2 | A routine change of the kind catalogued in §9.12, being the addition of a field to an existing entity end to end, shall be completable by the maintainer within one working session. |
 | NFR-M3 | The automated suite shall run to completion in under 10 minutes on the integration runner, so that it is actually run. |
 | NFR-M4 | The system shall be operable by one maintainer with no on-call obligation, and shall require no scheduled manual intervention more often than monthly. |
 
@@ -347,11 +347,9 @@ system being "intuitive".
 | NFR-Po2 | A complete environment shall be reproducible from the repository and a documented set of configuration values, with no undocumented manual step. |
 | NFR-Po3 | The Association's data shall be exportable in full in an open format on demand. |
 
-## 3.5 Quality-Attribute Scenarios
-
-Each scenario is stated in the six-part form of Bass, Clements and Kazman: source, stimulus,
-artefact, environment, response, response measure [13]. These are the scenarios carried into the
-utility tree of Figure 3.10 and into the design verification of §6.14. Eleven are given here; the
+The requirements above are tested through quality-attribute scenarios, each stated in the six-part
+form of Bass, Clements and Kazman: source, stimulus, artefact, environment, response, response measure [13]. These are the scenarios carried into the
+utility tree of Figure 3.10 and into the design verification of §6.10. Eleven are given here; the
 remainder are in `docs/SRS.md`.
 
 | ID | NFR | Source | Stimulus | Artefact | Environment | Response | Response measure |
@@ -361,7 +359,7 @@ remainder are in `docs/SRS.md`.
 | QAS-03 | NFR-S5 | Administrator | Terminates a membership while that member holds a valid access token | API, session store | Normal operation | The member's next request is rejected | Within one request; no successful authenticated call after the act |
 | QAS-04 | NFR-S6 | Authenticated member | Requests another member's payment record by identifier | API authorisation | Normal operation | Access refused, attempt recorded | 0 unauthorised disclosures across the enumerated protected endpoints |
 | QAS-05 | NFR-R4 | Mail provider | Becomes unavailable for 30 minutes | Notification component | Production | Authentication and reads continue; queued mail is retried or reported | 0 failed sign-ins attributable to the outage |
-| QAS-06 | NFR-M2 | Maintainer | Adds one field to an existing entity through to both clients | Whole stack | Development | Change completed with the suite green | ≤ 1 working session; file-touch count reported in §9.14 |
+| QAS-06 | NFR-M2 | Maintainer | Adds one field to an existing entity through to both clients | Whole stack | Development | Change completed with the suite green | ≤ 1 working session; file-touch count reported in §9.12 |
 | QAS-07 | NFR-M1 | Maintainer | Introduces a dependency from the domain layer onto the persistence layer | Build | Continuous integration | Build fails with the violation named | Detected on the first run, before merge |
 | QAS-08 | NFR-F2 | Examiner | Asks which code enforces the constitutional restriction on who may vote | Source and specification | Review | A single traced location is produced | Trace from Art. III §B to DC-03 to FR-36 to a named test |
 | QAS-09 | NFR-R2 | Maintainer | Loses the production database | Backup and restore procedure | Disaster | Service restored from backup | ≤ 4 hours; ≤ 24 hours of data lost |
@@ -372,7 +370,7 @@ QAS-08 is not a conventional quality scenario and is included deliberately. Audi
 trace is treated here as a first-class quality attribute, because it is the property that
 distinguishes this artefact from the configured alternatives assessed in §2.10.
 
-## 3.6 Use-Case Modelling
+## 3.5 Use Cases, User Stories and the Definition of Done
 
 The system-level model is Figure 3.1, decomposed by subsystem into membership (Figure 3.2), events
 (Figure 3.3), payments (Figure 3.4), governance (Figure 3.5) and administration (Figure 3.6). The actor
@@ -386,9 +384,7 @@ position can exist in the record without conferring system access.
 
 Table 3.3 gives the ten highest-value use cases in full. The remainder are in `docs/SRS.md`.
 
-## 3.7 User Stories, Acceptance Criteria and the Definition of Done
-
-Requirements were carried into delivery as user stories in the form Cohn describes [45], with
+Alongside the use cases, requirements were carried into delivery as user stories in the form Cohn describes [45], with
 acceptance criteria in given-when-then form. The stories do not replace this specification; they
 decompose it, and each cites the requirement it serves. Two representative examples:
 
@@ -415,7 +411,7 @@ applicable, sanitisation are present; the traceability matrix is updated; user-f
 NFR-U4 and NFR-U5; the change is deployed to the pre-production environment and exercised there; and
 the documentation affected is updated in the same change rather than later.
 
-## 3.8 Requirements Prioritisation
+## 3.6 Requirements Prioritisation and Traceability
 
 Table 3.5 records the prioritisation and what was negotiated to reach it. The counts are over
 FR-01 to FR-55 as they stand at the time of writing:
@@ -431,7 +427,7 @@ Constitutional mandate was treated as automatically Must, which removed a third 
 prioritisation argument before it began. The Won't set comprises live gateway payment, binding
 election balloting, statutory accounting output, offline-first mobile synchronisation, a native
 desktop client, machine-learning recommendation, an external language-model assistant, and
-multi-organisation tenancy. Each is recorded with its reason in §1.7 or §13.4.
+multi-organisation tenancy. Each is recorded with its reason in §1.7 or §13.2.
 
 Two prioritisation decisions are worth exposing because they were contested. Real-time messaging
 (FR-31) was reduced from Should to Could, on the ground that members already have working messaging
@@ -440,13 +436,12 @@ Gamification of engagement, requested with some enthusiasm, was excluded entirel
 literature of §2.3 gives no support for points and badges as a driver of the behaviour the
 Association actually wants, and the maintenance cost is permanent.
 
-## 3.9 Requirements Traceability
-
-Traceability here is a working obligation, not a document produced at the end. Gotel and Finkelstein
+Each prioritised requirement was also traced. Traceability here is a working obligation, not a
+document produced at the end. Gotel and Finkelstein
 established that the traceability problem is principally one of pre-requirements-specification
 traceability, meaning the ability to establish where a requirement came from and why [47]. In this
 project the answer is frequently a constitutional clause, which makes the trace unusually verifiable:
-a reviewer can read Article III Section B and follow it to DC-03, to FR-36, to the rule in §5.6, to
+a reviewer can read Article III Section B and follow it to DC-03, to FR-36, to the rule in §5.5, to
 the guard in the governance service, and to the named test.
 
 Table 3.4 records requirement to use case to design element to implementation artefact to test case.
@@ -460,9 +455,9 @@ tests themselves carry no requirement or constraint identifier, so the same trac
 from the code and read back. The matrix is therefore maintained by hand and could drift from the
 suite without anything failing. §9.4.5 and Table 9.9 close the governance half of that gap by naming
 the test for each domain constraint; making the whole matrix machine-checkable would need the tests
-tagged, which is recorded as future work in §13.4 rather than claimed here.
+tagged, which is recorded as future work in §13.2 rather than claimed here.
 
-## 3.10 Domain Constraints
+## 3.7 Domain Constraints
 
 These are the rules the software may not violate, listed in Table 3.6. They derive from the
 constitution at version 4.2 and from the election documents, and each cites its source. Where the wording below abbreviates the
@@ -491,28 +486,28 @@ between a rule and a program.
   publish, inform and record around it, and must not perform it, because performing it would move
   authority to whoever administers the server.
 
-The classification is used again in §12.8 to answer RQ3, where the boundary it draws is the answer
+The classification is used again in §12.6 to answer RQ3, where the boundary it draws is the answer
 rather than a preliminary to it. Its value is that the line between what software may do and what it
 must leave alone stops being a matter of the designer's restraint and becomes a property of the rule,
 readable from the constitution before any code is written.
 
 | ID | Constraint | Class | Source | Enforced by |
 | --- | --- | --- | --- | --- |
-| DC-01 | The Association's name, crest and motto shall be used only as the constitution prescribes, and the college's institutional identity shall not be represented as the Association's own. | Deterministic | Art. I §5 | FR-46, §7.9 |
-| DC-02 | The Association shall be non-political; no member shall use it for partisan purpose, and a Founding Member holding partisan office is suspended automatically. | Evidence | Art. I, Art. III, Art. VII | FR-24, §5.6 |
+| DC-01 | The Association's name, crest and motto shall be used only as the constitution prescribes, and the college's institutional identity shall not be represented as the Association's own. | Deterministic | Art. I §5 | FR-46, §7.7 |
+| DC-02 | The Association shall be non-political; no member shall use it for partisan purpose, and a Founding Member holding partisan office is suspended automatically. | Evidence | Art. I, Art. III, Art. VII | FR-24, §5.5 |
 | DC-03 | Only Founding, Executive and General members may vote. Associate, Honorary and Advisory members may not. | Deterministic | Art. III §B | FR-36, FR-38 |
-| DC-04 | Founding membership requires at least twenty years since higher secondary completion, a bachelor's degree, documented contribution to the Association or the college, no partisan office, and a signed non-political declaration. | Evidence | Art. III | Administrative, recorded; §5.6 |
-| DC-05 | Executive membership requires at least ten years since completion, existing General membership in good standing, and a meeting-attendance record of at least sixty percent. | State | Art. III | Administrative, recorded; §5.6 |
+| DC-04 | Founding membership requires at least twenty years since higher secondary completion, a bachelor's degree, documented contribution to the Association or the college, no partisan office, and a signed non-political declaration. | Evidence | Art. III | Administrative, recorded; §5.5 |
+| DC-05 | Executive membership requires at least ten years since completion, existing General membership in good standing, and a meeting-attendance record of at least sixty percent. | State | Art. III | Administrative, recorded; §5.5 |
 | DC-06 | Every membership tier is assigned by the Association; an applicant may not select a tier, and Honorary membership requires a two-thirds decision of the Executive Committee. | Procedural | Art. III | FR-01, FR-41 |
 | DC-07 | Membership shall be terminated only by the disciplinary procedure, with notice and a right of appeal exercisable within fifteen working days; false information in an application is ground for immediate termination under that procedure. | Procedural | Art. III §E, Art. X | FR-24, §3.2 |
 | DC-08 | An application shall be verified within thirty days of submission. | State | Art. III §E | FR-23 |
 | DC-09 | The Executive Committee comprises fifteen positions, thirteen elected and two ex officio without vote, for a term of three years. | Deterministic | Art. IV | FR-34 |
 | DC-10 | For the first fifteen years, three elected positions, being President, General Secretary and Treasurer, are reserved for Founding Members. | Deterministic | Art. IV | FR-34, FR-38 |
-| DC-11 | The Executive Committee shall meet at least half-yearly, with a quorum of fifty percent of elected members; Advisory members are excluded from the quorum computation. | State | Art. IV, Art. III | FR-34, §5.6 |
+| DC-11 | The Executive Committee shall meet at least half-yearly, with a quorum of fifty percent of elected members; Advisory members are excluded from the quorum computation. | State | Art. IV, Art. III | FR-34, §5.5 |
 | DC-12 | Elections for all voting members in good standing shall be held every three years, conducted under the authority of Article V and the election documents. | Authority | Art. V | FR-38, FR-39 |
 | DC-13 | An amendment may be proposed by the Executive Committee or by a petition of twenty percent of Voting Members, shall be circulated at least fourteen days before the Annual General Meeting, and requires a two-thirds majority at that meeting. | Procedural | Art. VIII | FR-35, FR-37 |
 | DC-14 | Financial records shall be maintained and reported to the membership; the Treasurer is accountable for receipts and disbursements. | Deterministic | Art. VI | FR-21, FR-25, FR-44 |
-| DC-15 | The conduct of a ballot, its sealing, counting and the declaration of result rest with the Election Commission under the election documents, and not with the platform. | Authority | Art. V, election regulations, ballot sealing certificate, counting authorisation | FR-39, §8.10 |
+| DC-15 | The conduct of a ballot, its sealing, counting and the declaration of result rest with the Election Commission under the election documents, and not with the platform. | Authority | Art. V, election regulations, ballot sealing certificate, counting authorisation | FR-39, §8.8 |
 | DC-16 | The constitution in force is the latest ratified version by effective date; earlier versions are superseded and retained, not destroyed. | Deterministic | Art. VIII | FR-32, FR-33 |
 
 DC-04 and DC-05 are the pair that shows why the classification is not a matter of degree. They read
@@ -531,14 +526,14 @@ declaration of the result with the Election Commission. The platform publishes t
 and the timetable, records who is eligible under DC-03, and does nothing else. That is a deliberate
 refusal rather than an unimplemented feature: a system that also counted the votes would make the
 Association's most contested decision depend on the integrity of whoever holds the server
-credentials, which in this deployment is one unpaid volunteer. Section 8.10 states the same boundary
-as a security position, and §12.8 treats it as the substantive answer to RQ3.
+credentials, which in this deployment is one unpaid volunteer. Section 8.8 states the same boundary
+as a security position, and §12.6 treats it as the substantive answer to RQ3.
 
 DC-16 is the reason no page in this system names a constitution version. The reader always resolves
 the version in force, so a page cannot become stale by pointing at a superseded document, which was
 one of the observed failures of the Facebook-attachment era.
 
-## 3.11 Feasibility Analysis
+## 3.8 Feasibility Analysis and Requirements Validation
 
 Table 3.7 summarises the four dimensions assessed below.
 
@@ -549,32 +544,31 @@ outside a conventional transactional web system: the heaviest single computation
 directory search, and the largest single artefact is a generated PDF. Feasible.
 
 **Economic.** Development cost is the maintainer's unpaid time. Operating cost comprises a managed
-database, a container host, a domain name and outbound mail, for which §10.10 gives the model and the
+database, a container host, a domain name and outbound mail, for which §10.6 gives the model and the
 actual figures; the total is of the order of tens of dollars a year, against a commercial alternative
 whose annual licence exceeds the Association's annual income. The economic case is not marginal.
 Feasible.
 
 **Operational.** The binding risk is not the software but the administrative workload the manual
-payment path creates, and the availability of officers to discharge it. Section 12.6 measures that
-workload rather than assuming it away, and §13.4 identifies it as the principal candidate for future
+payment path creates, and the availability of officers to discharge it. Section 12.4 measures that
+workload rather than assuming it away, and §13.2 identifies it as the principal candidate for future
 reduction. Feasible with a stated and quantified reservation.
 
 **Schedule.** Delivery was incremental with a working system after each increment, so schedule risk
-manifests as reduced scope rather than as no system, and the Could set of §3.8 is the declared
+manifests as reduced scope rather than as no system, and the Could set of §3.6 is the declared
 shock absorber. Chapter 11 reports what was actually delivered against plan, including the two
 increments that slipped. Feasible.
 
 **Legal and ethical.** The system holds national identity numbers, dates of birth, photographs and
 financial evidence for real people. Bangladesh's data protection statute was in draft at the time of
-writing, so the project cannot claim compliance with it and does not; instead §8.11 records the
+writing, so the project cannot claim compliance with it and does not; instead §8.9 records the
 principles applied, being purpose limitation, minimisation, default non-disclosure and stated
 retention, and the front-matter declaration records the basis on which live data was handled during
 development. Use of the college's name and crest is governed by DC-01. Feasible, with the
 declarations made explicitly rather than implied.
 
-## 3.12 Requirements Validation and Formal Technical Review
-
-Validation used four means, each aimed at a defect class the others miss.
+Once judged feasible, the requirements were validated by four means, each aimed at a defect class
+the others miss.
 
 **Constitutional cross-check.** Every DC entry was checked back against the clause it claims to
 derive from, and every article of the constitution was checked forward for software consequences not
@@ -631,7 +625,7 @@ requirements FR-38 and FR-39 are validated against documents rather than against
 volume assumptions behind NFR-P1 and NFR-P5 are estimates, since the true membership size was
 unknown at specification time, which was itself one of the problems the project set out to solve.
 
-## 3.13 Specification-Driven Development and the Spec Kit Artefacts
+## 3.9 Specification-Driven Development and the Spec Kit Artefacts
 
 The requirements in §3.3 and §3.4 are written at the level an examiner or an officer of the
 Association reads. A second, finer specification sits beside them in the repository under
@@ -645,7 +639,7 @@ The toolkit is installed at version 1.0.9.dev0 under `docs/specs/.specify`, with
 specify, clarify, plan, tasks, analyze, checklist, implement, converge, constitution and
 taskstoissues. Its governing file is a specification constitution at
 `docs/specs/.specify/memory/constitution.md`. This is not the Association's Constitution v4.2 of
-§3.10, where the domain constraints come from. It is a short set of five engineering principles
+§3.7, where the domain constraints come from. It is a short set of five engineering principles
 that every spec must respect: preserve the existing product contract, trace shared behaviour across
 all clients, keep boundaries clear, treat security and privacy as requirements, and verify with
 repository checks. The second and fifth principles shape the specs most. A requirement that touches
@@ -677,7 +671,7 @@ built. For most of the system the order the method prescribes was reversed: the 
 the spec was reverse-engineered from it in a fixed reading order of entities, DTOs and validators,
 services, controllers, clients and tests. The domain specs are therefore a record of what the
 platform does, not evidence that a specification drove its construction, and this dissertation does
-not claim the second. What the late adoption does give is the trace of §3.9 started from the other
+not claim the second. What the late adoption does give is the trace of §3.6 started from the other
 end. An Evidence row begins at a requirement and names the code and the test, and a Gaps entry makes
 an untested requirement visible instead of leaving it to be found. Writing the specs also found real
 defects. Seven were fixed and tested on 26 September 2026 under TODO 84.15, 84.24, 84.26, 84.30,
@@ -686,7 +680,7 @@ error and a gallery upload that refused system administrators. An eighth, TODO 8
 the FluentValidation validators are registered but never run on a request, so the rules they state
 are not enforced at the boundary.
 
-## 3.14 Summary
+## 3.10 Summary
 
 Fifty-five functional requirements, thirty-seven non-functional requirements across the eight ISO/IEC
 25010 characteristics, sixteen domain constraints traced to constitutional and electoral sources, and
@@ -699,7 +693,7 @@ is the specification's principal contribution to the answer to RQ3, and Chapter 
 modelled rules.
 
 Beside that catalogue, nine as-built domain specs under `docs/specs/` restate the platform as 312
-smaller requirements, each with its evidence or a recorded gap, as §3.13 describes. They were
+smaller requirements, each with its evidence or a recorded gap, as §3.9 describes. They were
 written after the code rather than before it, and are reported as a record of the built system.
 
 ---
@@ -712,14 +706,13 @@ written after the code rather than before it, and are reported as a record of th
 flowchart LR
     G(( Guest )):::a
     M(( Member )):::a
+    AD(( Admin )):::a
     V(( Voting Member )):::a
     E(( EC Member )):::a
-    AD(( Admin )):::a
     SA(( SuperAdmin )):::a
     EC(( Election Commission )):::a
 
     subgraph SYS["GHCAA Platform"]
-      direction TB
       P1[["Membership and Profile"]]
       P2[["Authentication and Session"]]
       P3[["Events"]]
@@ -737,17 +730,17 @@ flowchart LR
     M --> P3
     M --> P4
     M --> P5
-    V --> P6
-    E --> P6
-    E --> P5
     AD --> P1
     AD --> P3
     AD --> P4
     AD --> P5
     AD --> P6
     AD --> P7
-    SA --> P7
-    EC --> P6
+    P6 --> V
+    P6 --> E
+    P5 --> E
+    P7 --> SA
+    P6 --> EC
 
     classDef a fill:#eef,stroke:#446
 ```
@@ -755,37 +748,34 @@ flowchart LR
 ### Figure 3.2 — Membership subsystem use cases
 
 ```mermaid
-flowchart LR
-    G(( Guest )):::a
-    M(( Member )):::a
-    AD(( Admin )):::a
-    subgraph S["Membership and Profile"]
-      U1(Submit application)
-      U2(Resume saved application)
-      U3(Track application status)
-      U4(Maintain profile)
-      U5(Set field visibility)
-      U6(Search directory)
-      U7(View own standing)
-      U8(Obtain digital ID card)
-      U9(Review pending application)
-      U10(Approve or reject application)
-      U11(Assign membership tier)
-      U12(Change membership status with reason)
+flowchart TB
+    subgraph RG[" "]
+      direction TB
+      G(( Guest )):::a --> U1(Submit application)
+      G --> U2(Resume saved application)
+      G --> U3(Track application status)
     end
-    G --> U1
-    G --> U2
-    G --> U3
-    M --> U4
-    M --> U5
-    M --> U6
-    M --> U7
-    M --> U8
-    AD --> U9
-    AD --> U10
-    AD --> U11
-    AD --> U12
-    U10 -.->|includes| U11
+    subgraph RM[" "]
+      direction TB
+      M(( Member )):::a --> U4(Maintain profile)
+      M --> U5(Set field visibility)
+      M --> U6(Search directory)
+      M --> U7(View own standing)
+      M --> U8(Obtain digital ID card)
+    end
+    subgraph RA[" "]
+      direction TB
+      AD(( Admin )):::a --> U9(Review pending application)
+      AD --> U10(Approve or reject application)
+      AD --> U11(Assign membership tier)
+      AD --> U12(Change membership status with reason)
+      U10 -.->|includes| U11
+    end
+    RG --> RM --> RA
+    linkStyle 13,14 stroke:none
+    style RG fill:none,stroke:none
+    style RM fill:none,stroke:none
+    style RA fill:none,stroke:none
     classDef a fill:#eef,stroke:#446
 ```
 
@@ -859,14 +849,14 @@ flowchart LR
     subgraph S["Governance"]
       U1(Read constitution in force)
       U2(Read amendment history)
+      U10(Run non-binding poll)
+      U5(Cast amendment vote)
+      U9(Publish candidate information and results)
+      U8(Produce voter roll)
       U3(Publish a ratified version)
       U4(Open amendment proposal for voting)
-      U5(Cast amendment vote)
-      U6(Report amendment vote counts)
       U7(Maintain Executive Committee record)
-      U8(Produce voter roll)
-      U9(Publish candidate information and results)
-      U10(Run non-binding poll)
+      U6(Report amendment vote counts)
     end
     P --> U1
     P --> U2
@@ -874,13 +864,13 @@ flowchart LR
     M --> U1
     M --> U10
     V --> U5
-    E --> U3
-    E --> U4
-    E --> U7
-    E --> U6
-    EC --> U8
-    EC --> U9
     U5 -.->|guarded by DC-03| U8
+    U3 --> E
+    U4 --> E
+    U7 --> E
+    U6 --> E
+    U8 --> EC
+    U9 --> EC
     classDef a fill:#eef,stroke:#446
 ```
 
@@ -999,27 +989,36 @@ call the count into question.
 ```mermaid
 flowchart LR
     U[Utility]
-    U --> P[Performance efficiency]
-    U --> S[Security]
-    U --> M[Maintainability]
-    U --> Ur[Usability]
-    U --> R[Reliability]
-
-    P --> P1["Directory latency<br/>QAS-01 (H, M)"]
-    P --> P2["Mobile first paint<br/>QAS-02 (H, H)"]
-    S --> S1["Immediate session revocation<br/>QAS-03 (H, M)"]
-    S --> S2["No cross-member disclosure<br/>QAS-04 (H, H)"]
-    M --> M1["Routine change cost<br/>QAS-06 (H, M)"]
-    M --> M2["Dependency rule held<br/>QAS-07 (M, L)"]
-    M --> M3["Rule trace auditable<br/>QAS-08 (H, M)"]
-    Ur --> U1["Unaided registration on a handset<br/>QAS-10 (H, M)"]
-    R --> R1["Restore from backup<br/>QAS-09 (H, H)"]
-    R --> R2["Dependency outage degrades locally<br/>QAS-05 (M, M)"]
+    subgraph P["Performance efficiency"]
+      direction LR
+      P1["Directory latency<br/>QAS-01 (H, M)"] ~~~ P2["Mobile first paint<br/>QAS-02 (H, H)"]
+    end
+    subgraph S["Security"]
+      direction LR
+      S1["Immediate session revocation<br/>QAS-03 (H, M)"] ~~~ S2["No cross-member disclosure<br/>QAS-04 (H, H)"]
+    end
+    subgraph M["Maintainability"]
+      direction LR
+      M1["Routine change cost<br/>QAS-06 (H, M)"] ~~~ M2["Dependency rule held<br/>QAS-07 (M, L)"] ~~~ M3["Rule trace auditable<br/>QAS-08 (H, M)"]
+    end
+    subgraph Ur["Usability"]
+      direction LR
+      U1["Unaided registration on a handset<br/>QAS-10 (H, M)"]
+    end
+    subgraph R["Reliability"]
+      direction LR
+      R1["Restore from backup<br/>QAS-09 (H, H)"] ~~~ R2["Dependency outage degrades locally<br/>QAS-05 (M, M)"]
+    end
+    U --> P
+    U --> S
+    U --> M
+    U --> Ur
+    U --> R
 ```
 
 Annotations are (business value, technical risk) on a high, medium, low scale, in the ATAM convention
 [34]. The four (H, H) and (H, M) items with highest combined weight, being QAS-02, QAS-04, QAS-08 and
-QAS-09, are the scenarios the architectural evaluation of §6.12 examines in detail.
+QAS-09, are the scenarios the architectural evaluation of §6.9 examines in detail.
 
 ### Figure 3.11 — Requirements classification, FURPS+
 
@@ -1178,35 +1177,35 @@ The remaining use cases are in `docs/SRS.md`.
 The columns are requirement, constitutional source where applicable, use case, design element,
 implementation artefact and test case. A representative extract follows; the full matrix appears as
 Appendix B and is closed in §12.2. The first five columns are the analyst's reading of each
-requirement and are maintained by hand, with the consequence stated in §3.9. The Test column is
+requirement and are maintained by hand, with the consequence stated in §3.6. The Test column is
 regenerated from the `[Category("FR-NN")]` / `[Category("DC-NN")]` tags actually present in
 GHCAA.Tests by `docs/book/build/traceability.py`, whose `--check` mode fails the build if this
 table is edited out of step with those tags.
 
 | Req | DC / clause | Use case | Design element (Ch. 5–6) | Implementation artefact (Ch. 7) | Test (Ch. 9) |
 | --- | --- | --- | --- | --- | --- |
-| FR-01 | — | UC-01 | Registration sequence, §5.5 | Registration endpoint and application service | RegisterAsync_WithValidData_ShouldCreateMemberAndPaymentHistory (+1 more) |
+| FR-01 | — | UC-01 | Registration sequence, §5.4 | Registration endpoint and application service | RegisterAsync_WithValidData_ShouldCreateMemberAndPaymentHistory (+1 more) |
 | FR-02 | DC-08 | UC-01, UC-02 | Membership state machine, §5.3 | Membership status transitions | GetStatusAsync_WithInvalidMemberId_ShouldThrowException (+2 more) |
-| FR-03 | — | UC-04 (profile) | Masking projection, §8.7 | Field-visibility model and directory projection | GetProfileAsync_WithNonPrivilegedAccess_ShouldReturnMaskedProfile (+2 more) |
-| FR-19 | DC-14 | UC-02 | Approval flow, §5.5 | Obligation raising on approval | no tagged test (gap) |
-| FR-21 | DC-14 | UC-04 | Ledger model, §5.4 | Payment and verification records | RecordPaymentAsync_ShouldAddPaymentAndReturnDto |
-| FR-25 | DC-14 | UC-04 | Append-only rule, §5.6 | Receipt generation; amendment refusal | DeletePaymentAsync_ShouldRemovePaymentAndLogActivity (+3 more) |
-| FR-32 | DC-16 | UC-07 | Version resolution, §5.6 | Always-current reader | GetActiveConstitutionAsync_ReturnsLatestByEffectiveDate_NotInsertionOrder |
-| FR-33 | DC-16 | UC-07 | Supersede-not-delete rule, §5.6 | Version synchronisation at start-up | ActivateConstitutionAsync_SupersedesPreviousVersion_WithoutDeletingIt |
-| FR-36 | DC-03 | UC-09 | Eligibility rule, §5.6 | Voting eligibility guard | VoteOnConstitutionAsync_AcceptsVotingTierMember (+1 more) |
-| FR-37 | DC-13 | UC-08, UC-09 | Threshold reporting, §5.6 | Count and threshold report | no tagged test (gap) |
-| FR-44 | DC-14 | UC-02, UC-04 | Archival deletion, §6.9 | Global filter on archived records | DeletePaymentAsync_ShouldRemovePaymentAndLogActivity (+5 more) |
+| FR-03 | — | UC-04 (profile) | Masking projection, §8.6 | Field-visibility model and directory projection | GetProfileAsync_WithNonPrivilegedAccess_ShouldReturnMaskedProfile (+2 more) |
+| FR-19 | DC-14 | UC-02 | Approval flow, §5.4 | Obligation raising on approval | no tagged test (gap) |
+| FR-21 | DC-14 | UC-04 | Ledger model, §5.3 | Payment and verification records | RecordPaymentAsync_ShouldAddPaymentAndReturnDto |
+| FR-25 | DC-14 | UC-04 | Append-only rule, §5.5 | Receipt generation; amendment refusal | DeletePaymentAsync_ShouldRemovePaymentAndLogActivity (+3 more) |
+| FR-32 | DC-16 | UC-07 | Version resolution, §5.5 | Always-current reader | GetActiveConstitutionAsync_ReturnsLatestByEffectiveDate_NotInsertionOrder |
+| FR-33 | DC-16 | UC-07 | Supersede-not-delete rule, §5.5 | Version synchronisation at start-up | ActivateConstitutionAsync_SupersedesPreviousVersion_WithoutDeletingIt |
+| FR-36 | DC-03 | UC-09 | Eligibility rule, §5.5 | Voting eligibility guard | VoteOnConstitutionAsync_AcceptsVotingTierMember (+1 more) |
+| FR-37 | DC-13 | UC-08, UC-09 | Threshold reporting, §5.5 | Count and threshold report | no tagged test (gap) |
+| FR-44 | DC-14 | UC-02, UC-04 | Archival deletion, §6.7 | Global filter on archived records | DeletePaymentAsync_ShouldRemovePaymentAndLogActivity (+5 more) |
 | NFR-S5 | DC-07 | UC-02 | Session invalidation, §8.5 | Security-stamp check per request | RotateRefreshToken_ReplayOfARotatedToken_RevokesWholeFamilyAndRotatesStamp (+1 more) |
 
 ### Table 3.5 — MoSCoW prioritisation and negotiation outcome
 
-Given in §3.8, with the count per priority band, the basis on which the band was assigned, the
+Given in §3.6, with the count per priority band, the basis on which the band was assigned, the
 enumerated Won't set, and the two contested reclassifications recorded with their reasons. The three
 negotiated conflicts and their resolutions are in §3.2.
 
 ### Table 3.6 — Domain constraints, their class and their constitutional article
 
-Given in §3.10, with the sixteen DC entries, each stating the constraint, its source article and
+Given in §3.7, with the sixteen DC entries, each stating the constraint, its source article and
 section, and the requirement or design element by which it is enforced.
 
 ### Table 3.7 — Feasibility summary
@@ -1214,16 +1213,16 @@ section, and the requirement or design element by which it is enforced.
 | Dimension | Principal finding | Verdict | Residual concern | Treated in |
 | --- | --- | --- | --- | --- |
 | Technical | No requirement exceeds a conventional transactional web system; the maintainer already held the necessary platform competence | Feasible | None material | §6.2 |
-| Economic | Operating cost of the order of tens of dollars a year against a commercial licence exceeding the Association's annual income | Feasible | Cost is borne personally until the Association holds an account | §10.10 |
-| Operational | The binding constraint is officer time spent verifying payments, not the software | Feasible with reservation | Permanent administrative burden, quantified rather than assumed | §12.6, §13.4 |
+| Economic | Operating cost of the order of tens of dollars a year against a commercial licence exceeding the Association's annual income | Feasible | Cost is borne personally until the Association holds an account | §10.6 |
+| Operational | The binding constraint is officer time spent verifying payments, not the software | Feasible with reservation | Permanent administrative burden, quantified rather than assumed | §12.4, §13.2 |
 | Schedule | Incremental delivery, so schedule risk reduces scope rather than removing the system | Feasible | Two increments slipped | Ch. 11 |
-| Legal | Bangladesh's data protection statute was in draft; no compliance claim is made | Feasible | Obligations may change on enactment | §8.11 |
-| Ethical | Live personal data handled under a stated declaration; college identity used per DC-01 | Feasible | Sole-maintainer access to production data is an unresolved structural risk | Front matter, §8.11, §13.4 |
+| Legal | Bangladesh's data protection statute was in draft; no compliance claim is made | Feasible | Obligations may change on enactment | §8.9 |
+| Ethical | Live personal data handled under a stated declaration; college identity used per DC-01 | Feasible | Sole-maintainer access to production data is an unresolved structural risk | Front matter, §8.9, §13.2 |
 
 ### Table 3.8 — Specification defects found by the formal technical review
 
 Log identifiers refer to the findings record at `docs/BUSINESS_FINDINGS.md`. Severity as recorded
-there. Classes follow the set stated in §3.12.
+there. Classes follow the set stated in §3.8.
 
 | Log ID | Class | Defect in the specification | Disposition |
 | --- | --- | --- | --- |
@@ -1231,7 +1230,7 @@ there. Classes follow the set stated in §3.12.
 | COV-001 | Omission | The same rule was specified for the profile-update path only. Nothing in the specification said whether it also governed the registration path, and no falsifying condition had been stated for that path | Scope of FR-04 made explicit across both paths; the missing test is recorded as an open coverage gap, not as a passing check |
 | COV-003 | Omission | FR-01's thirteen mandatory particulars were specified as a completeness rule, but the specification did not state what should happen on an attempt to approve an incomplete application | Approval precondition stated explicitly; negative case remains untested and is logged as such |
 | COV-004 | Omission | The registration fee was specified as payable before approval without stating the effect of its absence at the moment of approval | Same treatment as COV-003; gate specified, negative case logged as open |
-| P3-F2 | Omission | Idle-session expiry was implemented in both clients and in neither the specification nor the API. No requirement stated whether inactivity is a client concern or a server one | Not resolved. Carried as a known gap for the reason given in §3.12 |
+| P3-F2 | Omission | Idle-session expiry was implemented in both clients and in neither the specification nor the API. No requirement stated whether inactivity is a client concern or a server one | Not resolved. Carried as a known gap for the reason given in §3.8 |
 
 ### Table 3.9 — As-built domain specifications under docs/specs
 

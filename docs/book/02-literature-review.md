@@ -12,7 +12,7 @@ on, and to stop when it has established them.
   literature say it costs? (Feeds RQ2 and §6.2, where the architecture is chosen.)
 - **RvQ3.** What does the digital-governance and electronic-voting literature establish about the
   conditions under which software may legitimately mediate a collective decision? (Feeds RQ3, and is
-  the reason for the boundary drawn in §2.7 and defended in §8.10, on governance integrity.)
+  the reason for the boundary drawn in §2.7 and defended in §8.8, on governance integrity.)
 - **RvQ4.** Which existing systems address the Association's problem, on what terms, and what
   remains uncovered? (Feeds RQ1, RQ2 and §2.11, the research gap.)
 
@@ -110,7 +110,7 @@ workflow and very poorly onto its tier structure.
 The gap in this strand is governance. A community platform models a moderator; a CRM models an
 account owner. Neither models an officer who holds an elected position for a fixed term under a
 written instrument, whose authority is bounded by that instrument, and whose successor inherits the
-office rather than the account. Section 5.4 of this dissertation had to construct that model from the
+office rather than the account. Section 5.3 of this dissertation had to construct that model from the
 constitution because the literature does not supply it.
 
 ## 2.5 Architectural Literature
@@ -140,8 +140,8 @@ small systems that structure may never pay for itself. It multiplies artefacts, 
 added to an entity can require edits in the domain model, the data transfer object, the mapping, the
 service interface, the implementation and the client model. And it invites the appearance of
 layering without the substance, where an interface exists for every service but has exactly one
-implementation and no test double, so the indirection buys nothing. Section 9.14 measures the first
-two objections in this codebase rather than dismissing them, and §6.11.12 records where the pattern
+implementation and no test double, so the indirection buys nothing. Section 9.12 measures the first
+two objections in this codebase rather than dismissing them, and §6.9.12 records where the pattern
 was deliberately not applied.
 
 ### 2.5.2 Monolith versus microservices for small-team systems
@@ -172,7 +172,7 @@ control-flow measure of testability [57]; Chidamber and Kemerer's suite gives co
 inheritance measures for object-oriented designs [56]; Oman and Hagemeister's maintainability index
 aggregates volume, complexity and comment density into a single trackable figure [58]. Each is
 imperfect and each is criticised, but they are the measures for which thresholds and comparative
-data exist, and §9.14 reports them with their limits stated.
+data exist, and §9.12 reports them with their limits stated.
 
 ## 2.6 Web and Mobile Engineering Literature
 
@@ -241,7 +241,7 @@ process most needs and least reliably has. It publishes the constitution, the am
 the committee record. It runs constitutional amendment voting and non-binding member polls, where
 the constitution itself sets the threshold and the outcome is a recorded expression of the
 membership rather than the transfer of an office. It does not seal a ballot, count votes for office,
-or declare a winner. Section 8.10, on governance integrity, gives the full argument, and §12.8
+or declare a winner. Section 8.8, on governance integrity, gives the full argument, and §12.6
 revisits whether the line was drawn in the right place.
 
 The distinction is worth naming precisely, because it is the substance of this work's answer to RQ3:
@@ -266,7 +266,7 @@ since been revised, ASVS to version 5.0.0 in May 2025 [75] and the Top Ten to it
 the work reported here was carried out against the editions cited, and §4.5.4, the
 security-evaluation strategy, states why a conformance claim is not carried across a revision. ASVS
 is used at level 2, on the grounds that the system holds identity documents and financial evidence
-but is not itself a payment processor. Section 8.13, the conformance assessment against ASVS, gives
+but is not itself a payment processor. Section 8.11, the conformance assessment against ASVS, gives
 the level-2 control mapping and, more usefully, records the requirements the project does not meet.
 
 For the cryptographic primitives the choices follow published specifications rather than invention:
@@ -278,11 +278,11 @@ for the verification codes described in §3.3.2 [52].
 
 For privacy the operative principle is Cavoukian's privacy by design, in particular default
 protection and end-to-end lifecycle management [41]. Its concrete expression in this system is the
-per-field visibility control of FR-03 and the masking protocol in §8.11, on personal data, under
+per-field visibility control of FR-03 and the masking protocol in §8.9, on personal data, under
 which the directory returns a masked projection unless the owning member has opted otherwise.
 Bangladesh's data protection framework was still in draft at the time of writing, so the project
 treats the principles of purpose limitation, minimisation and retention as design obligations rather
-than as compliance with a specific statute, and §8.11 states that position explicitly rather than
+than as compliance with a specific statute, and §8.9 states that position explicitly rather than
 implying a compliance claim it cannot support.
 
 ## 2.9 Survey of Existing Systems and Products
@@ -401,7 +401,7 @@ payment gateway it cannot obtain, or represent constitutional rules as configura
 audited against the instrument (§2.9).
 
 Figure 2.3 draws the manual practice that gap sits against, abstracted from the treasurer's ledger
-pages and the paper application forms described in §4.7.1, so that the claims made about what the
+pages and the paper application forms described in §4.6.1, so that the claims made about what the
 platform replaces can be checked against a stated process rather than an impression of one.
 
 The gap this work addresses is therefore the conjunction: an alumni platform in which constitutional
@@ -415,7 +415,7 @@ Two honest qualifications. First, none of the four elements is individually nove
 about the combination and about the recorded reasoning, which is why the contributions in §1.9 are
 stated as a method and an account rather than as an invention. Second, the gap is defined partly by
 a constraint, namely one maintainer and no budget, which some readers will regard as a circumstance
-rather than a research problem. Section 12.8 takes that objection seriously, and the response in
+rather than a research problem. Section 12.6 takes that objection seriously, and the response in
 short is that the constraint is the normal condition of the great majority of voluntary associations,
 and that a literature which only addresses the resourced case leaves them unserved.
 
@@ -437,61 +437,46 @@ that position into a specification.
 ### Figure 2.1 — Study selection flow
 
 ```mermaid
-flowchart TB
-    A["Records identified by search<br/>n = 214"] --> B["Duplicates removed<br/>n = 31"]
-    B --> C["Screened on title and abstract<br/>n = 183"]
-    C --> D["Excluded at screening: n = 96<br/>SIS/LMS scope 41<br/>enterprise scale 22<br/>marketing only 19<br/>blockchain voting, no analysis 14"]
-    C --> E["Full text sought<br/>n = 87"]
-    E --> F["Not retrievable<br/>n = 2"]
-    E --> G["Full text assessed<br/>n = 85"]
-    G --> H["Excluded at full text<br/>n = 29"]
-    G --> I["Included<br/>n = 56<br/>38 peer-reviewed or foundational<br/>10 standards<br/>8 product documentation sets"]
+flowchart LR
+    A["Identified, n = 214"] --> C["Screened, n = 183"] --> E["Full text sought, n = 87"] --> G["Assessed, n = 85"] --> I["Included, n = 56"]
+    A --> B["Duplicates, n = 31"]
+    C --> D["Excluded, n = 96"]
+    E --> F["Not retrievable, n = 2"]
+    G --> H["Excluded, n = 29"]
 ```
 
 ### Figure 2.2 — Concept map of the reviewed literature
 
 ```mermaid
-flowchart LR
-    ROOT[Reviewed<br/>literature]
-    ROOT --> D1[Alumni and membership domain]
-    ROOT --> D2[Architecture and sustainability]
-    ROOT --> D3[Governance and voting]
-    ROOT --> D4[Security and privacy]
-    ROOT --> D5[Method and measurement]
-
-    D1 --> D1a["Giving and engagement<br/>[8], [9]"]
-    D1 --> D1b["Community and CRM treatment"]
-    D2 --> D2a["Definition and evaluation<br/>[13]"]
-    D2 --> D2b["Clean / hexagonal / onion<br/>[1], [14], [15], [37]"]
-    D2 --> D2c["Monolith vs microservices<br/>[16], [17], [18]"]
-    D2 --> D2d["Evolution and metrics<br/>[55], [56], [57], [58]"]
-    D3 --> D3a["Procedural legitimacy<br/>[64], [65], [66], [67]"]
-    D3 --> D3b["E-voting security<br/>[27], [28], [29], [30]"]
-    D4 --> D4a["Threat modelling<br/>[26]"]
-    D4 --> D4b["Verification standards<br/>[7], [25]"]
-    D4 --> D4c["Primitives and privacy<br/>[41], [49], [50], [51], [52]"]
-    D5 --> D5a["Design science<br/>[4], [5]"]
-    D5 --> D5b["Review and case method<br/>[10], [11], [12]"]
-    D5 --> D5c["Standards<br/>[6], [19], [20], [21], [22], [24]"]
+flowchart TB
+    D1[Alumni and membership] --> D1a["Giving, engagement [8], [9]"] ~~~ D1b["Community and CRM"]
+    D1b ~~~ D3[Governance and voting] --> D3a["Procedural legitimacy [64]–[67]"] ~~~ D3b["E-voting security [27]–[30]"]
+    D2[Architecture and sustainability] --> D2a["Evaluation [13]"] ~~~ D2b["Clean architecture, DDD [1], [37]"] ~~~ D2e["Hexagonal, onion [14], [15]"] ~~~ D2c["Monolith, microservices [16]–[18]"] ~~~ D2d["Evolution, metrics [55]–[58]"]
+    D4[Security and privacy] --> D4a["Threat modelling [26]"] ~~~ D4b["Verification standards [7], [25]"] ~~~ D4c["Primitives, privacy [41], [49]–[52]"]
+    D5[Method and measurement] --> D5a["Design science [4], [5]"] ~~~ D5b["Review, case method [10]–[12]"] ~~~ D5c["Standards [6], [19]–[22], [24]"]
 ```
 
 ### Figure 2.3 — As-is process model of current manual practice (BPMN, abstracted)
 
 ```mermaid
 flowchart TB
-    S((Start)) --> A1["Prospective member obtains<br/>paper form at event"]
-    A1 --> A2["Fills form, attaches<br/>certificate photocopy"]
-    A2 --> A3["Hands form and cash<br/>to an officer"]
-    A3 --> G1{"Officer recognises<br/>the applicant?"}
-    G1 -->|Yes| A4["Accepted on personal<br/>recognition"]
-    G1 -->|No| A5["Held pending informal<br/>enquiry, no deadline"]
-    A4 --> A6["Treasurer writes entry<br/>in ledger notebook"]
-    A5 --> A6
-    A6 --> A7["Form filed in a folder;<br/>no member-facing record"]
-    A7 --> A8["Announcements posted to<br/>Facebook group"]
-    A8 --> G2{"Is the member<br/>in good standing?"}
-    G2 -->|Unanswerable| A9["Reconstructed by hand<br/>when an election is called"]
-    A9 --> E((End))
+    subgraph R1[" "]
+      direction LR
+      S((Start)) --> A1[Paper form at an event] --> A2[Form and certificate copy] --> A3[Form and cash to an officer]
+    end
+    subgraph R2[" "]
+      direction LR
+      G1{Known to officer?} -->|Yes| A4[Accepted on recognition] --> A6[Treasurer writes the ledger]
+      G1 -->|No| A5[Held, no deadline] --> A6
+    end
+    subgraph R3[" "]
+      direction LR
+      A7[Form filed, no record] --> A8[Notice on Facebook] --> G2{In good standing?} -->|Unanswerable| A9[Rebuilt at election] --> E((End))
+    end
+    R1 --> R2 --> R3
+    style R1 fill:none,stroke:none
+    style R2 fill:none,stroke:none
+    style R3 fill:none,stroke:none
 ```
 
 Four defects are visible in the model and each is traced to a requirement in Chapter 3. There is no
@@ -560,10 +545,10 @@ better than the artefact produced here, and the comparison would be dishonest wi
 
 | Required capability | Best covering system | Residual gap | Addressed in |
 | --- | --- | --- | --- |
-| Membership tiers with differentiated constitutional rights | CiviCRM (as priced membership types) | Tiers model price and duration, not rights; the non-voting rule for Associate members is an access convention, not a modelled property | §3.3.1, §5.6 |
-| Fixed-term officer positions with succession | Salesforce NPSP (custom object) | No term, quorum or ex-officio semantics; no institutional record independent of user accounts | §3.3.6, §5.4 |
-| Versioned governing instrument with an always-current reader | None | No product treats the governing document as versioned data with an effective date | §3.3.6, §7.12 |
-| Amendment voting at a constitutional threshold | None | Poll features exist; the two-thirds-at-AGM rule and eligibility gate do not | §3.3.6, §5.6 |
-| Payment without a gateway, evidenced and officer-verified | CiviCRM (offline contributions) | Secondary path; no proof-upload and verification workflow with an audit trail | §3.3.4, §8.9 |
-| Auditable trace from enforced rule to constitutional clause | None | Configuration produces behaviour, not a trace a reviewer can follow | §3.10, Table 3.4 |
+| Membership tiers with differentiated constitutional rights | CiviCRM (as priced membership types) | Tiers model price and duration, not rights; the non-voting rule for Associate members is an access convention, not a modelled property | §3.3.1, §5.5 |
+| Fixed-term officer positions with succession | Salesforce NPSP (custom object) | No term, quorum or ex-officio semantics; no institutional record independent of user accounts | §3.3.6, §5.3 |
+| Versioned governing instrument with an always-current reader | None | No product treats the governing document as versioned data with an effective date | §3.3.6, §7.10 |
+| Amendment voting at a constitutional threshold | None | Poll features exist; the two-thirds-at-AGM rule and eligibility gate do not | §3.3.6, §5.5 |
+| Payment without a gateway, evidenced and officer-verified | CiviCRM (offline contributions) | Secondary path; no proof-upload and verification workflow with an audit trail | §3.3.4, §8.7 |
+| Auditable trace from enforced rule to constitutional clause | None | Configuration produces behaviour, not a trace a reviewer can follow | §3.7, Table 3.4 |
 | Operation at tens of dollars per year by one volunteer | WordPress + plugin | Achievable only by abandoning C1, C2 and C8 | Ch. 10 |

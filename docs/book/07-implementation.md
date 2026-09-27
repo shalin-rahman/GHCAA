@@ -26,7 +26,7 @@ The web client is Angular 21.2.22 with TypeScript 5.9.2 (`GHCAA.Web/package.json
 script is a chain rather than a single compiler invocation: `sync:docs`, `gen:org-config`,
 `gen:site-content`, `apply-brand`, `type-check`, then `ng build`, in that order. The middle three steps
 generate files `ng build` then reads as ordinary source — `apply-brand` is the institution-profile
-rewrite described in §7.16 — so a build run without `npm run build` (an `ng build` invoked directly, say)
+rewrite described in §7.14 — so a build run without `npm run build` (an `ng build` invoked directly, say)
 silently skips them and builds against whatever those generators last produced. There is no ESLint
 configuration in the project (`package.json` carries no `lint` script and no `eslint` dependency); the
 only static check the build chain runs is `type-check`, the TypeScript compiler in no-emit mode, so a
@@ -74,7 +74,7 @@ with `find` and `wc -l`, excluding `bin/` and `obj/`):
 The migrations row is split out because it is not hand-written code: `20260907193705_InitialBaseline.cs`,
 its `.Designer.cs` and `ApplicationDbContextModelSnapshot.cs` together account for 157,079 of
 `GHCAA.Infrastructure`'s 171,567 lines, all of it EF Core's generated model-building code for the single
-squashed baseline migration referenced in §5.7 and §6.3.2. Reading the project's size from the combined
+squashed baseline migration referenced in §5.6 and §6.3.2. Reading the project's size from the combined
 figure without separating that row would overstate the hand-written backend by an order of magnitude.
 
 ## 7.3 Coding Standards, Conventions and Static Enforcement
@@ -101,13 +101,13 @@ with no project-specific rule added on top of that default set at the time of wr
 records adding so that ASP.NET Core's data-protection keys survive a Render redeploy rather than being
 regenerated — and, before that fix, silently invalidating every session and every value the application
 had encrypted with the previous key. The schema's migration history is a single file: the prior 31-migration
-history was squashed into `20260907193705_InitialBaseline.cs` on 8 September 2026, discussed in §7.14 as
+history was squashed into `20260907193705_InitialBaseline.cs` on 8 September 2026, discussed in §7.12 as
 the change that closed the build-time-out problem the old history had started causing.
 
 Persistence is EF Core against PostgreSQL in production and SQLite in the test and local-development
 path, a split Chapter 6 sets out the reasoning for. The domain layer itself (`GHCAA.Domain`, 52 files,
 1,700 lines) carries no EF Core reference: entities are plain classes, and every EF-specific concern —
-fluent configuration, converters such as the ISO-8601 `DateTime` converter §5.4 and §6.4 both describe,
+fluent configuration, converters such as the ISO-8601 `DateTime` converter §5.3 and §6.4 both describe,
 the `IsActive` global query filter on `AlumniEvent` — lives in `GHCAA.Infrastructure`, so a domain type can
 be read and reasoned about without also reading how it is persisted.
 
@@ -127,9 +127,9 @@ Two conventions recur across the layer rather than being decided per service. Fi
 that performs more than one write opens its own `DbContext` transaction rather than relying on
 `SaveChangesAsync`'s implicit one — necessary wherever a single business operation spans several
 `SaveChangesAsync` calls that must succeed or fail together, and the subject of the transaction-scoping
-fix in §7.15. Second, a service that calls an external system (SMTP, the real-time hub, a payment
+fix in §7.13. Second, a service that calls an external system (SMTP, the real-time hub, a payment
 provider) does so through its own interface (`IOtpService`, `IRealTimeService`) rather than a concrete
-client type, which is what let the fix in §7.15 move those calls out of the transaction: the transaction
+client type, which is what let the fix in §7.13 move those calls out of the transaction: the transaction
 boundary and the external call were already two separate seams in the code, not one that had to be
 created for the fix.
 
@@ -152,13 +152,13 @@ application/award shape the rest of the domain uses for a multi-stage workflow. 
 an application through `ScholarshipService` never sees the applicant's name or member record — the
 review projection is built without that join, so blinding is a property of the query rather than a
 UI field left off the screen. Awarding a scholarship writes a `FinancialRecord` Grant entry through
-the same idempotency guard `FinancialLedgerController` already enforces elsewhere (§7.10), so a retried
+the same idempotency guard `FinancialLedgerController` already enforces elsewhere (§7.8), so a retried
 disbursement request cannot double-pay an award.
 
 Work Package 37.6 is the oral-history and legacy archive: `ArchiveCollection` groups a set of
 `ArchiveItem` records, each one a transcript, recording or scanned document rather than a media file
 treated as an end in itself. The public `/legacy` page on the Angular client reuses the document-hero
-and document-prose shell §7.16's profile packs already style, rather than introducing a parallel
+and document-prose shell §7.14's profile packs already style, rather than introducing a parallel
 public-page layout for archive content.
 
 ## 7.6 Implementation of the API Layer
@@ -174,13 +174,13 @@ authorisation, not business logic. `ArchiveController`, `ScholarshipsController`
 rest of the layer: routing and authorisation only, with the archive lookup, blind-review scoring and
 short-code verification itself left to their respective application services. Two real-time
 hubs live in the same project rather than a separate one (`Hubs/ChatHub.cs`, `Hubs/NotificationHub.cs`),
-covered in §7.9.
+covered in §7.7.
 
-`RequireStepUpAttribute` (§7.10) and the `SecurityStampMiddleware` check (also §7.10) are both applied at
+`RequireStepUpAttribute` (§7.8) and the `SecurityStampMiddleware` check (also §7.8) are both applied at
 this layer rather than in `GHCAA.Application`, because both depend on the HTTP claims principal and the
 response status code convention, neither of which the application layer has a reason to know about.
 
-## 7.7 Implementation of the Web Client
+## 7.7 Web Client, Mobile Client and Real-Time Features
 
 `GHCAA.Web/src` is 268 TypeScript files and 26,601 lines (re-counted 23 September 2026), of which 102
 components are declared `standalone: true` — Angular's module-free component style, used throughout
@@ -188,35 +188,31 @@ rather than mixed with `NgModule`-declared components. The public `/legacy` and 
 (Work Packages 37.6 and 37.2) and their `ArchiveService`/`ScholarshipService` HTTP clients account for
 part of that growth. `styles.scss` is 3,468 lines, the shared token and utility layer §8.5's
 theme audit and the design-system skill both work against; component-scoped styles sit alongside it
-rather than replacing it, which is also the source of the scoping bugs recorded in §7.15 and the
+rather than replacing it, which is also the source of the scoping bugs recorded in §7.13 and the
 `:host-context()` pattern those bugs led to.
 
-The build chain in §7.1 is what makes the client's institution-profile awareness (§7.16) a compile-time
+The build chain in §7.1 is what makes the client's institution-profile awareness (§7.14) a compile-time
 concern rather than a runtime one: `apply-brand` rewrites `index.html`, the sitemap and the favicon set
 before `ng build` runs, so the shipped bundle already carries the active profile's branding rather than
 fetching it after first paint.
-
-## 7.8 Implementation of the Mobile Client
 
 `GHCAA.Mobile/lib` is 126 files and 25,159 lines, state managed with `flutter_riverpod` and routing with
 `go_router` (`pubspec.yaml`). Secure, on-device storage of the JWT and refresh token goes through a single
 `StorageService` (`GHCAA.Mobile/lib/core/storage/storage_service.dart`) wrapping `flutter_secure_storage`,
 rather than each screen touching the platform storage plugin directly — the wrapper is what made the
-fix in §7.15 a one-file change instead of a search-and-fix across every caller. `tool/apply_profile.dart`
-is the mobile equivalent of the web client's `apply-brand` script (§7.16): it rewrites the Android manifest
+fix in §7.13 a one-file change instead of a search-and-fix across every caller. `tool/apply_profile.dart`
+is the mobile equivalent of the web client's `apply-brand` script (§7.14): it rewrites the Android manifest
 label, the iOS display name and the launcher-icon/splash-screen generation inputs from the active profile
 before a platform build runs.
-
-## 7.9 Real-Time Features
 
 Real-time delivery is SignalR, wired in `GHCAA.API/Extensions/ServiceExtensions.cs` and `Program.cs`
 through two hubs: `ChatHub` and `NotificationHub` (`GHCAA.API/Hubs/`). `RealTimeService`
 (`GHCAA.API/Services/RealTimeService.cs`) is the single point application services call through to reach
-either hub — `MemberService`'s admin alert on a new registration (§7.10, §7.15) is one caller among
+either hub — `MemberService`'s admin alert on a new registration (§7.8, §7.13) is one caller among
 several — rather than a controller or service pushing to a hub context directly, which keeps the
 transport detail (SignalR specifically, as opposed to a different push mechanism) behind one interface.
 
-## 7.10 Security Implementation
+## 7.8 Security Implementation
 
 This section describes three mechanisms and the difficulty each one answers. What each threatens and
 how it fits the wider control set is §8.3; this section is only the code and the reasoning behind it.
@@ -271,7 +267,7 @@ protection a step-up check is meant to provide. `RequireStepUpAttributeTests.cs`
 directly across six cases; `DestructiveStepUpActionsTests.cs` covers the controller/service contract
 for two of the delete actions it protects.
 
-## 7.11 Document Generation
+## 7.9 Document Generation
 
 `IDCardService` (`GHCAA.Infrastructure/Services/IDCardService.cs`, 298 lines) generates every
 printable member artefact: an ID card, a membership certificate, and a PDF version of each. Its
@@ -322,7 +318,7 @@ rather than once per method. The remaining duplication (laying out the same head
 artefact type) has not been factored into a shared template as of this writing; it is a candidate for
 the deferred `GHCAA.Export` restructuring the outline does not require this chapter to resolve.
 
-## 7.12 Constitution Publication Pipeline
+## 7.10 Constitution Publication Pipeline
 
 The constitution reader (`docs/CONSTITUTION_PUBLISHING.md`) is built on one rule stated at the top
 of that document: the application always serves the latest ratified constitution, and no page,
@@ -364,7 +360,7 @@ still contains a leftover editing instruction ("TReplace the 21-day election not
 carried into the published text verbatim because the extractor's job is to transcribe the ratified
 document, not correct it.
 
-## 7.13 Third-Party Libraries: selection criteria
+## 7.11 Third-Party Libraries: selection criteria
 
 Twenty-six distinct NuGet package references appear across `GHCAA.API`, `GHCAA.Application`,
 `GHCAA.Infrastructure` and `GHCAA.Export` (`grep -rh "PackageReference" ... | sort -u`, run against
@@ -372,7 +368,7 @@ this tree). The web client's `package.json` lists 13 runtime dependencies; the m
 `pubspec.yaml` lists roughly 51 dependency entries once dev-only and transitive-only lines are
 included in the count. Most of these were adopted without a recorded alternatives comparison —
 `QuestPDF` (2026.2.3) for PDF generation, `QRCoder` (1.8.0) for the verification codes described in
-§7.11, `MailKit` (4.16.0) for outbound email, `ClosedXML` (0.105.0) for spreadsheet export, `Dapper`
+§7.9, `MailKit` (4.16.0) for outbound email, `ClosedXML` (0.105.0) for spreadsheet export, `Dapper`
 (2.1.72) alongside EF Core for the handful of read paths that favour a raw query over LINQ — and
 this chapter does not manufacture a selection rationale for choices the repository itself does not
 document.
@@ -388,7 +384,7 @@ migration-free path for the test harness, not a deployment target. It is the one
 repository where "why this library and not another" has a written answer rather than an inferred
 one.
 
-## 7.14 Software Configuration Management
+## 7.12 Software Configuration Management
 
 The repository carries 299 commits on `HEAD` and six local branches: `dev`, `preprod`,
 `release-1`, `release-2`, `release-3_b4_generic_N_refactor` and `release-4_white_paper`, plus
@@ -417,7 +413,7 @@ trading the ability to replay each historical schema change step by step for a m
 faster-to-apply migration chain. §6.3.2 covers the reasoning in more depth; this section notes only
 that the choice was made deliberately, not as a side effect of losing history.
 
-## 7.15 Notable Implementation Challenges and Their Resolution
+## 7.13 Notable Implementation Challenges and Their Resolution
 
 **Registration could commit a member row without ever sending the OTP that made the account usable.**
 `MemberService.RegisterAsync` (`GHCAA.Infrastructure/Services/MemberService.cs`, line 78) writes the
@@ -454,7 +450,7 @@ delete without blocking the ones after it or the navigation that follows. Becaus
 is the single wrapper every caller in the app already went through, the fix was contained to this
 one file rather than needing a change everywhere secure storage is used.
 
-## 7.16 Institution Profile Packs and White-Label Configuration
+## 7.14 Institution Profile Packs and White-Label Configuration
 
 Every string, seed row and asset described elsewhere in this chapter names Govt. Haraganga College
 by default, because the system was built for one association and had no reason to be otherwise until
@@ -537,7 +533,7 @@ institution's database would still not start empty until that separate problem (
 the system next, rather than letting a profile pack's existence imply a safety the migration chain
 does not yet provide.
 
-## 7.17 Summary
+## 7.15 Summary
 
 The nine projects described in this chapter split cleanly by responsibility — domain, application
 interfaces, infrastructure implementations, API, two client front ends, and three small
@@ -547,10 +543,10 @@ ignored, and no analyzer beyond `NUnit.Analyzers` runs across the solution. The 
 types but not lint rules; the mobile client is the only place `flutter analyze` runs against a real
 rule set at build time. A pair of closed work-package items left a durable mark on
 how the code is written rather than just what it does: the transaction-and-notification-ordering
-fix in `MemberService.RegisterAsync` (§7.15) and the per-call error isolation added to
-`StorageService` (§7.15) both replaced an implicit assumption — that a secondary side effect cannot
-fail in a way that matters — with an explicit one. The institution-profile-pack mechanism (§7.16)
-and the security middleware (§7.10) are the two areas of this codebase with the most deliberate
+fix in `MemberService.RegisterAsync` (§7.13) and the per-call error isolation added to
+`StorageService` (§7.13) both replaced an implicit assumption — that a secondary side effect cannot
+fail in a way that matters — with an explicit one. The institution-profile-pack mechanism (§7.14)
+and the security middleware (§7.8) are the two areas of this codebase with the most deliberate
 design behind them, both driven by a constraint that could not be worked around: a live deployment
 that could not be touched, and an authentication surface that had to survive a stolen token. Chapter
 6 covers the architecture these choices sit inside; Chapter 9 covers how the resulting system was
@@ -558,7 +554,7 @@ verified.
 
 ## Figures and Tables
 
-Table 7.2 lists a representative sample of the dependencies named across §7.11 and §7.13; the full
+Table 7.2 lists a representative sample of the dependencies named across §7.9 and §7.11; the full
 backend package list is in the four `.csproj` files under
 `GHCAA.API`, `GHCAA.Application`, `GHCAA.Infrastructure` and `GHCAA.Export`, the full web list in
 `GHCAA.Web/package.json`, and the full mobile list in `GHCAA.Mobile/pubspec.yaml`. "Alternative
@@ -568,14 +564,14 @@ considered" is left blank except where a repository record documents one.
 
 | Library | Version | Purpose | Alternative considered |
 |---|---|---|---|
-| QuestPDF | 2026.2.3 | ID card, certificate and financial document PDFs (§7.11) | *[Not documented]* |
-| QRCoder | 1.8.0 | Verification QR codes embedded in ID cards and certificates (§7.11) | *[Not documented]* |
+| QuestPDF | 2026.2.3 | ID card, certificate and financial document PDFs (§7.9) | *[Not documented]* |
+| QRCoder | 1.8.0 | Verification QR codes embedded in ID cards and certificates (§7.9) | *[Not documented]* |
 | Npgsql.EntityFrameworkCore.PostgreSQL | 9.0.4 | Production database provider | Pomelo MySQL provider — removed, ADR-0006 |
 | Microsoft.EntityFrameworkCore.Sqlite | 9.0.19 | Test/dev database provider only | — |
 | MailKit | 4.16.0 | Outbound email (OTP, notifications) | *[Not documented]* |
 | ClosedXML | 0.105.0 | Spreadsheet export | *[Not documented]* |
-| @microsoft/signalr | ^10.0.0 | Web client hub connections (§7.9) | *[Not documented]* |
-| flutter_secure_storage | ^10.3.2 | Mobile token/credential storage (§7.15) | *[Not documented]* |
+| @microsoft/signalr | ^10.0.0 | Web client hub connections (§7.7) | *[Not documented]* |
+| flutter_secure_storage | ^10.3.2 | Mobile token/credential storage (§7.13) | *[Not documented]* |
 
 The outline specifies twelve artefacts for this chapter: Figures 7.1-7.8 (module structure,
 dependency matrix, web build pipeline, Git branching model, constitution publication flow, file

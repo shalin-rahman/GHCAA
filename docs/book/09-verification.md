@@ -15,7 +15,7 @@ what came out of it is Chapter 12. The separation is the reason both chapters ex
 
 ## 9.2 Software Quality Assurance Plan
 
-*[Not written. Brief: reviews, standards conformance, defect prevention, and the role of formal technical reviews in this project. Two review sessions to draw on, and they differ in kind: the specification review of 3 July 2026 (§3.12, output = the 5 specification defects of Table 3.8), and the architecture and engineering audit of 4 September 2026 (`docs/ARCHITECTURE_AUDIT_2026-09.md`, output = 15 tracker items, 82.14-82.28). The second is worth treating separately: it was run against an external brief (`docs/materials/REVIEW.md`) rather than an internal checklist, it found defects in the *implementation and its documentation* rather than in the specification, and two of its own research streams failed, which the report states rather than conceals. That last point is the more honest material for this section than the findings themselves: a review that records its own incompleteness is the behaviour §12.11's validity-threat discussion should be able to point at]*
+*[Not written. Brief: reviews, standards conformance, defect prevention, and the role of formal technical reviews in this project. Two review sessions to draw on, and they differ in kind: the specification review of 3 July 2026 (§3.8, output = the 5 specification defects of Table 3.8), and the architecture and engineering audit of 4 September 2026 (`docs/ARCHITECTURE_AUDIT_2026-09.md`, output = 15 tracker items, 82.14-82.28). The second is worth treating separately: it was run against an external brief (`docs/materials/REVIEW.md`) rather than an internal checklist, it found defects in the *implementation and its documentation* rather than in the specification, and two of its own research streams failed, which the report states rather than conceals. That last point is the more honest material for this section than the findings themselves: a review that records its own incompleteness is the behaviour §12.9's validity-threat discussion should be able to point at]*
 
 ## 9.3 Test-Case Design Techniques Applied
 
@@ -37,7 +37,7 @@ what came out of it is Chapter 12. The separation is the reason both chapters ex
 
 *[Not written.]*
 
-### 9.3.5 Basis-path testing using the control-flow graph and cyclomatic complexity of §7.8
+### 9.3.5 Basis-path testing using the control-flow graph and cyclomatic complexity of §7.7
 
 *[Not written.]*
 
@@ -49,7 +49,7 @@ what came out of it is Chapter 12. The separation is the reason both chapters ex
 
 *[Not written.]*
 
-## 9.4 Unit Testing
+## 9.4 Unit and Component Testing
 
 *[Not written. Brief: Backend]*
 
@@ -71,7 +71,7 @@ what came out of it is Chapter 12. The separation is the reason both chapters ex
 
 ### 9.4.5 Testing the business rules that carry constitutional force
 
-*[Not written. Brief: dues, eligibility, committee terms, voting rights — traced back to the rule catalogue of §5.6]*
+*[Not written. Brief: dues, eligibility, committee terms, voting rights — traced back to the rule catalogue of §5.5]*
 
 ### 9.4.6 Testing of failure and exception paths
 
@@ -81,99 +81,89 @@ what came out of it is Chapter 12. The separation is the reason both chapters ex
 
 *[Not written. Brief: determinism and the elimination of order dependence]*
 
-## 9.5 Unit and Component Testing
-
 *[Not written. Brief: Web Client]*
 
-### 9.5.1 Runner, harness and component-testing strategy
+### 9.4.8 Runner, harness and component-testing strategy
 
 *[Not written.]*
 
-### 9.5.2 Testing signals, computed state and change propagation
+### 9.4.9 Testing signals, computed state and change propagation
 
 *[Not written.]*
 
-### 9.5.3 Testing guards, interceptors and the token-refresh queue
+### 9.4.10 Testing guards, interceptors and the token-refresh queue
 
 *[Not written.]*
 
-### 9.5.4 HTTP mocking and contract fidelity against the live API
+### 9.4.11 HTTP mocking and contract fidelity against the live API
 
 *[Not written.]*
 
-## 9.6 Widget and Golden Testing
+## 9.5 Widget and Golden Testing
 
 *[Not written. Brief: Mobile Client]*
 
-### 9.6.1 Widget-test scope
+### 9.5.1 Widget-test scope
 
 *[Not written.]*
 
-### 9.6.2 Golden (snapshot) testing: what it catches
+### 9.5.2 Golden (snapshot) testing: what it catches
 
 *[Not written. Brief: what it cannot, and the platform-rendering problem that requires it to be skipped in continuous integration]*
 
-## 9.7 Integration Testing Strategy
+## 9.6 Integration, System and End-to-End Testing
 
 *[Not written. Brief: and the reasoning for rejecting big-bang integration]*
 
-## 9.8 System and End-to-End Testing
+*[Not written.]*
+
+## 9.7 Regression Testing and Test Selection
 
 *[Not written.]*
 
-## 9.9 Regression Testing and Test Selection
-
-*[Not written.]*
-
-## 9.10 Security Testing
+## 9.8 Security Testing
 
 *[Not written. Brief: mapped to the threat model of Chapter 8 and to OWASP ASVS]*
 
-## 9.11 Performance and Load Testing
+## 9.9 Performance and Load Testing
 
 *[Not written. Brief: workload model, environment, results]*
 
-## 9.12 Usability and Accessibility Testing
+## 9.10 Usability and Accessibility Testing
 
 *[Not written. Brief: task success, time on task, System Usability Scale scores, WCAG audit]*
 
-## 9.13 User Acceptance Testing
+## 9.11 User Acceptance Testing
 
 *[Not written. Brief: participants, protocol, results, sign-off]*
 
-## 9.14 Product Metrics and Static Analysis
+## 9.12 Product Metrics, Static Analysis and Defect Analysis
 
 *[Not written.]*
 
-### 9.14.1 Size
+### 9.12.1 Size
 
 *[Not written. Brief: lines of code and function points]*
 
-### 9.14.2 Complexity
+### 9.12.2 Complexity
 
 *[Not written. Brief: cyclomatic complexity distribution and the worst offenders]*
 
-### 9.14.3 Coupling and cohesion
+### 9.12.3 Coupling and cohesion
 
 *[Not written. Brief: CBO, LCOM, afferent and efferent coupling, instability]*
 
-### 9.14.4 Maintainability index and technical-debt estimate
+### 9.12.4 Maintainability index and technical-debt estimate
 
 *[Not written.]*
 
-### 9.14.5 Test adequacy: coverage
+### 9.12.5 Test adequacy: coverage
 
 *[Not written. Brief: and the argument coverage can and cannot support]*
 
-## 9.15 Defect Analysis
-
 *[Not written. Brief: density, distribution, removal efficiency, root-cause categories]*
 
-## 9.16 Threats to the Validity of the Evaluation
-
-*[Not written. Brief: with forward reference to §12.11]*
-
-## 9.17 Summary
+## 9.13 Summary
 
 *[Not written.]*
 

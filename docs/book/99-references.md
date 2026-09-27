@@ -251,4 +251,4 @@ rather than by reference number.
 - Ballot Box Sealing and Poll Integrity Certificate.
 - Vote Counting Authorisation.
 
-All are held in `docs/Elections/` and in the constitution store of the platform described in §5.6.
+All are held in `docs/Elections/` and in the constitution store of the platform described in §5.5.

@@ -65,6 +65,10 @@ MERMAID_CDN = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"
 MERMAID_FONT_PX = "14px"
 MERMAID_BASE_PT = 10.5
 
+# A table longer than this may split across pages, header repeated. Held whole,
+# a mid-sized table jumps to the next page and leaves a gap behind it.
+LONG_TABLE_ROWS = 6
+
 # Tokens filled in at build time, so a copy printed today carries today's date
 # rather than a date someone forgot to update. Pin the submission date in the
 # source once it is fixed; until then the title page follows the build.
@@ -337,7 +341,7 @@ class Renderer(object):
                     continue
                 if what == "Table" and nxt[0] == "table":
                     thtml, rowcount = self.table_html(nxt[1])
-                    self.table_figure(num, caption, thtml, rowcount > 14, note)
+                    self.table_figure(num, caption, thtml, rowcount > LONG_TABLE_ROWS, note)
                     i += step + 1
                     continue
 
@@ -373,7 +377,7 @@ class Renderer(object):
             elif kind == "table":
                 thtml, rowcount = self.table_html(payload)
                 self.w('<figure class="tbl%s">%s</figure>'
-                       % (" long" if rowcount > 14 else "", thtml))
+                       % (" long" if rowcount > LONG_TABLE_ROWS else "", thtml))
             elif kind == "fence":
                 lang, src = payload
                 if lang == "mermaid":
@@ -467,7 +471,7 @@ try {
   const MMPX = 96 / 25.4;
   const PORTRAIT = { w: 174 * MMPX, h: 224 * MMPX };   // 255mm page less the caption
   const LANDSCAPE = { w: 257 * MMPX, h: 148 * MMPX };  // 174mm page less the caption
-  const MAX_ENLARGE = 1.5;                             // small diagrams grow, but not absurdly
+  const MAX_ENLARGE = 1.0;                             // never above the natural 10.5pt label size
 
   for (const fig of document.querySelectorAll("figure.fig")) {
     const svg = fig.querySelector(".diagram svg");
@@ -704,6 +708,11 @@ def main(argv=None):
                 failures += len(problems)
                 if not args.no_folios:
                     failures += _fill_folios(args.output, pdf_path, args.two_column)
+                if not args.two_column:
+                    # Imported here: pages.py imports this module.
+                    import pages
+                    print("  pages     : Chapter 1 to References, limit %d" % pages.PAGE_LIMIT)
+                    failures += pages.check(pdf_path)
         except (printer.BrowserMissing, RuntimeError, OSError,
                 subprocess.TimeoutExpired, folios.PdfError) as exc:
             print("  pdf       : not produced — %s" % exc)

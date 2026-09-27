@@ -48,7 +48,7 @@ before the work started, or reactively, as stakeholder feedback, a review findin
 
 Counted by work package, 29 (33%) were planned and 58 (67%) were not: 32 (37%) arrived as feedback
 from a stakeholder, 16 (18%) as a defect, and 10 (11%) as a finding from one of the review sessions of
-§3.12 or the September 2026 architecture audit. Counted by task the reactive share is larger still: 683
+§3.8 or the September 2026 architecture audit. Counted by task the reactive share is larger still: 683
 of 908 tasks (75%) arrived after the work they belong to had already started, most of them as feedback
 (299 tasks, 33%) or as review findings (255 tasks, 28%), with defects a smaller share (129 tasks, 14%)
 than the package count alone suggests, because most defects closed in one or two tasks each while a
@@ -180,7 +180,7 @@ reports the honest result rather than a crashing table that would only formalise
 not happen: nothing on the critical path was crashed, because nothing could be.
 
 What did shorten the delivered schedule against what a from-scratch build would have taken is
-recorded elsewhere in this chapter and in §3.8, not here — reuse (§11.5) and scope deferral into the
+recorded elsewhere in this chapter and in §3.6, not here — reuse (§11.5) and scope deferral into the
 Won't-have set of the MoSCoW negotiation (Table 3.5) did the work that adding a resource would have
 done on a team with one to add. Deferring a requirement removes it from the network rather than
 compressing it, which is a different mechanism from crashing and is named as such.
@@ -435,10 +435,10 @@ not an estimate dressed as one.
 ## 11.7 Team Structure and Responsibilities
 
 One person held every role the four P's of §11.0 assign to separate people: developer, tester,
-reviewer, release manager and, for the elicitation of §4.7, the interviewer of the ten participants he
+reviewer, release manager and, for the elicitation of §4.6, the interviewer of the ten participants he
 also built the system for. That has one structural cost worth naming plainly: nobody reviewed a
 change before it shipped except the person who wrote it, and nobody but that same person decided
-whether a payment rule was correct and then wrote the test that checked it. §4.8's RMMM table already
+whether a payment rule was correct and then wrote the test that checked it. §4.7's RMMM table already
 carries this as its first-listed risk, "single maintainer unavailable for an extended period", and
 §11.9 reports it with a risk-exposure score rather than only a description.
 
@@ -446,7 +446,7 @@ The mitigation actually used was mechanical rather than organisational, because 
 person to mitigate the risk the ordinary way: `docs/TODO.md` recorded every change as a numbered,
 dated item before it counted as done, and the automated-test suite (§9) stood in for an independent
 reviewer by failing when a change broke something the tracker had already promised was fixed. Neither
-replaces a second pair of eyes on a design decision before it is made; §12.11 treats that gap as a
+replaces a second pair of eyes on a design decision before it is made; §12.9 treats that gap as a
 validity threat to the project's own self-assessment, not only to the software, since a claim this
 report makes about its own numbers is subject to the same absence of independent review as the code.
 
@@ -473,7 +473,7 @@ person who made it and reviewed it — the same gap §11.7 already names.
 
 ## 11.9 Risk Monitoring Record
 
-Table 4.2 in §4.8 lists eight risks by category, probability, impact, mitigation, monitoring signal and
+Table 4.2 in §4.7 lists eight risks by category, probability, impact, mitigation, monitoring signal and
 outcome, in Pressman and Maxim's qualitative form. This section adds a numeric risk exposure to the
 same eight rows, RE = P × C, so they can be ranked rather than only read. Pressman's probability and
 impact bands are the qualitative Low/Medium/High of Table 4.2; converting each to a number needs a
@@ -492,14 +492,14 @@ them by the resulting exposure.
 | Payment amount not verified against the originating record | 3 (Medium) | 5 (High) | 15 | Closed, Phase 2 |
 | Administrative action attributed to a hardcoded identifier | 3 (Medium) | 5 (High) | 15 | Closed, Phase 2 |
 | Event capacity exceeded under concurrent registration | 3 (Medium) | 3 (Medium) | 9 | Closed, Phase 1 |
-| Manual payment verification backlog exceeding officer capacity | 3 (Medium) | 3 (Medium) | 9 | Open; monitored, §12.6 |
+| Manual payment verification backlog exceeding officer capacity | 3 (Medium) | 3 (Medium) | 9 | Open; monitored, §12.4 |
 | Volunteer officer turnover losing institutional knowledge | 3 (Medium) | 3 (Medium) | 9 | Open; structural mitigation only |
 
-The two highest-exposure risks, both scored 25, are the same two §4.8 already names as the ones that
+The two highest-exposure risks, both scored 25, are the same two §4.7 already names as the ones that
 went on to happen. That is not a coincidence the RE column manufactures — both were rated High on
 probability at the time, before either materialised, because each concerned a mechanism (a format
 crossing a client boundary, a startup no-op) the project had already seen behave unreliably elsewhere.
-The numeric score adds a ranking on top of a judgement §4.8 had already made correctly.
+The numeric score adds a ranking on top of a judgement §4.7 had already made correctly.
 
 **Risk information sheet — single maintainer unavailable for an extended period.**
 Risk ID: matches Table 4.2, row 1. Category: project. Probability: Medium. Impact: High. RE: 15.
@@ -531,18 +531,18 @@ retrospective form of quality assurance rather than the 40% up-front and 40% bac
 model assumes a resourced team can afford.
 
 Defect removal efficiency, DRE = E / (E + D), can be computed from two evidenced counts rather than
-estimated. E, defects and issues found before delivery: the 5 specification defects of Table 3.8 (§4.8's
+estimated. E, defects and issues found before delivery: the 5 specification defects of Table 3.8 (§4.7's
 U3) plus the 15 tracker items raised by the September 2026 architecture and engineering audit
 (82.14–82.28), 20 in total. D, defects found in production after delivery: the 2 confirmed, dated
-deployment incidents of §4.8's U5 (the `MigrationBootstrapper` legacy-database incident of 27 August
+deployment incidents of §4.7's U5 (the `MigrationBootstrapper` legacy-database incident of 27 August
 2026, and the stale-chunk-caching and `AuthService` NG0200 incidents of 28 August 2026, counted as one
-dated incident each per the corrected figure in §4.8). DRE = 20 / (20 + 2) ≈ 0.91.
+dated incident each per the corrected figure in §4.7). DRE = 20 / (20 + 2) ≈ 0.91.
 
 Ninety-one per cent is a plausible figure for a system this size, but it rests on a review process
 and a production-incident record that were both run by the one person who also wrote the code — the
 same independent-review gap §11.7 names, applied here to the number that is supposed to measure how
 well defects were caught. Mean time to correction, MTTC, is what QAS-06 already measures (§3, quality
-attribute scenarios); its value is not restated here because §9.14, where it is measured against the
+attribute scenarios); its value is not restated here because §9.12, where it is measured against the
 delivered test suite, has not yet been written — this section names what QAS-06 measures rather than
 quoting a figure that does not yet exist.
 
@@ -559,7 +559,7 @@ against wording rather than by a field that was there to record it at the time.
 Second, a single maintainer needs the mechanical checks §11.7 describes — the tracker and the test
 suite — more than a resourced team does, not less, because they are the only substitute available for
 a second person's review. Where those checks were thin (before Chapter 9's test suite reached its
-current size, and before the seeding and migration bugs of §4.8's RMMM table were caught), the record
+current size, and before the seeding and migration bugs of §4.7's RMMM table were caught), the record
 shows the cost directly: two production incidents, both from mechanisms nothing was checking.
 
 Third, effort estimation for a project like this one should be stated in the terms §11.4 and §11.5

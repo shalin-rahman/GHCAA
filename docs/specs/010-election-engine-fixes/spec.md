@@ -39,11 +39,14 @@ hand-typed `ECMember` rows.
 - `Ballot` (`Id`, `ElectionId`, `ElectionSeatId`, `SerialNumber`, `IssuedAt`, `IsSpoiled`) and
   `BallotVote` (`Id`, `BallotId`, `NominationId`, `CastAt`) — kept in separate tables with no
   member foreign key on the vote side. The roll records that a member voted; the ballot
-  records what was voted; nothing joins the two. That separation is the secret ballot and is
-  not retrofittable.
+  records what was voted; no foreign key joins the two. The 2026-09-27 review found that
+  they can still be joined by the shared `UtcNow` timestamp, the int identity order, the
+  Postgres transaction id and the audit log entry. The fix is in spec 023, election ballot
+  secrecy and standards.
 - `SeatVote` (`Id`, `ElectionId`, `ElectionSeatId`, `MemberId`, `VotedAt`) — added 2026-09-24
-  as part of the defect fix described below, purely for double-vote enforcement; it carries
-  no reference to which candidate was chosen and does not weaken the ballot secrecy above.
+  as part of the defect fix described below, purely for double-vote enforcement. It carries
+  no reference to which candidate was chosen, but it is written in the same transaction and
+  at the same instant as the `Ballot` row, so it is one of the links spec 023 removes.
 - `ElectionResult` (`Id`, `ElectionId`, `ElectionSeatId`, `NominationId`, `VoteCount`,
   `IsElected`, `IsTie`). Declaration writes winners into `ECMember` rows against the
   election's `ECPeriodId`.
@@ -62,7 +65,8 @@ rejected server-side outside the `Polling` phase.
 
 - Controllers never query `ApplicationDbContext` directly — all persistence goes through
   `IElectionService`.
-- A ballot row must never be joinable back to a member.
+- A ballot row must never be joinable back to a member. Not met as built; see spec 023
+  FR-001 to FR-004.
 - Server-side identity for any officer-privileged action (scrutiny decisions, phase
   transitions) is taken from the authenticated claim, never from client-supplied request
   fields.
@@ -124,3 +128,5 @@ attributes on `ElectionsController` (8 endpoints) were migrated to
 - `dotnet build` — clean.
 - `dotnet test GHCAA.Tests` — 860/860 passed, 2026-09-24.
 - `docs/TODO.md` item 37.1g.
+- Follow-up work from the 2026-09-27 review: spec 023 and `docs/TODO.md` items 37.1i to
+  37.1q.

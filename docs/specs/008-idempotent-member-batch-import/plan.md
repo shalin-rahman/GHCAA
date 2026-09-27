@@ -91,8 +91,8 @@ response) is unchanged.
 
 ### 9. Build the reusable editable-grid component
 
-Add `GHCAA.Web/src/app/shared/data-grid/` (or wherever the project's shared-component convention
-places cross-feature components — check `common/` vs `shared/` naming before creating it) as a
+Add `GHCAA.Web/src/app/common/data-grid/` (`common/` is the web app's shared-component folder;
+there is no `shared/`) as a
 standalone Angular component, generic over row shape: inputs for `columns` (key, label, edit type),
 `rows`, and `cellErrors` (keyed by row index + column key, matching the new DTO); outputs for
 `cellEdit` and `commit`. Style it from `styles.scss` tokens, following the project's existing

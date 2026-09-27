@@ -104,7 +104,7 @@ produces and how the two are judged against each other before meeting any of it 
 
 Three kinds of input govern the work, and they are not interchangeable. The first is the
 Association's own rule set: the constitution at version 4.2 and the seven documents of the election
-code, whose normative clauses become the domain constraints of §3.10 and are not negotiable with any
+code, whose normative clauses become the domain constraints of §3.7 and are not negotiable with any
 stakeholder. The second is current practice, being the paper application form, the treasurer's
 ledger and the recognition-based approval described in §1.2, which the software must either preserve
 or deliberately replace. The third is the operating reality: one volunteer maintainer, no licence
@@ -116,14 +116,14 @@ The artefact sits between them. It is a running platform rather than a model of 
 revised over increments, and the design-science position of Chapter 4 is what allows its
 construction to count as research: each increment answers a stated problem, and each is evaluated
 before the next is specified. The rules do not just inform the design. They are encoded in it, and
-each one traces back to the clause it came from, which is what the traceability matrix of §3.9 and
+each one traces back to the clause it came from, which is what the traceability matrix of §3.6 and
 the constitutional test table, Table 9.9, exist to demonstrate.
 
 The outputs are of two kinds, and keeping them apart matters. The artefact itself is one
 contribution, deployed and in use by real members with real records. The evidence about it is the
 other: requirement closure, the quality-attribute measurements against the thresholds declared in
-advance in §4.6, the operating cost of §10.10, and the comparison against the manual practice it
-replaced in §12.10. The thresholds are declared before measurement, in Chapter 4, precisely so that
+advance in §4.5, the operating cost of §10.6, and the comparison against the manual practice it
+replaced in §12.8. The thresholds are declared before measurement, in Chapter 4, precisely so that
 the evaluation cannot be written to fit whatever the system turned out to do.
 
 A static diagram loses the feedback path most easily, so it is worth stating. Evaluation did not
@@ -140,26 +140,26 @@ in Figure 1.4.
 **RQ1.** What functional and quality requirements characterise an alumni-management platform for a
 resource-constrained institution in a low-bandwidth, mobile-first, cash-and-manual-payment context?
 
-*Answered by:* the requirements engineering of Chapter 3, validated in the formal technical review of §3.12 and
+*Answered by:* the requirements engineering of Chapter 3, validated in the formal technical review of §3.8 and
 closed against the delivered artefact in §12.2, the functional evaluation.
 
 **RQ2.** Which architectural approach best satisfies those requirements under a single-maintainer,
 low-budget sustainability constraint, and at what cost?
 
-*Answered by:* the alternatives assessment of §6.2, the decision records of §6.13, the operational
-cost model of §10.10, and the maintainability metrics of §9.14.
+*Answered by:* the alternatives assessment of §6.2, the decision records of §6.10, the operational
+cost model of §10.6, and the maintainability metrics of §9.12.
 
 **RQ3.** To what extent can institutional governance processes, meaning the constitution, elections,
 committee terms and member voting, be encoded as software without loss of procedural legitimacy?
 
-*Answered by:* the domain constraints of §3.10, the business rules catalogue of §5.6, the governance
-integrity discussion of §8.10, and the argument in §12.8 that draws the boundary the project
+*Answered by:* the domain constraints of §3.7, the business rules catalogue of §5.5, the governance
+integrity discussion of §8.8, and the argument in §12.6 that draws the boundary the project
 actually settled on.
 
 **RQ4.** What measurable quality is achieved by the resulting artefact against ISO/IEC 25010
 characteristics, and what does that reveal about the approach?
 
-*Answered by:* the evaluation strategy declared in §4.5 and executed in §§12.3 to 12.7, the
+*Answered by:* the evaluation strategy declared in §4.5 and executed in §§12.3 to 12.5, the
 evaluation results.
 
 RQ3 is the question of genuine interest. RQ1 and RQ2 have to be answered first, because without an
@@ -198,11 +198,11 @@ public web site, a member portal and admin console in the same Angular applicati
 mobile application for members.
 
 **Out of scope, by decision.** Live payment gateway integration is present in the codebase but
-deliberately unconfigured; §8.9, on payment risk, gives the reasoning. Statutory accounting and
+deliberately unconfigured; §8.7, on payment risk, gives the reasoning. Statutory accounting and
 audit filing are not attempted; the ledger is a record, not an accounting package. The platform does
 not run binding Executive Committee elections. It supports the process around them, including the
 voter roll, candidate information and result publication, but the ballot itself remains under the
-election documents, and §8.10, on governance integrity, explains why that separation is deliberate
+election documents, and §8.8, on governance integrity, explains why that separation is deliberate
 rather than an omission. There is no offline-first mobile synchronisation, no native desktop client,
 no machine-learning recommendation, and no external large language model; the in-app assistant is a
 rule-based intent classifier over the Association's own data.
@@ -230,15 +230,15 @@ Delivery followed an incremental and iterative lifecycle rather than a single pa
 given in §4.4, the process-model justification: a single unpaid maintainer working in irregular
 hours cannot hold a long specification-to-integration cycle open, and needs a working system after
 every increment. The evaluation plan, including the metrics, instruments and thresholds, is declared
-in the evaluation strategy of §4.5 and the metric definitions of §4.6 before any measurement is
+in the evaluation strategy of §4.5 and the metric definitions of §4.5 before any measurement is
 reported, so that Chapter 12 cannot select its own criteria after seeing the results. Chapter 4
 gives the full account.
 
 ## 1.9 Contributions of this Work
 
 The three claims are stated in full in the front matter under Statement of Contributions and are
-substantiated in §13.2. In brief: a traceable method for encoding a voluntary association's written
-constitution as software business rules, together with the five-class scheme of §3.10 that decides,
+substantiated in §13.1. In brief: a traceable method for encoding a voluntary association's written
+constitution as software business rules, together with the five-class scheme of §3.7 that decides,
 for each rule, whether the software may enforce it, compute it, collect evidence for a person to
 judge, support a procedure it does not decide, or stay out of it; an account of a deliberately
 gateway-free payment design and
@@ -260,8 +260,8 @@ themselves.
 | Treasurer | An auditable ledger and evidence for every receipt | FR-19 to FR-25 |
 | General Secretary | Minutes, correspondence, notices, AGM circulation | FR-26 to FR-31, FR-35 |
 | Information and Technology Secretary | A platform maintainable by one person; the constitutional office responsible for it | NFR-M1 to NFR-M4 |
-| Election Commission | A defensible voter roll and published results, with the ballot itself under the election documents | FR-38 to FR-40, §8.10 |
-| College administration | Correct use of the institutional name and crest, per Article I Section 5 | §3.10, DC-01 |
+| Election Commission | A defensible voter roll and published results, with the ballot itself under the election documents | FR-38 to FR-40, §8.8 |
+| College administration | Correct use of the institutional name and crest, per Article I Section 5 | §3.7, DC-01 |
 | Prospective member and general public | Public information, a route to apply, published governance documents | FR-01, FR-32, FR-46, FR-47 |
 | Maintainer as researcher | An artefact whose quality can be measured and reported honestly | Ch. 4, Ch. 12 |
 
@@ -328,7 +328,7 @@ flowchart LR
     classDef sys fill:#ffe9b3,stroke:#8a6d1f,stroke-width:2px
 ```
 
-The dashed path carries the design position of §8.9. Money moves between the member and the
+The dashed path carries the design position of §8.7. Money moves between the member and the
 financial channel outside the platform boundary. What crosses into the platform is a claim plus
 evidence, which an officer then verifies. The platform never holds a payment credential.
 
@@ -341,21 +341,21 @@ flowchart TB
         subgraph DIR["Direct ring"]
           subgraph CORE["Core"]
             C1[Maintainer / IT Secretary]
-            C2[Treasurer and<br/>General Secretary]
-            C1 ~~~ C2
+            C2[Treasurer, General Secretary]
           end
           D1[Members, six tiers]
-          D2[EC officers:<br/>13 elected, 2 ex-officio]
+          D2[EC: 13 elected, 2 ex-officio]
           D3[Election Commission]
-          D1 ~~~ D2 ~~~ D3
+          CORE ~~~ D1 & D2 & D3
         end
-        I1[Prospective members,<br/>visitors and event guests]
+        I1[Prospective members, guests]
         I2[Donors and sponsors]
-        I1 ~~~ I2
+        DIR ~~~ I1 & I2
       end
-      R1[College administration:<br/>name and crest]
-      R2[Constitution and election<br/>documents; personal-data expectations]
-      R1 ~~~ R2
+      R1[College: name and crest]
+      R2[Constitution and election code]
+      R3[Personal-data expectations]
+      IND ~~~ R1 & R2 & R3
     end
 ```
 
@@ -394,17 +394,16 @@ flowchart TB
 ### Figure 1.4 — Research question, objective and chapter map
 
 ```mermaid
-flowchart LR
-    RQ1[RQ1 Requirements] --> O1[O1 Specify] --> C3[Ch 3]
-    RQ1 --> O2[O2 Review] --> C2[Ch 2]
-    RQ2[RQ2 Architecture and cost] --> O3[O3 Architect] --> C6[Ch 6]
-    RQ2 --> O7[O7 Operate and cost] --> C10[Ch 10]
-    RQ3[RQ3 Governance in software] --> O4[O4 Model rules] --> C5[Ch 5]
-    RQ3 --> C8[Ch 8 §8.10]
-    RQ4[RQ4 Measured quality] --> O6[O6 Verify] --> C9[Ch 9]
-    O5[O5 Implement] --> C7[Ch 7]
-    RQ2 --> O5
-    O8[O8 Evaluate] --> C12[Ch 12]
-    RQ4 --> O8
-    RQ3 --> O8
+flowchart TB
+    RQ1[RQ1 Requirements] --> O2[O2 Review, Ch 2]
+    RQ1 --> O1[O1 Specify, Ch 3]
+    RQ2[RQ2 Architecture and cost] --> O3[O3 Architect, Ch 6]
+    RQ2 --> O5[O5 Implement, Ch 7]
+    RQ2 --> O7[O7 Operate and cost, Ch 10]
+    O5 ~~~ RQ3
+    RQ3[RQ3 Governance in software] --> O4[O4 Model rules, Ch 5]
+    RQ3 --> C8[Ch 8 §8.8]
+    RQ3 --> O8[O8 Evaluate, Ch 12]
+    RQ4[RQ4 Measured quality] --> O8
+    RQ4 --> O6[O6 Verify, Ch 9]
 ```

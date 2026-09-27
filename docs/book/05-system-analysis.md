@@ -2,7 +2,7 @@
 
 Chapter 3 said what the system must do and what it must not violate. This chapter says how those
 statements turn into a model that can be built from. Two notations are used side by side rather than
-one being chosen over the other, and §5.1 explains why. The chapter's centre of gravity is §5.6: the
+one being chosen over the other, and §5.1 explains why. The chapter's centre of gravity is §5.5: the
 business rules catalogue is where the constitution's clauses stop being prose and become named,
 locatable checks in the code, and it is the artefact Chapter 9 tests against and Chapter 8 audits.
 
@@ -24,7 +24,7 @@ answer both questions tends to produce a diagram that answers neither well.
 A third view, state modelling, is needed because three of this system's central objects, being the
 member, the payment, and the constitution, are long-lived and pass through official states that the
 constitution itself names. Neither a data-flow diagram nor a class diagram makes a state machine
-explicit, so §5.5 draws it separately.
+explicit, so §5.4 draws it separately.
 
 ## 5.2 Structured Analysis: Data-Flow Modelling
 
@@ -36,8 +36,8 @@ where the boundary starts to be decomposed.
 ### 5.2.2 Level 1 decomposition
 
 Figure 5.2 decomposes the platform into seven processes, each corresponding to a subsystem named in
-the use-case model of §3.6, and four persistent data stores. The stores are drawn at the level a
-data-flow diagram uses them, which is coarser than the seventy-one mapped entities of §5.7; D1 Member
+the use-case model of §3.5, and four persistent data stores. The stores are drawn at the level a
+data-flow diagram uses them, which is coarser than the seventy-one mapped entities of §5.6; D1 Member
 Records, for instance, stands for the member, academic-record, professional-record and
 membership-history tables together, because at this level of analysis they are read and written as a
 unit.
@@ -53,7 +53,7 @@ and timing of an interaction across roles rather than the transformation of data
 diagram is not the right notation to carry. Table 5.3 gives the process specification for each
 numbered process in those three diagrams, and Table 5.4 the data stores they read and write.
 
-## 5.3 Object-Oriented Analysis
+## 5.3 Object-Oriented and Behavioural Analysis
 
 ### 5.3.1 Noun and verb analysis
 
@@ -64,8 +64,8 @@ apply, approve, declare, verify, register, publish, vote and supersede, became t
 attached to the services of §5.3.2 rather than to the domain objects themselves in every case; a
 `Member` does not approve itself, an administrator does, acting through `MemberService`. That
 division, of state living on the domain object and the decision to change it living on a service, is
-the reason the design pattern discussion of §6.12.4 calls the model anaemic rather than rich, and
-§6.12.7 records that this was noticed and deliberately not corrected everywhere, because a richer
+the reason the design pattern discussion of §6.9.16 calls the model anaemic rather than rich, and
+§6.9.19 records that this was noticed and deliberately not corrected everywhere, because a richer
 domain model would have moved authorisation logic out of the layer where the API can enforce it
 uniformly.
 
@@ -74,7 +74,7 @@ uniformly.
 Table 5.2 gives the CRC card set for the analysis classes with the widest collaboration surface.
 `Member` collaborates with almost everything, which is expected of the entity the whole domain
 orbits; `GovernanceService`'s collaborator list is the direct analysis-level evidence for the
-DC-03 enforcement discussed in §5.6.
+DC-03 enforcement discussed in §5.5.
 
 ### 5.3.3 Analysis class relationships
 
@@ -82,9 +82,7 @@ The relationships among these classes, at the level appropriate to analysis rath
 are drawn in Figure 3.8 already and are not repeated here; §6.3 and Figure 6.7 give the design-level
 version once persistence and DTO boundaries are added.
 
-## 5.4 Behavioural Modelling
-
-Three activity diagrams cover the flows where a decision is taken by a person rather than by code:
+The behaviour is modelled in three activity diagrams, for the flows where a decision is taken by a person rather than by code:
 registration and administrative approval in Figure 5.6, payment declaration and verification in
 Figure 5.7, and event registration with its waitlist in Figure 5.8. Figure 5.9 redraws the amendment
 vote as a swimlane diagram, because there the interesting property is which role may act at which
@@ -93,10 +91,10 @@ audience is the Association's officers rather than engineers. Four sequence diag
 with one-time password and token issue in Figure 5.15, event registration in Figure 5.16, payment
 declaration and verification in Figure 5.17, and real-time notification over SignalR in Figure 5.18.
 Figure 5.19 draws token lifetime and the refresh window to scale. Each is discussed at the point it
-is first needed in §5.5 and §5.6 rather than in a separate narrative here, so that a diagram sits
+is first needed in §5.4 and §5.5 rather than in a separate narrative here, so that a diagram sits
 next to the rule it illustrates.
 
-## 5.5 State Modelling of Long-Lived Entities
+## 5.4 State Modelling of Long-Lived Entities
 
 Four state machines are drawn, and all four are read directly from an enumeration already defined in
 the code rather than invented for the diagram; `Enums.cs` is authoritative and the diagrams follow
@@ -133,7 +131,7 @@ Figure 5.12 draws both because the two are easy to conflate and the ledger rule 
 keeping them apart: an unverified declaration is not yet a `FinancialRecord`, and once a
 `FinancialRecord` exists it is not edited, only corrected by a compensating entry.
 
-## 5.6 Business Rules Catalogue
+## 5.5 Business Rules Catalogue
 
 Table 5.1 is the same sixteen domain constraints Table 3.6 stated, restated here with the actual
 enforcement location rather than the requirement identifier, because a rule catalogue that a reviewer
@@ -156,7 +154,7 @@ cannot use to find the code is not doing the job the honesty rule in the front m
 | BR-11 | A change of credentials, role or status invalidates every outstanding session immediately | Design position, §8.5 | `SecurityStampMiddleware` |
 | BR-12 | Every mutating request is attributed to the acting user, not to a default identifier | Audit integrity, TODO 29-F.1 | Acting admin id read from the JWT `MemberId` claim in every approval and rejection path |
 | BR-13 | A payment declaration is not credited until the callback or officer-verified amount matches the originating record | Financial integrity, TODO 29-B.2 | Amount comparison against the originating `PaymentHistory` row before crediting |
-| BR-14 | Advisory members are excluded from the Executive Committee quorum computation | Art. IV, Art. III | Formal-technical-review finding, §3.12; enforcement recorded against `GovernanceService`'s committee-membership query |
+| BR-14 | Advisory members are excluded from the Executive Committee quorum computation | Art. IV, Art. III | Formal-technical-review finding, §3.8; enforcement recorded against `GovernanceService`'s committee-membership query |
 | BR-15 | Wire-format dates are ISO-8601; `dd-MM-yyyy` is display and input only | Data-integrity finding, TODO Work Package 23 | `DateFormatConverter`; pinned by twenty tests in `DateFormatConverterTests.cs` |
 | BR-16 | The Association's name, crest and motto are used only as the constitution prescribes | Art. I §5 | Public site content sourced from `OrgConfig.branding`, not hardcoded per environment |
 
@@ -166,14 +164,14 @@ only from "a voting member in good standing". `GovernanceService.VoteOnConstitut
 `MembershipType` against the three eligible tiers and checks for a prior vote; it does not check
 arrears status before admitting the vote. A voting member with an outstanding subscription can
 therefore still vote on an amendment, which BR-01 as coded does not prevent. This is the same class
-of finding as the idle-timeout gap recorded in §3.12: a requirement the specification stated
-correctly and the implementation only partially closed. It is carried forward to §9.9 as an open
+of finding as the idle-timeout gap recorded in §3.8: a requirement the specification stated
+correctly and the implementation only partially closed. It is carried forward to §9.7 as an open
 item rather than corrected in this chapter, since correcting the prose here would misrepresent what
 the shipped code actually checks.
 
-## 5.7 Data Modelling
+## 5.6 Data Modelling and Analysis Model Review
 
-### 5.7.1 Conceptual to logical progression
+### 5.6.1 Conceptual to logical progression
 
 The conceptual model is the domain class diagram of Figure 3.8; the logical model is the
 seventy-two `DbSet` properties on `ApplicationDbContext`, one per mapped entity, defined at analysis
@@ -184,7 +182,7 @@ exceptions are the join and history tables, being `AmendmentVote`, `MembershipHi
 `EventRegistration` and similar, which are relationships promoted to entities because they carry
 their own attributes, principally a timestamp and, in three cases, a reason.
 
-### 5.7.2 Multiplicities worth stating explicitly
+### 5.6.2 Multiplicities worth stating explicitly
 
 A `Member` has exactly one `User` account, zero or more `AcademicRecord` and `ProfessionalRecord`
 entries with at least one academic record required by FR-04, zero or more `ECMember` appointments
@@ -193,22 +191,20 @@ A `Constitution` has zero or more `AmendmentVote` rows, and exactly one `Constit
 whole table has `IsActive = true`, which is an invariant enforced by procedure rather than by a
 database constraint, a decision revisited critically in §6.5.2.
 
-## 5.8 Analysis Model Review and Validation
-
-The analysis model was checked the same way the requirement set was checked in §3.12: against the
+The analysis model was checked the same way the requirement set was checked in §3.8: against the
 constitution clause by clause, and against the shipped code rule by rule. The clause-by-clause pass
 is the source of BR-14 above, an enforcement gap the specification review had already surfaced. The
-rule-by-rule pass against the code is the source of the FR-36 gap recorded in §5.6, which the
-specification review did not surface because §3.12 checked the specification's wording, not the
+rule-by-rule pass against the code is the source of the FR-36 gap recorded in §5.5, which the
+specification review did not surface because §3.8 checked the specification's wording, not the
 implementation's behaviour; finding it required reading `GovernanceService` directly. Both gaps are
-carried forward rather than resolved in this document, and both are named again in §9.9 and §8.14 so
+carried forward rather than resolved in this document, and both are named again in §9.7 and §8.11 so
 that a reader working from either chapter alone still encounters them.
 
-## 5.9 Summary
+## 5.7 Summary
 
 Structured and object-oriented analysis were used side by side because they answer different
 questions about the same system. Four state machines were drawn directly from the code's own
-enumerations rather than from a separate design exercise, and the business rules catalogue of §5.6
+enumerations rather than from a separate design exercise, and the business rules catalogue of §5.5
 gives sixteen constitutional and operational rules a named location in the code, with one honestly
 reported as only partly enforced. Chapter 6 now takes this analysis model forward into the
 architecture and design that realise it.
@@ -275,16 +271,20 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    M([Member]):::ext --> P41[4.1 Declare payment<br/>with reference and evidence]
-    P41 --> D21[(Unverified declarations)]
-    D21 --> P42[4.2 Review queue,<br/>ordered by age]
-    A([Officer]):::ext --> P42
-    P42 --> P43{4.3 Amount matches<br/>originating record?}
-    P43 -->|no| P44[4.4 Reject, reason recorded]
-    P43 -->|yes| P45[4.5 Post verified<br/>FinancialRecord]
-    P45 --> D22[(Financial ledger,<br/>append-only)]
-    P45 --> P46[4.6 Issue receipt]
-    P46 --> M
+    subgraph R1[" "]
+      direction LR
+      M([Member]):::ext --> P41[4.1 Declare payment, evidence] --> D21[(Unverified declarations)] --> P42[4.2 Review queue, oldest first]
+      A([Officer]):::ext --> P42
+    end
+    subgraph R2[" "]
+      direction LR
+      P43{4.3 Matches due?} -->|yes| P45[4.5 Post verified FinancialRecord] --> D22[(Ledger, append-only)]
+      P45 --> P46[4.6 Issue receipt] --> M2([Member]):::ext
+      P43 -->|no| P44[4.4 Reject, reason recorded]
+    end
+    R1 --> R2
+    style R1 fill:none,stroke:none
+    style R2 fill:none,stroke:none
     classDef ext fill:#eef,stroke:#446
 ```
 
@@ -292,17 +292,20 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    G([Guest]):::ext --> P11[1.1 Submit application]
-    P11 --> D11[(Applications,<br/>status Applied)]
-    A([Officer]):::ext --> P12[1.2 Review against<br/>thirty-day flag, DC-08]
-    D11 --> P12
-    P12 --> P13{1.3 Approve?}
-    P13 -->|yes| P14[1.4 Assign membership<br/>number, set Active]
-    P14 --> P15[1.5 Raise admission and<br/>first subscription, FR-19]
-    P15 --> D12[(Membership dues)]
-    P13 -->|no| P16[1.6 Set Rejected,<br/>reason recorded]
-    P14 --> D13[(Member records)]
-    P16 --> D13
+    subgraph R1[" "]
+      direction LR
+      G([Guest]):::ext --> P11[1.1 Submit application] --> D11[(Applications: Applied)] --> P12[1.2 Review, 30-day flag, DC-08]
+      A([Officer]):::ext --> P12
+    end
+    subgraph R2[" "]
+      direction LR
+      P13{1.3 Approve?} -->|yes| P14[1.4 Assign number, set Active] --> P15[1.5 Raise first dues, FR-19] --> D12[(Membership dues)]
+      P14 --> D13[(Member records)]
+      P13 -->|no| P16[1.6 Set Rejected, reason] --> D13
+    end
+    R1 --> R2
+    style R1 fill:none,stroke:none
+    style R2 fill:none,stroke:none
     classDef ext fill:#eef,stroke:#446
 ```
 
@@ -310,19 +313,21 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    T([publish_constitution.py<br/>build-time tool]):::ext --> P61[6.1 Extract ratified PDF,<br/>rewrite Seed/constitution.json]
-    P61 --> D61[(Seed/constitution.json)]
-    B([Program.cs at boot]):::ext --> P62[6.2 ConstitutionSeeder.SyncAsync]
-    D61 --> P62
-    P62 --> P63{6.3 Version already<br/>present, changed,<br/>or new?}
-    P63 -->|new| P64[6.4 Insert, IsActive]
-    P63 -->|changed| P65[6.5 Refresh text in place]
-    P63 -->|superseded| P66[6.6 Set SupersededDate,<br/>never delete]
-    P64 --> D62[(Constitutions table)]
-    P65 --> D62
-    P66 --> D62
-    R([Public / Member]):::ext --> P67[6.7 Read the single<br/>IsActive row]
-    D62 --> P67
+    subgraph R1[" "]
+      direction LR
+      T([publish_constitution.py]):::ext --> P61[6.1 Extract PDF, rewrite seed] --> D61[(Seed/constitution.json)] --> P62[6.2 ConstitutionSeeder.SyncAsync]
+      B([Program.cs at boot]):::ext --> P62
+    end
+    subgraph R2[" "]
+      direction LR
+      P63{6.3 Version?} -->|new| P64[6.4 Insert, IsActive] --> D62[(Constitutions)]
+      P63 -->|changed| P65[6.5 Refresh text in place] --> D62
+      P63 -->|superseded, kept| P66[6.6 Set SupersededDate] --> D62
+      D62 --> P67[6.7 Read active row] --> R([Public / Member]):::ext
+    end
+    R1 --> R2
+    style R1 fill:none,stroke:none
+    style R2 fill:none,stroke:none
     classDef ext fill:#eef,stroke:#446
 ```
 
@@ -343,47 +348,50 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    S([Start]) --> A1[Complete registration wizard]
-    A1 --> A2[Save progress<br/>if interrupted]
-    A2 --> A3{All thirteen<br/>fields present?}
-    A3 -->|no| A1
-    A3 -->|yes| A4[Submit; status Applied]
-    A4 --> A5[Officer reviews,<br/>thirty-day flag if older]
-    A5 --> A6{Approve?}
-    A6 -->|yes| A7[Assign membership number,<br/>status Active, raise dues]
-    A6 -->|no| A8[Status Rejected,<br/>reason recorded]
-    A7 --> E([End])
-    A8 --> E
+    subgraph R1[" "]
+      direction LR
+      S([Start]) --> A1[Complete registration wizard] --> A2[Save progress if interrupted] --> A3{13 fields present?}
+      A3 -->|no| A1
+    end
+    subgraph R2[" "]
+      direction LR
+      A4[Submit, status Applied] --> A5[Officer reviews, 30-day flag] --> A6{Approve?}
+      A6 -->|yes| A7[Numbered, Active, dues raised] --> E([End])
+      A6 -->|no| A8[Rejected, reason recorded] --> E
+    end
+    R1 -->|yes| R2
+    style R1 fill:none,stroke:none
+    style R2 fill:none,stroke:none
 ```
 
 ### Figure 5.7 — Activity diagram: payment declaration and verification
 
 ```mermaid
 flowchart TB
-    S([Start]) --> B1[Member declares payment:<br/>reference + evidence upload]
-    B1 --> B2[Enters queue,<br/>status unverified]
-    B2 --> B3[Officer opens queue,<br/>oldest first]
-    B3 --> B4{Amount matches<br/>originating due?}
-    B4 -->|no| B5[Reject, reason recorded]
-    B4 -->|yes| B6[Post verified FinancialRecord,<br/>append-only]
-    B6 --> B7[Issue receipt]
-    B5 --> E([End])
-    B7 --> E
+    subgraph R1[" "]
+      direction LR
+      S([Start]) --> B1[Member sends reference, proof] --> B2[Queued, unverified] --> B3[Officer opens queue, oldest first]
+    end
+    subgraph R2[" "]
+      direction LR
+      B4{Amount matches the due?} -->|yes| B6[Post FinancialRecord, append-only] --> B7[Issue receipt] --> E([End])
+      B4 -->|no| B5[Reject, reason recorded] --> E
+    end
+    R1 --> R2
+    style R1 fill:none,stroke:none
+    style R2 fill:none,stroke:none
 ```
 
 ### Figure 5.8 — Activity diagram: event registration with waitlist
 
 ```mermaid
-flowchart TB
+flowchart LR
     S([Start]) --> C1[Member registers for event]
-    C1 --> C2{Capacity reached,<br/>counting every<br/>occupying status?}
-    C2 -->|no| C3[Status Approved]
-    C2 -->|yes, HasWaitlist| C4[Status Waitlisted,<br/>ordered by RegisteredAt]
-    C2 -->|yes, no waitlist| C5[Registration refused]
-    C6[A place is released] --> C7[Promote head of<br/>waitlist, FIFO]
-    C7 --> C3
-    C3 --> E([End])
-    C5 --> E
+    C1 --> C2{Capacity reached?}
+    C2 -->|no| C3[Status Approved] --> E([End])
+    C2 -->|yes, HasWaitlist| C4[Status Waitlisted, by RegisteredAt] --> E
+    C2 -->|yes, no waitlist| C5[Registration refused] --> E
+    C6[A place is released] --> C7[Promote head of waitlist, FIFO] --> C3
 ```
 
 ### Figure 5.9 — Swimlane activity diagram: constitution amendment vote
@@ -391,44 +399,36 @@ flowchart TB
 ```mermaid
 flowchart TB
     subgraph EC["EC Member"]
-      L1[Open amendment proposal]
-      L2[Circulate 14 days minimum]
+      direction LR
+      L1[Open amendment proposal] --> L2[Circulate 14 days minimum]
     end
     subgraph MEM["Voting Member"]
-      L3[Read proposal]
-      L4[Cast vote: for / against]
+      direction LR
+      L3[Read proposal] --> L4[Cast vote: for / against]
     end
     subgraph SYS["System"]
-      L5[Check MembershipType<br/>in Founding/Executive/General]
-      L6[Check no prior vote<br/>this constitution version]
-      L7[Record AmendmentVote]
-      L8[Report counts and<br/>two-thirds threshold reached?]
+      direction LR
+      L5[Check voting tier] -->|pass| L6[Check no prior vote] -->|pass| L7[Record AmendmentVote] --> L8[Count, two-thirds reached?]
+      L5 -->|fail| REFUSE[Vote refused]
+      L6 -->|fail| REFUSE
     end
-    L1 --> L2 --> L3 --> L4 --> L5
-    L5 -->|fail| REFUSE[Vote refused]
-    L5 -->|pass| L6
-    L6 -->|fail| REFUSE
-    L6 -->|pass| L7 --> L8
+    EC --> MEM --> SYS
 ```
 
 ### Figure 5.10 — BPMN process diagram of the election cycle
 
 ```mermaid
-flowchart TB
+flowchart LR
     subgraph EComm["Election Commission"]
-      direction TB
-      B1([Open cycle]) --> B2[Request voter roll]
-      B2 --> B5[Publish candidates]
-      B5 --> B6[Conduct ballot,<br/>outside the platform]
-      B6 --> B7[Publish results]
+      direction LR
+      B1([Open<br/>cycle]) --> B2[Request<br/>voter roll] ~~~ B5[Publish<br/>candidates] --> B6[Ballot, off<br/>the platform] --> B7[Publish<br/>results]
     end
     subgraph Sys["GHCAA Platform"]
-      direction TB
-      B3[Derive roll from<br/>tier and standing]
-      B4[Make roll available,<br/>challengeable]
-      B8[Publish results<br/>supplied by EC]
+      direction LR
+      B3[Derive roll:<br/>tier, standing] --> B4[Roll open to<br/>challenge] ~~~ B8[Publish the<br/>EC results]
     end
-    B2 --> B3 --> B4 --> B5
+    B2 --> B3
+    B4 --> B5
     B7 --> B8
 ```
 

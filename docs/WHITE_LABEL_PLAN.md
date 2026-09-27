@@ -1,6 +1,7 @@
 # White-label plan: one codebase, any institution
 
-Status: PLAN (nothing implemented yet)
+Status: in progress. Checked 2026-09-27: 62.22 and 62.50 are done, 62.2 and 62.41 are partial,
+the rest is open. docs/TODO.md Work Package 62 has the current state.
 Raised: 2026-09-01, "make this application generic rather than GHC ... will work with GHC or any
 other institution with minimal configuration changes"
 Tracked as: docs/TODO.md Work Package 62

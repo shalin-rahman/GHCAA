@@ -95,20 +95,24 @@ def locate(pages, anchors, start_page=1):
     return found
 
 
-PART_TITLE = re.compile(r"PART\s+[IVX]+", re.I)
+# Upper case and at the very top of the page. The contents page names every
+# part too, but always after its "Part, chapter and section" header row.
+PART_OPENS_PAGE = re.compile(r"PART\s+[IVX]+\b")
 
 
 def body_start(pages):
     """The first page of the body, so front-matter echoes are not matched.
 
     The contents page lists every chapter title, so a search beginning at page
-    one reports the contents page for all of them. The body opens on a part
-    title page, which carries almost nothing else — that shortness is what
-    distinguishes it from the contents page, which also names every part.
+    one reports the contents page for all of them. The body starts on the first
+    page whose text opens with a Part heading. That holds whether the Part has
+    a divider page of its own or, since 67.5 dropped the dividers, sits at the
+    top of its first chapter's first page. An earlier test for a short page
+    stopped matching once the dividers went, and every folio then pointed at
+    the contents page.
     """
     for index, page in enumerate(pages, 1):
-        text = _flat(page)
-        if PART_TITLE.search(text) and len(text) < 250:
+        if PART_OPENS_PAGE.match(_flat(page)):
             return index
     return 1
 

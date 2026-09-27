@@ -1,5 +1,8 @@
 # WP37 implementation plan
 
+> **Status 2026-09-27:** 37.8, 37.2 and 37.6 have shipped, so the order below is history. One gap
+> is still open: `ArchiveController` has no tests and no admin screen (TODO 84.27).
+
 ## Dependency order
 
 1. 37.8 Fundraising campaigns

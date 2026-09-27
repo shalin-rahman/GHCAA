@@ -2,7 +2,7 @@
 
 Chapter 5 modelled what the system does. This chapter records how it is built to do it, and, because
 §6.2 argues the point in earnest rather than as a formality, why it is built that way rather than one
-of the alternatives a reviewer would reasonably ask about. The chapter ends, in §6.11 and §6.12, by
+of the alternatives a reviewer would reasonably ask about. The chapter ends, in §6.9, by
 naming every design principle and pattern the codebase actually uses and giving each one a place a
 reader can go and check.
 
@@ -11,8 +11,8 @@ reader can go and check.
 Four goals governed every decision in this chapter, ranked in the order they were actually traded off
 against each other when they conflicted. The system must be operable by one volunteer with no
 on-call obligation (NFR-M4); it must run within an operating cost the Association can sustain
-indefinitely from subscription income (§10.10); it must satisfy the quality-attribute scenarios of
-§3.5, most of which concern correctness and auditability rather than throughput; and only after those
+indefinitely from subscription income (§10.6); it must satisfy the quality-attribute scenarios of
+§3.4, most of which concern correctness and auditability rather than throughput; and only after those
 three does raw performance matter, because the workload, being at most a few hundred members, does
 not stress a conventional web stack. Where a textbook recommendation would have improved a quality
 attribute the Association does not need at the cost of one it does, the textbook recommendation lost;
@@ -21,7 +21,7 @@ attribute the Association does not need at the cost of one it does, the textbook
 ## 6.2 Architectural Alternatives Considered and the Decision Taken
 
 Figure 6.13 scores the four candidates below across the quality attributes that decided between them.
-Four alternatives were assessed against the quality-attribute scenarios of §3.5 and the sustainability
+Four alternatives were assessed against the quality-attribute scenarios of §3.4 and the sustainability
 constraint of §6.1: a conventional layered architecture without an explicit dependency rule, clean
 architecture with the dependency rule enforced [1], a modular monolith with service-style internal
 boundaries but a single deployable, and a microservices decomposition [17]. Full microservices was
@@ -30,7 +30,7 @@ deployability and independent scaling paying for the operational cost of running
 [17], and neither benefit applies to a single maintainer deploying to a single small container.
 Fowler's advice to start monolithic and split later applies here in its strongest form, because there
 is no team boundary to relieve by splitting [16]. A conventional layered architecture without a
-dependency rule was rejected next, on the evidence of the DI registration comment recorded in §6.13
+dependency rule was rejected next, on the evidence of the DI registration comment recorded in §6.10
 below: the project has already once let an infrastructure detail (a pooled `DbContext`'s runtime
 type) leak into a place that silently broke migrations across every environment, and an
 unenforced layering would have made that class of defect ordinary rather than exceptional.
@@ -45,7 +45,7 @@ and §7.2 shows the reference graph that makes the rule enforceable rather than 
 
 What this decision cost is stated rather than glossed. Clean architecture's ceremony, meaning an
 interface in `GHCAA.Application` for every service implemented in `GHCAA.Infrastructure`, is
-overhead when there is exactly one implementation and no plan for a second; §6.11.4 returns to this
+overhead when there is exactly one implementation and no plan for a second; §6.9.4 returns to this
 as the clearest instance of a principle applied further than its payoff in this project actually
 warrants.
 
@@ -55,7 +55,7 @@ Figure 6.2 draws the four layers and the single direction dependencies are permi
 
 ### 6.3.1 Domain layer
 
-`GHCAA.Domain` holds the seventy-one entity sets enumerated in §5.7, the thirty-eight enumerations
+`GHCAA.Domain` holds the seventy-one entity sets enumerated in §5.6, the thirty-eight enumerations
 of `Enums.cs`, and constants. Figure 6.7 draws the membership, payment, event and governance
 classes at design level, with the attributes and multiplicities the analysis model of Figure 3.8
 left out. It references nothing else in the solution, which is the dependency rule's
@@ -65,7 +65,7 @@ starting point: if the domain depended on anything, the rule would already be br
 
 `GHCAA.Application` holds the service interfaces (forty-four are declared, and the forty-two
 implementations in `GHCAA.Infrastructure/Services` are bound to them by the assembly-scanning
-registration of §6.11.9) and the data transfer objects that cross the API boundary. It depends only on
+registration of §6.9.9) and the data transfer objects that cross the API boundary. It depends only on
 `GHCAA.Domain`.
 
 ### 6.3.3 Infrastructure layer
@@ -106,11 +106,11 @@ than a linter or a convention: `GHCAA.Domain.csproj` references no other project
 no `.csproj` in an inner layer references one in an outer layer. §7.2's dependency structure matrix
 is the evidence that this holds for the delivered solution, not only for its intended design.
 
-## 6.4 Component-Level Design
+## 6.4 Component and Interface Design
 
 Figure 6.9 draws the request path as a component diagram: a controller depends on a service
 interface it does not implement, the concrete service is supplied by the DI container built in
-§6.11.9, and the service depends on `ApplicationDbContext` as its persistence port. The middleware
+§6.9.9, and the service depends on `ApplicationDbContext` as its persistence port. The middleware
 pipeline, drawn in Figure 6.10, is the component boundary a request crosses before it reaches a
 controller at all, and its order is significant: `ExceptionMiddleware` wraps everything so that no
 unhandled exception below it reaches the client as anything other than a JSON error; rate limiting
@@ -119,11 +119,18 @@ a token is paid; `SecurityStampMiddleware` runs after authentication and before 
 is the ordering that makes BR-11 hold, since a request must be authenticated before its security
 stamp can be checked, and must be checked before authorisation decides what it may do.
 
+At the interface, the API resource model follows a `/api/[controller]` convention with sub-resources expressed as path
+segments, for example `/api/events/{id}/register`. Errors are returned as JSON with a consistent
+shape from `ExceptionMiddleware` rather than as provider stack traces, which is NFR-U4's requirement
+enforced at the one place that can guarantee it for every unhandled case. Table 6.3 catalogues every
+controller with its route and authorisation level; the full request and response shapes are in the
+generated OpenAPI document.
+
 ## 6.5 Data Design
 
 ### 6.5.1 Conceptual, logical and physical progression
 
-The conceptual model is Figure 3.8; the logical model is the seventy-one mapped entity sets of §5.7,
+The conceptual model is Figure 3.8; the logical model is the seventy-one mapped entity sets of §5.6,
 forty-five of which have a Fluent API configuration class under
 `GHCAA.Infrastructure/Data/Configurations/` rather than attribute-only mapping, which keeps
 persistence concerns out of the domain classes themselves; the remaining twenty-six are mapped by EF
@@ -240,16 +247,7 @@ without complaint and only surfaces as a broken image in a browser. The same tes
 with a second, value-level assertion — every `*Path`/`*Url` string must contain at least one
 alphanumeric character — since a correct key name is not by itself evidence of a correct value.
 
-## 6.6 Interface Design
-
-The API resource model follows a `/api/[controller]` convention with sub-resources expressed as path
-segments, for example `/api/events/{id}/register`. Errors are returned as JSON with a consistent
-shape from `ExceptionMiddleware` rather than as provider stack traces, which is NFR-U4's requirement
-enforced at the one place that can guarantee it for every unhandled case. Table 6.3 catalogues every
-controller with its route and authorisation level; the full request and response shapes are in the
-generated OpenAPI document.
-
-## 6.7 Security Architecture
+## 6.6 Security Architecture
 
 Summarised here as a design view; the threat model, control mapping and residual risk are Chapter 8's
 subject. Four mechanisms are worth naming as architecture rather than as detail, because each is a
@@ -257,7 +255,7 @@ structural decision rather than a local check: `SecurityStampMiddleware`, which 
 role change take effect within one request rather than at token expiry; the query-string token
 allowance in the middleware pipeline, which exists only to let a file download authenticate without a
 custom header and is scoped, in the pipeline order of Figure 6.10, to run before the ordinary
-authentication step rather than replacing it; the payment-gateway posture of §8.9, under which the
+authentication step rather than replacing it; the payment-gateway posture of §8.7, under which the
 platform never stores a payment credential of its own; and step-up authentication for destructive,
 financial and identity-changing admin actions, which re-verifies an already-authenticated Admin or
 SuperAdmin session by email OTP before it may reach one of five gated endpoints. The verification
@@ -281,26 +279,26 @@ otherwise assume an unencrypted request. Placing this ahead of `UseHsts()`/`UseH
 rather than treating it as an unrelated Dockerfile or platform concern is the structural point — three
 independent controls share one upstream dependency, and only one of them names it.
 
-## 6.8 User-Interface Design
+## 6.7 Web and Mobile User-Interface Design
 
-### 6.8.1 Design principles and information architecture
+### 6.7.1 Design principles and information architecture
 
 The public site, the member portal and the admin console are three route trees within one Angular
 application, separated by `PublicLayoutComponent`, `PortalLayoutComponent` and
 `AdminLayoutComponent` and by the `authGuard` and `adminGuard`/`superAdminGuard` route guards listed
 in Table 6.3's companion, the route map of Figure 6.11. A visitor never crosses from the public tree
 into a guarded one without authenticating, and the admin tree is itself split by guard between
-`Admin` and `SuperAdmin`, matching the role distinction §6.7 sets out.
+`Admin` and `SuperAdmin`, matching the role distinction §6.6 sets out.
 
-### 6.8.2 Design-token system, theming and the single-stylesheet decision
+### 6.7.2 Design-token system, theming and the single-stylesheet decision
 
 Presentation is governed by one stylesheet, `GHCAA.Web/src/styles.scss`, running to 3,363 lines on 7 September 2026. The decision to keep one file rather than a stylesheet per component was made
 for a reason specific to this project's constraint of one maintainer: a shared design-token set for
 colour, spacing and typography, resolved once and consumed everywhere, is the only way one person can
 change a brand colour in one place and have it apply to three route trees without hunting through
-the eighty components that declare one. §6.12.7 records what this decision cost as well as what it bought.
+the eighty components that declare one. §6.9.19 records what this decision cost as well as what it bought.
 
-### 6.8.3 Shared control library and the duplication it eliminates, and where it does not yet
+### 6.7.3 Shared control library and the duplication it eliminates, and where it does not yet
 
 Some presentation is genuinely shared: `PaginationComponent`, `ToastComponent`, `FooterComponent`
 and similar are each written once under `src/app/common/` and used from every route tree that needs
@@ -315,27 +313,25 @@ proposed remedy is a set of presentational sub-components, `AcademicHistoryEdito
 the relevant model slice as input and emitting change events rather than making its own HTTP calls.
 As of this writing that extraction has not been built, and the two templates still drift
 independently; it is listed here as an identified but unresolved duplication rather than as a
-completed piece of design, and §13.6.2 carries it forward as a named item of technical debt.
+completed piece of design, and §13.4.2 carries it forward as a named item of technical debt.
 
-### 6.8.4 Responsive design and accessibility strategy
+### 6.7.4 Responsive design and accessibility strategy
 
-Accessibility is targeted at WCAG 2.1 level AA per NFR-U1, verified by the audit reported in §9.12
+Accessibility is targeted at WCAG 2.1 level AA per NFR-U1, verified by the audit reported in §9.10
 rather than asserted here. Responsive layout follows Marcotte's approach of a fluid grid over fixed
 breakpoints [36], necessary because NFR-P3 and the assumption of §1.7 both treat a mobile browser,
 not a desktop one, as the primary surface for a member.
 
-### 6.8.5 Web application design pyramid
+### 6.7.5 Web application design pyramid
 
 Reading the site against Pressman and Maxim's design pyramid [54]: interface design is the guard-
-separated route trees of §6.8.1; aesthetic design is the token system of §6.8.2; content design is
+separated route trees of §6.7.1; aesthetic design is the token system of §6.7.2; content design is
 the admin-editable `SiteContent` blocks described in §5.2.3's public-content data flow, which let an
 officer change wording without a deployment (FR-45); navigation design is the route map of Figure
 6.17 and the site map of Figure 6.12; architecture design is Figure 6.1; and component design is the
-shared control library of §6.8.3, with the gap just recorded.
+shared control library of §6.7.3, with the gap just recorded.
 
-## 6.9 Mobile Application Design and Platform-Specific Concerns
-
-The Flutter client mirrors the web client's feature set (FR-48) rather than offering a reduced one,
+On mobile, the Flutter client mirrors the web client's feature set (FR-48) rather than offering a reduced one,
 using `Dio` for HTTP against the same API and `flutter_riverpod` for state. Two platform-specific
 concerns are worth naming: the identity card is rendered from data cached at first sign-in so it
 remains visible without a network connection at the venue where it is presented (FR-49), and payment
@@ -343,7 +339,7 @@ evidence images are compressed on the device before upload to the limit stated i
 relying on server-side compression, because the upload itself is the expensive step on the
 connections §1.7 assumes.
 
-## 6.10 Configuration-Driven Design
+## 6.8 Configuration-Driven Design
 
 Feature flags and organisation identity are design elements, not afterthoughts, because §1.7's
 delimitation to one association does not mean the code should hardcode that association's name.
@@ -352,7 +348,7 @@ and a fallback chain of cache, then database, then a built-in default so that a 
 configuration row cannot crash the application, holds branding, contact details, currency, feature
 toggles such as `enableForum` and `enableMentorship`, and workflow settings such as the membership
 approval mode. `GET /api/config` is public and `PUT /api/config` is SuperAdmin-only, which is the
-interface design principle of §6.6 applied to configuration itself. One field group is a deliberate
+interface design principle of §6.4 applied to configuration itself. One field group is a deliberate
 exception to the "database wins" rule. `Localization`, the UI copy strings such as the per-locale
 tagline, is overlaid from the built-in defaults on every read, whatever the stored config row holds.
 No admin screen edits it, so a stored row only carries it forward by accident: `UpdateConfigAsync`
@@ -360,31 +356,31 @@ round-trips the whole DTO on any Branding or Workflow save. Trusting that stale 
 text fix in the source never reaching production, which is what happened on 2026-08-31, when a
 corrected Bengali tagline kept serving the pre-fix value from an old row. At the time of writing the
 Angular and Flutter clients' consumption of this configuration is only partially complete, which
-`docs/CONFIG_DRIVEN_FRAMEWORK.md` itself records as Phase 2 and Phase 3, "TODO"; §13.6.2 carries the
+`docs/CONFIG_DRIVEN_FRAMEWORK.md` itself records as Phase 2 and Phase 3, "TODO"; §13.4.2 carries the
 remaining wiring forward.
 
-## 6.11 Design Principles: Claim, Mechanism and Evidence
+## 6.9 Design Principles and Patterns
 
-### 6.11.1 Separation of concerns and the layer boundary
+### 6.9.1 Separation of concerns and the layer boundary
 
 The four-assembly split of §6.3 is the mechanism; a controller containing a SQL query, or a domain
 class containing an HTTP call, would be the violation, and none exists in the solution.
 
-### 6.11.2 Dependency inversion
+### 6.9.2 Dependency inversion
 
 The domain depends on abstractions only, in the strong sense that it depends on nothing at all;
 `GHCAA.Application` defines the interfaces `GHCAA.Infrastructure` implements. Enforced by the project
 reference graph of §6.3.6 and reported numerically by the dependency structure matrix planned for Chapter 7.
 
-### 6.11.3 Single responsibility
+### 6.9.3 Single responsibility
 
-Service decomposition follows the subsystem boundaries of §3.6: `MemberService` owns membership
+Service decomposition follows the subsystem boundaries of §3.5: `MemberService` owns membership
 lifecycle, `FinancialService` and `FinancialLedgerService` are split apart from each other
 specifically so that raising and recording a due is a different responsibility from posting an
 append-only ledger entry, which is the separation BR-07 depends on. The cohesion evidence for this
-claim is measured, not asserted, in §9.14.3.
+claim is measured, not asserted, in §9.12.3.
 
-### 6.11.4 Open/closed
+### 6.9.4 Open/closed
 
 Where it is achieved: a new payment gateway is added by implementing `IPaymentGatewayService` (directly,
 or through the shared `BasePaymentGateway` base class introduced after 2026-09-07 for the three gateways
@@ -399,7 +395,7 @@ interface's openness to a cloud-storage adapter is structural rather than demons
 abstraction's cost, an interface and a DI registration for a substitution that has never happened, is
 real overhead until that day comes.
 
-### 6.11.5 Liskov substitution and interface segregation
+### 6.9.5 Liskov substitution and interface segregation
 
 Every one of the four `IPaymentGatewayService` implementations is substitutable through
 `PaymentGatewayFactory` without the caller testing which one it received, which is the property this
@@ -408,7 +404,7 @@ callers depend on to store and retrieve a file, and `IFileUploadRepository`, whi
 `MemberImportController`'s bulk path and a narrow set of query callers depend on for metadata lookup;
 neither interface forces a caller to depend on methods it does not use.
 
-### 6.11.6 Information hiding and encapsulation
+### 6.9.6 Information hiding and encapsulation
 
 A controller never queries `ApplicationDbContext` directly. Eight controllers did until 2026-09-06 —
 `AdminSocialAuthController`, `AuthController`, `FinancialsController`, `GatewaysController`,
@@ -420,20 +416,20 @@ one of those reads/writes behind a new or extended Application-layer interface (
 `IEventService`, `IMemberService`, `IFileUploadRepository`); `GovernanceController`'s own field turned
 out to be dead — injected but never read. The principle now holds without exception.
 
-### 6.11.7 Coupling and cohesion
+### 6.9.7 Coupling and cohesion
 
-Measured in §9.14.3 as CBO, afferent and efferent coupling and instability, and plotted against
+Measured in §9.12.3 as CBO, afferent and efferent coupling and instability, and plotted against
 Martin's main sequence; this section states the claim, that layer boundaries keep coupling
-directional, and §9.14.3 is where the claim is checked rather than assumed.
+directional, and §9.12.3 is where the claim is checked rather than assumed.
 
-### 6.11.8 Elimination of duplication
+### 6.9.8 Elimination of duplication
 
-The single stylesheet of §6.8.2 and the assembly-scanning registration of §6.11.9 both remove a class
+The single stylesheet of §6.7.2 and the assembly-scanning registration of §6.9.9 both remove a class
 of duplication that would otherwise recur on every new service or every new component. The shared
-member-record editors of §6.8.3 are the case where duplication was identified and not yet removed,
+member-record editors of §6.7.3 are the case where duplication was identified and not yet removed,
 and it is counted as a limitation here rather than claimed as a success.
 
-### 6.11.9 Convention over configuration
+### 6.9.9 Convention over configuration
 
 `GHCAA.Infrastructure.DependencyInjection.AddInfrastructure` scans its own assembly for every
 non-abstract class in a namespace containing `Services`, finds the interfaces it implements under
@@ -444,7 +440,7 @@ repository, the payment-gateway factory and the four gateways themselves plus th
 listed by hand, and the code comments them as exactly that: manual registrations for non-standard
 services.
 
-### 6.11.10 Principle of least astonishment
+### 6.9.10 Principle of least astonishment
 
 The membership-number format `GHC-[Year]-[Serial]`, the consistent `/api/[controller]` route shape,
 and the uniform JSON error envelope from `ExceptionMiddleware` are the three places this principle is
@@ -452,7 +448,7 @@ most visible to someone outside the maintainer's own head: an admin who has seen
 number can read any other, and a client developer who has called one endpoint successfully can guess
 the shape of the next one correctly more often than not.
 
-### 6.11.11 GRASP
+### 6.9.11 GRASP
 
 Information expert: `Member` exposes its own standing computation from data it holds. Creator:
 `MemberService` creates the `MembershipHistory` row alongside the status change that caused it,
@@ -463,9 +459,9 @@ counterpart, invented purely to keep gateway selection out of every controller t
 Indirection and protected variations: the `IPaymentGatewayService` interface is the seam that
 protects every caller from which concrete gateway is behind it.
 
-### 6.11.12 Principles deliberately traded away
+### 6.9.12 Principles deliberately traded away
 
-Deferred generality was chosen over speculative abstraction in the file-storage case of §6.11.4,
+Deferred generality was chosen over speculative abstraction in the file-storage case of §6.9.4,
 where a second adapter is not built until a second requirement for one exists. The modular monolith
 alternative to full microservices, argued in §6.2, is itself a principle traded away deliberately:
 independent deployability was sacrificed for operability by one person. Data transfer objects at
@@ -474,9 +470,7 @@ alternative, serialising domain entities directly, would have coupled the wire c
 persistence model in a way that failed the compatibility requirement of NFR-C3 the first time a
 provider-specific attribute needed adding.
 
-## 6.12 Design Patterns Applied
-
-### 6.12.1 Creational
+### 6.9.13 Creational patterns
 
 Table 6.4 lists the patterns applied, with the alternative rejected in each case; the subsections
 below give the reasoning for the entries where the choice was not obvious.
@@ -493,7 +487,7 @@ place of a hand-written Singleton; `IMemoryCache` behind `IOrgConfigService` is 
 container-managed lifetime rather than a static field, which is the idiomatic .NET substitute for the
 classic pattern.
 
-### 6.12.2 Structural
+### 6.9.14 Structural patterns
 
 **Adapter.** Each payment gateway class adapts a foreign HTTP API, bKash's, Nagad's, SSLCommerz's or
 DGePay's own request and response shapes, to the single `IPaymentGatewayService` contract. Forces:
@@ -503,7 +497,7 @@ gateway except in its routing.
 
 **Facade.** The service layer as a whole is a facade over `ApplicationDbContext` and EF Core's
 change-tracking, so that a controller never composes a LINQ query itself; the exceptions are the four
-controllers named in §6.11.6.
+controllers named in §6.9.6.
 
 **Decorator.** The middleware pipeline of Figure 6.10 is ASP.NET Core's own decorator chain: each
 middleware wraps the next and can act before and after it without the inner stages knowing the outer
@@ -513,7 +507,7 @@ ones exist.
 both act as a proxy standing in front of an expensive operation, a database round trip in one case, a
 configuration read in the other.
 
-### 6.12.3 Behavioural
+### 6.9.15 Behavioural patterns
 
 **Strategy.** The four `IPaymentGatewayService` implementations are interchangeable strategies
 selected by `PaymentGatewayFactory`; the three `ApplicationDbContext` provider shims play the same
@@ -531,7 +525,7 @@ binding: a request is bound to a typed DTO, dispatched to exactly one handler me
 is used implicitly rather than as an explicit `ICommand` hierarchy, which was judged unnecessary
 ceremony for a project of this size.
 
-### 6.12.4 Enterprise application patterns
+### 6.9.16 Enterprise application patterns
 
 **Repository.** Applied narrowly and by name to exactly one case, `IFileUploadRepository`, rather
 than uniformly across every entity; every other service reaches `ApplicationDbContext` directly.
@@ -539,29 +533,29 @@ than uniformly across every entity; every other service reaches `ApplicationDbCo
 commits every tracked change in a single transaction, which is the property a hand-rolled Unit of
 Work would exist to provide. **Service Layer.** The forty-two services of Table 6.3's companion DI
 map are this pattern, named and applied consistently. **Data Transfer Object.** Applied at every
-controller boundary, discussed in §6.11.12. **Domain Model.** Present but anaemic in Fowler's sense
+controller boundary, discussed in §6.9.12. **Domain Model.** Present but anaemic in Fowler's sense
 [2], as §5.3.1 already noted: state lives on the entity, behaviour that changes it lives on the
 service. **Identity Map.** EF Core's change tracker provides this per `DbContext` instance; no
 separate implementation exists or is needed at this scale.
 
-### 6.12.5 Architectural patterns
+### 6.9.17 Architectural patterns
 
 Layered/clean architecture (§6.3), dependency injection as the composition mechanism throughout,
-MVC on the API side and a comparable smart/presentational split on the Angular side (§6.12.6),
+MVC on the API side and a comparable smart/presentational split on the Angular side (§6.9.18),
 publish–subscribe for SignalR, and the API itself as the single gateway boundary both clients pass
 through.
 
-### 6.12.6 Angular and Flutter presentation patterns
+### 6.9.18 Angular and Flutter presentation patterns
 
 Angular components split, informally, into smart components that own a service dependency and
 presentational ones that do not, `PaginationComponent` and `ToastComponent` being the clearest
-presentational examples; the profile and admin-member components of §6.8.3 are the case where that
+presentational examples; the profile and admin-member components of §6.7.3 are the case where that
 split has been designed but not yet built. Reactive state uses Angular signals on the web side and
 Riverpod providers on the mobile side, both observer-pattern variants. `authGuard` and its
 `adminGuard`/`superAdminGuard` companions are the guard pattern; an HTTP interceptor attaches the
 bearer token and reacts to a 401 by attempting the refresh flow of Figure 5.15 before failing.
 
-### 6.12.7 Anti-patterns identified and remediated during development
+### 6.9.19 Anti-patterns identified and remediated during development
 
 Table 6.6 records each one as symptom, diagnosis and what was done. One is remediated, one is designed
 against but not yet built, and one is accepted as it stands with the reason given.
@@ -571,15 +565,15 @@ against but not yet built, and one is accepted as it stands with the reason give
 (PROJECT_MAP.md records both as separate registrations), kept two services from growing into one
 that owned both a business workflow and its append-only record of consequence.
 
-**Anaemic domain drift, noticed and knowingly not corrected.** §5.3.1 and §6.12.4 both record this:
+**Anaemic domain drift, noticed and knowingly not corrected.** §5.3.1 and §6.9.16 both record this:
 correcting it would have moved authorisation logic out of the service layer where every access-control
-test of §9.9 currently finds it uniformly.
+test of §9.7 currently finds it uniformly.
 
-**Raw-control styling leak, partially remediated.** The shared control library of §6.8.3 remediates
+**Raw-control styling leak, partially remediated.** The shared control library of §6.7.3 remediates
 this for cross-cutting UI elements; the member-record duplication in the same section is the instance
 where the anti-pattern is named, designed against, and still present in the shipped code.
 
-## 6.13 Architecture Decision Records
+## 6.10 Architecture Decision Records and Design Verification
 
 Table 6.1 indexes the six decisions this chapter treats as architectural, meaning that reversing one
 would change the shape of the system rather than the contents of a file.
@@ -591,29 +585,27 @@ would change the shape of the system rather than the contents of a file.
 | ADR-01 | Adopt clean architecture with a compiler-enforced dependency rule | §6.2: layering by convention had already once failed silently | NFR-M1 becomes checkable; four-assembly ceremony for a single-maintainer project |
 | ADR-02 | Pool provider-specific `ApplicationDbContext` shim types, not the base type | EF's `IMigrationsAssembly` matches migrations to the pooled context's exact runtime type; pooling the base type made `GetMigrations()` return zero migrations on every provider, so the self-healing boot logic was a silent no-op everywhere | Migrations apply correctly on boot on PostgreSQL, the only provider with a migration tree; the MySQL shim was removed once an audit found it advertised support it never had (`docs/adr/0006-drop-mysql-provider.md`), and SQLite is kept only for a migration-free test-bootstrap path outside this boot logic |
 | ADR-03 | Never write live constitution publication through `HasData` | Seed data expressed as `HasData` reaches a populated database only through a migration, which pins revisable text to whichever migration carried it; the `EnsureCreated()`-built preprod database never received it at all | `ConstitutionSeeder.SyncAsync` runs at every boot; schema is handled separately by `MigrationBootstrapper` |
-| ADR-04 | Keep the manual payment path primary and leave gateway integration optional | §3.2, §8.9: the Association holds no merchant account and no gateway credentials | Permanent officer verification workload, quantified in §12.6, in exchange for holding no payment credential |
+| ADR-04 | Keep the manual payment path primary and leave gateway integration optional | §3.2, §8.7: the Association holds no merchant account and no gateway credentials | Permanent officer verification workload, quantified in §12.4, in exchange for holding no payment credential |
 | ADR-05 | Merge news and notices into one table discriminated by `PostType` | §6.5.2: identical shape apart from authorship rule | BR-03 enforced at the controller rather than by two schemas |
-| ADR-06 | Defer a second `IFileStorageService` implementation | §6.11.4: no second storage requirement exists yet | Interface segregation is structural, not yet demonstrated |
-
-## 6.14 Design Verification
+| ADR-06 | Defer a second `IFileStorageService` implementation | §6.9.4: no second storage requirement exists yet | Interface segregation is structural, not yet demonstrated |
 
 Table 6.5 checks the architecture against the utility tree of Figure 3.10 by mapping each
 quality-attribute scenario to the tactic that addresses it: QAS-01's directory latency to indexed
-queries (§6.5.3) and the cache in front of configuration reads (§6.10); QAS-03's session
+queries (§6.5.3) and the cache in front of configuration reads (§6.8); QAS-03's session
 invalidation to `SecurityStampMiddleware`; QAS-06's maintainability scenario to the dependency rule
-and the risk-weighted coverage of §9.14.5; QAS-08's auditability scenario to the business rules
-catalogue of §5.6 itself, which is as much an architectural artefact as a requirements one. Nothing
+and the risk-weighted coverage of §9.12.5; QAS-08's auditability scenario to the business rules
+catalogue of §5.5 itself, which is as much an architectural artefact as a requirements one. Nothing
 in this verification is new measurement; it is a cross-check that the design of this chapter actually
 answers the scenarios Chapter 3 set, which Chapter 9 then measures.
 
-## 6.15 Summary
+## 6.11 Summary
 
 Clean architecture was chosen over a modular monolith and over microservices for a reason specific
 to this project, a compiler-enforced rule where a convention had already failed once, not as a
 default best practice. The four layers, three persistence providers, four payment-gateway adapters
-and one configuration document give the system the substitutability §6.11.4 and §6.11.5 claim, in
+and one configuration document give the system the substitutability §6.9.4 and §6.9.5 claim, in
 the one case that has actually been exercised and honestly not yet in the other. The pattern catalogue
-of §6.12 and the principle evidence of §6.11 are written so that a claim in this chapter can be
+of §6.9 and the principle evidence of §6.9 are written so that a claim in this chapter can be
 checked against a file, not only against this chapter's own prose. Chapter 7 now reports how this
 design was actually built.
 
@@ -944,17 +936,22 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    R([Request]) --> M1[ExceptionMiddleware]
-    M1 --> M2[SecurityHeadersMiddleware]
-    M2 --> M3[AuditLogMiddleware]
-    M3 --> M4[RateLimiter<br/>auth/registration/api policies]
-    M4 --> M5[WebSockets]
-    M5 --> M6[StaticFiles]
-    M6 --> M7[QueryStringTokenMiddleware]
-    M7 --> M8[Authentication, JWT]
-    M8 --> M9[SecurityStampMiddleware]
-    M9 --> M10[Authorization]
-    M10 --> M11[Controllers / Hubs]
+    subgraph R1[" "]
+      direction LR
+      R([Request]) --> M1[ExceptionMiddleware] --> M2[SecurityHeadersMiddleware] --> M3[AuditLogMiddleware]
+    end
+    subgraph R2[" "]
+      direction LR
+      M4[RateLimiter: named, global] --> M5[WebSockets] --> M6[StaticFiles] --> M7[QueryStringTokenMiddleware]
+    end
+    subgraph R3[" "]
+      direction LR
+      M8[Authentication, JWT] --> M9[SecurityStampMiddleware] --> M10[Authorization] --> M11[Controllers / Hubs]
+    end
+    R1 --> R2 --> R3
+    style R1 fill:none,stroke:none
+    style R2 fill:none,stroke:none
+    style R3 fill:none,stroke:none
 ```
 
 ### Figure 6.11 — Navigation and route map
@@ -1044,7 +1041,7 @@ quadrantChart
 | AdminGovernanceController | /api/admin/governance | Admin | Committee and amendment administration |
 | HealthController | /healthz | Public | Depends on `IDatabaseHealthService` (2026-09-06; was `ApplicationDbContext` directly) |
 
-### Table 6.4 — Design pattern catalogue (selected entries; full catalogue is §6.12 in full)
+### Table 6.4 — Design pattern catalogue (selected entries; full catalogue is §6.9 in full)
 
 | Pattern | Category | Problem and forces | Participants here | Alternative rejected |
 | --- | --- | --- | --- | --- |
@@ -1060,12 +1057,12 @@ quadrantChart
 | QAS-03 (session invalidation) | SecurityStampMiddleware, positioned after authentication and before authorisation |
 | QAS-06 (maintainability, one field end to end) | Convention-based DI registration; single stylesheet; DTOs isolate the wire contract from schema change |
 | QAS-07 (dependency-rule violation caught at build) | Project-reference enforcement of the dependency rule, §6.3.6 |
-| QAS-08 (auditability of the vote-eligibility rule) | Business rules catalogue, §5.6, naming the exact method for every constitutional rule |
+| QAS-08 (auditability of the vote-eligibility rule) | Business rules catalogue, §5.5, naming the exact method for every constitutional rule |
 
 ### Table 6.6 — Anti-patterns detected and remediated
 
 | Symptom | Diagnosis | Refactoring applied | Status |
 | --- | --- | --- | --- |
 | A service accreting both workflow and ledger-posting responsibility | God service | FinancialService split from FinancialLedgerService | Remediated |
-| Two independent templates rendering the same member fields, drifting in order and labelling | Duplication across presentation layer | AcademicHistoryEditor, EcHistoryView and related sub-components designed | Designed, not yet built (§6.8.3) |
-| Business state and behaviour split across entity and service | Anaemic domain model | Not corrected; kept for uniform authorisation, §6.12.4 | Accepted, not remediated |
+| Two independent templates rendering the same member fields, drifting in order and labelling | Duplication across presentation layer | AcademicHistoryEditor, EcHistoryView and related sub-components designed | Designed, not yet built (§6.7.3) |
+| Business state and behaviour split across entity and service | Anaemic domain model | Not corrected; kept for uniform authorisation, §6.9.16 | Accepted, not remediated |
