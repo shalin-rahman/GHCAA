@@ -41,12 +41,13 @@ The bound order is fixed by the `CHAPTERS` list at the top of `build/build.py`. 
 adding its filename there; the builder does not glob the directory, so a stray draft cannot wander
 into the book by accident.
 
-## The three tools
+## The tools
 
 | Command | What it does |
 |---|---|
 | `python docs/book/build/build.py` | builds the HTML and runs every source check |
 | `python docs/book/build/build.py --pdf` | the same, then measures A4 fit, prints the PDF with page numbers, and fills the Page columns from it |
+| `python docs/book/build/export_docx.py` | builds a Word file, `GHCAA-Documentation-Book.docx`, from the same chapter sources |
 | `python docs/book/build/renumber.py --apply` | renumbers figures and tables into bound order and rebuilds the contents and the front-matter lists |
 | `python docs/book/build/prose.py refs` | checks every section reference: none broken, and each names what is at the destination. Prints the destination title beside every reference, which is how a reference that resolves to the wrong section is caught |
 | `python docs/book/build/prose.py prose 03` | lists the sentences in a chapter likely to need a second reading. A filter for a human pass, not a gate |
@@ -55,6 +56,11 @@ into the book by accident.
 
 Python 3 only — no pandoc, no Node packages, no `node_modules`. The PDF step additionally needs
 Chrome or Edge, which it finds by itself (override with the `BOOK_BROWSER` environment variable).
+The docx export needs the same browser, for the same reason: a Mermaid diagram only exists as a
+rendered SVG once a browser has drawn it (see "What the docx carries" below), so it opens the built
+HTML in headless Chrome/Edge and screenshots each diagram rather than converting markup that was
+never there. Its one added dependency is `python-docx`; it does not use pandoc or LibreOffice, and
+none of `build.py`'s other outputs change because of it.
 
 One optional package: `pypdf` (or `PyMuPDF`) lets the build read page numbers back out of the printed
 PDF and fill the Page columns of the contents and the two lists. Without it everything else still
@@ -68,6 +74,22 @@ works and the report says the columns were left empty — it never guesses a pag
 - one A4 landscape page for the figure that needs it, the rest portrait
 - page numbers in the Table of Contents, List of Figures and List of Tables, read back from the
   printed copy and re-verified after the reprint
+
+### What the docx carries
+
+- every chapter, in bound order, with heading levels, figure/table captions, body text and inline
+  formatting carried over from the same parser `build.py` uses
+- a native Word field for the table of contents (right-click it, Update Field) instead of the PDF's
+  hand-filled page numbers, since a docx paginates differently on every reader's machine; the List
+  of Figures and List of Tables sections are kept as headings but their page-numbered rows are left
+  out for the same reason, with a note pointing at Word's own Navigation Pane instead
+- every Mermaid diagram as an embedded PNG, screenshotted from the rendered page at twice the print
+  step's resolution, since a docx cannot hold the CDN-drawn SVG live the way the HTML does
+
+What it does not carry: the PDF's A4 pagination, page numbers in the front-matter lists, or the
+running folio — a Word document paginates by the reader's page size, font substitution and zoom, so
+none of those would stay true after the first edit. The PDF remains the deliverable for submission;
+the docx is for a reader or reviewer who wants to comment or track changes in Word.
 
 Two deviations from the outline's front-matter convention, both forced by the print engine and both
 recorded rather than hidden: the front matter is numbered in Arabic with the body rather than in
