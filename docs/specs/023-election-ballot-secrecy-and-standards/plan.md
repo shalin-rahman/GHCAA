@@ -1,7 +1,8 @@
 # Election ballot secrecy and standards: implementation plan
 
-> **Status 2026-09-27:** Phase 1 and 37.1s (sealed ballots) built on branch
-> `prepod-election-refactoring`, not yet committed. Phase 2 is next.
+> **Status 2026-09-28:** Phase 1 and 37.1s (sealed ballots) built on branch
+> `prepod-election-refactoring`, not yet committed. Phase 4 (officials, personas, access) is
+> approved and starts next, at 37.1w, since voting is broken without it. Phase 2 follows.
 > Decisions D1 (receipt content), D2 (tie rule) and D3 (start date) are settled in [spec.md](spec.md).
 > The seat-count half of 37.1o was pulled forward because the count was wrong without it.
 
@@ -162,6 +163,31 @@ Phase 3 needs the tie rule from D2 on the setup screen and a reading of the cons
 - nomination without consent stays Submitted
 - officer as candidate rejected
 - ER-23 PDF text contains the per-candidate counts
+
+## Phase 4: officials, personas and access (FR-026 to FR-033, approved 2026-09-28)
+
+Full step-by-step detail, exact files, entities, migrations, endpoints and tests are in
+[plan-officials.md](plan-officials.md). Summary of the build order there:
+
+1. 37.1w: open the step-up endpoints to any signed-in user (fixes the "members can't vote" defect)
+2. 37.12a: `Elections` section in OrgConfig
+3. 37.12b: `ElectionPersona` table and the SuperAdmin screen
+4. 37.12c: `ElectionOfficial` role, roles list on `/me` and the token response
+5. 37.12d: `ElectionAppointment` replaces `ElectionOfficer`, accept and decline flow
+6. 37.12e: `IElectionAccessService` and `[RequireElectionPermission]`, admin handover rule
+7. 37.12f: two-person approvals for publish, open polling, replace key, close polling, declare,
+   archive (closes 37.1v)
+8. 37.12g: access ends automatically after declare or archive, no scheduled job
+9. 37.12h: officials area on web, reusing the admin election screen
+10. 37.12i: public board of officials, timeline and turnout
+11. 37.13a to 37.13g: the standards gap fixes (audit hash chain, ballot order, per-seat published
+    ballots, test elections, key procedure, incident response docs, accessibility check)
+12. 37.12j: spec, API registry, project map, features, SRS and architecture doc updates
+
+All four decisions in `plan-officials.md` §6 are answered: no SuperAdmin bypass by default,
+PASSWORD_RESET reused for non-member invites, the golden OrgConfig fixture may be edited, and the
+officials area is built on both web and mobile (not web-only). Build in the order in
+`plan-officials.md` §7, starting with 37.1w.
 
 ## Execution checkpoint
 

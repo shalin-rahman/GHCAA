@@ -187,6 +187,41 @@ P2 brings the rules in line with the constitution.
   if the constitution allows it, with no poll for that seat.
 - **FR-025** The ER forms are filled from stored records. ER-23 carries the per-candidate counts.
 
+## Officials, personas and access (raised 2026-09-28, waiting for plan approval)
+
+The Search Committee, Commission, officials, Observers and Appeal Tribunal are recorded in the app.
+Any of them can be a member or an appointed non-member. Full analysis, exact files, entities and
+tests are in [plan-officials.md](plan-officials.md); this section only states the rules as FRs.
+
+- **FR-026** The step-up request and verify endpoints accept any signed-in user, not admins only,
+  so a member can complete the check the vote endpoint asks for. Closes the 37.1w defect: a plain
+  member cannot vote today because step-up is admin-only.
+- **FR-027** An election persona (post) carries a name, a board group, a permission set, a
+  declaration text and a takeover flag. Personas are data SuperAdmin manages, not a fixed list in
+  code. Fourteen personas are seeded on boot and can be edited, added to or deactivated but not
+  deleted while in use.
+- **FR-028** A person is appointed to a persona on one election, member or not. A non-member
+  appointee gets a login with no member record attached. The appointment gives no access until the
+  appointee accepts it and signs the persona's declaration text.
+- **FR-029** Accepting an appointment adds a single `ElectionOfficial` role to the appointee's
+  account. What that role can do on a given election comes from the accepted persona's permission
+  set on that election, checked on every write. A member appointee keeps their normal member access
+  throughout.
+- **FR-030** Once a persona with the takeover flag has an accepted appointment on an election, Admin
+  loses write access to that election. SuperAdmin always keeps full access. This is configurable and
+  off by default for the "keeps control" case.
+- **FR-031** Publish, open polling, replace the ballot key, close polling, declare and archive each
+  need two different people: the one who asks and a second one, not the requester, who holds the
+  Approve permission. The action runs only once approved. Closes 37.1v, where any admin could swap
+  the ballot key alone.
+- **FR-032** An appointment's access ends on its own after the result is declared, on a configurable
+  number of days (default 21: the 7-day appeal window plus 14 for the tribunal), with no scheduled
+  job. Archiving the election revokes every appointment at once and deactivates non-member
+  appointees who hold no other access.
+- **FR-033** The Commission and officials appear on a public board, grouped by persona group, next
+  to the election timeline and turnout after polling closes. Members with no persona shown do not
+  appear.
+
 ## Receipt and print standard
 
 Standard 2, receipt-freeness, decides what the voter may print.
@@ -300,3 +335,6 @@ Review notes from 2026-09-27. Phase 1 (FR-001 to FR-009) was built on branch
 `GHCAA.Tests/Services/ElectionServiceTests.cs`, `GHCAA.Tests/Controllers/ElectionsControllerTests.cs`,
 `GHCAA.Tests/Middleware/AuditLogMiddlewareTests.cs`, `GHCAA.Web/src/app/member/election/election.spec.ts`
 and `GHCAA.Mobile/test/election_service_test.dart`. The rest are listed in [plan.md](plan.md).
+
+FR-026 to FR-033 (officials, personas and access) are un-built. They are written up in
+[plan-officials.md](plan-officials.md), which the user is reviewing before any of it is coded.
