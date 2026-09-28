@@ -49,6 +49,10 @@ namespace GHCAA.API.Middleware
                 await _next(context);
                 var elapsedMs = (DateTime.UtcNow - started).TotalMilliseconds;
 
+                // Spec 023 FR-004. A member id and exact time on the vote request would say who
+                // voted when, and the batch-moving vote runs longer than the rest.
+                if (AuditLogMiddleware.IsVoteEndpoint(context)) return;
+
                 // Read after _next() so authentication (which runs downstream of this
                 // middleware) has already populated context.User for the request.
                 var actingMemberId = context.User.FindFirst(AppClaimTypes.MemberId)?.Value ?? "anonymous";

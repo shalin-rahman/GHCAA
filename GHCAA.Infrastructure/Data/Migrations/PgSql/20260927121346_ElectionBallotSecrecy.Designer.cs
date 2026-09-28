@@ -3,6 +3,7 @@ using System;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 {
     [DbContext(typeof(PgSqlApplicationDbContext))]
-    partial class PgSqlApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260927121346_ElectionBallotSecrecy")]
+    partial class ElectionBallotSecrecy
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -331,32 +334,17 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Property<bool>("IsSpoiled")
                         .HasColumnType("boolean");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("ElectionId");
-
-                    b.ToTable("Ballots");
-                });
-
-            modelBuilder.Entity("GHCAA.Domain.Models.BallotReceipt", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("ElectionId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("TrackingCode")
+                    b.Property<string>("SerialNumber")
                         .IsRequired()
                         .HasMaxLength(80)
                         .HasColumnType("character varying(80)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ElectionId", "TrackingCode")
+                    b.HasIndex("ElectionId", "SerialNumber")
                         .IsUnique();
 
-                    b.ToTable("BallotReceipts");
+                    b.ToTable("Ballots");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.BallotVote", b =>
@@ -719,14 +707,6 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Property<DateTime>("AnnouncedOn")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("BallotKeyFingerprint")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<string>("BallotPublicKey")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
                     b.Property<int>("CreatedBy")
                         .HasColumnType("integer");
 
@@ -973,7 +953,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "OTP_EMAIL",
                             Description = "OTP verification email",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 124, DateTimeKind.Utc).AddTicks(6857),
+                            LastUpdated = new DateTime(2026, 9, 27, 12, 13, 44, 207, DateTimeKind.Utc).AddTicks(7777),
                             Subject = "{{OrgShortName}} Verification Code: {{OtpCode}}",
                             Variables = "['FullName', 'OtpCode']"
                         },
@@ -984,7 +964,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "WELCOME_EMAIL",
                             Description = "Welcome email",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 125, DateTimeKind.Utc).AddTicks(5460),
+                            LastUpdated = new DateTime(2026, 9, 27, 12, 13, 44, 208, DateTimeKind.Utc).AddTicks(4734),
                             Subject = "Welcome to {{OrgName}}!",
                             Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
                         },
@@ -995,7 +975,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PASSWORD_RESET",
                             Description = "Password reset email",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 125, DateTimeKind.Utc).AddTicks(5621),
+                            LastUpdated = new DateTime(2026, 9, 27, 12, 13, 44, 208, DateTimeKind.Utc).AddTicks(4841),
                             Subject = "{{OrgShortName}} Account Password Reset",
                             Variables = "['FullName', 'ResetUrl']"
                         },
@@ -1006,7 +986,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "APPLICATION_REJECTED",
                             Description = "Application rejection email",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 125, DateTimeKind.Utc).AddTicks(5829),
+                            LastUpdated = new DateTime(2026, 9, 27, 12, 13, 44, 208, DateTimeKind.Utc).AddTicks(5046),
                             Subject = "Update on your {{OrgShortName}} Membership Application",
                             Variables = "['FullName', 'Reason']"
                         },
@@ -1017,7 +997,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PAYMENT_RECEIVED",
                             Description = "Payment received acknowledgment",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 125, DateTimeKind.Utc).AddTicks(5922),
+                            LastUpdated = new DateTime(2026, 9, 27, 12, 13, 44, 208, DateTimeKind.Utc).AddTicks(5123),
                             Subject = "Payment Received: {{Amount}} BDT",
                             Variables = "['FullName', 'Amount', 'TrxID']"
                         },
@@ -1028,7 +1008,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PAYMENT_STATUS_UPDATED",
                             Description = "Payment status update email",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 125, DateTimeKind.Utc).AddTicks(5993),
+                            LastUpdated = new DateTime(2026, 9, 27, 12, 13, 44, 208, DateTimeKind.Utc).AddTicks(5186),
                             Subject = "Payment Status Updated: {{Status}}",
                             Variables = "['FullName', 'TrxID', 'Status']"
                         },
@@ -1039,7 +1019,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "FAMILY_LINK_REQUEST",
                             Description = "Family link request email",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 125, DateTimeKind.Utc).AddTicks(6050),
+                            LastUpdated = new DateTime(2026, 9, 27, 12, 13, 44, 208, DateTimeKind.Utc).AddTicks(5243),
                             Subject = "New Family Link Request from {{RequesterName}}",
                             Variables = "['FullName', 'RequesterName', 'Relationship', 'ProfileUrl']"
                         },
@@ -1050,7 +1030,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "FAMILY_LINK_ACCEPTED",
                             Description = "Family link acceptance confirmation",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 125, DateTimeKind.Utc).AddTicks(6117),
+                            LastUpdated = new DateTime(2026, 9, 27, 12, 13, 44, 208, DateTimeKind.Utc).AddTicks(5300),
                             Subject = "Family Link Request Accepted",
                             Variables = "['FullName', 'TargetName']"
                         });
@@ -3830,16 +3810,22 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("ElectionId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("SealedChoices")
+                    b.Property<string>("ChoicesJson")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("ElectionId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TrackingCode")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ElectionId");
+                    b.HasIndex("ElectionId", "TrackingCode")
+                        .IsUnique();
 
                     b.ToTable("PendingBallots");
                 });
@@ -4851,15 +4837,6 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .IsRequired();
 
                     b.Navigation("Election");
-                });
-
-            modelBuilder.Entity("GHCAA.Domain.Models.BallotReceipt", b =>
-                {
-                    b.HasOne("GHCAA.Domain.Models.Election", null)
-                        .WithMany()
-                        .HasForeignKey("ElectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.BallotVote", b =>

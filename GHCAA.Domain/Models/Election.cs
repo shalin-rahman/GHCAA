@@ -18,6 +18,11 @@ public class Election
     public DateTime PollingOpensOn { get; set; }
     public DateTime PollingClosesOn { get; set; }
     public DateTime? DeclaredOn { get; set; }
+    public ElectionTieRule TieRule { get; set; } = ElectionTieRule.DrawingLots;
+    // The returning officer's public key (SPKI, base64). Choices are sealed under it at cast and
+    // only the officer's private key, brought to the count, opens them.
+    public string? BallotPublicKey { get; set; }
+    public string? BallotKeyFingerprint { get; set; }
     public bool IsActive { get; set; } = true;
     public int CreatedBy { get; set; }
     public ECPeriod? ECPeriod { get; set; }
@@ -86,25 +91,45 @@ public class ScrutinyDecision
     public DateTime DecidedAt { get; set; }
 }
 
+// Ballot and BallotVote hold what was voted, never who voted. Keys are random GUIDs set in
+// code and there is no time column, so neither key order nor a timestamp can be matched to a
+// SeatVote row. Rows arrive here only at the count, all at once and shuffled.
 public class Ballot
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public int ElectionId { get; set; }
-    public int ElectionSeatId { get; set; }
-    public string SerialNumber { get; set; } = null!;
-    public DateTime IssuedAt { get; set; }
     public bool IsSpoiled { get; set; }
     public Election? Election { get; set; }
     public ICollection<BallotVote> Votes { get; set; } = new List<BallotVote>();
 }
 
+// One row per chosen candidate. A seat with no row on a ballot is an abstention.
 public class BallotVote
 {
-    public int Id { get; set; }
-    public int BallotId { get; set; }
+    public Guid Id { get; set; }
+    public Guid BallotId { get; set; }
+    public int ElectionSeatId { get; set; }
     public int NominationId { get; set; }
-    public DateTime CastAt { get; set; }
     public Ballot? Ballot { get; set; }
+}
+
+// Holding row written in the same transaction as the voter's SeatVote rows. It has no member
+// and no time column. SealedChoices can only be opened with the returning officer's private
+// key, and the row is deleted at the count.
+public class PendingBallot
+{
+    public Guid Id { get; set; }
+    public int ElectionId { get; set; }
+    public string SealedChoices { get; set; } = null!;
+}
+
+// The tracking codes handed to voters. They sit apart from the ballots, so a receipt shows a
+// ballot was received but cannot be matched to the choices on it.
+public class BallotReceipt
+{
+    public Guid Id { get; set; }
+    public int ElectionId { get; set; }
+    public string TrackingCode { get; set; } = null!;
 }
 
 public class SeatVote

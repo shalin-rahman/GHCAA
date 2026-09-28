@@ -94,7 +94,9 @@ class _ElectionManagementScreenState
     final confirmed = await showConfirmDialog(
       context,
       title: 'Count votes',
-      message: 'Count votes for "${election.title}"?',
+      message: 'Count votes for "${election.title}"? The first count needs '
+          "the returning officer's key file, so run it from the web admin. "
+          'After that this shows the stored results.',
     );
     if (!confirmed) return;
     await _runAction(election.id, 'count',
@@ -309,6 +311,12 @@ class _ElectionCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text('${election.eligibleVoterCount} eligible voters',
+                style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+            const SizedBox(height: 4),
+            Text(
+                election.ballotKeyFingerprint == null
+                    ? 'No returning officer key yet. Set it from the web admin.'
+                    : 'Officer key ${election.ballotKeyFingerprint}',
                 style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
             const Divider(color: Colors.white10, height: 24),
             Wrap(

@@ -25,19 +25,49 @@ namespace GHCAA.Tests.Controllers
             SetUserContext(_controller, memberId: 10, role: "Member");
         }
 
-        [Test]
-        public async Task Vote_ServiceReturnsFalse_Returns400Problem()
-        {
-            var dto = new CastVoteDto(1, 2, null);
-            _electionServiceMock.Setup(x => x.CastVoteAsync(1, 10, dto, It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(false);
+        private static readonly CastBallotDto Ballot = new([new BallotSeatChoiceDto(1, [2])]);
 
-            var result = await _controller.Vote(1, dto, CancellationToken.None);
+        [Test]
+        [Category("FR-39")]
+        public async Task Vote_ServiceFails_Returns400Problem()
+        {
+            _electionServiceMock.Setup(x => x.CastBallotAsync(1, 10, Ballot, It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync((false, "not-recorded", (string?)null));
+
+            var result = await _controller.Vote(1, Ballot, CancellationToken.None);
 
             var obj = result as ObjectResult;
             Assert.That(obj, Is.Not.Null);
             Assert.That(obj!.StatusCode, Is.EqualTo(400));
             Assert.That(((ProblemDetails)obj.Value!).Detail, Is.EqualTo("Vote could not be recorded."));
+        }
+
+        [Test]
+        [Category("NFR-R5")]
+        public async Task Vote_AlreadyVoted_Returns409WithCode()
+        {
+            _electionServiceMock.Setup(x => x.CastBallotAsync(1, 10, Ballot, It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync((false, "already-voted", (string?)null));
+
+            var result = await _controller.Vote(1, Ballot, CancellationToken.None);
+
+            var obj = result as ObjectResult;
+            Assert.That(obj!.StatusCode, Is.EqualTo(409));
+            Assert.That(((ProblemDetails)obj.Value!).Extensions["code"], Is.EqualTo(GHCAA.Domain.Constants.ErrorCodes.AlreadyVoted));
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task Vote_Success_ReturnsTrackingCode()
+        {
+            _electionServiceMock.Setup(x => x.CastBallotAsync(1, 10, Ballot, It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync((true, (string?)null, "ABCD-EFGH-JKMN"));
+
+            var result = await _controller.Vote(1, Ballot, CancellationToken.None);
+
+            var ok = result as OkObjectResult;
+            Assert.That(ok, Is.Not.Null);
+            Assert.That(((CastBallotResultDto)ok!.Value!).TrackingCode, Is.EqualTo("ABCD-EFGH-JKMN"));
         }
     }
 }

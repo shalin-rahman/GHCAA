@@ -1,9 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ElectionsService } from '../../core/services/elections.service';
-import { AdminElectionDto, CreateElectionRequest, NominationViewDto } from '../../core/models/election.models';
+import { AdminElectionDto, CreateElectionRequest, ELECTION_PHASE_ORDER, NominationViewDto } from '../../core/models/election.models';
+import { ExportUtil } from '../../core/utils/export.util';
+import { ballotKeyFileName, generateBallotKeyPair, readBallotKeyFile, toPem } from '../../core/utils/ballot-key.util';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
@@ -44,6 +47,8 @@ export class AdminElections {
     closingId = signal<number | null>(null);
     addingCandidateId = signal<number | null>(null);
     removingCandidateId = signal<number | null>(null);
+    keyingId = signal<number | null>(null);
+    countingId = signal<number | null>(null);
 
     filtered = computed(() => {
         const query = this.search().trim().toLowerCase();
@@ -154,6 +159,55 @@ export class AdminElections {
             next: () => { this.removingCandidateId.set(null); this.load(); },
             error: () => { this.removingCandidateId.set(null); this.notify.error('Failed to remove candidate.'); }
         });
+    }
+
+    // Spec 023 FR-001. The key can be set until polling opens, and polling will not open without it.
+    canSetBallotKey(election: AdminElectionDto): boolean {
+        return ELECTION_PHASE_ORDER.indexOf(election.phase) < ELECTION_PHASE_ORDER.indexOf('Polling');
+    }
+
+    async createBallotKey(election: AdminElectionDto): Promise<void> {
+        if (this.keyingId() !== null) return;
+        const confirmed = await firstValueFrom(this.confirmDialog.confirm({
+            title: election.ballotKeyFingerprint ? 'Replace returning officer key' : 'Make returning officer key',
+            message: 'A key file will download to this device. Only the returning officer should keep it. '
+                + 'The count cannot run without it, and nobody, including the system, can recover it if it is lost.',
+            confirmLabel: 'Make key'
+        }));
+        if (!confirmed) return;
+
+        this.keyingId.set(election.id);
+        try {
+            const pair = await generateBallotKeyPair();
+            // Save the private key before the server accepts the public one, so a failed download
+            // never leaves an election sealed under a key nobody has.
+            ExportUtil.saveFile(new Blob([toPem(pair.privateKey)], { type: 'application/x-pem-file' }), ballotKeyFileName(election.title));
+            const updated = await firstValueFrom(this.electionsService.setBallotKey(election.id, pair.publicKey));
+            this.replace(updated);
+            this.notify.success('Key stored. Keep the downloaded file safe until the count.');
+        } catch (err) {
+            // The HTTP interceptor already shows the server's reason for a failed request.
+            if (!(err instanceof HttpErrorResponse)) this.notify.error('This browser could not make the key.');
+        } finally {
+            this.keyingId.set(null);
+        }
+    }
+
+    async countWithKeyFile(election: AdminElectionDto, event: Event): Promise<void> {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        input.value = '';
+        if (!file || this.countingId() !== null) return;
+
+        this.countingId.set(election.id);
+        try {
+            const results = await firstValueFrom(this.electionsService.count(election.id, readBallotKeyFile(await file.text())));
+            this.notify.success(`Count done. ${results.length} result rows stored.`);
+        } catch (err) {
+            if (!(err instanceof HttpErrorResponse)) this.notify.error('The key file could not be read.');
+        } finally {
+            this.countingId.set(null);
+        }
     }
 
     private replace(updated: AdminElectionDto): void {

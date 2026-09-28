@@ -12,25 +12,42 @@
     } @else if (seatBallots().length === 0) {
         <div class="empty-state"><h2>No accepted candidates yet</h2><p>Candidates appear here once scrutiny is complete.</p></div>
     } @else {
+        @if (trackingCode()) {
+            <div class="glass-card">
+                <h2>Your ballot was recorded</h2>
+                <p>Tracking code: <strong>{{ trackingCode() }}</strong></p>
+                <p class="text-muted">Keep this code. It shows your ballot was counted and does not show who cast it.</p>
+            </div>
+        } @else if (alreadyVoted()) {
+            <div class="glass-card"><p class="text-muted">You have already voted in this election.</p></div>
+        } @else if (election()!.phase !== 'Polling') {
+            <p class="text-muted">Voting opens once this election reaches the polling phase.</p>
+        }
         <div class="stack gap-6">
             @for (seat of seatBallots(); track seat.seatId) {
                 <div class="glass-card">
                     <h2>Seat {{ seat.seatId }}</h2>
-                    @if (hasVoted(seat.seatId)) {
-                        <p class="text-muted">Your vote for this seat has been recorded.</p>
-                    } @else if (election()!.phase !== 'Polling') {
-                        <p class="text-muted">Voting opens once this election reaches the polling phase.</p>
-                    }
                     <div class="stack gap-2">
                         @for (nomination of seat.nominations; track nomination.id) {
-                            <button type="button" class="btn btn-outline text-left"
-                                [disabled]="hasVoted(seat.seatId) || election()!.phase !== 'Polling' || votingSeatId() === seat.seatId"
-                                (click)="vote(seat.seatId, nomination.id)">
+                            <button type="button" class="btn text-left"
+                                [class.btn-primary]="isChosen(seat.seatId, nomination.id)"
+                                [class.btn-outline]="!isChosen(seat.seatId, nomination.id)"
+                                [attr.aria-pressed]="isChosen(seat.seatId, nomination.id)"
+                                [disabled]="closed"
+                                (click)="choose(seat.seatId, nomination.id)">
                                 {{ nomination.statement }}
                             </button>
                         }
                     </div>
+                    @if (!closed && !choices()[seat.seatId]) {
+                        <p class="text-muted">No choice yet. This seat will be left blank.</p>
+                    }
                 </div>
+            }
+            @if (!closed) {
+                <button type="button" class="btn btn-primary" [disabled]="submitting()" (click)="submit()">
+                    {{ submitting() ? 'Recording...' : 'Cast ballot' }}
+                </button>
             }
         </div>
     }

@@ -28,10 +28,15 @@
                 <div>
                     <h2>{{ election.title }}</h2>
                     <p class="text-muted"><span class="status-badge" [class]="getElectionPhaseClass(election.phase)">{{ getElectionPhaseLabel(election.phase) }}</span> · {{ election.positions.length }} positions</p>
+                    <p class="text-muted" *ngIf="election.ballotKeyFingerprint">Officer key fingerprint: <code>{{ election.ballotKeyFingerprint }}</code></p>
+                    <p class="text-muted" *ngIf="!election.ballotKeyFingerprint && canSetBallotKey(election)">No returning officer key yet. Voting cannot open without one.</p>
                 </div>
                 <div class="flex gap-2">
                     <button class="btn btn-primary btn-sm" *ngIf="election.phase === 'Announced'" [disabled]="publishingId() === election.id" (click)="publish(election)">{{ publishingId() === election.id ? 'Publishing...' : 'Publish' }}</button>
                     <button class="btn btn-secondary btn-sm" *ngIf="election.phase === 'Polling'" [disabled]="closingId() === election.id" (click)="close(election)">{{ closingId() === election.id ? 'Closing...' : 'Close' }}</button>
+                    <button class="btn btn-secondary btn-sm" *ngIf="canSetBallotKey(election)" [disabled]="keyingId() === election.id" (click)="createBallotKey(election)">{{ keyingId() === election.id ? 'Making key...' : (election.ballotKeyFingerprint ? 'Replace officer key' : 'Make officer key') }}</button>
+                    <input #keyFile type="file" class="hidden" accept=".pem,.txt" (change)="countWithKeyFile(election, $event)">
+                    <button class="btn btn-primary btn-sm" *ngIf="election.phase === 'Counting'" [disabled]="countingId() === election.id" (click)="keyFile.click()">{{ countingId() === election.id ? 'Counting...' : 'Count with officer key' }}</button>
                 </div>
             </div>
             <div class="stack gap-2" *ngIf="election.candidates.length > 0">

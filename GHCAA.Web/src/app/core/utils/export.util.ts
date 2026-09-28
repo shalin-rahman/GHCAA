@@ -71,7 +71,7 @@ export class ExportUtil {
     }
   }
 
-  private static saveFile(blob: Blob, filename: string): void {
+  static saveFile(blob: Blob, filename: string): void {
     const nav = window.navigator as any;
     if (nav.msSaveOrOpenBlob) {
       nav.msSaveOrOpenBlob(blob, filename);

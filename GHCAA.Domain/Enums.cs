@@ -60,6 +60,7 @@ namespace GHCAA.Domain
         public enum ElectionPhase { Announced, Nomination, Scrutiny, Withdrawal, CandidateList, Campaign, Polling, Counting, Declared, Archived }
         public enum NominationStatus { Submitted, UnderScrutiny, Accepted, Rejected, Withdrawn }
         public enum ElectionRole { ReturningOfficer, AssistantReturningOfficer, PollingOfficer, Scrutineer }
+        public enum ElectionTieRule { DrawingLots, RunOff, ChairCastingVote }
 
         public enum ScholarshipApplicationStatus { Draft, Submitted, UnderReview, Shortlisted, Awarded, Rejected, Withdrawn }
         public enum DisbursementStatus { Pending, Approved, Paid, Cancelled }

@@ -1,14 +1,19 @@
 # Election ballot secrecy and standards: implementation plan
 
-> **Status 2026-09-27:** not started. Open decisions D1 (receipt content), D2 (tie rule) and D3
-> (start date) are listed in [spec.md](spec.md). Phase 1 does not wait on any of them.
+> **Status 2026-09-27:** Phase 1 and 37.1s (sealed ballots) built on branch
+> `prepod-election-refactoring`, not yet committed. Phase 2 is next.
+> Decisions D1 (receipt content), D2 (tie rule) and D3 (start date) are settled in [spec.md](spec.md).
+> The seat-count half of 37.1o was pulled forward because the count was wrong without it.
 
 ## Dependency order
 
 1. Phase 1, P0 backend: 37.1i ballot unlinkability, 37.1j whole-ballot submit and step-up,
    37.1k phase guards
 2. Phase 2, P1 clients: 37.1l vote screen, 37.1m receipt and tracking codes, 37.1n public results
-3. Phase 3, P2 rules: 37.1o multi-place seats and ties, 37.1p recount, consent, officer conflict,
+3. 37.1s sealed ballots under the returning officer's key. It follows Phase 1 because it changes
+   the same vote and count code, and it comes before Phase 2 because the vote screen must not open
+   an election that has no key.
+4. Phase 3, P2 rules: 37.1o multi-place seats and ties, 37.1p recount, consent, officer conflict,
    spoiled and unopposed, 37.1q filled ER forms
 
 ## Why this order
@@ -16,7 +21,7 @@
 Phase 1 changes the tables and the vote request. The screens in Phase 2 are built on the new
 request shape, so doing them first would mean doing them twice. Phase 2 comes before Phase 3
 because a voter who cannot see names or confirm a ballot is a bigger risk than a missing tie rule.
-Phase 3 needs D2 and a reading of the constitution, so it can wait.
+Phase 3 needs the tie rule from D2 on the setup screen and a reading of the constitution, so it can wait.
 
 ## Phase 1: P0 backend (37.1i, 37.1j, 37.1k)
 
@@ -31,10 +36,13 @@ Phase 3 needs D2 and a reading of the constitution, so it can wait.
 
 ### Services
 
-- `CastVoteAsync` takes the whole ballot, checks every seat, writes `SeatVote` rows and one
+- `CastBallotAsync` takes the whole ballot, checks every seat, writes `SeatVote` rows and one
   `PendingBallot`, all or nothing
-- new hosted job `BallotShuffleJob`: when 10 or more pending rows exist, or polling has closed,
-  moves them into `Ballot` and `BallotVote` in random order, in its own transaction
+- the move into `Ballot` and `BallotVote` runs in the request, not a hosted job. After each vote
+  commits, it moves the waiting rows in random order once 10 are waiting. `SetPhase(Counting)` and
+  `CountAsync` move whatever is left. Each move has its own transaction, and a failed move after a
+  vote still returns the voter's tracking code. The app runs one instance on Render, so a hosted
+  job would add a moving part without a gain
 - server makes the tracking code; `CastVoteDto.SerialNumber` removed
 - `CountAsync`: Counting phase only, no pending rows left, stores the result, repeat call returns it
 - `SetPhaseAsync`: refuse Declared
@@ -60,6 +68,36 @@ Phase 3 needs D2 and a reading of the constitution, so it can wait.
 - candidate add and remove after CandidateList fail
 - audit log test: vote entry has no seat and no time of day
 - tag each test with its FR from spec 023
+
+## 37.1s: sealed ballots and one mix at the count
+
+### What was built
+
+- the returning officer makes an RSA-OAEP key pair (3072 bits) in the browser; the private key is
+  saved as a .pem file before the public key is sent to `POST api/admin/elections/{id}/ballot-key`
+- the key can be set or replaced up to the campaign; `SetPhase(Polling)` is refused without one
+- each ballot is sealed with AES-256-GCM under a fresh key wrapped by the officer's public key,
+  and padded to 512-byte blocks so its length does not show how many names were marked
+- tracking codes live in `BallotReceipts`, which has no link to the ballot rows
+- the count takes the private key, opens every pending ballot in one Serializable transaction,
+  shuffles once, writes the ballots and totals, then deletes the pending rows
+- the count is refused under 10 ballots (`Constants.Elections.MinimumBallotsToCount`); the officer
+  counts by hand instead
+- on Postgres the count ends with `VACUUM` on the pending table so dead rows do not stay on disk
+
+### Deploy notes
+
+- empty `PendingBallots` before the migration; the migration stops with an error otherwise
+- `gen_random_uuid()` needs Postgres 13 or later
+- Down cannot turn sealed rows back into plain ones and pairs receipts with ballots at random
+- on a legacy database the MigrationBootstrapper cannot baseline this migration, so apply it with
+  `dotnet ef database update` and check the history table
+
+### Tests
+
+- `BallotSealTests`: seal and open, tampering, wrong key, short key refused, fingerprint match
+- `ElectionServiceTests`: no key blocks the vote, wrong key and short count refused, totals right
+- web `ballot-key.util.spec.ts` and `admin-elections.spec.ts`; mobile fingerprint parse test
 
 ## Phase 2: P1 clients (37.1l, 37.1m, 37.1n)
 

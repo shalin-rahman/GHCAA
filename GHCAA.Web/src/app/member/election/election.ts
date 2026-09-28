@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ElectionsService } from '../../core/services/elections.service';
-import { CastVoteDto, ElectionSummaryDto, NominationViewDto } from '../../core/models/election.models';
+import { CastBallotDto, ElectionSummaryDto, NominationViewDto } from '../../core/models/election.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
@@ -26,8 +27,11 @@ export class MemberElection {
     election = signal<ElectionSummaryDto | null>(null);
     loading = signal(true);
     error = signal(false);
-    votedSeatIds = signal<number[]>([]);
-    votingSeatId = signal<number | null>(null);
+    // Seat id to the chosen nomination. A seat left out of the map is cast blank.
+    choices = signal<Record<number, number>>({});
+    submitting = signal(false);
+    trackingCode = signal<string | null>(null);
+    alreadyVoted = signal(false);
 
     private nominations = signal<NominationViewDto[]>([]);
 
@@ -58,25 +62,49 @@ export class MemberElection {
         });
     }
 
-    hasVoted(seatId: number): boolean {
-        return this.votedSeatIds().includes(seatId);
+    get closed(): boolean {
+        return this.election()?.phase !== 'Polling' || this.trackingCode() !== null || this.alreadyVoted();
     }
 
-    vote(seatId: number, nominationId: number): void {
-        const election = this.election();
-        if (!election || this.votingSeatId() !== null || this.hasVoted(seatId)) return;
+    choose(seatId: number, nominationId: number): void {
+        if (this.closed) return;
+        const current = this.choices();
+        const next = { ...current };
+        if (current[seatId] === nominationId) delete next[seatId];
+        else next[seatId] = nominationId;
+        this.choices.set(next);
+    }
 
-        const dto: CastVoteDto = { electionSeatId: seatId, nominationId, serialNumber: undefined };
-        this.votingSeatId.set(seatId);
-        this.elections.castVote(election.id, dto).subscribe({
-            next: () => {
-                this.votingSeatId.set(null);
-                this.votedSeatIds.set([...this.votedSeatIds(), seatId]);
-                this.notify.success('Your vote was recorded.');
+    isChosen(seatId: number, nominationId: number): boolean {
+        return this.choices()[seatId] === nominationId;
+    }
+
+    submit(): void {
+        const election = this.election();
+        if (!election || this.closed || this.submitting()) return;
+
+        const choices = this.choices();
+        const ballot: CastBallotDto = {
+            seats: this.seatBallots().map(seat => ({
+                electionSeatId: seat.seatId,
+                nominationIds: choices[seat.seatId] !== undefined ? [choices[seat.seatId]] : []
+            }))
+        };
+        this.submitting.set(true);
+        this.elections.castBallot(election.id, ballot).subscribe({
+            next: result => {
+                this.submitting.set(false);
+                this.trackingCode.set(result.trackingCode);
+                this.notify.success('Your ballot was recorded.');
             },
-            error: () => {
-                this.votingSeatId.set(null);
-                this.notify.error('The vote could not be recorded.');
+            error: (err: HttpErrorResponse) => {
+                this.submitting.set(false);
+                if (err.status === 409) {
+                    this.alreadyVoted.set(true);
+                    this.notify.error('You have already voted in this election.');
+                } else {
+                    this.notify.error('The ballot could not be recorded.');
+                }
             }
         });
     }

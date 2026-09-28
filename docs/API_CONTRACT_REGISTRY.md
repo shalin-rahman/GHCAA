@@ -48,6 +48,24 @@ a gap someone still needs to close.
 
 ## Log
 
+### 2026-09-27 — /api/admin/elections/{id}/ballot-key
+- Change: new route. Takes `{ publicKey }`, the returning officer's RSA-OAEP public key (SPKI, base64, 3072 bits or more). Stores it with its SHA-256 fingerprint and returns the admin election, which now carries `ballotKeyFingerprint`. Refused once polling has opened. Admin only, with step-up.
+- Reason: TODO 37.1s. Ballots are sealed under this key so database access alone cannot read them. Spec 023 FR-001.
+- Web: `ElectionsService.setBallotKey`, called from the admin elections page after the key file has downloaded.
+- Mobile: reads `ballotKeyFingerprint` and shows it. Making the key is web only.
+
+### 2026-09-27 — /api/elections/{id}/count
+- Change: the body is now `{ privateKey }`, the officer's PKCS#8 key as base64. It is needed for the first count only. A later call with no body returns the stored result. A failed count returns 400 with a reason in `detail` (no key, wrong key, fewer than 10 ballots, totals do not match).
+- Reason: TODO 37.1s. The count opens the sealed ballots in one shuffled pass.
+- Web: the admin page reads the key file and sends it. `public/elections/election-results` calls with no key and gets the stored result.
+- Mobile: still posts no body, so it only reads stored results. The service comment says the first count runs from the web admin.
+
+### 2026-09-27 — /api/elections/{id}/vote
+- Change: the body is the whole ballot, `{ seats: [{ electionSeatId, nominationIds }] }`, one entry per seat with an accepted candidate. An empty list is an abstention. The response is `{ trackingCode }`, made by the server. The client serial field is gone. The route now needs step-up.
+- Reason: spec 023 FR-003, FR-005 and FR-006.
+- Web: `ElectionsService.castBallot` from the member election page.
+- Mobile: `ElectionService.castBallot` sends the same body.
+
 ### 2026-09-22 — /api/admin/elections
 - Change: added the admin election list, create, publish, close, and candidate-management routes expected by the Angular admin screen. The list returns the admin election shape used by the dashboard, and the admin lifecycle actions move elections through the documented voting phases.
 - Reason: the web admin UI was calling `/api/admin/elections` while the API only exposed the public `/api/elections` route family, so the missing route surface caused 404s.

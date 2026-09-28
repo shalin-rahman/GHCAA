@@ -109,10 +109,21 @@ P2 brings the rules in line with the constitution.
 ### P0: secrecy and integrity
 
 - **FR-001** The ballot write must not share a transaction, a timestamp or an insertion order with
-  the voter's `SeatVote` row. The vote request writes `SeatVote` and puts the choices in a holding
-  table (`PendingBallot`, no member column, no time column). A background job moves pending rows
-  into `Ballot` and `BallotVote` in shuffled batches of at least 10, or all of them when polling
-  closes. `CountAsync` refuses to run while any pending row is left.
+  the voter's `SeatVote` row that anyone with database access can use. Before polling opens, the
+  returning officer makes a key pair in the browser. Only the public key is stored on the election,
+  with its SHA-256 fingerprint. The private key downloads to the officer's device as a `.pem` file
+  and the server never sees it until the count. `SetPhase(Polling)` is refused without a key, and the
+  key cannot be changed once polling has opened. Each vote seals the choices with AES-256-GCM under
+  a one-off key, which is itself sealed with RSA-OAEP-3072 (SHA-256). The sealed value is padded to
+  512-byte blocks so its length says nothing. It goes in `PendingBallot` with no member, time or
+  tracking-code column. The tracking code goes in `BallotReceipt`, a table with no link to any
+  ballot. At Counting the officer uploads the key file once. `CountAsync` runs in one serializable
+  transaction. It checks that ballots, receipts and voters marked as voted all match, opens every
+  sealed ballot, shuffles them once, writes `Ballot` and `BallotVote`, rewrites the receipts in
+  shuffled order, and deletes the pending rows. It refuses when fewer than 10 ballots were cast
+  (`MinimumBallotsToCount`), since a count that small could name a voter. On Postgres it then runs
+  `VACUUM` on the pending table. The key is used for that one request and not stored. Later calls
+  return the stored result with no key.
 - **FR-002** `Ballot` and `BallotVote` use random GUID keys, not identity columns. They keep no
   time field finer than the election date. `IssuedAt` and `CastAt` are dropped.
 - **FR-003** The server makes the ballot serial (the tracking code). The client cannot send one.
@@ -120,16 +131,19 @@ P2 brings the rules in line with the constitution.
 - **FR-004** The audit log records "member voted in election N" once per ballot, with the date
   only. It never records the seat, the time of day or the request body for the vote endpoint.
 - **FR-005** A whole ballot, one entry per seat, goes in one request. Each entry is a list of
-  chosen nominations, or an abstain flag. The server checks it all and writes it all, or rejects it
-  all.
+  chosen nominations. An empty list casts that seat blank, which is the abstain choice in FR-012.
+  Every seat with at least one accepted candidate must have an entry. A seat with no accepted
+  candidate never reaches the voter's screen, so it may be left out. The server checks it all and
+  writes it all, or rejects it all.
 - **FR-006** Voting requires the OTP step-up already used for admin election actions.
 - **FR-007** `CountAsync` runs only in the Counting phase. The result is stored and a second call
   returns the stored result.
 - **FR-008** `SetPhaseAsync` cannot move an election to Declared. Only `DeclareAsync` can, so the
   `ECMember` rows are always written.
 - **FR-009** Admin candidate changes follow the nomination rules. `AddCandidateAsync` works only up
-  to CandidateList, checks the roll, needs a real proposer and seconder, and goes through scrutiny.
-  `RemoveCandidateAsync` works only up to CandidateList. After that a candidate leaves only through
+  to and including Scrutiny, so an added candidate still goes through scrutiny before the list is
+  published. It checks the roll and needs a proposer and a seconder, both eligible voters and
+  neither of them the candidate. `RemoveCandidateAsync` works only before CandidateList. After that a candidate leaves only through
   withdrawal, before `WithdrawalClosesOn`.
 - **FR-010** The `ElectionsController.Vote` doc comment and spec 010 stop claiming more secrecy
   than the code gives, until FR-001 to FR-004 ship.
@@ -156,8 +170,10 @@ P2 brings the rules in line with the constitution.
 
 - **FR-018** A seat with `SeatCount` above 1 lets the voter pick up to `SeatCount` candidates, and
   the top `SeatCount` are elected.
-- **FR-019** A tie for the last place follows a rule stored on the election. The rule is set by the
-  constitution. See open decision D2.
+- **FR-019** A tie for the last place follows a rule stored on the election. The admin picks it when
+  setting up the election, from drawing lots, a run-off, or the chair's casting vote, and each
+  option shows a one-line description. Until the rule is applied, no candidate in the tie is
+  marked elected. See decision D2.
 - **FR-020** A candidate may ask for a recount within a set window after the count. The recount
   uses ER-26 (recount request) and ER-28 (recount report) and replaces the stored result only when
   an officer confirms it.
@@ -198,14 +214,65 @@ strict receipt-freeness, print the tracking code only (option B in D1).
 - **Changing a vote after casting.** Some systems allow a later vote to replace an earlier one to
   beat coercion. It would need the member-to-ballot link that FR-001 removes.
 
-## Open decisions
+## Decisions
 
-- **D1 Receipt content.** Option A: marked ballot plus tracking code (recommended). Option B:
-  tracking code only. Option C: no receipt.
-- **D2 Tie rule.** Drawing lots, a run-off, or the chair's casting vote. It has to match the
-  constitution. The Article to cite has not been checked yet.
-- **D3 When to start.** P0 has to ship before the next live election. The date of that election is
-  not recorded in the repo.
+- **D1 Receipt content.** Decided 2026-09-27: option A, the marked ballot plus the tracking code.
+  Option B (tracking code only) and option C (no receipt) were not taken.
+- **D2 Tie rule.** Decided 2026-09-27: set per election at setup, from drawing lots, a run-off, or
+  the chair's casting vote, each with a short description on the setup screen. The admin is
+  responsible for choosing the one the constitution names. The Article has not been checked yet.
+- **D3 When to start.** Decided 2026-09-27: P0 ships before the next live election. This is a
+  project date, not an election setting. The election's own dates (nomination, polling open and
+  close) are already set on the create screen. `ScrutinyOn` and `WithdrawalClosesOn` are not on the
+  create screen yet and are added with the setup work in Phase 2.
+
+## What the vote record keeps about the request
+
+The turnout row in the activity log already stores the IP address and user agent the request came
+from, taken by `ActivityService` from the request. `UseForwardedHeaders` is on, so the IP is the
+client's and not Render's proxy. These sit on the turnout record, which names the member, never on
+the ballot. The time on that row stays date only (FR-004).
+
+Device details can be parsed from the user agent into the row's `Metadata` field with no schema
+change and no new package. Location by IP lookup is not added. It needs a new dependency or an
+outside service, and it would send every voter's IP to a third party. It needs the committee's
+approval first.
+
+## Known limits
+
+TODO 37.1s closed the database-access gaps the security review of 2026-09-27 found. What is left:
+
+- The server holds the private key in memory for the length of the count request. An attacker who
+  controls the running server at that moment could keep it. Nothing is written to disk or the log.
+- A lost key file means the election cannot be counted. Nobody can recover it, the system included.
+  The admin screen says so before the key is made.
+- An election with fewer than 10 ballots cannot be counted in the app. The officers count it by hand
+  under the regulations.
+- A superuser can still see from `xmin` which voters voted in the same transaction as which sealed
+  row, but the row cannot be opened without the key, and after the count the rows are gone and the
+  counted ballots are in shuffled order.
+- A backup, snapshot or WAL archive taken during polling keeps the sealed rows with their `xmin`.
+  Whoever later holds such a backup and the key file can match every voter to their choices, with
+  no time limit. The count vacuums the live tables only. The officer must destroy the key file once
+  the result is declared and any recount window has closed, and backups from the polling days need
+  the same care as the key.
+- Any admin can set or replace the key up to the campaign. The key is not yet tied to the member
+  who holds the ReturningOfficer role, and voters do not see its fingerprint. An admin who swaps in
+  their own key before polling and also reads the database could open ballots during polling. The
+  real officer finds out only when the count says the key is wrong. TODO 37.1v tracks the fix.
+- A counted ballot keeps the voter's choices for every seat together. With many seats the pattern
+  can be unique, so a coercer who can read the table could ask for an odd pattern and look for it.
+- Render's access log records the time and IP of each call to the vote endpoint, but not the body.
+  The app's own request log line (from `CorrelationIdMiddleware`) is skipped for the vote route.
+  `SeatVote.VotedAt` and `VoterRoll.VotedAt` keep the date only. `ActivityLog` ids are still
+  sequential, so a SuperAdmin can place the vote audit row between timed rows around it.
+- The first migration's `Down` refuses to run while any pending ballot is left. When it does run, a
+  ballot row with no vote rows (a fully blank ballot) has nothing to rebuild the old per-seat shape
+  from, and is dropped. The rollback prints the count of dropped rows as a notice.
+- The sealed-ballot migration (`ElectionSealedBallots`) refuses to run while any pending ballot is
+  left, because plain choices cannot be sealed without the officer's key. Its `Down` pairs receipts
+  back to ballots at random, since the link is gone by design. It uses `gen_random_uuid()`, which
+  needs Postgres 13 or later.
 
 ## Acceptance criteria
 
@@ -223,8 +290,13 @@ strict receipt-freeness, print the tracking code only (option B in D1).
    spoiled ballots and turnout.
 10. A two-place seat elects two members. A tie applies the stored rule.
 11. An officer's nomination as a candidate is rejected.
+12. Polling does not open without a returning officer key. The count refuses a wrong key and a
+    count below 10 ballots, and after it no pending row is left.
 
 ## Evidence
 
-Review notes from 2026-09-27. No code has changed yet. Tests to add are listed in
-[plan.md](plan.md).
+Review notes from 2026-09-27. Phase 1 (FR-001 to FR-009) was built on branch
+`prepod-election-refactoring` on 2026-09-27, with the multi-place count from FR-018. Tests are in
+`GHCAA.Tests/Services/ElectionServiceTests.cs`, `GHCAA.Tests/Controllers/ElectionsControllerTests.cs`,
+`GHCAA.Tests/Middleware/AuditLogMiddlewareTests.cs`, `GHCAA.Web/src/app/member/election/election.spec.ts`
+and `GHCAA.Mobile/test/election_service_test.dart`. The rest are listed in [plan.md](plan.md).

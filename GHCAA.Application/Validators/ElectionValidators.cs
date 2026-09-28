@@ -38,13 +38,3 @@ public sealed class ElectionSeatRequestValidator : AbstractValidator<ElectionSea
         RuleFor(x => x.SeatCount).InclusiveBetween(1, 20);
     }
 }
-
-public sealed class CastVoteValidator : AbstractValidator<CastVoteDto>
-{
-    public CastVoteValidator()
-    {
-        RuleFor(x => x.ElectionSeatId).GreaterThan(0);
-        RuleFor(x => x.NominationId).GreaterThan(0);
-        RuleFor(x => x.SerialNumber).MaximumLength(80);
-    }
-}

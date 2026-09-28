@@ -130,6 +130,8 @@ class AdminElection {
   final DateTime? declaredOn;
   final bool isActive;
   final int eligibleVoterCount;
+  // Spec 023 FR-001. Set once the returning officer's public key is stored.
+  final String? ballotKeyFingerprint;
 
   const AdminElection({
     required this.id,
@@ -144,6 +146,7 @@ class AdminElection {
     this.declaredOn,
     required this.isActive,
     required this.eligibleVoterCount,
+    this.ballotKeyFingerprint,
   });
 
   factory AdminElection.fromJson(Map<String, dynamic> json) => AdminElection(
@@ -157,11 +160,11 @@ class AdminElection {
         nominationClosesOn:
             AppUtils.parseDate(json['nominationClosesOn'] as String?),
         pollingOpensOn: AppUtils.parseDate(json['pollingOpensOn'] as String?),
-        pollingClosesOn:
-            AppUtils.parseDate(json['pollingClosesOn'] as String?),
+        pollingClosesOn: AppUtils.parseDate(json['pollingClosesOn'] as String?),
         declaredOn: AppUtils.parseDate(json['declaredOn'] as String?),
         isActive: json['isActive'] as bool? ?? false,
         eligibleVoterCount: json['eligibleVoterCount'] as int? ?? 0,
+        ballotKeyFingerprint: json['ballotKeyFingerprint'] as String?,
       );
 }
 
@@ -227,16 +230,16 @@ class ElectionService {
     return Nomination.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<bool> vote(int id,
-      {required int electionSeatId,
-      required int nominationId,
-      String? serialNumber}) async {
+  // Sends the whole ballot in one call. [choices] maps each contested seat to
+  // its picks; an empty list casts that seat blank. Returns the tracking code.
+  Future<String> castBallot(int id, Map<int, List<int>> choices) async {
     final response = await _dio.post('/elections/$id/vote', data: {
-      'electionSeatId': electionSeatId,
-      'nominationId': nominationId,
-      if (serialNumber != null) 'serialNumber': serialNumber,
+      'seats': [
+        for (final entry in choices.entries)
+          {'electionSeatId': entry.key, 'nominationIds': entry.value},
+      ],
     });
-    return response.statusCode == 200;
+    return (response.data as Map<String, dynamic>)['trackingCode'] as String;
   }
 
   Future<bool> withdrawNomination(int nominationId) async {
@@ -250,6 +253,8 @@ class ElectionService {
   Future<int> freezeVoterRoll(int id) async =>
       (await _dio.post('/elections/$id/voter-roll/freeze')).data['count']
           as int;
+  // The first count needs the returning officer's key file, which only the
+  // web admin can read. After that this returns the stored results.
   Future<List<dynamic>> count(int id) async =>
       (await _dio.post('/elections/$id/count')).data as List<dynamic>;
   Future<bool> declare(int id) async =>
@@ -259,7 +264,9 @@ class ElectionService {
       (await _dio.get<List<int>>(
         '/elections/$id/documents/$formCode',
         options: Options(responseType: ResponseType.bytes),
-      )).data ?? <int>[];
+      ))
+          .data ??
+      <int>[];
 
   void logFailure(String operation, Object error) =>
       debugPrint('ElectionService.$operation failed: $error');

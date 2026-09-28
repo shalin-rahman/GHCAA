@@ -23,7 +23,7 @@ namespace GHCAA.Infrastructure.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task LogActivityAsync(int? memberId, string type, string description, int? actorId = null, string? ipAddress = null, string? userAgent = null, string? source = null, string? metadata = null, CancellationToken cancellationToken = default)
+        public async Task LogActivityAsync(int? memberId, string type, string description, int? actorId = null, string? ipAddress = null, string? userAgent = null, string? source = null, string? metadata = null, CancellationToken cancellationToken = default, DateTime? timestamp = null)
         {
             var ctx = _httpContextAccessor.HttpContext;
             var ip = ipAddress ?? ctx?.Connection?.RemoteIpAddress?.ToString();
@@ -42,7 +42,7 @@ namespace GHCAA.Infrastructure.Services
                 UserAgent = ua,
                 Source = src,
                 Metadata = metadata,
-                Timestamp = DateTime.UtcNow
+                Timestamp = timestamp ?? DateTime.UtcNow
             };
 
             await _db.ActivityLogs.AddAsync(log, cancellationToken);

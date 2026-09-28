@@ -10,6 +10,8 @@ public sealed class ElectionConfiguration : IEntityTypeConfiguration<Election>
     {
         b.HasKey(x => x.Id);
         b.Property(x => x.Title).HasMaxLength(200).IsRequired();
+        b.Property(x => x.BallotPublicKey).HasMaxLength(2000);
+        b.Property(x => x.BallotKeyFingerprint).HasMaxLength(64);
         b.HasIndex(x => new { x.ECPeriodId, x.IsActive });
         b.HasOne(x => x.ECPeriod).WithMany().HasForeignKey(x => x.ECPeriodId).OnDelete(DeleteBehavior.Restrict);
     }
@@ -75,8 +77,10 @@ public sealed class BallotConfiguration : IEntityTypeConfiguration<Ballot>
     public void Configure(EntityTypeBuilder<Ballot> b)
     {
         b.HasKey(x => x.Id);
-        b.Property(x => x.SerialNumber).HasMaxLength(80).IsRequired();
-        b.HasIndex(x => new { x.ElectionId, x.SerialNumber }).IsUnique();
+        // Npgsql makes time-ordered GUIDs by default, which would put the vote order back into
+        // the key. The service sets a random Guid.NewGuid() instead.
+        b.Property(x => x.Id).ValueGeneratedNever();
+        b.HasIndex(x => x.ElectionId);
         b.HasOne(x => x.Election).WithMany().HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
     }
 }
@@ -86,8 +90,35 @@ public sealed class BallotVoteConfiguration : IEntityTypeConfiguration<BallotVot
     public void Configure(EntityTypeBuilder<BallotVote> b)
     {
         b.HasKey(x => x.Id);
+        b.Property(x => x.Id).ValueGeneratedNever();
+        b.HasIndex(x => new { x.BallotId, x.ElectionSeatId, x.NominationId }).IsUnique();
         b.HasOne(x => x.Ballot).WithMany(x => x.Votes).HasForeignKey(x => x.BallotId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne<ElectionSeat>().WithMany().HasForeignKey(x => x.ElectionSeatId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<Nomination>().WithMany().HasForeignKey(x => x.NominationId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public sealed class PendingBallotConfiguration : IEntityTypeConfiguration<PendingBallot>
+{
+    public void Configure(EntityTypeBuilder<PendingBallot> b)
+    {
+        b.HasKey(x => x.Id);
+        b.Property(x => x.Id).ValueGeneratedNever();
+        b.Property(x => x.SealedChoices).IsRequired();
+        b.HasIndex(x => x.ElectionId);
+        b.HasOne<Election>().WithMany().HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public sealed class BallotReceiptConfiguration : IEntityTypeConfiguration<BallotReceipt>
+{
+    public void Configure(EntityTypeBuilder<BallotReceipt> b)
+    {
+        b.HasKey(x => x.Id);
+        b.Property(x => x.Id).ValueGeneratedNever();
+        b.Property(x => x.TrackingCode).HasMaxLength(80).IsRequired();
+        b.HasIndex(x => new { x.ElectionId, x.TrackingCode }).IsUnique();
+        b.HasOne<Election>().WithMany().HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
     }
 }
 

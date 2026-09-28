@@ -18,8 +18,10 @@ public interface IElectionService
     Task<NominationViewDto> SubmitNominationAsync(int id, NominationDto request, CancellationToken ct = default);
     Task<bool> DecideNominationAsync(int nominationId, int officerMemberId, ScrutinyDto request, CancellationToken ct = default);
     Task<bool> WithdrawNominationAsync(int nominationId, int memberId, CancellationToken ct = default);
-    Task<bool> CastVoteAsync(int id, int memberId, CastVoteDto request, CancellationToken ct = default);
-    Task<IReadOnlyList<ElectionResultDto>> CountAsync(int id, CancellationToken ct = default);
+    Task<(bool Success, string? Error, string? TrackingCode)> CastBallotAsync(int id, int memberId, CastBallotDto request, CancellationToken ct = default);
+    // Null when the election is not in Counting or ballots are still waiting to be moved.
+    Task<(bool Success, string? Error, string? Fingerprint)> SetBallotKeyAsync(int id, string publicKeySpkiBase64, CancellationToken ct = default);
+    Task<(IReadOnlyList<ElectionResultDto>? Results, string? Error)> CountAsync(int id, string? privateKeyPkcs8Base64, CancellationToken ct = default);
     Task<bool> DeclareAsync(int id, CancellationToken ct = default);
     Task<IReadOnlyList<NominationViewDto>> GetNominationsAsync(int id, CancellationToken ct = default);
     Task<IReadOnlyList<AdminElectionDto>> ListAdminElectionsAsync(CancellationToken ct = default);

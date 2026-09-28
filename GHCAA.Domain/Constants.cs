@@ -104,6 +104,24 @@ namespace GHCAA.Domain
             public const string SuperAdminBootstrapPasswordFileName = "superadmin-bootstrap-password.txt";
         }
 
+        public static class Elections
+        {
+            // Spec 023 FR-003. The count refuses to run on fewer ballots than this, so a result
+            // never shows how one or two known voters voted.
+            public const int MinimumBallotsToCount = 10;
+            // Spec 023 FR-001. The returning officer's ballot key is RSA-OAEP with SHA-256.
+            public const int BallotKeyMinBits = 3072;
+            public const int BallotKeyMaxBits = 4096;
+            // Sealed choices are padded to a multiple of this many bytes, so the sealed length
+            // does not show how many seats were left blank.
+            public const int SealedChoicesBlockBytes = 512;
+            // Crockford base 32 leaves out I, L, O and U, so a printed code is hard to misread.
+            public const string TrackingCodeAlphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+            public const int TrackingCodeGroups = 3;
+            public const int TrackingCodeGroupLength = 4;
+            public const string VoteAuditType = "ElectionVote";
+        }
+
         public static class Localization
         {
             public const string DayMonthYearDateFormat = "dd-MM-yyyy";

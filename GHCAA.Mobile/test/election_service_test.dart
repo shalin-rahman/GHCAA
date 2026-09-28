@@ -39,7 +39,9 @@ class _ElectionAdapter implements HttpClientAdapter {
         }
       ]);
     }
-    if (options.path == '/elections/12/vote') return _json({}, status: 200);
+    if (options.path == '/elections/12/vote') {
+      return _json({'trackingCode': 'ABCD-EFGH'});
+    }
     throw StateError('Unhandled ${options.method} ${options.path}');
   }
 
@@ -67,13 +69,34 @@ void main() {
     expect(adapter.path, '/elections/12/nominations');
   });
 
-  test('posts the selected nomination as a vote', () async {
+  test('posts the whole ballot and returns the tracking code', () async {
     final adapter = _ElectionAdapter();
     final service = ElectionService(Dio()..httpClientAdapter = adapter);
 
-    expect(await service.vote(12, electionSeatId: 3, nominationId: 4), isTrue);
+    final code = await service.castBallot(12, {
+      3: [4],
+      5: [],
+    });
+
+    expect(code, 'ABCD-EFGH');
     expect(adapter.method, 'POST');
     expect(adapter.path, '/elections/12/vote');
-    expect((adapter.body as Map)['nominationId'], 4);
+    expect((adapter.body as Map)['seats'], [
+      {
+        'electionSeatId': 3,
+        'nominationIds': [4]
+      },
+      {'electionSeatId': 5, 'nominationIds': []},
+    ]);
+  });
+
+  // FR-39: the admin card shows whether the returning officer key is set.
+  test('reads the returning officer key fingerprint', () {
+    final withKey = AdminElection.fromJson(
+        {'id': 1, 'title': 'EC', 'ballotKeyFingerprint': 'ab12'});
+    final withoutKey = AdminElection.fromJson({'id': 2, 'title': 'EC'});
+
+    expect(withKey.ballotKeyFingerprint, 'ab12');
+    expect(withoutKey.ballotKeyFingerprint, isNull);
   });
 }

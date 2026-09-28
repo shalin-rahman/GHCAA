@@ -1,18 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { API_ENDPOINTS } from '../constants/app.constants';
-import { AdminElectionDto, CastVoteDto, ElectionResultDto, ElectionSummaryDto } from '../models/election.models';
+import { AdminElectionDto, CastBallotDto, ElectionResultDto, ElectionSummaryDto } from '../models/election.models';
 import { ElectionsService } from './elections.service';
 
 const ELECTION: ElectionSummaryDto = {
     id: 12, title: 'Executive Committee 2026', phase: 'Polling',
-    nominationOpensOn: '2026-01-01', nominationClosesOn: '2026-01-15',
-    pollingOpensOn: '2026-02-01', pollingClosesOn: '2026-02-07'
+    ecPeriodId: 3, voterCount: 40, eligibleVoterCount: 120
 };
 
 const ADMIN_ELECTION: AdminElectionDto = {
     id: 12, title: 'Executive Committee 2026', phase: 'Announced',
-    description: '', positions: [], candidates: []
+    description: '', isActive: true, hasVoted: false, positions: [], candidates: []
 };
 
 describe('ElectionsService', () => {
@@ -32,13 +31,15 @@ describe('ElectionsService', () => {
         request.flush(ELECTION);
     });
 
-    it('casts a member vote through the vote route', () => {
-        const vote: CastVoteDto = { electionSeatId: 1, nominationId: 5 };
-        service.castVote(ELECTION.id, vote).subscribe();
+    it('casts the whole ballot in one request and returns the tracking code', () => {
+        const ballot: CastBallotDto = { seats: [{ electionSeatId: 1, nominationIds: [5] }, { electionSeatId: 2, nominationIds: [] }] };
+        let code: string | undefined;
+        service.castBallot(ELECTION.id, ballot).subscribe(r => code = r.trackingCode);
         const request = http.expectOne(API_ENDPOINTS.ELECTIONS.VOTE(ELECTION.id));
         expect(request.request.method).toBe('POST');
-        expect(request.request.body).toEqual(vote);
-        request.flush({});
+        expect(request.request.body).toEqual(ballot);
+        request.flush({ trackingCode: 'ABCD-EFGH-JKMN' });
+        expect(code).toBe('ABCD-EFGH-JKMN');
     });
 
     it('runs the official count through the admin-only count route', () => {
@@ -47,6 +48,21 @@ describe('ElectionsService', () => {
         const request = http.expectOne(API_ENDPOINTS.ELECTIONS.COUNT(ELECTION.id));
         expect(request.request.method).toBe('POST');
         request.flush(results);
+    });
+
+    it('sends the returning officer key with the first count', () => {
+        service.count(ELECTION.id, 'PKCS8').subscribe();
+        const request = http.expectOne(API_ENDPOINTS.ELECTIONS.COUNT(ELECTION.id));
+        expect(request.request.body).toEqual({ privateKey: 'PKCS8' });
+        request.flush([]);
+    });
+
+    it('stores only the public key for an election', () => {
+        service.setBallotKey(ADMIN_ELECTION.id, 'SPKI').subscribe(value => expect(value).toEqual(ADMIN_ELECTION));
+        const request = http.expectOne(API_ENDPOINTS.ADMIN_ELECTIONS.BALLOT_KEY(ADMIN_ELECTION.id));
+        expect(request.request.method).toBe('POST');
+        expect(request.request.body).toEqual({ publicKey: 'SPKI' });
+        request.flush(ADMIN_ELECTION);
     });
 
     it('loads the admin election list', () => {

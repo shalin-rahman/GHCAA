@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/widgets/app_scaffold.dart';
@@ -45,28 +46,53 @@ class _ElectionBody extends ConsumerStatefulWidget {
 }
 
 class _ElectionBodyState extends ConsumerState<_ElectionBody> {
-  int? _votingNominationId;
-  final Set<int> _votedSeatIds = {};
+  // Seat id to the chosen nomination. A seat with no entry is cast blank.
+  final Map<int, int> _choices = {};
+  bool _submitting = false;
+  bool _alreadyVoted = false;
+  String? _trackingCode;
 
-  Future<void> _vote(Nomination nomination) async {
-    if (_votingNominationId != null) return;
-    setState(() => _votingNominationId = nomination.id);
+  bool get _closed =>
+      widget.election.phase != 'Polling' ||
+      _trackingCode != null ||
+      _alreadyVoted;
+
+  void _choose(Nomination nomination) {
+    if (_closed) return;
+    setState(() {
+      if (_choices[nomination.electionSeatId] == nomination.id) {
+        _choices.remove(nomination.electionSeatId);
+      } else {
+        _choices[nomination.electionSeatId] = nomination.id;
+      }
+    });
+  }
+
+  Future<void> _submit(Iterable<int> seatIds) async {
+    if (_closed || _submitting) return;
+    setState(() => _submitting = true);
     try {
-      await ref.read(electionServiceProvider).vote(widget.election.id,
-          electionSeatId: nomination.electionSeatId,
-          nominationId: nomination.id);
+      final code = await ref
+          .read(electionServiceProvider)
+          .castBallot(widget.election.id, {
+        for (final seatId in seatIds)
+          seatId: [if (_choices[seatId] != null) _choices[seatId]!],
+      });
       if (mounted) {
-        setState(() => _votedSeatIds.add(nomination.electionSeatId));
+        setState(() => _trackingCode = code);
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Your vote was recorded.')));
+            const SnackBar(content: Text('Your ballot was recorded.')));
       }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('The vote could not be recorded.')));
-      }
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final already = e.response?.statusCode == 409;
+      if (already) setState(() => _alreadyVoted = true);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(already
+              ? 'You have already voted in this election.'
+              : 'The ballot could not be recorded.')));
     } finally {
-      if (mounted) setState(() => _votingNominationId = null);
+      if (mounted) setState(() => _submitting = false);
     }
   }
 
@@ -78,8 +104,7 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
 
     return AsyncValueWidget<List<Nomination>>(
       value: nominationsAsync,
-      onRetry: () =>
-          ref.invalidate(_nominationsProvider(widget.election.id)),
+      onRetry: () => ref.invalidate(_nominationsProvider(widget.election.id)),
       data: (nominations) {
         if (nominations.isEmpty) {
           return const EmptyStateWidget(
@@ -89,8 +114,15 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
 
         final bySeat = <int, List<Nomination>>{};
         for (final nomination in nominations) {
-          bySeat.putIfAbsent(nomination.electionSeatId, () => []).add(nomination);
+          bySeat
+              .putIfAbsent(nomination.electionSeatId, () => [])
+              .add(nomination);
         }
+        // Only seats with an accepted candidate go on the ballot.
+        final contested = bySeat.entries
+            .where((e) => e.value.any((n) => n.status == 'Accepted'))
+            .map((e) => e.key)
+            .toList();
 
         return ListView(
           padding: const EdgeInsets.all(AppTheme.spaceL),
@@ -106,7 +138,8 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
                               fontSize: 20,
                               fontWeight: FontWeight.w800)),
                       const SizedBox(height: 8),
-                      Text('Phase: ${electionPhaseLabel(widget.election.phase)}',
+                      Text(
+                          'Phase: ${electionPhaseLabel(widget.election.phase)}',
                           style: const TextStyle(color: AppTheme.textMuted)),
                       if (widget.election.pollingOpensOn != null)
                         Text(
@@ -114,6 +147,18 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
                             style: const TextStyle(color: AppTheme.textMuted)),
                     ])),
             const SizedBox(height: AppTheme.spaceL),
+            if (_trackingCode != null)
+              _Notice(
+                  title: 'Your ballot was recorded',
+                  body: 'Tracking code: $_trackingCode\n'
+                      'Keep this code. It shows your ballot was counted and '
+                      'does not show who cast it.')
+            else if (_alreadyVoted)
+              const _Notice(body: 'You have already voted in this election.')
+            else if (!isPolling)
+              const _Notice(
+                  body:
+                      'Voting opens once this election reaches the polling phase.'),
             for (final seatId in bySeat.keys) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceS),
@@ -125,14 +170,26 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
               ),
               ...bySeat[seatId]!.map((nomination) => _NominationCard(
                     nomination: nomination,
-                    canVote: isPolling &&
-                        nomination.status == 'Accepted' &&
-                        !_votedSeatIds.contains(nomination.electionSeatId),
-                    hasVotedThisSeat:
-                        _votedSeatIds.contains(nomination.electionSeatId),
-                    isVoting: _votingNominationId == nomination.id,
-                    onVote: () => _vote(nomination),
+                    canChoose: !_closed && nomination.status == 'Accepted',
+                    chosen: _choices[seatId] == nomination.id,
+                    onChoose: () => _choose(nomination),
                   )),
+            ],
+            if (!_closed && contested.isNotEmpty) ...[
+              const SizedBox(height: AppTheme.spaceL),
+              FilledButton.icon(
+                onPressed: _submitting ? null : () => _submit(contested),
+                icon: _submitting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.how_to_vote),
+                label: Text(_submitting ? 'Recording...' : 'Cast ballot'),
+              ),
+              const SizedBox(height: AppTheme.spaceS),
+              const Text('A seat with no choice is cast blank.',
+                  style: TextStyle(color: AppTheme.textMuted)),
             ],
           ],
         );
@@ -141,26 +198,52 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
   }
 }
 
+class _Notice extends StatelessWidget {
+  final String? title;
+  final String body;
+  const _Notice({this.title, required this.body});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppTheme.spaceL),
+      child: GlassContainer(
+          padding: const EdgeInsets.all(AppTheme.spaceL),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            if (title != null)
+              Text(title!,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700)),
+            if (title != null) const SizedBox(height: 8),
+            SelectableText(body,
+                style: const TextStyle(color: AppTheme.textMuted)),
+          ])),
+    );
+  }
+}
+
 class _NominationCard extends StatelessWidget {
   final Nomination nomination;
-  final bool canVote;
-  final bool hasVotedThisSeat;
-  final bool isVoting;
-  final VoidCallback onVote;
+  final bool canChoose;
+  final bool chosen;
+  final VoidCallback onChoose;
 
   const _NominationCard({
     required this.nomination,
-    required this.canVote,
-    required this.hasVotedThisSeat,
-    required this.isVoting,
-    required this.onVote,
+    required this.canChoose,
+    required this.chosen,
+    required this.onChoose,
   });
 
   @override
   Widget build(BuildContext context) {
-    final photoUrl = nomination.photoPath != null && nomination.photoPath!.isNotEmpty
-        ? AppConfig.resolveImageUrl(nomination.photoPath)
-        : null;
+    final photoUrl =
+        nomination.photoPath != null && nomination.photoPath!.isNotEmpty
+            ? AppConfig.resolveImageUrl(nomination.photoPath)
+            : null;
 
     return Card(
       child: ListTile(
@@ -169,19 +252,12 @@ class _NominationCard extends StatelessWidget {
         leading: photoUrl == null
             ? const CircleAvatar(child: Icon(Icons.person_outline))
             : CircleAvatar(backgroundImage: NetworkImage(photoUrl)),
-        trailing: canVote
-            ? IconButton(
-                icon: isVoting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.how_to_vote),
-                onPressed: isVoting ? null : onVote,
-              )
-            : Text(hasVotedThisSeat
-                ? 'Voted'
-                : nominationStatusLabel(nomination.status)),
+        selected: chosen,
+        onTap: canChoose ? onChoose : null,
+        trailing: nomination.status == 'Accepted'
+            ? Icon(chosen ? Icons.check_circle : Icons.radio_button_unchecked,
+                color: chosen ? AppTheme.royalGold : AppTheme.textMuted)
+            : Text(nominationStatusLabel(nomination.status)),
       ),
     );
   }

@@ -105,19 +105,43 @@ public sealed class ElectionsController(
         return await service.WithdrawNominationAsync(nominationId, memberId, ct) ? Ok() : BadRequest();
     }
 
-    /// <summary>FR-37.1c: records a secret ballot without linking the vote to the voter.</summary>
+    /// <summary>FR-37.1c, spec 023 FR-005: records the whole ballot in one request and returns its
+    /// tracking code. The ballot row has no member or time column. The link that remains is the
+    /// batch it was moved in, described in spec 023.</summary>
     [HttpPost("{id:int}/vote")]
-    public async Task<IActionResult> Vote(int id, CastVoteDto request, CancellationToken ct)
+    [GHCAA.API.Filters.RequireStepUp]
+    public async Task<IActionResult> Vote(int id, CastBallotDto request, CancellationToken ct)
     {
-        var claim = this.CurrentMemberIdRaw();
-        return int.TryParse(claim, out var memberId) && await service.CastVoteAsync(id, memberId, request, ct) ? Ok() : Problem(detail: "Vote could not be recorded.", statusCode: StatusCodes.Status400BadRequest);
+        if (!int.TryParse(this.CurrentMemberIdRaw(), out var memberId))
+            return Unauthorized();
+        var (success, error, trackingCode) = await service.CastBallotAsync(id, memberId, request, ct);
+        if (success)
+            return Ok(new CastBallotResultDto(trackingCode!));
+        return error == "already-voted"
+            ? this.ProblemWithCode(ErrorCodes.AlreadyVoted, "You have already voted in this election.", StatusCodes.Status409Conflict)
+            : Problem(detail: "Vote could not be recorded.", statusCode: StatusCodes.Status400BadRequest);
     }
 
-    /// <summary>FR-37.1d: counts accepted nominations after polling closes.</summary>
+    /// <summary>FR-37.1d, spec 023 FR-001 and FR-003: opens the sealed ballots with the returning officer's key and counts them.</summary>
     [HttpPost("{id:int}/count")]
     [Authorize(Policy = Policies.AdminOnly)]
     [GHCAA.API.Filters.RequireStepUp]
-    public async Task<IActionResult> Count(int id, CancellationToken ct) => Ok(await service.CountAsync(id, ct));
+    public async Task<IActionResult> Count(int id, [FromBody] CountElectionRequest? request, CancellationToken ct)
+    {
+        var (results, error) = await service.CountAsync(id, request?.PrivateKey, ct);
+        if (results is not null) return Ok(results);
+        var detail = error switch
+        {
+            "no-key" => "Upload the returning officer's private key file to count.",
+            "wrong-key" => "This is not the key the election was sealed under.",
+            "below-threshold" => $"Fewer than {Elections.MinimumBallotsToCount} ballots were cast, so the count would not keep the vote secret.",
+            "integrity" => "The number of ballots, receipts and voters marked as voted do not match. Nothing was counted.",
+            "unreadable" => "A sealed ballot could not be opened. Nothing was counted.",
+            "not-recorded" => "The count could not be saved. Try again.",
+            _ => "The election is not in counting.",
+        };
+        return Problem(detail: detail, statusCode: StatusCodes.Status400BadRequest);
+    }
 
     /// <summary>FR-37.1d: declares counted results.</summary>
     [HttpPost("{id:int}/declare")]

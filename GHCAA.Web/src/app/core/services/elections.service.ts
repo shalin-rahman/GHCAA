@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import {
-    AdminElectionDto, CastVoteDto, CreateElectionRequest, ElectionPhase,
+    AdminElectionDto, CastBallotDto, CastBallotResultDto, CreateElectionRequest, ElectionPhase,
     ElectionResultDto, ElectionSummaryDto,
     NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto
 } from '../models/election.models';
@@ -73,12 +73,18 @@ export class ElectionsService {
         return this.http.post<void>(API_ENDPOINTS.ELECTIONS.WITHDRAW(nominationId), {});
     }
 
-    castVote(id: number, request: CastVoteDto): Observable<void> {
-        return this.http.post<void>(API_ENDPOINTS.ELECTIONS.VOTE(id), request);
+    castBallot(id: number, request: CastBallotDto): Observable<CastBallotResultDto> {
+        return this.http.post<CastBallotResultDto>(API_ENDPOINTS.ELECTIONS.VOTE(id), request);
     }
 
-    count(id: number): Observable<ElectionResultDto[]> {
-        return this.http.post<ElectionResultDto[]>(API_ENDPOINTS.ELECTIONS.COUNT(id), {});
+    setBallotKey(id: number, publicKey: string): Observable<AdminElectionDto> {
+        return this.http.post<AdminElectionDto>(API_ENDPOINTS.ADMIN_ELECTIONS.BALLOT_KEY(id), { publicKey });
+    }
+
+    // The first count needs the returning officer's private key. After that the stored results
+    // come back without it.
+    count(id: number, privateKey?: string): Observable<ElectionResultDto[]> {
+        return this.http.post<ElectionResultDto[]>(API_ENDPOINTS.ELECTIONS.COUNT(id), privateKey ? { privateKey } : {});
     }
 
     declare(id: number): Observable<void> {

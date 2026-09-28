@@ -713,6 +713,7 @@ export const API_ENDPOINTS = {
         BASE: '/api/admin/elections',
         PUBLISH: (id: number) => `/api/admin/elections/${id}/publish`,
         CLOSE: (id: number) => `/api/admin/elections/${id}/close`,
+        BALLOT_KEY: (id: number) => `/api/admin/elections/${id}/ballot-key`,
         CANDIDATES: (id: number) => `/api/admin/elections/${id}/candidates`
     },
     CONFIG: '/api/config',

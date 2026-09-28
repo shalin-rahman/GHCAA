@@ -38,7 +38,8 @@ public sealed class AdminElectionsController(IElectionService service) : Control
             request.NominationClosesOn,
             request.PollingOpensOn,
             request.PollingClosesOn,
-            memberId), ct);
+            memberId,
+            request.TieRule), ct);
 
         foreach (var position in request.Positions ?? Array.Empty<AdminElectionPositionRequest>())
         {
@@ -65,6 +66,20 @@ public sealed class AdminElectionsController(IElectionService service) : Control
         return updated is null ? Problem(detail: "Election is not ready to publish.", statusCode: StatusCodes.Status400BadRequest) : Ok(updated);
     }
 
+    /// <summary>Spec 023 FR-001: stores the returning officer's public key. Allowed only before polling opens.</summary>
+    [HttpPost("{id:int}/ballot-key")]
+    public async Task<IActionResult> SetBallotKey(int id, [FromBody] SetBallotKeyRequest request, CancellationToken ct)
+    {
+        var (success, error, _) = await service.SetBallotKeyAsync(id, request.PublicKey, ct);
+        if (success) return Ok(await service.GetAdminElectionAsync(id, ct));
+        return error switch
+        {
+            "not-found" => NotFound(),
+            "phase-closed" => Problem(detail: "The key cannot change once polling has opened.", statusCode: StatusCodes.Status400BadRequest),
+            _ => Problem(detail: $"The key must be an RSA public key of at least {Elections.BallotKeyMinBits} bits.", statusCode: StatusCodes.Status400BadRequest),
+        };
+    }
+
     [HttpPost("{id:int}/close")]
     public async Task<IActionResult> Close(int id, CancellationToken ct)
     {
@@ -80,7 +95,14 @@ public sealed class AdminElectionsController(IElectionService service) : Control
     {
         var (success, error, election) = await service.AddCandidateAsync(id, request, ct);
         if (!success)
-            return error == "duplicate-candidate" ? Problem(detail: "This member is already a candidate for this seat.", statusCode: StatusCodes.Status409Conflict) : NotFound();
+            return error switch
+            {
+                "duplicate-candidate" => Problem(detail: "This member is already a candidate for this seat.", statusCode: StatusCodes.Status409Conflict),
+                "phase-closed" => Problem(detail: "Candidates can only be added up to the scrutiny phase.", statusCode: StatusCodes.Status400BadRequest),
+                "not-eligible" => Problem(detail: "The candidate must be an eligible voter.", statusCode: StatusCodes.Status400BadRequest),
+                "invalid-proposer" => Problem(detail: "Proposer and seconder must be two other eligible voters.", statusCode: StatusCodes.Status400BadRequest),
+                _ => NotFound(),
+            };
 
         return Ok(election);
     }
@@ -90,7 +112,12 @@ public sealed class AdminElectionsController(IElectionService service) : Control
     {
         var (success, error) = await service.RemoveCandidateAsync(id, candidateId, ct);
         if (!success)
-            return error == "has-votes" ? Problem(detail: "This candidate already has votes recorded and cannot be removed.", statusCode: StatusCodes.Status409Conflict) : NotFound();
+            return error switch
+            {
+                "has-votes" => Problem(detail: "This candidate already has votes recorded and cannot be removed.", statusCode: StatusCodes.Status409Conflict),
+                "phase-closed" => Problem(detail: "The candidate list is published. A candidate can now only withdraw.", statusCode: StatusCodes.Status400BadRequest),
+                _ => NotFound(),
+            };
 
         return Ok();
     }

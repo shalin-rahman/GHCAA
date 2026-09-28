@@ -14,6 +14,9 @@ export const ELECTION_PHASE_LABELS: Record<ElectionPhase, string> = {
     Archived: 'Archived'
 };
 
+// The labels above are listed in phase order, the same order the server steps through.
+export const ELECTION_PHASE_ORDER = Object.keys(ELECTION_PHASE_LABELS) as ElectionPhase[];
+
 export const NOMINATION_STATUS_LABELS: Record<NominationStatus, string> = {
     Submitted: 'Submitted',
     UnderScrutiny: 'Under scrutiny',
@@ -57,6 +60,8 @@ export interface AdminElectionDto {
     candidates: AdminElectionCandidateDto[];
     eligibleVoterCount?: number;
     hasVoted: boolean;
+    // Spec 023 FR-001. Set once the returning officer's public key is stored. Polling cannot open without it.
+    ballotKeyFingerprint?: string | null;
 }
 
 export interface CreateElectionRequest {
@@ -74,6 +79,8 @@ export interface SaveCandidateRequest {
     memberId: number;
     positionId: number;
     statement?: string;
+    proposerMemberId: number;
+    seconderMemberId: number;
 }
 
 export interface ElectionSummaryDto {
@@ -107,10 +114,18 @@ export interface ScrutinyDto {
     reason?: string;
 }
 
-export interface CastVoteDto {
+// One entry per seat on the election. An empty nominationIds is an abstention on that seat.
+export interface BallotSeatChoiceDto {
     electionSeatId: number;
-    nominationId: number;
-    serialNumber?: string;
+    nominationIds: number[];
+}
+
+export interface CastBallotDto {
+    seats: BallotSeatChoiceDto[];
+}
+
+export interface CastBallotResultDto {
+    trackingCode: string;
 }
 
 export interface ElectionResultDto {
