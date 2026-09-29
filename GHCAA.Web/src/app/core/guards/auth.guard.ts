@@ -3,7 +3,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { filter, map, take } from 'rxjs';
 import { AuthService } from '../services/auth.service';
-import { ROUTES } from '../constants/app.constants';
+import { ELECTION_STAFF_ROLES, ROUTES } from '../constants/app.constants';
 
 const CHANGE_PASSWORD_URL = '/portal/change-password';
 
@@ -109,6 +109,22 @@ export const superAdminGuard = () => {
             }
 
             return router.parseUrl(ROUTES.ADMIN_DASHBOARD);
+        })
+    );
+};
+
+/** Election staff routes: SuperAdmin, Admin or ElectionOfficial. */
+export const electionStaffGuard = () => {
+    const auth = inject(AuthService);
+    const router = inject(Router);
+
+    return waitForAuthChecked(auth).pipe(
+        map(() => {
+            if (ELECTION_STAFF_ROLES.some(r => auth.hasRole(r))) {
+                return true;
+            }
+
+            return router.parseUrl(ROUTES.LOGIN);
         })
     );
 };

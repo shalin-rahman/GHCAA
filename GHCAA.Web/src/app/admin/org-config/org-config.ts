@@ -7,8 +7,12 @@ import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel'
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { ORG_CONFIG_FALLBACK } from '../../core/config/org-config-fallback.generated';
 import { DATE_FORMATS, DATE_FORMAT_LABELS, DEFAULT_DATE_FORMAT } from '../../core/constants/app.constants';
+import {
+  DEFAULT_ELECTION_SETTINGS, ELECTION_APPROVAL_ACTIONS, ELECTION_APPROVAL_ACTION_LABELS,
+  ELECTION_CANDIDATE_ORDERS, ElectionApprovalAction
+} from '../../core/models/election.models';
 
-type TabKey = 'branding' | 'contact' | 'currency' | 'features' | 'workflow' | 'localization' | 'advanced';
+type TabKey = 'branding' | 'contact' | 'currency' | 'features' | 'workflow' | 'elections' | 'localization' | 'advanced';
 
 @Component({
   selector: 'app-org-config',
@@ -26,6 +30,7 @@ export class AdminOrgConfig implements OnInit {
     { key: 'currency', label: 'Currency' },
     { key: 'features', label: 'Features' },
     { key: 'workflow', label: 'Workflow' },
+    { key: 'elections', label: 'Elections' },
     { key: 'localization', label: 'Localization' },
     { key: 'advanced', label: 'Advanced (JSON)' }
   ];
@@ -47,6 +52,9 @@ export class AdminOrgConfig implements OnInit {
   readonly currencyCodeHint = ORG_CONFIG_FALLBACK.currency.code;
   readonly DATE_FORMATS = DATE_FORMATS;
   readonly DATE_FORMAT_LABELS = DATE_FORMAT_LABELS;
+  readonly approvalActions = ELECTION_APPROVAL_ACTIONS;
+  readonly approvalActionLabels = ELECTION_APPROVAL_ACTION_LABELS;
+  readonly candidateOrders = ELECTION_CANDIDATE_ORDERS;
 
   ngOnInit() {
     const current = this.configService.config();
@@ -78,6 +86,18 @@ export class AdminOrgConfig implements OnInit {
 
   removePhone(index: number) {
     this.config?.contact.phoneNumbers.splice(index, 1);
+  }
+
+  isTwoPersonAction(action: ElectionApprovalAction): boolean {
+    return this.config?.elections?.twoPersonActions.includes(action) ?? false;
+  }
+
+  toggleTwoPersonAction(action: ElectionApprovalAction, on: boolean) {
+    const elections = this.config?.elections;
+    if (!elections) return;
+    const rest = elections.twoPersonActions.filter(a => a !== action);
+    // Kept in enum order so the saved list reads the same way every time.
+    elections.twoPersonActions = ELECTION_APPROVAL_ACTIONS.filter(a => a === action ? on : rest.includes(a));
   }
 
   trackByIndex(index: number): number {
@@ -116,6 +136,7 @@ export class AdminOrgConfig implements OnInit {
     this.config = structuredClone(cfg);
     this.config.contact.phoneNumbers ??= [];
     this.config.workflow.notificationChannel ??= 'Both';
+    this.config.elections = { ...structuredClone(DEFAULT_ELECTION_SETTINGS), ...this.config.elections };
     this.config.localization ??= { dateFormat: DEFAULT_DATE_FORMAT, locales: {} };
     this.config.localization.dateFormat ??= DEFAULT_DATE_FORMAT;
     this.localizationJson = JSON.stringify(

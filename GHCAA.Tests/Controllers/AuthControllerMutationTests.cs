@@ -55,7 +55,7 @@ namespace GHCAA.Tests.Controllers
             _controller.ControllerContext.HttpContext.Request.Headers["Cookie"] = $"{name}={value}";
         }
 
-        private async Task<User> SeedUserAsync(bool isActive = true, bool isArchived = false, string? email = "member@example.com")
+        private async Task<User> SeedUserAsync(bool isActive = true, bool isArchived = false, string? email = "member@example.com", string username = "user1")
         {
             Member? member = null;
             if (email != null)
@@ -80,7 +80,7 @@ namespace GHCAA.Tests.Controllers
 
             var user = new User
             {
-                Username = "user1",
+                Username = username,
                 PasswordHash = "ph",
                 SecurityStamp = "stamp",
                 CreatedAt = System.DateTime.UtcNow,
@@ -309,6 +309,51 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(result, Is.InstanceOf<ObjectResult>());
             Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
+        }
+
+        // 37.1w: voting needs step-up, so a plain member must be able to get a code.
+        [Test]
+        [Category("FR-39")]
+        public async Task RequestStepUp_SendsCodeToMemberEmail_ForPlainMember()
+        {
+            var user = await SeedUserAsync(email: "voter@example.com");
+            SetUserContext(_controller, userId: user.Id, role: "Member");
+            _otpServiceMock.Setup(x => x.GenerateAndSendOtpAsync("voter@example.com", GHCAA.Domain.Enums.OtpPurpose.AdminStepUp, It.IsAny<CancellationToken>()))
+                .ReturnsAsync("otp-id");
+
+            var result = await _controller.RequestStepUp(_otpServiceMock.Object, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task RequestStepUp_SendsCodeToUsername_WhenUserHasNoMemberAndEmailUsername()
+        {
+            var user = await SeedUserAsync(email: null, username: "official@example.com");
+            SetUserContext(_controller, userId: user.Id, role: "Member");
+            _otpServiceMock.Setup(x => x.GenerateAndSendOtpAsync("official@example.com", GHCAA.Domain.Enums.OtpPurpose.AdminStepUp, It.IsAny<CancellationToken>()))
+                .ReturnsAsync("otp-id");
+
+            var result = await _controller.RequestStepUp(_otpServiceMock.Object, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            _otpServiceMock.Verify(x => x.GenerateAndSendOtpAsync("official@example.com", GHCAA.Domain.Enums.OtpPurpose.AdminStepUp, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task VerifyStepUp_ReturnsOk_ForPlainMember()
+        {
+            var user = await SeedUserAsync(email: "voter@example.com");
+            SetUserContext(_controller, userId: user.Id, role: "Member");
+            _otpServiceMock.Setup(x => x.VerifyOtpAsync("voter@example.com", "123456", GHCAA.Domain.Enums.OtpPurpose.AdminStepUp, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+            _tokenServiceMock.Setup(x => x.CreateStepUpToken(It.IsAny<User>())).Returns("step-up-token");
+
+            var result = await _controller.VerifyStepUp(new StepUpVerifyDto { Code = "123456" }, _otpServiceMock.Object, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
         // --- VerifyStepUp ---

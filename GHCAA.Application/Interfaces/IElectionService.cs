@@ -12,11 +12,10 @@ public interface IElectionService
     Task<ElectionSummaryDto?> GetAsync(int id, CancellationToken ct = default);
     Task<ElectionSummaryDto?> GetCurrentAsync(CancellationToken ct = default);
     Task<int> AddSeatAsync(int id, ElectionSeatRequestDto request, CancellationToken ct = default);
-    Task<bool> AssignOfficerAsync(int id, ElectionOfficerDto request, CancellationToken ct = default);
     Task<bool> SetPhaseAsync(int id, Enums.ElectionPhase phase, CancellationToken ct = default);
     Task<int> FreezeVoterRollAsync(int id, CancellationToken ct = default);
     Task<NominationViewDto> SubmitNominationAsync(int id, NominationDto request, CancellationToken ct = default);
-    Task<bool> DecideNominationAsync(int nominationId, int officerMemberId, ScrutinyDto request, CancellationToken ct = default);
+    Task<bool> DecideNominationAsync(int nominationId, int decidedByUserId, ScrutinyDto request, CancellationToken ct = default);
     Task<bool> WithdrawNominationAsync(int nominationId, int memberId, CancellationToken ct = default);
     Task<(bool Success, string? Error, string? TrackingCode)> CastBallotAsync(int id, int memberId, CastBallotDto request, CancellationToken ct = default);
     // Null when the election is not in Counting or ballots are still waiting to be moved.

@@ -128,7 +128,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("me")]
         [Authorize]
         [DisableRateLimiting]
-        public IActionResult Me()
+        public async Task<IActionResult> Me([FromServices] IElectionAppointmentService appointments, CancellationToken ct)
         {
             var userId = this.CurrentUserIdRaw();
             var username = this.CurrentUsername();
@@ -139,7 +139,11 @@ namespace GHCAA.API.Controllers
             {
                 Username = username,
                 MemberId = memberId == null ? (int?)null : int.Parse(memberId),
-                Role = role
+                Role = role,
+                Roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value).Distinct().ToList(),
+                ElectionAppointments = int.TryParse(userId, out var id)
+                    ? await appointments.ListLiveSummariesAsync(id, ct)
+                    : Array.Empty<ElectionAppointmentSummaryDto>()
             });
         }
 
@@ -157,15 +161,17 @@ namespace GHCAA.API.Controllers
             return Ok();
         }
 
-        // 7.13: Step-up verification. An admin already holds a valid session; these two endpoints
-        // prove they still control the account's email inbox before a destructive/financial action
-        // is allowed through [RequireStepUp].
+        // 7.13: Step-up verification. The caller already holds a valid session; these two endpoints
+        // prove they still control the account's email inbox before an action behind
+        // [RequireStepUp] runs. 37.1w: open to any signed-in user, since casting a vote needs it.
+        // The admin/ routes stay so web builds that still call them keep working.
+        [HttpPost("step-up/request")]
         [HttpPost("admin/step-up/request")]
-        [Authorize(Policy = Constants.Policies.AdminOnly)]
+        [Authorize]
         public async Task<IActionResult> RequestStepUp([FromServices] IOtpService otpService, CancellationToken cancellationToken)
         {
             var user = await LoadCurrentUserAsync(cancellationToken);
-            var email = user?.Member?.Email;
+            var email = StepUpEmailFor(user);
 
             if (user == null || string.IsNullOrWhiteSpace(email))
                 return Problem(detail: "No email address is on file for this account.", statusCode: StatusCodes.Status400BadRequest);
@@ -174,12 +180,13 @@ namespace GHCAA.API.Controllers
             return Ok(new { Message = "A verification code has been sent to your registered email address." });
         }
 
+        [HttpPost("step-up/verify")]
         [HttpPost("admin/step-up/verify")]
-        [Authorize(Policy = Constants.Policies.AdminOnly)]
+        [Authorize]
         public async Task<IActionResult> VerifyStepUp([FromBody] StepUpVerifyDto dto, [FromServices] IOtpService otpService, CancellationToken cancellationToken)
         {
             var user = await LoadCurrentUserAsync(cancellationToken);
-            var email = user?.Member?.Email;
+            var email = StepUpEmailFor(user);
 
             if (user == null || string.IsNullOrWhiteSpace(email))
                 return Problem(detail: "No email address is on file for this account.", statusCode: StatusCodes.Status400BadRequest);
@@ -214,6 +221,19 @@ namespace GHCAA.API.Controllers
             return carriedEpoch.HasValue
                 ? _tokenService.CreateTokenWithCarriedStepUp(user, carriedEpoch.Value)
                 : _tokenService.CreateToken(user);
+        }
+
+        // A user with no member link (a system admin, or a non-member election official from
+        // 37.12d) signs in with an email as the username, so the code goes there.
+        private static string? StepUpEmailFor(GHCAA.Domain.Models.User? user)
+        {
+            if (user == null)
+                return null;
+            if (!string.IsNullOrWhiteSpace(user.Member?.Email))
+                return user.Member.Email;
+            if (user.MemberId == null && user.Username.Contains('@'))
+                return user.Username;
+            return null;
         }
 
         private async Task<GHCAA.Domain.Models.User?> LoadCurrentUserAsync(CancellationToken cancellationToken)

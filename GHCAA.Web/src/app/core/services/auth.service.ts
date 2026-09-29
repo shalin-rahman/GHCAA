@@ -82,7 +82,9 @@ export class AuthService {
                                 fullName: me.fullName ?? me.username,
                                 email: me.email,
                                 mobileNo: me.mobileNo,
-                                mustChangePassword: me.mustChangePassword ?? false
+                                mustChangePassword: me.mustChangePassword ?? false,
+                                roles: me.roles ?? [me.role ?? 'Member'],
+                                electionAppointments: me.electionAppointments ?? []
                             };
                             this._currentUser.set(user);
                             sessionStorage.setItem('user_session', JSON.stringify(this.toSessionUser(user)));
@@ -159,6 +161,12 @@ export class AuthService {
             });
     }
 
+    hasRole(name: string): boolean {
+        const user = this._currentUser();
+        if (!user) return false;
+        return (user.roles ?? [user.role]).includes(name);
+    }
+
     // token is in the httpOnly cookie — Angular doesn't read it directly.
     // Return empty string so Bearer header injection is harmless when token missing.
     getToken(): string | null {
@@ -185,7 +193,8 @@ export class AuthService {
             fullName: response.fullName,
             email: response.email,
             mobileNo: response.mobileNo,
-            mustChangePassword: response.mustChangePassword
+            mustChangePassword: response.mustChangePassword,
+            roles: response.roles ?? [response.role ?? 'Member']
         };
         this._currentUser.set(user);
         // Only persist non-sensitive display fields.

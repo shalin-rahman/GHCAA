@@ -156,6 +156,26 @@ namespace GHCAA.API.Extensions
                 app.Logger.LogWarning(ex, "Protected SuperAdmin restore skipped.");
             }
 
+            // 5b. Default election personas (spec 023, 37.12b). Only fills an empty table, so a
+            // SuperAdmin edit is never overwritten by a redeploy.
+            try
+            {
+                using var electionPersonaScope = app.Services.CreateScope();
+                var electionPersonaCtx = electionPersonaScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                if (await electionPersonaCtx.Database.CanConnectAsync())
+                {
+                    await GHCAA.Infrastructure.Data.ElectionPersonaSeeder.EnsureAsync(electionPersonaCtx, app.Logger);
+
+                    // 37.12c: the ElectionOfficial role comes from code, not roles.json.
+                    if (!await electionPersonaCtx.Roles.AnyAsync(r => r.Name == Roles.ElectionOfficial))
+                        await electionPersonaScope.ServiceProvider.GetRequiredService<IRoleService>().CreateRoleAsync(Roles.ElectionOfficial);
+                }
+            }
+            catch (Exception ex)
+            {
+                app.Logger.LogWarning(ex, "Election persona seed skipped.");
+            }
+
             // 6. Force a password reset on existing accounts — off by default. An admin turns this
             // on for one deploy (e.g. after a credential exposure) and back off afterward; it isn't
             // meant to stay on permanently. Only touches rows that don't already have the flag set,

@@ -27,7 +27,7 @@ public class Election
     public int CreatedBy { get; set; }
     public ECPeriod? ECPeriod { get; set; }
     public ICollection<ElectionSeat> Seats { get; set; } = new List<ElectionSeat>();
-    public ICollection<ElectionOfficer> Officers { get; set; } = new List<ElectionOfficer>();
+    public ICollection<ElectionAppointment> Appointments { get; set; } = new List<ElectionAppointment>();
     public ICollection<VoterRoll> VoterRoll { get; set; } = new List<VoterRoll>();
 }
 
@@ -41,14 +41,40 @@ public class ElectionSeat
     public ICollection<Nomination> Nominations { get; set; } = new List<Nomination>();
 }
 
-public class ElectionOfficer
+// Spec 023 (37.12d). One person holding one persona on one election. The person always has a
+// User row; MemberId is set only when they are also a member. DisplayName and Email are copied
+// at appointment time so the record still reads correctly if the member changes their details.
+public class ElectionAppointment
 {
     public int Id { get; set; }
     public int ElectionId { get; set; }
-    public int MemberId { get; set; }
-    public ElectionRole Role { get; set; }
+    public int PersonaId { get; set; }
+    public int UserId { get; set; }
+    public int? MemberId { get; set; }
+    public string DisplayName { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public string? Phone { get; set; }
+    public int AppointedByUserId { get; set; }
+    public DateTime AppointedAt { get; set; }
+    public DateTime? AcceptedAt { get; set; }
+    public DateTime? DeclarationSignedAt { get; set; }
+    public string? DeclarationTextSnapshot { get; set; }
+    public string? SignedFromIp { get; set; }
+    public DateTime? RevokedAt { get; set; }
+    public int? RevokedByUserId { get; set; }
+    public string? RevokedReason { get; set; }
+    public DateTime? ExpiresAt { get; set; }
     public Election? Election { get; set; }
-    public Member? Member { get; set; }
+    public ElectionPersona? Persona { get; set; }
+    public User? User { get; set; }
+
+    // Only a live appointment grants anything. Keep this in step with LiveAt below, which is the
+    // same rule written so EF can translate it to SQL.
+    public bool IsLive(DateTime now) =>
+        AcceptedAt != null && DeclarationSignedAt != null && RevokedAt == null && (ExpiresAt == null || ExpiresAt > now);
+
+    public static System.Linq.Expressions.Expression<Func<ElectionAppointment, bool>> LiveAt(DateTime now) =>
+        a => a.AcceptedAt != null && a.DeclarationSignedAt != null && a.RevokedAt == null && (a.ExpiresAt == null || a.ExpiresAt > now);
 }
 
 public class VoterRoll
@@ -85,7 +111,7 @@ public class ScrutinyDecision
 {
     public int Id { get; set; }
     public int NominationId { get; set; }
-    public int OfficerMemberId { get; set; }
+    public int DecidedByUserId { get; set; }
     public bool Accepted { get; set; }
     public string? Reason { get; set; }
     public DateTime DecidedAt { get; set; }

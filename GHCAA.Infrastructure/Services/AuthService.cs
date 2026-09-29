@@ -160,6 +160,7 @@ namespace GHCAA.Infrastructure.Services
                 Username = user.Username,
                 MemberId = user.MemberId,
                 Role = PickPrimaryRoleNameForClient(user.Roles),
+                Roles = RoleNames(user.Roles),
                 FullName = fullName,
                 Email = email,
                 MobileNo = mobileNo,
@@ -331,6 +332,7 @@ namespace GHCAA.Infrastructure.Services
                 Username = user.Username,
                 MemberId = user.MemberId,
                 Role = PickPrimaryRoleNameForClient(user.Roles),
+                Roles = RoleNames(user.Roles),
                 FullName = memberProfile?.FullName,
                 Email = memberProfile?.Email,
                 MobileNo = memberProfile?.MobileNo,
@@ -364,15 +366,21 @@ namespace GHCAA.Infrastructure.Services
         /// Mobile UI checks for "SuperAdmin" / "Admin" strings. When a user has multiple roles,
         /// EF does not guarantee order; pick the highest-privilege role for the login payload.
         /// </summary>
-        private static string PickPrimaryRoleNameForClient(ICollection<Role>? roles)
+        public static string PickPrimaryRoleNameForClient(ICollection<Role>? roles)
         {
             if (roles == null || roles.Count == 0) return Constants.Roles.Member;
             var names = roles.Where(r => !string.IsNullOrWhiteSpace(r.Name)).Select(r => r.Name!).ToList();
             if (names.Count == 0) return Constants.Roles.Member;
             if (names.Contains(Constants.Roles.SuperAdmin)) return Constants.Roles.SuperAdmin;
             if (names.Contains(Constants.Roles.Admin)) return Constants.Roles.Admin;
+            // A member who is also an election official still lands on the member portal.
+            if (names.Contains(Constants.Roles.Member)) return Constants.Roles.Member;
             return names[0];
         }
+
+        private static IReadOnlyList<string> RoleNames(ICollection<Role>? roles) =>
+            roles?.Where(r => !string.IsNullOrWhiteSpace(r.Name)).Select(r => r.Name!).Distinct().ToList()
+                ?? new List<string>();
         // 80.16: the self-service half of password reset. Always returns — never tells the caller
         // whether the identifier matched a real account, same reasoning as LoginAsync's S5.2 timing
         // equalization: an "email not found" response is a ready-made account-enumeration oracle.

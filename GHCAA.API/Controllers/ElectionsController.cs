@@ -56,13 +56,6 @@ public sealed class ElectionsController(
     public async Task<IActionResult> AddSeat(int id, ElectionSeatRequestDto request, CancellationToken ct)
         => Ok(new { Id = await service.AddSeatAsync(id, request, ct) });
 
-    /// <summary>FR-37.1a: assigns an election officer.</summary>
-    [HttpPost("{id:int}/officers")]
-    [Authorize(Policy = Policies.AdminOnly)]
-    [GHCAA.API.Filters.RequireStepUp]
-    public async Task<IActionResult> AssignOfficer(int id, ElectionOfficerDto request, CancellationToken ct)
-        => await service.AssignOfficerAsync(id, request, ct) ? Ok() : Problem(detail: "Officer assignment already exists or member is inactive.", statusCode: StatusCodes.Status409Conflict);
-
     /// <summary>FR-37.1a: freezes the auditable voter-roll snapshot.</summary>
     [HttpPost("{id:int}/voter-roll/freeze")]
     [Authorize(Policy = Policies.AdminOnly)]
@@ -91,9 +84,9 @@ public sealed class ElectionsController(
     [GHCAA.API.Filters.RequireStepUp]
     public async Task<IActionResult> Scrutinise(int nominationId, ScrutinyDto request, CancellationToken ct)
     {
-        if (!int.TryParse(this.CurrentMemberIdRaw(), out var officerMemberId))
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
             return Unauthorized();
-        return await service.DecideNominationAsync(nominationId, officerMemberId, request, ct) ? Ok() : NotFound();
+        return await service.DecideNominationAsync(nominationId, userId, request, ct) ? Ok() : NotFound();
     }
 
     /// <summary>FR-37.1b: withdraws an accepted nomination.</summary>

@@ -34,7 +34,6 @@ public sealed class ElectionDocumentService(
 
         var election = await db.Elections
             .Include(x => x.Seats)
-            .Include(x => x.Officers)
             .Include(x => x.VoterRoll)
             .Include(x => x.ECPeriod)
             .SingleOrDefaultAsync(x => x.Id == electionId, cancellationToken);

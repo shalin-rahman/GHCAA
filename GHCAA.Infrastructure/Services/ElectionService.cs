@@ -68,15 +68,6 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         return seat.Id;
     }
 
-    public async Task<bool> AssignOfficerAsync(int id, ElectionOfficerDto request, CancellationToken ct = default)
-    {
-        if (!await _db.Elections.AnyAsync(x => x.Id == id, ct) || !await _db.Members.AnyAsync(x => x.Id == request.MemberId && x.Status == MembershipStatus.Active, ct)) return false;
-        if (await _db.ElectionOfficers.AnyAsync(x => x.ElectionId == id && x.MemberId == request.MemberId && x.Role == request.Role, ct)) return false;
-        _db.ElectionOfficers.Add(new ElectionOfficer { ElectionId = id, MemberId = request.MemberId, Role = request.Role });
-        await _db.SaveChangesAsync(ct);
-        return true;
-    }
-
     public async Task<bool> SetPhaseAsync(int id, ElectionPhase phase, CancellationToken ct = default)
     {
         var e = await _db.Elections.FindAsync([id], ct);
@@ -144,16 +135,18 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         return ToNomination(n);
     }
 
-    public async Task<bool> DecideNominationAsync(int nominationId, int officerMemberId, ScrutinyDto request, CancellationToken ct = default)
+    public async Task<bool> DecideNominationAsync(int nominationId, int decidedByUserId, ScrutinyDto request, CancellationToken ct = default)
     {
         var n = await _db.Nominations.Include(x => x.Election).FirstOrDefaultAsync(x => x.Id == nominationId, ct);
         if (n == null || n.Status is NominationStatus.Withdrawn) return false;
         if (n.Election?.Phase != ElectionPhase.Scrutiny) return false;
-        if (!await _db.ElectionOfficers.AnyAsync(x => x.ElectionId == n.ElectionId && x.MemberId == officerMemberId &&
-            (x.Role == ElectionRole.ReturningOfficer || x.Role == ElectionRole.AssistantReturningOfficer || x.Role == ElectionRole.Scrutineer), ct))
+        // Stays until the 37.12e permission filter guards the endpoint. Then this check goes.
+        var now = DateTime.UtcNow;
+        if (!await _db.ElectionAppointments.Where(ElectionAppointment.LiveAt(now)).AnyAsync(x => x.ElectionId == n.ElectionId && x.UserId == decidedByUserId &&
+            (x.Persona!.Permissions & ElectionPermission.DecideNominations) != 0, ct))
             return false;
         n.Status = request.Accepted ? NominationStatus.Accepted : NominationStatus.Rejected;
-        _db.ScrutinyDecisions.Add(new ScrutinyDecision { NominationId = nominationId, OfficerMemberId = officerMemberId, Accepted = request.Accepted, Reason = request.Reason, DecidedAt = DateTime.UtcNow });
+        _db.ScrutinyDecisions.Add(new ScrutinyDecision { NominationId = nominationId, DecidedByUserId = decidedByUserId, Accepted = request.Accepted, Reason = request.Reason, DecidedAt = DateTime.UtcNow });
         await _db.SaveChangesAsync(ct);
         return true;
     }

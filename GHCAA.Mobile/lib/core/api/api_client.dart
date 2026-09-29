@@ -7,6 +7,9 @@ import '../config/app_config.dart';
 import '../logging/log_capture_service.dart';
 import '../storage/storage_service.dart';
 import 'retry_interceptor.dart';
+import 'step_up_interceptor.dart';
+import '../router/navigator_key.dart';
+import '../widgets/step_up_dialog.dart';
 import '../utils/background_json.dart';
 import 'ssl_pinning_stub.dart' if (dart.library.io) 'ssl_pinning_io.dart' as ssl_pinning;
 
@@ -170,6 +173,16 @@ final dioProvider = Provider<Dio>((ref) {
       },
     ),
   );
+
+  // 37.1w: a 403 with STEP_UP_REQUIRED asks for the emailed code and retries once.
+  dio.interceptors.add(StepUpInterceptor(
+    dio: dio,
+    promptForCode: () async {
+      final context = rootNavigatorKey.currentContext;
+      return context == null ? null : showStepUpDialog(context);
+    },
+    saveToken: storage.saveToken,
+  ));
 
   // Added last so its onError runs first (Dio walks error interceptors in
   // reverse of registration order) — it needs the raw exception/status to

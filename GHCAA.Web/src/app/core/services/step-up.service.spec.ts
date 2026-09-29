@@ -19,6 +19,12 @@ describe('StepUpService', () => {
 
     afterEach(() => httpMock.verify());
 
+    // 37.1w FR-39: members vote through step-up, so the client must use the routes open to them.
+    it('uses the step-up routes open to any signed-in user', () => {
+        expect(API_ENDPOINTS.AUTH.STEP_UP_REQUEST).toBe('/api/auth/step-up/request');
+        expect(API_ENDPOINTS.AUTH.STEP_UP_VERIFY).toBe('/api/auth/step-up/verify');
+    });
+
     it('opens the dialog and requests a code when challenged', () => {
         service.challenge().subscribe();
 

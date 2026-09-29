@@ -48,6 +48,30 @@ a gap someone still needs to close.
 
 ## Log
 
+### 2026-09-30 — /api/elections/{id}/appointments, /api/elections/appointments/{id}/revoke, /api/me/election-appointments
+- Change: new routes. `GET` and `POST api/elections/{id}/appointments` list and make appointments. `POST api/elections/appointments/{id}/revoke` ends one. `GET api/me/election-appointments` lists the caller's own, and `POST .../{id}/accept` and `.../{id}/decline` answer one. Appoint, revoke and accept need step-up. `POST api/elections/{id}/officers` is removed. This breaks the additive rule in ADR-0005, but no web or mobile code ever called it.
+- Reason: TODO 37.12d. An appointment counts only after the person accepts it and signs the declaration. It can be for a member or for someone with no member record.
+- Web: pending (37.12d).
+- Mobile: pending (37.12d).
+
+### 2026-09-30 — /api/auth/me, TokenResponseDto
+- Change: both now carry `roles`, the full role list. `/me` also carries `electionAppointments`, the caller's live appointments, each with the election, the persona name and its permissions.
+- Reason: TODO 37.12c and 37.12d. A user can hold ElectionOfficial beside another role, so one role name is not enough.
+- Web: `auth.models.ts`, `hasRole` and `electionStaffGuard`.
+- Mobile: `auth_models.dart`, stored in `StorageService`.
+
+### 2026-09-29 — /api/admin/election-personas, /api/election-personas
+- Change: new routes. Admin list, create, update, set active and delete for election personas. A plain signed-in read route lists the active ones.
+- Reason: TODO 37.12b. Election posts, their permissions and their declaration text are data, not code.
+- Web: `/admin/election-personas`, through `ElectionPersonasService`.
+- Mobile: not applicable.
+
+### 2026-09-29 — /api/auth/step-up/request, /api/auth/step-up/verify
+- Change: new routes open to any signed-in user. The old `api/auth/admin/step-up/*` paths still answer.
+- Reason: TODO 37.1w. The vote route needs step-up, and members could not reach the admin-only step-up routes.
+- Web: `STEP_UP_REQUEST` and `STEP_UP_VERIFY` in `app.constants.ts`.
+- Mobile: `step_up_interceptor.dart` and `step_up_dialog.dart`.
+
 ### 2026-09-27 — /api/admin/elections/{id}/ballot-key
 - Change: new route. Takes `{ publicKey }`, the returning officer's RSA-OAEP public key (SPKI, base64, 3072 bits or more). Stores it with its SHA-256 fingerprint and returns the admin election, which now carries `ballotKeyFingerprint`. Refused once polling has opened. Admin only, with step-up.
 - Reason: TODO 37.1s. Ballots are sealed under this key so database access alone cannot read them. Spec 023 FR-001.

@@ -6,6 +6,8 @@ namespace GHCAA.Application.DTOs
         public string Username { get; set; } = null!;
         public int? MemberId { get; set; }
         public string Role { get; set; } = "Member";
+        // Every role the user holds. Role above stays the single primary one for older clients.
+        public IReadOnlyList<string> Roles { get; set; } = Array.Empty<string>();
         public string? FullName { get; set; }
         public string? Email { get; set; }
         public string? MobileNo { get; set; }

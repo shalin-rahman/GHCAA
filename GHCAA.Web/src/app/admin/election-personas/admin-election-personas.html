@@ -1,0 +1,146 @@
+<div class="admin-feature">
+    <app-page-header title="Election Personas" [total]="personas().length"
+        emptySubtitle="Roles officials and members take on during an election">
+        <small subtitle>Showing {{ filtered().length }} of {{ personas().length }} personas</small>
+        <button actions class="btn btn-accent btn-md" (click)="openNew()">
+            <span class="icon">➕</span> New Persona
+        </button>
+    </app-page-header>
+
+    <div class="glass-card persona-main">
+        <div class="filter-bar">
+            <app-search-bar [value]="search()" (valueChange)="search.set($event)"
+                placeholder="Search by name or group…"></app-search-bar>
+        </div>
+
+        <div class="persona-table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Group</th>
+                        <th>Count</th>
+                        <th>Public board</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (p of filtered(); track p.id) {
+                    <tr>
+                        <td class="font-bold">{{ p.name }}</td>
+                        <td><span class="role-badge">{{ p.groupName }}</span></td>
+                        <td>{{ p.minCount }}{{ p.maxCount ? ' - ' + p.maxCount : '+' }}</td>
+                        <td>{{ p.showOnPublicBoard ? 'Yes' : 'No' }}</td>
+                        <td>
+                            <span class="status-badge" [class.active-badge]="p.isActive">{{ p.isActive ? 'Active' : 'Inactive' }}</span>
+                        </td>
+                        <td>
+                            <button class="icon-btn" (click)="openEdit(p)" title="Edit">✏️</button>
+                            <button class="icon-btn" (click)="toggleActive(p)" title="{{ p.isActive ? 'Deactivate' : 'Activate' }}">{{ p.isActive ? '⏸️' : '▶️' }}</button>
+                            <button class="icon-btn delete" (click)="remove(p)" title="Delete">🗑️</button>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state py-12">
+                                <span class="text-3xl mb-2 block">🗳️</span>
+                                <p class="text-muted italic">{{ search() ? 'No personas match your search.' : 'No election personas yet.' }}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (showModal()) {
+<div class="modal-overlay" (click)="showModal.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+        <app-modal-header [title]="(editId() ? 'Edit' : 'Create') + ' Persona'" (closed)="showModal.set(false)"></app-modal-header>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Name <span class="required-star">*</span></label>
+                <input type="text" class="form-control" [ngModel]="form().name"
+                    (ngModelChange)="form.update(f => ({ ...f, name: $event }))" maxlength="100"
+                    placeholder="e.g. Returning Officer">
+            </div>
+
+            <div class="form-group">
+                <label>Board group <span class="required-star">*</span></label>
+                <input type="text" class="form-control" [ngModel]="form().groupName"
+                    (ngModelChange)="form.update(f => ({ ...f, groupName: $event }))" maxlength="100"
+                    placeholder="e.g. Officials">
+            </div>
+
+            <div class="form-group">
+                <label>Description <span class="required-star">*</span></label>
+                <textarea class="form-control" rows="2" [ngModel]="form().description"
+                    (ngModelChange)="form.update(f => ({ ...f, description: $event }))" maxlength="500"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Permissions</label>
+                <div class="permission-grid">
+                    @for (flag of permissionNames; track flag) {
+                    <label class="permission-checkbox">
+                        <input type="checkbox" [checked]="hasPermission(flag)"
+                            (change)="togglePermission(flag, $any($event.target).checked)">
+                        {{ flag }}
+                    </label>
+                    }
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Min count</label>
+                    <input type="number" class="form-control" min="0" [ngModel]="form().minCount"
+                        (ngModelChange)="form.update(f => ({ ...f, minCount: +$event }))">
+                </div>
+                <div class="form-group">
+                    <label>Max count</label>
+                    <input type="number" class="form-control" min="0" [ngModel]="form().maxCount"
+                        (ngModelChange)="form.update(f => ({ ...f, maxCount: $event === '' ? null : +$event }))">
+                </div>
+                <div class="form-group">
+                    <label>Sort order</label>
+                    <input type="number" class="form-control" [ngModel]="form().sortOrder"
+                        (ngModelChange)="form.update(f => ({ ...f, sortOrder: +$event }))">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="permission-checkbox">
+                    <input type="checkbox" [ngModel]="form().showOnPublicBoard"
+                        (ngModelChange)="form.update(f => ({ ...f, showOnPublicBoard: $event }))">
+                    Show on the public election board
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label class="permission-checkbox">
+                    <input type="checkbox" [ngModel]="form().takesOverFromAdmin"
+                        (ngModelChange)="form.update(f => ({ ...f, takesOverFromAdmin: $event }))">
+                    Takes over admin control during the election
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label>Declaration text <span class="required-star">*</span></label>
+                <textarea class="form-control" rows="4" [ngModel]="form().declarationText"
+                    (ngModelChange)="form.update(f => ({ ...f, declarationText: $event }))" maxlength="4000"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" (click)="showModal.set(false)">Cancel</button>
+            <button class="btn btn-accent shadow-gold" (click)="save()" [disabled]="isSaving()">
+                {{ isSaving() ? 'Saving...' : (editId() ? 'Update' : 'Save') }}
+            </button>
+        </div>
+    </div>
+</div>
+}

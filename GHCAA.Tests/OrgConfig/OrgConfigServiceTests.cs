@@ -133,6 +133,48 @@ namespace GHCAA.Tests.OrgConfig
             fetchedConfig.Branding.ShortName.Should().Be("STILL_ADMIN_EDITABLE");
         }
 
+        // 37.12a: rows saved before the Elections section existed must still load.
+        [Test]
+        public async Task GetConfigAsync_ConfigJsonWithoutElections_ReadsElectionDefaults()
+        {
+            var dbContext = GetDbContext("TestDb_NoElectionsSection");
+            dbContext.OrganizationConfigs.Add(new GHCAA.Domain.Models.OrganizationConfig
+            {
+                ConfigJson = "{\"orgId\":\"default\",\"schemaVersion\":1}",
+                UpdatedAt = DateTime.UtcNow
+            });
+            await dbContext.SaveChangesAsync();
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+
+            var elections = (await service.GetConfigAsync()).Elections;
+
+            elections.Should().BeEquivalentTo(new ElectionSettingsDto());
+            elections.SuperAdminActsAlone.Should().BeFalse();
+            elections.AccessEndsDaysAfterDeclare.Should().Be(21);
+            elections.TwoPersonActions.Should().Equal(Enum.GetNames<GHCAA.Domain.Enums.ElectionApprovalAction>());
+        }
+
+        [Test]
+        public async Task UpdateConfigAsync_RoundTripsElectionSettings()
+        {
+            var dbContext = GetDbContext("TestDb_ElectionsRoundTrip");
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var config = await service.GetConfigAsync();
+            var changed = config.Elections with
+            {
+                AdminKeepsControlAfterHandover = true,
+                TwoPersonActions = new() { nameof(GHCAA.Domain.Enums.ElectionApprovalAction.Declare) },
+                ApprovalExpiryHours = 12,
+                CandidateOrder = GHCAA.Domain.Enums.ElectionCandidateOrder.Alphabetical,
+                PublishPerSeatBallots = false
+            };
+
+            await service.UpdateConfigAsync(config with { Elections = changed }, "admin-1");
+
+            (await service.GetConfigAsync()).Elections.Should().BeEquivalentTo(changed);
+            (await dbContext.OrganizationConfigs.SingleAsync()).ConfigJson.Should().Contain("\"Alphabetical\"");
+        }
+
         [Test]
         public async Task UpdateConfigAsync_RoundTripsSupportedDateFormat()
         {

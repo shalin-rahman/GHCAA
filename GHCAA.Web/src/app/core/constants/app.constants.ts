@@ -5,6 +5,9 @@ import { ELECTION_PHASE_LABELS, NOMINATION_STATUS_LABELS } from '../models/elect
 // amount of time before firing.
 export const SEARCH_DEBOUNCE_MS = 300;
 
+// 37.12c: mirrors Constants.Policies.ElectionStaff on the API.
+export const ELECTION_STAFF_ROLES = ['SuperAdmin', 'Admin', 'ElectionOfficial'] as const;
+
 // Mirrors GHCAA.Domain's ECPosition enum order exactly — index N here must equal enum value N,
 // since getECPositionName() below indexes into this array by the numeric position value.
 export const EC_ROLES = [
@@ -630,9 +633,9 @@ export const API_ENDPOINTS = {
         RESEND_OTP: '/api/auth/resend-otp',
         STATUS: '/api/auth/status',
         PROVIDERS: '/api/auth/providers',
-        // 7.13: admin step-up (re-verify by emailed OTP before destructive/financial actions)
-        STEP_UP_REQUEST: '/api/auth/admin/step-up/request',
-        STEP_UP_VERIFY: '/api/auth/admin/step-up/verify',
+        // 7.13: step-up (re-verify by emailed OTP before a guarded action). 37.1w: any signed-in user, voters included
+        STEP_UP_REQUEST: '/api/auth/step-up/request',
+        STEP_UP_VERIFY: '/api/auth/step-up/verify',
         GOOGLE: '/api/auth/google',
         FACEBOOK: '/api/auth/facebook',
         REFRESH: '/api/auth/refresh',
@@ -716,6 +719,13 @@ export const API_ENDPOINTS = {
         BALLOT_KEY: (id: number) => `/api/admin/elections/${id}/ballot-key`,
         CANDIDATES: (id: number) => `/api/admin/elections/${id}/candidates`
     },
+    // Work Package 37.12b election persona routes.
+    ADMIN_ELECTION_PERSONAS: {
+        BASE: '/api/admin/election-personas',
+        BY_ID: (id: number) => `/api/admin/election-personas/${id}`,
+        ACTIVE: (id: number) => `/api/admin/election-personas/${id}/active`
+    },
+    ELECTION_PERSONAS: '/api/election-personas',
     CONFIG: '/api/config',
     FORUM: '/api/forum',
     HEALTH: '/healthz'

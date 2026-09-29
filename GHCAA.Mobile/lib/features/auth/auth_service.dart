@@ -50,6 +50,7 @@ class AuthService {
         await _storage.saveToken(parsed.token);
         if (parsed.refreshToken != null) await _storage.saveRefreshToken(parsed.refreshToken!);
         await _storage.saveRole(parsed.role);
+        await _storage.saveRoles(parsed.roles);
         
         // 82.40: biometric re-login used to store the raw password here. It now just flips
         // this flag; loginWithStoredToken() below re-authenticates from the refresh token
@@ -144,6 +145,7 @@ class AuthService {
         await _storage.saveToken(parsed.token);
         if (parsed.refreshToken != null) await _storage.saveRefreshToken(parsed.refreshToken!);
         await _storage.saveRole(parsed.role);
+        await _storage.saveRoles(parsed.roles);
         
         return null; // Success
       }
@@ -236,6 +238,9 @@ class AuthService {
   Future<String?> getRole() async {
     return _storage.getRole();
   }
+
+  Future<bool> hasRole(String name) async =>
+      rolesInclude(await _storage.getRoles(), await _storage.getRole(), name);
 
   Future<bool> updateProfile(Map<String, dynamic> data) async {
     try {

@@ -69,7 +69,8 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     { path: '/admin/audit', label: 'Audit Logs', icon: 'audit', roles: ['SuperAdmin'], section: 'Finance & Tools' },
     { path: '/admin/error-logs', label: 'Error Logs', icon: 'audit', roles: ['SuperAdmin'], section: 'Finance & Tools' },
     { path: '/admin/dev-tracker', label: 'Developer Options', icon: 'audit', roles: ['SuperAdmin'], section: 'Finance & Tools' },
-    { path: '/admin/org-config', label: 'Org Config', icon: 'org-config', roles: ['SuperAdmin'], section: 'Finance & Tools' }
+    { path: '/admin/org-config', label: 'Org Config', icon: 'org-config', roles: ['SuperAdmin'], section: 'Finance & Tools' },
+    { path: '/admin/election-personas', label: 'Election Personas', icon: 'governance', roles: ['SuperAdmin'], section: 'Finance & Tools' }
 ];
 
 @Injectable({ providedIn: 'root' })
@@ -111,7 +112,8 @@ export class NavService {
         if (!user || !['Admin', 'SuperAdmin'].includes(user.role)) return [];
         return ADMIN_NAV_ITEMS.filter(item => {
             if (!item.roles) return true;
-            return item.roles.includes(user.role);
+            const roles = user.roles ?? [user.role];
+            return item.roles.some(r => roles.includes(r));
         });
     });
 

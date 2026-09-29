@@ -12,6 +12,15 @@ export interface TokenResponseDto {
   email?: string;
   mobileNo?: string;
   mustChangePassword?: boolean;
+  roles?: string[];
+}
+
+/** An accepted, live election appointment from /auth/me. 37.12d fills the list. */
+export interface ElectionAppointmentSummary {
+  electionId: number;
+  electionTitle: string;
+  personaName: string;
+  permissions: number;
 }
 
 export interface User {
@@ -23,4 +32,7 @@ export interface User {
   email?: string;
   mobileNo?: string;
   mustChangePassword?: boolean;
+  /** Every role the user holds. Missing on a session saved before 37.12c. */
+  roles?: string[];
+  electionAppointments?: ElectionAppointmentSummary[];
 }

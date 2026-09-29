@@ -73,4 +73,20 @@ describe('NavService', () => {
         authServiceMock.currentUser.mockReturnValue({ role: 'Admin' });
         expect(service.adminNavItems().some(i => i.path === '/admin/elections')).toBe(true);
     });
+
+    it('FR-39: shows an item when any role in the roles list matches', () => {
+        authServiceMock.currentUser.mockReturnValue({ role: 'Admin', roles: ['Admin', 'SuperAdmin'] });
+        expect(service.adminNavItems().some(i => i.label === 'User Roles')).toBe(true);
+    });
+
+    it('FR-39: hides an item when no role in the roles list matches', () => {
+        authServiceMock.currentUser.mockReturnValue({ role: 'Admin', roles: ['Admin'] });
+        expect(service.adminNavItems().some(i => i.label === 'User Roles')).toBe(false);
+    });
+
+    it('FR-39: falls back to the single role when an old session has no roles list', () => {
+        authServiceMock.currentUser.mockReturnValue({ role: 'Admin' });
+        expect(service.adminNavItems().some(i => i.label === 'User Roles')).toBe(false);
+        expect(service.adminNavItems().some(i => i.path === '/admin/elections')).toBe(true);
+    });
 });

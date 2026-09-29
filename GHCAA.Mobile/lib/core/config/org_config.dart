@@ -236,6 +236,51 @@ class OrgWorkflow {
   }
 }
 
+/// Spec 023 (37.12a). Matches ElectionSettingsDto. Mobile reads it only;
+/// admins change it on the web org-config screen.
+class ElectionSettings {
+  final bool adminKeepsControlAfterHandover;
+  final List<String> twoPersonActions;
+  final bool superAdminActsAlone;
+  final int approvalExpiryHours;
+  final int accessEndsDaysAfterDeclare;
+  final int inviteLinkHours;
+  final String candidateOrder;
+  final bool showTurnoutDuringPolling;
+  final bool publishPerSeatBallots;
+
+  static const allApprovalActions = [
+    'Publish', 'OpenPolling', 'ReplaceBallotKey', 'ClosePolling', 'Declare', 'Archive',
+  ];
+
+  const ElectionSettings({
+    this.adminKeepsControlAfterHandover = false,
+    this.twoPersonActions = allApprovalActions,
+    this.superAdminActsAlone = false,
+    this.approvalExpiryHours = 48,
+    this.accessEndsDaysAfterDeclare = 21,
+    this.inviteLinkHours = 72,
+    this.candidateOrder = 'Random',
+    this.showTurnoutDuringPolling = false,
+    this.publishPerSeatBallots = true,
+  });
+
+  factory ElectionSettings.fromJson(Map<String, dynamic> json) {
+    const d = ElectionSettings();
+    return ElectionSettings(
+      adminKeepsControlAfterHandover: json['adminKeepsControlAfterHandover'] ?? d.adminKeepsControlAfterHandover,
+      twoPersonActions: (json['twoPersonActions'] as List?)?.map((e) => e.toString()).toList() ?? d.twoPersonActions,
+      superAdminActsAlone: json['superAdminActsAlone'] ?? d.superAdminActsAlone,
+      approvalExpiryHours: json['approvalExpiryHours'] ?? d.approvalExpiryHours,
+      accessEndsDaysAfterDeclare: json['accessEndsDaysAfterDeclare'] ?? d.accessEndsDaysAfterDeclare,
+      inviteLinkHours: json['inviteLinkHours'] ?? d.inviteLinkHours,
+      candidateOrder: json['candidateOrder']?.toString() ?? d.candidateOrder,
+      showTurnoutDuringPolling: json['showTurnoutDuringPolling'] ?? d.showTurnoutDuringPolling,
+      publishPerSeatBallots: json['publishPerSeatBallots'] ?? d.publishPerSeatBallots,
+    );
+  }
+}
+
 /// Governing-document registry entry (bylaws, policies, amendment PDFs).
 /// Matches DocumentEntryDto.cs / org-config.model.ts's DocumentEntry.
 class DocumentEntry {
@@ -397,6 +442,7 @@ class OrgConfig {
   final Map<String, LocalePack> locales;
   final DateFormatConfig dateFormat;
   final List<DocumentEntry> documents;
+  final ElectionSettings elections;
 
   OrgConfig({
     required this.orgId,
@@ -410,6 +456,7 @@ class OrgConfig {
     required this.locales,
     required this.dateFormat,
     this.documents = const [],
+    this.elections = const ElectionSettings(),
   });
 
   factory OrgConfig.fromJson(Map<String, dynamic> json) {
@@ -446,6 +493,7 @@ class OrgConfig {
               ?.map((e) => DocumentEntry.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      elections: ElectionSettings.fromJson(json['elections'] ?? {}),
     );
   }
 

@@ -34,6 +34,10 @@ import 'package:ghcaa_mobile/features/support/support_service.dart';
 
 class FakeStorageService implements StorageService {
   @override
+  Future<void> saveRoles(List<String> roles) async {}
+  @override
+  Future<List<String>?> getRoles() async => ['Member'];
+  @override
   Future<void> saveToken(String token) async {}
   @override
   Future<String?> getToken() async => 'mock-token';
@@ -68,6 +72,8 @@ class FakeStorageService implements StorageService {
 }
 
 class FakeAuthService implements AuthService {
+  @override
+  Future<bool> hasRole(String name) async => name == 'Member';
   @override
   Future<String?> login(String identifier, String password, {bool enableBiometric = false}) async => null;
   @override

@@ -25,6 +25,46 @@ export const NOMINATION_STATUS_LABELS: Record<NominationStatus, string> = {
     Withdrawn: 'Withdrawn'
 };
 
+// Spec 023 (37.12a). Names match the backend ElectionApprovalAction and ElectionCandidateOrder enums.
+export type ElectionApprovalAction = 'Publish' | 'OpenPolling' | 'ReplaceBallotKey' | 'ClosePolling' | 'Declare' | 'Archive';
+export const ELECTION_APPROVAL_ACTION_LABELS: Record<ElectionApprovalAction, string> = {
+    Publish: 'Publish the election',
+    OpenPolling: 'Open polling',
+    ReplaceBallotKey: 'Replace the ballot key',
+    ClosePolling: 'Close polling',
+    Declare: 'Declare results',
+    Archive: 'Archive'
+};
+export const ELECTION_APPROVAL_ACTIONS = Object.keys(ELECTION_APPROVAL_ACTION_LABELS) as ElectionApprovalAction[];
+
+export type ElectionCandidateOrder = 'Random' | 'Alphabetical';
+export const ELECTION_CANDIDATE_ORDERS: ElectionCandidateOrder[] = ['Random', 'Alphabetical'];
+
+export interface ElectionSettings {
+    adminKeepsControlAfterHandover: boolean;
+    twoPersonActions: ElectionApprovalAction[];
+    superAdminActsAlone: boolean;
+    approvalExpiryHours: number;
+    accessEndsDaysAfterDeclare: number;
+    inviteLinkHours: number;
+    candidateOrder: ElectionCandidateOrder;
+    showTurnoutDuringPolling: boolean;
+    publishPerSeatBallots: boolean;
+}
+
+// Same values as ElectionSettingsDto. Used when a stored config or the build fallback has no section.
+export const DEFAULT_ELECTION_SETTINGS: ElectionSettings = {
+    adminKeepsControlAfterHandover: false,
+    twoPersonActions: [...ELECTION_APPROVAL_ACTIONS],
+    superAdminActsAlone: false,
+    approvalExpiryHours: 48,
+    accessEndsDaysAfterDeclare: 21,
+    inviteLinkHours: 72,
+    candidateOrder: 'Random',
+    showTurnoutDuringPolling: false,
+    publishPerSeatBallots: true
+};
+
 export interface AdminElectionPositionDto {
     id: number;
     title: string;
@@ -134,4 +174,53 @@ export interface ElectionResultDto {
     voteCount: number;
     isElected: boolean;
     isTie: boolean;
+}
+
+// Spec 023 (37.12b). Matches the backend ElectionPermission flags enum. Values are bit flags,
+// summed to store a persona's full permission set as one number.
+export const ELECTION_PERMISSION_FLAGS: Record<string, number> = {
+    ViewDashboard: 1,
+    ViewAudit: 2,
+    ManageSetup: 4,
+    ManageVoterRoll: 8,
+    DecideNominations: 16,
+    AppointOfficials: 32,
+    SetBallotKey: 64,
+    ChangePhase: 128,
+    Count: 256,
+    Declare: 512,
+    DecideAppeals: 1024,
+    Approve: 2048
+};
+
+export type ElectionPermissionName = keyof typeof ELECTION_PERMISSION_FLAGS;
+
+export const ELECTION_PERMISSION_NAMES = Object.keys(ELECTION_PERMISSION_FLAGS) as ElectionPermissionName[];
+
+export interface ElectionPersonaDto {
+    id: number;
+    name: string;
+    groupName: string;
+    description: string;
+    permissions: number;
+    minCount: number;
+    maxCount: number | null;
+    showOnPublicBoard: boolean;
+    takesOverFromAdmin: boolean;
+    declarationText: string;
+    sortOrder: number;
+    isActive: boolean;
+}
+
+export interface SaveElectionPersonaDto {
+    name: string;
+    groupName: string;
+    description: string;
+    permissions: number;
+    minCount: number;
+    maxCount: number | null;
+    showOnPublicBoard: boolean;
+    takesOverFromAdmin: boolean;
+    declarationText: string;
+    sortOrder: number;
 }

@@ -85,5 +85,29 @@ namespace GHCAA.Tests.Controllers
             Assert.That(result, Is.InstanceOf<ObjectResult>());
             Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(401));
         }
+
+        [Category("FR-39")]
+        [Test]
+        public async Task Me_ReturnsEveryRoleClaim()
+        {
+            _controller.ControllerContext.HttpContext.User = new System.Security.Claims.ClaimsPrincipal(
+                new System.Security.Claims.ClaimsIdentity(new[]
+                {
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, "5"),
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "official"),
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, GHCAA.Domain.Constants.Roles.Member),
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, GHCAA.Domain.Constants.Roles.ElectionOfficial)
+                }, "test"));
+
+            var appointments = new Mock<IElectionAppointmentService>();
+            appointments.Setup(s => s.ListLiveSummariesAsync(5, It.IsAny<System.Threading.CancellationToken>()))
+                .ReturnsAsync(new[] { new ElectionAppointmentSummaryDto(3, "EC 2027", "Scrutineer", GHCAA.Domain.Enums.ElectionPermission.DecideNominations) });
+
+            var ok = (OkObjectResult)await _controller.Me(appointments.Object, default);
+            var json = System.Text.Json.JsonSerializer.Serialize(ok.Value);
+
+            Assert.That(json, Does.Contain("\"Roles\":[\"Member\",\"ElectionOfficial\"]"));
+            Assert.That(json, Does.Contain("\"PersonaName\":\"Scrutineer\""));
+        }
     }
 }

@@ -20,6 +20,25 @@ namespace GHCAA.Application.DTOs
         // Branding.ConstitutionPdfUrl, which stays as the one link the public constitution page has
         // always used — this is the broader list an admin can add to without touching that field.
         public List<DocumentEntryDto> Documents { get; init; } = new();
+        // Spec 023 (37.12a). A ConfigJson row saved before this section existed reads these defaults.
+        public ElectionSettingsDto Elections { get; init; } = new();
+    }
+
+    public record ElectionSettingsDto
+    {
+        public bool AdminKeepsControlAfterHandover { get; init; } = false;
+        public List<string> TwoPersonActions { get; init; } = Enum.GetNames<Enums.ElectionApprovalAction>().ToList();
+        // Decision 1: off by default, an emergency switch only.
+        public bool SuperAdminActsAlone { get; init; } = false;
+        public int ApprovalExpiryHours { get; init; } = 48;
+        // 7-day appeal window plus 14 days for the tribunal (Election Regulations §12).
+        public int AccessEndsDaysAfterDeclare { get; init; } = 21;
+        public int InviteLinkHours { get; init; } = 72;
+        // Stored as a name so ConfigJson stays readable; OrgConfigService has no enum converter.
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        public Enums.ElectionCandidateOrder CandidateOrder { get; init; } = Enums.ElectionCandidateOrder.Random;
+        public bool ShowTurnoutDuringPolling { get; init; } = false;
+        public bool PublishPerSeatBallots { get; init; } = true;
     }
 
     public record DocumentEntryDto

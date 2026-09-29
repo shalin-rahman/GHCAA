@@ -107,6 +107,31 @@ void main() {
     expect(config.branding.appName, OrgConfig.offlineDefaults.branding.appName);
     expect(config.dateFormat.identifier, DateFormatConfig.ddMmYyyy);
   });
+
+  // 37.12a
+  test('reads election defaults when the elections section is absent', () {
+    final e = OrgConfig.fromJson({'orgId': 'x'}).elections;
+    expect(e.superAdminActsAlone, isFalse);
+    expect(e.accessEndsDaysAfterDeclare, 21);
+    expect(e.twoPersonActions, ElectionSettings.allApprovalActions);
+    expect(e.candidateOrder, 'Random');
+  });
+
+  test('parses a stored elections section', () {
+    final e = OrgConfig.fromJson({
+      'elections': {
+        'twoPersonActions': ['Declare'],
+        'candidateOrder': 'Alphabetical',
+        'inviteLinkHours': 5,
+        'publishPerSeatBallots': false,
+      },
+    }).elections;
+    expect(e.twoPersonActions, ['Declare']);
+    expect(e.candidateOrder, 'Alphabetical');
+    expect(e.inviteLinkHours, 5);
+    expect(e.publishPerSeatBallots, isFalse);
+    expect(e.approvalExpiryHours, 48);
+  });
 }
 
 class _CallbackAdapter implements HttpClientAdapter {

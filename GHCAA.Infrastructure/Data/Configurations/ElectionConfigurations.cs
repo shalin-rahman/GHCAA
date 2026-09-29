@@ -27,14 +27,24 @@ public sealed class ElectionSeatConfiguration : IEntityTypeConfiguration<Electio
     }
 }
 
-public sealed class ElectionOfficerConfiguration : IEntityTypeConfiguration<ElectionOfficer>
+public sealed class ElectionAppointmentConfiguration : IEntityTypeConfiguration<ElectionAppointment>
 {
-    public void Configure(EntityTypeBuilder<ElectionOfficer> b)
+    public void Configure(EntityTypeBuilder<ElectionAppointment> b)
     {
         b.HasKey(x => x.Id);
-        b.HasIndex(x => new { x.ElectionId, x.MemberId, x.Role }).IsUnique();
-        b.HasOne(x => x.Election).WithMany(x => x.Officers).HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
-        b.HasOne(x => x.Member).WithMany().HasForeignKey(x => x.MemberId).OnDelete(DeleteBehavior.Restrict);
+        b.Property(x => x.DisplayName).HasMaxLength(150).IsRequired();
+        b.Property(x => x.Email).HasMaxLength(256).IsRequired();
+        b.Property(x => x.Phone).HasMaxLength(30);
+        b.Property(x => x.DeclarationTextSnapshot).HasMaxLength(4000);
+        b.Property(x => x.SignedFromIp).HasMaxLength(64);
+        b.Property(x => x.RevokedReason).HasMaxLength(500);
+        // Quoted identifiers, so the same filter works on Postgres and on the Sqlite test database.
+        b.HasIndex(x => new { x.ElectionId, x.PersonaId, x.UserId }).IsUnique().HasFilter("\"RevokedAt\" IS NULL");
+        b.HasIndex(x => x.UserId);
+        b.HasOne(x => x.Election).WithMany(x => x.Appointments).HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne(x => x.Persona).WithMany().HasForeignKey(x => x.PersonaId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<Member>().WithMany().HasForeignKey(x => x.MemberId).OnDelete(DeleteBehavior.Restrict);
     }
 }
 
@@ -68,7 +78,7 @@ public sealed class ScrutinyDecisionConfiguration : IEntityTypeConfiguration<Scr
     {
         b.HasKey(x => x.Id);
         b.HasOne<Nomination>().WithMany().HasForeignKey(x => x.NominationId).OnDelete(DeleteBehavior.Cascade);
-        b.HasOne<Member>().WithMany().HasForeignKey(x => x.OfficerMemberId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<User>().WithMany().HasForeignKey(x => x.DecidedByUserId).OnDelete(DeleteBehavior.Restrict);
     }
 }
 
@@ -140,5 +150,18 @@ public sealed class ElectionResultConfiguration : IEntityTypeConfiguration<Elect
         b.HasKey(x => x.Id);
         b.HasIndex(x => new { x.ElectionId, x.ElectionSeatId, x.NominationId }).IsUnique();
         b.HasOne<Election>().WithMany().HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public sealed class ElectionPersonaConfiguration : IEntityTypeConfiguration<ElectionPersona>
+{
+    public void Configure(EntityTypeBuilder<ElectionPersona> b)
+    {
+        b.HasKey(x => x.Id);
+        b.Property(x => x.Name).HasMaxLength(100).IsRequired();
+        b.Property(x => x.GroupName).HasMaxLength(100).IsRequired();
+        b.Property(x => x.Description).HasMaxLength(500).IsRequired();
+        b.Property(x => x.DeclarationText).HasMaxLength(4000).IsRequired();
+        b.HasIndex(x => x.Name).IsUnique();
     }
 }

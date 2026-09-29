@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../services/auth.service';
-import { authGuard, adminGuard, memberGuard } from './auth.guard';
+import { authGuard, adminGuard, electionStaffGuard, memberGuard } from './auth.guard';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 describe('AuthGuards', () => {
@@ -96,6 +96,20 @@ describe('AuthGuards', () => {
             const result = await runGuard(TestBed.runInInjectionContext(() => adminGuard()));
             expect(result).toBe('/portal/dashboard');
             expect(routerMock.parseUrl).toHaveBeenCalledWith('/portal/dashboard');
+        });
+    });
+
+    describe('electionStaffGuard', () => {
+        it.each(['SuperAdmin', 'Admin', 'ElectionOfficial'])('FR-39: allows a user holding %s', async (role) => {
+            (authServiceMock.hasRole as any).mockImplementation((r: string) => r === role);
+            const result = await runGuard(TestBed.runInInjectionContext(() => electionStaffGuard()));
+            expect(result).toBe(true);
+        });
+
+        it('FR-39: sends a plain member to the login page', async () => {
+            (authServiceMock.hasRole as any).mockImplementation((r: string) => r === 'Member');
+            const result = await runGuard(TestBed.runInInjectionContext(() => electionStaffGuard()));
+            expect(result).toBe('/login');
         });
     });
 

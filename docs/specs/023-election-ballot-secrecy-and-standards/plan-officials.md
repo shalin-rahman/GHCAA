@@ -1,7 +1,8 @@
 # Spec 023 plan: election officials, personas and standards gaps
 
-Status: approved 2026-09-28. All four decisions in §6 are answered. No code has been written yet;
-implementation follows the order in §7, starting with 37.1w.
+Status: approved 2026-09-28. All four decisions in §6 are answered. Build follows the order in §7.
+As of 2026-09-30, 37.1w and 37.12a to 37.12c are done and 37.12d is in progress. `docs/TODO.md` records
+each item's state and where the build departed from this plan.
 Tracker items: 37.1w, 37.12a to 37.12j, 37.13a to 37.13g in `docs/TODO.md`.
 
 This plan is written so the build can follow it step by step. Every file, field, endpoint and test is

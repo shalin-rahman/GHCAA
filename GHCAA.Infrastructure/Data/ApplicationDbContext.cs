@@ -279,7 +279,7 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<PollVote> PollVotes { get; set; } = null!;
         public DbSet<Election> Elections { get; set; } = null!;
         public DbSet<ElectionSeat> ElectionSeats { get; set; } = null!;
-        public DbSet<ElectionOfficer> ElectionOfficers { get; set; } = null!;
+        public DbSet<ElectionAppointment> ElectionAppointments { get; set; } = null!;
         public DbSet<VoterRoll> VoterRolls { get; set; } = null!;
         public DbSet<Nomination> Nominations { get; set; } = null!;
         public DbSet<ScrutinyDecision> ScrutinyDecisions { get; set; } = null!;
@@ -289,6 +289,7 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<PendingBallot> PendingBallots { get; set; } = null!;
         public DbSet<BallotReceipt> BallotReceipts { get; set; } = null!;
         public DbSet<ElectionResult> ElectionResults { get; set; } = null!;
+        public DbSet<ElectionPersona> ElectionPersonas { get; set; } = null!;
         public DbSet<ScholarshipFund> ScholarshipFunds { get; set; } = null!;
         public DbSet<ScholarshipCall> ScholarshipCalls { get; set; } = null!;
         public DbSet<ScholarshipApplication> ScholarshipApplications { get; set; } = null!;

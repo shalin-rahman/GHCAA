@@ -363,6 +363,11 @@ export const routes: Routes = [
                 path: 'org-config',
                 loadComponent: () => import('./admin/org-config/org-config').then(m => m.AdminOrgConfig),
                 canActivate: [superAdminGuard]
+            },
+            {
+                path: 'election-personas',
+                loadComponent: () => import('./admin/election-personas/admin-election-personas').then(m => m.AdminElectionPersonas),
+                canActivate: [superAdminGuard]
             }
         ]
     }

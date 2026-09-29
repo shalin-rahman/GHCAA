@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'navigator_key.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../screens/app_home_screen.dart';
@@ -102,6 +103,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final authNotifier = ref.watch(authNotifierProvider);
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/',
     refreshListenable: authNotifier,
     redirect: (context, state) {

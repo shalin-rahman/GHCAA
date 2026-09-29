@@ -802,6 +802,69 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.ToTable("ElectionOfficers");
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.ElectionPersona", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeclarationText")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("GroupName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("MaxCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MinCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<long>("Permissions")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("ShowOnPublicBoard")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("TakesOverFromAdmin")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("ElectionPersonas");
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.ElectionResult", b =>
                 {
                     b.Property<int>("Id")
@@ -973,7 +1036,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "OTP_EMAIL",
                             Description = "OTP verification email",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 124, DateTimeKind.Utc).AddTicks(6857),
+                            LastUpdated = new DateTime(2026, 9, 29, 17, 33, 23, 403, DateTimeKind.Utc).AddTicks(978),
                             Subject = "{{OrgShortName}} Verification Code: {{OtpCode}}",
                             Variables = "['FullName', 'OtpCode']"
                         },
@@ -984,7 +1047,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "WELCOME_EMAIL",
                             Description = "Welcome email",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 125, DateTimeKind.Utc).AddTicks(5460),
+                            LastUpdated = new DateTime(2026, 9, 29, 17, 33, 23, 403, DateTimeKind.Utc).AddTicks(7821),
                             Subject = "Welcome to {{OrgName}}!",
                             Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
                         },
@@ -995,7 +1058,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PASSWORD_RESET",
                             Description = "Password reset email",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 125, DateTimeKind.Utc).AddTicks(5621),
+                            LastUpdated = new DateTime(2026, 9, 29, 17, 33, 23, 403, DateTimeKind.Utc).AddTicks(7925),
                             Subject = "{{OrgShortName}} Account Password Reset",
                             Variables = "['FullName', 'ResetUrl']"
                         },
@@ -1006,7 +1069,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "APPLICATION_REJECTED",
                             Description = "Application rejection email",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 125, DateTimeKind.Utc).AddTicks(5829),
+                            LastUpdated = new DateTime(2026, 9, 29, 17, 33, 23, 403, DateTimeKind.Utc).AddTicks(8107),
                             Subject = "Update on your {{OrgShortName}} Membership Application",
                             Variables = "['FullName', 'Reason']"
                         },
@@ -1017,7 +1080,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PAYMENT_RECEIVED",
                             Description = "Payment received acknowledgment",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 125, DateTimeKind.Utc).AddTicks(5922),
+                            LastUpdated = new DateTime(2026, 9, 29, 17, 33, 23, 403, DateTimeKind.Utc).AddTicks(8184),
                             Subject = "Payment Received: {{Amount}} BDT",
                             Variables = "['FullName', 'Amount', 'TrxID']"
                         },
@@ -1028,7 +1091,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PAYMENT_STATUS_UPDATED",
                             Description = "Payment status update email",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 125, DateTimeKind.Utc).AddTicks(5993),
+                            LastUpdated = new DateTime(2026, 9, 29, 17, 33, 23, 403, DateTimeKind.Utc).AddTicks(8244),
                             Subject = "Payment Status Updated: {{Status}}",
                             Variables = "['FullName', 'TrxID', 'Status']"
                         },
@@ -1039,7 +1102,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "FAMILY_LINK_REQUEST",
                             Description = "Family link request email",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 125, DateTimeKind.Utc).AddTicks(6050),
+                            LastUpdated = new DateTime(2026, 9, 29, 17, 33, 23, 403, DateTimeKind.Utc).AddTicks(8296),
                             Subject = "New Family Link Request from {{RequesterName}}",
                             Variables = "['FullName', 'RequesterName', 'Relationship', 'ProfileUrl']"
                         },
@@ -1050,7 +1113,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "FAMILY_LINK_ACCEPTED",
                             Description = "Family link acceptance confirmation",
-                            LastUpdated = new DateTime(2026, 9, 27, 16, 40, 31, 125, DateTimeKind.Utc).AddTicks(6117),
+                            LastUpdated = new DateTime(2026, 9, 29, 17, 33, 23, 403, DateTimeKind.Utc).AddTicks(8355),
                             Subject = "Family Link Request Accepted",
                             Variables = "['FullName', 'TargetName']"
                         });

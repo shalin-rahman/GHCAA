@@ -221,5 +221,23 @@
       "Version": "4.2",
       "Group": "Governance"
     }
-  ]
+  ],
+  "Elections": {
+    "AdminKeepsControlAfterHandover": false,
+    "TwoPersonActions": [
+      "Publish",
+      "OpenPolling",
+      "ReplaceBallotKey",
+      "ClosePolling",
+      "Declare",
+      "Archive"
+    ],
+    "SuperAdminActsAlone": false,
+    "ApprovalExpiryHours": 48,
+    "AccessEndsDaysAfterDeclare": 21,
+    "InviteLinkHours": 72,
+    "CandidateOrder": "Random",
+    "ShowTurnoutDuringPolling": false,
+    "PublishPerSeatBallots": true
+  }
 }

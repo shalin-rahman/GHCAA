@@ -115,6 +115,7 @@ export interface OrgConfig {
   workflow: OrgWorkflow;
   localization: OrgLocalization;
   documents?: DocumentEntry[];
+  elections?: import('./election.models').ElectionSettings;
 }
 
 export interface DocumentEntry {

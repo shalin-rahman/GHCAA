@@ -201,6 +201,65 @@
     </div>
     }
 
+    @case ('elections') {
+    @if (config.elections; as elections) {
+    <div class="config-grid">
+      <div class="form-group">
+        <label>Approval Expires After (hours)</label>
+        <input type="number" min="1" [(ngModel)]="elections.approvalExpiryHours" name="approvalExpiryHours">
+        <small class="text-muted">A two-person request not approved in this time lapses.</small>
+      </div>
+      <div class="form-group">
+        <label>Official Access Ends (days after declaration)</label>
+        <input type="number" min="0" [(ngModel)]="elections.accessEndsDaysAfterDeclare" name="accessEndsDaysAfterDeclare">
+        <small class="text-muted">21 covers the 7-day appeal window and 14 days for the tribunal.</small>
+      </div>
+      <div class="form-group">
+        <label>Invite Link Valid For (hours)</label>
+        <input type="number" min="1" [(ngModel)]="elections.inviteLinkHours" name="inviteLinkHours">
+      </div>
+      <div class="form-group">
+        <label>Candidate Order on the Ballot</label>
+        <select [(ngModel)]="elections.candidateOrder" name="candidateOrder">
+          @for (order of candidateOrders; track order) {
+          <option [value]="order">{{ humanize(order) }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    <div class="toggle-grid">
+      <label class="toggle-row">
+        <input type="checkbox" [(ngModel)]="elections.adminKeepsControlAfterHandover" name="adminKeepsControlAfterHandover">
+        <span>Admin Keeps Control After Handover</span>
+      </label>
+      <label class="toggle-row">
+        <input type="checkbox" [(ngModel)]="elections.superAdminActsAlone" name="superAdminActsAlone">
+        <span>SuperAdmin May Act Alone (emergency only)</span>
+      </label>
+      <label class="toggle-row">
+        <input type="checkbox" [(ngModel)]="elections.showTurnoutDuringPolling" name="showTurnoutDuringPolling">
+        <span>Show Turnout During Polling</span>
+      </label>
+      <label class="toggle-row">
+        <input type="checkbox" [(ngModel)]="elections.publishPerSeatBallots" name="publishPerSeatBallots">
+        <span>Publish Per-Seat Ballot Counts</span>
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Steps That Need a Second Official</label>
+      <div class="toggle-grid">
+        @for (action of approvalActions; track action) {
+        <label class="toggle-row">
+          <input type="checkbox" [checked]="isTwoPersonAction(action)"
+                 (change)="toggleTwoPersonAction(action, $any($event.target).checked)" [name]="'twoPerson' + action">
+          <span>{{ approvalActionLabels[action] }}</span>
+        </label>
+        }
+      </div>
+    </div>
+    }
+    }
+
     @case ('localization') {
     <div class="config-grid">
       <div class="form-group">

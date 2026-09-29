@@ -59,8 +59,29 @@ namespace GHCAA.Domain
 
         public enum ElectionPhase { Announced, Nomination, Scrutiny, Withdrawal, CandidateList, Campaign, Polling, Counting, Declared, Archived }
         public enum NominationStatus { Submitted, UnderScrutiny, Accepted, Rejected, Withdrawn }
-        public enum ElectionRole { ReturningOfficer, AssistantReturningOfficer, PollingOfficer, Scrutineer }
         public enum ElectionTieRule { DrawingLots, RunOff, ChairCastingVote }
+        // Spec 023 (37.12b): what an election persona can do. Which persona has which flag is
+        // data, not code. See ElectionPersonaSeeder.
+        [System.Flags]
+        public enum ElectionPermission : long
+        {
+            None = 0,
+            ViewDashboard = 1,
+            ViewAudit = 2,
+            ManageSetup = 4,
+            ManageVoterRoll = 8,
+            DecideNominations = 16,
+            AppointOfficials = 32,
+            SetBallotKey = 64,
+            ChangePhase = 128,
+            Count = 256,
+            Declare = 512,
+            DecideAppeals = 1024,
+            Approve = 2048
+        }
+        // Spec 023 (37.12a, 37.12f): election steps that need a second official to approve.
+        public enum ElectionApprovalAction { Publish, OpenPolling, ReplaceBallotKey, ClosePolling, Declare, Archive }
+        public enum ElectionCandidateOrder { Random, Alphabetical }
 
         public enum ScholarshipApplicationStatus { Draft, Submitted, UnderReview, Shortlisted, Awarded, Rejected, Withdrawn }
         public enum DisbursementStatus { Pending, Approved, Paid, Cancelled }

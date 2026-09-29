@@ -156,6 +156,17 @@ CREATE UNIQUE INDEX "IX_OrganizationConfigs_OrgId" ON "OrganizationConfigs" ("Or
     "adminEmailOnNewRegistration": true,
     "membershipTypes": ["Founding","Executive","General","Associate","Honorary","Advisory","Guest"]
   },
+  "elections": {
+    "adminKeepsControlAfterHandover": false,
+    "twoPersonActions": ["Publish","OpenPolling","ReplaceBallotKey","ClosePolling","Declare","Archive"],
+    "superAdminActsAlone": false,
+    "approvalExpiryHours": 48,
+    "accessEndsDaysAfterDeclare": 21,
+    "inviteLinkHours": 72,
+    "candidateOrder": "Random",
+    "showTurnoutDuringPolling": false,
+    "publishPerSeatBallots": true
+  },
   "localization": {
     "defaultLocale": "en",
     "supportedLocales": ["en", "bn"],

@@ -118,6 +118,7 @@ namespace GHCAA.API.Extensions
                 options.AddPolicy(Constants.Policies.SuperAdminOnly, policy => policy.RequireRole(Constants.Roles.SuperAdmin));
                 options.AddPolicy(Constants.Policies.AdminOnly, policy => policy.RequireRole(Constants.Roles.SuperAdmin, Constants.Roles.Admin));
                 options.AddPolicy(Constants.Policies.MemberOnly, policy => policy.RequireRole(Constants.Roles.SuperAdmin, Constants.Roles.Admin, Constants.Roles.Member));
+                options.AddPolicy(Constants.Policies.ElectionStaff, policy => policy.RequireRole(Constants.Roles.SuperAdmin, Constants.Roles.Admin, Constants.Roles.ElectionOfficial));
 
                 // 3d: Secure-by-default — any action without an explicit [Authorize]/[AllowAnonymous]
                 // now requires authentication instead of being implicitly public.

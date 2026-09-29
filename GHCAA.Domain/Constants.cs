@@ -7,6 +7,8 @@ namespace GHCAA.Domain
             public const string SuperAdmin = "SuperAdmin";
             public const string Admin = "Admin";
             public const string Member = "Member";
+            // Spec 023 (37.12c). Held by people appointed to run an election. Seeded at boot, not in roles.json.
+            public const string ElectionOfficial = "ElectionOfficial";
         }
 
         // Authorization POLICY names (registered once in ServiceExtensions.AddAppAuthorization),
@@ -18,6 +20,7 @@ namespace GHCAA.Domain
             public const string AdminOnly = "AdminOnly";
             public const string SuperAdminOnly = "SuperAdminOnly";
             public const string MemberOnly = "MemberOnly";
+            public const string ElectionStaff = "ElectionStaff";
         }
 
         // Output Cache policy names (registered once in Program.cs's AddOutputCache), referenced

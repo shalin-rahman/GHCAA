@@ -132,6 +132,16 @@ class StorageService {
     return prefs.getString('user_role');
   }
 
+  Future<void> saveRoles(List<String> roles) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('user_roles', roles);
+  }
+
+  Future<List<String>?> getRoles() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('user_roles');
+  }
+
   Future<void> saveDashboardLayout(bool isCompact) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('dashboard_is_compact', isCompact);
