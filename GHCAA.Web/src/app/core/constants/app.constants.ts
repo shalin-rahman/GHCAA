@@ -726,6 +726,14 @@ export const API_ENDPOINTS = {
         ACTIVE: (id: number) => `/api/admin/election-personas/${id}/active`
     },
     ELECTION_PERSONAS: '/api/election-personas',
+    // Work Package 37.12d appointment routes.
+    ELECTION_APPOINTMENTS: {
+        FOR_ELECTION: (electionId: number) => `/api/elections/${electionId}/appointments`,
+        REVOKE: (id: number) => `/api/elections/appointments/${id}/revoke`,
+        MINE: '/api/me/election-appointments',
+        ACCEPT: (id: number) => `/api/me/election-appointments/${id}/accept`,
+        DECLINE: (id: number) => `/api/me/election-appointments/${id}/decline`
+    },
     CONFIG: '/api/config',
     FORUM: '/api/forum',
     HEALTH: '/healthz'

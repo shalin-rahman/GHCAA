@@ -62,6 +62,7 @@ class AppDrawer extends ConsumerWidget {
                             _MenuItem(Icons.badge_outlined, 'My Profile', '/profile'),
                             _MenuItem(Icons.receipt_long_outlined, 'Payments', '/financials'),
                             _MenuItem(Icons.volunteer_activism_outlined, 'Fundraising Campaigns', '/campaigns'),
+                            _MenuItem(Icons.assignment_ind_outlined, 'Election Appointments', '/officials/appointments'),
                           ]),
                           _buildSection(context, localePack.community, [
                             _MenuItem(Icons.people_outline, 'Alumni Directory', '/directory'),

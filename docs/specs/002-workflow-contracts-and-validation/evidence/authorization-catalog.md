@@ -1,11 +1,12 @@
 # Authorization Policy Catalog
 
-**Reviewed**: 2026-09-26. Built for [../tasks.md](../tasks.md) T014 and tracker item 84.5 from
-the 45 files in `GHCAA.API/Controllers`, `GHCAA.API/Extensions/ServiceExtensions.cs`
+**Reviewed**: 2026-09-26, sections 2 and 3 regenerated 2026-09-30. Built for
+[../tasks.md](../tasks.md) T014 and tracker item 84.5 from the files in `GHCAA.API/Controllers`, `GHCAA.API/Extensions/ServiceExtensions.cs`
 (`AddAppAuthorization`), `GHCAA.API/Filters/RequireStepUpAttribute.cs`,
-`GHCAA.API/Extensions/RateLimitingExtensions.cs` and the tests named in section 5. The endpoint
-tables come from a script that reads the route, policy and step-up attributes on each action and
-its controller. It is not a runtime dump, so an attribute added through a convention or filter
+`GHCAA.API/Extensions/RateLimitingExtensions.cs` and the tests named in section 5. Sections 2 and
+3 come from `docs/api/authz_catalog.py`, which reads the route, policy, step-up and rate-limit
+attributes on each action and its controller. Run it with `--write` after changing a controller,
+and with `--check` to see whether this file is stale. The other sections are written by hand. It is not a runtime dump, so an attribute added through a convention or filter
 registered in `Program.cs` would not show here. None was found.
 
 ## 1. Policies defined
@@ -15,10 +16,12 @@ registered in `Program.cs` would not show here. None was found.
 | `SuperAdminOnly` | `RequireRole(SuperAdmin)` | `ServiceExtensions.cs` `AddAppAuthorization` |
 | `AdminOnly` | `RequireRole(SuperAdmin, Admin)` | same |
 | `MemberOnly` | `RequireRole(SuperAdmin, Admin, Member)` | same |
+| `ElectionStaff` | `RequireRole(SuperAdmin, Admin, ElectionOfficial)` | same. Spec 023 (37.12d). The service then checks the caller's appointment for that election |
 | Fallback | `RequireAuthenticatedUser()` | same. Any action with no attribute needs a signed-in user |
 
 No `[Authorize(Roles = ...)]` string is used anywhere. Every role gate is either one of the three
-policies or an `IsInRole` check inside the method body.
+policies or an `IsInRole` check inside the method body, and every `IsInRole` call uses
+`Constants.Roles`.
 
 Two further layers sit on top of the policy:
 
@@ -35,39 +38,41 @@ then puts Admin and SuperAdmin callers into the admin group with `IsInRole("Admi
 ## 2. Combinations in use
 
 One row per route template, so an action with a legacy alias route counts once per alias. The
-script found 334 routes. That matches the 334 `[Http*]` attributes in the folder.
+script found 348 routes. That matches the 348 `[Http*]` attributes in the folder.
 
 | Combination | Routes | Controllers |
 |---|---|---|
 | Anonymous | 64 | Archive, Auth, Campaigns, Contact, CredentialVerification, Elections, Events, Financials, Gallery, Gateways, Governance, Health, JobHub, Lookups, Networking, News, OrgConfig, PaymentConfig, Registration, Scholarships, SiteContent, Theme |
-| Authenticated | 64 | Activity, Assistant, Auth, Campaigns, Elections, FamilyLink, Financials, Forum, Governance, MemberCommunications, Mentorship, Messaging, News, Notification, PendingApprovals, Poll, Profile |
+| Authenticated | 70 | Activity, Assistant, Auth, Campaigns, ElectionAppointments, ElectionPersonasRead, Elections, FamilyLink, Financials, Forum, Governance, MemberCommunications, Mentorship, Messaging, News, Notification, PendingApprovals, Poll, Profile |
 | Authenticated + in-body Admin | 1 | Events |
 | Authenticated + in-body Admin or SuperAdmin | 9 | Archive, Financials, JobHub, News, SecureFiles |
 | Authenticated + in-body SuperAdmin | 5 | Events, Financials, Forum |
+| Authenticated + step-up | 2 | ElectionAppointments, Elections |
 | MemberOnly | 6 | Gallery, Scholarships |
 | MemberOnly + in-body Admin or SuperAdmin | 1 | Gallery |
-| AdminOnly | 130 | Activity, Admin, AdminGovernance, AdminPoll, AdminSocialAuth, Archive, Auth, Campaigns, Communication, CredentialVerification, Events, Financials, Gallery, JobHub, Lookups, MemberImport, Mentorship, News, PendingApprovals, Scholarships, SiteContent, Theme |
+| ElectionStaff | 1 | ElectionAppointments |
+| ElectionStaff + step-up | 2 | ElectionAppointments |
+| AdminOnly | 128 | Activity, Admin, AdminGovernance, AdminPoll, AdminSocialAuth, Archive, Campaigns, Communication, CredentialVerification, Events, Financials, Gallery, JobHub, Lookups, MemberImport, Mentorship, News, PendingApprovals, Scholarships, SiteContent, Theme |
 | AdminOnly + in-body SuperAdmin | 5 | Admin |
 | AdminOnly + step-up | 16 | Admin, AdminElections, AdminGovernance, Elections |
 | AdminOnly + step-up + in-body SuperAdmin | 1 | Admin |
-| SuperAdminOnly | 18 | Activity, Admin, AdminDevTracker, AdminErrorLogs, FinancialLedger, Financials, OrgConfig, PaymentConfig, Roles |
+| SuperAdminOnly | 19 | Activity, Admin, AdminDevTracker, AdminErrorLogs, ElectionPersonas, FinancialLedger, Financials, OrgConfig, PaymentConfig, Roles |
 | SuperAdminOnly + in-body SuperAdmin | 2 | PaymentConfig |
-| SuperAdminOnly + step-up | 12 | Admin, FinancialLedger, PaymentConfig, Roles |
+| SuperAdminOnly + step-up | 16 | Admin, ElectionPersonas, FinancialLedger, PaymentConfig, Roles |
 
 "In-body" means the policy lets the caller in and the method then branches on
-`User.IsInRole(...)`, usually to widen what an Admin can see or do. Those checks use the literal
-strings `"Admin"` and `"SuperAdmin"`, not `Constants.Roles.Admin` and `Constants.Roles.SuperAdmin`
-from `GHCAA.Domain/Constants.cs`.
+`User.IsInRole(...)`, usually to widen what an Admin can see or do. 24 routes do this.
 
 Where the policy was set:
 
 | Policy | On the action | On the controller | Fallback only |
 |---|---|---|---|
 | Anonymous | 64 | 0 | 0 |
-| Authenticated | 10 | 69 | 0 |
+| Authenticated | 17 | 70 | 0 |
 | MemberOnly | 7 | 0 | 0 |
-| AdminOnly | 98 | 54 | 0 |
-| SuperAdminOnly | 14 | 18 | 0 |
+| ElectionStaff | 3 | 0 | 0 |
+| AdminOnly | 95 | 55 | 0 |
+| SuperAdminOnly | 14 | 23 | 0 |
 
 No route relies on the fallback policy alone. Every action or its controller names its rule.
 
@@ -76,9 +81,9 @@ the stricter one is shown, and `[AllowAnonymous]` on either one wins over both.
 
 ## 3. Endpoints by combination
 
-Paths are built from the controller's `[Route]` and the action's template. `MessagingController`
-also answers under `/api/chat` and `NotificationController` under `/api/notification`, because
-each has a second class-level `[Route]`. Those copies are not repeated below.
+Paths are built from the controller's `[Route]` and the action's template.
+`MessagingController` also answers under `/api/chat` and `NotificationController` under `/api/notification`, because each has a second class-level `[Route]`.
+Those copies are not repeated below.
 
 ### 3.1 Anonymous
 
@@ -86,10 +91,11 @@ Base policy: `[AllowAnonymous]`, no sign-in.
 
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
+| GET | `/api/Theme/active` | `ThemeController.GetActiveTheme` (line 25) |  |
 | GET | `/api/archive/items/{id:int}` | `ArchiveController.PublicItem` (line 26) |  |
 | GET | `/api/archive/public` | `ArchiveController.PublicCollections` (line 21) |  |
 | POST | `/api/auth/facebook` | `AuthController.FacebookLogin` (line 66) | Auth |
-| POST | `/api/auth/forgot-password` | `AuthController.ForgotPassword` (line 232) | Auth, PasswordReset |
+| POST | `/api/auth/forgot-password` | `AuthController.ForgotPassword` (line 252) | Auth, PasswordReset |
 | POST | `/api/auth/google` | `AuthController.GoogleLogin` (line 56) | Auth |
 | POST | `/api/auth/login` | `AuthController.Login` (line 44) | Auth |
 | GET | `/api/auth/providers` | `AuthController.GetProviders` (line 36) | Auth |
@@ -97,7 +103,7 @@ Base policy: `[AllowAnonymous]`, no sign-in.
 | POST | `/api/auth/refresh-mobile` | `AuthController.RefreshMobile` (line 111) | Auth, Refresh |
 | POST | `/api/auth/register` | `RegistrationController.Register` (line 29) | Registration |
 | POST | `/api/auth/resend-otp` | `RegistrationController.ResendOtp` (line 108) | Registration, Auth |
-| POST | `/api/auth/reset-password` | `AuthController.ResetPassword` (line 242) | Auth |
+| POST | `/api/auth/reset-password` | `AuthController.ResetPassword` (line 262) | Auth |
 | GET | `/api/auth/status/{id:int}` | `RegistrationController.GetStatus` (line 75) | Registration |
 | POST | `/api/auth/verify-email` | `RegistrationController.VerifyEmail` (line 93) | Registration, Auth |
 | GET | `/api/campaigns/public` | `CampaignsController.GetPublicCampaigns` (line 25) |  |
@@ -108,8 +114,8 @@ Base policy: `[AllowAnonymous]`, no sign-in.
 | POST | `/api/contact` | `ContactController.Submit` (line 21) |  |
 | GET | `/api/elections/current` | `ElectionsController.GetCurrent` (line 42) |  |
 | GET | `/api/elections/{id:int}` | `ElectionsController.Get` (line 36) |  |
-| GET | `/api/elections/{id:int}/documents/{formCode}` | `ElectionsController.Document` (line 131) |  |
-| GET | `/api/elections/{id:int}/nominations` | `ElectionsController.Nominations` (line 76) |  |
+| GET | `/api/elections/{id:int}/documents/{formCode}` | `ElectionsController.Document` (line 148) |  |
+| GET | `/api/elections/{id:int}/nominations` | `ElectionsController.Nominations` (line 69) |  |
 | GET | `/api/events` | `EventsController.GetActiveEvents` (line 33) |  |
 | POST | `/api/events/register` | `EventsController.RegisterForEventForm` (line 60) |  |
 | POST | `/api/events/register` | `EventsController.RegisterForEventJson` (line 68) |  |
@@ -147,7 +153,6 @@ Base policy: `[AllowAnonymous]`, no sign-in.
 | GET | `/api/scholarships/public/funds` | `ScholarshipsController.PublicFunds` (line 20) |  |
 | GET | `/api/scholarships/status/{referenceCode}` | `ScholarshipsController.Status` (line 34) | ScholarshipStatus |
 | GET | `/api/site-content` | `SiteContentController.GetByGroup` (line 26) |  |
-| GET | `/api/theme/active` | `ThemeController.GetActiveTheme` (line 25) |  |
 | GET | `/api/verify/{shortCode}` | `CredentialVerificationController.Verify` (line 20) | CredentialVerification |
 | GET | `/healthz` | `HealthController.GetHealth` (line 26) |  |
 
@@ -157,22 +162,27 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
+| GET | `/api/Family/links` | `FamilyLinkController.GetFamily` (line 99) |  |
+| GET | `/api/Family/search` | `FamilyLinkController.Search` (line 118) |  |
+| GET | `/api/Forum/categories` | `ForumController.GetCategories` (line 26) |  |
+| GET | `/api/Forum/categories/{categoryId}/topics` | `ForumController.GetTopics` (line 32) |  |
+| POST | `/api/Forum/topics` | `ForumController.CreateTopic` (line 53) |  |
+| GET | `/api/Forum/topics/{topicId}` | `ForumController.GetTopic` (line 38) |  |
+| GET | `/api/Forum/topics/{topicId}/posts` | `ForumController.GetPosts` (line 47) |  |
+| POST | `/api/Forum/topics/{topicId}/posts` | `ForumController.CreatePost` (line 73) |  |
 | GET | `/api/activity/me` | `ActivityController.GetMyActivity` (line 26) |  |
 | POST | `/api/assistant/ask` | `AssistantController.Ask` (line 22) |  |
-| POST | `/api/auth/logout` | `AuthController.Logout` (line 150) | Auth |
-| GET | `/api/auth/me` | `AuthController.Me` (line 131) | Auth |
+| POST | `/api/auth/admin/step-up/request` | `AuthController.RequestStepUp` (line 171) | Auth |
+| POST | `/api/auth/admin/step-up/verify` | `AuthController.VerifyStepUp` (line 186) | Auth |
+| POST | `/api/auth/logout` | `AuthController.Logout` (line 154) |  |
+| GET | `/api/auth/me` | `AuthController.Me` (line 131) |  |
+| POST | `/api/auth/step-up/request` | `AuthController.RequestStepUp` (line 171) | Auth |
+| POST | `/api/auth/step-up/verify` | `AuthController.VerifyStepUp` (line 186) | Auth |
 | GET | `/api/campaigns/my-pledges` | `CampaignsController.GetMyPledges` (line 74) |  |
-| GET | `/api/chat/conversations` | `MessagingController.GetConversations` (line 24) |  |
-| GET | `/api/chat/history/{otherUserId}` | `MessagingController.GetChatHistory` (line 34) |  |
-| POST | `/api/chat/mark-read/{messageId}` | `MessagingController.MarkAsRead` (line 56) |  |
-| PATCH | `/api/chat/read/{messageId}` | `MessagingController.MarkAsRead` (line 56) |  |
-| GET | `/api/chat/recent` | `MessagingController.GetConversations` (line 24) |  |
-| POST | `/api/chat/send` | `MessagingController.SendMessage` (line 68) |  |
-| GET | `/api/chat/unread` | `MessagingController.GetUnreadCount` (line 45) |  |
 | GET | `/api/communications/me` | `MemberCommunicationsController.GetMine` (line 14) |  |
-| POST | `/api/elections/nominations/{nominationId:int}/withdraw` | `ElectionsController.Withdraw` (line 101) |  |
-| POST | `/api/elections/{id:int}/nominations` | `ElectionsController.Nominate` (line 81) |  |
-| POST | `/api/elections/{id:int}/vote` | `ElectionsController.Vote` (line 110) |  |
+| GET | `/api/election-personas` | `ElectionPersonasReadController.List` (line 69) |  |
+| POST | `/api/elections/nominations/{nominationId:int}/withdraw` | `ElectionsController.Withdraw` (line 94) |  |
+| POST | `/api/elections/{id:int}/nominations` | `ElectionsController.Nominate` (line 74) |  |
 | GET | `/api/family-links/my-family` | `FamilyLinkController.GetFamily` (line 99) |  |
 | GET | `/api/family-links/received` | `FamilyLinkController.GetReceived` (line 88) |  |
 | DELETE | `/api/family-links/remove/{requestId}` | `FamilyLinkController.Remove` (line 59) |  |
@@ -182,19 +192,13 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 | GET | `/api/family-links/sent` | `FamilyLinkController.GetSent` (line 79) |  |
 | GET | `/api/family-links/{memberId}/family` | `FamilyLinkController.GetPublicFamily` (line 108) |  |
 | POST | `/api/family-links/{requestId}/cancel` | `FamilyLinkController.Cancel` (line 69) |  |
-| GET | `/api/Family/links` | `FamilyLinkController.GetFamily` (line 99) |  |
-| GET | `/api/Family/search` | `FamilyLinkController.Search` (line 118) |  |
 | POST | `/api/financials/record-payment` | `FinancialsController.RecordPayment` (line 53) |  |
-| GET | `/api/financials/saved-methods` | `FinancialsController.GetSavedPaymentMethods` (line 215) |  |
-| POST | `/api/financials/saved-methods` | `FinancialsController.AddSavedPaymentMethod` (line 225) |  |
-| DELETE | `/api/financials/saved-methods/{id}` | `FinancialsController.DeleteSavedPaymentMethod` (line 235) |  |
-| GET | `/api/forum/categories` | `ForumController.GetCategories` (line 25) |  |
-| GET | `/api/forum/categories/{categoryId}/topics` | `ForumController.GetTopics` (line 31) |  |
-| POST | `/api/forum/topics` | `ForumController.CreateTopic` (line 52) |  |
-| GET | `/api/forum/topics/{topicId}` | `ForumController.GetTopic` (line 37) |  |
-| GET | `/api/forum/topics/{topicId}/posts` | `ForumController.GetPosts` (line 46) |  |
-| POST | `/api/forum/topics/{topicId}/posts` | `ForumController.CreatePost` (line 72) |  |
+| GET | `/api/financials/saved-methods` | `FinancialsController.GetSavedPaymentMethods` (line 217) |  |
+| POST | `/api/financials/saved-methods` | `FinancialsController.AddSavedPaymentMethod` (line 227) |  |
+| DELETE | `/api/financials/saved-methods/{id}` | `FinancialsController.DeleteSavedPaymentMethod` (line 237) |  |
 | POST | `/api/governance/constitution/{id:int}/vote` | `GovernanceController.VoteOnAmendment` (line 68) |  |
+| GET | `/api/me/election-appointments` | `ElectionAppointmentsController.Mine` (line 52) |  |
+| POST | `/api/me/election-appointments/{id:int}/decline` | `ElectionAppointmentsController.Decline` (line 73) |  |
 | GET | `/api/members/family` | `FamilyLinkController.GetFamily` (line 99) |  |
 | POST | `/api/members/family` | `FamilyLinkController.Send` (line 35) |  |
 | POST | `/api/mentorship` | `MentorshipController.SendRequest` (line 33) |  |
@@ -202,12 +206,19 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 | GET | `/api/mentorship/sent` | `MentorshipController.GetSent` (line 52) |  |
 | POST | `/api/mentorship/{id}/complete` | `MentorshipController.MarkComplete` (line 80) |  |
 | POST | `/api/mentorship/{id}/respond` | `MentorshipController.Respond` (line 70) |  |
+| GET | `/api/messaging/conversations` | `MessagingController.GetConversations` (line 24) |  |
+| GET | `/api/messaging/history/{otherUserId}` | `MessagingController.GetChatHistory` (line 34) |  |
+| POST | `/api/messaging/mark-read/{messageId}` | `MessagingController.MarkAsRead` (line 56) |  |
+| PATCH | `/api/messaging/read/{messageId}` | `MessagingController.MarkAsRead` (line 56) |  |
+| GET | `/api/messaging/recent` | `MessagingController.GetConversations` (line 24) |  |
+| POST | `/api/messaging/send` | `MessagingController.SendMessage` (line 68) |  |
+| GET | `/api/messaging/unread` | `MessagingController.GetUnreadCount` (line 45) |  |
 | GET | `/api/news/my-submissions` | `NewsController.GetMySubmissions` (line 101) |  |
 | POST | `/api/news/upload-image` | `NewsController.UploadImage` (line 170) |  |
-| GET | `/api/notification` | `NotificationController.GetMyNotifications` (line 46) |  |
-| POST | `/api/notification/device-token` | `NotificationController.RegisterDeviceToken` (line 31) |  |
-| POST | `/api/notification/read-all` | `NotificationController.MarkAllAsRead` (line 76) |  |
-| POST | `/api/notification/{id}/read` | `NotificationController.MarkAsRead` (line 64) |  |
+| GET | `/api/notifications` | `NotificationController.GetMyNotifications` (line 46) |  |
+| POST | `/api/notifications/device-token` | `NotificationController.RegisterDeviceToken` (line 31) |  |
+| POST | `/api/notifications/read-all` | `NotificationController.MarkAllAsRead` (line 76) |  |
+| POST | `/api/notifications/{id}/read` | `NotificationController.MarkAsRead` (line 64) |  |
 | GET | `/api/pending/me/summary` | `PendingApprovalsController.GetMySummary` (line 74) |  |
 | GET | `/api/polls/active` | `PollController.GetActivePolls` (line 33) |  |
 | GET | `/api/polls/{id}` | `PollController.GetPoll` (line 42) |  |
@@ -237,14 +248,14 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
 | POST | `/api/archive/items` | `ArchiveController.CreateItem` (line 65) |  |
-| GET | `/api/financials/membership-history/{memberId}` | `FinancialsController.GetMembershipHistory` (line 180) |  |
+| GET | `/api/financials/membership-history/{memberId}` | `FinancialsController.GetMembershipHistory` (line 182) |  |
 | GET | `/api/financials/receipt/{paymentId}` | `FinancialsController.DownloadReceipt` (line 89) |  |
 | POST | `/api/jobs` | `JobHubController.PostJob` (line 34) |  |
 | PATCH | `/api/jobs/deactivate/{id}` | `JobHubController.DeactivateJob` (line 75) |  |
 | DELETE | `/api/jobs/{id}` | `JobHubController.DeactivateJob` (line 75) |  |
 | PUT | `/api/jobs/{id}` | `JobHubController.UpdateJob` (line 48) |  |
 | POST | `/api/news/submit` | `NewsController.SubmitArticle` (line 113) |  |
-| GET | `/api/secure-files/{*filePath}` | `SecureFilesController.GetSecureFile` (line 26) |  |
+| GET | `/api/secure-files/{*filePath}` | `SecureFilesController.GetSecureFile` (line 27) |  |
 
 ### 3.5 Authenticated + in-body SuperAdmin
 
@@ -252,13 +263,22 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
+| DELETE | `/api/Forum/posts/{postId}` | `ForumController.DeletePost` (line 109) |  |
+| DELETE | `/api/Forum/topics/{topicId}` | `ForumController.DeleteTopic` (line 97) |  |
 | GET | `/api/events/my-registrations` | `EventsController.GetMyRegistrations` (line 117) |  |
-| GET | `/api/financials/my-dues` | `FinancialsController.GetMyDues` (line 110) |  |
+| GET | `/api/financials/my-dues` | `FinancialsController.GetMyDues` (line 112) |  |
 | GET | `/api/financials/my-history` | `FinancialsController.GetMyPaymentHistory` (line 36) |  |
-| DELETE | `/api/forum/posts/{postId}` | `ForumController.DeletePost` (line 108) |  |
-| DELETE | `/api/forum/topics/{topicId}` | `ForumController.DeleteTopic` (line 96) |  |
 
-### 3.6 MemberOnly
+### 3.6 Authenticated + step-up
+
+Base policy: any signed-in user (`[Authorize]` or the fallback policy).
+
+| Verb | Path | Action | Rate limit |
+|---|---|---|---|
+| POST | `/api/elections/{id:int}/vote` | `ElectionsController.Vote` (line 106) |  |
+| POST | `/api/me/election-appointments/{id:int}/accept` | `ElectionAppointmentsController.Accept` (line 62) |  |
+
+### 3.7 MemberOnly
 
 Base policy: `MemberOnly`: SuperAdmin, Admin or Member.
 
@@ -271,7 +291,7 @@ Base policy: `MemberOnly`: SuperAdmin, Admin or Member.
 | POST | `/api/scholarships/applications/{applicationId:int}/review` | `ScholarshipsController.SubmitReview` (line 51) |  |
 | GET | `/api/scholarships/review-queue` | `ScholarshipsController.ReviewQueue` (line 41) |  |
 
-### 3.7 MemberOnly + in-body Admin or SuperAdmin
+### 3.8 MemberOnly + in-body Admin or SuperAdmin
 
 Base policy: `MemberOnly`: SuperAdmin, Admin or Member.
 
@@ -279,12 +299,33 @@ Base policy: `MemberOnly`: SuperAdmin, Admin or Member.
 |---|---|---|---|
 | POST | `/api/gallery/albums/{id}/photos` | `GalleryController.AddPhotoToAlbum` (line 206) |  |
 
-### 3.8 AdminOnly
+### 3.9 ElectionStaff
+
+Base policy: `ElectionStaff`: SuperAdmin, Admin or ElectionOfficial.
+
+| Verb | Path | Action | Rate limit |
+|---|---|---|---|
+| GET | `/api/elections/{id:int}/appointments` | `ElectionAppointmentsController.List` (line 20) |  |
+
+### 3.10 ElectionStaff + step-up
+
+Base policy: `ElectionStaff`: SuperAdmin, Admin or ElectionOfficial.
+
+| Verb | Path | Action | Rate limit |
+|---|---|---|---|
+| POST | `/api/elections/appointments/{id:int}/revoke` | `ElectionAppointmentsController.Revoke` (line 42) |  |
+| POST | `/api/elections/{id:int}/appointments` | `ElectionAppointmentsController.Appoint` (line 31) |  |
+
+### 3.11 AdminOnly
 
 Base policy: `AdminOnly`: SuperAdmin or Admin.
 
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
+| POST | `/api/Theme` | `ThemeController.CreateTheme` (line 41) |  |
+| GET | `/api/Theme/all` | `ThemeController.GetAllThemes` (line 34) |  |
+| DELETE | `/api/Theme/{id}` | `ThemeController.DeleteTheme` (line 57) |  |
+| PUT | `/api/Theme/{id}` | `ThemeController.UpdateTheme` (line 49) |  |
 | GET | `/api/activity/admin/{memberId}` | `ActivityController.GetMemberActivity` (line 38) |  |
 | GET | `/api/admin/comm/logs` | `CommunicationController.GetLogs` (line 36) |  |
 | GET | `/api/admin/comm/member/{memberId:int}` | `CommunicationController.GetMemberLogs` (line 43) |  |
@@ -334,8 +375,6 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 | DELETE | `/api/archive/admin/items/{id:int}` | `ArchiveController.DeleteItem` (line 87) |  |
 | PUT | `/api/archive/admin/items/{id:int}` | `ArchiveController.UpdateItem` (line 79) |  |
 | POST | `/api/archive/admin/items/{id:int}/moderate` | `ArchiveController.ModerateItem` (line 92) |  |
-| POST | `/api/auth/admin/step-up/request` | `AuthController.RequestStepUp` (line 165) | Auth |
-| POST | `/api/auth/admin/step-up/verify` | `AuthController.VerifyStepUp` (line 179) | Auth |
 | POST | `/api/campaigns/admin` | `CampaignsController.Create` (line 91) |  |
 | PUT | `/api/campaigns/admin` | `CampaignsController.Update` (line 109) |  |
 | GET | `/api/campaigns/admin/all` | `CampaignsController.GetAllForAdmin` (line 84) |  |
@@ -360,9 +399,9 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 | DELETE | `/api/events/admin/{id}` | `EventsController.DeleteEvent` (line 187) |  |
 | PUT | `/api/events/admin/{id}` | `EventsController.UpdateEvent` (line 178) |  |
 | POST | `/api/events/admin/{id}/logo` | `EventsController.UploadEventLogo` (line 195) |  |
-| POST | `/api/financials/dues/generate` | `FinancialsController.GenerateAnnualDues` (line 137) |  |
-| GET | `/api/financials/member/{memberId}/history` | `FinancialsController.GetMemberPaymentHistory` (line 208) |  |
-| DELETE | `/api/financials/payment/{id}` | `FinancialsController.DeletePayment` (line 195) |  |
+| POST | `/api/financials/dues/generate` | `FinancialsController.GenerateAnnualDues` (line 139) |  |
+| GET | `/api/financials/member/{memberId}/history` | `FinancialsController.GetMemberPaymentHistory` (line 210) |  |
+| DELETE | `/api/financials/payment/{id}` | `FinancialsController.DeletePayment` (line 197) |  |
 | PATCH | `/api/financials/update-status/{id}` | `FinancialsController.UpdateStatus` (line 82) |  |
 | POST | `/api/gallery/admin` | `GalleryController.CreateGallery` (line 108) |  |
 | GET | `/api/gallery/admin/pending` | `GalleryController.GetPendingApprovals` (line 231) |  |
@@ -386,11 +425,11 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 | PUT | `/api/lookups/{id}` | `LookupsController.UpdateLookup` (line 65) |  |
 | GET | `/api/mentorship/admin/all` | `MentorshipController.GetAllForAdmin` (line 91) |  |
 | POST | `/api/news` | `NewsController.CreateNews` (line 70) |  |
+| GET | `/api/news/News/Pending` | `NewsController.GetPendingSubmissions` (line 62) |  |
 | GET | `/api/news/admin` | `NewsController.GetAllNewsForAdmin` (line 52) |  |
 | GET | `/api/news/admin/pending` | `NewsController.GetPendingSubmissions` (line 62) |  |
 | POST | `/api/news/admin/{id:int}/approve` | `NewsController.ApproveArticle` (line 137) |  |
 | POST | `/api/news/admin/{id:int}/reject` | `NewsController.RejectArticle` (line 146) |  |
-| GET | `/api/news/News/Pending` | `NewsController.GetPendingSubmissions` (line 62) |  |
 | GET | `/api/news/pending` | `NewsController.GetPendingSubmissions` (line 62) |  |
 | POST | `/api/news/upload-document` | `NewsController.UploadDocument` (line 200) |  |
 | DELETE | `/api/news/{id:int}` | `NewsController.DeleteNews` (line 93) |  |
@@ -410,13 +449,9 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 | DELETE | `/api/site-content/{id:int}` | `SiteContentController.Delete` (line 77) |  |
 | GET | `/api/site-content/{id:int}` | `SiteContentController.GetById` (line 42) |  |
 | PUT | `/api/site-content/{id:int}` | `SiteContentController.Update` (line 60) |  |
-| POST | `/api/theme` | `ThemeController.CreateTheme` (line 41) |  |
-| GET | `/api/theme/all` | `ThemeController.GetAllThemes` (line 34) |  |
-| DELETE | `/api/theme/{id}` | `ThemeController.DeleteTheme` (line 57) |  |
-| PUT | `/api/theme/{id}` | `ThemeController.UpdateTheme` (line 49) |  |
 | POST | `/api/verify/{shortCode}/revoke` | `CredentialVerificationController.Revoke` (line 30) |  |
 
-### 3.9 AdminOnly + in-body SuperAdmin
+### 3.12 AdminOnly + in-body SuperAdmin
 
 Base policy: `AdminOnly`: SuperAdmin or Admin.
 
@@ -428,7 +463,7 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 | PUT | `/api/admin/members/{id}` | `AdminController.UpdateMemberAdmin` (line 194) |  |
 | GET | `/api/admin/stats` | `AdminController.GetStats` (line 32) |  |
 
-### 3.10 AdminOnly + step-up
+### 3.13 AdminOnly + step-up
 
 Base policy: `AdminOnly`: SuperAdmin or Admin.
 
@@ -436,22 +471,22 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 |---|---|---|---|
 | GET | `/api/admin/elections` | `AdminElectionsController.List` (line 22) |  |
 | POST | `/api/admin/elections` | `AdminElectionsController.Create` (line 26) |  |
-| POST | `/api/admin/elections/{id:int}/candidates` | `AdminElectionsController.AddCandidate` (line 79) |  |
-| DELETE | `/api/admin/elections/{id:int}/candidates/{candidateId:int}` | `AdminElectionsController.RemoveCandidate` (line 89) |  |
-| POST | `/api/admin/elections/{id:int}/close` | `AdminElectionsController.Close` (line 69) |  |
-| POST | `/api/admin/elections/{id:int}/publish` | `AdminElectionsController.Publish` (line 59) |  |
+| POST | `/api/admin/elections/{id:int}/ballot-key` | `AdminElectionsController.SetBallotKey` (line 71) |  |
+| POST | `/api/admin/elections/{id:int}/candidates` | `AdminElectionsController.AddCandidate` (line 94) |  |
+| DELETE | `/api/admin/elections/{id:int}/candidates/{candidateId:int}` | `AdminElectionsController.RemoveCandidate` (line 111) |  |
+| POST | `/api/admin/elections/{id:int}/close` | `AdminElectionsController.Close` (line 84) |  |
+| POST | `/api/admin/elections/{id:int}/publish` | `AdminElectionsController.Publish` (line 60) |  |
 | DELETE | `/api/admin/governance/members/{ecMemberId}/hard-delete` | `AdminGovernanceController.DeleteECMember` (line 80) |  |
 | POST | `/api/admin/sync-members` | `AdminController.SyncMembers` (line 49) |  |
 | POST | `/api/elections` | `ElectionsController.Create` (line 26) |  |
-| POST | `/api/elections/nominations/{nominationId:int}/scrutiny` | `ElectionsController.Scrutinise` (line 92) |  |
-| POST | `/api/elections/{id:int}/count` | `ElectionsController.Count` (line 120) |  |
-| POST | `/api/elections/{id:int}/declare` | `ElectionsController.Declare` (line 126) |  |
-| POST | `/api/elections/{id:int}/officers` | `ElectionsController.AssignOfficer` (line 63) |  |
+| POST | `/api/elections/nominations/{nominationId:int}/scrutiny` | `ElectionsController.Scrutinise` (line 85) |  |
+| POST | `/api/elections/{id:int}/count` | `ElectionsController.Count` (line 122) |  |
+| POST | `/api/elections/{id:int}/declare` | `ElectionsController.Declare` (line 143) |  |
 | POST | `/api/elections/{id:int}/phase` | `ElectionsController.SetPhase` (line 49) |  |
 | POST | `/api/elections/{id:int}/seats` | `ElectionsController.AddSeat` (line 56) |  |
-| POST | `/api/elections/{id:int}/voter-roll/freeze` | `ElectionsController.FreezeRoll` (line 70) |  |
+| POST | `/api/elections/{id:int}/voter-roll/freeze` | `ElectionsController.FreezeRoll` (line 63) |  |
 
-### 3.11 AdminOnly + step-up + in-body SuperAdmin
+### 3.14 AdminOnly + step-up + in-body SuperAdmin
 
 Base policy: `AdminOnly`: SuperAdmin or Admin.
 
@@ -459,7 +494,7 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 |---|---|---|---|
 | POST | `/api/admin/members/{id}/reset-password-admin` | `AdminController.ResetPasswordAdmin` (line 290) |  |
 
-### 3.12 SuperAdminOnly
+### 3.15 SuperAdminOnly
 
 Base policy: `SuperAdminOnly`: SuperAdmin only.
 
@@ -467,12 +502,13 @@ Base policy: `SuperAdminOnly`: SuperAdmin only.
 |---|---|---|---|
 | GET | `/api/activity/admin/global` | `ActivityController.GetGlobalActivity` (line 46) |  |
 | GET | `/api/admin/dev-tracker` | `AdminDevTrackerController.GetOpenItems` (line 26) |  |
+| GET | `/api/admin/election-personas` | `ElectionPersonasController.List` (line 18) |  |
 | GET | `/api/admin/error-logs` | `AdminErrorLogsController.GetErrorLogs` (line 25) |  |
 | POST | `/api/admin/members/{id}/restore` | `AdminController.RestoreMember` (line 178) |  |
 | PUT | `/api/config` | `OrgConfigController.UpdateConfig` (line 25) |  |
-| GET | `/api/financials/fees/config` | `FinancialsController.GetFeeConfigs` (line 145) |  |
-| POST | `/api/financials/fees/config` | `FinancialsController.AddFeeConfig` (line 153) |  |
-| PUT | `/api/financials/fees/config` | `FinancialsController.UpdateFeeConfig` (line 167) |  |
+| GET | `/api/financials/fees/config` | `FinancialsController.GetFeeConfigs` (line 147) |  |
+| POST | `/api/financials/fees/config` | `FinancialsController.AddFeeConfig` (line 155) |  |
+| PUT | `/api/financials/fees/config` | `FinancialsController.UpdateFeeConfig` (line 169) |  |
 | GET | `/api/ledger` | `FinancialLedgerController.GetRecords` (line 26) |  |
 | GET | `/api/ledger/export/csv` | `FinancialLedgerController.ExportCsv` (line 82) |  |
 | GET | `/api/ledger/summary` | `FinancialLedgerController.GetSummary` (line 33) |  |
@@ -484,7 +520,7 @@ Base policy: `SuperAdminOnly`: SuperAdmin only.
 | POST | `/api/roles/remove` | `RolesController.RemoveRole` (line 98) |  |
 | GET | `/api/roles/users` | `RolesController.GetUsers` (line 30) |  |
 
-### 3.13 SuperAdminOnly + in-body SuperAdmin
+### 3.16 SuperAdminOnly + in-body SuperAdmin
 
 Base policy: `SuperAdminOnly`: SuperAdmin only.
 
@@ -493,12 +529,16 @@ Base policy: `SuperAdminOnly`: SuperAdmin only.
 | GET | `/api/payment-config/admin/all` | `PaymentConfigController.GetAllConfigs` (line 53) |  |
 | PUT | `/api/payment-config/admin/{id}` | `PaymentConfigController.UpdateConfig` (line 84) |  |
 
-### 3.14 SuperAdminOnly + step-up
+### 3.17 SuperAdminOnly + step-up
 
 Base policy: `SuperAdminOnly`: SuperAdmin only.
 
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
+| POST | `/api/admin/election-personas` | `ElectionPersonasController.Create` (line 23) |  |
+| DELETE | `/api/admin/election-personas/{id:int}` | `ElectionPersonasController.Delete` (line 45) |  |
+| PUT | `/api/admin/election-personas/{id:int}` | `ElectionPersonasController.Update` (line 31) |  |
+| POST | `/api/admin/election-personas/{id:int}/active` | `ElectionPersonasController.SetActive` (line 40) |  |
 | POST | `/api/admin/members/bulk-archive-inactive` | `AdminController.BulkArchiveInactive` (line 170) |  |
 | DELETE | `/api/admin/members/{id}` | `AdminController.ArchiveMember` (line 160) |  |
 | POST | `/api/ledger` | `FinancialLedgerController.AddRecord` (line 41) |  |
@@ -514,23 +554,19 @@ Base policy: `SuperAdminOnly`: SuperAdmin only.
 
 ## 4. Findings
 
-- Role names inside method bodies are literal strings in 24 routes and in `NotificationHub`.
-  `Constants.Roles` already holds them. A renamed role would silently stop matching.
 - `AdminOnly` is written two ways: `Constants.Policies.AdminOnly` and `Policies.AdminOnly` (with a
   `using static`). Both resolve to the same constant, so this is a style gap, not a bug.
-- No test reads the attributes across all controllers. A dropped `[Authorize(Policy = ...)]` on an
-  admin action would fall back to "any signed-in user" and no test would fail.
-- `FinancialsController.DownloadReceipt` returns `Forbid("You can only download your own
-  receipts.")` (`FinancialsController.cs:102`). `ControllerBase.Forbid(string)` takes an
-  authentication scheme name, not a message. At runtime ASP.NET looks for a scheme with that name,
-  finds none and throws, so the caller gets a 500 instead of a 403. The unit test
-  `DownloadReceipt_NonAdminDoesNotOwnPayment_ReturnsForbid` only checks the result type, so it
-  passes.
+- Fixed since the 2026-09-26 review: in-body role checks used the literal strings `"Admin"` and
+  `"SuperAdmin"` in 24 routes and in `NotificationHub`; they now use `Constants.Roles`.
+  `FinancialsController.DownloadReceipt` called `Forbid(string)`, which takes a scheme name and so
+  gave a 500; it now calls `Forbid()` (`FinancialsController.cs:102` explains why). No test read
+  the attributes across all controllers; `AuthorizationPolicyReflectionTests` now does (84.44).
 
 ## 5. Tests that pin authorization
 
 | Test file | What it pins |
 |---|---|
+| `GHCAA.Tests/Controllers/AuthorizationPolicyReflectionTests.cs` | every action's effective policy, `[AllowAnonymous]` and `[RequireStepUp]`, read by reflection and compared with a list kept in step with section 3 (84.44) |
 | `GHCAA.Tests/Filters/RequireStepUpAttributeTests.cs` | step-up denied when the claim is missing, not a number or expired; allowed when recent; TTL from config; body carries `STEP_UP_REQUIRED` |
 | `GHCAA.Tests/Controllers/DestructiveStepUpActionsTests.cs` | results of two step-up actions (`RolesController.DeleteUser`, `AdminGovernanceController.DeleteECMember`), including 401 with no caller id. It does not check that the attribute is present |
 | `GHCAA.Tests/Controllers/AuthControllerMutationTests.cs` | 401 on failed Google and Facebook login and on missing, invalid, inactive or archived refresh; step-up request and verify |
@@ -542,5 +578,6 @@ Base policy: `SuperAdminOnly`: SuperAdmin only.
 | `GHCAA.Tests/Controllers/PollControllerTests.cs` | 401 on member actions with no member claim |
 | `GHCAA.Web/src/app/core/interceptors/step-up-interceptor.spec.ts`, `step-up.service.spec.ts` | the web client prompts on `STEP_UP_REQUIRED` and retries |
 
-These are unit tests that call the controller directly, so none of them exercise the policy
-attributes themselves. Policy enforcement is covered only by the framework.
+Apart from the reflection test, these are unit tests that call the controller directly. The
+reflection test proves each attribute is present. That the framework then enforces it is left to
+ASP.NET.

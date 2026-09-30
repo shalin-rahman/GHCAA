@@ -7,6 +7,7 @@ import { NetworkingService } from '../../core/services/networking.service';
 import { AlertService } from '../../core/services/alert.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NewsService } from '../../core/services/news.service';
+import { ElectionsService } from '../../core/services/elections.service';
 import { of } from 'rxjs';
 import { provideRouter } from '@angular/router';
 import { MEMBERSHIP_TYPES } from '../../core/constants/app.constants';
@@ -20,6 +21,7 @@ describe('Dashboard Component', () => {
     let alertServiceMock: any;
     let authServiceMock: any;
     let newsServiceMock: any;
+    let electionsServiceMock: any;
 
     beforeEach(async () => {
         profileServiceMock = {
@@ -44,6 +46,9 @@ describe('Dashboard Component', () => {
         newsServiceMock = {
             getNews: vi.fn().mockReturnValue(of([]))
         };
+        electionsServiceMock = {
+            getMyAppointments: vi.fn().mockReturnValue(of([]))
+        };
 
         await TestBed.configureTestingModule({
             imports: [Dashboard],
@@ -54,6 +59,7 @@ describe('Dashboard Component', () => {
                 { provide: AlertService, useValue: alertServiceMock },
                 { provide: AuthService, useValue: authServiceMock },
                 { provide: NewsService, useValue: newsServiceMock },
+                { provide: ElectionsService, useValue: electionsServiceMock },
                 provideRouter([])
             ]
         }).compileComponents();
@@ -65,6 +71,18 @@ describe('Dashboard Component', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('lists election appointments still waiting for an answer, and not accepted ones', () => {
+        electionsServiceMock.getMyAppointments.mockReturnValue(of([
+            { id: 1, acceptedAt: null },
+            { id: 2, acceptedAt: '2026-09-01T00:00:00Z' }
+        ]));
+        component.ngOnInit();
+
+        expect(component.pendingRows()).toEqual([
+            { label: 'Election appointments awaiting your answer', count: 1, link: '/officials/my-appointments' }
+        ]);
     });
 
     it('should load overview data on init', () => {

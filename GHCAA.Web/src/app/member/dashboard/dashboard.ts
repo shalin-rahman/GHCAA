@@ -7,11 +7,13 @@ import { ProfileService } from '../../core/services/profile.service';
 import { EventsService } from '../../core/services/events.service';
 import { NetworkingService } from '../../core/services/networking.service';
 import { NewsService } from '../../core/services/news.service';
+import { ElectionsService } from '../../core/services/elections.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { Icon } from '../../common/icon/icon';
 import { getMembershipTypeLabel } from '../../core/constants/app.constants';
+import { ElectionAppointmentDto } from '../../core/models/election.models';
 
 @Component({
   selector: 'app-dashboard',
@@ -26,6 +28,7 @@ export class Dashboard implements OnInit {
   private eventsService = inject(EventsService);
   private networkingService = inject(NetworkingService);
   private newsService = inject(NewsService);
+  private electionsService = inject(ElectionsService);
 
   profile = signal<any>(null);
   eventCount = signal<number>(0);
@@ -45,8 +48,10 @@ export class Dashboard implements OnInit {
     return this.profile()?.rank ?? '—';
   }
 
-  private mapPendingRows(pending: any): { label: string; count: number; link: string }[] {
-    if (!pending) return [];
+  private mapPendingRows(pending: any, appointments: ElectionAppointmentDto[]): { label: string; count: number; link: string }[] {
+    const awaiting = appointments.filter(a => !a.acceptedAt).length;
+    const appointmentRow = { label: 'Election appointments awaiting your answer', count: awaiting, link: '/officials/my-appointments' };
+    if (!pending) return awaiting > 0 ? [appointmentRow] : [];
     const countOf = (list: any): number => Array.isArray(list) ? list.length : 0;
 
     return [
@@ -55,6 +60,7 @@ export class Dashboard implements OnInit {
       { label: 'Event registrations awaiting approval', count: countOf(pending.pendingEventRegistrations ?? pending.PendingEventRegistrations), link: '/portal/events' },
       { label: 'Family-link requests awaiting response', count: countOf(pending.familyLinkRequestsSent ?? pending.FamilyLinkRequestsSent), link: '/portal/requests' },
       { label: 'Mentorship requests awaiting response', count: countOf(pending.mentorshipRequestsSent ?? pending.MentorshipRequestsSent), link: '/portal/requests' },
+      appointmentRow,
     ].filter(row => row.count > 0);
   }
 
@@ -66,11 +72,12 @@ export class Dashboard implements OnInit {
       events: this.eventsService.getEvents().pipe(catchError(() => of([]))),
       members: this.networkingService.getRecentlyJoined(6).pipe(catchError(() => of({items:[]}))),
       news: this.newsService.getNews(undefined, true).pipe(catchError(() => of([]))),
-      pending: this.profileService.getMyPendingSummary().pipe(catchError(() => of(null)))
+      pending: this.profileService.getMyPendingSummary().pipe(catchError(() => of(null))),
+      appointments: this.electionsService.getMyAppointments().pipe(catchError(() => of([] as ElectionAppointmentDto[])))
     }).subscribe({
-      next: ({ profile, events, members, news, pending }) => {
+      next: ({ profile, events, members, news, pending, appointments }) => {
         this.profile.set(profile);
-        this.pendingRows.set(this.mapPendingRows(pending));
+        this.pendingRows.set(this.mapPendingRows(pending, appointments));
 
         const upcoming = (events as any[]).filter(e => new Date(e.startDate) >= new Date());
         this.eventCount.set(upcoming.length);

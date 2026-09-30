@@ -168,6 +168,40 @@ class AdminElection {
       );
 }
 
+// One row of GET /me/election-appointments. Revoked rows never come back.
+class ElectionAppointment {
+  final int id;
+  final String electionTitle;
+  final String personaName;
+  final String declarationText;
+  final DateTime? appointedAt;
+  final DateTime? acceptedAt;
+  final bool isLive;
+
+  ElectionAppointment({
+    required this.id,
+    required this.electionTitle,
+    required this.personaName,
+    required this.declarationText,
+    this.appointedAt,
+    this.acceptedAt,
+    this.isLive = false,
+  });
+
+  bool get isPending => acceptedAt == null;
+
+  factory ElectionAppointment.fromJson(Map<String, dynamic> json) =>
+      ElectionAppointment(
+        id: json['id'] as int,
+        electionTitle: json['electionTitle'] as String? ?? '',
+        personaName: json['personaName'] as String? ?? '',
+        declarationText: json['declarationText'] as String? ?? '',
+        appointedAt: AppUtils.parseDate(json['appointedAt'] as String?),
+        acceptedAt: AppUtils.parseDate(json['acceptedAt'] as String?),
+        isLive: json['isLive'] as bool? ?? false,
+      );
+}
+
 class ElectionService {
   final Dio _dio;
   ElectionService(this._dio);
@@ -267,6 +301,23 @@ class ElectionService {
       ))
           .data ??
       <int>[];
+
+  Future<List<ElectionAppointment>> getMyAppointments() async {
+    final response = await _dio.get('/me/election-appointments');
+    return (response.data as List)
+        .map((item) =>
+            ElectionAppointment.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  // Needs step-up; StepUpInterceptor asks for the code and retries.
+  Future<void> acceptAppointment(int id) => _dio.post(
+      '/me/election-appointments/$id/accept',
+      data: {'agreeToDeclaration': true});
+
+  Future<void> declineAppointment(int id, String? reason) => _dio.post(
+      '/me/election-appointments/$id/decline',
+      data: {'reason': reason});
 
   void logFailure(String operation, Object error) =>
       debugPrint('ElectionService.$operation failed: $error');

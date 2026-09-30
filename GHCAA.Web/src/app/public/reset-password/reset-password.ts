@@ -22,6 +22,7 @@ export class ResetPassword {
 
   email = '';
   token = '';
+  invite = false;
   newPassword = '';
   confirmPassword = '';
   
@@ -37,7 +38,9 @@ export class ResetPassword {
   constructor() {
     this.email = this.route.snapshot.queryParamMap.get('email') || '';
     this.token = this.route.snapshot.queryParamMap.get('token') || '';
-    
+    // An election appointment invite reuses this link, so it should not read as a reset.
+    this.invite = this.route.snapshot.queryParamMap.get('invite') === '1';
+
     if (!this.email || !this.token) {
       this.error.set('Invalid reset link. Please request a new one from an administrator.');
     }

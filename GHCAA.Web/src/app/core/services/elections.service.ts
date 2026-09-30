@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import {
-    AdminElectionDto, CastBallotDto, CastBallotResultDto, CreateElectionRequest, ElectionPhase,
+    AdminElectionDto, CastBallotDto, CastBallotResultDto, CreateElectionRequest, ElectionAppointmentDto, ElectionPhase,
     ElectionResultDto, ElectionSummaryDto,
     NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto
 } from '../models/election.models';
@@ -93,5 +93,18 @@ export class ElectionsService {
 
     getOfficialDocument(id: number, formCode: string): Observable<Blob> {
         return this.http.get(API_ENDPOINTS.ELECTIONS.DOCUMENT(id, formCode), { responseType: 'blob' });
+    }
+
+    getMyAppointments(): Observable<ElectionAppointmentDto[]> {
+        return this.http.get<ElectionAppointmentDto[]>(API_ENDPOINTS.ELECTION_APPOINTMENTS.MINE);
+    }
+
+    // Accept needs step-up; the global interceptor raises the dialog and retries.
+    acceptAppointment(id: number): Observable<void> {
+        return this.http.post<void>(API_ENDPOINTS.ELECTION_APPOINTMENTS.ACCEPT(id), { agreeToDeclaration: true });
+    }
+
+    declineAppointment(id: number, reason: string | null): Observable<void> {
+        return this.http.post<void>(API_ENDPOINTS.ELECTION_APPOINTMENTS.DECLINE(id), { reason });
     }
 }

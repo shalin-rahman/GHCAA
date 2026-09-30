@@ -224,3 +224,25 @@ export interface SaveElectionPersonaDto {
     declarationText: string;
     sortOrder: number;
 }
+
+/** One row of `ElectionAppointmentDto` (37.12d). `isLive` means accepted, signed, not revoked, not expired. */
+export interface ElectionAppointmentDto {
+    id: number;
+    electionId: number;
+    electionTitle: string;
+    personaId: number;
+    personaName: string;
+    declarationText: string;
+    userId: number;
+    memberId: number | null;
+    displayName: string;
+    email: string;
+    phone: string | null;
+    appointedAt: string;
+    acceptedAt: string | null;
+    declarationSignedAt: string | null;
+    revokedAt: string | null;
+    revokedReason: string | null;
+    expiresAt: string | null;
+    isLive: boolean;
+}

@@ -144,6 +144,20 @@ export const routes: Routes = [
         ]
     },
     {
+        // An appointed official may be an outsider with a login but no member record, so this
+        // sits outside /portal and its memberGuard.
+        path: 'officials',
+        loadComponent: () => import('./layouts/portal-layout/portal-layout').then(m => m.PortalLayout),
+        canActivate: [authGuard],
+        children: [
+            { path: '', redirectTo: 'my-appointments', pathMatch: 'full' },
+            {
+                path: 'my-appointments',
+                loadComponent: () => import('./officials/my-appointments/my-appointments').then(m => m.MyAppointments)
+            }
+        ]
+    },
+    {
         path: 'portal',
         loadComponent: () => import('./layouts/portal-layout/portal-layout').then(m => m.PortalLayout),
         canActivate: [authGuard, memberGuard],

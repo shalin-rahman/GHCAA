@@ -1,0 +1,42 @@
+<section class="page-section animate-fade-in">
+    <app-page-header title="My election appointments" [total]="appointments().length" emptySubtitle="Roles you have been asked to take in an election"></app-page-header>
+
+    @if (loading()) {
+        <app-loading-panel label="Loading appointments..."></app-loading-panel>
+    } @else if (error()) {
+        <div class="empty-state"><h2>Appointments unavailable</h2><p>Try again later.</p></div>
+    } @else if (appointments().length === 0) {
+        <div class="empty-state"><h2>No appointments</h2><p>You have no open election appointment.</p></div>
+    } @else {
+        <div class="flex flex-col gap-2">
+            @for (a of appointments(); track a.id) {
+                <div class="glass-card">
+                    <h2>{{ a.personaName }}</h2>
+                    <p class="text-muted">{{ a.electionTitle }}. Appointed {{ a.appointedAt | date: 'mediumDate' }}.</p>
+
+                    @if (a.isLive) {
+                        <p>You accepted this role on {{ a.acceptedAt | date: 'medium' }}.</p>
+                    } @else if (a.acceptedAt) {
+                        <p class="text-muted">This appointment has expired.</p>
+                    } @else {
+                        <h3>Declaration</h3>
+                        <p class="declaration-text">{{ a.declarationText }}</p>
+                        <label class="flex gap-2">
+                            <input type="checkbox" [(ngModel)]="agreed[a.id]" [name]="'agree-' + a.id">
+                            I have read this declaration and agree to it.
+                        </label>
+                        <div class="form-group">
+                            <label [for]="'reason-' + a.id">Reason, if you decline</label>
+                            <input type="text" class="form-control" maxlength="400" [id]="'reason-' + a.id"
+                                [(ngModel)]="reasons[a.id]" [name]="'reason-' + a.id">
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-primary" [disabled]="busyId() === a.id || !agreed[a.id]" (click)="accept(a)">Accept</button>
+                            <button type="button" class="btn btn-outline" [disabled]="busyId() === a.id" (click)="decline(a)">Decline</button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</section>

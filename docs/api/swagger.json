@@ -357,6 +357,29 @@
         }
       }
     },
+    "/api/admin/members/{id}/revert-approval": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/admin/members/{id}/reject": {
       "post": {
         "tags": [
@@ -716,6 +739,292 @@
         }
       }
     },
+    "/api/admin/dev-tracker": {
+      "get": {
+        "tags": [
+          "AdminDevTracker"
+        ],
+        "parameters": [
+          {
+            "name": "priority",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/elections": {
+      "get": {
+        "tags": [
+          "AdminElections"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "AdminElections"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdminElectionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdminElectionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdminElectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/elections/{id}/publish": {
+      "post": {
+        "tags": [
+          "AdminElections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/elections/{id}/ballot-key": {
+      "post": {
+        "tags": [
+          "AdminElections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetBallotKeyRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetBallotKeyRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetBallotKeyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/elections/{id}/close": {
+      "post": {
+        "tags": [
+          "AdminElections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/elections/{id}/candidates": {
+      "post": {
+        "tags": [
+          "AdminElections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveCandidateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveCandidateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveCandidateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/elections/{id}/candidates/{candidateId}": {
+      "delete": {
+        "tags": [
+          "AdminElections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/error-logs": {
+      "get": {
+        "tags": [
+          "AdminErrorLogs"
+        ],
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/admin/governance/periods": {
       "get": {
         "tags": [
@@ -899,6 +1208,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "notifyMember",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -921,6 +1237,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "notifyMember",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -1102,6 +1425,306 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/SocialProvider"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/archive/public": {
+      "get": {
+        "tags": [
+          "Archive"
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/archive/items/{id}": {
+      "get": {
+        "tags": [
+          "Archive"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/archive/admin/items": {
+      "get": {
+        "tags": [
+          "Archive"
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/archive/admin/collections": {
+      "get": {
+        "tags": [
+          "Archive"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Archive"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveCollectionDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveCollectionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveCollectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/archive/admin/collections/{id}": {
+      "put": {
+        "tags": [
+          "Archive"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveCollectionDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveCollectionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveCollectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Archive"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/archive/items": {
+      "post": {
+        "tags": [
+          "Archive"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveItemDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveItemDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/archive/admin/items/{id}": {
+      "put": {
+        "tags": [
+          "Archive"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveItemDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveItemDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Archive"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/archive/admin/items/{id}/moderate": {
+      "post": {
+        "tags": [
+          "Archive"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ArchiveModerationState"
+            }
+          },
+          {
+            "name": "publication",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ArchivePublicationState"
             }
           }
         ],
@@ -1315,11 +1938,54 @@
         }
       }
     },
+    "/api/auth/step-up/request": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/auth/admin/step-up/request": {
       "post": {
         "tags": [
           "Auth"
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/step-up/verify": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepUpVerifyDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepUpVerifyDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepUpVerifyDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -1760,6 +2426,47 @@
         }
       }
     },
+    "/api/admin/comm/member/{memberId}": {
+      "get": {
+        "tags": [
+          "Communication"
+        ],
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/admin/comm/templates/{id}": {
       "put": {
         "tags": [
@@ -1940,6 +2647,867 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/verify/{shortCode}": {
+      "get": {
+        "tags": [
+          "CredentialVerification"
+        ],
+        "parameters": [
+          {
+            "name": "shortCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/verify/{shortCode}/revoke": {
+      "post": {
+        "tags": [
+          "CredentialVerification"
+        ],
+        "parameters": [
+          {
+            "name": "shortCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeCredentialRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeCredentialRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeCredentialRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/appointments": {
+      "get": {
+        "tags": [
+          "ElectionAppointments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ElectionAppointments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/appointments/{id}/revoke": {
+      "post": {
+        "tags": [
+          "ElectionAppointments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentReasonDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentReasonDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentReasonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/me/election-appointments": {
+      "get": {
+        "tags": [
+          "ElectionAppointments"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/me/election-appointments/{id}/accept": {
+      "post": {
+        "tags": [
+          "ElectionAppointments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptAppointmentDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptAppointmentDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/me/election-appointments/{id}/decline": {
+      "post": {
+        "tags": [
+          "ElectionAppointments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentReasonDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentReasonDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentReasonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/election-personas": {
+      "get": {
+        "tags": [
+          "ElectionPersonas"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ElectionPersonas"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveElectionPersonaDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveElectionPersonaDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveElectionPersonaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/election-personas/{id}": {
+      "put": {
+        "tags": [
+          "ElectionPersonas"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveElectionPersonaDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveElectionPersonaDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveElectionPersonaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ElectionPersonas"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/election-personas/{id}/active": {
+      "post": {
+        "tags": [
+          "ElectionPersonas"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/election-personas": {
+      "get": {
+        "tags": [
+          "ElectionPersonasRead"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateElectionDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateElectionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateElectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/{id}": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/current": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/phase": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectionPhase"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectionPhase"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectionPhase"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/seats": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectionSeatRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectionSeatRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectionSeatRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/voter-roll/freeze": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/nominations": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NominationDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NominationDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/NominationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/nominations/{nominationId}/scrutiny": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "nominationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrutinyDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrutinyDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrutinyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/nominations/{nominationId}/withdraw": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "nominationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/vote": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CastBallotDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CastBallotDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CastBallotDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/count": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CountElectionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CountElectionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CountElectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/declare": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/documents/{formCode}": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "formCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4327,6 +5895,14 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "notifyMember",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
           }
         ],
         "responses": {
@@ -4391,6 +5967,14 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "notifyMember",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
             }
           }
         ],
@@ -4890,6 +6474,14 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "notifyMember",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
           }
         ],
         "responses": {
@@ -5069,6 +6661,38 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/communications/me": {
+      "get": {
+        "tags": [
+          "MemberCommunications"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25
             }
           }
         ],
@@ -6267,6 +7891,68 @@
         }
       }
     },
+    "/api/notifications/device-token": {
+      "post": {
+        "tags": [
+          "Notification"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceTokenDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceTokenDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/notification/device-token": {
+      "post": {
+        "tags": [
+          "Notification"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceTokenDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceTokenDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/notifications": {
       "get": {
         "tags": [
@@ -6972,6 +8658,9 @@
                   "NotifyRelevantUpdates": {
                     "type": "boolean"
                   },
+                  "NotifyCommitteeChanges": {
+                    "type": "boolean"
+                  },
                   "HighestCertificate": {
                     "type": "string"
                   },
@@ -7149,6 +8838,9 @@
                   "style": "form"
                 },
                 "NotifyRelevantUpdates": {
+                  "style": "form"
+                },
+                "NotifyCommitteeChanges": {
                   "style": "form"
                 },
                 "HighestCertificate": {
@@ -7558,6 +9250,304 @@
         }
       }
     },
+    "/api/scholarships/public/funds": {
+      "get": {
+        "tags": [
+          "Scholarships"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/scholarships/public/calls": {
+      "get": {
+        "tags": [
+          "Scholarships"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/scholarships/calls/{callId}/applications": {
+      "post": {
+        "tags": [
+          "Scholarships"
+        ],
+        "parameters": [
+          {
+            "name": "callId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScholarshipApplicationDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScholarshipApplicationDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScholarshipApplicationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/scholarships/status/{referenceCode}": {
+      "get": {
+        "tags": [
+          "Scholarships"
+        ],
+        "parameters": [
+          {
+            "name": "referenceCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/scholarships/review-queue": {
+      "get": {
+        "tags": [
+          "Scholarships"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/scholarships/applications/{applicationId}/review": {
+      "get": {
+        "tags": [
+          "Scholarships"
+        ],
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Scholarships"
+        ],
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitScholarshipReviewDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitScholarshipReviewDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitScholarshipReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/scholarships/admin/applications": {
+      "get": {
+        "tags": [
+          "Scholarships"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/scholarships/admin/funds": {
+      "post": {
+        "tags": [
+          "Scholarships"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScholarshipFundDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScholarshipFundDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScholarshipFundDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/scholarships/admin/calls": {
+      "post": {
+        "tags": [
+          "Scholarships"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScholarshipCallDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScholarshipCallDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScholarshipCallDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/scholarships/admin/awards": {
+      "post": {
+        "tags": [
+          "Scholarships"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScholarshipAwardDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScholarshipAwardDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScholarshipAwardDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/scholarships/admin/awards/{awardId}/disburse": {
+      "post": {
+        "tags": [
+          "Scholarships"
+        ],
+        "parameters": [
+          {
+            "name": "awardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/secure-files/{filePath}": {
       "get": {
         "tags": [
@@ -7803,17 +9793,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SpecialDayTheme"
+                "$ref": "#/components/schemas/SpecialDayThemeSaveDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/SpecialDayTheme"
+                "$ref": "#/components/schemas/SpecialDayThemeSaveDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/SpecialDayTheme"
+                "$ref": "#/components/schemas/SpecialDayThemeSaveDto"
               }
             }
           }
@@ -7862,17 +9852,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SpecialDayTheme"
+                "$ref": "#/components/schemas/SpecialDayThemeSaveDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/SpecialDayTheme"
+                "$ref": "#/components/schemas/SpecialDayThemeSaveDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/SpecialDayTheme"
+                "$ref": "#/components/schemas/SpecialDayThemeSaveDto"
               }
             }
           }
@@ -8009,6 +9999,10 @@
           "isOrgProfile": {
             "type": "boolean"
           },
+          "isGHC": {
+            "type": "boolean",
+            "nullable": true
+          },
           "result": {
             "maxLength": 100,
             "type": "string",
@@ -8017,6 +10011,15 @@
           "certificatePath": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AcceptAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "agreeToDeclaration": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -8043,6 +10046,24 @@
           "spentAt": {
             "type": "string",
             "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminElectionPositionRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "seats": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -8162,6 +10183,9 @@
             "type": "boolean"
           },
           "notifyRelevantUpdates": {
+            "type": "boolean"
+          },
+          "notifyCommitteeChanges": {
             "type": "boolean"
           },
           "highestCertificate": {
@@ -8293,6 +10317,52 @@
         },
         "additionalProperties": false
       },
+      "AppointDto": {
+        "type": "object",
+        "properties": {
+          "personaId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "memberId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "displayName": {
+            "maxLength": 150,
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "maxLength": 256,
+            "type": "string",
+            "format": "email",
+            "nullable": true
+          },
+          "phone": {
+            "maxLength": 30,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AppointmentReasonDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 400,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ApproveMemberDto": {
         "type": "object",
         "additionalProperties": false
@@ -8309,6 +10379,106 @@
           }
         },
         "additionalProperties": false
+      },
+      "ArchiveCollectionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "decade": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "publicationState": {
+            "$ref": "#/components/schemas/ArchivePublicationState"
+          },
+          "moderationState": {
+            "$ref": "#/components/schemas/ArchiveModerationState"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ArchiveItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "archiveCollectionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "narrator": {
+            "type": "string",
+            "nullable": true
+          },
+          "transcript": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "decade": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "linkedMemberId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "fileUploadId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "mediaUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicationState": {
+            "$ref": "#/components/schemas/ArchivePublicationState"
+          },
+          "moderationState": {
+            "$ref": "#/components/schemas/ArchiveModerationState"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ArchiveModerationState": {
+        "enum": [
+          "Pending",
+          "Approved",
+          "Rejected"
+        ],
+        "type": "string"
+      },
+      "ArchivePublicationState": {
+        "enum": [
+          "Draft",
+          "Published",
+          "Archived"
+        ],
+        "type": "string"
       },
       "ArticleCategory": {
         "enum": [
@@ -8332,6 +10502,9 @@
           "reason": {
             "type": "string",
             "nullable": true
+          },
+          "notifyMember": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -8341,6 +10514,24 @@
         "properties": {
           "query": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BallotSeatChoiceDto": {
+        "type": "object",
+        "properties": {
+          "electionSeatId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nominationIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
             "nullable": true
           }
         },
@@ -8463,6 +10654,19 @@
           "memberId": {
             "type": "integer",
             "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CastBallotDto": {
+        "type": "object",
+        "properties": {
+          "seats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BallotSeatChoiceDto"
+            },
             "nullable": true
           }
         },
@@ -8596,6 +10800,16 @@
         },
         "additionalProperties": false
       },
+      "CountElectionRequest": {
+        "type": "object",
+        "properties": {
+          "privateKey": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "CreateAdminDto": {
         "required": [
           "password"
@@ -8614,6 +10828,54 @@
           "role": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateAdminElectionRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "ecPeriodId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nominationOpensOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nominationClosesOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pollingOpensOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pollingClosesOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "positions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminElectionPositionRequest"
+            },
+            "nullable": true
+          },
+          "tieRule": {
+            "$ref": "#/components/schemas/ElectionTieRule"
           }
         },
         "additionalProperties": false
@@ -8704,6 +10966,43 @@
         },
         "additionalProperties": false
       },
+      "CreateElectionDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "ecPeriodId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nominationOpensOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nominationClosesOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pollingOpensOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pollingClosesOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tieRule": {
+            "$ref": "#/components/schemas/ElectionTieRule"
+          }
+        },
+        "additionalProperties": false
+      },
       "CreateEventDto": {
         "required": [
           "description",
@@ -8776,6 +11075,9 @@
           },
           "requiresRegistration": {
             "type": "boolean"
+          },
+          "notifyMembers": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -8809,17 +11111,25 @@
         "additionalProperties": false
       },
       "CreateForumPostDto": {
+        "required": [
+          "content"
+        ],
         "type": "object",
         "properties": {
           "topicId": {
+            "maximum": 2147483647,
+            "minimum": 1,
             "type": "integer",
             "format": "int32"
           },
           "content": {
-            "type": "string",
-            "nullable": true
+            "maxLength": 10000,
+            "minLength": 1,
+            "type": "string"
           },
           "parentPostId": {
+            "maximum": 2147483647,
+            "minimum": 1,
             "type": "integer",
             "format": "int32",
             "nullable": true
@@ -8828,19 +11138,27 @@
         "additionalProperties": false
       },
       "CreateForumTopicDto": {
+        "required": [
+          "content",
+          "title"
+        ],
         "type": "object",
         "properties": {
           "categoryId": {
+            "maximum": 2147483647,
+            "minimum": 1,
             "type": "integer",
             "format": "int32"
           },
           "title": {
-            "type": "string",
-            "nullable": true
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
           },
           "content": {
-            "type": "string",
-            "nullable": true
+            "maxLength": 10000,
+            "minLength": 1,
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -8883,6 +11201,9 @@
           },
           "jobCategory": {
             "$ref": "#/components/schemas/JobCategory"
+          },
+          "notifyMembers": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -9083,6 +11404,168 @@
         },
         "additionalProperties": false
       },
+      "CreateScholarshipApplicationDto": {
+        "required": [
+          "applicantEmail",
+          "applicantName",
+          "applicantPhone",
+          "class",
+          "guardianName",
+          "institutionName",
+          "meritStatement",
+          "needStatement"
+        ],
+        "type": "object",
+        "properties": {
+          "applicantName": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "applicantEmail": {
+            "maxLength": 320,
+            "minLength": 1,
+            "type": "string",
+            "format": "email"
+          },
+          "applicantPhone": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "institutionName": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "class": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "guardianName": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "householdIncome": {
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "needStatement": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "meritStatement": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateScholarshipAwardDto": {
+        "required": [
+          "scholarshipApplicationId"
+        ],
+        "type": "object",
+        "properties": {
+          "scholarshipApplicationId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "amount": {
+            "minimum": 0.01,
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateScholarshipCallDto": {
+        "required": [
+          "academicYear",
+          "closesOn",
+          "eligibilityCriteria",
+          "opensOn",
+          "scholarshipFundId"
+        ],
+        "type": "object",
+        "properties": {
+          "scholarshipFundId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "academicYear": {
+            "maxLength": 30,
+            "minLength": 1,
+            "type": "string"
+          },
+          "opensOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closesOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "slotCount": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "awardAmount": {
+            "minimum": 0.01,
+            "type": "number",
+            "format": "double"
+          },
+          "eligibilityCriteria": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateScholarshipFundDto": {
+        "required": [
+          "description",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "namedAfter": {
+            "maxLength": 200,
+            "type": "string",
+            "nullable": true
+          },
+          "targetAmount": {
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "CurrencyDto": {
         "type": "object",
         "properties": {
@@ -9139,6 +11622,42 @@
             "nullable": true
           },
           "channel": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeviceTokenDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "nullable": true
+          },
+          "platform": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DocumentEntryDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "group": {
             "type": "string",
             "nullable": true
           }
@@ -9213,6 +11732,29 @@
             "type": "string",
             "nullable": true
           },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedByAdminId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "isArchived": {
+            "type": "boolean"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deletedByAdminId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
           "member": {
             "$ref": "#/components/schemas/Member"
           },
@@ -9273,6 +11815,107 @@
           "LawSecretary",
           "ImmediatePastPresident",
           "InstitutionalRepresentative"
+        ],
+        "type": "string"
+      },
+      "ElectionCandidateOrder": {
+        "enum": [
+          "Random",
+          "Alphabetical"
+        ],
+        "type": "string"
+      },
+      "ElectionPermission": {
+        "enum": [
+          "None",
+          "ViewDashboard",
+          "ViewAudit",
+          "ManageSetup",
+          "ManageVoterRoll",
+          "DecideNominations",
+          "AppointOfficials",
+          "SetBallotKey",
+          "ChangePhase",
+          "Count",
+          "Declare",
+          "DecideAppeals",
+          "Approve"
+        ],
+        "type": "string"
+      },
+      "ElectionPhase": {
+        "enum": [
+          "Announced",
+          "Nomination",
+          "Scrutiny",
+          "Withdrawal",
+          "CandidateList",
+          "Campaign",
+          "Polling",
+          "Counting",
+          "Declared",
+          "Archived"
+        ],
+        "type": "string"
+      },
+      "ElectionSeatRequestDto": {
+        "type": "object",
+        "properties": {
+          "position": {
+            "$ref": "#/components/schemas/ECPosition"
+          },
+          "seatCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectionSettingsDto": {
+        "type": "object",
+        "properties": {
+          "adminKeepsControlAfterHandover": {
+            "type": "boolean"
+          },
+          "twoPersonActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "superAdminActsAlone": {
+            "type": "boolean"
+          },
+          "approvalExpiryHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "accessEndsDaysAfterDeclare": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inviteLinkHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "candidateOrder": {
+            "$ref": "#/components/schemas/ElectionCandidateOrder"
+          },
+          "showTurnoutDuringPolling": {
+            "type": "boolean"
+          },
+          "publishPerSeatBallots": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectionTieRule": {
+        "enum": [
+          "DrawingLots",
+          "RunOff",
+          "ChairCastingVote"
         ],
         "type": "string"
       },
@@ -9555,6 +12198,12 @@
           },
           "enableFundraising": {
             "type": "boolean"
+          },
+          "enableScholarships": {
+            "type": "boolean"
+          },
+          "enableLegacyArchive": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -9637,7 +12286,7 @@
             "format": "int32",
             "nullable": true
           },
-          "isDeleted": {
+          "isArchived": {
             "type": "boolean"
           },
           "deletedAt": {
@@ -9920,6 +12569,10 @@
       "LocalizationDto": {
         "type": "object",
         "properties": {
+          "dateFormat": {
+            "type": "string",
+            "nullable": true
+          },
           "defaultLocale": {
             "type": "string",
             "nullable": true
@@ -10145,6 +12798,9 @@
           "notifyRelevantUpdates": {
             "type": "boolean"
           },
+          "notifyCommitteeChanges": {
+            "type": "boolean"
+          },
           "isArchived": {
             "type": "boolean"
           },
@@ -10175,6 +12831,19 @@
           "contributionPoints": {
             "type": "integer",
             "format": "int32"
+          },
+          "fcmToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "fcmTokenPlatform": {
+            "type": "string",
+            "nullable": true
+          },
+          "fcmTokenUpdatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           },
           "user": {
             "$ref": "#/components/schemas/User"
@@ -10304,6 +12973,36 @@
         },
         "additionalProperties": false
       },
+      "NominationDto": {
+        "type": "object",
+        "properties": {
+          "electionSeatId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "candidateMemberId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "proposerMemberId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seconderMemberId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statement": {
+            "type": "string",
+            "nullable": true
+          },
+          "photoPath": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "OrgConfigDto": {
         "type": "object",
         "properties": {
@@ -10339,6 +13038,16 @@
           },
           "localization": {
             "$ref": "#/components/schemas/LocalizationDto"
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentEntryDto"
+            },
+            "nullable": true
+          },
+          "elections": {
+            "$ref": "#/components/schemas/ElectionSettingsDto"
           }
         },
         "additionalProperties": false
@@ -10525,7 +13234,7 @@
             "format": "int32",
             "nullable": true
           },
-          "isDeleted": {
+          "isArchived": {
             "type": "boolean"
           },
           "deletedAt": {
@@ -10716,6 +13425,9 @@
           "reason": {
             "type": "string",
             "nullable": true
+          },
+          "notifyMember": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -10736,6 +13448,9 @@
           "reason": {
             "type": "string",
             "nullable": true
+          },
+          "notifyMember": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -10814,6 +13529,16 @@
         },
         "additionalProperties": false
       },
+      "RevokeCredentialRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Role": {
         "type": "object",
         "properties": {
@@ -10830,6 +13555,101 @@
             "items": {
               "$ref": "#/components/schemas/User"
             },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SaveCandidateRequest": {
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "positionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statement": {
+            "type": "string",
+            "nullable": true
+          },
+          "proposerMemberId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seconderMemberId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SaveElectionPersonaDto": {
+        "required": [
+          "declarationText",
+          "description",
+          "groupName",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "groupName": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/ElectionPermission"
+          },
+          "minCount": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "showOnPublicBoard": {
+            "type": "boolean"
+          },
+          "takesOverFromAdmin": {
+            "type": "boolean"
+          },
+          "declarationText": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScrutinyDto": {
+        "type": "object",
+        "properties": {
+          "accepted": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
             "nullable": true
           }
         },
@@ -10864,6 +13684,16 @@
             "nullable": true
           },
           "domain": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SetBallotKeyRequest": {
+        "type": "object",
+        "properties": {
+          "publicKey": {
             "type": "string",
             "nullable": true
           }
@@ -11018,6 +13848,72 @@
         },
         "additionalProperties": false
       },
+      "SpecialDayThemeSaveDto": {
+        "required": [
+          "backgroundColor",
+          "endDate",
+          "startDate",
+          "textColor",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "backgroundColor": {
+            "maxLength": 7,
+            "minLength": 1,
+            "type": "string"
+          },
+          "textColor": {
+            "maxLength": 7,
+            "minLength": 1,
+            "type": "string"
+          },
+          "announcementText": {
+            "maxLength": 500,
+            "type": "string",
+            "nullable": true
+          },
+          "animationStyle": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "maxLength": 255,
+            "type": "string",
+            "nullable": true
+          },
+          "sidebarColor": {
+            "maxLength": 7,
+            "type": "string",
+            "nullable": true
+          },
+          "enableGradientFading": {
+            "type": "boolean"
+          },
+          "isEnabled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "StepUpVerifyDto": {
         "required": [
           "code"
@@ -11040,6 +13936,29 @@
           "Rejected"
         ],
         "type": "string"
+      },
+      "SubmitScholarshipReviewDto": {
+        "type": "object",
+        "properties": {
+          "needScore": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "meritScore": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "comments": {
+            "maxLength": 2000,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "UpdateCampaignDto": {
         "required": [
@@ -11184,9 +14103,15 @@
           "requiresRegistration": {
             "type": "boolean"
           },
+          "notifyMembers": {
+            "type": "boolean"
+          },
           "id": {
             "type": "integer",
             "format": "int32"
+          },
+          "notifyOnUpdate": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -11426,6 +14351,9 @@
             "type": "boolean"
           },
           "notifyRelevantUpdates": {
+            "type": "boolean"
+          },
+          "notifyCommitteeChanges": {
             "type": "boolean"
           },
           "highestCertificate": {
@@ -11674,11 +14602,8 @@
           "adminEmailOnNewRegistration": {
             "type": "boolean"
           },
-          "membershipTypes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
+          "notificationChannel": {
+            "type": "string",
             "nullable": true
           }
         },

@@ -58,6 +58,7 @@ import '../../screens/member/governance_screen.dart';
 import '../../core/widgets/main_shell.dart';
 import '../../features/polls/polls_screen.dart';
 import '../../screens/member/election_screen.dart';
+import '../../screens/officials/my_appointments_screen.dart';
 import '../../screens/member/forum/forum_categories_screen.dart';
 import '../../screens/member/forum/forum_topics_screen.dart';
 import '../../screens/member/forum/forum_topic_detail_screen.dart';
@@ -208,6 +209,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/professionals', name: 'professionals', builder: (context, state) => const ProfessionalHubScreen()),
           GoRoute(path: '/polls', name: 'polls', builder: (context, state) => const PollsScreen()),
           GoRoute(path: '/election', name: 'election', builder: (context, state) => const ElectionScreen()),
+          GoRoute(path: '/officials/appointments', name: 'my-appointments', builder: (context, state) => const MyAppointmentsScreen()),
           GoRoute(path: '/messages', name: 'messages', builder: (context, state) => const ChatsScreen()),
           GoRoute(path: '/forum', name: 'forum', builder: (context, state) => const ForumCategoriesScreen()),
           GoRoute(
