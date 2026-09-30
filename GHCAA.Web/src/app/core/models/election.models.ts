@@ -102,6 +102,10 @@ export interface AdminElectionDto {
     hasVoted: boolean;
     // Spec 023 FR-001. Set once the returning officer's public key is stored. Polling cannot open without it.
     ballotKeyFingerprint?: string | null;
+    // Spec 023 (37.12e). ElectionPermission flag names the caller holds on this election.
+    myPermissions?: string[] | null;
+    // True once a live appointment to a persona that takes over from the admin exists.
+    adminHandedOver?: boolean;
 }
 
 export interface CreateElectionRequest {

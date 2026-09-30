@@ -157,6 +157,8 @@ namespace GHCAA.Domain
         public static class ErrorCodes
         {
             public const string StepUpRequired = "STEP_UP_REQUIRED";
+            // Spec 023 (37.12e): the caller lacks the named permission on this election.
+            public const string ElectionPermission = "ELECTION_PERMISSION";
             public const string AlreadyVoted = "ALREADY_VOTED";
             public const string OtpInvalid = "OTP_INVALID";
             public const string PaymentMethodDisabled = "PAYMENT_METHOD_DISABLED";

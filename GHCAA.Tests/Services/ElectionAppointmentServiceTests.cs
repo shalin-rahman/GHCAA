@@ -29,7 +29,7 @@ public sealed class ElectionAppointmentServiceTests : TestBase
         _tokens = new Mock<ITokenService>();
         var orgConfig = new Mock<IOrgConfigService>();
         orgConfig.Setup(s => s.GetConfigAsync()).ReturnsAsync(new OrgConfigDto());
-        _service = new ElectionAppointmentService(_context, orgConfig.Object, new Mock<ICommunicationService>().Object,
+        _service = new ElectionAppointmentService(_context, orgConfig.Object, new ElectionAccessService(_context, orgConfig.Object), new Mock<ICommunicationService>().Object,
             new Mock<INotificationService>().Object, _tokens.Object,
             Microsoft.Extensions.Options.Options.Create(new AppSettingsOptions()), NullLogger<ElectionAppointmentService>.Instance);
 

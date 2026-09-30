@@ -1,10 +1,12 @@
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static GHCAA.Domain.Enums;
@@ -14,15 +16,33 @@ namespace GHCAA.API.Controllers;
 
 [ApiController]
 [Route("api/admin/elections")]
-[Authorize(Policy = Policies.AdminOnly)]
+[Authorize(Policy = Policies.ElectionStaff)]
 [GHCAA.API.Filters.RequireStepUp]
-public sealed class AdminElectionsController(IElectionService service) : ControllerBase
+public sealed class AdminElectionsController(IElectionService service, IElectionAccessService access) : ControllerBase
 {
+    // Admin sees every election. An official sees only the ones they hold a live appointment on.
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken ct)
-        => Ok(await service.ListAdminElectionsAsync(ct));
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+
+        var roles = CallerRoles();
+        var elections = await service.ListAdminElectionsAsync(ct);
+        if (!roles.Contains(Constants.Roles.Admin) && !roles.Contains(Constants.Roles.SuperAdmin))
+        {
+            var mine = await access.ElectionIdsWithLiveAppointmentAsync(userId, ct);
+            elections = elections.Where(e => mine.Contains(e.Id)).ToList();
+        }
+
+        var result = new List<AdminElectionDto>(elections.Count);
+        foreach (var election in elections)
+            result.Add(await WithAccessAsync(election, userId, roles, ct));
+        return Ok(result);
+    }
 
     [HttpPost]
+    [Authorize(Policy = Policies.AdminOnly)]
     public async Task<IActionResult> Create([FromBody] CreateAdminElectionRequest request, CancellationToken ct)
     {
         if (request is null)
@@ -53,14 +73,15 @@ public sealed class AdminElectionsController(IElectionService service) : Control
             await service.AddSeatAsync(created.Id, new ElectionSeatRequestDto(parsed, Math.Max(1, position.Seats)), ct);
         }
 
-        return Ok(await service.GetAdminElectionAsync(created.Id, ct));
+        return Ok(await DetailAsync(created.Id, ct));
     }
 
     [HttpPost("{id:int}/publish")]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ChangePhase)]
     public async Task<IActionResult> Publish(int id, CancellationToken ct)
     {
         var updated = await service.SetPhaseAsync(id, ElectionPhase.Nomination, ct)
-            ? await service.GetAdminElectionAsync(id, ct)
+            ? await DetailAsync(id, ct)
             : null;
 
         return updated is null ? Problem(detail: "Election is not ready to publish.", statusCode: StatusCodes.Status400BadRequest) : Ok(updated);
@@ -68,10 +89,11 @@ public sealed class AdminElectionsController(IElectionService service) : Control
 
     /// <summary>Spec 023 FR-001: stores the returning officer's public key. Allowed only before polling opens.</summary>
     [HttpPost("{id:int}/ballot-key")]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.SetBallotKey)]
     public async Task<IActionResult> SetBallotKey(int id, [FromBody] SetBallotKeyRequest request, CancellationToken ct)
     {
         var (success, error, _) = await service.SetBallotKeyAsync(id, request.PublicKey, ct);
-        if (success) return Ok(await service.GetAdminElectionAsync(id, ct));
+        if (success) return Ok(await DetailAsync(id, ct));
         return error switch
         {
             "not-found" => NotFound(),
@@ -81,16 +103,18 @@ public sealed class AdminElectionsController(IElectionService service) : Control
     }
 
     [HttpPost("{id:int}/close")]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ChangePhase)]
     public async Task<IActionResult> Close(int id, CancellationToken ct)
     {
         var updated = await service.SetPhaseAsync(id, ElectionPhase.Counting, ct)
-            ? await service.GetAdminElectionAsync(id, ct)
+            ? await DetailAsync(id, ct)
             : null;
 
         return updated is null ? Problem(detail: "Election is not ready to close.", statusCode: StatusCodes.Status400BadRequest) : Ok(updated);
     }
 
     [HttpPost("{id:int}/candidates")]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ManageSetup)]
     public async Task<IActionResult> AddCandidate(int id, [FromBody] SaveCandidateRequest request, CancellationToken ct)
     {
         var (success, error, election) = await service.AddCandidateAsync(id, request, ct);
@@ -108,6 +132,7 @@ public sealed class AdminElectionsController(IElectionService service) : Control
     }
 
     [HttpDelete("{id:int}/candidates/{candidateId:int}")]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ManageSetup)]
     public async Task<IActionResult> RemoveCandidate(int id, int candidateId, CancellationToken ct)
     {
         var (success, error) = await service.RemoveCandidateAsync(id, candidateId, ct);
@@ -120,6 +145,27 @@ public sealed class AdminElectionsController(IElectionService service) : Control
             };
 
         return Ok();
+    }
+
+    // Every reply carries the caller's permissions, so the page can swap one election in place.
+    private async Task<AdminElectionDto?> DetailAsync(int id, CancellationToken ct)
+    {
+        var election = await service.GetAdminElectionAsync(id, ct);
+        if (election is null || !int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return election;
+        return await WithAccessAsync(election, userId, CallerRoles(), ct);
+    }
+
+    private List<string> CallerRoles() => User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+
+    private async Task<AdminElectionDto> WithAccessAsync(AdminElectionDto election, int userId, IReadOnlyCollection<string> roles, CancellationToken ct)
+    {
+        var perms = await access.GetPermissionsAsync(election.Id, userId, roles, ct);
+        var names = Enum.GetValues<ElectionPermission>()
+            .Where(p => p != ElectionPermission.None && perms.HasFlag(p))
+            .Select(p => p.ToString())
+            .ToList();
+        return election with { MyPermissions = names, AdminHandedOver = await access.IsHandedOverAsync(election.Id, ct) };
     }
 
     private static ECPosition ParsePosition(string value)

@@ -21,6 +21,7 @@ namespace GHCAA.Infrastructure.Services;
 public sealed class ElectionAppointmentService(
     ApplicationDbContext db,
     IOrgConfigService orgConfig,
+    IElectionAccessService access,
     ICommunicationService communication,
     INotificationService notifications,
     ITokenService tokens,
@@ -194,7 +195,7 @@ public sealed class ElectionAppointmentService(
 
     public async Task<IReadOnlyList<ElectionAppointmentDto>?> ListAsync(int electionId, int actorUserId, CancellationToken ct)
     {
-        if (!await IsAdminAsync(actorUserId, ct) && !await HasPermissionAsync(electionId, actorUserId, ElectionPermission.ViewDashboard, ct))
+        if (!await HasAsync(electionId, actorUserId, ElectionPermission.ViewDashboard, ct))
             return null;
         return await LoadAsync(db.ElectionAppointments.Where(x => x.ElectionId == electionId), ct);
     }
@@ -208,34 +209,17 @@ public sealed class ElectionAppointmentService(
             .Select(x => new ElectionAppointmentSummaryDto(x.ElectionId, x.Election!.Title, x.Persona!.Name, x.Persona.Permissions))
             .ToListAsync(ct);
 
-    // Admin appoints until a persona that takes over from admin is live on the election.
-    // After that only someone holding AppointOfficials there, or a SuperAdmin, may.
-    private async Task<bool> MayAppointAsync(int electionId, int actorUserId, CancellationToken ct)
+    // Admin appoints until a persona that takes over from admin is live on the election, unless the
+    // org config keeps admin in control. After that only AppointOfficials holders or a SuperAdmin may.
+    private Task<bool> MayAppointAsync(int electionId, int actorUserId, CancellationToken ct) =>
+        HasAsync(electionId, actorUserId, ElectionPermission.AppointOfficials, ct);
+
+    // Services get a user id, not claims, so the roles come from the database.
+    private async Task<bool> HasAsync(int electionId, int userId, ElectionPermission needed, CancellationToken ct)
     {
-        var roles = await RoleNamesAsync(actorUserId, ct);
-        if (roles.Contains(Constants.Roles.SuperAdmin))
-            return true;
-
-        var takenOver = await db.ElectionAppointments.Where(ElectionAppointment.LiveAt(DateTime.UtcNow))
-            .AnyAsync(x => x.ElectionId == electionId && x.Persona!.TakesOverFromAdmin, ct);
-        if (!takenOver)
-            return roles.Contains(Constants.Roles.Admin);
-
-        return await HasPermissionAsync(electionId, actorUserId, ElectionPermission.AppointOfficials, ct);
+        var roles = await db.Users.Where(x => x.Id == userId).SelectMany(x => x.Roles.Select(r => r.Name)).ToListAsync(ct);
+        return await access.HasAsync(electionId, userId, roles, needed, ct);
     }
-
-    private async Task<bool> IsAdminAsync(int userId, CancellationToken ct)
-    {
-        var roles = await RoleNamesAsync(userId, ct);
-        return roles.Contains(Constants.Roles.SuperAdmin) || roles.Contains(Constants.Roles.Admin);
-    }
-
-    private async Task<List<string>> RoleNamesAsync(int userId, CancellationToken ct) =>
-        await db.Users.Where(x => x.Id == userId).SelectMany(x => x.Roles.Select(r => r.Name)).ToListAsync(ct);
-
-    private Task<bool> HasPermissionAsync(int electionId, int userId, ElectionPermission permission, CancellationToken ct) =>
-        db.ElectionAppointments.Where(ElectionAppointment.LiveAt(DateTime.UtcNow))
-            .AnyAsync(x => x.ElectionId == electionId && x.UserId == userId && (x.Persona!.Permissions & permission) != 0, ct);
 
     // A member hears through the portal. Anyone else gets the password-reset link so they can set a
     // password for the new login. The send is best effort; the appointment stands either way.

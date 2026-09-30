@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static GHCAA.Domain.Constants;
+using static GHCAA.Domain.Enums;
 
 namespace GHCAA.API.Controllers;
 
-// Spec 023 (37.12d). The service checks the per-election permission until the 37.12e filter does it here.
+// Spec 023 (37.12d). The service repeats the AppointOfficials check, since it is also called outside HTTP.
 [ApiController]
 [Route("api")]
 public sealed class ElectionAppointmentsController(IElectionAppointmentService service) : ControllerBase
@@ -28,6 +29,7 @@ public sealed class ElectionAppointmentsController(IElectionAppointmentService s
     [HttpPost("elections/{id:int}/appointments")]
     [Authorize(Policy = Policies.ElectionStaff)]
     [GHCAA.API.Filters.RequireStepUp]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.AppointOfficials)]
     public async Task<IActionResult> Appoint(int id, [FromBody] AppointDto dto, CancellationToken ct)
     {
         if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
@@ -39,6 +41,7 @@ public sealed class ElectionAppointmentsController(IElectionAppointmentService s
     [HttpPost("elections/appointments/{id:int}/revoke")]
     [Authorize(Policy = Policies.ElectionStaff)]
     [GHCAA.API.Filters.RequireStepUp]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.AppointOfficials, ElectionIdLookup.Appointment)]
     public async Task<IActionResult> Revoke(int id, [FromBody] AppointmentReasonDto dto, CancellationToken ct)
     {
         if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))

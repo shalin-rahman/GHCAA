@@ -99,4 +99,20 @@ void main() {
     expect(withKey.ballotKeyFingerprint, 'ab12');
     expect(withoutKey.ballotKeyFingerprint, isNull);
   });
+
+  // FR-39: the admin card learns what the caller may do on this election.
+  test('reads my permissions and the handover flag', () {
+    final e = AdminElection.fromJson({
+      'id': 1,
+      'title': 'EC',
+      'myPermissions': ['Count', 'Declare'],
+      'adminHandedOver': true,
+    });
+    final bare = AdminElection.fromJson({'id': 2, 'title': 'EC'});
+
+    expect(e.myPermissions, ['Count', 'Declare']);
+    expect(e.adminHandedOver, isTrue);
+    expect(bare.myPermissions, isEmpty);
+    expect(bare.adminHandedOver, isFalse);
+  });
 }

@@ -132,6 +132,10 @@ class AdminElection {
   final int eligibleVoterCount;
   // Spec 023 FR-001. Set once the returning officer's public key is stored.
   final String? ballotKeyFingerprint;
+  // Spec 023 (37.12e). ElectionPermission flag names the caller holds on this election.
+  final List<String> myPermissions;
+  // True once a live appointment to a persona that takes over from the admin exists.
+  final bool adminHandedOver;
 
   const AdminElection({
     required this.id,
@@ -147,6 +151,8 @@ class AdminElection {
     required this.isActive,
     required this.eligibleVoterCount,
     this.ballotKeyFingerprint,
+    this.myPermissions = const [],
+    this.adminHandedOver = false,
   });
 
   factory AdminElection.fromJson(Map<String, dynamic> json) => AdminElection(
@@ -165,6 +171,11 @@ class AdminElection {
         isActive: json['isActive'] as bool? ?? false,
         eligibleVoterCount: json['eligibleVoterCount'] as int? ?? 0,
         ballotKeyFingerprint: json['ballotKeyFingerprint'] as String?,
+        myPermissions: (json['myPermissions'] as List<dynamic>?)
+                ?.map((e) => e.toString())
+                .toList() ??
+            const [],
+        adminHandedOver: json['adminHandedOver'] as bool? ?? false,
       );
 }
 

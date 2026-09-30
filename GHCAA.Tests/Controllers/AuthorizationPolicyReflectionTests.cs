@@ -48,13 +48,13 @@ namespace GHCAA.Tests.Controllers
             [("AdminController", "UpdateMemberPhoto")] = new(Constants.Policies.AdminOnly, false, false),
             [("AdminController", "UpdateMemberSignature")] = new(Constants.Policies.AdminOnly, false, false),
             [("AdminDevTrackerController", "GetOpenItems")] = new(Constants.Policies.SuperAdminOnly, false, false),
-            [("AdminElectionsController", "AddCandidate")] = new(Constants.Policies.AdminOnly, false, true),
-            [("AdminElectionsController", "Close")] = new(Constants.Policies.AdminOnly, false, true),
+            [("AdminElectionsController", "AddCandidate")] = new(Constants.Policies.ElectionStaff, false, true),
+            [("AdminElectionsController", "Close")] = new(Constants.Policies.ElectionStaff, false, true),
             [("AdminElectionsController", "Create")] = new(Constants.Policies.AdminOnly, false, true),
-            [("AdminElectionsController", "List")] = new(Constants.Policies.AdminOnly, false, true),
-            [("AdminElectionsController", "Publish")] = new(Constants.Policies.AdminOnly, false, true),
-            [("AdminElectionsController", "RemoveCandidate")] = new(Constants.Policies.AdminOnly, false, true),
-            [("AdminElectionsController", "SetBallotKey")] = new(Constants.Policies.AdminOnly, false, true),
+            [("AdminElectionsController", "List")] = new(Constants.Policies.ElectionStaff, false, true),
+            [("AdminElectionsController", "Publish")] = new(Constants.Policies.ElectionStaff, false, true),
+            [("AdminElectionsController", "RemoveCandidate")] = new(Constants.Policies.ElectionStaff, false, true),
+            [("AdminElectionsController", "SetBallotKey")] = new(Constants.Policies.ElectionStaff, false, true),
             [("AdminErrorLogsController", "GetErrorLogs")] = new(Constants.Policies.SuperAdminOnly, false, false),
             [("AdminGovernanceController", "ActivatePeriod")] = new(Constants.Policies.AdminOnly, false, false),
             [("AdminGovernanceController", "AssignMember")] = new(Constants.Policies.AdminOnly, false, false),
@@ -131,18 +131,18 @@ namespace GHCAA.Tests.Controllers
             [("ElectionPersonasController", "SetActive")] = new(Constants.Policies.SuperAdminOnly, false, true),
             [("ElectionPersonasController", "Update")] = new(Constants.Policies.SuperAdminOnly, false, true),
             [("ElectionPersonasReadController", "List")] = new(null, false, false),
-            [("ElectionsController", "AddSeat")] = new(Constants.Policies.AdminOnly, false, true),
-            [("ElectionsController", "Count")] = new(Constants.Policies.AdminOnly, false, true),
+            [("ElectionsController", "AddSeat")] = new(Constants.Policies.ElectionStaff, false, true),
+            [("ElectionsController", "Count")] = new(Constants.Policies.ElectionStaff, false, true),
             [("ElectionsController", "Create")] = new(Constants.Policies.AdminOnly, false, true),
-            [("ElectionsController", "Declare")] = new(Constants.Policies.AdminOnly, false, true),
+            [("ElectionsController", "Declare")] = new(Constants.Policies.ElectionStaff, false, true),
             [("ElectionsController", "Document")] = new(null, true, false),
-            [("ElectionsController", "FreezeRoll")] = new(Constants.Policies.AdminOnly, false, true),
+            [("ElectionsController", "FreezeRoll")] = new(Constants.Policies.ElectionStaff, false, true),
             [("ElectionsController", "Get")] = new(null, true, false),
             [("ElectionsController", "GetCurrent")] = new(null, true, false),
             [("ElectionsController", "Nominate")] = new(null, false, false),
             [("ElectionsController", "Nominations")] = new(null, true, false),
-            [("ElectionsController", "Scrutinise")] = new(Constants.Policies.AdminOnly, false, true),
-            [("ElectionsController", "SetPhase")] = new(Constants.Policies.AdminOnly, false, true),
+            [("ElectionsController", "Scrutinise")] = new(Constants.Policies.ElectionStaff, false, true),
+            [("ElectionsController", "SetPhase")] = new(Constants.Policies.ElectionStaff, false, true),
             [("ElectionsController", "Vote")] = new(null, false, true),
             [("ElectionsController", "Withdraw")] = new(null, false, false),
             [("EventsController", "AddExpense")] = new(Constants.Policies.AdminOnly, false, false),
@@ -417,6 +417,26 @@ namespace GHCAA.Tests.Controllers
                 message.Add($"Attribute drift: {string.Join("; ", drifted)}");
 
             Assert.That(message, Is.Empty, string.Join("\n", message));
+        }
+
+        // Spec 023 (37.12e): ElectionStaff alone lets any official in, so an election write must also
+        // carry the per-election filter, unless it is AdminOnly. Member actions check the member instead.
+        // Actions a member or appointee takes on their own row, not on the election.
+        private static readonly HashSet<string> ElectionMemberActions = ["Nominate", "Withdraw", "Vote", "Accept", "Decline"];
+
+        [Test]
+        public void EveryElectionWriteAction_HasThePermissionFilterOrAdminOnly()
+        {
+            var controllers = new[] { typeof(GHCAA.API.Controllers.ElectionsController), typeof(GHCAA.API.Controllers.AdminElectionsController), typeof(GHCAA.API.Controllers.ElectionAppointmentsController) };
+            var unguarded = DiscoverActions()
+                .Where(x => controllers.Contains(x.ControllerType) && !ElectionMemberActions.Contains(x.Action.Name))
+                .Where(x => x.Action.GetCustomAttributes<Microsoft.AspNetCore.Mvc.Routing.HttpMethodAttribute>().Any(h => h is not HttpGetAttribute))
+                .Where(x => x.Action.GetCustomAttribute<RequireElectionPermissionAttribute>() == null
+                    && ResolveActual(x.ControllerType, x.Action).Policy != Constants.Policies.AdminOnly)
+                .Select(x => $"{x.ControllerType.Name}.{x.Action.Name}")
+                .ToList();
+
+            Assert.That(unguarded, Is.Empty, $"Election writes with neither the permission filter nor AdminOnly: {string.Join(", ", unguarded)}");
         }
     }
 }

@@ -140,11 +140,6 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         var n = await _db.Nominations.Include(x => x.Election).FirstOrDefaultAsync(x => x.Id == nominationId, ct);
         if (n == null || n.Status is NominationStatus.Withdrawn) return false;
         if (n.Election?.Phase != ElectionPhase.Scrutiny) return false;
-        // Stays until the 37.12e permission filter guards the endpoint. Then this check goes.
-        var now = DateTime.UtcNow;
-        if (!await _db.ElectionAppointments.Where(ElectionAppointment.LiveAt(now)).AnyAsync(x => x.ElectionId == n.ElectionId && x.UserId == decidedByUserId &&
-            (x.Persona!.Permissions & ElectionPermission.DecideNominations) != 0, ct))
-            return false;
         n.Status = request.Accepted ? NominationStatus.Accepted : NominationStatus.Rejected;
         _db.ScrutinyDecisions.Add(new ScrutinyDecision { NominationId = nominationId, DecidedByUserId = decidedByUserId, Accepted = request.Accepted, Reason = request.Reason, DecidedAt = DateTime.UtcNow });
         await _db.SaveChangesAsync(ct);
