@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.Extensions.Logging;
@@ -62,6 +63,124 @@ namespace GHCAA.Infrastructure.Data
 
             await SelfHealFalselyBaselinedMigrationsAsync(ctx, logger, applied);
             await ctx.Database.MigrateAsync();
+            await RepairMissingColumnsAsync(ctx, logger);
+        }
+
+        // The self-heal above only catches migrations of one risky shape. Preprod still ended up with
+        // model columns that no table had (2026-09-30: /api/networking/search and
+        // /api/pending/me/summary failing with errorMissingColumn), and the history table said every
+        // migration was applied. So after migrating, compare the model with the live schema and add
+        // what is missing, the way EF's AddColumn would. A column that a migration renamed is renamed
+        // from its old name instead, so its data is kept. Postgres only: the lookup reads
+        // information_schema through current_schema().
+        private static async Task RepairMissingColumnsAsync(ApplicationDbContext ctx, ILogger logger)
+        {
+            if (!ctx.Database.IsNpgsql())
+            {
+                return;
+            }
+
+            var live = (await ctx.Database.SqlQueryRaw<LiveColumn>(
+                    "SELECT table_name AS \"Table\", column_name AS \"Column\" FROM information_schema.columns WHERE table_schema = current_schema()")
+                .ToListAsync()).Select(c => (c.Table, c.Column)).ToHashSet();
+            var liveTables = live.Select(c => c.Table).ToHashSet(StringComparer.Ordinal);
+
+            // Built only when something is missing, so a healthy boot doesn't instantiate every migration.
+            List<RenameColumnOperation>? renames = null;
+
+            var model = ctx.GetService<IDesignTimeModel>().Model.GetRelationalModel();
+            foreach (var table in model.Tables.Where(t => t.Schema is null && !t.IsExcludedFromMigrations && liveTables.Contains(t.Name)))
+            {
+                foreach (var column in table.Columns.Where(c => !live.Contains((table.Name, c.Name))))
+                {
+                    renames ??= LoadRenames(ctx);
+                    // Only rename when the old name is no longer mapped by the model. Otherwise the old
+                    // name was re-added later as a different column, and renaming it would move that
+                    // column's data.
+                    var oldName = renames.LastOrDefault(r => r.Table == table.Name && r.NewName == column.Name)?.Name;
+                    var canRename = oldName is not null
+                        && live.Contains((table.Name, oldName))
+                        && table.Columns.All(c => c.Name != oldName);
+
+                    string? sql = canRename
+                        ? $"ALTER TABLE \"{table.Name}\" RENAME COLUMN \"{oldName}\" TO \"{column.Name}\""
+                        : IsGenerated(column)
+                            ? null
+                            : BuildAddColumnSql(table.Name, column.Name, column.StoreType, column.IsNullable, DefaultSqlFor(column));
+
+                    if (sql is null)
+                    {
+                        logger.LogError(
+                            "Column {Table}.{Column} ({StoreType}) is missing and cannot be added safely at startup; add it by hand.",
+                            table.Name, column.Name, column.StoreType);
+                        continue;
+                    }
+
+                    // Best effort: one failed repair is logged and the API still starts, as it did
+                    // before this check existed.
+                    try
+                    {
+                        await ctx.Database.ExecuteSqlRawAsync(sql);
+                        logger.LogWarning("Column {Table}.{Column} was missing from the live schema; repaired with: {Sql}",
+                            table.Name, column.Name, sql);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Repair of missing column {Table}.{Column} failed: {Sql}", table.Name, column.Name, sql);
+                    }
+                }
+            }
+        }
+
+        private sealed record LiveColumn(string Table, string Column);
+
+        private static List<RenameColumnOperation> LoadRenames(ApplicationDbContext ctx)
+        {
+            var migrationsAssembly = ctx.GetService<IMigrationsAssembly>();
+            var provider = ctx.Database.ProviderName!;
+            return migrationsAssembly.Migrations.Values
+                .SelectMany(t => migrationsAssembly.CreateMigration(t, provider).UpOperations.OfType<RenameColumnOperation>())
+                .ToList();
+        }
+
+        // Identity and computed columns need a sequence or an expression, not a zero default.
+        private static bool IsGenerated(IColumn column) =>
+            column.ComputedColumnSql is not null
+            || (column.DefaultValueSql is null && column.DefaultValue is null
+                && column.PropertyMappings.Any(m => m.Property.ValueGenerated != ValueGenerated.Never));
+
+        private static string? DefaultSqlFor(IColumn column)
+        {
+            if (column.DefaultValueSql is not null) return column.DefaultValueSql;
+            if (column.DefaultValue is null) return null;
+            return column.StoreTypeMapping.GenerateSqlLiteral(column.DefaultValue);
+        }
+
+        // A NOT NULL column added to a table that already has rows needs a default. This uses the
+        // CLR default EF itself writes into AddColumn (false, 0, '' and so on). Returns null for a
+        // store type with no obvious zero value, so the caller logs it rather than guessing.
+        internal static string? BuildAddColumnSql(string table, string column, string storeType, bool nullable, string? defaultSql)
+        {
+            var sql = $"ALTER TABLE \"{table}\" ADD COLUMN IF NOT EXISTS \"{column}\" {storeType}";
+            if (nullable)
+            {
+                return defaultSql is null ? sql : $"{sql} DEFAULT {defaultSql}";
+            }
+
+            var fallback = defaultSql ?? ZeroValueFor(storeType);
+            return fallback is null ? null : $"{sql} NOT NULL DEFAULT {fallback}";
+        }
+
+        private static string? ZeroValueFor(string storeType)
+        {
+            var t = storeType.ToLowerInvariant();
+            if (t == "boolean") return "FALSE";
+            if (t is "integer" or "smallint" or "bigint" or "real" or "double precision" || t.StartsWith("numeric")) return "0";
+            if (t == "text" || t.StartsWith("character varying") || t.StartsWith("varchar")) return "''";
+            if (t == "timestamp with time zone") return "'0001-01-01 00:00:00+00'";
+            if (t.StartsWith("timestamp") || t == "date") return "'0001-01-01 00:00:00'";
+            if (t == "uuid") return "'00000000-0000-0000-0000-000000000000'";
+            return null;
         }
 
         // ctx.Database.MigrateAsync() below trusts __EFMigrationsHistory and will never revisit a
