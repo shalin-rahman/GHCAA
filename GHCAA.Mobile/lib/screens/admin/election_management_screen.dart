@@ -67,8 +67,17 @@ class _ElectionManagementScreenState
           'Move "${election.title}" from ${electionPhaseLabel(election.phase)} to ${electionPhaseLabel(next)}?',
     );
     if (!confirmed) return;
-    await _runAction(election.id, 'phase',
-        () => ref.read(electionServiceProvider).setPhase(election.id, next));
+    await _runAction(election.id, 'phase', () async {
+      _tellIfWaiting(
+          await ref.read(electionServiceProvider).setPhase(election.id, next));
+    });
+  }
+
+  void _tellIfWaiting(bool waiting) {
+    if (!waiting || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Saved. A second person must approve this on the '
+            'web admin before it happens.')));
   }
 
   Future<void> _freezeVoterRoll(AdminElection election) async {
@@ -112,8 +121,10 @@ class _ElectionManagementScreenState
       destructive: true,
     );
     if (!confirmed) return;
-    await _runAction(election.id, 'declare',
-        () => ref.read(electionServiceProvider).declare(election.id));
+    await _runAction(election.id, 'declare', () async {
+      _tellIfWaiting(
+          await ref.read(electionServiceProvider).declare(election.id));
+    });
   }
 
   void _createElection() {

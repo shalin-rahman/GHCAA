@@ -101,6 +101,19 @@ public class RequireElectionPermissionAttributeTests
         _access.Verify(a => a.HasAsync(40, It.IsAny<int>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<ElectionPermission>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
+    // Approve's route is elections/approvals/{approvalId}/approve.
+    [Test]
+    public async Task ApprovalLookup_ReadsTheApprovalId()
+    {
+        _access.Setup(a => a.ElectionIdForAsync(ElectionIdLookup.Approval, 9, It.IsAny<CancellationToken>())).ReturnsAsync(3);
+        _access.Setup(a => a.HasAsync(3, 5, It.IsAny<IReadOnlyCollection<string>>(), ElectionPermission.Approve, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var context = BuildContext(new RouteValueDictionary { ["approvalId"] = "9" });
+
+        var ran = await RunAsync(new RequireElectionPermissionAttribute(ElectionPermission.Approve, ElectionIdLookup.Approval), context);
+
+        ran.Should().BeTrue();
+    }
+
     [Test]
     public async Task UnknownNomination_Returns404()
     {

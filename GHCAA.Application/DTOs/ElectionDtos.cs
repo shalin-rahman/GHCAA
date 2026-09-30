@@ -22,7 +22,8 @@ public record ScrutinyDto(bool Accepted, string? Reason);
 public record CastBallotDto(IReadOnlyList<BallotSeatChoiceDto> Seats);
 public record BallotSeatChoiceDto(int ElectionSeatId, IReadOnlyList<int> NominationIds);
 public record CastBallotResultDto(string TrackingCode);
-public record ElectionSummaryDto(int Id, string Title, ElectionPhase Phase, int ECPeriodId, int VoterCount, int EligibleVoterCount);
+// BallotKeyFingerprint lets a voter check the key their ballot is sealed under (37.1v).
+public record ElectionSummaryDto(int Id, string Title, ElectionPhase Phase, int ECPeriodId, int VoterCount, int EligibleVoterCount, string? BallotKeyFingerprint = null);
 public record AdminElectionPositionDto(int Id, string Title, string? Description, int Seats);
 public record AdminElectionCandidateDto(int Id, int MemberId, string Name, string? PhotoUrl, string? Statement, int PositionId, string PositionTitle);
 public record AdminElectionDto(int Id, string Title, string? Description, ElectionPhase Phase, DateTime? AnnouncedOn, DateTime? NominationOpensOn, DateTime? NominationClosesOn, DateTime? ScrutinyOn, DateTime? WithdrawalClosesOn, DateTime? PollingOpensOn, DateTime? PollingClosesOn, DateTime? DeclaredOn, bool IsActive, IReadOnlyList<AdminElectionPositionDto> Positions, IReadOnlyList<AdminElectionCandidateDto> Candidates, int EligibleVoterCount, bool HasVoted, ElectionTieRule TieRule, string? BallotKeyFingerprint = null, IReadOnlyList<string>? MyPermissions = null, bool AdminHandedOver = false);
@@ -109,3 +110,11 @@ public record ElectionAppointmentDto(int Id, int ElectionId, string ElectionTitl
 
 // What /api/auth/me returns for each live appointment.
 public record ElectionAppointmentSummaryDto(int ElectionId, string ElectionTitle, string PersonaName, ElectionPermission Permissions);
+
+// Spec 023 (37.12f). KeyFingerprint is set only on a ReplaceBallotKey request, so the approver sees which key they approve.
+public record ElectionApprovalDto(int Id, int ElectionId, ElectionApprovalAction Action, int RequestedByUserId, string RequestedBy, DateTime RequestedAt, DateTime ExpiresAt, string? KeyFingerprint);
+
+// What a two-person step did. Pending is set when it was stored for a second person instead of run.
+public record ElectionApprovalRunResult(bool Ran, string? Error, ElectionApprovalDto? Pending);
+
+public record RejectApprovalRequest(string? Reason);

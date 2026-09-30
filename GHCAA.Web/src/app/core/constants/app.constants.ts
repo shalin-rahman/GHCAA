@@ -710,7 +710,10 @@ export const API_ENDPOINTS = {
         FREEZE_VOTER_ROLL: (id: number) => `/api/elections/${id}/voter-roll/freeze`,
         COUNT: (id: number) => `/api/elections/${id}/count`,
         DECLARE: (id: number) => `/api/elections/${id}/declare`,
-        DOCUMENT: (id: number, formCode: string) => `/api/elections/${id}/documents/${formCode}`
+        DOCUMENT: (id: number, formCode: string) => `/api/elections/${id}/documents/${formCode}`,
+        APPROVALS: (id: number) => `/api/elections/${id}/approvals`,
+        APPROVE: (approvalId: number) => `/api/elections/approvals/${approvalId}/approve`,
+        REJECT: (approvalId: number) => `/api/elections/approvals/${approvalId}/reject`
     },
     ADMIN_ELECTIONS: {
         BASE: '/api/admin/elections',

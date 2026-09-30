@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import {
-    AdminElectionDto, CastBallotDto, CastBallotResultDto, CreateElectionRequest, ElectionAppointmentDto, ElectionPhase,
+    AdminElectionDto, AdminElectionStepResult, CastBallotDto, ElectionApprovalDto, CastBallotResultDto, CreateElectionRequest, ElectionAppointmentDto, ElectionPhase,
     ElectionResultDto, ElectionSummaryDto,
     NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto
 } from '../models/election.models';
@@ -33,12 +33,32 @@ export class ElectionsService {
         return this.http.post<AdminElectionDto>(API_ENDPOINTS.ADMIN_ELECTIONS.BASE, request);
     }
 
-    publish(id: number): Observable<AdminElectionDto> {
-        return this.http.post<AdminElectionDto>(API_ENDPOINTS.ADMIN_ELECTIONS.PUBLISH(id), {});
+    publish(id: number): Observable<AdminElectionStepResult> {
+        return this.runStep(API_ENDPOINTS.ADMIN_ELECTIONS.PUBLISH(id), {});
     }
 
-    close(id: number): Observable<AdminElectionDto> {
-        return this.http.post<AdminElectionDto>(API_ENDPOINTS.ADMIN_ELECTIONS.CLOSE(id), {});
+    close(id: number): Observable<AdminElectionStepResult> {
+        return this.runStep(API_ENDPOINTS.ADMIN_ELECTIONS.CLOSE(id), {});
+    }
+
+    // Spec 023 (37.12f). A 202 means the step was stored until a second person approves it.
+    private runStep(url: string, body: unknown): Observable<AdminElectionStepResult> {
+        return this.http.post<AdminElectionDto | ElectionApprovalDto>(url, body, { observe: 'response' }).pipe(
+            map(response => response.status === 202
+                ? { election: null, pending: response.body as ElectionApprovalDto }
+                : { election: response.body as AdminElectionDto, pending: null }));
+    }
+
+    getApprovals(id: number): Observable<ElectionApprovalDto[]> {
+        return this.http.get<ElectionApprovalDto[]>(API_ENDPOINTS.ELECTIONS.APPROVALS(id));
+    }
+
+    approve(approvalId: number): Observable<void> {
+        return this.http.post<void>(API_ENDPOINTS.ELECTIONS.APPROVE(approvalId), {});
+    }
+
+    reject(approvalId: number, reason: string | null): Observable<void> {
+        return this.http.post<void>(API_ENDPOINTS.ELECTIONS.REJECT(approvalId), { reason });
     }
 
     addCandidate(id: number, request: SaveCandidateRequest): Observable<AdminElectionDto> {
@@ -77,8 +97,8 @@ export class ElectionsService {
         return this.http.post<CastBallotResultDto>(API_ENDPOINTS.ELECTIONS.VOTE(id), request);
     }
 
-    setBallotKey(id: number, publicKey: string): Observable<AdminElectionDto> {
-        return this.http.post<AdminElectionDto>(API_ENDPOINTS.ADMIN_ELECTIONS.BALLOT_KEY(id), { publicKey });
+    setBallotKey(id: number, publicKey: string): Observable<AdminElectionStepResult> {
+        return this.runStep(API_ENDPOINTS.ADMIN_ELECTIONS.BALLOT_KEY(id), { publicKey });
     }
 
     // The first count needs the returning officer's private key. After that the stored results

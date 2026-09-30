@@ -77,6 +77,29 @@ public class ElectionAppointment
         a => a.AcceptedAt != null && a.DeclarationSignedAt != null && a.RevokedAt == null && (a.ExpiresAt == null || a.ExpiresAt > now);
 }
 
+// Spec 023 (37.12f). A sensitive step held until a second person with Approve agrees. The row
+// itself records who asked, who decided and when. PayloadJson carries what the step needs, such as
+// the new ballot key, so the approver sees exactly what they approve.
+public class ElectionApproval
+{
+    public int Id { get; set; }
+    public int ElectionId { get; set; }
+    public ElectionApprovalAction Action { get; set; }
+    public string? PayloadJson { get; set; }
+    public int RequestedByUserId { get; set; }
+    public DateTime RequestedAt { get; set; }
+    public DateTime ExpiresAt { get; set; }
+    public int? ApprovedByUserId { get; set; }
+    public DateTime? ApprovedAt { get; set; }
+    public int? RejectedByUserId { get; set; }
+    public DateTime? RejectedAt { get; set; }
+    public string? RejectReason { get; set; }
+    public DateTime? ExecutedAt { get; set; }
+    public Election? Election { get; set; }
+
+    public bool IsOpenAt(DateTime now) => ExecutedAt == null && RejectedAt == null && ExpiresAt > now;
+}
+
 public class VoterRoll
 {
     public int Id { get; set; }

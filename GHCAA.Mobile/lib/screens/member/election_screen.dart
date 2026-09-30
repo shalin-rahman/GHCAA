@@ -145,6 +145,11 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
                         Text(
                             'Voting: ${AppUtils.formatDate(widget.election.pollingOpensOn)}',
                             style: const TextStyle(color: AppTheme.textMuted)),
+                      if (widget.election.ballotKeyFingerprint != null)
+                        SelectableText(
+                            "Returning officer's key: ${widget.election.ballotKeyFingerprint}. "
+                            'It should match the one the commission announced.',
+                            style: const TextStyle(color: AppTheme.textMuted)),
                     ])),
             const SizedBox(height: AppTheme.spaceL),
             if (_trackingCode != null)

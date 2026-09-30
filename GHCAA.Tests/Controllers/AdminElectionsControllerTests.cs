@@ -19,6 +19,7 @@ namespace GHCAA.Tests.Controllers
     {
         private Mock<IElectionService> _electionServiceMock;
         private Mock<IElectionAccessService> _accessMock;
+        private Mock<IElectionApprovalService> _approvalsMock;
         private AdminElectionsController _controller;
 
         [SetUp]
@@ -26,15 +27,16 @@ namespace GHCAA.Tests.Controllers
         {
             _electionServiceMock = new Mock<IElectionService>();
             _accessMock = new Mock<IElectionAccessService>();
-            _controller = new AdminElectionsController(_electionServiceMock.Object, _accessMock.Object);
+            _approvalsMock = new Mock<IElectionApprovalService>();
+            _controller = new AdminElectionsController(_electionServiceMock.Object, _accessMock.Object, _approvalsMock.Object);
             SetUserContext(_controller, memberId: 1, role: "Admin");
         }
 
         [Test]
         public async Task Publish_ElectionNotReady_Returns400Problem()
         {
-            _electionServiceMock.Setup(x => x.SetPhaseAsync(1, It.IsAny<GHCAA.Domain.Enums.ElectionPhase>(), It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(false);
+            _approvalsMock.Setup(x => x.RunOrRequestAsync(1, ElectionApprovalAction.Publish, 1, It.IsAny<IReadOnlyCollection<string>>(), null, It.IsAny<CancellationToken>()))
+                          .ReturnsAsync(new ElectionApprovalRunResult(true, "not-ready", null));
 
             var result = await _controller.Publish(1, CancellationToken.None);
 
@@ -42,6 +44,36 @@ namespace GHCAA.Tests.Controllers
             Assert.That(obj, Is.Not.Null);
             Assert.That(obj!.StatusCode, Is.EqualTo(400));
             Assert.That(((ProblemDetails)obj.Value!).Detail, Is.EqualTo("Election is not ready to publish."));
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task Publish_WaitingForSecondPerson_Returns202WithTheRequest()
+        {
+            var pending = new ElectionApprovalDto(9, 1, ElectionApprovalAction.Publish, 1, "admin", DateTime.UtcNow, DateTime.UtcNow.AddHours(48), null);
+            _approvalsMock.Setup(x => x.RunOrRequestAsync(1, ElectionApprovalAction.Publish, 1, It.IsAny<IReadOnlyCollection<string>>(), null, It.IsAny<CancellationToken>()))
+                          .ReturnsAsync(new ElectionApprovalRunResult(false, null, pending));
+
+            var result = await _controller.Publish(1, CancellationToken.None);
+
+            var accepted = result as AcceptedResult;
+            Assert.That(accepted, Is.Not.Null);
+            Assert.That(accepted!.Value, Is.EqualTo(pending));
+            _electionServiceMock.Verify(x => x.SetPhaseAsync(It.IsAny<int>(), It.IsAny<ElectionPhase>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task SetBallotKey_AlreadyPending_Returns409WithTheCode()
+        {
+            _approvalsMock.Setup(x => x.RunOrRequestAsync(1, ElectionApprovalAction.ReplaceBallotKey, 1, It.IsAny<IReadOnlyCollection<string>>(), "key", It.IsAny<CancellationToken>()))
+                          .ReturnsAsync(new ElectionApprovalRunResult(false, "already-pending", null));
+
+            var result = await _controller.SetBallotKey(1, new SetBallotKeyRequest("key"), CancellationToken.None);
+
+            var obj = result as ObjectResult;
+            Assert.That(obj!.StatusCode, Is.EqualTo(409));
+            Assert.That(((ProblemDetails)obj.Value!).Extensions["code"], Is.EqualTo(Constants.ErrorCodes.ApprovalPending));
         }
 
         [Test]

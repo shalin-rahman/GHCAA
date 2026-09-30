@@ -4,7 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ElectionsService } from '../../core/services/elections.service';
-import { AdminElectionDto, CreateElectionRequest, ELECTION_PHASE_ORDER, NominationViewDto } from '../../core/models/election.models';
+import {
+    AdminElectionDto, AdminElectionStepResult, CreateElectionRequest, ELECTION_APPROVAL_ACTION_LABELS, ELECTION_PHASE_ORDER,
+    ElectionApprovalDto, NominationViewDto
+} from '../../core/models/election.models';
 import { ExportUtil } from '../../core/utils/export.util';
 import { ballotKeyFileName, generateBallotKeyPair, readBallotKeyFile, toPem } from '../../core/utils/ballot-key.util';
 import { NotificationService } from '../../core/services/notification.service';
@@ -49,6 +52,9 @@ export class AdminElections {
     removingCandidateId = signal<number | null>(null);
     keyingId = signal<number | null>(null);
     countingId = signal<number | null>(null);
+    approvals = signal<Partial<Record<number, ElectionApprovalDto[]>>>({});
+    decidingApprovalId = signal<number | null>(null);
+    approvalLabels = ELECTION_APPROVAL_ACTION_LABELS;
 
     filtered = computed(() => {
         const query = this.search().trim().toLowerCase();
@@ -122,7 +128,7 @@ export class AdminElections {
         if (this.publishingId() !== null) return;
         this.publishingId.set(election.id);
         this.electionsService.publish(election.id).subscribe({
-            next: updated => { this.publishingId.set(null); this.replace(updated); },
+            next: result => { this.publishingId.set(null); this.applyStep(result); },
             error: () => { this.publishingId.set(null); this.notify.error('Failed to publish election.'); }
         });
     }
@@ -139,7 +145,7 @@ export class AdminElections {
 
         this.closingId.set(election.id);
         this.electionsService.close(election.id).subscribe({
-            next: updated => { this.closingId.set(null); this.replace(updated); },
+            next: result => { this.closingId.set(null); this.applyStep(result); },
             error: () => { this.closingId.set(null); this.notify.error('Failed to close election.'); }
         });
     }
@@ -182,9 +188,14 @@ export class AdminElections {
             // Save the private key before the server accepts the public one, so a failed download
             // never leaves an election sealed under a key nobody has.
             ExportUtil.saveFile(new Blob([toPem(pair.privateKey)], { type: 'application/x-pem-file' }), ballotKeyFileName(election.title));
-            const updated = await firstValueFrom(this.electionsService.setBallotKey(election.id, pair.publicKey));
-            this.replace(updated);
-            this.notify.success('Key stored. Keep the downloaded file safe until the count.');
+            const result = await firstValueFrom(this.electionsService.setBallotKey(election.id, pair.publicKey));
+            if (result.election) {
+                this.replace(result.election);
+                this.notify.success('Key stored. Keep the downloaded file safe until the count.');
+            } else {
+                // The old key stays in force until a second person approves. Keep both files until then.
+                this.applyStep(result);
+            }
         } catch (err) {
             // The HTTP interceptor already shows the server's reason for a failed request.
             if (!(err instanceof HttpErrorResponse)) this.notify.error('This browser could not make the key.');
@@ -212,6 +223,63 @@ export class AdminElections {
 
     private replace(updated: AdminElectionDto): void {
         this.elections.set(this.elections().map(item => item.id === updated.id ? updated : item));
+    }
+
+    private applyStep(result: AdminElectionStepResult): void {
+        if (result.election) {
+            this.replace(result.election);
+            return;
+        }
+        const pending = result.pending;
+        this.approvals.update(all => ({ ...all, [pending.electionId]: [...(all[pending.electionId] ?? []), pending] }));
+        this.notify.info('Saved. A second person must approve this before it happens.');
+    }
+
+    // Spec 023 (37.12f). Loaded on request, since the list needs step-up.
+    loadApprovals(election: AdminElectionDto): void {
+        this.electionsService.getApprovals(election.id).subscribe({
+            next: values => {
+                this.approvals.update(all => ({ ...all, [election.id]: values }));
+                if (values.length === 0) this.notify.info('Nothing is waiting for approval.');
+            },
+            error: () => this.notify.error('Failed to load approvals.')
+        });
+    }
+
+    approve(approval: ElectionApprovalDto): void {
+        if (this.decidingApprovalId() !== null) return;
+        this.decidingApprovalId.set(approval.id);
+        this.electionsService.approve(approval.id).subscribe({
+            next: () => {
+                this.decidingApprovalId.set(null);
+                this.dropApproval(approval);
+                this.notify.success(`${ELECTION_APPROVAL_ACTION_LABELS[approval.action]}: approved and done.`);
+                this.load();
+            },
+            // The interceptor shows the server's reason, such as asking the requester to approve their own step.
+            error: () => this.decidingApprovalId.set(null)
+        });
+    }
+
+    async reject(approval: ElectionApprovalDto): Promise<void> {
+        if (this.decidingApprovalId() !== null) return;
+        const confirmed = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Reject request',
+            message: `Reject "${ELECTION_APPROVAL_ACTION_LABELS[approval.action]}" asked for by ${approval.requestedBy}? It will not happen.`,
+            confirmLabel: 'Reject',
+            danger: true
+        }));
+        if (!confirmed) return;
+
+        this.decidingApprovalId.set(approval.id);
+        this.electionsService.reject(approval.id, null).subscribe({
+            next: () => { this.decidingApprovalId.set(null); this.dropApproval(approval); this.notify.success('Request rejected.'); },
+            error: () => this.decidingApprovalId.set(null)
+        });
+    }
+
+    private dropApproval(approval: ElectionApprovalDto): void {
+        this.approvals.update(all => ({ ...all, [approval.electionId]: (all[approval.electionId] ?? []).filter(item => item.id !== approval.id) }));
     }
 
     selectElectionForScrutiny(id: number): void {

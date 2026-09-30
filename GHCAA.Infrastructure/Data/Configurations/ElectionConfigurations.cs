@@ -48,6 +48,21 @@ public sealed class ElectionAppointmentConfiguration : IEntityTypeConfiguration<
     }
 }
 
+public sealed class ElectionApprovalConfiguration : IEntityTypeConfiguration<ElectionApproval>
+{
+    public void Configure(EntityTypeBuilder<ElectionApproval> b)
+    {
+        b.HasKey(x => x.Id);
+        b.Property(x => x.PayloadJson).HasMaxLength(8000);
+        b.Property(x => x.RejectReason).HasMaxLength(500);
+        b.HasIndex(x => new { x.ElectionId, x.Action, x.ExecutedAt, x.RejectedAt });
+        b.HasOne(x => x.Election).WithMany().HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne<User>().WithMany().HasForeignKey(x => x.RequestedByUserId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<User>().WithMany().HasForeignKey(x => x.ApprovedByUserId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<User>().WithMany().HasForeignKey(x => x.RejectedByUserId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
 public sealed class VoterRollConfiguration : IEntityTypeConfiguration<VoterRoll>
 {
     public void Configure(EntityTypeBuilder<VoterRoll> b)

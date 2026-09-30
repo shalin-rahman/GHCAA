@@ -37,6 +37,19 @@
                     <button class="btn btn-secondary btn-sm" *ngIf="canSetBallotKey(election)" [disabled]="keyingId() === election.id" (click)="createBallotKey(election)">{{ keyingId() === election.id ? 'Making key...' : (election.ballotKeyFingerprint ? 'Replace officer key' : 'Make officer key') }}</button>
                     <input #keyFile type="file" class="hidden" accept=".pem,.txt" (change)="countWithKeyFile(election, $event)">
                     <button class="btn btn-primary btn-sm" *ngIf="election.phase === 'Counting'" [disabled]="countingId() === election.id" (click)="keyFile.click()">{{ countingId() === election.id ? 'Counting...' : 'Count with officer key' }}</button>
+                    <button class="btn btn-secondary btn-sm" (click)="loadApprovals(election)">Waiting approvals</button>
+                </div>
+            </div>
+            <div class="stack gap-2" *ngIf="(approvals()[election.id] ?? []).length > 0">
+                <div class="flex justify-between items-center" *ngFor="let approval of approvals()[election.id]">
+                    <span>
+                        {{ approvalLabels[approval.action] }}, asked for by {{ approval.requestedBy }}. Expires {{ approval.expiresAt | date:'medium' }}.
+                        <ng-container *ngIf="approval.keyFingerprint"> New key fingerprint: <code>{{ approval.keyFingerprint }}</code></ng-container>
+                    </span>
+                    <div class="flex gap-2">
+                        <button class="btn btn-primary btn-sm" [disabled]="decidingApprovalId() === approval.id" (click)="approve(approval)">Approve</button>
+                        <button class="btn btn-secondary btn-sm" [disabled]="decidingApprovalId() === approval.id" (click)="reject(approval)">Reject</button>
+                    </div>
                 </div>
             </div>
             <div class="stack gap-2" *ngIf="election.candidates.length > 0">

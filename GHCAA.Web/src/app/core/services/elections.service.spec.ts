@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { API_ENDPOINTS } from '../constants/app.constants';
-import { AdminElectionDto, CastBallotDto, ElectionResultDto, ElectionSummaryDto } from '../models/election.models';
+import { AdminElectionDto, CastBallotDto, ElectionApprovalDto, ElectionResultDto, ElectionSummaryDto } from '../models/election.models';
 import { ElectionsService } from './elections.service';
 
 const ELECTION: ElectionSummaryDto = {
@@ -58,11 +58,31 @@ describe('ElectionsService', () => {
     });
 
     it('stores only the public key for an election', () => {
-        service.setBallotKey(ADMIN_ELECTION.id, 'SPKI').subscribe(value => expect(value).toEqual(ADMIN_ELECTION));
+        service.setBallotKey(ADMIN_ELECTION.id, 'SPKI').subscribe(value => expect(value).toEqual({ election: ADMIN_ELECTION, pending: null }));
         const request = http.expectOne(API_ENDPOINTS.ADMIN_ELECTIONS.BALLOT_KEY(ADMIN_ELECTION.id));
         expect(request.request.method).toBe('POST');
         expect(request.request.body).toEqual({ publicKey: 'SPKI' });
         request.flush(ADMIN_ELECTION);
+    });
+
+    // FR-39 (spec 023, 37.12f): 202 means the step waits for a second person.
+    it('reports a 202 reply as a waiting request', () => {
+        const pending: ElectionApprovalDto = {
+            id: 30, electionId: 12, action: 'ReplaceBallotKey', requestedByUserId: 1, requestedBy: 'alice',
+            requestedAt: '2026-10-01T10:00:00Z', expiresAt: '2026-10-03T10:00:00Z', keyFingerprint: 'cd34'
+        };
+        let result: unknown;
+        service.setBallotKey(ADMIN_ELECTION.id, 'SPKI').subscribe(value => result = value);
+        http.expectOne(API_ENDPOINTS.ADMIN_ELECTIONS.BALLOT_KEY(ADMIN_ELECTION.id)).flush(pending, { status: 202, statusText: 'Accepted' });
+        expect(result).toEqual({ election: null, pending });
+    });
+
+    it('sends approve and reject to the approval routes', () => {
+        service.approve(30).subscribe();
+        expect(http.expectOne(API_ENDPOINTS.ELECTIONS.APPROVE(30)).request.method).toBe('POST');
+        service.reject(30, 'wrong key').subscribe();
+        const request = http.expectOne(API_ENDPOINTS.ELECTIONS.REJECT(30));
+        expect(request.request.body).toEqual({ reason: 'wrong key' });
     });
 
     it('loads the admin election list', () => {

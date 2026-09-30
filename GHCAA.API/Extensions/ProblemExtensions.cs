@@ -14,6 +14,13 @@ namespace GHCAA.API.Extensions
             return new ObjectResult(problem) { StatusCode = statusCode };
         }
 
+        // Spec 023 (37.12f). The reply when a two-person step was stored rather than run, or null
+        // when it ran or failed, so the caller maps its own errors.
+        public static IActionResult? ApprovalReply(this ControllerBase controller, GHCAA.Application.DTOs.ElectionApprovalRunResult run) =>
+            run.Pending is not null ? controller.Accepted(run.Pending)
+            : run.Error == "already-pending" ? controller.ProblemWithCode(GHCAA.Domain.Constants.ErrorCodes.ApprovalPending, "This step is already waiting for a second person.", StatusCodes.Status409Conflict)
+            : null;
+
         // Filters and middleware run outside a ControllerBase, so they build the same shape here
         // instead of going through the extension method above.
         public static ProblemDetails BuildProblemDetails(string code, string detail, int statusCode)

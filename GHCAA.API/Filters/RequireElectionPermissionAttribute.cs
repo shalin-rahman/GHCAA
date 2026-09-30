@@ -67,6 +67,7 @@ namespace GHCAA.API.Filters
             {
                 ElectionIdLookup.Nomination => "nominationId",
                 ElectionIdLookup.Appointment => "appointmentId",
+                ElectionIdLookup.Approval => "approvalId",
                 _ => "electionId",
             };
             var values = context.RouteData.Values;

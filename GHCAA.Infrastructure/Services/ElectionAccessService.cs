@@ -54,6 +54,7 @@ public sealed class ElectionAccessService(ApplicationDbContext db, IOrgConfigSer
     {
         ElectionIdLookup.Nomination => await db.Nominations.Where(x => x.Id == id).Select(x => (int?)x.ElectionId).FirstOrDefaultAsync(ct),
         ElectionIdLookup.Appointment => await db.ElectionAppointments.Where(x => x.Id == id).Select(x => (int?)x.ElectionId).FirstOrDefaultAsync(ct),
+        ElectionIdLookup.Approval => await db.ElectionApprovals.Where(x => x.Id == id).Select(x => (int?)x.ElectionId).FirstOrDefaultAsync(ct),
         _ => id,
     };
 

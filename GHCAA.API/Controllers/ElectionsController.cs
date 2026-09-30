@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.API.Extensions;
@@ -17,7 +20,8 @@ namespace GHCAA.API.Controllers;
 [Authorize]
 public sealed class ElectionsController(
     IElectionService service,
-    IElectionDocumentService documentService) : ControllerBase
+    IElectionDocumentService documentService,
+    IElectionApprovalService approvals) : ControllerBase
 {
     /// <summary>FR-37.1a: creates an election and its persisted timetable.</summary>
     [HttpPost]
@@ -42,13 +46,21 @@ public sealed class ElectionsController(
     public async Task<IActionResult> GetCurrent(CancellationToken ct)
         => (await service.GetCurrentAsync(ct)) is { } result ? Ok(result) : NoContent();
 
-    /// <summary>FR-37.1a: advances the election through its controlled phases.</summary>
+    /// <summary>FR-37.1a: advances the election through its controlled phases. Spec 023 (37.12f):
+    /// publishing, opening and closing polling and archiving may wait for a second person (202).</summary>
     [HttpPost("{id:int}/phase")]
     [Authorize(Policy = Policies.ElectionStaff)]
     [GHCAA.API.Filters.RequireStepUp]
     [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ChangePhase)]
     public async Task<IActionResult> SetPhase(int id, [FromBody] ElectionPhase phase, CancellationToken ct)
-        => await service.SetPhaseAsync(id, phase, ct) ? Ok() : Problem(detail: "Invalid phase transition.", statusCode: StatusCodes.Status400BadRequest);
+    {
+        if (ApprovalActionFor(phase) is not { } action)
+            return await service.SetPhaseAsync(id, phase, ct) ? Ok() : Problem(detail: "Invalid phase transition.", statusCode: StatusCodes.Status400BadRequest);
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var run = await approvals.RunOrRequestAsync(id, action, userId, CallerRoles(), ct: ct);
+        return this.ApprovalReply(run) ?? (run.Error is null ? Ok() : Problem(detail: "Invalid phase transition.", statusCode: StatusCodes.Status400BadRequest));
+    }
 
     /// <summary>FR-37.1a: adds a seat to an election.</summary>
     [HttpPost("{id:int}/seats")]
@@ -141,12 +153,51 @@ public sealed class ElectionsController(
         return Problem(detail: detail, statusCode: StatusCodes.Status400BadRequest);
     }
 
-    /// <summary>FR-37.1d: declares counted results.</summary>
+    /// <summary>FR-37.1d: declares counted results. Spec 023 (37.12f): may wait for a second person (202).</summary>
     [HttpPost("{id:int}/declare")]
     [Authorize(Policy = Policies.ElectionStaff)]
     [GHCAA.API.Filters.RequireStepUp]
     [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.Declare)]
-    public async Task<IActionResult> Declare(int id, CancellationToken ct) => await service.DeclareAsync(id, ct) ? Ok() : Problem(detail: "Election is not ready for declaration.", statusCode: StatusCodes.Status400BadRequest);
+    public async Task<IActionResult> Declare(int id, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var run = await approvals.RunOrRequestAsync(id, ElectionApprovalAction.Declare, userId, CallerRoles(), ct: ct);
+        return this.ApprovalReply(run) ?? (run.Error is null ? Ok() : Problem(detail: "Election is not ready for declaration.", statusCode: StatusCodes.Status400BadRequest));
+    }
+
+    /// <summary>Spec 023 (37.12f): the two-person steps on this election still waiting for a second person.</summary>
+    [HttpGet("{id:int}/approvals")]
+    [Authorize(Policy = Policies.ElectionStaff)]
+    [GHCAA.API.Filters.RequireStepUp]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ViewDashboard)]
+    public async Task<IActionResult> Approvals(int id, CancellationToken ct) => Ok(await approvals.ListOpenAsync(id, ct));
+
+    /// <summary>Spec 023 (37.12f): a second person agrees, and the stored step runs.</summary>
+    [HttpPost("approvals/{approvalId:int}/approve")]
+    [Authorize(Policy = Policies.ElectionStaff)]
+    [GHCAA.API.Filters.RequireStepUp]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.Approve, ElectionIdLookup.Approval)]
+    public async Task<IActionResult> Approve(int approvalId, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var (success, error) = await approvals.ApproveAsync(approvalId, userId, CallerRoles(), ct);
+        return success ? Ok() : ApprovalError(error);
+    }
+
+    /// <summary>Spec 023 (37.12f): turns a stored step down, so it never runs.</summary>
+    [HttpPost("approvals/{approvalId:int}/reject")]
+    [Authorize(Policy = Policies.ElectionStaff)]
+    [GHCAA.API.Filters.RequireStepUp]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.Approve, ElectionIdLookup.Approval)]
+    public async Task<IActionResult> Reject(int approvalId, [FromBody] RejectApprovalRequest? request, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var (success, error) = await approvals.RejectAsync(approvalId, userId, CallerRoles(), request?.Reason, ct);
+        return success ? Ok() : ApprovalError(error);
+    }
 
     /// <summary>FR-37.1e: generates a completed official election form from persisted records.</summary>
     [HttpGet("{id:int}/documents/{formCode}")]
@@ -158,4 +209,28 @@ public sealed class ElectionsController(
             ? NotFound()
             : File(pdf, "application/pdf", $"E-{id:D6}_{formCode.ToUpperInvariant()}.pdf");
     }
+
+    private List<string> CallerRoles() => User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+
+    // Phases missing here are not two-person steps. Declared is reached only through Declare.
+    private static ElectionApprovalAction? ApprovalActionFor(ElectionPhase phase) => phase switch
+    {
+        ElectionPhase.Nomination => ElectionApprovalAction.Publish,
+        ElectionPhase.Polling => ElectionApprovalAction.OpenPolling,
+        ElectionPhase.Counting => ElectionApprovalAction.ClosePolling,
+        ElectionPhase.Archived => ElectionApprovalAction.Archive,
+        _ => null,
+    };
+
+    private IActionResult ApprovalError(string? error) => error switch
+    {
+        "not-found" => NotFound(),
+        "forbidden" => this.ProblemWithCode(ErrorCodes.ElectionPermission, "You need the Approve permission on this election.", StatusCodes.Status403Forbidden),
+        "same-person" => Problem(detail: "The person who asked for this step cannot also approve it.", statusCode: StatusCodes.Status403Forbidden),
+        "expired" => Problem(detail: "This request has expired. Ask again.", statusCode: StatusCodes.Status400BadRequest),
+        "closed" => Problem(detail: "This request has already been decided.", statusCode: StatusCodes.Status409Conflict),
+        "phase-closed" => Problem(detail: "The key cannot change once polling has opened.", statusCode: StatusCodes.Status400BadRequest),
+        "invalid-key" => Problem(detail: "The stored key is not valid.", statusCode: StatusCodes.Status400BadRequest),
+        _ => Problem(detail: "The election is not ready for this step.", statusCode: StatusCodes.Status400BadRequest),
+    };
 }

@@ -21,7 +21,7 @@ namespace GHCAA.Tests.Controllers
         {
             _electionServiceMock = new Mock<IElectionService>();
             _documentServiceMock = new Mock<IElectionDocumentService>();
-            _controller = new ElectionsController(_electionServiceMock.Object, _documentServiceMock.Object);
+            _controller = new ElectionsController(_electionServiceMock.Object, _documentServiceMock.Object, new Mock<IElectionApprovalService>().Object);
             SetUserContext(_controller, memberId: 10, role: "Member");
         }
 

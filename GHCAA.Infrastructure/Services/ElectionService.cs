@@ -534,6 +534,6 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         _ => position.ToString(),
     };
 
-    private static ElectionSummaryDto ToSummary(Election e, int count, int eligible) => new(e.Id, e.Title, e.Phase, e.ECPeriodId, count, eligible);
+    private static ElectionSummaryDto ToSummary(Election e, int count, int eligible) => new(e.Id, e.Title, e.Phase, e.ECPeriodId, count, eligible, e.BallotKeyFingerprint);
     private static NominationViewDto ToNomination(Nomination n) => new(n.Id, n.ElectionSeatId, n.CandidateMemberId, n.Status, n.Statement);
 }

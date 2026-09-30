@@ -38,7 +38,7 @@ then puts Admin and SuperAdmin callers into the admin group with `IsInRole("Admi
 ## 2. Combinations in use
 
 One row per route template, so an action with a legacy alias route counts once per alias. The
-script found 348 routes. That matches the 348 `[Http*]` attributes in the folder.
+script found 351 routes. That matches the 351 `[Http*]` attributes in the folder.
 
 | Combination | Routes | Controllers |
 |---|---|---|
@@ -51,10 +51,10 @@ script found 348 routes. That matches the 348 `[Http*]` attributes in the folder
 | MemberOnly | 6 | Gallery, Scholarships |
 | MemberOnly + in-body Admin or SuperAdmin | 1 | Gallery |
 | ElectionStaff | 1 | ElectionAppointments |
-| ElectionStaff + step-up | 2 | ElectionAppointments |
+| ElectionStaff + step-up | 17 | AdminElections, ElectionAppointments, Elections |
 | AdminOnly | 128 | Activity, Admin, AdminGovernance, AdminPoll, AdminSocialAuth, Archive, Campaigns, Communication, CredentialVerification, Events, Financials, Gallery, JobHub, Lookups, MemberImport, Mentorship, News, PendingApprovals, Scholarships, SiteContent, Theme |
 | AdminOnly + in-body SuperAdmin | 5 | Admin |
-| AdminOnly + step-up | 16 | Admin, AdminElections, AdminGovernance, Elections |
+| AdminOnly + step-up | 4 | Admin, AdminElections, AdminGovernance, Elections |
 | AdminOnly + step-up + in-body SuperAdmin | 1 | Admin |
 | SuperAdminOnly | 19 | Activity, Admin, AdminDevTracker, AdminErrorLogs, ElectionPersonas, FinancialLedger, Financials, OrgConfig, PaymentConfig, Roles |
 | SuperAdminOnly + in-body SuperAdmin | 2 | PaymentConfig |
@@ -70,8 +70,8 @@ Where the policy was set:
 | Anonymous | 64 | 0 | 0 |
 | Authenticated | 17 | 70 | 0 |
 | MemberOnly | 7 | 0 | 0 |
-| ElectionStaff | 3 | 0 | 0 |
-| AdminOnly | 95 | 55 | 0 |
+| ElectionStaff | 12 | 6 | 0 |
+| AdminOnly | 90 | 48 | 0 |
 | SuperAdminOnly | 14 | 23 | 0 |
 
 No route relies on the fallback policy alone. Every action or its controller names its rule.
@@ -112,10 +112,10 @@ Base policy: `[AllowAnonymous]`, no sign-in.
 | POST | `/api/campaigns/{slug}/pledges` | `CampaignsController.CreatePledge` (line 51) |  |
 | GET | `/api/config` | `OrgConfigController.GetConfig` (line 19) |  |
 | POST | `/api/contact` | `ContactController.Submit` (line 21) |  |
-| GET | `/api/elections/current` | `ElectionsController.GetCurrent` (line 42) |  |
-| GET | `/api/elections/{id:int}` | `ElectionsController.Get` (line 36) |  |
-| GET | `/api/elections/{id:int}/documents/{formCode}` | `ElectionsController.Document` (line 148) |  |
-| GET | `/api/elections/{id:int}/nominations` | `ElectionsController.Nominations` (line 69) |  |
+| GET | `/api/elections/current` | `ElectionsController.GetCurrent` (line 46) |  |
+| GET | `/api/elections/{id:int}` | `ElectionsController.Get` (line 40) |  |
+| GET | `/api/elections/{id:int}/documents/{formCode}` | `ElectionsController.Document` (line 205) |  |
+| GET | `/api/elections/{id:int}/nominations` | `ElectionsController.Nominations` (line 84) |  |
 | GET | `/api/events` | `EventsController.GetActiveEvents` (line 33) |  |
 | POST | `/api/events/register` | `EventsController.RegisterForEventForm` (line 60) |  |
 | POST | `/api/events/register` | `EventsController.RegisterForEventJson` (line 68) |  |
@@ -181,8 +181,8 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 | GET | `/api/campaigns/my-pledges` | `CampaignsController.GetMyPledges` (line 74) |  |
 | GET | `/api/communications/me` | `MemberCommunicationsController.GetMine` (line 14) |  |
 | GET | `/api/election-personas` | `ElectionPersonasReadController.List` (line 69) |  |
-| POST | `/api/elections/nominations/{nominationId:int}/withdraw` | `ElectionsController.Withdraw` (line 94) |  |
-| POST | `/api/elections/{id:int}/nominations` | `ElectionsController.Nominate` (line 74) |  |
+| POST | `/api/elections/nominations/{nominationId:int}/withdraw` | `ElectionsController.Withdraw` (line 110) |  |
+| POST | `/api/elections/{id:int}/nominations` | `ElectionsController.Nominate` (line 89) |  |
 | GET | `/api/family-links/my-family` | `FamilyLinkController.GetFamily` (line 99) |  |
 | GET | `/api/family-links/received` | `FamilyLinkController.GetReceived` (line 88) |  |
 | DELETE | `/api/family-links/remove/{requestId}` | `FamilyLinkController.Remove` (line 59) |  |
@@ -197,8 +197,8 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 | POST | `/api/financials/saved-methods` | `FinancialsController.AddSavedPaymentMethod` (line 227) |  |
 | DELETE | `/api/financials/saved-methods/{id}` | `FinancialsController.DeleteSavedPaymentMethod` (line 237) |  |
 | POST | `/api/governance/constitution/{id:int}/vote` | `GovernanceController.VoteOnAmendment` (line 68) |  |
-| GET | `/api/me/election-appointments` | `ElectionAppointmentsController.Mine` (line 52) |  |
-| POST | `/api/me/election-appointments/{id:int}/decline` | `ElectionAppointmentsController.Decline` (line 73) |  |
+| GET | `/api/me/election-appointments` | `ElectionAppointmentsController.Mine` (line 55) |  |
+| POST | `/api/me/election-appointments/{id:int}/decline` | `ElectionAppointmentsController.Decline` (line 76) |  |
 | GET | `/api/members/family` | `FamilyLinkController.GetFamily` (line 99) |  |
 | POST | `/api/members/family` | `FamilyLinkController.Send` (line 35) |  |
 | POST | `/api/mentorship` | `MentorshipController.SendRequest` (line 33) |  |
@@ -275,8 +275,8 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
-| POST | `/api/elections/{id:int}/vote` | `ElectionsController.Vote` (line 106) |  |
-| POST | `/api/me/election-appointments/{id:int}/accept` | `ElectionAppointmentsController.Accept` (line 62) |  |
+| POST | `/api/elections/{id:int}/vote` | `ElectionsController.Vote` (line 122) |  |
+| POST | `/api/me/election-appointments/{id:int}/accept` | `ElectionAppointmentsController.Accept` (line 65) |  |
 
 ### 3.7 MemberOnly
 
@@ -305,7 +305,7 @@ Base policy: `ElectionStaff`: SuperAdmin, Admin or ElectionOfficial.
 
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
-| GET | `/api/elections/{id:int}/appointments` | `ElectionAppointmentsController.List` (line 20) |  |
+| GET | `/api/elections/{id:int}/appointments` | `ElectionAppointmentsController.List` (line 21) |  |
 
 ### 3.10 ElectionStaff + step-up
 
@@ -313,8 +313,23 @@ Base policy: `ElectionStaff`: SuperAdmin, Admin or ElectionOfficial.
 
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
-| POST | `/api/elections/appointments/{id:int}/revoke` | `ElectionAppointmentsController.Revoke` (line 42) |  |
-| POST | `/api/elections/{id:int}/appointments` | `ElectionAppointmentsController.Appoint` (line 31) |  |
+| GET | `/api/admin/elections` | `AdminElectionsController.List` (line 25) |  |
+| POST | `/api/admin/elections/{id:int}/ballot-key` | `AdminElectionsController.SetBallotKey` (line 88) |  |
+| POST | `/api/admin/elections/{id:int}/candidates` | `AdminElectionsController.AddCandidate` (line 122) |  |
+| DELETE | `/api/admin/elections/{id:int}/candidates/{candidateId:int}` | `AdminElectionsController.RemoveCandidate` (line 140) |  |
+| POST | `/api/admin/elections/{id:int}/close` | `AdminElectionsController.Close` (line 105) |  |
+| POST | `/api/admin/elections/{id:int}/publish` | `AdminElectionsController.Publish` (line 81) |  |
+| POST | `/api/elections/appointments/{id:int}/revoke` | `ElectionAppointmentsController.Revoke` (line 45) |  |
+| POST | `/api/elections/approvals/{approvalId:int}/approve` | `ElectionsController.Approve` (line 181) |  |
+| POST | `/api/elections/approvals/{approvalId:int}/reject` | `ElectionsController.Reject` (line 194) |  |
+| POST | `/api/elections/nominations/{nominationId:int}/scrutiny` | `ElectionsController.Scrutinise` (line 101) |  |
+| POST | `/api/elections/{id:int}/appointments` | `ElectionAppointmentsController.Appoint` (line 33) |  |
+| GET | `/api/elections/{id:int}/approvals` | `ElectionsController.Approvals` (line 174) |  |
+| POST | `/api/elections/{id:int}/count` | `ElectionsController.Count` (line 139) |  |
+| POST | `/api/elections/{id:int}/declare` | `ElectionsController.Declare` (line 161) |  |
+| POST | `/api/elections/{id:int}/phase` | `ElectionsController.SetPhase` (line 55) |  |
+| POST | `/api/elections/{id:int}/seats` | `ElectionsController.AddSeat` (line 70) |  |
+| POST | `/api/elections/{id:int}/voter-roll/freeze` | `ElectionsController.FreezeRoll` (line 78) |  |
 
 ### 3.11 AdminOnly
 
@@ -469,22 +484,10 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
-| GET | `/api/admin/elections` | `AdminElectionsController.List` (line 22) |  |
-| POST | `/api/admin/elections` | `AdminElectionsController.Create` (line 26) |  |
-| POST | `/api/admin/elections/{id:int}/ballot-key` | `AdminElectionsController.SetBallotKey` (line 71) |  |
-| POST | `/api/admin/elections/{id:int}/candidates` | `AdminElectionsController.AddCandidate` (line 94) |  |
-| DELETE | `/api/admin/elections/{id:int}/candidates/{candidateId:int}` | `AdminElectionsController.RemoveCandidate` (line 111) |  |
-| POST | `/api/admin/elections/{id:int}/close` | `AdminElectionsController.Close` (line 84) |  |
-| POST | `/api/admin/elections/{id:int}/publish` | `AdminElectionsController.Publish` (line 60) |  |
+| POST | `/api/admin/elections` | `AdminElectionsController.Create` (line 46) |  |
 | DELETE | `/api/admin/governance/members/{ecMemberId}/hard-delete` | `AdminGovernanceController.DeleteECMember` (line 80) |  |
 | POST | `/api/admin/sync-members` | `AdminController.SyncMembers` (line 49) |  |
-| POST | `/api/elections` | `ElectionsController.Create` (line 26) |  |
-| POST | `/api/elections/nominations/{nominationId:int}/scrutiny` | `ElectionsController.Scrutinise` (line 85) |  |
-| POST | `/api/elections/{id:int}/count` | `ElectionsController.Count` (line 122) |  |
-| POST | `/api/elections/{id:int}/declare` | `ElectionsController.Declare` (line 143) |  |
-| POST | `/api/elections/{id:int}/phase` | `ElectionsController.SetPhase` (line 49) |  |
-| POST | `/api/elections/{id:int}/seats` | `ElectionsController.AddSeat` (line 56) |  |
-| POST | `/api/elections/{id:int}/voter-roll/freeze` | `ElectionsController.FreezeRoll` (line 63) |  |
+| POST | `/api/elections` | `ElectionsController.Create` (line 30) |  |
 
 ### 3.14 AdminOnly + step-up + in-body SuperAdmin
 

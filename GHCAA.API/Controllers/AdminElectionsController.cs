@@ -18,7 +18,7 @@ namespace GHCAA.API.Controllers;
 [Route("api/admin/elections")]
 [Authorize(Policy = Policies.ElectionStaff)]
 [GHCAA.API.Filters.RequireStepUp]
-public sealed class AdminElectionsController(IElectionService service, IElectionAccessService access) : ControllerBase
+public sealed class AdminElectionsController(IElectionService service, IElectionAccessService access, IElectionApprovalService approvals) : ControllerBase
 {
     // Admin sees every election. An official sees only the ones they hold a live appointment on.
     [HttpGet]
@@ -79,22 +79,20 @@ public sealed class AdminElectionsController(IElectionService service, IElection
     [HttpPost("{id:int}/publish")]
     [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ChangePhase)]
     public async Task<IActionResult> Publish(int id, CancellationToken ct)
-    {
-        var updated = await service.SetPhaseAsync(id, ElectionPhase.Nomination, ct)
-            ? await DetailAsync(id, ct)
-            : null;
+        => await RunAsync(id, ElectionApprovalAction.Publish, "Election is not ready to publish.", ct);
 
-        return updated is null ? Problem(detail: "Election is not ready to publish.", statusCode: StatusCodes.Status400BadRequest) : Ok(updated);
-    }
-
-    /// <summary>Spec 023 FR-001: stores the returning officer's public key. Allowed only before polling opens.</summary>
+    /// <summary>Spec 023 FR-001: stores the returning officer's public key. Allowed only before polling opens.
+    /// Replacing a key already set may wait for a second person (37.12f, 202).</summary>
     [HttpPost("{id:int}/ballot-key")]
     [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.SetBallotKey)]
     public async Task<IActionResult> SetBallotKey(int id, [FromBody] SetBallotKeyRequest request, CancellationToken ct)
     {
-        var (success, error, _) = await service.SetBallotKeyAsync(id, request.PublicKey, ct);
-        if (success) return Ok(await DetailAsync(id, ct));
-        return error switch
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var run = await approvals.RunOrRequestAsync(id, ElectionApprovalAction.ReplaceBallotKey, userId, CallerRoles(), request.PublicKey, ct);
+        if (this.ApprovalReply(run) is { } reply) return reply;
+        if (run.Error is null) return Ok(await DetailAsync(id, ct));
+        return run.Error switch
         {
             "not-found" => NotFound(),
             "phase-closed" => Problem(detail: "The key cannot change once polling has opened.", statusCode: StatusCodes.Status400BadRequest),
@@ -105,12 +103,18 @@ public sealed class AdminElectionsController(IElectionService service, IElection
     [HttpPost("{id:int}/close")]
     [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ChangePhase)]
     public async Task<IActionResult> Close(int id, CancellationToken ct)
-    {
-        var updated = await service.SetPhaseAsync(id, ElectionPhase.Counting, ct)
-            ? await DetailAsync(id, ct)
-            : null;
+        => await RunAsync(id, ElectionApprovalAction.ClosePolling, "Election is not ready to close.", ct);
 
-        return updated is null ? Problem(detail: "Election is not ready to close.", statusCode: StatusCodes.Status400BadRequest) : Ok(updated);
+    // Spec 023 (37.12f): a two-person step replies 202 with the stored request instead of running.
+    private async Task<IActionResult> RunAsync(int id, ElectionApprovalAction action, string notReady, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var run = await approvals.RunOrRequestAsync(id, action, userId, CallerRoles(), ct: ct);
+        if (this.ApprovalReply(run) is { } reply) return reply;
+        return run.Error is null && await DetailAsync(id, ct) is { } updated
+            ? Ok(updated)
+            : Problem(detail: notReady, statusCode: StatusCodes.Status400BadRequest);
     }
 
     [HttpPost("{id:int}/candidates")]

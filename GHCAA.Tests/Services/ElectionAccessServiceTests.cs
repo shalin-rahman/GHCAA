@@ -150,5 +150,11 @@ public sealed class ElectionAccessServiceTests : TestBase
         (await _service.ElectionIdForAsync(ElectionIdLookup.Appointment, a.Id)).Should().Be(_election.Id);
         (await _service.ElectionIdForAsync(ElectionIdLookup.Nomination, 999_999)).Should().BeNull();
         (await _service.ElectionIdForAsync(ElectionIdLookup.Election, 42)).Should().Be(42);
+
+        var approval = new ElectionApproval { ElectionId = _election.Id, Action = ElectionApprovalAction.Publish, RequestedByUserId = await UserAsync(7), RequestedAt = DateTime.UtcNow, ExpiresAt = DateTime.UtcNow.AddHours(1) };
+        _context.ElectionApprovals.Add(approval);
+        await _context.SaveChangesAsync();
+        (await _service.ElectionIdForAsync(ElectionIdLookup.Approval, approval.Id)).Should().Be(_election.Id);
+        (await _service.ElectionIdForAsync(ElectionIdLookup.Approval, 999_999)).Should().BeNull();
     }
 }

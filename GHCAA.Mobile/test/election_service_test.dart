@@ -42,6 +42,13 @@ class _ElectionAdapter implements HttpClientAdapter {
     if (options.path == '/elections/12/vote') {
       return _json({'trackingCode': 'ABCD-EFGH'});
     }
+    // The phase change runs at once. Declare waits for a second person (spec 023, 37.12f).
+    if (options.path == '/elections/12/phase') {
+      return ResponseBody.fromString('', 200);
+    }
+    if (options.path == '/elections/12/declare') {
+      return _json({'id': 30, 'action': 'Declare'}, status: 202);
+    }
     throw StateError('Unhandled ${options.method} ${options.path}');
   }
 
@@ -114,5 +121,14 @@ void main() {
     expect(e.adminHandedOver, isTrue);
     expect(bare.myPermissions, isEmpty);
     expect(bare.adminHandedOver, isFalse);
+  });
+
+  // FR-39 (spec 023, 37.12f): true tells the screen the step is waiting.
+  test('reports a 202 phase or declare reply as waiting', () async {
+    final service =
+        ElectionService(Dio()..httpClientAdapter = _ElectionAdapter());
+
+    expect(await service.setPhase(12, 'Counting'), isFalse);
+    expect(await service.declare(12), isTrue);
   });
 }

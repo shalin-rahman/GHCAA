@@ -63,6 +63,8 @@ class ElectionSummary {
   final DateTime? announcedOn;
   final DateTime? pollingOpensOn;
   final DateTime? pollingClosesOn;
+  // Spec 023 FR-001. Voters compare it with the one the commission announced.
+  final String? ballotKeyFingerprint;
 
   const ElectionSummary({
     required this.id,
@@ -71,6 +73,7 @@ class ElectionSummary {
     required this.ecPeriodId,
     required this.voterCount,
     required this.eligibleVoterCount,
+    this.ballotKeyFingerprint,
     this.announcedOn,
     this.pollingOpensOn,
     this.pollingClosesOn,
@@ -84,6 +87,7 @@ class ElectionSummary {
         ecPeriodId: json['ecPeriodId'] as int? ?? 0,
         voterCount: json['voterCount'] as int? ?? 0,
         eligibleVoterCount: json['eligibleVoterCount'] as int? ?? 0,
+        ballotKeyFingerprint: json['ballotKeyFingerprint'] as String?,
         announcedOn: AppUtils.parseDate(json['announcedOn'] as String?),
         pollingOpensOn: AppUtils.parseDate(json['pollingOpensOn'] as String?),
         pollingClosesOn: AppUtils.parseDate(json['pollingClosesOn'] as String?),
@@ -293,8 +297,11 @@ class ElectionService {
     return response.statusCode == 200;
   }
 
-  Future<void> setPhase(int id, String phase) =>
-      _dio.post('/elections/$id/phase', data: phase);
+  // Spec 023 (37.12f). True when the server stored the step for a second
+  // person (202) instead of running it. Approving happens on the web admin.
+  Future<bool> setPhase(int id, String phase) async =>
+      (await _dio.post('/elections/$id/phase', data: phase)).statusCode ==
+      202;
   Future<int> freezeVoterRoll(int id) async =>
       (await _dio.post('/elections/$id/voter-roll/freeze')).data['count']
           as int;
@@ -302,8 +309,9 @@ class ElectionService {
   // web admin can read. After that this returns the stored results.
   Future<List<dynamic>> count(int id) async =>
       (await _dio.post('/elections/$id/count')).data as List<dynamic>;
+  // True when the declaration waits for a second person, as with setPhase.
   Future<bool> declare(int id) async =>
-      (await _dio.post('/elections/$id/declare')).statusCode == 200;
+      (await _dio.post('/elections/$id/declare')).statusCode == 202;
 
   Future<List<int>> downloadOfficialDocument(int id, String formCode) async =>
       (await _dio.get<List<int>>(

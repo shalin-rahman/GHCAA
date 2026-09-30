@@ -134,7 +134,26 @@ export interface ElectionSummaryDto {
     ecPeriodId: number;
     voterCount: number;
     eligibleVoterCount: number;
+    // Spec 023 FR-001. Voters can check this against the one the returning officer announces.
+    ballotKeyFingerprint?: string | null;
 }
+
+// Spec 023 (37.12f). A step waiting for a second person.
+export interface ElectionApprovalDto {
+    id: number;
+    electionId: number;
+    action: ElectionApprovalAction;
+    requestedByUserId: number;
+    requestedBy: string;
+    requestedAt: string;
+    expiresAt: string;
+    keyFingerprint?: string | null;
+}
+
+// A two-person step either ran and sent back the election, or was stored and sent back the request.
+export type AdminElectionStepResult =
+    | { election: AdminElectionDto; pending: null }
+    | { election: null; pending: ElectionApprovalDto };
 
 export interface NominationDto {
     electionSeatId: number;

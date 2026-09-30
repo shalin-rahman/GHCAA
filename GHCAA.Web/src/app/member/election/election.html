@@ -23,6 +23,9 @@
         } @else if (election()!.phase !== 'Polling') {
             <p class="text-muted">Voting opens once this election reaches the polling phase.</p>
         }
+        @if (election()!.ballotKeyFingerprint) {
+            <p class="text-muted">Ballots are sealed with the returning officer's key. Its fingerprint is <code>{{ election()!.ballotKeyFingerprint }}</code>. It should match the one the commission announced.</p>
+        }
         <div class="stack gap-6">
             @for (seat of seatBallots(); track seat.seatId) {
                 <div class="glass-card">
