@@ -19,6 +19,10 @@ jobs:
           dotnet-version: 9.x
       - name: Verify Formatting
         run: dotnet format --verify-no-changes
+      # authorization-catalog.md is the spec 002 route and policy list. It drifted once unnoticed,
+      # so a route or policy change now fails here until `authz_catalog.py --write` is run and committed.
+      - name: Check authorization catalog is current
+        run: python3 docs/api/authz_catalog.py --check
 
   lint-frontend:
     name: Frontend Analysis

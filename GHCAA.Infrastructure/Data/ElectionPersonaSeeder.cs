@@ -35,21 +35,21 @@ public static class ElectionPersonaSeeder
 
         ElectionPersona Row(string name, string group, string description, ElectionPermission permissions,
             bool takesOver, bool showOnPublicBoard, int minCount, int? maxCount, int sortOrder) => new()
-        {
-            Name = name,
-            GroupName = group,
-            Description = description,
-            Permissions = permissions,
-            MinCount = minCount,
-            MaxCount = maxCount,
-            ShowOnPublicBoard = showOnPublicBoard,
-            TakesOverFromAdmin = takesOver,
-            DeclarationText = NeutralityDeclarationText,
-            SortOrder = sortOrder,
-            IsActive = true,
-            CreatedAt = now,
-            UpdatedAt = now
-        };
+            {
+                Name = name,
+                GroupName = group,
+                Description = description,
+                Permissions = permissions,
+                MinCount = minCount,
+                MaxCount = maxCount,
+                ShowOnPublicBoard = showOnPublicBoard,
+                TakesOverFromAdmin = takesOver,
+                DeclarationText = NeutralityDeclarationText,
+                SortOrder = sortOrder,
+                IsActive = true,
+                CreatedAt = now,
+                UpdatedAt = now
+            };
 
         var defaults = new List<ElectionPersona>
         {

@@ -62,8 +62,15 @@ public sealed class ElectionAccessServiceTests : TestBase
         var userId = await UserAsync(key);
         var a = new ElectionAppointment
         {
-            ElectionId = _election.Id, PersonaId = persona.Id, UserId = userId, AppointedByUserId = userId, DisplayName = "Official", Email = $"u{key}-{persona.Id}@example.com",
-            AppointedAt = now, AcceptedAt = live ? now : null, DeclarationSignedAt = live ? now : null,
+            ElectionId = _election.Id,
+            PersonaId = persona.Id,
+            UserId = userId,
+            AppointedByUserId = userId,
+            DisplayName = "Official",
+            Email = $"u{key}-{persona.Id}@example.com",
+            AppointedAt = now,
+            AcceptedAt = live ? now : null,
+            DeclarationSignedAt = live ? now : null,
         };
         _context.ElectionAppointments.Add(a);
         await _context.SaveChangesAsync();

@@ -1433,7 +1433,9 @@ Refreshed 2026-09-30. The one-off script is now `docs/api/authz_catalog.py`, wit
 `docs/api/test_authz_catalog.py`. `--write` rebuilds sections 2 and 3 and `--check` reports a stale
 catalog, ignoring line-number shifts. It found 348 routes, which adds the spec 023 appointments,
 personas and step-up routes, drops `POST /api/elections/{id}/officers`, and brings in the new
-`ElectionStaff` policy. It is not in CI yet.
+`ElectionStaff` policy. Since 2026-10-01 `--check` runs in the Backend Analysis job of both
+`ghcaa-ci-standard.yml` and `ghcaa-ci-preprod.yml`, so a route or policy change fails CI until the
+catalog is rebuilt with `--write` and committed.
 
 84.6 [DONE] **Priority: P3 | Depends on: none — product decision, not a documentation task.**
 Decision accepted: develop a persisted online election engine scoped by Work Package 37.1, retain static
