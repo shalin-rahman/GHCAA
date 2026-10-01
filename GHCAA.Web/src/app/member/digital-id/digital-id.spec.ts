@@ -1,6 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { DigitalId } from './digital-id';
 import { ProfileService } from '../../core/services/profile.service';
+import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
+import { OrgConfigService } from '../../core/services/org-config.service';
 import { of } from 'rxjs';
 import { MEMBERSHIP_TYPES } from '../../core/constants/app.constants';
 
@@ -14,10 +18,17 @@ describe('DigitalId Component', () => {
             getProfile: vi.fn().mockReturnValue(of({ fullName: 'Test Member', memberId: 'M123' }))
         };
 
+        const authServiceMock = { currentUser: signal(null) };
+        const notificationServiceMock = { success: vi.fn(), error: vi.fn() };
+        const orgConfigServiceMock = { config: signal(null) };
+
         await TestBed.configureTestingModule({
             imports: [DigitalId],
             providers: [
-                { provide: ProfileService, useValue: profileServiceMock }
+                { provide: ProfileService, useValue: profileServiceMock },
+                { provide: AuthService, useValue: authServiceMock },
+                { provide: NotificationService, useValue: notificationServiceMock },
+                { provide: OrgConfigService, useValue: orgConfigServiceMock }
             ]
         }).compileComponents();
 
