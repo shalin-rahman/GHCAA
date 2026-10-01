@@ -3,6 +3,7 @@ import { createNotificationServiceMock } from '../../core/testing/testing-utils'
 import { AdminGovernance } from './admin-governance';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { LookupService } from '../../core/services/lookup.service';
 import { of } from 'rxjs';
 
 describe('AdminGovernance Component', () => {
@@ -10,6 +11,7 @@ describe('AdminGovernance Component', () => {
     let fixture: ComponentFixture<AdminGovernance>;
     let adminServiceMock: any;
     let notificationServiceMock: any;
+    let lookupServiceMock: any;
 
     beforeEach(async () => {
         adminServiceMock = {
@@ -23,12 +25,16 @@ describe('AdminGovernance Component', () => {
             getMembers: vi.fn().mockReturnValue(of([]))
         };
         notificationServiceMock = createNotificationServiceMock();
+        lookupServiceMock = {
+            getOptions: vi.fn().mockReturnValue(of([{ value: '1', label: 'President' }]))
+        };
 
         await TestBed.configureTestingModule({
             imports: [AdminGovernance],
             providers: [
                 { provide: AdminService, useValue: adminServiceMock },
-                { provide: NotificationService, useValue: notificationServiceMock }
+                { provide: NotificationService, useValue: notificationServiceMock },
+                { provide: LookupService, useValue: lookupServiceMock }
             ]
         }).compileComponents();
 
