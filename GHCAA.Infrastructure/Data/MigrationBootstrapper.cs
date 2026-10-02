@@ -61,6 +61,7 @@ namespace GHCAA.Infrastructure.Data
                 await BaselineLegacyDatabaseAsync(ctx, logger, allMigrations);
             }
 
+            await RestoreWronglyRemovedHistoryRowsAsync(ctx, logger, allMigrations, applied);
             await SelfHealFalselyBaselinedMigrationsAsync(ctx, logger, applied);
             await ctx.Database.MigrateAsync();
             await RepairMissingColumnsAsync(ctx, logger);
@@ -212,6 +213,7 @@ namespace GHCAA.Infrastructure.Data
         {
             var migrationsAssembly = ctx.GetService<IMigrationsAssembly>();
             var activeProvider = ctx.Database.ProviderName!;
+            var modelColumns = ModelColumns(ctx);
 
             foreach (var migrationId in applied)
             {
@@ -230,36 +232,6 @@ namespace GHCAA.Infrastructure.Data
 
                 var operations = migrationsAssembly.CreateMigration(migrationType, activeProvider).UpOperations;
 
-                var targets = new List<(string Table, string? Column)>();
-                foreach (var op in operations)
-                {
-                    switch (op)
-                    {
-                        case AddColumnOperation addColumn:
-                            targets.Add((addColumn.Table, addColumn.Name));
-                            break;
-                        case CreateTableOperation createTable:
-                            targets.Add((createTable.Name, null));
-                            break;
-                        case SqlOperation sqlOp when sqlOp.Sql is not null:
-                            // A raw-SQL migration mixing DDL with a data statement is exactly the
-                            // risky shape this method exists to catch, and we can't type-check that
-                            // from a single opaque string — so any CREATE TABLE/ADD COLUMN found here
-                            // is always treated as needing verification, regardless of what else is
-                            // in the migration.
-                            foreach (Match m in CreateTableRegex.Matches(sqlOp.Sql))
-                                targets.Add((m.Groups["table"].Value, null));
-                            foreach (Match m in AddColumnRegex.Matches(sqlOp.Sql))
-                                targets.Add((m.Groups["table"].Value, m.Groups["column"].Value));
-                            break;
-                    }
-                }
-
-                if (targets.Count == 0)
-                {
-                    continue;
-                }
-
                 // Typed-op migrations only count as risky when a schema op is mixed with a data op —
                 // preserves the original scope for those. Raw-SQL targets found via regex are always
                 // checked, since we can't tell whether the surrounding SqlOperation also seeds data.
@@ -271,26 +243,188 @@ namespace GHCAA.Infrastructure.Data
                     continue;
                 }
 
+                var targets = StillMappedTargets(operations, modelColumns);
                 foreach (var (table, column) in targets)
                 {
-                    var exists = column is null
-                        ? await ctx.Database.SqlQueryRaw<int>(
-                            "SELECT 1 AS \"Value\" FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = {0}", table).AnyAsync()
-                        : await ctx.Database.SqlQueryRaw<int>(
-                            "SELECT 1 AS \"Value\" FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = {0} AND column_name = {1}", table, column).AnyAsync();
-
-                    if (!exists)
+                    if (!await TargetExistsAsync(ctx, table, column))
                     {
+                        var missing = column is null ? table : $"{table}.{column}";
+
+                        // Replaying a migration whose other tables exist fails with 42P07 and stops
+                        // startup, which is worse than the missing object. Leave those for a person.
+                        var createsAnExistingTable = false;
+                        foreach (var (otherTable, _) in targets.Where(t => t.Column is null && t.Table != table))
+                        {
+                            if (await TargetExistsAsync(ctx, otherTable, null))
+                            {
+                                createsAnExistingTable = true;
+                                break;
+                            }
+                        }
+
+                        if (createsAnExistingTable)
+                        {
+                            logger.LogError(
+                                "Migration {MigrationId} is recorded as applied but {Table} is missing. Other tables it creates exist, so it cannot be replayed; fix this by hand.",
+                                migrationId, missing);
+                            break;
+                        }
+
                         await ctx.Database.ExecuteSqlInterpolatedAsync(
                             $"DELETE FROM \"__EFMigrationsHistory\" WHERE \"MigrationId\" = {migrationId}");
                         logger.LogWarning(
                             "Migration {MigrationId} was recorded as applied but {Table} is missing — history row removed so it will reapply.",
-                            migrationId, column is null ? table : $"{table}.{column}");
+                            migrationId, missing);
                         break;
                     }
                 }
             }
         }
+
+        // Until 2026-10-02 self-heal also checked tables that a later migration dropped on purpose.
+        // ElectionAppointments drops ElectionOfficers, which AddElectionEngine created, so every boot
+        // removed AddElectionEngine's history row and MigrateAsync then failed with 42P07 on
+        // "Elections" (preprod crash loop, 2026-10-01). A migration that is not applied while a newer
+        // one is is almost always such a removed row. Put the row back when every table and column it
+        // creates that the model still maps is there, and at least one of those is a table. Columns
+        // alone are not enough: RepairMissingColumnsAsync adds model columns itself, so a late-merged
+        // migration that only adds columns could look applied when its other steps never ran.
+        private static async Task RestoreWronglyRemovedHistoryRowsAsync(
+            ApplicationDbContext ctx, ILogger logger, List<string> allMigrations, HashSet<string> applied)
+        {
+            if (!ctx.Database.IsNpgsql())
+            {
+                return;
+            }
+
+            var gap = HistoryGap(allMigrations, applied);
+            if (gap.Count == 0)
+            {
+                return;
+            }
+
+            var migrationsAssembly = ctx.GetService<IMigrationsAssembly>();
+            var activeProvider = ctx.Database.ProviderName!;
+            var modelColumns = ModelColumns(ctx);
+
+            foreach (var migrationId in gap)
+            {
+                // Newer migrations are applied, so the baseline schema is there. Replaying it would fail
+                // on its first CREATE TABLE.
+                if (migrationId.EndsWith("_InitialBaseline", StringComparison.Ordinal))
+                {
+                    await InsertHistoryRowAsync(ctx, logger, migrationId, applied);
+                    continue;
+                }
+
+                if (!migrationsAssembly.Migrations.TryGetValue(migrationId, out var migrationType))
+                {
+                    continue;
+                }
+
+                var operations = migrationsAssembly.CreateMigration(migrationType, activeProvider).UpOperations;
+                var targets = StillMappedTargets(operations, modelColumns);
+                if (!targets.Any(t => t.Column is null))
+                {
+                    logger.LogWarning(
+                        "Migration {MigrationId} is older than applied migrations but not applied itself. It creates no table to check, so it is left to run.",
+                        migrationId);
+                    continue;
+                }
+
+                var allPresent = true;
+                foreach (var (table, column) in targets)
+                {
+                    if (!await TargetExistsAsync(ctx, table, column))
+                    {
+                        allPresent = false;
+                        break;
+                    }
+                }
+
+                if (!allPresent)
+                {
+                    continue;
+                }
+
+                await InsertHistoryRowAsync(ctx, logger, migrationId, applied);
+            }
+        }
+
+        private static async Task InsertHistoryRowAsync(ApplicationDbContext ctx, ILogger logger, string migrationId, HashSet<string> applied)
+        {
+            var historyRepository = ctx.GetService<IHistoryRepository>();
+            try
+            {
+                await ctx.Database.ExecuteSqlRawAsync(historyRepository.GetInsertScript(new HistoryRow(migrationId, "9.0.0")));
+                logger.LogWarning(
+                    "Migration {MigrationId} was missing from the history but its tables are present; history row restored.",
+                    migrationId);
+            }
+            catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation)
+            {
+                // Another instance booting at the same time restored it first.
+            }
+
+            applied.Add(migrationId);
+        }
+
+        // Migrations older than the newest applied one that are not applied themselves.
+        public static List<string> HistoryGap(IReadOnlyList<string> allMigrations, IReadOnlySet<string> applied)
+        {
+            var newest = -1;
+            for (var i = 0; i < allMigrations.Count; i++)
+            {
+                if (applied.Contains(allMigrations[i])) newest = i;
+            }
+
+            return allMigrations.Take(Math.Max(newest, 0)).Where(id => !applied.Contains(id)).ToList();
+        }
+
+        // Table name to column names, for every table the current model maps.
+        private static Dictionary<string, HashSet<string>> ModelColumns(ApplicationDbContext ctx) =>
+            ctx.GetService<IDesignTimeModel>().Model.GetRelationalModel().Tables
+                .Where(t => t.Schema is null && !t.IsExcludedFromMigrations)
+                .ToDictionary(t => t.Name, t => t.Columns.Select(c => c.Name).ToHashSet(StringComparer.Ordinal), StringComparer.Ordinal);
+
+        // The CREATE TABLE and ADD COLUMN targets of a migration, keeping only those the model still
+        // maps. A table or column a later migration dropped or renamed is meant to be missing, and so
+        // are the scratch tables a raw-SQL migration creates and drops again (BallotsCopy and so on).
+        public static List<(string Table, string? Column)> StillMappedTargets(
+            IEnumerable<MigrationOperation> operations, IReadOnlyDictionary<string, HashSet<string>> modelColumns)
+        {
+            var targets = new List<(string Table, string? Column)>();
+            foreach (var op in operations)
+            {
+                switch (op)
+                {
+                    case AddColumnOperation addColumn:
+                        targets.Add((addColumn.Table, addColumn.Name));
+                        break;
+                    case CreateTableOperation createTable:
+                        targets.Add((createTable.Name, null));
+                        break;
+                    case SqlOperation sqlOp when sqlOp.Sql is not null:
+                        foreach (Match m in CreateTableRegex.Matches(sqlOp.Sql))
+                            targets.Add((m.Groups["table"].Value, null));
+                        foreach (Match m in AddColumnRegex.Matches(sqlOp.Sql))
+                            targets.Add((m.Groups["table"].Value, m.Groups["column"].Value));
+                        break;
+                }
+            }
+
+            return targets
+                .Where(t => modelColumns.TryGetValue(t.Table, out var columns) && (t.Column is null || columns.Contains(t.Column)))
+                .Distinct()
+                .ToList();
+        }
+
+        private static Task<bool> TargetExistsAsync(ApplicationDbContext ctx, string table, string? column) =>
+            column is null
+                ? ctx.Database.SqlQueryRaw<int>(
+                    "SELECT 1 AS \"Value\" FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = {0}", table).AnyAsync()
+                : ctx.Database.SqlQueryRaw<int>(
+                    "SELECT 1 AS \"Value\" FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = {0} AND column_name = {1}", table, column).AnyAsync();
 
         // Legacy database: tables already exist but no migration was ever recorded as applied.
         // Attempt each migration in order via the real migrator; a "such object already exists"
