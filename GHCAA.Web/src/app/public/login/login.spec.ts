@@ -97,12 +97,44 @@ describe('Login Component', () => {
         expect(component.errorMessage()).toBe('Invalid username or password.');
     });
 
-    it('should stop safely when the server does not respond within 8 seconds', () => {
+    it('should still sign in when the server answers after the old 8 second limit', () => {
+        authServiceMock.login.mockReturnValue(new Observable(subscriber => {
+            setTimeout(() => subscriber.next({ role: 'User' }), 20000);
+            return () => undefined;
+        }));
+        component.credentials = { username: 'slowuser', password: 'password' };
+
+        component.onLogin(mockForm);
+        vi.advanceTimersByTime(20000);
+
+        expect(component.errorMessage()).toBe('');
+        expect(component.loading()).toBe(false);
+        expect(router.navigate).toHaveBeenCalledWith(['/portal/dashboard']);
+    });
+
+    it('should keep cycling status words instead of freezing on the last one', () => {
         authServiceMock.login.mockReturnValue(new Observable(() => undefined));
         component.credentials = { username: 'slowuser', password: 'password' };
 
         component.onLogin(mockForm);
-        vi.advanceTimersByTime(7999);
+        const seen = new Set<string>();
+        for (let i = 0; i < 20; i++) {
+            vi.advanceTimersByTime(1200);
+            seen.add(component.loginStatus()!);
+        }
+
+        expect(component.loading()).toBe(true);
+        expect(seen.size).toBeGreaterThan(1);
+        expect(seen.has('Connecting')).toBe(false);
+    });
+
+    it('should stop and cancel the request when the server does not respond within 60 seconds', () => {
+        const teardown = vi.fn();
+        authServiceMock.login.mockReturnValue(new Observable(() => teardown));
+        component.credentials = { username: 'slowuser', password: 'password' };
+
+        component.onLogin(mockForm);
+        vi.advanceTimersByTime(59999);
 
         expect(component.loading()).toBe(true);
         expect(component.errorMessage()).toBe('');
@@ -112,5 +144,6 @@ describe('Login Component', () => {
         expect(component.loading()).toBe(false);
         expect(component.loginStatus()).toBeNull();
         expect(component.errorMessage()).toBe('Login timed out. Please try again.');
+        expect(teardown).toHaveBeenCalled();
     });
 });

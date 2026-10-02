@@ -153,7 +153,12 @@ app.UseOutputCache();
 if (!app.Environment.IsDevelopment())
 {
     app.UseHsts();
-    app.UseHttpsRedirection();
+    // http-to-https redirect. With no HTTPS port known the middleware does nothing except log
+    // "Failed to determine the https port for redirect", so only add it when a port is set.
+    if (!string.IsNullOrEmpty(configuration["HTTPS_PORT"]) || !string.IsNullOrEmpty(configuration["HTTPS_PORTS"]))
+    {
+        app.UseHttpsRedirection();
+    }
 }
 
 app.UseMiddleware<SecurityHeadersMiddleware>();

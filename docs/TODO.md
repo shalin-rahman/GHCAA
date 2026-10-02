@@ -1825,6 +1825,15 @@ sequence, restores the idle form, and shows `Login timed out. Please try again.`
 the progress indicator and label both return to their idle state immediately on success or failure.
 **Acceptance:** done; `npx vitest run src/app/public/login/login.spec.ts` (6 passed, run 2026-09-22).
 
+87.3 [DONE] **Priority: P1 | Depends on: 87.2.** Reported by the user 2026-10-02: the status words ran
+out before the login reply came back and the page stayed on the login form. Two causes. The 8-second
+timeout fired while the request was still running, and a reply after that was ignored even though
+`AuthService` had already stored the session. And once the 6 or 7 words were used up, the last one stayed
+on screen. The timeout is now 60 seconds and cancels the request when it fires. The words loop from the
+second one until the reply arrives. The three login paths (password, Google, Facebook) share one
+`runLogin` helper, so the request handle is kept in one place.
+**Acceptance:** done; `npx vitest run src/app/public/login/login.spec.ts` (8 passed, run 2026-10-02).
+
 # Work Package 88 — Idempotent delivery path for the May 2026 alumni batch
 
 Raised by the user 2026-09-22, who suspected Work Package 46.1 "reverted while migration re-factored."

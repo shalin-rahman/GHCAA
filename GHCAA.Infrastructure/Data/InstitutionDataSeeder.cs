@@ -156,13 +156,28 @@ namespace GHCAA.Infrastructure.Data
                 foreach (var file in Directory.EnumerateFiles(dir!, "*.json"))
                 {
                     var name = Path.GetFileName(file);
-                    if (!registeredFiles.Contains(name))
+                    // An empty array has nothing to lose, so it is not worth a warning on every boot.
+                    if (!registeredFiles.Contains(name) && !IsEmptyJsonArray(file))
                     {
                         logger.LogWarning(
                             "Institution data seed: {File} in {Directory} is not in InstitutionDataSeeder.Registry — it will never be loaded.",
                             name, dir);
                     }
                 }
+            }
+        }
+
+        public static bool IsEmptyJsonArray(string path)
+        {
+            try
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(path));
+                return doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Array
+                    && doc.RootElement.GetArrayLength() == 0;
+            }
+            catch (System.Text.Json.JsonException)
+            {
+                return false;
             }
         }
     }

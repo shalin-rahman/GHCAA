@@ -107,6 +107,9 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 # Disable config-file FileSystemWatcher: Render containers hit the host inotify
 # instance limit (128), crashing WebApplication.CreateBuilder at startup (exit 139).
 ENV DOTNET_hostBuilder__reloadConfigOnChange=false
+# The aspnet base image sets ASPNETCORE_HTTP_PORTS=8080. Program.cs binds to Render's PORT through
+# UseUrls instead, and ASP.NET logs a warning on every boot when both are set.
+ENV ASPNETCORE_HTTP_PORTS=
 COPY --from=publish /app/publish .
 # Copy the built Angular SPA into wwwroot so UseStaticFiles serves it at /
 COPY --from=web /web/dist/GHCAA.Web/browser ./wwwroot

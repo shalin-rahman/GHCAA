@@ -19,7 +19,7 @@ The login button shall show a progress status instead of the static `Authenticat
 
 The displayed word shall come from a small, fixed pool of technical verbs: `Connecting`, `Validating`, `Reading`, `Parsing`, `Encrypting`, `Transmitting`, `Ingesting`, `Intercepting`, `Decrypting`, `Salting`, `Hashing`, `Querying`, `Matching`, `Verifying`, `Authorizing`, `Generating`, `Signing`, `Issuing`, `Caching`, and `Redirecting`.
 
-At the start of each authentication attempt, the component shall choose a 6-to-7-item subset from that list and show the selected verbs in strict chronological order. The order shall never move backwards and shall not leave the sequence running after the request resolves.
+At the start of each authentication attempt, the component shall choose a 6-to-7-item subset from that list and show the selected verbs in strict chronological order. The order shall never move backwards and shall not leave the sequence running after the request resolves. If the request is still pending once the last verb has shown, the sequence starts again from its second verb rather than holding on the last one.
 
 ### FR-2 Visual behaviour
 
@@ -33,7 +33,7 @@ The component shall disable the submit button and social-login buttons while an 
 
 When the component is destroyed, all active timers and pending animation state shall be cleared immediately so no stale callbacks or memory leaks remain.
 
-The authentication flow shall enforce an 8-second safety timeout. If the request hangs, the system shall stop the progress sequence, restore the form to an idle state, and show a clear error message.
+The authentication flow shall enforce a 60-second safety timeout, long enough for a Render free-tier wake. If the request hangs, the system shall cancel the request, stop the progress sequence, restore the form to an idle state, and show a clear error message. A reply that arrives before the timeout shall always complete the login.
 
 ### FR-4 Completion clarity
 
@@ -56,8 +56,8 @@ The login button shall return to the plain `Login` label after the request resol
 ## Acceptance scenarios
 
 1. Given a valid login request, when the component starts the flow, then the submit button shows a progress word and the form becomes disabled.
-2. Given the request stays active, when the interval advances, then the displayed verb changes in order and never regresses.
+2. Given the request stays active, when the interval advances, then the displayed verb changes in order and never regresses, and after the last verb it starts again from the second.
 3. Given the request resolves successfully, when the response arrives, then the progress indicator disappears and the user is redirected normally.
 4. Given the request fails, when the error response arrives, then the loading state ends and the error text is shown.
-5. Given the request hangs for longer than 8 seconds, when the timeout fires, then the flow clears its timers and shows `Login timed out. Please try again.`
+5. Given the request hangs for longer than 60 seconds, when the timeout fires, then the flow cancels the request, clears its timers and shows `Login timed out. Please try again.`
 6. Given the component is destroyed mid-flow, when `ngOnDestroy` runs, then all timers are cleared and no state update is emitted after the component is gone.

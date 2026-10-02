@@ -9,6 +9,7 @@ import { Icon } from '../../common/icon/icon';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { ROUTES } from '../../core/constants/app.constants';
 import { OrgConfigService } from '../../core/services/org-config.service';
+import { Observable, Subscription } from 'rxjs';
 
 const AUTH_STATUS_SEQUENCE = [
   'Connecting', 'Validating', 'Reading', 'Parsing', 'Encrypting', 'Transmitting',
@@ -17,7 +18,10 @@ const AUTH_STATUS_SEQUENCE = [
   'Caching', 'Redirecting'
 ];
 const AUTH_STATUS_INTERVAL_MS = 1200;
-const AUTH_TIMEOUT_MS = 8000;
+// A Render free-tier wake plus a cold database can take most of a minute. The old 8s limit gave
+// up while the request was still running, so a login that then succeeded was thrown away and the
+// user was left on this page.
+const AUTH_TIMEOUT_MS = 60000;
 
 declare var google: any;
 declare var FB: any;
@@ -47,6 +51,7 @@ export class Login implements OnInit, OnDestroy {
   private returnUrl: string | null = null;
   private loginStatusTimer: number | null = null;
   private authTimeoutTimer: number | null = null;
+  private loginRequest: Subscription | null = null;
   private loginAttemptId = 0;
   private loginSequence: string[] = [];
   private loginSequenceIndex = 0;
@@ -63,6 +68,7 @@ export class Login implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.cancelLoginRequest();
     this.clearLoginProgress();
     this.loginAttemptId += 1;
   }
@@ -108,13 +114,12 @@ export class Login implements OnInit, OnDestroy {
         return;
       }
 
+      // Loop back past 'Connecting' rather than freezing on the last word while the server is slow.
       this.loginSequenceIndex += 1;
-      const nextStatus = this.loginSequence[this.loginSequenceIndex];
-      if (nextStatus) {
-        this.loginStatus.set(nextStatus);
-      } else {
-        this.loginStatus.set(this.loginSequence[this.loginSequence.length - 1]);
+      if (this.loginSequenceIndex >= this.loginSequence.length) {
+        this.loginSequenceIndex = 1;
       }
+      this.loginStatus.set(this.loginSequence[this.loginSequenceIndex]);
     }, AUTH_STATUS_INTERVAL_MS);
 
     this.authTimeoutTimer = window.setTimeout(() => {
@@ -122,11 +127,26 @@ export class Login implements OnInit, OnDestroy {
         return;
       }
 
-      this.loginAttemptId += 1;
-      this.clearLoginProgress();
-      this.loading.set(false);
+      // Cancel the request too, so a late reply can't sign the user in behind this message.
+      this.cancelLoginRequest();
+      this.finishLoginProgress();
       this.errorMessage.set('Login timed out. Please try again.');
     }, AUTH_TIMEOUT_MS);
+  }
+
+  private cancelLoginRequest(): void {
+    this.loginRequest?.unsubscribe();
+    this.loginRequest = null;
+  }
+
+  private runLogin(request: Observable<User>, fallbackError: string): void {
+    const attemptId = this.loginAttemptId + 1;
+    this.startLoginProgress(attemptId);
+    this.cancelLoginRequest();
+    this.loginRequest = request.subscribe({
+      next: (user) => this.handleAuthSuccess(user, attemptId),
+      error: (err) => this.handleAuthError(err, attemptId, fallbackError)
+    });
   }
 
   private finishLoginProgress(): void {
@@ -203,12 +223,7 @@ export class Login implements OnInit, OnDestroy {
   }
 
   handleGoogleLogin(idToken: string) {
-    const attemptId = this.loginAttemptId + 1;
-    this.startLoginProgress(attemptId);
-    this.auth.googleLogin(idToken).subscribe({
-      next: (user) => this.handleAuthSuccess(user, attemptId),
-      error: (err) => this.handleAuthError(err, attemptId)
-    });
+    this.runLogin(this.auth.googleLogin(idToken), 'Authentication failed. Please try again.');
   }
 
   loginWithFacebook() {
@@ -218,12 +233,7 @@ export class Login implements OnInit, OnDestroy {
 
     FB.login((response: any) => {
       if (response.authResponse) {
-        const attemptId = this.loginAttemptId + 1;
-        this.startLoginProgress(attemptId);
-        this.auth.facebookLogin(response.authResponse.accessToken).subscribe({
-          next: (user) => this.handleAuthSuccess(user, attemptId),
-          error: (err) => this.handleAuthError(err, attemptId)
-        });
+        this.runLogin(this.auth.facebookLogin(response.authResponse.accessToken), 'Authentication failed. Please try again.');
       }
     }, { scope: 'public_profile,email' });
   }
@@ -251,13 +261,13 @@ export class Login implements OnInit, OnDestroy {
     }
   }
 
-  private handleAuthError(err: any, attemptId: number) {
+  private handleAuthError(err: any, attemptId: number, fallbackError: string) {
     if (this.loginAttemptId !== attemptId) {
       return;
     }
 
     this.finishLoginProgress();
-    this.errorMessage.set(err.error?.message || 'Authentication failed. Please try again.');
+    this.errorMessage.set(err.error?.message || fallbackError);
   }
 
   togglePassword() {
@@ -272,27 +282,7 @@ export class Login implements OnInit, OnDestroy {
       return;
     }
 
-    const attemptId = this.loginAttemptId + 1;
-    this.startLoginProgress(attemptId);
-
-    this.auth.login(this.credentials).subscribe({
-      next: (user) => {
-        if (this.loginAttemptId !== attemptId) {
-          return;
-        }
-
-        this.finishLoginProgress();
-        this.navigateAfterLogin(user);
-      },
-      error: (err) => {
-        if (this.loginAttemptId !== attemptId) {
-          return;
-        }
-
-        this.finishLoginProgress();
-        this.errorMessage.set(err.error?.message || 'Invalid username or password.');
-      }
-    });
+    this.runLogin(this.auth.login(this.credentials), 'Invalid username or password.');
   }
 
   forgotPassword() {
