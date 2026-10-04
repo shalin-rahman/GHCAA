@@ -110,4 +110,31 @@ describe('AdminPolls', () => {
 
     expect(adminPollServiceMock.createPoll).not.toHaveBeenCalled();
   });
+
+  it('replaces the toggled row so the zoneless view sees the new status', () => {
+    component.polls.set([TEST_POLL, { ...TEST_POLL, id: 2, title: 'Other' }]);
+    adminPollServiceMock.toggleStatus.mockReturnValue(of({}));
+    const before = component.polls()[0];
+
+    component.toggleStatus(before);
+
+    expect(adminPollServiceMock.toggleStatus).toHaveBeenCalledWith(1, false);
+    expect(component.polls()[0].isActive).toBe(false);
+    // Setting isActive on the same object left the badge stale and threw NG0100 in the browser.
+    expect(component.polls()[0]).not.toBe(before);
+    expect(before.isActive).toBe(true);
+    expect(component.polls()[1].isActive).toBe(true);
+    expect(component.togglingId()).toBeNull();
+  });
+
+  it('keeps the old status when the toggle fails', () => {
+    component.polls.set([TEST_POLL]);
+    adminPollServiceMock.toggleStatus.mockReturnValue(throwError(() => new Error('Request failed')));
+
+    component.toggleStatus(component.polls()[0]);
+
+    expect(component.polls()[0].isActive).toBe(true);
+    expect(component.togglingId()).toBeNull();
+    expect(notifyMock.error).toHaveBeenCalledOnce();
+  });
 });

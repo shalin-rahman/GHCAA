@@ -2370,3 +2370,11 @@ comparison the table now supports.
 **Acceptance:** met; `build.py --pdf --strict` ends "clean, ready to deliver" and `wbs.py --check`
 exits 0 (2026-10-03). §6.3.2's entity count and Chapter 6's service-interface count still predate the
 re-take; the README says so.
+
+96.8 [DONE] **Priority: P1 | Depends on: none.** Poll Activate/Deactivate on /admin/polls did
+nothing on screen (raised 2026-10-05: "fix poll issue"). The request went through, but
+`toggleStatus` set `isActive` on the row object inside the `polls` signal. The app is zoneless, so
+the badge kept its old value and Angular threw NG0100 in the console. It now replaces the row
+through `polls.update`, so the badge, icon and active/inactive search follow the new status.
+**Acceptance:** met; two polls spec cases (row replaced on success, old status kept on failure),
+tsc clean, and the toggle checked in the browser against a mocked API.

@@ -120,7 +120,9 @@ export class AdminPolls implements OnInit {
     this.pollService.toggleStatus(poll.id, newStatus).subscribe({
       next: () => {
         this.togglingId.set(null);
-        poll.isActive = newStatus;
+        // Replace the row instead of setting poll.isActive. The app is zoneless, so a
+        // mutation inside the signal is never seen and the badge throws NG0100.
+        this.polls.update(list => list.map(p => p.id === poll.id ? { ...p, isActive: newStatus } : p));
         this.notify.success(`Poll ${newStatus ? 'activated' : 'deactivated'}.`);
       },
       error: () => {
