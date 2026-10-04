@@ -74,7 +74,7 @@ def _tracked_text():
 # the duration; the packages tie the activity to the tracker; predecessors are the
 # author's reading of what had to exist first, not derived from git.
 CODE = [
-    ("C1", "Persistence and migrations", ["31", "47"],
+    ("C1", "Persistence and migrations", ["31", "47", "94"],
      ["GHCAA.Infrastructure/Data"], []),
     ("C2", "Authentication and access", ["15", "24"],
      ["GHCAA.API/Controllers/AuthController.cs",
@@ -99,7 +99,7 @@ CODE = [
      ["GHCAA.API/Controllers/EventsController.cs",
       "GHCAA.Infrastructure/Services/EventService.cs",
       "GHCAA.Infrastructure/Services/IDCardService.cs"], ["C3"]),
-    ("C6", "Governance and elections", ["9", "16", "36", "37", "38", "39", "42"],
+    ("C6", "Governance and elections", ["9", "16", "36", "37", "38", "39", "42", "95"],
      ["GHCAA.API/Controllers/GovernanceController.cs",
       "GHCAA.API/Controllers/AdminGovernanceController.cs",
       "GHCAA.API/Controllers/PollController.cs",
@@ -136,7 +136,7 @@ CODE = [
      ["GHCAA.API/Middleware", "GHCAA.Application/Security",
       "GHCAA.API/Controllers/SecureFilesController.cs",
       "GHCAA.API/Controllers/RolesController.cs"], ["C2"]),
-    ("C13", "Web client", ["11", "26", "30", "33", "53", "54", "56", "58", "87"],
+    ("C13", "Web client", ["11", "26", "30", "33", "53", "54", "56", "58", "87", "93", "96"],
      ["GHCAA.Web/src"],
      ["C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11"]),
     ("C14", "Mobile client", ["1", "8", "60"], ["GHCAA.Mobile/lib"],
@@ -283,6 +283,17 @@ PRE = [
 
 # The first commit in the repository. Everything in PRE ends before it.
 DEVELOPMENT_START = datetime.date(2026, 2, 9)
+
+
+def expects_commits(paths, area_list, done):
+    """Whether a component with no commits means its paths are wrong.
+
+    Planned work has none yet. A component whose files exist, or whose tracker
+    items are already done, should have some, so there the paths are suspect.
+    """
+    if any(os.path.exists(os.path.join(REPO, p)) for p in paths):
+        return True
+    return sum(done.get(a, 0) for a in area_list) > 0
 
 
 def back_schedule(activities, finish_before):
@@ -930,8 +941,9 @@ def main(argv=None):
                 if other not in tasks:
                     problems.append("area %s says it followed area %s, which has no items"
                                     % (area, other))
+        _tasks, done, _arrival, _stated = tracker()
         for key, label, area_list, paths, _pred in CODE:
-            if not commit_days(paths):
+            if not commit_days(paths) and expects_commits(paths, area_list, done):
                 problems.append("%s (%s) matched no commits; check its paths" % (key, label))
             if not sum(tasks[a] for a in area_list):
                 problems.append("%s (%s) has no tracker items; check its work packages" % (key, label))

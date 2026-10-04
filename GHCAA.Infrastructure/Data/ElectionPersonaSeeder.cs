@@ -6,11 +6,13 @@ using GHCAA.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using static GHCAA.Domain.Enums;
+using PersonaGroups = GHCAA.Domain.Constants.Elections.PersonaGroups;
 
 namespace GHCAA.Infrastructure.Data;
 
-// Spec 023 (37.12b). Inserts any default election persona missing by name. An existing row is
-// never updated, so a SuperAdmin edit survives a redeploy. The ElectionAppointments migration
+// Spec 023 (37.12b). Inserts any default election persona missing by name. An existing row keeps
+// whatever a SuperAdmin set, so an edit survives a redeploy. The one exception is a default persona
+// with no permissions at all, which gets its default set (95.10). The ElectionAppointments migration
 // may insert four of these first, which is why this cannot stop at a non-empty table.
 public static class ElectionPersonaSeeder
 {
@@ -53,48 +55,66 @@ public static class ElectionPersonaSeeder
 
         var defaults = new List<ElectionPersona>
         {
-            Row("ECSC Member", "Search Committee", "Screens and recommends candidates before nominations open.",
+            Row("ECSC Member", PersonaGroups.SearchCommittee, "Screens and recommends candidates before nominations open.",
                 ElectionPermission.ViewDashboard, false, true, 3, 5, 10),
-            Row("Chief Commissioner", "Election Commission", "Runs the election commission and can act in place of the admin.",
+            Row("Chief Commissioner", PersonaGroups.ElectionCommission, "Runs the election commission and can act in place of the admin.",
                 chiefCommissioner, true, true, 1, 1, 20),
-            Row("Commissioner", "Election Commission", "Sits on the election commission alongside the Chief Commissioner.",
+            Row("Commissioner", PersonaGroups.ElectionCommission, "Sits on the election commission alongside the Chief Commissioner.",
                 ElectionPermission.ViewDashboard | ElectionPermission.ViewAudit | ElectionPermission.ManageSetup
                     | ElectionPermission.ManageVoterRoll | ElectionPermission.DecideNominations | ElectionPermission.AppointOfficials
                     | ElectionPermission.ChangePhase | ElectionPermission.Declare | ElectionPermission.Approve,
                 true, true, 2, 4, 30),
-            Row("Returning Officer", "Officials", "Holds the ballot key and runs the count.",
+            Row("Returning Officer", PersonaGroups.Officials, "Holds the ballot key and runs the count.",
                 ElectionPermission.ViewDashboard | ElectionPermission.ViewAudit | ElectionPermission.DecideNominations
                     | ElectionPermission.SetBallotKey | ElectionPermission.Count | ElectionPermission.Approve,
                 false, true, 1, 1, 40),
-            Row("Assistant Returning Officer", "Officials", "Helps the Returning Officer with nominations.",
+            Row("Assistant Returning Officer", PersonaGroups.Officials, "Helps the Returning Officer with nominations.",
                 ElectionPermission.ViewDashboard | ElectionPermission.DecideNominations, false, true, 0, null, 50),
-            Row("Presiding Officer", "Officials", "Oversees a polling station on election day.",
+            Row("Presiding Officer", PersonaGroups.Officials, "Oversees a polling station on election day.",
                 ElectionPermission.ViewDashboard, false, true, 0, null, 60),
-            Row("Polling Officer", "Officials", "Staffs a polling station on election day.",
+            Row("Polling Officer", PersonaGroups.Officials, "Staffs a polling station on election day.",
                 ElectionPermission.ViewDashboard, false, true, 0, null, 70),
-            Row("Scrutineer", "Officials", "Checks nominations for eligibility.",
+            Row("Scrutineer", PersonaGroups.Officials, "Checks nominations for eligibility.",
                 ElectionPermission.ViewDashboard | ElectionPermission.DecideNominations, false, true, 0, null, 80),
-            Row("Counting Supervisor", "Officials", "Oversees the vote count.",
+            Row("Counting Supervisor", PersonaGroups.Officials, "Oversees the vote count.",
                 ElectionPermission.ViewDashboard | ElectionPermission.Count, false, true, 0, null, 90),
-            Row("Technical Administrator", "Officials", "Keeps the voting system running.",
+            Row("Technical Administrator", PersonaGroups.Officials, "Keeps the voting system running.",
                 ElectionPermission.ViewDashboard | ElectionPermission.ViewAudit, false, true, 0, null, 100),
-            Row("Cybersecurity Auditor", "Officials", "Reviews the election for security issues.",
+            Row("Cybersecurity Auditor", PersonaGroups.Officials, "Reviews the election for security issues.",
                 ElectionPermission.ViewDashboard | ElectionPermission.ViewAudit, false, true, 0, null, 110),
-            Row("Security Officer", "Officials", "Handles physical security for the election.",
+            Row("Security Officer", PersonaGroups.Officials, "Handles physical security for the election.",
                 ElectionPermission.ViewDashboard, false, false, 0, null, 120),
-            Row("Observer", "Observers", "Watches the election without taking part in it.",
+            Row("Observer", PersonaGroups.Observers, "Watches the election without taking part in it.",
                 ElectionPermission.ViewDashboard | ElectionPermission.ViewAudit, false, true, 0, null, 130),
-            Row("Appeal Tribunal Member", "Appeal Tribunal", "Decides appeals raised against election decisions.",
+            Row("Appeal Tribunal Member", PersonaGroups.AppealTribunal, "Decides appeals raised against election decisions.",
                 ElectionPermission.ViewDashboard | ElectionPermission.ViewAudit | ElectionPermission.DecideAppeals,
                 false, true, 3, 3, 140)
         };
 
-        var existing = await db.ElectionPersonas.Select(x => x.Name).ToListAsync();
-        var missing = defaults.Where(x => !existing.Contains(x.Name)).ToList();
-        if (missing.Count == 0)
+        var existing = await db.ElectionPersonas.ToListAsync();
+        var existingNames = existing.Select(x => x.Name).ToHashSet();
+        var missing = defaults.Where(x => !existingNames.Contains(x.Name)).ToList();
+        db.ElectionPersonas.AddRange(missing);
+
+        // A persona with no permissions cannot even open the election dashboard, so an empty set is
+        // never a deliberate choice. Only rows still named as a default are filled; a renamed or
+        // custom persona has no known default.
+        var filled = 0;
+        foreach (var row in existing.Where(x => x.Permissions == ElectionPermission.None))
+        {
+            var match = defaults.FirstOrDefault(x => x.Name == row.Name);
+            if (match is null)
+                continue;
+            row.Permissions = match.Permissions;
+            row.UpdatedAt = now;
+            filled++;
+        }
+
+        if (missing.Count == 0 && filled == 0)
             return;
 
-        db.ElectionPersonas.AddRange(missing);
         await db.SaveChangesAsync();
+        if (filled > 0)
+            logger.LogInformation("Gave {Count} election persona(s) their default permissions.", filled);
     }
 }

@@ -174,7 +174,7 @@ namespace GHCAA.API.Controllers
             var email = StepUpEmailFor(user);
 
             if (user == null || string.IsNullOrWhiteSpace(email))
-                return Problem(detail: "No email address is on file for this account.", statusCode: StatusCodes.Status400BadRequest);
+                return Problem(detail: "No email address is on file for this account, so a verification code cannot be sent. Ask a SuperAdmin to add an email to your account.", statusCode: StatusCodes.Status400BadRequest);
 
             await otpService.GenerateAndSendOtpAsync(email, Domain.Enums.OtpPurpose.AdminStepUp, cancellationToken);
             return Ok(new { Message = "A verification code has been sent to your registered email address." });
@@ -189,7 +189,7 @@ namespace GHCAA.API.Controllers
             var email = StepUpEmailFor(user);
 
             if (user == null || string.IsNullOrWhiteSpace(email))
-                return Problem(detail: "No email address is on file for this account.", statusCode: StatusCodes.Status400BadRequest);
+                return Problem(detail: "No email address is on file for this account, so a verification code cannot be sent. Ask a SuperAdmin to add an email to your account.", statusCode: StatusCodes.Status400BadRequest);
 
             var verified = await otpService.VerifyOtpAsync(email, dto.Code, Domain.Enums.OtpPurpose.AdminStepUp, cancellationToken);
             if (!verified)
@@ -231,6 +231,8 @@ namespace GHCAA.API.Controllers
                 return null;
             if (!string.IsNullOrWhiteSpace(user.Member?.Email))
                 return user.Member.Email;
+            if (user.MemberId == null && !string.IsNullOrWhiteSpace(user.Email))
+                return user.Email;
             if (user.MemberId == null && user.Username.Contains('@'))
                 return user.Username;
             return null;

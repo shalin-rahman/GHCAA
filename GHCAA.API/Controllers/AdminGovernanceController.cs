@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GHCAA.Domain;
 using GHCAA.API.Extensions;
+using static GHCAA.Domain.Enums;
 
 namespace GHCAA.API.Controllers
 {
@@ -59,20 +61,43 @@ namespace GHCAA.API.Controllers
             return Ok(members);
         }
 
+        [HttpGet("periods/{id}/seats")]
+        public async Task<IActionResult> GetCommitteeSeats(int id, CancellationToken cancellationToken)
+        {
+            var seats = await _governanceService.GetCommitteeSeatsAsync(id, cancellationToken);
+            return Ok(seats);
+        }
+
         [HttpPost("periods/{id}/members")]
         public async Task<IActionResult> AssignMember(int id, [FromBody] AssignMemberRequest request, CancellationToken cancellationToken)
         {
-            var success = await _governanceService.AssignMemberToRoleAsync(id, request.MemberId, request.Position, request.Reason, request.NotifyMember, cancellationToken);
-            if (!success) return Problem(detail: "Assignment failed", statusCode: StatusCodes.Status400BadRequest);
-            return Ok(new { Message = "Member assigned to role successfully" });
+            try
+            {
+                var success = await _governanceService.AssignMemberToRoleAsync(id, request.MemberId, request.Position, request.Reason, request.NotifyMember,
+                    request.EndCurrentHolderReason, request.EndCurrentHolderNote, cancellationToken);
+                if (!success) return Problem(detail: "Assignment failed", statusCode: StatusCodes.Status400BadRequest);
+                return Ok(new { Message = "Member assigned to role successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
         }
 
-        [HttpDelete("members/{ecMemberId}")]
-        public async Task<IActionResult> RemoveMember(int ecMemberId, [FromQuery] bool notifyMember, CancellationToken cancellationToken)
+        // 95.3: replaces DELETE members/{ecMemberId}, which ended a term without saying why.
+        [HttpPost("members/{ecMemberId}/end-term")]
+        public async Task<IActionResult> EndTerm(int ecMemberId, [FromBody] EndTermRequest request, CancellationToken cancellationToken)
         {
-            var success = await _governanceService.RemoveMemberFromCommitteeAsync(ecMemberId, notifyMember, cancellationToken);
-            if (!success) return NotFound();
-            return Ok(new { Message = "Member removed from committee" });
+            try
+            {
+                var success = await _governanceService.RemoveMemberFromCommitteeAsync(ecMemberId, request.Reason!.Value, request.Note, request.NotifyMember, cancellationToken);
+                if (!success) return NotFound();
+                return Ok(new { Message = "Committee term ended" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
         }
 
         [HttpDelete("members/{ecMemberId}/hard-delete")]
@@ -111,5 +136,18 @@ namespace GHCAA.API.Controllers
         public int Position { get; set; }
         public string? Reason { get; set; }
         public bool NotifyMember { get; set; } = false;
+        // Set only to replace whoever holds the seat now.
+        public VacancyReason? EndCurrentHolderReason { get; set; }
+        [MaxLength(Constants.Governance.VacancyNoteMaxLength)]
+        public string? EndCurrentHolderNote { get; set; }
+    }
+
+    public class EndTermRequest
+    {
+        [Required]
+        public VacancyReason? Reason { get; set; }
+        [MaxLength(Constants.Governance.VacancyNoteMaxLength)]
+        public string? Note { get; set; }
+        public bool NotifyMember { get; set; }
     }
 }

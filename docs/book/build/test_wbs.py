@@ -74,5 +74,21 @@ class CommitDaysChecksGit(unittest.TestCase):
         self.assertIn("cannot run git", str(caught.exception))
 
 
+class NoCommitCheck(unittest.TestCase):
+    """--check flags a component with no commits only when its paths look wrong."""
+
+    def test_planned_component_with_no_files_and_nothing_done_is_not_flagged(self):
+        self.assertFalse(wbs.expects_commits(["GHCAA.API/NoSuchFile.cs"], ["90"], {"90": 0}))
+
+    def test_area_missing_from_the_done_counts_is_not_flagged(self):
+        self.assertFalse(wbs.expects_commits(["GHCAA.API/NoSuchFile.cs"], ["90"], {}))
+
+    def test_done_items_with_a_wrong_path_are_flagged(self):
+        self.assertTrue(wbs.expects_commits(["GHCAA.API/NoSuchFile.cs"], ["90"], {"90": 1}))
+
+    def test_a_path_that_exists_is_flagged(self):
+        self.assertTrue(wbs.expects_commits(["GHCAA.API"], ["90"], {}))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

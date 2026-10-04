@@ -21,6 +21,7 @@ describe('Login Component', () => {
         vi.useFakeTimers();
         authServiceMock = {
             login: vi.fn(),
+            forgotPassword: vi.fn().mockReturnValue(of({})),
             getSocialProviders: vi.fn().mockReturnValue(of([]))
         };
 
@@ -58,7 +59,7 @@ describe('Login Component', () => {
 
     it('should start a sequential login status and hide it on success', () => {
         authServiceMock.login.mockReturnValue(new Observable(subscriber => {
-            setTimeout(() => subscriber.next({ role: 'User' }), 1500);
+            setTimeout(() => subscriber.next({ role: 'User' }), 2500);
             return () => undefined;
         }));
         component.credentials = { username: 'user', password: 'password' };
@@ -66,11 +67,10 @@ describe('Login Component', () => {
         component.onLogin(mockForm);
 
         expect(component.loading()).toBe(true);
-        expect(component.loginStatus()).toBeTruthy();
-        expect(component.loginStatus()).toBe('Connecting');
+        expect(component.loginStatus()).toBe('Checking your details');
 
-        vi.advanceTimersByTime(1200);
-        expect(component.loginStatus()).not.toBe('Connecting');
+        vi.advanceTimersByTime(2000);
+        expect(component.loginStatus()).toBe('Verifying your password');
 
         vi.advanceTimersByTime(500);
         expect(component.loading()).toBe(false);
@@ -112,20 +112,23 @@ describe('Login Component', () => {
         expect(router.navigate).toHaveBeenCalledWith(['/portal/dashboard']);
     });
 
-    it('should keep cycling status words instead of freezing on the last one', () => {
+    it('should tell the user the server is waking up and keep cycling instead of freezing', () => {
         authServiceMock.login.mockReturnValue(new Observable(() => undefined));
         component.credentials = { username: 'slowuser', password: 'password' };
 
         component.onLogin(mockForm);
+        // Past the four normal steps the slow-server messages take over.
+        vi.advanceTimersByTime(4 * 2000);
+        expect(component.loginStatus()).toBe('Waking up the server');
+
         const seen = new Set<string>();
         for (let i = 0; i < 20; i++) {
-            vi.advanceTimersByTime(1200);
+            vi.advanceTimersByTime(2000);
             seen.add(component.loginStatus()!);
         }
 
         expect(component.loading()).toBe(true);
-        expect(seen.size).toBeGreaterThan(1);
-        expect(seen.has('Connecting')).toBe(false);
+        expect(seen).toEqual(new Set(['Waking up the server', 'This can take up to a minute', 'Still signing you in']));
     });
 
     it('should stop and cancel the request when the server does not respond within 60 seconds', () => {
@@ -145,5 +148,32 @@ describe('Login Component', () => {
         expect(component.loginStatus()).toBeNull();
         expect(component.errorMessage()).toBe('Login timed out. Please try again.');
         expect(teardown).toHaveBeenCalled();
+    });
+
+    it('should ask for an email before sending a reset link', () => {
+        component.credentials = { username: 'shalin', password: '' };
+
+        component.forgotPassword();
+
+        expect(authServiceMock.forgotPassword).not.toHaveBeenCalled();
+        expect(notificationServiceMock.info).toHaveBeenCalledWith(expect.stringContaining('Type your email'));
+    });
+
+    it('should request a reset link for an email and show the generic message', () => {
+        component.credentials = { username: ' someone@example.com ', password: '' };
+
+        component.forgotPassword();
+
+        expect(authServiceMock.forgotPassword).toHaveBeenCalledWith('someone@example.com');
+        expect(notificationServiceMock.info).toHaveBeenCalledWith(expect.stringContaining('If that email has an account'));
+    });
+
+    it('should show the rate-limit message when the API returns 429', () => {
+        authServiceMock.forgotPassword.mockReturnValue(throwError(() => ({ status: 429 })));
+        component.credentials = { username: 'someone@example.com', password: '' };
+
+        component.forgotPassword();
+
+        expect(notificationServiceMock.error).toHaveBeenCalledWith(expect.stringContaining('Too many'));
     });
 });

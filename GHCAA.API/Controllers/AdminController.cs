@@ -213,6 +213,10 @@ namespace GHCAA.API.Controllers
             {
                 return Forbid();
             }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
         }
 
         [HttpPost("members/{id}/photo")]

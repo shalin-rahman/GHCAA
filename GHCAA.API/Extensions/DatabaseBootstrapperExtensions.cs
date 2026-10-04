@@ -143,6 +143,16 @@ namespace GHCAA.API.Extensions
                 if (await protectedAdminCtx.Database.CanConnectAsync())
                 {
                     var userService = protectedAdminScope.ServiceProvider.GetRequiredService<IUserService>();
+                    // Before the bootstrap below, which then sees a SuperAdmin and does nothing.
+                    try
+                    {
+                        await ProtectedSuperAdminSeeder.EnsureCreatorAccountAsync(protectedAdminCtx, userService, app.Logger);
+                    }
+                    catch (Exception ex)
+                    {
+                        app.Logger.LogWarning(ex, "Creator account check skipped.");
+                        protectedAdminCtx.ChangeTracker.Clear();
+                    }
                     var passwordFilePath = app.Configuration[ConfigKeys.SuperAdminBootstrapPasswordFilePath]
                         ?? Path.Combine(app.Environment.ContentRootPath, Defaults.SuperAdminBootstrapPasswordFileName);
                     await ProtectedSuperAdminSeeder.BootstrapFirstSuperAdminAsync(

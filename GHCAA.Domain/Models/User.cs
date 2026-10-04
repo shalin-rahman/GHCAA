@@ -15,6 +15,9 @@ namespace GHCAA.Domain.Models
         // Link to Member (created only after approval)
         public int? MemberId { get; set; }
 
+        // Only for accounts with no Member, such as a system admin. A member's email lives on Member.
+        public string? Email { get; set; }
+
         // Audit
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsActive { get; set; } = true;

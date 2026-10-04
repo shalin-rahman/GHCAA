@@ -267,6 +267,8 @@ namespace GHCAA.Infrastructure.Services
             {
                 role.EndDate = DateTime.UtcNow;
                 role.ChangeReason = "Member archived";
+                role.EndReason = Enums.VacancyReason.Other;
+                role.EndNote = "Member archived";
             }
 
             // Cascade: Archive Job Opportunities
@@ -373,7 +375,9 @@ namespace GHCAA.Infrastructure.Services
                 .Where(em => targetMemberIds.Contains(em.MemberId) && em.EndDate == null)
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(em => em.EndDate, DateTime.UtcNow)
-                    .SetProperty(em => em.ChangeReason, "Bulk archived"), cancellationToken);
+                    .SetProperty(em => em.ChangeReason, "Bulk archived")
+                    .SetProperty(em => em.EndReason, Enums.VacancyReason.Other)
+                    .SetProperty(em => em.EndNote, "Member archived"), cancellationToken);
 
             // Bulk cancel pending family link requests
             await _db.FamilyLinkRequests

@@ -11,13 +11,12 @@ import { ROUTES } from '../../core/constants/app.constants';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { Observable, Subscription } from 'rxjs';
 
-const AUTH_STATUS_SEQUENCE = [
-  'Connecting', 'Validating', 'Reading', 'Parsing', 'Encrypting', 'Transmitting',
-  'Ingesting', 'Intercepting', 'Decrypting', 'Salting', 'Hashing', 'Querying',
-  'Matching', 'Verifying', 'Authorizing', 'Generating', 'Signing', 'Issuing',
-  'Caching', 'Redirecting'
-];
-const AUTH_STATUS_INTERVAL_MS = 1200;
+// Shown in order while the request runs. A normal login answers inside the first two.
+const LOGIN_STEPS = ['Checking your details', 'Verifying your password', 'Loading your profile', 'Opening your portal'];
+// After the steps run out the server is most likely waking from sleep, so say that plainly and
+// repeat these until the reply comes.
+const SLOW_LOGIN_STEPS = ['Waking up the server', 'This can take up to a minute', 'Still signing you in'];
+const AUTH_STATUS_INTERVAL_MS = 2000;
 // A Render free-tier wake plus a cold database can take most of a minute. The old 8s limit gave
 // up while the request was still running, so a login that then succeeded was thrown away and the
 // user was left on this page.
@@ -53,8 +52,7 @@ export class Login implements OnInit, OnDestroy {
   private authTimeoutTimer: number | null = null;
   private loginRequest: Subscription | null = null;
   private loginAttemptId = 0;
-  private loginSequence: string[] = [];
-  private loginSequenceIndex = 0;
+  private loginStep = 0;
 
   ngOnInit() {
     this.loadSocialProviders();
@@ -73,14 +71,10 @@ export class Login implements OnInit, OnDestroy {
     this.loginAttemptId += 1;
   }
 
-  private buildLoginSequence(): string[] {
-    const minLength = 6;
-    const maxLength = 7;
-    const totalLength = minLength + Math.floor(Math.random() * (maxLength - minLength + 1));
-    const backupPool = AUTH_STATUS_SEQUENCE.filter(status => status !== 'Connecting');
-    const startIndex = Math.floor(Math.random() * (backupPool.length - (totalLength - 1) + 1));
-
-    return ['Connecting', ...backupPool.slice(startIndex, startIndex + totalLength - 1)];
+  private statusForStep(step: number): string {
+    return step < LOGIN_STEPS.length
+      ? LOGIN_STEPS[step]
+      : SLOW_LOGIN_STEPS[(step - LOGIN_STEPS.length) % SLOW_LOGIN_STEPS.length];
   }
 
   private clearLoginProgress(): void {
@@ -94,17 +88,15 @@ export class Login implements OnInit, OnDestroy {
       this.authTimeoutTimer = null;
     }
 
-    this.loginSequence = [];
-    this.loginSequenceIndex = 0;
+    this.loginStep = 0;
     this.loginStatus.set(null);
   }
 
   private startLoginProgress(attemptId: number): void {
     this.clearLoginProgress();
     this.loginAttemptId = attemptId;
-    this.loginSequence = this.buildLoginSequence();
-    this.loginSequenceIndex = 0;
-    this.loginStatus.set(this.loginSequence[0]);
+    this.loginStep = 0;
+    this.loginStatus.set(this.statusForStep(0));
     this.loading.set(true);
     this.errorMessage.set('');
 
@@ -114,12 +106,8 @@ export class Login implements OnInit, OnDestroy {
         return;
       }
 
-      // Loop back past 'Connecting' rather than freezing on the last word while the server is slow.
-      this.loginSequenceIndex += 1;
-      if (this.loginSequenceIndex >= this.loginSequence.length) {
-        this.loginSequenceIndex = 1;
-      }
-      this.loginStatus.set(this.loginSequence[this.loginSequenceIndex]);
+      this.loginStep += 1;
+      this.loginStatus.set(this.statusForStep(this.loginStep));
     }, AUTH_STATUS_INTERVAL_MS);
 
     this.authTimeoutTimer = window.setTimeout(() => {
@@ -286,6 +274,23 @@ export class Login implements OnInit, OnDestroy {
   }
 
   forgotPassword() {
-    this.notify.info('Password reset is currently handled by the Admin Desk. Please contact your batch representative or email help@ghcaa.com.');
+    const email = this.credentials.username.trim();
+    if (!email.includes('@')) {
+      this.notify.info('Type your email address in the Username box, then click Forgot password again.');
+      return;
+    }
+
+    // The API answers the same way whether or not the email has an account, so the message does too.
+    const sent = 'If that email has an account, a reset link is on its way. Check your inbox.';
+    this.auth.forgotPassword(email).subscribe({
+      next: () => this.notify.info(sent),
+      error: (err) => {
+        if (err?.status === 429) {
+          this.notify.error('Too many reset requests. Please wait a few minutes and try again.');
+        } else {
+          this.notify.info(sent);
+        }
+      }
+    });
   }
 }

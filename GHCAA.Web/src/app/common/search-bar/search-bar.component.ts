@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
  * Renders ONLY the `.search-wrap` (icon + input + clear button) — NOT the
  * outer `.filter-bar`, so pages keep their own filter row and can place extra
  * `<select>` filters alongside it. Styling lives centrally in styles.scss
- * (`.filter-bar .search-wrap …`); fix the look in one place, every search
+ * (`.search-wrap …`), inside a .filter-bar or not; fix the look in one place, every search
  * updates.
  *
  * Usage:

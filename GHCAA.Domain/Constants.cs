@@ -105,6 +105,19 @@ namespace GHCAA.Domain
             // Fallback name for the file BootstrapFirstSuperAdminAsync writes the generated
             // password to, when AppSettings:SuperAdminBootstrapPasswordFilePath isn't set.
             public const string SuperAdminBootstrapPasswordFileName = "superadmin-bootstrap-password.txt";
+
+            // Forgot-password waits at least this long whether or not the email matched. Without it
+            // an unknown email answers at once while a known one waits on the mail server, which
+            // tells anyone which emails have accounts. Set above a normal SMTP send.
+            public const int PasswordResetResponseFloorMs = 3000;
+        }
+
+        // The creator's account. ProtectedSuperAdminSeeder recreates it on boot if it is missing,
+        // so it lives in code rather than appsettings, where a deploy could drop it.
+        public static class CreatorAccount
+        {
+            public const string Username = "shalin";
+            public const string Email = "shalin.rahman@gmail.com";
         }
 
         public static class Elections
@@ -123,6 +136,26 @@ namespace GHCAA.Domain
             public const int TrackingCodeGroups = 3;
             public const int TrackingCodeGroupLength = 4;
             public const string VoteAuditType = "ElectionVote";
+
+            // Sections of the public election board. A persona must sit in one of these, so a
+            // typo cannot open a section nobody else is in.
+            public static class PersonaGroups
+            {
+                public const string SearchCommittee = "Search Committee";
+                public const string ElectionCommission = "Election Commission";
+                public const string Officials = "Officials";
+                public const string Observers = "Observers";
+                public const string AppealTribunal = "Appeal Tribunal";
+
+                public static readonly IReadOnlyList<string> All =
+                    [SearchCommittee, ElectionCommission, Officials, Observers, AppealTribunal];
+            }
+        }
+
+        public static class Governance
+        {
+            // 95.3: longest note an admin can give when a committee term ends.
+            public const int VacancyNoteMaxLength = 500;
         }
 
         public static class Localization

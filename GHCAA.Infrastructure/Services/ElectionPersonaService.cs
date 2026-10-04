@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,8 @@ public sealed class ElectionPersonaService(ApplicationDbContext db) : IElectionP
 
     public async Task<(bool Success, string? Error, ElectionPersonaDto? Persona)> CreateAsync(SaveElectionPersonaDto dto, CancellationToken ct)
     {
+        if (!IsKnownGroup(dto.GroupName))
+            return (false, "invalid-group", null);
         if (await NameTakenAsync(dto.Name, null, ct))
             return (false, "duplicate-name", null);
 
@@ -56,6 +59,10 @@ public sealed class ElectionPersonaService(ApplicationDbContext db) : IElectionP
         var entity = await db.ElectionPersonas.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (entity is null)
             return (false, "not-found", null);
+        // A row made before the group list existed may hold another group. It can keep it, but
+        // cannot be moved to a new one outside the list.
+        if (dto.GroupName != entity.GroupName && !IsKnownGroup(dto.GroupName))
+            return (false, "invalid-group", null);
         if (await NameTakenAsync(dto.Name, id, ct))
             return (false, "duplicate-name", null);
 
@@ -100,6 +107,9 @@ public sealed class ElectionPersonaService(ApplicationDbContext db) : IElectionP
         await db.SaveChangesAsync(ct);
         return (true, null);
     }
+
+    private static bool IsKnownGroup(string groupName) =>
+        Constants.Elections.PersonaGroups.All.Contains(groupName);
 
     // Name has a unique index. Checking first turns a clash into a 409 instead of a DbUpdateException.
     private Task<bool> NameTakenAsync(string name, int? exceptId, CancellationToken ct) =>

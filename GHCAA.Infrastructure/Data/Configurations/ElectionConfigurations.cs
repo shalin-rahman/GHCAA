@@ -41,6 +41,9 @@ public sealed class ElectionAppointmentConfiguration : IEntityTypeConfiguration<
         // Quoted identifiers, so the same filter works on Postgres and on the Sqlite test database.
         b.HasIndex(x => new { x.ElectionId, x.PersonaId, x.UserId }).IsUnique().HasFilter("\"RevokedAt\" IS NULL");
         b.HasIndex(x => x.UserId);
+        // User has a !IsArchived query filter, so any query that includes x.User drops the appointment
+        // once its user is archived (EF warning 10622). ElectionAppointmentService.AcceptAsync already
+        // does this. Admins still need to see and revoke such an appointment. TODO 94.5.
         b.HasOne(x => x.Election).WithMany(x => x.Appointments).HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
         b.HasOne(x => x.Persona).WithMany().HasForeignKey(x => x.PersonaId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
@@ -71,6 +74,9 @@ public sealed class VoterRollConfiguration : IEntityTypeConfiguration<VoterRoll>
         b.Property(x => x.IneligibilityReason).HasMaxLength(500);
         b.HasIndex(x => new { x.ElectionId, x.MemberId }).IsUnique();
         b.HasOne(x => x.Election).WithMany(x => x.VoterRoll).HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
+        // Do not add a filter on Member.IsArchived here (EF warning 10622 suggests it). An archived
+        // member's row would drop out of the roll and the turnout counts, changing a published result.
+        // Queries that include x.Member hide those rows too. TODO 94.1.
         b.HasOne(x => x.Member).WithMany().HasForeignKey(x => x.MemberId).OnDelete(DeleteBehavior.Restrict);
     }
 }

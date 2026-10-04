@@ -1,74 +1,90 @@
 <div class="login-page on-dark">
-    <div class="glass-card login-card">
-        <div class="login-header">
-            <img [src]="orgConfig.config()?.branding?.logoUrl" alt="Logo" class="logo" appImgFallback="/assets/logo.png">
-            <h2>Member Portal</h2>
-            <p>Login to your account</p>
-        </div>
+    <div class="login-shell">
+        <aside class="login-aside">
+            <img [src]="orgConfig.config()?.branding?.logoUrl" alt="" class="aside-logo" appImgFallback="/assets/logo.png">
+            <h2>Welcome back</h2>
+            <p class="aside-org">{{ orgConfig.config()?.branding?.fullName || orgConfig.config()?.branding?.institutionName }}</p>
+            <p class="aside-text">Sign in to see your membership, events, payments and notices in one place.</p>
+        </aside>
 
-        <form (ngSubmit)="onLogin(loginForm)" #loginForm="ngForm">
-            <div class="form-group">
-                <label>Username</label>
-                <input type="text" name="username" [(ngModel)]="credentials.username" 
-                    required minlength="3" #usernameModel="ngModel"
-                    placeholder="Enter your username" class="form-control"
-                    [class.is-invalid]="usernameModel.touched && usernameModel.invalid">
-                <div class="field-error" *ngIf="usernameModel.touched && usernameModel.invalid">
-                    <span *ngIf="usernameModel.errors?.['required']">Username is required.</span>
-                    <span *ngIf="usernameModel.errors?.['minlength']">Username must be at least 3 characters.</span>
-                </div>
+        <section class="login-card">
+            <div class="login-header">
+                <img [src]="orgConfig.config()?.branding?.logoUrl" alt="Logo" class="logo" appImgFallback="/assets/logo.png">
+                <h1>Sign in</h1>
+                <p>Member portal</p>
             </div>
 
-            <div class="form-group">
-                <label>Password</label>
-                <div class="password-input">
-                    <input [type]="showPassword() ? 'text' : 'password'" name="password" [(ngModel)]="credentials.password" 
-                        required minlength="6" #passwordModel="ngModel"
-                        placeholder="••••••••" class="form-control"
-                        [class.is-invalid]="passwordModel.touched && passwordModel.invalid">
-                    <button type="button" class="toggle-password" (click)="togglePassword()" tabindex="-1">
-                        <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="16"></app-icon>
+            <form (ngSubmit)="onLogin(loginForm)" #loginForm="ngForm">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input id="login-username" type="text" name="username" [(ngModel)]="credentials.username"
+                        required minlength="3" #usernameModel="ngModel" autocomplete="username"
+                        placeholder="Your username" class="form-control"
+                        [class.is-invalid]="usernameModel.touched && usernameModel.invalid">
+                    <div class="field-error" *ngIf="usernameModel.touched && usernameModel.invalid">
+                        <span *ngIf="usernameModel.errors?.['required']">Username is required.</span>
+                        <span *ngIf="usernameModel.errors?.['minlength']">Username must be at least 3 characters.</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="label-row">
+                        <label for="login-password">Password</label>
+                        <button type="button" class="link-btn" (click)="forgotPassword()">Forgot password?</button>
+                    </div>
+                    <div class="password-input">
+                        <input id="login-password" [type]="showPassword() ? 'text' : 'password'" name="password" [(ngModel)]="credentials.password"
+                            required minlength="6" #passwordModel="ngModel" autocomplete="current-password"
+                            placeholder="Your password" class="form-control"
+                            [class.is-invalid]="passwordModel.touched && passwordModel.invalid">
+                        <button type="button" class="toggle-password" (click)="togglePassword()" tabindex="-1"
+                            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
+                            <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="16"></app-icon>
+                        </button>
+                    </div>
+                    <div class="field-error" *ngIf="passwordModel.touched && passwordModel.invalid">
+                        <span *ngIf="passwordModel.errors?.['required']">Password is required.</span>
+                        <span *ngIf="passwordModel.errors?.['minlength']">Password must be at least 6 characters.</span>
+                    </div>
+                </div>
+
+                <div class="error-msg" role="alert" *ngIf="errorMessage()">
+                    {{ errorMessage() }}
+                </div>
+
+                <button type="submit" class="btn btn-accent w-full" [disabled]="loginForm.invalid || loading()" [attr.aria-busy]="loading()">
+                    <span *ngIf="loading(); else loginButtonLabel" class="login-busy">
+                        Signing in
+                        <span class="login-status-dots" aria-hidden="true">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </span>
+                    </span>
+                    <ng-template #loginButtonLabel>Sign in</ng-template>
+                </button>
+
+                <p class="login-status" aria-live="polite">
+                    <span *ngIf="loading() && loginStatus()" class="login-status-text">{{ loginStatus() }}</span>
+                </p>
+
+                <div class="social-login-separator" *ngIf="socialProviders().length > 0">
+                    <span>or</span>
+                </div>
+
+                <div class="social-login-buttons" *ngIf="socialProviders().length > 0">
+                    <button *ngIf="isProviderEnabled('Google')" type="button" class="btn btn-social btn-google" (click)="loginWithGoogle()" [disabled]="loading()">
+                        <app-icon name="google" [size]="16"></app-icon> Continue with Google
+                    </button>
+                    <button *ngIf="isProviderEnabled('Facebook')" type="button" class="btn btn-social btn-facebook" (click)="loginWithFacebook()" [disabled]="loading()">
+                        <app-icon name="facebook" [size]="16"></app-icon> Continue with Facebook
                     </button>
                 </div>
-                <div class="field-error" *ngIf="passwordModel.touched && passwordModel.invalid">
-                    <span *ngIf="passwordModel.errors?.['required']">Password is required.</span>
-                    <span *ngIf="passwordModel.errors?.['minlength']">Password must be at least 6 characters.</span>
-                </div>
-            </div>
 
-            <div class="error-msg" *ngIf="errorMessage()">
-                {{ errorMessage() }}
-            </div>
-
-            <button type="submit" class="btn btn-accent w-full" [disabled]="loginForm.invalid || loading()">
-                <span *ngIf="loading() && loginStatus(); else loginButtonLabel" class="login-status-wrap" aria-live="polite" aria-busy="true">
-                    <span class="login-status-text">{{ loginStatus() }}</span>
-                    <span class="login-status-dots" aria-hidden="true">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </span>
-                </span>
-                <ng-template #loginButtonLabel>Login</ng-template>
-            </button>
-
-            <div class="social-login-separator" *ngIf="socialProviders().length > 0">
-                <span>OR</span>
-            </div>
-
-            <div class="social-login-buttons" *ngIf="socialProviders().length > 0">
-                <button *ngIf="isProviderEnabled('Google')" type="button" class="btn btn-social btn-google" (click)="loginWithGoogle()" [disabled]="loading()">
-                    <app-icon name="google" [size]="16"></app-icon> Continue with Google
-                </button>
-                <button *ngIf="isProviderEnabled('Facebook')" type="button" class="btn btn-social btn-facebook" (click)="loginWithFacebook()" [disabled]="loading()">
-                    <app-icon name="facebook" [size]="16"></app-icon> Continue with Facebook
-                </button>
-            </div>
-
-            <div class="form-footer">
-                <a href="javascript:void(0)" (click)="forgotPassword()">Forgot Password?</a>
-                <span>Don't have an account? <a routerLink="/register">Apply for Membership</a></span>
-            </div>
-        </form>
+                <p class="form-footer">
+                    Not a member yet? <a routerLink="/register">Apply for membership</a>
+                </p>
+            </form>
+        </section>
     </div>
 </div>

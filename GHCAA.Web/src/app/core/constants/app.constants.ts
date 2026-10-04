@@ -641,7 +641,8 @@ export const API_ENDPOINTS = {
         REFRESH: '/api/auth/refresh',
         ME: '/api/auth/me',
         LOGOUT: '/api/auth/logout',
-        RESET_PASSWORD: '/api/auth/reset-password'
+        RESET_PASSWORD: '/api/auth/reset-password',
+        FORGOT_PASSWORD: '/api/auth/forgot-password'
     },
     ROLES: '/api/roles',
     ACTIVITY: {

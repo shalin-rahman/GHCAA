@@ -62,13 +62,13 @@
 }
 
 .nav-section {
-    padding: 0.75rem 0.75rem 0.25rem;
+    padding: 0.5rem 0.75rem 0.15rem;
 
     /* Clearer grouping: separate each section (except the first) with spacing + a hairline */
     & + & {
-        margin-top: 0.35rem;
+        margin-top: 0.25rem;
         border-top: 1px solid var(--glass-border);
-        padding-top: 1rem;
+        padding-top: 0.6rem;
     }
 }
 
@@ -87,14 +87,14 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.55rem 0.75rem;
+    padding: var(--nav-item-pad-y) 0.75rem;
     border-radius: 8px;
     text-decoration: none;
     color: var(--text-main);
     font-weight: 600;
     font-size: 0.82rem;
     transition: all 0.15s;
-    margin-bottom: 0.1rem;
+    margin-bottom: var(--nav-item-gap);
 }
 
 .nav-item:hover {
@@ -203,13 +203,13 @@
 
 .admin-header-inner {
     // Shares the `portal-content` class with .admin-content so the breadcrumb lines
-    // up with the page body below. But portal-content's 2.5rem (40px) all-round padding
+    // up with the page body below. But portal-content's all-round padding (--page-pad)
     // overflows this 60px-tall bar, so override to horizontal-only padding here.
     // Span the full width (drop portal-content's 1400px cap) so the user/sign-out
     // controls sit flush at the far top-right on wide screens.
     max-width: none;
     width: 100%;
-    padding: 0 2.5rem;
+    padding: 0 var(--page-pad);
     display: flex;
     justify-content: space-between;
     align-items: center;

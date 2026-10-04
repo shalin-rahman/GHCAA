@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Options;
@@ -190,6 +191,87 @@ namespace GHCAA.Tests.Services
             {
                 if (File.Exists(passwordFilePath)) File.Delete(passwordFilePath);
             }
+        }
+
+        [Test]
+        public async Task EnsureCreatorAccountAsync_CreatesAccount_WhenMissing()
+        {
+            await ProtectedSuperAdminSeeder.EnsureCreatorAccountAsync(_context, _userService, _mockLogger.Object);
+
+            var user = await _context.Users.Include(u => u.Roles).FirstAsync(u => u.Username == Constants.CreatorAccount.Username);
+            user.Email.Should().Be(Constants.CreatorAccount.Email);
+            user.MemberId.Should().BeNull();
+            user.MustChangePassword.Should().BeTrue();
+            user.IsActive.Should().BeTrue();
+            user.Roles.Should().Contain(r => r.Name == Constants.Roles.SuperAdmin);
+        }
+
+        [Test]
+        public async Task EnsureCreatorAccountAsync_RestoresArchivedDisabledAccount_WithoutTouchingPassword()
+        {
+            var user = new User
+            {
+                Username = Constants.CreatorAccount.Username,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("KeepThis123"),
+                CreatedAt = DateTime.UtcNow,
+                IsActive = false,
+                IsArchived = true
+            };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            var hashBefore = user.PasswordHash;
+
+            await ProtectedSuperAdminSeeder.EnsureCreatorAccountAsync(_context, _userService, _mockLogger.Object);
+
+            var restored = await _context.Users.IgnoreQueryFilters().Include(u => u.Roles).SingleAsync(u => u.Username == Constants.CreatorAccount.Username);
+            restored.IsArchived.Should().BeFalse();
+            restored.IsActive.Should().BeTrue();
+            restored.PasswordHash.Should().Be(hashBefore);
+            restored.MustChangePassword.Should().BeFalse();
+            restored.Email.Should().Be(Constants.CreatorAccount.Email);
+            restored.Roles.Should().Contain(r => r.Name == Constants.Roles.SuperAdmin);
+        }
+
+        [Test]
+        public async Task EnsureCreatorAccountAsync_KeepsAnEmailAlreadySet()
+        {
+            _context.Users.Add(new User { Username = Constants.CreatorAccount.Username, PasswordHash = "x", CreatedAt = DateTime.UtcNow, IsActive = true, Email = "other@example.com" });
+            await _context.SaveChangesAsync();
+
+            await ProtectedSuperAdminSeeder.EnsureCreatorAccountAsync(_context, _userService, _mockLogger.Object);
+            await ProtectedSuperAdminSeeder.EnsureCreatorAccountAsync(_context, _userService, _mockLogger.Object);
+
+            var users = await _context.Users.IgnoreQueryFilters().Where(u => u.Username == Constants.CreatorAccount.Username).ToListAsync();
+            users.Should().ContainSingle().Which.Email.Should().Be("other@example.com");
+        }
+
+        [Test]
+        public async Task CreatorAccount_CannotBeDeletedOrDisabled()
+        {
+            await ProtectedSuperAdminSeeder.EnsureCreatorAccountAsync(_context, _userService, _mockLogger.Object);
+            var user = await _context.Users.FirstAsync(u => u.Username == Constants.CreatorAccount.Username);
+
+            (await _userService.DeleteSystemAdminAsync(user.Id)).Should().BeFalse();
+            (await _userService.SetUserActiveAsync(user.Id, false)).Should().BeFalse();
+
+            var after = await _context.Users.FirstAsync(u => u.Id == user.Id);
+            after.IsActive.Should().BeTrue();
+        }
+
+        [Test]
+        public async Task EnsureCreatorAccountAsync_MemberHoldingTheName_IsNotMadeSuperAdmin()
+        {
+            var member = await CreateAndSaveTestMemberAsync("Squatter", "squatter@example.com", "01799999999", "9999999999");
+            _context.Users.Add(new User { Username = Constants.CreatorAccount.Username.ToUpperInvariant(), PasswordHash = "x", CreatedAt = DateTime.UtcNow, IsActive = false, MemberId = member.Id });
+            await _context.SaveChangesAsync();
+
+            await ProtectedSuperAdminSeeder.EnsureCreatorAccountAsync(_context, _userService, _mockLogger.Object);
+
+            var users = await _context.Users.IgnoreQueryFilters().Include(u => u.Roles).ToListAsync();
+            users.Should().ContainSingle();
+            users[0].Roles.Should().NotContain(r => r.Name == Constants.Roles.SuperAdmin);
+            users[0].IsActive.Should().BeFalse();
+            users[0].Email.Should().BeNull();
         }
     }
 }

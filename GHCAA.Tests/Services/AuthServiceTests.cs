@@ -41,6 +41,7 @@ namespace GHCAA.Tests.Services
             _mockOrgConfigService.Setup(x => x.GetConfigAsync())
                 .ReturnsAsync(new OrgConfigDto { Branding = new BrandingDto { ShortName = "GHCAA" } });
             _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object, _appSettings, _mockHttp.Object, _mockEmail.Object, _mockCommunicationService.Object, _mockOrgConfigService.Object);
+            _service.PasswordResetResponseFloor = TimeSpan.Zero;
         }
 
         [Category("FR-08")]
@@ -221,6 +222,142 @@ namespace GHCAA.Tests.Services
             var updatedUser = await _context.Users.FindAsync(user.Id);
             BCrypt.Net.BCrypt.Verify("NewPassword123", updatedUser!.PasswordHash).Should().BeTrue();
             updatedUser.ResetToken.Should().BeNull();
+        }
+
+        [Category("FR-09")]
+        [Test]
+        public async Task RequestPasswordResetAsync_WaitsTheFloor_WhetherOrNotTheEmailMatches()
+        {
+            var member = await CreateAndSaveTestMemberAsync("Timed", "timed@example.com", "555", "555");
+            await CreateAndSaveTestUserAsync(member.Id, "timed_user");
+            _service.PasswordResetResponseFloor = TimeSpan.FromMilliseconds(300);
+
+            var unknown = System.Diagnostics.Stopwatch.StartNew();
+            await _service.RequestPasswordResetAsync("nobody@example.com");
+            unknown.Stop();
+            var known = System.Diagnostics.Stopwatch.StartNew();
+            await _service.RequestPasswordResetAsync("timed@example.com");
+            known.Stop();
+
+            // A little slack for timer resolution on Windows.
+            unknown.ElapsedMilliseconds.Should().BeGreaterThanOrEqualTo(280);
+            known.ElapsedMilliseconds.Should().BeGreaterThanOrEqualTo(280);
+        }
+
+        [Category("FR-09")]
+        [Test]
+        public async Task RequestPasswordResetAsync_SystemAdminByEmail_SendsLinkToThatEmail()
+        {
+            var user = new User { Username = "admin_with_email", PasswordHash = "old", MemberId = null, Email = "Admin@Example.com", CreatedAt = DateTime.UtcNow, IsActive = true };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            await _service.RequestPasswordResetAsync("admin@example.com");
+
+            var updated = await _context.Users.FindAsync(user.Id);
+            updated!.ResetToken.Should().NotBeNullOrEmpty();
+            _mockEmail.Verify(x => x.SendEmailAsync("Admin@Example.com", It.IsAny<string>(), It.Is<string>(b => b.Contains(updated.ResetToken!)), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Category("FR-09")]
+        [Test]
+        public async Task RequestPasswordResetAsync_EmailSharedByMemberAndAdmin_IssuesOneLinkEach()
+        {
+            var email = "shared@example.com";
+            var member = await CreateAndSaveTestMemberAsync("Shared", email, "666", "666");
+            var memberUser = await CreateAndSaveTestUserAsync(member.Id, "shared_member");
+            var admin = new User { Username = "shared_admin", PasswordHash = "old", MemberId = null, Email = email, CreatedAt = DateTime.UtcNow, IsActive = true };
+            await _context.Users.AddAsync(admin);
+            await _context.SaveChangesAsync();
+
+            await _service.RequestPasswordResetAsync(email);
+
+            var m = await _context.Users.FindAsync(memberUser.Id);
+            var a = await _context.Users.FindAsync(admin.Id);
+            m!.ResetToken.Should().NotBeNullOrEmpty();
+            a!.ResetToken.Should().NotBeNullOrEmpty().And.NotBe(m.ResetToken);
+            _mockEmail.Verify(x => x.SendEmailAsync(email, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+
+            // Each link resets only its own account.
+            (await _service.ResetPasswordAsync(email, a.ResetToken!, "AdminNew123")).Should().BeTrue();
+            var memberAfter = await _context.Users.FindAsync(memberUser.Id);
+            BCrypt.Net.BCrypt.Verify("AdminNew123", memberAfter!.PasswordHash).Should().BeFalse();
+            memberAfter.ResetToken.Should().NotBeNull();
+        }
+
+        [Category("FR-09")]
+        [Test]
+        public async Task ResetPasswordAsync_TokenForAnotherAccountsEmail_ShouldReturnFalse()
+        {
+            var member = await CreateAndSaveTestMemberAsync("Victim", "victim@example.com", "777", "777");
+            await CreateAndSaveTestUserAsync(member.Id, "victim_user");
+            var attacker = new User { Username = "attacker_admin", PasswordHash = "old", MemberId = null, Email = "attacker@example.com", CreatedAt = DateTime.UtcNow, IsActive = true, ResetToken = "attacker_token", ResetTokenExpiry = DateTime.UtcNow.AddHours(1) };
+            await _context.Users.AddAsync(attacker);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.ResetPasswordAsync("victim@example.com", "attacker_token", "NewPassword123");
+
+            result.Should().BeFalse();
+        }
+
+        [Category("FR-09")]
+        [Test]
+        public async Task ResetPasswordAsync_EmptyToken_ShouldReturnFalse()
+        {
+            var member = await CreateAndSaveTestMemberAsync("No Token", "notoken@example.com", "888", "888");
+            await CreateAndSaveTestUserAsync(member.Id, "notoken_user");
+
+            (await _service.ResetPasswordAsync("notoken@example.com", "", "NewPassword123")).Should().BeFalse();
+            (await _service.ResetPasswordAsync("notoken@example.com", "  ", "NewPassword123")).Should().BeFalse();
+        }
+
+        [Category("FR-09")]
+        [Test]
+        public async Task RequestPasswordResetAsync_RepeatRequest_ResendsTheSameLinkWithoutExtendingIt()
+        {
+            var user = new User { Username = "repeat_admin", PasswordHash = "old", MemberId = null, Email = "repeat@example.com", CreatedAt = DateTime.UtcNow, IsActive = true };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            await _service.RequestPasswordResetAsync("repeat@example.com");
+            var first = (await _context.Users.FindAsync(user.Id))!;
+            var token = first.ResetToken;
+            var expiry = first.ResetTokenExpiry;
+
+            await _service.RequestPasswordResetAsync("repeat@example.com");
+
+            var second = (await _context.Users.FindAsync(user.Id))!;
+            second.ResetToken.Should().Be(token);
+            second.ResetTokenExpiry.Should().Be(expiry);
+            _mockEmail.Verify(x => x.SendEmailAsync("repeat@example.com", It.IsAny<string>(), It.Is<string>(b => b.Contains(token!)), It.IsAny<CancellationToken>()), Times.Exactly(2));
+        }
+
+        [Category("FR-09")]
+        [Test]
+        public async Task RequestPasswordResetAsync_ExpiredToken_IsReplaced()
+        {
+            var user = new User { Username = "expired_admin", PasswordHash = "old", MemberId = null, Email = "expired@example.com", CreatedAt = DateTime.UtcNow, IsActive = true, ResetToken = "stale", ResetTokenExpiry = DateTime.UtcNow.AddMinutes(-1) };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            await _service.RequestPasswordResetAsync("expired@example.com");
+
+            var updated = (await _context.Users.FindAsync(user.Id))!;
+            updated.ResetToken.Should().NotBe("stale");
+            updated.ResetTokenExpiry.Should().BeAfter(DateTime.UtcNow);
+        }
+
+        [Category("FR-09")]
+        [Test]
+        public async Task ResetPasswordAsync_ClearsMustChangePassword()
+        {
+            var user = new User { Username = "forced_admin", PasswordHash = "old", MemberId = null, Email = "forced@example.com", CreatedAt = DateTime.UtcNow, IsActive = true, MustChangePassword = true, ResetToken = "forced_token", ResetTokenExpiry = DateTime.UtcNow.AddHours(1) };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            (await _service.ResetPasswordAsync("forced@example.com", "forced_token", "NewPassword123")).Should().BeTrue();
+
+            (await _context.Users.FindAsync(user.Id))!.MustChangePassword.Should().BeFalse();
         }
 
         [Category("FR-09")]

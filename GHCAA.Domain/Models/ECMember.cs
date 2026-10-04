@@ -16,6 +16,11 @@ namespace GHCAA.Domain.Models
         public DateTime? EndDate { get; set; }
         public string? ChangeReason { get; set; }
 
+        // 95.3: set when the term ends. ChangeReason is why the person was put in the seat;
+        // these say why they left it. Rows ended before 95.3 have neither.
+        public VacancyReason? EndReason { get; set; }
+        public string? EndNote { get; set; }
+
         // 82.29: Class A soft-delete fields (ARCHITECTURE.md §4). EndDate already covers the
         // ordinary "this person's term ended" case; these cover the separate case of a row that
         // should never have existed (wrong member added) and is permanently removed by an admin.

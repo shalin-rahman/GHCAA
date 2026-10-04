@@ -5,19 +5,21 @@ import { firstValueFrom } from 'rxjs';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
+import { HumanizePipe } from '../../core/pipes/humanize.pipe';
 import { ElectionPersonasService } from '../../core/services/election-personas.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import {
     ElectionPersonaDto, SaveElectionPersonaDto,
-    ELECTION_PERMISSION_FLAGS, ELECTION_PERMISSION_NAMES, ElectionPermissionName
+    ELECTION_PERMISSION_FLAGS, ELECTION_PERMISSION_NAMES, ELECTION_PERSONA_GROUPS, ElectionPermissionName
 } from '../../core/models/election.models';
 
 const EMPTY_FORM: SaveElectionPersonaDto = {
     name: '',
     groupName: '',
     description: '',
-    permissions: 0,
+    // Every default persona can at least open the election dashboard.
+    permissions: ELECTION_PERMISSION_FLAGS['ViewDashboard'],
     minCount: 0,
     maxCount: null,
     showOnPublicBoard: true,
@@ -31,7 +33,7 @@ const EMPTY_FORM: SaveElectionPersonaDto = {
 @Component({
     selector: 'app-admin-election-personas',
     standalone: true,
-    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, ModalHeaderComponent],
+    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, ModalHeaderComponent, HumanizePipe],
     templateUrl: './admin-election-personas.html',
     styleUrl: './admin-election-personas.scss'
 })
@@ -50,6 +52,16 @@ export class AdminElectionPersonas implements OnInit {
     isSaving = signal(false);
 
     permissionNames: ElectionPermissionName[] = ELECTION_PERMISSION_NAMES;
+
+    // The group a persona had when the form opened. One saved before the list existed can keep it.
+    private originalGroup = signal('');
+
+    groupOptions = computed(() => {
+        const original = this.originalGroup();
+        return original && !ELECTION_PERSONA_GROUPS.includes(original)
+            ? [...ELECTION_PERSONA_GROUPS, original]
+            : [...ELECTION_PERSONA_GROUPS];
+    });
 
     filtered = computed(() => {
         const q = this.search().toLowerCase();
@@ -87,12 +99,14 @@ export class AdminElectionPersonas implements OnInit {
 
     openNew() {
         this.editId.set(null);
+        this.originalGroup.set('');
         this.form.set({ ...EMPTY_FORM });
         this.showModal.set(true);
     }
 
     openEdit(p: ElectionPersonaDto) {
         this.editId.set(p.id);
+        this.originalGroup.set(p.groupName);
         this.form.set({
             name: p.name,
             groupName: p.groupName,
@@ -112,6 +126,10 @@ export class AdminElectionPersonas implements OnInit {
         const data = this.form();
         if (!data.name || !data.groupName || !data.description || !data.declarationText) {
             this.notify.error('Name, group, description and declaration text are required.');
+            return;
+        }
+        if (!this.groupOptions().includes(data.groupName)) {
+            this.notify.error('Pick a board group from the list.');
             return;
         }
 

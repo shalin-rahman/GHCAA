@@ -220,6 +220,15 @@ export type ElectionPermissionName = keyof typeof ELECTION_PERMISSION_FLAGS;
 
 export const ELECTION_PERMISSION_NAMES = Object.keys(ELECTION_PERMISSION_FLAGS) as ElectionPermissionName[];
 
+// Matches Constants.Elections.PersonaGroups. The API refuses a group outside this list.
+export const ELECTION_PERSONA_GROUPS: readonly string[] = [
+    'Search Committee',
+    'Election Commission',
+    'Officials',
+    'Observers',
+    'Appeal Tribunal'
+];
+
 export interface ElectionPersonaDto {
     id: number;
     name: string;

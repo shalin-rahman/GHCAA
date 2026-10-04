@@ -233,4 +233,8 @@ export class AuthService {
     resetPassword(email: string, token: string, newPassword: string): Observable<any> {
         return this.http.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, { email, token, newPassword });
     }
+
+    forgotPassword(identifier: string): Observable<any> {
+        return this.http.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, { identifier });
+    }
 }

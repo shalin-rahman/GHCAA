@@ -23,7 +23,8 @@ public sealed class ElectionPersonasController(IElectionPersonaService service) 
     public async Task<IActionResult> Create([FromBody] SaveElectionPersonaDto dto, CancellationToken ct)
     {
         var (success, error, persona) = await service.CreateAsync(dto, ct);
-        return success ? Ok(persona) : DuplicateName();
+        if (success) return Ok(persona);
+        return error == "invalid-group" ? InvalidGroup() : DuplicateName();
     }
 
     [HttpPut("{id:int}")]
@@ -32,7 +33,12 @@ public sealed class ElectionPersonasController(IElectionPersonaService service) 
     {
         var (success, error, persona) = await service.UpdateAsync(id, dto, ct);
         if (success) return Ok(persona);
-        return error == "duplicate-name" ? DuplicateName() : NotFound();
+        return error switch
+        {
+            "duplicate-name" => DuplicateName(),
+            "invalid-group" => InvalidGroup(),
+            _ => NotFound(),
+        };
     }
 
     [HttpPost("{id:int}/active")]
@@ -55,6 +61,9 @@ public sealed class ElectionPersonasController(IElectionPersonaService service) 
 
     private ObjectResult DuplicateName() =>
         Problem(detail: "Another persona already uses this name.", statusCode: StatusCodes.Status409Conflict);
+
+    private ObjectResult InvalidGroup() =>
+        Problem(detail: "Pick a board group from the list.", statusCode: StatusCodes.Status400BadRequest);
 }
 
 // Spec 023 (37.12b). Read-only list for election staff. The appoint dialog needs the active

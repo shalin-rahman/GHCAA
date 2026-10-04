@@ -174,6 +174,7 @@ namespace GHCAA.Infrastructure.Services
                     StartDate = em.StartDate.ToLocalTime(),
                     EndDate = em.EndDate.HasValue ? em.EndDate.Value.ToLocalTime() : null,
                     ChangeReason = em.ChangeReason,
+                    EndReason = em.EndReason,
                     IsCurrent = em.ECPeriod?.IsActive ?? false
                 }).OrderByDescending(h => h.StartDate).ToList();
             }

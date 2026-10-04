@@ -1836,6 +1836,27 @@ second one until the reply arrives. The three login paths (password, Google, Fac
 `runLogin` helper, so the request handle is kept in one place.
 **Acceptance:** done; `npx vitest run src/app/public/login/login.spec.ts` (8 passed, run 2026-10-02).
 
+87.4 [DONE] **Priority: P2 | Depends on: 87.3.** Raised by the user 2026-10-02: "i want more relevant
+words". Words like `Salting`, `Intercepting` and `Ingesting` meant nothing to a member. The button now
+reads `Signing in`, and a status line under it steps through `Checking your details`, `Verifying your
+password`, `Loading your profile` and `Opening your portal` every 2 seconds. After those it repeats
+`Waking up the server`, `This can take up to a minute` and `Still signing you in`, because a reply that
+slow is almost always a Render cold start. Spec 007 FR-1, FR-2, FR-4 and its plan updated to match.
+**Acceptance:** done; `login.spec.ts` 8 passed and checked in the browser against a login held for 15s
+(2026-10-03).
+
+87.5 [DONE] **Priority: P2 | Depends on: none.** Raised by the user 2026-10-02: "overall login page
+doesnt look a good design, and laypout to me". Found on screenshots: at 360x640 the card was taller than
+the screen and `height: 100vh; overflow: hidden` cut off the logo at the top and the membership link at
+the bottom; the photo stopped short of both screen edges on desktop because of `<main>`'s padding;
+labels were 0.65rem heavy uppercase and placeholders were at 15% opacity. The page now grows and
+scrolls, breaks out to full width, and shows a two-panel layout from 900px (welcome text and org name on
+the left, form on the right) and a single compact card below that. Labels and the button use normal
+case, placeholders are readable, `Forgot password?` sits beside the password label, and all colors come
+from theme tokens. `.field-error` had no styles anywhere, so it now has them here.
+**Acceptance:** done; checked at 360x640, 390x844 and 1440x900 with no horizontal scroll; full web
+unit suite 566 passed and `ng build` clean (2026-10-03).
+
 # Work Package 88 — Idempotent delivery path for the May 2026 alumni batch
 
 Raised by the user 2026-09-22, who suspected Work Package 46.1 "reverted while migration re-factored."
@@ -2076,3 +2097,236 @@ shows and gate them on the same settings, so a user never sees a button the API 
 state-transition tables, `business_flow` notes, `PROJECT_MAP.md`, and the book's role–permission
 matrix (§8.4, Authorisation Model) and Fig. 8.3. **Acceptance:** `build.py --pdf --strict` clean for the
 book changes.
+
+# Work Package 93 — Member portal menu on small screens (raised by user 2026-10-03: "review member menu navigation panel items for not showing all, from smaller device browser")
+
+93.1 [DONE] **Priority: P1 | Depends on: none.** Below 768px the portal sidebar was `display: none`
+and the hamburger did nothing visible, so a phone browser only had the 7 bottom-bar shortcuts. Messaging,
+Discussions, Governance, Association Election, My Requests, Alumni Directory, Event Gallery, Digital ID,
+My Giving, My Articles and the Admin Panel link had no way in. The sidebar is now an off-canvas drawer
+on phones, as admin-layout already does. The bottom bar keeps 4 shortcuts (Dashboard, News, Events, My
+Profile) plus a Menu button that opens the drawer. Logout left the bottom bar because the header user
+menu already has it. The drawer closes after navigating or on a backdrop tap.
+**Acceptance:** done. Checked in headless Chrome at 390x844 on 2026-10-03: drawer closed on load,
+19 links after Menu, closed again after picking Governance.
+
+93.2 [DONE] **Priority: P2 | Depends on: none.** `/portal/polls` and `/portal/communications` were
+routed but linked from nowhere on any screen size. Both are in the member menu now; Polls follows
+`enablePolls`. `nav.service.spec.ts` checks every top-level portal route has a menu entry, so a new
+page without one fails the test.
+**Acceptance:** done; `npx vitest run` (566 passed, run 2026-10-03).
+
+93.3 [TODO] **Priority: P2 | Depends on: none.** `tests/e2e/portal-mobile-nav.spec.ts` covers 93.1 but
+could not run locally: `registerNewMemberViaUi` gets "Registration failed" from the local API, and
+`gallery.spec.ts` fails the same way, so the cause is in registration or the local DB, not the menu.
+**Acceptance:** both specs pass against a fresh local stack.
+
+93.4 [TODO] **Priority: P3 | Depends on: none.** Flutter drawer (`app_drawer.dart`) has no entry for
+`/communications`, `/legacy` or `/professionals`, and nothing else in the app links to them. It also
+shows Events, Job Hub, Discussions, Gallery and the rest without checking the OrgConfig feature flags
+the web menu honours. Decide which of these screens should be reachable before adding them.
+**Acceptance:** each routed member screen is either in the drawer or deliberately removed.
+
+# Work Package 94 — EF query filter warnings 10622 (raised by user 2026-10-02: "i want no warnings")
+
+Each warning below means EF found a required relationship to an entity with a global query filter,
+and the dependent row has no matching filter. `Member` and `User` both filter on `!IsArchived`, and
+`FileUpload` filters on `Member != null && !Member.IsArchived`. Either the dependent gets the same
+filter, or the query stops joining through the filtered navigation. Picking the wrong one for a row
+hides real records, so each case is noted with what a matching filter would do. Nothing here is
+changed yet; it waits on the user's choice.
+
+94.1 [TODO] **Priority: P2 | Depends on: none.** `VoterRoll` → `Member`. A matching filter would drop
+an archived member's row from the roll and from the turnout counts, which changes a published result
+after the fact. Keep the rows: take out the `Include` or add `IgnoreQueryFilters()` on the roll and
+turnout queries, then suppress 10622 for this one relationship.
+**Acceptance:** archiving a member who voted leaves the roll size and turnout unchanged; test covers it.
+
+94.2 [TODO] **Priority: P2 | Depends on: none.** `ScholarshipReview` → `Member` (reviewer). A
+matching filter would make reviews by an archived member vanish from the application, so the
+committee loses the record of who scored what. Same fix as 94.1.
+**Acceptance:** an application still shows every review after its reviewer is archived; test covers it.
+
+94.3 [TODO] **Priority: P2 | Depends on: none.** `ScholarshipDocument` → `FileUpload`. The
+`FileUpload` filter needs a member, so a matching filter would hide every document uploaded by a
+public applicant, since those uploads have no member. This one cannot take the filter at all. Read
+the documents without the `FileUpload` filter and suppress 10622 for this relationship.
+**Acceptance:** a public applicant's documents load in the admin review screen; test covers it.
+
+94.4 [TODO] **Priority: P2 | Depends on: none.** `IssuedCredential` → `Member`. A matching filter
+means an archived member's certificate or ID card stops verifying at `/verify/{shortCode}`. That
+may be what we want for an ID card and not for a certificate already handed out, so the user has to
+decide per credential type before the filter goes on. Recommendation so far: add the filter.
+**Acceptance:** the verify page answers for an archived member's credential as decided; test covers it.
+
+94.5 [TODO] **Priority: P1 | Depends on: none.** `ElectionAppointment` → `User`. The warning points
+at a bug that is already live: `ElectionAppointmentService.cs:109` does `Include(x => x.User!)`, so
+once the appointed user is archived the appointment drops out of the results and can no longer be
+revoked or audited. Load the appointment without the user filter, and treat an archived user's
+appointment as not live in `ElectionAccessService` rather than letting it disappear.
+**Acceptance:** archiving an appointed user leaves the appointment visible to admins and gives the
+user no election permissions; test covers both.
+
+# Work Package 95 — Step-up for email-less admins and by-elections (raised by user 2026-10-03: "if superadmin logged in and he dont have email, how did he get 6 digit code for election menu" and "if any specefic position(s) got empty, there masy needed another elction")
+
+95.1 [DONE] **Priority: P1 | Depends on: none.** A system admin with no member link and a username
+without `@` could not pass step-up, so every `[RequireStepUp]` endpoint stayed shut for it. User
+chose a recovery email (2026-10-03). `User.Email` is a new nullable column (migration
+`20261002193135_AddUserEmail`), used only when the account has no member. `StepUpEmailFor` falls back
+to it, and the 400 now tells the admin to ask a SuperAdmin to add an email. Forgot-password finds
+system admins by this email too, and one email shared by a member and an admin issues one link per
+account; the reset matches the token first and then checks the email belongs to that account. The
+web login's "Forgot password?" now calls `POST /api/auth/forgot-password` with the email typed in the
+Username box instead of showing an Admin Desk toast. Still missing: a screen where a SuperAdmin sets
+`Email` on another system admin, so today only the creator account (95.7) has one.
+**Acceptance:** met for the creator account; tests in `AuthServiceTests` (admin by email, shared
+email, token for another account's email, empty token) and `login.spec.ts`.
+
+95.7 [DONE] **Priority: P0 | Depends on: none.** The creator account must always exist (user
+2026-10-03: "set shalin, as superadmin for always ... even remove from database shouldnt restrict
+this ever"). `Constants.CreatorAccount` holds the username and email in code, not appsettings.
+`ProtectedSuperAdminSeeder.EnsureCreatorAccountAsync` runs on every boot before the first-SuperAdmin
+bootstrap: a missing row is recreated with a random password, `MustChangePassword` and the creator
+email, and the owner gets in through Forgot password. An existing row is un-archived, re-enabled,
+given the SuperAdmin role back and a blank email filled; its password is never touched.
+`UserService.IsProtectedUsername` always protects the name, so it cannot be deleted or disabled.
+**Acceptance:** met; `ProtectedSuperAdminSeederTests` cover create, restore without a password
+change, an email already set, and delete/disable refused.
+
+95.2 [TODO] **Priority: P2 | Depends on: none.** Committee positions must be configurable (user
+decision 2026-10-03). Today only the labels are configurable (`ecRoleLabels` in org config). The set
+itself is the `ECPosition` enum (`GHCAA.Domain/Enums.cs:8`), stored as an int on `ECMember.Position`
+and `ElectionSeat.Position`, repeated as a fixed list in `lookup.service.ts`, and parsed by
+`AdminElectionsController.ParsePosition`. Plan: a `CommitteePosition` table (key, label, sort order,
+seats, active) seeded with the current enum values under the same ids, so existing rows map 1:1;
+both columns become a foreign key; admin screen to add, rename, reorder and retire positions; web
+and mobile read the list from the API instead of the enum.
+**Acceptance:** adding a position makes it selectable for assignment and elections without a code
+change; retiring one hides it from new use and leaves past terms and results intact.
+
+95.3 [TODO] **Priority: P1 | Depends on: none.** A seat can fall vacant at any time (death,
+resignation, removal) and the record must say why. `GovernanceService.RemoveMemberFromCommitteeAsync`
+already end-dates the row but takes no reason, and `AssignMemberToRoleAsync` adds a holder without
+checking the seat is free, so a seat can end up with two current holders. Add a vacancy reason
+(Died, Resigned, Removed, TermEnded, Other plus a note) on end of term, and refuse a second current
+holder for a single seat unless the old one is ended in the same action.
+**Acceptance:** ending a term records date and reason; a filled seat cannot get a second holder;
+the committee view shows the seat as vacant with the reason.
+
+95.4 [TODO] **Priority: P2 | Depends on: 95.3.** Vacant-seat view and filter. A seat is vacant when
+no `ECMember` row for it in the active period has `EndDate == null`. Show vacant seats on the admin
+governance page with a filter, and use the same query for the by-election form.
+**Acceptance:** after a term is ended the seat appears in the vacant filter; once filled it leaves it.
+
+95.5 [TODO] **Priority: P2 | Depends on: 95.2, 95.4.** By-election type. Add an election kind
+(General or ByElection) shown on the ballot and results. For a by-election the form offers only
+vacant seats. `ElectionService.DeclareAsync` (ElectionService.cs:308) adds a new `ECMember` for each
+seat in the election and touches no other seat, which is right for a by-election, but it must first
+end any current holder of that seat with reason TermEnded. `GetCurrentAsync` returns only the latest
+open election, so two open elections in one period need handling.
+**Acceptance:** a by-election for two vacant seats fills only those seats and leaves every other
+committee member untouched; tests cover declare, the vacant-only guard and two open elections.
+
+95.6 [TODO] **Priority: P3 | Depends on: 95.1.** Authenticator app (TOTP) as a second way to pass
+step-up, for admins who would rather not rely on email. Needs a secret per user, enrolment with a
+QR code, recovery codes and a reset path for a lost phone.
+**Acceptance:** an enrolled admin passes step-up with a 6-digit app code; email still works.
+
+95.11 [DONE] **Priority: P1 | Depends on: 95.1, 95.7.** Fixes from the security review of 95.1 and
+95.7. A repeat forgot-password request resends the link already issued instead of replacing it and
+logging the owner out, so anyone who knows the email cannot keep killing the owner's sessions; the
+expiry is not extended. A completed reset clears `MustChangePassword`. The creator seeder matches the
+username case-insensitively and refuses to grant SuperAdmin when that name is held by a member
+account. Forgot-password now waits out a 3 second floor (`Constants.Defaults.PasswordResetResponseFloorMs`)
+whether or not the email matched, so the reply time no longer shows which emails have accounts; it
+replaced the dummy BCrypt hash, which could not match the cost of sending the email. Members get the
+same fix. A mail server slower than 3 seconds would still show through; moving the send to a
+background queue would close that, and there is no queue in the app today.
+**Acceptance:** met; tests in `AuthServiceTests` (repeat request, expired token, MustChangePassword,
+response floor for known and unknown emails) and `ProtectedSuperAdminSeederTests` (member holding the
+name).
+
+95.8 [DONE] **Priority: P2 | Depends on: none.** Edit Persona: board group is a free-text box
+(user 2026-10-03: "why board group is a textbox?, should be dropdown"). A typo makes a new group
+nobody else is in. The groups are now `Constants.Elections.PersonaGroups`, mirrored on the web as
+`ELECTION_PERSONA_GROUPS`, and the form shows them as a dropdown. The API refuses a group outside
+the list with a 400. A persona saved before the list existed keeps its group, and the dropdown lists
+it, but cannot be moved to another unknown one.
+**Acceptance:** met; `ElectionPersonaServiceTests` (unknown group on create, older group on update)
+and the component spec (group options).
+
+95.9 [DONE] **Priority: P2 | Depends on: none.** Edit Persona: the permissions section looks broken
+(user 2026-10-03: "check design, permission looks broken"). Two causes: the checkboxes used a local
+class that the global `.form-group input` rule stretched, and the shared `.checkbox-group` never set
+`flex-direction: row`, so the box sat above its label. Fixed in `styles.scss`, which also gives a
+checkbox label normal case and size. Permission names show through the humanize pipe ("View
+Dashboard"). The grid goes to one column below 600px. The polls toggle, the only other user of
+`.checkbox-group`, still renders right.
+**Acceptance:** met; checked in the browser at 1366px and 390px in light and dark themes against a
+mocked API (2026-10-03).
+
+95.10 [DONE] **Priority: P2 | Depends on: none.** Default permissions for every seeded persona (user
+2026-10-03: "also setup default permissions for all persona"). `ElectionPersonaSeeder` now, on every
+boot, gives a persona its default permissions when it still has a default name and no permissions at
+all. A persona someone has edited, or a custom one, is left alone. A new persona made in the admin
+form starts with View Dashboard ticked.
+**Acceptance:** met; `ElectionPersonaServiceTests` (fill an empty default, keep an edited one, skip
+a custom one, every default has permissions and a known group) and the component spec.
+
+# Work Package 96 — Compact admin and portal layout (raised by user 2026-10-03: "titles, and top common are is taking too much space ... navbar height is increased for too many mentu items ... whatever you do do centrally managed way")
+
+96.1 [DONE] **Priority: P2 | Depends on: none.** Page titles, filter bars and sidebar links in the
+admin and member shells used more height than the data below them. Density tokens now sit on `:root`
+in `styles.scss` (`--page-pad`, `--page-title-size`, `--page-header-gap`, `--control-height`,
+`--nav-item-pad-y`, `--nav-item-gap`), and `.portal-content`, `.page-header`, the filter bar and
+both sidebars read them. Measured at 1280x720: page title 77px to 50px tall, first row of data on
+All Members from y=379 to y=296, nav links 41-44px to 36px.
+**Acceptance:** met; changing a token resizes every admin and portal page at once.
+
+96.2 [DONE] **Priority: P1 | Depends on: none.** `<app-search-bar>` was only styled inside a
+`.filter-bar`, so Fundraising, Communications, Elections and Mentorship showed a raw input. The
+`.search-wrap` rules are now global (`@at-root`), so the shared search looks the same wherever it sits.
+**Acceptance:** met; checked on /admin/campaigns.
+
+96.3 [TODO] **Priority: P3 | Depends on: 96.1.** Pages that still draw their own header or search
+instead of the shared ones: member giving, forum and polls (own h1), messages, admin governance,
+election personas and the directory (own search CSS), and the Fundraising donor-tier inputs (raw
+inputs). Move them onto `app-page-header`, `app-search-bar` and the form tokens.
+**Acceptance:** each listed page uses the shared header and search, with no page-level size overrides.
+
+96.4 [DONE] **Priority: P2 | Depends on: none.** Display fixes raised 2026-10-03. The roles page
+said "Showing 631 of 631 system administrators" while it lists every user account, members included;
+it now says "user accounts". Role names stored as one word ("ElectionPersona") show spaced through a
+new shared `humanize` pipe in the user menu and on the roles page. The portal sidebar brand and the
+landing banner had "HARAGANGIAN" typed in; both now read `branding.memberNickname` from org config.
+**Acceptance:** met; `humanize.pipe.spec.ts` and a development build.
+
+96.5 [DONE] **Priority: P2 | Depends on: none.** Admin polls modals, found while checking 95.9 on
+2026-10-03. Both used a local `.modal-card` whose header rules could not reach inside
+`<app-modal-header>`, so the close button was a bare native button. The poll option inputs sat
+outside any `.form-group` and got no input styling, and the vote bars and totals in the results modal
+were only styled inside a poll card. Both modals now use the shared `.modal-box`, `.modal-body` and
+`.modal-footer`; the options list is a `.form-group`; the stats and vote bars are styled once for card
+and modal.
+**Acceptance:** met; create and results modals checked in the browser at 1366px and 390px in light
+and dark themes against a mocked API; polls spec and tsc clean.
+
+96.6 [DONE] **Priority: P3 | Depends on: none.** `wbs.py --check` failed on C18 (ad-hoc reporting,
+WP90) because WP90 is not built yet, so its files have no commits. The check meant to catch a wrong
+path, and it could not tell that from planned work. `expects_commits` now flags a component with no
+commits only when one of its paths exists or one of its areas has a done item. A wrong path on built
+work still fails.
+**Acceptance:** met; `--check` exits 0 and `test_wbs.py` covers planned, done and existing-path
+cases (2026-10-03).
+
+96.7 [DONE] **Priority: P1 | Depends on: none.** The strict book build failed on seven repository
+counts: chapters 4, 7 and 11 still quoted 299 commits and 88 work packages from 23 September, and the
+tree now has 324 and 96. Every figure Chapter 11 quotes was re-run on 3 October 2026 and re-dated,
+along with the counts in chapters 4 and 7, the README's repository numbers and the outline's Chapter 11
+block. Table 11.1's last two columns were labelled commits and active days but held tracker tasks and
+done tasks; they are relabelled. §7.12 had the branch direction backwards: `preprod` is 97 commits
+ahead of `dev`, not behind it. §11.4.1's open placeholder is replaced by the tasks-per-effort-day
+comparison the table now supports.
+**Acceptance:** met; `build.py --pdf --strict` ends "clean, ready to deliver" and `wbs.py --check`
+exits 0 (2026-10-03). §6.3.2's entity count and Chapter 6's service-interface count still predate the
+re-take; the README says so.

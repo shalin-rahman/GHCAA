@@ -8,7 +8,7 @@
     }
     <div class="user-details hide-mobile">
         <span class="username">{{ auth.currentUser()?.fullName || auth.currentUser()?.username }}</span>
-        <small class="role">{{ roleLabel }}</small>
+        <small class="role">{{ roleLabel | humanize }}</small>
     </div>
 </div>
 @if (isAdmin) {

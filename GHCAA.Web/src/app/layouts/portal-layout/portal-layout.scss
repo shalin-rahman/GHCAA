@@ -66,7 +66,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 1.5rem 0;
+    padding: 0.75rem 0;
     overflow-y: auto;
 }
 
@@ -84,8 +84,8 @@
     padding: 0 0 0.25rem;
 
     & + & {
-        margin-top: 0.35rem;
-        padding-top: 0.85rem;
+        margin-top: 0.25rem;
+        padding-top: 0.6rem;
         border-top: 1px solid var(--glass-border);
     }
 }
@@ -105,8 +105,8 @@
     display: flex;
     align-items: center;
     gap: 0.85rem;
-    padding: 0.65rem 1.25rem;
-    margin: 0.15rem 0.75rem;
+    padding: var(--nav-item-pad-y) 1.25rem;
+    margin: var(--nav-item-gap) 0.75rem;
     text-decoration: none;
     color: var(--text-muted);
     border-radius: 8px;
@@ -235,9 +235,9 @@
 
 .top-bar-inner {
     // Shares `portal-content` with .page-content so the bar aligns with the page
-    // body below, but portal-content's 2.5rem all-round padding overflows this
+    // body below, but portal-content's all-round padding overflows this
     // fixed-height bar — restrict to horizontal padding here.
-    padding: 0 2.5rem;
+    padding: 0 var(--page-pad);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -367,16 +367,51 @@
     display: none; /* hidden by default (desktop) */
 }
 
+.sidebar-overlay {
+    display: none;
+}
+
 @media (max-width: 767px) {
 
-    /* Completely hide the sidebar - bottom nav handles navigation */
-    .sidebar {
-        display: none !important;
+    /* The bottom bar only holds a few shortcuts, so the full menu becomes an
+       off-canvas drawer opened from its Menu button (same as admin-layout). */
+    .sidebar,
+    .sidebar.collapsed {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: min(280px, 85vw);
+        z-index: 1100;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
     }
 
-    /* Remove sidebar overlay on mobile (no sidebar = no overlay needed) */
+    .nav-list {
+        padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    }
+
     .sidebar-overlay {
-        display: none !important;
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 1050;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+    }
+
+    .app-shell.mobile-menu-open {
+        .sidebar {
+            transform: translateX(0);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .sidebar-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
     }
 
     /* Main content fills full width with no sidebar */
@@ -438,4 +473,4 @@
             font-size: 0.6rem;
         }
     }
-}
+}

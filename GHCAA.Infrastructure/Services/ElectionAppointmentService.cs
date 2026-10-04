@@ -106,6 +106,8 @@ public sealed class ElectionAppointmentService(
 
     public async Task<(bool Success, string? Error)> AcceptAsync(int appointmentId, int userId, AcceptAppointmentDto dto, string? ip, CancellationToken ct)
     {
+        // Including User applies its !IsArchived filter, so an archived user's appointment is not found
+        // here at all. TODO 94.5.
         var appointment = await db.ElectionAppointments.Include(x => x.Persona).Include(x => x.User!).ThenInclude(u => u.Roles)
             .FirstOrDefaultAsync(x => x.Id == appointmentId && x.UserId == userId && x.RevokedAt == null, ct);
         if (appointment is null)

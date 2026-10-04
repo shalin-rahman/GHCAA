@@ -17,6 +17,8 @@ namespace GHCAA.Infrastructure.Data.Configurations
 
             builder.HasIndex(u => u.Username).IsUnique();
 
+            builder.Property(u => u.Email).HasMaxLength(256);
+
             // S8.1: Performance indexes for common lookup patterns.
             builder.HasIndex(u => u.MemberId);
             builder.HasIndex(u => u.ResetToken).HasFilter("\"ResetToken\" IS NOT NULL");

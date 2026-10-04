@@ -18,11 +18,11 @@ Review the public login component, template, and styling so the status indicator
 
 ### 2. Implement the sequence engine
 
-Add a small list of technical verbs, generate a random 6-to-7-item sequence, and show each item in strict order while the auth request is pending.
+Add a fixed list of four plain status steps and a second list of slow-server messages. Show the steps in order while the request is pending, then repeat the slow-server messages until it resolves.
 
 ### 3. Wire lifecycle safety
 
-Use explicit timers for the status interval and the 8-second timeout. Clear both on success, failure, timeout, and component destroy to prevent stale updates.
+Use explicit timers for the status interval and the 60-second timeout. Clear both on success, failure, timeout, and component destroy to prevent stale updates.
 
 ### 4. Prevent duplicate submission
 
@@ -35,6 +35,6 @@ Run the focused login unit tests and confirm the status disappears after the req
 ## Delivery checkpoints
 
 - Status text updates in order and then disappears after success or error.
-- Timeout path triggers after 8 seconds and shows the graceful error message.
+- Timeout path triggers after 60 seconds and shows the graceful error message.
 - Component destroy clears all timers and prevents memory leaks.
 - Login buttons remain disabled during processing.

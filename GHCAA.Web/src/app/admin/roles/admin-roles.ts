@@ -10,11 +10,12 @@ import { AdminService } from '../../core/services/admin.service';
 import { Icon } from '../../common/icon/icon';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
+import { HumanizePipe } from '../../core/pipes/humanize.pipe';
 
 @Component({
     selector: 'app-admin-roles',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, PageHeaderComponent, SearchBarComponent, Icon, LoadingPanelComponent, ModalHeaderComponent],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, PageHeaderComponent, SearchBarComponent, Icon, LoadingPanelComponent, ModalHeaderComponent, HumanizePipe],
     templateUrl: './admin-roles.html',
     styleUrl: './admin-roles.scss'
 })

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -159,12 +160,66 @@ namespace GHCAA.Infrastructure.Services
             return members.Select(MapToMemberDto);
         }
 
-        public async Task<bool> AssignMemberToRoleAsync(int periodId, int memberId, int position, string? reason, bool notifyMember = false, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<CommitteeSeatDto>> GetCommitteeSeatsAsync(int periodId, CancellationToken cancellationToken = default)
+        {
+            var rows = await _db.ECMembers
+                .Include(em => em.Member)
+                .Where(em => em.ECPeriodId == periodId)
+                .ToListAsync(cancellationToken);
+
+            var seats = new List<CommitteeSeatDto>();
+            foreach (var position in Enum.GetValues<ECPosition>().Where(p => p != ECPosition.None))
+            {
+                var held = rows.Where(r => r.Position == position).ToList();
+                var holder = held.FirstOrDefault(r => r.EndDate == null);
+                if (holder != null)
+                {
+                    seats.Add(new CommitteeSeatDto { Position = position, Holder = MapToMemberDto(holder) });
+                    continue;
+                }
+
+                var last = held.OrderByDescending(r => r.EndDate).FirstOrDefault();
+                seats.Add(new CommitteeSeatDto
+                {
+                    Position = position,
+                    VacancyReason = last?.EndReason,
+                    VacancyNote = last?.EndNote,
+                    VacatedOn = last?.EndDate,
+                    LastHolderName = last?.Member?.FullName
+                });
+            }
+            return seats;
+        }
+
+        public async Task<bool> AssignMemberToRoleAsync(int periodId, int memberId, int position, string? reason, bool notifyMember = false,
+            VacancyReason? endCurrentHolderReason = null, string? endCurrentHolderNote = null, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
             if (member == null || member.Status != MembershipStatus.Active)
             {
                 throw new InvalidOperationException("Only active members can be assigned to the Executive Committee.");
+            }
+
+            // 95.3: one current holder per seat. Replacing someone has to say why their term ended.
+            var currentHolders = await _db.ECMembers
+                .Include(em => em.Member)
+                .Where(em => em.ECPeriodId == periodId && em.Position == (ECPosition)position && em.EndDate == null)
+                .ToListAsync(cancellationToken);
+            if (currentHolders.Any(h => h.MemberId == memberId))
+            {
+                throw new InvalidOperationException("This member already holds that seat.");
+            }
+            if (currentHolders.Count > 0)
+            {
+                if (endCurrentHolderReason == null)
+                {
+                    var name = currentHolders[0].Member?.FullName ?? "another member";
+                    throw new InvalidOperationException($"{(ECPosition)position} is held by {name}. End their term first, or replace them and give a reason.");
+                }
+                foreach (var holder in currentHolders)
+                {
+                    EndTerm(holder, endCurrentHolderReason.Value, endCurrentHolderNote);
+                }
             }
 
             var newAssignment = new ECMember
@@ -193,12 +248,16 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
-        public async Task<bool> RemoveMemberFromCommitteeAsync(int ecMemberId, bool notifyMember = false, CancellationToken cancellationToken = default)
+        public async Task<bool> RemoveMemberFromCommitteeAsync(int ecMemberId, VacancyReason reason, string? note, bool notifyMember = false, CancellationToken cancellationToken = default)
         {
             var ecMember = await _db.ECMembers.FindAsync(new object[] { ecMemberId }, cancellationToken);
             if (ecMember == null) return false;
+            if (ecMember.EndDate != null)
+            {
+                throw new InvalidOperationException("This term has already ended.");
+            }
 
-            ecMember.EndDate = DateTime.UtcNow;
+            EndTerm(ecMember, reason, note);
             await _db.SaveChangesAsync(cancellationToken);
 
             // 82.52: admin-chosen, off by default (nothing notified here before this item).
@@ -344,6 +403,23 @@ namespace GHCAA.Infrastructure.Services
             IsActive = p.IsActive,
             ECMembers = p.ECMembers?.Select(MapToMemberDto).ToList() ?? new List<ECMemberDto>()
         };
+
+        private static void EndTerm(ECMember ecMember, VacancyReason reason, string? note)
+        {
+            note = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
+            if (reason == VacancyReason.Other && note == null)
+            {
+                throw new InvalidOperationException("Say what happened when the reason is Other.");
+            }
+            if (note != null && note.Length > Constants.Governance.VacancyNoteMaxLength)
+            {
+                throw new InvalidOperationException($"The note can be at most {Constants.Governance.VacancyNoteMaxLength} characters.");
+            }
+
+            ecMember.EndDate = DateTime.UtcNow;
+            ecMember.EndReason = reason;
+            ecMember.EndNote = note;
+        }
 
         private static ECMemberDto MapToMemberDto(ECMember m) => new()
         {

@@ -6,6 +6,8 @@ namespace GHCAA.Domain
         public enum MembershipType { Founding, Executive, General, Associate, Honorary, Advisory, Guest }
         public enum MemberCategory { None, LifelongPatron, Sponsor, Advisor, Mentor, Recruiter, Active, Volunteer, Contributor, Guest, Student }
         public enum ECPosition { None, President, VicePresident, GeneralSecretary, OfficeSecretary, JointSecretary1, JointSecretary2, Treasurer, MediaCulturalAndSportsSecretary, OrganizationalSecretary, InformationAndTechnologySecretary, Member1, Member2, LawSecretary, ImmediatePastPresident, InstitutionalRepresentative }
+        // 95.3: why a committee seat fell vacant. Other needs a note saying what happened.
+        public enum VacancyReason { Died, Resigned, Removed, TermEnded, Other }
         public enum BloodGroup { Unknown, APositive, ANegative, BPositive, BNegative, OPositive, ONegative, ABPositive, ABNegative }
         public enum Gender { None, Male, Female, Other }
         public enum Degree { HSC, Bachelor, Masters, PhD, Other }

@@ -307,14 +307,14 @@ a log file, a test run, a commit range — so an examiner can check it. Figures 
 states what the code does, and where the two disagree the code is right.
 
 **Keeping the numbers true.** Repository figures quoted in the text go stale as the code moves. The
-`DbSet`, entity and enumeration counts, and the endpoint/controller counts, were re-taken on
-23 September 2026 against the Election module and the Work Package 37.2/37.6/37.8 landing described
-in §6.3.1, §7.5, §7.6 and §7.11: 72 `DbSet` properties (71 domain models plus `DataProtectionKeys`, a
-framework table added per `docs/adr/0007-data-protection-keys-in-database.md` — §6.3.2's
-"seventy-one entity sets" still means the domain models alone, since that count is about §5.7's
-analysis model, not every table the schema has), 38 enumerations, and 333 endpoint attributes across
-45 controllers. The remaining figures were last taken on 14 September 2026 and have not been
-re-verified since: 46 service interfaces with 43
+`DbSet`, entity, enumeration, endpoint/controller and service-interface counts were re-taken on
+3 October 2026 for the Chapter 11 re-date: 77 `DbSet` properties (76 domain models plus
+`DataProtectionKeys`, a framework table added per `docs/adr/0007-data-protection-keys-in-database.md`),
+41 enumerations, 351 endpoint attributes across 47 controllers, and 57 service interfaces declared in
+55 files under `GHCAA.Application/Interfaces`. §6.3.2's "seventy-one entity sets", in the design
+chapter's data model, and Chapter 6's "46 service interfaces" predate this re-take and still need
+re-taking against the tree. The remaining figures were last taken on 14 September 2026 and have not
+been re-verified since: 43 service
 implementations, 1 migration (`GHCAA.Infrastructure/Data/Migrations/PgSql/20260907193705_InitialBaseline.cs`
 — the prior 31-file history was squashed to this single baseline on 8 September 2026), 3,468 lines of
 `styles.scss`. The test totals (859/859 backend tests, 511/511 web tests) were re-taken on

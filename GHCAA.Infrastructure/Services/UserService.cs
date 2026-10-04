@@ -167,6 +167,8 @@ namespace GHCAA.Infrastructure.Services
         // while leaving the account confusingly half-locked in the meantime.
         private bool IsProtectedUsername(string username)
         {
+            if (string.Equals(username, Constants.CreatorAccount.Username, StringComparison.OrdinalIgnoreCase))
+                return true;
             var protectedUsernames = _appSettings.Value.ProtectedSuperAdmins;
             return protectedUsernames.Contains(username, StringComparer.OrdinalIgnoreCase);
         }

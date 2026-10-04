@@ -131,11 +131,12 @@ namespace GHCAA.Tests.Services
             await _context.SaveChangesAsync();
 
             // Act
-            await _service.RemoveMemberFromCommitteeAsync(ecMember.Id);
+            await _service.RemoveMemberFromCommitteeAsync(ecMember.Id, Enums.VacancyReason.Resigned, null);
 
             // Assert
             var updatedECMember = await _context.ECMembers.FindAsync(ecMember.Id);
             updatedECMember!.EndDate.Should().NotBeNull();
+            updatedECMember.EndReason.Should().Be(Enums.VacancyReason.Resigned);
 
             // 82.52: default is off.
             _notificationService.Verify(n => n.CreateNotificationAsync(
@@ -156,12 +157,135 @@ namespace GHCAA.Tests.Services
             await _context.SaveChangesAsync();
 
             // Act
-            await _service.RemoveMemberFromCommitteeAsync(ecMember.Id, notifyMember: true);
+            await _service.RemoveMemberFromCommitteeAsync(ecMember.Id, Enums.VacancyReason.Resigned, null, notifyMember: true);
 
             // Assert
             _notificationService.Verify(n => n.CreateNotificationAsync(
                 member.Id, It.IsAny<string>(), It.IsAny<string>(), Enums.NotificationType.CommitteeAssignment,
                 It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        private async Task<Member> AddSavedMemberAsync(string name, string nid)
+        {
+            var member = CreateMinimalMember(name);
+            member.NID = nid;
+            member.MobileNo = "017" + nid[^8..];
+            _context.Members.Add(member);
+            await _context.SaveChangesAsync();
+            return member;
+        }
+
+        private async Task<(Member holder, GHCAA.Application.DTOs.ECPeriodDto period, ECMember seat)> SeedHeldPresidencyAsync()
+        {
+            var holder = await AddSavedMemberAsync("Current President", "9500000001");
+            var period = await _service.CreatePeriodAsync("Active Period", DateTime.UtcNow.AddDays(-1), null);
+            var seat = new ECMember { MemberId = holder.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow };
+            _context.ECMembers.Add(seat);
+            await _context.SaveChangesAsync();
+            return (holder, period, seat);
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task AssignMemberToRoleAsync_RefusesSecondHolder_WithoutReplaceReason()
+        {
+            var (_, period, seat) = await SeedHeldPresidencyAsync();
+            var other = await AddSavedMemberAsync("Would Be President", "9500000002");
+
+            var act = () => _service.AssignMemberToRoleAsync(period.Id, other.Id, (int)Enums.ECPosition.President, "Voted");
+
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Current President*");
+            (await _context.ECMembers.FindAsync(seat.Id))!.EndDate.Should().BeNull();
+            _context.ECMembers.Count(em => em.MemberId == other.Id).Should().Be(0);
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task AssignMemberToRoleAsync_RefusesSameMemberTwice()
+        {
+            var (holder, period, _) = await SeedHeldPresidencyAsync();
+
+            var act = () => _service.AssignMemberToRoleAsync(period.Id, holder.Id, (int)Enums.ECPosition.President, "Again",
+                endCurrentHolderReason: Enums.VacancyReason.Removed);
+
+            await act.Should().ThrowAsync<InvalidOperationException>();
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task AssignMemberToRoleAsync_WithReplaceReason_EndsOldHolderAndSeatsNewOne()
+        {
+            var (_, period, seat) = await SeedHeldPresidencyAsync();
+            var other = await AddSavedMemberAsync("New President", "9500000003");
+
+            await _service.AssignMemberToRoleAsync(period.Id, other.Id, (int)Enums.ECPosition.President, "By-election",
+                endCurrentHolderReason: Enums.VacancyReason.Died, endCurrentHolderNote: "Passed away in May");
+
+            var old = await _context.ECMembers.FindAsync(seat.Id);
+            old!.EndDate.Should().NotBeNull();
+            old.EndReason.Should().Be(Enums.VacancyReason.Died);
+            old.EndNote.Should().Be("Passed away in May");
+            _context.ECMembers.Count(em => em.ECPeriodId == period.Id && em.Position == Enums.ECPosition.President && em.EndDate == null)
+                .Should().Be(1);
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task RemoveMemberFromCommitteeAsync_OtherWithoutNote_IsRefused()
+        {
+            var (_, _, seat) = await SeedHeldPresidencyAsync();
+
+            var act = () => _service.RemoveMemberFromCommitteeAsync(seat.Id, Enums.VacancyReason.Other, "   ");
+
+            await act.Should().ThrowAsync<InvalidOperationException>();
+            (await _context.ECMembers.FindAsync(seat.Id))!.EndDate.Should().BeNull();
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task RemoveMemberFromCommitteeAsync_AlreadyEnded_IsRefused()
+        {
+            var (_, _, seat) = await SeedHeldPresidencyAsync();
+            await _service.RemoveMemberFromCommitteeAsync(seat.Id, Enums.VacancyReason.TermEnded, null);
+
+            var act = () => _service.RemoveMemberFromCommitteeAsync(seat.Id, Enums.VacancyReason.Resigned, null);
+
+            await act.Should().ThrowAsync<InvalidOperationException>();
+            (await _context.ECMembers.FindAsync(seat.Id))!.EndReason.Should().Be(Enums.VacancyReason.TermEnded);
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task RemoveMemberFromCommitteeAsync_UnknownId_ReturnsFalse()
+        {
+            (await _service.RemoveMemberFromCommitteeAsync(999999, Enums.VacancyReason.Resigned, null)).Should().BeFalse();
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task GetCommitteeSeatsAsync_ShowsHolderAndVacancyReason()
+        {
+            var (_, period, seat) = await SeedHeldPresidencyAsync();
+            var treasurer = await AddSavedMemberAsync("Former Treasurer", "9500000004");
+            var treasurerSeat = new ECMember { MemberId = treasurer.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.Treasurer, StartDate = DateTime.UtcNow };
+            _context.ECMembers.Add(treasurerSeat);
+            await _context.SaveChangesAsync();
+            await _service.RemoveMemberFromCommitteeAsync(treasurerSeat.Id, Enums.VacancyReason.Resigned, "Moved abroad");
+
+            var seats = (await _service.GetCommitteeSeatsAsync(period.Id)).ToList();
+
+            seats.Should().NotContain(s => s.Position == Enums.ECPosition.None);
+            seats.Should().HaveCount(Enum.GetValues<Enums.ECPosition>().Length - 1);
+            var president = seats.Single(s => s.Position == Enums.ECPosition.President);
+            president.Holder!.Id.Should().Be(seat.Id);
+            president.VacancyReason.Should().BeNull();
+            var vacant = seats.Single(s => s.Position == Enums.ECPosition.Treasurer);
+            vacant.Holder.Should().BeNull();
+            vacant.VacancyReason.Should().Be(Enums.VacancyReason.Resigned);
+            vacant.VacancyNote.Should().Be("Moved abroad");
+            vacant.LastHolderName.Should().Be("Former Treasurer");
+            vacant.VacatedOn.Should().NotBeNull();
+            seats.Single(s => s.Position == Enums.ECPosition.GeneralSecretary).VacancyReason.Should().BeNull();
         }
 
         // 82.29: DeleteECMemberAsync is the separate "this row should never have existed"

@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Domain.Models;
+using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Application.Interfaces
 {
@@ -15,8 +16,12 @@ namespace GHCAA.Application.Interfaces
         Task<bool> ActivatePeriodAsync(int id, CancellationToken cancellationToken = default);
 
         Task<IEnumerable<ECMemberDto>> GetCommitteeMembersAsync(int periodId, CancellationToken cancellationToken = default);
-        Task<bool> AssignMemberToRoleAsync(int periodId, int memberId, int position, string? reason, bool notifyMember = false, CancellationToken cancellationToken = default);
-        Task<bool> RemoveMemberFromCommitteeAsync(int ecMemberId, bool notifyMember = false, CancellationToken cancellationToken = default);
+        Task<IEnumerable<CommitteeSeatDto>> GetCommitteeSeatsAsync(int periodId, CancellationToken cancellationToken = default);
+        // A seat with a current holder is refused unless endCurrentHolderReason is given, which
+        // ends that holder's term in the same save.
+        Task<bool> AssignMemberToRoleAsync(int periodId, int memberId, int position, string? reason, bool notifyMember = false,
+            VacancyReason? endCurrentHolderReason = null, string? endCurrentHolderNote = null, CancellationToken cancellationToken = default);
+        Task<bool> RemoveMemberFromCommitteeAsync(int ecMemberId, VacancyReason reason, string? note, bool notifyMember = false, CancellationToken cancellationToken = default);
         Task<bool> DeleteECMemberAsync(int id, int adminId, bool notifyMember = false, CancellationToken cancellationToken = default);
 
         Task<ECPeriodDto?> GetActivePeriodAsync(CancellationToken cancellationToken = default);

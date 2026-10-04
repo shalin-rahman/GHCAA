@@ -14,22 +14,27 @@
 .permission-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem 1rem;
+    gap: 0 1rem;
+
+    // The grid gap spaces the rows, so drop the stacked-checkbox margin from styles.scss.
+    > .form-group.checkbox-group + .form-group.checkbox-group {
+        margin-top: 0;
+    }
 }
 
-.permission-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    font-weight: normal;
-    text-transform: none;
-    letter-spacing: normal;
+.modal-body > .form-group {
+    margin-bottom: 1rem;
 }
 
 .form-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
+}
+
+@media (max-width: 600px) {
+    .permission-grid,
+    .form-row {
+        grid-template-columns: 1fr;
+    }
 }

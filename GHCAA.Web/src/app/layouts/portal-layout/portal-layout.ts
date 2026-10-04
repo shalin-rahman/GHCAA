@@ -2,7 +2,6 @@ import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/cor
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Title } from '@angular/platform-browser';
-import { AuthService } from '../../core/services/auth.service';
 import { NavService } from '../../core/services/nav.service';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -20,13 +19,15 @@ import { OrgConfigService } from '../../core/services/org-config.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PortalLayout {
-  auth = inject(AuthService);
   nav = inject(NavService);
   orgConfig = inject(OrgConfigService);
   private router = inject(Router);
   private titleService = inject(Title);
 
   isSidebarCollapsed = signal(false);
+  // Under 768px the sidebar is an off-canvas drawer, same as admin-layout. It has its own
+  // flag so the desktop icon-rail state never hides labels inside the drawer.
+  isMobileMenuOpen = signal(false);
   currentPageTitle = signal('Dashboard');
 
   constructor() {
@@ -45,14 +46,15 @@ export class PortalLayout {
       this.currentPageTitle.set(title);
       this.titleService.setTitle(`${title} | ${this.orgConfig.config()?.branding?.shortName ?? 'GHCAA'} Member Portal`);
 
-      // Auto-collapse on mobile after navigation
-      if (typeof window !== 'undefined' && window.innerWidth <= 768) {
-        this.isSidebarCollapsed.set(true);
-      }
+      this.isMobileMenuOpen.set(false);
     });
   }
 
   toggleSidebar() {
-    this.isSidebarCollapsed.update(v => !v);
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      this.isMobileMenuOpen.update(v => !v);
+    } else {
+      this.isSidebarCollapsed.update(v => !v);
+    }
   }
 }

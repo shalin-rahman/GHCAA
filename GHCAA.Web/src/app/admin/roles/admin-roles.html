@@ -90,7 +90,7 @@
                 placeholder="Search users by name or email…"></app-search-bar>
             @if (users().length) {
             <div class="record-meta">
-                Showing {{ filteredUsers().length }} of {{ users().length }} system administrators
+                Showing {{ filteredUsers().length }} of {{ users().length }} user accounts
             </div>
             }
         </div>
@@ -127,7 +127,7 @@
                             @for (role of user.roles; track role) {
                             <span
                                 class="px-2 py-0.5 rounded bg-primary/20 border border-primary/30 text-[10px] font-black uppercase tracking-tighter flex items-center gap-2">
-                                {{ role }}
+                                {{ role | humanize }}
                                 <button (click)="removeRole(user.id, role)" class="icon-btn delete"
                                     title="Remove Role">✕</button>
                             </span>
@@ -139,7 +139,7 @@
                             <select #roleSelect [value]="user.roles[0] || roles()[0]?.name"
                                 class="role-select">
                                 @for (r of roles(); track r.name) {
-                                <option [value]="r.name">{{ r.name }}</option>
+                                <option [value]="r.name">{{ r.name | humanize }}</option>
                                 }
                             </select>
                             @if (user.roles.length === 1) {

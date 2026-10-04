@@ -3,6 +3,7 @@ using System;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 {
     [DbContext(typeof(PgSqlApplicationDbContext))]
-    partial class PgSqlApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261002193135_AddUserEmail")]
+    partial class AddUserEmail
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -655,14 +658,6 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("EndNote")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("EndReason")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
                     b.Property<bool>("IsArchived")
                         .HasColumnType("boolean");
 
@@ -1158,7 +1153,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "OTP_EMAIL",
                             Description = "OTP verification email",
-                            LastUpdated = new DateTime(2026, 10, 3, 20, 12, 54, 493, DateTimeKind.Utc).AddTicks(7914),
+                            LastUpdated = new DateTime(2026, 10, 2, 19, 31, 34, 201, DateTimeKind.Utc).AddTicks(5491),
                             Subject = "{{OrgShortName}} Verification Code: {{OtpCode}}",
                             Variables = "['FullName', 'OtpCode']"
                         },
@@ -1169,7 +1164,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "WELCOME_EMAIL",
                             Description = "Welcome email",
-                            LastUpdated = new DateTime(2026, 10, 3, 20, 12, 54, 494, DateTimeKind.Utc).AddTicks(4176),
+                            LastUpdated = new DateTime(2026, 10, 2, 19, 31, 34, 202, DateTimeKind.Utc).AddTicks(2053),
                             Subject = "Welcome to {{OrgName}}!",
                             Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
                         },
@@ -1180,7 +1175,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PASSWORD_RESET",
                             Description = "Password reset email",
-                            LastUpdated = new DateTime(2026, 10, 3, 20, 12, 54, 494, DateTimeKind.Utc).AddTicks(4282),
+                            LastUpdated = new DateTime(2026, 10, 2, 19, 31, 34, 202, DateTimeKind.Utc).AddTicks(2160),
                             Subject = "{{OrgShortName}} Account Password Reset",
                             Variables = "['FullName', 'ResetUrl']"
                         },
@@ -1191,7 +1186,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "APPLICATION_REJECTED",
                             Description = "Application rejection email",
-                            LastUpdated = new DateTime(2026, 10, 3, 20, 12, 54, 494, DateTimeKind.Utc).AddTicks(4493),
+                            LastUpdated = new DateTime(2026, 10, 2, 19, 31, 34, 202, DateTimeKind.Utc).AddTicks(2346),
                             Subject = "Update on your {{OrgShortName}} Membership Application",
                             Variables = "['FullName', 'Reason']"
                         },
@@ -1202,7 +1197,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PAYMENT_RECEIVED",
                             Description = "Payment received acknowledgment",
-                            LastUpdated = new DateTime(2026, 10, 3, 20, 12, 54, 494, DateTimeKind.Utc).AddTicks(4571),
+                            LastUpdated = new DateTime(2026, 10, 2, 19, 31, 34, 202, DateTimeKind.Utc).AddTicks(2428),
                             Subject = "Payment Received: {{Amount}} BDT",
                             Variables = "['FullName', 'Amount', 'TrxID']"
                         },
@@ -1213,7 +1208,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PAYMENT_STATUS_UPDATED",
                             Description = "Payment status update email",
-                            LastUpdated = new DateTime(2026, 10, 3, 20, 12, 54, 494, DateTimeKind.Utc).AddTicks(4631),
+                            LastUpdated = new DateTime(2026, 10, 2, 19, 31, 34, 202, DateTimeKind.Utc).AddTicks(2488),
                             Subject = "Payment Status Updated: {{Status}}",
                             Variables = "['FullName', 'TrxID', 'Status']"
                         },
@@ -1224,7 +1219,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "FAMILY_LINK_REQUEST",
                             Description = "Family link request email",
-                            LastUpdated = new DateTime(2026, 10, 3, 20, 12, 54, 494, DateTimeKind.Utc).AddTicks(4684),
+                            LastUpdated = new DateTime(2026, 10, 2, 19, 31, 34, 202, DateTimeKind.Utc).AddTicks(2544),
                             Subject = "New Family Link Request from {{RequesterName}}",
                             Variables = "['FullName', 'RequesterName', 'Relationship', 'ProfileUrl']"
                         },
@@ -1235,7 +1230,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "FAMILY_LINK_ACCEPTED",
                             Description = "Family link acceptance confirmation",
-                            LastUpdated = new DateTime(2026, 10, 3, 20, 12, 54, 494, DateTimeKind.Utc).AddTicks(4739),
+                            LastUpdated = new DateTime(2026, 10, 2, 19, 31, 34, 202, DateTimeKind.Utc).AddTicks(2606),
                             Subject = "Family Link Request Accepted",
                             Variables = "['FullName', 'TargetName']"
                         });

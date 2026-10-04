@@ -5,6 +5,7 @@ import { ProfileService } from '../../core/services/profile.service';
 import { Icon } from '../icon/icon';
 import { ThemeToggle } from '../theme-toggle/theme-toggle';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
+import { HumanizePipe } from '../../core/pipes/humanize.pipe';
 
 /**
  * Shared identity + quick-actions cluster for the top-right of both the portal and
@@ -24,7 +25,7 @@ import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 @Component({
   selector: 'app-user-menu',
   standalone: true,
-  imports: [Icon, ImgFallbackDirective, RouterLink, ThemeToggle],
+  imports: [Icon, ImgFallbackDirective, RouterLink, ThemeToggle, HumanizePipe],
   templateUrl: './user-menu.html',
   styleUrl: './user-menu.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,5 +1,6 @@
 using FluentAssertions;
 using GHCAA.Application.DTOs;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
@@ -153,5 +154,78 @@ public sealed class ElectionPersonaServiceTests : TestBase
 
         _context.ElectionPersonas.Should().HaveCount(15);
         _context.ElectionPersonas.Single(p => p.Name == "Returning Officer").Description.Should().Be("A test persona.");
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task CreateAsync_RefusesGroupOutsideTheList()
+    {
+        var dto = MakeDto();
+        dto.GroupName = "Oficials";
+
+        var (success, error, _) = await new ElectionPersonaService(_context).CreateAsync(dto, CancellationToken.None);
+
+        success.Should().BeFalse();
+        error.Should().Be("invalid-group");
+        _context.ElectionPersonas.Should().BeEmpty();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task UpdateAsync_KeepsAnOlderGroup_ButRefusesMovingToAnUnknownOne()
+    {
+        var now = DateTime.UtcNow;
+        var legacy = new ElectionPersona
+        {
+            Name = "Old Persona", GroupName = "Volunteers", Description = "d", DeclarationText = "x",
+            Permissions = ElectionPermission.ViewDashboard, IsActive = true, CreatedAt = now, UpdatedAt = now
+        };
+        _context.ElectionPersonas.Add(legacy);
+        await _context.SaveChangesAsync();
+        var service = new ElectionPersonaService(_context);
+
+        var keep = MakeDto("Old Persona");
+        keep.GroupName = "Volunteers";
+        (await service.UpdateAsync(legacy.Id, keep, CancellationToken.None)).Success.Should().BeTrue();
+
+        var move = MakeDto("Old Persona");
+        move.GroupName = "Helpers";
+        var (success, error, _) = await service.UpdateAsync(legacy.Id, move, CancellationToken.None);
+        success.Should().BeFalse();
+        error.Should().Be("invalid-group");
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task Seeder_FillsADefaultPersonaThatHasNoPermissions()
+    {
+        var empty = MakeDto("Returning Officer");
+        empty.Permissions = ElectionPermission.None;
+        var edited = MakeDto("Scrutineer");
+        edited.Permissions = ElectionPermission.ViewAudit;
+        var custom = MakeDto("Custom Helper");
+        custom.Permissions = ElectionPermission.None;
+        var service = new ElectionPersonaService(_context);
+        await service.CreateAsync(empty, CancellationToken.None);
+        await service.CreateAsync(edited, CancellationToken.None);
+        await service.CreateAsync(custom, CancellationToken.None);
+
+        await ElectionPersonaSeeder.EnsureAsync(_context, NullLogger.Instance);
+
+        _context.ElectionPersonas.Single(p => p.Name == "Returning Officer").Permissions.Should().Be(
+            ElectionPermission.ViewDashboard | ElectionPermission.ViewAudit | ElectionPermission.DecideNominations
+            | ElectionPermission.SetBallotKey | ElectionPermission.Count | ElectionPermission.Approve);
+        _context.ElectionPersonas.Single(p => p.Name == "Scrutineer").Permissions.Should().Be(ElectionPermission.ViewAudit);
+        _context.ElectionPersonas.Single(p => p.Name == "Custom Helper").Permissions.Should().Be(ElectionPermission.None);
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task Seeder_EveryDefaultPersonaHasPermissionsAndAKnownGroup()
+    {
+        await ElectionPersonaSeeder.EnsureAsync(_context, NullLogger.Instance);
+
+        _context.ElectionPersonas.Should().OnlyContain(p =>
+            p.Permissions != ElectionPermission.None && Constants.Elections.PersonaGroups.All.Contains(p.GroupName));
     }
 }

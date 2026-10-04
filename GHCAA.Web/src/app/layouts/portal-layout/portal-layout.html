@@ -1,7 +1,7 @@
-<div class="app-shell" [class.collapsed]="isSidebarCollapsed()">
+<div class="app-shell" [class.collapsed]="isSidebarCollapsed()" [class.mobile-menu-open]="isMobileMenuOpen()">
 
-    <!-- Sidebar Overlay (mobile) -->
-    <div class="sidebar-overlay" *ngIf="!isSidebarCollapsed()" (click)="toggleSidebar()"></div>
+    <!-- Backdrop for the mobile drawer; hidden on desktop by CSS -->
+    <div class="sidebar-overlay" (click)="isMobileMenuOpen.set(false)"></div>
 
     <!-- Sidebar -->
     <aside class="sidebar glass-effect" [class.collapsed]="isSidebarCollapsed()">
@@ -11,7 +11,7 @@
             <img [src]="orgConfig.config()?.branding?.logoUrl || '/assets/logo.png'"
                 [alt]="orgConfig.config()?.branding?.shortName || 'Logo'" class="mini-logo"
                 appImgFallback="/assets/logo.png">
-            <span class="brand-name" *ngIf="!isSidebarCollapsed()">HARAGANGIAN</span>
+            <span class="brand-name" *ngIf="!isSidebarCollapsed() || isMobileMenuOpen()">{{ (orgConfig.config()?.branding?.memberNickname || orgConfig.config()?.branding?.shortName) | uppercase }}</span>
         </div>
 
         <nav class="nav-list">
@@ -19,11 +19,11 @@
                  sections mirroring the admin sidebar's pattern (TODO 30.13). -->
             @for (section of nav.portalNavSections(); track section.name) {
             <div class="nav-section">
-                <span class="nav-section-label" *ngIf="!isSidebarCollapsed()">{{ section.name }}</span>
+                <span class="nav-section-label" *ngIf="!isSidebarCollapsed() || isMobileMenuOpen()">{{ section.name }}</span>
                 @for (item of section.items; track item.path) {
                 <a [routerLink]="item.path" routerLinkActive="active" class="nav-item">
                     <span class="icon"><app-icon [name]="item.icon"></app-icon></span>
-                    <span class="label" *ngIf="!isSidebarCollapsed()">{{ item.label }}</span>
+                    <span class="label" *ngIf="!isSidebarCollapsed() || isMobileMenuOpen()">{{ item.label }}</span>
                 </a>
                 }
             </div>
@@ -35,7 +35,7 @@
             @if (nav.isAdmin()) {
             <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item admin-link">
                 <span class="icon"><app-icon name="admin-panel"></app-icon></span>
-                <span class="label" *ngIf="!isSidebarCollapsed()">Admin Panel</span>
+                <span class="label" *ngIf="!isSidebarCollapsed() || isMobileMenuOpen()">Admin Panel</span>
             </a>
             }
         </nav>
@@ -81,9 +81,11 @@
             <span class="label">{{ item.label }}</span>
         </a>
         }
-        <button (click)="auth.logout()" class="touch-target b-nav-item">
-            <span class="icon"><app-icon name="sign-out"></app-icon></span>
-            <span class="label">Logout</span>
+        <!-- Opens the full menu. Sign out stays in the header user menu. -->
+        <button type="button" (click)="isMobileMenuOpen.set(true)" class="touch-target b-nav-item"
+            [class.active]="isMobileMenuOpen()" aria-label="Open menu">
+            <span class="icon"><app-icon name="menu"></app-icon></span>
+            <span class="label">Menu</span>
         </button>
     </nav>
 </div>

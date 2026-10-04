@@ -22,4 +22,16 @@ namespace GHCAA.Application.DTOs
         public DateTime? EndDate { get; set; }
         public MemberSummaryDto? Member { get; set; }
     }
+
+    // 95.3: one row per committee position in a period. Holder is null when the seat is
+    // empty; the vacancy fields then come from the last person who held it, if anyone did.
+    public class CommitteeSeatDto
+    {
+        public ECPosition Position { get; set; }
+        public ECMemberDto? Holder { get; set; }
+        public VacancyReason? VacancyReason { get; set; }
+        public string? VacancyNote { get; set; }
+        public DateTime? VacatedOn { get; set; }
+        public string? LastHolderName { get; set; }
+    }
 }

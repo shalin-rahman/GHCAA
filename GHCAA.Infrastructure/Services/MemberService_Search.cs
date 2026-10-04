@@ -203,6 +203,8 @@ namespace GHCAA.Infrastructure.Services
                         StartDate = em.StartDate.ToLocalTime(),
                         EndDate = em.EndDate.HasValue ? em.EndDate.Value.ToLocalTime() : null,
                         ChangeReason = em.ChangeReason,
+                        EndReason = em.EndReason,
+                        EndNote = isPrivileged ? em.EndNote : null,
                         IsCurrent = em.ECPeriod?.IsActive ?? false
                     }).OrderByDescending(h => h.StartDate).ToList();
                 }
@@ -370,6 +372,17 @@ namespace GHCAA.Infrastructure.Services
                     var period = await _db.ECPeriods.FirstOrDefaultAsync(p => p.Title == ec.PeriodTitle, cancellationToken);
                     if (period == null) continue;
 
+                    // 95.3: the governance page refuses a second current holder, so this form must too.
+                    if (!ec.EndDate.HasValue)
+                    {
+                        var seatTaken = await _db.ECMembers.AnyAsync(other => other.MemberId != id
+                            && other.ECPeriodId == period.Id && other.Position == ec.Position && other.EndDate == null, cancellationToken);
+                        if (seatTaken)
+                        {
+                            throw new InvalidOperationException($"{ec.Position} in {period.Title} already has a current holder. End their term on the governance page first.");
+                        }
+                    }
+
                     _db.ECMembers.Add(new ECMember
                     {
                         MemberId = id,
@@ -377,7 +390,9 @@ namespace GHCAA.Infrastructure.Services
                         Position = ec.Position,
                         StartDate = DateTime.SpecifyKind(ec.StartDate, DateTimeKind.Utc),
                         EndDate = ec.EndDate.HasValue ? DateTime.SpecifyKind(ec.EndDate.Value, DateTimeKind.Utc) : null,
-                        ChangeReason = ec.ChangeReason
+                        ChangeReason = ec.ChangeReason,
+                        EndReason = ec.EndDate.HasValue ? ec.EndReason : null,
+                        EndNote = ec.EndDate.HasValue ? ec.EndNote : null
                     });
                 }
             }

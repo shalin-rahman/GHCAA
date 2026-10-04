@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { NavService } from './nav.service';
 import { AuthService } from './auth.service';
 import { OrgConfigService } from './org-config.service';
+import { routes } from '../../app.routes';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 describe('NavService', () => {
@@ -88,5 +89,32 @@ describe('NavService', () => {
         authServiceMock.currentUser.mockReturnValue({ role: 'Admin' });
         expect(service.adminNavItems().some(i => i.label === 'User Roles')).toBe(false);
         expect(service.adminNavItems().some(i => i.path === '/admin/elections')).toBe(true);
+    });
+
+    // Phones only get the sidebar through the drawer, so a portal page with no nav entry
+    // is unreachable there. Detail pages and change-password are opened from other pages.
+    it('lists every top-level portal page in the member menu', () => {
+        authServiceMock.currentUser.mockReturnValue({ role: 'Member' });
+        const reachedFromOtherPages = new Set(['', 'change-password', 'forum/:id']);
+        const portalPages = routes.find(r => r.path === 'portal')!.children!
+            .map(r => r.path!)
+            .filter(p => !reachedFromOtherPages.has(p));
+        const navPaths = service.portalNavItems().map(i => i.path);
+
+        expect(portalPages.filter(p => !navPaths.includes(`/portal/${p}`))).toEqual([]);
+    });
+
+    it('keeps the phone bottom bar to a few shortcuts', () => {
+        authServiceMock.currentUser.mockReturnValue({ role: 'Member' });
+        expect(service.mobileNavItems().map(i => i.path))
+            .toEqual(['/portal/dashboard', '/portal/news', '/portal/events', '/portal/profile']);
+    });
+
+    it('hides Polls when the polls feature is off', () => {
+        authServiceMock.currentUser.mockReturnValue({ role: 'Member' });
+        orgConfigMock.isFeatureEnabled.mockImplementation((f: string) => f !== 'enablePolls');
+        const paths = service.portalNavItems().map(i => i.path);
+        expect(paths).not.toContain('/portal/polls');
+        expect(paths).toContain('/portal/communications');
     });
 });

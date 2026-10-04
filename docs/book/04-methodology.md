@@ -56,8 +56,8 @@ was rejected and why.
 The **design cycle** is the inner loop of building and evaluating, repeated across the increments
 Chapter 7 reports and gated, in every increment, by the verification discipline described in §4.4.
 This is the cycle that ran most often. It is also the cycle for which the repository itself is the
-clearest evidence, since every one of the two hundred and ninety-nine commits between 9 February and
-23 September 2026 is a turn of it.
+clearest evidence, since every one of the three hundred and twenty-four commits between 9 February and
+2 October 2026 is a turn of it.
 
 ## 4.3 Mapping Design Science Activities to the Work Performed
 
@@ -75,7 +75,7 @@ document.
 | Communication | This dissertation, and the documentation corpus in `docs/` that a successor maintainer would read first | Whole document |
 
 The "design and development" row understates nothing by omission and nothing by exaggeration: the
-eighty-eight work packages are `docs/TODO.md`'s own numbering, several of them opened explicitly "raised by
+ninety-six work packages are `docs/TODO.md`'s own numbering, several of them opened explicitly "raised by
 user" on a dated request, which is the clearest documentary evidence available that the relevance
 cycle kept running throughout construction rather than only at the requirements stage. This chapter
 and Chapter 11 count the same project by five different units — commit, tracker task, work package,
@@ -112,7 +112,7 @@ change in response to what the working software reveals [53], [54].
 
 What was actually followed is incremental and evolutionary delivery in the sense Lehman describes
 software's continuing growth and increasing complexity as inherent to a live system rather than as a
-process failure [55]: eighty-eight work packages, opened as problems were found or requested, each closed
+process failure [55]: ninety-six work packages, opened as problems were found or requested, each closed
 against a gate rather than against a date. The gate is stated plainly in `docs/TODO.md`'s own
 verification standard: "no task marked done until its test passes", and the phased remediation plans
 in `docs/FORUM_PLAN_2026-05.md` end each phase with an explicit gate line, for example `dotnet test` (API),

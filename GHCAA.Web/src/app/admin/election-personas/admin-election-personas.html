@@ -71,9 +71,13 @@
 
             <div class="form-group">
                 <label>Board group <span class="required-star">*</span></label>
-                <input type="text" class="form-control" [ngModel]="form().groupName"
-                    (ngModelChange)="form.update(f => ({ ...f, groupName: $event }))" maxlength="100"
-                    placeholder="e.g. Officials">
+                <select class="form-control" [ngModel]="form().groupName"
+                    (ngModelChange)="form.update(f => ({ ...f, groupName: $event }))">
+                    <option value="" disabled>Select a group</option>
+                    @for (g of groupOptions(); track g) {
+                    <option [value]="g">{{ g }}</option>
+                    }
+                </select>
             </div>
 
             <div class="form-group">
@@ -86,11 +90,11 @@
                 <label>Permissions</label>
                 <div class="permission-grid">
                     @for (flag of permissionNames; track flag) {
-                    <label class="permission-checkbox">
-                        <input type="checkbox" [checked]="hasPermission(flag)"
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" [id]="'perm-' + flag" [checked]="hasPermission(flag)"
                             (change)="togglePermission(flag, $any($event.target).checked)">
-                        {{ flag }}
-                    </label>
+                        <label [for]="'perm-' + flag">{{ flag | humanize }}</label>
+                    </div>
                     }
                 </div>
             </div>
@@ -113,20 +117,16 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="permission-checkbox">
-                    <input type="checkbox" [ngModel]="form().showOnPublicBoard"
-                        (ngModelChange)="form.update(f => ({ ...f, showOnPublicBoard: $event }))">
-                    Show on the public election board
-                </label>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="persona-public-board" [ngModel]="form().showOnPublicBoard"
+                    (ngModelChange)="form.update(f => ({ ...f, showOnPublicBoard: $event }))">
+                <label for="persona-public-board">Show on the public election board</label>
             </div>
 
-            <div class="form-group">
-                <label class="permission-checkbox">
-                    <input type="checkbox" [ngModel]="form().takesOverFromAdmin"
-                        (ngModelChange)="form.update(f => ({ ...f, takesOverFromAdmin: $event }))">
-                    Takes over admin control during the election
-                </label>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="persona-takes-over" [ngModel]="form().takesOverFromAdmin"
+                    (ngModelChange)="form.update(f => ({ ...f, takesOverFromAdmin: $event }))">
+                <label for="persona-takes-over">Takes over admin control during the election</label>
             </div>
 
             <div class="form-group">

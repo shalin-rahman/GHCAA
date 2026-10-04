@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Linq;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
@@ -46,6 +47,10 @@ namespace GHCAA.Infrastructure.Services
             _communicationService = communicationService;
             _orgConfigService = orgConfigService;
         }
+
+        // Tests set this to zero so they do not wait on every forgot-password call.
+        public TimeSpan PasswordResetResponseFloor { get; set; } =
+            TimeSpan.FromMilliseconds(Constants.Defaults.PasswordResetResponseFloorMs);
 
         // Brute-force lockout (S5.1) and timing-enumeration equalization (S5.2) are both handled
         // inline below, not here.
@@ -381,54 +386,88 @@ namespace GHCAA.Infrastructure.Services
         private static IReadOnlyList<string> RoleNames(ICollection<Role>? roles) =>
             roles?.Where(r => !string.IsNullOrWhiteSpace(r.Name)).Select(r => r.Name!).Distinct().ToList()
                 ?? new List<string>();
-        // 80.16: the self-service half of password reset. Always returns — never tells the caller
-        // whether the identifier matched a real account, same reasoning as LoginAsync's S5.2 timing
-        // equalization: an "email not found" response is a ready-made account-enumeration oracle.
-        // System admin accounts have no email (gotcha_system_admin_no_email) so this only reaches
-        // members; an admin still resets a system admin's password via the existing admin flow.
+        // 80.16: the self-service half of password reset. Always returns and never says whether
+        // the identifier matched, same reasoning as LoginAsync's S5.2 timing equalization: an
+        // "email not found" response would let anyone check which emails have accounts. Both
+        // outcomes wait out PasswordResetResponseFloor, so the reply time gives nothing away either.
+        // An email can belong to a member and to a system admin at once (the creator is usually
+        // also an alumnus), so every account on that email gets its own link.
         public async Task RequestPasswordResetAsync(string identifier, CancellationToken cancellationToken = default)
         {
+            var started = Stopwatch.StartNew();
+            try
+            {
+                await FindAndIssuePasswordResetsAsync(identifier, cancellationToken);
+            }
+            finally
+            {
+                var remaining = PasswordResetResponseFloor - started.Elapsed;
+                if (remaining > TimeSpan.Zero)
+                    await Task.Delay(remaining, cancellationToken);
+            }
+        }
+
+        private async Task FindAndIssuePasswordResetsAsync(string identifier, CancellationToken cancellationToken)
+        {
             var trimmed = identifier?.Trim() ?? string.Empty;
+            var lowered = trimmed.ToLower();
+            var targets = new List<(User User, string Email, string DisplayName, Member? Member)>();
+
             var member = await _db.Members
                 .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(m => m.Email.ToLower() == trimmed.ToLower(), cancellationToken);
-
-            if (member == null)
+                .FirstOrDefaultAsync(m => m.Email.ToLower() == lowered, cancellationToken);
+            if (member != null)
             {
-                // Same shape of work as the match branch below (one BCrypt hash, comparable cost to
-                // the real path's hashing-adjacent work) so a missing identifier doesn't resolve
-                // noticeably faster than one that exists.
-                BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString("N"));
-                return;
+                var memberUser = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == member.Id, cancellationToken);
+                if (memberUser != null)
+                    targets.Add((memberUser, member.Email, member.FullName, member));
             }
 
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == member.Id, cancellationToken);
-            if (user == null)
+            if (trimmed.Length > 0)
             {
-                BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString("N"));
-                return;
+                var adminUsers = await _db.Users
+                    .Where(u => u.MemberId == null && u.Email != null && u.Email.ToLower() == lowered)
+                    .ToListAsync(cancellationToken);
+                targets.AddRange(adminUsers.Select(u => (u, u.Email!, u.Username, (Member?)null)));
             }
 
-            var token = Guid.NewGuid().ToString("N");
-            user.ResetToken = token;
-            user.ResetTokenExpiry = DateTime.UtcNow.AddHours(24);
-            await _db.SaveChangesAsync(cancellationToken);
+            foreach (var target in targets)
+            {
+                await IssuePasswordResetAsync(target.User, target.Email, target.DisplayName, target.Member, cancellationToken);
+            }
+        }
 
-            // A reset request otherwise leaves a session taken over before the request still valid
-            // once the reset completes.
-            await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
+        private async Task IssuePasswordResetAsync(User user, string email, string displayName, Member? member, CancellationToken cancellationToken)
+        {
+            // Anyone can ask for a reset on a known email, so a repeat request resends the link
+            // already issued instead of replacing it. Otherwise a stream of requests keeps killing
+            // the owner's link and logging them out. The expiry is not extended.
+            var reuse = !string.IsNullOrEmpty(user.ResetToken)
+                && user.ResetTokenExpiry.HasValue && user.ResetTokenExpiry.Value > DateTime.UtcNow;
+            var token = reuse ? user.ResetToken! : Guid.NewGuid().ToString("N");
+            if (!reuse)
+            {
+                user.ResetToken = token;
+                user.ResetTokenExpiry = DateTime.UtcNow.AddHours(24);
+                await _db.SaveChangesAsync(cancellationToken);
 
-            await _activityService.LogActivityAsync(member.Id, "Password Reset Requested",
-                "Member requested a password reset link.", cancellationToken: cancellationToken);
+                // A reset request otherwise leaves a session taken over before the request still valid
+                // once the reset completes.
+                await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
+            }
+
+            await _activityService.LogActivityAsync(member?.Id, "Password Reset Requested",
+                member != null ? "Member requested a password reset link." : $"Password reset link requested for {user.Username}.",
+                cancellationToken: cancellationToken);
 
             var clientUrl = _appSettings.Value.ClientUrl;
-            var resetUrl = $"{clientUrl}/reset-password?email={Uri.EscapeDataString(member.Email)}&token={token}";
+            var resetUrl = $"{clientUrl}/reset-password?email={Uri.EscapeDataString(email)}&token={token}";
 
             var dbTemplate = await _communicationService.GetTemplateByCodeAsync(Constants.TemplateCodes.PasswordReset, cancellationToken);
 
             // FullName is member-supplied at registration - HTML-encode it before it lands in an
             // email body, same as CommunicationService.SendEmailByCodeAsync does for template vars.
-            var encodedFullName = WebUtility.HtmlEncode(member.FullName);
+            var encodedFullName = WebUtility.HtmlEncode(displayName);
 
             string subject, body;
             if (dbTemplate != null)
@@ -437,7 +476,7 @@ namespace GHCAA.Infrastructure.Services
                 body = dbTemplate.Body
                     .Replace("{{FullName}}", encodedFullName)
                     .Replace("{{ResetUrl}}", resetUrl)
-                    .Replace("{{MembershipNumber}}", member.MembershipNumber ?? "Pending");
+                    .Replace("{{MembershipNumber}}", member?.MembershipNumber ?? WebUtility.HtmlEncode(user.Username));
             }
             else
             {
@@ -458,36 +497,42 @@ namespace GHCAA.Infrastructure.Services
 
             try
             {
-                await _email.SendEmailAsync(member.Email, subject, body);
+                await _email.SendEmailAsync(email, subject, body);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to send password reset email to {Email}", member.Email);
+                _logger.LogWarning(ex, "Failed to send password reset email to {Email}", email);
             }
         }
 
         public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default)
         {
-            var member = await _db.Members
-                .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(m => m.Email.ToLower() == email.Trim().ToLower(), cancellationToken);
+            // A null or empty token would match every user whose ResetToken is null.
+            if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(email))
+                return false;
 
-            User? user;
-            if (member != null)
+            // The token picks the account. The email in the link must then belong to that same
+            // account, which matters when a member and a system admin share one email.
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.ResetToken == token, cancellationToken);
+            if (user == null) return false;
+
+            var identifier = email.Trim();
+            Member? member = null;
+            bool matches;
+            if (user.MemberId != null)
             {
-                user = await _db.Users
-                    .FirstOrDefaultAsync(u => u.MemberId == member.Id && u.ResetToken == token, cancellationToken);
+                member = await _db.Members
+                    .IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(m => m.Id == user.MemberId, cancellationToken);
+                matches = member != null && string.Equals(member.Email, identifier, StringComparison.OrdinalIgnoreCase);
             }
             else
             {
-                // A system admin has no Member/email, so its link carries the Username instead.
-                // Scoped to MemberId == null so this cannot also be used to look up a member's
-                // account by guessing their username.
-                user = await _db.Users
-                    .FirstOrDefaultAsync(u => u.MemberId == null && u.Username == email.Trim() && u.ResetToken == token, cancellationToken);
+                // An older link for a system admin carries the Username instead of an email.
+                matches = user.Username == identifier
+                    || string.Equals(user.Email, identifier, StringComparison.OrdinalIgnoreCase);
             }
-
-            if (user == null) return false;
+            if (!matches) return false;
 
             if (!user.ResetTokenExpiry.HasValue || user.ResetTokenExpiry.Value < DateTime.UtcNow)
             {
@@ -500,6 +545,9 @@ namespace GHCAA.Infrastructure.Services
             user.ResetToken = null;
             user.ResetTokenExpiry = null;
             user.SecurityStamp = Guid.NewGuid().ToString("N");
+            // The new password came from the owner through their email, so there is nothing left
+            // to force a change for.
+            user.MustChangePassword = false;
 
             await _db.SaveChangesAsync(cancellationToken);
             await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);

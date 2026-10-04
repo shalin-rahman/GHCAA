@@ -49,6 +49,9 @@ public sealed class ScholarshipDocumentConfiguration : IEntityTypeConfiguration<
         b.Property(x => x.DocumentType).HasMaxLength(100).IsRequired();
         b.HasIndex(x => new { x.ScholarshipApplicationId, x.FileUploadId }).IsUnique();
         b.HasOne(x => x.ScholarshipApplication).WithMany(x => x.Documents).HasForeignKey(x => x.ScholarshipApplicationId).OnDelete(DeleteBehavior.Cascade);
+        // FileUpload's query filter needs a non-archived member, and a public applicant's upload has no
+        // member. A matching filter here, or any query that includes x.FileUpload, hides every public
+        // applicant's documents (EF warning 10622). TODO 94.3.
         b.HasOne(x => x.FileUpload).WithMany().HasForeignKey(x => x.FileUploadId).OnDelete(DeleteBehavior.Restrict);
     }
 }
@@ -61,6 +64,9 @@ public sealed class ScholarshipReviewConfiguration : IEntityTypeConfiguration<Sc
         b.Property(x => x.Comments).HasMaxLength(2000);
         b.HasIndex(x => new { x.ScholarshipApplicationId, x.ReviewerMemberId }).IsUnique();
         b.HasOne(x => x.ScholarshipApplication).WithMany(x => x.Reviews).HasForeignKey(x => x.ScholarshipApplicationId).OnDelete(DeleteBehavior.Cascade);
+        // Do not add a filter on ReviewerMember.IsArchived here (EF warning 10622 suggests it). Reviews by
+        // an archived member would vanish from the application, and the committee loses who scored what.
+        // Queries that include x.ReviewerMember hide them too. TODO 94.2.
         b.HasOne(x => x.ReviewerMember).WithMany().HasForeignKey(x => x.ReviewerMemberId).OnDelete(DeleteBehavior.Restrict);
     }
 }
