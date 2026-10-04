@@ -112,9 +112,13 @@ public record ElectionAppointmentDto(int Id, int ElectionId, string ElectionTitl
 public record ElectionAppointmentSummaryDto(int ElectionId, string ElectionTitle, string PersonaName, ElectionPermission Permissions);
 
 // Spec 023 (37.12f). KeyFingerprint is set only on a ReplaceBallotKey request, so the approver sees which key they approve.
-public record ElectionApprovalDto(int Id, int ElectionId, ElectionApprovalAction Action, int RequestedByUserId, string RequestedBy, DateTime RequestedAt, DateTime ExpiresAt, string? KeyFingerprint);
+// ApprovedAt is set only on an approved Count that has not run yet (37.13h).
+public record ElectionApprovalDto(int Id, int ElectionId, ElectionApprovalAction Action, int RequestedByUserId, string RequestedBy, DateTime RequestedAt, DateTime ExpiresAt, string? KeyFingerprint, DateTime? ApprovedAt = null);
 
 // What a two-person step did. Pending is set when it was stored for a second person instead of run.
 public record ElectionApprovalRunResult(bool Ran, string? Error, ElectionApprovalDto? Pending);
+
+// What a count call did (37.13h): counted, failed, or stored for a second person.
+public record ElectionCountRunResult(IReadOnlyList<ElectionResultDto>? Results, string? Error, ElectionApprovalDto? Pending);
 
 public record RejectApprovalRequest(string? Reason);

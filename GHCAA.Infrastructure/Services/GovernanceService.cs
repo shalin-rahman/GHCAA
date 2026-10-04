@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -171,7 +172,8 @@ namespace GHCAA.Infrastructure.Services
             foreach (var position in Enum.GetValues<ECPosition>().Where(p => p != ECPosition.None))
             {
                 var held = rows.Where(r => r.Position == position).ToList();
-                var holder = held.FirstOrDefault(r => r.EndDate == null);
+                // Older data can hold two open rows for one seat. Show the newest.
+                var holder = held.Where(r => r.EndDate == null).OrderByDescending(r => r.StartDate).FirstOrDefault();
                 if (holder != null)
                 {
                     seats.Add(new CommitteeSeatDto { Position = position, Holder = MapToMemberDto(holder) });
@@ -200,7 +202,14 @@ namespace GHCAA.Infrastructure.Services
                 throw new InvalidOperationException("Only active members can be assigned to the Executive Committee.");
             }
 
+            if (!Enum.IsDefined((ECPosition)position) || (ECPosition)position == ECPosition.None)
+            {
+                throw new InvalidOperationException("Pick a committee position.");
+            }
+
             // 95.3: one current holder per seat. Replacing someone has to say why their term ended.
+            // Serializable so two admins filling the same seat at once cannot both get in.
+            await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
             var currentHolders = await _db.ECMembers
                 .Include(em => em.Member)
                 .Where(em => em.ECPeriodId == periodId && em.Position == (ECPosition)position && em.EndDate == null)
@@ -232,7 +241,16 @@ namespace GHCAA.Infrastructure.Services
             };
 
             _db.ECMembers.Add(newAssignment);
-            await _db.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await _db.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (Exception ex) when (ex is DbUpdateException or DbException)
+            {
+                _db.ChangeTracker.Clear();
+                throw new InvalidOperationException("Someone else changed this seat just now. Reload and try again.", ex);
+            }
 
             // 82.52: admin-chosen, off by default (nothing notified here before this item).
             if (notifyMember)
@@ -406,6 +424,11 @@ namespace GHCAA.Infrastructure.Services
 
         private static void EndTerm(ECMember ecMember, VacancyReason reason, string? note)
         {
+            // System.Text.Json lets an unknown number such as 99 through to here.
+            if (!Enum.IsDefined(reason))
+            {
+                throw new InvalidOperationException("Pick a reason the term ended.");
+            }
             note = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
             if (reason == VacancyReason.Other && note == null)
             {

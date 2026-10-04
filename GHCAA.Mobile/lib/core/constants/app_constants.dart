@@ -21,3 +21,17 @@ class AppConstants {
   // Layout
   static const double idCardAspectRatio = 0.63;
 }
+
+// 95.3: values match the API's VacancyReason enum, sent as strings.
+class GovernanceConstants {
+  static const List<Map<String, String>> vacancyReasonOptions = [
+    {'value': 'Died', 'label': 'Died'},
+    {'value': 'Resigned', 'label': 'Resigned'},
+    {'value': 'Removed', 'label': 'Removed'},
+    {'value': 'TermEnded', 'label': 'Term ended'},
+    {'value': 'Other', 'label': 'Other'},
+  ];
+  static const String vacancyReasonOther = 'Other';
+  // Same limit as Constants.Governance.VacancyNoteMaxLength on the API.
+  static const int vacancyNoteMaxLength = 500;
+}

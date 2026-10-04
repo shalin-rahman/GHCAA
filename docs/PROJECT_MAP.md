@@ -601,8 +601,9 @@ not block a build yet). For the full mechanism and where it stands, see
 | `UpdatePeriodAsync(id, title, start, end, isActive, ct)` | `bool` |
 | `ActivatePeriodAsync(id, ct)` | `bool` |
 | `GetCommitteeMembersAsync(periodId, ct)` | `IEnumerable<ECMemberDto>` |
-| `AssignMemberToRoleAsync(periodId, memberId, position, reason, ct)` | `bool` |
-| `RemoveMemberFromCommitteeAsync(ecMemberId, ct)` | `bool` |
+| `GetCommitteeSeatsAsync(periodId, ct)` | `IEnumerable<CommitteeSeatDto>` |
+| `AssignMemberToRoleAsync(periodId, memberId, position, reason, notifyMember, endCurrentHolderReason, endCurrentHolderNote, ct)` | `bool` |
+| `RemoveMemberFromCommitteeAsync(ecMemberId, vacancyReason, note, notifyMember, ct)` | `bool` |
 | `DeleteECMemberAsync(id, ct)` | `bool` |
 | `GetActivePeriodAsync(ct)` | `ECPeriodDto?` |
 | `GetActiveConstitutionAsync(ct)` | `Constitution?` |
@@ -1207,6 +1208,8 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `updateTheme()` | `(id, theme) => Observable<any>` | `PUT /theme/:id` |
 | `deleteTheme()` | `(id) => Observable<any>` | `DELETE /theme/:id` |
 | `deleteECMember()` | `(id) => Observable<any>` | `DELETE /admin/governance/members/:id/hard-delete` |
+| `getCommitteeSeats()` | `(periodId) => Observable<any[]>` | `GET /admin/governance/periods/:id/seats` |
+| `endCommitteeTerm()` | `(ecMemberId, {reason, note, notifyMember}) => Observable<any>` | `POST /admin/governance/members/:id/end-term` |
 | `getMemberPayments()` | `(memberId) => Observable<any[]>` | `GET /financials/member/:id/history` |
 | `deletePayment()` | `(id) => Observable<any>` | `DELETE /financials/payment/:id` |
 | `getPeriods()` | `() => Observable<any[]>` | `GET /networking/periods` |
@@ -1622,7 +1625,7 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 | `updateFeeConfig()` | `(data) => Future<bool>` | `PUT /financials/fees/config` |
 | `getCommitteeMembers()` | `(periodId) => Future<List>` | `GET /admin/governance/periods/:id/members` |
 | `assignMemberToCommittee()` | `(periodId, data) => Future<bool>` | `POST /admin/governance/periods/:id/members` |
-| `removeMemberFromCommittee()` | `(ecMemberId) => Future<bool>` | `DELETE /admin/governance/members/:id` |
+| `endCommitteeTerm()` | `(ecMemberId, reason, note?, notifyMember) => Future<bool>` | `POST /admin/governance/members/:id/end-term` |
 
 ---
 

@@ -227,8 +227,12 @@ export class AdminService {
         return this.http.post(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${periodId}/members`, data);
     }
 
-    removeCommitteeMember(ecMemberId: number, notifyMember: boolean): Observable<any> {
-        return this.http.delete(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/members/${ecMemberId}?notifyMember=${notifyMember}`);
+    getCommitteeSeats(periodId: number): Observable<any[]> {
+        return this.http.get<any[]>(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${periodId}/seats`);
+    }
+
+    endCommitteeTerm(ecMemberId: number, body: { reason: string; note: string | null; notifyMember: boolean }): Observable<any> {
+        return this.http.post(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/members/${ecMemberId}/end-term`, body);
     }
 
     // Audit log

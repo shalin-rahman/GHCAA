@@ -25,6 +25,10 @@ screens on web and mobile, the printed receipt, results publication and the ER f
 Out of scope: postal or paper ballots, end-to-end verifiable cryptography (homomorphic tallies,
 mix-nets), and ranked or preferential voting. Those are recorded under "Not adopted" with the reason.
 
+The result is a trusted-server secret ballot. The server is trusted while it seals each ballot, and
+the Returning Officer is trusted as the only holder of the key that opens them. "Known limits" below
+lists what that leaves open.
+
 ## Standards applied
 
 The requirements below come from these common rules of a secret-ballot election. They are stated
@@ -245,6 +249,10 @@ strict receipt-freeness, print the tracking code only (option B in D1).
 
 - **End-to-end verifiable cryptography.** Strong, but it needs key ceremonies and trained officers.
   The shuffle in FR-001 plus the code list in FR-016 gives most of the value for an alumni body.
+- **Threshold custody of the key.** Splitting the key so that, say, two of three officials must
+  act together to count would remove the Returning Officer as a single point of trust. It needs a
+  key ceremony and software the officials would have to run themselves. Not built; the officer is a
+  trusted key custodian, an accepted trust assumption (online-voting review, 2026-10-04).
 - **Ranked voting.** The constitution uses first past the post per seat.
 - **Changing a vote after casting.** Some systems allow a later vote to replace an earlier one to
   beat coercion. It would need the member-to-ballot link that FR-001 removes.
@@ -291,10 +299,15 @@ TODO 37.1s closed the database-access gaps the security review of 2026-09-27 fou
   no time limit. The count vacuums the live tables only. The officer must destroy the key file once
   the result is declared and any recount window has closed, and backups from the polling days need
   the same care as the key.
-- Any admin can set or replace the key up to the campaign. The key is not yet tied to the member
-  who holds the ReturningOfficer role, and voters do not see its fingerprint. An admin who swaps in
-  their own key before polling and also reads the database could open ballots during polling. The
-  real officer finds out only when the count says the key is wrong. TODO 37.1v tracks the fix.
+- Whoever holds the private key file can open every ballot. The Returning Officer is a trusted key
+  custodian and the key is a single point of trust; threshold custody is not built (see "Not
+  adopted"). Setting the key needs the SetBallotKey permission, replacing it needs a second person,
+  and voters see its fingerprint (TODO 37.12f, which closed 37.1v). Counting needs a second person
+  too (TODO 37.13h), but the approver never sees the key, so it limits who counts, not who could
+  read the ballots with a copy of the file.
+- Ballots sealed before TODO 37.13i are not bound to their election. Those elections keep the
+  version 1 format so their ballots still open; every newer election binds its id into the seal, so
+  a ballot moved to another election will not open (tested under 37.13j).
 - A counted ballot keeps the voter's choices for every seat together. With many seats the pattern
   can be unique, so a coercer who can read the table could ask for an odd pattern and look for it.
 - Render's access log records the time and IP of each call to the vote endpoint, but not the body.

@@ -155,6 +155,16 @@
     }
 }
 
+.vacant-seats {
+    margin-top: 1.5rem;
+
+    h4 {
+        margin: 0 0 0.75rem;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+}
+
 .member-cell {
     display: flex;
     align-items: center;

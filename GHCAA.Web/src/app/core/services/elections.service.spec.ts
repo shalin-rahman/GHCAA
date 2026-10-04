@@ -51,10 +51,21 @@ describe('ElectionsService', () => {
     });
 
     it('sends the returning officer key with the first count', () => {
-        service.count(ELECTION.id, 'PKCS8').subscribe();
+        let run: unknown;
+        service.runCount(ELECTION.id, 'PKCS8').subscribe(value => run = value);
         const request = http.expectOne(API_ENDPOINTS.ELECTIONS.COUNT(ELECTION.id));
         expect(request.request.body).toEqual({ privateKey: 'PKCS8' });
         request.flush([]);
+        expect(run).toEqual({ results: [], pending: null });
+    });
+
+    // FR-39 (37.13h)
+    it('reports a count stored for a second person', () => {
+        const pending = { id: 3, electionId: ELECTION.id, action: 'Count', requestedByUserId: 1, requestedBy: 'alice', requestedAt: '', expiresAt: '' };
+        let run: unknown;
+        service.runCount(ELECTION.id, 'PKCS8').subscribe(value => run = value);
+        http.expectOne(API_ENDPOINTS.ELECTIONS.COUNT(ELECTION.id)).flush(pending, { status: 202, statusText: 'Accepted' });
+        expect(run).toEqual({ results: null, pending });
     });
 
     it('stores only the public key for an election', () => {

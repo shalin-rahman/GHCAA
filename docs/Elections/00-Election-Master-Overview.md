@@ -533,7 +533,7 @@ where it deliberately stops short.
 
 | What the recommendation expects | How this design answers it |
 | --- | --- |
-| Secrecy of the vote | Ballots are sealed at the moment of casting and opened only together, in random order, at the count. No stored record links a member to how they voted. |
+| Secrecy of the vote | A trusted-server secret ballot. Ballots are sealed at the moment of casting and opened only together, in random order, at the count. No stored record links a member to how they voted. Secrecy relies on the server and on the Returning Officer who holds the key, as set out below. |
 | Equal and free suffrage | One member, one ballot, checked against a roll frozen before voting opens. Candidate order is randomised at publication so no candidate gains from position. |
 | Voter authentication and eligibility | Members sign in and confirm identity with a one-time code at the point of voting. Eligibility is judged against the frozen roll. |
 | Transparency | The Commission and every official are published on a public board. Full results, including zero-vote candidates, abstentions and spoiled ballots, are published after declaration. |
@@ -541,7 +541,7 @@ where it deliberately stops short.
 | Auditability | A tamper-evident history of every significant action, so a later alteration is detectable. |
 | Accessibility | The voting screens target WCAG 2.2 Level AA and work on both web and mobile. |
 | Oversight and administration | An independent Election Commission, appointed by a Search Committee, with an Appeal Tribunal that decides separately from the Commission. |
-| Protection against unauthorised intervention | Two people must agree before any of the six sensitive actions happens, and the ballot-sealing key sits with the Returning Officer, not with administrators. |
+| Protection against unauthorised intervention | Two people must agree before any of the seven sensitive actions happens, counting included, and the ballot-sealing key sits with the Returning Officer, not with administrators. |
 
 **Where it stops short.** The recommendation contemplates full end-to-end verifiability, where a
 voter can prove their own ballot was counted as cast without trusting the system at all. This
@@ -549,6 +549,16 @@ design gives individual verification that a ballot was recorded, and universal v
 the published ballots add up to the published result, but not a cryptographic proof tying one to
 the other. Closing that gap would mean a verifiable mixnet or a homomorphic tally, judged out of
 proportion to a members' association election.
+
+**The trust model.** This is a trusted-server secret ballot, not an end-to-end verifiable one. The
+server sees each ballot in the clear for the moment it seals it, and whoever controls the running
+server during polling could watch votes arrive. The Returning Officer is a trusted key custodian:
+whoever holds the private key file can open every sealed ballot, so the key is a single point of
+trust. Threshold custody, where the key is split so that several officials must act together to
+count, was considered and not built. That is an accepted trust assumption for an association
+election, recorded here so nobody reads the design as stronger than it is. What limits the risk is
+procedural: the key is made and kept off the server, a second person must agree before the count
+(TODO 37.13h), and the file is destroyed once the result stands (TODO 37.13e, the key procedure).
 
 ### VVSG 2.0
 

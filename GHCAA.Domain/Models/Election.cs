@@ -23,6 +23,9 @@ public class Election
     // only the officer's private key, brought to the count, opens them.
     public string? BallotPublicKey { get; set; }
     public string? BallotKeyFingerprint { get; set; }
+    // Which BallotSeal format this election's ballots use. Elections that existed before the
+    // version 2 format were set to 1 by the migration, so their ballots still open.
+    public int BallotSealVersion { get; set; } = Constants.Elections.BallotSealVersion;
     public bool IsActive { get; set; } = true;
     public int CreatedBy { get; set; }
     public ECPeriod? ECPeriod { get; set; }
@@ -95,6 +98,9 @@ public class ElectionApproval
     public DateTime? RejectedAt { get; set; }
     public string? RejectReason { get; set; }
     public DateTime? ExecutedAt { get; set; }
+    // Count only (37.13h). Approving a count does not run it, because the key is never stored.
+    // The count claims the approved row by setting this, so one approval allows one count.
+    public DateTime? ConsumedAt { get; set; }
     public Election? Election { get; set; }
 
     public bool IsOpenAt(DateTime now) => ExecutedAt == null && RejectedAt == null && ExpiresAt > now;

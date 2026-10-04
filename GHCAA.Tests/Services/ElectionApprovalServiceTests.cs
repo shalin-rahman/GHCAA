@@ -239,4 +239,111 @@ public sealed class ElectionApprovalServiceTests : TestBase
         (await _service.ApproveAsync(999_999, _bob, Admin)).Error.Should().Be("not-found");
         (await _service.RejectAsync(999_999, _bob, Admin, null)).Error.Should().Be("not-found");
     }
+
+    // 37.13h. The count is mocked here: these tests are about who may count and how often. The
+    // count itself is covered in ElectionServiceTests.
+    private const string Key = "pkcs8";
+    private static readonly IReadOnlyList<ElectionResultDto> Counted = [new ElectionResultDto(1, 1, 10, true, false)];
+
+    private async Task<(ElectionApprovalService Service, Mock<IElectionService> Elections)> CountingAsync()
+    {
+        await _context.Elections.Where(x => x.Id == _election.Id)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.Phase, ElectionPhase.Counting));
+        var elections = new Mock<IElectionService>();
+        elections.Setup(x => x.CountAsync(_election.Id, null, It.IsAny<CancellationToken>())).ReturnsAsync(((IReadOnlyList<ElectionResultDto>?)null, "no-key"));
+        elections.Setup(x => x.CountAsync(_election.Id, Key, It.IsAny<CancellationToken>())).ReturnsAsync(((IReadOnlyList<ElectionResultDto>?)Counted, (string?)null));
+        var service = new ElectionApprovalService(_context, elections.Object, new ElectionAccessService(_context, _orgConfig.Object), _orgConfig.Object, NullLogger<ElectionApprovalService>.Instance);
+        return (service, elections);
+    }
+
+    [Test]
+    public async Task Count_FirstCallWaitsForASecondPerson_AndDoesNotOpenBallots()
+    {
+        var (service, elections) = await CountingAsync();
+
+        var run = await service.CountAsync(_election.Id, _alice, Admin, Key);
+
+        run.Results.Should().BeNull();
+        run.Pending!.Action.Should().Be(ElectionApprovalAction.Count);
+        run.Pending.ApprovedAt.Should().BeNull();
+        elections.Verify(x => x.CountAsync(_election.Id, Key, It.IsAny<CancellationToken>()), Times.Never);
+        (await service.CountAsync(_election.Id, _alice, Admin, Key)).Error.Should().Be("already-pending");
+        (await _context.ElectionApprovals.AsNoTracking().SingleAsync()).PayloadJson.Should().BeNull();
+    }
+
+    [Test]
+    public async Task Count_WithNoKey_DoesNotStoreARequest()
+    {
+        var (service, _) = await CountingAsync();
+
+        (await service.CountAsync(_election.Id, _alice, Admin, null)).Error.Should().Be("no-key");
+
+        _context.ElectionApprovals.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task Count_AfterApproval_RunsOnceForAnyoneButTheApprover()
+    {
+        var (service, elections) = await CountingAsync();
+        var pending = (await service.CountAsync(_election.Id, _alice, Admin, Key)).Pending!;
+        (await service.ApproveAsync(pending.Id, _bob, Admin)).Success.Should().BeTrue();
+        elections.Verify(x => x.CountAsync(_election.Id, Key, It.IsAny<CancellationToken>()), Times.Never);
+        (await service.ListOpenAsync(_election.Id)).Should().ContainSingle(x => x.Id == pending.Id && x.ApprovedAt != null);
+
+        (await service.RequestAsync(_election.Id, ElectionApprovalAction.Count, _carol, null)).Error.Should().Be("already-pending");
+        (await service.CountAsync(_election.Id, _bob, Admin, Key)).Error.Should().Be("same-person");
+        (await service.CountAsync(_election.Id, _alice, Admin, null)).Error.Should().Be("no-key");
+        (await service.CountAsync(_election.Id, _alice, Admin, Key)).Results.Should().BeEquivalentTo(Counted);
+
+        elections.Verify(x => x.CountAsync(_election.Id, Key, It.IsAny<CancellationToken>()), Times.Once);
+        (await _context.ElectionApprovals.AsNoTracking().SingleAsync()).ConsumedAt.Should().NotBeNull();
+        (await service.ListOpenAsync(_election.Id)).Should().BeEmpty();
+        // The approval is used up, so another count needs another one.
+        (await service.CountAsync(_election.Id, _alice, Admin, Key)).Pending.Should().NotBeNull();
+    }
+
+    [Test]
+    public async Task Count_ThatFails_GivesTheApprovalBack()
+    {
+        var (service, elections) = await CountingAsync();
+        elections.Setup(x => x.CountAsync(_election.Id, "wrong", It.IsAny<CancellationToken>())).ReturnsAsync(((IReadOnlyList<ElectionResultDto>?)null, "wrong-key"));
+        var pending = (await service.CountAsync(_election.Id, _alice, Admin, Key)).Pending!;
+        await service.ApproveAsync(pending.Id, _bob, Admin);
+
+        (await service.CountAsync(_election.Id, _alice, Admin, "wrong")).Error.Should().Be("wrong-key");
+        (await _context.ElectionApprovals.AsNoTracking().SingleAsync()).ConsumedAt.Should().BeNull();
+        (await service.CountAsync(_election.Id, _carol, Admin, Key)).Results.Should().NotBeNull();
+    }
+
+    [Test]
+    public async Task Count_CannotBeApprovedOutsideCounting()
+    {
+        var (service, _) = await CountingAsync();
+        var pending = (await service.CountAsync(_election.Id, _alice, Admin, Key)).Pending!;
+        await _context.Elections.Where(x => x.Id == _election.Id)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.Phase, ElectionPhase.Polling));
+
+        (await service.ApproveAsync(pending.Id, _bob, Admin)).Error.Should().Be("not-ready");
+        (await _context.ElectionApprovals.AsNoTracking().SingleAsync()).ApprovedAt.Should().BeNull();
+    }
+
+    [Test]
+    public async Task Count_RunsAtOnce_WhenItIsNotATwoPersonStep_OrResultsAreStored()
+    {
+        var (service, elections) = await CountingAsync();
+        UseSettings(new ElectionSettingsDto { TwoPersonActions = [nameof(ElectionApprovalAction.Declare)] });
+
+        (await service.CountAsync(_election.Id, _alice, Admin, Key)).Results.Should().BeEquivalentTo(Counted);
+
+        UseSettings(new ElectionSettingsDto());
+        elections.Setup(x => x.CountAsync(_election.Id, null, It.IsAny<CancellationToken>())).ReturnsAsync(((IReadOnlyList<ElectionResultDto>?)Counted, (string?)null));
+        (await service.CountAsync(_election.Id, _alice, Admin, null)).Results.Should().BeEquivalentTo(Counted);
+        _context.ElectionApprovals.Should().BeEmpty();
+    }
+
+    [Test]
+    public void Count_IsATwoPersonStep_ByDefault()
+    {
+        new ElectionSettingsDto().TwoPersonActions.Should().Contain(nameof(ElectionApprovalAction.Count));
+    }
 }

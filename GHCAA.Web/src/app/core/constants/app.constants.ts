@@ -479,6 +479,22 @@ export function getBloodGroupName(bg: string | undefined | null): string {
 // directly, so a different institution's tier labels are a lookups-table change, not a
 // code change. This array only stays the values/labels getMembershipTypeLabel() reads
 // synchronously and the fallback getOptions() returns if the API has no seeded rows.
+// 95.3: why a committee term ended. Values must match Enums.VacancyReason on the API.
+export const VACANCY_REASON_OPTIONS = [
+    { value: 'Died', label: 'Died' },
+    { value: 'Resigned', label: 'Resigned' },
+    { value: 'Removed', label: 'Removed' },
+    { value: 'TermEnded', label: 'Term ended' },
+    { value: 'Other', label: 'Other' }
+] as const;
+export const VACANCY_REASON_OTHER = 'Other';
+// Same limit as Constants.Governance.VacancyNoteMaxLength on the API.
+export const VACANCY_NOTE_MAX_LENGTH = 500;
+
+export function getVacancyReasonLabel(reason: string | null | undefined): string {
+    return VACANCY_REASON_OPTIONS.find(o => o.value === reason)?.label || reason || '';
+}
+
 export const MEMBERSHIP_TYPE_OPTIONS = [
     { value: 'Founding', label: 'Founding Member' },
     { value: 'Executive', label: 'Executive Member' },

@@ -139,7 +139,7 @@ class FakeAdminService implements AdminService {
   @override
   Future<bool> assignMemberToCommittee(int periodId, Map<String, dynamic> data) async => true;
   @override
-  Future<bool> removeMemberFromCommittee(int ecMemberId, {bool notifyMember = false}) async => true;
+  Future<bool> endCommitteeTerm(int ecMemberId, {required String reason, String? note, bool notifyMember = false}) async => true;
 }
 
 class FakeFinancialService implements FinancialService {

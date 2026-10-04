@@ -11,6 +11,9 @@ public sealed class BallotSealTests
 {
     private static readonly RSA Key = RSA.Create(Constants.Elections.BallotKeyMinBits);
     private static readonly string PublicKey = Convert.ToBase64String(Key.ExportSubjectPublicKeyInfo());
+    private const int ElectionId = 7;
+    private const int Current = Constants.Elections.BallotSealVersion;
+    private const int Legacy = Constants.Elections.BallotSealLegacyVersion;
 
     [OneTimeTearDown]
     public void DisposeKey() => Key.Dispose();
@@ -19,26 +22,72 @@ public sealed class BallotSealTests
     [Category("FR-39")]
     public void Open_ReturnsWhatWasSealed()
     {
-        var sealedValue = BallotSeal.Seal(PublicKey, "[{\"S\":1,\"N\":[2]}]");
+        var sealedValue = BallotSeal.Seal(PublicKey, "[{\"S\":1,\"N\":[2]}]", ElectionId, Current);
 
-        BallotSeal.Open(Key, sealedValue).Should().Be("[{\"S\":1,\"N\":[2]}]");
+        sealedValue.Should().StartWith(Constants.Elections.BallotSealPrefix);
+        BallotSeal.Open(Key, sealedValue, ElectionId, Current).Should().Be("[{\"S\":1,\"N\":[2]}]");
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public void Open_ReadsALegacyBallotInALegacyElection()
+    {
+        var sealedValue = BallotSeal.Seal(PublicKey, "choices", ElectionId, Legacy);
+
+        sealedValue.Should().NotStartWith(Constants.Elections.BallotSealPrefix);
+        BallotSeal.Open(Key, sealedValue, ElectionId, Legacy).Should().Be("choices");
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public void Open_ThrowsForAnotherElection()
+    {
+        var sealedValue = BallotSeal.Seal(PublicKey, "choices", ElectionId, Current);
+
+        var act = () => BallotSeal.Open(Key, sealedValue, ElectionId + 1, Current);
+
+        act.Should().Throw<CryptographicException>();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public void Open_ThrowsWhenTheFormatDoesNotMatchTheElection()
+    {
+        var legacy = BallotSeal.Seal(PublicKey, "choices", ElectionId, Legacy);
+        var current = BallotSeal.Seal(PublicKey, "choices", ElectionId, Current);
+
+        // A legacy ballot carries no election id, so a version 2 election must not take it.
+        ((Action)(() => BallotSeal.Open(Key, legacy, ElectionId, Current))).Should().Throw<CryptographicException>();
+        ((Action)(() => BallotSeal.Open(Key, current, ElectionId, Legacy))).Should().Throw<CryptographicException>();
+        // With the prefix stripped, the bytes were still sealed with the election id.
+        var stripped = current[Constants.Elections.BallotSealPrefix.Length..];
+        ((Action)(() => BallotSeal.Open(Key, stripped, ElectionId, Legacy))).Should().Throw<CryptographicException>();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public void Seal_RefusesAnUnknownVersion()
+    {
+        var act = () => BallotSeal.Seal(PublicKey, "choices", ElectionId, 99);
+
+        act.Should().Throw<ArgumentOutOfRangeException>();
     }
 
     [Test]
     [Category("FR-39")]
     public void Seal_GivesADifferentValueEachTime()
     {
-        BallotSeal.Seal(PublicKey, "same").Should().NotBe(BallotSeal.Seal(PublicKey, "same"));
+        BallotSeal.Seal(PublicKey, "same", ElectionId, Current).Should().NotBe(BallotSeal.Seal(PublicKey, "same", ElectionId, Current));
     }
 
     [Test]
     [Category("FR-39")]
     public void Open_ThrowsWhenTheValueWasChanged()
     {
-        var bytes = Convert.FromBase64String(BallotSeal.Seal(PublicKey, "choices"));
+        var bytes = Convert.FromBase64String(BallotSeal.Seal(PublicKey, "choices", ElectionId, Current)[Constants.Elections.BallotSealPrefix.Length..]);
         bytes[^1] ^= 1;
 
-        var act = () => BallotSeal.Open(Key, Convert.ToBase64String(bytes));
+        var act = () => BallotSeal.Open(Key, Constants.Elections.BallotSealPrefix + Convert.ToBase64String(bytes), ElectionId, Current);
 
         act.Should().Throw<CryptographicException>();
     }
@@ -49,7 +98,7 @@ public sealed class BallotSealTests
     {
         using var other = RSA.Create(Constants.Elections.BallotKeyMinBits);
 
-        var act = () => BallotSeal.Open(other, BallotSeal.Seal(PublicKey, "choices"));
+        var act = () => BallotSeal.Open(other, BallotSeal.Seal(PublicKey, "choices", ElectionId, Current), ElectionId, Current);
 
         act.Should().Throw<CryptographicException>();
     }

@@ -230,7 +230,8 @@
       "ReplaceBallotKey",
       "ClosePolling",
       "Declare",
-      "Archive"
+      "Archive",
+      "Count"
     ],
     "SuperAdminActsAlone": false,
     "ApprovalExpiryHours": 48,

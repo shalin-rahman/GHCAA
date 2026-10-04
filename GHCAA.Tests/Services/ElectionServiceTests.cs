@@ -127,7 +127,8 @@ public sealed class ElectionServiceTests : TestBase
         stored.Should().OnlyContain(x => !x.Contains("\"N\"") && !x.Contains("\"S\""));
         // Padding hides how many choices a ballot carries.
         stored.Select(x => x.Length).Distinct().Should().ContainSingle();
-        BallotSeal.Open(OfficerKey, stored[0]).Should().Contain($"{poll.Nominations[0].Id}");
+        stored.Should().OnlyContain(x => x.StartsWith(Constants.Elections.BallotSealPrefix));
+        BallotSeal.Open(OfficerKey, stored[0], poll.Election.Id, poll.Election.BallotSealVersion).Should().Contain($"{poll.Nominations[0].Id}");
     }
 
     [Test]
@@ -285,6 +286,61 @@ public sealed class ElectionServiceTests : TestBase
 
         (await service.CountAsync(poll.Election.Id, OfficerPrivateKey)).Error.Should().Be("integrity");
         _context.ElectionResults.Should().BeEmpty();
+    }
+
+    // TODO 37.13j. Both elections are sealed under the same key, so only the election id in the
+    // seal stops a ballot from one being counted in the other.
+    [Test]
+    [Category("FR-39")]
+    public async Task CountAsync_RefusesABallotSealedForAnotherElection()
+    {
+        var poll = await CreatePollingElectionAsync(voters: Constants.Elections.MinimumBallotsToCount);
+        var service = new ElectionService(_context);
+        await CastAllAsync(service, poll);
+        var moved = _context.PendingBallots.First();
+        var choices = BallotSeal.Open(OfficerKey, moved.SealedChoices, poll.Election.Id, poll.Election.BallotSealVersion);
+        moved.SealedChoices = BallotSeal.Seal(OfficerPublicKey, choices, poll.Election.Id + 1, Constants.Elections.BallotSealVersion);
+        await _context.SaveChangesAsync();
+        await CloseAndStartCountingAsync(service, poll.Election);
+
+        (await service.CountAsync(poll.Election.Id, OfficerPrivateKey)).Error.Should().Be("unreadable");
+        _context.ChangeTracker.Clear();
+        _context.Ballots.Should().BeEmpty();
+        _context.ElectionResults.Should().BeEmpty();
+        _context.PendingBallots.Should().HaveCount(Constants.Elections.MinimumBallotsToCount);
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task CountAsync_RefusesALegacyBallotInAVersion2Election()
+    {
+        var poll = await CreatePollingElectionAsync(voters: Constants.Elections.MinimumBallotsToCount);
+        var service = new ElectionService(_context);
+        await CastAllAsync(service, poll);
+        var moved = _context.PendingBallots.First();
+        var choices = BallotSeal.Open(OfficerKey, moved.SealedChoices, poll.Election.Id, poll.Election.BallotSealVersion);
+        moved.SealedChoices = BallotSeal.Seal(OfficerPublicKey, choices, poll.Election.Id, Constants.Elections.BallotSealLegacyVersion);
+        await _context.SaveChangesAsync();
+        await CloseAndStartCountingAsync(service, poll.Election);
+
+        (await service.CountAsync(poll.Election.Id, OfficerPrivateKey)).Error.Should().Be("unreadable");
+        _context.ElectionResults.Should().BeEmpty();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task CountAsync_StillCountsAnElectionSealedInTheLegacyFormat()
+    {
+        var poll = await CreatePollingElectionAsync(voters: Constants.Elections.MinimumBallotsToCount);
+        poll.Election.BallotSealVersion = Constants.Elections.BallotSealLegacyVersion;
+        await _context.SaveChangesAsync();
+        var service = new ElectionService(_context);
+        await CastAllAsync(service, poll);
+        _context.PendingBallots.Select(x => x.SealedChoices).ToList()
+            .Should().OnlyContain(x => !x.StartsWith(Constants.Elections.BallotSealPrefix));
+        await CloseAndStartCountingAsync(service, poll.Election);
+
+        (await service.CountAsync(poll.Election.Id, OfficerPrivateKey)).Error.Should().BeNull();
     }
 
     [Test]

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
-import { LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS, getECPositionName, getMembershipTypeLabel, getCategoryLabel } from '../../core/constants/app.constants';
+import { LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS, getECPositionName, getMembershipTypeLabel, getCategoryLabel, VACANCY_REASON_OPTIONS, VACANCY_REASON_OTHER, VACANCY_NOTE_MAX_LENGTH, getVacancyReasonLabel } from '../../core/constants/app.constants';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { debounce } from '../../core/utils/debounce.util';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
@@ -42,14 +42,26 @@ export class AdminGovernance implements OnInit {
 
     // Assign Member
     showAssignModal = signal(false);
-    assignData = signal<any>({ memberId: null, position: '', reason: '', notifyMember: false });
+    assignData = signal<any>(this.emptyAssignData());
     searchQuery = signal('');
     memberSearchResults = signal<any[]>([]);
     isSearching = signal(false);
 
-    // Remove Member (confirm dialog carries the 82.52 notify toggle)
+    // End a term (95.3). The dialog asks why, and keeps the 82.52 notify toggle.
     removingMemberId = signal<number | null>(null);
     removeNotifyMember = signal(false);
+    removeReason = signal('');
+    removeNote = signal('');
+    removingMember = computed(() => this.committeeMembers().find(m => m.id === this.removingMemberId()));
+
+    // Every seat in the period, so empty ones show why they are empty.
+    seats = signal<any[]>([]);
+    vacantSeats = computed(() => this.seats().filter(s => !s.holder));
+
+    vacancyReasons = VACANCY_REASON_OPTIONS;
+    vacancyReasonOther = VACANCY_REASON_OTHER;
+    vacancyNoteMaxLength = VACANCY_NOTE_MAX_LENGTH;
+    getVacancyReasonLabel = getVacancyReasonLabel;
 
     committeeSearch = signal('');
     filteredMembers = computed(() => {
@@ -106,6 +118,10 @@ export class AdminGovernance implements OnInit {
             // 29D.8: without this the committee list silently stayed empty on failure,
             // indistinguishable from a genuinely empty committee.
             error: () => this.notify.error('Failed to load committee members.')
+        });
+        this.adminService.getCommitteeSeats(periodId).subscribe({
+            next: (data) => this.seats.set(data),
+            error: () => this.seats.set([])
         });
     }
 
@@ -226,36 +242,72 @@ export class AdminGovernance implements OnInit {
             this.notify.error('Please search and select a member first.');
             return;
         }
+        // The API refuses to seat a second holder, so ask for the outgoing holder's reason here.
+        const holder = this.holderOf(data.position);
+        if (holder && !this.reasonIsComplete(data.endCurrentHolderReason, data.endCurrentHolderNote)) {
+            this.notify.error(`Say why ${holder.member?.fullName || 'the current holder'}'s term ended.`);
+            return;
+        }
 
-        this.adminService.assignCommitteeRole(period.id, data).subscribe({
+        const payload = {
+            ...data,
+            endCurrentHolderReason: holder ? data.endCurrentHolderReason : null,
+            endCurrentHolderNote: holder ? (data.endCurrentHolderNote?.trim() || null) : null
+        };
+        this.adminService.assignCommitteeRole(period.id, payload).subscribe({
             next: () => {
                 this.notify.success('Role assigned');
                 this.showAssignModal.set(false);
                 this.loadCommittee(period.id);
-                this.assignData.set({ memberId: null, position: '', reason: '', notifyMember: false });
+                this.assignData.set(this.emptyAssignData());
                 this.searchQuery.set('');
             },
-            error: (err) => this.notify.error(err.error?.message || 'Assignment failed')
+            error: (err) => this.notify.error(err.error?.detail || err.error?.message || 'Assignment failed')
         });
+    }
+
+    // Read on every change detection because the position select writes into assignData() in place.
+    holderOf(position: number | string | null | undefined) {
+        if (position === null || position === undefined || position === '') return undefined;
+        const name = getECPositionName(position);
+        return this.committeeMembers().find(m => getECPositionName(m.position) === name);
     }
 
     removeMember(ecMemberId: number) {
         this.removeNotifyMember.set(false);
+        this.removeReason.set('');
+        this.removeNote.set('');
         this.removingMemberId.set(ecMemberId);
+    }
+
+    canEndTerm(): boolean {
+        return this.reasonIsComplete(this.removeReason(), this.removeNote());
     }
 
     confirmRemoveMember() {
         const ecMemberId = this.removingMemberId();
-        if (ecMemberId == null) return;
-        const notifyMember = this.removeNotifyMember();
-        this.adminService.removeCommitteeMember(ecMemberId, notifyMember).subscribe({
+        if (ecMemberId == null || !this.canEndTerm()) return;
+        this.adminService.endCommitteeTerm(ecMemberId, {
+            reason: this.removeReason(),
+            note: this.removeNote().trim() || null,
+            notifyMember: this.removeNotifyMember()
+        }).subscribe({
             next: () => {
-                this.notify.success('Member removed');
+                this.notify.success('Term ended');
                 this.removingMemberId.set(null);
                 this.loadCommittee(this.selectedPeriod().id);
             },
-            error: () => this.notify.error('Failed to remove member.')
+            error: (err) => this.notify.error(err.error?.detail || 'Failed to end the term.')
         });
+    }
+
+    private reasonIsComplete(reason: string | null | undefined, note: string | null | undefined): boolean {
+        if (!reason) return false;
+        return reason !== VACANCY_REASON_OTHER || !!note?.trim();
+    }
+
+    private emptyAssignData() {
+        return { memberId: null, position: '', reason: '', notifyMember: false, endCurrentHolderReason: '', endCurrentHolderNote: '' };
     }
 
     getRoleName(pos: number | string) {

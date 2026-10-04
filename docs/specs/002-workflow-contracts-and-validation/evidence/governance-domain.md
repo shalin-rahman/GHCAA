@@ -33,7 +33,7 @@ field at all; a vote row's mere existence is the state.
 | From | To | Trigger | Who | Where | Side effects |
 |---|---|---|---|---|---|
 | (none) | active (`EndDate=null`) | Assign member to role | Admin | `POST /api/admin/governance/periods/{id}/members` → `AssignMemberToRoleAsync` (`GovernanceService.cs:162`) | Requires member `Status == MembershipStatus.Active` or throws; optional notification if `NotifyMember=true` |
-| active | ended (`EndDate` set) | Remove from committee | Admin | `DELETE /api/admin/governance/members/{ecMemberId}` → `RemoveMemberFromCommitteeAsync` (`GovernanceService.cs:196`) | Soft end-date only, row retained; optional notification |
+| active | ended (`EndDate` set) | End term | Admin | `POST /api/admin/governance/members/{ecMemberId}/end-term` → `RemoveMemberFromCommitteeAsync` | Sets `EndDate`, `EndReason` and optional `EndNote` (required when the reason is Other); row retained; optional notification. Assigning a held seat ends the old holder the same way and needs the outgoing reason |
 | active or ended | archived (`IsArchived=true`) | Hard delete | Admin + `RequireStepUp` filter | `DELETE /api/admin/governance/members/{ecMemberId}/hard-delete` → `DeleteECMemberAsync` (`GovernanceService.cs:218`) | Class A soft-delete (per ARCHITECTURE.md §4): sets `DeletedAt`/`DeletedByAdminId`, refuses (401) if admin id can't be resolved from claims; no-op if already archived |
 
 **Constitution (`IsActive`: false/true)**
@@ -96,7 +96,8 @@ rather than 400s, not verified further) or absent entirely.
 | `/api/admin/governance/periods/{id}/activate` | POST | — | `{ Message }` | 200 | 404 if not found; unhandled exception if period doesn't cover today | AdminOnly |
 | `/api/admin/governance/periods/{id}/members` | GET | — | `ECMemberDto[]` | 200 | — | AdminOnly |
 | `/api/admin/governance/periods/{id}/members` | POST | `AssignMemberRequest` | `{ Message }` | 200 | 400 (`Problem`) on assignment failure (inactive member or unhandled service exception mapped generically) | AdminOnly |
-| `/api/admin/governance/members/{ecMemberId}` | DELETE | `notifyMember` (query) | `{ Message }` | 200 | 404 if not found | AdminOnly |
+| `/api/admin/governance/members/{ecMemberId}/end-term` | POST | `{ reason, note?, notifyMember }` | `{ Message }` | 200 | 400 (no reason), 404 if not found, 409 (Other without note, note too long, term already ended) | AdminOnly |
+| `/api/admin/governance/periods/{id}/seats` | GET | none | `CommitteeSeatDto[]` | 200 | none | AdminOnly |
 | `/api/admin/governance/members/{ecMemberId}/hard-delete` | DELETE | `notifyMember` (query) | `{ Message }` | 200 | 401 (admin id unresolvable from claims), 404 if not found/already archived | AdminOnly + `[RequireStepUp]` (step-up re-auth filter) |
 
 Pagination: none of these routes accept `cursor`/`page`/`pageSize` — every

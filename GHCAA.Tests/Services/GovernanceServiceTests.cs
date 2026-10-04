@@ -288,6 +288,58 @@ namespace GHCAA.Tests.Services
             seats.Single(s => s.Position == Enums.ECPosition.GeneralSecretary).VacancyReason.Should().BeNull();
         }
 
+        [Category("FR-34")]
+        [Test]
+        public async Task RemoveMemberFromCommitteeAsync_NoteOverMaxLength_IsRefused()
+        {
+            var (_, _, seat) = await SeedHeldPresidencyAsync();
+
+            var act = () => _service.RemoveMemberFromCommitteeAsync(seat.Id, Enums.VacancyReason.Resigned,
+                new string('x', Constants.Governance.VacancyNoteMaxLength + 1));
+
+            await act.Should().ThrowAsync<InvalidOperationException>();
+            (await _context.ECMembers.FindAsync(seat.Id))!.EndDate.Should().BeNull();
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task RemoveMemberFromCommitteeAsync_UnknownReasonNumber_IsRefused()
+        {
+            var (_, _, seat) = await SeedHeldPresidencyAsync();
+
+            var act = () => _service.RemoveMemberFromCommitteeAsync(seat.Id, (Enums.VacancyReason)99, null);
+
+            await act.Should().ThrowAsync<InvalidOperationException>();
+            (await _context.ECMembers.FindAsync(seat.Id))!.EndDate.Should().BeNull();
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task AssignMemberToRoleAsync_UnknownPosition_IsRefused()
+        {
+            var (_, period, _) = await SeedHeldPresidencyAsync();
+            var other = await AddSavedMemberAsync("No Seat", "9000000099");
+
+            var act = () => _service.AssignMemberToRoleAsync(period.Id, other.Id, 999, null);
+
+            await act.Should().ThrowAsync<InvalidOperationException>();
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task GetCommitteeSeatsAsync_TwoOpenRows_ShowsTheNewestHolder()
+        {
+            var (_, period, _) = await SeedHeldPresidencyAsync();
+            var later = await AddSavedMemberAsync("Later President", "9000000098");
+            var laterSeat = new ECMember { MemberId = later.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow.AddDays(1) };
+            _context.ECMembers.Add(laterSeat);
+            await _context.SaveChangesAsync();
+
+            var seats = await _service.GetCommitteeSeatsAsync(period.Id);
+
+            seats.Single(s => s.Position == Enums.ECPosition.President).Holder!.Id.Should().Be(laterSeat.Id);
+        }
+
         // 82.29: DeleteECMemberAsync is the separate "this row should never have existed"
         // path (wrong member added), distinct from RemoveMemberFromCommitteeAsync above (a term
         // ending). ECMember is Class A, so this must soft-delete with an actor, not Remove().

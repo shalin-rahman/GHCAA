@@ -26,14 +26,15 @@ export const NOMINATION_STATUS_LABELS: Record<NominationStatus, string> = {
 };
 
 // Spec 023 (37.12a). Names match the backend ElectionApprovalAction and ElectionCandidateOrder enums.
-export type ElectionApprovalAction = 'Publish' | 'OpenPolling' | 'ReplaceBallotKey' | 'ClosePolling' | 'Declare' | 'Archive';
+export type ElectionApprovalAction = 'Publish' | 'OpenPolling' | 'ReplaceBallotKey' | 'ClosePolling' | 'Declare' | 'Archive' | 'Count';
 export const ELECTION_APPROVAL_ACTION_LABELS: Record<ElectionApprovalAction, string> = {
     Publish: 'Publish the election',
     OpenPolling: 'Open polling',
     ReplaceBallotKey: 'Replace the ballot key',
     ClosePolling: 'Close polling',
     Declare: 'Declare results',
-    Archive: 'Archive'
+    Archive: 'Archive',
+    Count: 'Count the ballots'
 };
 export const ELECTION_APPROVAL_ACTIONS = Object.keys(ELECTION_APPROVAL_ACTION_LABELS) as ElectionApprovalAction[];
 
@@ -148,7 +149,15 @@ export interface ElectionApprovalDto {
     requestedAt: string;
     expiresAt: string;
     keyFingerprint?: string | null;
+    // 37.13h. Set on a Count that a second person approved. It still runs only when the requester
+    // brings the key file, because the key is never stored.
+    approvedAt?: string | null;
 }
+
+// A count either ran and sent back the results, or was stored for a second person.
+export type ElectionCountStepResult =
+    | { results: ElectionResultDto[]; pending: null }
+    | { results: null; pending: ElectionApprovalDto };
 
 // A two-person step either ran and sent back the election, or was stored and sent back the request.
 export type AdminElectionStepResult =

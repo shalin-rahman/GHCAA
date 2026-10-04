@@ -306,7 +306,8 @@ class ElectionService {
       (await _dio.post('/elections/$id/voter-roll/freeze')).data['count']
           as int;
   // The first count needs the returning officer's key file, which only the
-  // web admin can read. After that this returns the stored results.
+  // web admin can read. After that this returns the stored results. With no
+  // key the server never counts or asks a second person to approve (37.13h).
   Future<List<dynamic>> count(int id) async =>
       (await _dio.post('/elections/$id/count')).data as List<dynamic>;
   // True when the declaration waits for a second person, as with setPhase.

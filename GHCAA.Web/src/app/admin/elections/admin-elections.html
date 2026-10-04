@@ -45,8 +45,9 @@
                     <span>
                         {{ approvalLabels[approval.action] }}, asked for by {{ approval.requestedBy }}. Expires {{ approval.expiresAt | date:'medium' }}.
                         <ng-container *ngIf="approval.keyFingerprint"> New key fingerprint: <code>{{ approval.keyFingerprint }}</code></ng-container>
+                        <ng-container *ngIf="approval.approvedAt"> Approved. Count with the key file to finish.</ng-container>
                     </span>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2" *ngIf="!approval.approvedAt">
                         <button class="btn btn-primary btn-sm" [disabled]="decidingApprovalId() === approval.id" (click)="approve(approval)">Approve</button>
                         <button class="btn btn-secondary btn-sm" [disabled]="decidingApprovalId() === approval.id" (click)="reject(approval)">Reject</button>
                     </div>

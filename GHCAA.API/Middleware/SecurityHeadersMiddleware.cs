@@ -1,4 +1,8 @@
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GHCAA.API.Middleware
@@ -6,10 +10,27 @@ namespace GHCAA.API.Middleware
     public class SecurityHeadersMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly string _connectSrc;
 
-        public SecurityHeadersMiddleware(RequestDelegate next)
+        public SecurityHeadersMiddleware(RequestDelegate next, IConfiguration configuration)
         {
             _next = next;
+            _connectSrc = ConnectSrc(configuration.GetSection(Constants.ConfigKeys.AllowedOrigins).Get<string[]>());
+        }
+
+        // TODO 37.13k. The page may only send data to its own origin and the origins CORS already
+        // allows. Before this it was any https host. Entries that are not bare http(s) origins are
+        // skipped, so a bad config value cannot add a directive to the header.
+        internal static string ConnectSrc(string[]? allowedOrigins)
+        {
+            var origins = (allowedOrigins ?? Array.Empty<string>())
+                .Select(o => Uri.TryCreate(o?.Trim(), UriKind.Absolute, out var uri) ? uri : null)
+                // User info may hold a ';', which would end the directive early.
+                .Where(uri => uri is not null && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp)
+                    && uri.UserInfo.Length == 0 && uri.Query.Length == 0 && uri.AbsolutePath == "/")
+                .Select(uri => uri!.GetLeftPart(UriPartial.Authority))
+                .Distinct(StringComparer.OrdinalIgnoreCase);
+            return string.Join(" ", new[] { "'self'" }.Concat(origins));
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -45,7 +66,7 @@ namespace GHCAA.API.Middleware
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " +
                 "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
                 "img-src 'self' data: https:; " +
-                "connect-src 'self' https:; " +
+                $"connect-src {_connectSrc}; " +
                 "frame-ancestors 'none'; " +
                 "form-action 'self';");
 

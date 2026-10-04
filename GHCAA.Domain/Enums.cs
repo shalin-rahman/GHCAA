@@ -81,8 +81,9 @@ namespace GHCAA.Domain
             DecideAppeals = 1024,
             Approve = 2048
         }
-        // Spec 023 (37.12a, 37.12f): election steps that need a second official to approve.
-        public enum ElectionApprovalAction { Publish, OpenPolling, ReplaceBallotKey, ClosePolling, Declare, Archive }
+        // Spec 023 (37.12a, 37.12f, 37.13h): election steps that need a second official to approve.
+        // New values go at the end; the column stores the number.
+        public enum ElectionApprovalAction { Publish, OpenPolling, ReplaceBallotKey, ClosePolling, Declare, Archive, Count }
         public enum ElectionCandidateOrder { Random, Alphabetical }
 
         public enum ScholarshipApplicationStatus { Draft, Submitted, UnderReview, Shortlisted, Awarded, Rejected, Withdrawn }

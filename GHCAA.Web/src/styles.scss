@@ -343,6 +343,15 @@ p {
   }
 }
 
+/* Comes after the variants so it also beats their :hover lift. */
+.btn:disabled,
+.btn:disabled:hover {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 /* Canonical icon-button — SINGLE SOURCE OF TRUTH. Was previously redefined per-component
    (polls/news/members/governance/gallery scss) with drifting sizes/colors; two more usage
    sites (admin-comm, member-messages) had NO definition at all and rendered browser-native.

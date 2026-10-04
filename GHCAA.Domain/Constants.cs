@@ -131,6 +131,13 @@ namespace GHCAA.Domain
             // Sealed choices are padded to a multiple of this many bytes, so the sealed length
             // does not show how many seats were left blank.
             public const int SealedChoicesBlockBytes = 512;
+            // Version 2 seals bind the election id into AES-GCM as associated data, so a ballot
+            // moved to another election will not open. Version 1 ballots, sealed before that,
+            // carry no prefix. ':' is not a base64 character, so the two cannot be confused.
+            public const int BallotSealLegacyVersion = 1;
+            public const int BallotSealVersion = 2;
+            public const string BallotSealPrefix = "v2:";
+            public const string BallotSealAssociatedDataFormat = "ghcaa-ballot:v2:election:{0}";
             // Crockford base 32 leaves out I, L, O and U, so a printed code is hard to misread.
             public const string TrackingCodeAlphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
             public const int TrackingCodeGroups = 3;

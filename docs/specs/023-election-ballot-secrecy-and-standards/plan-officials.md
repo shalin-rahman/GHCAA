@@ -3,7 +3,7 @@
 Status: approved 2026-09-28. All four decisions in §6 are answered. Build follows the order in §7.
 As of 2026-09-30, 37.1w and 37.12a to 37.12c are done and 37.12d is in progress. `docs/TODO.md` records
 each item's state and where the build departed from this plan.
-Tracker items: 37.1w, 37.12a to 37.12j, 37.13a to 37.13g in `docs/TODO.md`.
+Tracker items: 37.1w, 37.12a to 37.12j, 37.13a to 37.13l in `docs/TODO.md`.
 
 This plan is written so the build can follow it step by step. Every file, field, endpoint and test is
 named. If a step needs a choice that is not made here, it is listed under "Decisions" at the end and
@@ -106,7 +106,7 @@ Add an `Elections` section to `OrgConfigDto`. Defaults in brackets.
 | Key | Type | Default | Used by |
 |---|---|---|---|
 | `AdminKeepsControlAfterHandover` | bool | false | 37.12e |
-| `TwoPersonActions` | string[] | Publish, OpenPolling, ReplaceBallotKey, ClosePolling, Declare, Archive | 37.12f |
+| `TwoPersonActions` | string[] | Publish, OpenPolling, ReplaceBallotKey, ClosePolling, Declare, Archive, Count | 37.12f, 37.13h |
 | `SuperAdminActsAlone` | bool | false | 37.12f, see Decision 1 |
 | `ApprovalExpiryHours` | int | 48 | 37.12f |
 | `AccessEndsDaysAfterDeclare` | int | 21 (7-day appeal window plus 14 days for the tribunal, Regulations §12) | 37.12g |
@@ -411,7 +411,7 @@ Domain (`Election.cs`)
 ElectionApproval: Id, ElectionId, Action (ElectionApprovalAction), PayloadJson? (8000),
   RequestedByUserId, RequestedAt, ExpiresAt, ApprovedByUserId?, ApprovedAt?,
   RejectedByUserId?, RejectedAt?, RejectReason?, ExecutedAt?
-enum ElectionApprovalAction { Publish, OpenPolling, ReplaceBallotKey, ClosePolling, Declare, Archive }
+enum ElectionApprovalAction { Publish, OpenPolling, ReplaceBallotKey, ClosePolling, Declare, Archive, Count }
 ```
 
 Only one open approval per election and action. Index on (ElectionId, Action, ExecutedAt, RejectedAt).
@@ -429,8 +429,12 @@ How it runs
   path in AdminElectionsController), OpenPolling to `SetPhaseAsync(Polling)`, ClosePolling to
   `SetPhaseAsync(Counting)`, Declare to `DeclareAsync`, Archive to `SetPhaseAsync(Archived)` plus
   37.12g, ReplaceBallotKey to `SetBallotKeyAsync` with the new key from the payload.
-- Count is left out. The private key cannot be stored for a second person to approve later, and
-  entering Counting is already approved through ClosePolling.
+- Count was left out at 37.12f, because the private key cannot be stored for a second person to
+  approve later. 37.13h added it without storing the key. Approving a Count only checks the election
+  is in Counting and marks the request approved. The count runs on a later call that brings the key,
+  from anyone but the approver. That call claims the approval by setting `ConsumedAt`, so one
+  approval allows one count, and gives it back if the count fails. A call with no key only reads
+  stored results and never stores a request.
 - Ballot key: the first key is set by a person with `SetBallotKey` alone. Replacing a key always goes
   through `ReplaceBallotKey`, and the payload stores the public key and its fingerprint so the approver
   sees what they approve. Each approval request, approval and rejection writes an audit row.
@@ -570,6 +574,24 @@ Left out on purpose, with the reason recorded in spec 023 Known limits:
 - Load testing. No tooling in the repo.
 - Threshold keys (several key holders). Large change to the count.
 
+### Gaps from the online-voting review (2026-10-04)
+
+`docs/Elections/00-Election-Online-Voting-Review.md` was checked against the code. Most of its points
+were already met or are documentation. Five were real gaps in the code and became 37.13h to 37.13l.
+The documentation points went into 37.13e (ballot protocol and key custody) and 37.13f (threat model,
+incident procedure, logging and retention).
+
+| Item | Gap | Design | Effort |
+|---|---|---|---|
+| 37.13h Second person before the count | One person with Count and the key file counts alone. | `Count` joins `ElectionApprovalAction`. A count with no approved request answers 202 and stores a request with no payload. Once a second person approves it, the requester sends the key with the count, and the count claims the approved row in its own transaction (`ConsumedAt`). The key is never stored. The approver cannot count. One approval, one count, inside `ApprovalExpiryHours`. | M |
+| 37.13i Sealed ballot bound to its election | AES-GCM runs with no associated data. | Associated data is `ghcaa-ballot:v2:election:{id}`. Stored as `v2:` plus base64; `:` is not a base64 character, so the two formats cannot be confused. `Election.BallotSealVersion`: 1 for rows that exist at migration, 2 for new elections. The count refuses a ballot whose format does not match, so an old-format ballot cannot be moved into a new election. | S |
+| 37.13j Cross-election test | No test moves a ballot between elections. | Service test: seal for A, insert into B with the same key, count B, expect `unreadable` and nothing counted. Unit tests on `BallotSeal` for the round trip, a wrong election id, a changed prefix, and a legacy ballot in a version 2 election. | S |
+| 37.13k connect-src | `connect-src 'self' https:` lets page script reach any https host. | `'self'` plus `AppSettings:AllowedOrigins`, the list CORS already reads, because the prod build calls an absolute API URL and the site may be reached on a second host name. Pinned by a header test. | S |
+| 37.13l Request logging | The review assumed Serilog. There is none. | Confirmed by reading `AuditLogMiddleware` and `ExceptionMiddleware`: method, path and user only. Tests pin that the count key and the vote body never reach a log line or activity row. | S |
+
+The trust model stays a trusted-server secret ballot. Threshold custody of the key was considered
+and not built; it is an accepted trust assumption that 37.13e writes down.
+
 ## 6. Decisions — answered 2026-09-28
 
 1. **Can SuperAdmin skip the two-person rule?** No. `SuperAdminActsAlone = false`, switchable in
@@ -600,6 +622,7 @@ Left out on purpose, with the reason recorded in spec 023 Known limits:
 | 9 | 37.12h officials area, web and mobile (Decision 4 grew this from M to L) | L |
 | 10 | 37.12i public board | S |
 | 11 | 37.13a to 37.13g | M in total |
+| 11a | 37.13i, 37.13j, 37.13h, then 37.13k and 37.13l | M in total |
 | 12 | 37.12j docs | S |
 
 Decision 4 (mobile officials area) adds Flutter work across items 4, 5 and 9 above; no new item

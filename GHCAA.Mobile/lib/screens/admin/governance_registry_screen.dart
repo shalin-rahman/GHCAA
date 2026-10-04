@@ -8,6 +8,8 @@ import '../../core/api/api_client.dart';
 import '../../features/admin/admin_service.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/widgets/app_dropdown_field.dart';
+import '../../core/constants/app_constants.dart';
 
 final ecPeriodsAdminProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(adminServiceProvider).getECPeriods();
@@ -330,48 +332,93 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
       _idController.clear();
       _posController.clear();
       _load();
+    } else if (mounted) {
+      // The API refuses a seat that is already held, so point the admin at the end-term action.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not assign. If the seat is taken, end the current term first.')),
+      );
     }
     if (mounted) setState(() => _isAdding = false);
   }
 
   Future<void> _confirmRemove(dynamic member) async {
     bool notify = false;
+    String? reason;
+    final noteController = TextEditingController();
+    bool canEnd() =>
+        reason != null && (reason != GovernanceConstants.vacancyReasonOther || noteController.text.trim().isNotEmpty);
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           backgroundColor: AppTheme.midnightSurface,
-          title: const Text('REMOVE FROM COMMITTEE', style: TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.bold)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Remove ${member['fullName'] ?? 'this member'} from the committee?', style: const TextStyle(color: Colors.white70)),
-              CheckboxListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Notify member of this removal', style: TextStyle(fontSize: 12, color: Colors.white70)),
-                value: notify,
-                activeColor: AppTheme.royalGold,
-                controlAffinity: ListTileControlAffinity.leading,
-                onChanged: (v) => setDialogState(() => notify = v ?? false),
-              ),
-            ],
+          title: const Text('END COMMITTEE TERM', style: TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.bold)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("End ${member['fullName'] ?? 'this member'}'s term?", style: const TextStyle(color: Colors.white70)),
+                const SizedBox(height: 12),
+                AppDropdownField<String>(
+                  key: const Key('endTermReason'),
+                  value: reason,
+                  labelText: 'Reason',
+                  items: GovernanceConstants.vacancyReasonOptions
+                      .map((o) => DropdownMenuItem(value: o['value'], child: Text(o['label']!)))
+                      .toList(),
+                  onChanged: (v) => setDialogState(() => reason = v),
+                ),
+                TextField(
+                  key: const Key('endTermNote'),
+                  controller: noteController,
+                  maxLength: GovernanceConstants.vacancyNoteMaxLength,
+                  maxLines: 2,
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                  decoration: InputDecoration(
+                    labelText: reason == GovernanceConstants.vacancyReasonOther ? 'Note (required)' : 'Note',
+                  ),
+                  onChanged: (_) => setDialogState(() {}),
+                ),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Notify member that their term ended', style: TextStyle(fontSize: 12, color: Colors.white70)),
+                  value: notify,
+                  activeColor: AppTheme.royalGold,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  onChanged: (v) => setDialogState(() => notify = v ?? false),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('CANCEL', style: TextStyle(color: Colors.white54))),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
-              onPressed: () => Navigator.pop(ctx, notify),
-              child: const Text('REMOVE', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              onPressed: canEnd() ? () => Navigator.pop(ctx, true) : null,
+              child: const Text('END TERM', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
       ),
     );
 
-    if (confirmed == null) return; // cancelled
-    final ok = await ref.read(adminServiceProvider).removeMemberFromCommittee(member['id'], notifyMember: confirmed);
-    if (ok) _load();
+    final note = noteController.text.trim();
+    noteController.dispose();
+    final picked = reason;
+    if (confirmed != true || picked == null) return;
+    final ok = await ref.read(adminServiceProvider).endCommitteeTerm(
+          member['id'],
+          reason: picked,
+          note: note.isEmpty ? null : note,
+          notifyMember: notify,
+        );
+    if (ok) {
+      _load();
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not end the term. Please try again.')));
+    }
   }
 
   @override

@@ -188,12 +188,17 @@ class AdminService {
     }
   }
 
-  Future<bool> removeMemberFromCommittee(int ecMemberId, {bool notifyMember = false}) async {
+  // 95.3: the API needs a reason. A note is required when the reason is Other.
+  Future<bool> endCommitteeTerm(int ecMemberId, {required String reason, String? note, bool notifyMember = false}) async {
     try {
-      final response = await _dio.delete('/admin/governance/members/$ecMemberId', queryParameters: {'notifyMember': notifyMember});
+      final response = await _dio.post('/admin/governance/members/$ecMemberId/end-term', data: {
+        'reason': reason,
+        'note': note,
+        'notifyMember': notifyMember,
+      });
       return response.statusCode == 200;
     } catch (e) {
-      debugPrint('AdminService.removeMemberFromCommittee failed: $e');
+      debugPrint('AdminService.endCommitteeTerm failed: $e');
       return false;
     }
   }

@@ -172,7 +172,7 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
 
         var trackingCode = NewTrackingCode();
         var choices = request.Seats.Select(x => new PendingChoice(x.ElectionSeatId, x.NominationIds.ToArray())).ToArray();
-        var sealedChoices = BallotSeal.Seal(e.BallotPublicKey, JsonSerializer.Serialize(choices));
+        var sealedChoices = BallotSeal.Seal(e.BallotPublicKey, JsonSerializer.Serialize(choices), e.Id, e.BallotSealVersion);
 
         await using (var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct))
         {
@@ -247,7 +247,7 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         try
         {
             foreach (var p in pending)
-                opened.Add(JsonSerializer.Deserialize<PendingChoice[]>(BallotSeal.Open(rsa, p.SealedChoices)) ?? []);
+                opened.Add(JsonSerializer.Deserialize<PendingChoice[]>(BallotSeal.Open(rsa, p.SealedChoices, id, e.BallotSealVersion)) ?? []);
         }
         catch (Exception ex) when (ex is CryptographicException or JsonException or FormatException)
         {

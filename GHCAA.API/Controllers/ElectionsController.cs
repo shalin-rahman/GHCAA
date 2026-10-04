@@ -131,15 +131,20 @@ public sealed class ElectionsController(
             : Problem(detail: "Vote could not be recorded.", statusCode: StatusCodes.Status400BadRequest);
     }
 
-    /// <summary>FR-37.1d, spec 023 FR-001 and FR-003: opens the sealed ballots with the returning officer's key and counts them.</summary>
+    /// <summary>FR-37.1d, spec 023 FR-001 and FR-003: opens the sealed ballots with the returning officer's key and counts them. 37.13h: may wait for a second person (202).</summary>
     [HttpPost("{id:int}/count")]
     [Authorize(Policy = Policies.ElectionStaff)]
     [GHCAA.API.Filters.RequireStepUp]
     [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.Count)]
     public async Task<IActionResult> Count(int id, [FromBody] CountElectionRequest? request, CancellationToken ct)
     {
-        var (results, error) = await service.CountAsync(id, request?.PrivateKey, ct);
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var (results, error, pending) = await approvals.CountAsync(id, userId, CallerRoles(), request?.PrivateKey, ct);
         if (results is not null) return Ok(results);
+        var waiting = this.ApprovalReply(new ElectionApprovalRunResult(false, error, pending));
+        if (waiting is not null) return waiting;
+        if (error is "same-person" or "closed") return ApprovalError(error);
         var detail = error switch
         {
             "no-key" => "Upload the returning officer's private key file to count.",
@@ -226,7 +231,7 @@ public sealed class ElectionsController(
     {
         "not-found" => NotFound(),
         "forbidden" => this.ProblemWithCode(ErrorCodes.ElectionPermission, "You need the Approve permission on this election.", StatusCodes.Status403Forbidden),
-        "same-person" => Problem(detail: "The person who asked for this step cannot also approve it.", statusCode: StatusCodes.Status403Forbidden),
+        "same-person" => Problem(detail: "The person who asked for this step cannot also approve it, and the person who approved a count cannot run it.", statusCode: StatusCodes.Status403Forbidden),
         "expired" => Problem(detail: "This request has expired. Ask again.", statusCode: StatusCodes.Status400BadRequest),
         "closed" => Problem(detail: "This request has already been decided.", statusCode: StatusCodes.Status409Conflict),
         "phase-closed" => Problem(detail: "The key cannot change once polling has opened.", statusCode: StatusCodes.Status400BadRequest),

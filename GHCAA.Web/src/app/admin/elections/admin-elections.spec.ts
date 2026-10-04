@@ -28,7 +28,7 @@ describe('AdminElections ballot key', () => {
             publish: vi.fn(),
             approve: vi.fn().mockReturnValue(of(undefined)),
             reject: vi.fn().mockReturnValue(of(undefined)),
-            count: vi.fn().mockReturnValue(of([]))
+            runCount: vi.fn().mockReturnValue(of({ results: [], pending: null }))
         };
         notifyMock = createNotificationServiceMock();
         confirmMock = { confirm: vi.fn().mockReturnValue(of(true)) };
@@ -85,13 +85,13 @@ describe('AdminElections ballot key', () => {
 
         await component.countWithKeyFile({ ...election, phase: 'Counting' }, { target: input } as unknown as Event);
 
-        expect(electionsMock.count).toHaveBeenCalledWith(7, 'ABCD');
+        expect(electionsMock.runCount).toHaveBeenCalledWith(7, 'ABCD');
         expect(input.value).toBe('');
         expect(notifyMock.success).toHaveBeenCalled();
     });
 
     it('leaves a failed count message to the HTTP interceptor', async () => {
-        electionsMock.count.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 400 })));
+        electionsMock.runCount.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 400 })));
         const input = { files: [keyFile('ABCD')], value: '' } as unknown as HTMLInputElement;
 
         await component.countWithKeyFile({ ...election, phase: 'Counting' }, { target: input } as unknown as Event);
@@ -132,6 +132,39 @@ describe('AdminElections ballot key', () => {
         expect(electionsMock.approve).toHaveBeenCalledWith(30);
         expect(component.approvals()[7]).toEqual([]);
         expect(electionsMock.getAdminElections).toHaveBeenCalledTimes(2);
+    });
+
+    // FR-39 (37.13h): the count can wait for a second person, then runs with the same key file.
+    const countRequest: ElectionApprovalDto = { ...request, id: 31, action: 'Count' };
+
+    it('lists the count request when a second person must approve it', async () => {
+        electionsMock.runCount.mockReturnValue(of({ results: null, pending: countRequest }));
+        const input = { files: [keyFile('ABCD')], value: '' } as unknown as HTMLInputElement;
+
+        await component.countWithKeyFile({ ...election, phase: 'Counting' }, { target: input } as unknown as Event);
+
+        expect(component.approvals()[7]).toEqual([countRequest]);
+        expect(notifyMock.success).not.toHaveBeenCalled();
+        expect(notifyMock.info).toHaveBeenCalled();
+    });
+
+    it('keeps an approved count listed as ready, without reloading', () => {
+        component.approvals.set({ 7: [countRequest] });
+
+        component.approve(countRequest);
+
+        expect(component.approvals()[7]?.[0].approvedAt).toBeTruthy();
+        expect(electionsMock.getAdminElections).toHaveBeenCalledTimes(1);
+    });
+
+    it('clears the count request once the count runs', async () => {
+        component.approvals.set({ 7: [request, { ...countRequest, approvedAt: '2026-10-02T10:00:00Z' }] });
+        const input = { files: [keyFile('ABCD')], value: '' } as unknown as HTMLInputElement;
+
+        await component.countWithKeyFile({ ...election, phase: 'Counting' }, { target: input } as unknown as Event);
+
+        expect(component.approvals()[7]).toEqual([request]);
+        expect(notifyMock.success).toHaveBeenCalled();
     });
 
     it('rejects only after the confirm dialog', async () => {

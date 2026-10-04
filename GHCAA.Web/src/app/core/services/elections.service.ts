@@ -4,7 +4,7 @@ import { Observable, map } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import {
     AdminElectionDto, AdminElectionStepResult, CastBallotDto, ElectionApprovalDto, CastBallotResultDto, CreateElectionRequest, ElectionAppointmentDto, ElectionPhase,
-    ElectionResultDto, ElectionSummaryDto,
+    ElectionCountStepResult, ElectionResultDto, ElectionSummaryDto,
     NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto
 } from '../models/election.models';
 
@@ -101,10 +101,18 @@ export class ElectionsService {
         return this.runStep(API_ENDPOINTS.ADMIN_ELECTIONS.BALLOT_KEY(id), { publicKey });
     }
 
-    // The first count needs the returning officer's private key. After that the stored results
-    // come back without it.
-    count(id: number, privateKey?: string): Observable<ElectionResultDto[]> {
-        return this.http.post<ElectionResultDto[]>(API_ENDPOINTS.ELECTIONS.COUNT(id), privateKey ? { privateKey } : {});
+    // Reads the stored results. Without a key the server never counts or stores a count request.
+    count(id: number): Observable<ElectionResultDto[]> {
+        return this.http.post<ElectionResultDto[]>(API_ENDPOINTS.ELECTIONS.COUNT(id), {});
+    }
+
+    // Counts with the returning officer's private key. 37.13h: a 202 means the count waits for a
+    // second person, and the same call runs it once they approve.
+    runCount(id: number, privateKey: string): Observable<ElectionCountStepResult> {
+        return this.http.post<ElectionResultDto[] | ElectionApprovalDto>(API_ENDPOINTS.ELECTIONS.COUNT(id), { privateKey }, { observe: 'response' }).pipe(
+            map(response => response.status === 202
+                ? { results: null, pending: response.body as ElectionApprovalDto }
+                : { results: response.body as ElectionResultDto[], pending: null }));
     }
 
     declare(id: number): Observable<void> {

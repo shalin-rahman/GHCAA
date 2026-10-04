@@ -212,8 +212,14 @@ export class AdminElections {
 
         this.countingId.set(election.id);
         try {
-            const results = await firstValueFrom(this.electionsService.count(election.id, readBallotKeyFile(await file.text())));
-            this.notify.success(`Count done. ${results.length} result rows stored.`);
+            const run = await firstValueFrom(this.electionsService.runCount(election.id, readBallotKeyFile(await file.text())));
+            if (run.results) {
+                this.dropCountApprovals(election.id);
+                this.notify.success(`Count done. ${run.results.length} result rows stored.`);
+            } else {
+                this.addApproval(run.pending);
+                this.notify.info('Saved. A second person must approve the count. Then count again with the same key file.');
+            }
         } catch (err) {
             if (!(err instanceof HttpErrorResponse)) this.notify.error('The key file could not be read.');
         } finally {
@@ -230,9 +236,16 @@ export class AdminElections {
             this.replace(result.election);
             return;
         }
-        const pending = result.pending;
-        this.approvals.update(all => ({ ...all, [pending.electionId]: [...(all[pending.electionId] ?? []), pending] }));
+        this.addApproval(result.pending);
         this.notify.info('Saved. A second person must approve this before it happens.');
+    }
+
+    private addApproval(pending: ElectionApprovalDto): void {
+        this.approvals.update(all => ({ ...all, [pending.electionId]: [...(all[pending.electionId] ?? []), pending] }));
+    }
+
+    private dropCountApprovals(electionId: number): void {
+        this.approvals.update(all => ({ ...all, [electionId]: (all[electionId] ?? []).filter(item => item.action !== 'Count') }));
     }
 
     // Spec 023 (37.12f). Loaded on request, since the list needs step-up.
@@ -252,6 +265,13 @@ export class AdminElections {
         this.electionsService.approve(approval.id).subscribe({
             next: () => {
                 this.decidingApprovalId.set(null);
+                // 37.13h. An approved count stays listed until the requester runs it with the key file.
+                if (approval.action === 'Count') {
+                    this.approvals.update(all => ({ ...all, [approval.electionId]: (all[approval.electionId] ?? [])
+                        .map(item => item.id === approval.id ? { ...item, approvedAt: new Date().toISOString() } : item) }));
+                    this.notify.success('Count approved. Anyone but you can now count with the key file.');
+                    return;
+                }
                 this.dropApproval(approval);
                 this.notify.success(`${ELECTION_APPROVAL_ACTION_LABELS[approval.action]}: approved and done.`);
                 this.load();

@@ -28,9 +28,7 @@ public sealed class ElectionApprovalService(
 
     public async Task<ElectionApprovalRunResult> RunOrRequestAsync(int electionId, ElectionApprovalAction action, int userId, IReadOnlyCollection<string> roles, string? newPublicKey = null, CancellationToken ct = default)
     {
-        var settings = (await orgConfig.GetConfigAsync()).Elections;
-        var needsSecond = settings.TwoPersonActions.Contains(action.ToString(), StringComparer.OrdinalIgnoreCase)
-            && !(settings.SuperAdminActsAlone && roles.Contains(Constants.Roles.SuperAdmin));
+        var needsSecond = await NeedsSecondAsync(action, roles);
         // Setting the first key replaces nothing, so it runs at once.
         if (needsSecond && action == ElectionApprovalAction.ReplaceBallotKey
             && await db.Elections.AnyAsync(x => x.Id == electionId && x.BallotKeyFingerprint == null, ct))
@@ -62,7 +60,8 @@ public sealed class ElectionApprovalService(
             return (false, payloadError, null);
 
         var now = DateTime.UtcNow;
-        if (await OpenAt(now).AnyAsync(x => x.ElectionId == electionId && x.Action == action, ct))
+        // An approved count waiting to run also blocks a second request for one.
+        if (await OpenAt(now).Union(ReadyToCountAt(now)).AnyAsync(x => x.ElectionId == electionId && x.Action == action, ct))
             return (false, "already-pending", null);
 
         var hours = Math.Max(1, (await orgConfig.GetConfigAsync()).Elections.ApprovalExpiryHours);
@@ -142,11 +141,72 @@ public sealed class ElectionApprovalService(
         return (true, null);
     }
 
-    public async Task<IReadOnlyList<ElectionApprovalDto>> ListOpenAsync(int electionId, CancellationToken ct = default) =>
-        await ToDtos(OpenAt(DateTime.UtcNow).Where(x => x.ElectionId == electionId).OrderBy(x => x.RequestedAt), ct);
+    public async Task<ElectionCountRunResult> CountAsync(int electionId, int userId, IReadOnlyCollection<string> roles, string? privateKeyPkcs8Base64, CancellationToken ct = default)
+    {
+        // Results already stored, or an election not in counting, need no approval.
+        var (stored, probeError) = await elections.CountAsync(electionId, null, ct);
+        if (stored is not null || probeError == "not-counting")
+            return new ElectionCountRunResult(stored, probeError, null);
+        // A caller with no key only wanted the stored results. It must not store a count request.
+        if (string.IsNullOrWhiteSpace(privateKeyPkcs8Base64))
+            return new ElectionCountRunResult(null, "no-key", null);
+
+        if (!await NeedsSecondAsync(ElectionApprovalAction.Count, roles))
+        {
+            var (results, error) = await elections.CountAsync(electionId, privateKeyPkcs8Base64, ct);
+            return new ElectionCountRunResult(results, error, null);
+        }
+
+        var now = DateTime.UtcNow;
+        var approved = await ReadyToCountAt(now).Where(x => x.ElectionId == electionId)
+            .OrderBy(x => x.ApprovedAt).AsNoTracking().FirstOrDefaultAsync(ct);
+        if (approved is null)
+        {
+            var (_, requestError, pending) = await RequestAsync(electionId, ElectionApprovalAction.Count, userId, null, ct);
+            return new ElectionCountRunResult(null, requestError, pending);
+        }
+        if (approved.ApprovedByUserId == userId)
+            return new ElectionCountRunResult(null, "same-person", null);
+
+        // The count opens its own transaction, so the claim cannot share it. A count that fails
+        // gives the approval back, so a wrong key file does not use it up.
+        var claimed = await ReadyToCountAt(now).Where(x => x.Id == approved.Id)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.ConsumedAt, now), ct);
+        if (claimed != 1)
+            return new ElectionCountRunResult(null, "closed", null);
+
+        var (counted, countError) = await elections.CountAsync(electionId, privateKeyPkcs8Base64, ct);
+        if (counted is null)
+        {
+            await db.ElectionApprovals.Where(x => x.Id == approved.Id && x.ConsumedAt == now)
+                .ExecuteUpdateAsync(s => s.SetProperty(x => x.ConsumedAt, (DateTime?)null), CancellationToken.None);
+            return new ElectionCountRunResult(null, countError, null);
+        }
+        logger.LogInformation("Election {ElectionId}: user {UserId} counted under approval {ApprovalId}.", electionId, userId, approved.Id);
+        return new ElectionCountRunResult(counted, null, null);
+    }
+
+    public async Task<IReadOnlyList<ElectionApprovalDto>> ListOpenAsync(int electionId, CancellationToken ct = default)
+    {
+        var now = DateTime.UtcNow;
+        var waiting = OpenAt(now).Union(ReadyToCountAt(now));
+        return await ToDtos(waiting.Where(x => x.ElectionId == electionId).OrderBy(x => x.RequestedAt), ct);
+    }
+
+    private async Task<bool> NeedsSecondAsync(ElectionApprovalAction action, IReadOnlyCollection<string> roles)
+    {
+        var settings = (await orgConfig.GetConfigAsync()).Elections;
+        return settings.TwoPersonActions.Contains(action.ToString(), StringComparer.OrdinalIgnoreCase)
+            && !(settings.SuperAdminActsAlone && roles.Contains(Constants.Roles.SuperAdmin));
+    }
 
     private IQueryable<ElectionApproval> OpenAt(DateTime now) =>
         db.ElectionApprovals.Where(x => x.ExecutedAt == null && x.RejectedAt == null && x.ExpiresAt > now);
+
+    // An approved count that has not run yet. It still has to run before the request expires.
+    private IQueryable<ElectionApproval> ReadyToCountAt(DateTime now) =>
+        db.ElectionApprovals.Where(x => x.Action == ElectionApprovalAction.Count && x.ApprovedAt != null
+            && x.ConsumedAt == null && x.RejectedAt == null && x.ExpiresAt > now);
 
     private async Task<List<ElectionApprovalDto>> ToDtos(IQueryable<ElectionApproval> query, CancellationToken ct)
     {
@@ -156,7 +216,8 @@ public sealed class ElectionApprovalService(
             .ToListAsync(ct);
         return rows.Select(r => new ElectionApprovalDto(
             r.Approval.Id, r.Approval.ElectionId, r.Approval.Action, r.Approval.RequestedByUserId, r.RequestedBy ?? "",
-            r.Approval.RequestedAt, r.Approval.ExpiresAt, ReadKey(r.Approval.PayloadJson)?.Fingerprint)).ToList();
+            r.Approval.RequestedAt, r.Approval.ExpiresAt, ReadKey(r.Approval.PayloadJson)?.Fingerprint,
+            r.Approval.Action == ElectionApprovalAction.Count ? r.Approval.ApprovedAt : null)).ToList();
     }
 
     private static (string? Error, string? PayloadJson) BuildPayload(ElectionApprovalAction action, string? newPublicKey)
@@ -186,6 +247,9 @@ public sealed class ElectionApprovalService(
                 return fingerprint == payload.Fingerprint ? null : "invalid-key";
             case ElectionApprovalAction.Declare:
                 return await elections.DeclareAsync(electionId, ct) ? null : "not-ready";
+            case ElectionApprovalAction.Count:
+                // Approving only allows the count. It runs when the requester brings the key.
+                return await db.Elections.AnyAsync(x => x.Id == electionId && x.Phase == ElectionPhase.Counting, ct) ? null : "not-ready";
             default:
                 return await elections.SetPhaseAsync(electionId, PhaseFor(action), ct) ? null : "not-ready";
         }

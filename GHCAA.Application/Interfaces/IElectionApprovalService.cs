@@ -16,5 +16,10 @@ public interface IElectionApprovalService
     Task<(bool Success, string? Error, ElectionApprovalDto? Approval)> RequestAsync(int electionId, ElectionApprovalAction action, int userId, string? newPublicKey = null, CancellationToken ct = default);
     Task<(bool Success, string? Error)> ApproveAsync(int approvalId, int userId, IReadOnlyCollection<string> roles, CancellationToken ct = default);
     Task<(bool Success, string? Error)> RejectAsync(int approvalId, int userId, IReadOnlyCollection<string> roles, string? reason, CancellationToken ct = default);
+    // 37.13h. When Count is a two-person step, the first call stores a request and a second person
+    // approves it. The key is never stored, so the count runs on a later call that brings the key,
+    // and that call uses the approval up. The approver cannot run the count.
+    Task<ElectionCountRunResult> CountAsync(int electionId, int userId, IReadOnlyCollection<string> roles, string? privateKeyPkcs8Base64, CancellationToken ct = default);
+    // Includes an approved Count that has not run yet.
     Task<IReadOnlyList<ElectionApprovalDto>> ListOpenAsync(int electionId, CancellationToken ct = default);
 }
