@@ -48,6 +48,25 @@
 > - `GATEWAY_SSLCOMMERZ/BKASH/AAMARPAY` (mobile) — gateways fetched from API `GET /api/payment-config/active`
 > - `AppSettings__AllowedOrigins__*` wildcard syntax — invalid; must be `__0`, `__1`, etc.
 
+### Production origin
+
+The canonical production origin is `https://haragangian.com` (decided 2026-10-04). `www.haragangian.com`
+redirects to it at DNS or Render level and is not added to AllowedOrigins. Every place below must
+agree. TODO 7.19 makes the code match and 7.18 makes startup fail on a bad list.
+
+| Where | Value | State |
+|---|---|---|
+| `AppSettings__AllowedOrigins__0` | `https://haragangian.com` | Set on Render by the owner |
+| `AppSettings__ClientUrl` | `https://haragangian.com` | Set on Render by the owner; startup will check it is in AllowedOrigins (7.19) |
+| Web `environment.prod.ts` `apiUrl` | `/api` | Today `https://haragangian.com/api`; changed by 7.19 |
+| Payment return URL (`GatewaysController`) | ClientUrl | Today the first AllowedOrigins entry; changed by 7.19 |
+| CSP `connect-src` | `'self'` plus AllowedOrigins | Done (37.13k) |
+| Auth cookies | Host of the canonical origin | To be checked under 7.19 |
+| `www` redirect | 301 to `https://haragangian.com` | DNS or Render step for the owner |
+
+Wildcards are not allowed. A change to AllowedOrigins is recorded by the app at the next start
+(7.18), but who changed it is only in Render's deploy history.
+
 ---
 
 ## 2. Web (Angular — environment files)

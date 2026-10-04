@@ -592,6 +592,26 @@ incident procedure, logging and retention).
 The trust model stays a trusted-server secret ballot. Threshold custody of the key was considered
 and not built; it is an accepted trust assumption that 37.13e writes down.
 
+### Count roles, settings audit and freeze (2026-10-04)
+
+Raised as COUNT-APP-001 to 004, COUNT-CONFIG-001 and 002, and a rule that election security
+settings cannot change during polling and counting. FR-034 is already met by 37.13h. The rest:
+
+| Item | Gap | Design | Effort |
+|---|---|---|---|
+| 37.13m Count executor | The executor is in a log line only. | `ElectionApproval.ExecutedByUserId`, set with `ConsumedAt` in the same conditional update and cleared with it. Activity row naming all three people. | S |
+| 37.13n Requester-only | No way to limit the count to the requester. | `Elections.CountRequesterOnly`, default off. DTO, defaults, golden.json, web toggle, mobile model. Error `not-requester`. | S |
+| 37.13o Defaults | A row saved before `TwoPersonActions` existed would pick up Count by default. | Check first. If real, such a row keeps its old behaviour. Tests for a new site, a saved list, and an old row. | S |
+| 37.13p Settings audit | A save keeps only who and when. | Diff the `Elections` section on save, one activity row with old and new values, same `SaveChanges`. | S |
+| 37.13q Freeze | Settings, personas and appointments can change during polling. | One service answers "is a freeze on, and for which election". Used by the OrgConfig save, the persona service and the appointment service. 409 plus an activity row for a refused attempt. | M |
+| 37.13r Emergency revocation | No way to remove a compromised official during the freeze. | Reuses the `ElectionApproval` request and approve flow with a reason and the target appointment as payload. Revocation only. Approver is any other active official on the election with Approve, not the requester or the target. Eligibility checked again when it runs, then revoked once in one transaction and audited. | M |
+| 37.13s Returning Officer flag | The Returning Officer is found by an editable persona name. | A flag on the appointment with a filtered unique index, one active per election. Set from the appointment screens. | S |
+| 37.13t Approver check | Too few approvers locks the freeze against its own fix. | Warn when polling is asked for with fewer than two active officials holding Approve. | S |
+
+Settled 2026-10-04: the approver is any other active official with Approve, so revoking the
+Returning Officer needs no special case. If nobody is eligible the request is refused. The
+Returning Officer is marked on the appointment (37.13s).
+
 ## 6. Decisions — answered 2026-09-28
 
 1. **Can SuperAdmin skip the two-person rule?** No. `SuperAdminActsAlone = false`, switchable in

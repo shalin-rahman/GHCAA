@@ -386,10 +386,10 @@ one.
 
 ## 7.12 Software Configuration Management
 
-The repository carries 324 commits on `HEAD` and eight local branches: `dev`, `preprod`,
+The repository carries 325 commits on `HEAD` and eight local branches: `dev`, `preprod`,
 `release-1`, `release-2`, `release-3_b4_generic_N_refactor`, `release-4_white_paper`,
 `prepod-election-refactoring` and `backup/2026-10-01-column-repair`, plus `dev-mobile` and
-`mobile_app` that exist only on the remote, as of 3 October 2026. `dev` is named as the integration
+`mobile_app` that exist only on the remote, as of 4 October 2026. `dev` is named as the integration
 branch, but `preprod` (the branch this chapter was written from) is ahead of it, not behind:
 `git rev-list --count dev..preprod` gives 97 and `preprod..dev` gives 0. Work has been landing on
 `preprod`, the branch that deploys to the staging environment described in §10, and `dev` has not

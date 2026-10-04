@@ -42,15 +42,15 @@ would misdescribe it.
 
 ## 11.1 Process Model in Practice and its Deviations from Plan
 
-`docs/book/build/wbs.py`, run on 3 October 2026, classifies every one of the 96 work packages
-`docs/TODO.md` has raised, and every one of the 1,006 tracker tasks under them, by how it arrived: planned
+`docs/book/build/wbs.py`, run on 4 October 2026, classifies every one of the 96 work packages
+`docs/TODO.md` has raised, and every one of the 1,059 tracker tasks under them, by how it arrived: planned
 before the work started, or reactively, as stakeholder feedback, a review finding or a defect.
 
 Counted by work package, 30 (31%) were planned and 66 (69%) were not: 40 (42%) arrived as feedback
 from a stakeholder, 16 (17%) as a defect, and 10 (10%) as a finding from one of the review sessions of
-§3.8 or the September 2026 architecture audit. Counted by task the reactive share is larger still: 776
-of 1,006 tasks (77%) arrived after the work they belong to had already started, most of them as feedback
-(350 tasks, 35%) or as review findings (297 tasks, 30%), with defects a smaller share (129 tasks, 13%)
+§3.8 or the September 2026 architecture audit. Counted by task the reactive share is larger still: 826
+of 1,059 tasks (78%) arrived after the work they belong to had already started, most of them as feedback
+(399 tasks, 38%) or as review findings (298 tasks, 28%), with defects a smaller share (129 tasks, 12%)
 than the package count alone suggests, because most defects closed in one or two tasks each while a
 handful of review sessions each seeded dozens.
 
@@ -84,8 +84,8 @@ defined once, here, and used by name everywhere else in the book:
   packages, and a work package can deliver only part of a feature — the two lists are not the same
   shape.
 
-`docs/TODO.md` had 96 numbered work packages holding 1,006 tracker tasks between them, tied to 18 WBS
-activities and 324 commits, as of 3 October 2026 (`git rev-list --count HEAD`) — five different
+`docs/TODO.md` had 96 numbered work packages holding 1,059 tracker tasks between them, tied to 18 WBS
+activities and 325 commits, as of 4 October 2026 (`git rev-list --count HEAD`) — five different
 counts of one project, each answering a different question about it.
 
 Five streams, one of them carrying no commit at all: the back-scheduled P1–P5 research and design
@@ -95,9 +95,9 @@ one entry per component, each a cluster of source paths `wbs.py` groups by direc
 the tracker work packages that raised the changes inside it — Table 11.1 in §11.3.1 lists all
 eighteen with their tracker areas. C18, Ad-hoc reporting, is planned work with no commit yet. A
 component's place on the critical path is not the same thing as how long it took in the calendar: C1,
-Persistence and migrations, carries ten working days of effort, yet its last commit landed on 2 October
+Persistence and migrations, carries ten working days of effort, yet its last commit landed on 4 October
 2026, nearly eight months after its first; C17, Standards, docs and dissertation, carries eleven days of
-effort spread across 129 working days between its first commit on 6 April and its last on 2 October.
+effort spread across 130 working days between its first commit on 6 April and its last on 4 October.
 The activity list and the tracker are the same data read two ways — one groups by source path, the
 other by the work package a change was raised under — and `wbs.py --check` fails if a component has no
 tracker area, or has no commit although its files exist or its tracker items are done, which is what
@@ -112,13 +112,13 @@ estimate to compare them against, because no network existed before the code did
 
 The critical path is C1 (Persistence and migrations) → C2 (Authentication and access) → C3 (Registry
 and membership) → C5 (Events and attendance) → C8 (Gallery and albums) → C13 (Web client) → C15
-(Quality and testing) → C17 (Standards, docs and dissertation), 63 working days end to end. Against
-that, 86 working days are evidenced by a code commit somewhere in the project (§11.1), and the first
-commit to the last spans 9 February to 2 October 2026, 236 elapsed calendar days. Sixty-three
-planned days, eighty-six worked days, two hundred and thirty-six elapsed days: the three numbers
-diverge for different reasons. The gap between 63 and 86 is components running in parallel, which a
+(Quality and testing) → C17 (Standards, docs and dissertation), 64 working days end to end. Against
+that, 87 working days are evidenced by a code commit somewhere in the project (§11.1), and the first
+commit to the last spans 9 February to 4 October 2026, 238 elapsed calendar days. Sixty-four
+planned days, eighty-seven worked days, two hundred and thirty-eight elapsed days: the three numbers
+diverge for different reasons. The gap between 64 and 87 is components running in parallel, which a
 single maintainer cannot actually do at the same moment, so total work exceeds the shortest possible
-path through it. The gap between 86 and 236 is availability rather than dependency — a volunteer
+path through it. The gap between 87 and 238 is availability rather than dependency — a volunteer
 project fits around a full-time job, and nothing in the network says a day off is a defect.
 
 Two components do not sit on the critical path but were touched on far more days than their own
@@ -126,7 +126,7 @@ duration would suggest, which is what Pressman calls a hammock activity: work st
 whole span rather than boxed at a fixed point in it. C12, Security and hardening, carries three days
 of effort and a float of twenty-three, the widest of any component with commits behind it, yet it stayed
 open for 164 working days between its first commit on 12 February and its last on 28 September. C11,
-Configuration and white-label, carries three days of effort and a float of eleven, and stayed open for
+Configuration and white-label, carries three days of effort and a float of twelve, and stayed open for
 146 working days between 6 March and 26 September. Both are the kind of work a single maintainer keeps returning to as
 other components change under it — a new endpoint needs an authorisation check, a new setting needs a
 white-label default — rather than work with a start and a finish of its own. Drawing either as a
@@ -144,26 +144,26 @@ much room the record shows they had.
 | Component | Effort (days) | ES | EF | LS | LF | Float | Predecessors | Tracker tasks | Done |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | C1 Persistence and migrations | 10 | 0 | 10 | 0 | 10 | 0 | — | 22 | 15 |
-| C2 Authentication and access | 3 | 10 | 13 | 10 | 13 | 0 | C1 | 67 | 67 |
-| C3 Registry and membership | 6 | 13 | 19 | 13 | 19 | 0 | C1, C2 | 35 | 30 |
-| C5 Events and attendance | 3 | 19 | 22 | 19 | 22 | 0 | C3 | 6 | 6 |
-| C8 Gallery and albums | 2 | 22 | 24 | 22 | 24 | 0 | C5 | 29 | 27 |
-| C13 Web client | 15 | 24 | 39 | 24 | 39 | 0 | C3–C11 | 103 | 100 |
-| C15 Quality and testing | 13 | 39 | 52 | 39 | 52 | 0 | C12, C13 | 67 | 61 |
-| C17 Standards, docs and dissertation | 11 | 52 | 63 | 52 | 63 | 0 | C15, C16, C14 | 205 | 155 |
-| C4 Payments and finance | 3 | 19 | 22 | 21 | 24 | 2 | C3 | 9 | 9 |
-| C6 Governance and elections | 2 | 19 | 21 | 22 | 24 | 3 | C3 | 66 | 50 |
-| C9 Careers and job board | 2 | 19 | 21 | 22 | 24 | 3 | C3 | 2 | 1 |
-| C10 Networking, forum and messaging | 2 | 19 | 21 | 22 | 24 | 3 | C3 | 25 | 25 |
-| C7 Content and communication | 3 | 13 | 16 | 21 | 24 | 8 | C2 | 15 | 15 |
-| C16 Deployment and operations | 4 | 39 | 43 | 48 | 52 | 9 | C13 | 10 | 10 |
-| C11 Configuration and white-label | 3 | 10 | 13 | 21 | 24 | 11 | C1 | 72 | 62 |
-| C14 Mobile client | 9 | 22 | 31 | 43 | 52 | 21 | C3, C4, C5 | 40 | 33 |
-| C12 Security and hardening | 3 | 13 | 16 | 36 | 39 | 23 | C2 | 52 | 45 |
-| C18 Ad-hoc reporting | 1 | 22 | 23 | 62 | 63 | 40 | C3, C4 | 5 | 0 |
+| C2 Authentication and access | 4 | 10 | 14 | 10 | 14 | 0 | C1 | 67 | 67 |
+| C3 Registry and membership | 6 | 14 | 20 | 14 | 20 | 0 | C1, C2 | 35 | 30 |
+| C5 Events and attendance | 3 | 20 | 23 | 20 | 23 | 0 | C3 | 6 | 6 |
+| C8 Gallery and albums | 2 | 23 | 25 | 23 | 25 | 0 | C5 | 29 | 27 |
+| C13 Web client | 15 | 25 | 40 | 25 | 40 | 0 | C3–C11 | 104 | 101 |
+| C15 Quality and testing | 13 | 40 | 53 | 40 | 53 | 0 | C12, C13 | 67 | 61 |
+| C17 Standards, docs and dissertation | 11 | 53 | 64 | 53 | 64 | 0 | C15, C16, C14 | 206 | 156 |
+| C4 Payments and finance | 3 | 20 | 23 | 22 | 25 | 2 | C3 | 9 | 9 |
+| C6 Governance and elections | 2 | 20 | 22 | 23 | 25 | 3 | C3 | 114 | 68 |
+| C9 Careers and job board | 2 | 20 | 22 | 23 | 25 | 3 | C3 | 2 | 1 |
+| C10 Networking, forum and messaging | 2 | 20 | 22 | 23 | 25 | 3 | C3 | 25 | 25 |
+| C7 Content and communication | 3 | 14 | 17 | 22 | 25 | 8 | C2 | 15 | 15 |
+| C16 Deployment and operations | 4 | 40 | 44 | 49 | 53 | 9 | C13 | 10 | 10 |
+| C11 Configuration and white-label | 3 | 10 | 13 | 22 | 25 | 12 | C1 | 72 | 62 |
+| C14 Mobile client | 9 | 23 | 32 | 44 | 53 | 21 | C3, C4, C5 | 40 | 33 |
+| C12 Security and hardening | 3 | 14 | 17 | 37 | 40 | 23 | C2 | 55 | 45 |
+| C18 Ad-hoc reporting | 1 | 23 | 24 | 63 | 64 | 40 | C3, C4 | 5 | 0 |
 
-*Source: `python docs/book/build/wbs.py`, run 3 October 2026, against `docs/TODO.md` and the git
-history at HEAD (324 commits). Effort is apportioned commit-days. ES/EF/LS/LF are in working days
+*Source: `python docs/book/build/wbs.py`, run 4 October 2026, against `docs/TODO.md` and the git
+history at HEAD (325 commits). Effort is apportioned commit-days. ES/EF/LS/LF are in working days
 from the first commit. "Tracker tasks" counts the numbered items in the component's tracker areas,
 and "Done" the ones closed. C18 is planned work with no commit yet, so its effort is a stated
 one-day placeholder in the network, not a measurement.*
@@ -174,7 +174,7 @@ client, are both cross-cutting concerns that every other component depends on wi
 their timing — a security check or a white-label default can be added on any day and still be in place
 when the component that needs it ships. C18 has the widest float of all only because nothing has been
 built for it yet. And float does not correlate with the work raised: C12 has the widest float of any
-built component and 52 tracker tasks, more than all but six others, which is the hammock pattern of
+built component and 55 tracker tasks, more than all but six others, which is the hammock pattern of
 §11.3 stated as a number rather than an observation.
 
 ### 11.3.2 Crashing analysis
@@ -279,9 +279,9 @@ substance.
 Table 11.1 carries two estimates of each component's size side by side: its effort in apportioned
 commit-days, and the number of tracker tasks raised against it. If tasks were a steady unit of work the
 two would rise together. They do not. Across the sixteen components with commits and more than a
-handful of tasks, tasks per effort-day run from about 2 to 33. Governance and elections (C6, 66 tasks
-on two days of effort), configuration (C11, 72 on three), authentication (C2, 67 on three), standards
-and the dissertation (C17, 205 on eleven) and security (C12, 52 on three) look heavy by task count,
+handful of tasks, tasks per effort-day run from about 2 to 57. Governance and elections (C6, 114 tasks
+on two days of effort), configuration (C11, 72 on three), authentication (C2, 67 on four), standards
+and the dissertation (C17, 206 on eleven) and security (C12, 55 on three) look heavy by task count,
 because the tracker holds many small items there. Persistence (C1, 22 tasks on ten days), events (C5,
 6 on three), deployment (C16, 10 on four), payments (C4, 9 on three) and the mobile client (C14, 40 on
 nine) look heavy by effort, because a handful of items each took days. C9 (two tasks) is too small to
@@ -295,7 +295,7 @@ either estimate gives alone: neither column can be converted into the other with
 
 The function-point count above (2,223 unadjusted, 2,445 adjusted) is a size figure: it describes how
 large the delivered system is by a standard method, counted from what actually exists. §11.1 and
-§11.5 report a different kind of figure: 164 days of effort the record can evidence, and 388 days the
+§11.5 report a different kind of figure: 166 days of effort the record can evidence, and 392 days the
 same work would represent built without this project's particular reuse. These are not directly
 comparable without the missing productivity factor named in §11.4, so no over-prediction ratio is
 computed here — one that could be, given only a placeholder rate, would be a fabricated number wearing
@@ -331,28 +331,28 @@ Table 11.4 gives the resulting hours by kind and their sum.
 
 | Kind | Lines | Rate (lines/hour) | Hours |
 | --- | --- | --- | --- |
-| Backend C# (excluding generated migrations) | 31,396 | 12 | 2,616 |
-| Web client: TypeScript, templates, stylesheets | 60,652 | 25 | 2,426 |
-| Mobile client: Dart | 28,370 | 18 | 1,576 |
-| Automated tests | 20,858 | 20 | 1,043 |
-| **Total** | **141,276** | | **7,661** |
+| Backend C# (excluding generated migrations) | 31,723 | 12 | 2,644 |
+| Web client: TypeScript, templates, stylesheets | 60,948 | 25 | 2,438 |
+| Mobile client: Dart | 28,437 | 18 | 1,580 |
+| Automated tests | 21,453 | 20 | 1,073 |
+| **Total** | **142,561** | | **7,734** |
 
-Seven thousand, six hundred and sixty-one hours, at eight hours a working day, is 958 working days —
+Seven thousand, seven hundred and thirty-four hours, at eight hours a working day, is 967 working days —
 what this codebase would cost built conventionally, one line at a time, with no reduction for
 anything reused, generated or assisted. That figure is the baseline the rest of this section reduces,
 not a claim about how the project actually ran.
 
 ### 11.5.2 The four reductions, each with its evidence
 
-Four multiplicative reductions apply to the 958-day baseline, and they are stated in decreasing order
+Four multiplicative reductions apply to the 967-day baseline, and they are stated in decreasing order
 of how directly each is evidenced rather than in the order they act during a build.
 
 **Reuse from the author's own earlier projects, ×0.85 — measured, not judged.** `wbs.py` totals five
-carried-over modules against the tree: authentication, OTP, tokens and the middleware pipeline (1,799
+carried-over modules against the tree: authentication, OTP, tokens and the middleware pipeline (1,820
 lines); payment-gateway adapters (1,030); file handling, validation and storage (306); the front-end
-grid, shared controls, core services and layouts (20,365); and the design-token stylesheet (3,490) —
-26,990 of 141,276 lines, 19.1% of the codebase. At roughly 78% of each module carried over intact from
-the author's 2024 projects rather than rewritten for this one, that is about 14.8% of the total build
+grid, shared controls, core services and layouts (20,413); and the design-token stylesheet (3,499) —
+27,068 of 142,561 lines, 19.0% of the codebase. At roughly 78% of each module carried over intact from
+the author's 2024 projects rather than rewritten for this one, that is about 14.7% of the total build
 effectively already paid for, which is where the 0.85 factor comes from directly rather than by
 judgement.
 
@@ -378,12 +378,12 @@ any one of the three would make it alone, and the arithmetic has to say so.
 
 ### 11.5.3 The result and its sensitivity
 
-0.80 × 0.85 × 0.85 × 0.70 ≈ 0.40. Applied to the 958-day baseline, that is 388 working days — what the
-delivered codebase represents as reuse-adjusted effort. Against the 164 days the commit and tracker
+0.80 × 0.85 × 0.85 × 0.70 ≈ 0.40. Applied to the 967-day baseline, that is 392 working days — what the
+delivered codebase represents as reuse-adjusted effort. Against the 166 days the commit and tracker
 record can actually evidence (§11.1), the ratio is 2.4×: for every day the record can prove, the
 delivered system represents close to two and a half days of conventionally-built equivalent. Both
-figures answer different questions and neither replaces the other — the 388-day figure is what the
-system represents as work if none of it had been reused or generated; the 164-day figure is a lower
+figures answer different questions and neither replaces the other — the 392-day figure is what the
+system represents as work if none of it had been reused or generated; the 166-day figure is a lower
 bound on what actually happened, because reading, debugging and design leave no commit to count.
 
 The two factors that carry most of the 0.40 differ in kind, and the difference matters to how much the
@@ -391,12 +391,12 @@ result should be trusted. Prior-project reuse (×0.85) is measured from the tree
 other three are judged. Of those, the tooling factor (×0.70) is the least certain, because "AI-assisted
 and rapid development tooling" was not logged as a separate activity at the time — it is a retrospective
 estimate of how much of the drafted code needed only review rather than composition. Moving that one
-factor from 0.70 to a less generous 0.85 would move the reuse-adjusted total from 388 to about 471
+factor from 0.70 to a less generous 0.85 would move the reuse-adjusted total from 392 to about 475
 working days; the conclusion that reuse and generation, not raw effort, explain the delivered scope
 would still hold, but the specific multiplier should be read as the least firm number in this chain.
 
-With 42 working days still outstanding (§11.6 and the "still to do" projection below), the completed
-project's reuse-adjusted total is about 431 working days, and its evidenced total about 206.
+With 51 working days still outstanding (§11.6 and the "still to do" projection below), the completed
+project's reuse-adjusted total is about 444 working days, and its evidenced total about 217.
 
 ### 11.5.4 What this cost
 
@@ -424,9 +424,9 @@ the work did not exist as a plan before it was done.
 
 What can be reconstructed, honestly labelled as a reconstruction rather than a contemporaneous record,
 is a single end-of-project snapshot rather than a time series. Taking the reuse-adjusted total for the
-finished project, 431 working days (§11.5.3), as a proxy for budget at completion (BAC), and the 206
+finished project, 444 working days (§11.5.3), as a proxy for budget at completion (BAC), and the 217
 evidenced working days at completion as a proxy for budgeted cost of work performed (BCWP) against
-that same total scope, gives a completion ratio of 206/431 ≈ 48%, as of 3 October 2026 — roughly
+that same total scope, gives a completion ratio of 217/444 ≈ 49%, as of 4 October 2026 — roughly
 half the reuse-adjusted work the finished project represents has commit or document evidence behind
 it so far, the other half being what §11.4 and the "still to do" projection below still owe.
 
@@ -461,7 +461,7 @@ distinct from the tracker. There was one tracker, split for length into two file
 `docs/TODO.md` (open work packages, 2,320 lines) and `docs/TODO_ARCHIVE.md` (closed ones, 7,387 lines),
 9,707 lines together as of 3 October 2026 (`wc -l docs/TODO.md docs/TODO_ARCHIVE.md`), simultaneously
 the project plan (the P1–P5 pre-development items and the planned work packages of §11.1), the change
-log (every reactively-arriving item, §11.1's 776 of 1,006 tasks), the defect log (the 129 tasks classified
+log (every reactively-arriving item, §11.1's 826 of 1,059 tasks), the defect log (the 129 tasks classified
 `defect` by `wbs.py`) and the decision record — a work package that changes direction mid-course states
 why in its own entry rather than in a separate minute.
 
@@ -521,7 +521,7 @@ for that reason rather than left off the record because it cannot be closed.
 
 Pressman's 40-20-40 allocation splits effort roughly evenly between up-front analysis and design,
 construction, and validation. This project's measured effort (§11.5.1's hour breakdown) does not
-match it: of the 7,661 nominal hours the delivered code represents, 1,043 are attributed to automated
+match it: of the 7,734 nominal hours the delivered code represents, 1,073 are attributed to automated
 tests — about 14% of the total, well under the 40% the model prescribes for validation, with the
 remaining share split across backend, web and mobile construction and no separately-tracked analysis
 and design phase at all, because §4.4 already establishes that this project ran incrementally rather
@@ -529,7 +529,7 @@ than in Pressman's staged form.
 
 That gap is reported rather than explained away. A single maintainer with no separate QA role has to
 choose where review time goes, and the record shows it went disproportionately into fixing what
-testing found rather than into writing more of it: §11.1 shows 129 tasks classified as defects and 297
+testing found rather than into writing more of it: §11.1 shows 129 tasks classified as defects and 298
 as review findings, both arriving after code existed to find something wrong with, which is a
 retrospective form of quality assurance rather than the 40% up-front and 40% back-end split Pressman's
 model assumes a resourced team can afford.
@@ -555,7 +555,7 @@ quoting a figure that does not yet exist.
 Three things this project would do differently, stated plainly rather than as a list of virtues.
 
 First, the tracker should have separated the plan from the change log from the start, even while both
-lived in the same file. §11.1 and §11.8 show that most of the tracker's 1,006 tasks arrived
+lived in the same file. §11.1 and §11.8 show that most of the tracker's 1,059 tasks arrived
 reactively; nothing about the file's structure distinguishes a planned work package from one raised by
 a defect except the prose in its own heading, which is why `wbs.py` has to classify each one by regex
 against wording rather than by a field that was there to record it at the time.
@@ -575,10 +575,10 @@ measurement precisely because it does not claim to be an effort prediction it ca
 ## 11.12 Summary
 
 This chapter counted the same project five different ways and did not let the counts agree by
-force. The critical path is 63 working days; 86 are evidenced by a commit; 236 elapsed on the
+force. The critical path is 64 working days; 87 are evidenced by a commit; 238 elapsed on the
 calendar between the first and the last. The delivered codebase, priced at conventional rates with no
-reduction, represents 958 working days; four reductions, three of them judged and one measured, bring
-that to 388; the record can evidence 164. Seventy-seven per cent of the tracker's 1,006 tasks arrived
+reduction, represents 967 working days; four reductions, three of them judged and one measured, bring
+that to 392; the record can evidence 166. Seventy-eight per cent of the tracker's 1,059 tasks arrived
 after the work they belong to had already started. A function-point count of the delivered system,
 simplified and stated as such, comes to 2,223 unadjusted points, and could not be converted to an
 effort or cost figure without a productivity rate this project has no defensible source for — recorded

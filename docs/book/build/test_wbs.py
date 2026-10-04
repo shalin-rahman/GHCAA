@@ -90,5 +90,33 @@ class NoCommitCheck(unittest.TestCase):
         self.assertTrue(wbs.expects_commits(["GHCAA.API"], ["90"], {}))
 
 
+class TrackerItemShapes(unittest.TestCase):
+    """WP37 writes items as "- **37.13m Title [TODO] Priority: P1 ...**". The patterns only
+    knew "7.16 [TODO] **Priority: P3.**" until 2026-10-04, so 48 items were left out of the
+    task totals and 27 open ones out of the remaining hours quoted in Chapter 11."""
+
+    TEXT = (
+        "7.16 [IN-PROGRESS] **Priority: P3.** plain shape\n"
+        "7.17 [TODO] **Priority: P2 | Depends on: none.** plain open\n"
+        "  more text for 7.17\n"
+        "  - **37.13m Count executor [TODO] Priority: P1 | Depends on: 37.13h.** bold open\n"
+        "  - **37.13h Count approval [DONE 2026-10-03] Priority: P1 | Depends on: none.** bold done\n"
+        "1.5 hours each [see table] is prose, not an item\n"
+    )
+
+    def test_both_shapes_are_counted_as_items(self):
+        found = [(m.group(2), m.group(3), m.group(4)) for m in wbs.ITEM.finditer(self.TEXT)]
+        self.assertEqual(found, [("7", "16", "IN-PROGRESS"), ("7", "17", "TODO"),
+                                 ("37", "13m", "TODO"), ("37", "13h", "DONE 2026-10-03")])
+
+    def test_open_items_carry_their_priority_in_either_shape(self):
+        entries = [m.group(0) for m in wbs.OPEN_ITEM.finditer(self.TEXT)]
+        self.assertEqual([wbs.PRIORITY.search(e).group(1) for e in entries], ["P2", "P1"])
+        # An open item runs to the next item of either shape, not into it.
+        self.assertIn("more text for 7.17", entries[0])
+        self.assertNotIn("bold open", entries[0])
+        self.assertNotIn("bold done", entries[1])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

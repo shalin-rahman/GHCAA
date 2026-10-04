@@ -226,6 +226,38 @@ tests are in [plan-officials.md](plan-officials.md); this section only states th
   to the election timeline and turnout after polling closes. Members with no persona shown do not
   appear.
 
+The count, settings and freeze rules below were raised on 2026-10-04 as COUNT-APP-001 to 004 and
+COUNT-CONFIG-001 and 002, plus a freeze rule. They are security and audit rules, so the API enforces
+them. A screen that hides a button is not enough.
+
+- **FR-034** A count needs approval by a second official who is not the requester, and the approver
+  may not run the approved count (COUNT-APP-001, 002). Built by 37.13h.
+- **FR-035** The requester, approver and executor of a count are stored separately on the approval
+  row and named in the election's activity record (COUNT-APP-003). TODO 37.13m.
+- **FR-036** Any official with the Count permission other than the approver may run an approved
+  count. The `CountRequesterOnly` setting, off by default, limits it to the requester
+  (COUNT-APP-004). TODO 37.13n.
+- **FR-037** New sites have Count in the two-person list by default. An existing site keeps its saved
+  list until an authorized admin changes it, and an upgrade never rewrites it (COUNT-CONFIG-001,
+  002). TODO 37.13o.
+- **FR-038** Every change to the election settings is recorded with who, when, and the old and new
+  values. TODO 37.13p.
+Freeze rule, as the owner set it on 2026-10-04: normal administrative changes are frozen from
+Polling through Declared. Only defined emergency security actions can bypass the lock, and every
+bypass needs independent authorization and a complete audit record.
+
+- **FR-039** Election security and authorization rules cannot change from an OpenPolling request
+  until the result is declared: the election settings, persona permissions, and appointments to that
+  election. The API refuses the change and records the refused attempt. TODO 37.13q.
+- **FR-040** During that window the only exception is revoking an official's appointment. A
+  SuperAdmin with step-up and a written reason asks. Another active official on that election with
+  Approve, who is neither the requester nor the target, approves. Eligibility, the target and the
+  request are checked again when it runs, and it runs once. With nobody eligible it is refused, and
+  SuperAdmin cannot skip the approval. The record keeps requester, approver, target, reason, the
+  appointment before and after, the time and the outcome. TODO 37.13r.
+- **FR-041** The Returning Officer is identified by an explicit flag on the election appointment,
+  with at most one active per election, never by persona name. TODO 37.13s.
+
 ## Receipt and print standard
 
 Standard 2, receipt-freeness, decides what the voter may print.
@@ -268,6 +300,14 @@ strict receipt-freeness, print the tracking code only (option B in D1).
   project date, not an election setting. The election's own dates (nomination, polling open and
   close) are already set on the create screen. `ScrutinyOn` and `WithdrawalClosesOn` are not on the
   create screen yet and are added with the setup work in Phase 2.
+- **D4 Count roles, settings audit and freeze.** Decided 2026-10-04. The count executor gets its own
+  column plus an activity row. Requester-only counting is a setting, off by default. The freeze runs
+  from an OpenPolling request to Declared, covers the election settings, personas and appointments,
+  and refuses changes outright rather than warning. Only defined emergency security actions bypass it, each
+  with independent approval and a full audit record. In the first version the only such action is
+  revoking an official. Any other active official on the election with Approve approves it, not
+  only the Returning Officer. The Returning Officer is marked on the appointment, not found by
+  persona name.
 
 ## What the vote record keeps about the request
 
@@ -321,6 +361,12 @@ TODO 37.1s closed the database-access gaps the security review of 2026-09-27 fou
   left, because plain choices cannot be sealed without the officer's key. Its `Down` pairs receipts
   back to ballots at random, since the link is gone by design. It uses `gen_random_uuid()`, which
   needs Postgres 13 or later.
+- Appointments are frozen during polling and counting, so a new approver cannot be added then. If
+  the only other official with Approve is the one compromised, nobody can approve the revocation
+  and it waits until the result is declared. Appoint at least two officials with Approve before
+  polling opens; the admin screen warns when there are fewer (TODO 37.13t).
+- Revoking an official removes their access in the app. It does not revoke a copy of the private
+  ballot key they may hold outside it. A key thought copied needs the key replacement step.
 
 ## Acceptance criteria
 

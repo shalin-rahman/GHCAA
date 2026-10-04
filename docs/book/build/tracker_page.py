@@ -14,7 +14,10 @@ OUT = ROOT / "docs" / "book" / "build" / "tracker.html"
 HEAD = re.compile(r"^#+ *Work Package (\d+)[ \u2014:-]*(.*)$")
 # The bracket sometimes carries a trailing date or note, e.g. "[DONE 2026-09-05]"
 # or "[DONE \u2014 see 40.11]", so the state word and that trailing text are two groups.
-ITEM = re.compile(r"^(\d+)\.(\d+[a-z]?) *\[(TODO|IN PROGRESS|BLOCKED|ONHOLD|PARTIAL|DONE)([^\]]*)\]\s*(.*)$")
+# WP37 writes most items as "- **37.13m Title [TODO] Priority: P1 | ...** text". A title
+# is only allowed after the bullet and bold, so a numbered prose line is not an item.
+ITEM = re.compile(r"^(?P<bold>\s*- \*\*)?(\d+)\.(\d+[a-z]?)(?(bold)(?: (?P<title>[^\[\n]*?))?) *"
+                  r"\[(TODO|IN PROGRESS|BLOCKED|ONHOLD|PARTIAL|DONE)([^\]]*)\]\s*(.*)$")
 
 # Same shape as wbs.py's DEFECT pattern, applied per item instead of per work
 # package, so the tracker page can flag individual bug/defect entries.
@@ -99,8 +102,9 @@ def parse():
         m = ITEM.match(line)
         if not m:
             continue
-        num = int(m.group(1))
-        body = [m.group(5)]
+        num = int(m.group(2))
+        # Put the opening bold back, so "Priority: P1 | ...**" reads as the usual meta run.
+        body = [("**" if m.group("bold") else "") + m.group(7)]
         for nxt in lines[i + 1:]:
             if not nxt.strip() or ITEM.match(nxt) or nxt.startswith("#"):
                 break
@@ -117,12 +121,14 @@ def parse():
         clean = re.sub(r"Priority:\s*P\d\s*[.|]?", "", clean)
         clean = re.sub(r"Depends on:?\s*(?:none|[\d.,a-z\s]+?)\.", "", clean, count=1)
         clean = re.sub(r"^[\s|*.]+", "", clean).strip()
+        if m.group("title"):
+            clean = f"{m.group('title').strip()}. {clean}"
         cat, cat_note = classify(num, blob)
-        state = m.group(3)
-        note = m.group(4).strip(" —-:")
+        state = m.group(5)
+        note = m.group(6).strip(" —-:")
         pr_val = pr.group(1) if pr else "none"
         items.append(dict(
-            id=f"{m.group(1)}.{m.group(2)}", wp=num, state=state,
+            id=f"{m.group(2)}.{m.group(3)}", wp=num, state=state,
             state_label=(f"{state} {note}".strip() if note else state),
             status=("closed" if state == "DONE" else "open"),
             pr=pr_val,
@@ -488,4 +494,5 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
 </script>
 """
 
-main()
+if __name__ == "__main__":
+    main()

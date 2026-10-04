@@ -300,6 +300,10 @@ Acceptance Scenarios:
 - FR-033: The system shall aggregate an authenticated Member's own pending submissions and
   requests via GET api/pending/me/summary, returning 401 when no member-id claim is present on
   the caller's token. [code+test]
+- FR-034: The system shall offer a social sign-in provider only when Features.EnableSocialAuth
+  is on, the provider is enabled, and its client credentials are set. GET api/auth/providers
+  returns nothing otherwise and the clients show no social buttons. Raised as AUTH-SOCIAL-001
+  and 002 on 2026-10-04. Production keeps it off. [planned, TODO 7.17]
 
 ### Key Entities
 
@@ -361,6 +365,7 @@ Acceptance Scenarios:
 - ResetPasswordAdmin returns the reset URL directly in the API response because system-admin User rows have no email address to send it to. This bypasses the normal reset-password delivery channel and puts a live reset link in the HTTP response body and, by extension, in any client-side logging of that response.
 - SocialLoginAsync auto-links an existing Member/User to a Google or Facebook identity only when the provider's verified email matches an existing account; the actual member-approval workflow (Applied to Active) is owned by AdminController, outside this spec's six controllers, so the boundary between registration/auth and approval is split across two controllers with no shared contract documented in code. [NEEDS CLARIFICATION: should the approve/reject workflow in AdminController be pulled into this spec's boundary, or does it remain a separate domain?]
 - MemberImportController.Import validates the workbook and each photo file but the Evidence table shows no test asserting partial-row-failure behaviour (e.g., row 5 invalid, rows 1-4 valid). GHCAA.Tests/Services/MemberImportServiceTests.cs was not confirmed to cover mixed-outcome batches.
+- Features.EnableSocialAuth is read nowhere. GetProviders lists any enabled provider row, and the web login page then loads Google and Facebook scripts that the CSP blocks, so the buttons fail. TODO 7.17.
 - AuthController.Me and AuthController.GetProviders have no dedicated test coverage found in GHCAA.Tests/Controllers/AuthControllerTests.cs or AuthControllerMutationTests.cs.
 
 ## Enhancements: modularisation and reusability

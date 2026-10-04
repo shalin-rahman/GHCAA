@@ -217,7 +217,10 @@ ASSUMED = [
 
 HOURS_PER_DAY = 8.0
 
-ITEM = re.compile(r"^\s*(\d+)\.(\d+[a-zA-Z]?)\s*\[([^\]]*)\]", re.M)
+# Items come in two shapes: "7.16 [TODO] **Priority: P3.** text", and in WP37 mostly
+# "- **37.13m Title [TODO] Priority: P1 | ...** text". A title is only allowed after the
+# bullet and bold, so a numbered prose line with a bracket further on is not an item.
+ITEM = re.compile(r"^\s*(- \*\*)?(\d+)\.(\d+[a-zA-Z]?)(?(1)(?: [^\[\n]*?)?)\s*\[([^\]]*)\]", re.M)
 # Headings were "Area N" until 2026-09-03 and are being renamed to "Work Package N".
 # Both forms parse while the rename runs.
 AREA_HEAD = re.compile(r"^#+ *(?:AREA|Area|WORK PACKAGE|Work Package) (\d+)[^\n]*", re.M)
@@ -418,10 +421,11 @@ HOURS_PER_WORKDAY = 8
 
 PLACEHOLDER = re.compile(r"^\s*\*\[", re.M)
 OPEN_ITEM = re.compile(
-    r"^\s*\d+\.\d+[a-z]?\s*\[TODO\][^\n]*(?:\n(?!\s*\d+\.\d+[a-z]?\s*\[)[^\n]*)*", re.M)
+    r"^\s*(- \*\*)?\d+\.\d+[a-z]?(?(1)(?: [^\[\n]*?)?)\s*\[TODO\][^\n]*"
+    r"(?:\n(?!\s*\d+\.\d+[a-z]?\s*\[|\s*- \*\*\d+\.\d+[a-z]? )[^\n]*)*", re.M)
 # ONHOLD items are not counted as remaining engineering effort: they're blocked on something
 # outside this session (user action, a business decision) rather than schedulable work.
-PRIORITY = re.compile(r"\*\*Priority: (P[0-4])")
+PRIORITY = re.compile(r"(?:\*\*|\] )Priority: (P[0-4])")
 
 
 def remaining():
@@ -448,8 +452,8 @@ def remaining():
                           if line.startswith(("- Figure ", "- Table ", "- Listings"))])
     items = collections.Counter()
     text = _tracked_text()
-    for entry in OPEN_ITEM.findall(text):
-        found = PRIORITY.search(entry)
+    for match in OPEN_ITEM.finditer(text):
+        found = PRIORITY.search(match.group(0))
         items[found.group(1) if found else "none"] += 1
     return sections, artefacts, items
 
@@ -583,9 +587,9 @@ def tracker():
         else:
             arrival[area] = "planned"
     for match in ITEM.finditer(text):
-        area = match.group(1)
+        area = match.group(2)
         tasks[area] += 1
-        if match.group(3).strip().upper().startswith("DONE"):
+        if match.group(4).strip().upper().startswith("DONE"):
             done[area] += 1
     # An item numbered for an area whose heading the pattern missed would be
     # counted per component and left out of the arrival totals, understating the
