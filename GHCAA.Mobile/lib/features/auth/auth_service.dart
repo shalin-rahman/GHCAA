@@ -9,6 +9,7 @@ import '../../core/real_time/notification_hub_service.dart';
 import '../../core/router/app_router.dart';
 import '../../core/models/auth_models.dart';
 import '../../core/models/member_profile.dart';
+import '../../core/constants/app_constants.dart';
 
 
 final authServiceProvider = Provider<AuthService>((ref) {
@@ -257,6 +258,12 @@ class AuthService {
 // Invalidate explicitly after login/logout via ref.invalidate(roleProvider).
 final roleProvider = FutureProvider<String?>((ref) async {
   return ref.read(authServiceProvider).getRole();
+});
+
+// Follows roleProvider, so it refreshes when that is invalidated at login or logout.
+final isSuperAdminProvider = FutureProvider<bool>((ref) async {
+  await ref.watch(roleProvider.future);
+  return ref.read(authServiceProvider).hasRole(ElectionConstants.superAdminRole);
 });
 
 /// Canonical list of profile fields for completeness calculation.

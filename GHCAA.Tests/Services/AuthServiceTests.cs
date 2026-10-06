@@ -40,7 +40,7 @@ namespace GHCAA.Tests.Services
             _mockOrgConfigService = new Mock<IOrgConfigService>();
             _mockOrgConfigService.Setup(x => x.GetConfigAsync())
                 .ReturnsAsync(new OrgConfigDto { Branding = new BrandingDto { ShortName = "GHCAA" } });
-            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object, _appSettings, _mockHttp.Object, _mockEmail.Object, _mockCommunicationService.Object, _mockOrgConfigService.Object);
+            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object, _appSettings, _mockHttp.Object, _mockEmail.Object, _mockCommunicationService.Object, _mockOrgConfigService.Object, new SocialAuthConfigService(_context, _mockOrgConfigService.Object));
             _service.PasswordResetResponseFloor = TimeSpan.Zero;
         }
 

@@ -57,7 +57,35 @@ describe('Login Component', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should start a sequential login status and hide it on success', () => {
+    // 7.17, spec 012 FR-034. This spec does not render the template, so it checks the state
+    // the template reads rather than the DOM.
+    it('loads no provider script when the server lists none', () => {
+        const initGoogle = vi.spyOn(component, 'initGoogleAuth').mockImplementation(() => undefined);
+        const initFacebook = vi.spyOn(component, 'initFacebookAuth').mockImplementation(() => undefined);
+
+        component.loadSocialProviders();
+
+        expect(component.socialProviders()).toEqual([]);
+        expect(initGoogle).not.toHaveBeenCalled();
+        expect(initFacebook).not.toHaveBeenCalled();
+    });
+
+    it('enables only the providers the server lists', () => {
+        const initGoogle = vi.spyOn(component, 'initGoogleAuth').mockImplementation(() => undefined);
+        const initFacebook = vi.spyOn(component, 'initFacebookAuth').mockImplementation(() => undefined);
+        authServiceMock.getSocialProviders.mockReturnValue(of([{ provider: 'Google', clientId: 'g-id' }]));
+
+        component.loadSocialProviders();
+
+        expect(component.isProviderEnabled('Google')).toBe(true);
+        expect(component.isProviderEnabled('Facebook')).toBe(false);
+        expect(initGoogle).toHaveBeenCalledWith('g-id');
+        expect(initFacebook).not.toHaveBeenCalled();
+    });
+
+    it('should name only the real steps, in order: the check, then opening the portal', async () => {
+        let finishNavigation!: (ok: boolean) => void;
+        vi.mocked(router.navigate).mockReturnValue(new Promise<boolean>(resolve => finishNavigation = resolve));
         authServiceMock.login.mockReturnValue(new Observable(subscriber => {
             setTimeout(() => subscriber.next({ role: 'User' }), 2500);
             return () => undefined;
@@ -67,14 +95,31 @@ describe('Login Component', () => {
         component.onLogin(mockForm);
 
         expect(component.loading()).toBe(true);
-        expect(component.loginStatus()).toBe('Checking your details');
+        expect(component.loginStatus()).toBe('Checking your username and password');
 
+        // The password check is still running, so the text must not move on by itself.
         vi.advanceTimersByTime(2000);
-        expect(component.loginStatus()).toBe('Verifying your password');
+        expect(component.loginStatus()).toBe('Checking your username and password');
 
         vi.advanceTimersByTime(500);
+        expect(component.loading()).toBe(true);
+        expect(component.loginStatus()).toBe('Opening your portal');
+
+        finishNavigation(true);
+        await Promise.resolve();
         expect(component.loading()).toBe(false);
         expect(component.loginStatus()).toBeNull();
+    });
+
+    it('should give the button back when the navigation after login is refused', async () => {
+        vi.mocked(router.navigate).mockResolvedValue(false);
+        authServiceMock.login.mockReturnValue(of({ role: 'User' }));
+        component.credentials = { username: 'user', password: 'password' };
+
+        component.onLogin(mockForm);
+        await Promise.resolve();
+
+        expect(component.loading()).toBe(false);
     });
 
     it('should navigate to admin portal for admin role', () => {
@@ -97,7 +142,14 @@ describe('Login Component', () => {
         expect(component.errorMessage()).toBe('Invalid username or password.');
     });
 
-    it('should still sign in when the server answers after the old 8 second limit', () => {
+    it('should show the reason the API gives in a problem response', () => {
+        authServiceMock.login.mockReturnValue(throwError(() => ({ status: 401, error: { title: 'Unauthorized', detail: 'Invalid username or password' } })));
+        component.onLogin(mockForm);
+        expect(component.errorMessage()).toBe('Invalid username or password');
+    });
+
+    it('should still sign in when the server answers after the old 8 second limit', async () => {
+        vi.mocked(router.navigate).mockResolvedValue(true);
         authServiceMock.login.mockReturnValue(new Observable(subscriber => {
             setTimeout(() => subscriber.next({ role: 'User' }), 20000);
             return () => undefined;
@@ -106,29 +158,29 @@ describe('Login Component', () => {
 
         component.onLogin(mockForm);
         vi.advanceTimersByTime(20000);
+        await Promise.resolve();
 
         expect(component.errorMessage()).toBe('');
         expect(component.loading()).toBe(false);
         expect(router.navigate).toHaveBeenCalledWith(['/portal/dashboard']);
     });
 
-    it('should tell the user the server is waking up and keep cycling instead of freezing', () => {
+    it('should say once that the server is starting up when the reply is slow', () => {
         authServiceMock.login.mockReturnValue(new Observable(() => undefined));
         component.credentials = { username: 'slowuser', password: 'password' };
 
         component.onLogin(mockForm);
-        // Past the four normal steps the slow-server messages take over.
-        vi.advanceTimersByTime(4 * 2000);
-        expect(component.loginStatus()).toBe('Waking up the server');
+        vi.advanceTimersByTime(4999);
+        expect(component.loginStatus()).toBe('Checking your username and password');
 
-        const seen = new Set<string>();
-        for (let i = 0; i < 20; i++) {
-            vi.advanceTimersByTime(2000);
-            seen.add(component.loginStatus()!);
-        }
+        vi.advanceTimersByTime(1);
+        const waking = component.loginStatus();
+        expect(waking).toBe('The server is starting up. This can take up to a minute.');
 
+        // It stays put rather than cycling through more lines.
+        vi.advanceTimersByTime(40000);
         expect(component.loading()).toBe(true);
-        expect(seen).toEqual(new Set(['Waking up the server', 'This can take up to a minute', 'Still signing you in']));
+        expect(component.loginStatus()).toBe(waking);
     });
 
     it('should stop and cancel the request when the server does not respond within 60 seconds', () => {

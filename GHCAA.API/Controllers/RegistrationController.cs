@@ -107,7 +107,15 @@ namespace GHCAA.API.Controllers
         [EnableRateLimiting(Constants.RateLimitPolicies.Auth)]
         public async Task<IActionResult> ResendOtp([FromBody] ResendOtpDto dto, CancellationToken cancellationToken)
         {
-            var success = await _memberService.ResendOtpAsync(dto.Email, cancellationToken);
+            bool success;
+            try
+            {
+                success = await _memberService.ResendOtpAsync(dto.Email, cancellationToken);
+            }
+            catch (OtpDeliveryException)
+            {
+                return Problem(detail: "The code could not be emailed. Try again in a few minutes.", statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
             if (!success)
             {
                 return Problem(detail: "Could not resend OTP. Ensure the email is correct and not already verified.", statusCode: StatusCodes.Status400BadRequest);

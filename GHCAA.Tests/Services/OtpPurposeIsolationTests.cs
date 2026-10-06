@@ -22,6 +22,8 @@ public class OtpPurposeIsolationTests : TestBase
     public void Setup()
     {
         var mockCommunication = new Mock<ICommunicationService>();
+        mockCommunication.Setup(x => x.SendEmailByCodeAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<GHCAA.Domain.Models.Member?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
         var mockConfig = new Mock<IConfiguration>();
         var mockLogger = new Mock<ILogger<OtpService>>();
         mockConfig.Setup(x => x["Jwt:Key"]).Returns("otp-service-test-dummy-hmac-key-please-32chars");

@@ -26,6 +26,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly IEmailService _email;
         private readonly ICommunicationService _communicationService;
         private readonly IOrgConfigService _orgConfigService;
+        private readonly ISocialAuthConfigService _socialAuth;
 
         public AuthService(ApplicationDbContext db,
             ITokenService tokenService,
@@ -35,7 +36,8 @@ namespace GHCAA.Infrastructure.Services
             IHttpClientFactory httpClientFactory,
             IEmailService email,
             ICommunicationService communicationService,
-            IOrgConfigService orgConfigService)
+            IOrgConfigService orgConfigService,
+            ISocialAuthConfigService socialAuth)
         {
             _db = db;
             _tokenService = tokenService;
@@ -46,6 +48,7 @@ namespace GHCAA.Infrastructure.Services
             _email = email;
             _communicationService = communicationService;
             _orgConfigService = orgConfigService;
+            _socialAuth = socialAuth;
         }
 
         // Tests set this to zero so they do not wait on every forgot-password call.
@@ -142,7 +145,7 @@ namespace GHCAA.Infrastructure.Services
 
             if (user.MemberId.HasValue)
             {
-                await _activityService.LogActivityAsync(user.MemberId.Value, "Login", $"User {user.Username} logged in.", source: "System", cancellationToken: default);
+                await _activityService.LogActivityAsync(user.MemberId.Value, "Login", $"User {user.Username} logged in.", source: Constants.ActivitySources.System, cancellationToken: default);
             }
 
             string? fullName = null;
@@ -177,8 +180,8 @@ namespace GHCAA.Infrastructure.Services
         {
             try
             {
-                var config = await _db.SocialAuthConfigs.FirstOrDefaultAsync(c => c.Provider == Enums.SocialProvider.Google, cancellationToken);
-                if (config == null || !config.IsEnabled)
+                var config = await _socialAuth.FindUsableAsync(Enums.SocialProvider.Google, cancellationToken);
+                if (config == null)
                 {
                     _logger.LogWarning("Google login is disabled or not configured.");
                     return null;
@@ -203,8 +206,8 @@ namespace GHCAA.Infrastructure.Services
         {
             try
             {
-                var config = await _db.SocialAuthConfigs.FirstOrDefaultAsync(c => c.Provider == Enums.SocialProvider.Facebook, cancellationToken);
-                if (config == null || !config.IsEnabled)
+                var config = await _socialAuth.FindUsableAsync(Enums.SocialProvider.Facebook, cancellationToken);
+                if (config == null)
                 {
                     _logger.LogWarning("Facebook login is disabled or not configured.");
                     return null;

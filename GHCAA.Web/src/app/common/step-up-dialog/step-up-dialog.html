@@ -3,13 +3,12 @@
     <div class="modal-box step-up-box">
         <app-modal-header title="Confirm it's you" headingId="step-up-title" closeLabel="Cancel verification" (closed)="stepUp.cancel()"></app-modal-header>
 
-        <div class="modal-content">
-            <p class="text-main">
-                This action is protected. Enter the 6-digit code sent to your registered email
-                address to continue.
-            </p>
+        <div class="modal-body">
+            <p class="text-main">This action is protected. Enter the 6-digit code from your email to continue.</p>
 
-            @if (stepUp.infoMessage(); as info) {
+            @if (stepUp.sending()) {
+            <p class="step-up-info">Sending a code…</p>
+            } @else if (stepUp.infoMessage(); as info) {
             <p class="step-up-info">{{ info }}</p>
             }
 
@@ -24,18 +23,19 @@
                     (keyup.enter)="submit()" [disabled]="stepUp.verifying()" />
             </div>
 
-            <div class="step-up-actions">
-                <button type="button" class="btn btn-primary" (click)="submit()"
-                    [disabled]="!isCodeValid() || stepUp.verifying()">
-                    {{ stepUp.verifying() ? 'Verifying…' : 'Verify and continue' }}
-                </button>
-                <button type="button" class="btn btn-secondary" (click)="stepUp.requestCode()"
-                    [disabled]="stepUp.sending() || stepUp.verifying()">
-                    {{ stepUp.sending() ? 'Sending…' : 'Resend code' }}
-                </button>
-                <button type="button" class="btn btn-secondary" (click)="stepUp.cancel()"
-                    [disabled]="stepUp.verifying()">Cancel</button>
-            </div>
+            <button type="button" class="btn btn-outline btn-sm" (click)="stepUp.requestCode()"
+                [disabled]="stepUp.sending() || stepUp.verifying()">
+                {{ stepUp.sending() ? 'Sending…' : 'Resend code' }}
+            </button>
+        </div>
+
+        <div class="modal-footer step-up-actions">
+            <button type="button" class="btn btn-primary" (click)="submit()"
+                [disabled]="!isCodeValid() || stepUp.verifying()">
+                {{ stepUp.verifying() ? 'Verifying…' : 'Verify and continue' }}
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="stepUp.cancel()"
+                [disabled]="stepUp.verifying()">Cancel</button>
         </div>
     </div>
 </div>

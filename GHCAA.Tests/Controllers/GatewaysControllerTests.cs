@@ -1,3 +1,4 @@
+using GHCAA.Infrastructure.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,6 +31,7 @@ namespace GHCAA.Tests.Controllers
         private Mock<IPaymentCallbackOrchestrator> _callbackOrchestratorMock = null!;
         private Mock<ILogger<GatewaysController>> _loggerMock = null!;
         private IConfiguration _gatewayTestConfig = null!;
+        private const string TestClientUrl = "https://client.example";
         private Mock<IOrgConfigService> _orgConfigMock = null!;
         private GatewaysController _controller = null!;
         private Member _testMember = null!;
@@ -120,7 +122,8 @@ namespace GHCAA.Tests.Controllers
                 paymentConfigService,
                 _loggerMock.Object,
                 _gatewayTestConfig,
-                _orgConfigMock.Object);
+                _orgConfigMock.Object,
+                Microsoft.Extensions.Options.Options.Create(new AppSettingsOptions { ClientUrl = TestClientUrl }));
 
             _testMember = await CreateAndSaveTestMemberAsync("Test Member", "test@test.com", "123", "123");
 
@@ -280,6 +283,7 @@ namespace GHCAA.Tests.Controllers
             var result = await _controller.SSLCommerzCallback(callbackData, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<RedirectResult>());
+            Assert.That(((RedirectResult)result).Url, Does.StartWith($"{TestClientUrl}/payment/"));
 
             // Controller's job: call the orchestrator with the right transaction ID.
             // Orchestrator internals (DB update, registration approval) are tested in orchestrator unit tests.

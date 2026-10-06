@@ -300,6 +300,21 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
+        public async Task RequestStepUp_Returns503_WhenTheCodeCannotBeEmailed()
+        {
+            var user = await SeedUserAsync(email: "admin@example.com");
+            SetUserContext(_controller, userId: user.Id, role: "SuperAdmin");
+            _otpServiceMock.Setup(x => x.GenerateAndSendOtpAsync("admin@example.com", GHCAA.Domain.Enums.OtpPurpose.AdminStepUp, It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new OtpDeliveryException("admin@example.com"));
+
+            var result = await _controller.RequestStepUp(_otpServiceMock.Object, CancellationToken.None);
+
+            var problem = result as ObjectResult;
+            Assert.That(problem?.StatusCode, Is.EqualTo(StatusCodes.Status503ServiceUnavailable));
+            Assert.That(((ProblemDetails)problem!.Value!).Detail, Does.Contain("adm***@example.com"));
+        }
+
+        [Test]
         public async Task RequestStepUp_ReturnsBadRequest_WhenNoEmailOnFile()
         {
             var user = await SeedUserAsync(email: null);

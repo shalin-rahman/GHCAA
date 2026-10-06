@@ -129,8 +129,9 @@ re-issued token carries the step-up claim, independent of the underlying protect
 
 Acceptance Scenarios:
 1. Given an authenticated Admin with an email on file, When POST
-   api/auth/admin/step-up/request, Then an OTP is generated and emailed; an admin with no
-   email on file gets 400.
+   api/auth/admin/step-up/request, Then an OTP is generated and emailed, and the reply names
+   the masked address it went to; an admin with no email on file gets 400. If the email cannot
+   be sent, the reply is 503 and its message names the masked address.
 2. Given a correct step-up OTP, When POST api/auth/admin/step-up/verify, Then a
    new access_token carrying the step-up claim is issued, and the refresh token is untouched.
 3. Given the access token is refreshed while the step-up epoch is still within
@@ -157,7 +158,9 @@ Acceptance Scenarios:
 4. Given a SuperAdmin caller who has completed step-up, When POST
    api/roles/users/{id}/disable, /enable, DELETE api/roles/users/{id}, or
    /reset-password-admin, Then the action applies only to non-member system-admin
-   accounts; the reset endpoint returns the reset URL directly instead of emailing it.
+   accounts; the reset endpoint returns the reset URL directly instead of emailing it. A
+   DELETE for a user who holds election records (appointments or approvals) is refused with
+   409 and the user is kept. The message tells the caller to deactivate the account instead.
 5. Given a SuperAdmin caller, When GET or PUT api/admin/social-auth or POST
    {provider}/toggle, Then provider config is read, updated, or toggled and ClientSecret is
    always masked or null in the response.
@@ -303,7 +306,7 @@ Acceptance Scenarios:
 - FR-034: The system shall offer a social sign-in provider only when Features.EnableSocialAuth
   is on, the provider is enabled, and its client credentials are set. GET api/auth/providers
   returns nothing otherwise and the clients show no social buttons. Raised as AUTH-SOCIAL-001
-  and 002 on 2026-10-04. Production keeps it off. [planned, TODO 7.17]
+  and 002 on 2026-10-04. Production keeps it off. [code+test, TODO 7.17]
 
 ### Key Entities
 
@@ -365,7 +368,7 @@ Acceptance Scenarios:
 - ResetPasswordAdmin returns the reset URL directly in the API response because system-admin User rows have no email address to send it to. This bypasses the normal reset-password delivery channel and puts a live reset link in the HTTP response body and, by extension, in any client-side logging of that response.
 - SocialLoginAsync auto-links an existing Member/User to a Google or Facebook identity only when the provider's verified email matches an existing account; the actual member-approval workflow (Applied to Active) is owned by AdminController, outside this spec's six controllers, so the boundary between registration/auth and approval is split across two controllers with no shared contract documented in code. [NEEDS CLARIFICATION: should the approve/reject workflow in AdminController be pulled into this spec's boundary, or does it remain a separate domain?]
 - MemberImportController.Import validates the workbook and each photo file but the Evidence table shows no test asserting partial-row-failure behaviour (e.g., row 5 invalid, rows 1-4 valid). GHCAA.Tests/Services/MemberImportServiceTests.cs was not confirmed to cover mixed-outcome batches.
-- Features.EnableSocialAuth is read nowhere. GetProviders lists any enabled provider row, and the web login page then loads Google and Facebook scripts that the CSP blocks, so the buttons fail. TODO 7.17.
+- Fixed 2026-10-05 (TODO 7.17): Features.EnableSocialAuth was read nowhere, and GetProviders listed any enabled provider row. `SocialAuthConfigService.GetUsableAsync` now decides for the providers list and both sign-in endpoints.
 - AuthController.Me and AuthController.GetProviders have no dedicated test coverage found in GHCAA.Tests/Controllers/AuthControllerTests.cs or AuthControllerMutationTests.cs.
 
 ## Enhancements: modularisation and reusability

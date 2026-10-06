@@ -7,9 +7,10 @@ import 'package:ghcaa_mobile/core/api/step_up_interceptor.dart';
 /// FR-39 (37.1w). The vote endpoint answers 403 STEP_UP_REQUIRED until the
 /// request carries the re-issued token. Records every path it sees.
 class _StepUpAdapter implements HttpClientAdapter {
-  _StepUpAdapter({this.verifyStatus = 200});
+  _StepUpAdapter({this.verifyStatus = 200, this.sendStatus = 200});
 
   final int verifyStatus;
+  final int sendStatus;
   final List<String> paths = [];
   final List<String?> authHeaders = [];
 
@@ -29,7 +30,10 @@ class _StepUpAdapter implements HttpClientAdapter {
     paths.add(options.path);
     authHeaders.add(options.headers['Authorization'] as String?);
     if (options.path == StepUpInterceptor.requestPath) {
-      return ResponseBody.fromString('{}', 200, headers: _json);
+      if (sendStatus != 200) {
+        return ResponseBody.fromString('{"detail":"The code could not be emailed."}', sendStatus, headers: _json);
+      }
+      return ResponseBody.fromString('{"sentTo":"sha*****@example.com"}', 200, headers: _json);
     }
     if (options.path == StepUpInterceptor.verifyPath) {
       return verifyStatus == 200
@@ -47,17 +51,19 @@ void main() {
   late Dio dio;
   late _StepUpAdapter adapter;
   String? savedToken;
+  String? promptedSentTo;
   int prompts = 0;
 
-  Dio build({String? code, int verifyStatus = 200}) {
+  Dio build({String? code, int verifyStatus = 200, int sendStatus = 200}) {
     savedToken = null;
     prompts = 0;
-    adapter = _StepUpAdapter(verifyStatus: verifyStatus);
+    adapter = _StepUpAdapter(verifyStatus: verifyStatus, sendStatus: sendStatus);
     final d = Dio()..httpClientAdapter = adapter;
     d.interceptors.add(StepUpInterceptor(
       dio: d,
-      promptForCode: () async {
+      promptForCode: (sentTo) async {
         prompts++;
+        promptedSentTo = sentTo;
         return code;
       },
       saveToken: (t) async => savedToken = t,
@@ -82,6 +88,14 @@ void main() {
     expect(adapter.authHeaders.last, 'Bearer stepped-up');
   });
 
+  test('the prompt is told the masked address the code went to', () async {
+    dio = build(code: '123456');
+
+    await dio.post('/elections/1/vote');
+
+    expect(promptedSentTo, 'sha*****@example.com');
+  });
+
   test('FR-39: cancelling the prompt returns the original 403', () async {
     dio = build(code: null);
 
@@ -102,11 +116,21 @@ void main() {
     expect(adapter.paths.where((p) => p == '/elections/1/vote').length, 1);
   });
 
+  test('a code that could not be emailed returns the send error, not the 403', () async {
+    dio = build(code: '123456', sendStatus: 503);
+
+    final err = await dio.post('/elections/1/vote').then<DioException?>((_) => null, onError: (e) => e as DioException);
+
+    expect(err?.response?.statusCode, 503);
+    expect((err?.response?.data as Map)['detail'], 'The code could not be emailed.');
+    expect(prompts, 0);
+  });
+
   test('a plain 403 without the step-up code passes straight through', () async {
     dio = Dio()..httpClientAdapter = _Plain403Adapter();
     dio.interceptors.add(StepUpInterceptor(
       dio: dio,
-      promptForCode: () async {
+      promptForCode: (_) async {
         prompts++;
         return '1';
       },

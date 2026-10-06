@@ -177,9 +177,9 @@ final dioProvider = Provider<Dio>((ref) {
   // 37.1w: a 403 with STEP_UP_REQUIRED asks for the emailed code and retries once.
   dio.interceptors.add(StepUpInterceptor(
     dio: dio,
-    promptForCode: () async {
+    promptForCode: (sentTo) async {
       final context = rootNavigatorKey.currentContext;
-      return context == null ? null : showStepUpDialog(context);
+      return context == null ? null : showStepUpDialog(context, sentTo: sentTo);
     },
     saveToken: storage.saveToken,
   ));

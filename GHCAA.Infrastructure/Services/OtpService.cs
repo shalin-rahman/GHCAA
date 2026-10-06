@@ -73,7 +73,8 @@ namespace GHCAA.Infrastructure.Services
 
             // Send the plaintext code in the email — the hash is never exposed
             var customVars = new Dictionary<string, string> { { "OtpCode", plainCode } };
-            await _communication.SendEmailByCodeAsync(email, "OTP_EMAIL", customVars, null, cancellationToken);
+            if (!await _communication.SendEmailByCodeAsync(email, "OTP_EMAIL", customVars, null, cancellationToken))
+                throw new OtpDeliveryException(email);
 
             _logger.LogInformation("OTP generated for {Email}", email);
             return plainCode;

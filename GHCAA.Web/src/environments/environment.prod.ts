@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://haragangian.com/api' // The exact Production backend API
+  // Same origin as the site (7.19), so www and the apex both reach the API without CORS.
+  apiUrl: '/api'
 };

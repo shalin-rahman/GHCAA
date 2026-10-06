@@ -245,13 +245,13 @@ namespace GHCAA.Infrastructure.Services
             await SendEmailByCodeAsync(member.Email, templateCode, customVars, member, cancellationToken);
         }
 
-        public async Task SendEmailByCodeAsync(string to, string templateCode, Dictionary<string, string>? customVars = null, Member? member = null, CancellationToken cancellationToken = default)
+        public async Task<bool> SendEmailByCodeAsync(string to, string templateCode, Dictionary<string, string>? customVars = null, Member? member = null, CancellationToken cancellationToken = default)
         {
             var template = await GetTemplateByCodeAsync(templateCode, cancellationToken);
             if (template == null)
             {
                 _logger.LogWarning("Email template {TemplateCode} not found. Skipping email.", templateCode);
-                return;
+                return false;
             }
 
             var vars = await BuildTemplateVariables(member, cancellationToken);
@@ -265,7 +265,7 @@ namespace GHCAA.Infrastructure.Services
             string subject = ReplacePlaceholders(template.Subject, vars, encodeHtml);
             string body = ReplacePlaceholders(template.Body, vars, encodeHtml);
 
-            await SendAndLogAsync(
+            return await SendAndLogAsync(
                 template.Channel == MessageChannel.Sms ? member?.MobileNo ?? string.Empty : to,
                 subject,
                 body,
@@ -406,7 +406,7 @@ namespace GHCAA.Infrastructure.Services
                 cancellationToken);
         }
 
-        private async Task SendAndLogAsync(
+        private async Task<bool> SendAndLogAsync(
             string recipient,
             string subject,
             string body,
@@ -462,6 +462,7 @@ namespace GHCAA.Infrastructure.Services
 
             _db.EmailLogs.Add(log);
             await _db.SaveChangesAsync(cancellationToken);
+            return log.Status == "Sent";
         }
 
         /// <summary>

@@ -9,17 +9,33 @@ namespace GHCAA.Infrastructure.Services
     public class SocialAuthConfigService : ISocialAuthConfigService
     {
         private readonly ApplicationDbContext _db;
+        private readonly IOrgConfigService _orgConfig;
 
-        public SocialAuthConfigService(ApplicationDbContext db)
+        public SocialAuthConfigService(ApplicationDbContext db, IOrgConfigService orgConfig)
         {
             _db = db;
+            _orgConfig = orgConfig;
         }
 
         public Task<List<SocialAuthConfig>> GetAllAsync()
             => _db.SocialAuthConfigs.ToListAsync();
 
-        public Task<List<SocialAuthConfig>> GetEnabledAsync()
-            => _db.SocialAuthConfigs.Where(c => c.IsEnabled).ToListAsync();
+        // The one check the providers list and both sign-in endpoints share, so the login page
+        // never shows a button the server would refuse.
+        public async Task<List<SocialAuthConfig>> GetUsableAsync(CancellationToken ct = default)
+        {
+            if (!(await _orgConfig.GetConfigAsync()).Features.EnableSocialAuth) return [];
+            var enabled = await _db.SocialAuthConfigs.AsNoTracking().Where(c => c.IsEnabled).ToListAsync(ct);
+            return enabled.Where(HasKeys).ToList();
+        }
+
+        public async Task<SocialAuthConfig?> FindUsableAsync(SocialProvider provider, CancellationToken ct = default)
+            => (await GetUsableAsync(ct)).FirstOrDefault(c => c.Provider == provider);
+
+        // Facebook also needs the app secret to check which app a token was issued for (29B.1).
+        private static bool HasKeys(SocialAuthConfig c) =>
+            !string.IsNullOrWhiteSpace(c.ClientId)
+            && (c.Provider != SocialProvider.Facebook || !string.IsNullOrWhiteSpace(c.ClientSecret));
 
         public async Task<SocialAuthConfig> UpsertAsync(SocialProvider provider, SocialAuthConfig update)
         {

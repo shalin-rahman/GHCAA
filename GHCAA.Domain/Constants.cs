@@ -221,6 +221,15 @@ namespace GHCAA.Domain
             public const string Mobile = "Mobile";
         }
 
+        // 7.18. Startup checks on deploy settings that the app cannot see being changed.
+        public static class Deploy
+        {
+            // Activity row written when AllowedOrigins differs from the list last recorded.
+            // Its metadata holds the list, so the newest row is the record to compare against.
+            public const string AllowedOriginsChangedAuditType = "AllowedOriginsChanged";
+            public const string WildcardOrigin = "*";
+        }
+
         public static class Governance
         {
             // 95.3: longest note an admin can give when a committee term ends.

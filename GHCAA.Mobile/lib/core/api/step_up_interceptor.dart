@@ -17,7 +17,8 @@ class StepUpInterceptor extends Interceptor {
   static const _retriedKey = '_stepUpRetried';
 
   final Dio _dio;
-  final Future<String?> Function() promptForCode;
+  // Gets the masked address the code went to, or null when the API did not say.
+  final Future<String?> Function(String? sentTo) promptForCode;
   final Future<void> Function(String token) saveToken;
 
   bool _isStepUpChallenge(DioException err) {
@@ -36,9 +37,18 @@ class StepUpInterceptor extends Interceptor {
       return handler.next(err);
     }
 
+    Response<dynamic> sent;
     try {
-      await _dio.post(requestPath);
-      final code = await promptForCode();
+      sent = await _dio.post(requestPath);
+    } on DioException catch (sendErr) {
+      // Pass on the send failure, not the 403. Its detail says the email did not go out.
+      return handler.next(sendErr);
+    }
+
+    try {
+      final sentBody = sent.data;
+      final sentTo = sentBody is Map ? (sentBody['sentTo'] ?? sentBody['SentTo']) as String? : null;
+      final code = await promptForCode(sentTo);
       if (code == null || code.trim().isEmpty) return handler.next(err);
 
       final verify = await _dio.post(verifyPath, data: {'code': code.trim()});

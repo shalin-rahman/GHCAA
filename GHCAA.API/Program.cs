@@ -86,12 +86,22 @@ builder.Services.AddSignalR();
 builder.Services.AddScoped<IRealTimeService, RealTimeService>();
 builder.Services.AddHostedService<ExpiredRevokeSweep>();
 
+// Checked here rather than inside AddCors, whose options callback only runs on the first request.
+var allowedOrigins = configuration.GetSection(Constants.ConfigKeys.AllowedOrigins).Get<string[]>() ?? Array.Empty<string>();
+if (!builder.Environment.IsDevelopment())
+{
+    if (allowedOrigins.Length == 0)
+        throw new InvalidOperationException($"{Constants.ConfigKeys.AllowedOrigins} must be configured in Production environments.");
+    var originProblems = AllowedOriginsAudit.Problems(allowedOrigins);
+    if (originProblems.Count > 0)
+        throw new InvalidOperationException($"{Constants.ConfigKeys.AllowedOrigins} is not valid: {string.Join(" ", originProblems)}");
+    var clientUrlProblem = AllowedOriginsAudit.ClientUrlProblem(configuration[Constants.ConfigKeys.ClientUrl], allowedOrigins);
+    if (clientUrlProblem is not null)
+        throw new InvalidOperationException(clientUrlProblem);
+}
+
 builder.Services.AddCors(options =>
 {
-    var allowedOrigins = configuration.GetSection("AppSettings:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
-
-    if (!builder.Environment.IsDevelopment() && allowedOrigins.Length == 0)
-        throw new InvalidOperationException("AppSettings:AllowedOrigins must be configured in Production environments.");
 
     options.AddPolicy("AngularApp", policy =>
     {

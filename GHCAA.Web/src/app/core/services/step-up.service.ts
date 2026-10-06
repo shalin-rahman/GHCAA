@@ -45,16 +45,19 @@ export class StepUpService {
         this.sending.set(true);
         this.errorMessage.set(null);
 
-        this.http.post(API_ENDPOINTS.AUTH.STEP_UP_REQUEST, {}, {
+        this.http.post<{ sentTo?: string }>(API_ENDPOINTS.AUTH.STEP_UP_REQUEST, {}, {
             headers: { 'X-Skip-Error-Notify': 'true' }
         }).pipe(
             catchError(err => {
-                this.errorMessage.set(err?.error?.message || 'Could not send a verification code.');
+                this.errorMessage.set(err?.error?.detail || err?.error?.message || 'Could not send a verification code.');
                 return of(null);
             })
         ).subscribe(res => {
             this.sending.set(false);
-            if (res !== null) this.infoMessage.set('A verification code has been sent to your registered email.');
+            if (res === null) return;
+            this.infoMessage.set(res?.sentTo
+                ? `A verification code has been sent to ${res.sentTo}.`
+                : 'A verification code has been sent to your registered email.');
         });
     }
 
@@ -68,7 +71,7 @@ export class StepUpService {
         }).pipe(
             map(() => true),
             catchError(err => {
-                this.errorMessage.set(err?.error?.message || 'That code is invalid or has expired.');
+                this.errorMessage.set(err?.error?.detail || err?.error?.message || 'That code is invalid or has expired.');
                 return of(false);
             }),
             tap(() => this.verifying.set(false))

@@ -23,6 +23,8 @@ public class OtpServiceTests : TestBase
     public void Setup()
     {
         _mockCommunication = new Mock<ICommunicationService>();
+        _mockCommunication.Setup(x => x.SendEmailByCodeAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<GHCAA.Domain.Models.Member?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
         _mockConfig = new Mock<IConfiguration>();
         _mockLogger = new Mock<ILogger<OtpService>>();
         _mockConfig.Setup(x => x["Jwt:Key"]).Returns("otp-service-test-dummy-hmac-key-please-32chars");
@@ -71,6 +73,18 @@ public class OtpServiceTests : TestBase
 
         _mockCommunication.Verify(x => x.SendEmailByCodeAsync(
             email, "OTP_EMAIL", It.IsAny<Dictionary<string, string>>(), null, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    // The step-up dialog used to say "code sent" when the mail server had refused it.
+    [Test]
+    public async Task GenerateAndSendOtpAsync_Throws_WhenTheEmailIsNotSent()
+    {
+        _mockCommunication.Setup(x => x.SendEmailByCodeAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<GHCAA.Domain.Models.Member?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        Func<Task> act = () => _service.GenerateAndSendOtpAsync("otp-fail@example.com");
+
+        await act.Should().ThrowAsync<OtpDeliveryException>();
     }
 
     // 82.17: expiry is now bound to OtpSettingsOptions.ExpiryMinutes via services.Configure<T>,

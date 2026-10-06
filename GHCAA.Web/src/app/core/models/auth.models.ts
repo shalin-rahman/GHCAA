@@ -36,3 +36,9 @@ export interface User {
   roles?: string[];
   electionAppointments?: ElectionAppointmentSummary[];
 }
+
+// One row of GET api/auth/providers. The server lists only providers that can sign in now (7.17).
+export interface SocialProviderConfig {
+    provider: 'Google' | 'Facebook';
+    clientId: string;
+}

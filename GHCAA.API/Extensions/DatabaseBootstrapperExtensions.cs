@@ -186,6 +186,25 @@ namespace GHCAA.API.Extensions
                 app.Logger.LogWarning(ex, "Election persona seed skipped.");
             }
 
+            // 5c. 7.18: record AllowedOrigins when it differs from the last start. Program.cs has
+            // already refused a bad list outside Development.
+            try
+            {
+                using var originsScope = app.Services.CreateScope();
+                var originsCtx = originsScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                if (await originsCtx.Database.CanConnectAsync())
+                {
+                    var origins = app.Configuration.GetSection(ConfigKeys.AllowedOrigins).Get<string[]>() ?? [];
+                    await GHCAA.Infrastructure.Services.AllowedOriginsAudit.RecordIfChangedAsync(originsCtx,
+                        originsScope.ServiceProvider.GetRequiredService<IActivityService>(),
+                        originsScope.ServiceProvider.GetRequiredService<IElectionFreezeService>(), origins);
+                }
+            }
+            catch (Exception ex)
+            {
+                app.Logger.LogWarning(ex, "AllowedOrigins change record skipped.");
+            }
+
             // 6. Force a password reset on existing accounts — off by default. An admin turns this
             // on for one deploy (e.g. after a credential exposure) and back off afterward; it isn't
             // meant to stay on permanently. Only touches rows that don't already have the flag set,

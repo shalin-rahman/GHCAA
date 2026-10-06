@@ -2,7 +2,7 @@ import { Injectable, signal, computed, inject, afterNextRender, effect } from '@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, map, catchError, of, switchMap } from 'rxjs';
-import { LoginDto, TokenResponseDto, User } from '../models/auth.models';
+import { LoginDto, SocialProviderConfig, TokenResponseDto, User } from '../models/auth.models';
 import { API_ENDPOINTS, ROUTES } from '../constants/app.constants';
 
 // Non-sensitive display fields stored in sessionStorage (no token).
@@ -123,8 +123,8 @@ export class AuthService {
         );
     }
 
-    getSocialProviders(): Observable<any[]> {
-        return this.http.get<any[]>(API_ENDPOINTS.AUTH.PROVIDERS);
+    getSocialProviders(): Observable<SocialProviderConfig[]> {
+        return this.http.get<SocialProviderConfig[]>(API_ENDPOINTS.AUTH.PROVIDERS);
     }
 
     googleLogin(idToken: string): Observable<User> {

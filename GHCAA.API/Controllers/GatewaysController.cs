@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GHCAA.Application.Security;
 using GHCAA.API.Extensions;
+using GHCAA.Infrastructure.Options;
+using Microsoft.Extensions.Options;
 
 namespace GHCAA.API.Controllers
 {
@@ -21,6 +23,7 @@ namespace GHCAA.API.Controllers
         private readonly ILogger<GatewaysController> _logger;
         private readonly IConfiguration _config;
         private readonly IOrgConfigService _orgConfig;
+        private readonly AppSettingsOptions _appSettings;
 
         public GatewaysController(
             IPaymentGatewayFactory gatewayFactory,
@@ -30,7 +33,8 @@ namespace GHCAA.API.Controllers
             IPaymentConfigService paymentConfigService,
             ILogger<GatewaysController> logger,
             IConfiguration config,
-            IOrgConfigService orgConfig)
+            IOrgConfigService orgConfig,
+            IOptions<AppSettingsOptions> appSettings)
         {
             _gatewayFactory = gatewayFactory;
             _financialService = financialService;
@@ -40,6 +44,7 @@ namespace GHCAA.API.Controllers
             _logger = logger;
             _config = config;
             _orgConfig = orgConfig;
+            _appSettings = appSettings.Value;
         }
 
         [HttpPost("initiate")]
@@ -303,7 +308,8 @@ namespace GHCAA.API.Controllers
 
         private string GetClientUrl()
         {
-            return _config.GetSection("AppSettings:AllowedOrigins")?.Get<string[]>()?.FirstOrDefault() ?? "http://localhost:4200";
+            // 7.19. Startup checks ClientUrl is an allowed origin outside Development.
+            return _appSettings.ClientUrl;
         }
 
         public class InitiatePaymentRequest

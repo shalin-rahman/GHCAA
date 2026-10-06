@@ -36,6 +36,24 @@ describe('StepUpService', () => {
         expect(service.infoMessage()).toContain('verification code');
     });
 
+    it('names the masked address the code went to', () => {
+        service.challenge().subscribe();
+        httpMock.expectOne(API_ENDPOINTS.AUTH.STEP_UP_REQUEST).flush({ sentTo: 'sha***@gmail.com' });
+
+        expect(service.infoMessage()).toBe('A verification code has been sent to sha***@gmail.com.');
+    });
+
+    it('shows the server reason when the code could not be emailed', () => {
+        service.challenge().subscribe();
+        httpMock.expectOne(API_ENDPOINTS.AUTH.STEP_UP_REQUEST).flush(
+            { detail: 'The code could not be emailed to sha***@gmail.com. Try again in a few minutes.' },
+            { status: 503, statusText: 'Service Unavailable' }
+        );
+
+        expect(service.errorMessage()).toContain('could not be emailed to sha***@gmail.com');
+        expect(service.infoMessage()).toBeNull();
+    });
+
     it('emits true and closes once a valid code is verified', () => {
         const outcome = vi.fn();
         service.challenge().subscribe(outcome);

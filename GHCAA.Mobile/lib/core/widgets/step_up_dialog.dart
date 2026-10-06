@@ -3,7 +3,7 @@ import '../theme/app_theme.dart';
 
 /// 37.1w: asks for the emailed step-up code. Styled like [showConfirmDialog].
 /// Returns the code, or `null` if the user cancels or dismisses it.
-Future<String?> showStepUpDialog(BuildContext context) async {
+Future<String?> showStepUpDialog(BuildContext context, {String? sentTo}) async {
   final controller = TextEditingController();
   final result = await showDialog<String>(
     context: context,
@@ -15,9 +15,11 @@ Future<String?> showStepUpDialog(BuildContext context) async {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'We sent a code to your email. Enter it to continue.',
-            style: TextStyle(color: Colors.white70, height: 1.4),
+          Text(
+            sentTo == null || sentTo.isEmpty
+                ? 'We sent a code to your email. Enter it to continue.'
+                : 'We sent a code to $sentTo. Enter it to continue.',
+            style: const TextStyle(color: Colors.white70, height: 1.4),
           ),
           const SizedBox(height: 12),
           TextField(

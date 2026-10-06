@@ -35,8 +35,8 @@ namespace GHCAA.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetProviders()
         {
-            var enabled = await _socialAuthConfigService.GetEnabledAsync();
-            return Ok(enabled.Select(c => new { c.Provider, c.ClientId }));
+            var usable = await _socialAuthConfigService.GetUsableAsync(HttpContext.RequestAborted);
+            return Ok(usable.Select(c => new { c.Provider, c.ClientId }));
         }
 
         [HttpPost("login")]
@@ -176,8 +176,16 @@ namespace GHCAA.API.Controllers
             if (user == null || string.IsNullOrWhiteSpace(email))
                 return Problem(detail: "No email address is on file for this account, so a verification code cannot be sent. Ask a SuperAdmin to add an email to your account.", statusCode: StatusCodes.Status400BadRequest);
 
-            await otpService.GenerateAndSendOtpAsync(email, Domain.Enums.OtpPurpose.AdminStepUp, cancellationToken);
-            return Ok(new { Message = "A verification code has been sent to your registered email address." });
+            var sentTo = GHCAA.Application.Security.EmailMask.Mask(email);
+            try
+            {
+                await otpService.GenerateAndSendOtpAsync(email, Domain.Enums.OtpPurpose.AdminStepUp, cancellationToken);
+            }
+            catch (OtpDeliveryException)
+            {
+                return Problem(detail: $"The code could not be emailed to {sentTo}. Try again in a few minutes. If it keeps failing, the site's email settings need checking.", statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+            return Ok(new { Message = $"A verification code has been sent to {sentTo}.", SentTo = sentTo });
         }
 
         [HttpPost("step-up/verify")]
