@@ -140,6 +140,7 @@ app.UseForwardedHeaders(forwardedHeadersOptions);
 
 // Middleware Pipeline
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<WwwRedirectMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseCors("AngularApp");
 
