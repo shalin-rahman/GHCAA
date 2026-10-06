@@ -58,6 +58,18 @@ Tribunal Member, and ECSC (Search Committee) Member. Each persona carries:
 6. Someone can hold a post at all only if they aren't also a candidate in the same election, and
    in the case of whoever accepts or rejects nominations, only if they didn't nominate or second
    the candidate they're deciding on.
+7. **The Returning Officer is flagged.** An appointment to the Returning Officer post carries a flag
+   that marks it as the live Returning Officer. An election has one live Returning Officer. When a
+   new one is appointed, the earlier appointment is expired (its reason is recorded as "Expired")
+   rather than left standing beside it.
+8. **Appointments are made from the officials panel**, on the admin web and in the mobile app. The
+   person making the appointment either picks an existing member or gives a name and email. Member
+   search is limited to administrators, so an official using the mobile app gives a name and email.
+9. **An appointment can be revoked** from the same panel. A plain revoke works only while the
+   election's rules are open to change. Once the rules are frozen (stage F), a revoke goes through
+   the emergency revoke described there.
+10. **A user who holds election records cannot be deleted for good.** The request is refused with a
+    conflict, and the user and their records are kept. The user is deactivated instead.
 
 ## 3. The full workflow, step by step
 
@@ -128,6 +140,25 @@ safeguard applies.
 19. **Polling opens.** This needs the ballot-sealing key in place, and — like every sensitive moment
     — needs two people to agree before it starts. *Admin web to generate the key; officials area for
     the two-person approval.*
+    **Before the request goes in, the screen warns** if fewer than two live officials hold the
+    Approve permission. With only one, an emergency revoke during polling could find nobody to
+    approve it. The warning does not stop the request.
+    **From that request until the result is declared, the election rules are frozen.** The freeze
+    starts when an open-polling request is waiting for approval, and it lasts while the election is
+    in Polling or Counting. Running the count does not end it, because the election stays in
+    Counting until the declaration moves it to Declared. While it holds, these changes are refused: the election settings in the
+    organisation configuration, the posts (personas), new appointments, plain revokes, and the
+    ballot key. Each refusal answers with a conflict and the code `ELECTION_RULES_FROZEN`, and is
+    written to the audit history. *Admin web and officials area.*
+    **A SuperAdmin can open a rules unlock** when a frozen rule must change. It is site-wide and
+    time-boxed: 30 minutes by default and 60 at most. It needs a written reason of 20 to 1000
+    characters, and it can be closed early on request. A change made while it is open is audited
+    with the unlock and its reason. An unlock never covers a plain revoke. *Admin web and mobile.*
+    **To remove an official while frozen, use an emergency revoke.** One official asks, giving a
+    reason. A second active official who holds Approve on that election must approve. That second
+    person can be neither the requester nor the person being revoked. A SuperAdmin has no way past
+    this. If nobody acts before the request expires, it lapses, and a background sweep that runs
+    every 15 minutes writes the "expired" row to the audit history. *Officials area, web and mobile.*
 20. **A member logs in and confirms their identity with a one-time code** sent to them at the point
     of voting. *Member web and mobile.*
 21. **The member is shown every seat up for election, with every candidate's name and photo**, and
@@ -142,7 +173,12 @@ safeguard applies.
 ### Stage G — Counting
 
 25. **Polling closes**, needing two people to agree, the same as opening it.
-26. **The Returning Officer opens the ballot-sealing key** to begin the count. *Officials area.*
+26. **The count is approved, then run, as two separate steps.** An official asks for the count and a
+    second person approves it. Approval does not run the count. The requester runs it with the
+    ballot-sealing key, which the Returning Officer holds. If the organisation setting
+    `CountRequesterOnly` is on, only the requester may run it. It is off by default, so any other
+    official with the Count permission, except the approver, may run an approved count. The
+    official who ran it is recorded with the count. *Officials area.*
 27. **Every ballot is opened and counted together, in one pass, in a random order** — never the order
     they were cast — so nobody can work backwards from sequence to guess who voted which way.
 28. **An election with very few ballots is counted by hand instead**, because a tiny automated count
@@ -217,6 +253,9 @@ flowchart TD
 Every colour is a light fill with dark text, so the diagram reads the same whether the page around
 it is light or dark. Blue is the run-up to the vote, amber is the part where real ballots exist,
 green is everything after the result is fixed.
+
+The rules freeze (stage F) is not a status of its own. It runs from an open-polling request waiting
+for approval, through Polling and Counting, so it covers the whole of the amber part.
 
 ### 4.2 Which role writes which record, and when
 
@@ -385,8 +424,9 @@ flowchart TB
 | `Election` | The election itself: title, phase, every stage date, the tie rule, and the returning officer's public ballot key with its fingerprint | The private key, which never reaches the server |
 | `ElectionSeat` | One position being elected and how many places it carries | |
 | `ElectionPersona` | A named post, its recommended headcount, who may hold it, and the permissions it carries | |
-| `ElectionAppointment` | One person appointed to one post for one election, with their acceptance and neutrality declaration | Any standing role that survives the election |
-| `ElectionApproval` | One of the six gated actions, who asked for it and who approved it | An approval by the same person who asked |
+| `ElectionAppointment` | One person appointed to one post for one election, with their acceptance and neutrality declaration, an expiry, and the flag that marks the live Returning Officer | Any standing role that survives the election |
+| `ElectionApproval` | One of the gated actions, who asked for it, who approved it, who executed it, and an open key that stops two identical open requests being stored | An approval by the same person who asked |
+| `ElectionRulesUnlock` | One SuperAdmin unlock of the frozen rules: who opened it, the reason, when it expires, and who closed it early | |
 | `VoterRoll` | Who was eligible at the moment voting opened, and why anyone was not | |
 | `Nomination` | A candidate, their proposer and seconder, their statement and photo, their consent, their published ballot order | |
 | `ScrutinyDecision` | Who ruled on a nomination, the outcome, and the reason | |
@@ -416,26 +456,36 @@ No entity class ever leaves the server: the clients only ever see the request an
 | Input checks | `GHCAA.Application/Validators/ElectionValidators.cs` | What a request must contain before the rules run |
 | The rules | `GHCAA.Application/Interfaces/IElectionService.cs`, `GHCAA.Infrastructure/Services/ElectionService.cs` | Phase guards, nomination and scrutiny, sealing a ballot, counting, ties, declaring, archiving. This is where the process in section 3 is actually enforced |
 | Access and approvals | The election access service and the permission attribute beside `ElectionService` | Which post may take which action, and the two-person rule |
+| The freeze | `GHCAA.Infrastructure/Services/ElectionFreezeService.cs`, `GHCAA.API/Filters/ElectionRulesFrozenFilter.cs` | Whether the rules are frozen, whether an unlock is open, and the refusal that answers a frozen change |
+| Appointments and unlocks | `GHCAA.Infrastructure/Services/ElectionAppointmentService.cs`, `GHCAA.API/Controllers/ElectionAppointmentsController.cs`, `GHCAA.API/Controllers/ElectionRulesUnlockController.cs` | Appointing, revoking and emergency revoke, and opening and closing a rules unlock |
+| Expiry sweep | `GHCAA.API/Services/ExpiredRevokeSweep.cs` | A background service that runs every 15 minutes and records emergency revokes that expired untouched |
 | Filled forms | `GHCAA.Application/Interfaces/IElectionDocumentService.cs`, `GHCAA.Infrastructure/Services/ElectionDocumentService.cs` | The ER forms, filled from the stored records |
 | Endpoints | `GHCAA.API/Controllers/ElectionsController.cs` for members and public pages, `GHCAA.API/Controllers/AdminElectionsController.cs` for the Commission and officials | The only way in from outside |
 | Web types | `GHCAA.Web/src/app/core/models/election.models.ts` | The client's mirror of the transport shapes |
 | Web calls | `GHCAA.Web/src/app/core/services/elections.service.ts` | Every call the website makes |
-| Web screens | `GHCAA.Web/src/app/admin/elections`, `member/election`, `public/elections` | Setup and officials, the ballot, the public pages |
-| Mobile | `GHCAA.Mobile/lib/features/elections/election_service.dart`, `lib/screens/member/election_screen.dart`, `lib/screens/admin/election_management_screen.dart` | The same three surfaces on the app |
+| Web screens | `GHCAA.Web/src/app/admin/elections` (with `election-officials` and `election-rules-unlock`), `member/election`, `public/elections` | Setup and officials, the officials panel, the rules unlock, the ballot, the public pages |
+| Mobile | `GHCAA.Mobile/lib/features/elections/election_service.dart`, `lib/screens/member/election_screen.dart`, `lib/screens/admin/election_management_screen.dart`, `election_officials_sheet.dart`, `election_rules_unlock_sheet.dart` | The same three surfaces on the app, plus the officials and rules-unlock sheets |
 | Tests | `GHCAA.Tests/Services/ElectionServiceTests.cs`, the two controller test files, the web `.spec.ts` files, `GHCAA.Mobile/test/election_service_test.dart` | Every rule above pinned to a test |
 
 ## 5. The two-person rule
 
-Six moments in the process are sensitive enough that no single person should trigger them alone:
+Seven moments in the process are sensitive enough that no single person should trigger them alone:
 publishing the election setup (step 9), opening polling (step 19), replacing the ballot-sealing key
-if it's ever needed, closing polling (step 25), declaring the result (step 30), and archiving the
-election (step 36).
+if it's ever needed, closing polling (step 25), starting the count (step 26), declaring the result
+(step 30), and archiving the election (step 36). These are the seven actions in the default
+two-person setting. An organisation can change that list.
 
 For each of these, one person requests the action and a different, appropriately authorised person
 has to approve it before it happens. The same person can never request and approve the same
 action. This applies by default even to the most senior system administrator; an organisation can
-switch on an emergency setting that lets the top administrator act alone, but that's off unless
-turned on deliberately.
+switch on an emergency setting that lets the top administrator act alone on those seven, but
+that's off unless turned on deliberately.
+
+An eighth action, the emergency revoke of an official (step 19), always needs a second person. It is
+not in the configurable list and the emergency setting does not cover it.
+
+Two identical open requests for the same step cannot both be stored. A second request for a step
+that already has one open is refused. A count that is approved but not yet run counts as open.
 
 ## 6. Secrecy and security, by design
 
@@ -470,7 +520,21 @@ turned on deliberately.
 - **The two key dates** — when scrutiny happens and when withdrawal closes — are set at election
   setup, not fixed in the system.
 - **Can the top administrator skip the two-person rule?** No, by default; switchable for genuine
-  emergencies only.
+  emergencies only. The switch covers the seven configurable actions. It never covers an emergency
+  revoke, which has no SuperAdmin bypass.
+- **A user with election records is never hard-deleted.** The request is refused and the record is
+  kept. The user is deactivated instead.
+- **Emergency revokes that expire are recorded by a background sweep**, every 15 minutes, not when
+  someone next reads the request.
+- **A plain revoke never unlocks a frozen election.** While frozen, an official is removed only by
+  an emergency revoke, and a rules unlock does not cover a plain revoke.
+- **Approving a count does not run it.** The approver and the executor are separate steps, and the
+  executor is recorded.
+- **`CountRequesterOnly` is off by default.** On, only the requester runs the count. Off, any other
+  official with Count, except the approver, may.
+- **A rules unlock is SuperAdmin only and time-boxed**: 30 minutes by default, 60 at most, with a
+  written reason of 20 to 1000 characters.
+- **One live Returning Officer per election.** Appointing a new one expires the earlier row.
 - **How outside officials are invited**: the same kind of email link used for a password reset,
   reusing existing wording rather than a brand-new invitation flow.
 - **Officials get access on both the website and the mobile app**, not just one or the other; only
@@ -585,7 +649,7 @@ precisely because the software route cannot offer these.
 | --- | --- |
 | Identity and access management | Access is tied to an accepted post, scoped to one election, and withdrawn automatically at archive with nobody switching it off by hand. |
 | Cryptographic controls | Sealed ballots under a key generated by and held by the Returning Officer, with a documented procedure for generating and destroying it after each election. |
-| Separation of duties | The two-person rule on publishing, opening and closing polling, replacing the key, declaring and archiving — binding even on the most senior administrator unless an emergency setting is deliberately switched on. |
+| Separation of duties | The two-person rule on publishing, opening and closing polling, replacing the key, counting, declaring and archiving — binding even on the most senior administrator unless an emergency setting is deliberately switched on. An emergency revoke of an official is always two-person. |
 | Logging and monitoring | A tamper-evident history of significant actions, with vote entries carrying no seat and no time of day, so the log itself cannot leak how someone voted. |
 | Incident management | A documented incident-response procedure for the election period. |
 | Risk assessment | The residual risk in section 6 is written down and disclosed rather than left unstated. |

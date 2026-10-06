@@ -76,6 +76,18 @@ Use during Phases 2–4. Mark `[x]` when verified on the relevant layer(s). Note
 
 - [x] **A11.1** `AuthServiceTests.SocialLoginAsync_WithValidGoogleId` (API)
 - [ ] **A11.2** Incomplete profile onboarding wizard (Web/Mobile)
+- [ ] **A11.3** With `Features.EnableSocialAuth` off, or a provider row disabled or missing its client id, `GET /api/auth/providers` returns an empty list and the web login page shows no social buttons or "or" separator (API, Web). Tests: `SocialAuthConfigServiceTests`.
+- [ ] **A11.4** With the provider usable, its button shows on web and mobile (Web/Mobile).
+
+### A12 — Step-up code message and delivery failure
+
+- [ ] **A12.1** Request a step-up code as an admin. The message names the masked email address (for example `s***@example.com`), not only "your registered email" (API, Web, Mobile).
+- [ ] **A12.2** With the email provider failing, the request answers 503 and the screen shows the "try again in a few minutes" text (API, Web, Mobile).
+
+### A13 — Hard delete of a user with election records
+
+- [ ] **A13.1** As SuperAdmin, delete a system-admin user who holds an appointment, an approval or a rules unlock. The API answers 409 "has election records, deactivate instead" and the user stays (API, Web). Tests: `UserServiceTests`, `RolesControllerTests`.
+- [ ] **A13.2** Delete a system-admin user with no election records. It is removed (API, Web).
 
 ---
 
@@ -107,6 +119,30 @@ Use during Phases 2–4. Mark `[x]` when verified on the relevant layer(s). Note
 
 ---
 
+### E6 — Election officials, rules freeze and rules unlock
+
+Manual checks for the screens added with spec 023 FR-034 to FR-041. Run them on a test election, not a live one.
+
+- [ ] **E6.1** Officials panel, web: open `/admin/elections`, expand a row, and appoint a member found by search. The new appointment shows with its persona and live status (Web).
+- [ ] **E6.2** Officials panel, web: appoint a person by name and email, with no member search. The appointment is stored (Web).
+- [ ] **E6.3** Returning Officer: appoint a second person with the Returning Officer box ticked. The first Returning Officer row expires and only one badge shows (Web, Mobile).
+- [ ] **E6.4** Officials sheet, mobile: open it from the election card, appoint, and revoke an appointment while no election is frozen (Mobile).
+- [ ] **E6.5** Mobile, signed in as an election official who is not an admin: the member search is not offered and a note asks for a name and email (Mobile).
+- [ ] **E6.6** Ask to open polling and leave the request waiting for a second official (or put an election in Polling). On `/admin/org-config`, change an election setting. The save is refused with the 409 message naming the election, and an `ElectionFrozenChangeRefused` row appears in the activity record (Web, API).
+- [ ] **E6.7** While frozen, edit a persona and add an appointment. Both are refused. A plain revoke is refused too (Web, Mobile, API).
+- [ ] **E6.8** While frozen, a SuperAdmin asks for an emergency revoke with a reason. The request is stored and waits for approval (Web, Mobile).
+- [ ] **E6.9** Another active official with Approve approves it. The target is revoked and the activity record shows requester, approver, target and reason. The requester and the target cannot approve it (Web, API).
+- [ ] **E6.10** With no other active official holding Approve, the emergency revoke request is refused. SuperAdmin cannot approve it alone (API).
+- [ ] **E6.11** Leave an emergency revoke unapproved past its expiry. Within 15 minutes an `expired` row appears once in the activity record (API).
+- [ ] **E6.12** Rules unlock, web: as SuperAdmin, open the unlock box on `/admin/elections` with a reason shorter than 20 characters (refused), then a valid reason with the default 30 minutes. The box shows who opened it, the reason and the time left (Web).
+- [ ] **E6.13** With the unlock open, an election setting saves. An `ElectionFrozenChangeUnlocked` row carries the unlock id and reason. A plain appointment revoke is still refused (Web, API).
+- [ ] **E6.14** Close the unlock early. The next change to a frozen rule is refused again (Web, Mobile).
+- [ ] **E6.15** Rules unlock, mobile: the sheet from the election management app bar loads nothing until asked, and opens and closes an unlock after step-up (Mobile).
+- [ ] **E6.16** Count: after a second official approves a count, the approver cannot run it. The requester can, with the key file, and an `ElectionCountRun` row names the executor (API, Web).
+- [ ] **E6.17** Count with `CountRequesterOnly` on (on `/admin/org-config`): a Count holder who is not the requester gets `not-requester`. With it off, that person can run the count (API, Web).
+- [ ] **E6.18** Ask for polling with fewer than 2 live officials holding Approve. The warning shows on the admin elections row, and on the mobile advance-phase dialog (Web, Mobile).
+- [ ] **E6.19** Send two identical approval requests together. One is stored and the other answers `already-pending` (API).
+
 ## F. Security & Session
 
 - [x] **F1, F3, F4** Partial — login 401/200, inactive user blocked (`AuthServiceTests`, `AuthControllerTests`, `TokenServiceTests`)
@@ -125,6 +161,7 @@ Use during Phases 2–4. Mark `[x]` when verified on the relevant layer(s). Note
 | Forum | [x] | [ ] | [x] | API + Mobile verified; Phase 4 HTTP smoke 1 category OK |
 | Governance | [x] | [x] | [x] | Web `governance.spec.ts` 3/3 pass |
 | Org config | [x] | [x] | [x] | Web `config-regression.spec.ts` 2/2 pass |
+| Election officials and rules unlock (E6) | [ ] | [ ] | [ ] | Manual checks E6.1 to E6.19 not yet run |
 
 ---
 

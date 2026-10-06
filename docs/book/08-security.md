@@ -216,8 +216,18 @@ present, so an unauthenticated request carries no double-submit obligation, and 
 CORS is configured as a single named policy, `AngularApp`, in `Program.cs` (lines 88-107): allowed
 origins come from configuration, credentials are permitted, and the application throws at startup if
 `AllowedOrigins` is empty outside Development — an empty allowlist in production is treated as a
-misconfiguration to fail on, not a default to fall back from. A development-only branch adds
-`localhost` origins so the Angular dev server can reach the API without a configuration change.
+misconfiguration to fail on, not a default to fall back from. Outside Development the same startup
+check also refuses a list that contains `*`, an address that is not `https`, or an entry that is more
+than a scheme and host (a path, query, trailing slash or user info, which CORS would never match), and
+it refuses a `ClientUrl` that is not one of the listed origins. The rules are in `AllowedOriginsAudit`
+(`GHCAA.Infrastructure/Services/AllowedOriginsAudit.cs`) and are covered by `AllowedOriginsAuditTests`.
+The same class writes an activity-log row whenever the list differs from the one last recorded,
+because the list comes from an environment variable and the application cannot otherwise see who
+changed it. A development-only branch adds `localhost` origins so the Angular dev server can reach the
+API without a configuration change. A request for the `www` host is redirected to the `ClientUrl`
+origin by `WwwRedirectMiddleware` (§6.4, where the middleware pipeline is described). The redirect is
+not yet checked on the live site, because on 5 October 2026 the production and preprod domains did not
+resolve.
 
 Rate limiting sits in `RateLimitingExtensions` (`GHCAA.API/Extensions/RateLimitingExtensions.cs`),
 on `System.Threading.RateLimiting`. It names six fixed-window policies. Five are keyed per source

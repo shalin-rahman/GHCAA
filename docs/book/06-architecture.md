@@ -118,6 +118,12 @@ runs before authentication so that an unauthenticated flood is rejected before t
 a token is paid; `SecurityStampMiddleware` runs after authentication and before authorisation, which
 is the ordering that makes BR-11 hold, since a request must be authenticated before its security
 stamp can be checked, and must be checked before authorisation decides what it may do.
+`WwwRedirectMiddleware` sits just after `CorrelationIdMiddleware` and before `ExceptionMiddleware`. It
+answers a request for `www.` plus the host of `AppSettings:ClientUrl` with a redirect to that origin,
+a 301 for `GET` and `HEAD` and a 308 for other methods so that a `POST` stays a `POST`, and it does
+nothing when `ClientUrl` is unset, is a loopback or IP address, or is itself a `www` host. Figure 6.10
+leaves it out, as it leaves out the correlation-ID stage and CORS, to keep the checks that decide
+access in view.
 
 At the interface, the API resource model follows a `/api/[controller]` convention with sub-resources expressed as path
 segments, for example `/api/events/{id}/register`. Errors are returned as JSON with a consistent

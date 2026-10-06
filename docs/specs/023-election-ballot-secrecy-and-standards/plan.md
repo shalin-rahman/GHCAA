@@ -1,5 +1,8 @@
 # Election ballot secrecy and standards: implementation plan
 
+> **Status 2026-10-06:** Phase 4 is built as far as 37.12f (see the note under Phase 4 below). The
+> status below is the 2026-09-28 position, kept for the record.
+>
 > **Status 2026-09-28:** Phase 1 and 37.1s (sealed ballots) built on branch
 > `prepod-election-refactoring`, not yet committed. Phase 4 (officials, personas, access) is
 > approved and starts next, at 37.1w, since voting is broken without it. Phase 2 follows.
@@ -183,6 +186,13 @@ Full step-by-step detail, exact files, entities, migrations, endpoints and tests
 11. 37.13a to 37.13g: the standards gap fixes (audit hash chain, ballot order, per-seat published
     ballots, test elections, key procedure, incident response docs, accessibility check)
 12. 37.12j: spec, API registry, project map, features, SRS and architecture doc updates
+
+Built as of 2026-10-06: items 1 to 7 (37.1w, 37.12a to 37.12f). Items 8 to 12 (37.12g to 37.12j, and
+37.13a to 37.13g) are still open in `docs/TODO.md`. After this plan was written, the code review and
+the rules work added 37.13h to 37.13y, all built: second person before the count, count executor and
+`CountRequesterOnly`, the settings audit, the rules freeze and SuperAdmin unlock, emergency revoke, the
+Returning Officer flag, the pre-polling warning, the duplicate-request guard, the expiry sweep, and the
+officials panel on web and mobile. `plan-officials.md` has the gaps table for those.
 
 All four decisions in `plan-officials.md` §6 are answered: no SuperAdmin bypass by default,
 PASSWORD_RESET reused for non-member invites, the golden OrgConfig fixture may be edited, and the

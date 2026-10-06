@@ -1,7 +1,9 @@
 # Spec 023 plan: election officials, personas and standards gaps
 
 Status: approved 2026-09-28. All four decisions in §6 are answered. Build follows the order in §7.
-As of 2026-09-30, 37.1w and 37.12a to 37.12c are done and 37.12d is in progress. `docs/TODO.md` records
+As of 2026-10-06, 37.1w and 37.12a to 37.12f are done. 37.12g to 37.12j and 37.13a to 37.13g are
+still open. The later review and rules items, 37.13h to 37.13y, were added after this plan and are
+built. `docs/TODO.md` records
 each item's state and where the build departed from this plan.
 Tracker items: 37.1w, 37.12a to 37.12j, 37.13a to 37.13l in `docs/TODO.md`.
 
@@ -611,6 +613,40 @@ settings cannot change during polling and counting. FR-034 is already met by 37.
 Settled 2026-10-04: the approver is any other active official with Approve, so revoking the
 Returning Officer needs no special case. If nobody is eligible the request is refused. The
 Returning Officer is marked on the appointment (37.13s).
+
+### Gaps left after the code review of 2026-10-05
+
+TODO 37.13u and 37.13v listed what the review left open. The owner answered four questions on
+2026-10-05: build the screens on web and mobile now, add a www redirect in the app as well as at
+Render, refuse to hard-delete a user who has election records, and audit expired emergency
+revokes from a background sweep.
+
+| Item | Gap | Design | Effort |
+|---|---|---|---|
+| 37.13w Duplicate requests | Two identical approval requests sent together can both be stored, because the check reads before it inserts. A plain unique index cannot say "only while open". | A nullable `OpenKey` on `ElectionApproval` with a unique index. It holds `e{electionId}:{action}`, or `e{electionId}:EmergencyRevoke:{appointmentId}`, while the row can still block a new request, and null after. A request first clears the key on rows for the same key that no longer block (expired, rejected, run or consumed), then inserts. If the insert hits the index, the answer is `already-pending`. Reject, run and consume clear the key in the same update that ends the row. Null keys never collide, on PgSql or SQLite. Migration `AddApprovalOpenKey` backfills the key on rows that are open now. | S |
+| 37.13x Expired revoke audit | An emergency revoke that expires untouched is audited only when someone later tries it. | A hosted service, the first in the API, runs every 15 minutes. It finds `EmergencyRevoke` rows past `ExpiresAt` that still hold an `OpenKey`, clears the key with a conditional update, and writes the `expired` audit row only when its update won. The row records the real expiry time. The approve path that already writes `expired` claims the key the same way, so each request gets one `expired` row whichever side gets there first. | S |
+| 37.13y Officials panel | No screen calls the appoint, revoke or emergency-revoke routes, so the Returning Officer flag and FR-040 are API-only. | Web: an Officials panel on each row of the admin elections page. It lists the appointments with a Returning Officer badge and live status, appoints from a member search (the existing `getMembers` lookup used by governance) or a name and email, with a persona choice and a Returning Officer checkbox, revokes, and for a SuperAdmin asks for an emergency revoke with a reason. The 202 answer adds the request to the row's approvals list. Mobile: the same list and actions in a bottom sheet from the election card on `ElectionManagementScreen`. This is not the 37.12h officials area, which still needs its own route group and dashboard. | M |
+| 37.13z Unlock panel | No screen for `api/admin/elections/rules-unlock`. | Web: a SuperAdmin-only box at the top of the admin elections page. It shows the open unlock with who opened it, the reason and the time left, with a Close button. With none open it takes a reason (20 to 1000 characters) and minutes (1 to 60, default 30). Mobile: the same from the app bar of `ElectionManagementScreen`. | S |
+| 7.20 www redirect | `www` to apex is left to DNS or Render. | Middleware early in the pipeline. When the request host is `www.` plus the host of `AppSettings:ClientUrl`, answer 301 to the same path and query on the ClientUrl host. The host comes from config, never from code. It does nothing when ClientUrl is localhost or already a `www` host. | S |
+| 7.21 Check www live | DNS for haragangian.com does not resolve yet. | Owner step once DNS is live: add the Render custom-domain redirect, then `curl -I https://www.haragangian.com/x?y=1` must give 301 to `https://haragangian.com/x?y=1`. | owner |
+| 7.22 Preprod origin | Preprod answers CORS for `https://preprod.haragangian.com`, which does not resolve. Payment returns built from ClientUrl would go there too. | Owner step: set `AppSettings__AllowedOrigins__0` and `AppSettings__ClientUrl` on Render to `https://ghcaa-ryl6.onrender.com`, and the preprod lines in the root and mobile `.env.preprod`. Docs fixed in `docs/ENV_REVIEW.md`. | owner |
+| 7.23 User delete | The approval, unlock and appointment user keys are Restrict, so deleting such a user throws and answers 500. | `DeleteSystemAdminAsync` checks first for appointments, approvals the user asked for, approved, rejected or ran, and unlocks they opened or closed. If any exist it refuses, and the API answers 409 "has election records, deactivate instead". The election record stays whole. No migration. | S |
+
+Rolling back the migrations (37.13u item 3). `AddReturningOfficerFlag` drops
+`ElectionAppointments.IsReturningOfficer`, and `AddCountExecutor` drops
+`ElectionApprovals.ExecutedByUserId`. A rollback loses who was Returning Officer and who ran each
+count. The `ElectionCountRun` activity rows still name the executor, so take a copy of both columns
+before rolling back if the record matters. `AddElectionRulesUnlock` drops the unlock table; the
+`ElectionRulesUnlockOpened` and `ElectionRulesUnlockClosed` activity rows keep who opened and
+closed each unlock and why.
+`AddApprovalOpenKey` drops only `OpenKey`, which has no meaning once the rows have ended, so its
+rollback loses nothing; rolling forward again backfills it for open rows.
+
+Item 5 of 37.13u is closed as not needed. The mobile app has no approval model: approving and
+rejecting happen on the web admin, and the mobile actions only report that a 202 was stored.
+
+Order: 37.13w, 37.13x, 7.23, 7.20, then 37.13y and 37.13z, then the swagger snapshot. Gate as in
+section 7.
 
 ## 6. Decisions — answered 2026-09-28
 

@@ -51,7 +51,7 @@ The core of the system is a high-integrity registration and verification workflo
   * System auto-provisions a **User Account** where the Membership Number becomes the Login ID.
 * **3.1.3 Digital ID & Certificates**: Automatic generation of secure, QR-coded SVG/PDF ID cards and membership certificates for "Active" members.
 * **3.1.4 Profile Management**: Granular control over personal data with member-defined **Privacy Toggles** (Masking NID, Email, Mobile, Address).
-* **3.1.5 Social Authentication**: Integration with **Google** and **Facebook** for simplified login. The system automatically links social IDs to existing accounts via email or prompts for profile completion for new users.
+* **3.1.5 Social Authentication**: Integration with **Google** and **Facebook** for simplified login. The system automatically links social IDs to existing accounts via email or prompts for profile completion for new users. A provider's button is offered only when `Features.EnableSocialAuth` is on, the provider is enabled, and its client credentials are set.
 * **3.1.6 Onboarding Workflow**: "Applied" members who login via social auth are restricted to a Profile Wizard. Full system access is gated until:
   1. **Profile Completion**: 100% of mandatory fields provided. The 13 required fields are:
      * Personal: `FullName`, `Email`, `MobileNo`, `DateOfBirth`, `Gender`, `NID`, `FatherName`, `MotherName`, `PermanentAddress`, `BloodGroup`.
@@ -104,6 +104,13 @@ Supporting professional and personal connections within the network.
 * **3.6.6 News & Notice Board**: News and official notices share one entity discriminated by `PostType`, managed from a single admin screen and surfaced on one tab-filtered public/portal feed. Notices may carry a PDF attachment. **Notices may be posted by administrators only** — the member article-submission path rejects notice-typed posts from non-admin callers, while member *news* submissions continue to follow the existing approval workflow.
 * **3.6.7 Contact Details Configuration**: On-campus address, phone numbers, support email, social links, and an optional map embed URL are held in organisation configuration and edited by SuperAdmin, giving web and mobile a single source of truth. The map URL is admin-supplied and therefore allow-list validated before being embedded.
 * **3.6.8 Member Polls & Voting**: Admin-managed polling system for sentiment analysis and formal association decisions. Supports single/multiple choice, expiry dates, and real-time result visualization for members.
+* **3.6.9 Election Officials, Rules Freeze and Rules Unlock**: Administrators appoint and revoke election officials from an officials panel on the admin elections page (web) and an officials sheet (mobile). The API enforces these rules, and a screen that hides a button is not enough:
+  * *Freeze*: while any election has an open-polling request waiting for approval, or is in Polling or Counting, the shared election settings, ballot and count rules, personas and permissions, appointments and the ballot key cannot change. A refused change answers 409 and is audited.
+  * *Rules unlock*: a SuperAdmin with step-up can open a time-boxed unlock (30 minutes by default, 60 at most) with a written reason of 20 to 1000 characters. Every change it lets through is audited with the unlock id and reason. It never covers a plain appointment revoke.
+  * *Emergency revoke*: while the rules are frozen an official is removed by an emergency revoke. It needs another active official on that election who holds Approve and who is neither the requester nor the target. SuperAdmin has no bypass. A request nobody acts on expires, and a background sweep every 15 minutes writes the `expired` audit row.
+  * *Returning Officer*: identified by a flag on the appointment, one live Returning Officer per election.
+  * *Count*: approving a count does not run it. The requester runs it with the key file. Unless the `CountRequesterOnly` org setting (default off) is on, any official with Count other than the approver may run it. The executor is recorded.
+  * Fewer than 2 live officials holding Approve raises a warning before polling opens. Two identical approval requests cannot both be stored.
 
 ### 3.7 Alumni Programs & Verification
 
@@ -121,6 +128,8 @@ Supporting professional and personal connections within the network.
 * **Strict Deduplication**: Unique database indexes on NID, Mobile, and Email to prevent record collision.
 * **Stateless Auth**: JWT-based session management with real-time **Security Stamp** validation to invalidate sessions if a user is terminated.
 * **Rate Limiting**: Tiered limits (Auth: 5/min, Registration: 10/5min, API: 100/min) to prevent brute-force and DDoS.
+* **Election records protected**: A user who holds election appointments, approvals or rules unlocks cannot be hard-deleted. The API answers 409 and the user is deactivated instead.
+* **Step-up delivery**: The step-up code message names the masked email address. If the code email fails, the user gets a "try again" message (503).
 
 ### 4.2 Performance & UI/UX
 
@@ -147,6 +156,7 @@ Supporting professional and personal connections within the network.
 
 * **Storage**: Local file storage abstraction with Cloud (S3/Azure) interface readiness.
 * **Automation**: Multi-stage **Sequential CI Pipeline** (Analysis -> API Tests -> UI Tests -> Mobile Tests -> Build).
+* **Canonical host**: `www.<domain>` is redirected to the main domain read from `AppSettings:ClientUrl` by `WwwRedirectMiddleware`.
 * **Observability**: Tiered `ILogger` implementation with SignalR-based real-time admin analytics.
 * **Multi-institution deployment (in progress)**: the codebase supports running for an institution
   other than GHC through an institution profile pack (`profiles/<name>/`), selected by the

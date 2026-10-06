@@ -213,7 +213,7 @@ Each flow verified on **Web + Mobile + API** where applicable. Code references b
 | A8 | Privacy toggles | Directory masks phone/email/address | `MemberService.GetProfileAsync`; `NetworkingService` |
 | A9 | Family/spouse linking | Search-by-name link | `FamilyLinkController` |
 | A10 | Blue tick verification | Verified badge in directory | `Member.IsVerified` set on approval |
-| A11 | Social login | Links verified email; onboarding wizard | `AuthController`, `AdminSocialAuthController` |
+| A11 | Social login | Links verified email; onboarding wizard; buttons only when the provider is usable | `AuthController`, `AdminSocialAuthController`, `SocialAuthConfigService` |
 
 **Test coverage (A1–A6):**
 
@@ -271,6 +271,7 @@ Tests: `FinancialServiceTests`, `FinancialLedgerControllerTests`, `PaymentConfig
 | E3 | News / magazine / gallery | `NewsController`, `GalleryController` |
 | E4 | Communication hub | `CommunicationController` |
 | E5 | Admin audit log | `ActivityController`, `IActivityService` |
+| E6 | Election officials, rules freeze, rules unlock, emergency revoke, count run | `ElectionAppointmentsController`, `ElectionRulesUnlockController`, `ElectionsController`, `ElectionFreezeService`, `ElectionApprovalService`, `ExpiredRevokeSweep` |
 
 ### F. Security & Session (Business Impact)
 

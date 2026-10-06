@@ -39,6 +39,11 @@ Steps:
 5. Redeploy (or just restart the service) so the app's next boot finds nothing pending and stops
    logging the fallback warning.
 
+Rolling back a migration can lose data. Rolling back `20261004190943_AddReturningOfficerFlag` and
+`20261004194309_AddCountExecutor` drops the columns they added, and whatever those columns held is gone.
+`20261005144927_AddApprovalOpenKey` adds a unique index on `ElectionApproval.OpenKey`, so two open requests
+for the same step cannot both be stored. Back up the database before any `dotnet ef database update <earlier migration>`.
+
 If the failure is something `MigrationBootstrapper`'s baselining logic can't resolve on its own — for
 instance a genuinely conflicting schema change, not a legacy-`EnsureCreated()` baseline mismatch —
 this needs a human decision about the migration itself, not another automated retry.

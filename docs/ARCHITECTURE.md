@@ -71,6 +71,11 @@ graph TD
 - **Connections**: Persistent WebSocket established. 
 - **Delivery**: Backend triggers `Clients.Group(memberId).SendAsync()` for instant notification delivery.
 
+### C2. Request pipeline order
+`ForwardedHeaders`, `CorrelationIdMiddleware`, `WwwRedirectMiddleware`, `ExceptionMiddleware`, CORS, then the rest as listed in `docs/PROJECT_MAP.md`, section "API Layer — Middleware Pipeline & Extensions". `WwwRedirectMiddleware` moves `www.<apex>` to the apex host named in `AppSettings:ClientUrl`: a 301 for GET and HEAD, a 308 for other methods.
+
+The API also runs one hosted service, `ExpiredRevokeSweep`. Every 15 minutes (`Constants.Elections.ExpiredRevokeSweepMinutes`) it writes the `expired` audit row for emergency revoke approvals that nobody acted on. Outside Development, startup fails if `AllowedOrigins` is empty, has a wildcard or a bad entry, or `ClientUrl` is not in it.
+
 ### D. Public Content Delivery
 - **Site content (About / Contact intro)**: Public Client → `GET /api/site-content?group=about` (anonymous) → `SiteContentService` → active `SiteContent` blocks ordered by `DisplayOrder`, rendered as trusted HTML. Writes go the other way — Admin Client → `SiteContentController` (`AdminOnly`) → `SiteContentService`, which passes `BodyHtml` through `HtmlSanitizer` **before** persistence, so the public read path never has to sanitize. If the read returns nothing, the Angular page renders its static fallback markup rather than an empty page.
 - **News & Notices**: one `NewsPost` table serves both, discriminated by `PostType`. Public Client → `GET /api/news?postType=` → `NewsService` filters on `IsActive` + `PostType`; the Angular feed additionally filters client-side between tabs so switching tabs costs no request. Admin Client → `POST /api/news` / `POST /api/news/upload-document` (both `AdminOnly`) → `FileValidationService` (PDF, 10 MB) → `FileStorageService` (`FileUploadType.NoticeDocument`). The member-facing `POST /api/news/submit` path is the one place a non-admin can create a post, and it rejects `PostType.Notice` with `Forbid()` — this is the single enforcement point for "notices are admin-post-only".

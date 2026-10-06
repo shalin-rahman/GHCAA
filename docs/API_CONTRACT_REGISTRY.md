@@ -48,6 +48,28 @@ a gap someone still needs to close.
 
 ## Log
 
+### 2026-10-06 — /api/elections/appointments/{appointmentId}/emergency-revoke, /api/elections/{id}/approvals, /api/elections/approvals/{approvalId}/approve, /api/elections/approvals/{approvalId}/reject
+- Change: new routes. `POST .../emergency-revoke` answers 202 with an approval. Another active official with Approve on that election approves it; a SuperAdmin has no bypass. `GET api/elections/{id}/approvals` lists approvals. `POST approvals/{approvalId}/approve` and `.../reject` answer one. A second open request for the same step is refused.
+- Reason: TODO 37.13, spec 023. An emergency revoke always needs two people.
+- Web: updated in `app.constants.ts` (`EMERGENCY_REVOKE`, `APPROVALS`, `APPROVE`, `REJECT`).
+- Mobile: emergency revoke updated in `features/elections/election_service.dart` (`emergencyRevoke`) and the officials sheet. Listing, approving and rejecting approvals: not applicable, approving happens on the web admin (TODO 37.13u, item 5).
+
+### 2026-10-06 — /api/admin/elections/rules-unlock, /api/admin/elections/rules-unlock/close
+- Change: new routes, SuperAdmin only. `GET` returns the open unlock, `POST` opens one (`reason` 20-1000 characters, `minutes` 1-60, default 30), `POST .../close` ends it. Every other election rule change now answers 409 with code `ELECTION_RULES_FROZEN` while an election is waiting for polling, polling or counting, unless an unlock is open.
+- Reason: TODO 37.13q and 37.13v, spec 023.
+- Web: updated in `app.constants.ts` and `admin/elections/election-rules-unlock`.
+- Mobile: not applicable. No admin election screens on mobile.
+
+### 2026-10-06 — DELETE /api/roles/users/{id}
+- Change: a hard delete of a user with election records (appointments, approvals, rules unlocks, scrutiny decisions) answers 409.
+- Reason: those rows must keep their user. `IUserService.HasElectionRecordsAsync` decides.
+- Web: not applicable. Mobile: not applicable.
+
+### 2026-10-06 — OrgConfigDto.elections, step-up OTP replies
+- Change: `elections.countRequesterOnly` (bool, default false) is new. On, only the official who asked for a count may run it. The `twoPersonActions` default now leaves out `EmergencyRevoke`. Step-up OTP replies carry a masked email, and a failed OTP email answers 503.
+- Reason: TODO 37.13n, 7.19.
+- Web: updated in `election.models.ts` and `admin/org-config`. Mobile: updated in `org_config.dart`.
+
 ### 2026-09-30 — /api/elections/{id}/appointments, /api/elections/appointments/{id}/revoke, /api/me/election-appointments
 - Change: new routes. `GET` and `POST api/elections/{id}/appointments` list and make appointments. `POST api/elections/appointments/{id}/revoke` ends one. `GET api/me/election-appointments` lists the caller's own, and `POST .../{id}/accept` and `.../{id}/decline` answer one. Appoint, revoke and accept need step-up. `POST api/elections/{id}/officers` is removed. This breaks the additive rule in ADR-0005, but no web or mobile code ever called it.
 - Reason: TODO 37.12d. An appointment counts only after the person accepts it and signs the declaration. It can be for a member or for someone with no member record.

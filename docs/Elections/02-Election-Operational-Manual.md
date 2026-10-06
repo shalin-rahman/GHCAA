@@ -313,6 +313,26 @@ Outputs
 
 ✓ Calendar Approved
 
+System procedure: appointing officials
+
+Appointments are made from the officials panel, on the admin web or in the mobile app.
+
+The panel takes an existing member, or a name and email.
+
+Member search is for administrators only. An official on mobile gives a name and email.
+
+The post is live only after the appointee accepts and signs the neutrality declaration.
+
+The Returning Officer post carries a flag.
+
+An election has one live Returning Officer.
+
+Appointing a new one expires the earlier appointment.
+
+A user who holds election records cannot be deleted.
+
+The system refuses and keeps the record. The user is deactivated instead.
+
 ---
 
 # 6. Phase 3 – Planning
@@ -721,6 +741,50 @@ Any unusual event
 
 must be recorded immediately.
 
+System procedure: rules freeze and emergency revoke
+
+Before polling is requested, the panel warns if fewer than two live officials hold Approve.
+
+The warning does not block the request.
+
+The election rules freeze when a request to open polling is waiting for approval.
+
+They stay frozen through Polling and Counting.
+
+While frozen, the system refuses changes to election settings, posts, appointments and the ballot key.
+
+A plain revoke is refused as well.
+
+Each refusal is recorded in the audit history.
+
+Rules unlock
+
+Only a SuperAdmin can open one.
+
+It needs a written reason of 20 to 1000 characters.
+
+It lasts 30 minutes unless a shorter or longer time is set, up to 60 minutes.
+
+It can be closed early.
+
+It never allows a plain revoke.
+
+Emergency revoke
+
+Used to remove an official while the rules are frozen.
+
+One official asks and gives a reason.
+
+A second active official with Approve on that election must approve.
+
+The second official cannot be the requester or the person being revoked.
+
+A SuperAdmin cannot approve in their place.
+
+A request nobody acts on expires.
+
+The system checks every 15 minutes and records the expiry.
+
 ---
 
 # 13. Poll Closing
@@ -796,6 +860,20 @@ Disputed ballots separated.
 Rejected ballots documented.
 
 Recount if ordered.
+
+System procedure: count approval and run
+
+The count is requested and a second person approves it.
+
+Approval does not run the count.
+
+The requester runs it with the ballot-sealing key.
+
+If the CountRequesterOnly setting is on, only the requester may run it.
+
+If it is off, any other official with the Count permission, except the approver, may run it.
+
+The system records who ran the count.
 
 ---
 

@@ -42,15 +42,15 @@ would misdescribe it.
 
 ## 11.1 Process Model in Practice and its Deviations from Plan
 
-`docs/book/build/wbs.py`, run on 4 October 2026, classifies every one of the 96 work packages
-`docs/TODO.md` has raised, and every one of the 1,059 tracker tasks under them, by how it arrived: planned
+`docs/book/build/wbs.py`, run on 6 October 2026, classifies every one of the 96 work packages
+`docs/TODO.md` has raised, and every one of the 1,072 tracker tasks under them, by how it arrived: planned
 before the work started, or reactively, as stakeholder feedback, a review finding or a defect.
 
 Counted by work package, 30 (31%) were planned and 66 (69%) were not: 40 (42%) arrived as feedback
 from a stakeholder, 16 (17%) as a defect, and 10 (10%) as a finding from one of the review sessions of
-§3.8 or the September 2026 architecture audit. Counted by task the reactive share is larger still: 826
-of 1,059 tasks (78%) arrived after the work they belong to had already started, most of them as feedback
-(399 tasks, 38%) or as review findings (298 tasks, 28%), with defects a smaller share (129 tasks, 12%)
+§3.8 or the September 2026 architecture audit. Counted by task the reactive share is larger still: 835
+of 1,072 tasks (78%) arrived after the work they belong to had already started, most of them as feedback
+(408 tasks, 38%) or as review findings (298 tasks, 28%), with defects a smaller share (129 tasks, 12%)
 than the package count alone suggests, because most defects closed in one or two tasks each while a
 handful of review sessions each seeded dozens.
 
@@ -84,8 +84,8 @@ defined once, here, and used by name everywhere else in the book:
   packages, and a work package can deliver only part of a feature — the two lists are not the same
   shape.
 
-`docs/TODO.md` had 96 numbered work packages holding 1,059 tracker tasks between them, tied to 18 WBS
-activities and 325 commits, as of 4 October 2026 (`git rev-list --count HEAD`) — five different
+`docs/TODO.md` had 96 numbered work packages holding 1,072 tracker tasks between them, tied to 18 WBS
+activities and 328 commits, as of 6 October 2026 (`git rev-list --count HEAD`) — five different
 counts of one project, each answering a different question about it.
 
 Five streams, one of them carrying no commit at all: the back-scheduled P1–P5 research and design
@@ -148,22 +148,22 @@ much room the record shows they had.
 | C3 Registry and membership | 6 | 14 | 20 | 14 | 20 | 0 | C1, C2 | 35 | 30 |
 | C5 Events and attendance | 3 | 20 | 23 | 20 | 23 | 0 | C3 | 6 | 6 |
 | C8 Gallery and albums | 2 | 23 | 25 | 23 | 25 | 0 | C5 | 29 | 27 |
-| C13 Web client | 15 | 25 | 40 | 25 | 40 | 0 | C3–C11 | 104 | 101 |
+| C13 Web client | 15 | 25 | 40 | 25 | 40 | 0 | C3–C11 | 105 | 102 |
 | C15 Quality and testing | 13 | 40 | 53 | 40 | 53 | 0 | C12, C13 | 67 | 61 |
 | C17 Standards, docs and dissertation | 11 | 53 | 64 | 53 | 64 | 0 | C15, C16, C14 | 206 | 156 |
 | C4 Payments and finance | 3 | 20 | 23 | 22 | 25 | 2 | C3 | 9 | 9 |
-| C6 Governance and elections | 2 | 20 | 22 | 23 | 25 | 3 | C3 | 114 | 68 |
+| C6 Governance and elections | 2 | 20 | 22 | 23 | 25 | 3 | C3 | 122 | 84 |
 | C9 Careers and job board | 2 | 20 | 22 | 23 | 25 | 3 | C3 | 2 | 1 |
 | C10 Networking, forum and messaging | 2 | 20 | 22 | 23 | 25 | 3 | C3 | 25 | 25 |
 | C7 Content and communication | 3 | 14 | 17 | 22 | 25 | 8 | C2 | 15 | 15 |
 | C16 Deployment and operations | 4 | 40 | 44 | 49 | 53 | 9 | C13 | 10 | 10 |
 | C11 Configuration and white-label | 3 | 10 | 13 | 22 | 25 | 12 | C1 | 72 | 62 |
 | C14 Mobile client | 9 | 23 | 32 | 44 | 53 | 21 | C3, C4, C5 | 40 | 33 |
-| C12 Security and hardening | 3 | 14 | 17 | 37 | 40 | 23 | C2 | 55 | 45 |
+| C12 Security and hardening | 3 | 14 | 17 | 37 | 40 | 23 | C2 | 59 | 50 |
 | C18 Ad-hoc reporting | 1 | 23 | 24 | 63 | 64 | 40 | C3, C4 | 5 | 0 |
 
-*Source: `python docs/book/build/wbs.py`, run 4 October 2026, against `docs/TODO.md` and the git
-history at HEAD (325 commits). Effort is apportioned commit-days. ES/EF/LS/LF are in working days
+*Source: `python docs/book/build/wbs.py`, run 6 October 2026, against `docs/TODO.md` and the git
+history at HEAD (328 commits). Effort is apportioned commit-days. ES/EF/LS/LF are in working days
 from the first commit. "Tracker tasks" counts the numbered items in the component's tracker areas,
 and "Done" the ones closed. C18 is planned work with no commit yet, so its effort is a stated
 one-day placeholder in the network, not a measurement.*
@@ -461,7 +461,7 @@ distinct from the tracker. There was one tracker, split for length into two file
 `docs/TODO.md` (open work packages, 2,320 lines) and `docs/TODO_ARCHIVE.md` (closed ones, 7,387 lines),
 9,707 lines together as of 3 October 2026 (`wc -l docs/TODO.md docs/TODO_ARCHIVE.md`), simultaneously
 the project plan (the P1–P5 pre-development items and the planned work packages of §11.1), the change
-log (every reactively-arriving item, §11.1's 826 of 1,059 tasks), the defect log (the 129 tasks classified
+log (every reactively-arriving item, §11.1's 835 of 1,072 tasks), the defect log (the 129 tasks classified
 `defect` by `wbs.py`) and the decision record — a work package that changes direction mid-course states
 why in its own entry rather than in a separate minute.
 
@@ -555,7 +555,7 @@ quoting a figure that does not yet exist.
 Three things this project would do differently, stated plainly rather than as a list of virtues.
 
 First, the tracker should have separated the plan from the change log from the start, even while both
-lived in the same file. §11.1 and §11.8 show that most of the tracker's 1,059 tasks arrived
+lived in the same file. §11.1 and §11.8 show that most of the tracker's 1,072 tasks arrived
 reactively; nothing about the file's structure distinguishes a planned work package from one raised by
 a defect except the prose in its own heading, which is why `wbs.py` has to classify each one by regex
 against wording rather than by a field that was there to record it at the time.
@@ -578,7 +578,7 @@ This chapter counted the same project five different ways and did not let the co
 force. The critical path is 64 working days; 87 are evidenced by a commit; 238 elapsed on the
 calendar between the first and the last. The delivered codebase, priced at conventional rates with no
 reduction, represents 967 working days; four reductions, three of them judged and one measured, bring
-that to 392; the record can evidence 166. Seventy-eight per cent of the tracker's 1,059 tasks arrived
+that to 392; the record can evidence 166. Seventy-eight per cent of the tracker's 1,072 tasks arrived
 after the work they belong to had already started. A function-point count of the delivered system,
 simplified and stated as such, comes to 2,223 unadjusted points, and could not be converted to an
 effort or cost figure without a productivity rate this project has no defensible source for — recorded

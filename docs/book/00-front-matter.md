@@ -221,7 +221,7 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 7.4 Implementation of the Domain and Persistence Layers | 71 |
 | 7.5 Implementation of the Application and Business Services | 71 |
 | 7.6 Implementation of the API Layer | 71 |
-| 7.7 Web Client, Mobile Client and Real-Time Features | 71 |
+| 7.7 Web Client, Mobile Client and Real-Time Features | 72 |
 | 7.8 Security Implementation | 72 |
 | 7.9 Document Generation | 72 |
 | 7.10 Constitution Publication Pipeline | 73 |
@@ -239,7 +239,7 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 8.6 Transport Security, Browser Policy and Rate Limiting | 77 |
 | 8.7 Payment-Related Risk and the No-Gateway-Keys Posture | 78 |
 | 8.8 Governance Integrity | 78 |
-| 8.9 Personal Data: Lawful Basis, Minimisation, Consent, Retention and Subject Rights | 78 |
+| 8.9 Personal Data: Lawful Basis, Minimisation, Consent, Retention and Subject Rights | 79 |
 | 8.10 Audit Logging and Non-Repudiation | 79 |
 | 8.11 OWASP ASVS Conformance and Residual Risks | 79 |
 | 8.12 Summary | 80 |

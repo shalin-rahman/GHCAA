@@ -34,6 +34,11 @@ A granular, module-by-module breakdown of the platform's features — including 
     `/admin/dashboard` instead of reaching member-only pages (Profile, Payments, Dashboard) that
     assume a real `memberId` and previously rendered broken/blank. Web-only — mobile's own auth flow
     isn't affected by this route guard.
+  - Social sign-in buttons show only when the provider is usable: `Features.EnableSocialAuth` is on,
+    the provider row is enabled, and its client id is set (and the secret, for Facebook).
+    `GET /api/auth/providers` returns an empty list otherwise, and the login page hides the section.
+  - A system-admin user who holds election records (appointments, approvals, or rules unlocks) cannot
+    be hard-deleted. The API answers 409 and the admin deactivates the user instead.
 - **Dependencies**: JWT token service.
 
 ### 1.2a Admin Step-Up Verification (2FA)
@@ -46,6 +51,7 @@ A granular, module-by-module breakdown of the platform's features — including 
   - Once verified, a 30-minute grace period applies (tracked via a JWT claim carried forward across normal token refreshes) — not a per-action or per-login re-prompt. (Originally 30 days; a 2026-08-29 security review found that let the claim ride along on every hourly token refresh for the full window, so a stolen or left-open session almost always already carried a valid one, defeating the control's purpose.)
   - A fresh login always starts unverified; the grace period only survives continued activity within an existing session.
   - OTP codes are purpose-scoped (`OtpPurpose.AdminStepUp`), so a registration or password-reset code can never satisfy a step-up challenge.
+  - The "code sent" message names the masked email address the code went to. If the code email fails, the API answers 503 with a "try again in a few minutes" message instead of a generic error.
 - **Dependencies**: Existing `IOtpService`/email template plumbing (no new OTP infrastructure).
 
 ### 1.3 Personal Profile & Privacy Control
@@ -247,6 +253,46 @@ The platform operates without live payment-gateway credentials. All payment meth
   `tools/constitution/publish_constitution.py` (PyMuPDF) is a build-time documentation tool, not
   an application dependency.
 
+### 5.1b Election Officials, Rules Freeze and Rules Unlock
+- **Business description**: Lets administrators appoint and revoke election officials, and keeps the
+  election rules fixed while an election is running, so nobody can change who may count or approve
+  during the vote.
+- **User roles**: Admin and SuperAdmin (officials panel), SuperAdmin (rules unlock, emergency revoke),
+  election officials with the Approve or Count permission (approve an emergency revoke, run a count).
+- **Inputs / outputs**:
+  - Screens: the Officials panel on each row of `/admin/elections` and the "Officials" bottom sheet on the
+    mobile election card; the SuperAdmin-only rules unlock box on `/admin/elections` and the rules unlock
+    sheet in the mobile app bar.
+  - API: `POST/GET api/elections/{id}/appointments`, `POST api/elections/appointments/{id}/revoke`,
+    `POST api/elections/appointments/{appointmentId}/emergency-revoke`,
+    `GET/POST api/admin/elections/rules-unlock` and `POST api/admin/elections/rules-unlock/close`.
+  - Key fields: persona, member or (name and email), Returning Officer flag, revoke reason, unlock
+    reason (20 to 1000 characters) and minutes (1 to 60, default 30).
+- **Validations & rules**:
+  - Freeze: while any election has an open-polling request waiting for approval, or is in Polling or Counting, the shared election
+    settings, ballot and count rules, personas and their permissions, appointments and the ballot key
+    cannot change. The API refuses with 409 (`ELECTION_RULES_FROZEN`) and writes an activity row for the
+    refused attempt. Reading the audit or monitoring is never locked.
+  - Rules unlock: a SuperAdmin with step-up can open one site-wide unlock with a written reason. It lasts
+    30 minutes by default and 60 at most. Any SuperAdmin can close it early. Each change it lets through
+    is recorded with the unlock id and reason. It never covers a plain appointment revoke.
+  - Emergency revoke: while the rules are frozen an official is removed only by an emergency revoke. A
+    SuperAdmin with step-up asks, with a reason. Another active official on that election who holds
+    Approve approves it, and that person cannot be the requester or the target. SuperAdmin cannot skip
+    the approval. With nobody eligible the request is refused. If nobody acts, the request expires, and a
+    background sweep every 15 minutes writes the `expired` audit row.
+  - Returning Officer: marked by a flag on the appointment. There is one live Returning Officer per
+    election. Appointing a new one expires the old row.
+  - Count: approving a count does not run it. The requester runs it with the key file. Unless the
+    `CountRequesterOnly` org setting (default off) is on, any official with Count other than the approver
+    can run it. The executor is recorded (`ElectionCountRun` audit row).
+  - Pre-polling warning when fewer than 2 live officials hold Approve.
+  - Two identical approval requests cannot both be stored.
+  - Member search in the officials panel is admin-only. On mobile an election official sees a note to
+    give a name and email instead.
+- **Dependencies**: `ElectionFreezeService`, `ElectionApprovalService`, `ElectionAppointmentService`,
+  `ExpiredRevokeSweep` hosted service, step-up verification (1.2a). Spec 023, FR-034 to FR-041.
+
 ### 5.2 Bulk Member Import & Export
 - **Business description**: Excel-to-database bridging for migrating legacy records and exporting registry data.
 - **User roles**: SuperAdmin.
@@ -418,6 +464,8 @@ Note: on a brand-new empty database, the runtime builds the schema and applies s
 - SCSS design system with CSS custom properties for colors, spacing, and glassmorphism tokens; semantic theme tokens flip between fully-styled light and dark modes.
 
 ### API & tooling
+- `WwwRedirectMiddleware` moves `www.<domain>` to the main domain taken from `AppSettings:ClientUrl`
+  (301, or 308 for methods other than GET and HEAD). It does nothing for localhost.
 - Swagger/OpenAPI interactive documentation for manual API verification.
 - Excel-to-database member import utility with column mapping and auto-generation of missing legacy data.
 - File storage abstraction (local storage today, with an interface ready for cloud/S3/Azure expansion).

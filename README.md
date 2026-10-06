@@ -147,7 +147,7 @@ The platform follows Clean Architecture (Onion) principles so business logic sta
 - **Domain** (`GHCAA.Domain`) — pure C# entities (`Member`, `User`, `AlumniEvent`, ~45 entities), enums, and shared constants; no external dependencies.
 - **Application** (`GHCAA.Application`) — service interfaces (`IMemberService`, `IAuthService`), DTOs, FluentValidation validators, and security primitives (JWT key resolution); defines the business contracts.
 - **Infrastructure** (`GHCAA.Infrastructure`) — ~37 service implementations, EF Core persistence with a multi-provider `ApplicationDbContext` (PostgreSQL + SQLite), per-entity `IEntityTypeConfiguration` mappings, payment gateways, and integrations (email, OTP, SMS, file storage). Services auto-register by convention.
-- **API** (`GHCAA.API`) — ~36 REST controllers, a 7-component middleware pipeline (exception handling, security headers, audit logging, login rate limiting, security-stamp invalidation, XSRF), two SignalR hubs (`ChatHub`, `NotificationHub`), and JWT authentication. Hosts the built Angular SPA from `wwwroot` in production.
+- **API** (`GHCAA.API`) — ~36 REST controllers, an 8-component middleware pipeline (correlation id, www redirect, exception handling, security headers, audit logging, security-stamp invalidation, XSRF, plus a Visual-profile test auth), two SignalR hubs (`ChatHub`, `NotificationHub`), and JWT authentication. Hosts the built Angular SPA from `wwwroot` in production.
 
 ### Web frontend (Angular 21)
 
@@ -183,7 +183,7 @@ The patterns below are the ones actually implemented, with their locations. Wher
 | Convention-based service registration | [`AddInfrastructure()`](GHCAA.Infrastructure/DependencyInjection.cs) reflects over the `.Services` namespace and auto-binds each implementation to its `GHCAA.Application.Interfaces` interface, so new services need no manual wiring. |
 | Strategy | Payment channels implement a common [`IPaymentGatewayService`](GHCAA.Application/Interfaces/IPaymentGatewayService.cs) with swappable implementations (SSLCommerz, bKash, Nagad, DGePay) in [`GHCAA.Infrastructure/Gateways/`](GHCAA.Infrastructure/Gateways/). The database provider (SQLite / PostgreSQL) is selected by the same approach in [`AddInfrastructure()`](GHCAA.Infrastructure/DependencyInjection.cs). |
 | Factory | [`PaymentGatewayFactory`](GHCAA.Infrastructure/Gateways/PaymentGatewayFactory.cs) takes the injected set of gateway strategies and returns the one matching the requested gateway type. |
-| Middleware pipeline | Seven custom middleware components in [`GHCAA.API/Middleware/`](GHCAA.API/Middleware/) — global exception handling, security headers, audit logging, login rate limiting, security-stamp session invalidation, and XSRF protection — composed in [`Program.cs`](GHCAA.API/Program.cs). |
+| Middleware pipeline | Eight custom middleware components in [`GHCAA.API/Middleware/`](GHCAA.API/Middleware/) — correlation id, www-to-apex redirect (301 for GET and HEAD, 308 otherwise, host from `AppSettings:ClientUrl`), global exception handling, security headers, audit logging, security-stamp session invalidation, XSRF protection, and a test-only Visual profile auth — composed in [`Program.cs`](GHCAA.API/Program.cs). |
 | Global query filters (soft delete) | Per-entity `IEntityTypeConfiguration` classes in [`GHCAA.Infrastructure/Data/Configurations/`](GHCAA.Infrastructure/Data/Configurations/) apply `HasQueryFilter(!IsArchived)`, registered via `ApplyConfigurationsFromAssembly` in [`ApplicationDbContext`](GHCAA.Infrastructure/Data/ApplicationDbContext.cs). |
 | DTOs (manual mapping) | Request/response DTOs live in [`GHCAA.Application/DTOs/`](GHCAA.Application/DTOs/); mapping is done explicitly in services (no AutoMapper, keeping mappings visible and dependency-free). |
 | Observer (real-time) | SignalR hubs [`ChatHub`](GHCAA.API/Hubs/ChatHub.cs) and [`NotificationHub`](GHCAA.API/Hubs/NotificationHub.cs) push messages and notifications to connected clients. |
@@ -265,7 +265,8 @@ Do not commit real passwords, API keys, or production connection strings. Base s
 | `Jwt__Key` | JWT signing secret, 32+ characters. Required outside Development — the API fails fast on boot if it is unset. |
 | `ConnectionStrings__PgSqlConnection` or `DATABASE_URL` | PostgreSQL connection (a `postgres://...` URL is parsed automatically). |
 | `GmailSettings__Email` / `GmailSettings__AppPassword` | SMTP credentials for OTP, approval, and notification email. |
-| `AppSettings__AllowedOrigins__0` | Browser origins permitted by CORS. |
+| `AppSettings__AllowedOrigins__0` | Browser origins permitted by CORS. The base file list is empty. Outside Development the API refuses to start if the list is empty, has a wildcard or a bad entry, or `AppSettings__ClientUrl` is not in it. |
+| `AppSettings__ClientUrl` | The public site URL. Must be one of the allowed origins. Also the host that `www.` requests are redirected to. |
 | `DataProtection__KeyRingPath` | Persistent path for Data Protection keys (mount a volume in containers so auth cookies survive restarts). |
 
 ### Local development options

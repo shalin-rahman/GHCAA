@@ -762,7 +762,9 @@ not block a build yet). For the full mechanism and where it stands, see
 | Interface | Impl | Key Methods |
 |---|---|---|
 | `IAuthService` | `AuthService` | `LoginAsync`, `GoogleLoginAsync`, `FacebookLoginAsync` |
-| `IUserService` | `UserService` | CRUD on User entity |
+| `IUserService` | `UserService` | CRUD on User entity; `HasElectionRecordsAsync` (appointments, approvals, rules unlocks, scrutiny decisions). `RolesController` refuses a hard delete with 409 when it is true |
+| `IElectionFreezeService` | `ElectionFreezeService` | `EnsureNotFrozenAsync`, `FindFrozenAsync`, `GetOpenUnlockAsync`, `OpenUnlockAsync`, `CloseUnlockAsync` |
+| `ISocialAuthConfigService` | `SocialAuthConfigService` | `GetUsableAsync`; the providers list and the sign-in endpoints both use it |
 | `ITokenService` | `TokenService` | `GenerateToken(user)` |
 | `IRoleService` | `RoleService` | `CreateRole`, `AssignRoleToUser`, `RemoveRole`, `GetUserRoles` |
 | `ILookupService` | `LookupService` | `GetByCategory(cat)`, `GetAll()`, `Add()`, `Delete()` |
@@ -994,6 +996,9 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 | `ScholarshipsController` | `/api/scholarships` (WP37.2) | Public (apply/status) + Member (review queue) + Admin (funds/calls/award/disburse) | `IScholarshipService` |
 | `ArchiveController` | `/api/archive` (WP37.6) | Public (collection/item reads) + Member (submission) + Admin (curation/moderation) | `IArchiveService` |
 | `CredentialVerificationController` | `/api/verify/{shortCode}` (WP37.8) | Public / RateLimit: `RateLimitPolicies.CredentialVerification` | `IIDCardService` |
+| `ElectionRulesUnlockController` | `/api/admin/elections/rules-unlock` (spec 023): `GET` current unlock, `POST` open (`reason` 20-1000 chars, `minutes` 1-60, default 30), `POST close` | SuperAdmin | `IElectionFreezeService` |
+| `ElectionAppointmentsController` | `/api` (spec 023): election appointments, plus `POST elections/appointments/{appointmentId}/emergency-revoke` (202 with an approval; another active official with Approve on that election approves; no SuperAdmin bypass) | ElectionStaff / Auth | `IElectionAppointmentService`, `IElectionApprovalService` |
+| `ElectionsController` | `/api/elections` (spec 023): `GET {id}/approvals`, `POST approvals/{approvalId}/approve`, `POST approvals/{approvalId}/reject`, plus the public election reads | Public / Auth / ElectionStaff | `IElectionApprovalService`, `IElectionAccessService` |
 
 ---
 
@@ -1024,24 +1029,30 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 ### Order in `Program.cs`:
 1. `ForwardedHeaders` — reverse proxy / TLS header resolution
 2. `CorrelationIdMiddleware` — Assigns correlation id for distributed tracking
-3. `ExceptionMiddleware` — Global exception → ProblemDetails RFC 7807 JSON
-4. `Cors` (`"AngularApp"`)
-5. `Swagger` / `SwaggerUI` (Development only)
-6. `ResponseCompression` & `OutputCache`
-7. `Hsts` / `HttpsRedirection` (Non-Development)
-8. `SecurityHeadersMiddleware` — CSP, X-Frame-Options, HSTS
-9. `AuditLogMiddleware` — Logs mutating requests via `IActivityService`
-10. `RateLimiter`
-11. `WebSockets`
-12. `StaticFiles` — `wwwroot/` + `/api/uploads/` physical mapping & image placeholder fallback
-13. `Authentication` (JWT Bearer / httpOnly cookie)
-14. `VisualTestAuthMiddleware` (Visual profile development only)
-15. `SecurityStampMiddleware` — Invalidates sessions on `SecurityStamp` change
-16. `XsrfMiddleware` — CSRF token protection for cookie-based clients
-17. `Authorization`
-18. Endpoints: `MapControllers().RequireRateLimiting("api")`, `/health`, SignalR hubs (`/api/hubs/chat`, `/api/hubs/notifications`)
-19. `MapSpaFallback` — SPA HTML5 deep-linking routing fallback
-20. `BootstrapDatabaseAsync` — Async database migration & initialization on startup
+3. `WwwRedirectMiddleware` — Sends `www.<apex>` to the apex host. The host comes only from `AppSettings:ClientUrl`. GET and HEAD get a 301, other methods get a 308 so the method and body survive. It does nothing when `ClientUrl` has no usable host or the request host is not `www.<apex>`
+4. `ExceptionMiddleware` — Global exception → ProblemDetails RFC 7807 JSON
+5. `Cors` (`"AngularApp"`)
+6. `Swagger` / `SwaggerUI` (Development only)
+7. `ResponseCompression` & `OutputCache`
+8. `Hsts` / `HttpsRedirection` (Non-Development)
+9. `SecurityHeadersMiddleware` — CSP, X-Frame-Options, HSTS
+10. `AuditLogMiddleware` — Logs mutating requests via `IActivityService`
+11. `RateLimiter`
+12. `WebSockets`
+13. `StaticFiles` — `wwwroot/` + `/api/uploads/` physical mapping & image placeholder fallback
+14. `Authentication` (JWT Bearer / httpOnly cookie)
+15. `VisualTestAuthMiddleware` (Visual profile development only)
+16. `SecurityStampMiddleware` — Invalidates sessions on `SecurityStamp` change
+17. `XsrfMiddleware` — CSRF token protection for cookie-based clients
+18. `Authorization`
+19. Endpoints: `MapControllers().RequireRateLimiting("api")`, `/health`, SignalR hubs (`/api/hubs/chat`, `/api/hubs/notifications`)
+20. `MapSpaFallback` — SPA HTML5 deep-linking routing fallback
+21. `BootstrapDatabaseAsync` — Async database migration & initialization on startup
+
+### Startup checks, filters and hosted services
+- `Program.cs` refuses to start outside Development when `AppSettings:AllowedOrigins` is empty, has a wildcard or a bad entry, or `AppSettings:ClientUrl` is not in the list (`AllowedOriginsAudit`, `GHCAA.Infrastructure/Services/`). `BootstrapDatabaseAsync` records an `AllowedOriginsChanged` activity row when the list differs from the last one stored. The base `appsettings.json` list is empty.
+- `ElectionRulesFrozenFilter` (`GHCAA.API/Filters/`) is a global MVC filter. It calls `IElectionFreezeService` (`ElectionFreezeService`). Election rules are frozen while any election is `WaitingForPolling`, `Polling` or `Counting`. A refused change returns 409 with code `ELECTION_RULES_FROZEN` and writes an audit row. A SuperAdmin can open a short unlock through `ElectionRulesUnlockController`.
+- `ExpiredRevokeSweep` (`GHCAA.API/Services/`) is a hosted service. Every `Constants.Elections.ExpiredRevokeSweepMinutes` (15) minutes it writes the `expired` audit row for emergency revoke approvals that nobody acted on.
 
 ---
 

@@ -16,7 +16,7 @@
 |---|---|
 | `Dockerfile` | Multi-stage: Node 22 builds Angular → copied into the API's `wwwroot`. One image serves both. |
 | `GHCAA.API/Program.cs` | SPA fallback — serves `index.html` for non-`/api` routes so deep-links work on refresh. |
-| `GHCAA.Web/src/environments/environment.preprod.ts` | `apiUrl` → `/api` (relative, same-origin). Old `preprod.haragangian.com` domain does not exist. |
+| `GHCAA.Web/src/environments/environment.preprod.ts` | `apiUrl` → `/api` (relative, same-origin). The preprod URL is `https://ghcaa-ryl6.onrender.com`. The old `preprod.haragangian.com` domain does not exist. |
 | `.github/workflows/neon_workflow.yml` | Creates/deletes a Neon DB branch per pull request. |
 
 You only need to do the dashboard/Git steps below. **No further code changes required.**
@@ -95,13 +95,20 @@ git push -u origin preprod
 
 ## Step 3 — Set the environment variables
 
-In the service → **Environment** tab → **Add Environment Variable**, add these **three**:
+In the service → **Environment** tab → **Add Environment Variable**, add these five:
 
 | Key | Value |
 |---|---|
 | `Jwt__Key` | `ahpleDW6hI1zvQ/F2x0fo8+o0Y1KX44P5tKqPFvNSgiVJ5+se8OSYwhfGlND49hf` |
 | `ASPNETCORE_ENVIRONMENT` | `Preprod` |
+| `AppSettings__AllowedOrigins__0` | `https://ghcaa-ryl6.onrender.com` |
+| `AppSettings__ClientUrl` | `https://ghcaa-ryl6.onrender.com` |
 | `DATABASE_URL` | `postgresql://neondb_owner:npg_keJCzc13FsIy@ep-green-fog-ax3l40f0-pooler.c-4.us-east-2.aws.neon.tech/GhcaaDB?sslmode=require&channel_binding=require` |
+
+> **`AppSettings__AllowedOrigins__0` and `AppSettings__ClientUrl`.** Outside Development the app refuses
+> to start when `AllowedOrigins` is empty, has a wildcard or a bad entry, or `ClientUrl` is not in the list.
+> The base `appsettings.json` list is empty. For preprod set both to `https://ghcaa-ryl6.onrender.com`.
+> `ClientUrl` is also the host that `www.<host>` requests are redirected to (301 for GET and HEAD, 308 otherwise).
 
 > **Why `Jwt__Key` (double underscore)?** .NET maps `Jwt__Key` → config key `Jwt:Key`.
 > Outside Development the app **refuses to start** without it (exit 139) — this was the

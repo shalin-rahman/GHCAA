@@ -249,14 +249,28 @@ bypass needs independent authorization and a complete audit record.
 - **FR-039** Election security and authorization rules cannot change from an OpenPolling request
   until the result is declared: the election settings, persona permissions, and appointments to that
   election. The API refuses the change and records the refused attempt. TODO 37.13q.
+  The lock holds while any election is waiting for polling, polling or counting. It covers the
+  shared election settings, ballot and count rules, personas and official permissions, and the
+  ballot key. Election-specific data follows its own phase rules, and reading the audit or
+  monitoring is never locked. TODO 37.13v.
+  For an accident or a situation nobody could avoid, a SuperAdmin with step-up can open one
+  site-wide unlock with a written reason (20 to 1000 characters) for 30 minutes by default and 60 at
+  most. Any SuperAdmin can close it early. Every change it lets through is recorded with the unlock
+  id and reason. It never covers revoking an appointment, which stays on the FR-040 path.
+  A SuperAdmin opens and closes the unlock from the admin election screens on web and mobile.
+  TODO 37.13z.
 - **FR-040** During that window the only exception is revoking an official's appointment. A
   SuperAdmin with step-up and a written reason asks. Another active official on that election with
   Approve, who is neither the requester nor the target, approves. Eligibility, the target and the
   request are checked again when it runs, and it runs once. With nobody eligible it is refused, and
   SuperAdmin cannot skip the approval. The record keeps requester, approver, target, reason, the
   appointment before and after, the time and the outcome. TODO 37.13r.
+  A request that expires with nobody acting on it gets its `expired` record within 15 minutes of
+  expiry, once only. Two identical requests sent together store one. A SuperAdmin asks for it from
+  the officials panel on web and mobile. TODO 37.13w, 37.13x, 37.13y.
 - **FR-041** The Returning Officer is identified by an explicit flag on the election appointment,
-  with at most one active per election, never by persona name. TODO 37.13s.
+  with at most one active per election, never by persona name. It is set when appointing, from
+  the officials panel on web and mobile. TODO 37.13s, 37.13y.
 
 ## Receipt and print standard
 
@@ -308,6 +322,11 @@ strict receipt-freeness, print the tracking code only (option B in D1).
   revoking an official. Any other active official on the election with Approve approves it, not
   only the Returning Officer. The Returning Officer is marked on the appointment, not found by
   persona name.
+- **D5 Gaps after the 2026-10-05 review.** Decided 2026-10-05. The officials panel and the unlock
+  panel are built on web and mobile now, ahead of the full 37.12h officials area. An expired
+  emergency revoke is audited by a background sweep rather than lazily. A user who has election
+  records is refused hard delete and is deactivated instead, so the record stays whole. The unlock
+  stays site-wide.
 
 ## What the vote record keeps about the request
 

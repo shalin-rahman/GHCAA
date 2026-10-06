@@ -165,7 +165,8 @@ CREATE UNIQUE INDEX "IX_OrganizationConfigs_OrgId" ON "OrganizationConfigs" ("Or
     "inviteLinkHours": 72,
     "candidateOrder": "Random",
     "showTurnoutDuringPolling": false,
-    "publishPerSeatBallots": true
+    "publishPerSeatBallots": true,
+    "countRequesterOnly": false
   },
   "localization": {
     "defaultLocale": "en",
@@ -186,6 +187,8 @@ CREATE UNIQUE INDEX "IX_OrganizationConfigs_OrgId" ON "OrganizationConfigs" ("Or
 |--------|-------|------|---------|
 | `GET` | `/api/config` | Public | Returns full OrgConfigDto (10-min memory-cached) |
 | `PUT` | `/api/config` | SuperAdminOnly | Updates config, invalidates cache, persists to DB |
+
+**`elections.countRequesterOnly`** (bool, default `false`): off, any official with Count except the approver may run an approved count. On, only the official who asked for it may run it. `twoPersonActions` leaves out `EmergencyRevoke` by default, because an emergency revoke always needs a second person.
 
 **PUT payload:** full `OrgConfigDto` JSON (same shape as GET response).  
 **PUT response:** `204 No Content`.  

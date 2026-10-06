@@ -146,6 +146,19 @@ Work Package 37.1 uses the same application-service boundary for its persisted e
 The service enforces phase transitions, frozen voter-roll eligibility, officer permissions, candidate
 rules, secret-ballot separation and one-vote concurrency controls before writing election state.
 Generated election documents use the reusable document service and the active organisation profile.
+Election rules are frozen while any election is waiting for polling, polling or counting. A global
+filter, `ElectionRulesFrozenFilter`, backed by `ElectionFreezeService`, refuses a change to election
+settings, personas or appointments with a 409 and the code `ELECTION_RULES_FROZEN`, and audits the
+refusal. A SuperAdmin can lift the freeze for a set time through a route under `api/admin/elections`, 30 minutes
+by default and 60 at most, and must give a reason of 20 to 1,000 characters. The one change allowed
+during the freeze is an emergency revoke of an official, which needs a second active official holding
+Approve on that election and has no SuperAdmin bypass. A hosted service, `ExpiredRevokeSweep`, runs
+every 15 minutes and writes the audit row for any emergency revoke that expired unused. A unique
+`OpenKey` index on approval requests stops two identical open requests from being stored together.
+The appointment carries a Returning Officer flag, the approval row records who ran an approved count,
+and the organisation setting `CountRequesterOnly`, off by default, limits running an approved count to
+the official who asked for it, so anyone else is refused with `not-requester`. A user who holds election records cannot be hard deleted: the request is refused with a
+409.
 
 Work Package 37.2 carries the scholarship and student-aid programme through the same fund/call/
 application/award shape the rest of the domain uses for a multi-stage workflow. A reviewer scoring
@@ -386,7 +399,7 @@ one.
 
 ## 7.12 Software Configuration Management
 
-The repository carries 325 commits on `HEAD` and eight local branches: `dev`, `preprod`,
+The repository carries 328 commits on `HEAD` and eight local branches: `dev`, `preprod`,
 `release-1`, `release-2`, `release-3_b4_generic_N_refactor`, `release-4_white_paper`,
 `prepod-election-refactoring` and `backup/2026-10-01-column-repair`, plus `dev-mobile` and
 `mobile_app` that exist only on the remote, as of 4 October 2026. `dev` is named as the integration
