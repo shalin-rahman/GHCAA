@@ -30,7 +30,7 @@ namespace GHCAA.Infrastructure.Services
             var ua = userAgent ?? ctx?.Request?.Headers["User-Agent"].ToString();
 
             // Auto-detect source if not provided
-            var src = source ?? (ua?.ToLower().Contains("mobile") == true ? "Mobile" : "Web");
+            var src = source ?? (ua?.ToLower().Contains("mobile") == true ? GHCAA.Domain.Constants.ActivitySources.Mobile : GHCAA.Domain.Constants.ActivitySources.Web);
 
             var log = new ActivityLog
             {

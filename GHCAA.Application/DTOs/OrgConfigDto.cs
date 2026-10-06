@@ -27,7 +27,9 @@ namespace GHCAA.Application.DTOs
     public record ElectionSettingsDto
     {
         public bool AdminKeepsControlAfterHandover { get; init; } = false;
-        public List<string> TwoPersonActions { get; init; } = Enum.GetNames<Enums.ElectionApprovalAction>().ToList();
+        // EmergencyRevoke is left out because it always needs a second person and cannot be switched off here.
+        public List<string> TwoPersonActions { get; init; } = Enum.GetNames<Enums.ElectionApprovalAction>()
+            .Where(n => n != nameof(Enums.ElectionApprovalAction.EmergencyRevoke)).ToList();
         // Decision 1: off by default, an emergency switch only.
         public bool SuperAdminActsAlone { get; init; } = false;
         public int ApprovalExpiryHours { get; init; } = 48;
@@ -39,6 +41,9 @@ namespace GHCAA.Application.DTOs
         public Enums.ElectionCandidateOrder CandidateOrder { get; init; } = Enums.ElectionCandidateOrder.Random;
         public bool ShowTurnoutDuringPolling { get; init; } = false;
         public bool PublishPerSeatBallots { get; init; } = true;
+        // 37.13n. Off: any official with Count except the approver may run an approved count.
+        // On: only the official who asked for it.
+        public bool CountRequesterOnly { get; init; } = false;
     }
 
     public record DocumentEntryDto

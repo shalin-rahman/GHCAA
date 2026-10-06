@@ -5,6 +5,7 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -29,9 +30,7 @@ public sealed class ElectionAppointmentServiceTests : TestBase
         _tokens = new Mock<ITokenService>();
         var orgConfig = new Mock<IOrgConfigService>();
         orgConfig.Setup(s => s.GetConfigAsync()).ReturnsAsync(new OrgConfigDto());
-        _service = new ElectionAppointmentService(_context, orgConfig.Object, new ElectionAccessService(_context, orgConfig.Object), new Mock<ICommunicationService>().Object,
-            new Mock<INotificationService>().Object, _tokens.Object,
-            Microsoft.Extensions.Options.Options.Create(new AppSettingsOptions()), NullLogger<ElectionAppointmentService>.Instance);
+        _service = NewAppointments(orgConfig.Object, _tokens.Object);
 
         var period = new ECPeriod { Title = "2027", StartDate = DateTime.UtcNow.AddDays(-1) };
         _context.ECPeriods.Add(period);
@@ -54,6 +53,54 @@ public sealed class ElectionAppointmentServiceTests : TestBase
 
     private Task<(bool Success, string? Error)> AcceptAsync(ElectionAppointmentDto a) =>
         _service.AcceptAsync(a.Id, a.UserId, new AcceptAppointmentDto { AgreeToDeclaration = true }, "10.0.0.1", CancellationToken.None);
+
+    private Task<(bool Success, string? Error, ElectionAppointmentDto? Appointment)> AppointReturningOfficerAsync(string email) =>
+        _service.AppointAsync(_election.Id, new AppointDto { PersonaId = _persona.Id, DisplayName = "Returning Officer", Email = email, IsReturningOfficer = true }, _admin.Id, CancellationToken.None);
+
+    [Test]
+    public async Task Appoint_SecondReturningOfficer_IsRefused()
+    {
+        (await AppointReturningOfficerAsync("ro1@example.com")).Appointment!.IsReturningOfficer.Should().BeTrue();
+
+        var (success, error, _) = await AppointReturningOfficerAsync("ro2@example.com");
+
+        success.Should().BeFalse();
+        error.Should().Be("returning-officer-taken");
+    }
+
+    [Test]
+    public async Task Appoint_ReturningOfficer_AllowedAgainAfterRevoke()
+    {
+        var first = (await AppointReturningOfficerAsync("ro1@example.com")).Appointment!;
+        await _service.RevokeAsync(first.Id, _admin.Id, "Stood down", CancellationToken.None);
+
+        (await AppointReturningOfficerAsync("ro2@example.com")).Success.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task Appoint_ReturningOfficer_AllowedAfterTheOldOneExpired()
+    {
+        var first = (await AppointReturningOfficerAsync("ro1@example.com")).Appointment!;
+        var past = DateTime.UtcNow.AddMinutes(-1);
+        await _context.ElectionAppointments.Where(x => x.Id == first.Id).ExecuteUpdateAsync(s => s.SetProperty(x => x.ExpiresAt, past));
+
+        (await AppointReturningOfficerAsync("ro2@example.com")).Success.Should().BeTrue();
+        (await _context.ElectionAppointments.AsNoTracking().SingleAsync(x => x.Id == first.Id)).RevokedReason.Should().Be(Constants.Elections.AppointmentExpiredReason);
+    }
+
+    [Test]
+    public async Task Database_RefusesTwoLiveReturningOfficers()
+    {
+        var first = (await AppointReturningOfficerAsync("ro1@example.com")).Appointment!;
+        var second = (await AppointOutsiderAsync("ro2@example.com")).Appointment!;
+
+        var row = await _context.ElectionAppointments.SingleAsync(x => x.Id == second.Id);
+        row.IsReturningOfficer = true;
+        var save = () => _context.SaveChangesAsync();
+
+        await save.Should().ThrowAsync<DbUpdateException>();
+        first.IsReturningOfficer.Should().BeTrue();
+    }
 
     [Test]
     public async Task Appoint_Member_UsesTheMembersUser()

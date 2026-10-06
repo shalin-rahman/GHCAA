@@ -24,7 +24,8 @@ namespace GHCAA.Infrastructure.Services
         ApplicationDbContext db,
         IMemoryCache cache,
         IInstitutionProfileProvider? profiles = null,
-        Microsoft.Extensions.Configuration.IConfiguration? configuration = null) : IOrgConfigService
+        Microsoft.Extensions.Configuration.IConfiguration? configuration = null,
+        IElectionFreezeService? freeze = null) : IOrgConfigService
     {
         private const string CacheKey = "org_config_v1";
         private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(10);
@@ -45,7 +46,7 @@ namespace GHCAA.Infrastructure.Services
                 entry.AbsoluteExpirationRelativeToNow = CacheTtl;
                 var record = await db.OrganizationConfigs.AsNoTracking().FirstOrDefaultAsync();
                 var dto = record is not null
-                    ? JsonSerializer.Deserialize<OrgConfigDto>(record.ConfigJson, JsonOpts) ?? BuildDefaults()
+                    ? ReadStored(record.ConfigJson) ?? BuildDefaults()
                     : BuildDefaults();
 
                 // Keep profile-owned localization values current, while preserving the
@@ -93,6 +94,17 @@ namespace GHCAA.Infrastructure.Services
             var record = await db.OrganizationConfigs.FirstOrDefaultAsync(x => x.OrgId == dto.OrgId)
                          ?? new OrganizationConfig { OrgId = dto.OrgId };
 
+            // Spec 023 FR-038. The row only keeps who saved last, so the old election values are
+            // read before they are overwritten. A row saved before the Elections section existed
+            // reads the DTO defaults, which are the values that were in force.
+            var previousElections = record.Id == 0
+                ? BuildDefaults().Elections
+                : ReadStored(record.ConfigJson)?.Elections ?? new();
+            var electionChanges = DiffElectionSettings(previousElections, dto.Elections ?? new());
+            // FR-039 (37.13q). Only a save that touches the Elections section is refused.
+            if (electionChanges.Count > 0 && freeze is not null)
+                await freeze.EnsureNotFrozenAsync(Constants.Elections.FrozenRules.Settings, electionChanges);
+
             record.OrgId = dto.OrgId;
             record.SchemaVersion = dto.SchemaVersion;
             record.ConfigJson = JsonSerializer.Serialize(dto, JsonOpts);
@@ -105,16 +117,70 @@ namespace GHCAA.Infrastructure.Services
             if (record.Id == 0)
                 db.OrganizationConfigs.Add(record);
 
+            // Added before the one SaveChanges, so the config and its audit row commit together.
+            if (electionChanges.Count > 0)
+            {
+                db.ActivityLogs.Add(new ActivityLog
+                {
+                    ActorId = int.TryParse(updatedByAdminId, out var actorId) ? actorId : null,
+                    ActivityType = Constants.Elections.SettingsChangedAuditType,
+                    Description = $"Election settings changed: {string.Join(", ", electionChanges.Keys)}.",
+                    Timestamp = record.UpdatedAt,
+                    Source = Constants.ActivitySources.System,
+                    Metadata = JsonSerializer.Serialize(
+                        new { updatedBy = updatedByAdminId, changes = electionChanges }, JsonOpts)
+                });
+            }
+
             await db.SaveChangesAsync();
             InvalidateCache();
         }
 
         private void InvalidateCache() => cache.Remove(CacheKey);
 
+        // Compares the serialized form, so a field added to ElectionSettingsDto later is covered
+        // without touching this method.
+        private static SortedDictionary<string, object?> DiffElectionSettings(
+            ElectionSettingsDto before, ElectionSettingsDto after)
+        {
+            var was = JsonSerializer.SerializeToElement(before, JsonOpts);
+            var now = JsonSerializer.SerializeToElement(after, JsonOpts);
+            var names = was.EnumerateObject().Select(p => p.Name)
+                .Union(now.EnumerateObject().Select(p => p.Name));
+
+            var changes = new SortedDictionary<string, object?>(StringComparer.Ordinal);
+            foreach (var name in names)
+            {
+                var hadOld = was.TryGetProperty(name, out var oldValue);
+                var hasNew = now.TryGetProperty(name, out var newValue);
+                if (hadOld && hasNew && oldValue.GetRawText() == newValue.GetRawText())
+                    continue;
+                changes[name] = new
+                {
+                    from = hadOld ? oldValue.Clone() : (JsonElement?)null,
+                    to = hasNew ? newValue.Clone() : (JsonElement?)null
+                };
+            }
+            return changes;
+        }
+
         // The defaults actually in force. Reads the institution profile pack once ORG_PROFILE names
         // one; falls back to the hardcoded GHC copy while it is unset, for the reason given on the
         // class. Both sides are asserted byte-identical by OrgConfigGoldenSnapshotTests, so which
         // branch runs is invisible to callers today — that is what makes the eventual deletion safe.
+        // 37.13o. A row saved before TwoPersonActions existed has no list, and the DTO default
+        // would turn on two-person counting that nobody chose. Such a row keeps the one-person
+        // count it had before 37.13h. A saved list is used as it is.
+        private static OrgConfigDto? ReadStored(string configJson)
+        {
+            var dto = JsonSerializer.Deserialize<OrgConfigDto>(configJson, JsonOpts);
+            var node = System.Text.Json.Nodes.JsonNode.Parse(configJson, new System.Text.Json.Nodes.JsonNodeOptions { PropertyNameCaseInsensitive = true });
+            if (dto is null || node?[nameof(OrgConfigDto.Elections)]?[nameof(ElectionSettingsDto.TwoPersonActions)] is not null)
+                return dto;
+            var count = nameof(Enums.ElectionApprovalAction.Count);
+            return dto with { Elections = dto.Elections with { TwoPersonActions = dto.Elections.TwoPersonActions.Where(a => a != count).ToList() } };
+        }
+
         private OrgConfigDto BuildDefaults() =>
             profiles is { ProfileExplicitlySelected: true }
                 ? profiles.OrgConfigDefaults

@@ -106,6 +106,8 @@ namespace GHCAA.API.Controllers
         [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> DeleteUser(int id, CancellationToken cancellationToken)
         {
+            if (await _userService.HasElectionRecordsAsync(id, cancellationToken))
+                return Problem(detail: "This account has election records. Deactivate it instead.", statusCode: StatusCodes.Status409Conflict);
             var success = await _userService.DeleteSystemAdminAsync(id, cancellationToken);
             if (!success) return Problem(detail: "Only non-member system administrator accounts can be deleted here.", statusCode: StatusCodes.Status400BadRequest);
             return Ok(new { Message = "System administrator account deleted." });

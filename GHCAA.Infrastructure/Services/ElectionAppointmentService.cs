@@ -26,12 +26,14 @@ public sealed class ElectionAppointmentService(
     INotificationService notifications,
     ITokenService tokens,
     IOptions<AppSettingsOptions> appSettings,
-    ILogger<ElectionAppointmentService> logger) : IElectionAppointmentService
+    ILogger<ElectionAppointmentService> logger,
+    IElectionFreezeService freeze) : IElectionAppointmentService
 {
     public async Task<(bool Success, string? Error, ElectionAppointmentDto? Appointment)> AppointAsync(int electionId, AppointDto dto, int actorUserId, CancellationToken ct)
     {
         if (!await db.Elections.AnyAsync(x => x.Id == electionId, ct))
             return (false, "not-found", null);
+        await freeze.EnsureNotFrozenAsync(Constants.Elections.FrozenRules.Appointment, new { action = "appoint", dto.PersonaId, dto.MemberId }, electionId, ct);
         var persona = await db.ElectionPersonas.FirstOrDefaultAsync(x => x.Id == dto.PersonaId && x.IsActive, ct);
         if (persona is null)
             return (false, "persona-not-found", null);
@@ -83,6 +85,19 @@ public sealed class ElectionAppointmentService(
 
         if (!createdUser && await db.ElectionAppointments.AnyAsync(x => x.ElectionId == electionId && x.PersonaId == persona.Id && x.UserId == user.Id && x.RevokedAt == null, ct))
             return (false, "duplicate", null);
+        if (dto.IsReturningOfficer)
+        {
+            // The one-officer index ignores ExpiresAt, so an expired row would block every new one. Close it first.
+            var now = DateTime.UtcNow;
+            await db.ElectionAppointments
+                .Where(x => x.ElectionId == electionId && x.IsReturningOfficer && x.RevokedAt == null && x.ExpiresAt != null && x.ExpiresAt <= now)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(x => x.RevokedAt, now)
+                    .SetProperty(x => x.RevokedByUserId, actorUserId)
+                    .SetProperty(x => x.RevokedReason, Constants.Elections.AppointmentExpiredReason), ct);
+            if (await ReturningOfficerTakenAsync(electionId, ct))
+                return (false, "returning-officer-taken", null);
+        }
 
         var appointment = new ElectionAppointment
         {
@@ -91,18 +106,35 @@ public sealed class ElectionAppointmentService(
             User = user,
             MemberId = dto.MemberId,
             DisplayName = displayName,
+            IsReturningOfficer = dto.IsReturningOfficer,
             Email = email,
             Phone = phone,
             AppointedByUserId = actorUserId,
             AppointedAt = DateTime.UtcNow
         };
         db.ElectionAppointments.Add(appointment);
-        await db.SaveChangesAsync(ct);
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException) when (dto.IsReturningOfficer)
+        {
+            // Two appointments raced past the check above and the unique index stopped the second.
+            db.Entry(appointment).State = EntityState.Detached;
+            if (createdUser)
+                db.Entry(user).State = EntityState.Detached;
+            if (!await ReturningOfficerTakenAsync(electionId, ct))
+                throw;
+            return (false, "returning-officer-taken", null);
+        }
 
         await SendInviteAsync(appointment, persona, user, ct);
 
         return (true, null, (await LoadAsync(db.ElectionAppointments.Where(x => x.Id == appointment.Id), ct)).Single());
     }
+
+    private Task<bool> ReturningOfficerTakenAsync(int electionId, CancellationToken ct) =>
+        db.ElectionAppointments.AnyAsync(x => x.ElectionId == electionId && x.IsReturningOfficer && x.RevokedAt == null, ct);
 
     public async Task<(bool Success, string? Error)> AcceptAsync(int appointmentId, int userId, AcceptAppointmentDto dto, string? ip, CancellationToken ct)
     {
@@ -112,6 +144,9 @@ public sealed class ElectionAppointmentService(
             .FirstOrDefaultAsync(x => x.Id == appointmentId && x.UserId == userId && x.RevokedAt == null, ct);
         if (appointment is null)
             return (false, "not-found");
+        // Accepting makes a pending appointment live, so it is frozen too. Declining is not,
+        // because it only takes someone out.
+        await freeze.EnsureNotFrozenAsync(Constants.Elections.FrozenRules.Appointment, new { action = "accept", appointmentId }, appointment.ElectionId, ct);
         if (appointment.AcceptedAt is not null)
             return (false, "already-accepted");
         if (appointment.ExpiresAt is DateTime expires && expires <= DateTime.UtcNow)
@@ -161,6 +196,8 @@ public sealed class ElectionAppointmentService(
             return (false, "not-found");
         if (!await MayAppointAsync(appointment.ElectionId, actorUserId, ct))
             return (false, "forbidden");
+        // FR-040: revoking inside the window goes through the emergency path (37.13r), not this one.
+        await freeze.EnsureNotFrozenAsync(Constants.Elections.FrozenRules.AppointmentRevoke, new { action = "revoke", appointmentId, reason }, appointment.ElectionId, ct);
 
         appointment.RevokedAt = DateTime.UtcNow;
         appointment.RevokedByUserId = actorUserId;
@@ -262,6 +299,6 @@ public sealed class ElectionAppointmentService(
         return rows.Select(x => new ElectionAppointmentDto(
             x.Id, x.ElectionId, x.Election!.Title, x.PersonaId, x.Persona!.Name, x.Persona.DeclarationText,
             x.UserId, x.MemberId, x.DisplayName, x.Email, x.Phone, x.AppointedAt, x.AcceptedAt,
-            x.DeclarationSignedAt, x.RevokedAt, x.RevokedReason, x.ExpiresAt, x.IsLive(now))).ToList();
+            x.DeclarationSignedAt, x.RevokedAt, x.RevokedReason, x.ExpiresAt, x.IsLive(now), x.IsReturningOfficer)).ToList();
     }
 }

@@ -14,6 +14,8 @@ public interface IElectionApprovalService
     // SuperAdminActsAlone is on. Otherwise stores it. newPublicKey is used only by ReplaceBallotKey.
     Task<ElectionApprovalRunResult> RunOrRequestAsync(int electionId, ElectionApprovalAction action, int userId, IReadOnlyCollection<string> roles, string? newPublicKey = null, CancellationToken ct = default);
     Task<(bool Success, string? Error, ElectionApprovalDto? Approval)> RequestAsync(int electionId, ElectionApprovalAction action, int userId, string? newPublicKey = null, CancellationToken ct = default);
+    // Spec 023 FR-040 (37.13r). Always needs a second person, even with SuperAdminActsAlone on.
+    Task<(bool Success, string? Error, ElectionApprovalDto? Approval)> RequestEmergencyRevokeAsync(int appointmentId, int userId, IReadOnlyCollection<string> roles, string? reason, CancellationToken ct = default);
     Task<(bool Success, string? Error)> ApproveAsync(int approvalId, int userId, IReadOnlyCollection<string> roles, CancellationToken ct = default);
     Task<(bool Success, string? Error)> RejectAsync(int approvalId, int userId, IReadOnlyCollection<string> roles, string? reason, CancellationToken ct = default);
     // 37.13h. When Count is a two-person step, the first call stores a request and a second person
@@ -22,4 +24,6 @@ public interface IElectionApprovalService
     Task<ElectionCountRunResult> CountAsync(int electionId, int userId, IReadOnlyCollection<string> roles, string? privateKeyPkcs8Base64, CancellationToken ct = default);
     // Includes an approved Count that has not run yet.
     Task<IReadOnlyList<ElectionApprovalDto>> ListOpenAsync(int electionId, CancellationToken ct = default);
+    // 37.13x. Writes the expired audit row for each emergency revoke that ran out untouched. Returns how many it wrote.
+    Task<int> AuditExpiredRevokesAsync(CancellationToken ct = default);
 }

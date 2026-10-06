@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
@@ -22,6 +23,7 @@ public sealed class AdminElectionsController(IElectionService service, IElection
 {
     // Admin sees every election. An official sees only the ones they hold a live appointment on.
     [HttpGet]
+    [ProducesResponseType<IReadOnlyList<AdminElectionDto>>(StatusCodes.Status200OK)]
     public async Task<IActionResult> List(CancellationToken ct)
     {
         if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
@@ -169,7 +171,12 @@ public sealed class AdminElectionsController(IElectionService service, IElection
             .Where(p => p != ElectionPermission.None && perms.HasFlag(p))
             .Select(p => p.ToString())
             .ToList();
-        return election with { MyPermissions = names, AdminHandedOver = await access.IsHandedOverAsync(election.Id, ct) };
+        return election with
+        {
+            MyPermissions = names,
+            AdminHandedOver = await access.IsHandedOverAsync(election.Id, ct),
+            TooFewApprovers = await access.LiveApproverCountAsync(election.Id, ct) < Constants.Elections.MinApproversBeforePolling,
+        };
     }
 
     private static ECPosition ParsePosition(string value)

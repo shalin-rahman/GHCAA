@@ -86,6 +86,7 @@ public sealed class ElectionAppointmentsController(IElectionAppointmentService s
         "forbidden" => Forbid(),
         "not-found" or "persona-not-found" or "member-not-found" => NotFound(),
         "duplicate" => Problem(detail: "This person already holds this role in the election.", statusCode: StatusCodes.Status409Conflict),
+        "returning-officer-taken" => Problem(detail: "This election already has a Returning Officer. Revoke that appointment first.", statusCode: StatusCodes.Status409Conflict),
         "email-is-member" => Problem(detail: "This email belongs to a member. Appoint them as a member instead.", statusCode: StatusCodes.Status409Conflict),
         "member-no-login" => Problem(detail: "This member has no login yet.", statusCode: StatusCodes.Status409Conflict),
         "already-accepted" => Problem(detail: "This appointment is already accepted.", statusCode: StatusCodes.Status409Conflict),

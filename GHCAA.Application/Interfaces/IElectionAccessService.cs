@@ -15,6 +15,8 @@ public interface IElectionAccessService
     Task<bool> HasAsync(int electionId, int userId, IReadOnlyCollection<string> roles, ElectionPermission needed, CancellationToken ct = default);
     // True once a live appointment with a persona that takes over from admin exists on the election.
     Task<bool> IsHandedOverAsync(int electionId, CancellationToken ct = default);
+    // Live officials on the election whose active persona grants Approve.
+    Task<int> LiveApproverCountAsync(int electionId, CancellationToken ct = default);
     // Null when the nomination, appointment or approval does not exist.
     Task<int?> ElectionIdForAsync(ElectionIdLookup kind, int id, CancellationToken ct = default);
     // Elections where the user holds a live appointment.

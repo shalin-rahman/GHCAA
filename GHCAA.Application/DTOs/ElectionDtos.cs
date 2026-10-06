@@ -26,7 +26,7 @@ public record CastBallotResultDto(string TrackingCode);
 public record ElectionSummaryDto(int Id, string Title, ElectionPhase Phase, int ECPeriodId, int VoterCount, int EligibleVoterCount, string? BallotKeyFingerprint = null);
 public record AdminElectionPositionDto(int Id, string Title, string? Description, int Seats);
 public record AdminElectionCandidateDto(int Id, int MemberId, string Name, string? PhotoUrl, string? Statement, int PositionId, string PositionTitle);
-public record AdminElectionDto(int Id, string Title, string? Description, ElectionPhase Phase, DateTime? AnnouncedOn, DateTime? NominationOpensOn, DateTime? NominationClosesOn, DateTime? ScrutinyOn, DateTime? WithdrawalClosesOn, DateTime? PollingOpensOn, DateTime? PollingClosesOn, DateTime? DeclaredOn, bool IsActive, IReadOnlyList<AdminElectionPositionDto> Positions, IReadOnlyList<AdminElectionCandidateDto> Candidates, int EligibleVoterCount, bool HasVoted, ElectionTieRule TieRule, string? BallotKeyFingerprint = null, IReadOnlyList<string>? MyPermissions = null, bool AdminHandedOver = false);
+public record AdminElectionDto(int Id, string Title, string? Description, ElectionPhase Phase, DateTime? AnnouncedOn, DateTime? NominationOpensOn, DateTime? NominationClosesOn, DateTime? ScrutinyOn, DateTime? WithdrawalClosesOn, DateTime? PollingOpensOn, DateTime? PollingClosesOn, DateTime? DeclaredOn, bool IsActive, IReadOnlyList<AdminElectionPositionDto> Positions, IReadOnlyList<AdminElectionCandidateDto> Candidates, int EligibleVoterCount, bool HasVoted, ElectionTieRule TieRule, string? BallotKeyFingerprint = null, IReadOnlyList<string>? MyPermissions = null, bool AdminHandedOver = false, bool TooFewApprovers = false);
 public record NominationViewDto(int Id, int ElectionSeatId, int CandidateMemberId, NominationStatus Status, string Statement);
 public record ElectionResultDto(int ElectionSeatId, int NominationId, int VoteCount, bool IsElected, bool IsTie);
 
@@ -85,6 +85,9 @@ public class AppointDto : IValidatableObject
     [MaxLength(30)]
     public string? Phone { get; set; }
 
+    // 37.13s. Only one live appointment per election may carry this.
+    public bool IsReturningOfficer { get; set; }
+
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         var hasContact = !string.IsNullOrWhiteSpace(DisplayName) || !string.IsNullOrWhiteSpace(Email);
@@ -106,14 +109,19 @@ public class AppointmentReasonDto
     public string? Reason { get; set; }
 }
 
-public record ElectionAppointmentDto(int Id, int ElectionId, string ElectionTitle, int PersonaId, string PersonaName, string DeclarationText, int UserId, int? MemberId, string DisplayName, string Email, string? Phone, DateTime AppointedAt, DateTime? AcceptedAt, DateTime? DeclarationSignedAt, DateTime? RevokedAt, string? RevokedReason, DateTime? ExpiresAt, bool IsLive);
+public record ElectionAppointmentDto(int Id, int ElectionId, string ElectionTitle, int PersonaId, string PersonaName, string DeclarationText, int UserId, int? MemberId, string DisplayName, string Email, string? Phone, DateTime AppointedAt, DateTime? AcceptedAt, DateTime? DeclarationSignedAt, DateTime? RevokedAt, string? RevokedReason, DateTime? ExpiresAt, bool IsLive, bool IsReturningOfficer);
 
 // What /api/auth/me returns for each live appointment.
 public record ElectionAppointmentSummaryDto(int ElectionId, string ElectionTitle, string PersonaName, ElectionPermission Permissions);
 
 // Spec 023 (37.12f). KeyFingerprint is set only on a ReplaceBallotKey request, so the approver sees which key they approve.
 // ApprovedAt is set only on an approved Count that has not run yet (37.13h).
-public record ElectionApprovalDto(int Id, int ElectionId, ElectionApprovalAction Action, int RequestedByUserId, string RequestedBy, DateTime RequestedAt, DateTime ExpiresAt, string? KeyFingerprint, DateTime? ApprovedAt = null);
+public record ElectionApprovalDto(int Id, int ElectionId, ElectionApprovalAction Action, int RequestedByUserId, string RequestedBy, DateTime RequestedAt, DateTime ExpiresAt, string? KeyFingerprint, DateTime? ApprovedAt = null, int? ExecutedByUserId = null);
+
+// 37.13v. The open SuperAdmin unlock of the frozen rules.
+public record ElectionRulesUnlockDto(int Id, int OpenedByUserId, string OpenedBy, string Reason, DateTime OpenedAt, DateTime ExpiresAt);
+// Minutes defaults to Constants.Elections.RulesUnlockDefaultMinutes.
+public record OpenElectionRulesUnlockRequest(string Reason, int? Minutes = null);
 
 // What a two-person step did. Pending is set when it was stored for a second person instead of run.
 public record ElectionApprovalRunResult(bool Ran, string? Error, ElectionApprovalDto? Pending);

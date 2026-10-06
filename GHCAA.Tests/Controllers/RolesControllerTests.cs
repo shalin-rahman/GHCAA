@@ -115,6 +115,17 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
+        public async Task DeleteUser_WithElectionRecords_Returns409_AndDoesNotDelete()
+        {
+            _userServiceMock.Setup(x => x.HasElectionRecordsAsync(7, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+
+            var result = await _controller.DeleteUser(7, CancellationToken.None);
+
+            Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(409));
+            _userServiceMock.Verify(x => x.DeleteSystemAdminAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Test]
         public async Task DeleteUser_ProtectedOrMissing_ReturnsBadRequest()
         {
             _userServiceMock.Setup(x => x.DeleteSystemAdminAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(false);

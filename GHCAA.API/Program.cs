@@ -66,7 +66,7 @@ builder.Services.Configure<FormOptions>(x =>
 
 // ProblemDetails & Controllers
 builder.Services.AddProblemDetails();
-builder.Services.AddControllers()
+builder.Services.AddControllers(options => options.Filters.Add<GHCAA.API.Filters.ElectionRulesFrozenFilter>())
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
@@ -84,6 +84,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IRealTimeService, RealTimeService>();
+builder.Services.AddHostedService<ExpiredRevokeSweep>();
 
 builder.Services.AddCors(options =>
 {

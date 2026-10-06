@@ -1,3 +1,4 @@
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -40,6 +41,9 @@ public sealed class ElectionAppointmentConfiguration : IEntityTypeConfiguration<
         b.Property(x => x.RevokedReason).HasMaxLength(500);
         // Quoted identifiers, so the same filter works on Postgres and on the Sqlite test database.
         b.HasIndex(x => new { x.ElectionId, x.PersonaId, x.UserId }).IsUnique().HasFilter("\"RevokedAt\" IS NULL");
+        // One live Returning Officer per election. A revoked one frees the slot.
+        b.HasIndex(x => x.ElectionId).IsUnique().HasFilter("\"IsReturningOfficer\" = true AND \"RevokedAt\" IS NULL")
+            .HasDatabaseName("IX_ElectionAppointments_ElectionId_ReturningOfficer");
         b.HasIndex(x => x.UserId);
         // User has a !IsArchived query filter, so any query that includes x.User drops the appointment
         // once its user is archived (EF warning 10622). ElectionAppointmentService.AcceptAsync already
@@ -59,10 +63,25 @@ public sealed class ElectionApprovalConfiguration : IEntityTypeConfiguration<Ele
         b.Property(x => x.PayloadJson).HasMaxLength(8000);
         b.Property(x => x.RejectReason).HasMaxLength(500);
         b.HasIndex(x => new { x.ElectionId, x.Action, x.ExecutedAt, x.RejectedAt });
+        b.Property(x => x.OpenKey).HasMaxLength(64);
+        b.HasIndex(x => x.OpenKey).IsUnique();
         b.HasOne(x => x.Election).WithMany().HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
         b.HasOne<User>().WithMany().HasForeignKey(x => x.RequestedByUserId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<User>().WithMany().HasForeignKey(x => x.ApprovedByUserId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<User>().WithMany().HasForeignKey(x => x.RejectedByUserId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<User>().WithMany().HasForeignKey(x => x.ExecutedByUserId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public sealed class ElectionRulesUnlockConfiguration : IEntityTypeConfiguration<ElectionRulesUnlock>
+{
+    public void Configure(EntityTypeBuilder<ElectionRulesUnlock> b)
+    {
+        b.HasKey(x => x.Id);
+        b.Property(x => x.Reason).HasMaxLength(Constants.Elections.RulesUnlockReasonMaxLength).IsRequired();
+        b.HasIndex(x => new { x.ClosedAt, x.ExpiresAt });
+        b.HasOne<User>().WithMany().HasForeignKey(x => x.OpenedByUserId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<User>().WithMany().HasForeignKey(x => x.ClosedByUserId).OnDelete(DeleteBehavior.Restrict);
     }
 }
 

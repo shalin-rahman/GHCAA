@@ -50,6 +50,10 @@ public sealed class ElectionAccessService(ApplicationDbContext db, IOrgConfigSer
         db.ElectionAppointments.Where(ElectionAppointment.LiveAt(DateTime.UtcNow))
             .AnyAsync(x => x.ElectionId == electionId && x.Persona!.TakesOverFromAdmin, ct);
 
+    public Task<int> LiveApproverCountAsync(int electionId, CancellationToken ct = default) =>
+        db.ElectionAppointments.Where(ElectionAppointment.LiveAt(DateTime.UtcNow)).Where(ElectionAppointment.GrantsApprove)
+            .Where(x => x.ElectionId == electionId).Select(x => x.UserId).Distinct().CountAsync(ct);
+
     public async Task<int?> ElectionIdForAsync(ElectionIdLookup kind, int id, CancellationToken ct = default) => kind switch
     {
         ElectionIdLookup.Nomination => await db.Nominations.Where(x => x.Id == id).Select(x => (int?)x.ElectionId).FirstOrDefaultAsync(ct),

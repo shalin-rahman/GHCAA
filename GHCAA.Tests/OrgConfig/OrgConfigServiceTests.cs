@@ -148,10 +148,41 @@ namespace GHCAA.Tests.OrgConfig
 
             var elections = (await service.GetConfigAsync()).Elections;
 
-            elections.Should().BeEquivalentTo(new ElectionSettingsDto());
+            elections.Should().BeEquivalentTo(new ElectionSettingsDto(), o => o.Excluding(x => x.TwoPersonActions));
             elections.SuperAdminActsAlone.Should().BeFalse();
             elections.AccessEndsDaysAfterDeclare.Should().Be(21);
-            elections.TwoPersonActions.Should().Equal(Enum.GetNames<GHCAA.Domain.Enums.ElectionApprovalAction>());
+            // 37.13o. Every other action is on by default. Count stays one-person, as it was before 37.13h,
+            // and EmergencyRevoke is always two-person and not a setting.
+            elections.TwoPersonActions.Should().Equal(new ElectionSettingsDto().TwoPersonActions
+                .Where(n => n != nameof(GHCAA.Domain.Enums.ElectionApprovalAction.Count)));
+        }
+
+        // 37.13o, spec 023 FR-037.
+        [Test]
+        public async Task GetConfigAsync_NewSite_TurnsCountApprovalOn()
+        {
+            var service = new OrgConfigService(GetDbContext("TestDb_NewSiteCount"), new MemoryCache(new MemoryCacheOptions()));
+
+            (await service.GetConfigAsync()).Elections.TwoPersonActions
+                .Should().Contain(nameof(GHCAA.Domain.Enums.ElectionApprovalAction.Count));
+        }
+
+        // 37.13o. A saved list is never rewritten, whether or not it has Count.
+        [TestCase("[\"Declare\"]", new[] { "Declare" })]
+        [TestCase("[\"Count\",\"Declare\"]", new[] { "Count", "Declare" })]
+        [TestCase("[]", new string[0])]
+        public async Task GetConfigAsync_SavedTwoPersonList_IsKeptAsSaved(string saved, string[] expected)
+        {
+            var dbContext = GetDbContext("TestDb_SavedTwoPerson" + saved.Length);
+            dbContext.OrganizationConfigs.Add(new GHCAA.Domain.Models.OrganizationConfig
+            {
+                ConfigJson = "{\"orgId\":\"default\",\"Elections\":{\"TwoPersonActions\":" + saved + "}}",
+                UpdatedAt = DateTime.UtcNow
+            });
+            await dbContext.SaveChangesAsync();
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+
+            (await service.GetConfigAsync()).Elections.TwoPersonActions.Should().Equal(expected);
         }
 
         [Test]
@@ -173,6 +204,71 @@ namespace GHCAA.Tests.OrgConfig
 
             (await service.GetConfigAsync()).Elections.Should().BeEquivalentTo(changed);
             (await dbContext.OrganizationConfigs.SingleAsync()).ConfigJson.Should().Contain("\"Alphabetical\"");
+        }
+
+        // 37.13p, spec 023 FR-038.
+        [Category("FR-39")]
+        [Test]
+        public async Task UpdateConfigAsync_ElectionSettingChanged_WritesAuditRowWithOldAndNewValues()
+        {
+            var dbContext = GetDbContext("TestDb_ElectionSettingsAudit");
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var config = await service.GetConfigAsync();
+            await service.UpdateConfigAsync(config, "system");
+
+            await service.UpdateConfigAsync(
+                config with { Elections = config.Elections with { ApprovalExpiryHours = 12 } }, "42");
+
+            var row = await dbContext.ActivityLogs.SingleAsync();
+            row.ActivityType.Should().Be(GHCAA.Domain.Constants.Elections.SettingsChangedAuditType);
+            row.ActorId.Should().Be(42);
+            row.Timestamp.Should().Be((await dbContext.OrganizationConfigs.SingleAsync()).UpdatedAt);
+            using var metadata = JsonDocument.Parse(row.Metadata!);
+            var changes = metadata.RootElement.GetProperty("changes");
+            changes.EnumerateObject().Select(p => p.Name).Should().Equal("approvalExpiryHours");
+            changes.GetProperty("approvalExpiryHours").GetProperty("from").GetInt32().Should().Be(48);
+            changes.GetProperty("approvalExpiryHours").GetProperty("to").GetInt32().Should().Be(12);
+        }
+
+        [Category("FR-39")]
+        [Test]
+        public async Task UpdateConfigAsync_NoElectionChange_WritesNoAuditRow()
+        {
+            var dbContext = GetDbContext("TestDb_ElectionSettingsNoAudit");
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var config = await service.GetConfigAsync();
+
+            await service.UpdateConfigAsync(config, "system");
+            await service.UpdateConfigAsync(
+                config with { Localization = config.Localization with { DateFormat = "MM/dd/yyyy" } }, "42");
+
+            (await dbContext.ActivityLogs.CountAsync()).Should().Be(0);
+        }
+
+        [Category("FR-39")]
+        [Test]
+        public async Task UpdateConfigAsync_RowSavedBeforeElectionsSection_DiffsAgainstDefaults()
+        {
+            var dbContext = GetDbContext("TestDb_ElectionSettingsLegacyRow");
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var config = await service.GetConfigAsync();
+            dbContext.OrganizationConfigs.Add(new GHCAA.Domain.Models.OrganizationConfig
+            {
+                OrgId = config.OrgId,
+                ConfigJson = "{\"orgId\":\"" + config.OrgId + "\"}",
+                RowVersion = Guid.NewGuid().ToByteArray()
+            });
+            await dbContext.SaveChangesAsync();
+            // Read the row the way the settings page does, so the save starts from what is in force.
+            config = await new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions())).GetConfigAsync();
+
+            await service.UpdateConfigAsync(
+                config with { Elections = config.Elections with { SuperAdminActsAlone = true } }, "7");
+
+            var row = await dbContext.ActivityLogs.SingleAsync();
+            using var metadata = JsonDocument.Parse(row.Metadata!);
+            metadata.RootElement.GetProperty("changes").EnumerateObject().Select(p => p.Name)
+                .Should().Equal("superAdminActsAlone");
         }
 
         [Test]

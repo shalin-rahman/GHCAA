@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GHCAA.Infrastructure.Services;
 
-public sealed class ElectionPersonaService(ApplicationDbContext db) : IElectionPersonaService
+public sealed class ElectionPersonaService(ApplicationDbContext db, IElectionFreezeService freeze) : IElectionPersonaService
 {
     public async Task<IReadOnlyList<ElectionPersonaDto>> ListAsync(bool includeInactive, CancellationToken ct)
     {
@@ -26,6 +26,7 @@ public sealed class ElectionPersonaService(ApplicationDbContext db) : IElectionP
 
     public async Task<(bool Success, string? Error, ElectionPersonaDto? Persona)> CreateAsync(SaveElectionPersonaDto dto, CancellationToken ct)
     {
+        await freeze.EnsureNotFrozenAsync(Constants.Elections.FrozenRules.Persona, dto, ct: ct);
         if (!IsKnownGroup(dto.GroupName))
             return (false, "invalid-group", null);
         if (await NameTakenAsync(dto.Name, null, ct))
@@ -56,6 +57,7 @@ public sealed class ElectionPersonaService(ApplicationDbContext db) : IElectionP
 
     public async Task<(bool Success, string? Error, ElectionPersonaDto? Persona)> UpdateAsync(int id, SaveElectionPersonaDto dto, CancellationToken ct)
     {
+        await freeze.EnsureNotFrozenAsync(Constants.Elections.FrozenRules.Persona, new { id, dto }, ct: ct);
         var entity = await db.ElectionPersonas.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (entity is null)
             return (false, "not-found", null);
@@ -84,6 +86,7 @@ public sealed class ElectionPersonaService(ApplicationDbContext db) : IElectionP
 
     public async Task<bool> SetActiveAsync(int id, bool isActive, CancellationToken ct)
     {
+        await freeze.EnsureNotFrozenAsync(Constants.Elections.FrozenRules.Persona, new { id, isActive }, ct: ct);
         var entity = await db.ElectionPersonas.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (entity is null)
             return false;
@@ -96,6 +99,7 @@ public sealed class ElectionPersonaService(ApplicationDbContext db) : IElectionP
 
     public async Task<(bool Success, string? Error)> DeleteAsync(int id, CancellationToken ct)
     {
+        await freeze.EnsureNotFrozenAsync(Constants.Elections.FrozenRules.Persona, new { id, deleted = true }, ct: ct);
         var entity = await db.ElectionPersonas.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (entity is null)
             return (false, "not-found");

@@ -3,6 +3,7 @@ using System;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 {
     [DbContext(typeof(PgSqlApplicationDbContext))]
-    partial class PgSqlApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261004190943_AddReturningOfficerFlag")]
+    partial class AddReturningOfficerFlag
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -902,15 +905,8 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Property<DateTime?>("ExecutedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("ExecutedByUserId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("OpenKey")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("PayloadJson")
                         .HasMaxLength(8000)
@@ -935,11 +931,6 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.HasKey("Id");
 
                     b.HasIndex("ApprovedByUserId");
-
-                    b.HasIndex("ExecutedByUserId");
-
-                    b.HasIndex("OpenKey")
-                        .IsUnique();
 
                     b.HasIndex("RejectedByUserId");
 
@@ -1045,45 +1036,6 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .IsUnique();
 
                     b.ToTable("ElectionResults");
-                });
-
-            modelBuilder.Entity("GHCAA.Domain.Models.ElectionRulesUnlock", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("ClosedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("ClosedByUserId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("OpenedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("OpenedByUserId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClosedByUserId");
-
-                    b.HasIndex("OpenedByUserId");
-
-                    b.HasIndex("ClosedAt", "ExpiresAt");
-
-                    b.ToTable("ElectionRulesUnlocks");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.ElectionSeat", b =>
@@ -1223,7 +1175,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "OTP_EMAIL",
                             Description = "OTP verification email",
-                            LastUpdated = new DateTime(2026, 10, 5, 14, 49, 26, 70, DateTimeKind.Utc).AddTicks(2818),
+                            LastUpdated = new DateTime(2026, 10, 4, 19, 9, 41, 423, DateTimeKind.Utc).AddTicks(6349),
                             Subject = "{{OrgShortName}} Verification Code: {{OtpCode}}",
                             Variables = "['FullName', 'OtpCode']"
                         },
@@ -1234,7 +1186,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "WELCOME_EMAIL",
                             Description = "Welcome email",
-                            LastUpdated = new DateTime(2026, 10, 5, 14, 49, 26, 70, DateTimeKind.Utc).AddTicks(9144),
+                            LastUpdated = new DateTime(2026, 10, 4, 19, 9, 41, 424, DateTimeKind.Utc).AddTicks(5142),
                             Subject = "Welcome to {{OrgName}}!",
                             Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
                         },
@@ -1245,7 +1197,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PASSWORD_RESET",
                             Description = "Password reset email",
-                            LastUpdated = new DateTime(2026, 10, 5, 14, 49, 26, 70, DateTimeKind.Utc).AddTicks(9243),
+                            LastUpdated = new DateTime(2026, 10, 4, 19, 9, 41, 424, DateTimeKind.Utc).AddTicks(5282),
                             Subject = "{{OrgShortName}} Account Password Reset",
                             Variables = "['FullName', 'ResetUrl']"
                         },
@@ -1256,7 +1208,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "APPLICATION_REJECTED",
                             Description = "Application rejection email",
-                            LastUpdated = new DateTime(2026, 10, 5, 14, 49, 26, 70, DateTimeKind.Utc).AddTicks(9438),
+                            LastUpdated = new DateTime(2026, 10, 4, 19, 9, 41, 424, DateTimeKind.Utc).AddTicks(5559),
                             Subject = "Update on your {{OrgShortName}} Membership Application",
                             Variables = "['FullName', 'Reason']"
                         },
@@ -1267,7 +1219,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PAYMENT_RECEIVED",
                             Description = "Payment received acknowledgment",
-                            LastUpdated = new DateTime(2026, 10, 5, 14, 49, 26, 70, DateTimeKind.Utc).AddTicks(9527),
+                            LastUpdated = new DateTime(2026, 10, 4, 19, 9, 41, 424, DateTimeKind.Utc).AddTicks(5671),
                             Subject = "Payment Received: {{Amount}} BDT",
                             Variables = "['FullName', 'Amount', 'TrxID']"
                         },
@@ -1278,7 +1230,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "PAYMENT_STATUS_UPDATED",
                             Description = "Payment status update email",
-                            LastUpdated = new DateTime(2026, 10, 5, 14, 49, 26, 70, DateTimeKind.Utc).AddTicks(9588),
+                            LastUpdated = new DateTime(2026, 10, 4, 19, 9, 41, 424, DateTimeKind.Utc).AddTicks(5762),
                             Subject = "Payment Status Updated: {{Status}}",
                             Variables = "['FullName', 'TrxID', 'Status']"
                         },
@@ -1289,7 +1241,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "FAMILY_LINK_REQUEST",
                             Description = "Family link request email",
-                            LastUpdated = new DateTime(2026, 10, 5, 14, 49, 26, 70, DateTimeKind.Utc).AddTicks(9641),
+                            LastUpdated = new DateTime(2026, 10, 4, 19, 9, 41, 424, DateTimeKind.Utc).AddTicks(5845),
                             Subject = "New Family Link Request from {{RequesterName}}",
                             Variables = "['FullName', 'RequesterName', 'Relationship', 'ProfileUrl']"
                         },
@@ -1300,7 +1252,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Channel = 0,
                             Code = "FAMILY_LINK_ACCEPTED",
                             Description = "Family link acceptance confirmation",
-                            LastUpdated = new DateTime(2026, 10, 5, 14, 49, 26, 70, DateTimeKind.Utc).AddTicks(9699),
+                            LastUpdated = new DateTime(2026, 10, 4, 19, 9, 41, 424, DateTimeKind.Utc).AddTicks(5939),
                             Subject = "Family Link Request Accepted",
                             Variables = "['FullName', 'TargetName']"
                         });
@@ -5260,11 +5212,6 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 
                     b.HasOne("GHCAA.Domain.Models.User", null)
                         .WithMany()
-                        .HasForeignKey("ExecutedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("GHCAA.Domain.Models.User", null)
-                        .WithMany()
                         .HasForeignKey("RejectedByUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
@@ -5283,20 +5230,6 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .WithMany()
                         .HasForeignKey("ElectionId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("GHCAA.Domain.Models.ElectionRulesUnlock", b =>
-                {
-                    b.HasOne("GHCAA.Domain.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("ClosedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("GHCAA.Domain.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("OpenedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

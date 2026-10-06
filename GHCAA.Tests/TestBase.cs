@@ -1,6 +1,8 @@
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
@@ -33,6 +35,17 @@ namespace GHCAA.Tests
             _context.Dispose();
             _connection.Close();
         }
+
+        // One place to build the services election tests share, so a constructor change edits one line.
+        protected ActivityService NewActivity() => new(_context, new HttpContextAccessor());
+        protected ElectionFreezeService NewFreeze() => new(_context, new HttpContextAccessor(), NewActivity());
+        protected ElectionAppointmentService NewAppointments(GHCAA.Application.Interfaces.IOrgConfigService orgConfig, GHCAA.Application.Interfaces.ITokenService? tokens = null) =>
+            new(_context, orgConfig, new ElectionAccessService(_context, orgConfig),
+                new Moq.Mock<GHCAA.Application.Interfaces.ICommunicationService>().Object,
+                new Moq.Mock<GHCAA.Application.Interfaces.INotificationService>().Object,
+                tokens ?? new Moq.Mock<GHCAA.Application.Interfaces.ITokenService>().Object,
+                Microsoft.Extensions.Options.Options.Create(new GHCAA.Infrastructure.Options.AppSettingsOptions()),
+                Microsoft.Extensions.Logging.Abstractions.NullLogger<ElectionAppointmentService>.Instance, NewFreeze());
 
         protected void DetachAll()
         {

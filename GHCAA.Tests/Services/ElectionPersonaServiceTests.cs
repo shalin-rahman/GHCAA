@@ -4,6 +4,7 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
 using static GHCAA.Domain.Enums;
@@ -31,7 +32,7 @@ public sealed class ElectionPersonaServiceTests : TestBase
     [Category("FR-39")]
     public async Task CreateAsync_AddsPersona()
     {
-        var result = (await new ElectionPersonaService(_context).CreateAsync(MakeDto(), CancellationToken.None)).Persona!;
+        var result = (await new ElectionPersonaService(_context, NewFreeze()).CreateAsync(MakeDto(), CancellationToken.None)).Persona!;
 
         result.Id.Should().BeGreaterThan(0);
         _context.ElectionPersonas.Single().Name.Should().Be("Test Persona");
@@ -41,7 +42,7 @@ public sealed class ElectionPersonaServiceTests : TestBase
     [Category("FR-39")]
     public async Task CreateAsync_RefusesDuplicateName()
     {
-        var service = new ElectionPersonaService(_context);
+        var service = new ElectionPersonaService(_context, NewFreeze());
         await service.CreateAsync(MakeDto(), CancellationToken.None);
 
         var (success, error, _) = await service.CreateAsync(MakeDto(), CancellationToken.None);
@@ -81,7 +82,7 @@ public sealed class ElectionPersonaServiceTests : TestBase
     [Category("FR-39")]
     public async Task UpdateAsync_ChangesFields()
     {
-        var service = new ElectionPersonaService(_context);
+        var service = new ElectionPersonaService(_context, NewFreeze());
         var created = (await service.CreateAsync(MakeDto(), CancellationToken.None)).Persona!;
 
         var dto = MakeDto("Renamed Persona");
@@ -96,7 +97,7 @@ public sealed class ElectionPersonaServiceTests : TestBase
     [Category("FR-39")]
     public async Task UpdateAsync_ReturnsNotFoundForMissingId()
     {
-        var (success, error, updated) = await new ElectionPersonaService(_context).UpdateAsync(9999, MakeDto(), CancellationToken.None);
+        var (success, error, updated) = await new ElectionPersonaService(_context, NewFreeze()).UpdateAsync(9999, MakeDto(), CancellationToken.None);
 
         success.Should().BeFalse();
         error.Should().Be("not-found");
@@ -107,7 +108,7 @@ public sealed class ElectionPersonaServiceTests : TestBase
     [Category("FR-39")]
     public async Task DeleteAsync_RemovesUnusedPersona()
     {
-        var service = new ElectionPersonaService(_context);
+        var service = new ElectionPersonaService(_context, NewFreeze());
         var created = (await service.CreateAsync(MakeDto(), CancellationToken.None)).Persona!;
 
         var (success, error) = await service.DeleteAsync(created.Id, CancellationToken.None);
@@ -121,7 +122,7 @@ public sealed class ElectionPersonaServiceTests : TestBase
     [Category("FR-39")]
     public async Task SetActiveAsync_FalseHidesFromActiveList()
     {
-        var service = new ElectionPersonaService(_context);
+        var service = new ElectionPersonaService(_context, NewFreeze());
         var created = (await service.CreateAsync(MakeDto(), CancellationToken.None)).Persona!;
 
         var ok = await service.SetActiveAsync(created.Id, false, CancellationToken.None);
@@ -146,7 +147,7 @@ public sealed class ElectionPersonaServiceTests : TestBase
     [Category("FR-39")]
     public async Task Seeder_AddsMissingDefaultsAndKeepsExistingRows()
     {
-        var service = new ElectionPersonaService(_context);
+        var service = new ElectionPersonaService(_context, NewFreeze());
         await service.CreateAsync(MakeDto("Returning Officer"), CancellationToken.None);
         await service.CreateAsync(MakeDto(), CancellationToken.None);
 
@@ -163,7 +164,7 @@ public sealed class ElectionPersonaServiceTests : TestBase
         var dto = MakeDto();
         dto.GroupName = "Oficials";
 
-        var (success, error, _) = await new ElectionPersonaService(_context).CreateAsync(dto, CancellationToken.None);
+        var (success, error, _) = await new ElectionPersonaService(_context, NewFreeze()).CreateAsync(dto, CancellationToken.None);
 
         success.Should().BeFalse();
         error.Should().Be("invalid-group");
@@ -182,7 +183,7 @@ public sealed class ElectionPersonaServiceTests : TestBase
         };
         _context.ElectionPersonas.Add(legacy);
         await _context.SaveChangesAsync();
-        var service = new ElectionPersonaService(_context);
+        var service = new ElectionPersonaService(_context, NewFreeze());
 
         var keep = MakeDto("Old Persona");
         keep.GroupName = "Volunteers";
@@ -205,7 +206,7 @@ public sealed class ElectionPersonaServiceTests : TestBase
         edited.Permissions = ElectionPermission.ViewAudit;
         var custom = MakeDto("Custom Helper");
         custom.Permissions = ElectionPermission.None;
-        var service = new ElectionPersonaService(_context);
+        var service = new ElectionPersonaService(_context, NewFreeze());
         await service.CreateAsync(empty, CancellationToken.None);
         await service.CreateAsync(edited, CancellationToken.None);
         await service.CreateAsync(custom, CancellationToken.None);

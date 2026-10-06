@@ -144,7 +144,7 @@ public sealed class ElectionsController(
         if (results is not null) return Ok(results);
         var waiting = this.ApprovalReply(new ElectionApprovalRunResult(false, error, pending));
         if (waiting is not null) return waiting;
-        if (error is "same-person" or "closed") return ApprovalError(error);
+        if (error is "same-person" or "not-requester" or "closed") return ApprovalError(error);
         var detail = error switch
         {
             "no-key" => "Upload the returning officer's private key file to count.",
@@ -176,6 +176,7 @@ public sealed class ElectionsController(
     [Authorize(Policy = Policies.ElectionStaff)]
     [GHCAA.API.Filters.RequireStepUp]
     [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ViewDashboard)]
+    [ProducesResponseType<IReadOnlyList<ElectionApprovalDto>>(StatusCodes.Status200OK)]
     public async Task<IActionResult> Approvals(int id, CancellationToken ct) => Ok(await approvals.ListOpenAsync(id, ct));
 
     /// <summary>Spec 023 (37.12f): a second person agrees, and the stored step runs.</summary>
@@ -189,6 +190,19 @@ public sealed class ElectionsController(
             return Unauthorized();
         var (success, error) = await approvals.ApproveAsync(approvalId, userId, CallerRoles(), ct);
         return success ? Ok() : ApprovalError(error);
+    }
+
+    /// <summary>Spec 023 FR-040 (37.13r): asks to remove one official, the only change allowed while rules are frozen.</summary>
+    [HttpPost("appointments/{appointmentId:int}/emergency-revoke")]
+    [Authorize(Policy = Policies.SuperAdminOnly)]
+    [GHCAA.API.Filters.RequireStepUp]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.AppointOfficials, ElectionIdLookup.Appointment)]
+    public async Task<IActionResult> EmergencyRevoke(int appointmentId, [FromBody] AppointmentReasonDto dto, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var (success, error, approval) = await approvals.RequestEmergencyRevokeAsync(appointmentId, userId, CallerRoles(), dto.Reason, ct);
+        return success ? Accepted(approval) : ApprovalError(error);
     }
 
     /// <summary>Spec 023 (37.12f): turns a stored step down, so it never runs.</summary>
@@ -232,8 +246,14 @@ public sealed class ElectionsController(
         "not-found" => NotFound(),
         "forbidden" => this.ProblemWithCode(ErrorCodes.ElectionPermission, "You need the Approve permission on this election.", StatusCodes.Status403Forbidden),
         "same-person" => Problem(detail: "The person who asked for this step cannot also approve it, and the person who approved a count cannot run it.", statusCode: StatusCodes.Status403Forbidden),
+        "not-requester" => Problem(detail: "Only the official who asked for this count can run it.", statusCode: StatusCodes.Status403Forbidden),
         "expired" => Problem(detail: "This request has expired. Ask again.", statusCode: StatusCodes.Status400BadRequest),
         "closed" => Problem(detail: "This request has already been decided.", statusCode: StatusCodes.Status409Conflict),
+        "already-pending" => this.ProblemWithCode(ErrorCodes.ApprovalPending, "This step is already waiting for a second person.", StatusCodes.Status409Conflict),
+        "reason-required" => Problem(detail: "Give a reason for the revocation.", statusCode: StatusCodes.Status400BadRequest),
+        "no-eligible-approver" => Problem(detail: "Another authorized election official with Approve permission is required.", statusCode: StatusCodes.Status409Conflict),
+        "not-eligible-approver" => this.ProblemWithCode(ErrorCodes.ElectionPermission, "Only another active official on this election with Approve can approve this, not the person asking or the one being removed.", StatusCodes.Status403Forbidden),
+        "target-not-live" => Problem(detail: "This official is no longer active, so there is nothing to revoke.", statusCode: StatusCodes.Status409Conflict),
         "phase-closed" => Problem(detail: "The key cannot change once polling has opened.", statusCode: StatusCodes.Status400BadRequest),
         "invalid-key" => Problem(detail: "The stored key is not valid.", statusCode: StatusCodes.Status400BadRequest),
         _ => Problem(detail: "The election is not ready for this step.", statusCode: StatusCodes.Status400BadRequest),

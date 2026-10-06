@@ -239,6 +239,7 @@
     "InviteLinkHours": 72,
     "CandidateOrder": "Random",
     "ShowTurnoutDuringPolling": false,
-    "PublishPerSeatBallots": true
+    "PublishPerSeatBallots": true,
+    "CountRequesterOnly": false
   }
 }

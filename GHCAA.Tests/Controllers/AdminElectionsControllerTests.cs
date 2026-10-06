@@ -103,6 +103,8 @@ namespace GHCAA.Tests.Controllers
             _accessMock.Setup(x => x.GetPermissionsAsync(2, 9, It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
                        .ReturnsAsync(ElectionPermission.Count | ElectionPermission.Declare);
             _accessMock.Setup(x => x.IsHandedOverAsync(2, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            _accessMock.Setup(x => x.LiveApproverCountAsync(2, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(Constants.Elections.MinApproversBeforePolling - 1);
 
             var result = await _controller.List(CancellationToken.None) as OkObjectResult;
 
@@ -110,6 +112,8 @@ namespace GHCAA.Tests.Controllers
             Assert.That(list.Select(e => e.Id), Is.EqualTo(new[] { 2 }));
             Assert.That(list[0].MyPermissions, Is.EquivalentTo(new[] { "Count", "Declare" }));
             Assert.That(list[0].AdminHandedOver, Is.True);
+            // 37.13t. One approver is not enough to cover an emergency revocation.
+            Assert.That(list[0].TooFewApprovers, Is.True);
         }
 
         [Test]

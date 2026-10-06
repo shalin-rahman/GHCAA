@@ -9,6 +9,8 @@ namespace GHCAA.Application.Interfaces
         Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken = default);
         Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword, CancellationToken cancellationToken = default);
         Task<bool> DeleteSystemAdminAsync(int userId, CancellationToken cancellationToken = default);
+        // 7.23. Election tables keep the user's id under a Restrict key, so such a user cannot be hard-deleted.
+        Task<bool> HasElectionRecordsAsync(int userId, CancellationToken cancellationToken = default);
         Task<bool> SetUserActiveAsync(int userId, bool isActive, CancellationToken cancellationToken = default);
         Task<(bool Success, string? ResetUrl)> SendAdminPasswordResetLinkAsync(int userId, CancellationToken cancellationToken = default);
         string GenerateDefaultPassword();

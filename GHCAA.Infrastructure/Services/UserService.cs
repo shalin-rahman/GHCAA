@@ -135,12 +135,20 @@ namespace GHCAA.Infrastructure.Services
             // via member archive/restore instead, to avoid silently locking a member out.
             var user = await _db.Users.FindAsync(new object[] { userId }, cancellationToken);
             if (user == null || user.MemberId != null || IsProtectedUsername(user.Username)) return false;
+            if (await HasElectionRecordsAsync(userId, cancellationToken)) return false;
 
             _db.Users.Remove(user);
             await _db.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("System admin account deleted: {UserId}", userId);
             return true;
         }
+
+        // Every Restrict key from an election table to Users. A new one added there belongs here too.
+        public async Task<bool> HasElectionRecordsAsync(int userId, CancellationToken cancellationToken = default) =>
+            await _db.ElectionAppointments.AnyAsync(x => x.UserId == userId, cancellationToken)
+            || await _db.ElectionApprovals.AnyAsync(x => x.RequestedByUserId == userId || x.ApprovedByUserId == userId || x.RejectedByUserId == userId || x.ExecutedByUserId == userId, cancellationToken)
+            || await _db.ElectionRulesUnlocks.AnyAsync(x => x.OpenedByUserId == userId || x.ClosedByUserId == userId, cancellationToken)
+            || await _db.ScrutinyDecisions.AnyAsync(x => x.DecidedByUserId == userId, cancellationToken);
 
         public async Task<bool> SetUserActiveAsync(int userId, bool isActive, CancellationToken cancellationToken = default)
         {

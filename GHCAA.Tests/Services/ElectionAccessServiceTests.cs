@@ -120,6 +120,26 @@ public sealed class ElectionAccessServiceTests : TestBase
     }
 
     [Test]
+    public async Task LiveApproverCount_CountsLiveOfficialsWithActiveApprove_OncePerUser()
+    {
+        var approver = new ElectionPersona { Name = "Approver", GroupName = "Officials", Description = "d", DeclarationText = "t", Permissions = ElectionPermission.Approve, IsActive = true };
+        var deputy = new ElectionPersona { Name = "Deputy", GroupName = "Officials", Description = "d", DeclarationText = "t", Permissions = ElectionPermission.Approve | ElectionPermission.Count, IsActive = true };
+        var offPersona = new ElectionPersona { Name = "Old approver", GroupName = "Officials", Description = "d", DeclarationText = "t", Permissions = ElectionPermission.Approve, IsActive = false };
+        _context.ElectionPersonas.AddRange(approver, deputy, offPersona);
+        await _context.SaveChangesAsync();
+        await AppointAsync(1, approver);
+        await AppointAsync(1, deputy); // two personas, one person
+        await AppointAsync(2, approver, live: false);
+        await AppointAsync(3, offPersona);
+        await AppointAsync(4, _scrutineer);
+
+        (await _service.LiveApproverCountAsync(_election.Id)).Should().Be(1);
+
+        await AppointAsync(5, approver);
+        (await _service.LiveApproverCountAsync(_election.Id)).Should().Be(2);
+    }
+
+    [Test]
     public async Task RevokedExpiredOrUnsignedAppointments_GiveNothing()
     {
         var revoked = await AppointAsync(7, _scrutineer);

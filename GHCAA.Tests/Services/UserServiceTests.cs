@@ -257,5 +257,31 @@ namespace GHCAA.Tests.Services
             result.Should().BeTrue();
             (await _context.Users.FindAsync(user.Id)).Should().BeNull();
         }
+
+        // 7.23. Opening a rules unlock leaves a Restrict key on the user, so the delete is refused and the row stays.
+        [Test]
+        public async Task DeleteSystemAdminAsync_UserWithElectionRecords_IsRefusedAndKept()
+        {
+            var user = new User { Username = "unlockadmin", PasswordHash = "x", MemberId = null, CreatedAt = DateTime.UtcNow, IsActive = true };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            _context.ElectionRulesUnlocks.Add(new ElectionRulesUnlock { OpenedByUserId = user.Id, Reason = "r", OpenedAt = DateTime.UtcNow, ExpiresAt = DateTime.UtcNow.AddMinutes(30) });
+            await _context.SaveChangesAsync();
+            var service = ServiceWithProtectedUsernames("shalin");
+
+            (await service.HasElectionRecordsAsync(user.Id)).Should().BeTrue();
+            (await service.DeleteSystemAdminAsync(user.Id)).Should().BeFalse();
+            (await _context.Users.AsNoTracking().AnyAsync(x => x.Id == user.Id)).Should().BeTrue();
+        }
+
+        [Test]
+        public async Task HasElectionRecordsAsync_UserWithNone_IsFalse()
+        {
+            var user = new User { Username = "plainadmin", PasswordHash = "x", MemberId = null, CreatedAt = DateTime.UtcNow, IsActive = true };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            (await ServiceWithProtectedUsernames("shalin").HasElectionRecordsAsync(user.Id)).Should().BeFalse();
+        }
     }
 }

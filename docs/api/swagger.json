@@ -767,7 +767,33 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminElectionDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminElectionDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminElectionDto"
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -1194,8 +1220,31 @@
         }
       }
     },
-    "/api/admin/governance/members/{ecMemberId}": {
-      "delete": {
+    "/api/admin/governance/periods/{id}/seats": {
+      "get": {
+        "tags": [
+          "AdminGovernance"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/governance/members/{ecMemberId}/end-term": {
+      "post": {
         "tags": [
           "AdminGovernance"
         ],
@@ -1208,15 +1257,27 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "notifyMember",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndTermRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndTermRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndTermRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -3076,6 +3137,156 @@
         }
       }
     },
+    "/api/admin/elections/rules-unlock": {
+      "get": {
+        "tags": [
+          "ElectionRulesUnlock"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionRulesUnlockDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionRulesUnlockDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionRulesUnlockDto"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ElectionRulesUnlock"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenElectionRulesUnlockRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenElectionRulesUnlockRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenElectionRulesUnlockRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionRulesUnlockDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionRulesUnlockDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionRulesUnlockDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/elections/rules-unlock/close": {
+      "post": {
+        "tags": [
+          "ElectionRulesUnlock"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/elections": {
       "post": {
         "tags": [
@@ -3477,6 +3688,162 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/approvals": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectionApprovalDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectionApprovalDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectionApprovalDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/elections/approvals/{approvalId}/approve": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "approvalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/appointments/{appointmentId}/emergency-revoke": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentReasonDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentReasonDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentReasonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/approvals/{approvalId}/reject": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "approvalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectApprovalRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectApprovalRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectApprovalRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -10050,6 +10417,167 @@
         },
         "additionalProperties": false
       },
+      "AdminElectionCandidateDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "memberId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "photoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "statement": {
+            "type": "string",
+            "nullable": true
+          },
+          "positionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "positionTitle": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminElectionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "phase": {
+            "$ref": "#/components/schemas/ElectionPhase"
+          },
+          "announcedOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "nominationOpensOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "nominationClosesOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "scrutinyOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "withdrawalClosesOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "pollingOpensOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "pollingClosesOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "declaredOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "positions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminElectionPositionDto"
+            },
+            "nullable": true
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminElectionCandidateDto"
+            },
+            "nullable": true
+          },
+          "eligibleVoterCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasVoted": {
+            "type": "boolean"
+          },
+          "tieRule": {
+            "$ref": "#/components/schemas/ElectionTieRule"
+          },
+          "ballotKeyFingerprint": {
+            "type": "string",
+            "nullable": true
+          },
+          "myPermissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "adminHandedOver": {
+            "type": "boolean"
+          },
+          "tooFewApprovers": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminElectionPositionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "seats": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "AdminElectionPositionRequest": {
         "type": "object",
         "properties": {
@@ -10348,6 +10876,9 @@
             "maxLength": 30,
             "type": "string",
             "nullable": true
+          },
+          "isReturningOfficer": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -10505,6 +11036,14 @@
           },
           "notifyMember": {
             "type": "boolean"
+          },
+          "endCurrentHolderReason": {
+            "$ref": "#/components/schemas/VacancyReason"
+          },
+          "endCurrentHolderNote": {
+            "maxLength": 500,
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -11695,6 +12234,13 @@
             "type": "string",
             "nullable": true
           },
+          "endReason": {
+            "$ref": "#/components/schemas/VacancyReason"
+          },
+          "endNote": {
+            "type": "string",
+            "nullable": true
+          },
           "isCurrent": {
             "type": "boolean"
           }
@@ -11729,6 +12275,13 @@
             "nullable": true
           },
           "changeReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "endReason": {
+            "$ref": "#/components/schemas/VacancyReason"
+          },
+          "endNote": {
             "type": "string",
             "nullable": true
           },
@@ -11818,6 +12371,66 @@
         ],
         "type": "string"
       },
+      "ElectionApprovalAction": {
+        "enum": [
+          "Publish",
+          "OpenPolling",
+          "ReplaceBallotKey",
+          "ClosePolling",
+          "Declare",
+          "Archive",
+          "Count",
+          "EmergencyRevoke"
+        ],
+        "type": "string"
+      },
+      "ElectionApprovalDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "electionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "action": {
+            "$ref": "#/components/schemas/ElectionApprovalAction"
+          },
+          "requestedByUserId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requestedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "keyFingerprint": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "executedByUserId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ElectionCandidateOrder": {
         "enum": [
           "Random",
@@ -11857,6 +12470,36 @@
           "Archived"
         ],
         "type": "string"
+      },
+      "ElectionRulesUnlockDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "openedByUserId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "openedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "openedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
       },
       "ElectionSeatRequestDto": {
         "type": "object",
@@ -11906,6 +12549,9 @@
             "type": "boolean"
           },
           "publishPerSeatBallots": {
+            "type": "boolean"
+          },
+          "countRequesterOnly": {
             "type": "boolean"
           }
         },
@@ -11983,6 +12629,26 @@
           "lastUpdated": {
             "type": "string",
             "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EndTermRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "$ref": "#/components/schemas/VacancyReason"
+          },
+          "note": {
+            "maxLength": 500,
+            "type": "string",
+            "nullable": true
+          },
+          "notifyMember": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -13003,6 +13669,21 @@
         },
         "additionalProperties": false
       },
+      "OpenElectionRulesUnlockRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "minutes": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "OrgConfigDto": {
         "type": "object",
         "properties": {
@@ -13295,6 +13976,33 @@
         ],
         "type": "string"
       },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
       "ProfessionalRecord": {
         "required": [
           "designation",
@@ -13415,6 +14123,16 @@
           "refreshToken": {
             "minLength": 1,
             "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RejectApprovalRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -14515,6 +15233,10 @@
             "format": "int32",
             "nullable": true
           },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -14570,6 +15292,16 @@
           }
         },
         "additionalProperties": false
+      },
+      "VacancyReason": {
+        "enum": [
+          "Died",
+          "Resigned",
+          "Removed",
+          "TermEnded",
+          "Other"
+        ],
+        "type": "string"
       },
       "VerifyEmailDto": {
         "type": "object",

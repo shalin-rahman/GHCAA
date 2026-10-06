@@ -67,6 +67,8 @@ public class ElectionAppointment
     public int? RevokedByUserId { get; set; }
     public string? RevokedReason { get; set; }
     public DateTime? ExpiresAt { get; set; }
+    // 37.13s. Code that needs the Returning Officer reads this flag, never the persona name.
+    public bool IsReturningOfficer { get; set; }
     public Election? Election { get; set; }
     public ElectionPersona? Persona { get; set; }
     public User? User { get; set; }
@@ -78,6 +80,10 @@ public class ElectionAppointment
 
     public static System.Linq.Expressions.Expression<Func<ElectionAppointment, bool>> LiveAt(DateTime now) =>
         a => a.AcceptedAt != null && a.DeclarationSignedAt != null && a.RevokedAt == null && (a.ExpiresAt == null || a.ExpiresAt > now);
+
+    // Use after LiveAt. The persona must be active and grant Approve.
+    public static readonly System.Linq.Expressions.Expression<Func<ElectionAppointment, bool>> GrantsApprove =
+        a => a.Persona!.IsActive && (a.Persona.Permissions & ElectionPermission.Approve) == ElectionPermission.Approve;
 }
 
 // Spec 023 (37.12f). A sensitive step held until a second person with Approve agrees. The row
@@ -101,9 +107,18 @@ public class ElectionApproval
     // Count only (37.13h). Approving a count does not run it, because the key is never stored.
     // The count claims the approved row by setting this, so one approval allows one count.
     public DateTime? ConsumedAt { get; set; }
+    // 37.13m. Who ran the count. Set and cleared with ConsumedAt, so a failed count leaves none.
+    public int? ExecutedByUserId { get; set; }
+    // 37.13w. Set while the row can still block a new request for the same step, and unique, so two
+    // requests sent at once cannot both be stored. Cleared when the row is rejected, runs or expires.
+    public string? OpenKey { get; set; }
     public Election? Election { get; set; }
 
     public bool IsOpenAt(DateTime now) => ExecutedAt == null && RejectedAt == null && ExpiresAt > now;
+
+    // The migration that backfills OpenKey builds the same string in SQL. Change both together.
+    public static string KeyFor(int electionId, ElectionApprovalAction action, int? appointmentId = null) =>
+        appointmentId is null ? $"{electionId}:{(int)action}" : $"{electionId}:{(int)action}:{appointmentId}";
 }
 
 public class VoterRoll
@@ -206,4 +221,20 @@ public class ElectionResult
     public int VoteCount { get; set; }
     public bool IsElected { get; set; }
     public bool IsTie { get; set; }
+}
+
+// Spec 023 FR-039 (37.13v). A SuperAdmin opens this to change frozen rules when something has gone
+// wrong. It covers the whole site, closes by itself at ExpiresAt, and any SuperAdmin can close it
+// early. Every change it lets through is logged with its id and reason.
+public class ElectionRulesUnlock
+{
+    public int Id { get; set; }
+    public int OpenedByUserId { get; set; }
+    public string Reason { get; set; } = string.Empty;
+    public DateTime OpenedAt { get; set; }
+    public DateTime ExpiresAt { get; set; }
+    public int? ClosedByUserId { get; set; }
+    public DateTime? ClosedAt { get; set; }
+
+    public bool IsOpenAt(DateTime now) => ClosedAt == null && ExpiresAt > now;
 }

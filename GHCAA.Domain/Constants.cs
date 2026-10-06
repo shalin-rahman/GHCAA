@@ -143,6 +143,60 @@ namespace GHCAA.Domain
             public const int TrackingCodeGroups = 3;
             public const int TrackingCodeGroupLength = 4;
             public const string VoteAuditType = "ElectionVote";
+            // 37.13p. ActivityLog type for a saved change to OrgConfig's Elections section.
+            public const string SettingsChangedAuditType = "ElectionSettingsChanged";
+            // 37.13q. ActivityLog type for a change refused because an election's rules are frozen.
+            public const string FrozenChangeRefusedAuditType = "ElectionFrozenChangeRefused";
+            // 37.13r. ActivityLog type for every outcome of an emergency revocation request.
+            public const string EmergencyRevokeAuditType = "ElectionEmergencyRevoke";
+            // 37.13m. ActivityLog type for a count run under a second person's approval.
+            public const string CountRunAuditType = "ElectionCountRun";
+            // 37.13t. Below this many live officials with Approve, asking for polling warns that an
+            // emergency revocation may find nobody to approve it.
+            public const int MinApproversBeforePolling = 2;
+            // RevokedReason written on an expired returning officer row when a new one is appointed.
+            public const string AppointmentExpiredReason = "Expired";
+            // 37.13v. A SuperAdmin unlock of the frozen rules. Short by default, capped, and it
+            // needs a written reason long enough to say what went wrong.
+            public const int RulesUnlockDefaultMinutes = 30;
+            public const int RulesUnlockMaxMinutes = 60;
+            public const int RulesUnlockReasonMinLength = 20;
+            public const int RulesUnlockReasonMaxLength = 1000;
+            public const string RulesUnlockOpenedAuditType = "ElectionRulesUnlockOpened";
+            public const string RulesUnlockClosedAuditType = "ElectionRulesUnlockClosed";
+            // A frozen rule changed because an unlock was open. Carries the unlock id and reason.
+            public const string FrozenChangeUnlockedAuditType = "ElectionFrozenChangeUnlocked";
+            // 37.13x. How often the API looks for emergency revokes that expired untouched.
+            public const int ExpiredRevokeSweepMinutes = 15;
+            public static class EmergencyRevokeOutcomes
+            {
+                public const string Requested = "requested";
+                public const string Revoked = "revoked";
+                public const string Rejected = "rejected";
+                public const string Expired = "expired";
+                public const string RefusedPrefix = "refused:";
+            }
+            public static class RulesUnlockErrors
+            {
+                public const string ReasonTooShort = "reason-too-short";
+                public const string ReasonTooLong = "reason-too-long";
+                public const string InvalidMinutes = "invalid-minutes";
+                public const string NotFrozen = "not-frozen";
+                public const string AlreadyOpen = "already-open";
+                public const string NotOpen = "not-open";
+            }
+            public static class FrozenRules
+            {
+                public const string Settings = "ElectionSettings";
+                public const string Persona = "ElectionPersona";
+                public const string Appointment = "ElectionAppointment";
+                // 37.13v. Security configuration: the returning officer's ballot key.
+                public const string BallotKey = "ElectionBallotKey";
+                // A plain revoke. Kept apart from Appointment so a SuperAdmin unlock cannot open it;
+                // a revoke while frozen goes through the two-person emergency path instead.
+                public const string AppointmentRevoke = "ElectionAppointmentRevoke";
+                public static readonly IReadOnlySet<string> NeverUnlocked = new HashSet<string> { AppointmentRevoke };
+            }
 
             // Sections of the public election board. A persona must sit in one of these, so a
             // typo cannot open a section nobody else is in.
@@ -157,6 +211,14 @@ namespace GHCAA.Domain
                 public static readonly IReadOnlyList<string> All =
                     [SearchCommittee, ElectionCommission, Officials, Observers, AppealTribunal];
             }
+        }
+
+        // ActivityLog.Source values. System marks a row written by the server on its own account.
+        public static class ActivitySources
+        {
+            public const string System = "System";
+            public const string Web = "Web";
+            public const string Mobile = "Mobile";
         }
 
         public static class Governance
@@ -201,6 +263,8 @@ namespace GHCAA.Domain
             public const string ElectionPermission = "ELECTION_PERMISSION";
             // Spec 023 (37.12f): the same step is already waiting for a second person.
             public const string ApprovalPending = "APPROVAL_PENDING";
+            // Spec 023 (37.13q): election rules are frozen from an OpenPolling request until Declared.
+            public const string ElectionRulesFrozen = "ELECTION_RULES_FROZEN";
             public const string AlreadyVoted = "ALREADY_VOTED";
             public const string OtpInvalid = "OTP_INVALID";
             public const string PaymentMethodDisabled = "PAYMENT_METHOD_DISABLED";
