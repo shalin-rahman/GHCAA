@@ -1,12 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
-import { createNotificationServiceMock } from '../../core/testing/testing-utils';
+import { createAuthServiceMock, createNotificationServiceMock } from '../../core/testing/testing-utils';
+import { AuthService } from '../../core/services/auth.service';
 import { AdminElections } from './admin-elections';
 import { ElectionsService } from '../../core/services/elections.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
-import { AdminElectionDto, AdminElectionStepResult, ElectionApprovalDto } from '../../core/models/election.models';
+import { AdminElectionDto, AdminElectionStepResult, ElectionApprovalDto, ELECTION_TOO_FEW_APPROVERS_WARNING, pollingApproverWarning } from '../../core/models/election.models';
 import { ExportUtil } from '../../core/utils/export.util';
 
 describe('AdminElections ballot key', () => {
@@ -38,7 +39,8 @@ describe('AdminElections ballot key', () => {
             providers: [
                 { provide: ElectionsService, useValue: electionsMock },
                 { provide: NotificationService, useValue: notifyMock },
-                { provide: ConfirmDialogService, useValue: confirmMock }
+                { provide: ConfirmDialogService, useValue: confirmMock },
+                { provide: AuthService, useValue: createAuthServiceMock({ hasRole: false }) }
             ]
         }).compileComponents();
 
@@ -55,6 +57,12 @@ describe('AdminElections ballot key', () => {
         expect(component.canSetBallotKey(election)).toBe(true);
         expect(component.canSetBallotKey({ ...election, phase: 'Polling' })).toBe(false);
         expect(component.canSetBallotKey({ ...election, phase: 'Counting' })).toBe(false);
+    });
+
+    it('warns on the row about too few approvers only before polling', () => {
+        expect(component.pollingWarning(election)).toBeNull();
+        expect(component.pollingWarning({ ...election, tooFewApprovers: true })).toBe(ELECTION_TOO_FEW_APPROVERS_WARNING);
+        expect(component.pollingWarning({ ...election, phase: 'Polling', tooFewApprovers: true })).toBeNull();
     });
 
     it('saves the private key before the public key is sent', async () => {
@@ -177,5 +185,17 @@ describe('AdminElections ballot key', () => {
         await component.reject(request);
         expect(electionsMock.reject).toHaveBeenCalledWith(30, null);
         expect(component.approvals()[7]).toEqual([]);
+    });
+});
+
+// 37.13t. Opening polling with too few approvers carries a warning.
+describe('pollingApproverWarning', () => {
+    const few = { id: 1, phase: 'Campaign', tooFewApprovers: true } as AdminElectionDto;
+    const enough = { id: 2, phase: 'Campaign', tooFewApprovers: false } as AdminElectionDto;
+
+    it('warns only when moving to polling with too few approvers', () => {
+        expect(pollingApproverWarning(few, 'Polling')).toBe(ELECTION_TOO_FEW_APPROVERS_WARNING);
+        expect(pollingApproverWarning(few, 'Counting')).toBeNull();
+        expect(pollingApproverWarning(enough, 'Polling')).toBeNull();
     });
 });

@@ -1,0 +1,24 @@
+<div class="glass-card stack gap-2">
+    <h3>Unlock frozen rules</h3>
+    <div *ngIf="!loaded()"><button class="btn btn-secondary btn-sm" (click)="load()">Check rules unlock</button></div>
+    <ng-container *ngIf="loaded() && unlock() as current; else closedBox">
+        <p>
+            Unlocked by <strong>{{ current.openedBy }}</strong> at {{ current.openedAt | date:'short' }}.
+            About {{ minutesLeft(current) }} minute(s) left.
+        </p>
+        <p class="text-muted">Reason: {{ current.reason }}</p>
+        <div><button class="btn btn-primary btn-sm" [disabled]="busy()" (click)="close()">{{ busy() ? 'Closing...' : 'Close now' }}</button></div>
+    </ng-container>
+    <ng-template #closedBox><ng-container *ngIf="loaded()">
+        <p class="text-muted">Only for when something has gone wrong after the rules froze. A plain revoke stays locked; use the emergency revoke for that.</p>
+        <div class="form-group">
+            <label for="unlock-reason">Reason (at least {{ limits.REASON_MIN }} characters)</label>
+            <textarea id="unlock-reason" [maxlength]="limits.REASON_MAX" [(ngModel)]="reason"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="unlock-minutes">Minutes (1 to {{ limits.MAX_MINUTES }})</label>
+            <input id="unlock-minutes" type="number" min="1" [max]="limits.MAX_MINUTES" [(ngModel)]="minutes">
+        </div>
+        <div><button class="btn btn-secondary btn-sm" [disabled]="busy()" (click)="open()">{{ busy() ? 'Unlocking...' : 'Unlock' }}</button></div>
+    </ng-container></ng-template>
+</div>

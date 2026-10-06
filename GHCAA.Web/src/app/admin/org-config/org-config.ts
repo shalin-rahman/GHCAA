@@ -126,7 +126,7 @@ export class AdminOrgConfig implements OnInit {
       this.hydrate(payload);
       this.successMessage = 'Configuration saved successfully.';
     } catch (e: any) {
-      this.errorMessage = 'Failed to save: ' + (e?.message ?? 'unknown error');
+      this.errorMessage = 'Failed to save: ' + (e?.error?.detail ?? e?.message ?? 'unknown error');
     } finally {
       this.isSaving = false;
     }

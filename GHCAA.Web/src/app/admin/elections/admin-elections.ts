@@ -6,7 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { ElectionsService } from '../../core/services/elections.service';
 import {
     AdminElectionDto, AdminElectionStepResult, CreateElectionRequest, ELECTION_APPROVAL_ACTION_LABELS, ELECTION_PHASE_ORDER,
-    ElectionApprovalDto, NominationViewDto
+    ElectionApprovalDto, NominationViewDto, pollingApproverWarning
 } from '../../core/models/election.models';
 import { ExportUtil } from '../../core/utils/export.util';
 import { ballotKeyFileName, generateBallotKeyPair, readBallotKeyFile, toPem } from '../../core/utils/ballot-key.util';
@@ -15,9 +15,12 @@ import { ConfirmDialogService } from '../../core/services/confirm-dialog.service
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { AuthService } from '../../core/services/auth.service';
+import { ElectionOfficials } from './election-officials/election-officials';
+import { ElectionRulesUnlock } from './election-rules-unlock/election-rules-unlock';
 import {
     getElectionPhaseLabel, getElectionPhaseClass,
-    getNominationStatusLabel, getNominationStatusClass
+    getNominationStatusLabel, getNominationStatusClass, SUPER_ADMIN_ROLE
 } from '../../core/constants/app.constants';
 
 type AdminElectionsTab = 'elections' | 'nominations';
@@ -25,13 +28,14 @@ type AdminElectionsTab = 'elections' | 'nominations';
 @Component({
     selector: 'app-admin-elections',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent, SearchBarComponent, PageHeaderComponent],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, SearchBarComponent, PageHeaderComponent, ElectionOfficials, ElectionRulesUnlock],
     templateUrl: './admin-elections.html'
 })
 export class AdminElections {
     private readonly electionsService = inject(ElectionsService);
     private readonly notify = inject(NotificationService);
     private readonly confirmDialog = inject(ConfirmDialogService);
+    private readonly auth = inject(AuthService);
 
     getElectionPhaseLabel = getElectionPhaseLabel;
     getElectionPhaseClass = getElectionPhaseClass;
@@ -55,6 +59,8 @@ export class AdminElections {
     approvals = signal<Partial<Record<number, ElectionApprovalDto[]>>>({});
     decidingApprovalId = signal<number | null>(null);
     approvalLabels = ELECTION_APPROVAL_ACTION_LABELS;
+    officialsOpenId = signal<number | null>(null);
+    readonly isSuperAdmin = computed(() => this.auth.hasRole(SUPER_ADMIN_ROLE));
 
     filtered = computed(() => {
         const query = this.search().trim().toLowerCase();
@@ -172,6 +178,11 @@ export class AdminElections {
         return ELECTION_PHASE_ORDER.indexOf(election.phase) < ELECTION_PHASE_ORDER.indexOf('Polling');
     }
 
+    // 37.13t. Polling opens on its date here, not from a button, so the warning sits on the row until then.
+    pollingWarning(election: AdminElectionDto): string | null {
+        return this.canSetBallotKey(election) ? pollingApproverWarning(election, 'Polling') : null;
+    }
+
     async createBallotKey(election: AdminElectionDto): Promise<void> {
         if (this.keyingId() !== null) return;
         const confirmed = await firstValueFrom(this.confirmDialog.confirm({
@@ -238,6 +249,15 @@ export class AdminElections {
         }
         this.addApproval(result.pending);
         this.notify.info('Saved. A second person must approve this before it happens.');
+    }
+
+    toggleOfficials(election: AdminElectionDto): void {
+        this.officialsOpenId.update(id => id === election.id ? null : election.id);
+    }
+
+    // The officials panel has already shown its own toast for an emergency revoke.
+    onOfficialPending(pending: ElectionApprovalDto): void {
+        this.addApproval(pending);
     }
 
     private addApproval(pending: ElectionApprovalDto): void {

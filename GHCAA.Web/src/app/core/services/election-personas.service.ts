@@ -13,6 +13,11 @@ export class ElectionPersonasService {
         return this.http.get<ElectionPersonaDto[]>(API_ENDPOINTS.ADMIN_ELECTION_PERSONAS.BASE);
     }
 
+    // Active personas only, readable by any signed-in user. The appoint form uses this one.
+    listActive(): Observable<ElectionPersonaDto[]> {
+        return this.http.get<ElectionPersonaDto[]>(API_ENDPOINTS.ELECTION_PERSONAS);
+    }
+
     create(request: SaveElectionPersonaDto): Observable<ElectionPersonaDto> {
         return this.http.post<ElectionPersonaDto>(API_ENDPOINTS.ADMIN_ELECTION_PERSONAS.BASE, request);
     }

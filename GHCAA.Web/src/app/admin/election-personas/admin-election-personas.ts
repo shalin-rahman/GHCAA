@@ -156,7 +156,7 @@ export class AdminElectionPersonas implements OnInit {
                 this.notify.success(p.isActive ? 'Persona deactivated' : 'Persona activated');
                 this.load();
             },
-            error: () => this.notify.error('Failed to change persona status.')
+            error: (err) => this.notify.error(err.error?.detail || 'Failed to change persona status.')
         });
     }
 

@@ -26,7 +26,7 @@ export const NOMINATION_STATUS_LABELS: Record<NominationStatus, string> = {
 };
 
 // Spec 023 (37.12a). Names match the backend ElectionApprovalAction and ElectionCandidateOrder enums.
-export type ElectionApprovalAction = 'Publish' | 'OpenPolling' | 'ReplaceBallotKey' | 'ClosePolling' | 'Declare' | 'Archive' | 'Count';
+export type ElectionApprovalAction = 'Publish' | 'OpenPolling' | 'ReplaceBallotKey' | 'ClosePolling' | 'Declare' | 'Archive' | 'Count' | 'EmergencyRevoke';
 export const ELECTION_APPROVAL_ACTION_LABELS: Record<ElectionApprovalAction, string> = {
     Publish: 'Publish the election',
     OpenPolling: 'Open polling',
@@ -34,9 +34,12 @@ export const ELECTION_APPROVAL_ACTION_LABELS: Record<ElectionApprovalAction, str
     ClosePolling: 'Close polling',
     Declare: 'Declare results',
     Archive: 'Archive',
-    Count: 'Count the ballots'
+    Count: 'Count the ballots',
+    EmergencyRevoke: 'Remove an official in an emergency'
 };
-export const ELECTION_APPROVAL_ACTIONS = Object.keys(ELECTION_APPROVAL_ACTION_LABELS) as ElectionApprovalAction[];
+// The actions an admin can switch between one and two people. EmergencyRevoke always needs two, as on the server.
+export const ELECTION_APPROVAL_ACTIONS = (Object.keys(ELECTION_APPROVAL_ACTION_LABELS) as ElectionApprovalAction[])
+    .filter(a => a !== 'EmergencyRevoke');
 
 export type ElectionCandidateOrder = 'Random' | 'Alphabetical';
 export const ELECTION_CANDIDATE_ORDERS: ElectionCandidateOrder[] = ['Random', 'Alphabetical'];
@@ -51,6 +54,7 @@ export interface ElectionSettings {
     candidateOrder: ElectionCandidateOrder;
     showTurnoutDuringPolling: boolean;
     publishPerSeatBallots: boolean;
+    countRequesterOnly: boolean;
 }
 
 // Same values as ElectionSettingsDto. Used when a stored config or the build fallback has no section.
@@ -63,7 +67,8 @@ export const DEFAULT_ELECTION_SETTINGS: ElectionSettings = {
     inviteLinkHours: 72,
     candidateOrder: 'Random',
     showTurnoutDuringPolling: false,
-    publishPerSeatBallots: true
+    publishPerSeatBallots: true,
+    countRequesterOnly: false
 };
 
 export interface AdminElectionPositionDto {
@@ -107,6 +112,17 @@ export interface AdminElectionDto {
     myPermissions?: string[] | null;
     // True once a live appointment to a persona that takes over from the admin exists.
     adminHandedOver?: boolean;
+    // 37.13t. Fewer live officials with Approve than an emergency revocation needs.
+    tooFewApprovers?: boolean;
+}
+
+// 37.13t. Shown when polling is asked for and the server says too few officials can approve.
+export const ELECTION_TOO_FEW_APPROVERS_WARNING =
+    'Fewer than two officials can approve on this election. Once polling opens nobody can be appointed, so if an official has to be removed in an emergency there may be nobody left to approve it until the result is declared.';
+
+// The warning to add when moving the election to `next`, or null. The 37.12h phase controls show it.
+export function pollingApproverWarning(election: AdminElectionDto, next: ElectionPhase): string | null {
+    return next === 'Polling' && election.tooFewApprovers ? ELECTION_TOO_FEW_APPROVERS_WARNING : null;
 }
 
 export interface CreateElectionRequest {
@@ -152,6 +168,8 @@ export interface ElectionApprovalDto {
     // 37.13h. Set on a Count that a second person approved. It still runs only when the requester
     // brings the key file, because the key is never stored.
     approvedAt?: string | null;
+    // 37.13m. Who ran an approved count.
+    executedByUserId?: number | null;
 }
 
 // A count either ran and sent back the results, or was stored for a second person.
@@ -286,4 +304,26 @@ export interface ElectionAppointmentDto {
     revokedReason: string | null;
     expiresAt: string | null;
     isLive: boolean;
+    /** 37.13s. At most one live appointment per election has this set. */
+    isReturningOfficer: boolean;
+}
+
+/** Body of POST /api/elections/{id}/appointments. Give a member, or a name and email, never both. */
+export interface AppointRequest {
+    personaId: number;
+    memberId: number | null;
+    displayName: string | null;
+    email: string | null;
+    phone: string | null;
+    isReturningOfficer: boolean;
+}
+
+/** 37.13v. The open SuperAdmin unlock of the frozen rules. */
+export interface ElectionRulesUnlockDto {
+    id: number;
+    openedByUserId: number;
+    openedBy: string;
+    reason: string;
+    openedAt: string;
+    expiresAt: string;
 }

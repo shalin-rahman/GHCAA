@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Governance } from './governance';
 import { NetworkingService } from '../../core/services/networking.service';
 import { ConstitutionService } from '../../core/services/constitution.service';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 
 describe('Governance Component', () => {
@@ -28,6 +29,7 @@ describe('Governance Component', () => {
         await TestBed.configureTestingModule({
             imports: [Governance],
             providers: [
+                provideRouter([]),
                 { provide: NetworkingService, useValue: networkServiceMock },
                 { provide: ConstitutionService, useValue: constitutionServiceMock }
             ]

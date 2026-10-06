@@ -6,7 +6,12 @@ import { ELECTION_PHASE_LABELS, NOMINATION_STATUS_LABELS } from '../models/elect
 export const SEARCH_DEBOUNCE_MS = 300;
 
 // 37.12c: mirrors Constants.Policies.ElectionStaff on the API.
-export const ELECTION_STAFF_ROLES = ['SuperAdmin', 'Admin', 'ElectionOfficial'] as const;
+export const SUPER_ADMIN_ROLE = 'SuperAdmin';
+export const ELECTION_STAFF_ROLES = [SUPER_ADMIN_ROLE, 'Admin', 'ElectionOfficial'] as const;
+
+// 37.13y/z: mirror the limits in Constants.Elections and AppointmentReasonDto on the API.
+export const ELECTION_RULES_UNLOCK = { DEFAULT_MINUTES: 30, MAX_MINUTES: 60, REASON_MIN: 20, REASON_MAX: 1000 } as const;
+export const ELECTION_APPOINTMENT_REASON_MAX = 400;
 
 // Mirrors GHCAA.Domain's ECPosition enum order exactly — index N here must equal enum value N,
 // since getECPositionName() below indexes into this array by the numeric position value.
@@ -750,9 +755,15 @@ export const API_ENDPOINTS = {
     ELECTION_APPOINTMENTS: {
         FOR_ELECTION: (electionId: number) => `/api/elections/${electionId}/appointments`,
         REVOKE: (id: number) => `/api/elections/appointments/${id}/revoke`,
+        EMERGENCY_REVOKE: (id: number) => `/api/elections/appointments/${id}/emergency-revoke`,
         MINE: '/api/me/election-appointments',
         ACCEPT: (id: number) => `/api/me/election-appointments/${id}/accept`,
         DECLINE: (id: number) => `/api/me/election-appointments/${id}/decline`
+    },
+    // Work Package 37.13v SuperAdmin unlock of the frozen election rules.
+    ELECTION_RULES_UNLOCK: {
+        BASE: '/api/admin/elections/rules-unlock',
+        CLOSE: '/api/admin/elections/rules-unlock/close'
     },
     CONFIG: '/api/config',
     FORUM: '/api/forum',

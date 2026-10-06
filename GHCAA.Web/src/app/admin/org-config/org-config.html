@@ -244,6 +244,10 @@
         <input type="checkbox" [(ngModel)]="elections.publishPerSeatBallots" name="publishPerSeatBallots">
         <span>Publish Per-Seat Ballot Counts</span>
       </label>
+      <label class="toggle-row">
+        <input type="checkbox" [(ngModel)]="elections.countRequesterOnly" name="countRequesterOnly">
+        <span>Only the Official Who Asked May Run a Count</span>
+      </label>
     </div>
     <div class="form-group">
       <label>Steps That Need a Second Official</label>

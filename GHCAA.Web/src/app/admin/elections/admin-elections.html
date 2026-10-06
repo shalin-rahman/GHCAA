@@ -10,6 +10,7 @@
     </div>
 
     <div *ngIf="activeTab() === 'elections'" class="tab-content animate-fade-in">
+        <app-election-rules-unlock *ngIf="isSuperAdmin()"></app-election-rules-unlock>
         <div *ngIf="showForm()" class="glass-card stack gap-4">
             <div class="form-group"><label for="election-title">Title</label><input id="election-title" [(ngModel)]="form.title"></div>
             <div class="form-group"><label for="election-description">Description</label><textarea id="election-description" [(ngModel)]="form.description"></textarea></div>
@@ -20,7 +21,9 @@
             </div>
             <div class="flex gap-2"><button class="btn btn-secondary" (click)="addPosition()">Add position</button><button class="btn btn-primary" [disabled]="saving()" (click)="create()">{{ saving() ? 'Saving...' : 'Create election' }}</button></div>
         </div>
-        <app-search-bar placeholder="Search elections" (valueChange)="search.set($event)"></app-search-bar>
+        <div class="filter-bar">
+            <app-search-bar [value]="search()" (valueChange)="search.set($event)" placeholder="Search elections…"></app-search-bar>
+        </div>
         <div *ngIf="loading()" class="empty-state"><app-logo-spinner [size]="48" [ripple]="false"></app-logo-spinner><p>Loading elections...</p></div>
         <div *ngIf="!loading() && filtered().length === 0" class="empty-state"><h2>No elections found</h2><p>Create an election to begin.</p></div>
         <div class="glass-card" *ngFor="let election of filtered()">
@@ -30,6 +33,7 @@
                     <p class="text-muted"><span class="status-badge" [class]="getElectionPhaseClass(election.phase)">{{ getElectionPhaseLabel(election.phase) }}</span> · {{ election.positions.length }} positions</p>
                     <p class="text-muted" *ngIf="election.ballotKeyFingerprint">Officer key fingerprint: <code>{{ election.ballotKeyFingerprint }}</code></p>
                     <p class="text-muted" *ngIf="!election.ballotKeyFingerprint && canSetBallotKey(election)">No returning officer key yet. Voting cannot open without one.</p>
+                    <p class="text-muted" *ngIf="pollingWarning(election) as warning">{{ warning }}</p>
                 </div>
                 <div class="flex gap-2">
                     <button class="btn btn-primary btn-sm" *ngIf="election.phase === 'Announced'" [disabled]="publishingId() === election.id" (click)="publish(election)">{{ publishingId() === election.id ? 'Publishing...' : 'Publish' }}</button>
@@ -38,6 +42,7 @@
                     <input #keyFile type="file" class="hidden" accept=".pem,.txt" (change)="countWithKeyFile(election, $event)">
                     <button class="btn btn-primary btn-sm" *ngIf="election.phase === 'Counting'" [disabled]="countingId() === election.id" (click)="keyFile.click()">{{ countingId() === election.id ? 'Counting...' : 'Count with officer key' }}</button>
                     <button class="btn btn-secondary btn-sm" (click)="loadApprovals(election)">Waiting approvals</button>
+                    <button class="btn btn-secondary btn-sm" (click)="toggleOfficials(election)">{{ officialsOpenId() === election.id ? 'Hide officials' : 'Officials' }}</button>
                 </div>
             </div>
             <div class="stack gap-2" *ngIf="(approvals()[election.id] ?? []).length > 0">
@@ -53,6 +58,7 @@
                     </div>
                 </div>
             </div>
+            <app-election-officials *ngIf="officialsOpenId() === election.id" [election]="election" (pending)="onOfficialPending($event)"></app-election-officials>
             <div class="stack gap-2" *ngIf="election.candidates.length > 0">
                 <div class="flex justify-between items-center" *ngFor="let candidate of election.candidates">
                     <span>{{ candidate.name }} — {{ candidate.positionTitle }}</span>

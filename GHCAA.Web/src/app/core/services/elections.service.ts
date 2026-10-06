@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import {
-    AdminElectionDto, AdminElectionStepResult, CastBallotDto, ElectionApprovalDto, CastBallotResultDto, CreateElectionRequest, ElectionAppointmentDto, ElectionPhase,
-    ElectionCountStepResult, ElectionResultDto, ElectionSummaryDto,
+    AdminElectionDto, AdminElectionStepResult, AppointRequest, CastBallotDto, ElectionApprovalDto, CastBallotResultDto, CreateElectionRequest, ElectionAppointmentDto, ElectionPhase,
+    ElectionCountStepResult, ElectionResultDto, ElectionRulesUnlockDto, ElectionSummaryDto,
     NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto
 } from '../models/election.models';
 
@@ -134,5 +134,36 @@ export class ElectionsService {
 
     declineAppointment(id: number, reason: string | null): Observable<void> {
         return this.http.post<void>(API_ENDPOINTS.ELECTION_APPOINTMENTS.DECLINE(id), { reason });
+    }
+
+    // 37.13y. Officials of one election, for the admin panel.
+    getAppointments(electionId: number): Observable<ElectionAppointmentDto[]> {
+        return this.http.get<ElectionAppointmentDto[]>(API_ENDPOINTS.ELECTION_APPOINTMENTS.FOR_ELECTION(electionId));
+    }
+
+    appoint(electionId: number, request: AppointRequest): Observable<ElectionAppointmentDto> {
+        return this.http.post<ElectionAppointmentDto>(API_ENDPOINTS.ELECTION_APPOINTMENTS.FOR_ELECTION(electionId), request);
+    }
+
+    revokeAppointment(id: number, reason: string | null): Observable<void> {
+        return this.http.post<void>(API_ENDPOINTS.ELECTION_APPOINTMENTS.REVOKE(id), { reason });
+    }
+
+    // Always waits for a second person, so the server answers 202 with the stored request.
+    emergencyRevoke(id: number, reason: string): Observable<ElectionApprovalDto> {
+        return this.http.post<ElectionApprovalDto>(API_ENDPOINTS.ELECTION_APPOINTMENTS.EMERGENCY_REVOKE(id), { reason });
+    }
+
+    // 37.13z. The server answers 204 when no unlock is open, which HttpClient hands back as null.
+    getRulesUnlock(): Observable<ElectionRulesUnlockDto | null> {
+        return this.http.get<ElectionRulesUnlockDto | null>(API_ENDPOINTS.ELECTION_RULES_UNLOCK.BASE);
+    }
+
+    openRulesUnlock(reason: string, minutes: number | null): Observable<ElectionRulesUnlockDto> {
+        return this.http.post<ElectionRulesUnlockDto>(API_ENDPOINTS.ELECTION_RULES_UNLOCK.BASE, { reason, minutes });
+    }
+
+    closeRulesUnlock(): Observable<void> {
+        return this.http.post<void>(API_ENDPOINTS.ELECTION_RULES_UNLOCK.CLOSE, {});
     }
 }
