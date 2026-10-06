@@ -248,9 +248,10 @@ class ElectionSettings {
   final String candidateOrder;
   final bool showTurnoutDuringPolling;
   final bool publishPerSeatBallots;
+  final bool countRequesterOnly;
 
   static const allApprovalActions = [
-    'Publish', 'OpenPolling', 'ReplaceBallotKey', 'ClosePolling', 'Declare', 'Archive',
+    'Publish', 'OpenPolling', 'ReplaceBallotKey', 'ClosePolling', 'Declare', 'Archive', 'Count',
   ];
 
   const ElectionSettings({
@@ -263,6 +264,7 @@ class ElectionSettings {
     this.candidateOrder = 'Random',
     this.showTurnoutDuringPolling = false,
     this.publishPerSeatBallots = true,
+    this.countRequesterOnly = false,
   });
 
   factory ElectionSettings.fromJson(Map<String, dynamic> json) {
@@ -277,6 +279,7 @@ class ElectionSettings {
       candidateOrder: json['candidateOrder']?.toString() ?? d.candidateOrder,
       showTurnoutDuringPolling: json['showTurnoutDuringPolling'] ?? d.showTurnoutDuringPolling,
       publishPerSeatBallots: json['publishPerSeatBallots'] ?? d.publishPerSeatBallots,
+      countRequesterOnly: json['countRequesterOnly'] ?? d.countRequesterOnly,
     );
   }
 }

@@ -108,6 +108,9 @@ class FakeBiometricService implements BiometricService {
 class FakeAdminService implements AdminService {
   @override
   Future<List<dynamic>> getPendingApprovals() async => [];
+
+  @override
+  Future<List<dynamic>> searchMembers(String query) async => [];
   @override
   Future<List<dynamic>> getContactMessages() async => [];
   @override

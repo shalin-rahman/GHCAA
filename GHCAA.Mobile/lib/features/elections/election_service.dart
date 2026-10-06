@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/utils/app_utils.dart';
 
 final electionServiceProvider =
@@ -40,6 +41,16 @@ String? nextElectionPhase(String phase) {
   if (index == -1 || index >= electionPhaseOrder.length - 1) return null;
   return electionPhaseOrder[index + 1];
 }
+
+// 37.13t. Shown when polling is asked for and the server says too few officials can approve.
+const electionTooFewApproversWarning =
+    'Fewer than two officials can approve on this election. Once polling opens nobody can be appointed, so if an official has to be removed in an emergency there may be nobody left to approve it until the result is declared.';
+
+// The warning to add when moving [election] to [next], or null.
+String? pollingApproverWarning(AdminElection election, String next) =>
+    next == 'Polling' && election.tooFewApprovers
+        ? electionTooFewApproversWarning
+        : null;
 
 const nominationStatusLabels = <String, String>{
   'Submitted': 'Submitted',
@@ -140,6 +151,8 @@ class AdminElection {
   final List<String> myPermissions;
   // True once a live appointment to a persona that takes over from the admin exists.
   final bool adminHandedOver;
+  // 37.13t. Fewer live officials with Approve than an emergency revocation needs.
+  final bool tooFewApprovers;
 
   const AdminElection({
     required this.id,
@@ -157,6 +170,7 @@ class AdminElection {
     this.ballotKeyFingerprint,
     this.myPermissions = const [],
     this.adminHandedOver = false,
+    this.tooFewApprovers = false,
   });
 
   factory AdminElection.fromJson(Map<String, dynamic> json) => AdminElection(
@@ -180,6 +194,7 @@ class AdminElection {
                 .toList() ??
             const [],
         adminHandedOver: json['adminHandedOver'] as bool? ?? false,
+        tooFewApprovers: json['tooFewApprovers'] as bool? ?? false,
       );
 }
 
@@ -192,6 +207,11 @@ class ElectionAppointment {
   final DateTime? appointedAt;
   final DateTime? acceptedAt;
   final bool isLive;
+  final bool isReturningOfficer;
+  // Filled on the admin list for one election (37.13y); the "mine" list leaves them empty.
+  final String displayName;
+  final String? email;
+  final DateTime? revokedAt;
 
   ElectionAppointment({
     required this.id,
@@ -201,6 +221,10 @@ class ElectionAppointment {
     this.appointedAt,
     this.acceptedAt,
     this.isLive = false,
+    this.isReturningOfficer = false,
+    this.displayName = '',
+    this.email,
+    this.revokedAt,
   });
 
   bool get isPending => acceptedAt == null;
@@ -214,7 +238,99 @@ class ElectionAppointment {
         appointedAt: AppUtils.parseDate(json['appointedAt'] as String?),
         acceptedAt: AppUtils.parseDate(json['acceptedAt'] as String?),
         isLive: json['isLive'] as bool? ?? false,
+        isReturningOfficer: json['isReturningOfficer'] as bool? ?? false,
+        displayName: json['displayName'] as String? ?? '',
+        email: json['email'] as String?,
+        revokedAt: AppUtils.parseDate(json['revokedAt'] as String?),
       );
+}
+
+// A persona that can be appointed, from GET /election-personas.
+class ElectionPersonaOption {
+  final int id;
+  final String name;
+
+  const ElectionPersonaOption({required this.id, required this.name});
+
+  factory ElectionPersonaOption.fromJson(Map<String, dynamic> json) =>
+      ElectionPersonaOption(
+          id: json['id'] as int, name: json['name'] as String? ?? '');
+}
+
+// The open site-wide unlock of frozen election rules (37.13z).
+class ElectionRulesUnlock {
+  final int id;
+  final String openedBy;
+  final String reason;
+  final DateTime? openedAt;
+  final DateTime? expiresAt;
+
+  const ElectionRulesUnlock({
+    required this.id,
+    required this.openedBy,
+    required this.reason,
+    this.openedAt,
+    this.expiresAt,
+  });
+
+  factory ElectionRulesUnlock.fromJson(Map<String, dynamic> json) =>
+      ElectionRulesUnlock(
+        id: json['id'] as int,
+        openedBy: json['openedBy'] as String? ?? '',
+        reason: json['reason'] as String? ?? '',
+        openedAt: AppUtils.parseDate(json['openedAt'] as String?),
+        expiresAt: AppUtils.parseDate(json['expiresAt'] as String?),
+      );
+
+  // Whole minutes left, rounded up, so a nearly-expired unlock reads 1 rather than 0.
+  int minutesLeft(DateTime now) {
+    if (expiresAt == null) return 0;
+    final seconds = expiresAt!.difference(now).inSeconds;
+    return seconds <= 0 ? 0 : (seconds + 59) ~/ 60;
+  }
+}
+
+// Same checks as the API, so the common mistakes are caught before the step-up code is asked for.
+String? rulesUnlockProblem(String reason, int? minutes) {
+  final length = reason.trim().length;
+  if (length < ElectionConstants.unlockReasonMin) {
+    return 'Give a reason of at least ${ElectionConstants.unlockReasonMin} characters.';
+  }
+  if (length > ElectionConstants.unlockReasonMax) {
+    return 'The reason can be at most ${ElectionConstants.unlockReasonMax} characters.';
+  }
+  if (minutes == null || minutes < 1 || minutes > ElectionConstants.unlockMaxMinutes) {
+    return 'An unlock lasts 1 to ${ElectionConstants.unlockMaxMinutes} minutes.';
+  }
+  return null;
+}
+
+// The appoint body, or the problem to show. A picked member wins over the typed name and email.
+({Map<String, dynamic>? body, String? problem}) buildAppointRequest({
+  int? personaId,
+  int? memberId,
+  String displayName = '',
+  String email = '',
+  String phone = '',
+  bool isReturningOfficer = false,
+}) {
+  if (personaId == null) return (body: null, problem: 'Choose a role.');
+  final name = displayName.trim();
+  final mail = email.trim();
+  if (memberId == null && (name.isEmpty || mail.isEmpty)) {
+    return (body: null, problem: 'Choose a member, or give a name and email.');
+  }
+  return (
+    body: {
+      'personaId': personaId,
+      'memberId': memberId,
+      'displayName': memberId == null ? name : null,
+      'email': memberId == null ? mail : null,
+      'phone': memberId == null && phone.trim().isNotEmpty ? phone.trim() : null,
+      'isReturningOfficer': isReturningOfficer,
+    },
+    problem: null,
+  );
 }
 
 class ElectionService {
@@ -338,6 +454,54 @@ class ElectionService {
   Future<void> declineAppointment(int id, String? reason) => _dio.post(
       '/me/election-appointments/$id/decline',
       data: {'reason': reason});
+
+  // 37.13y. Officials of one election, live and revoked.
+  Future<List<ElectionAppointment>> getAppointments(int electionId) async {
+    final response = await _dio.get('/elections/$electionId/appointments');
+    return (response.data as List)
+        .map((item) =>
+            ElectionAppointment.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<ElectionAppointment> appoint(
+      int electionId, Map<String, dynamic> body) async {
+    final response =
+        await _dio.post('/elections/$electionId/appointments', data: body);
+    return ElectionAppointment.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<void> revokeAppointment(int id, String? reason) =>
+      _dio.post('/elections/appointments/$id/revoke', data: {'reason': reason});
+
+  // Always stored for a second person (202). Approving happens on the web admin.
+  Future<void> emergencyRevoke(int id, String reason) => _dio.post(
+      '/elections/appointments/$id/emergency-revoke',
+      data: {'reason': reason});
+
+  Future<List<ElectionPersonaOption>> getPersonas() async {
+    final response = await _dio.get('/election-personas');
+    return (response.data as List)
+        .map((item) =>
+            ElectionPersonaOption.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  // 37.13z. Every call needs step-up. A 204 means nothing is open.
+  Future<ElectionRulesUnlock?> getRulesUnlock() async {
+    final response = await _dio.get('/admin/elections/rules-unlock');
+    if (response.statusCode == 204 || response.data is! Map) return null;
+    return ElectionRulesUnlock.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<ElectionRulesUnlock> openRulesUnlock(String reason, int minutes) async {
+    final response = await _dio.post('/admin/elections/rules-unlock',
+        data: {'reason': reason, 'minutes': minutes});
+    return ElectionRulesUnlock.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<void> closeRulesUnlock() =>
+      _dio.post('/admin/elections/rules-unlock/close', data: {});
 
   void logFailure(String operation, Object error) =>
       debugPrint('ElectionService.$operation failed: $error');

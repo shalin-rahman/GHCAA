@@ -7,7 +7,10 @@ import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/widgets/confirm_dialog.dart';
 import '../../core/utils/app_utils.dart';
+import '../../features/auth/auth_service.dart';
 import '../../features/elections/election_service.dart';
+import 'election_officials_sheet.dart';
+import 'election_rules_unlock_sheet.dart';
 
 final adminElectionsProvider =
     FutureProvider.autoDispose<List<AdminElection>>((ref) async {
@@ -60,11 +63,14 @@ class _ElectionManagementScreenState
   Future<void> _advancePhase(AdminElection election) async {
     final next = nextElectionPhase(election.phase);
     if (next == null) return;
+    final warning = pollingApproverWarning(election, next);
     final confirmed = await showConfirmDialog(
       context,
       title: 'Advance phase',
       message:
-          'Move "${election.title}" from ${electionPhaseLabel(election.phase)} to ${electionPhaseLabel(next)}?',
+          'Move "${election.title}" from ${electionPhaseLabel(election.phase)} to ${electionPhaseLabel(next)}?'
+          '${warning == null ? '' : '\n\n$warning'}',
+      destructive: warning != null,
     );
     if (!confirmed) return;
     await _runAction(election.id, 'phase', () async {
@@ -247,11 +253,20 @@ class _ElectionManagementScreenState
   @override
   Widget build(BuildContext context) {
     final electionsAsync = ref.watch(adminElectionsProvider);
+    final isSuperAdmin = ref.watch(isSuperAdminProvider).value ?? false;
 
     return AppScaffold(
       isAdmin: true,
       title: 'Elections',
       breadcrumb: 'ADMIN > ELECTIONS',
+      actions: [
+        if (isSuperAdmin)
+          IconButton(
+            tooltip: 'Rules unlock',
+            icon: const Icon(Icons.lock_open_outlined, color: AppTheme.royalGold),
+            onPressed: () => showElectionRulesUnlockSheet(context),
+          ),
+      ],
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppTheme.royalGold,
         onPressed: _createElection,
@@ -358,6 +373,12 @@ class _ElectionCard extends StatelessWidget {
                   icon: Icons.campaign_outlined,
                   busy: parent._isBusy(election.id, 'declare'),
                   onPressed: () => parent._declare(election),
+                ),
+                _actionButton(
+                  label: 'Officials',
+                  icon: Icons.badge_outlined,
+                  busy: false,
+                  onPressed: () => showElectionOfficialsSheet(context, election),
                 ),
               ],
             ),

@@ -35,3 +35,13 @@ class GovernanceConstants {
   // Same limit as Constants.Governance.VacancyNoteMaxLength on the API.
   static const int vacancyNoteMaxLength = 500;
 }
+
+// Same limits as the API and the web admin (app.constants.ts ELECTION_RULES_UNLOCK).
+class ElectionConstants {
+  static const String superAdminRole = 'SuperAdmin';
+  static const int unlockDefaultMinutes = 30;
+  static const int unlockMaxMinutes = 60;
+  static const int unlockReasonMin = 20;
+  static const int unlockReasonMax = 1000;
+  static const int appointmentReasonMax = 400;
+}

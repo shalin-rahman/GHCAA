@@ -25,6 +25,16 @@ class AdminService {
     }
   }
 
+  // First ten members matching [query], for pickers such as the election officials sheet.
+  Future<List<dynamic>> searchMembers(String query) async {
+    final response = await _dio.get('/admin/members', queryParameters: {
+      'page': 1,
+      'pageSize': 10,
+      'searchQuery': query,
+    });
+    return response.data['items'] ?? [];
+  }
+
   Future<List<dynamic>> getContactMessages() async {
     try {
       final response = await _dio.get('/admin/contact-messages');
