@@ -23,7 +23,7 @@
     &:hover {
         border-color: var(--accent-color);
         transform: translateY(-5px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        box-shadow: var(--shadow-lg);
     }
 
     h4 {

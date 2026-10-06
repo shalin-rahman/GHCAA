@@ -13,31 +13,3 @@
     }
 }
 
-/* .title-cell / .attachment-flag / .pill / .status-badge / .actions-cell / .icon-btn all live
-   in central styles.scss — do NOT re-add them here. */
-
-.loading-state,
-.empty-state {
-    text-align: center;
-    padding: 5rem 2rem;
-    color: var(--text-muted);
-
-    span {
-        font-size: 3rem;
-        display: block;
-        margin-bottom: 1rem;
-        opacity: 0.4;
-    }
-}
-
-@media (max-width: 768px) {
-    .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .loading-state,
-    .empty-state {
-        padding: 3rem 1rem;
-    }
-}

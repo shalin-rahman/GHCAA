@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AssistantService, AssistantResponse } from '../../core/services/assistant.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SITE_CONTENT } from '../../core/config/site-content.generated';
 import { interpolateOrgTemplate } from '../../core/utils/org-template';
 
@@ -17,7 +18,7 @@ interface ChatMessage {
 @Component({
     selector: 'app-assistant',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, PageHeaderComponent],
     templateUrl: './assistant.html',
     styleUrl: './assistant.scss'
 })

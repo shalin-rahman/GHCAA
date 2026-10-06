@@ -8,6 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { SEARCH_DEBOUNCE_MS } from '../../core/constants/app.constants';
 import { debounce } from '../../core/utils/debounce.util';
@@ -16,7 +17,7 @@ import { ModalHeaderComponent } from '../../common/modal-header/modal-header.com
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImgFallbackDirective, LogoSpinnerComponent, ModalHeaderComponent],
+  imports: [CommonModule, FormsModule, ImgFallbackDirective, LogoSpinnerComponent, ModalHeaderComponent, SearchBarComponent],
   templateUrl: './messages.html',
   styleUrl: './messages.scss'
 })

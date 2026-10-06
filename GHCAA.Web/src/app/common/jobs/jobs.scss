@@ -1,48 +1,11 @@
 .jobs-page {
     animation: fadeIn 0.4s ease-out;
 
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        margin-bottom: 3rem;
-
-        h2 {
-            font-weight: 900;
-            letter-spacing: -1px;
-        }
-    }
 }
 
-.controls-bar {
-    display: flex;
-    gap: 1.5rem;
-    padding: 1rem 1.5rem;
-    margin-bottom: 2.5rem;
-
-    .filter-group {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        background: var(--bg-color);
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        padding: 0.5rem 1rem;
-
-        span {
-            opacity: 0.5;
-        }
-
-        input,
-        select {
-            border: none !important;
-            background: transparent !important;
-            box-shadow: none !important;
-            width: 100%;
-            font-weight: 600;
-        }
-    }
+/* The view toggle sits inside the filter bar, so it drops the tab row's bottom gap. */
+.filter-bar .tabs {
+    margin-bottom: 0;
 }
 
 .job-card {
@@ -66,7 +29,7 @@
         right: 0;
         width: 100px;
         height: 100px;
-        background: radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.1), transparent);
+        background: radial-gradient(circle at top right, rgba(var(--accent-color-rgb), 0.1), transparent);
     }
 
     &.mentorship {
@@ -77,24 +40,6 @@
     .card-badges {
         display: flex;
         gap: 0.5rem;
-
-        .badge {
-            font-size: 0.65rem;
-            font-weight: 900;
-            padding: 0.3rem 0.6rem;
-            border-radius: 6px;
-            text-transform: uppercase;
-
-            &.cat {
-                background: var(--surface-subtle);
-                color: var(--text-muted);
-            }
-
-            &.mentor {
-                background: var(--gold-gradient);
-                color: var(--text-main);
-            }
-        }
     }
 
     .card-content {
@@ -203,79 +148,6 @@
     }
 }
 
-.modal-content {
-    max-width: 800px;
-    width: 95%;
-    background: var(--bg-color);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    overflow: hidden;
-
-    .modal-header {
-        padding: 2.5rem;
-        background: var(--surface-color);
-        border-bottom: 1px solid var(--glass-border);
-        display: flex;
-        justify-content: space-between;
-
-        .badge {
-            font-weight: 900;
-            font-size: 0.7rem;
-            color: var(--accent-text);
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        h3 {
-            font-size: 1.75rem;
-            font-weight: 900;
-        }
-    }
-
-    .modal-body {
-        padding: 2.5rem;
-        display: flex;
-        flex-direction: column;
-        gap: 2.5rem;
-
-        .detail-hero {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-
-            .v-item {
-                font-size: 0.85rem;
-            }
-        }
-
-        .detail-section {
-            h4 {
-                font-weight: 900;
-                color: var(--accent-text);
-                text-transform: uppercase;
-                font-size: 0.75rem;
-                margin-bottom: 0.75rem;
-                letter-spacing: 1px;
-            }
-
-            .long-text {
-                font-size: 0.95rem;
-                line-height: 1.7;
-                white-space: pre-wrap;
-            }
-        }
-    }
-
-    .modal-footer {
-        padding: 1.5rem 2.5rem;
-        background: var(--surface-color);
-        border-top: 1px solid var(--glass-border);
-        display: flex;
-        gap: 1rem;
-        justify-content: flex-end;
-    }
-}
-
 @media (max-width: 768px) {
     .form-grid {
         grid-template-columns: 1fr !important;
@@ -285,11 +157,4 @@
         }
     }
 
-    .controls-bar {
-        flex-direction: column;
-    }
-
-    .modal-body .detail-hero {
-        grid-template-columns: 1fr !important;
-    }
 }

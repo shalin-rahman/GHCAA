@@ -4,10 +4,6 @@
    but for now aligning with the current inline form style using standardized variables */
 .admin-card {
     padding: 2.5rem;
-    background: var(--surface-color);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    box-shadow: var(--shadow-md);
 
     h3 {
         margin-top: 0;
@@ -174,34 +170,6 @@
     }
 }
 
-.status-badge {
-    padding: 0.3rem 0.75rem;
-    font-size: 0.6rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    border-radius: 6px;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    color: var(--text-on-dark);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s;
-
-    &.active {
-        color: var(--success-color);
-        border-color: rgba(16, 185, 129, 0.3);
-    }
-
-    &.featured {
-        color: var(--accent-text);
-        border-color: rgba(var(--accent-rgb), 0.3);
-    }
-
-    &:hover {
-        background: rgba(255, 255, 255, 0.1);
-    }
-}
-
 /* .icon-btn moved to central styles.scss (30.2) — do NOT re-add a block here. Delete-album
    button here previously always rendered red (no .delete modifier) — now uses the modifier
    explicitly so it matches every other danger icon-button app-wide. */
@@ -209,28 +177,6 @@
 
 
 /* .pill lives in central styles.scss — do NOT re-add it here. */
-
-.loading-state,
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 6rem 2rem;
-    text-align: center;
-    color: var(--text-muted);
-
-    span {
-        font-size: 3.5rem;
-        opacity: 0.4;
-        margin-bottom: 1.5rem;
-    }
-
-    p {
-        font-size: 1rem;
-        font-weight: 600;
-    }
-}
 
 .photo-grid {
     display: grid;
@@ -307,8 +253,8 @@
     grid-column: 1 / -1;
 }
 
-.modal-content-lg {
-    max-width: 1000px !important;
+.modal-lg {
+    max-width: 1000px;
 }
 
 .animate-fade {

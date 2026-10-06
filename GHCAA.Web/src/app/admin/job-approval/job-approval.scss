@@ -1,21 +1,3 @@
-.submissions-table {
-    th {
-        text-align: left;
-        padding: 1.25rem 1.5rem;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--text-muted);
-        border-bottom: 1px solid var(--glass-border);
-    }
-
-    td {
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid var(--glass-border);
-        font-size: 0.9rem;
-    }
-}
-
 .job-info {
     strong {
         display: block;
@@ -41,18 +23,6 @@
         font-size: 1.1rem;
         color: var(--text-main);
         white-space: pre-wrap;
-    }
-}
-
-.modal-box.large {
-    max-width: 1000px;
-    height: 90vh;
-    display: flex;
-    flex-direction: column;
-
-    .modal-body {
-        flex: 1;
-        overflow-y: auto;
     }
 }
 

@@ -5,7 +5,7 @@
     <!-- List view -->
     <h1 class="page-title">Fundraising Campaigns</h1>
     @if (campaigns().length === 0) {
-      <p class="empty-msg">No fundraising campaigns are open right now.</p>
+      <div class="empty-state"><p>No fundraising campaigns are open right now.</p></div>
     } @else {
       <div class="campaign-grid">
         @for (c of campaigns(); track c.id) {
@@ -99,6 +99,6 @@
       }
     </div>
   } @else {
-    <p class="empty-msg">This campaign could not be found.</p>
+    <div class="empty-state"><p>This campaign could not be found.</p></div>
   }
 </div>

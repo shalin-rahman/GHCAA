@@ -1,4 +1,5 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { CommonModule } from '@angular/common';
@@ -16,7 +17,7 @@ import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 @Component({
     selector: 'app-admin-gallery',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LoadingPanelComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, ModalHeaderComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LoadingPanelComponent],
     templateUrl: './admin-gallery.html',
     styleUrl: './admin-gallery.scss'
 })

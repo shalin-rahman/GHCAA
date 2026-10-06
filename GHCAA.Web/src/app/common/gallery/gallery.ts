@@ -8,6 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { LoadingPanelComponent } from '../loading-panel/loading-panel';
+import { PageHeaderComponent } from '../page-header/page-header.component';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { safeImageUrl } from '../../core/utils/image.util';
 import { SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
@@ -16,7 +17,7 @@ import { OrgConfigService } from '../../core/services/org-config.service';
 @Component({
   selector: 'app-gallery',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, ImgFallbackDirective],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective],
   templateUrl: './gallery.html',
   styleUrl: './gallery.scss'
 })

@@ -1,18 +1,13 @@
-<div class="credentials-page">
-    <div class="header">
-        <div class="header-main">
-            <h2>Digital ID</h2>
-            <p>Your official digital identity as a {{ orgConfig.config()?.branding?.memberNickname }}</p>
-        </div>
-        <div class="header-btns">
-            <button class="btn btn-accent" (click)="download()">
-                <span class="icon">🪪</span> Download ID Card
-            </button>
-            <button class="btn btn-accent" (click)="downloadCert()">
-                <span class="icon">📑</span> Download Certificate
-            </button>
-        </div>
-    </div>
+<div class="admin-feature">
+    <app-page-header title="Digital ID"
+        [emptySubtitle]="'Your official digital identity as a ' + (orgConfig.config()?.branding?.memberNickname ?? 'member')">
+        <button actions class="btn btn-accent" (click)="download()">
+            <span class="icon">🪪</span> Download ID Card
+        </button>
+        <button actions class="btn btn-accent" (click)="downloadCert()">
+            <span class="icon">📑</span> Download Certificate
+        </button>
+    </app-page-header>
 
     <div class="credentials-container" *ngIf="profile(); else loading">
         <!-- Front View -->
@@ -88,8 +83,6 @@
     </div>
 
     <ng-template #loading>
-        <div class="loading-state">
-            <app-loading-panel label="Loading document..." [size]="48"></app-loading-panel>
-        </div>
+        <app-loading-panel label="Loading document..." [size]="48"></app-loading-panel>
     </ng-template>
 </div>

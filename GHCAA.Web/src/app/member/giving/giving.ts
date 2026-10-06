@@ -6,11 +6,12 @@ import { CampaignPledge } from '../../core/models/business.models';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { getPledgeStatusLabel, getPledgeStatusClass } from '../../core/constants/app.constants';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 
 @Component({
     selector: 'app-giving',
     standalone: true,
-    imports: [CommonModule, RouterLink, LoadingPanelComponent, AppCurrencyPipe],
+    imports: [CommonModule, RouterLink, LoadingPanelComponent, AppCurrencyPipe, PageHeaderComponent],
     templateUrl: './giving.html',
     styleUrl: './giving.scss'
 })

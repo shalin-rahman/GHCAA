@@ -12,7 +12,7 @@ import { ExportUtil } from '../../core/utils/export.util';
 import { ballotKeyFileName, generateBallotKeyPair, readBallotKeyFile, toPem } from '../../core/utils/ballot-key.util';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { AuthService } from '../../core/services/auth.service';
@@ -28,7 +28,7 @@ type AdminElectionsTab = 'elections' | 'nominations';
 @Component({
     selector: 'app-admin-elections',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent, SearchBarComponent, PageHeaderComponent, ElectionOfficials, ElectionRulesUnlock],
+    imports: [CommonModule, FormsModule, LoadingPanelComponent, SearchBarComponent, PageHeaderComponent, ElectionOfficials, ElectionRulesUnlock],
     templateUrl: './admin-elections.html'
 })
 export class AdminElections {

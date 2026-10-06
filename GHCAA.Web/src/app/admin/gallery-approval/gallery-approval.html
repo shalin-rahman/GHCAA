@@ -14,7 +14,7 @@
     <app-loading-panel label="Checking for pending submissions..." [size]="64"></app-loading-panel>
     } @else {
     <h4 class="section-label">Pending Albums</h4>
-    <div class="submissions-table glass-card table-wrap mb-10">
+    <div class="glass-card table-wrap mb-10">
         <table class="data-table">
             <thead>
                 <tr>
@@ -46,8 +46,8 @@
                 </tr>
                 } @empty {
                 <tr>
-                    <td colspan="5" class="py-20 text-center italic opacity-50">
-                        {{ searchQuery() ? 'No albums match your search.' : 'No pending albums found.' }}
+                    <td colspan="5">
+                        <div class="empty-state"><p>{{ searchQuery() ? 'No albums match your search.' : 'No pending albums found.' }}</p></div>
                     </td>
                 </tr>
                 }
@@ -56,7 +56,7 @@
     </div>
 
     <h4 class="section-label">Pending Photos</h4>
-    <div class="submissions-table glass-card table-wrap">
+    <div class="glass-card table-wrap">
         <table class="data-table">
             <thead>
                 <tr>
@@ -82,8 +82,8 @@
                 </tr>
                 } @empty {
                 <tr>
-                    <td colspan="5" class="py-20 text-center italic opacity-50">
-                        {{ searchQuery() ? 'No photos match your search.' : 'No pending photos found.' }}
+                    <td colspan="5">
+                        <div class="empty-state"><p>{{ searchQuery() ? 'No photos match your search.' : 'No pending photos found.' }}</p></div>
                     </td>
                 </tr>
                 }
@@ -96,7 +96,7 @@
 <!-- Review Modal -->
 @if (selectedItem(); as item) {
 <div class="modal-overlay" (click)="selectedItem.set(null)">
-    <div class="modal-box large reveal-top" (click)="$event.stopPropagation()">
+    <div class="modal-box wide reveal-top" (click)="$event.stopPropagation()">
         <app-modal-header [title]="item.kind === 'album' ? 'Review Album' : 'Review Photo'" (closed)="selectedItem.set(null)"></app-modal-header>
         <div class="modal-body custom-scrollbar">
             @if (item.kind === 'album') {

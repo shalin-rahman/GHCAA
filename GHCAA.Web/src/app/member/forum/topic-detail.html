@@ -1,31 +1,21 @@
-<div class="forum-page">
-  <!-- Back navigation -->
-  <div class="forum-header">
-    <div class="forum-header-inner">
-      <div class="header-left">
-        <a class="btn-back" routerLink="/portal/forum">
-          <span class="icon">&#8592;</span> Back to Forum
-        </a>
-      </div>
-    </div>
-  </div>
+<div class="admin-feature">
+  <app-page-header title="Discussion" emptySubtitle="Read the thread and join the conversation.">
+    <a actions class="btn btn-secondary btn-sm" routerLink="/portal/forum">&#8592; Back to Forum</a>
+  </app-page-header>
 
   @if (errorMsg()) {
     <div class="alert alert-error">{{ errorMsg() }}</div>
   }
 
   @if (loadingTopic()) {
-    <div class="loader-wrap">
-      <app-logo-spinner [size]="48"></app-logo-spinner>
-      <p>Loading topic discussion…</p>
-    </div>
+    <app-loading-panel label="Loading topic discussion…"></app-loading-panel>
   } @else if (topic()) {
     <!-- Main Topic Thread Card -->
-    <div class="topic-detail-card">
+    <div class="glass-card topic-detail-card">
       <div class="topic-header-section">
         <div class="topic-meta-badges">
-          @if (topic()!.isPinned) { <span class="badge badge-pin">Pinned</span> }
-          @if (topic()!.isLocked) { <span class="badge badge-lock">Locked</span> }
+          @if (topic()!.isPinned) { <span class="status-badge gold">Pinned</span> }
+          @if (topic()!.isLocked) { <span class="status-badge neutral">Locked</span> }
         </div>
         <div class="topic-title-area">
           <h2>{{ topic()!.title }}</h2>
@@ -42,10 +32,10 @@
               </div>
             </div>
             <div class="topic-actions">
-              <span class="stats" title="Views">👁️ {{ topic()!.viewCount }} views</span>
-              <span class="stats" title="Replies">💬 {{ topic()!.replyCount }} replies</span>
+              <span class="pill" title="Views">👁️ {{ topic()!.viewCount }} views</span>
+              <span class="pill" title="Replies">💬 {{ topic()!.replyCount }} replies</span>
               @if (canDeleteTopic(topic()!)) {
-                <button class="btn-delete" (click)="deleteTopic()" title="Delete Topic">🗑️ Delete</button>
+                <button class="btn btn-danger btn-sm" (click)="deleteTopic()" title="Delete Topic">🗑️ Delete</button>
               }
             </div>
           </div>
@@ -62,7 +52,7 @@
 
       <div class="replies-list">
         @for (post of posts(); track post.id) {
-          <div class="reply-card" [class.nested-reply]="post.parentPostId">
+          <div class="glass-card reply-card" [class.nested-reply]="post.parentPostId">
             <div class="reply-header">
               <div class="author-info">
                 @if (post.authorPhotoUrl) {
@@ -84,10 +74,10 @@
               </div>
               <div class="reply-actions">
                 @if (!topic()!.isLocked) {
-                  <button class="btn-text-action" (click)="setReplyTo(post)">Reply</button>
+                  <button class="btn btn-outline btn-sm" (click)="setReplyTo(post)">Reply</button>
                 }
                 @if (canDeletePost(post)) {
-                  <button class="btn-delete" (click)="deletePost(post.id)" title="Delete Reply">🗑️</button>
+                  <button class="btn btn-danger btn-sm" (click)="deletePost(post.id)" title="Delete Reply">🗑️</button>
                 }
               </div>
             </div>
@@ -104,14 +94,12 @@
 
       @if (hasMorePosts() && !loadingPosts()) {
         <div class="load-more-container">
-          <button class="btn-secondary" (click)="loadMore()">Load More Replies</button>
+          <button class="btn btn-secondary" (click)="loadMore()">Load More Replies</button>
         </div>
       }
 
       @if (loadingPosts()) {
-        <div class="loader-wrap">
-          <app-logo-spinner [size]="48"></app-logo-spinner>
-        </div>
+        <app-loading-panel [compact]="true" label="Loading replies"></app-loading-panel>
       }
     </div>
 
@@ -122,11 +110,11 @@
           <span class="icon">🔒</span> This discussion is locked. You cannot post replies.
         </div>
       } @else {
-        <div class="reply-form-card">
+        <div class="glass-card reply-form-card">
           @if (replyingToPost()) {
             <div class="replying-to-banner">
               <span>Replying to <strong>{{ replyingToPost()!.authorName }}</strong>: <em>"{{ replyingToPost()!.content.substring(0, 60) }}..."</em></span>
-              <button class="btn-cancel-reply" (click)="setReplyTo(null)">Cancel</button>
+              <button class="btn btn-outline btn-sm" (click)="setReplyTo(null)">Cancel</button>
             </div>
           }
           <h4>Write a Reply</h4>
@@ -140,7 +128,7 @@
           </div>
           <div class="form-actions">
             <button
-              class="btn-primary"
+              class="btn btn-primary"
               (click)="submitReply()"
               [disabled]="submittingReply() || !newReplyContent().trim()"
             >
@@ -153,7 +141,7 @@
   } @else {
     <div class="empty-state">
       <p>Discussion topic not found or has been deleted.</p>
-      <a class="btn-primary" routerLink="/portal/forum">Return to Forum</a>
+      <a class="btn btn-primary" routerLink="/portal/forum">Return to Forum</a>
     </div>
   }
 </div>

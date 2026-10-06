@@ -1,6 +1,6 @@
 <div class="stack gap-4">
     <h3>Officials</h3>
-    <p *ngIf="loading()" class="text-muted">Loading officials...</p>
+    <app-loading-panel *ngIf="loading()" [compact]="true" [size]="32" label="Loading officials..." />
     <p *ngIf="!loading() && open().length === 0" class="text-muted">No officials appointed yet.</p>
 
     <div class="stack gap-2" *ngFor="let appointment of open()">

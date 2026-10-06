@@ -8,7 +8,7 @@
         </button>
     </app-page-header>
 
-    <div class="tabs tab-nav">
+    <div class="tab-nav">
         @for (tab of postTypeTabs; track tab.value) {
         <button type="button" [class.active]="postTypeFilter() === tab.value"
             (click)="postTypeFilter.set(tab.value)">{{ tab.label }}</button>

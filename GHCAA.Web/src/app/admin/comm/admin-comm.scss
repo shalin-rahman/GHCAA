@@ -1,52 +1,3 @@
-
-
-// ─── Tab Navigation ───────────────────────────────
-/* 30.20: was 1.5rem margin + 0.65rem/1.5rem button padding — took up disproportionate
-   vertical space above the panels for a 3-item tab strip. Tightened to the same compact
-   scale already used for `.btn-sm`/dense admin controls elsewhere. */
-.tab-nav {
-    display: flex;
-    gap: 0.3rem;
-    margin-bottom: 1rem;
-    background: var(--surface-color);
-    padding: 0.25rem;
-    border-radius: 12px;
-    width: fit-content;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-
-    button {
-        background: none;
-        border: none;
-        padding: 0.45rem 1.1rem;
-        border-radius: 8px;
-        color: var(--text-muted);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 700;
-        font-size: 0.82rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-        &:hover {
-            color: var(--text-main);
-            background: var(--card-bg-hover);
-        }
-
-        &.active {
-            color: var(--bg-color);
-            background: var(--primary-color);
-            box-shadow: var(--shadow-md);
-        }
-
-        .icon {
-            font-size: 1.1rem;
-        }
-    }
-}
-
-// ─── Panel Headers ────────────────────────────────
 .panel-header {
     display: flex;
     justify-content: space-between;
@@ -59,11 +10,6 @@
     }
 }
 
-.mb-6 {
-    margin-bottom: 1.5rem;
-}
-
-// ─── Broadcast Panel ──────────────────────────────
 .broadcast-panel {
     padding: 2rem;
 }
@@ -74,70 +20,6 @@
     gap: 1.25rem;
 }
 
-// ─── Form Grid ────────────────────────────────────
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
-
-    .full {
-        grid-column: 1 / -1;
-    }
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-
-    label {
-        font-size: 0.72rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--text-muted);
-    }
-
-    input[type="text"],
-    input[type="email"],
-    select,
-    textarea {
-        background: var(--surface-color);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-sm, 8px);
-        padding: 0.7rem 1rem;
-        color: var(--text-main);
-        font-size: 0.9rem;
-        font-weight: 600;
-        transition: border-color 0.2s, box-shadow 0.2s;
-
-        &::placeholder {
-            color: var(--text-muted);
-            opacity: 0.5;
-        }
-
-        &:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 212, 175, 55), 0.12);
-        }
-    }
-
-    textarea {
-        resize: vertical;
-        min-height: 70px;
-    }
-
-    select {
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23888' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 1rem center;
-        padding-right: 2.5rem;
-    }
-}
-
-// ─── Variable Chips (Template Editor) ─────────────
 .variable-chip-group {
     display: flex;
     flex-wrap: wrap;
@@ -157,13 +39,12 @@
     transition: all 0.2s ease;
 
     &:hover {
-        background: rgba(var(--accent-color-rgb, 212, 175, 55), 0.12);
+        background: rgba(var(--accent-rgb), 0.12);
         color: var(--accent-text);
-        border-color: rgba(var(--accent-color-rgb, 212, 175, 55), 0.3);
+        border-color: rgba(var(--accent-rgb), 0.3);
     }
 }
 
-// ─── Radio Grid (Target Audience) ─────────────────
 .radio-grid {
     display: flex;
     gap: 0.5rem;
@@ -175,7 +56,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.6rem 1.2rem;
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     border: 1.5px solid var(--border-color);
     background: var(--surface-color);
     cursor: pointer;
@@ -195,13 +76,12 @@
 
     &.active {
         border-color: var(--accent-color);
-        background: rgba(var(--accent-color-rgb, 212, 175, 55), 0.1);
+        background: rgba(var(--accent-rgb), 0.1);
         color: var(--accent-text);
-        box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 212, 175, 55), 0.08);
+        box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.08);
     }
 }
 
-// ─── Checkbox Grid (Years / Types) ────────────────
 .checkbox-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
@@ -211,9 +91,8 @@
     padding: 0.75rem;
     background: var(--surface-color);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm, 8px);
+    border-radius: var(--radius-sm);
 
-    // Scrollbar styling
     &::-webkit-scrollbar {
         width: 5px;
     }
@@ -233,7 +112,7 @@
     align-items: center;
     justify-content: center;
     padding: 0.4rem 0.5rem;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     border: 1px solid transparent;
     background: var(--card-bg);
     cursor: pointer;
@@ -245,105 +124,17 @@
     text-align: center;
 
     &:hover {
-        background: rgba(var(--accent-color-rgb, 212, 175, 55), 0.06);
+        background: rgba(var(--accent-rgb), 0.06);
         color: var(--text-main);
     }
 
     &.checked {
-        background: rgba(var(--accent-color-rgb, 212, 175, 55), 0.15);
+        background: rgba(var(--accent-rgb), 0.15);
         color: var(--accent-text);
-        border-color: rgba(var(--accent-color-rgb, 212, 175, 55), 0.3);
+        border-color: rgba(var(--accent-rgb), 0.3);
         font-weight: 900;
         transform: scale(1.05);
         z-index: 1;
-    }
-}
-
-.year-filter-input {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 0.25rem 0.6rem;
-    font-size: 0.75rem;
-    color: var(--text-main);
-    width: 120px;
-    transition: all 0.2s;
-
-    &:focus {
-        outline: none;
-        border-color: var(--accent-color);
-        background: var(--card-bg-hover);
-        width: 160px;
-    }
-}
-
-// ─── Utility helpers ──────────────────────────────
-.flex {
-    display: flex;
-}
-
-.justify-between {
-    justify-content: space-between;
-}
-
-.justify-end {
-    justify-content: flex-end;
-}
-
-.items-center {
-    align-items: center;
-}
-
-.gap-2 {
-    gap: 0.5rem;
-}
-
-.mb-2 {
-    margin-bottom: 0.5rem;
-}
-
-.mt-4 {
-    margin-top: 1rem;
-}
-
-.mt-8 {
-    margin-top: 2rem;
-}
-
-.my-4 {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-}
-
-.opacity-10 {
-    opacity: 0.1;
-}
-
-.text-xs {
-    font-size: 0.75rem;
-}
-
-.animate-fade {
-    animation: fadeIn 0.3s ease-out;
-}
-
-.reveal-top {
-    animation: revealTop 0.4s ease-out;
-}
-
-// ─── Button Link ──────────────────────────────────
-.btn-link {
-    background: none;
-    border: none;
-    color: var(--accent-text);
-    font-weight: 800;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 6px;
-    transition: background 0.2s;
-
-    &:hover {
-        background: rgba(var(--accent-color-rgb, 212, 175, 55), 0.1);
     }
 }
 
@@ -352,19 +143,3 @@ hr.full {
     border: none;
     border-top: 1px solid var(--border-color);
 }
-
-// ─── Table & Data-Table ───────────────────────────
-.table-wrap {
-    overflow-x: auto;
-    border-radius: 12px;
-}
-
-.font-bold {
-    font-weight: 700;
-}
-
-.text-accent {
-    color: var(--accent-text);
-}
-
-// ─── Modal ────────────────────────────────────────

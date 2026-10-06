@@ -1,6 +1,6 @@
-<div class="admin-polls-page animate-fade-in">
+<div class="admin-feature">
     <app-page-header title="Member Polls" emptySubtitle="Manage feedback and association decisions">
-        <div actions class="tabs tab-nav view-toggle">
+        <div actions class="tab-nav">
             <button type="button" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')">☰ Table</button>
             <button type="button" [class.active]="viewMode() === 'card'" (click)="viewMode.set('card')">▦ Card</button>
         </div>
@@ -31,7 +31,7 @@
                 <tr *ngFor="let poll of filteredPolls()">
                     <td class="title-cell">{{ poll.title }}</td>
                     <td>
-                        <span class="status-badge" [class.active]="poll.isActive" [class.pending]="!poll.isActive">
+                        <span class="status-badge" [class.active]="poll.isActive" [class.inactive]="!poll.isActive">
                             {{ poll.isActive ? 'Active' : 'Inactive' }}
                         </span>
                     </td>
@@ -51,7 +51,7 @@
                 </tr>
             </tbody>
         </table>
-        <div *ngIf="!filteredPolls().length" class="empty-state py-10">
+        <div *ngIf="!filteredPolls().length" class="empty-state compact">
             <span>📊</span>
             <h3>No matching polls</h3>
             <p>Try a different search term.</p>
@@ -61,7 +61,7 @@
     <div class="polls-grid" *ngIf="viewMode() === 'card'">
         <div class="glass-card poll-card" *ngFor="let poll of filteredPolls()" [class.inactive]="!poll.isActive">
             <div class="poll-header">
-                <span class="status-badge" [class.active]="poll.isActive" [class.pending]="!poll.isActive">
+                <span class="status-badge" [class.active]="poll.isActive" [class.inactive]="!poll.isActive">
                     {{ poll.isActive ? 'Active' : 'Inactive' }}
                 </span>
                 <div class="actions">
@@ -109,10 +109,7 @@
     </ng-container>
 
     <ng-template #loader>
-        <div class="loader-container">
-            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-            <p>Syncing polls...</p>
-        </div>
+        <app-loading-panel label="Syncing polls..." [size]="64"></app-loading-panel>
     </ng-template>
 
     <!-- Results Modal (table view's "Results" action reuses the card view's option breakdown) -->
@@ -174,7 +171,7 @@
                         <label>Poll Options</label>
                         <div class="option-input" *ngFor="let opt of newPoll.options; let i = index; trackBy: trackByIndex">
                             <input type="text" [name]="'opt' + i" [(ngModel)]="newPoll.options[i]" placeholder="Option {{i+1}}" required>
-                            <button type="button" class="remove-opt" (click)="removeOption(i)" *ngIf="newPoll.options.length > 2">
+                            <button type="button" class="icon-btn delete" title="Remove option" (click)="removeOption(i)" *ngIf="newPoll.options.length > 2">
                                 <app-icon name="close" [size]="14"></app-icon>
                             </button>
                         </div>

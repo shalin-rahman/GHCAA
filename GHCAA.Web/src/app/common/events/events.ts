@@ -16,12 +16,14 @@ import { ROUTES } from '../../core/constants/app.constants';
 import { getEventStatusMeta } from '../../core/utils/date.util';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { ModalHeaderComponent } from '../modal-header/modal-header.component';
+import { PageHeaderComponent } from '../page-header/page-header.component';
+import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, ReactiveFormsModule, PaymentPortalComponent, ImgFallbackDirective, ModalHeaderComponent, AppCurrencyPipe],
+  imports: [CommonModule, AppDatePipe, FormsModule, ReactiveFormsModule, PaymentPortalComponent, ImgFallbackDirective, ModalHeaderComponent, PageHeaderComponent, LoadingPanelComponent, AppCurrencyPipe],
   templateUrl: './events.html',
   styleUrl: './events.scss'
 })

@@ -15,8 +15,8 @@
 }
 
 tr.unread {
-    background: rgba(var(--accent-color-rgb), 0.03);
-    
+    background: rgba(var(--accent-rgb), 0.03);
+
     td {
         font-weight: 700;
     }
@@ -47,9 +47,10 @@ tr.unread {
 }
 
 .msg-content {
+    padding: 1.5rem;
     line-height: 1.7;
     font-size: 1rem;
-    border-radius: 12px;
+    white-space: pre-wrap;
 }
 
 @media (max-width: 768px) {

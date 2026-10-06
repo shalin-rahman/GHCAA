@@ -63,16 +63,16 @@
 
             <!-- Batch Selection -->
             @if (sendOptions.method === 'batch') {
-            <div class="form-group animate-fade">
+            <div class="form-group animate-fade-in">
                 <div class="flex justify-between items-center mb-2">
                     <label>Select Batch Years ({{ sendOptions.targetYears.length }} selected)</label>
                     <div class="flex gap-2">
-                        <input type="text" [ngModel]="yearSearch()" (ngModelChange)="yearSearch.set($event)"
-                            placeholder="Filter years..." class="year-filter-input">
-                        <button class="btn-link text-xs" (click)="selectAllYears()">Select All</button>
-                        <button class="btn-link text-xs" (click)="selectFilteredYears()" *ngIf="yearSearch()">Select
+                        <app-search-bar [value]="yearSearch()" (valueChange)="yearSearch.set($event)"
+                            placeholder="Filter years…"></app-search-bar>
+                        <button class="btn btn-outline btn-sm" (click)="selectAllYears()">Select All</button>
+                        <button class="btn btn-outline btn-sm" (click)="selectFilteredYears()" *ngIf="yearSearch()">Select
                             Filtered</button>
-                        <button class="btn-link text-xs" (click)="clearYears()">Clear</button>
+                        <button class="btn btn-outline btn-sm" (click)="clearYears()">Clear</button>
                     </div>
                 </div>
                 <div class="checkbox-grid">
@@ -88,12 +88,12 @@
 
             <!-- Type Selection -->
             @if (sendOptions.method === 'type') {
-            <div class="form-group animate-fade">
+            <div class="form-group animate-fade-in">
                 <div class="flex justify-between items-center mb-2">
                     <label>Select Membership Types ({{ sendOptions.targetTypes.length }} selected)</label>
                     <div class="flex gap-2">
-                        <button class="btn-link text-xs" (click)="selectAllTypes()">Select All</button>
-                        <button class="btn-link text-xs" (click)="clearTypes()">Clear</button>
+                        <button class="btn btn-outline btn-sm" (click)="selectAllTypes()">Select All</button>
+                        <button class="btn btn-outline btn-sm" (click)="clearTypes()">Clear</button>
                     </div>
                 </div>
                 <div class="checkbox-grid types-grid">
@@ -109,18 +109,18 @@
 
             <!-- Custom Emails -->
             @if (sendOptions.method === 'custom') {
-            <div class="form-group animate-fade">
+            <div class="form-group animate-fade-in">
                 <label>Recipient Emails (comma separated)</label>
                 <textarea [(ngModel)]="sendOptions.target" name="target" rows="2"
                     placeholder="email1@example.com, email2@example.com"></textarea>
             </div>
             }
 
-            <hr class="full opacity-10 my-4">
+            <hr class="full opacity-10">
 
             <!-- Step 2: Message Content -->
             @if (!isManualMessage) {
-            <div class="form-group animate-fade">
+            <div class="form-group animate-fade-in">
                 <label>Step 2 — Select Message Template</label>
                 <select [(ngModel)]="sendOptions.templateCode" name="templateCode">
                     <option value="">-- Choose a template --</option>
@@ -132,7 +132,7 @@
             }
 
             @if (isManualMessage) {
-            <div class="animate-fade">
+            <div class="animate-fade-in">
                 <div class="form-group">
                     <label>Step 2 — Subject Line</label>
                     <input type="text" [(ngModel)]="sendOptions.customSubject" name="subject"
@@ -145,8 +145,8 @@
             </div>
             }
 
-            <div class="mt-8 flex justify-end">
-                <button class="btn btn-accent btn-lg" [disabled]="sending()" (click)="sendMessage()">
+            <div class="mt-4 flex justify-end">
+                <button class="btn btn-accent" [disabled]="sending()" (click)="sendMessage()">
                     {{ sending() ? '⚡ Dispatching...' : '🚀 Dispatch Broadcast' }}
                 </button>
             </div>
@@ -187,8 +187,8 @@
                         <td class="font-bold text-accent">{{ temp.code }}</td>
                         <td>{{ temp.description }}</td>
                         <td><small>{{ temp.channel === channels.Sms ? '(SMS – no subject)' : temp.subject }}</small></td>
-                        <td class="actions-cell">
-                            <div class="action-group">
+                        <td>
+                            <div class="actions-cell justify-end">
                                 <button class="btn btn-outline btn-sm" (click)="editTemplate(temp)">Edit ↗</button>
                                 <button class="icon-btn delete" (click)="deleteTemplate(temp)" title="Delete">🗑️</button>
                             </div>
@@ -197,9 +197,9 @@
                     } @empty {
                     <tr>
                         <td colspan="5">
-                            <div class="empty-state py-12">
-                                <span class="text-3xl mb-2 block">📄</span>
-                                <p class="text-muted italic">{{ templateSearch() ? 'No templates match your search.' : 'No communication templates found.' }}</p>
+                            <div class="empty-state">
+                                <span>📄</span>
+                                <p>{{ templateSearch() ? 'No templates match your search.' : 'No communication templates found.' }}</p>
                             </div>
                         </td>
                     </tr>
@@ -259,9 +259,9 @@
                     } @empty {
                     <tr>
                         <td colspan="5">
-                            <div class="empty-state py-12">
-                                <span class="text-3xl mb-2 block">📜</span>
-                                <p class="text-muted italic">{{ logSearch() ? 'No activity logs match your search.' : 'No communication history found.' }}</p>
+                            <div class="empty-state">
+                                <span>📜</span>
+                                <p>{{ logSearch() ? 'No activity logs match your search.' : 'No communication history found.' }}</p>
                             </div>
                         </td>
                     </tr>
@@ -276,7 +276,7 @@
     <!-- Template Editor Modal -->
     @if (editingTemplate()) {
     <div class="modal-overlay" (click)="cancelEdit()">
-        <div class="modal-box glass-card wide animate-pop" (click)="$event.stopPropagation()">
+        <div class="modal-box wide" (click)="$event.stopPropagation()">
             <app-modal-header [title]="(editingTemplate()?.id ? 'Edit' : 'Create') + ' Template'" (closed)="cancelEdit()"></app-modal-header>
             <div class="modal-body">
                 <div class="form-grid">

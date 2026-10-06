@@ -8,6 +8,7 @@ import { AdminService } from '../../../core/services/admin.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
+import { LoadingPanelComponent } from '../../../common/loading-panel/loading-panel';
 import { debounce } from '../../../core/utils/debounce.util';
 import { ELECTION_APPOINTMENT_REASON_MAX, SEARCH_DEBOUNCE_MS, SUPER_ADMIN_ROLE } from '../../../core/constants/app.constants';
 import {
@@ -22,7 +23,7 @@ interface MemberHit { id: number; fullName: string; membershipNumber: string | n
 @Component({
     selector: 'app-election-officials',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LoadingPanelComponent],
     templateUrl: './election-officials.html'
 })
 export class ElectionOfficials implements OnInit, OnDestroy {

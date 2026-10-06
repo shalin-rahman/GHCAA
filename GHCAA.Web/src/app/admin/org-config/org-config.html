@@ -4,10 +4,10 @@
     <small subtitle>Applies to the web portal and the mobile app</small>
   </app-page-header>
 
-  @if (isLoading) {
+  @if (isLoading()) {
   <app-loading-panel label="Loading configuration…" [size]="64"></app-loading-panel>
   } @else if (config) {
-  <div class="tabs tab-nav">
+  <div class="tab-nav">
     @for (tab of tabs; track tab.key) {
     <button type="button" [class.active]="activeTab() === tab.key" (click)="activeTab.set(tab.key)">
       {{ tab.label }}
@@ -287,16 +287,16 @@
     }
     }
 
-    @if (successMessage) {
-    <div class="alert alert-success">{{ successMessage }}</div>
+    @if (successMessage()) {
+    <div class="alert alert-success">{{ successMessage() }}</div>
     }
-    @if (errorMessage) {
-    <div class="alert alert-error">{{ errorMessage }}</div>
+    @if (errorMessage()) {
+    <div class="alert alert-error">{{ errorMessage() }}</div>
     }
 
     <div class="flex justify-end">
-      <button type="submit" class="btn btn-accent shadow-gold" [disabled]="isSaving">
-        {{ isSaving ? 'Saving…' : 'Save Configuration' }}
+      <button type="submit" class="btn btn-accent shadow-gold" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving…' : 'Save Configuration' }}
       </button>
     </div>
   </form>

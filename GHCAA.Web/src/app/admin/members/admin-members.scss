@@ -12,7 +12,7 @@
     .member-avatar {
         width: 40px;
         height: 40px;
-        border-radius: 12px;
+        border-radius: var(--radius-md);
         background: var(--primary-color);
         color: var(--text-on-dark);
         display: flex;
@@ -46,64 +46,11 @@
     }
 }
 
-/* Pagination Bar */
-.pagination-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    background: var(--surface-subtle);
-    border-top: 1px solid var(--glass-border);
-
-    .page-size {
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        font-weight: 600;
-
-        select {
-            margin-left: 0.5rem;
-            padding: 0.3rem 0.6rem;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-color);
-            color: var(--text-main);
-        }
-    }
-
-    .page-controls {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: var(--text-main);
-    }
-}
-
-/* Special Badges */
-.badge {
-    padding: 0.25rem 0.75rem;
-    font-size: 0.65rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    border-radius: 4px;
-    letter-spacing: 0.5px;
-
-    &.lifelong { background: rgba(var(--success-color-rgb), 0.1); color: var(--success-color); border: 1px solid rgba(var(--success-color-rgb), 0.2); }
-    &.donor { background: rgba(var(--accent-color-rgb), 0.1); color: var(--accent-text); border: 1px solid rgba(var(--accent-color-rgb), 0.2); }
-    &.patron {
-        background: color-mix(in srgb, var(--primary-color) 10%, transparent);
-        color: var(--primary-color);
-        border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent);
-    }
-    &.guest { background: var(--surface-subtle); color: var(--text-muted); border: 1px solid var(--glass-border); }
-}
-
 /* Modal Specific Overrides */
 .modal-avatar {
     width: 60px;
     height: 60px;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     background: var(--primary-color);
     color: var(--text-on-dark);
     display: flex;
@@ -156,7 +103,7 @@
     padding: 1.25rem;
     background: var(--bg-color);
     border: 1px solid var(--glass-border);
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     transition: 0.3s;
     position: relative; // Ensure relative for close button
 
@@ -229,7 +176,7 @@
         align-items: center;
         padding: 1rem;
         background: var(--surface-color);
-        border-radius: 10px;
+        border-radius: var(--radius-md);
         border: 1px solid transparent;
         transition: 0.2s;
 

@@ -3,7 +3,7 @@
         emptySubtitle="Membership admission queue">
         <small subtitle>Showing {{ filteredRequests().length }} of {{ pendingRequests().length }} pending
             applications</small>
-        <div stat class="stat-badge">Pending: {{ pendingRequests().length }}</div>
+        <div stat class="status-badge gold">Pending: {{ pendingRequests().length }}</div>
     </app-page-header>
 
     <!-- Search Bar -->
@@ -22,7 +22,7 @@
                     <th>Applicant Profile</th>
                     <th>Academic Credentials</th>
                     <th>Status</th>
-                    <th style="text-align: right;">Operations</th>
+                    <th class="text-right">Operations</th>
                 </tr>
             </thead>
             <tbody>
@@ -56,7 +56,7 @@
                         </span>
                     </td>
                     <td>
-                        <div class="action-btns">
+                        <div class="action-group">
                             <button (click)="viewDetails(reg)" class="btn btn-outline btn-sm">Details ↗</button>
                             <button (click)="contactMember(reg.email)" class="btn btn-secondary btn-sm"
                                 title="Contact Applicant">📨</button>

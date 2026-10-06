@@ -1,11 +1,8 @@
 <div class="events-page mb-10">
-    <div class="header">
-        <h2 class="text-3xl font-bold">Events</h2>
-        <p class="text-muted">Stay connected with your fellow alumni across the globe</p>
-    </div>
+    <app-page-header title="Events" emptySubtitle="Stay connected with your fellow alumni across the globe"></app-page-header>
 
     <!-- Navigation Tabs -->
-    <div class="tabs">
+    <div class="tabs tab-nav">
         <button (click)="activeTab.set('upcoming')" [class.active]="activeTab() === 'upcoming'">Active
             Events</button>
         @if (!isGuest()) {
@@ -114,9 +111,9 @@
                         </div>
                         <div class="grid gap-2">
                             <div class="flex gap-2">
-                                <a [href]="getCalendarLink(ev)" target="_blank" class="btn btn-outline btn-xs flex-1">📅
+                                <a [href]="getCalendarLink(ev)" target="_blank" class="btn btn-outline btn-sm flex-1">📅
                                     Sync</a>
-                                <button (click)="askAdmin(ev)" class="btn btn-outline btn-xs flex-1">Query</button>
+                                <button (click)="askAdmin(ev)" class="btn btn-outline btn-sm flex-1">Query</button>
                             </div>
                         </div>
                         } @else {
@@ -128,9 +125,9 @@
                             <button disabled class="btn btn-secondary opacity-50 w-full">Closed</button>
                             }
                             <div class="flex gap-2">
-                                <a [href]="getCalendarLink(ev)" target="_blank" class="btn btn-outline btn-xs flex-1">📅
+                                <a [href]="getCalendarLink(ev)" target="_blank" class="btn btn-outline btn-sm flex-1">📅
                                     Sync</a>
-                                <button (click)="askAdmin(ev)" class="btn btn-outline btn-xs flex-1">Query</button>
+                                <button (click)="askAdmin(ev)" class="btn btn-outline btn-sm flex-1">Query</button>
                             </div>
                         </div>
                         }
@@ -145,14 +142,10 @@
                         <div class="h-[1px] flex-1 bg-white/5"></div>
                     </div>
 
-                    <div *ngIf="loadingParticipants()" class="text-center py-4">
-                        <span class="text-xs font-black uppercase text-accent animate-pulse tracking-widest">Loading
-                            attendees...</span>
-                    </div>
+                    <app-loading-panel *ngIf="loadingParticipants()" [compact]="true" [size]="32" label="Loading attendees..."></app-loading-panel>
 
-                    <div *ngIf="!loadingParticipants() && participants().length === 0"
-                        class="text-center py-4 text-muted text-xs italic">
-                        No visible participants yet.
+                    <div *ngIf="!loadingParticipants() && participants().length === 0" class="empty-state">
+                        <p>No visible participants yet.</p>
                     </div>
 
                     <div *ngIf="!loadingParticipants() && participants().length > 0" class="participants-grid">
@@ -259,8 +252,8 @@
                 </div>
             </div>
             } @empty {
-            <div class="text-center py-20 glass-card">
-                <p class="text-muted italic">No active events found at this moment.</p>
+            <div class="empty-state glass-card">
+                <p>No active events found at this moment.</p>
             </div>
             }
         </div>
@@ -268,8 +261,8 @@
 
     <!-- My Participations Tab -->
     <div *ngIf="activeTab() === 'my-registrations'" class="tab-content animate-fade-in">
-        <div *ngIf="myRegistrations().length === 0" class="text-center py-20 glass-card">
-            <p class="text-muted italic">You haven't participated in any events yet.</p>
+        <div *ngIf="myRegistrations().length === 0" class="empty-state glass-card">
+            <p>You haven't participated in any events yet.</p>
         </div>
 
         <div class="registrations-list grid gap-4">
@@ -284,11 +277,7 @@
                 </div>
 
                 <div class="flex items-center gap-6">
-                    <div class="status-badge" [ngClass]="{
-                        'bg-yellow-500 text-black': reg.status === 'Pending',
-                        'bg-green-500 text-white': reg.status === 'Approved',
-                        'bg-red-500 text-white': reg.status === 'Rejected'
-                    }">
+                    <div class="status-badge" [ngClass]="reg.status.toLowerCase()">
                         {{ reg.status }}
                     </div>
 

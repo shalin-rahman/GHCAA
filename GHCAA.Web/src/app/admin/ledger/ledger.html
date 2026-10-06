@@ -131,9 +131,9 @@
                     <td>{{ tr.date | appDate }}</td>
                     <td class="reference-cell"><code>{{ tr.reference || '—' }}</code></td>
                     <td>{{ tr.description }}</td>
-                    <td><span class="category-pill">{{ getCategoryName(tr.financialCategory) }}</span></td>
+                    <td><span class="pill">{{ getCategoryName(tr.financialCategory) }}</span></td>
                     <td>
-                        <span class="type-indicator" [ngClass]="tr.recordType === 'Income' ? 'credit' : 'debit'">
+                        <span class="status-badge" [ngClass]="tr.recordType === 'Income' ? 'success' : 'danger'">
                             {{ tr.recordType === 'Income' ? 'Income' : 'Expense' }}
                         </span>
                     </td>

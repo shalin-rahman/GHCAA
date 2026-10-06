@@ -13,7 +13,7 @@
     @if (loading()) {
     <app-loading-panel label="Checking for pending submissions..." [size]="64"></app-loading-panel>
     } @else {
-    <div class="submissions-table glass-card table-wrap">
+    <div class="glass-card table-wrap">
         <table class="data-table">
             <thead>
                 <tr>
@@ -42,8 +42,8 @@
                 </tr>
                 } @empty {
                 <tr>
-                    <td colspan="5" class="py-20 text-center italic opacity-50">
-                        {{ searchQuery() ? 'No submissions match your search.' : 'No pending submissions found.' }}
+                    <td colspan="5">
+                        <div class="empty-state"><p>{{ searchQuery() ? 'No submissions match your search.' : 'No pending submissions found.' }}</p></div>
                     </td>
                 </tr>
                 }
@@ -56,7 +56,7 @@
 <!-- Review Modal -->
 @if (selectedJob()) {
 <div class="modal-overlay" (click)="selectedJob.set(null)">
-    <div class="modal-box large reveal-top" (click)="$event.stopPropagation()">
+    <div class="modal-box wide reveal-top" (click)="$event.stopPropagation()">
         <app-modal-header title="Review Job Posting" (closed)="selectedJob.set(null)"></app-modal-header>
         <div class="modal-body custom-scrollbar">
             <div class="job-preview">

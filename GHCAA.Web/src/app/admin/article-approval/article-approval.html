@@ -13,7 +13,7 @@
     @if (loading()) {
     <app-loading-panel label="Checking for pending submissions..." [size]="64"></app-loading-panel>
     } @else {
-    <div class="submissions-table glass-card table-wrap">
+    <div class="table-wrap">
         <table class="data-table">
             <thead>
                 <tr>
@@ -47,8 +47,10 @@
                 </tr>
                 } @empty {
                 <tr>
-                    <td colspan="5" class="py-20 text-center italic opacity-50">
-                        {{ searchQuery() ? 'No submissions match your search.' : 'No pending submissions found.' }}
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <p>{{ searchQuery() ? 'No submissions match your search.' : 'No pending submissions found.' }}</p>
+                        </div>
                     </td>
                 </tr>
                 }
@@ -61,9 +63,9 @@
 <!-- Review Modal -->
 @if (selectedArticle()) {
 <div class="modal-overlay" (click)="selectedArticle.set(null)">
-    <div class="modal-box large reveal-top" (click)="$event.stopPropagation()">
+    <div class="modal-box wide reveal-top" (click)="$event.stopPropagation()">
         <app-modal-header title="Review Submission" (closed)="selectedArticle.set(null)"></app-modal-header>
-        <div class="modal-body custom-scrollbar">
+        <div class="modal-body">
             <div class="article-preview">
                 @if (selectedArticle()?.imageUrl) {
                 <img [src]="safeImg(selectedArticle()?.imageUrl)" alt="Cover" class="preview-hero" appImgFallback>
@@ -79,8 +81,10 @@
 
                 <div class="rejection-box mt-10 p-6 glass-card bg-white/5">
                     <label class="text-xs uppercase font-black mb-4 block">Rejection Note (Only if rejecting)</label>
-                    <textarea [ngModel]="rejectReason()" (ngModelChange)="rejectReason.set($event)"
-                        placeholder="Explain why this article is being rejected..."></textarea>
+                    <div class="form-group">
+                        <textarea [ngModel]="rejectReason()" (ngModelChange)="rejectReason.set($event)"
+                            placeholder="Explain why this article is being rejected..."></textarea>
+                    </div>
                 </div>
             </div>
         </div>

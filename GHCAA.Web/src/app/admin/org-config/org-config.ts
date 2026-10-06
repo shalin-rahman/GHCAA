@@ -38,10 +38,10 @@ export class AdminOrgConfig implements OnInit {
   activeTab = signal<TabKey>('branding');
   config: OrgConfig | null = null;
   localizationJson = '';
-  isSaving = false;
-  isLoading = false;
-  successMessage = '';
-  errorMessage = '';
+  isSaving = signal(false);
+  isLoading = signal(false);
+  successMessage = signal('');
+  errorMessage = signal('');
 
   readonly approvalModes = ['ManualReview', 'AutoApprove', 'PaymentGated'];
   readonly notificationChannels = ['Both', 'Email', 'Sms'];
@@ -62,13 +62,13 @@ export class AdminOrgConfig implements OnInit {
       this.hydrate(current);
       return;
     }
-    this.isLoading = true;
+    this.isLoading.set(true);
     this.configService.loadConfig()
       .then(() => {
         const cfg = this.configService.config();
         if (cfg) this.hydrate(cfg);
       })
-      .finally(() => { this.isLoading = false; });
+      .finally(() => { this.isLoading.set(false); });
   }
 
   get featureKeys(): (keyof FeatureToggles)[] {
@@ -106,9 +106,9 @@ export class AdminOrgConfig implements OnInit {
 
   async saveConfig() {
     if (!this.config) return;
-    this.isSaving = true;
-    this.successMessage = '';
-    this.errorMessage = '';
+    this.isSaving.set(true);
+    this.successMessage.set('');
+    this.errorMessage.set('');
 
     try {
       const payload: OrgConfig = {
@@ -124,11 +124,11 @@ export class AdminOrgConfig implements OnInit {
       };
       await this.configService.updateConfig(payload);
       this.hydrate(payload);
-      this.successMessage = 'Configuration saved successfully.';
+      this.successMessage.set('Configuration saved successfully.');
     } catch (e: any) {
-      this.errorMessage = 'Failed to save: ' + (e?.error?.detail ?? e?.message ?? 'unknown error');
+      this.errorMessage.set('Failed to save: ' + (e?.error?.detail ?? e?.message ?? 'unknown error'));
     } finally {
-      this.isSaving = false;
+      this.isSaving.set(false);
     }
   }
 

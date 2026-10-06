@@ -1,4 +1,4 @@
-<section class="page-section animate-fade-in">
+<section class="admin-feature">
     <app-page-header title="Elections" [total]="elections().length" emptySubtitle="Create and run the association election">
         <small subtitle>{{ elections().length }} election(s)</small>
         <button actions class="btn btn-accent" (click)="showForm.set(!showForm())">{{ showForm() ? 'Close' : 'New election' }}</button>
@@ -9,7 +9,7 @@
         <button (click)="switchTab('nominations')" [class.active]="activeTab() === 'nominations'">Nominations &amp; scrutiny</button>
     </div>
 
-    <div *ngIf="activeTab() === 'elections'" class="tab-content animate-fade-in">
+    <div *ngIf="activeTab() === 'elections'" class="tab-content stack gap-4 animate-fade-in">
         <app-election-rules-unlock *ngIf="isSuperAdmin()"></app-election-rules-unlock>
         <div *ngIf="showForm()" class="glass-card stack gap-4">
             <div class="form-group"><label for="election-title">Title</label><input id="election-title" [(ngModel)]="form.title"></div>
@@ -24,7 +24,7 @@
         <div class="filter-bar">
             <app-search-bar [value]="search()" (valueChange)="search.set($event)" placeholder="Search elections…"></app-search-bar>
         </div>
-        <div *ngIf="loading()" class="empty-state"><app-logo-spinner [size]="48" [ripple]="false"></app-logo-spinner><p>Loading elections...</p></div>
+        <app-loading-panel *ngIf="loading()" label="Loading elections..." />
         <div *ngIf="!loading() && filtered().length === 0" class="empty-state"><h2>No elections found</h2><p>Create an election to begin.</p></div>
         <div class="glass-card" *ngFor="let election of filtered()">
             <div class="flex justify-between items-center">
@@ -68,14 +68,14 @@
         </div>
     </div>
 
-    <div *ngIf="activeTab() === 'nominations'" class="tab-content animate-fade-in">
+    <div *ngIf="activeTab() === 'nominations'" class="tab-content stack gap-4 animate-fade-in">
         <div class="form-group">
             <label for="scrutiny-election">Election</label>
             <select id="scrutiny-election" [ngModel]="selectedElectionId()" (ngModelChange)="selectElectionForScrutiny($event)">
                 <option *ngFor="let election of elections()" [ngValue]="election.id">{{ election.title }}</option>
             </select>
         </div>
-        <div *ngIf="nominationsLoading()" class="empty-state"><app-logo-spinner [size]="48" [ripple]="false"></app-logo-spinner><p>Loading nominations...</p></div>
+        <app-loading-panel *ngIf="nominationsLoading()" label="Loading nominations..." />
         <div *ngIf="!nominationsLoading() && nominations().length === 0" class="empty-state"><h2>No nominations</h2><p>Nominations will appear here once submitted.</p></div>
         <div class="glass-card" *ngFor="let nomination of nominations()">
             <div class="flex justify-between items-center">

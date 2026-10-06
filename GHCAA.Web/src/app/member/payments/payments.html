@@ -1,13 +1,9 @@
-<div class="payments-page">
-    <div class="header">
-        <div class="title-group">
-            <h2>Payments</h2>
-            <p>Manage your membership contributions and annual fees.</p>
-        </div>
-        <button class="btn btn-accent" (click)="openPayModal()">
+<div class="admin-feature">
+    <app-page-header title="Payments" emptySubtitle="Manage your membership contributions and annual fees.">
+        <button actions class="btn btn-accent" (click)="openPayModal()">
             <span class="icon">➕</span> Record New Payment
         </button>
-    </div>
+    </app-page-header>
 
     @if (loading()) {
     <app-loading-panel label="Gathering financial history..." [size]="64"></app-loading-panel>
@@ -30,7 +26,7 @@
             </div>
             }
             } @empty {
-            <div class="glass-card empty-card full-width">
+            <div class="empty-state">
                 <span class="icon">✅</span>
                 <p>No outstanding dues. You are all set!</p>
             </div>
@@ -42,14 +38,12 @@
     <div class="section">
         <h3>Recent Transactions</h3>
             <div class="glass-card history-card reveal-card">
-                <div class="card-header pb-6 border-b border-white/5 flex justify-between items-center">
-                    <h3 class="text-xs font-black uppercase tracking-widest text-muted">Archived Transactions</h3>
-                    <div class="badges flex gap-2">
-                         <span class="badge badge-outline text-[10px]">Tax Deductible</span>
-                    </div>
+                <div class="card-header">
+                    <h3>Archived Transactions</h3>
+                    <span class="pill">Tax Deductible</span>
                 </div>
-                <div class="table-container pt-6">
-                    <table class="history-table">
+                <div class="table-wrap">
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Category</th>
@@ -62,25 +56,17 @@
                         </thead>
                         <tbody>
                             @for (item of history(); track item.transactionId) {
-                            <tr class="hover:bg-white/5 transition-colors">
+                            <tr>
+                                <td>{{ getCategoryLabel(item.financialCategory) }}</td>
+                                <td class="txn-id">{{ item.transactionId }}</td>
+                                <td class="payment-date">{{ item.paidAt | appDate }}</td>
+                                <td class="amount">{{ item.amount | appCurrency }}</td>
                                 <td>
-                                    <span class="text-[11px] font-bold">{{ getCategoryLabel(item.financialCategory) }}</span>
-                                </td>
-                                <td>
-                                    <span class="text-[10px] font-mono text-muted">{{ item.transactionId }}</span>
-                                </td>
-                                <td>
-                                    <span class="text-[10px] payment-date">{{ item.paidAt | appDate }}</span>
-                                </td>
-                                <td>
-                                    <span class="font-black">{{ item.amount | appCurrency }}</span>
-                                </td>
-                                <td>
-                                    <span class="badge" [ngClass]="getStatusClass(item.status)">{{ getStatusLabel(item.status) }}</span>
+                                    <span class="status-badge" [ngClass]="getStatusClass(item.status)">{{ getStatusLabel(item.status) }}</span>
                                 </td>
                                 <td class="text-right">
                                     @if (isCompleted(item.status)) {
-                                        <button class="btn btn-outline btn-sm !py-1 !px-3 !text-[10px]" (click)="downloadReceipt(item.id)">
+                                        <button class="btn btn-outline btn-sm" (click)="downloadReceipt(item.id)">
                                             📜 Receipt
                                         </button>
                                     }
@@ -88,7 +74,7 @@
                             </tr>
                             } @empty {
                             <tr>
-                                <td colspan="6" class="text-center py-12 text-muted italic">No community contributions found.</td>
+                                <td colspan="6" class="empty-row">No community contributions found.</td>
                             </tr>
                             }
                         </tbody>
@@ -97,27 +83,26 @@
             </div>
         </div>
 
-        <div class="sidebar lg:col-span-1 space-y-8 reveal-right">
-            <!-- Saved Identity Wallet -->
-            <div class="glass-card wallet-card !bg-accent/5 !border-accent/10">
-                <div class="card-header mb-6">
-                    <h4 class="text-[10px] font-black uppercase tracking-widest text-accent">Identity Wallet</h4>
-                    <p class="text-[9px] text-muted uppercase font-bold mt-1">Faster Checkout for Haragangians</p>
+        <div class="sidebar reveal-right">
+            <div class="glass-card wallet-card">
+                <div class="card-header">
+                    <h4>Identity Wallet</h4>
+                    <p>Faster Checkout for Haragangians</p>
                 </div>
 
-                <div class="wallet-items space-y-4">
+                <div class="wallet-items">
                     @for (m of savedMethods(); track m.id) {
-                        <div class="wallet-item bg-white/5 p-4 rounded-xl border border-white/5 flex justify-between items-center">
+                        <div class="wallet-item">
                             <div class="method-info">
-                                <span class="block text-[10px] font-black">{{ m.methodName }}</span>
-                                <span class="block text-[9px] text-muted">{{ m.accountIdentifier }}</span>
+                                <span class="method-name">{{ m.methodName }}</span>
+                                <span class="method-id">{{ m.accountIdentifier }}</span>
                             </div>
-                            <button class="text-red-500/50 hover:text-red-500 text-xs" (click)="removeMethod(m.id)">Deregister</button>
+                            <button class="btn btn-danger btn-sm" (click)="removeMethod(m.id)">Deregister</button>
                         </div>
                     } @empty {
-                        <div class="empty-wallet text-center p-6 border border-dashed border-white/10 rounded-2xl">
-                             <span class="text-2xl opacity-20 block mb-2">💳</span>
-                             <p class="text-[10px] text-muted italic">Secure your first payment method to see it here.</p>
+                        <div class="empty-state">
+                            <span class="icon">💳</span>
+                            <p>Secure your first payment method to see it here.</p>
                         </div>
                     }
                 </div>
@@ -129,9 +114,9 @@
 <!-- Payment Modal -->
 @if (showPayModal()) {
 <div class="modal-overlay" (click)="showPayModal.set(false)">
-    <div class="modal-box glass-card reveal-top" (click)="$event.stopPropagation()" style="max-width: 640px;">
+    <div class="modal-box pay-modal" (click)="$event.stopPropagation()">
         <app-modal-header title="Record Payment" (closed)="showPayModal.set(false)"></app-modal-header>
-        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+        <div class="modal-body">
             <div class="form-group">
                 <label>Payment Purpose / Category</label>
                 <select [(ngModel)]="paymentForm.financialCategory" class="form-control">

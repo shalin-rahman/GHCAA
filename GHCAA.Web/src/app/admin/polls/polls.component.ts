@@ -7,7 +7,7 @@ import { PollDto } from '../../core/services/poll.service';
 import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { Icon } from '../../common/icon/icon';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
@@ -16,7 +16,7 @@ import { SearchBarComponent } from '../../common/search-bar/search-bar.component
 @Component({
   selector: 'app-admin-polls',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, LogoSpinnerComponent, Icon, ModalHeaderComponent, PageHeaderComponent, SearchBarComponent],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, Icon, ModalHeaderComponent, PageHeaderComponent, SearchBarComponent],
   templateUrl: './polls.html',
   styleUrl: './polls.scss'
 })

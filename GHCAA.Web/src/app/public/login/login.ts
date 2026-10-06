@@ -11,13 +11,19 @@ import { ROUTES } from '../../core/constants/app.constants';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { Observable, Subscription } from 'rxjs';
 
-// Signing in is one request and then a page change, so the text below the button names only
-// those. The button already says "Signing in", so none of these repeat it.
+// Signing in is one request and then a page change, so the text below the button follows those
+// in order. Each line shows once and the list never loops. The button already says "Signing in",
+// so none of these repeat it.
 const LOGIN_STATUS_CHECKING = 'Checking your username and password';
-const LOGIN_STATUS_WAKING = 'The server is starting up. This can take up to a minute.';
-const LOGIN_STATUS_OPENING = 'Opening your portal';
-// A normal login answers well inside this. Past it the server was most likely asleep.
-const SLOW_LOGIN_AFTER_MS = 5000;
+const LOGIN_STATUS_OPENING = 'Signed in. Opening your portal';
+// A normal login answers well inside 5 seconds. Past that the server was most likely asleep, so
+// the lines after it explain the wait as it gets longer. The last one stays until the reply or
+// the timeout.
+const SLOW_LOGIN_STEPS: ReadonlyArray<{ afterMs: number; text: string }> = [
+  { afterMs: 5000, text: 'The server is starting up. This can take up to a minute.' },
+  { afterMs: 20000, text: 'Still starting up. Your sign-in has been sent.' },
+  { afterMs: 40000, text: 'Nearly there. Please keep this page open.' }
+];
 // A Render free-tier wake plus a cold database can take most of a minute. The old 8s limit gave
 // up while the request was still running, so a login that then succeeded was thrown away and the
 // user was left on this page.
@@ -49,7 +55,7 @@ export class Login implements OnInit, OnDestroy {
   socialProviders = signal<SocialProviderConfig[]>([]);
   // 29D.8: where to send the user after a successful login (set by authGuard).
   private returnUrl: string | null = null;
-  private slowLoginTimer: number | null = null;
+  private slowLoginTimers: number[] = [];
   private authTimeoutTimer: number | null = null;
   private loginRequest: Subscription | null = null;
   private loginAttemptId = 0;
@@ -72,10 +78,8 @@ export class Login implements OnInit, OnDestroy {
   }
 
   private clearLoginTimers(): void {
-    if (this.slowLoginTimer !== null) {
-      window.clearTimeout(this.slowLoginTimer);
-      this.slowLoginTimer = null;
-    }
+    this.slowLoginTimers.forEach(timer => window.clearTimeout(timer));
+    this.slowLoginTimers = [];
 
     if (this.authTimeoutTimer !== null) {
       window.clearTimeout(this.authTimeoutTimer);
@@ -95,11 +99,11 @@ export class Login implements OnInit, OnDestroy {
     this.loading.set(true);
     this.errorMessage.set('');
 
-    this.slowLoginTimer = window.setTimeout(() => {
+    this.slowLoginTimers = SLOW_LOGIN_STEPS.map(step => window.setTimeout(() => {
       if (this.loginAttemptId === attemptId) {
-        this.loginStatus.set(LOGIN_STATUS_WAKING);
+        this.loginStatus.set(step.text);
       }
-    }, SLOW_LOGIN_AFTER_MS);
+    }, step.afterMs));
 
     this.authTimeoutTimer = window.setTimeout(() => {
       if (this.loginAttemptId !== attemptId) {

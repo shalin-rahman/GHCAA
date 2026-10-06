@@ -1,8 +1,8 @@
 <div class="directory-page" [class.compact]="isCompact">
-    <div class="header">
-        <h2 *ngIf="!isCompact">Alumni Directory</h2>
-        <p *ngIf="!isCompact">Find and connect with fellow {{ orgConfig.config()?.branding?.memberNickname }}s</p>
-    </div>
+    @if (!isCompact) {
+    <app-page-header title="Alumni Directory"
+        [emptySubtitle]="'Find and connect with fellow ' + orgConfig.config()?.branding?.memberNickname + 's'"></app-page-header>
+    }
 
     <!-- Search & Filters -->
     <div class="glass-card filters">
@@ -84,7 +84,7 @@
         @if (loading()) {
         <app-loading-panel label="Searching directory..." [size]="64"></app-loading-panel>
         } @else if (!isCompact && viewMode() === 'table') {
-        <div class="glass-card table-wrap">
+        <div class="table-wrap">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -121,8 +121,12 @@
                         </td>
                     </tr>
                     } @empty {
-                    <tr class="empty-row">
-                        <td colspan="6" class="text-center py-20 italic opacity-50">No members found matching your search. Try different filters.</td>
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state compact">
+                                <p>No members found matching your search. Try different filters.</p>
+                            </div>
+                        </td>
                     </tr>
                     }
                 </tbody>
@@ -167,10 +171,10 @@
                         <div class="membership-meta">
                             <span class="m-no">{{ m.membershipNumber || 'REG-PENDING' }}</span>
                             @if (m.rank) {
-                                <span class="badge badge-rank !bg-amber-500/20 !text-amber-500 !border-amber-500/30">#{{ m.rank }}</span>
+                                <span class="status-badge warning">#{{ m.rank }}</span>
                             }
                             @if (m.categoryBadge) {
-                                <span class="badge badge-category !bg-blue-500/20 !text-blue-500 !border-blue-500/30">{{ m.categoryBadge }}</span>
+                                <span class="status-badge info">{{ m.categoryBadge }}</span>
                             }
                             @if (m.membershipType) {
                                 <span class="m-type-label">{{ m.membershipType }}</span>
@@ -207,7 +211,7 @@
                 </div>
             </div>
             } @empty {
-            <div class="empty-state glass-card full-width">
+            <div class="empty-state full-width">
                 <span class="icon">🔍</span>
                 <p>No members found matching your search. Try different filters.</p>
             </div>
@@ -241,24 +245,24 @@
 <!-- Profile Detail Modal -->
 @if (selectedMember() && !disableProfile) {
 <div class="modal-overlay" (click)="selectedMember.set(null)">
-    <div class="modal-content glass-card reveal-top" (click)="$event.stopPropagation()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <div class="header-info">
                 <h3>Member Profile</h3>
                 <div class="membership-meta ml-4">
                     <span class="m-no">{{ selectedMember()?.membershipNumber || 'REG-PENDING' }}</span>
                     @if (selectedMember()?.rank) {
-                        <span class="badge badge-rank !bg-amber-500/20 !text-amber-500 ml-2">#{{ selectedMember()?.rank }}</span>
+                        <span class="status-badge warning ml-2">#{{ selectedMember()?.rank }}</span>
                     }
                     @if (selectedMember()?.categoryBadge) {
-                        <span class="badge badge-category !bg-blue-500/20 !text-blue-500 ml-2">{{ selectedMember()?.categoryBadge }}</span>
+                        <span class="status-badge info ml-2">{{ selectedMember()?.categoryBadge }}</span>
                     }
                     @if (selectedMember()?.membershipType) {
                         <span class="m-type-label ml-2">{{ selectedMember()?.membershipType }}</span>
                     }
                 </div>
             </div>
-            <button class="close-btn" (click)="selectedMember.set(null)">×</button>
+            <button type="button" class="close-btn" aria-label="Close" (click)="selectedMember.set(null)">&times;</button>
         </div>
 
         <div class="modal-body profile-viewer">
@@ -384,7 +388,7 @@
                         }
                     </div>
                     } @else {
-                    <p class="empty-history">No executive committee records found.</p>
+                    <div class="empty-state compact"><p>No executive committee records found.</p></div>
                     }
                 </div>
             </div>

@@ -1,10 +1,7 @@
 <div class="news-page">
-    <div class="header">
-        <div class="header-text">
-            <h2>News &amp; Notices</h2>
-            <p>Announcements, updates, and stories from the alumni community</p>
-        </div>
+    <app-page-header title="News &amp; Notices" emptySubtitle="Announcements, updates, and stories from the alumni community"></app-page-header>
 
+    <div class="news-controls">
         <div class="tabs tab-nav">
             @for (tab of postTypeTabs; track tab.value) {
             <button type="button" [class.active]="postTypeFilter() === tab.value" (click)="setFilter(tab.value)">
@@ -21,7 +18,7 @@
     @if (loading()) {
     <app-loading-panel label="Loading news..." [size]="64"></app-loading-panel>
     } @else if (filteredNews().length === 0) {
-    <div class="empty-state glass-card">
+    <div class="empty-state">
         <p>
             @if (postTypeFilter() === 'Notice') { No notices published at the moment. }
             @else if (postTypeFilter() === 'News') { No news stories available at the moment. }
@@ -29,7 +26,7 @@
         </p>
     </div>
     } @else if (viewMode() === 'table') {
-    <div class="glass-card table-wrap">
+    <div class="table-wrap">
         <table class="data-table">
             <thead>
                 <tr>

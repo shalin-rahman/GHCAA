@@ -4,12 +4,13 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ForumService } from '../../core/services/forum.service';
 import { ForumCategory, ForumTopic, CreateForumTopicDto } from '../../core/models/business.models';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 
 @Component({
     selector: 'app-forum',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, LogoSpinnerComponent],
+    imports: [CommonModule, RouterModule, FormsModule, LoadingPanelComponent, PageHeaderComponent],
     templateUrl: './forum.html',
     styleUrls: ['./forum.scss']
 })

@@ -1,18 +1,15 @@
-<div class="member-polls-page animate-fade-in">
-    <div class="page-header">
-        <h1>Member Voices</h1>
-        <p>Participate in shaping the future of our association</p>
-    </div>
+<div class="admin-feature">
+    <app-page-header title="Member Voices" emptySubtitle="Participate in shaping the future of our association"></app-page-header>
 
     <div class="polls-container" *ngIf="!loading(); else loader">
-        <div class="no-polls" *ngIf="polls().length === 0">
+        <div class="empty-state" *ngIf="polls().length === 0">
             <app-icon name="poll" [size]="32"></app-icon>
             <h3>No Active Polls</h3>
             <p>Check back later for new opportunities to contribute.</p>
         </div>
 
         <div class="glass-card poll-vote-card" *ngFor="let poll of polls()" [class.voted]="poll.hasVoted">
-            <div class="poll-badge" *ngIf="poll.hasVoted">
+            <div class="status-badge success poll-badge" *ngIf="poll.hasVoted">
                 <app-icon name="check-circle" [size]="14"></app-icon> Voted
             </div>
 
@@ -62,9 +59,6 @@
     </div>
 
     <ng-template #loader>
-        <div class="loader-container">
-            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-            <p>Loading active polls...</p>
-        </div>
+        <app-loading-panel label="Loading active polls..." [size]="64"></app-loading-panel>
     </ng-template>
 </div>

@@ -7,13 +7,14 @@ import { ConstitutionService, Constitution } from '../../core/services/constitut
 import { getECPositionName, getECPositionForPeriod } from '../../core/constants/app.constants';
 import { formatPeriodRange } from '../../core/utils/date.util';
 import { LoadingPanelComponent } from '../loading-panel/loading-panel';
+import { PageHeaderComponent } from '../page-header/page-header.component';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
 @Component({
     // ... (rest of metadata)
     selector: 'app-governance',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, LoadingPanelComponent, ImgFallbackDirective],
+    imports: [CommonModule, FormsModule, RouterLink, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective],
     templateUrl: './governance.html',
     styleUrl: './governance.scss'
 })

@@ -4,7 +4,7 @@
     emptySubtitle="Configure how members pay dues and fees">
     <small subtitle>Showing {{ configs().length }} active payment gateway configurations</small>
     <div actions class="flex gap-4">
-        <button (click)="openCreateForm()" class="btn btn-accent shadow-gold header-cta">
+        <button (click)="openCreateForm()" class="btn btn-accent shadow-gold">
             <span class="icon">✨</span> Add Payment Method
         </button>
         <button *ngIf="configs().length === 0" (click)="seedDefaults()" class="btn btn-secondary">
@@ -15,7 +15,7 @@
 
   <app-loading-panel *ngIf="loading()" label="Synchronizing financial logic networks..." [size]="64"></app-loading-panel>
 
-  <div class="table-wrap reveal-bottom" *ngIf="!loading()">
+  <div class="glass-card table-wrap reveal-bottom" *ngIf="!loading()">
       <table class="data-table">
           <thead>
               <tr>
@@ -33,7 +33,7 @@
                       <div class="flex items-center gap-3">
                           <img *ngIf="isImageIcon(config.icon)" [src]="getIconPath(config.icon)" alt="Logo" class="w-10 h-10 object-contain rounded" appImgFallback>
                           <span *ngIf="!isImageIcon(config.icon)" class="text-2xl">{{ config.icon || '💸' }}</span>
-                          <span class="badge badge-secondary">{{ config.method }}</span>
+                          <span class="badge-info">{{ config.method }}</span>
                       </div>
                   </td>
                   <td>
@@ -46,7 +46,7 @@
                       <span class="text-xs uppercase font-bold text-accent tracking-widest">{{ config.gateway !== 'None' ? config.gateway : 'Manual' }}</span>
                   </td>
                   <td>
-                      <span class="status-badge" [class.bg-green-500]="config.isEnabled" [class.text-black]="config.isEnabled" [class.bg-red-500]="!config.isEnabled">
+                      <span class="status-badge" [class.active]="config.isEnabled" [class.danger]="!config.isEnabled">
                           {{ config.isEnabled ? 'Active' : 'Offline' }}
                       </span>
                   </td>
@@ -59,7 +59,7 @@
               </tr>
               } @empty {
               <tr>
-                  <td colspan="5" class="empty-state py-20">
+                  <td colspan="5" class="empty-state">
                       <span>⚠️</span>
                       <h3>No Payment Methods</h3>
                       <p>No payment methods exist in the system core.</p>
@@ -71,7 +71,7 @@
       </table>
   </div>
   } @else {
-      <div class="max-w-4xl mx-auto reveal-top">
+      <div class="reveal-top">
           <div class="page-header flex items-center gap-6 mb-8">
               <button (click)="showForm.set(false)" class="btn btn-secondary btn-sm p-3 h-12 w-12 rounded-full !min-w-0">
                   <span>←</span>

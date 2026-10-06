@@ -1,31 +1,35 @@
-<div class="giving-page">
-  <h1>My Giving</h1>
+<div class="admin-feature">
+  <app-page-header title="My Giving" emptySubtitle="Your campaign pledges and confirmed gifts"></app-page-header>
 
   @if (loading()) {
     <app-loading-panel label="Loading your giving history..." [size]="80"></app-loading-panel>
   } @else if (pledges().length === 0) {
-    <p class="empty-msg">You haven't made a pledge yet. <a routerLink="/campaigns">Browse open campaigns</a>.</p>
+    <div class="empty-state">
+      <p>You haven't made a pledge yet. <a routerLink="/campaigns">Browse open campaigns</a>.</p>
+    </div>
   } @else {
     <p class="total-line">Total confirmed giving: <strong>{{ totalGiven() | appCurrency }}</strong></p>
-    <table class="giving-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Pledged</th>
-          <th>Received</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (p of pledges(); track p.id) {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
           <tr>
-            <td>{{ p.pledgedAt | date: 'mediumDate' }}</td>
-            <td>{{ p.amount | appCurrency }}</td>
-            <td>{{ p.amountReceived | appCurrency }}</td>
-            <td><span class="status-badge" [class]="getPledgeStatusClass(p.status)">{{ getPledgeStatusLabel(p.status) }}</span></td>
+            <th>Date</th>
+            <th>Pledged</th>
+            <th>Received</th>
+            <th>Status</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (p of pledges(); track p.id) {
+            <tr>
+              <td>{{ p.pledgedAt | date: 'mediumDate' }}</td>
+              <td>{{ p.amount | appCurrency }}</td>
+              <td>{{ p.amountReceived | appCurrency }}</td>
+              <td><span class="status-badge" [class]="getPledgeStatusClass(p.status)">{{ getPledgeStatusLabel(p.status) }}</span></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </div>

@@ -7,11 +7,12 @@ import { ProfileService } from '../../core/services/profile.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ROUTES } from '../../core/constants/app.constants';
 import { Icon } from '../../common/icon/icon';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [CommonModule, FormsModule, Icon],
+  imports: [CommonModule, FormsModule, Icon, PageHeaderComponent],
   templateUrl: './change-password.html',
   styleUrl: './change-password.scss'
 })

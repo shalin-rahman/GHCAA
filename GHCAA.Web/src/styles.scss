@@ -54,6 +54,10 @@
   --danger-color-rgb: 214, 48, 49;
   --success-color: #27ae60;
   --success-color-rgb: 39, 174, 96;
+  --warning-color: #d97706;
+  --warning-color-rgb: 217, 119, 6;
+  --info-color: #2563eb;
+  --info-color-rgb: 37, 99, 235;
 
   --text-main: #1a1a1a;
   /* Darkened from #6c757d, which measured 4.17-4.48:1 against the light surfaces it is
@@ -136,6 +140,10 @@ body.dark-theme {
   --surface-color: #0c0c0c;
   --primary-color: #1a1a1a;
   --primary-rgb: 26, 26, 26;
+  --warning-color: #f59e0b;
+  --warning-color-rgb: 245, 158, 11;
+  --info-color: #60a5fa;
+  --info-color-rgb: 96, 165, 250;
 
   --text-main: #f5f5f5;
   --text-muted: #888888;
@@ -483,9 +491,9 @@ p {
 }
 
 /* Dashboard & Portal Specific Utilities */
-/* Status badge — SINGLE SOURCE OF TRUTH (layout + state colours). A second
-   `.status-badge` block used to live near the bottom of this file holding only the
-   state modifiers; both are merged here. Do NOT re-add a block elsewhere. */
+/* The one status badge. Pages add a tone (success, warning, info, danger, neutral, gold) or a
+   status name that maps to one, so the same status looks the same everywhere. Don't redefine
+   .status-badge in a component; add the missing status name here instead. */
 .status-badge {
   padding: 0.3rem 0.75rem;
   font-size: 0.65rem;
@@ -494,31 +502,97 @@ p {
   letter-spacing: 1px;
   border-radius: 20px;
   display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  background: rgba(107, 114, 128, 0.12);
+  color: var(--text-muted);
 
-  &.pending {
-    background: rgba(245, 158, 11, 0.12);
-    color: #d97706;
+  &.success,
+  &.active,
+  &.approved,
+  &.published,
+  &.paid,
+  &.accepted,
+  &.completed,
+  &.done,
+  &.ok,
+  &.open,
+  &.verified {
+    background: rgba(var(--success-color-rgb), 0.12);
+    color: var(--success-color);
   }
 
-  &.active {
-    background: rgba(16, 185, 129, 0.12);
-    color: #059669;
+  &.warning,
+  &.pending,
+  &.requested,
+  &.review,
+  &.urgent {
+    background: rgba(var(--warning-color-rgb), 0.12);
+    color: var(--warning-color);
   }
 
-  &.inactive {
-    background: rgba(107, 114, 128, 0.12);
-    color: #4b5563;
+  &.info,
+  &.scheduled,
+  &.upcoming,
+  &.refunded,
+  &.current {
+    background: rgba(var(--info-color-rgb), 0.12);
+    color: var(--info-color);
   }
 
+  &.danger,
+  &.failed,
+  &.error,
+  &.rejected,
+  &.expired,
+  &.cancelled,
   &.resigned,
   &.terminated {
-    background: rgba(239, 68, 68, 0.12);
-    color: #dc2626;
+    background: rgba(var(--danger-color-rgb), 0.12);
+    color: var(--danger-color);
+  }
+
+  &.neutral,
+  &.inactive,
+  &.draft,
+  &.closed,
+  &.archived,
+  &.muted {
+    background: rgba(107, 114, 128, 0.12);
+    color: var(--text-muted);
+  }
+
+  &.gold,
+  &.featured {
+    background: rgba(var(--accent-rgb), 0.15);
+    color: var(--accent-text);
   }
 }
 
 .shadow-gold {
   box-shadow: var(--shadow-gold);
+}
+
+/* An inline message box above a form or list. Use .alert-error or .alert-success with it. */
+.alert {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: 0.9rem;
+
+  &.alert-error {
+    color: var(--danger-color);
+    background: rgba(var(--danger-color-rgb), 0.08);
+    border-color: rgba(var(--danger-color-rgb), 0.3);
+  }
+
+  &.alert-success {
+    color: var(--success-color);
+    background: rgba(var(--success-color-rgb), 0.08);
+    border-color: rgba(var(--success-color-rgb), 0.3);
+  }
 }
 
 /* Global Icon Standardization - Standard Emoji Colors */
@@ -954,6 +1028,18 @@ select.border-red-500 {
 
 .flex-row {
   flex-direction: row;
+}
+
+/* Vertical stack spaced by a .gap-* class. The election screens used .stack before it was
+   defined, so their cards and form fields sat flush. A filter bar inside one drops its own
+   bottom margin so the gap stays even. */
+.stack {
+  display: flex;
+  flex-direction: column;
+
+  > .filter-bar {
+    margin-bottom: 0;
+  }
 }
 
 .justify-between {
@@ -1563,7 +1649,6 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
   display: flex;
   flex-direction: column;
   animation: fadeIn 0.4s ease-out;
-  padding-bottom: 5rem;
 }
 
 .page-header {
@@ -2433,11 +2518,6 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
     td {
       padding: 0.5rem 0.6rem;
     }
-  }
-
-  /* Admin feature padding */
-  .admin-feature {
-    padding-bottom: 2rem;
   }
 
   /* Buttons smaller on mobile */

@@ -21,11 +21,11 @@ namespace GHCAA.API.Middleware
         // TODO 37.13k. The page may only send data to its own origin and the origins CORS already
         // allows. Before this it was any https host. Entries that are not bare http(s) origins are
         // skipped, so a bad config value cannot add a directive to the header.
+        // That includes any with user info, which may hold a ';' and end the directive early.
         internal static string ConnectSrc(string[]? allowedOrigins)
         {
             var origins = (allowedOrigins ?? Array.Empty<string>())
                 .Select(o => Uri.TryCreate(o?.Trim(), UriKind.Absolute, out var uri) ? uri : null)
-                // User info may hold a ';', which would end the directive early.
                 .Where(uri => uri is not null && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp)
                     && uri.UserInfo.Length == 0 && uri.Query.Length == 0 && uri.AbsolutePath == "/")
                 .Select(uri => uri!.GetLeftPart(UriPartial.Authority))

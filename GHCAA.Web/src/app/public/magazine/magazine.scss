@@ -47,7 +47,7 @@
 
 .magazine-card {
     background: var(--surface-color);
-    border-radius: 20px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
     border: 1px solid var(--glass-border);
     cursor: pointer;
@@ -56,7 +56,7 @@
     &:hover {
         transform: translateY(-10px);
         border-color: var(--text-main);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        box-shadow: var(--shadow-lg);
 
         .card-image img {
             transform: scale(1.05);

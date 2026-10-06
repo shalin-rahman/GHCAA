@@ -14,6 +14,7 @@ import {
     getPaymentStatusLabel
 } from '../../core/constants/app.constants';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
@@ -21,7 +22,7 @@ import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 @Component({
     selector: 'app-payments',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, PaymentPortalComponent, LoadingPanelComponent, ModalHeaderComponent, AppCurrencyPipe],
+    imports: [CommonModule, AppDatePipe, FormsModule, PaymentPortalComponent, LoadingPanelComponent, ModalHeaderComponent, AppCurrencyPipe, PageHeaderComponent],
     templateUrl: './payments.html',
     styleUrl: './payments.scss'
 })

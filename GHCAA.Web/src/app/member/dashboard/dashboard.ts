@@ -12,13 +12,15 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { Icon } from '../../common/icon/icon';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { getMembershipTypeLabel } from '../../core/constants/app.constants';
 import { ElectionAppointmentDto } from '../../core/models/election.models';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, RouterLink, DatePipe, Icon, ImgFallbackDirective],
+  imports: [CommonModule, AppDatePipe, RouterLink, DatePipe, Icon, ImgFallbackDirective, LoadingPanelComponent, PageHeaderComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
@@ -102,13 +104,6 @@ export class Dashboard implements OnInit {
   // 35.2: same defect as 35.1 — the local map labelled index 6 'Life' when the domain enum's
   // member 6 is Guest. Delegates to the shared helper; the label already includes " Member".
   getMembershipType = getMembershipTypeLabel;
-
-  getStatusColor(status: any): string {
-    const colors: Record<number, string> = {
-      0: '#f59e0b', 1: '#10b981', 2: '#6b7280', 3: '#ef4444', 4: '#ef4444'
-    };
-    return colors[status as number] || 'var(--accent-color)';
-  }
 
   getStatusLabel(status: any): string {
     const labels: Record<number, string> = {

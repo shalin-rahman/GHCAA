@@ -7,12 +7,13 @@ import { NewsPost, PostType } from '../../core/models/business.models';
 import { getArticleCategoryLabel, POST_TYPE_TABS, matchesPostType } from '../../core/constants/app.constants';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { LoadingPanelComponent } from '../loading-panel/loading-panel';
+import { PageHeaderComponent } from '../page-header/page-header.component';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-news',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, ImgFallbackDirective, LoadingPanelComponent],
+  imports: [CommonModule, AppDatePipe, ImgFallbackDirective, LoadingPanelComponent, PageHeaderComponent],
   templateUrl: './news.html',
   styleUrl: './news.scss'
 })

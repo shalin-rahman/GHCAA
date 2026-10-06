@@ -62,23 +62,3 @@ textarea {
 
   input { flex: 1; }
 }
-
-.alert {
-  padding: 0.85rem 1rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.85rem;
-  font-weight: 700;
-  border: 1px solid transparent;
-
-  &.alert-success {
-    color: var(--success-color);
-    background: rgba(16, 185, 129, 0.08);
-    border-color: rgba(16, 185, 129, 0.3);
-  }
-
-  &.alert-error {
-    color: var(--danger-color);
-    background: rgba(239, 68, 68, 0.08);
-    border-color: rgba(239, 68, 68, 0.3);
-  }
-}

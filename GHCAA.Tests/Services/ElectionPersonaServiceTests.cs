@@ -178,8 +178,14 @@ public sealed class ElectionPersonaServiceTests : TestBase
         var now = DateTime.UtcNow;
         var legacy = new ElectionPersona
         {
-            Name = "Old Persona", GroupName = "Volunteers", Description = "d", DeclarationText = "x",
-            Permissions = ElectionPermission.ViewDashboard, IsActive = true, CreatedAt = now, UpdatedAt = now
+            Name = "Old Persona",
+            GroupName = "Volunteers",
+            Description = "d",
+            DeclarationText = "x",
+            Permissions = ElectionPermission.ViewDashboard,
+            IsActive = true,
+            CreatedAt = now,
+            UpdatedAt = now
         };
         _context.ElectionPersonas.Add(legacy);
         await _context.SaveChangesAsync();

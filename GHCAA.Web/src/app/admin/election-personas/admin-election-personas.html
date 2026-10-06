@@ -13,7 +13,7 @@
                 placeholder="Search by name or group…"></app-search-bar>
         </div>
 
-        <div class="persona-table-wrap">
+        <div class="table-wrap">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -29,24 +29,25 @@
                     @for (p of filtered(); track p.id) {
                     <tr>
                         <td class="font-bold">{{ p.name }}</td>
-                        <td><span class="role-badge">{{ p.groupName }}</span></td>
+                        <td><span class="badge">{{ p.groupName }}</span></td>
                         <td>{{ p.minCount }}{{ p.maxCount ? ' - ' + p.maxCount : '+' }}</td>
                         <td>{{ p.showOnPublicBoard ? 'Yes' : 'No' }}</td>
                         <td>
-                            <span class="status-badge" [class.active-badge]="p.isActive">{{ p.isActive ? 'Active' : 'Inactive' }}</span>
+                            <span class="status-badge" [class.active]="p.isActive" [class.inactive]="!p.isActive">{{ p.isActive ? 'Active' : 'Inactive' }}</span>
                         </td>
                         <td>
+                            <div class="actions-cell">
                             <button class="icon-btn" (click)="openEdit(p)" title="Edit">✏️</button>
                             <button class="icon-btn" (click)="toggleActive(p)" title="{{ p.isActive ? 'Deactivate' : 'Activate' }}">{{ p.isActive ? '⏸️' : '▶️' }}</button>
                             <button class="icon-btn delete" (click)="remove(p)" title="Delete">🗑️</button>
+                            </div>
                         </td>
                     </tr>
                     } @empty {
                     <tr>
                         <td colspan="6">
-                            <div class="empty-state py-12">
-                                <span class="text-3xl mb-2 block">🗳️</span>
-                                <p class="text-muted italic">{{ search() ? 'No personas match your search.' : 'No election personas yet.' }}</p>
+                            <div class="empty-state">
+                                <p>{{ search() ? 'No personas match your search.' : 'No election personas yet.' }}</p>
                             </div>
                         </td>
                     </tr>

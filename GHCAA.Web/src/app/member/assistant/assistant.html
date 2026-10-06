@@ -1,11 +1,7 @@
-<div class="assistant-page">
-    <div class="header">
-        <div class="title-group">
-            <h2>Assistance</h2>
-            <p>Search alumni, ask about association rules, or get help with the portal</p>
-        </div>
-        <div class="ai-badge">Powered by {{ orgConfig.config()?.branding?.shortName }}-AI</div>
-    </div>
+<div class="admin-feature assistant-page">
+    <app-page-header title="Assistance" emptySubtitle="Search alumni, ask about association rules, or get help with the portal">
+        <span actions class="status-badge gold">Powered by {{ orgConfig.config()?.branding?.shortName }}-AI</span>
+    </app-page-header>
 
     <div class="glass-card chat-container">
         <div class="message-list" #scrollContainer [scrollTop]="scrollContainer.scrollHeight">

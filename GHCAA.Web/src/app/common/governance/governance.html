@@ -1,17 +1,13 @@
 <div class="governance-page">
-    <div class="header">
-        <h2>Governance</h2>
-        <p>Official leadership records of the association</p>
-
-        <!-- Period Selector -->
-        <div class="period-selector-wrap" *ngIf="periods().length > 1">
+    <app-page-header title="Governance" emptySubtitle="Official leadership records of the association">
+        <div actions class="period-selector-wrap" *ngIf="periods().length > 1">
             <select [ngModel]="selectedPeriodId()" (ngModelChange)="onPeriodChange($event)" class="period-select">
                 @for (p of periods(); track p.id) {
                 <option [value]="p.id">{{ periodLabel(p) }}</option>
                 }
             </select>
         </div>
-    </div>
+    </app-page-header>
 
     <!-- Committee List -->
     <div class="committee-section">
@@ -32,7 +28,7 @@
                     </div>
                     <div class="member-details">
                         <div class="flex flex-wrap items-center gap-2 mb-2">
-                            <span class="position-badge">{{ getPositionName(member) }}</span>
+                            <span class="badge-info">{{ getPositionName(member) }}</span>
                             @if (member.category && member.category !== 'None') {
                                 <span class="badge" [class]="member.category.toLowerCase()">{{ member.category }}</span>
                             }

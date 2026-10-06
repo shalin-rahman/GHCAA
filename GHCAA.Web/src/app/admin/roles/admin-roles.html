@@ -57,7 +57,7 @@
                     </div>
                 </form>
             </div>
-            <div class="form-actions mt-6 flex gap-4">
+            <div class="modal-footer">
                 <button type="button" (click)="showCreateForm.set(false)" class="btn btn-secondary">Cancel</button>
                 <button type="submit" (click)="createAdmin()" [disabled]="submitting() || createForm.invalid"
                     class="btn btn-accent shadow-gold">
@@ -125,8 +125,7 @@
                     <td class="p-4 px-6">
                         <div class="flex flex-wrap gap-2">
                             @for (role of user.roles; track role) {
-                            <span
-                                class="px-2 py-0.5 rounded bg-primary/20 border border-primary/30 text-[10px] font-black uppercase tracking-tighter flex items-center gap-2">
+                            <span class="status-badge info">
                                 {{ role | humanize }}
                                 <button (click)="removeRole(user.id, role)" class="icon-btn delete"
                                     title="Remove Role">✕</button>
@@ -169,8 +168,8 @@
                     </td>
                 </tr>
                 } @empty {
-                <tr class="empty-row">
-                    <td colspan="3" class="text-center py-20 italic opacity-50">{{ searchQuery() ? 'No users match your search.' : 'No administrative users found in the identity cache.' }}</td>
+                <tr>
+                    <td colspan="3" class="empty-state compact">{{ searchQuery() ? 'No users match your search.' : 'No administrative users found in the identity cache.' }}</td>
                 </tr>
                 }
             </tbody>

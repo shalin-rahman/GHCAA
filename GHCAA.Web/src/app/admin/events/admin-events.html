@@ -17,22 +17,14 @@
         </div>
     </app-page-header>
     } @else {
-    <div class="page-header flex items-center gap-6 mb-10">
-        <button (click)="showForm.set(false)" class="btn btn-secondary btn-sm p-3 h-12 w-12 rounded-full !min-w-0">
-            <span>←</span>
-        </button>
-        <div>
-            <h2 class="text-2xl font-black text-accent tracking-tighter">
-                {{ editingEventId() ? 'Edit Event' : 'Create Event' }}
-            </h2>
-            <p class="text-xs uppercase font-black tracking-widest text-muted">Event Information</p>
-        </div>
-    </div>
+    <app-page-header [title]="editingEventId() ? 'Edit Event' : 'Create Event'" emptySubtitle="Event information">
+        <button actions type="button" (click)="showForm.set(false)" class="btn btn-secondary btn-sm">← Back</button>
+    </app-page-header>
     }
 
     <!-- Event Form Section (Inline) -->
     @if (showForm()) {
-    <div class="glass-card p-10 reveal-top max-w-4xl mx-auto border-accent/20">
+    <div class="glass-card p-10 reveal-top">
         <div class="events-form">
             <form [formGroup]="eventForm" (ngSubmit)="submitEvent()">
                 <!-- Image Upload Section -->
@@ -278,8 +270,8 @@
                 </div>
             </div>
             } @empty {
-            <div class="py-20 text-center glass-card border-dashed">
-                <p class="text-muted italic opacity-50">{{ searchQuery() ? 'No events match your search.' : 'No events found. Start by launching your first project.' }}</p>
+            <div class="empty-state">
+                <p>{{ searchQuery() ? 'No events match your search.' : 'No events found. Start by launching your first project.' }}</p>
             </div>
             }
         </div>
@@ -315,7 +307,7 @@
         @if (loadingRegistrations()) {
         <app-loading-panel label="Loading participations..." [size]="64"></app-loading-panel>
         } @else {
-        <div class="glass-card table-container">
+        <div class="table-wrap">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -389,25 +381,23 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="actions-cell justify-end">
                                 @if (reg.status === 'Approved') {
                                 <button (click)="fetchInvitation(reg.id)"
-                                    class="p-2 rounded-lg bg-accent/10 text-accent hover:bg-accent hover:text-white transition-all"
-                                    title="View & Print Pass">📜
+                                    class="icon-btn" title="View & Print Pass">📜
                                 </button>
                                 <button (click)="sendEmail(reg.id)"
-                                    class="p-2 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all"
-                                    title="Email Invitation">📧
+                                    class="icon-btn" title="Email Invitation">📧
                                 </button>
                                 }
                                 @if (reg.status === 'Pending') {
                                 <button (click)="approveReg(reg.id, true)"
-                                    class="p-2 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all">✅
+                                    class="btn btn-accent btn-sm">✅
                                     Approve</button>
                                 }
                                 @if (reg.status === 'Pending') {
                                 <button (click)="approveReg(reg.id, false)"
-                                    class="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">❌
+                                    class="btn btn-danger btn-sm">❌
                                     Reject</button>
                                 }
                             </div>
@@ -416,9 +406,8 @@
                     } @empty {
                     <tr>
                         <td colspan="6">
-                            <div class="empty-state py-20">
-                                <span class="text-4xl mb-3 block">🎟️</span>
-                                <p class="text-muted italic opacity-50">{{ searchQuery() ? 'No participation records match your search criteria.' : 'All clear. No pending participations or registration records found.' }}</p>
+                            <div class="empty-state">
+                                <p>{{ searchQuery() ? 'No participation records match your search criteria.' : 'All clear. No pending participations or registration records found.' }}</p>
                             </div>
                         </td>
                     </tr>
@@ -575,21 +564,17 @@
         </div>
     </div>
     <!-- Receipt Preview Modal -->
-    <div *ngIf="showReceiptModal() && activeReceiptUrl()" class="modal-overlay z-[2000] backdrop-blur-md"
-        (click)="closeReceipt()">
-        <div class="modal-box max-w-2xl bg-black/80 p-4 border border-white/10" (click)="$event.stopPropagation()">
-            <div class="flex justify-between items-center mb-4 px-2">
-                <span class="text-[10px] uppercase font-black tracking-widest text-accent">Financial Evidence
-                    Review</span>
-                <button (click)="closeReceipt()" class="text-white hover:text-accent font-bold">✕ Close Preview</button>
-            </div>
-            <div class="receipt-preview-container rounded-xl overflow-hidden shadow-2xl bg-white/5">
+    <div *ngIf="showReceiptModal() && activeReceiptUrl()" class="modal-overlay" (click)="closeReceipt()">
+        <div class="modal-box" (click)="$event.stopPropagation()">
+            <app-modal-header title="Financial Evidence Review" (closed)="closeReceipt()"></app-modal-header>
+            <div class="modal-body">
                 <img [src]="activeReceiptUrl()" alt="Receipt Evidence"
-                    class="w-full h-auto max-h-[80vh] object-contain" appImgFallback>
+                    class="receipt-image" appImgFallback>
             </div>
-            <div class="mt-4 flex justify-center">
+            <div class="modal-footer">
                 <a [href]="activeReceiptUrl()" target="_blank" class="btn btn-secondary btn-sm">Open in Full Resolution
                     ↗</a>
+                <button class="btn btn-outline btn-sm" (click)="closeReceipt()">Close</button>
             </div>
         </div>
     </div>

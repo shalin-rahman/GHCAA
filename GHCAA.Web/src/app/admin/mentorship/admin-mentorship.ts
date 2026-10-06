@@ -11,8 +11,7 @@ import { getMentorshipStatusLabel, getMentorshipStatusClass } from '../../core/c
     selector: 'app-admin-mentorship',
     standalone: true,
     imports: [CommonModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent],
-    templateUrl: './admin-mentorship.html',
-    styleUrl: './admin-mentorship.scss'
+    templateUrl: './admin-mentorship.html'
 })
 export class AdminMentorship implements OnInit {
     private mentorshipService = inject(MentorshipService);

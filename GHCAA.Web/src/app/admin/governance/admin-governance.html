@@ -23,7 +23,7 @@
                     </div>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
                         @if (p.isActive) {
-                        <span class="status-badge active-badge">Active</span>
+                        <span class="status-badge active">Active</span>
                         }
                         <button class="icon-btn" (click)="$event.stopPropagation(); editPeriod(p)" title="Edit Period">✏️</button>
                     </div>
@@ -65,7 +65,7 @@
                 </div>
             </div>
 
-            <div class="committee-table-wrap">
+            <div class="table-wrap">
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -124,7 +124,7 @@
             </div>
 
             @if (vacantSeats().length) {
-            <div class="committee-table-wrap vacant-seats">
+            <div class="table-wrap vacant-seats">
                 <h4>Vacant seats</h4>
                 <table class="data-table">
                     <thead>
@@ -216,12 +216,12 @@
             <!-- Search field for member -->
             <div class="form-group search-group">
                 <label>Search Member <span class="required-star">*</span></label>
-                <div class="search-box">
-                    <input type="text" 
-                           class="form-control" 
-                           placeholder="Search by name or member ID..." 
-                           [ngModel]="searchQuery()"
-                           (ngModelChange)="searchQuery.set($event); searchMembers($event)">
+                <div class="flex items-center gap-2">
+                    <app-search-bar
+                        [value]="searchQuery()"
+                        (valueChange)="searchQuery.set($event); searchMembers($event)"
+                        placeholder="Search by name or member ID..."
+                        ariaLabel="Search member"></app-search-bar>
                     @if (isSearching()) {
                         <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
                     }

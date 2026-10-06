@@ -8,13 +8,14 @@ import { ForumService } from '../../core/services/forum.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { ForumTopic, ForumPost, CreateForumPostDto } from '../../core/models/business.models';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 
 @Component({
     selector: 'app-topic-detail',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, LogoSpinnerComponent, ImgFallbackDirective],
+    imports: [CommonModule, RouterModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective],
     templateUrl: './topic-detail.html',
     styleUrls: ['./topic-detail.scss']
 })

@@ -1,4 +1,4 @@
-<div class="messaging-layout">
+<div class="admin-feature messaging-layout">
     <!-- Sidebar: Recent Chats -->
     <aside class="chat-sidebar glass-card">
         <div class="sidebar-header">
@@ -8,10 +8,8 @@
                     <span class="icon">✉️</span> New Message
                 </button>
             </div>
-            <div class="search-box">
-                <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
-                    placeholder="Search people...">
-            </div>
+            <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+                placeholder="Search people..."></app-search-bar>
         </div>
         <div class="conversation-list">
             @for (c of filteredRecentChats(); track c.userId) {
@@ -35,7 +33,7 @@
                 </div>
             </div>
             } @empty {
-            <div class="empty-list">
+            <div class="empty-state compact">
                 <p>No recent conversations.</p>
             </div>
             }
@@ -65,7 +63,7 @@
                 </div>
             </div>
             } @empty {
-            <div class="chat-start">
+            <div class="empty-state compact">
                 <p>No messages yet. Say hello!</p>
             </div>
             }
@@ -73,16 +71,16 @@
 
         <div class="chat-input-area">
             <div class="input-container">
-                <button class="icon-btn attachment">📎</button>
+                <button class="icon-btn">📎</button>
                 <input type="text" [(ngModel)]="newMessage" (keyup.enter)="send()" placeholder="Type a message...">
-                <button class="send-btn" (click)="send()" [disabled]="!newMessage.trim()">
+                <button class="btn btn-accent btn-sm" (click)="send()" [disabled]="!newMessage.trim()">
                     <span class="icon">✈️</span>
                 </button>
             </div>
         </div>
         } @else {
-        <div class="no-selection">
-            <div class="illu">💬</div>
+        <div class="empty-state">
+            <span>💬</span>
             <h3>Select a conversation</h3>
             <p>Pick a colleague from the list, or use "New Message" to start chatting with someone for the first time.</p>
         </div>
@@ -98,16 +96,15 @@
         <div class="modal-body">
             <div class="form-group search-group">
                 <label>To <span class="required-star">*</span></label>
-                <div class="search-box">
-                    <input type="text" class="form-control" placeholder="Search by name or member ID..."
-                        [ngModel]="memberPickerQuery()"
-                        (ngModelChange)="searchMembersForNewMessage($event)">
+                <div class="picker-search">
+                    <app-search-bar [value]="memberPickerQuery()" (valueChange)="searchMembersForNewMessage($event)"
+                        placeholder="Search by name or member ID..."></app-search-bar>
                     @if (isSearchingMembers()) {
                     <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
                     }
                 </div>
                 @if (selectedNewMember()) {
-                <div class="mt-2 text-[10px] text-accent font-bold uppercase tracking-widest">
+                <div class="status-badge success">
                     ✅ Selected: {{ selectedNewMember()!.fullName }}
                 </div>
                 }

@@ -27,8 +27,7 @@
                 @for (c of configs(); track c.id) {
                 <tr class="animate-fade-in" [class.opacity-50]="!c.isActive">
                     <td>
-                        <span class="badge" [class.badge-primary]="c.category === 'RegistrationFee'"
-                            [class.badge-secondary]="c.category === 'MembershipFee'">
+                        <span class="badge" [class.badge-info]="c.category === 'RegistrationFee'">
                             {{ getCategoryLabel(c.category) }}
                         </span>
                     </td>
@@ -42,17 +41,20 @@
                             {{ c.isActive ? 'Active' : 'Inactive' }}
                         </span>
                     </td>
-                    <td class="actions-cell">
-                        <button class="icon-btn" (click)="openEditForm(c)" title="Edit">✏️</button>
-                        <button class="icon-btn delete" (click)="deleteConfig(c.id)" title="Delete Fee">🗑️</button>
+                    <td>
+                        <div class="actions-cell">
+                            <button class="icon-btn" (click)="openEditForm(c)" title="Edit">✏️</button>
+                            <button class="icon-btn delete" (click)="deleteConfig(c.id)" title="Delete Fee">🗑️</button>
+                        </div>
                     </td>
                 </tr>
                 } @empty {
                 <tr>
-                    <td colspan="7" class="empty-state py-20">
-                        <span>🧾</span>
-                        <h3>No fee schedules</h3>
-                        <p>No fee schedules have been established yet.</p>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <h3>No fee schedules</h3>
+                            <p>No fee schedules have been established yet.</p>
+                        </div>
                     </td>
                 </tr>
                 }
@@ -60,17 +62,10 @@
         </table>
     </div>
     } @else {
-    <div class="max-w-4xl mx-auto reveal-top">
-        <div class="page-header flex items-center gap-6 mb-8">
-            <button (click)="showForm.set(false)" class="btn btn-secondary btn-sm p-3 h-12 w-12 rounded-full !min-w-0">
-                <span>←</span>
-            </button>
-            <div>
-                <h2 class="text-2xl font-black text-accent tracking-tighter">{{ editingId() ? 'Edit Fee'
-                    : 'Create Fee' }}</h2>
-                <p class="text-xs uppercase font-black tracking-widest text-muted">Fee Settings</p>
-            </div>
-        </div>
+    <div class="reveal-top">
+        <app-page-header [title]="editingId() ? 'Edit Fee' : 'Create Fee'" emptySubtitle="Fee settings">
+            <button actions type="button" (click)="showForm.set(false)" class="btn btn-secondary btn-sm">← Back</button>
+        </app-page-header>
 
         <form [formGroup]="form" (ngSubmit)="submitForm()" class="glass-card p-10 mt-6">
             <div class="form-grid mb-8">

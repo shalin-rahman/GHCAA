@@ -11,7 +11,7 @@
 .periods-sidebar {
     padding: 0;
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
 }
 
 .card-header {
@@ -39,7 +39,7 @@
 
     &::-webkit-scrollbar-thumb {
         background: var(--glass-border);
-        border-radius: 10px;
+        border-radius: var(--radius-sm);
     }
 }
 
@@ -84,16 +84,10 @@
     color: var(--text-muted);
 }
 
-.active-badge {
-    background: color-mix(in srgb, var(--success-color) 15%, transparent);
-    color: var(--success-color);
-    font-size: 0.65rem;
-}
-
 .committee-main {
     min-height: 550px;
     padding: 1.5rem;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
 }
 
 .committee-header {
@@ -129,29 +123,6 @@
     strong {
         color: var(--text-main);
         font-weight: 700;
-    }
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-
-    th {
-        text-align: left;
-        padding: 0.9rem 1.25rem;
-        font-size: 0.72rem;
-        font-weight: 900;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--text-muted);
-        border-bottom: 1px solid var(--glass-border);
-        background: var(--surface-color);
-    }
-
-    td {
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid var(--glass-border);
-        font-size: 0.9rem;
     }
 }
 
@@ -212,7 +183,7 @@
     padding: 0.25rem 0.65rem;
     background: rgba(var(--accent-color-rgb), 0.12);
     color: var(--accent-text);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     font-size: 0.75rem;
     font-weight: 900;
     text-transform: uppercase;
@@ -240,17 +211,6 @@
 }
 
 /* .icon-btn.delete moved to central styles.scss (30.2) — do NOT re-add a block here. */
-
-.search-box {
-    position: relative;
-    .loading-icon {
-        position: absolute;
-        right: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 1rem;
-    }
-}
 
 .autocomplete-list {
     list-style: none;

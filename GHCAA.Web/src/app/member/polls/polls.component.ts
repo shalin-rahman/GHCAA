@@ -4,13 +4,14 @@ import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { PollService, PollDto } from '../../core/services/poll.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { Icon } from '../../common/icon/icon';
 
 @Component({
   selector: 'app-member-polls',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, LogoSpinnerComponent, Icon],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, Icon],
   templateUrl: './polls.html',
   styleUrl: './polls.scss'
 })

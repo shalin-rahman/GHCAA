@@ -13,12 +13,14 @@ import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { toWireDate } from '../../core/utils/date.util';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { Icon } from '../../common/icon/icon';
+import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent, ImgFallbackDirective, Icon],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, ImgFallbackDirective, Icon, LoadingPanelComponent, PageHeaderComponent],
     providers: [DatePipe],
     templateUrl: './profile.html',
     styleUrl: './profile.scss'

@@ -5,6 +5,7 @@ import { MemberProfile } from '../../core/models/business.models';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { getMembershipTypeLabel } from '../../core/constants/app.constants';
 import { OrgConfigService } from '../../core/services/org-config.service';
@@ -12,7 +13,7 @@ import { OrgConfigService } from '../../core/services/org-config.service';
 @Component({
   selector: 'app-digital-id',
   standalone: true,
-  imports: [CommonModule, LoadingPanelComponent, ImgFallbackDirective],
+  imports: [CommonModule, LoadingPanelComponent, ImgFallbackDirective, PageHeaderComponent],
   templateUrl: './digital-id.html',
   styleUrl: './digital-id.scss'
 })

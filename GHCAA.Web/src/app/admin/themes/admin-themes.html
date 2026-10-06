@@ -28,7 +28,7 @@
             </thead>
             <tbody>
                 @for (theme of themes(); track theme.id) {
-                <tr class="theme-row">
+                <tr>
                     <td>
                         <div class="theme-info">
                             <strong>{{ theme.title }}</strong>
@@ -55,7 +55,7 @@
                         </div>
                     </td>
                     <td>
-                        <span class="status-pill"
+                        <span class="status-badge"
                             [class.active]="themeStatus(theme) === 'LIVE'"
                             [class.scheduled]="themeStatus(theme) === 'SCHEDULED'"
                             [class.expired]="themeStatus(theme) === 'EXPIRED'">
@@ -64,10 +64,10 @@
                     </td>
                     <td class="text-right">
                         <div class="action-group">
-                            <button class="action-btn edit" (click)="openEdit(theme)">
+                            <button class="btn btn-outline btn-sm" (click)="openEdit(theme)">
                                 <span>✏️</span> Edit
                             </button>
-                            <button class="action-btn delete" (click)="deleteTheme(theme.id)">
+                            <button class="icon-btn delete" title="Delete theme" aria-label="Delete theme" (click)="deleteTheme(theme.id)">
                                 <span>🗑️</span>
                             </button>
                         </div>

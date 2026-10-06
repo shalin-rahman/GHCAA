@@ -1,8 +1,7 @@
 <div class="admin-feature">
     <app-page-header title="Dashboard" [total]="1" emptySubtitle="Live system overview">
         <small subtitle>Live system overview — {{ now | appDate }}</small>
-        <span actions class="pulse-line">Live System Status</span>
-        <div actions class="pulse-dot"></div>
+        <span actions class="status-badge success">Live System Status</span>
     </app-page-header>
 
     @if (loading()) {
@@ -29,7 +28,7 @@
                 <h3>{{ stats()?.totalMembers || 0 }}</h3>
                 <p>Total Alumni</p>
             </div>
-            <span class="action-btn">Manage →</span>
+            <span class="pill stat-cta">Manage →</span>
         </div>
 
         <div class="glass-card stat-card ripple-effect" routerLink="/admin/members" tabindex="0" role="link" [attr.aria-label]="'Manage Active Members: ' + (stats()?.active || 0)">
@@ -38,7 +37,7 @@
                 <h3>{{ stats()?.active || 0 }}</h3>
                 <p>Active Members</p>
             </div>
-            <span class="action-btn">Manage →</span>
+            <span class="pill stat-cta">Manage →</span>
         </div>
 
         <div class="glass-card stat-card ripple-effect" routerLink="/admin/approvals" tabindex="0" role="link" [attr.aria-label]="'View Pending Approvals: ' + (stats()?.applied || 0)">
@@ -47,7 +46,7 @@
                 <h3>{{ stats()?.applied || 0 }}</h3>
                 <p>Pending Approvals</p>
             </div>
-            <span class="action-btn">View All →</span>
+            <span class="pill stat-cta">View All →</span>
         </div>
 
         <div class="glass-card stat-card ripple-effect" routerLink="/admin/members" tabindex="0" role="link" [attr.aria-label]="'View Inactive Members: ' + inactiveCount">
@@ -56,7 +55,7 @@
                 <h3>{{ inactiveCount }}</h3>
                 <p>Inactive Members</p>
             </div>
-            <span class="action-btn">View →</span>
+            <span class="pill stat-cta">View →</span>
         </div>
 
         @if (nav.isSuperAdmin()) {
@@ -66,7 +65,7 @@
                 <h3>{{ stats()?.balance == null ? 'Restricted' : (stats()!.balance! | appCurrency) }}</h3>
                 <p>Net Fund Balance</p>
             </div>
-            <span class="action-btn">Ledger →</span>
+            <span class="pill stat-cta">Ledger →</span>
         </div>
         }
 
@@ -76,7 +75,7 @@
                 <h3>{{ publishedArticleCount() }}</h3>
                 <p>Published Articles</p>
             </div>
-            <span class="action-btn">Manage →</span>
+            <span class="pill stat-cta">Manage →</span>
         </div>
     </div>
 
@@ -89,9 +88,9 @@
                 <a routerLink="/admin/news" class="card-link">Manage All →</a>
             </div>
             @if (recentNews().length === 0) {
-            <div class="empty-state-compact">
+            <div class="empty-state">
                 <p>No news articles published yet.</p>
-                <button class="btn btn-accent btn-sm mt-3" routerLink="/admin/news">+ Create Article</button>
+                <button class="btn btn-accent btn-sm" routerLink="/admin/news">+ Create Article</button>
             </div>
             } @else {
             <div class="news-feed-list">
@@ -109,7 +108,7 @@
                         <strong>{{ item.title }}</strong>
                         <small>{{ item.publishedAt || item.createdAt | appDate }}</small>
                     </div>
-                    <div class="news-status-chip" [class]="newsStatus(item).class">
+                    <div class="status-badge" [class]="newsStatus(item).class">
                         {{ newsStatus(item).label }}
                     </div>
                 </div>
@@ -132,7 +131,7 @@
                         <div class="news-feed-body">
                             <strong>{{ row.label }}</strong>
                         </div>
-                        <div class="news-status-chip pending">{{ row.count }}</div>
+                        <div class="status-badge pending">{{ row.count }}</div>
                     </a>
                     }
                 </div>
@@ -146,7 +145,7 @@
                     <a routerLink="/admin/events" class="card-link">All →</a>
                 </div>
                 @if (upcomingEvents().length === 0) {
-                <div class="empty-state-compact">
+                <div class="empty-state">
                     <p>No upcoming events scheduled.</p>
                 </div>
                 } @else {
@@ -173,29 +172,29 @@
                     <h3>⚡ Quick Actions</h3>
                 </div>
                 <div class="quick-actions-grid">
-                    <a routerLink="/admin/approvals" class="qa-btn">
+                    <a routerLink="/admin/approvals" class="btn btn-secondary qa-btn">
                         <span class="qa-icon">📋</span>
                         <span>Approvals</span>
                     </a>
-                    <a routerLink="/admin/news" class="qa-btn">
+                    <a routerLink="/admin/news" class="btn btn-secondary qa-btn">
                         <span class="qa-icon">✍️</span>
                         <span>Post News</span>
                     </a>
-                    <a routerLink="/admin/events" class="qa-btn">
+                    <a routerLink="/admin/events" class="btn btn-secondary qa-btn">
                         <span class="qa-icon">📅</span>
                         <span>New Event</span>
                     </a>
-                    <a routerLink="/admin/members" class="qa-btn">
+                    <a routerLink="/admin/members" class="btn btn-secondary qa-btn">
                         <span class="qa-icon">👤</span>
                         <span>Members</span>
                     </a>
                     @if (nav.isSuperAdmin()) {
-                    <a routerLink="/admin/ledger" class="qa-btn">
+                    <a routerLink="/admin/ledger" class="btn btn-secondary qa-btn">
                         <span class="qa-icon">📊</span>
                         <span>Finances</span>
                     </a>
                     }
-                    <a routerLink="/admin/members/ec" class="qa-btn">
+                    <a routerLink="/admin/members/ec" class="btn btn-secondary qa-btn">
                         <span class="qa-icon">🏛️</span>
                         <span>EC Panel</span>
                     </a>

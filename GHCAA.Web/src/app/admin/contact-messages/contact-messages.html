@@ -14,7 +14,7 @@
     @if (loading()) {
     <app-loading-panel label="Loading enquiries..." [size]="64"></app-loading-panel>
     } @else {
-    <div class="glass-card table-wrap">
+    <div class="table-wrap">
         <table class="data-table">
             <thead>
                 <tr>
@@ -39,7 +39,7 @@
                     </td>
                     <td>{{ msg.createdAt | appDate }}</td>
                     <td>
-                        <div class="action-btns">
+                        <div class="actions-cell">
                             <button class="btn btn-secondary btn-sm" (click)="viewMessage(msg)">View Detail</button>
                             <button class="icon-btn delete" (click)="deleteMessage(msg)" [disabled]="deletingId() === msg.id" title="Delete Enquiry">🗑️</button>
                         </div>
@@ -47,7 +47,11 @@
                 </tr>
                 } @empty {
                 <tr>
-                    <td colspan="4" class="py-20 text-center italic opacity-40">{{ searchQuery() ? 'No enquiries match your search.' : 'No enquiries found.' }}</td>
+                    <td colspan="4">
+                        <div class="empty-state">
+                            <p>{{ searchQuery() ? 'No enquiries match your search.' : 'No enquiries found.' }}</p>
+                        </div>
+                    </td>
                 </tr>
                 }
             </tbody>
@@ -75,7 +79,7 @@
                     <span class="val">{{ selectedMessage().createdAt | appDate }}</span>
                 </div>
             </div>
-            <div class="msg-content p-6 glass-card bg-white/5 border border-white/5 whitespace-pre-wrap">
+            <div class="msg-content glass-card">
                 {{ selectedMessage().message }}
             </div>
         </div>

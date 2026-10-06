@@ -103,7 +103,7 @@ describe('Login Component', () => {
 
         vi.advanceTimersByTime(500);
         expect(component.loading()).toBe(true);
-        expect(component.loginStatus()).toBe('Opening your portal');
+        expect(component.loginStatus()).toBe('Signed in. Opening your portal');
 
         finishNavigation(true);
         await Promise.resolve();
@@ -165,22 +165,60 @@ describe('Login Component', () => {
         expect(router.navigate).toHaveBeenCalledWith(['/portal/dashboard']);
     });
 
-    it('should say once that the server is starting up when the reply is slow', () => {
+    it('should explain a slow reply in order, each line once, with no loop', () => {
+        authServiceMock.login.mockReturnValue(new Observable(() => undefined));
+        component.credentials = { username: 'slowuser', password: 'password' };
+        const seen: (string | null)[] = [];
+        const record = () => {
+            const status = component.loginStatus();
+            if (seen[seen.length - 1] !== status) seen.push(status);
+        };
+
+        component.onLogin(mockForm);
+        record();
+        for (let ms = 0; ms < 59000; ms += 500) {
+            vi.advanceTimersByTime(500);
+            record();
+        }
+
+        expect(seen).toEqual([
+            'Checking your username and password',
+            'The server is starting up. This can take up to a minute.',
+            'Still starting up. Your sign-in has been sent.',
+            'Nearly there. Please keep this page open.'
+        ]);
+        expect(component.loading()).toBe(true);
+    });
+
+    it('should move on to the next line only at its time', () => {
         authServiceMock.login.mockReturnValue(new Observable(() => undefined));
         component.credentials = { username: 'slowuser', password: 'password' };
 
         component.onLogin(mockForm);
         vi.advanceTimersByTime(4999);
         expect(component.loginStatus()).toBe('Checking your username and password');
-
         vi.advanceTimersByTime(1);
-        const waking = component.loginStatus();
-        expect(waking).toBe('The server is starting up. This can take up to a minute.');
+        expect(component.loginStatus()).toBe('The server is starting up. This can take up to a minute.');
+        vi.advanceTimersByTime(14999);
+        expect(component.loginStatus()).toBe('The server is starting up. This can take up to a minute.');
+        vi.advanceTimersByTime(1);
+        expect(component.loginStatus()).toBe('Still starting up. Your sign-in has been sent.');
+    });
 
-        // It stays put rather than cycling through more lines.
+    it('should not show a waiting line after the reply has come back', async () => {
+        vi.mocked(router.navigate).mockReturnValue(new Promise<boolean>(() => undefined));
+        authServiceMock.login.mockReturnValue(new Observable(subscriber => {
+            setTimeout(() => subscriber.next({ role: 'User' }), 6000);
+            return () => undefined;
+        }));
+        component.credentials = { username: 'slowuser', password: 'password' };
+
+        component.onLogin(mockForm);
+        vi.advanceTimersByTime(6000);
+        expect(component.loginStatus()).toBe('Signed in. Opening your portal');
+
         vi.advanceTimersByTime(40000);
-        expect(component.loading()).toBe(true);
-        expect(component.loginStatus()).toBe(waking);
+        expect(component.loginStatus()).toBe('Signed in. Opening your portal');
     });
 
     it('should stop and cancel the request when the server does not respond within 60 seconds', () => {

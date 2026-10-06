@@ -1,24 +1,11 @@
-<div class="dashboard-grid">
+<div class="admin-feature dashboard-grid">
 
-    <!-- 30.11: page header added so the on-page title matches the "Dashboard" nav
-         label/breadcrumb (previously this page had no title at all, unlike admin's
-         dashboard which already showed one). -->
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Dashboard</h2>
-            <small>Welcome back{{ profile()?.fullName ? ', ' + profile()?.fullName : '' }}</small>
-        </div>
-    </div>
+    <app-page-header title="Dashboard"
+        [emptySubtitle]="'Welcome back' + (profile()?.fullName ? ', ' + profile()?.fullName : '')">
+    </app-page-header>
 
     @if (loading()) {
-    <div class="dash-loading">
-        <div class="skeleton-row">
-            <div class="sk-card"></div>
-            <div class="sk-card"></div>
-            <div class="sk-card"></div>
-            <div class="sk-card"></div>
-        </div>
-    </div>
+    <app-loading-panel label="Loading your dashboard..." [size]="64"></app-loading-panel>
     } @else {
 
     <!-- Profile Completion Wizard Notice -->
@@ -84,8 +71,7 @@
                 <div class="val">{{ profile().membershipNumber || 'Pending' }}</div>
                 <!-- 35.2: helper already returns the full label ("Guest Member") — do not append " Member". -->
                 <small>{{ getMembershipType(profile().membershipType) }}</small>
-                <span class="status-chip" [style.background]="getStatusColor(profile().status) + '22'"
-                    [style.color]="getStatusColor(profile().status)">
+                <span class="status-badge" [class]="getStatusLabel(profile().status).toLowerCase()">
                     {{ getStatusLabel(profile().status) }}
                 </span>
             </div>
@@ -150,7 +136,7 @@
                         </div>
                     </a>
                     } @empty {
-                    <div class="empty-feed">
+                    <div class="empty-state">
                         <p>No news articles yet.</p>
                     </div>
                     }
@@ -192,12 +178,12 @@
                     @if (row.link) {
                     <a [routerLink]="row.link" class="feed-item">
                         <div class="text"><strong>{{ row.label }}</strong></div>
-                        <span class="unread-badge">{{ row.count }}</span>
+                        <span class="status-badge gold">{{ row.count }}</span>
                     </a>
                     } @else {
                     <div class="feed-item">
                         <div class="text"><strong>{{ row.label }}</strong></div>
-                        <span class="unread-badge">{{ row.count }}</span>
+                        <span class="status-badge gold">{{ row.count }}</span>
                     </div>
                     }
                     }
@@ -211,7 +197,7 @@
             <div class="header-row flex justify-between items-center mb-6">
                 <h3 class="text-xl font-black">Notifications</h3>
                 @if (alertService.unreadCount() > 0) {
-                <span class="unread-badge">{{ alertService.unreadCount() }} New</span>
+                <span class="status-badge gold">{{ alertService.unreadCount() }} New</span>
                 }
             </div>
 
@@ -226,7 +212,7 @@
                     </div>
                 </div>
                 } @empty {
-                <div class="empty-feed">
+                <div class="empty-state">
                     <p>No new notifications.</p>
                 </div>
                 }
@@ -262,7 +248,7 @@
                 </div>
             </div>
             } @empty {
-            <div class="empty-feed">
+            <div class="empty-state">
                 <p>Loading member network...</p>
             </div>
             }

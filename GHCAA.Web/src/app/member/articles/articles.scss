@@ -27,19 +27,7 @@
             position: absolute;
             top: 1rem;
             right: 1rem;
-            padding: 0.4rem 0.8rem;
-            border-radius: 30px;
-            font-size: 0.65rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 1px;
             box-shadow: var(--shadow-md);
-            backdrop-filter: blur(8px);
-
-            &.draft { background: var(--surface-subtle); color: var(--text-main); border: 1px solid var(--card-border); }
-            &.pending { background: rgba(var(--accent-rgb), 0.9); color: var(--text-on-dark); }
-            &.active { background: color-mix(in srgb, var(--success-color) 90%, transparent); color: var(--text-on-dark); }
-            &.terminated { background: color-mix(in srgb, var(--danger-color) 90%, transparent); color: var(--text-on-dark); }
         }
 
         .category-tag {
@@ -48,12 +36,6 @@
             left: 1rem;
             background: var(--dark-gradient);
             color: var(--accent-text);
-            padding: 0.25rem 0.6rem;
-            font-size: 0.6rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            border-radius: 4px;
-            letter-spacing: 0.5px;
         }
     }
 
@@ -148,17 +130,6 @@
         span { font-size: 2rem; }
         small { font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; }
     }
-}
-
-.close-btn {
-    background: transparent;
-    border: none;
-    font-size: 2rem;
-    color: var(--text-muted);
-    cursor: pointer;
-    line-height: 1;
-    
-    &:hover { color: var(--danger-color); }
 }
 
 .grid {

@@ -1,24 +1,14 @@
-<div class="forum-page">
-  <!-- Page Header -->
-  <div class="forum-header">
-    <div class="forum-header-inner">
-      <div class="header-left">
-        @if (selectedCategory()) {
-          <button class="btn-back" (click)="backToCategories()">
-            <span class="icon">&#8592;</span> All Categories
-          </button>
-          <h1>{{ selectedCategory()!.name }}</h1>
-          <p class="sub">{{ selectedCategory()!.description }}</p>
-        } @else {
-          <h1>&#128172; Discussions</h1>
-          <p class="sub">Ask questions, share ideas, and connect with fellow Haragangians.</p>
-        }
-      </div>
-      @if (selectedCategory() && !showCreateForm()) {
-        <button class="btn-primary" (click)="openCreateForm()">+ New Topic</button>
-      }
-    </div>
-  </div>
+<div class="admin-feature">
+  <app-page-header
+    [title]="selectedCategory() ? selectedCategory()!.name : '&#128172; Discussions'"
+    [emptySubtitle]="selectedCategory() ? (selectedCategory()!.description ?? '') : 'Ask questions, share ideas, and connect with fellow Haragangians.'">
+    @if (selectedCategory()) {
+      <button actions class="btn btn-secondary btn-sm" (click)="backToCategories()">&#8592; All Categories</button>
+    }
+    @if (selectedCategory() && !showCreateForm()) {
+      <button actions class="btn btn-primary btn-sm" (click)="openCreateForm()">+ New Topic</button>
+    }
+  </app-page-header>
 
   @if (errorMsg()) {
     <div class="alert alert-error">{{ errorMsg() }}</div>
@@ -26,7 +16,7 @@
 
   <!-- Create Topic Form -->
   @if (showCreateForm()) {
-    <div class="create-topic-card">
+    <div class="glass-card create-topic-card">
       <h3>Start a New Discussion</h3>
       <div class="form-group">
         <label>Topic Title <span class="req">*</span></label>
@@ -37,8 +27,8 @@
         <textarea [(ngModel)]="newTopic.content" rows="6" placeholder="Describe your topic in detail..."></textarea>
       </div>
       <div class="form-actions">
-        <button class="btn-secondary" (click)="cancelCreate()">Cancel</button>
-        <button class="btn-primary" (click)="submitTopic()" [disabled]="submitting() || !newTopic.title.trim() || !newTopic.content.trim()">
+        <button class="btn btn-secondary" (click)="cancelCreate()">Cancel</button>
+        <button class="btn btn-primary" (click)="submitTopic()" [disabled]="submitting() || !newTopic.title.trim() || !newTopic.content.trim()">
           {{ submitting() ? 'Posting...' : 'Post Topic' }}
         </button>
       </div>
@@ -48,11 +38,11 @@
   <!-- Category Grid -->
   @if (!selectedCategory() && !showCreateForm()) {
     @if (loading()) {
-      <div class="loader-wrap"><app-logo-spinner [size]="48" label="Loading categories…"></app-logo-spinner></div>
+      <app-loading-panel label="Loading categories…"></app-loading-panel>
     } @else {
       <div class="category-grid">
         @for (cat of categories(); track cat.id) {
-          <div class="category-card" (click)="selectCategory(cat)">
+          <div class="glass-card category-card" (click)="selectCategory(cat)">
             <div class="cat-icon">&#128172;</div>
             <div class="cat-info">
               <h3>{{ cat.name }}</h3>
@@ -77,14 +67,14 @@
   <!-- Topics List -->
   @if (selectedCategory() && !showCreateForm()) {
     @if (topicsLoading()) {
-      <div class="loader-wrap"><app-logo-spinner [size]="48" label="Loading topics…"></app-logo-spinner></div>
+      <app-loading-panel label="Loading topics…"></app-loading-panel>
     } @else {
       <div class="topics-list">
         @for (topic of topics(); track topic.id) {
-          <div class="topic-row" (click)="openTopic(topic)">
+          <div class="glass-card topic-row" (click)="openTopic(topic)">
             <div class="topic-indicators">
-              @if (topic.isPinned) { <span class="badge badge-pin">Pinned</span> }
-              @if (topic.isLocked) { <span class="badge badge-lock">Locked</span> }
+              @if (topic.isPinned) { <span class="status-badge gold">Pinned</span> }
+              @if (topic.isLocked) { <span class="status-badge neutral">Locked</span> }
             </div>
             <div class="topic-main">
               <h4>{{ topic.title }}</h4>
@@ -99,7 +89,7 @@
           </div>
         } @empty {
           <div class="empty-state">
-            <p>No topics yet. <button class="link-btn" (click)="openCreateForm()">Start the first discussion!</button></p>
+            <p>No topics yet. <button class="btn btn-sm btn-outline" (click)="openCreateForm()">Start the first discussion!</button></p>
           </div>
         }
       </div>

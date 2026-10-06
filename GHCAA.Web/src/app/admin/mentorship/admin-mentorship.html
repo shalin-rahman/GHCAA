@@ -10,21 +10,31 @@
   @if (loading()) {
     <app-loading-panel label="Loading mentorship requests..." [size]="80"></app-loading-panel>
   } @else {
-    <table class="data-table">
-      <thead>
-        <tr><th>Requester</th><th>Mentor</th><th>Domain</th><th>Requested</th><th>Status</th></tr>
-      </thead>
-      <tbody>
-        @for (r of filteredRequests(); track r.id) {
-          <tr>
-            <td>{{ r.requester?.fullName || 'Unknown' }}</td>
-            <td>{{ r.mentor?.fullName || 'Unknown' }}</td>
-            <td>{{ r.domain || '—' }}</td>
-            <td>{{ r.requestedAt | date:'mediumDate' }}</td>
-            <td><span class="status-badge" [class]="getMentorshipStatusClass(r.status)">{{ getMentorshipStatusLabel(r.status) }}</span></td>
-          </tr>
-        }
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Requester</th><th>Mentor</th><th>Domain</th><th>Requested</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          @for (r of filteredRequests(); track r.id) {
+            <tr>
+              <td>{{ r.requester?.fullName || 'Unknown' }}</td>
+              <td>{{ r.mentor?.fullName || 'Unknown' }}</td>
+              <td>{{ r.domain || '—' }}</td>
+              <td>{{ r.requestedAt | date:'mediumDate' }}</td>
+              <td><span class="status-badge" [class]="getMentorshipStatusClass(r.status)">{{ getMentorshipStatusLabel(r.status) }}</span></td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5">
+                <div class="empty-state">
+                  <p>{{ searchTerm() ? 'No requests match your search.' : 'No mentorship requests yet.' }}</p>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </div>

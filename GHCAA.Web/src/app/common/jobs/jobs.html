@@ -1,14 +1,12 @@
 <div class="jobs-page">
     @if (!selectedJob()) {
-    <div class="header">
-        <div class="title-group">
-            <h2>Job Hub</h2>
-            <p>Careers, Mentorship, and Professional Growth</p>
-        </div>
-        <button class="btn btn-accent" (click)="closeForm(); showForm.set(true)" *ngIf="!showForm()">
+    <app-page-header title="Job Hub" emptySubtitle="Careers, Mentorship, and Professional Growth">
+        @if (!showForm()) {
+        <button actions class="btn btn-accent" (click)="closeForm(); showForm.set(true)">
             <span class="icon">✨</span> Share Opportunity
         </button>
-    </div>
+        }
+    </app-page-header>
 
     @if (showForm()) {
     <div class="glass-card form-box reveal-top">
@@ -75,21 +73,15 @@
     </div>
     } @else {
     <!-- Controls Section -->
-    <div class="controls-bar glass-card reveal-top flex flex-col md:flex-row gap-6 p-6">
-        <div class="filter-group">
-            <span class="icon">🔍</span>
-            <input type="text" [(ngModel)]="searchQuery" name="search" placeholder="Filter by title or company..."
-                (input)="onSearch()">
-        </div>
-        <div class="filter-group">
-            <span class="icon">🏷️</span>
-            <select (change)="onFilterChange($event)">
-                <option value="">All Categories</option>
-                @for (cat of categories; track cat.id) {
-                <option [value]="cat.id">{{ cat.name }}</option>
-                }
-            </select>
-        </div>
+    <div class="filter-bar">
+        <app-search-bar [value]="searchQuery" (valueChange)="searchQuery = $event; onSearch()"
+            placeholder="Filter by title or company..."></app-search-bar>
+        <select aria-label="Category" (change)="onFilterChange($event)">
+            <option value="">All Categories</option>
+            @for (cat of categories; track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+            }
+        </select>
         <div class="tabs tab-nav view-toggle">
             <button type="button" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')">☰ Table</button>
             <button type="button" [class.active]="viewMode() === 'card'" (click)="viewMode.set('card')">▦ Card</button>
@@ -101,7 +93,7 @@
         @if (loading()) {
         <app-loading-panel label="Scanning for opportunities..." [size]="64"></app-loading-panel>
         } @else if (viewMode() === 'table') {
-        <div class="glass-card table-wrap">
+        <div class="table-wrap">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -137,8 +129,12 @@
                         </td>
                     </tr>
                     } @empty {
-                    <tr class="empty-row">
-                        <td colspan="6" class="text-center py-20 italic opacity-50">No open opportunities. Be the bridge — share one!</td>
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state compact">
+                                <p>No open opportunities. Be the bridge, share one!</p>
+                            </div>
+                        </td>
                     </tr>
                     }
                 </tbody>
@@ -149,7 +145,7 @@
             @for (job of jobs(); track job.id) {
             <div class="glass-card job-card reveal-card" [class.mentorship]="job.jobCategory === 'Mentorship'">
                 <div class="card-badges">
-                    <span class="badge cat">{{ getCategoryName(job.jobCategory) }}</span>
+                    <span class="pill">{{ getCategoryName(job.jobCategory) }}</span>
                     @if (job.jobCategory === 'Mentorship') {
                     <span class="badge mentor">MENTORSHIP</span>
                     }
@@ -180,7 +176,7 @@
                 </div>
             </div>
             } @empty {
-            <div class="empty-state glass-card full-width">
+            <div class="empty-state full-width">
                 <div class="icon">💼</div>
                 <h3>No Open Opportunities</h3>
                 <p>Be the bridge. If you know of any job openings or want to offer mentorship, share it now!</p>

@@ -52,7 +52,7 @@
                     {{ errorMessage() }}
                 </div>
 
-                <button type="submit" class="btn btn-accent w-full" [disabled]="loginForm.invalid || loading()" [attr.aria-busy]="loading()">
+                <button type="submit" class="btn btn-accent login-submit w-full" [disabled]="loginForm.invalid || loading()" [attr.aria-busy]="loading()">
                     <span *ngIf="loading(); else loginButtonLabel" class="login-busy">
                         Signing in
                         <span class="login-status-dots" aria-hidden="true">

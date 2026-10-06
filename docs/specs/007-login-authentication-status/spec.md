@@ -17,9 +17,9 @@ Improve the public login experience so the UI shows a short, reliable authentica
 
 The login button shall show `Signing in` with animated dots instead of the static `Authenticating...` label while the auth request remains active. A status line under the button, read out by screen readers through `aria-live`, says what is happening in plain words.
 
-The status line shall step through `Checking your details`, `Verifying your password`, `Loading your profile` and `Opening your portal`, one every 2 seconds. A normal login answers inside the first two. If the request is still pending after the fourth, the server is most likely waking from sleep, so the line shall repeat `Waking up the server`, `This can take up to a minute` and `Still signing you in` until the reply comes. The order shall never move backwards, the line shall never freeze on one message, and the sequence shall stop as soon as the request resolves.
+The status line shall follow the real flow, which is one request and then a page change. It shall show `Checking your username and password` while the request runs. If no reply has come after 5 seconds the server is most likely waking from sleep, so the line shall move on to `The server is starting up. This can take up to a minute.`, then at 20 seconds to `Still starting up. Your sign-in has been sent.`, then at 40 seconds to `Nearly there. Please keep this page open.`. The last line stays until the reply or the timeout. When the reply succeeds the line shall show `Signed in. Opening your portal` until the page change ends. Each line shall show once, the list shall never loop or move backwards, no line shall repeat the button's `Signing in`, and no waiting line shall appear after the reply has come back.
 
-(Revised 2026-10-03. The first version picked 6 or 7 random technical verbs such as `Salting` and `Ingesting`, which told the user nothing. See TODO 87.4.)
+(Revised 2026-10-03, and again 2026-10-06. The first version picked random technical verbs such as `Salting` and `Ingesting`. The second stepped through four steps on a timer that did not match what the code was doing, then looped three waking lines. See TODO 87.4 and 87.6.)
 
 ### FR-2 Visual behaviour
 
@@ -55,8 +55,8 @@ The login button shall return to the plain `Sign in` label after the request res
 
 ## Acceptance scenarios
 
-1. Given a valid login request, when the component starts the flow, then the submit button shows `Signing in`, the status line shows `Checking your details` and the form becomes disabled.
-2. Given the request stays active, when the interval advances, then the status line moves through the four normal steps in order, and after them repeats the three slow-server messages until the reply comes.
+1. Given a valid login request, when the component starts the flow, then the submit button shows `Signing in`, the status line shows `Checking your username and password` and the form becomes disabled.
+2. Given the request stays active, when 5, 20 and 40 seconds pass, then the status line moves to each slow-server line in that order, shows each one once, and does not loop.
 3. Given the request resolves successfully, when the response arrives, then the progress indicator disappears and the user is redirected normally.
 4. Given the request fails, when the error response arrives, then the loading state ends and the error text is shown.
 5. Given the request hangs for longer than 60 seconds, when the timeout fires, then the flow cancels the request, clears its timers and shows `Login timed out. Please try again.`

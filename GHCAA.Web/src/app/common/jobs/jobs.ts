@@ -11,13 +11,15 @@ import { AuthService } from '../../core/services/auth.service';
 import { getJobCategoryLabel, SUBMISSION_STATUS_MAP, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS } from '../../core/constants/app.constants';
 import { LookupService } from '../../core/services/lookup.service';
 import { LoadingPanelComponent } from '../loading-panel/loading-panel';
+import { PageHeaderComponent } from '../page-header/page-header.component';
+import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 import { debounce } from '../../core/utils/debounce.util';
 
 @Component({
   selector: 'app-jobs',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent],
   templateUrl: './jobs.html',
   styleUrl: './jobs.scss'
 })

@@ -1905,6 +1905,16 @@ from theme tokens. `.field-error` had no styles anywhere, so it now has them her
 **Acceptance:** done; checked at 360x640, 390x844 and 1440x900 with no horizontal scroll; full web
 unit suite 566 passed and `ng build` clean (2026-10-03).
 
+87.6 [DONE] **Priority: P2 | Depends on: 87.4.** Raised by the user 2026-10-06: the login progress words
+should not repeat, should add more lines when the wait is long, and should follow the order of what is
+really happening. 87.4 looped three waking lines, and 37.1y then left one static line for up to 60s. The
+line now reads `Checking your username and password` during the request, then moves once each to a
+server-starting line at 5s, a still-starting line at 20s and a nearly-there line at 40s, and shows
+`Signed in. Opening your portal` once the reply succeeds. No line repeats the button's `Signing in`, and
+the waiting lines stop as soon as the reply comes. Spec 007 FR-1 and scenarios 1-2 updated.
+**Acceptance:** done; `login.spec.ts` 17 passed, with tests for the order, exact times and no line after
+the reply (2026-10-06).
+
 # Work Package 88 — Idempotent delivery path for the May 2026 alumni batch
 
 Raised by the user 2026-09-22, who suspected Work Package 46.1 "reverted while migration re-factored."
@@ -2398,3 +2408,59 @@ the badge kept its old value and Angular threw NG0100 in the console. It now rep
 through `polls.update`, so the badge, icon and active/inactive search follow the new status.
 **Acceptance:** met; two polls spec cases (row replaced on success, old status kept on failure),
 tsc clean, and the toggle checked in the browser against a mocked API.
+
+96.9 [DONE] **Priority: P2 | Depends on: none.** Page space across the app, raised 2026-10-06 with
+three screenshots. /admin/polls wrapped its page in `.admin-polls-page` with 2.5rem padding on top of
+the 1.5rem `.portal-content` already gives every page, so about 4rem was lost on each side and above
+the header. The same double padding sat on several member pages. Polls and Elections now use the
+shared `.admin-feature` root like the other admin pages, and the dead `.page-header` override in
+`polls.scss` is gone (it could not reach inside `<app-page-header>`). The page roots of member polls,
+forum, giving, change-password, digital ID and payments lost their own padding, and the gallery drops
+its public-site padding when it renders inside the portal. `.admin-feature` lost its 5rem bottom
+padding (and the 3rem and 2rem overrides on the dashboard and on mobile); the portal layout already
+leaves room for the mobile bottom nav. `--page-pad` in `styles.scss` is now the one place that sets
+page spacing. The max-width reading caps on member polls, forum, giving and payments stay.
+Elections cards and form fields sat flush because `.stack` was used there but never defined; it is
+now a global column-flex class, and a `.filter-bar` inside one drops its own bottom margin. The
+unstyled Elections search and the unpadded step-up dialog in the same screenshots came from a build
+older than 97d7edb2 and 8acf5c98, which already fixed both in source.
+**Acceptance:** met; tsc clean, 60 specs across the touched pages pass, and admin polls, elections,
+dashboard plus member polls, forum, gallery, giving, payments and change-password checked in the
+browser against a mocked API: the page title is 24px from the top of the content at 1446px and 16px
+at 390px, and the Elections unlock card, search and list are 16px apart.
+
+96.10 [DONE] **Priority: P2 | Depends on: 96.9.** Every page should use the shared UI, not only the
+shared page spacing (raised 2026-10-06). A read-only audit the same day found about 100 web files
+that build their own version of something styles.scss or app/common already provides. Most of it
+is in the member area (payments, forum, topic detail, giving, digital ID, change password,
+dashboard, polls, profile, assistant). By area: page roots with their own width or padding
+(about 15 files), hand-written headers instead of `<app-page-header>` (about 16), local `.btn`
+redefinitions (14), local `.status-badge`/`.badge` sets with differing status colours (about 20),
+local `.table-wrap` (9), local `.empty-state` (12), own spinners instead of `<app-loading-panel>`
+(about 13), a second `.modal-content` modal family (about 12), local tabs (4), local search
+inputs (2), and literal radius, shadow and rgba values where tokens exist (about 60, overlapping).
+The user signed off on doing every area in one pass, with member pages full width like admin.
+Admin, member, public and common pages now use `.admin-feature`, `<app-page-header>`,
+`<app-search-bar>`, `<app-loading-panel>`, the central buttons, badges, tables, tabs, modals and
+empty states, and their local copies are gone. `.alert` moved into styles.scss from the forum and
+org-config pages, and `.status-badge` gained `accepted` and `requested`. Admin mentorship had a
+table outside `.table-wrap` with no empty row; it now has both. Kept local because nothing central
+fits yet: stat cards, task rows, receipt images, album and photo grids, `.toggle-row`,
+`.config-grid`, the news form, role select, poll cards, `.btn-social`, `btn-lg`, and the modal
+headers on directory, event detail and news detail, which carry badges or a banner that
+`<app-modal-header>` has no slot for. Org-config's spec failed with NG0100 at HEAD too: its
+loading flag and messages were plain fields set from a promise, so they are signals now.
+The initial bundle is 501.67 kB against a 500 kB budget because the shared rules now sit in the
+global stylesheet; the budget was not raised.
+**Acceptance:** met; tsc and `ng build` clean apart from the budget warning, the full web suite
+passes (101 files, 613 tests), and 28 admin, member and public pages were checked in the browser
+in light and dark themes against a mocked API with no horizontal overflow (2026-10-07).
+
+96.11 [DONE] **Priority: P1 | Depends on: none.** CI `dotnet format --verify-no-changes` failed on
+2026-10-06 with WHITESPACE errors in two files. `ElectionPersonaServiceTests.cs` set several object
+initializer members on one line; they are now one per line. In `SecurityHeadersMiddleware.cs` a
+comment sat inside the `.Select(...).Where(...)` chain. The formatter rewrites the line breaks
+around such a comment with the machine's newline, so the CRLF file passed on Windows and failed on
+the Linux runner. The note moved into the comment above `ConnectSrc`.
+**Acceptance:** met locally; `dotnet format GHCAA.sln --verify-no-changes` exits 0 and the 17
+persona and security-header tests pass. The Linux runner confirms on the next push.

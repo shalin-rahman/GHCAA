@@ -23,17 +23,3 @@
         border-color: var(--accent-color);
     }
 }
-
-.loading-state,
-.empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: var(--text-muted);
-}
-
-@media (max-width: 768px) {
-    .loading-state,
-    .empty-state {
-        padding: 2.5rem 1rem;
-    }
-}
