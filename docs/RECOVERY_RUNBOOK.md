@@ -12,18 +12,17 @@ mechanism.
 
 ## Scenario 1 — a deploy's migration step failed
 
-`MigrationBootstrapper.EnsureMigratedAsync` runs at every boot (`Program.cs:449`) inside a try/catch
-(`Program.cs:447-458`). If it throws, the app does not crash — it logs the exception as an **error**
-and falls back to `EnsureCreated()`, which is a no-op against an existing database. That means a
-failed migration does not stop the app from serving traffic; it means the app keeps serving traffic
-against a schema that's now out of sync with the code that just deployed.
+`MigrationBootstrapper.EnsureMigratedAsync` runs at every boot, called from
+`GHCAA.API/Extensions/DatabaseBootstrapperExtensions.cs`. If it throws, the app logs the exception as
+**critical** and refuses to start. The new deploy never goes Live, so the code that needs the new
+schema never serves traffic. (Before 2026-09-09 it fell back to `EnsureCreated()` and kept running on
+a stale schema. Older notes may still describe that.)
 
 Steps:
 
 1. **Check the Render service logs** for the deploy that just went out. Look for the log line
-   `"Migration bootstrap failed; falling back to EnsureCreated. Schema may be stale until this is
-   fixed manually."` (from `Program.cs:456`) and the exception logged with it — that's the actual
-   cause, not a generic failure.
+   `"Migration bootstrap failed; refusing to start with an unverified schema."` and the exception
+   logged with it. The exception is the real cause.
 2. **Do not roll the code back yet** if the exception names a real schema problem (a column type
    change conflicting with existing data, a unique constraint violated by existing rows, etc.) — the
    next deploy will hit the same failure until the migration itself is fixed.
@@ -32,12 +31,12 @@ Steps:
    ```
    dotnet ef database update --project GHCAA.Infrastructure --startup-project GHCAA.API --connection "<DATABASE_URL>"
    ```
-   Get `<DATABASE_URL>` from the Render service's Environment tab — do not commit it to a file
-   (`docs/deploy_connection.txt` already did that once; see its own security-cleanup note).
+   Get `<DATABASE_URL>` from the Render service's Environment tab or the Neon console. Do not commit
+   it to a file; `docs/deploy_connection.txt` did that once (see `RENDER_DEPLOYMENT.md` Step 7, security
+   cleanup). Take a Neon branch of the database first so the manual run has something to go back to.
 4. **Confirm** with `dotnet ef migrations list` against the same connection string that every
-   migration through the one you expect now shows as applied.
-5. Redeploy (or just restart the service) so the app's next boot finds nothing pending and stops
-   logging the fallback warning.
+   migration through the one expected now shows as applied.
+5. Redeploy, or restart the service, so the next boot finds nothing pending and starts.
 
 Rolling back a migration can lose data. Rolling back `20261004190943_AddReturningOfficerFlag` and
 `20261004194309_AddCountExecutor` drops the columns they added, and whatever those columns held is gone.
@@ -52,21 +51,21 @@ this needs a human decision about the migration itself, not another automated re
 
 **What this repo documents, plainly:** `RENDER_DEPLOYMENT.md` names the database as **Neon Postgres**
 and describes how to provision it, connect to it, and branch it per pull request
-(`.github/workflows/neon_workflow.yml`). It does not document any backup schedule, point-in-time
-recovery process, or restore procedure — for either Neon or Render's own Postgres offering (a Render
-Postgres connection string also exists in `docs/deploy_connection.txt`, unused by the live
-`RENDER_DEPLOYMENT.md` path). **No backup/restore capability for this platform's database is
+(`.github/workflows/neon_workflow.yml`). Preprod moved from Render Postgres to Neon on 2026-07-27. The repo
+does not document any backup schedule, point-in-time recovery process or restore procedure for the
+Neon database. (`docs/deploy_conn_Info.txt`, gitignored, still holds the old Render Postgres
+connection string, which nothing uses.) **No backup/restore capability for this platform's database is
 documented anywhere in this repo.** Treat that as the current true state, not an oversight to explain
 around — an operator facing real data loss should check the Neon console and Neon's own plan-level
 documentation directly, rather than assume a capability this repo has never described.
 
 What can be recovered without a database backup:
 
-- **Schema** — rebuilt from scratch by `MigrationBootstrapper`/`EnsureCreated()` on next boot against
-  an empty database. No manual step; see Scenario 1's mechanism.
+- **Schema** — rebuilt from scratch by `MigrationBootstrapper` (which calls `EnsureCreated()` on an
+  empty database) on the next boot. No manual step; see Scenario 1's mechanism.
 - **Seed data that ships in the migrations or `Data/Seed/*.json`** — the constitution
   (`ConstitutionSeeder.SyncAsync`, runs at every boot), the organization config defaults
-  (`Program.cs`'s OrgConfig seed block), and the baked-in alumni seed rows described in
+  (the OrgConfig seed step in `DatabaseBootstrapperExtensions.cs`), and the baked-in alumni seed rows described in
   `docs/TODO.md` item 82.16 (Work Package 82.31) all re-populate on a fresh database because they run
   from code, not from a database backup.
 - **The protected super-admin list** — comes back from `appsettings.json` on next boot
@@ -78,7 +77,7 @@ What cannot be recovered without a database backup, because nothing in this repo
 - Every member record, financial ledger entry, governance vote, gallery upload row, forum post, and
   anything else a person entered through the running application since the schema was last empty.
 
-If a real backup/restore capability exists on the Neon or Render account (a paid-tier feature, a
+If a real backup/restore capability exists on the Neon account (a paid-tier feature, a
 manually configured export, anything set up outside this repo), record it here and in
 `RENDER_DEPLOYMENT.md` as soon as it exists, with the actual steps to invoke it. Until then, the
 honest operator action on real data loss is: rebuild the empty schema per Scenario 1, accept that

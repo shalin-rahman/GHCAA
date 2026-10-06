@@ -1988,7 +1988,7 @@ guessing at it.
   the shipped app) — not worth a dedicated pass. TODO/FIXME/HACK markers total 15 across 12 files,
   small enough to review inline next time each file is touched rather than as a separate sweep.
 - 2026-09-01 follow-up: scope widened on request — the tone rule now applies retroactively (touch a
-  file for any reason, clean up what you pass over in it), and a full repo-wide sweep was requested
+  file for any reason, clean up what is passed over in it), and a full repo-wide sweep was requested
   ("nothing should be missed"), not just the light grep above. See 61.4.
 
 61.4 [DONE 2026-09-01] Full repo-wide human-tone pass, run as 4 parallel grep-driven sweeps
@@ -4012,7 +4012,7 @@ which hasn't landed) correctly left untouched — out of scope for this pass.
 stranded it, not as a deferred cleanup. Bounded deliberately: only code the genericization work
 actually orphaned. Do NOT open a general refactor, and do not introduce a new abstraction or pattern
 that the change does not concretely need (project rule: no abstraction without a real duplication or
-coupling problem in front of you). This closes 61.2.
+coupling problem at hand). This closes 61.2.
 **Resolved 2026-09-07:** nothing to remove — 62.47's sweep found no stranded code, reported plainly
 rather than manufacturing a change. `dotnet build`, `npx tsc --noEmit`, and `flutter analyze` all clean.
 
@@ -5240,7 +5240,7 @@ family-link send uses `/api/family-links/search`, which is deliberately scoped t
 `Member.IsFamilyPublic` members only (a privacy consent flag) — reusing the general directory search
 here would let a member request a family link with someone who never opted into that visibility.
 Mentorship send uses the general `/api/networking/search` directory endpoint instead, since asking
-someone to be your mentor isn't gated by that same consent flag and no mentor-specific search exists.
+someone to be a mentor isn't gated by that same consent flag and no mentor-specific search exists.
 Tests: `requests.spec.ts` (9 tests). `ng build` clean, `vitest` 399/399 (was 390).
 
 81.5 [DONE 2026-09-06] **Priority: P4 | Depends on: none.** Raised by the user while building 81.2: "approval and

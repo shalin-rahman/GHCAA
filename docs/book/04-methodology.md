@@ -12,7 +12,7 @@ a criterion fixed here.
 The work sits in the pragmatist tradition rather than the positivist or interpretivist ones. The
 question that drove it was not "what is universally true of alumni platforms" but "what artefact,
 built and evaluated in this setting, resolves the problem stated in §1.3, and what does building it
-teach". Pragmatism measures an idea's worth by what it lets you do, which is the right test for a
+teach". Pragmatism measures an idea's worth by what it makes possible, which is the right test for a
 piece of software: a requirement, an architectural choice or a business rule is warranted here if it
 produces a working, checkable consequence, not because it follows from a prior theory of alumni
 engagement.
@@ -56,8 +56,8 @@ was rejected and why.
 The **design cycle** is the inner loop of building and evaluating, repeated across the increments
 Chapter 7 reports and gated, in every increment, by the verification discipline described in §4.4.
 This is the cycle that ran most often. It is also the cycle for which the repository itself is the
-clearest evidence, since every one of the three hundred and twenty-eight commits between 9 February and
-5 October 2026 is a turn of it.
+clearest evidence, since every one of the three hundred and thirty-four commits between 9 February and
+6 October 2026 is a turn of it.
 
 ## 4.3 Mapping Design Science Activities to the Work Performed
 

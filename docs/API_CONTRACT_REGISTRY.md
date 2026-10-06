@@ -26,8 +26,7 @@ The CI pipeline (`.github/workflows/ghcaa-ci-standard.yml`) already runs an
 API contract snapshot comparison against `docs/api/swagger.json`
 (`docs/api/diff_swagger.py`) — that catches an accidental breaking change.
 This registry is the complementary manual record: it captures *why* a change
-was made and *which client picked it up*, which a snapshot diff can't tell
-you.
+was made and *which client picked it up*, which a snapshot diff can't tell.
 
 ## Entry format
 
@@ -69,6 +68,12 @@ a gap someone still needs to close.
 - Change: `elections.countRequesterOnly` (bool, default false) is new. On, only the official who asked for a count may run it. The `twoPersonActions` default now leaves out `EmergencyRevoke`. Step-up OTP replies carry a masked email, and a failed OTP email answers 503.
 - Reason: TODO 37.13n, 7.19.
 - Web: updated in `election.models.ts` and `admin/org-config`. Mobile: updated in `org_config.dart`.
+
+### 2026-10-04 — /api/admin/governance/periods/{id}/seats, /api/admin/governance/members/{ecMemberId}/end-term
+- Change: new routes, AdminOnly. `GET periods/{id}/seats` lists each committee seat of a period with its current holder, so a vacant seat shows as empty. `POST members/{ecMemberId}/end-term` ends a term and takes `reason` (a `VacancyReason`, required), `note` (optional, capped at `Governance.VacancyNoteMaxLength`) and `notifyMember`. It answers 404 for an unknown member and 409 when the service refuses. It replaced `DELETE members/{ecMemberId}`, which ended a term without a reason. `DELETE members/{ecMemberId}/hard-delete` (step-up) is older and unchanged.
+- Reason: TODO 95.3. A seat can fall vacant mid-term and the record has to say why.
+- Web: updated in `core/services/admin.service.ts` (`getCommitteeSeats`, `endCommitteeTerm`) and `admin/governance/admin-governance.ts`.
+- Mobile: end-term updated in `features/admin/admin_service.dart`. Seats: not used yet; the mobile governance screen lists members only (vacant-seat view is TODO 95.4).
 
 ### 2026-09-30 — /api/elections/{id}/appointments, /api/elections/appointments/{id}/revoke, /api/me/election-appointments
 - Change: new routes. `GET` and `POST api/elections/{id}/appointments` list and make appointments. `POST api/elections/appointments/{id}/revoke` ends one. `GET api/me/election-appointments` lists the caller's own, and `POST .../{id}/accept` and `.../{id}/decline` answer one. Appoint, revoke and accept need step-up. `POST api/elections/{id}/officers` is removed. This breaks the additive rule in ADR-0005, but no web or mobile code ever called it.

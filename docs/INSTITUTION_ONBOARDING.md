@@ -1,9 +1,8 @@
 # Standing up a new institution
 
 This is for whoever deploys this app for an institution that is not Govt. Haraganga College Alumni
-Association. It is a checklist of what to supply and in what shape, not a tour of the code. If you
-are working on the app itself, read `docs/WHITE_LABEL_PLAN.md` and Work Package 62 in
-`docs/TODO.md` instead.
+Association. It is a checklist of what to supply and in what shape, not a tour of the code. For work on the app itself, read
+`docs/WHITE_LABEL_PLAN.md` and Work Package 62 in `docs/TODO.md` instead.
 
 ## Read this first
 
@@ -16,41 +15,41 @@ Setting `ORG_PROFILE` changes what the app shows. It does not change what the mi
 the database. Until 62.31 and 82.31 are done, a second institution's database still ends up holding
 GHC's real members' real data, and no config file can undo that after the fact.
 
-## What you supply
+## What to supply
 
-A profile pack: a new folder `profiles/<your-name>/`, built from `profiles/default/` as a starting
+A profile pack: a new folder `profiles/<name>/`, built from `profiles/default/` as a starting
 point. `scripts/new-institution.mjs` is meant to scaffold this automatically, but it has not been
-built yet (Work Package 62.39), so for now you copy the folder by hand.
+built yet (Work Package 62.39), so for now the folder is copied by hand.
 
 | File | What it holds |
 |---|---|
 | `org-config.json` | Branding, contact details, currency, feature toggles, which payment gateways are enabled, and the bilingual locale pack (member terminology, EC role names) |
-| `demo-data/*.json` | Leave these empty, the same shape `profiles/default/demo-data/` ships. This is your institution's own members, events, and history. Nobody else can supply it, so the app starts you with nothing here on purpose |
+| `demo-data/*.json` | Leave these empty, the same shape `profiles/default/demo-data/` ships. This is the institution's own members, events, and history. Nobody else can supply it, so the app starts with nothing here on purpose |
 | `site-content.json`, `seo.json` | Static page text: about/purpose copy, terms and conditions, meta description |
 | `assets/` | Logo, favicon, launcher icons, splash art |
 
-You do not touch `lookups.json`, `roles.json`, or `email_templates.json`. Those are shared,
+Leave `lookups.json`, `roles.json`, and `email_templates.json` alone. They are shared,
 structural files every institution uses unchanged.
 
 ## What a fresh database looks like on day one
 
 Once 62.31 and 82.31 are done: empty. No members, no events, no galleries, no news, no payment
-history, no executive committee. Your first administrator account comes from
+history, no executive committee. The first administrator account comes from
 `appsettings.json`'s `AppSettings:ProtectedSuperAdmins` list, the same way GHC's `shalin` account is
-set up today. It is not seeded from a file, so you name your own first admin in configuration.
+set up today. It is not seeded from a file, so the first admin is named in configuration.
 
-## Settings that are yours to set
+## Settings the institution sets
 
 | Setting | What it controls |
 |---|---|
-| `ORG_PROFILE` | Which `profiles/<name>/` folder drives configuration. Leave it unset and the app uses `default`, the neutral sample pack, and logs a warning at boot to remind you |
-| `ConnectionStrings:*` | Your own database |
+| `ORG_PROFILE` | Which `profiles/<name>/` folder drives configuration. Leave it unset and the app uses `default`, the neutral sample pack, and logs a warning at boot as a reminder |
+| `ConnectionStrings:*` | The institution's own database |
 | `GeneralSettings:PortalBaseUrl` (appsettings, optional) | Only needed if one environment needs a different portal URL than the profile pack's — a staging subdomain, say |
-| `Jwt:Key` | Your own secret. Never copy GHC's |
-| `AppSettings:ProtectedSuperAdmins` | Your first administrator's username(s) |
-| Payment gateway sandbox/production URLs and the `PaymentConfigurations` database rows | Your own gateway credentials, never GHC's. No gateway keys belong in this repository |
+| `Jwt:Key` | A secret made for the institution. Never copy GHC's |
+| `AppSettings:ProtectedSuperAdmins` | The first administrator's username(s) |
+| Payment gateway sandbox/production URLs and the `PaymentConfigurations` database rows | The institution's own gateway credentials, never GHC's. No gateway keys belong in this repository |
 
-If your institution has no local payment gateway, set `EnabledGatewayMethods: []` in your
+If the institution has no local payment gateway, set `EnabledGatewayMethods: []` in its
 `org-config.json` and leave every row in `PaymentConfigurations` disabled. The app already runs
 fine on manual payment alone.
 

@@ -21,10 +21,10 @@ then calls `MigrateAsync()` for whatever is genuinely still pending. It also sel
 whose "applied" history row is a false positive (a same-transaction seed insert that rolled back
 partway through an otherwise-successful migration).
 
-`Program.cs:447-458` wraps the whole thing in a try/catch. If bootstrap throws, the app logs an error
-and falls back to `EnsureCreated()` rather than crashing — a bug in the bootstrap logic degrades
-service instead of taking the app down, at the cost of the schema silently staying stale until a human
-looks at the log.
+The call sits in `GHCAA.API/Extensions/DatabaseBootstrapperExtensions.cs`. If bootstrap throws, the
+app logs a critical error and refuses to start, so it never serves traffic on a schema it could not
+verify. Until 2026-09-09 (commit 8696792d) it logged an error and fell back to `EnsureCreated()`
+instead, which kept the app up but let the schema go stale without anyone noticing.
 
 ## Decision
 

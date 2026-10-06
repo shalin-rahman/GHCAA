@@ -232,7 +232,7 @@ Currently dead (never computed). **Recommendation:** compute
 `ProfileCompletionPercentage` server-side from the same criteria the dashboard checklist uses
 (identity+photo, academic history, professional history, payment) so the two never disagree; and
 **remove the Global Rank tile** rather than ship a fake `#---`, until a contribution-points
-source of truth exists. Needs your confirmation before implementation.
+source of truth exists. Needs confirmation before implementation.
 
 ### 3.3 `[B]` Messaging: verify/add "send to member with no prior thread"
 Confirm the messaging controller accepts a first message to an arbitrary member id (with the
@@ -275,10 +275,10 @@ a shared widget's pixels change (see `ghcaa-preflight` for the CI golden rules).
 
 ---
 
-## Open decisions needed from you
+## Open decisions needed
 
 1. **3.2** — compute Profile Health server-side and drop the Global Rank tile, or keep Rank and
    implement contribution points as well?
-2. **1.1** — accept the proposed portal nav grouping, or supply your own grouping/order?
+2. **1.1** — accept the proposed portal nav grouping, or supply a different grouping/order?
 3. **0.3** — replacing emoji with an SVG icon set changes the look of every nav item and action.
    Confirm before it lands, since it is the most visually far-reaching change here.

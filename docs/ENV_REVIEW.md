@@ -25,7 +25,7 @@
 |---|---|---|---|
 | `ASPNETCORE_ENVIRONMENT` | ASP.NET Core | `Development` | `Preprod` |
 | `ORG_PROFILE` | [`InstitutionProfileProvider.cs`](../GHCAA.Infrastructure/Services/InstitutionProfileProvider.cs) | `ghc` (or `default`) | `ghc` |
-| `DATABASE_URL` | [`DependencyInjection.cs`](../GHCAA.Infrastructure/DependencyInjection.cs) | *(blank — uses PgSqlConnection)* | Render postgres URL |
+| `DATABASE_URL` | [`DependencyInjection.cs`](../GHCAA.Infrastructure/DependencyInjection.cs) | *(blank — uses PgSqlConnection)* | Neon pooled URL (preprod moved off Render Postgres on 2026-07-27) |
 | `ConnectionStrings__PgSqlConnection` | `DependencyInjection.cs` | `Host=localhost;...` | *(not needed — DATABASE_URL used)* |
 | `PORT` | [`Program.cs`](../GHCAA.API/Program.cs) | *(set by Render automatically)* | *(set by Render automatically)* |
 | `Jwt__Key` | [`JwtSigningKeyResolver.cs`](../GHCAA.Application/Security/JwtSigningKeyResolver.cs) | *(blank = ephemeral dev key)* | **Required, ≥32 chars** |
@@ -74,8 +74,8 @@ environment history holds that, so check it when one of these rows appears.
 
 | Where | Value | State |
 |---|---|---|
-| `AppSettings__AllowedOrigins__0` | `https://haragangian.com` | Set on Render by the owner |
-| `AppSettings__ClientUrl` | `https://haragangian.com` | Set on Render by the owner. Outside Development startup fails when it is unset or not in AllowedOrigins (7.19) |
+| `AppSettings__AllowedOrigins__0` | `https://haragangian.com` | Not set yet. Owner sets it on the production service once that service and its DNS exist |
+| `AppSettings__ClientUrl` | `https://haragangian.com` | Not set yet, same owner step. Outside Development startup fails when it is unset or not in AllowedOrigins (7.19) |
 | Web `environment.prod.ts` `apiUrl` | `/api` | Done (7.19). Same origin as the page, so no CORS call |
 | Payment return URL (`GatewaysController`) | ClientUrl | Done (7.19). It used the first AllowedOrigins entry before |
 | CSP `connect-src` | `'self'` plus AllowedOrigins | Done (37.13k) |
@@ -129,20 +129,10 @@ Mobile has **two** `.env` files. Only `.env` is bundled as a Flutter asset (decl
 All `.env*` files are excluded from the build context via `**/.env*`.
 Secrets flow through **Render environment variables only** — never baked into the image.
 
-### Render Service Environment Variables (must be configured in Render dashboard)
-Set these for the **API service** on Render (preprod):
-
-```
-ASPNETCORE_ENVIRONMENT=Preprod
-ORG_PROFILE=ghc
-DATABASE_URL=<Render Postgres Internal URL>
-Jwt__Key=<production-secret-32-chars>
-GmailSettings__Email=<smtp-email>
-GmailSettings__AppPassword=<smtp-app-password>
-AppSettings__AllowedOrigins__0=https://ghcaa-ryl6.onrender.com
-AppSettings__ClientUrl=https://ghcaa-ryl6.onrender.com
-DOTNET_hostBuilder__reloadConfigOnChange=false
-```
+### Render service variables
+The full list of what to set on Render and GitHub, where each value comes from, and what breaks
+without it is in [`DEPLOYMENT_CHECKLIST.md`](DEPLOYMENT_CHECKLIST.md) section 1, one-time setup.
+This file keeps only what each variable does in the code (section 1 above).
 
 ---
 
@@ -183,6 +173,6 @@ drives the Angular build. For a different institution: `docker build --build-arg
 
 ---
 
-## 5. Lookups & Seeding Model
+## 6. Lookups & Seeding Model
 - Lookups are seeded exclusively via EF Core baseline migrations (`InitialBaseline`) and managed at runtime via admin CRUD API (`/api/lookups`).
 - Initial OrgConfig defaults are seeded dynamically from the active profile (`profiles/<name>/org-config.json` or `profiles/default/org-config.json`) on first boot when the DB is clean.

@@ -382,7 +382,9 @@ dl.legend dd {{ margin:0; font-size:13px; color:var(--ink-2); }}
   </div>
   <div class="fresh">
     <span>Built from <code>docs/TODO.md</code> on {generated}</span>
-    <button class="reload" type="button" onclick="location.reload()">Reload</button>
+    <span>The page is a fixed file. To update the numbers, run
+      <code>python docs/book/build/tracker_page.py</code>, then reload.</span>
+    <button class="reload" type="button" onclick="location.reload()">Reload page</button>
   </div>
 </header>
 

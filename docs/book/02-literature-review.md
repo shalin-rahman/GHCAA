@@ -150,8 +150,8 @@ Newman's account of microservices makes the organisational precondition explicit
 deployable services pay off when independent teams own them [17]. Dragoni et al., surveying the
 field, similarly present the benefits as coupled to operational maturity, including per-service
 deployment, monitoring and data ownership [18]. Fowler's "monolith first" position is the direct
-corollary and the one relevant here: begin with a modular monolith, because you cannot yet identify
-the service boundaries that matter, and because the operational cost of distribution is paid
+corollary and the one relevant here: begin with a modular monolith, because the service boundaries that matter
+cannot yet be identified, and because the operational cost of distribution is paid
 immediately while the benefit arrives only at scale [16].
 
 For a system with one maintainer, the calculation is not close. Distribution converts in-process

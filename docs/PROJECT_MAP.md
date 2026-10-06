@@ -931,9 +931,8 @@ every migration in order, applying it for real; a Postgres "object already exist
 migration's effect predates migration tracking, so it is marked applied without re-running it — any
 other failure aborts), and a database with real migration history (self-heals a false-baselined
 migration — one whose "applied" row is a false positive because a same-transaction seed insert rolled
-back partway — then calls `Database.MigrateAsync()`). On any bootstrap failure the boot logs an error
-and falls back to `EnsureCreated()` rather than crash, so a migration bug degrades to the old status
-quo instead of taking the app down. `ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))`
+back partway — then calls `Database.MigrateAsync()`). On any bootstrap failure the boot logs a critical error
+and the app refuses to start, so it never runs on a schema it could not verify. `ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))`
 is set everywhere a context is configured — see `gotcha_pending_model_changes_seed`, that warning is
 non-deterministic `HasData` seed churn, not real schema drift, and scaffolding a migration for it is
 wrong. Validated 2026-09 by a full migration-chain dry run against a throwaway database.
@@ -2086,7 +2085,7 @@ assert on exported pure functions rather than rendered templates.
 
 ---
 
-## Impact Guide — When You Change Something
+## Impact Guide: When Something Changes
 
 | Change | Files to Update |
 |---|---|

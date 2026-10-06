@@ -189,7 +189,7 @@ Full step-by-step detail, exact files, entities, migrations, endpoints and tests
 
 Built as of 2026-10-06: items 1 to 7 (37.1w, 37.12a to 37.12f). Items 8 to 12 (37.12g to 37.12j, and
 37.13a to 37.13g) are still open in `docs/TODO.md`. After this plan was written, the code review and
-the rules work added 37.13h to 37.13y, all built: second person before the count, count executor and
+the rules work added 37.13h to 37.13z, all built: second person before the count, count executor and
 `CountRequesterOnly`, the settings audit, the rules freeze and SuperAdmin unlock, emergency revoke, the
 Returning Officer flag, the pre-polling warning, the duplicate-request guard, the expiry sweep, and the
 officials panel on web and mobile. `plan-officials.md` has the gaps table for those.

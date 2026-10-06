@@ -181,7 +181,7 @@ Acceptance Scenarios:
 3. Given a valid spreadsheet, When GET api/admin/members/import/export, Then an
    .xlsx workbook of the member registry is streamed back.
 
-### User Story 8 - See everything pending your action in one place (Priority: P3)
+### User Story 8 - See everything awaiting action in one place (Priority: P3)
 
 Why this priority: a read-only aggregation convenience over five other domains' pending queues;
 adds no new state transitions.

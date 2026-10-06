@@ -174,8 +174,8 @@ and marking one applied without re-running it whenever Postgres reports its targ
 exists — then calls `MigrateAsync()` for anything genuinely still pending. It also self-heals a
 migration whose "applied" history row is a false positive (a same-transaction seed insert that rolled
 back partway through a migration that otherwise succeeded). Any unhandled failure during bootstrap
-falls back to `EnsureCreated()` rather than crash the app, so a bug here degrades to the old status
-quo instead of taking preprod down.
+logs a critical error and stops the app from starting, so it never runs on a schema it could not
+verify (`DatabaseBootstrapperExtensions.cs`).
 
 `ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))` is set on every
 context. That warning is non-deterministic `HasData` seed churn (see `gotcha_pending_model_changes_seed`

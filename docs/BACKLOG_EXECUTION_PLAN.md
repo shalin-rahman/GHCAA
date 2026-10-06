@@ -95,7 +95,7 @@ error parsing (audit didn't find one — add if missing, small and mechanical).
 `RolesController.CreateRole` (line 82) and `RemoveRole` (line 98) are the only two role-mutating
 actions in the controller without `[GHCAA.API.Filters.RequireStepUp]` — `AssignRole` and four
 others have it. **Fix:** add the attribute to both actions, same pattern.
-**Side effect you must not skip:** `AuthorizationPolicyReflectionTests.cs` (from 84.44) reflects
+**Side effect that must not be skipped:** `AuthorizationPolicyReflectionTests.cs` (from 84.44) reflects
 over every `[RequireStepUp]` action against `evidence/authorization-catalog.md`'s expected table
 (321 entries). Adding step-up here requires updating that catalog in the same change or the
 reflection test fails.
@@ -119,7 +119,7 @@ recovery path. **Reuse:** port the pattern from `GHCAA.Web`'s
 `RetryInterceptor`/auth interceptor (per 8.6). Needs a device-confirmation UI step per the
 item's own acceptance criteria — don't skip that to just handle the 403.
 **Depends on:** 84.10 landing first makes sense (so the full step-up-protected action set is
-final before you build the client handling for it), but not a hard blocker.
+final before the client handling for it is built), but not a hard blocker.
 
 ### 84.14 — Nagad gateway is fake (P2)
 `NagadGateway.InitiatePaymentAsync` (~lines 23-29) always returns
@@ -127,7 +127,7 @@ final before you build the client handling for it), but not a hard blocker.
 Nagad as selectable (`PaymentMethod.Nagad`, SortOrder 2) — presented to users as working. Two
 valid fixes, pick one: build it out against `BasePaymentGateway`/other working gateways as the
 template, or hide the method from selection until it's built. **Do not leave it selectable and
-broken** — that's the actual bug, independent of which fix you choose.
+broken** — that's the actual bug, independent of which fix is chosen.
 **Depends on:** none. Loosely related to 84.13 (same payments spec 015) but no hard dependency.
 
 ### 84.13 — Dead payment method with no caller (P3)
@@ -223,7 +223,7 @@ migration (nothing exists today — confirmed via grep, only doc references). **
 **90.3**'s `AdminReportsController` follows the existing `[Authorize(Roles = "Admin,SuperAdmin")]`
 convention from `CampaignsController`/`MentorshipController`. **90.4**'s Angular page: **consume
 88.5's `common/data-grid/` component in read-only mode**, not `directory.ts`'s markup as TODO.md's
-current text suggests — that text predates the grid decision; update it when you start 90.4.
+current text suggests — that text predates the grid decision; update it when 90.4 starts.
 **90.5** adds `GHCAA.Tests/Services/ReportServiceTests.cs` and a Vitest spec for the report
 builder, both FR-tagged per `feedback_fr_nfr_tag_new_tests`.
 **Depends on:** 90.1→90.2→90.3→90.4→90.5 strictly; 90.4 additionally depends on 88.5.
