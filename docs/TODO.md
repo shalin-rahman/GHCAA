@@ -2492,4 +2492,6 @@ becomes Declined and an accepted one becomes Completed; both members get a notif
 note is added after the mentor's own. The new endpoint is `POST /api/mentorship/admin/{id}/close`
 under the AdminOnly policy. Declined and completed requests cannot be closed again.
 **Acceptance:** met; the mentorship service and policy tests pass (12), the admin mentorship spec
-passes within the 625-test web suite, and the close flow was checked in the browser.
+passes within the 625-test web suite, and the close flow was checked in the browser. CI's
+`authz_catalog.py --check` failed on the new route until the authorization catalog was regenerated
+(357 routes, AdminOnly 130).

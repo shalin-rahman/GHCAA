@@ -38,7 +38,7 @@ then puts Admin and SuperAdmin callers into the admin group with `IsInRole("Admi
 ## 2. Combinations in use
 
 One row per route template, so an action with a legacy alias route counts once per alias. The
-script found 356 routes. That matches the 356 `[Http*]` attributes in the folder.
+script found 357 routes. That matches the 357 `[Http*]` attributes in the folder.
 
 | Combination | Routes | Controllers |
 |---|---|---|
@@ -52,7 +52,7 @@ script found 356 routes. That matches the 356 `[Http*]` attributes in the folder
 | MemberOnly + in-body Admin or SuperAdmin | 1 | Gallery |
 | ElectionStaff | 1 | ElectionAppointments |
 | ElectionStaff + step-up | 17 | AdminElections, ElectionAppointments, Elections |
-| AdminOnly | 129 | Activity, Admin, AdminGovernance, AdminPoll, AdminSocialAuth, Archive, Campaigns, Communication, CredentialVerification, Events, Financials, Gallery, JobHub, Lookups, MemberImport, Mentorship, News, PendingApprovals, Scholarships, SiteContent, Theme |
+| AdminOnly | 130 | Activity, Admin, AdminGovernance, AdminPoll, AdminSocialAuth, Archive, Campaigns, Communication, CredentialVerification, Events, Financials, Gallery, JobHub, Lookups, MemberImport, Mentorship, News, PendingApprovals, Scholarships, SiteContent, Theme |
 | AdminOnly + in-body SuperAdmin | 5 | Admin |
 | AdminOnly + step-up | 4 | Admin, AdminElections, AdminGovernance, Elections |
 | AdminOnly + step-up + in-body SuperAdmin | 1 | Admin |
@@ -71,7 +71,7 @@ Where the policy was set:
 | Authenticated | 17 | 70 | 0 |
 | MemberOnly | 7 | 0 | 0 |
 | ElectionStaff | 12 | 6 | 0 |
-| AdminOnly | 90 | 49 | 0 |
+| AdminOnly | 91 | 49 | 0 |
 | SuperAdminOnly | 15 | 26 | 0 |
 
 No route relies on the fallback policy alone. Every action or its controller names its rule.
@@ -201,11 +201,11 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 | POST | `/api/me/election-appointments/{id:int}/decline` | `ElectionAppointmentsController.Decline` (line 76) |  |
 | GET | `/api/members/family` | `FamilyLinkController.GetFamily` (line 99) |  |
 | POST | `/api/members/family` | `FamilyLinkController.Send` (line 35) |  |
-| POST | `/api/mentorship` | `MentorshipController.SendRequest` (line 33) |  |
-| GET | `/api/mentorship/received` | `MentorshipController.GetReceived` (line 61) |  |
-| GET | `/api/mentorship/sent` | `MentorshipController.GetSent` (line 52) |  |
-| POST | `/api/mentorship/{id}/complete` | `MentorshipController.MarkComplete` (line 80) |  |
-| POST | `/api/mentorship/{id}/respond` | `MentorshipController.Respond` (line 70) |  |
+| POST | `/api/mentorship` | `MentorshipController.SendRequest` (line 34) |  |
+| GET | `/api/mentorship/received` | `MentorshipController.GetReceived` (line 62) |  |
+| GET | `/api/mentorship/sent` | `MentorshipController.GetSent` (line 53) |  |
+| POST | `/api/mentorship/{id}/complete` | `MentorshipController.MarkComplete` (line 81) |  |
+| POST | `/api/mentorship/{id}/respond` | `MentorshipController.Respond` (line 71) |  |
 | GET | `/api/messaging/conversations` | `MessagingController.GetConversations` (line 24) |  |
 | GET | `/api/messaging/history/{otherUserId}` | `MessagingController.GetChatHistory` (line 34) |  |
 | POST | `/api/messaging/mark-read/{messageId}` | `MessagingController.MarkAsRead` (line 56) |  |
@@ -439,7 +439,8 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 | POST | `/api/lookups` | `LookupsController.CreateLookup` (line 57) |  |
 | DELETE | `/api/lookups/{id}` | `LookupsController.DeleteLookup` (line 74) |  |
 | PUT | `/api/lookups/{id}` | `LookupsController.UpdateLookup` (line 65) |  |
-| GET | `/api/mentorship/admin/all` | `MentorshipController.GetAllForAdmin` (line 91) |  |
+| GET | `/api/mentorship/admin/all` | `MentorshipController.GetAllForAdmin` (line 92) |  |
+| POST | `/api/mentorship/admin/{id}/close` | `MentorshipController.AdminClose` (line 100) |  |
 | POST | `/api/news` | `NewsController.CreateNews` (line 70) |  |
 | GET | `/api/news/News/Pending` | `NewsController.GetPendingSubmissions` (line 62) |  |
 | GET | `/api/news/admin` | `NewsController.GetAllNewsForAdmin` (line 52) |  |
