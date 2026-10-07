@@ -14,11 +14,12 @@ import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel'
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 
 @Component({
     selector: 'app-admin-news',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
+    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, ModalHeaderComponent],
     templateUrl: './admin-news.html',
     styleUrl: './admin-news.scss'
 })

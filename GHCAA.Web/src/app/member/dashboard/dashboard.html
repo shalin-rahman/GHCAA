@@ -19,8 +19,8 @@
             </div>
             <div class="completion-stat">
                 <span class="pct">{{ profileCompletion }}%</span>
-                <div class="progress-container">
-                    <div class="progress-bar" [style.width.%]="profileCompletion"></div>
+                <div class="progress-track md">
+                    <div class="progress-fill" [style.width.%]="profileCompletion"></div>
                 </div>
             </div>
         </div>
@@ -62,55 +62,55 @@
     }
 
     <!-- Quick Stats Row -->
-    <div class="stats-row">
+    <div class="stats-grid cols-4">
         <!-- Membership Card -->
-        <div class="glass-card stat-card profile-summary">
-            <div class="icon-box">🏆</div>
+        <div class="glass-card stat-card accent-bar profile-summary">
+            <div class="stat-icon">🏆</div>
             @if (profile()) {
-            <div class="stat-info">
-                <div class="val">{{ profile().membershipNumber || 'Pending' }}</div>
+            <div class="stat-body">
+                <div class="stat-value">{{ profile().membershipNumber || 'Pending' }}</div>
                 <!-- 35.2: helper already returns the full label ("Guest Member") — do not append " Member". -->
-                <small>{{ getMembershipType(profile().membershipType) }}</small>
+                <small class="stat-label">{{ getMembershipType(profile().membershipType) }}</small>
                 <span class="status-badge" [class]="getStatusLabel(profile().status).toLowerCase()">
                     {{ getStatusLabel(profile().status) }}
                 </span>
             </div>
             } @else {
-            <div class="stat-info">
-                <div class="val">—</div>
-                <small>Membership</small>
+            <div class="stat-body">
+                <div class="stat-value">—</div>
+                <small class="stat-label">Membership</small>
             </div>
             }
         </div>
 
         <!-- Profile Completion -->
-        <div class="glass-card stat-card">
-            <div class="icon-box">📊</div>
-            <div class="stat-info">
-                <div class="val">{{ profileCompletion }}%</div>
-                <small>Profile Complete</small>
-                <div class="mini-progress">
-                    <div class="mini-bar" [style.width]="profileCompletion + '%'"></div>
+        <div class="glass-card stat-card accent-bar">
+            <div class="stat-icon">📊</div>
+            <div class="stat-body">
+                <div class="stat-value">{{ profileCompletion }}%</div>
+                <small class="stat-label">Profile Complete</small>
+                <div class="progress-track sm mt-2">
+                    <div class="progress-fill" [style.width.%]="profileCompletion"></div>
                 </div>
             </div>
         </div>
 
         <!-- Contribution Points -->
-        <div class="glass-card stat-card">
-            <div class="icon-box">⭐</div>
-            <div class="stat-info">
-                <div class="val">{{ contributionPoints }}</div>
-                <small>Contribution Points</small>
+        <div class="glass-card stat-card accent-bar">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-body">
+                <div class="stat-value">{{ contributionPoints }}</div>
+                <small class="stat-label">Contribution Points</small>
                 <span class="rank-badge">Rank: {{ memberRank }}</span>
             </div>
         </div>
 
         <!-- Upcoming Events -->
-        <div class="glass-card stat-card">
-            <div class="icon-box">🎟️</div>
-            <div class="stat-info">
-                <div class="val">{{ eventCount() }}</div>
-                <small>Upcoming Events</small>
+        <div class="glass-card stat-card accent-bar">
+            <div class="stat-icon">🎟️</div>
+            <div class="stat-body">
+                <div class="stat-value">{{ eventCount() }}</div>
+                <small class="stat-label">Upcoming Events</small>
             </div>
         </div>
     </div>
@@ -136,7 +136,7 @@
                         </div>
                     </a>
                     } @empty {
-                    <div class="empty-state">
+                    <div class="empty-state compact">
                         <p>No news articles yet.</p>
                     </div>
                     }
@@ -212,7 +212,7 @@
                     </div>
                 </div>
                 } @empty {
-                <div class="empty-state">
+                <div class="empty-state compact">
                     <p>No new notifications.</p>
                 </div>
                 }
@@ -248,7 +248,7 @@
                 </div>
             </div>
             } @empty {
-            <div class="empty-state">
+            <div class="empty-state compact">
                 <p>Loading member network...</p>
             </div>
             }

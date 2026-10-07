@@ -149,10 +149,50 @@ namespace GHCAA.Infrastructure.Services
                     r.Message,
                     r.Status,
                     r.RequestedAt,
-                    Requester = r.Requester == null ? null : new { r.Requester.Id, r.Requester.FullName },
-                    Mentor = r.Mentor == null ? null : new { r.Mentor.Id, r.Mentor.FullName }
+                    r.RespondedAt,
+                    r.ResponseNote,
+                    Requester = r.Requester == null ? null : new { r.Requester.Id, r.Requester.FullName, r.Requester.MembershipNumber },
+                    Mentor = r.Mentor == null ? null : new { r.Mentor.Id, r.Mentor.FullName, r.Mentor.MembershipNumber }
                 })
                 .ToListAsync(ct);
+        }
+
+        // Admin clean-up for requests nobody is acting on. A pending one becomes Declined and an
+        // accepted one becomes Completed, so both members see a normal end state. Declined and
+        // completed requests are already closed and return false.
+        public async Task<bool> AdminCloseAsync(int requestId, string? note, CancellationToken ct = default)
+        {
+            var request = await _db.MentorshipRequests.FirstOrDefaultAsync(r => r.Id == requestId, ct);
+            if (request == null) return false;
+
+            if (request.Status == MentorshipStatus.Pending)
+                request.Status = MentorshipStatus.Declined;
+            else if (request.Status == MentorshipStatus.Accepted)
+                request.Status = MentorshipStatus.Completed;
+            else
+                return false;
+
+            if (!string.IsNullOrWhiteSpace(note))
+            {
+                // Keep the mentor's own note and add the admin's after it. The column holds 500 characters.
+                var adminNote = $"Closed by admin: {note.Trim()}";
+                var combined = string.IsNullOrWhiteSpace(request.ResponseNote)
+                    ? adminNote
+                    : $"{request.ResponseNote}\n{adminNote}";
+                request.ResponseNote = combined.Length > 500 ? combined[..500] : combined;
+            }
+            request.RespondedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Mentorship request {Id} closed by admin as {Status}", request.Id, request.Status);
+
+            const string message = "An administrator closed a mentorship request you are part of.";
+            await _notifications.CreateNotificationAsync(
+                request.RequesterId, "Mentorship Update", message, Enums.NotificationType.GeneralSystem, cancellationToken: ct);
+            await _notifications.CreateNotificationAsync(
+                request.MentorId, "Mentorship Update", message, Enums.NotificationType.GeneralSystem, cancellationToken: ct);
+
+            return true;
         }
     }
 }

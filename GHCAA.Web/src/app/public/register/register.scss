@@ -404,20 +404,6 @@
         margin-bottom: 0.75rem;
         display: block;
     }
-
-    .progress-container {
-        height: 8px;
-        background: var(--border-color);
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    .p-bar {
-        height: 100%;
-        background: var(--accent-color);
-        box-shadow: var(--shadow-gold);
-        transition: 1s cubic-bezier(0.4, 0, 0.2, 1);
-    }
 }
 
 @media (max-width: 992px) {

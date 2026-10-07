@@ -25,15 +25,6 @@
     }
 }
 
-.thumb {
-    width: 60px;
-    height: 45px;
-    border-radius: var(--radius-sm);
-    object-fit: cover;
-    flex-shrink: 0;
-    border: 1px solid var(--glass-border);
-}
-
 .article-preview {
     .preview-hero {
         width: 100%;

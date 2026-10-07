@@ -19,11 +19,12 @@ import { ImgFallbackDirective } from '../../common/directives/img-fallback.direc
 import { SITE_CONTENT } from '../../core/config/site-content.generated';
 import { interpolateOrgTemplate } from '../../core/utils/org-template';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaymentPortalComponent, LogoSpinnerComponent, Icon, ImgFallbackDirective, AppCurrencyPipe],
+  imports: [CommonModule, FormsModule, PaymentPortalComponent, LogoSpinnerComponent, Icon, ImgFallbackDirective, AppCurrencyPipe, ModalHeaderComponent],
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })

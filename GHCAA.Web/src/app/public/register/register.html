@@ -44,8 +44,8 @@
                 @if (!submitted()) {
                 <div class="mobile-wizard-header show-mobile">
                     <span class="step-badge">Phase {{ currentStep() }} of 3</span>
-                    <div class="progress-container">
-                        <div class="p-bar" [style.width]="(currentStep() * 33.3) + '%'"></div>
+                    <div class="progress-track md">
+                        <div class="progress-fill" [style.width]="(currentStep() * 33.3) + '%'"></div>
                     </div>
                 </div>
                 }
@@ -477,14 +477,10 @@
 @if (showTerms()) {
 <div class="modal-overlay" (click)="showTerms.set(false)">
     <div class="modal-box reveal-top max-w-3xl" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <div class="flex flex-col">
-                <h2 class="text-accent font-black uppercase tracking-tighter leading-none mb-1">{{ termsHeading() }}</h2>
-                <h3 class="text-xs text-white/60 font-medium uppercase tracking-widest">Membership Registration: Terms and Conditions</h3>
-                <span class="text-[10px] text-muted uppercase font-bold mt-2">Effective Date: {{ termsContent.effectiveDate }}</span>
-            </div>
-            <button class="close-btn" (click)="showTerms.set(false)">×</button>
-        </div>
+        <app-modal-header [title]="termsHeading()" headingClass="text-accent" (closed)="showTerms.set(false)">
+            <p class="modal-subtitle">Membership Registration: Terms and Conditions</p>
+            <p class="modal-subtitle">Effective Date: {{ termsContent.effectiveDate }}</p>
+        </app-modal-header>
         <div class="modal-body terms-scrollable p-8">
             <div class="prose max-w-none text-xs leading-relaxed text-main/90 space-y-8">
                 <div class="premium-alert bg-accent/5 border border-accent/20 p-6 rounded-xl italic text-sm">

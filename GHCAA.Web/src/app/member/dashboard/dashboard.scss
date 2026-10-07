@@ -41,20 +41,6 @@
                 line-height: 1;
                 margin-bottom: 0.5rem;
             }
-
-            .progress-container {
-                height: 8px;
-                background: var(--surface-subtle);
-                border-radius: 10px;
-                overflow: hidden;
-
-                .progress-bar {
-                    height: 100%;
-                    background: var(--gold-gradient);
-                    border-radius: 10px;
-                    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-                }
-            }
         }
     }
 
@@ -139,97 +125,14 @@
     }
 }
 
-// ── Stats Row ──────────────────────────────────────────────
-.stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.25rem;
-
-    @media (max-width: 1100px) { grid-template-columns: repeat(2, 1fr); }
-    @media (max-width: 580px)  { grid-template-columns: 1fr 1fr; }
-    @media (max-width: 380px)  { grid-template-columns: 1fr; }
-}
-
-.stat-card {
-    padding: 1.5rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 1.1rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0;
-        width: 3px; height: 100%;
-        background: var(--gold-gradient);
-        opacity: 0.4;
-        transition: opacity 0.25s;
-    }
-
-    &:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-md);
-        &::before { opacity: 1; }
-    }
-
-    .icon-box {
-        width: 52px; height: 52px;
-        background: var(--surface-color);
-        border: 1px solid var(--glass-border);
-        border-radius: var(--radius-md);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.4rem;
-        flex-shrink: 0;
-    }
-
-    .stat-info {
-        display: flex;
-        flex-direction: column;
-        gap: 0.15rem;
-        min-width: 0;
-
-        .val {
-            font-size: 1.6rem;
-            font-weight: 900;
-            line-height: 1;
-            color: var(--text-main);
-        }
-
-        small {
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-size: 0.67rem;
-            letter-spacing: 0.8px;
-        }
-
-        .rank-badge {
-            font-size: 0.65rem;
-            font-weight: 800;
-            color: var(--accent-text);
-            margin-top: 0.25rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .mini-progress {
-            height: 3px;
-            background: var(--surface-subtle);
-            border-radius: 2px;
-            margin-top: 0.4rem;
-            overflow: hidden;
-
-            .mini-bar {
-                height: 100%;
-                background: var(--gold-gradient);
-                border-radius: 2px;
-                transition: width 1s ease-out;
-            }
-        }
-    }
+// Extra line under the contribution-points stat.
+.rank-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--accent-text);
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 // ── Main Row ───────────────────────────────────────────────
@@ -358,15 +261,6 @@
     }
 }
 
-.feed-items,
-.alert-list,
-.members-compact-grid {
-    .empty-state {
-        padding: 1.5rem;
-        grid-column: 1 / -1;
-    }
-}
-
 // ── Alert widget ───────────────────────────────────────────
 .alert-widget {
     padding: 1.75rem;
@@ -466,5 +360,4 @@
     .activity-feed { padding: 1.25rem; }
     .alert-widget  { padding: 1.25rem; max-height: none; }
     .networking-widget { padding: 1.25rem; }
-    .stat-card { padding: 1.1rem; }
 }

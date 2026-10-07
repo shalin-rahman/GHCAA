@@ -25,8 +25,8 @@
         <div class="glass-card stat-card ripple-effect" routerLink="/admin/members" tabindex="0" role="link" [attr.aria-label]="'Manage Total Alumni: ' + (stats()?.totalMembers || 0)">
             <div class="stat-icon">👥</div>
             <div class="stat-body">
-                <h3>{{ stats()?.totalMembers || 0 }}</h3>
-                <p>Total Alumni</p>
+                <h3 class="stat-value">{{ stats()?.totalMembers || 0 }}</h3>
+                <p class="stat-label">Total Alumni</p>
             </div>
             <span class="pill stat-cta">Manage →</span>
         </div>
@@ -34,8 +34,8 @@
         <div class="glass-card stat-card ripple-effect" routerLink="/admin/members" tabindex="0" role="link" [attr.aria-label]="'Manage Active Members: ' + (stats()?.active || 0)">
             <div class="stat-icon">✅</div>
             <div class="stat-body">
-                <h3>{{ stats()?.active || 0 }}</h3>
-                <p>Active Members</p>
+                <h3 class="stat-value">{{ stats()?.active || 0 }}</h3>
+                <p class="stat-label">Active Members</p>
             </div>
             <span class="pill stat-cta">Manage →</span>
         </div>
@@ -43,8 +43,8 @@
         <div class="glass-card stat-card ripple-effect" routerLink="/admin/approvals" tabindex="0" role="link" [attr.aria-label]="'View Pending Approvals: ' + (stats()?.applied || 0)">
             <div class="stat-icon">📝</div>
             <div class="stat-body">
-                <h3>{{ stats()?.applied || 0 }}</h3>
-                <p>Pending Approvals</p>
+                <h3 class="stat-value">{{ stats()?.applied || 0 }}</h3>
+                <p class="stat-label">Pending Approvals</p>
             </div>
             <span class="pill stat-cta">View All →</span>
         </div>
@@ -52,18 +52,18 @@
         <div class="glass-card stat-card ripple-effect" routerLink="/admin/members" tabindex="0" role="link" [attr.aria-label]="'View Inactive Members: ' + inactiveCount">
             <div class="stat-icon">😴</div>
             <div class="stat-body">
-                <h3>{{ inactiveCount }}</h3>
-                <p>Inactive Members</p>
+                <h3 class="stat-value">{{ inactiveCount }}</h3>
+                <p class="stat-label">Inactive Members</p>
             </div>
             <span class="pill stat-cta">View →</span>
         </div>
 
         @if (nav.isSuperAdmin()) {
-        <div class="glass-card stat-card ripple-effect balance-card" routerLink="/admin/ledger" tabindex="0" role="link" aria-label="View Net Fund Balance in Ledger">
+        <div class="glass-card stat-card ripple-effect highlight" routerLink="/admin/ledger" tabindex="0" role="link" aria-label="View Net Fund Balance in Ledger">
             <div class="stat-icon">💰</div>
             <div class="stat-body">
-                <h3>{{ stats()?.balance == null ? 'Restricted' : (stats()!.balance! | appCurrency) }}</h3>
-                <p>Net Fund Balance</p>
+                <h3 class="stat-value">{{ stats()?.balance == null ? 'Restricted' : (stats()!.balance! | appCurrency) }}</h3>
+                <p class="stat-label">Net Fund Balance</p>
             </div>
             <span class="pill stat-cta">Ledger →</span>
         </div>
@@ -72,8 +72,8 @@
         <div class="glass-card stat-card ripple-effect" routerLink="/admin/news" tabindex="0" role="link" [attr.aria-label]="'Manage Published Articles: ' + publishedArticleCount()">
             <div class="stat-icon">📰</div>
             <div class="stat-body">
-                <h3>{{ publishedArticleCount() }}</h3>
-                <p>Published Articles</p>
+                <h3 class="stat-value">{{ publishedArticleCount() }}</h3>
+                <p class="stat-label">Published Articles</p>
             </div>
             <span class="pill stat-cta">Manage →</span>
         </div>

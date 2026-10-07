@@ -3,15 +3,6 @@
     align-items: center;
     gap: 1.25rem;
 
-    .thumb {
-        width: 60px;
-        height: 45px;
-        border-radius: var(--radius-sm);
-        object-fit: cover;
-        flex-shrink: 0;
-        border: 1px solid var(--glass-border);
-    }
-
     .txt {
         strong {
             display: block;

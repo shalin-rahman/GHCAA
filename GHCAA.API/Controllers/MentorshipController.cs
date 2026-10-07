@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
@@ -92,6 +93,21 @@ namespace GHCAA.API.Controllers
         {
             return Ok(await _service.GetAllForAdminAsync(ct));
         }
+
+        /// <summary>Admin closes an open request: pending becomes Declined, accepted becomes Completed.</summary>
+        [HttpPost("admin/{id}/close")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
+        public async Task<IActionResult> AdminClose(int id, [FromBody] AdminCloseMentorshipDto? dto, CancellationToken ct)
+        {
+            var success = await _service.AdminCloseAsync(id, dto?.Note, ct);
+            return success ? Ok() : NotFound();
+        }
+    }
+
+    public class AdminCloseMentorshipDto
+    {
+        [MaxLength(400)]
+        public string? Note { get; set; }
     }
 
     public class SendMentorshipRequestDto

@@ -142,8 +142,8 @@
 @if (selectedMember()) {
 <div class="modal-overlay" (click)="closeDetail()">
     <div class="modal-box" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <div class="flex items-center">
+        <app-modal-header (closed)="closeDetail()">
+            <div lead class="flex items-center gap-3">
                 <div class="relative group cursor-pointer" (click)="isEditing() && photoInput.click()"
                     [title]="isEditing() ? 'Click to change photo' : ''">
                     @if (photoPreview()) {
@@ -162,24 +162,22 @@
                 <input #photoInput type="file" accept="image/jpeg,image/png,image/webp"
                     (change)="onAdminPhotoSelected($event)" class="hidden">
                 @if (isEditing() && photoPreview()) {
-                <button class="btn btn-accent btn-sm ml-3" (click)="uploadMemberPhoto()"><app-icon name="save" [size]="14"></app-icon> Save Photo</button>
+                <button class="btn btn-accent btn-sm" (click)="uploadMemberPhoto()"><app-icon name="save" [size]="14"></app-icon> Save Photo</button>
                 }
-                <div class="header-info">
-                    @if (isEditing()) {
-                    <input type="text" [(ngModel)]="selectedMember().fullName" #nameInput="ngModel" required
-                        class="edit-input title-input w-full"
-                        [class.border-red-500]="nameInput.invalid && nameInput.touched" placeholder="Full Name">
-                    <input type="text" [(ngModel)]="selectedMember().membershipNumber"
-                        class="edit-input sub-input w-full mt-2" placeholder="Membership Number">
-                    } @else {
-                    <h3>{{ selectedMember()?.fullName }}</h3>
-                    <small>{{ selectedMember()?.membershipNumber || 'Pending Membership ID' }}</small>
-                    }
-                </div>
             </div>
+            @if (isEditing()) {
+            <input type="text" [(ngModel)]="selectedMember().fullName" #nameInput="ngModel" required
+                class="edit-input title-input w-full"
+                [class.border-red-500]="nameInput.invalid && nameInput.touched" placeholder="Full Name">
+            <input type="text" [(ngModel)]="selectedMember().membershipNumber"
+                class="edit-input sub-input w-full" placeholder="Membership Number">
+            } @else {
+            <h3>{{ selectedMember()?.fullName }}</h3>
+            <p class="modal-subtitle">{{ selectedMember()?.membershipNumber || 'Pending Membership ID' }}</p>
+            }
 
             <!-- Administrative Signature Oversight (Inline) -->
-            <div class="header-photo-controls flex items-center gap-4 ml-auto mr-12 bg-black/10 p-2 rounded-xl border border-white/5">
+            <div aside class="header-photo-controls flex items-center gap-4 bg-black/10 p-2 rounded-xl border border-white/5">
                 <div class="relative group cursor-pointer" (click)="isEditing() && signatureInput.click()" [title]="isEditing() ? 'Click to change signature' : ''">
                     @if (signaturePreview()) {
                         <img [src]="signaturePreview()" class="h-12 w-24 object-contain bg-white/20 rounded-md" alt="Signature Preview" appImgFallback>
@@ -197,9 +195,7 @@
                     <button class="btn btn-accent btn-xs" (click)="uploadMemberSignature()"><app-icon name="save" [size]="14"></app-icon> Save</button>
                 }
             </div>
-
-            <button (click)="closeDetail()" class="close-btn"><app-icon name="close" [size]="18"></app-icon></button>
-        </div>
+        </app-modal-header>
 
         <div class="modal-body">
             <!-- Modal Actions Bar -->

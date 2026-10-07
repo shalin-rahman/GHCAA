@@ -23,9 +23,9 @@
             </div>
         </div>
 
-        <div class="task-list">
-            <div *ngFor="let task of tasks()" class="task-row">
-                <div class="task-main">
+        <div>
+            <div *ngFor="let task of tasks()" class="item-row">
+                <div class="item-main">
                     <button class="task-check" (click)="toggleTask(task.id)" [disabled]="togglingTaskId() === task.id"
                             [class.done]="task.isCompleted" [attr.aria-label]="'Toggle ' + task.title">
                         <app-icon *ngIf="task.isCompleted" name="check" [size]="14"></app-icon>
@@ -43,37 +43,43 @@
                 </button>
             </div>
 
-            <div *ngIf="tasks().length === 0" class="empty-state">
+            <div *ngIf="tasks().length === 0" class="empty-state compact">
                 <p>No tasks assigned yet.</p>
             </div>
         </div>
     </div>
 
     <div *ngIf="activeOpTab() === 'budget'" class="ops-section animate-fade-in">
-        <div class="budget-tiles">
-            <div class="glass-card budget-tile">
-                <p class="tile-label">Estimated Budget</p>
-                <div class="budget-edit">
-                    <span class="tile-value">{{ orgConfig.config()?.currency?.symbol }}</span>
-                    <input type="number" [(ngModel)]="newBudget.estimatedTotal" (blur)="updateBudget()" aria-label="Estimated budget">
+        <div class="stats-grid auto">
+            <div class="glass-card stat-card">
+                <div class="stat-body">
+                    <p class="stat-label">Estimated Budget</p>
+                    <div class="budget-edit">
+                        <span class="stat-value">{{ orgConfig.config()?.currency?.symbol }}</span>
+                        <input type="number" [(ngModel)]="newBudget.estimatedTotal" (blur)="updateBudget()" aria-label="Estimated budget">
+                    </div>
+                    <p class="text-muted">Edit the figure and tab out to save.</p>
                 </div>
-                <p class="text-muted">Edit the figure and tab out to save.</p>
             </div>
 
-            <div class="glass-card budget-tile">
-                <p class="tile-label">Actual Spend</p>
-                <p class="tile-value">{{ (budget()?.actualTotal || 0) | appCurrency:'1.2-2' }}</p>
-                <p class="text-muted">Captured through expenses</p>
+            <div class="glass-card stat-card">
+                <div class="stat-body">
+                    <p class="stat-label">Actual Spend</p>
+                    <p class="stat-value">{{ (budget()?.actualTotal || 0) | appCurrency:'1.2-2' }}</p>
+                    <p class="text-muted">Captured through expenses</p>
+                </div>
             </div>
 
-            <div class="glass-card budget-tile" [class.over]="(budget()?.actualTotal || 0) > (budget()?.estimatedTotal || 0)">
-                <p class="tile-label">Remaining / Over</p>
-                <p class="tile-value">
-                    {{ ((budget()?.estimatedTotal || 0) - (budget()?.actualTotal || 0)) | appCurrency:'1.2-2' }}
-                </p>
-                <p class="text-muted">
-                    {{ (budget()?.actualTotal || 0) > (budget()?.estimatedTotal || 0) ? 'Over budget' : 'Under budget' }}
-                </p>
+            <div class="glass-card stat-card" [class.danger]="(budget()?.actualTotal || 0) > (budget()?.estimatedTotal || 0)">
+                <div class="stat-body">
+                    <p class="stat-label">Remaining / Over</p>
+                    <p class="stat-value">
+                        {{ ((budget()?.estimatedTotal || 0) - (budget()?.actualTotal || 0)) | appCurrency:'1.2-2' }}
+                    </p>
+                    <p class="text-muted">
+                        {{ (budget()?.actualTotal || 0) > (budget()?.estimatedTotal || 0) ? 'Over budget' : 'Under budget' }}
+                    </p>
+                </div>
             </div>
         </div>
 

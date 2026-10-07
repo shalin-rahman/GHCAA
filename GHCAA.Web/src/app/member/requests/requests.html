@@ -68,12 +68,12 @@
         <div class="empty-state compact"><p>No family link requests waiting on you.</p></div>
         } @else {
         @for (r of familyReceived(); track r.id) {
-        <div class="request-row">
-            <div class="text">
+        <div class="item-row">
+            <div>
                 <strong>{{ r.requesterName }}</strong> wants to link as <em>{{ r.relationship }}</em>
-                @if (r.note) { <p class="note">"{{ r.note }}"</p> }
+                @if (r.note) { <p class="item-note">"{{ r.note }}"</p> }
             </div>
-            <div class="row-actions">
+            <div class="action-group">
                 <button class="btn btn-accent btn-sm" [disabled]="processingId() === r.id" (click)="respondFamily(r.id, true)">Accept</button>
                 <button class="btn btn-outline btn-sm" [disabled]="processingId() === r.id" (click)="respondFamily(r.id, false)">Decline</button>
             </div>
@@ -88,13 +88,13 @@
         <div class="empty-state compact"><p>You haven't sent any family link requests.</p></div>
         } @else {
         @for (r of familySent(); track r.id) {
-        <div class="request-row">
-            <div class="text">
+        <div class="item-row">
+            <div>
                 <strong>{{ r.targetMemberName }}</strong> — <em>{{ r.relationship }}</em>
                 <span class="status-badge" [class]="r.status?.toLowerCase()">{{ r.status }}</span>
             </div>
             @if (r.status === 'Requested') {
-            <div class="row-actions">
+            <div class="action-group">
                 <button class="btn btn-outline btn-sm" [disabled]="processingId() === r.id" (click)="cancelFamily(r.id)">Cancel</button>
             </div>
             }
@@ -109,12 +109,12 @@
         <div class="empty-state compact"><p>No accepted family links yet.</p></div>
         } @else {
         @for (link of familyAccepted(); track link.id) {
-        <div class="request-row">
-            <div class="text">
+        <div class="item-row">
+            <div>
                 <strong>{{ otherFamilyMember(link).name }}</strong> — <em>{{ link.relationship }}</em>
                 <small>{{ otherFamilyMember(link).membershipNumber }}</small>
             </div>
-            <div class="row-actions">
+            <div class="action-group">
                 <button class="btn btn-outline btn-sm" [disabled]="processingId() === link.id" (click)="removeFamily(link.id)">Remove</button>
             </div>
         </div>
@@ -130,19 +130,19 @@
         <div class="empty-state compact"><p>No mentorship requests waiting on you.</p></div>
         } @else {
         @for (r of mentorshipReceived(); track r.id) {
-        <div class="request-row">
-            <div class="text">
+        <div class="item-row">
+            <div>
                 <strong>{{ r.requester?.fullName }}</strong> asked for mentorship @if (r.domain) { in <em>{{ r.domain }}</em> }
-                @if (r.message) { <p class="note">"{{ r.message }}"</p> }
+                @if (r.message) { <p class="item-note">"{{ r.message }}"</p> }
             </div>
             @if (r.status === 'Pending') {
-            <div class="row-actions">
+            <div class="action-group">
                 <button class="btn btn-accent btn-sm" [disabled]="processingId() === r.id" (click)="respondMentorship(r.id, true)">Accept</button>
                 <button class="btn btn-outline btn-sm" [disabled]="processingId() === r.id" (click)="respondMentorship(r.id, false)">Decline</button>
             </div>
             }
             @if (r.status === 'Accepted') {
-            <div class="row-actions">
+            <div class="action-group">
                 <button class="btn btn-outline btn-sm" [disabled]="processingId() === r.id" (click)="completeMentorship(r.id)">Mark Complete</button>
             </div>
             }
@@ -157,13 +157,13 @@
         <div class="empty-state compact"><p>You haven't sent any mentorship requests.</p></div>
         } @else {
         @for (r of mentorshipSent(); track r.id) {
-        <div class="request-row">
-            <div class="text">
+        <div class="item-row">
+            <div>
                 <strong>{{ r.mentor?.fullName }}</strong> @if (r.domain) { — <em>{{ r.domain }}</em> }
                 <span class="status-badge" [class]="getMentorshipStatusClass(r.status)">{{ r.status }}</span>
             </div>
             @if (r.status === 'Accepted') {
-            <div class="row-actions">
+            <div class="action-group">
                 <button class="btn btn-outline btn-sm" [disabled]="processingId() === r.id" (click)="completeMentorship(r.id)">Mark Complete</button>
             </div>
             }

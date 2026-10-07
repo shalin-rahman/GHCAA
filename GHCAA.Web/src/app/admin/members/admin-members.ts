@@ -27,7 +27,7 @@ import { MemberImportModalComponent } from './member-import-modal/member-import-
 @Component({
   selector: 'app-admin-members',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon, AppCurrencyPipe, MemberImportModalComponent],
+  imports: [CommonModule, AppDatePipe, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon, AppCurrencyPipe, MemberImportModalComponent, ModalHeaderComponent],
   providers: [DatePipe],
   templateUrl: './admin-members.html',
   styleUrl: './admin-members.scss'

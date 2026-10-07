@@ -2,8 +2,15 @@
   <app-page-header title="Mentorship Requests"
       [total]="requests().length"
       emptySubtitle="Requests members have sent for mentorship">
-      <small subtitle>Showing {{ filteredRequests().length }} of {{ requests().length }} requests</small>
+      <small subtitle>Showing {{ filteredRequests().length }} of {{ requests().length }} requests · {{ counts().Pending }} waiting for the mentor</small>
   </app-page-header>
+
+  <div class="tab-nav" role="tablist">
+    @for (tab of tabs; track tab) {
+      <button type="button" role="tab" [class.active]="activeTab() === tab" [attr.aria-selected]="activeTab() === tab"
+          (click)="activeTab.set(tab)">{{ tab }} ({{ counts()[tab] }})</button>
+    }
+  </div>
 
   <app-search-bar [value]="searchTerm()" (valueChange)="searchTerm.set($event)" placeholder="Search by member or domain…" />
 
@@ -13,7 +20,7 @@
     <div class="table-wrap">
       <table class="data-table">
         <thead>
-          <tr><th>Requester</th><th>Mentor</th><th>Domain</th><th>Requested</th><th>Status</th></tr>
+          <tr><th>Requester</th><th>Mentor</th><th>Domain</th><th>Requested</th><th>Status</th><th>Actions</th></tr>
         </thead>
         <tbody>
           @for (r of filteredRequests(); track r.id) {
@@ -23,18 +30,84 @@
               <td>{{ r.domain || '—' }}</td>
               <td>{{ r.requestedAt | date:'mediumDate' }}</td>
               <td><span class="status-badge" [class]="getMentorshipStatusClass(r.status)">{{ getMentorshipStatusLabel(r.status) }}</span></td>
+              <td><button type="button" class="btn btn-outline btn-sm" (click)="open(r)">View</button></td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="5">
+              <td colspan="6">
                 <div class="empty-state">
-                  <p>{{ searchTerm() ? 'No requests match your search.' : 'No mentorship requests yet.' }}</p>
+                  <p>{{ searchTerm() || activeTab() !== 'All' ? 'No requests match this filter.' : 'No mentorship requests yet.' }}</p>
                 </div>
               </td>
             </tr>
           }
         </tbody>
       </table>
+    </div>
+  }
+
+  @if (selected(); as r) {
+    <div class="modal-overlay" (click)="dismiss()">
+      <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="mentorship-detail-title" (click)="$event.stopPropagation()">
+        <app-modal-header title="Mentorship request" headingId="mentorship-detail-title" (closed)="dismiss()"></app-modal-header>
+
+        <div class="modal-body">
+          <div class="detail-item">
+            <label>Status</label>
+            <span><span class="status-badge" [class]="getMentorshipStatusClass(r.status)">{{ getMentorshipStatusLabel(r.status) }}</span></span>
+          </div>
+          <div class="detail-item">
+            <label>Requester</label>
+            <span class="value-display">{{ r.requester?.fullName || 'Unknown' }}{{ r.requester?.membershipNumber ? ' · ' + r.requester?.membershipNumber : '' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Mentor</label>
+            <span class="value-display">{{ r.mentor?.fullName || 'Unknown' }}{{ r.mentor?.membershipNumber ? ' · ' + r.mentor?.membershipNumber : '' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Domain</label>
+            <span class="value-display">{{ r.domain || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Requested</label>
+            <span class="value-display">{{ r.requestedAt | date:'medium' }}</span>
+          </div>
+          @if (r.respondedAt) {
+            <div class="detail-item">
+              <label>Last update</label>
+              <span class="value-display">{{ r.respondedAt | date:'medium' }}</span>
+            </div>
+          }
+          <div class="detail-item">
+            <label>Message</label>
+            <span class="value-display whitespace-pre-wrap">{{ r.message || 'No message.' }}</span>
+          </div>
+          @if (r.responseNote) {
+            <div class="detail-item">
+              <label>Response note</label>
+              <span class="value-display whitespace-pre-wrap">{{ r.responseNote }}</span>
+            </div>
+          }
+
+          @if (canClose(r)) {
+            <div class="form-group">
+              <label for="mentorshipCloseNote">Note for the record (optional)</label>
+              <textarea id="mentorshipCloseNote" rows="3" maxlength="400" [value]="closeNote()"
+                  (input)="closeNote.set($any($event.target).value)"
+                  placeholder="Why the request is being closed"></textarea>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          @if (canClose(r)) {
+            <button type="button" class="btn btn-danger" (click)="closeRequest(r)" [disabled]="closing()">
+              {{ closing() ? 'Closing…' : 'Close as ' + closeOutcome(r) }}
+            </button>
+          }
+          <button type="button" class="btn btn-secondary" (click)="dismiss()" [disabled]="closing()">Done</button>
+        </div>
+      </div>
     </div>
   }
 </div>

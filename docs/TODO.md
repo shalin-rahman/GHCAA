@@ -2444,14 +2444,11 @@ Admin, member, public and common pages now use `.admin-feature`, `<app-page-head
 `<app-search-bar>`, `<app-loading-panel>`, the central buttons, badges, tables, tabs, modals and
 empty states, and their local copies are gone. `.alert` moved into styles.scss from the forum and
 org-config pages, and `.status-badge` gained `accepted` and `requested`. Admin mentorship had a
-table outside `.table-wrap` with no empty row; it now has both. Kept local because nothing central
-fits yet: stat cards, task rows, receipt images, album and photo grids, `.toggle-row`,
-`.config-grid`, the news form, role select, poll cards, `.btn-social`, `btn-lg`, and the modal
-headers on directory, event detail and news detail, which carry badges or a banner that
-`<app-modal-header>` has no slot for. Org-config's spec failed with NG0100 at HEAD too: its
-loading flag and messages were plain fields set from a promise, so they are signals now.
-The initial bundle is 501.67 kB against a 500 kB budget because the shared rules now sit in the
-global stylesheet; the budget was not raised.
+table outside `.table-wrap` with no empty row; it now has both. What this item first left local
+(stat cards, task rows, toggle rows, the news form, `btn-lg` and three modal headers) went central
+under 96.12. Org-config's spec failed with NG0100 at HEAD too: its loading flag and messages were
+plain fields set from a promise, so they are signals now. The initial bundle came out at 501.67 kB
+against a 500 kB budget; 96.13 has the follow-up.
 **Acceptance:** met; tsc and `ng build` clean apart from the budget warning, the full web suite
 passes (101 files, 613 tests), and 28 admin, member and public pages were checked in the browser
 in light and dark themes against a mocked API with no horizontal overflow (2026-10-07).
@@ -2464,3 +2461,35 @@ around such a comment with the machine's newline, so the CRLF file passed on Win
 the Linux runner. The note moved into the comment above `ConnectSrc`.
 **Acceptance:** met locally; `dotnet format GHCAA.sln --verify-no-changes` exits 0 and the 17
 persona and security-header tests pass. The Linux runner confirms on the next push.
+
+96.12 [DONE] **Priority: P2 | Depends on: 96.10.** The pages 96.10 left with their own styles,
+raised 2026-10-07: anything that repeats across pages gets one central copy. styles.scss now holds
+`.stats-grid` and `.stat-card` (with `.stat-icon`, `.stat-value`, `.stat-label`, `.stat-cta`),
+`.progress-track` and `.progress-fill`, `.item-list` and `.item-row`, `.form-actions`,
+`.form-stack`, `.toggle-grid` and `.toggle-row`, `.thumb`, `.table-thumb`, `.photo-count`,
+`.btn-lg` and `.modal-banner`. `.empty-state` now spans a grid row on its own, so the member
+dashboard and payments overrides are gone. The local copies were deleted from the admin and
+member dashboards, polls, campaigns (admin and public), register, event operations, requests,
+forum, topic detail, profile, news, communications, org-config, site content, both approval
+queues and both galleries. `<app-modal-header>` gained `[lead]`, default and `[aside]` slots and
+an optional title, and the event, news, directory, terms and member detail modals use it now.
+Still local because each appears on one page only: role select, poll cards, `.btn-social`,
+receipt images and `.config-grid`.
+**Acceptance:** met; every touched stylesheet compiles, `ng build` is clean, the web suite passes
+(625 tests), and 18 pages were checked in light and dark themes against a mocked API with no
+horizontal overflow (2026-10-07).
+
+96.13 [DONE] **Priority: P2 | Depends on: 96.10.** The initial bundle was over its 500 kB budget
+after 96.10 (raised 2026-10-07). With the duplicate styles removed under 96.12 it is 455.73 kB
+(120.34 kB transferred) and the build gives no warning. The budget in angular.json was not
+changed.
+**Acceptance:** met; `ng build` on 2026-10-07 reports an initial total of 455.73 kB.
+
+96.14 [DONE] **Priority: P2 | Depends on: none.** Admin mentorship was read-only (raised
+2026-10-07). The detail modal now shows both members' membership numbers, the last update and the
+response note, and an admin can close an open request with an optional note. A pending request
+becomes Declined and an accepted one becomes Completed; both members get a notification and the
+note is added after the mentor's own. The new endpoint is `POST /api/mentorship/admin/{id}/close`
+under the AdminOnly policy. Declined and completed requests cannot be closed again.
+**Acceptance:** met; the mentorship service and policy tests pass (12), the admin mentorship spec
+passes within the 625-test web suite, and the close flow was checked in the browser.

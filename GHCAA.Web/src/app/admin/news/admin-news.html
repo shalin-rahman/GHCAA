@@ -37,7 +37,7 @@
     <!-- Create / Edit Form Section -->
     @if (showForm()) {
     <div class="glass-card p-10 reveal-top max-w-5xl mx-auto">
-        <form #newsForm="ngForm" (ngSubmit)="saveNews(newsForm)" class="news-form space-y-8">
+        <form #newsForm="ngForm" (ngSubmit)="saveNews(newsForm)" class="form-stack">
             <div class="form-group">
                 <label>Article Headline <span class="required-star">*</span></label>
                 <input type="text" [(ngModel)]="form.title" name="title" required minlength="5" maxlength="300"
@@ -219,16 +219,10 @@
     @if (selectedPost(); as post) {
     <div class="modal-overlay" (click)="selectedPost.set(null)">
         <div class="modal-box" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-                <div>
-                    <span
-                        class="px-3 py-1 bg-accent/10 text-accent rounded-full text-[10px] uppercase font-black tracking-widest">{{
-                        getCategoryLabel(post.articleCategory) }}</span>
-                    <h3 class="mt-2">{{ post.title }}</h3>
-                    <p class="text-xs opacity-50 font-bold mt-1">Published on {{ post.createdAt | appDate }}</p>
-                </div>
-                <button (click)="selectedPost.set(null)" class="close-btn">✕</button>
-            </div>
+            <app-modal-header [title]="post.title" (closed)="selectedPost.set(null)">
+                <div class="modal-badges"><span class="status-badge info">{{ getCategoryLabel(post.articleCategory) }}</span></div>
+                <p class="modal-subtitle">Published on {{ post.createdAt | appDate }}</p>
+            </app-modal-header>
             <div class="modal-body">
                 @if (post.imageUrl) {
                 <img [src]="post.imageUrl"

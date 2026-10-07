@@ -303,18 +303,6 @@
     }
 }
 
-/* The modal header carries the membership badges next to the title, so it keeps its own row. */
-.modal-header .header-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-
-    h3 {
-        margin: 0;
-    }
-}
-
 .viewer-header {
     display: flex;
     gap: 2rem;

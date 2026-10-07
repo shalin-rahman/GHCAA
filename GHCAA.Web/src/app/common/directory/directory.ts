@@ -13,11 +13,12 @@ import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../page-header/page-header.component';
+import { ModalHeaderComponent } from '../modal-header/modal-header.component';
 
 @Component({
     selector: 'app-directory',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, LogoSpinnerComponent, ImgFallbackDirective, PageHeaderComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, LogoSpinnerComponent, ImgFallbackDirective, PageHeaderComponent, ModalHeaderComponent],
     templateUrl: './directory.html',
     styleUrl: './directory.scss'
 })

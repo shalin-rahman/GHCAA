@@ -32,4 +32,8 @@ export class MentorshipService {
     getAllForAdmin(): Observable<MentorshipAdminRow[]> {
         return this.http.get<MentorshipAdminRow[]>(`${this.apiUrl}/admin/all`);
     }
+
+    adminClose(id: number, note?: string): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/admin/${id}/close`, { note });
+    }
 }

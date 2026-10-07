@@ -13,5 +13,6 @@ namespace GHCAA.Application.Interfaces
         Task<bool> RespondAsync(int requestId, int mentorId, bool accept, string? note, CancellationToken ct = default);
         Task<bool> MarkCompleteAsync(int requestId, int memberId, CancellationToken ct = default);
         Task<IEnumerable<object>> GetAllForAdminAsync(CancellationToken ct = default);
+        Task<bool> AdminCloseAsync(int requestId, string? note, CancellationToken ct = default);
     }
 }

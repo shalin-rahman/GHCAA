@@ -427,20 +427,13 @@
     @if (selectedEvent(); as ev) {
     <div class="modal-overlay" (click)="closeDetail()">
         <div class="modal-box" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-                <div>
-                    @if (ev.imageUrl) {
-                    <div class="mb-4 rounded-xl overflow-hidden border border-white/10">
-                        <img [src]="'/' + ev.imageUrl" class="w-full h-40 object-cover" alt="Event Banner" appImgFallback="/assets/images/event-placeholder.jpg">
-                    </div>
-                    }
-                    <h3 class="text-accent">{{ ev.title }}</h3>
-                    <p class="text-xs uppercase font-black tracking-widest text-muted mt-1">{{ ev.location }} • {{
-                        ev.startDate | appDate }} – {{ ev.endDate | appDate }}</p>
-                </div>
-                <button (click)="closeDetail()" class="close-btn">✕</button>
-            </div>
+            <app-modal-header [title]="ev.title" headingClass="text-accent" (closed)="closeDetail()">
+                <p class="modal-subtitle">{{ ev.location }} • {{ ev.startDate | appDate }} – {{ ev.endDate | appDate }}</p>
+            </app-modal-header>
             <div class="modal-body">
+                @if (ev.imageUrl) {
+                <img [src]="'/' + ev.imageUrl" class="modal-banner" alt="Event Banner" appImgFallback="/assets/images/event-placeholder.jpg">
+                }
                 <section>
                     <h4 class="text-[10px] font-black uppercase tracking-widest text-accent mb-4">Event Summary</h4>
                     <p class="text-lg font-light" style="white-space: pre-wrap;">{{ ev.description }}</p>

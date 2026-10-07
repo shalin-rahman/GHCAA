@@ -62,30 +62,6 @@
     margin: 0;
 }
 
-.stats {
-    display: flex;
-    gap: 2rem;
-
-    .stat {
-        display: flex;
-        flex-direction: column;
-
-        .value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .label {
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-        }
-    }
-}
-
 .options-summary {
     display: flex;
     flex-direction: column;
@@ -99,20 +75,6 @@
             font-size: 0.85rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
-        }
-
-        .progress-bar {
-            height: 6px;
-            background: var(--surface-subtle);
-            border-radius: 10px;
-            overflow: hidden;
-
-            .fill {
-                height: 100%;
-                background: var(--gold-gradient);
-                border-radius: 10px;
-                transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-            }
         }
     }
 }

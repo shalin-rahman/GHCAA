@@ -77,14 +77,14 @@
             <h3>{{ poll.title }}</h3>
             <p class="description">{{ poll.description }}</p>
 
-            <div class="stats">
-                <div class="stat">
-                    <span class="value">{{ poll.totalVotes }}</span>
-                    <span class="label">Total Votes</span>
+            <div class="flex gap-6">
+                <div class="stat-body">
+                    <span class="stat-value">{{ poll.totalVotes }}</span>
+                    <span class="stat-label">Total Votes</span>
                 </div>
-                <div class="stat">
-                    <span class="value">{{ poll.options.length }}</span>
-                    <span class="label">Options</span>
+                <div class="stat-body">
+                    <span class="stat-value">{{ poll.options.length }}</span>
+                    <span class="stat-label">Options</span>
                 </div>
             </div>
 
@@ -94,8 +94,8 @@
                         <span>{{ opt.text }}</span>
                         <span>{{ opt.voteCount }} ({{ opt.percentage }}%)</span>
                     </div>
-                    <div class="progress-bar">
-                        <div class="fill" [style.width.%]="opt.percentage"></div>
+                    <div class="progress-track">
+                        <div class="progress-fill" [style.width.%]="opt.percentage"></div>
                     </div>
                 </div>
             </div>
@@ -118,14 +118,14 @@
             <app-modal-header [title]="poll.title" (closed)="selectedPoll.set(null)"></app-modal-header>
             <div class="modal-body poll-results">
                 <p class="description">{{ poll.description }}</p>
-                <div class="stats">
-                    <div class="stat">
-                        <span class="value">{{ poll.totalVotes }}</span>
-                        <span class="label">Total Votes</span>
+                <div class="flex gap-6">
+                    <div class="stat-body">
+                        <span class="stat-value">{{ poll.totalVotes }}</span>
+                        <span class="stat-label">Total Votes</span>
                     </div>
-                    <div class="stat">
-                        <span class="value">{{ poll.options.length }}</span>
-                        <span class="label">Options</span>
+                    <div class="stat-body">
+                        <span class="stat-value">{{ poll.options.length }}</span>
+                        <span class="stat-label">Options</span>
                     </div>
                 </div>
                 <div class="options-summary">
@@ -134,8 +134,8 @@
                             <span>{{ opt.text }}</span>
                             <span>{{ opt.voteCount }} ({{ opt.percentage }}%)</span>
                         </div>
-                        <div class="progress-bar">
-                            <div class="fill" [style.width.%]="opt.percentage"></div>
+                        <div class="progress-track">
+                            <div class="progress-fill" [style.width.%]="opt.percentage"></div>
                         </div>
                     </div>
                 </div>

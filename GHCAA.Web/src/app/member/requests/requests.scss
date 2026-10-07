@@ -8,13 +8,6 @@
     .form-group {
         margin-top: 12px;
     }
-
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 8px;
-        margin-top: 20px;
-    }
 }
 
 .search-results {
@@ -45,29 +38,4 @@
     h3 {
         margin: 0 0 12px;
     }
-}
-
-.request-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 0;
-    border-top: 1px solid var(--border-color);
-
-    &:first-of-type {
-        border-top: none;
-    }
-
-    .note {
-        margin: 4px 0 0;
-        font-size: 0.85em;
-        opacity: 0.75;
-    }
-}
-
-.row-actions {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
 }

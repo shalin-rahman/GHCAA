@@ -264,6 +264,7 @@ namespace GHCAA.Tests.Controllers
             [("MemberCommunicationsController", "GetMine")] = new(null, false, false),
             [("MemberImportController", "Export")] = new(Constants.Policies.AdminOnly, false, false),
             [("MemberImportController", "Import")] = new(Constants.Policies.AdminOnly, false, false),
+            [("MentorshipController", "AdminClose")] = new(Constants.Policies.AdminOnly, false, false),
             [("MentorshipController", "GetAllForAdmin")] = new(Constants.Policies.AdminOnly, false, false),
             [("MentorshipController", "GetReceived")] = new(null, false, false),
             [("MentorshipController", "GetSent")] = new(null, false, false),

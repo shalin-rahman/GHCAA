@@ -37,24 +37,6 @@
   }
 }
 
-.progress-bar {
-  background: var(--surface-subtle);
-  border-radius: 999px;
-  height: 10px;
-  overflow: hidden;
-  margin: 0.5rem 0;
-
-  &.large {
-    height: 16px;
-  }
-}
-
-.progress-fill {
-  background: var(--accent-color);
-  height: 100%;
-  transition: width 0.3s ease;
-}
-
 .progress-text {
   font-size: 0.85rem;
   opacity: 0.8;

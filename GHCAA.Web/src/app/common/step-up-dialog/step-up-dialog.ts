@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { StepUpService } from '../../core/services/step-up.service';
 import { ModalHeaderComponent } from '../modal-header/modal-header.component';
 
@@ -11,7 +10,9 @@ import { ModalHeaderComponent } from '../modal-header/modal-header.component';
 @Component({
     selector: 'app-step-up-dialog',
     standalone: true,
-    imports: [FormsModule, ModalHeaderComponent],
+    // No FormsModule here: this dialog loads with the app shell, and FormsModule alone
+    // added about 50 kB to the initial bundle for one input.
+    imports: [ModalHeaderComponent],
     templateUrl: './step-up-dialog.html',
     styleUrl: './step-up-dialog.scss'
 })

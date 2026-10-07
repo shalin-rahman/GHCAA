@@ -11,16 +11,6 @@
     padding: 0;
 }
 
-/* Cover thumbnail in the table view, same as admin-gallery. */
-.table-thumb {
-    width: 56px;
-    height: 56px;
-    border-radius: var(--radius-sm);
-    background-size: cover;
-    background-position: center;
-    background-color: var(--surface-subtle);
-}
-
 .gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -51,19 +41,6 @@
     position: relative;
 }
 
-.photo-count {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: color-mix(in srgb, var(--primary-color) 82%, transparent);
-    color: var(--accent-text);
-    padding: 0.4rem 0.8rem;
-    border-radius: var(--radius-lg);
-    font-size: 0.75rem;
-    font-weight: 800;
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--glass-border);
-}
 
 .card-body {
     padding: 1.5rem;

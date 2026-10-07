@@ -14,7 +14,7 @@
               <img [src]="c.coverImagePath" [alt]="c.title" class="cover" />
             }
             <h3>{{ c.title }}</h3>
-            <div class="progress-bar">
+            <div class="progress-track md my-2">
               <div class="progress-fill" [style.width.%]="progressPercent(c)"></div>
             </div>
             <p class="progress-text">{{ c.amountReceived | appCurrency }} raised of {{ c.targetAmount | appCurrency }} ({{ progressPercent(c) }}%)</p>
@@ -30,7 +30,7 @@
       @if (campaign()!.coverImagePath) {
         <img [src]="campaign()!.coverImagePath" [alt]="campaign()!.title" class="cover-large" />
       }
-      <div class="progress-bar large">
+      <div class="progress-track lg my-2">
         <div class="progress-fill" [style.width.%]="progressPercent(campaign()!)"></div>
       </div>
       <p class="progress-text">{{ campaign()!.amountReceived | appCurrency }} raised of {{ campaign()!.targetAmount | appCurrency }} ({{ progressPercent(campaign()!) }}%)</p>

@@ -800,14 +800,16 @@ export interface MentorshipRequestDto {
     requester?: MentorshipPerson;
 }
 
-// GetAllForAdminAsync's projection: no respondedAt/responseNote, and either party can be null
-// (deleted/inactive member) so the admin grid can't assume both sides always render.
+// GetAllForAdminAsync's projection. Either party can be null (deleted or inactive member), so the
+// admin grid can't assume both sides always render.
 export interface MentorshipAdminRow {
     id: number;
     domain?: string;
     message?: string;
     status: MentorshipStatus;
     requestedAt: string;
-    requester?: { id: number; fullName: string };
-    mentor?: { id: number; fullName: string };
+    respondedAt?: string;
+    responseNote?: string;
+    requester?: { id: number; fullName: string; membershipNumber?: string };
+    mentor?: { id: number; fullName: string; membershipNumber?: string };
 }

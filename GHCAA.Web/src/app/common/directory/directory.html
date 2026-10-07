@@ -246,24 +246,20 @@
 @if (selectedMember() && !disableProfile) {
 <div class="modal-overlay" (click)="selectedMember.set(null)">
     <div class="modal-box" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <div class="header-info">
-                <h3>Member Profile</h3>
-                <div class="membership-meta ml-4">
-                    <span class="m-no">{{ selectedMember()?.membershipNumber || 'REG-PENDING' }}</span>
-                    @if (selectedMember()?.rank) {
-                        <span class="status-badge warning ml-2">#{{ selectedMember()?.rank }}</span>
-                    }
-                    @if (selectedMember()?.categoryBadge) {
-                        <span class="status-badge info ml-2">{{ selectedMember()?.categoryBadge }}</span>
-                    }
-                    @if (selectedMember()?.membershipType) {
-                        <span class="m-type-label ml-2">{{ selectedMember()?.membershipType }}</span>
-                    }
-                </div>
+        <app-modal-header title="Member Profile" (closed)="selectedMember.set(null)">
+            <div class="modal-badges">
+                <span class="status-badge">{{ selectedMember()?.membershipNumber || 'REG-PENDING' }}</span>
+                @if (selectedMember()?.rank) {
+                    <span class="status-badge warning">#{{ selectedMember()?.rank }}</span>
+                }
+                @if (selectedMember()?.categoryBadge) {
+                    <span class="status-badge info">{{ selectedMember()?.categoryBadge }}</span>
+                }
+                @if (selectedMember()?.membershipType) {
+                    <span class="modal-subtitle">{{ selectedMember()?.membershipType }}</span>
+                }
             </div>
-            <button type="button" class="close-btn" aria-label="Close" (click)="selectedMember.set(null)">&times;</button>
-        </div>
+        </app-modal-header>
 
         <div class="modal-body profile-viewer">
             <div class="viewer-header">
