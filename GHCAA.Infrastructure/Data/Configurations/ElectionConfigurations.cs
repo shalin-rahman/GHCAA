@@ -45,9 +45,9 @@ public sealed class ElectionAppointmentConfiguration : IEntityTypeConfiguration<
         b.HasIndex(x => x.ElectionId).IsUnique().HasFilter("\"IsReturningOfficer\" = true AND \"RevokedAt\" IS NULL")
             .HasDatabaseName("IX_ElectionAppointments_ElectionId_ReturningOfficer");
         b.HasIndex(x => x.UserId);
-        // User has a !IsArchived query filter, so any query that includes x.User drops the appointment
-        // once its user is archived (EF warning 10622). ElectionAppointmentService.AcceptAsync already
-        // does this. Admins still need to see and revoke such an appointment. TODO 94.5.
+        // EF warning 10622 asks for a filter on User.IsArchived. Adding it would hide an archived user's
+        // appointment from admins, who still need to see and revoke it. Instead no appointment query
+        // includes x.User, and ElectionAccessService drops archived users' appointments itself (94.5).
         b.HasOne(x => x.Election).WithMany(x => x.Appointments).HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
         b.HasOne(x => x.Persona).WithMany().HasForeignKey(x => x.PersonaId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);

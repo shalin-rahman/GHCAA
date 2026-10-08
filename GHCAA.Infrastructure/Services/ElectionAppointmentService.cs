@@ -138,11 +138,12 @@ public sealed class ElectionAppointmentService(
 
     public async Task<(bool Success, string? Error)> AcceptAsync(int appointmentId, int userId, AcceptAppointmentDto dto, string? ip, CancellationToken ct)
     {
-        // Including User applies its !IsArchived filter, so an archived user's appointment is not found
-        // here at all. TODO 94.5.
-        var appointment = await db.ElectionAppointments.Include(x => x.Persona).Include(x => x.User!).ThenInclude(u => u.Roles)
+        var appointment = await db.ElectionAppointments.Include(x => x.Persona)
             .FirstOrDefaultAsync(x => x.Id == appointmentId && x.UserId == userId && x.RevokedAt == null, ct);
-        if (appointment is null)
+        // Loaded on its own so the User filter cannot hide the appointment row. An archived user is
+        // not found here, so cannot accept.
+        var user = await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == userId, ct);
+        if (appointment is null || user is null)
             return (false, "not-found");
         // Accepting makes a pending appointment live, so it is frozen too. Declining is not,
         // because it only takes someone out.
@@ -160,7 +161,6 @@ public sealed class ElectionAppointmentService(
         appointment.DeclarationTextSnapshot = appointment.Persona!.DeclarationText;
         appointment.SignedFromIp = ip;
 
-        var user = appointment.User!;
         if (!user.Roles.Any(r => r.Name == Constants.Roles.ElectionOfficial))
         {
             // The role is seeded at boot, so a fresh database without the seeder run may lack it.

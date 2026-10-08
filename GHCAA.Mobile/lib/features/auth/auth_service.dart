@@ -3,6 +3,7 @@ import '../../core/utils/upload_file_naming.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
+import '../../core/api/api_exception.dart';
 import '../../core/services/device_info_service.dart';
 import '../../core/storage/storage_service.dart';
 import '../../core/real_time/notification_hub_service.dart';
@@ -153,7 +154,7 @@ class AuthService {
     } catch (e) {
       debugPrint('AuthService._socialLogin failed ($path): $e');
       if (e is DioException) {
-        return e.response?.data?['message'] ?? e.response?.data?['error'] ?? "Authentication failed.";
+        return ApiException.serverMessage(e.response?.data) ?? "Authentication failed.";
       }
       return "Something went wrong.";
     }
@@ -200,7 +201,7 @@ class AuthService {
     } catch (e) {
       debugPrint('AuthService.register failed: $e');
       if (e is DioException) {
-        return e.response?.data?['message'] ?? e.response?.data?['error'] ?? "Data mismatch or connection error.";
+        return ApiException.serverMessage(e.response?.data) ?? "Data mismatch or connection error.";
       }
       return "Something went wrong.";
     }

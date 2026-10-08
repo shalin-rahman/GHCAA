@@ -21,12 +21,17 @@ public sealed class ElectionAccessService(ApplicationDbContext db, IOrgConfigSer
     // Appeals go to a body independent of the administration, so Admin never decides them.
     private static readonly ElectionPermission AdminDefault = All & ~ElectionPermission.DecideAppeals;
 
+    // An archived user's appointment stays on record for admins but grants nothing (94.5). The
+    // navigation join applies User's !IsArchived filter, which is the point here.
+    private IQueryable<ElectionAppointment> LiveAppointments() =>
+        db.ElectionAppointments.Where(ElectionAppointment.LiveAt(DateTime.UtcNow)).Where(x => !x.User!.IsArchived);
+
     public async Task<ElectionPermission> GetPermissionsAsync(int electionId, int userId, IReadOnlyCollection<string> roles, CancellationToken ct = default)
     {
         if (roles.Contains(Constants.Roles.SuperAdmin))
             return All;
 
-        var live = await db.ElectionAppointments.Where(ElectionAppointment.LiveAt(DateTime.UtcNow))
+        var live = await LiveAppointments()
             .Where(x => x.ElectionId == electionId)
             .Select(x => new { x.UserId, x.Persona!.Permissions, x.Persona.TakesOverFromAdmin })
             .ToListAsync(ct);
@@ -47,11 +52,11 @@ public sealed class ElectionAccessService(ApplicationDbContext db, IOrgConfigSer
         (await GetPermissionsAsync(electionId, userId, roles, ct) & needed) == needed;
 
     public Task<bool> IsHandedOverAsync(int electionId, CancellationToken ct = default) =>
-        db.ElectionAppointments.Where(ElectionAppointment.LiveAt(DateTime.UtcNow))
+        LiveAppointments()
             .AnyAsync(x => x.ElectionId == electionId && x.Persona!.TakesOverFromAdmin, ct);
 
     public Task<int> LiveApproverCountAsync(int electionId, CancellationToken ct = default) =>
-        db.ElectionAppointments.Where(ElectionAppointment.LiveAt(DateTime.UtcNow)).Where(ElectionAppointment.GrantsApprove)
+        LiveAppointments().Where(ElectionAppointment.GrantsApprove)
             .Where(x => x.ElectionId == electionId).Select(x => x.UserId).Distinct().CountAsync(ct);
 
     public async Task<int?> ElectionIdForAsync(ElectionIdLookup kind, int id, CancellationToken ct = default) => kind switch
@@ -63,7 +68,7 @@ public sealed class ElectionAccessService(ApplicationDbContext db, IOrgConfigSer
     };
 
     public async Task<IReadOnlyCollection<int>> ElectionIdsWithLiveAppointmentAsync(int userId, CancellationToken ct = default) =>
-        await db.ElectionAppointments.Where(ElectionAppointment.LiveAt(DateTime.UtcNow))
+        await LiveAppointments()
             .Where(x => x.UserId == userId)
             .Select(x => x.ElectionId).Distinct().ToListAsync(ct);
 }

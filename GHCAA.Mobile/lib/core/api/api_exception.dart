@@ -11,14 +11,27 @@ class ApiException implements Exception {
     debugPrint('[ApiException] Status: $statusCode | Message: $message | Data: $data');
   }
 
+  /// The message the server put in an error body, or null if there is none. The API answers
+  /// with ProblemDetails (82.4), so `detail` then `title` come first; `message` and `error`
+  /// cover bodies still on the older ad-hoc shape. Every mobile reader goes through this so
+  /// they agree on the order (84.43).
+  static String? serverMessage(dynamic data) {
+    if (data is! Map) return null;
+    for (final key in const ['detail', 'title', 'message', 'error']) {
+      final value = data[key];
+      if (value != null && value.toString().isNotEmpty) return value.toString();
+    }
+    return null;
+  }
+
   factory ApiException.fromDioException(DioException error) {
     final response = error.response;
     final statusCode = response?.statusCode;
     String message = 'An unexpected network error occurred.';
 
-    if (response?.data is Map<String, dynamic>) {
-      final map = response!.data as Map<String, dynamic>;
-      message = map['message'] ?? map['title'] ?? map['detail'] ?? message;
+    final serverMessage = ApiException.serverMessage(response?.data);
+    if (serverMessage != null) {
+      message = serverMessage;
     } else if (response?.statusMessage != null && response!.statusMessage!.isNotEmpty) {
       message = response.statusMessage!;
     } else if (error.type == DioExceptionType.connectionTimeout ||

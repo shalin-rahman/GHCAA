@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
@@ -153,6 +154,24 @@ public sealed class ElectionAccessServiceTests : TestBase
         (await _service.GetPermissionsAsync(_election.Id, await UserAsync(8), Official)).Should().Be(ElectionPermission.None);
         (await _service.IsHandedOverAsync(_election.Id)).Should().BeFalse();
         (await _service.ElectionIdsWithLiveAppointmentAsync(await UserAsync(7))).Should().BeEmpty();
+    }
+
+    // 94.5
+    [Test]
+    public async Task ArchivedUser_KeepsTheAppointmentOnRecord_ButGetsNoPermissions()
+    {
+        var appointment = await AppointAsync(9, _returningOfficer);
+        var user = await _context.Users.FindAsync(await UserAsync(9));
+        user!.IsArchived = true;
+        await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
+
+        (await _context.ElectionAppointments.AnyAsync(x => x.Id == appointment.Id)).Should().BeTrue();
+        (await _service.ElectionIdForAsync(ElectionIdLookup.Appointment, appointment.Id)).Should().Be(_election.Id);
+
+        (await _service.GetPermissionsAsync(_election.Id, user.Id, Official)).Should().Be(ElectionPermission.None);
+        (await _service.IsHandedOverAsync(_election.Id)).Should().BeFalse();
+        (await _service.ElectionIdsWithLiveAppointmentAsync(user.Id)).Should().BeEmpty();
     }
 
     [Test]

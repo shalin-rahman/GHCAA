@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/api/api_exception.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
@@ -48,9 +49,8 @@ class _MyAppointmentsScreenState extends ConsumerState<MyAppointmentsScreen> {
             .showSnackBar(SnackBar(content: Text(done)));
       }
     } catch (e) {
-      final detail = e is DioException && e.response?.data is Map
-          ? (e.response!.data as Map)['detail']?.toString()
-          : null;
+      final detail =
+          e is DioException ? ApiException.serverMessage(e.response?.data) : null;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(detail ?? 'That did not go through.')));

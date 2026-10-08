@@ -286,8 +286,6 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
   hardcoded AdminOnly. Spec 022 first.
 - **67.5** — Book under 100 pages, Chapter 1 to References. Layout done; prose pass waits on the
   author's merge and cut confirmations. (P1 in its own entry.)
-- **84.43** — Mobile error readers still disagree on field order. Found by 84.5. (Its
-  controller-side string-body half is done; so is 84.44, the policy-attribute reflection test.)
 - **42.1–42.5** — Admin-manageable elections forms/docs, plan only.
 - **51.4–51.5** — Remaining file-storage hardening: broader regression coverage and admin-configurable
   settings.
@@ -1707,7 +1705,7 @@ actions should always fail on mobile with a 403. The web client handles it in
 Then either add a mobile step-up prompt that verifies and retries, or hide the step-up actions on
 mobile. A test covers whichever is chosen.
 
-84.43 [TODO] **Priority: P2 | Depends on: none.** Controller side fixed 2026-09-27: the grep in 82.4's
+84.43 [DONE 2026-10-08] **Priority: P2 | Depends on: none.** Controller side fixed 2026-09-27: the grep in 82.4's
 acceptance (literal-string `BadRequest`/`Conflict`/`Unauthorized`/`NotFound` bodies) now finds nothing
 in AdminElections, Elections, CredentialVerification, Events, Financials, Forum, Governance or
 Notification; `ForumController.cs:87` returns `Problem(detail: ex.Message, statusCode: 404)`, not
@@ -1717,6 +1715,10 @@ Notification; `ForumController.cs:87` returns `Problem(detail: ex.Message, statu
 read only `message`, `error` and never look at `detail`/`title` at all. Found by 84.5; see
 `evidence/error-catalog.md` sections 4 and 5. **Acceptance:** the mobile readers read the same fields
 in the same order as `api_client.dart` (server-supplied `detail`/`title` first).
+Fixed 2026-10-08: `ApiException.serverMessage` reads `detail`, `title`, `message`, `error` in that
+order and skips empty values. `api_client.dart`, `ApiException.fromDioException`, both
+`auth_service.dart` readers and `my_appointments_screen.dart` (which read only `detail`) now all call
+it. It also stops the auth readers throwing on a plain-text body. Tests in `test/api_exception_test.dart`.
 
 84.44 [DONE 2026-09-27] No test checked the policy attributes. The controller tests call actions
 directly, so a dropped `[Authorize(Policy = ...)]` on an admin action would fall back to "any
@@ -2217,13 +2219,20 @@ may be what we want for an ID card and not for a certificate already handed out,
 decide per credential type before the filter goes on. Recommendation so far: add the filter.
 **Acceptance:** the verify page answers for an archived member's credential as decided; test covers it.
 
-94.5 [TODO] **Priority: P1 | Depends on: none.** `ElectionAppointment` → `User`. The warning points
+94.5 [DONE 2026-10-08] **Priority: P1 | Depends on: none.** `ElectionAppointment` → `User`. The warning points
 at a bug that is already live: `ElectionAppointmentService.cs:109` does `Include(x => x.User!)`, so
 once the appointed user is archived the appointment drops out of the results and can no longer be
 revoked or audited. Load the appointment without the user filter, and treat an archived user's
 appointment as not live in `ElectionAccessService` rather than letting it disappear.
 **Acceptance:** archiving an appointed user leaves the appointment visible to admins and gives the
 user no election permissions; test covers both.
+Fixed 2026-10-08: `AcceptAsync` was the only appointment query that included `User`; it now loads the
+user on its own, so an archived user gets `not-found` and the appointment row is untouched. Revoke and
+the admin lists never joined `User`. `ElectionAccessService` reads every live appointment through one
+`LiveAppointments()` query that drops archived users, so they get no permissions, do not count as
+approvers and do not trigger handover. No filter added on the relationship; the 10622 note in
+`ElectionConfigurations.cs` says why. Test:
+`ElectionAccessServiceTests.ArchivedUser_KeepsTheAppointmentOnRecord_ButGetsNoPermissions`.
 
 # Work Package 95 — Step-up for email-less admins and by-elections (raised by user 2026-10-03: "if superadmin logged in and he dont have email, how did he get 6 digit code for election menu" and "if any specefic position(s) got empty, there masy needed another elction")
 
