@@ -2495,3 +2495,15 @@ under the AdminOnly policy. Declined and completed requests cannot be closed aga
 passes within the 625-test web suite, and the close flow was checked in the browser. CI's
 `authz_catalog.py --check` failed on the new route until the authorization catalog was regenerated
 (357 routes, AdminOnly 130).
+
+96.15 [IN PROGRESS] **Priority: P0 | Depends on: 7.19.** The preprod deploy of 2026-10-07 exited
+at startup with "AppSettings:ClientUrl is not set". The 7.19 check needs ClientUrl in every
+environment outside Development, and no appsettings file had it. `appsettings.Preprod.json` now
+sets it to its own origin, `https://preprod.haragangian.com`. If Render sets
+`AppSettings__AllowedOrigins__0`, it replaces that origin, and `AppSettings__ClientUrl` must be set
+on Render to the same value. Production has no origin in its file, so it needs both variables
+before its first deploy with this code. The same build warned CS8602 in
+`ElectionApprovalService.RequestEmergencyRevokeAsync`, because the compiler cannot tell the reason
+is non-empty after the early returns. The reason is now held in a non-null local.
+**Acceptance:** Release build of the API has 0 warnings, and 150 election approval, origin and
+config tests pass. Still open: the Render variable, and a deploy that starts.

@@ -114,12 +114,14 @@ public sealed class ElectionApprovalService(
             return (false, error, null);
         }
 
+        // The checks above return early on an empty reason, so it is set from here on.
+        var reasonText = trimmed!;
         var hours = Math.Max(1, (await orgConfig.GetConfigAsync()).Elections.ApprovalExpiryHours);
         var approval = new ElectionApproval
         {
             ElectionId = target!.ElectionId,
             Action = ElectionApprovalAction.EmergencyRevoke,
-            PayloadJson = JsonSerializer.Serialize(new RevokePayload(appointmentId, trimmed![..Math.Min(trimmed.Length, 500)])),
+            PayloadJson = JsonSerializer.Serialize(new RevokePayload(appointmentId, reasonText[..Math.Min(reasonText.Length, 500)])),
             RequestedByUserId = userId,
             RequestedAt = now,
             ExpiresAt = now.AddHours(hours),

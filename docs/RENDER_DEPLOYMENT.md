@@ -109,6 +109,9 @@ ones this guide depends on:
 > **`AppSettings__AllowedOrigins__0` and `AppSettings__ClientUrl`.** Outside Development the app refuses
 > to start when `AllowedOrigins` is empty, has a wildcard or a bad entry, or `ClientUrl` is not in the list.
 > The base `appsettings.json` list is empty. For preprod set both to `https://ghcaa-ryl6.onrender.com`.
+> `appsettings.Preprod.json` falls back to `https://preprod.haragangian.com` for both. That fallback
+> only works while neither variable is set: once `AllowedOrigins__0` is set, `ClientUrl` must be set
+> to the same value, or the app stops at startup with "ClientUrl ... is not in AllowedOrigins".
 > `ClientUrl` is also the host that `www.<host>` requests are redirected to (301 for GET and HEAD, 308 otherwise).
 
 > **Why `Jwt__Key` (double underscore)?** .NET maps `Jwt__Key` → config key `Jwt:Key`.
