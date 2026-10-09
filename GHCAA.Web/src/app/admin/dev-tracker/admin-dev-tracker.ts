@@ -56,9 +56,17 @@ export class AdminDevTracker implements OnInit {
         });
     }
 
-    // Reuses the .status-badge state modifiers instead of adding new colors for TODO/PARTIAL.
+    // Reuses the .status-badge state modifiers instead of adding new colors per tracker status.
     getStatusClass(status: string): string {
-        return status === 'PARTIAL' ? 'pending' : 'terminated';
+        switch (status) {
+            case 'PARTIAL':
+            case 'IN PROGRESS':
+                return 'pending';
+            case 'ONHOLD':
+                return 'neutral';
+            default:
+                return 'terminated';
+        }
     }
 
     private groupByWorkPackage(items: DevTrackerItem[]): DevTrackerGroup[] {

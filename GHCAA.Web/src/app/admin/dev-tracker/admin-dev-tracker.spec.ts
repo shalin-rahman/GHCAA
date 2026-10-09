@@ -51,8 +51,10 @@ describe('AdminDevTracker Component', () => {
         expect(adminServiceMock.getDevTrackerItems).toHaveBeenCalledWith('P1');
     });
 
-    it('should map PARTIAL and TODO to the existing badge state classes', () => {
+    it('should map each open tracker status to an existing badge state class', () => {
         expect(component.getStatusClass('PARTIAL')).toBe('pending');
+        expect(component.getStatusClass('IN PROGRESS')).toBe('pending');
+        expect(component.getStatusClass('ONHOLD')).toBe('neutral');
         expect(component.getStatusClass('TODO')).toBe('terminated');
     });
 

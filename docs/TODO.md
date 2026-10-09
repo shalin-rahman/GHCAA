@@ -197,6 +197,13 @@ counting it twice would inflate the figure.
 RE = P × C in §4.8 needs an impact cost per risk on the same basis.
 
 ### P0 — CRITICAL (blocked on the user; cannot be closed from a coding session)
+- **82.31 / 62.31** — 631 real alumni records, including all 631 password hashes, are literal
+  `InsertData` values in eight committed migrations, so a clean clone of this repo builds a database
+  full of real personal data. Editing `Seed/members.json` does not reach it, and no environment
+  variable turns it off. Needs a decision on the history purge and a forced password reset before any
+  code moves. `docs/SEED_CLASSIFICATION.md` has the per-file breakdown.
+
+### Closed by user decision (moved out of the P0 list on 2026-10-09)
 - **48.2** [WONTDO 2026-09-18, user decision] (merged 2026-09-15 with 47.10's credentials half and
   48.13) — Live production secrets committed to git (JWT signing key, DB passwords, Gmail app
   password, Render deploy-hook URL) in `docs/deploy_connection.txt`/`docs/deploy_conn_Info.txt`,
@@ -206,11 +213,6 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
   have needed the user to rotate every credential via the relevant dashboards, then `git rm --cached`
   + `.gitignore` (done) + a history purge (`git filter-repo`). User decided against the rotation/purge;
   closed without remediation. No coding-session action can reopen this without a fresh user decision.
-- **82.31 / 62.31** — 631 real alumni records, including all 631 password hashes, are literal
-  `InsertData` values in eight committed migrations, so a clean clone of this repo builds a database
-  full of real personal data. Editing `Seed/members.json` does not reach it, and no environment
-  variable turns it off. Needs a decision on the history purge and a forced password reset before any
-  code moves. `docs/SEED_CLASSIFICATION.md` has the per-file breakdown.
 
 ### P1 — HIGH (security surface / explicitly time-sensitive / blocking other work)
 - **37.1i–37.1n** — Election ballot secrecy (review 2026-09-27). The ballot can be joined back to
@@ -358,7 +360,7 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
 8.5 [TODO] **Priority: P4.** Persistence: Switch to High-Performance Local DB (Isar/Drift)
 8.6 [DONE 2026-09-17] **Priority: P2.** Networking: Exponential backoff and connectivity banners. Added `RetryInterceptor` (lib/core/api/retry_interceptor.dart), wired into `dioProvider` after the existing auth/friendly-message interceptor so its onError runs first on the raw exception. Retries timeouts, connection errors, and 5xx responses only — never 4xx or auth failures — capped at 3 attempts with exponential backoff (500ms base, doubling) plus up to 150ms jitter, refetching through the same Dio instance so the auth token header is reattached on each retry. The connectivity banner (`NoInternetBanner`/`ConnectivityAwareWrapper` in lib/core/widgets/no_internet_banner.dart, backed by `connectivity_service.dart`'s `isOnlineProvider`) was already implemented and wired into `main.dart`'s `MaterialApp.router` builder — it just had no test coverage, added here. No new dependency: `connectivity_plus` was already in pubspec.yaml. VERIFIED 2026-09-17: `flutter test test/retry_interceptor_test.dart test/no_internet_banner_test.dart` (8 tests: retry on 5xx/timeout/connection-error, no retry on 4xx, gives up after max attempts, banner hidden/shown/reacts-to-stream-changes) and `flutter analyze lib/core/api/retry_interceptor.dart lib/core/api/api_client.dart test/retry_interceptor_test.dart test/no_internet_banner_test.dart`, both clean. Also re-ran `flutter test test/auth_service_test.dart` to confirm the new interceptor doesn't disturb the existing 401 refresh flow — unaffected.
 8.7 [TODO] **Priority: P3.** State: Riverpod State Hydration (Local local persistence)
-8.8 [TODO] **Priority: P2.** i18n: Unified Localization (English + Bengali)
+8.8 [PARTIAL 2026-10-09] **Priority: P2.** i18n: Unified Localization (English + Bengali). Audit 2026-10-09: `GHCAA.Mobile/lib/core/services/app_localizations.dart` holds a small hand-written `en`/`bn` map. There is no ARB or `l10n.yaml` pipeline and most screen strings are not extracted yet.
 8.9  [DONE] CI/CD: Fastlane + GitHub Actions Deployment Pipeline
 ## WORK PACKAGE 12: PROCESS & ENGINEERING STANDARDS
 
@@ -702,7 +704,7 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
   - **37.1l Vote screen shows names, abstain, review and server voted state [TODO] Priority: P1 | Depends on: 37.1j.** Web shows "Seat {{seatId}}", casts on one click, has no abstain, and forgets the voted state on reload. Mobile has the same flow. Spec 023 FR-011 to FR-014; spec 011 criteria 9 to 11 and 14.
   - **37.1m Printable receipt and published tracking codes [TODO] Priority: P1 | Depends on: 37.1i, 37.1l, decision D1.** No receipt exists. Web print stylesheet with `window.print()`, mobile PDF on the device, both built on the client only. Tracking-code list published after close with no choices. Spec 023 FR-015, FR-016 and its receipt and print standard.
   - **37.1n Public results endpoint [TODO] Priority: P1 | Depends on: 37.1k.** `election-results.ts:25-27` calls the admin-only `POST /count`, so members and the public see nothing. New public read, Declared or Archived only, with zero-vote candidates, abstentions, spoiled ballots and turnout. Spec 023 FR-017.
-  - **37.1o Multi-place seats and tie rule [PARTIAL 2026-09-27] Priority: P2 | Depends on: 37.1k.** `CountAsync` elected one candidate and ignored `SeatCount`. The count half is done: a seat elects its top `SeatCount`, and candidates level at the last place are flagged as a tie with none elected. Left: web and mobile ballots still allow one pick per seat, and the tie rule is not stored. D2 is decided: the admin picks drawing lots, run-off or chair's casting vote at setup, each with a short description. `ScrutinyOn` and `WithdrawalClosesOn` go on the create screen in the same change. Spec 023 FR-018, FR-019.
+  - **37.1o Multi-place seats and tie rule [PARTIAL 2026-09-27] Priority: P2 | Depends on: 37.1k.** `CountAsync` elected one candidate and ignored `SeatCount`. The count half is done: a seat elects its top `SeatCount`, and candidates level at the last place are flagged as a tie with none elected. Left: web and mobile ballots still allow one pick per seat. Audit 2026-10-09: the tie rule is now stored (`Election.TieRule`, `Election.cs:21`); the create-screen picker for it is still missing. D2 is decided: the admin picks drawing lots, run-off or chair's casting vote at setup, each with a short description. `ScrutinyOn` and `WithdrawalClosesOn` go on the create screen in the same change. Spec 023 FR-018, FR-019.
   - **37.1p Recount, candidate consent, officer conflict, spoiled and unopposed seats [TODO] Priority: P2 | Depends on: 37.1k.** None of these rules exist in code. Spec 023 FR-020 to FR-024. The unopposed rule and the recount window need the constitution checked first.
   - **37.1r Device details on the vote turnout record [TODO] Priority: P2 | Depends on: 37.1i.** Asked 2026-09-27 to track IP, location and device on each vote. IP and user agent are already stored on the turnout row by `ActivityService`, behind `UseForwardedHeaders`. Left: parse browser, OS and device type into the row's `Metadata` with no new package. Location by IP lookup waits on the committee's approval because it sends voter IPs to a third party. Spec 023, section on what the vote record keeps.
   - **37.1s Ballot secrecy against database access [DONE 2026-09-27] Priority: P1 | Depends on: 37.1i.** Decision: the returning officer holds the key (option a). Built: the officer makes the key pair in the browser and keeps the private half, pending choices are sealed with it and padded to 512-byte blocks, tracking codes sit in `BallotReceipts` with no link to ballots, the count opens every ballot in one shuffled Serializable pass and refuses fewer than 10, and Postgres gets a VACUUM after. Voting cannot open without a key. Evidence: 917 backend tests pass (`BallotSealTests`, the CountAsync tests in `ElectionServiceTests`), `ballot-key.util.spec.ts` and `admin-elections.spec.ts` pass, migration `ElectionSealedBallots` checked on a throwaway database. Left open: the key sits in server memory during the count, and a lost key means a hand count. Original finding: The security review of 2026-09-27 found three ways someone with database, disk or backup access can still link a voter to a ballot. The pending row shares the voter's transaction id, so waiting ballots can be joined to `SeatVote`. `Ballot.SerialNumber` holds the voter's tracking code, so a receipt proves the vote to anyone with the table. The last batch at close can hold one ballot. The fix options are to encrypt `ChoicesJson` under a key the returning officer brings at Count, keep tracking codes in their own table, and move everything as one batch at Counting. The key handling needs the user's choice. Fixed already in this pass: vote request log line, time of day on vote rows, phase re-read inside the vote transaction, rollback after a failed commit. Spec 023, Known limits.
@@ -719,15 +721,15 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
   - **37.12d Appointments with accept and signed declaration [DONE 2026-09-30] Priority: P1 | Depends on: 37.12c.** `ElectionAppointment` replaces `ElectionOfficer`. Member or non-member. A non-member gets a user with no member link and a set-password link. Counts only after accept and signed declaration. Migration copies the old officer rows. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`. So far (2026-09-30): `ElectionAppointment` entity and config, `ElectionAppointmentService`, and `ElectionAppointmentsController` with list, appoint, revoke, mine, accept and decline. `/me` fills `electionAppointments` from the live appointments. `ElectionOfficer`, the `ElectionRole` enum and `POST api/elections/{id}/officers` are gone. `ScrutinyDecision` records `DecidedByUserId` in place of `OfficerMemberId`. A persona that any appointment uses cannot be deleted. 8 FR-39 tests in `ElectionAppointmentServiceTests`; the backend suite passed 942 of 942. Then: migration `ElectionAppointments` copies each old officer row into an accepted appointment, with the appointed, accepted and signed times set to the migration run, and a throwaway-DB dry run on 2026-09-30 ran clean. Web has `/officials/my-appointments` (accept needs the tick, decline takes a reason), the dashboard lists appointments waiting for an answer, and reset-password reads as setting a first password when the link carries `invite=1`. Mobile has `/officials/appointments` under My Account in the drawer. Tests: 4 web page specs, 2 reset-password specs, 1 dashboard spec, 2 Flutter widget tests; web suite 555 of 555, `ng build` and `flutter analyze` clean. Departures from the plan: the migration inserts the four personas it needs with NOT EXISTS, since the personas table has no unique name index for ON CONFLICT; an old row with no appointer falls back to the first SuperAdmin user, or the officer when there is none; an old officer with no login is skipped rather than given a new user; where a member has more than one user the active one is picked (DISTINCT ON); the Roles sequence is moved past the fixed seed ids before `ElectionOfficial` is inserted; the invite link uses the existing `/reset-password` route, not a new one; the web page sits outside `/portal` because its memberGuard would turn away an outside official; the mobile drawer item always shows, since `/me` lists live appointments only and a pending one would hide it; mobile has no reset screen, because reset links open on the web. Known noise: vitest reports 6 unhandled XHR errors to `/api/lookups/ECPosition` from a spec this change did not touch; every test passes. Earlier departures: the invite reuses the password-reset template inline rather than a helper pulled out of `AuthService`; the partial index filter is not guarded by provider, since the quoted form works on both; `DecideNominationAsync` checks the DecideNominations permission itself until 37.12e adds the filter; a member appointee gets an in-app notification and no email; the appointment routes use the `ElectionStaff` policy plus a check in the service until 37.12e; decline also works on an accepted appointment, as a resignation; appoint does not check the persona's `MaxCount`.
   - **37.12e Per-election permission check and admin handover [DONE 2026-10-01] Priority: P1 | Depends on: 37.12d.** `IElectionAccessService` plus `[RequireElectionPermission]` on every election write. SuperAdmin always passes. Admin loses access once a takeover persona has a live appointment, unless the setting says otherwise. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`. Done: `ElectionAccessService` gives SuperAdmin every permission, a caller the union of their live appointments, and an Admin that union plus every permission except DecideAppeals until a takeover persona has a live appointment (`AdminKeepsControlAfterHandover` keeps the Admin set after it). The filter answers 401 with no user id, 404 when the route id does not resolve to an election, and 403 ProblemDetails with code `ELECTION_PERMISSION` naming the missing permission. Election writes on `ElectionsController`, `AdminElectionsController` and `ElectionAppointmentsController` moved to the `ElectionStaff` policy plus the filter; `Create` stays `AdminOnly`, since no election exists to check against. `GET api/admin/elections` shows an official only the elections they hold a live appointment on. `AdminElectionDto` carries `MyPermissions` and `AdminHandedOver`, read by the web and Flutter models. `ElectionAppointmentService` now asks the access service, so appointing honours the handover switch; its own role and permission checks are gone. `DecideNominationAsync` lost its interim check, since the filter guards the route. Tests: 7 in `ElectionAccessServiceTests`, 5 in `RequireElectionPermissionAttributeTests`, 2 controller tests on the filtered list, 1 Flutter model test, and a reflection test that fails when a non-GET election action has neither the filter nor `AdminOnly`. Backend suite 967 of 967; web `tsc` and `flutter analyze` clean. Departures from the plan: no election audit read endpoint exists yet, so "audit reads need ViewAudit" has nothing to guard until 37.13a; the appointment service keeps its own AppointOfficials check as well as the filter, since it is called outside HTTP; `AdminHandedOver` reports a live takeover whatever the config switch says. Known gap: the reflection test resolves the method policy before the class policy, so it would not notice a stricter class policy. Review notes left open: the filter reads roles from the token, so a demoted Admin keeps Admin rights until the token expires; the filter answers 404 before 403, so staff can tell a real nomination id from a missing one; `GET api/admin/elections` runs a permission query per election; the Admin set includes Approve, which 37.12f has to settle so an Admin cannot be both people in a two-person step.
   - **37.12f Two-person rule for sensitive steps [DONE 2026-10-01] Priority: P1 | Depends on: 37.12e.** `ElectionApproval` table. Listed actions return 202 and run only when a second person with Approve agrees. Replacing the ballot key goes through it, which closes 37.1v. Vote screen shows the key fingerprint. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`. Done: `ElectionApprovalService` with migration `ElectionApprovals`. Publish, OpenPolling, ClosePolling, Archive (phase route), Declare, admin Publish and Close, and a ballot key replacement go through `RunOrRequestAsync`, which answers 202 with the stored request when a second person is needed. `GET api/elections/{id}/approvals`, `POST .../approvals/{approvalId}/approve` and `.../reject` sit behind step-up. Approve claims the row with a conditional update inside the step's transaction, so two approvers cannot both run it and a failed step leaves the request open. Reject uses the same conditional update. The web admin lists waiting requests with Approve and Reject; the member vote page and the Flutter vote screen show the fingerprint; the Flutter admin screen says when a step is waiting. Tests: 16 in `ElectionApprovalServiceTests`, controller and filter tests updated, 4 web component tests, 2 web service tests, 1 Flutter service test. Backend 986 of 986; web 559 tests pass, Flutter 179 pass, `flutter analyze` clean. Departures from the plan: approve and reject take the caller's roles so SuperAdmin and the handover rules apply; the requester can never approve their own request, but two different Admins can approve each other's; the key travels as the request payload; reject needs Approve too; one open request per election and action is checked in code, not a unique index, since an expired row would still block the index; the first ballot key runs at once and only a replacement waits; the hash-chain audit row waits for 37.13a, with the approval row and the log standing in; a forbidden approval answers with the `ELECTION_PERMISSION` code; the web list loads on request because it needs step-up; Flutter shows the waiting notice but approving happens on the web admin. Review notes left open: two requests sent at the same moment can both be stored (the second then fails as not-ready), and two first-key calls at once can both run; whoever can edit `TwoPersonActions` in OrgConfig can turn the rule off, and a misspelled action name is ignored; the Flutter `declare` returning true for "waiting" is easy to misread. Also seen: `admin-governance.spec.ts` raises 6 unhandled HTTP errors from a real `/api/lookups/ECPosition` call, untouched by this change.
-  - **37.12g Election access ends by itself [TODO] Priority: P1 | Depends on: 37.12f.** Declare sets an end date on every appointment. The permission check, `/me` and login refuse after it. Archive revokes all, removes the role, rotates stamps and deactivates non-member officials. No background job. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`.
-  - **37.12h Officials area on web [TODO] Priority: P2 | Depends on: 37.12e.** `/officials` route group reusing the admin election screen with buttons shown from the caller's permissions. Dashboard with timeline, approvals, nominations, key status, roll and turnout, appointments and audit. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`.
+  - **37.12g Election access ends by itself [PARTIAL 2026-10-09] Priority: P1 | Depends on: 37.12f.** Audit 2026-10-09: emergency revoke and the archived-user exclusion (94.5) are built; the end date set at Declare and its check in `/me` and login are not. Declare sets an end date on every appointment. The permission check, `/me` and login refuse after it. Archive revokes all, removes the role, rotates stamps and deactivates non-member officials. No background job. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`.
+  - **37.12h Officials area on web [PARTIAL 2026-10-09] Priority: P2 | Depends on: 37.12e.** Audit 2026-10-09: only `officials/my-appointments` exists; the route group and dashboard are not built. `/officials` route group reusing the admin election screen with buttons shown from the caller's permissions. Dashboard with timeline, approvals, nominations, key status, roll and turnout, appointments and audit. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`.
   - **37.12i Public election board [TODO] Priority: P2 | Depends on: 37.12d.** Anonymous `GET api/elections/{id}/board` with officials by group, timeline and turnout after close. Web public page, member page roll and voted lines, mobile read-only list. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`.
   - **37.12j Docs for officials and personas [TODO] Priority: P2 | Depends on: 37.12i.** Spec 023 stories, operational manual steps, API registry, project map, features, SRS, architecture. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`.
   - **37.13a Election audit hash chain [TODO] Priority: P2 | Depends on: 37.12f.** `ElectionAuditEntries` with previous and own hash, a verify endpoint, and the head hash on the board at declare. Standards §11, audit and transparency. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`.
   - **37.13b Candidate order fixed at CandidateList [TODO] Priority: P2 | Depends on: none.** `Nomination.BallotOrder` set by a shuffle or alphabetically when the phase is entered. Standards §8, ballot design. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`.
   - **37.13c Per-seat opened ballots after declare [TODO] Priority: P3 | Depends on: 37.13a.** Each seat's choice sets published in a separately shuffled list after declare. Standards §10, tallying. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`.
   - **37.13d Test elections [TODO] Priority: P3 | Depends on: none.** `Election.IsTest`: hidden from public lists and writes no committee on declare. Standards §18, testing. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`.
-  - **37.13e Ballot key handling procedure [TODO] Priority: P2 | Depends on: 37.12f.** Written key procedure plus a destroy-key-file step on the dashboard after declare. Standards §14, security. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`. Raised by the online-voting review, `docs/Elections/00-Election-Online-Voting-Review.md`, 2026-10-04. The procedure grows into a ballot protocol document: algorithm, key size, sealed format with the version prefix and associated data from 37.13i, padding, fingerprint, key generation, storage, backup, replacement and destruction, the count procedure, failure handling and test vectors. It states that the Returning Officer is a trusted key custodian and that holding the private key is a single point of trust. Threshold custody (key shares held by several officials) was considered and not built; that is an accepted trust assumption, recorded, not a gap. It also covers backups and snapshots taken during polling.
+  - **37.13e Ballot key handling procedure [PARTIAL 2026-10-09] Priority: P2 | Depends on: 37.12f.** Audit 2026-10-09: the key fingerprint is shown; the written procedure and the destroy step are not done. Written key procedure plus a destroy-key-file step on the dashboard after declare. Standards §14, security. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`. Raised by the online-voting review, `docs/Elections/00-Election-Online-Voting-Review.md`, 2026-10-04. The procedure grows into a ballot protocol document: algorithm, key size, sealed format with the version prefix and associated data from 37.13i, padding, fingerprint, key generation, storage, backup, replacement and destruction, the count procedure, failure handling and test vectors. It states that the Returning Officer is a trusted key custodian and that holding the private key is a single point of trust. Threshold custody (key shares held by several officials) was considered and not built; that is an accepted trust assumption, recorded, not a gap. It also covers backups and snapshots taken during polling.
   - **37.13f Incident response, threat model and compliance table [TODO] Priority: P3 | Depends on: none.** Two short documents and a table mapping each standards requirement to the code or TODO item that meets it. Standards §17 and §19. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`. Raised by the online-voting review, `docs/Elections/00-Election-Online-Voting-Review.md`, 2026-10-04. The threat model names the design a trusted-server secret ballot and says what that does and does not protect: who can link a voter to a ballot (the server operator during polling, someone holding a polling-day backup and the key file), what the client is trusted with, and where the Render platform boundary sits. The incident procedure covers a lost or leaked key, a suspected link between voter and ballot, and a stopped poll. A logging and retention note lists what the vote and count routes log and for how long.
   - **37.13g Manual accessibility check of the vote screens [TODO] Priority: P3 | Depends on: none.** WCAG 2.2 AA checklist run once with keyboard only and a screen reader. Standards §13. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`.
   - **37.13h Second person before the count [DONE] Priority: P1 | Depends on: 37.12f.** Today one person with the Count permission and the key file can count alone, while every other sensitive step waits for a second person. Add `Count` to `ElectionApprovalAction`. When it is listed in `TwoPersonActions`, a count call with no approved request answers 202 and stores a request with no payload. A second person with Approve approves it. The private key is never stored: the requester then sends the key with the count as today, and the count claims the approved request, so one approval allows one count. The approver cannot be the one who counts. Needs a `ConsumedAt` column on `ElectionApproval` (migration). Web and Flutter show the waiting state and then the upload step. Saved OrgConfig rows keep their old `TwoPersonActions` list, so existing sites must add Count by hand; the default list picks it up. Raised by the online-voting review, `docs/Elections/00-Election-Online-Voting-Review.md`, 2026-10-04. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md`. As built 2026-10-04: the count opens its own transaction, so the claim is a conditional update that sets `ConsumedAt` first and clears it again when the count fails, which means a wrong key file does not use the approval up. Approving a Count only checks the election is in counting. A call with no key never stores a request, because the results page and the mobile app call count with no key just to read stored results. Web `runCount` maps the 202 to a pending row and keeps an approved row listed until the count runs; the mobile app sends no key, so it needed no change. Migration `AddBallotSealVersionAndCountApproval` (shared with 37.13i). The OrgConfig golden file now lists Count. Tests: `ElectionApprovalServiceTests` (Count_*), `ElectionsControllerTests` (Count_*), `admin-elections.spec.ts`, `elections.service.spec.ts`. Security review the same day: an approved count waiting to run now blocks a second count request. Left open: any official with Count other than the approver may use the approval, not only the requester; two people are still involved.
@@ -964,6 +966,10 @@ visual) fixes protect mobile automatically, since both are enforced server-side,
   - 58.3 — poll voting already correctly blocked past `ExpiryDate`/inactive server-side
     (`PollService.VoteAsync`), confirmed already correct — no web fix was needed, so nothing to
     check on mobile for this one specifically, included here only for completeness of the sweep.
+Audit 2026-10-09: the duplicate check exists. `_isRegistrationOpen` in `events_screen.dart:535-549` and
+`event_details_screen.dart:365-376` looks only at `isActive` and the registration start and end
+dates. An event past its `EndDate` with no `RegistrationEndDate` shows an enabled Register button,
+and the server then rejects the call. Fix: add the `EndDate` check in both places, with a test.
 
 60.3 [TODO] **Priority: P4 | Depends on: none.** Messages vs. Chat+Forum naming mismatch: web has a
 single "Messages" page (`member/messages`); mobile splits the same networking space into a separate
@@ -973,8 +979,8 @@ confirmed whether these map to the same backend feature/data model or web's Mess
 mobile's split model doesn't (e.g. direct 1:1 alumni messaging vs. threaded forum discussion) —
 needs a closer read of both the web and mobile networking/messaging services before concluding
 anything is actually missing; flagged as needs-verification, not a confirmed gap.
-60.4 [TODO — tracked in 82.84] **Priority: P1.** Mobile: Complete authenticated integration verification on a supported Flutter device/toolchain for the recorded environment blockers. Use 82.84 as the canonical execution record.
-60.5 [TODO — tracked in 82.85] **Priority: P2 | Depends on: 60.4.** Mobile: Correct integration credentials and deterministic financial/forum coverage gaps. Use 82.85 as the canonical execution record.
+60.4 [DONE 2026-10-09, closed with 82.84] **Priority: P1.** Mobile: Complete authenticated integration verification on a supported Flutter device/toolchain for the recorded environment blockers. Use 82.84 as the canonical execution record. Audit 2026-10-09: 82.84 is DONE 2026-09-14 in `docs/TODO_ARCHIVE.md`, with the forum leg moved to 82.85, so this mirror closes with it.
+60.5 [DONE 2026-10-09, closed with 82.85] **Priority: P2 | Depends on: 60.4.** Mobile: Correct integration credentials and deterministic financial/forum coverage gaps. Use 82.85 as the canonical execution record. Audit 2026-10-09: 82.85 is DONE 2026-09-16 in `docs/TODO_ARCHIVE.md`, so this mirror closes with it.
 
 ## WORK PACKAGE 62: INSTITUTION-AGNOSTIC / WHITE-LABEL PLATFORM (raised by "make this application generic rather than GHC ... will work with GHC or any other institution with minimal configuration changes", 2026-09-01)
 
@@ -1047,6 +1053,23 @@ exist yet is the premature-abstraction risk the project's own rule warns against
 
 ### PHASE F: ONBOARDING, OPS, PROOF
 
+62.6b [TODO] **Priority: P2 | Depends on: 62.6, and on `ORG_PROFILE=ghc` being set on the
+deployments.** Delete `OrgConfigService.BuildGhcaaDefaults()` (~190 lines), the optional `profiles`
+constructor parameter, and the `ProfileExplicitlySelected` branch in `BuildDefaults()`, leaving the
+service reading the pack unconditionally. **Why it is a separate item rather than part of 62.6:** the
+hardcoded copy is the fallback that stops an unconfigured deployment serving sample branding to a
+live association, so it cannot be removed while any deployment still lacks `ORG_PROFILE`. Removing it
+first would reintroduce exactly the failure 62.6's guard exists to prevent.
+
+**Acceptance:** `ORG_PROFILE` is confirmed set on every running deployment (preprod and any other);
+`BuildGhcaaDefaults()` and the guard are gone; `ProfileDrivenConfigTests` is updated so the cases that
+currently assert the unset-profile fallback instead assert that an unset profile now fails loudly;
+`OrgConfigGoldenSnapshotTests` still passes unchanged, which is what proves the deletion changed
+nothing.
+Audit 2026-10-09: moved back from `docs/TODO_ARCHIVE.md`, where it was the only open copy.
+`OrgConfigService.cs:22` and `:185-193` still hold `BuildGhcaaDefaults()` and the guard. Only
+`.env.preprod` shows `ORG_PROFILE=ghc`; the Render settings cannot be checked from the repo.
+
 62.41 [PARTIAL 2026-09-06] **Priority: P1 | Depends on: 62.6, 62.15, 62.27 (all done, so this was
 unblocked).** Acceptance test written: `GHCAA.Web/tests/e2e/generic-profile-acceptance.spec.ts` +
 its own `playwright.generic.config.ts` (kept separate from the normal suite on purpose — it needs a
@@ -1088,10 +1111,12 @@ the sentences that carry them. They were taken on 2026-09-01 and go stale with e
 
 63.29 [DONE 2026-10-06] **Priority: P2 | Depends on: nothing.** Chapter 11 and its outline block re-taken from `python docs/book/build/wbs.py` on 2026-10-06. Code commit-days 87 to 89, document commit-days 45 to 47, evidenced effort 166 to 170 days, nominal 967 to 996 days, reuse-adjusted 392 to 406, completed project 444 to 454, tasks 1,072 to 1,077, commits 328 to 334 (also in Chapters 4 and 7). Prior-project reuse is now 18.6% of the tree, so that factor moved from 0.85 to 0.86. Left open for the user: whether the chapter quotes `wbs.py`'s open-item count or the tracker page's; the P1-P5 stream sums to 27 days while the total still adds 30; the outline's U1-U5 table still carries 43,000 words and four incidents where `wbs.py` now has 13,800 and two; outline figures 2,710 days and 65 per cent are not produced by `wbs.py`. `build.py --pdf --strict` clean, `wbs.py --check` passes. Requested 2026-10-06.
 
-63.10 [TODO] **Priority: P3 | Depends on: 63.6.** When Chapters 7-13 are written, every new figure
+63.10 [DONE 2026-10-09, not needed] **Priority: P3 | Depends on: 63.6.** When Chapters 7-13 are written, every new figure
 goes through the same gate: draw it, run `--audit`, fix the shape rather than marking `{landscape}`,
 then `renumber.py --apply`. The fix order is in `docs/book/README.md` under "Fitting A4". Do not add a
 figure to a chapter without a sentence in the body that names it, or the build will fail.
+Audit 2026-10-09: this is a standing rule, not a task. `build.py --strict` already enforces it and
+`docs/book/README.md` records it, so there is nothing left to close.
 
 63.18 [TODO] **Priority: P3 | Depends on: 63.14.** Front matter is numbered in Arabic with the body,
 not lower-case Roman as `DOCUMENTATION_BOOK_OUTLINE.md` specifies, and the title page carries a folio.
@@ -1099,20 +1124,23 @@ Chrome's footer template is one template for every page, so neither can be varie
 two prints (front matter and body, each with its own template) merged into one file, which needs a PDF
 library beyond the standard library. Worth doing only if a supervisor asks for it.
 
-64.8 [TODO] **Priority: P2 | Depends on: 64.7.** Revise §4.8 to carry risk exposure **RE = P × C** and
+64.8 [PARTIAL 2026-10-09] **Priority: P2 | Depends on: 64.7.** Revise §4.8 to carry risk exposure **RE = P × C** and
 impact on the 1–5 scale, which is the convention the course material uses. The probabilities are
 already there; the impact costs are author-stated and blocked on 64.7.
+Audit 2026-10-09: RE = P × C is now used in §11.9, the project risk register. §4.8 and Table 4.2 still lack the
+1–5 impact scale.
 
 64.9 [TODO] **Priority: P2.** Chapter 11 figure set is seventeen per-component activity diagrams plus
 six chapter-level charts, not one module network. A seventeen-node network with nine edges converging
 on the web client prints at about 4pt, well under the enforced 7pt floor. Per-component diagrams also
 sit beside the prose for their own component, which is where a reader wants them.
 
-65.5 [TODO] **Priority: P3.** Within Chapter 6, §6.11 Design Principles (twelve subsections) and §6.12
+65.5 [DONE 2026-10-09, not needed] **Priority: P3.** Within Chapter 6, §6.11 Design Principles (twelve subsections) and §6.12
 Patterns (seven) come after §6.8 to §6.10 on user interface, mobile and configuration. Principles are
 more fundamental than the specific designs that apply them, so the conventional order would put them
 first. Not done: reordering sections inside a written chapter renumbers a large share of the 84 §6
 references for a modest gain. Worth doing only if the chapter is revised for another reason anyway.
+Audit 2026-10-09: superseded by merge M11 in 67.7, which settles the Chapter 6 order.
 
 # Work Package 67 — The remaining chapters: nothing of Work Packages 63 to 66 reaches a reader yet
 
@@ -1130,8 +1158,11 @@ into an effort or cost figure, and the per-component completed-task-count breakd
 set out to compare against commit-days. Chapter 8 is done too, as of 16 September 2026: all 15
 sections written, all 6 figures and 5 tables from the outline drawn, and `build.py --pdf --strict`
 ends `status : clean, ready to deliver`. The remaining four chapters are not: as of 16 September
-2026, `build.py --strict` reports 105 open placeholders across them (`07-implementation.md` 17,
-`09-verification.md` 44, `10-deployment.md` 16, `12-results.md` 16, `13-conclusion.md` 12). Chapter
+2026, `build.py --strict` reported 105 open placeholders across them (`07-implementation.md` 17,
+`09-verification.md` 44, `10-deployment.md` 16, `12-results.md` 16, `13-conclusion.md` 12).
+Recounted 2026-10-09 by counting `*[` in each chapter file: `07-implementation.md` 6,
+`09-verification.md` 43, `10-deployment.md` 16, `11-project-management.md` 1, `12-results.md` 16,
+`13-conclusion.md` 11, 93 in all. Chapter
 11 went first because `wbs.py` prints its activity table, critical path and arrival profile from git
 and this file, so writing it was prose around generated numbers rather than gathering anything;
 Chapter 8 went next as the WP82.6 refactor left it well scoped; the remaining four still need that
@@ -1223,10 +1254,12 @@ Three are already true and documented; three describe a system stronger than the
 writing them up as fact would have put an unverifiable claim into a document whose whole argument is
 that its claims are checkable.
 
-73.5 [TODO] **Priority: P2 | Depends on: 73.4.** Generate the traceability matrix as a repository
+73.5 [PARTIAL 2026-10-09] **Priority: P2 | Depends on: 73.4.** Generate the traceability matrix as a repository
 artefact from those tags, the way `wbs.py` generates the Chapter 11 tables. Then §3.9's original
 claim becomes true and can be restored, and §12.2 can close the matrix from evidence rather than by
 reading.
+Audit 2026-10-09: `traceability.py` exists but regenerates only the Test column. The rest of the matrix is still
+written by hand.
 
 73.6 [TODO] **Priority: P2.** "Constitutional rules fail the build if they drift from the governing
 text" is the user's description and is not what happens today. `ConstitutionSeeder` synchronises the
@@ -1238,13 +1271,14 @@ data without changing the test is a failure. That is worth building, and it woul
 Chapter 9 make a claim no commercial CRM comparison in Chapter 2 can match. Not built unasked,
 because it is application code rather than documentation.
 
-73.7 [TODO] **Priority: P3.** Two of the user's statements have no counterpart in the system and are
+73.7 [DONE 2026-10-09, not needed] **Priority: P3.** Two of the user's statements have no counterpart in the system and are
 recorded here so they are not written up by mistake. There is no mapping of requirements to
 dependency trees; the dependency evidence in the book is the assembly-level structure matrix of
 Figure 7.2, which is a different thing. And there is no immutable per-requirement version history
 recording who authorised a change: `docs/TODO.md` and the git history together carry when and why,
 but not an authorisation record, and the Association has no change-control board to authorise
 anything (§11.7 says so).
+Audit 2026-10-09: this is a record of what not to claim, with no work attached, so it closes as written.
 
 74.3 [TODO] **Priority: P3.** Backfill markers for Work Packages 1 to 67. Not done in bulk: a marker asserting
 a start date is a claim about when work happened, and for most of those areas the honest source is the
@@ -1299,10 +1333,11 @@ walkthrough control by control for §8.13.
 **Acceptance:** each figure traceable to a command that can be re-run against the tree, with the date
 of the run recorded, per the repository-numbers rule in `CLAUDE.md`.
 
-78.12 [TODO] **Priority: P2.** Chapter completion order, recorded so it is not re-argued: Chapter 11
+78.12 [DONE 2026-10-09, not needed] **Priority: P2.** Chapter completion order, recorded so it is not re-argued: Chapter 11
 first, being the only chapter whose figures `wbs.py` already computes and which is blocked on nothing;
 then 9; then the evidence of 78.9 and 78.10; then 12, 7, 8, 10, 13, the abstract, and a final
 consistency pass. This departs from the review brief, which scheduled 11 near the end.
+Audit 2026-10-09: a recorded decision, not a task. The order stands; the open chapters are tracked in 67.2.
 
 ---
 
@@ -1395,6 +1430,16 @@ as the source-of-truth drafts. Add the `default` profile equivalents for any fil
 profile pack.
 
 (82.115 done 2026-09-18 — see docs/TODO_ARCHIVE.md)
+
+82.117 [DONE 2026-10-09] **Priority: P2 | Depends on: 82.115.** The Developer Options tracker
+showed fewer open items than `docs/book/build/tracker_page.py` did for the same file. Its parser
+read only the `82.1 [TODO] **Priority...**` shape and only TODO and PARTIAL, so it dropped every
+WP37 bullet item, items with a note in the bracket such as `[TODO — tracked in 82.84]`, and the
+IN PROGRESS, BLOCKED and ONHOLD states. `DevTrackerService` now uses the same item shapes and open
+states as `tracker_page.py`, joins wrapped lines, and reads the file on every call, so Refresh shows
+the current file. The deployed page still shows the `docs/TODO.md` copied into the image, so it
+changes only after a redeploy. The badge colors reuse the `.status-badge` modifiers. Tests:
+`DevTrackerServiceTests` 7 passed, `admin-dev-tracker.spec.ts` 6 passed, both run 2026-10-09.
 
 ---
 
@@ -1695,7 +1740,7 @@ the action now returns `Problem(detail: "You can only download your own receipts
 type. **Acceptance met:** action returns `Problem(detail: ..., statusCode: 403)`; test asserts the
 status code, not only the type.
 
-84.42 [TODO] **Priority: P1 | Depends on: none.** The mobile app has no step-up flow. Nothing in
+84.42 [PARTIAL 2026-10-09] **Priority: P1 | Depends on: none.** The mobile app has no step-up flow. Nothing in
 `GHCAA.Mobile/lib` reads `STEP_UP_REQUIRED` or calls `/auth/step-up`, yet the mobile admin screens call
 routes marked `[RequireStepUp]`: `POST /roles/users` and `POST /roles/assign`
 (`features/admin/roles_service.dart:27` and `:62`) and `POST /admin/elections`
@@ -1704,6 +1749,10 @@ actions should always fail on mobile with a 403. The web client handles it in
 `global-http.interceptor.ts:70`. Found by 84.5. **Acceptance:** confirm the failure on a device first.
 Then either add a mobile step-up prompt that verifies and retries, or hide the step-up actions on
 mobile. A test covers whichever is chosen.
+Audit 2026-10-09: the text above predates 37.1w. `GHCAA.Mobile/lib/core/api/step_up_interceptor.dart` now reads
+`STEP_UP_REQUIRED` and is wired in `api_client.dart`, so the actions should no longer always fail.
+What is left is a device check that `POST /roles/users`, `POST /roles/assign` and
+`POST /admin/elections` succeed through the prompt.
 
 84.43 [DONE 2026-10-08] **Priority: P2 | Depends on: none.** Controller side fixed 2026-09-27: the grep in 82.4's
 acceptance (literal-string `BadRequest`/`Conflict`/`Unauthorized`/`NotFound` bodies) now finds nothing
@@ -1736,6 +1785,9 @@ table entry with no matching action. Full suite green at 886 tests (was 885).
 error codes beyond `STEP_UP_REQUIRED` (for example a `code` extension on ProblemDetails), and bodies for
 429 and the framework 401 and 403, which are empty today. Found by 84.5. **Acceptance:** the error-code
 question has a recorded yes or no.
+Audit 2026-10-09: still open. Commit ee673f78 names 84.45, but its change is the mobile token fallback in
+`api_client.dart` and its tracker edits touch only 84.43 and 94.5. That label is a mistake, and the
+token fix has no entry of its own.
 
 84.46 [DONE 2026-09-27] **Priority: P0 | Depends on: none.** `Program.cs` attached the `Api` rate-limit
 policy to `MapControllers()` with `.RequireRateLimiting(RateLimitPolicies.Api)`. That convention adds

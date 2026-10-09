@@ -3536,7 +3536,7 @@ serving the sample pack; no provider at all behaves the same; and an explicitly-
 profile really does change the output to "Sample Alumni Association"/`MEM-`, which is what proves the
 pack branch is live rather than the guard swallowing every case. Full suite 573 to 580, green.
 
-62.6b [TODO] **Priority: P2 | Depends on: 62.6, and on `ORG_PROFILE=ghc` being set on the
+62.6b [MOVED 2026-10-09, open copy is in docs/TODO.md] **Priority: P2 | Depends on: 62.6, and on `ORG_PROFILE=ghc` being set on the
 deployments.** Delete `OrgConfigService.BuildGhcaaDefaults()` (~190 lines), the optional `profiles`
 constructor parameter, and the `ProfileExplicitlySelected` branch in `BuildDefaults()`, leaving the
 service reading the pack unconditionally. **Why it is a separate item rather than part of 62.6:** the
