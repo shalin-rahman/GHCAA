@@ -136,6 +136,13 @@ describe('Login Component', () => {
         expect(router.navigate).toHaveBeenCalledWith(['/portal/dashboard']);
     });
 
+    it('should send an official with no member record to the officials dashboard', () => {
+        authServiceMock.login.mockReturnValue(of({ role: 'ElectionOfficial' }));
+        component.credentials = { username: 'official', password: 'password' };
+        component.onLogin(mockForm);
+        expect(router.navigate).toHaveBeenCalledWith(['/officials']);
+    });
+
     it('should show error on login failure', () => {
         authServiceMock.login.mockReturnValue(throwError(() => ({ error: { message: 'Invalid username or password.' } })));
         component.onLogin(mockForm);

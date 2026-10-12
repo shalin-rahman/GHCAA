@@ -86,6 +86,8 @@ namespace GHCAA.API.Controllers
                 return Unauthorized();
             }
 
+            if (await _authService.EndExpiredOfficialAccessAsync(user, cancellationToken)) return Unauthorized();
+
             var accessToken = _tokenService.CreateToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken();
             await _tokenService.StoreRefreshTokenAsync(user.Id, refreshToken, cancellationToken);

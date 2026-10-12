@@ -41,14 +41,17 @@ by the form named against it, and no step may be skipped.
 
 ## Appendix C — Record Retention
 
+Every record below is kept for ten years from the declaration of the result, as Regulation Article 17
+sets. No record has a shorter or an open-ended period.
+
 | Record | Minimum Retention |
 |---------|-------------------|
-| Ballot Papers | 3 years, or until all appeals conclude, whichever is later |
-| Result Sheets | Permanent |
-| Election Certificates | Permanent |
+| Ballot Papers | 10 years |
+| Result Sheets | 10 years |
+| Election Certificates | 10 years |
 | Complaints | 10 years |
 | Appeals | 10 years |
-| Tribunal Decisions | Permanent |
-| Registers | Permanent |
-| Election Reports | Permanent |
-| Handover Records | Permanent |
+| Tribunal Decisions | 10 years |
+| Registers | 10 years |
+| Election Reports | 10 years |
+| Handover Records | 10 years |

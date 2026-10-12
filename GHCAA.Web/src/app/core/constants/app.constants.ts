@@ -7,7 +7,8 @@ export const SEARCH_DEBOUNCE_MS = 300;
 
 // 37.12c: mirrors Constants.Policies.ElectionStaff on the API.
 export const SUPER_ADMIN_ROLE = 'SuperAdmin';
-export const ELECTION_STAFF_ROLES = [SUPER_ADMIN_ROLE, 'Admin', 'ElectionOfficial'] as const;
+export const ADMIN_ROLE = 'Admin';
+export const ELECTION_STAFF_ROLES = [SUPER_ADMIN_ROLE, ADMIN_ROLE, 'ElectionOfficial'] as const;
 
 // 37.13y/z: mirror the limits in Constants.Elections and AppointmentReasonDto on the API.
 export const ELECTION_RULES_UNLOCK = { DEFAULT_MINUTES: 30, MAX_MINUTES: 60, REASON_MIN: 20, REASON_MAX: 1000 } as const;
@@ -624,7 +625,8 @@ export const ensureValidAcademicData = (member: any) => {
 export const ROUTES = {
     LOGIN: '/login',
     PORTAL_DASHBOARD: '/portal/dashboard',
-    ADMIN_DASHBOARD: '/admin/dashboard'
+    ADMIN_DASHBOARD: '/admin/dashboard',
+    OFFICIALS_DASHBOARD: '/officials'
 };
 
 export const API_ENDPOINTS = {
@@ -724,21 +726,45 @@ export const API_ENDPOINTS = {
     ELECTIONS: {
         BASE: '/api/elections',
         CURRENT: '/api/elections/current',
+        LATEST_DECLARED: '/api/elections/latest-declared',
         NOMINATIONS: (id: number) => `/api/elections/${id}/nominations`,
         SCRUTINY: (id: number) => `/api/elections/nominations/${id}/scrutiny`,
         WITHDRAW: (id: number) => `/api/elections/nominations/${id}/withdraw`,
         VOTE: (id: number) => `/api/elections/${id}/vote`,
+        BALLOT: (id: number) => `/api/elections/${id}/ballot`,
+        BOARD: (id: number) => `/api/elections/${id}/board`,
+        RESULTS: (id: number) => `/api/elections/${id}/results`,
+        OPENED_BALLOTS: (id: number) => `/api/elections/${id}/opened-ballots`,
+        AUDIT_VERIFY: (id: number) => `/api/elections/${id}/audit/verify`,
+        AUDIT: (id: number) => `/api/elections/${id}/audit`,
+        TRACKING_CODES: (id: number) => `/api/elections/${id}/tracking-codes`,
         PHASE: (id: number) => `/api/elections/${id}/phase`,
         FREEZE_VOTER_ROLL: (id: number) => `/api/elections/${id}/voter-roll/freeze`,
+        UNFREEZE_VOTER_ROLL: (id: number) => `/api/elections/${id}/voter-roll/unfreeze`,
         COUNT: (id: number) => `/api/elections/${id}/count`,
         DECLARE: (id: number) => `/api/elections/${id}/declare`,
+        KEY_DESTROYED: (id: number) => `/api/elections/${id}/key-destroyed`,
         DOCUMENT: (id: number, formCode: string) => `/api/elections/${id}/documents/${formCode}`,
         APPROVALS: (id: number) => `/api/elections/${id}/approvals`,
         APPROVE: (approvalId: number) => `/api/elections/approvals/${approvalId}/approve`,
-        REJECT: (approvalId: number) => `/api/elections/approvals/${approvalId}/reject`
+        REJECT: (approvalId: number) => `/api/elections/approvals/${approvalId}/reject`,
+        PICK_UP_TO: (places: number) => `Pick up to ${places}`
     },
     ADMIN_ELECTIONS: {
         BASE: '/api/admin/elections',
+        NOMINATION_OPENS_ON_LABEL: 'Nominations open',
+        NOMINATION_CLOSES_ON_LABEL: 'Nominations close',
+        POLLING_OPENS_ON_LABEL: 'Polling opens',
+        POLLING_CLOSES_ON_LABEL: 'Polling closes',
+        DATES_MISSING: 'Set the dates nominations open and close and polling opens and closes.',
+        TIE_RULE_LABEL: 'If the vote is tied',
+        SCRUTINY_ON_LABEL: 'Scrutiny date',
+        WITHDRAWAL_CLOSES_ON_LABEL: 'Withdrawals close',
+        TIE_RULES: [
+            { value: 'DrawingLots', label: 'Drawing lots', description: 'A tie is settled by drawing lots in front of the candidates.' },
+            { value: 'RunOff', label: 'Run-off poll', description: 'A tie goes to a second poll between the tied candidates.' },
+            { value: 'ChairCastingVote', label: 'Casting vote', description: "The returning officer's casting vote settles a tie." }
+        ] as const,
         PUBLISH: (id: number) => `/api/admin/elections/${id}/publish`,
         CLOSE: (id: number) => `/api/admin/elections/${id}/close`,
         BALLOT_KEY: (id: number) => `/api/admin/elections/${id}/ballot-key`,

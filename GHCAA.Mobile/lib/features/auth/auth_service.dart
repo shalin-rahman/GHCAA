@@ -354,4 +354,8 @@ extension UserRoleExt on String? {
     final r = this?.trim().toLowerCase();
     return r == 'superadmin' || r == 'admin';
   }
+
+  /// A pure official has no other role, so sign-in lands on /officials.
+  bool get isElectionOfficialRole =>
+      this?.trim().toLowerCase() == 'electionofficial';
 }

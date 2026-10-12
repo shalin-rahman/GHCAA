@@ -1,0 +1,55 @@
+:root {
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --text: #1d2330;
+    --muted: #5b6475;
+    --line: #d5d9e0;
+    --accent: #1f4fd8;
+    --danger: #b3261e;
+    --ok: #17703a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 24px 16px;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, sans-serif;
+}
+
+main { max-width: 640px; margin: 0 auto; }
+nav { margin-bottom: 16px; }
+nav a { margin-right: 12px; color: var(--accent); }
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+label { display: block; margin: 12px 0 4px; font-weight: 600; }
+input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 6px; font: inherit; }
+button { padding: 8px 16px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; font: inherit; cursor: pointer; }
+button:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; }
+button.danger { background: var(--danger); }
+
+.warning { border-color: var(--danger); background: #fdf1f0; }
+.warning h2 { margin-top: 0; color: var(--danger); }
+.status { padding: 8px 12px; border-radius: 6px; margin-top: 12px; }
+.status.ok { background: #e6f4ea; color: var(--ok); }
+.status.fail { background: #fdf1f0; color: var(--danger); }
+.mono { font-family: ui-monospace, Consolas, monospace; word-break: break-all; font-size: 14px; }
+.hidden { display: none; }
+
+.dropzone { border: 2px dashed var(--line); border-radius: 8px; padding: 32px 16px; text-align: center; color: var(--muted); }
+.dropzone.over { border-color: var(--accent); color: var(--accent); }
+
+.bar-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.bar-label { width: 120px; flex: none; }
+.bar-track { flex: 1; background: var(--line); border-radius: 4px; height: 20px; }
+.bar-fill { height: 100%; background: var(--accent); border-radius: 4px; }
+.bar-count { width: 48px; text-align: right; }

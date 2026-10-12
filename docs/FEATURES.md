@@ -230,6 +230,13 @@ The platform operates without live payment-gateway credentials. All payment meth
     reference/date rule, form code chip, ruled write-on fields, tick-box lists, signature grid and
     seal box. `renderFormMarkdown` (`core/utils/markdown.util.ts`) drives it from a small directive
     DSL in the source markdown (`:: grid`, `:: sign`, `:: lines`, `Label: ____`, `[ ]`).
+  - The public `/elections` page opens with a board for the current election: the stage, the accepted
+    officials by group (name and role only, no contact details), a turnout line once it may be shown,
+    the ballot key fingerprint, and after the result is declared the audit chain head with a link to
+    the chain check. `GET api/elections/{id}/board`, anonymous (FR-033). The member election page and
+    the mobile election screen show the same officials, and tell a member they are on the roll.
+  - The server-rendered forms ER-09, 10, 13, 14, 19, 23, 29, 30 and 31 fill their tables from stored
+    records (FR-025). ER-01, 02, 11, 26, 28 and 33 stay generic until their source records exist.
   - API: `GET /api/governance/constitution`, `GET /api/governance/constitution/history`,
     `POST /api/governance/constitution/{id}/vote`.
 - **Validations & rules**:
@@ -287,11 +294,52 @@ The platform operates without live payment-gateway credentials. All payment meth
     `CountRequesterOnly` org setting (default off) is on, any official with Count other than the approver
     can run it. The executor is recorded (`ElectionCountRun` audit row).
   - Pre-polling warning when fewer than 2 live officials hold Approve.
+  - Access ends by itself: declaring the result sets an end date on every appointment, the declared date
+    plus `AccessEndsDaysAfterDeclare` days (default 21). After it the permission check, the current-user
+    read, login, social login and token refresh stop treating the appointment as live, with no job running.
+    A non-member whose only role is ElectionOfficial is then refused at sign-in. A member official keeps
+    normal member access and loses only the official role. Archiving the election revokes every
+    appointment at once with the reason "Election archived".
+  - Vote audit row: the row written when a ballot is cast keeps the device class, OS and browser parsed
+    from the user agent. It carries the date only, no time of day. Location by IP is not built.
   - Two identical approval requests cannot both be stored.
   - Member search in the officials panel is admin-only. On mobile an election official sees a note to
     give a name and email instead.
 - **Dependencies**: `ElectionFreezeService`, `ElectionApprovalService`, `ElectionAppointmentService`,
   `ExpiredRevokeSweep` hosted service, step-up verification (1.2a). Spec 023, FR-034 to FR-041.
+- **Election audit chain and opened ballots**: `ElectionAuditWriter` keeps a hash chain per election in
+  `ElectionAuditEntries`; `GET api/elections/{id}/audit/verify` names the first broken entry. After
+  Declared, `GET api/elections/{id}/opened-ballots` lists each seat's ballots in an order unrelated
+  between seats. Spec 023, FR-048 and FR-049.
+
+### 5.1c Member Ballot
+- **Business description**: Lets an eligible member fill in the whole ballot, review it and cast it
+  once during polling, on web and mobile.
+- **User roles**: Member on the frozen voter roll, with step-up.
+- **Inputs / outputs**:
+  - Screens: `/member/election` on web, the election screen on mobile.
+  - API: `GET api/elections/{id}/ballot`, `POST api/elections/{id}/vote`.
+  - Key fields: seats with candidates and places, `hasVoted`, `isEligible`, `ineligibilityReason`.
+- **Validations & rules**:
+  - Every seat needs a candidate or an explicit "Abstain on this seat". An untouched seat is undecided and
+    keeps review closed. The help line on abstain reads "Your ballot still counts, but no candidate on this seat gets your vote."
+  - `isEligible` false shows the reason and locks the paper. Null means the roll is not frozen yet.
+    The field only warns. The vote endpoint checks the roll again and refuses an ineligible member.
+  - Review shows every seat, with "Abstained" where the voter chose it. Only the confirm sends the
+    ballot. A member who has voted sees a locked screen after a reload or on another device.
+  - Candidates are listed in an order fixed when the election enters CandidateList, shuffled or by
+    name as the `CandidateOrder` setting says. Every voter sees the same order.
+  - A seat with more than one place says "Pick up to N" and takes up to that many candidates. A
+    further pick is blocked, and abstain clears the seat. The receipt lists every name picked.
+  - The create form asks which rule settles a tie for the last place (drawing lots, a run-off or the
+    returning officer's casting vote), each with a one-line description, and takes optional
+    scrutiny and withdrawal dates. A missing nomination or polling date, or dates out of phase
+    order, are refused.
+  - An admin can create an election as a test run. Members and the public do not see it in the
+    current-election read, its results, documents and tracking codes answer 404, and declaring it
+    puts nobody on the committee. The admin list marks it "Test".
+- **Dependencies**: `ElectionService`, step-up verification (1.2a). Spec 023, FR-011 to FR-014,
+  FR-044 to FR-047.
 
 ### 5.2 Bulk Member Import & Export
 - **Business description**: Excel-to-database bridging for migrating legacy records and exporting registry data.

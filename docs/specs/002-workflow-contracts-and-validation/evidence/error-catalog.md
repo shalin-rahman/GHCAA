@@ -207,9 +207,9 @@ back to its generic message for it.
 
 - No error codes beyond `STEP_UP_REQUIRED`. A client that has to react to one failure (already
   voted, OTP expired, payment method off) can only match on English text.
-- The mobile app has no step-up flow, but its admin screens call step-up routes (section 2). Read
-  from source only, not tried on a device: creating a user, assigning a role or creating an election
-  from mobile should always fail with a 403.
+- When this was written the mobile app had no step-up flow, but its admin screens call step-up routes
+  (section 2). Since 37.1w, `step_up_interceptor.dart` asks for the emailed code and retries once. Not
+  yet tried on a device (TODO 84.42).
 - 16 `Problem` calls pass `ex.Message` straight to the caller, and so does one `NotFound`. The
   wording then depends on whatever the service threw.
 - `"unsupported_gateway"` (404) and `"failed"` (400) look like codes but travel in `detail`.

@@ -13,6 +13,42 @@
 <div class="container main-content">
 
     @if (!selected()) {
+    @if (board(); as b) {
+    <section class="doc-group" id="election-board">
+        <h2 class="group-title">
+            {{ b.title }}
+            @if (b.isTest) {
+            <span class="status-badge pending">Test</span>
+            }
+        </h2>
+        <article class="glass-card doc-card">
+            <p>Stage: {{ getElectionPhaseLabel(b.phase) }}</p>
+            @if (b.turnout; as t) {
+            <p>Turnout: {{ t.ballotsCast }} of {{ t.rollSize }} eligible members have voted.</p>
+            }
+            <h3>Who runs this election</h3>
+            @if (b.groups.length === 0) {
+            <p>No officials have accepted an appointment yet.</p>
+            }
+            @for (group of b.groups; track group.groupName) {
+            <h4>{{ group.groupName }}</h4>
+            <ul>
+                @for (member of group.members; track member.personaName + member.displayName) {
+                <li><strong>{{ member.displayName }}</strong>, {{ member.personaName }}</li>
+                }
+            </ul>
+            }
+            @if (b.keyFingerprint) {
+            <p>Ballot key fingerprint: <code>{{ b.keyFingerprint }}</code></p>
+            }
+            @if (b.auditHeadHash) {
+            <p>Audit chain head: <code>{{ b.auditHeadHash }}</code>
+                <a [href]="auditVerifyUrl" target="_blank" rel="noopener">Check the audit chain</a></p>
+            }
+        </article>
+    </section>
+    }
+
     <!-- Index: the whole document set, grouped so the purpose of each is obvious. -->
     @for (group of groups; track group) {
     <section class="doc-group">

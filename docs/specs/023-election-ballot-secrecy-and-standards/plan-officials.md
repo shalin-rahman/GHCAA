@@ -1,7 +1,7 @@
 # Spec 023 plan: election officials, personas and standards gaps
 
 Status: approved 2026-09-28. All four decisions in §6 are answered. Build follows the order in §7.
-As of 2026-10-06, 37.1w and 37.12a to 37.12f are done. 37.12g to 37.12j and 37.13a to 37.13g are
+As of 2026-10-10, 37.1w and 37.12a to 37.12g are done. 37.12h to 37.12j and 37.13a to 37.13g are
 still open. The later review and rules items, 37.13h to 37.13y, were added after this plan and are
 built. `docs/TODO.md` records
 each item's state and where the build departed from this plan.
@@ -45,8 +45,8 @@ the default shown there is what gets built.
 
 `POST api/elections/{id}/vote` carries `[RequireStepUp]`. The only way to get a step-up claim is
 `POST auth/admin/step-up/request` and `/verify`, which are `AdminOnly`. A plain member gets 403 on the
-vote and 403 again when the web dialog asks for a code. Mobile has no step-up handling at all. So no
-ordinary member can vote on either client. This is item 37.1w and goes first.
+vote and 403 again when the web dialog asks for a code. Mobile had no step-up handling when this was written. So no
+ordinary member could vote on either client. This was item 37.1w, since built.
 
 ## 3. Design in one page
 
@@ -111,7 +111,7 @@ Add an `Elections` section to `OrgConfigDto`. Defaults in brackets.
 | `TwoPersonActions` | string[] | Publish, OpenPolling, ReplaceBallotKey, ClosePolling, Declare, Archive, Count | 37.12f, 37.13h |
 | `SuperAdminActsAlone` | bool | false | 37.12f, see Decision 1 |
 | `ApprovalExpiryHours` | int | 48 | 37.12f |
-| `AccessEndsDaysAfterDeclare` | int | 21 (7-day appeal window plus 14 days for the tribunal, Regulations §12) | 37.12g |
+| `AccessEndsDaysAfterDeclare` | int | 21 (7-day appeal window plus 14 days for the tribunal, Regulations Articles 5 and 16) | 37.12g |
 | `InviteLinkHours` | int | 72 | 37.12d |
 | `CandidateOrder` | enum Random, Alphabetical | Random | 37.13b |
 | `ShowTurnoutDuringPolling` | bool | false | 37.12i |
@@ -460,6 +460,8 @@ Tests (`ElectionApprovalServiceTests`)
 
 ### 37.12g Access ends by itself
 
+Built 2026-10-10. The archive hook sits in `ElectionApprovalService`, the only route to Archive, so it runs inside the approval transaction.
+
 - `DeclareAsync`: after declaring, set `ExpiresAt = DeclaredOn + AccessEndsDaysAfterDeclare days` on
   every live appointment of that election that has no `ExpiresAt` yet.
 - The access service (37.12e) already refuses an expired appointment, so permissions stop on the date
@@ -515,6 +517,42 @@ Mobile
   from the member dashboard drawer, not a separate shell.
 - Nav/drawer: filtered the same way as web, by role and by `MyPermissions` per election.
 
+Card list and mobile flow, settled 2026-10-10 before the S6 build. Each card shows only when the
+user holds the permission named, and every gate below is the server's own guard, so hiding a card
+never stands in for a check.
+
+| Card | Source | Shown when |
+|---|---|---|
+| Phase and timeline | `GET api/admin/elections`, `AdminElectionDto` | any live appointment on the election |
+| Open approvals, approve and reject | `GET api/elections/{id}/approvals` | ViewDashboard; loads on request because the list needs step-up |
+| Nominations waiting | `GET api/elections/{id}/nominations`, status Submitted | DecideNominations |
+| Ballot key status and fingerprint | `BallotKeyFingerprint` on the election | SetBallotKey or ViewDashboard |
+| Roll size | `EligibleVoterCount` | ViewDashboard |
+| Ballots cast | `GET api/elections/{id}/board`, `Turnout` | ViewDashboard, and only when the board returns a turnout, so polling hides it unless `ShowTurnoutDuringPolling` |
+| Appointments, accept status, MinCount and MaxCount warnings | `GET api/elections/{id}/appointments` and the persona settings | ViewDashboard |
+| Audit list | `GET api/elections/{id}/audit` | ViewAudit |
+| Key destroyed (FR-050) | new `POST api/elections/{id}/key-destroyed` | SetBallotKey, phase Declared, not yet recorded |
+
+Departures from the design above, and why:
+- The group stays under PortalLayout with `authGuard` swapped for `electionStaffGuard`, not
+  AdminLayout. The route already sits outside `/portal` so an outsider with no member record can
+  use it, and AdminLayout's nav is built for Admin. Portal nav gains an Officials section shown to
+  ElectionStaff roles, and a pure ElectionOfficial sees only that section and My Account.
+- Approve is hidden on the user's own request. The web `User` has no user id, so
+  `ElectionApprovalDto` gains `RequestedByMe`, set by the approvals action from the caller's id.
+  The server still refuses a self-approval; the flag only hides the button.
+
+Mobile flow:
+- Sign-in: a user whose only role is ElectionOfficial lands on `/officials`. Everyone else lands
+  on `/dashboard` as today.
+- `/officials` lists one card per live appointment, with the cards above that its permissions
+  allow. Tapping an election opens `/officials/elections/:id`. An Approvals tile opens
+  `/officials/approvals`.
+- `/officials/approvals` lists open requests for the chosen election. Approve goes through the
+  existing step-up interceptor. Approve is hidden on the user's own request.
+- A member who holds an appointment reaches `/officials` from the My Account section of the
+  drawer, next to Election Appointments. There is no second shell.
+
 Tests
 - `officials-dashboard.spec.ts`: cards hidden without the permission; approve button hidden on the
   user's own request.
@@ -538,6 +576,13 @@ Tests
   data the member DTO already has (`HasVoted`, roll check).
 - Mobile `screens/member/election_screen.dart`: a read-only officials list from the same endpoint.
 
+Built 2026-10-10 (delivery plan S5). Departures from the design above, and why:
+- The board is readable for a test election and carries `IsTest`, so the web page can show a Test badge. The other anonymous test-election reads answer 404.
+- The audit head is returned only from Declared on, and the web page links it to `audit/verify`.
+- Turnout counts eligible voters only, so a voter marked ineligible after voting cannot push the count above the roll size.
+- An archived election keeps the officials whose appointments the archive step ended. Archiving revokes every appointment, and without this the public record of who ran the election would empty on archive. Anyone revoked for another reason stays off.
+- ER forms read records through `ElectionDocumentService.LoadTablesAsync`. ER-19 takes its officials from the board. ER-10 shows `SubmittedAt` as "Consent filed", because `Nomination` has no consent timestamp (37.12o).
+
 Tests
 - `ElectionBoardTests`: only accepted and public personas; no email in the DTO (reflection check like
   `CredentialVerificationDto`); turnout hidden during polling and below the minimum.
@@ -560,12 +605,32 @@ is S (under half a day), M (a day or two).
 | Item | Standards section | What to build | Effort |
 |---|---|---|---|
 | 37.13a Audit hash chain | §11, audit and transparency | Table `ElectionAuditEntries` (Id, ElectionId, Seq, At, ActorUserId?, Action, DetailJson, PrevHash, Hash). `Hash = SHA-256(PrevHash + Seq + At + Action + DetailJson)`. Written by one `ElectionAuditWriter` called from the election, appointment and approval services, never with voter identity. `GET api/elections/{id}/audit/verify` recomputes the chain and returns the first broken `Seq` or ok. Head hash published on the board at declare. Tests: chain verifies; editing one row breaks it at that row. | M |
-| 37.13b Candidate order on the ballot | §8, ballot design | `Nomination.BallotOrder` (int). Set when the election enters CandidateList: shuffled with `RandomNumberGenerator` or alphabetical per `CandidateOrder`. Ballot DTOs sort by it. The seed of the shuffle is written to the audit chain. Tests: order fixed after the phase change; alphabetical option. | S |
-| 37.13c Per-seat opened ballots | §10, tallying | After count, if `PublishPerSeatBallots`, `GET api/elections/{id}/opened-ballots` returns per seat the list of choice sets, each seat's list shuffled on its own so rows cannot be joined across seats. Only after Declared. Tests: counts match results; rows are not in cast order. | S |
-| 37.13d Dry run | §18, testing | `Election.IsTest` (bool), set at create. A test election is left out of the public list and the current-election endpoint, and `DeclareAsync` does not write ECMember rows. The board shows a "Test" badge. Tests: declare of a test election writes no committee. | S |
+| 37.13b Candidate order on the ballot (built 2026-10-10) | §8, ballot design | `Nomination.BallotOrder` (int). Set when the election enters CandidateList: shuffled with `RandomNumberGenerator` or alphabetical per `CandidateOrder`. Ballot DTOs sort by it. The seed of the shuffle is written to the audit chain. Tests: order fixed after the phase change; alphabetical option. | S |
+| 37.13c Per-seat opened ballots | §10, tallying | After count, if `PublishPerSeatBallots`, `GET api/elections/{id}/opened-ballots` returns per seat the list of choice sets, each seat's list shuffled on its own so rows cannot be joined across seats. Only after Declared. Built 2026-10-10 with no stored shuffle: ballots are ordered by the smallest random `BallotVote.Id` per ballot, which stays the same on every read and differs per seat. Tests: counts match results; rows are not in cast order. | S |
+| 37.13d Dry run (built 2026-10-10) | §18, testing | `Election.IsTest` (bool), set at create. A test election is left out of the public list and the current-election endpoint, and `DeclareAsync` does not write ECMember rows. The board shows a "Test" badge. Tests: declare of a test election writes no committee. | S |
 | 37.13e Key handling procedure | §14, security | Written procedure in `docs/Elections/`: who makes the key, where the file is kept, two-person replacement, destroying the file after declare with a signed note. Plus a "destroy key file" checkbox on the officials dashboard after declare, recorded in the audit chain. | S |
-| 37.13f Incident response and threat model | §17, incident handling; §19, risks | Two short documents in `docs/Elections/`, plus a compliance table in the standards document mapping each "must" to the TODO item or code that meets it. | S |
+| 37.13f Incident response and threat model | §17, incident handling; §19, risks | Two short documents in `docs/Elections/`, plus a compliance table mapping each "must" to the TODO item or code that meets it. Drafted 2026-10-09 as `09-Election-Security-and-Compliance.md`, with the table inside it rather than in the standards document. | S |
 | 37.13g Accessibility check | §13, accessibility | A manual WCAG 2.2 AA checklist for the vote screens, run once with keyboard only and a screen reader, results written to the checklist. No new tooling. | S |
+
+37.13b and 37.13d were built on 2026-10-10 in delivery plan S1, as spec 023 FR-046 and FR-047. What
+changed from the rows above, and why:
+- The shuffle is `RandomNumberGenerator.Shuffle`, which is the same Fisher-Yates walk over
+  `GetInt32` that the row describes, without a hand-written loop.
+- The order goes to an `ElectionCandidateOrderSet` activity row for now. The audit chain is
+  37.13a, which comes in S4 and moves this record into it.
+- `ElectionService` reads `CandidateOrder` through an optional `IOrgConfigService` constructor
+  argument, so the tests that build it with only the context still compile. With no settings
+  service the order is Random.
+- The public results, documents and tracking-codes reads answer 404 for a test election. The
+  check sits in `ElectionsController` through `IsTestAsync`, not in each service query. Tracking
+  codes were added after the code review, since they show that a test run took place and how
+  many voted.
+- The "Test" badge is on the admin row on web and mobile. The public board does not exist yet
+  (37.12i).
+- Decided 2026-10-11: a test election no longer holds its EC period, so a rehearsal does not block
+  the real election for that period (37.12l). `GET api/elections/{id}` and `audit/verify` also answer
+  404 for a test election. The official PDF route needs sign-in and `ViewDashboard`. The anonymous
+  `GET api/elections/latest-declared` returns the newest declared or archived non-test election.
 
 The review stage in §4, the election lifecycle, needs no code. Publish is in `TwoPersonActions`,
 so a second person reviews the setup before nominations open. The operational manual says so.
@@ -665,6 +730,8 @@ section 7.
 
 ## 7. Order and size
 
+The remaining items are split into build sessions S1 to S6 in [delivery-plan.md](delivery-plan.md), with file anchors, tests and doc rows for each. The order below is the design order; that file is the build order.
+
 | Order | Item | Size |
 |---|---|---|
 | 1 | 37.1w step-up for voters | S |
@@ -685,7 +752,9 @@ Decision 4 (mobile officials area) adds Flutter work across items 4, 5 and 9 abo
 number, since it is scope inside the same steps rather than a separate task.
 
 Then Phase 2 of the earlier batch (37.1l, 37.1m, 37.1n), then 37.1o to 37.1r, 37.1t, 37.1u. 37.1v is
-closed by 37.12f.
+closed by 37.12f. Phase 2, 37.1t and 37.1u were built on 2026-10-09; 37.1m still needs a visual
+check and a Unicode receipt font. The 37.13f and 37.13g drafts are in `docs/Elections/` as files 09
+and 10, waiting for the committee and a manual test run.
 
 Gate after every item: `dotnet test`, `npx vitest run`, `npm run type-check`, `npx ng build`, and
 `flutter test` for mobile changes (37.11).

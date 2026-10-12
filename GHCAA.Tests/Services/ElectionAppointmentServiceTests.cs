@@ -221,4 +221,72 @@ public sealed class ElectionAppointmentServiceTests : TestBase
         (await AppointOutsiderAsync()).Error.Should().Be("forbidden");
         (await _service.AppointAsync(_election.Id, new AppointDto { PersonaId = _persona.Id, DisplayName = "Out Sider", Email = "outsider@example.com" }, chief.UserId, CancellationToken.None)).Success.Should().BeTrue();
     }
+
+    [Test]
+    public async Task EndAll_RevokesEveryAppointment()
+    {
+        var first = (await AppointOutsiderAsync("a@example.com")).Appointment!;
+        var second = (await AppointOutsiderAsync("b@example.com")).Appointment!;
+        await AcceptAsync(first);
+
+        await _service.EndAllAsync(_election.Id, Constants.Elections.ElectionArchivedReason, CancellationToken.None);
+
+        var rows = await _context.ElectionAppointments.AsNoTracking().Where(x => x.ElectionId == _election.Id).ToListAsync();
+        rows.Should().HaveCount(2).And.OnlyContain(x => x.RevokedAt != null && x.RevokedReason == Constants.Elections.ElectionArchivedReason);
+        rows.Select(x => x.Id).Should().BeEquivalentTo(new[] { first.Id, second.Id });
+        _context.ElectionAuditEntries.Count(x => x.ElectionId == _election.Id && x.Action == Constants.Elections.AuditActions.AppointmentRevoked).Should().Be(2);
+    }
+
+    [Test]
+    public async Task EndAll_DeactivatesNonMemberWithNoOtherRole()
+    {
+        var appointment = (await AppointOutsiderAsync()).Appointment!;
+        await AcceptAsync(appointment);
+
+        await _service.EndAllAsync(_election.Id, Constants.Elections.ElectionArchivedReason, CancellationToken.None);
+
+        var user = _context.Users.Include(u => u.Roles).Single(u => u.Id == appointment.UserId);
+        user.Roles.Should().BeEmpty();
+        user.IsActive.Should().BeFalse();
+        _tokens.Verify(t => t.RevokeAllRefreshTokensAsync(appointment.UserId, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
+    public async Task EndAll_MemberOfficialKeepsMemberAccess()
+    {
+        var member = await CreateAndSaveTestMemberAsync();
+        var user = new User { Username = "member-login", PasswordHash = "x", MemberId = member.Id };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+        var appointment = (await _service.AppointAsync(_election.Id, new AppointDto { PersonaId = _persona.Id, MemberId = member.Id }, _admin.Id, CancellationToken.None)).Appointment!;
+        await AcceptAsync(appointment);
+
+        await _service.EndAllAsync(_election.Id, Constants.Elections.ElectionArchivedReason, CancellationToken.None);
+
+        var after = _context.Users.Include(u => u.Roles).Single(u => u.Id == user.Id);
+        after.IsActive.Should().BeTrue();
+        after.Roles.Should().NotContain(r => r.Name == Constants.Roles.ElectionOfficial);
+    }
+
+    [Test]
+    public async Task EndAll_RotatesSecurityStamp()
+    {
+        var appointment = (await AppointOutsiderAsync()).Appointment!;
+        await AcceptAsync(appointment);
+        var stampBefore = _context.Users.Single(u => u.Id == appointment.UserId).SecurityStamp;
+
+        await _service.EndAllAsync(_election.Id, Constants.Elections.ElectionArchivedReason, CancellationToken.None);
+
+        _context.Users.Single(u => u.Id == appointment.UserId).SecurityStamp.Should().NotBe(stampBefore);
+    }
+
+    [Category("NFR-R5")]
+    [Test]
+    public async Task EndAll_NoOpenAppointments_DoesNothing()
+    {
+        var act = () => _service.EndAllAsync(_election.Id, Constants.Elections.ElectionArchivedReason, CancellationToken.None);
+
+        await act.Should().NotThrowAsync();
+        _tokens.Verify(t => t.RevokeAllRefreshTokensAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
 }

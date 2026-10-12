@@ -101,7 +101,7 @@ over every `[RequireStepUp]` action against `evidence/authorization-catalog.md`'
 reflection test fails.
 **Test:** extend `GHCAA.Tests/Controllers/RolesControllerTests.cs` (exists from 47.13.3) — don't
 create a new file.
-**Depends on:** none. **Related:** 84.42 (mobile has no step-up handling at all — see Workstream C).
+**Depends on:** none. **Related:** 84.42 (mobile step-up is built; a device check is left, see Workstream C).
 
 ---
 
@@ -110,16 +110,14 @@ create a new file.
 Do these in priority order (P1 first): 84.42, then P2 items (84.14, 84.29, 84.27, 84.45,
 62.42-blocked — skip, see note), then P3/P4.
 
-### 84.42 — Mobile has no step-up flow at all (P1)
-Confirmed: zero matches for `STEP_UP_REQUIRED`/`step-up`/`StepUp` anywhere in
-`GHCAA.Mobile/lib`. `roles_service.dart:27,62` and `election_service.dart:185` already call
-routes the server marks `[RequireStepUp]` (see 84.10) — they currently just fail with no
-recovery path. **Reuse:** port the pattern from `GHCAA.Web`'s
-`global-http.interceptor.ts:70` into mobile's Dio interceptor stack, alongside the existing
-`RetryInterceptor`/auth interceptor (per 8.6). Needs a device-confirmation UI step per the
-item's own acceptance criteria — don't skip that to just handle the 403.
-**Depends on:** 84.10 landing first makes sense (so the full step-up-protected action set is
-final before the client handling for it is built), but not a hard blocker.
+### 84.42 — Mobile step-up: device check left (P1)
+Mobile step-up exists. Task 37.1w added `StepUpInterceptor`
+(`GHCAA.Mobile/lib/core/api/step_up_interceptor.dart`, wired in `api_client.dart`) and the prompt in
+`step_up_dialog.dart`. It reads `STEP_UP_REQUIRED` and asks the user to confirm. The routes that need
+it are `POST /roles/users` and `POST /roles/assign` (`roles_service.dart:27,62`) and
+`POST /admin/elections` (`election_service.dart:185`). A test covers the interceptor.
+What is left is the acceptance check in `docs/TODO.md` 84.42: confirm on a real device that these three
+actions succeed through the prompt. No code work is expected unless that check fails.
 
 ### 84.14 — Nagad gateway is fake (P2)
 `NagadGateway.InitiatePaymentAsync` (~lines 23-29) always returns

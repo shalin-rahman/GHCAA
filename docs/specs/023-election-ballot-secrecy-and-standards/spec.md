@@ -89,6 +89,9 @@ The existing tests only check that `BallotVote` has no member column.
 
 ### Voter screen gaps
 
+Closed on 2026-10-09 by 37.1l, 37.1m and 37.1n (see Evidence). The list below is the 2026-09-27
+position, kept for the record.
+
 - The web screen (`GHCAA.Web/src/app/member/election/election.html`) shows "Seat {{seatId}}" and
   the nomination statement, not the candidate name or the position.
 - One click casts the vote. There is no review or confirm step and no abstain option.
@@ -164,16 +167,30 @@ P2 brings the rules in line with the constitution.
   `SeatVote`. The screen uses it after a reload and on a second device.
 - **FR-015** After a successful vote the confirmation screen offers a print or save of the receipt.
   See "Receipt and print standard" below.
-- **FR-016** After polling closes, the list of tracking codes in the count is published, sorted,
-  with no choices beside them. A voter can check their code is on it.
+- **FR-016** After the count has run, the list of tracking codes in the count is published, sorted,
+  with no choices beside them. A voter can check their code is on it. The list waits for the count,
+  not only for polling to close, because until then the receipt rows sit in the order voters cast
+  them. The count rewrites them in a random order (FR-001).
 - **FR-017** A public endpoint returns the declared result: per seat, every accepted candidate
   with their votes (zero included), abstentions, spoiled ballots and turnout against the frozen
   roll. The public results page uses it instead of `POST /count`.
+- **FR-044** The ballot read also says whether this member may vote: `isEligible` is true, false
+  with `ineligibilityReason`, or null while the roll is not frozen. A member who is not on the roll
+  gets "You are not on the voter roll for this election." The screens use it to tell the member why
+  before they fill in the paper, and lock the paper. It authorizes nothing. The vote endpoint checks
+  the roll again and answers 400 to an ineligible member whatever the screen showed. Added
+  2026-10-09, tracker 37.1z.
+- **FR-045** Abstain is a choice the voter makes on purpose, on web and mobile alike. Every seat
+  shows "Abstain on this seat" with the help line "Your ballot still counts, but no candidate on this seat gets your vote." A seat the voter has not touched is undecided,
+  not abstained. The review step stays closed, with the line "Pick a candidate or abstain on every seat to continue.", until every seat has a
+  candidate or an abstain. Screen readers hear each seat as a group or heading named by its
+  position, the abstain help line, and the checked state of each option. Added 2026-10-09, tracker
+  37.1z.
 
 ### P2: election rules
 
 - **FR-018** A seat with `SeatCount` above 1 lets the voter pick up to `SeatCount` candidates, and
-  the top `SeatCount` are elected.
+  the top `SeatCount` are elected. Built on web and mobile 2026-10-10, tracker 37.1o.
 - **FR-019** A tie for the last place follows a rule stored on the election. The admin picks it when
   setting up the election, from drawing lots, a run-off, or the chair's casting vote, and each
   option shows a one-line description. Until the rule is applied, no candidate in the tie is
@@ -190,6 +207,45 @@ P2 brings the rules in line with the constitution.
 - **FR-024** A seat with one accepted candidate after withdrawal closes can be declared unopposed,
   if the constitution allows it, with no poll for that seat.
 - **FR-025** The ER forms are filled from stored records. ER-23 carries the per-candidate counts.
+  The official PDF route `GET api/elections/{id}/documents/{formCode}` needs sign-in and the
+  `ViewDashboard` election permission. It is not anonymous. Decided 2026-10-11.
+  Built by 37.1q: ER-09, 10, 13, 14, 19, 23, 29, 30 and 31 read stored records; the rest stay generic.
+- **FR-046** Candidates appear on the ballot in a fixed order, set when the election enters
+  CandidateList, either shuffled or alphabetical as the `CandidateOrder` setting says. The order
+  does not change after that. Added 2026-10-10, tracker 37.13b.
+- **FR-047** An election can be marked as a test when it is created. A test election is left out of
+  the current-election read, its public results and tracking codes answer 404, and
+  declaring it writes no committee members. The official documents route stays open to any official
+  with the `ViewDashboard` permission, so a rehearsal can print its forms. Admin reads still show it. Added 2026-10-10, tracker
+  37.13d. Decided 2026-10-11: `GET api/elections/{id}` and `GET api/elections/{id}/audit/verify` also
+  answer 404 for a test election, the board stays readable, and a test election does not hold its EC
+  period. A rehearsal therefore never blocks the real election for the same period. The anonymous
+  `GET api/elections/latest-declared` returns the newest declared or archived non-test election, for the
+  results pages.
+- **FR-048** Each election keeps a hash-chained audit list. Anyone can ask whether the chain is whole,
+  and the answer names the first broken entry. No entry holds voter identity. Added 2026-10-10,
+  tracker 37.13a.
+- **FR-049** After Declared, and when `PublishPerSeatBallots` is on, the opened ballots are published
+  per seat, each seat's list shuffled on its own so rows cannot be joined across seats. Added
+  2026-10-10, tracker 37.13c.
+- **FR-050** After Declared, an official with the SetBallotKey permission records that the key file
+  was destroyed. The record goes into the audit chain with who and when, and carries the key
+  fingerprint. It can be recorded once and not before Declared. The officials dashboard on web shows
+  the box. Added 2026-10-10, tracker 37.12h and 37.13e. Procedure:
+  `docs/Elections/11-Election-Key-Procedure.md`.
+
+### P1: the incoming committee (added 2026-10-09, tracker 37.1t and 37.1u)
+
+- **FR-042** An election names the EC period its winners will serve in. The period must exist,
+  start on or after the day polling closes, have no committee members yet, and not be the target
+  of another election that is not archived. A test election is not counted for this rule. The setup screens
+  on web and mobile pick it from a list, and the service refuses anything else with a plain reason.
+  The database holds the last rule too, through the unique index `IX_Elections_ECPeriodId_Live`
+  (its filter leaves test elections out), so two admins creating at the same moment cannot both succeed.
+- **FR-043** On Declare the winners are written into that period with the period's start date. The
+  outgoing committee stays the current one, in the EC list and in the member search filter by
+  position, until an admin makes the new period active. Declare refuses if the period has had
+  members added to it since the election was created.
 
 ## Officials, personas and access (raised 2026-09-28, waiting for plan approval)
 
@@ -221,10 +277,10 @@ tests are in [plan-officials.md](plan-officials.md); this section only states th
 - **FR-032** An appointment's access ends on its own after the result is declared, on a configurable
   number of days (default 21: the 7-day appeal window plus 14 for the tribunal), with no scheduled
   job. Archiving the election revokes every appointment at once and deactivates non-member
-  appointees who hold no other access.
+  appointees who hold no other access. Built by 37.12g.
 - **FR-033** The Commission and officials appear on a public board, grouped by persona group, next
   to the election timeline and turnout after polling closes. Members with no persona shown do not
-  appear.
+  appear. Built by 37.12i.
 
 The count, settings and freeze rules below were raised on 2026-10-04 as COUNT-APP-001 to 004 and
 COUNT-CONFIG-001 and 002, plus a freeze rule. They are security and audit rules, so the API enforces
@@ -272,6 +328,25 @@ bypass needs independent authorization and a complete audit record.
   with at most one active per election, never by persona name. It is set when appointing, from
   the officials panel on web and mobile. TODO 37.13s, 37.13y.
 
+### User stories for officials
+
+These stories describe what the officials area must let each person do. The rules behind them are the
+FRs above. Built 2026-10-10 under tracker 37.12h.
+
+- A pure official, with no member record, signs in on web or mobile and lands on the officials
+  dashboard. They see the elections they are appointed to and nothing else.
+- A person sees only the dashboard cards their permissions allow. The roll, key and turnout cards need
+  ViewDashboard, nominations need DecideNominations, approvals need Approve or ViewDashboard.
+- A person who asks for a two-person step (replace the key, count, declare) cannot approve it. The
+  approve and reject buttons are hidden on their own request, and the server refuses it anyway.
+- A second official sees the open requests with who asked and when it expires, and approves or rejects
+  with a step-up check.
+- Turnout stays hidden while polling is open and appears once the board sends it.
+- A member who also holds an appointment reaches the officials area from the member menu.
+- After Declared, an official with the key records that the file was destroyed (FR-050).
+- Actions stay on the web admin election screen. Mobile shows the dashboard, the election summary and
+  the approvals, and decides approvals only.
+
 ## Receipt and print standard
 
 Standard 2, receipt-freeness, decides what the voter may print.
@@ -312,8 +387,9 @@ strict receipt-freeness, print the tracking code only (option B in D1).
   responsible for choosing the one the constitution names. The Article has not been checked yet.
 - **D3 When to start.** Decided 2026-09-27: P0 ships before the next live election. This is a
   project date, not an election setting. The election's own dates (nomination, polling open and
-  close) are already set on the create screen. `ScrutinyOn` and `WithdrawalClosesOn` are not on the
-  create screen yet and are added with the setup work in Phase 2.
+  close) are already set on the create screen. `ScrutinyOn` and `WithdrawalClosesOn` were added to
+  the create screen on 2026-10-10 (tracker 37.1o). Both are optional, and the create call refuses
+  dates out of phase order.
 - **D4 Count roles, settings audit and freeze.** Decided 2026-10-04. The count executor gets its own
   column plus an activity row. Requester-only counting is a setting, off by default. The freeze runs
   from an OpenPolling request to Declared, covers the election settings, personas and appointments,
@@ -405,6 +481,14 @@ TODO 37.1s closed the database-access gaps the security review of 2026-09-27 fou
 11. An officer's nomination as a candidate is rejected.
 12. Polling does not open without a returning officer key. The count refuses a wrong key and a
     count below 10 ballots, and after it no pending row is left.
+13. Creating an election with a missing period, a period that starts before polling closes, a
+    period that already has members, or a period another election targets returns 400.
+14. After Declare into a period that is not active yet, the EC list and the search by position
+    still show the outgoing committee, and the new members' start date is the period's start.
+15. A member marked ineligible, or not on the roll, sees the reason before the paper and cannot
+    reach review. A vote sent straight to the API by that member still returns 400 and writes nothing.
+16. On web and mobile, review stays closed while any seat is untouched, and the review step shows
+    "Abstained" only for a seat where the voter picked abstain.
 
 ## Evidence
 
@@ -414,5 +498,35 @@ Review notes from 2026-09-27. Phase 1 (FR-001 to FR-009) was built on branch
 `GHCAA.Tests/Middleware/AuditLogMiddlewareTests.cs`, `GHCAA.Web/src/app/member/election/election.spec.ts`
 and `GHCAA.Mobile/test/election_service_test.dart`. The rest are listed in [plan.md](plan.md).
 
-FR-026 to FR-033 (officials, personas and access) are un-built. They are written up in
-[plan-officials.md](plan-officials.md), which the user is reviewing before any of it is coded.
+FR-026 to FR-041 (officials, personas and access) were approved on 2026-09-28. Their build state
+is kept in [plan-officials.md](plan-officials.md) and in the WP37.12 and WP37.13 entries of
+`docs/TODO.md`, not here.
+
+Backend for FR-011 to FR-017, FR-042 and FR-043 was built on 2026-10-09 (tracker 37.1l, 37.1m,
+37.1n, 37.1t, 37.1u): `GET /api/elections/{id}/ballot`, the anonymous `{id}/results` and
+`{id}/tracking-codes` reads, the period check in `ElectionService.CreateAsync`, the period start
+date in `DeclareAsync`, and the active-period check in `NetworkingService.SearchMembersAsync`. Tests
+in `ElectionServiceTests` (`CreateAsync_NeedsAnEmptyPeriodThatStartsOnceVotingIsOver`,
+`GetBallotAsync_ShowsNamesAndPlacesAndWhetherTheMemberHasVoted`,
+`GetTrackingCodesAsync_StaysHiddenUntilTheCountHasRun`,
+`GetPublicResultsAsync_ShowsTurnoutAbstentionsAndCandidatesWithNoVotes`,
+`DeclareAsync_StartsTheWinnersWhenTheirPeriodStarts`), `ElectionsControllerTests` and
+`NetworkingServiceTests.SearchMembersAsync_ECPositionFilter_IgnoresAPeriodThatIsNotActive`. The
+`Election|BallotSeal|Networking` run on 2026-10-09 passed 196 of 196, with
+`DeclareAsync_RefusesWhenThePeriodWasFilledMeanwhile` and
+`ElectionApprovalServiceTests.Declare_IntoAPeriodThatWasFilledByHand_SaysWhy` added after the
+security and code reviews. The index for FR-042 came later that day with
+`Database_HoldsOneLiveElectionPerPeriod_ButAnArchivedOneDoesNotCount`, and the full backend suite
+then passed 1176 of 1176.
+
+Clients for the same items were built on 2026-10-09. Web: `member/election` (vote screen, review,
+receipt print), `public/elections/election-results` (results and tracking-code search) and the
+period picker in `admin/elections`. `tsc` is clean and the four election specs pass 50 of 50.
+Mobile: `election_screen.dart`, the new `election_results_screen.dart`, `ballot_receipt.dart` and
+the period dropdown in `election_management_screen.dart`. `flutter analyze` is clean and
+`test/election_service_test.dart` passes 28 of 28. Neither client has been looked at in a browser
+or on a device yet, and the mobile receipt font cannot draw Bengali names (37.1m).
+
+FR-044 and FR-045 were built on 2026-10-09 (tracker 37.1z) in `ElectionService.GetBallotAsync`,
+`BallotViewDto`, `member/election` on web and `election_screen.dart` on mobile. Tests: `ElectionServiceTests.GetBallotAsync_SaysWhetherTheMemberCanVoteAndWhyNot`, `GetBallotAsync_LeavesEligibilityOpenUntilTheRollIsFrozen`, `GetBallotAsync_GivesAReasonWhenTheRollRowHasNone` and `CastBallotAsync_RejectsAVoterOnTheRollWhoIsNotEligible`; `member/election/election.spec.ts` (four new, 19 in all); mobile `test/election_service_test.dart` (eligibility read and `allSeatsDecided`, 30 in all).
+The `Election|BallotSeal|Authorization` run passed 188 of 188. The full suite passed 1179 of 1179 just before the last of these tests was added.

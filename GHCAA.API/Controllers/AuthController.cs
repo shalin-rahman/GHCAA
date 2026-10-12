@@ -94,6 +94,7 @@ namespace GHCAA.API.Controllers
             // race the client's already-issued refresh token; !IsActive is the backstop that closes
             // that window even if revocation is somehow missed at the point of deactivation.
             if (user == null || !user.IsActive || user.IsArchived) { ClearAuthCookies(); return Unauthorized(); }
+            if (await _authService.EndExpiredOfficialAccessAsync(user, cancellationToken)) { ClearAuthCookies(); return Unauthorized(); }
 
             var newAccessToken = CreateRefreshedAccessToken(user);
             this.SetAuthCookie(_env, "access_token", newAccessToken, TimeSpan.FromMinutes(65));
@@ -118,6 +119,7 @@ namespace GHCAA.API.Controllers
 
             var user = await _authService.GetUserWithRolesAsync(userId, cancellationToken);
             if (user == null || !user.IsActive || user.IsArchived) return Unauthorized();
+            if (await _authService.EndExpiredOfficialAccessAsync(user, cancellationToken)) return Unauthorized();
 
             var newAccessToken = _tokenService.CreateToken(user);
 
@@ -202,6 +204,8 @@ namespace GHCAA.API.Controllers
             var verified = await otpService.VerifyOtpAsync(email, dto.Code, Domain.Enums.OtpPurpose.AdminStepUp, cancellationToken);
             if (!verified)
                 return Problem(detail: "That verification code is invalid or has expired.", statusCode: StatusCodes.Status400BadRequest);
+
+            if (await _authService.EndExpiredOfficialAccessAsync(user, cancellationToken)) { ClearAuthCookies(); return Unauthorized(); }
 
             // Re-issue the access token carrying the step-up claim. The refresh token is left
             // alone: this raises the current session's assurance level, it is not a new login.

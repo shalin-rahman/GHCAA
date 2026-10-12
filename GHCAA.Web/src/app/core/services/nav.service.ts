@@ -2,6 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { AuthService } from './auth.service';
 import { OrgConfigService } from './org-config.service';
 import { OrgConfig } from '../models/org-config.model';
+import { ELECTION_STAFF_ROLES } from '../constants/app.constants';
 
 export interface NavItem {
     path: string;
@@ -39,6 +40,8 @@ const ALL_NAV_ITEMS: NavItem[] = [
     { path: '/portal/articles', label: 'My Articles', icon: 'articles', feature: 'enableMagazine', section: 'My Account' },
     { path: '/portal/communications', label: 'My Communications', icon: 'comm', section: 'My Account' },
     { path: '/portal/profile', label: 'My Profile', icon: 'profile', mobileVisible: true, section: 'My Account' },
+    { path: '/officials', label: 'Election Officials', icon: 'governance', exact: true, roles: [...ELECTION_STAFF_ROLES], section: 'Officials' },
+    { path: '/officials/my-appointments', label: 'My Appointments', icon: 'governance', roles: [...ELECTION_STAFF_ROLES], section: 'Officials' },
 ];
 
 // Admin panel navigation items
@@ -86,8 +89,10 @@ export class NavService {
         if (!user) return [];
         // 29F.4: honor OrgConfig feature flags — items tied to a disabled feature are
         // hidden (was returning the full list regardless of the tenant's configuration).
+        const roles = user.roles ?? [user.role];
         return ALL_NAV_ITEMS.filter(item =>
-            !item.feature || this.orgConfig.isFeatureEnabled(item.feature)
+            (!item.feature || this.orgConfig.isFeatureEnabled(item.feature)) &&
+            (!item.roles || item.roles.some(r => roles.includes(r)))
         );
     });
 
@@ -104,7 +109,8 @@ export class NavService {
             { name: 'Community', items: items.filter(i => i.section === 'Community') },
             { name: 'Directory', items: items.filter(i => i.section === 'Directory') },
             { name: 'Career', items: items.filter(i => i.section === 'Career') },
-            { name: 'My Account', items: items.filter(i => i.section === 'My Account') }
+            { name: 'My Account', items: items.filter(i => i.section === 'My Account') },
+            { name: 'Officials', items: items.filter(i => i.section === 'Officials') }
         ].filter(s => s.items.length > 0);
     });
 

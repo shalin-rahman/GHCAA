@@ -70,6 +70,11 @@ export const memberGuard = (_route: ActivatedRouteSnapshot, state: RouterStateSn
                 return true;
             }
 
+            // An official with no member record has no portal; send them to their own area.
+            if (auth.currentUser()?.role === 'ElectionOfficial') {
+                return router.parseUrl(ROUTES.OFFICIALS_DASHBOARD);
+            }
+
             return router.parseUrl(ROUTES.ADMIN_DASHBOARD);
         })
     );
@@ -114,7 +119,7 @@ export const superAdminGuard = () => {
 };
 
 /** Election staff routes: SuperAdmin, Admin or ElectionOfficial. */
-export const electionStaffGuard = () => {
+export const electionStaffGuard = (_route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
     const auth = inject(AuthService);
     const router = inject(Router);
 
@@ -124,7 +129,11 @@ export const electionStaffGuard = () => {
                 return true;
             }
 
-            return router.parseUrl(ROUTES.LOGIN);
+            if (!auth.isAuthenticated()) {
+                return router.createUrlTree([ROUTES.LOGIN], { queryParams: { returnUrl: state.url } });
+            }
+
+            return router.parseUrl(ROUTES.PORTAL_DASHBOARD);
         })
     );
 };

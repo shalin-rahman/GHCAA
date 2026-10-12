@@ -88,6 +88,8 @@ export interface AdminElectionCandidateDto {
     positionTitle: string;
 }
 
+export type ElectionTieRule = 'DrawingLots' | 'RunOff' | 'ChairCastingVote';
+
 export interface AdminElectionDto {
     id: number;
     title: string;
@@ -98,6 +100,7 @@ export interface AdminElectionDto {
     nominationClosesOn?: string;
     scrutinyOn?: string;
     withdrawalClosesOn?: string;
+    tieRule?: ElectionTieRule;
     pollingOpensOn?: string;
     pollingClosesOn?: string;
     declaredOn?: string;
@@ -114,6 +117,8 @@ export interface AdminElectionDto {
     adminHandedOver?: boolean;
     // 37.13t. Fewer live officials with Approve than an emergency revocation needs.
     tooFewApprovers?: boolean;
+    // Spec 023 FR-047. A rehearsal run: hidden from public reads, and declaring it writes no committee.
+    isTest?: boolean;
 }
 
 // 37.13t. Shown when polling is asked for and the server says too few officials can approve.
@@ -132,8 +137,12 @@ export interface CreateElectionRequest {
     nominationClosesOn: string;
     pollingOpensOn: string;
     pollingClosesOn: string;
+    tieRule?: ElectionTieRule;
+    scrutinyOn?: string | null;
+    withdrawalClosesOn?: string | null;
     description?: string;
     positions?: Array<Pick<AdminElectionPositionDto, 'title' | 'description' | 'seats'>>;
+    isTest?: boolean;
 }
 
 export interface SaveCandidateRequest {
@@ -155,6 +164,42 @@ export interface ElectionSummaryDto {
     ballotKeyFingerprint?: string | null;
 }
 
+// Spec 023 FR-033 (37.12i). The public board carries no contact details.
+export interface ElectionBoardMemberDto {
+    personaName: string;
+    displayName: string;
+    acceptedAt: string;
+}
+
+export interface ElectionBoardGroupDto {
+    groupName: string;
+    members: ElectionBoardMemberDto[];
+}
+
+export interface ElectionBoardTurnoutDto {
+    ballotsCast: number;
+    rollSize: number;
+}
+
+export interface ElectionBoardDto {
+    id: number;
+    title: string;
+    phase: ElectionPhase;
+    isTest: boolean;
+    announcedOn?: string | null;
+    nominationOpensOn?: string | null;
+    nominationClosesOn?: string | null;
+    scrutinyOn?: string | null;
+    withdrawalClosesOn?: string | null;
+    pollingOpensOn?: string | null;
+    pollingClosesOn?: string | null;
+    declaredOn?: string | null;
+    groups: ElectionBoardGroupDto[];
+    turnout: ElectionBoardTurnoutDto | null;
+    keyFingerprint?: string | null;
+    auditHeadHash?: string | null;
+}
+
 // Spec 023 (37.12f). A step waiting for a second person.
 export interface ElectionApprovalDto {
     id: number;
@@ -170,6 +215,8 @@ export interface ElectionApprovalDto {
     approvedAt?: string | null;
     // 37.13m. Who ran an approved count.
     executedByUserId?: number | null;
+    // FR-050. True when the caller made the request, so the screen hides Approve on it.
+    requestedByMe?: boolean;
 }
 
 // A count either ran and sent back the results, or was stored for a second person.
@@ -216,6 +263,86 @@ export interface CastBallotDto {
 
 export interface CastBallotResultDto {
     trackingCode: string;
+}
+
+// 37.1l. The paper the member votes on, from GET /elections/{id}/ballot.
+export interface BallotCandidateDto {
+    nominationId: number;
+    name: string;
+    photoUrl: string | null;
+    statement: string;
+}
+
+export interface BallotSeatDto {
+    seatId: number;
+    positionTitle: string;
+    places: number;
+    candidates: BallotCandidateDto[];
+}
+
+export interface BallotViewDto {
+    electionId: number;
+    title: string;
+    phase: ElectionPhase;
+    hasVoted: boolean;
+    ballotKeyFingerprint: string | null;
+    seats: BallotSeatDto[];
+    // Null until the voter roll is frozen. It only warns early; the server checks the roll again on cast.
+    isEligible: boolean | null;
+    ineligibilityReason: string | null;
+}
+
+// 37.1n. The declared result, from the anonymous GET /elections/{id}/results.
+export interface PublicResultCandidateDto {
+    nominationId: number;
+    name: string;
+    voteCount: number;
+    isElected: boolean;
+    isTie: boolean;
+}
+
+export interface PublicResultSeatDto {
+    seatId: number;
+    positionTitle: string;
+    places: number;
+    abstentions: number;
+    candidates: PublicResultCandidateDto[];
+}
+
+export interface ElectionAuditVerifyDto {
+    ok: boolean;
+    entries: number;
+    firstBrokenSeq: number | null;
+}
+
+export interface ElectionAuditEntryDto {
+    seq: number;
+    at: string;
+    actorUserId: number | null;
+    action: string;
+    detailJson: string;
+    hash: string;
+}
+
+export interface OpenedSeatBallotsDto {
+    electionSeatId: number;
+    ballots: number[][];
+}
+
+export interface OpenedBallotsDto {
+    electionId: number;
+    seats: OpenedSeatBallotsDto[];
+}
+
+export interface PublicElectionResultsDto {
+    electionId: number;
+    title: string;
+    phase: ElectionPhase;
+    declaredOn: string | null;
+    eligibleVoters: number;
+    ballotsCast: number;
+    spoiledBallots: number;
+    seats: PublicResultSeatDto[];
 }
 
 export interface ElectionResultDto {

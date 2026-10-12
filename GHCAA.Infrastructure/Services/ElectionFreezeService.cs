@@ -15,8 +15,9 @@ using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Infrastructure.Services;
 
-public sealed class ElectionFreezeService(ApplicationDbContext db, IHttpContextAccessor http, IActivityService activity) : IElectionFreezeService
+public sealed class ElectionFreezeService(ApplicationDbContext db, IHttpContextAccessor http, IActivityService activity, IElectionAuditWriter? audit = null) : IElectionFreezeService
 {
+    private readonly IElectionAuditWriter _audit = audit ?? new ElectionAuditWriter(db);
     public async Task EnsureNotFrozenAsync(string rule, object? attempted, int? electionId = null, CancellationToken ct = default)
     {
         var now = DateTime.UtcNow;
@@ -31,6 +32,8 @@ public sealed class ElectionFreezeService(ApplicationDbContext db, IHttpContextA
         {
             // Logged before the change is saved, so a change that then fails its own checks
             // still leaves this row. It records the attempt, not that the change landed.
+            await _audit.AppendAsync(frozen.Id, Constants.Elections.AuditActions.RulesChangeUnlocked, actorId, new { rule, unlockId = unlock.Id }, ct);
+            await _audit.SaveAsync(ct);
             await activity.LogActivityAsync(null, Constants.Elections.FrozenChangeUnlockedAuditType,
                 $"Unlock {unlock.Id} allowed an attempt to change {rule} while \"{frozen.Title}\" is frozen. Reason: {unlock.Reason}", actorId,
                 source: Constants.ActivitySources.System,
@@ -39,6 +42,8 @@ public sealed class ElectionFreezeService(ApplicationDbContext db, IHttpContextA
             return;
         }
 
+        await _audit.AppendAsync(frozen.Id, Constants.Elections.AuditActions.RulesChangeRefused, actorId, new { rule }, ct);
+        await _audit.SaveAsync(ct);
         await activity.LogActivityAsync(null, Constants.Elections.FrozenChangeRefusedAuditType,
             $"Refused a change to {rule} while \"{frozen.Title}\" is frozen.", actorId,
             source: Constants.ActivitySources.System,

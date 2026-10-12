@@ -13,7 +13,14 @@ public sealed class ElectionConfiguration : IEntityTypeConfiguration<Election>
         b.Property(x => x.Title).HasMaxLength(200).IsRequired();
         b.Property(x => x.BallotPublicKey).HasMaxLength(2000);
         b.Property(x => x.BallotKeyFingerprint).HasMaxLength(64);
+        b.Property(x => x.IsTest).HasDefaultValue(false);
         b.HasIndex(x => new { x.ECPeriodId, x.IsActive });
+        // 37.1t. One election per EC period unless the older one is archived. CreateAsync checks
+        // first; this stops two admins who create at the same moment. The filter is stored as the
+        // number 9, so reordering ElectionPhase needs a migration that rebuilds this index.
+        // A rehearsal (IsTest) is left out so it cannot block the real election.
+        b.HasIndex(x => x.ECPeriodId).IsUnique().HasFilter($"\"Phase\" <> {(int)Enums.ElectionPhase.Archived} AND NOT \"IsTest\"")
+            .HasDatabaseName("IX_Elections_ECPeriodId_Live");
         b.HasOne(x => x.ECPeriod).WithMany().HasForeignKey(x => x.ECPeriodId).OnDelete(DeleteBehavior.Restrict);
     }
 }
@@ -45,7 +52,7 @@ public sealed class ElectionAppointmentConfiguration : IEntityTypeConfiguration<
         b.HasIndex(x => x.ElectionId).IsUnique().HasFilter("\"IsReturningOfficer\" = true AND \"RevokedAt\" IS NULL")
             .HasDatabaseName("IX_ElectionAppointments_ElectionId_ReturningOfficer");
         b.HasIndex(x => x.UserId);
-        // EF warning 10622 asks for a filter on User.IsArchived. Adding it would hide an archived user's
+        // EF warning 10622 asks for a filter on User.IsArchived (ignored globally in DependencyInjection). Adding it would hide an archived user's
         // appointment from admins, who still need to see and revoke it. Instead no appointment query
         // includes x.User, and ElectionAccessService drops archived users' appointments itself (94.5).
         b.HasOne(x => x.Election).WithMany(x => x.Appointments).HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
@@ -95,7 +102,7 @@ public sealed class VoterRollConfiguration : IEntityTypeConfiguration<VoterRoll>
         b.HasOne(x => x.Election).WithMany(x => x.VoterRoll).HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
         // Do not add a filter on Member.IsArchived here (EF warning 10622 suggests it). An archived
         // member's row would drop out of the roll and the turnout counts, changing a published result.
-        // Queries that include x.Member hide those rows too. TODO 94.1.
+        // No query includes x.Member, so the rows stay. The warning is ignored globally in DependencyInjection.
         b.HasOne(x => x.Member).WithMany().HasForeignKey(x => x.MemberId).OnDelete(DeleteBehavior.Restrict);
     }
 }
@@ -189,6 +196,25 @@ public sealed class ElectionResultConfiguration : IEntityTypeConfiguration<Elect
     {
         b.HasKey(x => x.Id);
         b.HasIndex(x => new { x.ElectionId, x.ElectionSeatId, x.NominationId }).IsUnique();
+        b.HasOne<Election>().WithMany().HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public sealed class ElectionAuditEntryConfiguration : IEntityTypeConfiguration<ElectionAuditEntry>
+{
+    public void Configure(EntityTypeBuilder<ElectionAuditEntry> b)
+    {
+        b.HasKey(x => x.Id);
+        b.Property(x => x.Action).HasMaxLength(100).IsRequired();
+        b.Property(x => x.DetailJson).IsRequired();
+        b.Property(x => x.PrevHash).HasMaxLength(64).IsRequired();
+        b.Property(x => x.Hash).HasMaxLength(64).IsRequired();
+        b.HasIndex(x => new { x.ElectionId, x.Seq }).IsUnique();
+        // 37.13e. A key is destroyed once per election. The service checks first and holds a lock;
+        // this stops a second API instance that records at the same moment.
+        b.HasIndex(x => new { x.ElectionId, x.Action }).IsUnique()
+            .HasFilter($"\"Action\" = '{Constants.Elections.AuditActions.KeyDestroyed}'")
+            .HasDatabaseName("IX_ElectionAuditEntries_KeyDestroyed_Once");
         b.HasOne<Election>().WithMany().HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
     }
 }

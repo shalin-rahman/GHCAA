@@ -27,12 +27,14 @@ public sealed class ElectionAppointmentService(
     ITokenService tokens,
     IOptions<AppSettingsOptions> appSettings,
     ILogger<ElectionAppointmentService> logger,
-    IElectionFreezeService freeze) : IElectionAppointmentService
+    IElectionFreezeService freeze,
+    IElectionAuditWriter? audit = null) : IElectionAppointmentService
 {
+    private readonly IElectionAuditWriter _audit = audit ?? new ElectionAuditWriter(db);
     public async Task<(bool Success, string? Error, ElectionAppointmentDto? Appointment)> AppointAsync(int electionId, AppointDto dto, int actorUserId, CancellationToken ct)
     {
         if (!await db.Elections.AnyAsync(x => x.Id == electionId, ct))
-            return (false, "not-found", null);
+            return (false, Constants.Elections.Replies.NotFound, null);
         await freeze.EnsureNotFrozenAsync(Constants.Elections.FrozenRules.Appointment, new { action = "appoint", dto.PersonaId, dto.MemberId }, electionId, ct);
         var persona = await db.ElectionPersonas.FirstOrDefaultAsync(x => x.Id == dto.PersonaId && x.IsActive, ct);
         if (persona is null)
@@ -128,6 +130,8 @@ public sealed class ElectionAppointmentService(
             return (false, "returning-officer-taken", null);
         }
 
+        await _audit.AppendAsync(electionId, Constants.Elections.AuditActions.Appointed, actorUserId, new { appointmentId = appointment.Id, isReturningOfficer = dto.IsReturningOfficer }, ct);
+        await _audit.SaveAsync(ct);
         await SendInviteAsync(appointment, persona, user, ct);
 
         return (true, null, (await LoadAsync(db.ElectionAppointments.Where(x => x.Id == appointment.Id), ct)).Single());
@@ -144,7 +148,7 @@ public sealed class ElectionAppointmentService(
         // not found here, so cannot accept.
         var user = await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == userId, ct);
         if (appointment is null || user is null)
-            return (false, "not-found");
+            return (false, Constants.Elections.Replies.NotFound);
         // Accepting makes a pending appointment live, so it is frozen too. Declining is not,
         // because it only takes someone out.
         await freeze.EnsureNotFrozenAsync(Constants.Elections.FrozenRules.Appointment, new { action = "accept", appointmentId }, appointment.ElectionId, ct);
@@ -160,6 +164,7 @@ public sealed class ElectionAppointmentService(
         appointment.DeclarationSignedAt = now;
         appointment.DeclarationTextSnapshot = appointment.Persona!.DeclarationText;
         appointment.SignedFromIp = ip;
+        await _audit.AppendAsync(appointment.ElectionId, Constants.Elections.AuditActions.AppointmentAccepted, userId, new { appointmentId }, ct);
 
         if (!user.Roles.Any(r => r.Name == Constants.Roles.ElectionOfficial))
         {
@@ -170,7 +175,7 @@ public sealed class ElectionAppointmentService(
         }
         user.SecurityStamp = Guid.NewGuid().ToString("N");
 
-        await db.SaveChangesAsync(ct);
+        await _audit.SaveAsync(ct);
         return (true, null);
     }
 
@@ -178,12 +183,13 @@ public sealed class ElectionAppointmentService(
     {
         var appointment = await db.ElectionAppointments.FirstOrDefaultAsync(x => x.Id == appointmentId && x.UserId == userId && x.RevokedAt == null, ct);
         if (appointment is null)
-            return (false, "not-found");
+            return (false, Constants.Elections.Replies.NotFound);
 
         appointment.RevokedAt = DateTime.UtcNow;
         appointment.RevokedByUserId = userId;
         appointment.RevokedReason = string.IsNullOrWhiteSpace(reason) ? "Declined" : $"Declined: {reason.Trim()}";
-        await db.SaveChangesAsync(ct);
+        await _audit.AppendAsync(appointment.ElectionId, Constants.Elections.AuditActions.AppointmentRevoked, userId, new { appointmentId, declined = true }, ct);
+        await _audit.SaveAsync(ct);
 
         await EndAccessIfNoneLeftAsync(userId, ct);
         return (true, null);
@@ -193,7 +199,7 @@ public sealed class ElectionAppointmentService(
     {
         var appointment = await db.ElectionAppointments.FirstOrDefaultAsync(x => x.Id == appointmentId && x.RevokedAt == null, ct);
         if (appointment is null)
-            return (false, "not-found");
+            return (false, Constants.Elections.Replies.NotFound);
         if (!await MayAppointAsync(appointment.ElectionId, actorUserId, ct))
             return (false, "forbidden");
         // FR-040: revoking inside the window goes through the emergency path (37.13r), not this one.
@@ -202,10 +208,30 @@ public sealed class ElectionAppointmentService(
         appointment.RevokedAt = DateTime.UtcNow;
         appointment.RevokedByUserId = actorUserId;
         appointment.RevokedReason = reason?.Trim();
-        await db.SaveChangesAsync(ct);
+        await _audit.AppendAsync(appointment.ElectionId, Constants.Elections.AuditActions.AppointmentRevoked, actorUserId, new { appointmentId }, ct);
+        await _audit.SaveAsync(ct);
 
         await EndAccessIfNoneLeftAsync(appointment.UserId, ct);
         return (true, null);
+    }
+
+    public async Task EndAllAsync(int electionId, string reason, CancellationToken ct)
+    {
+        var open = await db.ElectionAppointments.Where(x => x.ElectionId == electionId && x.RevokedAt == null).ToListAsync(ct);
+        if (open.Count == 0)
+            return;
+
+        var now = DateTime.UtcNow;
+        foreach (var appointment in open)
+        {
+            appointment.RevokedAt = now;
+            appointment.RevokedReason = reason;
+            await _audit.AppendAsync(electionId, Constants.Elections.AuditActions.AppointmentRevoked, null, new { appointmentId = appointment.Id, ended = true }, ct);
+        }
+        await _audit.SaveAsync(ct);
+
+        foreach (var userId in open.Select(x => x.UserId).Distinct())
+            await EndAccessIfNoneLeftAsync(userId, ct);
     }
 
     public async Task EndAccessIfNoneLeftAsync(int userId, CancellationToken ct)

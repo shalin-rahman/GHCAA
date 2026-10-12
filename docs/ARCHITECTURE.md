@@ -74,6 +74,8 @@ graph TD
 ### C2. Request pipeline order
 `ForwardedHeaders`, `CorrelationIdMiddleware`, `WwwRedirectMiddleware`, `ExceptionMiddleware`, CORS, then the rest as listed in `docs/PROJECT_MAP.md`, section "API Layer — Middleware Pipeline & Extensions". `WwwRedirectMiddleware` moves `www.<apex>` to the apex host named in `AppSettings:ClientUrl`: a 301 for GET and HEAD, a 308 for other methods.
 
+Election events are written to a hash chain by `ElectionAuditWriter` (table `ElectionAuditEntries`, unique on ElectionId and Seq). It adds to the caller's context and shares its save. Spec 023, FR-048.
+
 The API also runs one hosted service, `ExpiredRevokeSweep`. Every 15 minutes (`Constants.Elections.ExpiredRevokeSweepMinutes`) it writes the `expired` audit row for emergency revoke approvals that nobody acted on. Outside Development, startup fails if `AllowedOrigins` is empty, has a wildcard or a bad entry, or `ClientUrl` is not in it.
 
 ### D. Public Content Delivery

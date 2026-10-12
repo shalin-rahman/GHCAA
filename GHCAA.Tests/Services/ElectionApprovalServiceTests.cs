@@ -185,6 +185,21 @@ public sealed class ElectionApprovalServiceTests : TestBase
         (await ReloadAsync()).Phase.Should().Be(ElectionPhase.Nomination);
     }
 
+    [Test]
+    public async Task Declare_IntoAPeriodThatWasFilledByHand_SaysWhy()
+    {
+        UseSettings(new ElectionSettingsDto { TwoPersonActions = [] });
+        _election.Phase = ElectionPhase.Counting;
+        var outsider = await CreateAndSaveTestMemberAsync();
+        _context.ECMembers.Add(new ECMember { ECPeriodId = _election.ECPeriodId, MemberId = outsider.Id, Position = ECPosition.President, StartDate = DateTime.UtcNow });
+        await _context.SaveChangesAsync();
+
+        var run = await _service.RunOrRequestAsync(_election.Id, ElectionApprovalAction.Declare, _alice, Admin);
+
+        run.Error.Should().Be("period-has-members");
+        (await ReloadAsync()).Phase.Should().Be(ElectionPhase.Counting);
+    }
+
     [TestCase(true, true)]
     [TestCase(false, false)]
     public async Task SuperAdmin_ActsAlone_OnlyWhenTheSwitchIsOn(bool actsAlone, bool expectRan)
@@ -682,5 +697,26 @@ public sealed class ElectionApprovalServiceTests : TestBase
         await sweep.RunOnceAsync(CancellationToken.None);
 
         (await ExpiredAuditAsync()).Should().ContainSingle();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task ApproveArchive_EndsAllAppointments()
+    {
+        UseSettings(new ElectionSettingsDto { TwoPersonActions = [] });
+        _context.Elections.Single(x => x.Id == _election.Id).Phase = ElectionPhase.Declared;
+        var persona = new ElectionPersona { Name = "Scrutineer", GroupName = "Officials", Description = "d", DeclarationText = "d" };
+        _context.ElectionPersonas.Add(persona);
+        await _context.SaveChangesAsync();
+        _context.ElectionAppointments.Add(new ElectionAppointment { ElectionId = _election.Id, PersonaId = persona.Id, UserId = _carol, DisplayName = "o", Email = "c@example.com", AppointedByUserId = _alice, AppointedAt = DateTime.UtcNow, AcceptedAt = DateTime.UtcNow, DeclarationSignedAt = DateTime.UtcNow });
+        await _context.SaveChangesAsync();
+        DetachAll();
+
+        var run = await _service.RunOrRequestAsync(_election.Id, ElectionApprovalAction.Archive, _alice, SuperAdmin);
+
+        run.Ran.Should().BeTrue();
+        (await ReloadAsync()).Phase.Should().Be(ElectionPhase.Archived);
+        var rows = await _context.ElectionAppointments.AsNoTracking().Where(x => x.ElectionId == _election.Id).ToListAsync();
+        rows.Should().OnlyContain(x => x.RevokedAt != null && x.RevokedReason == Constants.Elections.ElectionArchivedReason);
     }
 }

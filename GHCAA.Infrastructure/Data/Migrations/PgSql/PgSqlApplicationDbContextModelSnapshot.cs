@@ -750,6 +750,11 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsTest")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
                     b.Property<DateTime>("NominationClosesOn")
                         .HasColumnType("timestamp with time zone");
 
@@ -780,6 +785,11 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ECPeriodId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Elections_ECPeriodId_Live")
+                        .HasFilter("\"Phase\" <> 9 AND NOT \"IsTest\"");
 
                     b.HasIndex("ECPeriodId", "IsActive");
 
@@ -1045,6 +1055,58 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .IsUnique();
 
                     b.ToTable("ElectionResults");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ElectionAuditEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int?>("ActorUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("At")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DetailJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ElectionId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Hash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("PrevHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("Seq")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ElectionId", "Action")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ElectionAuditEntries_KeyDestroyed_Once")
+                        .HasFilter("\"Action\" = 'KeyDestroyed'");
+
+                    b.HasIndex("ElectionId", "Seq")
+                        .IsUnique();
+
+                    b.ToTable("ElectionAuditEntries");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.ElectionRulesUnlock", b =>
@@ -3622,6 +3684,9 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("BallotOrder")
+                        .HasColumnType("integer");
+
                     b.Property<int>("CandidateMemberId")
                         .HasColumnType("integer");
 
@@ -5278,6 +5343,15 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.ElectionResult", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.Election", null)
+                        .WithMany()
+                        .HasForeignKey("ElectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ElectionAuditEntry", b =>
                 {
                     b.HasOne("GHCAA.Domain.Models.Election", null)
                         .WithMany()

@@ -25,8 +25,10 @@ public sealed class ElectionApprovalService(
     IElectionAppointmentService appointments,
     IActivityService activity,
     ILogger<ElectionApprovalService> logger,
-    IElectionFreezeService freeze) : IElectionApprovalService
+    IElectionFreezeService freeze,
+    IElectionAuditWriter? audit = null) : IElectionApprovalService
 {
+    private readonly IElectionAuditWriter _audit = audit ?? new ElectionAuditWriter(db);
     private sealed record BallotKeyPayload(string PublicKey, string Fingerprint);
     private sealed record RevokePayload(int AppointmentId, string Reason);
 
@@ -48,14 +50,19 @@ public sealed class ElectionApprovalService(
         if (payloadError != null)
             return new ElectionApprovalRunResult(false, payloadError, null);
         await EnsureKeyNotFrozenAsync(electionId, action, payload, ct);
-        return new ElectionApprovalRunResult(true, await ExecuteAsync(electionId, action, payload, ct), null);
+        // The phase change and the appointment cleanup for Archive commit together, or not at all.
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        var error = await ExecuteAsync(electionId, action, payload, ct);
+        if (error == null)
+            await transaction.CommitAsync(ct);
+        return new ElectionApprovalRunResult(true, error, null);
     }
 
     public async Task<(bool Success, string? Error, ElectionApprovalDto? Approval)> RequestAsync(int electionId, ElectionApprovalAction action, int userId, string? newPublicKey = null, CancellationToken ct = default)
     {
         var election = await db.Elections.AsNoTracking().Where(x => x.Id == electionId).Select(x => new { x.Phase }).FirstOrDefaultAsync(ct);
         if (election is null)
-            return (false, "not-found", null);
+            return (false, Constants.Elections.Replies.NotFound, null);
         // Checked again when the key is set, but there is no point asking for a key that can no longer change.
         if (action == ElectionApprovalAction.ReplaceBallotKey && election.Phase >= ElectionPhase.Polling)
             return (false, "phase-closed", null);
@@ -102,7 +109,7 @@ public sealed class ElectionApprovalService(
         else if (string.IsNullOrEmpty(trimmed))
             error = "reason-required";
         else if (target is null)
-            error = "not-found";
+            error = Constants.Elections.Replies.NotFound;
         else if (await RevokePendingAsync(target.ElectionId, appointmentId, now, ct))
             error = "already-pending";
         else if (!await EligibleApprovers(target.ElectionId, userId, target.UserId, now).AnyAsync(ct))
@@ -141,7 +148,7 @@ public sealed class ElectionApprovalService(
     {
         var approval = await db.ElectionApprovals.AsNoTracking().FirstOrDefaultAsync(x => x.Id == approvalId, ct);
         if (approval is null)
-            return (false, "not-found");
+            return (false, Constants.Elections.Replies.NotFound);
         if (approval.Action == ElectionApprovalAction.EmergencyRevoke)
             return await ApproveEmergencyRevokeAsync(approval, userId, ct);
         var now = DateTime.UtcNow;
@@ -150,7 +157,7 @@ public sealed class ElectionApprovalService(
         if (approval.ExpiresAt <= now)
             return (false, "expired");
         if (approval.RequestedByUserId == userId)
-            return (false, "same-person");
+            return (false, Constants.Elections.Replies.SamePerson);
         if (!await access.HasAsync(approval.ElectionId, userId, roles, ElectionPermission.Approve, ct))
             return (false, "forbidden");
 
@@ -184,7 +191,7 @@ public sealed class ElectionApprovalService(
     {
         var approval = await db.ElectionApprovals.AsNoTracking().FirstOrDefaultAsync(x => x.Id == approvalId, ct);
         if (approval is null)
-            return (false, "not-found");
+            return (false, Constants.Elections.Replies.NotFound);
         var now = DateTime.UtcNow;
         if (!approval.IsOpenAt(now))
             return (false, "closed");
@@ -243,7 +250,7 @@ public sealed class ElectionApprovalService(
             return new ElectionCountRunResult(null, requestError, pending);
         }
         if (approved.ApprovedByUserId == userId)
-            return new ElectionCountRunResult(null, "same-person", null);
+            return new ElectionCountRunResult(null, Constants.Elections.Replies.SamePerson, null);
         if (approved.RequestedByUserId != userId && (await orgConfig.GetConfigAsync()).Elections.CountRequesterOnly)
             return new ElectionCountRunResult(null, "not-requester", null);
 
@@ -274,6 +281,8 @@ public sealed class ElectionApprovalService(
         // The results are already stored. A failed audit write must not turn that into an error the client retries.
         try
         {
+            await _audit.AppendAsync(electionId, Constants.Elections.AuditActions.CountApproved, userId, new { approvalId = approved.Id, requesterId = approved.RequestedByUserId, approverId = approved.ApprovedByUserId }, CancellationToken.None);
+            await _audit.SaveAsync(CancellationToken.None);
             await activity.LogActivityAsync(null, Constants.Elections.CountRunAuditType,
                 $"Election {electionId} counted under approval {approved.Id}.", userId,
                 source: Constants.ActivitySources.System,
@@ -310,7 +319,7 @@ public sealed class ElectionApprovalService(
         else if (approval.ExpiresAt <= now)
             error = "expired";
         else if (approval.RequestedByUserId == userId)
-            error = "same-person";
+            error = Constants.Elections.Replies.SamePerson;
         else
         {
             target = await db.ElectionAppointments.AsNoTracking().Where(ElectionAppointment.LiveAt(now)).FirstOrDefaultAsync(x => x.Id == payload.AppointmentId, ct);
@@ -475,6 +484,11 @@ public sealed class ElectionApprovalService(
 
     private async Task AuditRevokeAsync(string outcome, int? electionId, int? approvalId, int requesterId, int? approverId, int? appointmentId, string? reason, object? before, object? after, CancellationToken ct, DateTime? expiredAt = null)
     {
+        if (electionId is int eid)
+        {
+            await _audit.AppendAsync(eid, Constants.Elections.AuditActions.EmergencyRevoke, approverId ?? requesterId, new { outcome, approvalId, appointmentId }, ct);
+            await _audit.SaveAsync(ct);
+        }
         await activity.LogActivityAsync(null, Constants.Elections.EmergencyRevokeAuditType,
             $"Emergency revocation of appointment {appointmentId}: {outcome}.", approverId ?? requesterId,
             source: Constants.ActivitySources.System,
@@ -550,7 +564,11 @@ public sealed class ElectionApprovalService(
                     return error;
                 return fingerprint == payload.Fingerprint ? null : "invalid-key";
             case ElectionApprovalAction.Declare:
-                return await elections.DeclareAsync(electionId, ct) ? null : "not-ready";
+                if (await elections.DeclareAsync(electionId, ct)) return null;
+                // Declare also refuses when someone put members into the incoming period by hand.
+                // Say so, or the official sees "not ready" and cannot tell what to fix.
+                return await db.Elections.AnyAsync(x => x.Id == electionId && x.Phase == ElectionPhase.Counting
+                    && db.ECMembers.Any(m => m.ECPeriodId == x.ECPeriodId), ct) ? "period-has-members" : "not-ready";
             case ElectionApprovalAction.EmergencyRevoke:
                 // Runs only through ApproveEmergencyRevokeAsync.
                 return "not-ready";
@@ -558,7 +576,12 @@ public sealed class ElectionApprovalService(
                 // Approving only allows the count. It runs when the requester brings the key.
                 return await db.Elections.AnyAsync(x => x.Id == electionId && x.Phase == ElectionPhase.Counting, ct) ? null : "not-ready";
             default:
-                return await elections.SetPhaseAsync(electionId, PhaseFor(action), ct) ? null : "not-ready";
+                if (!await elections.SetPhaseAsync(electionId, PhaseFor(action), ct))
+                    return "not-ready";
+                // FR-032: archiving closes every appointment, in the same run as the phase change.
+                if (action == ElectionApprovalAction.Archive)
+                    await appointments.EndAllAsync(electionId, Constants.Elections.ElectionArchivedReason, ct);
+                return null;
         }
     }
 

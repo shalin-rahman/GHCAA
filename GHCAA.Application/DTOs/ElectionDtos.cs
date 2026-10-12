@@ -5,8 +5,8 @@ using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Application.DTOs;
 
-public record CreateElectionDto(string Title, int ECPeriodId, DateTime NominationOpensOn, DateTime NominationClosesOn, DateTime PollingOpensOn, DateTime PollingClosesOn, int CreatedBy, ElectionTieRule TieRule = ElectionTieRule.DrawingLots);
-public record CreateAdminElectionRequest(string Title, int ECPeriodId, DateTime NominationOpensOn, DateTime NominationClosesOn, DateTime PollingOpensOn, DateTime PollingClosesOn, int CreatedBy, string? Description, IReadOnlyList<AdminElectionPositionRequest>? Positions, ElectionTieRule TieRule = ElectionTieRule.DrawingLots);
+public record CreateElectionDto(string Title, int ECPeriodId, DateTime NominationOpensOn, DateTime NominationClosesOn, DateTime PollingOpensOn, DateTime PollingClosesOn, int CreatedBy, ElectionTieRule TieRule = ElectionTieRule.DrawingLots, bool IsTest = false, DateTime? ScrutinyOn = null, DateTime? WithdrawalClosesOn = null);
+public record CreateAdminElectionRequest(string Title, int ECPeriodId, DateTime NominationOpensOn, DateTime NominationClosesOn, DateTime PollingOpensOn, DateTime PollingClosesOn, string? Description, IReadOnlyList<AdminElectionPositionRequest>? Positions, ElectionTieRule TieRule = ElectionTieRule.DrawingLots, bool IsTest = false, DateTime? ScrutinyOn = null, DateTime? WithdrawalClosesOn = null);
 // Spec 023 FR-001. The returning officer's public key, base64 SPKI. The private half never reaches the server until the count.
 public record SetBallotKeyRequest(string PublicKey);
 // The private key, base64 PKCS#8. It is used for the count and not stored. Left out once the count has run, to read the stored results.
@@ -26,9 +26,35 @@ public record CastBallotResultDto(string TrackingCode);
 public record ElectionSummaryDto(int Id, string Title, ElectionPhase Phase, int ECPeriodId, int VoterCount, int EligibleVoterCount, string? BallotKeyFingerprint = null);
 public record AdminElectionPositionDto(int Id, string Title, string? Description, int Seats);
 public record AdminElectionCandidateDto(int Id, int MemberId, string Name, string? PhotoUrl, string? Statement, int PositionId, string PositionTitle);
-public record AdminElectionDto(int Id, string Title, string? Description, ElectionPhase Phase, DateTime? AnnouncedOn, DateTime? NominationOpensOn, DateTime? NominationClosesOn, DateTime? ScrutinyOn, DateTime? WithdrawalClosesOn, DateTime? PollingOpensOn, DateTime? PollingClosesOn, DateTime? DeclaredOn, bool IsActive, IReadOnlyList<AdminElectionPositionDto> Positions, IReadOnlyList<AdminElectionCandidateDto> Candidates, int EligibleVoterCount, bool HasVoted, ElectionTieRule TieRule, string? BallotKeyFingerprint = null, IReadOnlyList<string>? MyPermissions = null, bool AdminHandedOver = false, bool TooFewApprovers = false);
+public record AdminElectionDto(int Id, string Title, string? Description, ElectionPhase Phase, DateTime? AnnouncedOn, DateTime? NominationOpensOn, DateTime? NominationClosesOn, DateTime? ScrutinyOn, DateTime? WithdrawalClosesOn, DateTime? PollingOpensOn, DateTime? PollingClosesOn, DateTime? DeclaredOn, bool IsActive, IReadOnlyList<AdminElectionPositionDto> Positions, IReadOnlyList<AdminElectionCandidateDto> Candidates, int EligibleVoterCount, bool HasVoted, ElectionTieRule TieRule, string? BallotKeyFingerprint = null, IReadOnlyList<string>? MyPermissions = null, bool AdminHandedOver = false, bool TooFewApprovers = false, bool IsTest = false);
 public record NominationViewDto(int Id, int ElectionSeatId, int CandidateMemberId, NominationStatus Status, string Statement);
 public record ElectionResultDto(int ElectionSeatId, int NominationId, int VoteCount, bool IsElected, bool IsTie);
+
+// Spec 023 FR-011 to FR-014: the member's ballot paper. HasVoted comes from SeatVote, so a
+// reload or a second device shows the vote as cast. Places is how many names a seat takes.
+// IsEligible is null until the voter roll is frozen. It only lets the screen warn early; CastBallotAsync checks the roll itself.
+public record BallotViewDto(int ElectionId, string Title, ElectionPhase Phase, bool HasVoted, string? BallotKeyFingerprint, IReadOnlyList<BallotSeatViewDto> Seats,
+    bool? IsEligible, string? IneligibilityReason);
+public record BallotSeatViewDto(int SeatId, string PositionTitle, int Places, IReadOnlyList<BallotCandidateDto> Candidates);
+public record BallotCandidateDto(int NominationId, string Name, string? PhotoUrl, string Statement);
+
+// Spec 023 FR-017: the declared result. Abstentions on a seat are valid ballots that named
+// nobody for it. Turnout is BallotsCast against EligibleVoters on the frozen roll.
+// Spec 023 FR-033 (37.12i): the public board. No email, phone or user id on any member of it.
+// Turnout is null while it must stay hidden. AuditHeadHash is set only once the election is Declared.
+public record ElectionBoardMemberDto(string PersonaName, string DisplayName, DateTime AcceptedAt);
+public record ElectionBoardGroupDto(string GroupName, IReadOnlyList<ElectionBoardMemberDto> Members);
+public record ElectionBoardTurnoutDto(int BallotsCast, int RollSize);
+public record ElectionBoardDto(int Id, string Title, ElectionPhase Phase, bool IsTest, DateTime? AnnouncedOn, DateTime? NominationOpensOn, DateTime? NominationClosesOn,
+    DateTime? ScrutinyOn, DateTime? WithdrawalClosesOn, DateTime? PollingOpensOn, DateTime? PollingClosesOn, DateTime? DeclaredOn,
+    IReadOnlyList<ElectionBoardGroupDto> Groups, ElectionBoardTurnoutDto? Turnout, string? KeyFingerprint, string? AuditHeadHash);
+public record ElectionAuditVerifyDto(bool Ok, int Entries, int? FirstBrokenSeq);
+public record ElectionAuditEntryDto(int Seq, DateTime At, int? ActorUserId, string Action, string DetailJson, string Hash);
+public record OpenedSeatBallotsDto(int ElectionSeatId, IReadOnlyList<IReadOnlyList<int>> Ballots);
+public record OpenedBallotsDto(int ElectionId, IReadOnlyList<OpenedSeatBallotsDto> Seats);
+public record PublicElectionResultsDto(int ElectionId, string Title, ElectionPhase Phase, DateTime? DeclaredOn, int EligibleVoters, int BallotsCast, int SpoiledBallots, IReadOnlyList<PublicSeatResultDto> Seats);
+public record PublicSeatResultDto(int SeatId, string PositionTitle, int Places, int Abstentions, IReadOnlyList<PublicCandidateResultDto> Candidates);
+public record PublicCandidateResultDto(int NominationId, string Name, int VoteCount, bool IsElected, bool IsTie);
 
 // Spec 023 (37.12b).
 public record ElectionPersonaDto(int Id, string Name, string GroupName, string Description, ElectionPermission Permissions, int MinCount, int? MaxCount, bool ShowOnPublicBoard, bool TakesOverFromAdmin, string DeclarationText, int SortOrder, bool IsActive);
@@ -103,6 +129,12 @@ public class AcceptAppointmentDto
     public bool AgreeToDeclaration { get; set; }
 }
 
+public class UnfreezeVoterRollDto
+{
+    [Required, MaxLength(400)]
+    public string Reason { get; set; } = string.Empty;
+}
+
 public class AppointmentReasonDto
 {
     [MaxLength(400)]
@@ -116,7 +148,7 @@ public record ElectionAppointmentSummaryDto(int ElectionId, string ElectionTitle
 
 // Spec 023 (37.12f). KeyFingerprint is set only on a ReplaceBallotKey request, so the approver sees which key they approve.
 // ApprovedAt is set only on an approved Count that has not run yet (37.13h).
-public record ElectionApprovalDto(int Id, int ElectionId, ElectionApprovalAction Action, int RequestedByUserId, string RequestedBy, DateTime RequestedAt, DateTime ExpiresAt, string? KeyFingerprint, DateTime? ApprovedAt = null, int? ExecutedByUserId = null);
+public record ElectionApprovalDto(int Id, int ElectionId, ElectionApprovalAction Action, int RequestedByUserId, string RequestedBy, DateTime RequestedAt, DateTime ExpiresAt, string? KeyFingerprint, DateTime? ApprovedAt = null, int? ExecutedByUserId = null, bool RequestedByMe = false);
 
 // 37.13v. The open SuperAdmin unlock of the frozen rules.
 public record ElectionRulesUnlockDto(int Id, int OpenedByUserId, string OpenedBy, string Reason, DateTime OpenedAt, DateTime ExpiresAt);

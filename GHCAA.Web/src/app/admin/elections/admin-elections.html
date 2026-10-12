@@ -1,7 +1,7 @@
 <section class="admin-feature">
     <app-page-header title="Elections" [total]="elections().length" emptySubtitle="Create and run the association election">
         <small subtitle>{{ elections().length }} election(s)</small>
-        <button actions class="btn btn-accent" (click)="showForm.set(!showForm())">{{ showForm() ? 'Close' : 'New election' }}</button>
+        <button actions *ngIf="isAdmin()" class="btn btn-accent" (click)="showForm.set(!showForm())">{{ showForm() ? 'Close' : 'New election' }}</button>
     </app-page-header>
 
     <div class="tabs">
@@ -13,6 +13,27 @@
         <app-election-rules-unlock *ngIf="isSuperAdmin()"></app-election-rules-unlock>
         <div *ngIf="showForm()" class="glass-card stack gap-4">
             <div class="form-group"><label for="election-title">Title</label><input id="election-title" [(ngModel)]="form.title"></div>
+            <div class="form-group">
+                <label for="election-period">Governance period</label>
+                <select id="election-period" required [(ngModel)]="selectedPeriodId">
+                    <option [ngValue]="null" disabled>Choose a period</option>
+                    <option *ngFor="let period of periods()" [ngValue]="period.id">{{ period.label }}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="election-tie-rule">{{ text.TIE_RULE_LABEL }}</label>
+                <select id="election-tie-rule" [(ngModel)]="form.tieRule">
+                    <option *ngFor="let option of text.TIE_RULES" [value]="option.value">{{ option.label }}: {{ option.description }}</option>
+                </select>
+                <small class="text-muted">{{ tieRuleHelp(form.tieRule) }}</small>
+            </div>
+            <div class="form-group"><label for="election-nomination-opens-on">{{ text.NOMINATION_OPENS_ON_LABEL }}</label><input id="election-nomination-opens-on" type="date" required [(ngModel)]="form.nominationOpensOn"></div>
+            <div class="form-group"><label for="election-nomination-closes-on">{{ text.NOMINATION_CLOSES_ON_LABEL }}</label><input id="election-nomination-closes-on" type="date" required [(ngModel)]="form.nominationClosesOn"></div>
+            <div class="form-group"><label for="election-scrutiny-on">{{ text.SCRUTINY_ON_LABEL }}</label><input id="election-scrutiny-on" type="date" [(ngModel)]="form.scrutinyOn"></div>
+            <div class="form-group"><label for="election-withdrawal-closes-on">{{ text.WITHDRAWAL_CLOSES_ON_LABEL }}</label><input id="election-withdrawal-closes-on" type="date" [(ngModel)]="form.withdrawalClosesOn"></div>
+            <div class="form-group"><label for="election-polling-opens-on">{{ text.POLLING_OPENS_ON_LABEL }}</label><input id="election-polling-opens-on" type="date" required [(ngModel)]="form.pollingOpensOn"></div>
+            <div class="form-group"><label for="election-polling-closes-on">{{ text.POLLING_CLOSES_ON_LABEL }}</label><input id="election-polling-closes-on" type="date" required [(ngModel)]="form.pollingClosesOn"></div>
+            <div class="form-group checkbox-group"><input type="checkbox" id="election-is-test" [(ngModel)]="form.isTest" /><label for="election-is-test">Test run (hidden from members and the public, puts nobody on the committee)</label></div>
             <div class="form-group"><label for="election-description">Description</label><textarea id="election-description" [(ngModel)]="form.description"></textarea></div>
             <div class="glass-card" *ngFor="let position of form.positions; let i = index">
                 <div class="form-group"><label [for]="'position-' + i">Position</label><input [id]="'position-' + i" [(ngModel)]="position.title"></div>
@@ -30,20 +51,35 @@
             <div class="flex justify-between items-center">
                 <div>
                     <h2>{{ election.title }}</h2>
-                    <p class="text-muted"><span class="status-badge" [class]="getElectionPhaseClass(election.phase)">{{ getElectionPhaseLabel(election.phase) }}</span> · {{ election.positions.length }} positions</p>
+                    <p class="text-muted"><span class="status-badge" [class]="getElectionPhaseClass(election.phase)">{{ getElectionPhaseLabel(election.phase) }}</span> <span class="status-badge pending" *ngIf="election.isTest">Test</span> · {{ election.positions.length }} positions</p>
                     <p class="text-muted" *ngIf="election.ballotKeyFingerprint">Officer key fingerprint: <code>{{ election.ballotKeyFingerprint }}</code></p>
                     <p class="text-muted" *ngIf="!election.ballotKeyFingerprint && canSetBallotKey(election)">No returning officer key yet. Voting cannot open without one.</p>
                     <p class="text-muted" *ngIf="pollingWarning(election) as warning">{{ warning }}</p>
                 </div>
                 <div class="flex gap-2">
-                    <button class="btn btn-primary btn-sm" *ngIf="election.phase === 'Announced'" [disabled]="publishingId() === election.id" (click)="publish(election)">{{ publishingId() === election.id ? 'Publishing...' : 'Publish' }}</button>
-                    <button class="btn btn-secondary btn-sm" *ngIf="election.phase === 'Polling'" [disabled]="closingId() === election.id" (click)="close(election)">{{ closingId() === election.id ? 'Closing...' : 'Close' }}</button>
-                    <button class="btn btn-secondary btn-sm" *ngIf="canSetBallotKey(election)" [disabled]="keyingId() === election.id" (click)="createBallotKey(election)">{{ keyingId() === election.id ? 'Making key...' : (election.ballotKeyFingerprint ? 'Replace officer key' : 'Make officer key') }}</button>
+                    <button class="btn btn-primary btn-sm" *ngIf="election.phase === 'Announced' && can(election, 'ChangePhase')" [disabled]="publishingId() === election.id" (click)="publish(election)">{{ publishingId() === election.id ? 'Publishing...' : 'Publish' }}</button>
+                    <button class="btn btn-secondary btn-sm" *ngIf="canEditRoll(election)" [disabled]="freezingId() === election.id" (click)="freezeRoll(election)">{{ freezingId() === election.id ? 'Working...' : 'Freeze voter roll' }}</button>
+                    <button class="btn btn-secondary btn-sm" *ngIf="canEditRoll(election) && election.eligibleVoterCount" [disabled]="freezingId() === election.id" (click)="openUnfreeze(election)">Unfreeze voter roll</button>
+                    <button class="btn btn-secondary btn-sm" *ngIf="election.phase === 'Polling' && can(election, 'ChangePhase')" [disabled]="closingId() === election.id" (click)="close(election)">{{ closingId() === election.id ? 'Closing...' : 'Close' }}</button>
+                    <button class="btn btn-secondary btn-sm" *ngIf="canSetBallotKey(election) && can(election, 'SetBallotKey')" [disabled]="keyingId() === election.id" (click)="createBallotKey(election)">{{ keyingId() === election.id ? 'Making key...' : (election.ballotKeyFingerprint ? 'Replace officer key' : 'Make officer key') }}</button>
                     <input #keyFile type="file" class="hidden" accept=".pem,.txt" (change)="countWithKeyFile(election, $event)">
-                    <button class="btn btn-primary btn-sm" *ngIf="election.phase === 'Counting'" [disabled]="countingId() === election.id" (click)="keyFile.click()">{{ countingId() === election.id ? 'Counting...' : 'Count with officer key' }}</button>
-                    <button class="btn btn-secondary btn-sm" (click)="loadApprovals(election)">Waiting approvals</button>
-                    <button class="btn btn-secondary btn-sm" (click)="toggleOfficials(election)">{{ officialsOpenId() === election.id ? 'Hide officials' : 'Officials' }}</button>
+                    <button class="btn btn-primary btn-sm" *ngIf="election.phase === 'Counting' && can(election, 'Count')" [disabled]="countingId() === election.id" (click)="keyFile.click()">{{ countingId() === election.id ? 'Counting...' : 'Count with officer key' }}</button>
+                    <button class="btn btn-secondary btn-sm" *ngIf="can(election, 'ViewDashboard')" (click)="loadApprovals(election)">Waiting approvals</button>
+                    <button class="btn btn-secondary btn-sm" *ngIf="can(election, 'AppointOfficials')" (click)="toggleOfficials(election)">{{ officialsOpenId() === election.id ? 'Hide officials' : 'Officials' }}</button>
                 </div>
+            </div>
+            <div class="stack gap-2" *ngIf="unfreezeOpenId() === election.id">
+                <div class="form-group">
+                    <label [for]="'unfreeze-reason-' + election.id">Reason for unfreezing the voter roll</label>
+                    <textarea [id]="'unfreeze-reason-' + election.id" [maxlength]="reasonMax" [(ngModel)]="unfreezeReason"></textarea>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-primary btn-sm" [disabled]="freezingId() === election.id" (click)="unfreezeRoll(election)">Unfreeze</button>
+                    <button class="btn btn-secondary btn-sm" (click)="unfreezeOpenId.set(null)">Cancel</button>
+                </div>
+            </div>
+            <div class="flex items-center gap-2" *ngIf="election.phase === 'Declared' && can(election, 'SetBallotKey') && election.ballotKeyFingerprint">
+                <label class="flex gap-2"><input type="checkbox" [disabled]="destroyingKeyId() === election.id" (change)="keyDestroyed(election, $any($event.target).checked)"> I destroyed the key file after the declare</label>
             </div>
             <div class="stack gap-2" *ngIf="(approvals()[election.id] ?? []).length > 0">
                 <div class="flex justify-between items-center" *ngFor="let approval of approvals()[election.id]">
@@ -52,7 +88,7 @@
                         <ng-container *ngIf="approval.keyFingerprint"> New key fingerprint: <code>{{ approval.keyFingerprint }}</code></ng-container>
                         <ng-container *ngIf="approval.approvedAt"> Approved. Count with the key file to finish.</ng-container>
                     </span>
-                    <div class="flex gap-2" *ngIf="!approval.approvedAt">
+                    <div class="flex gap-2" *ngIf="!approval.approvedAt && can(election, 'Approve') && !approval.requestedByMe">
                         <button class="btn btn-primary btn-sm" [disabled]="decidingApprovalId() === approval.id" (click)="approve(approval)">Approve</button>
                         <button class="btn btn-secondary btn-sm" [disabled]="decidingApprovalId() === approval.id" (click)="reject(approval)">Reject</button>
                     </div>
@@ -62,7 +98,7 @@
             <div class="stack gap-2" *ngIf="election.candidates.length > 0">
                 <div class="flex justify-between items-center" *ngFor="let candidate of election.candidates">
                     <span>{{ candidate.name }} — {{ candidate.positionTitle }}</span>
-                    <button class="btn btn-secondary btn-sm" [disabled]="removingCandidateId() === candidate.id" (click)="removeCandidate(election, candidate.id)">{{ removingCandidateId() === candidate.id ? 'Removing...' : 'Remove' }}</button>
+                    <button class="btn btn-secondary btn-sm" *ngIf="can(election, 'ManageSetup')" [disabled]="removingCandidateId() === candidate.id" (click)="removeCandidate(election, candidate.id)">{{ removingCandidateId() === candidate.id ? 'Removing...' : 'Remove' }}</button>
                 </div>
             </div>
         </div>
@@ -84,7 +120,7 @@
                     <p class="text-muted">{{ nomination.statement }}</p>
                     <span class="status-badge" [class]="getNominationStatusClass(nomination.status)">{{ getNominationStatusLabel(nomination.status) }}</span>
                 </div>
-                <div class="flex gap-2" *ngIf="nomination.status === 'Submitted' || nomination.status === 'UnderScrutiny'">
+                <div class="flex gap-2" *ngIf="(nomination.status === 'Submitted' || nomination.status === 'UnderScrutiny') && canOnSelected('DecideNominations')">
                     <button class="btn btn-primary btn-sm" [disabled]="scrutinisingId() === nomination.id" (click)="scrutinise(nomination, true)">Accept</button>
                     <button class="btn btn-secondary btn-sm" [disabled]="scrutinisingId() === nomination.id" (click)="scrutinise(nomination, false)">Reject</button>
                 </div>

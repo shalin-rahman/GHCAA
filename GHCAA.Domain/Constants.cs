@@ -151,11 +151,43 @@ namespace GHCAA.Domain
             public const string EmergencyRevokeAuditType = "ElectionEmergencyRevoke";
             // 37.13m. ActivityLog type for a count run under a second person's approval.
             public const string CountRunAuditType = "ElectionCountRun";
+            // Reply codes a service returns when it refuses a step. Controllers map them to a status.
+            public static class Replies
+            {
+                public const string NotFound = "not-found";
+                public const string NotDeclared = "not-declared";
+                public const string AlreadyRecorded = "already-recorded";
+                public const string SamePerson = "same-person";
+            }
+            // 37.13a. Action names written to the election's audit chain.
+            public static class AuditActions
+            {
+                public const string PhaseChanged = "PhaseChanged";
+                public const string CandidateOrderSet = "CandidateOrderSet";
+                public const string Counted = "Counted";
+                public const string Declared = "Declared";
+                public const string CountApproved = "CountApproved";
+                public const string EmergencyRevoke = "EmergencyRevoke";
+                public const string RulesChangeRefused = "RulesChangeRefused";
+                public const string RulesChangeUnlocked = "RulesChangeUnlocked";
+                public const string Appointed = "Appointed";
+                public const string AppointmentAccepted = "AppointmentAccepted";
+                public const string AppointmentRevoked = "AppointmentRevoked";
+                public const string BallotKeySet = "BallotKeySet";
+                // 37.12q. A frozen voter roll was thrown away so it can be frozen again.
+                public const string VoterRollUnfrozen = "VoterRollUnfrozen";
+                // FR-050. An official records that the key file was destroyed after the declare.
+                public const string KeyDestroyed = "KeyDestroyed";
+            }
+            // Previous hash of the first chain entry.
+            public static readonly string AuditGenesisHash = new('0', 64);
             // 37.13t. Below this many live officials with Approve, asking for polling warns that an
             // emergency revocation may find nobody to approve it.
             public const int MinApproversBeforePolling = 2;
             // RevokedReason written on an expired returning officer row when a new one is appointed.
             public const string AppointmentExpiredReason = "Expired";
+            // 37.12g. RevokedReason written on every appointment when an election is archived.
+            public const string ElectionArchivedReason = "Election archived";
             // 37.13v. A SuperAdmin unlock of the frozen rules. Short by default, capped, and it
             // needs a written reason long enough to say what went wrong.
             public const int RulesUnlockDefaultMinutes = 30;
@@ -219,6 +251,29 @@ namespace GHCAA.Domain
             public const string System = "System";
             public const string Web = "Web";
             public const string Mobile = "Mobile";
+        }
+
+        // 37.1r. Values the user agent parser writes into the vote row's Metadata.
+        public static class UserAgentDevices
+        {
+            public const string Mobile = "mobile";
+            public const string Tablet = "tablet";
+            public const string Desktop = "desktop";
+            public const string Unknown = "unknown";
+            public const string IOs = "iOS";
+            public const string Android = "Android";
+            public const string Windows = "Windows";
+            public const string MacOs = "macOS";
+            public const string ChromeOs = "ChromeOS";
+            public const string Linux = "Linux";
+            public const string Flutter = "Flutter";
+            public const string Edge = "Edge";
+            public const string Opera = "Opera";
+            public const string SamsungInternet = "Samsung Internet";
+            public const string Firefox = "Firefox";
+            public const string Chrome = "Chrome";
+            public const string Safari = "Safari";
+            public const string FlutterApp = "Flutter app";
         }
 
         // 7.18. Startup checks on deploy settings that the app cannot see being changed.

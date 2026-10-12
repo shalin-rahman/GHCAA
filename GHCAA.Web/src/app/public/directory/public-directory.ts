@@ -27,7 +27,7 @@ import { Directory } from '../../common/directory/directory';
         font-size: 3rem;
         margin: 0;
         font-weight: 900;
-        color: var(--primary-color);
+        color: var(--text-main);
       }
       p {
         color: var(--text-muted);

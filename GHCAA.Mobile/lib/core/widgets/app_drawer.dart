@@ -63,6 +63,9 @@ class AppDrawer extends ConsumerWidget {
                             _MenuItem(Icons.receipt_long_outlined, 'Payments', '/financials'),
                             _MenuItem(Icons.volunteer_activism_outlined, 'Fundraising Campaigns', '/campaigns'),
                             _MenuItem(Icons.assignment_ind_outlined, 'Election Appointments', '/officials/appointments'),
+                            // The page reads /admin/elections, which answers 403 to anyone who is not staff.
+                            if (role.isElectionOfficialRole)
+                              _MenuItem(Icons.how_to_vote_outlined, 'Election Officials', '/officials'),
                           ]),
                           _buildSection(context, localePack.community, [
                             _MenuItem(Icons.people_outline, 'Alumni Directory', '/directory'),

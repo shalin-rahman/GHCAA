@@ -1,26 +1,30 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ElectionsService } from '../../core/services/elections.service';
 import {
     AdminElectionDto, AdminElectionStepResult, CreateElectionRequest, ELECTION_APPROVAL_ACTION_LABELS, ELECTION_PHASE_ORDER,
-    ElectionApprovalDto, NominationViewDto, pollingApproverWarning
+    ElectionApprovalDto, ElectionPermissionName, ElectionTieRule, NominationViewDto, pollingApproverWarning
 } from '../../core/models/election.models';
 import { ExportUtil } from '../../core/utils/export.util';
 import { ballotKeyFileName, generateBallotKeyPair, readBallotKeyFile, toPem } from '../../core/utils/ballot-key.util';
 import { NotificationService } from '../../core/services/notification.service';
+import { confirmRejectApproval } from '../../core/utils/election-approval.util';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { AuthService } from '../../core/services/auth.service';
+import { AdminService } from '../../core/services/admin.service';
+import { formatPeriodRange } from '../../core/utils/date.util';
 import { ElectionOfficials } from './election-officials/election-officials';
 import { ElectionRulesUnlock } from './election-rules-unlock/election-rules-unlock';
 import {
     getElectionPhaseLabel, getElectionPhaseClass,
-    getNominationStatusLabel, getNominationStatusClass, SUPER_ADMIN_ROLE
+    getNominationStatusLabel, getNominationStatusClass, SUPER_ADMIN_ROLE, ADMIN_ROLE, API_ENDPOINTS, ELECTION_APPOINTMENT_REASON_MAX
 } from '../../core/constants/app.constants';
 
 type AdminElectionsTab = 'elections' | 'nominations';
@@ -36,7 +40,11 @@ export class AdminElections {
     private readonly notify = inject(NotificationService);
     private readonly confirmDialog = inject(ConfirmDialogService);
     private readonly auth = inject(AuthService);
+    private readonly adminService = inject(AdminService);
+    // Set on /officials/elections/:id, where the page shows that one election.
+    private readonly routeElectionId = Number(inject(ActivatedRoute, { optional: true })?.snapshot.paramMap.get('id')) || null;
 
+    readonly text = API_ENDPOINTS.ADMIN_ELECTIONS;
     getElectionPhaseLabel = getElectionPhaseLabel;
     getElectionPhaseClass = getElectionPhaseClass;
     getNominationStatusLabel = getNominationStatusLabel;
@@ -56,18 +64,29 @@ export class AdminElections {
     removingCandidateId = signal<number | null>(null);
     keyingId = signal<number | null>(null);
     countingId = signal<number | null>(null);
+    freezingId = signal<number | null>(null);
+    unfreezeOpenId = signal<number | null>(null);
+    unfreezeReason = '';
+    readonly reasonMax = ELECTION_APPOINTMENT_REASON_MAX;
     approvals = signal<Partial<Record<number, ElectionApprovalDto[]>>>({});
     decidingApprovalId = signal<number | null>(null);
     approvalLabels = ELECTION_APPROVAL_ACTION_LABELS;
     officialsOpenId = signal<number | null>(null);
+    destroyingKeyId = signal<number | null>(null);
     readonly isSuperAdmin = computed(() => this.auth.hasRole(SUPER_ADMIN_ROLE));
+    // Creating an election and listing governance periods are admin-only on the server.
+    readonly isAdmin = computed(() => this.auth.hasRole(SUPER_ADMIN_ROLE) || this.auth.hasRole(ADMIN_ROLE));
 
     filtered = computed(() => {
         const query = this.search().trim().toLowerCase();
-        return query ? this.elections().filter(election => election.title.toLowerCase().includes(query)) : this.elections();
+        const all = this.routeElectionId === null ? this.elections() : this.elections().filter(election => election.id === this.routeElectionId);
+        return query ? all.filter(election => election.title.toLowerCase().includes(query)) : all;
     });
 
     form: CreateElectionRequest = this.emptyForm();
+    // Chosen in the form's period select. It stays null until the admin picks one.
+    selectedPeriodId: number | null = null;
+    periods = signal<{ id: number; label: string }[]>([]);
 
     // Nominations/scrutiny tab.
     selectedElectionId = signal<number | null>(null);
@@ -75,7 +94,17 @@ export class AdminElections {
     nominationsLoading = signal(false);
     scrutinisingId = signal<number | null>(null);
 
-    constructor() { this.load(); }
+    constructor() {
+        this.load();
+        if (this.isAdmin()) this.loadPeriods();
+    }
+
+    private loadPeriods(): void {
+        this.adminService.getGovernancePeriods().subscribe({
+            next: periods => this.periods.set(periods.map(p => ({ id: p.id, label: `${p.title} (${formatPeriodRange(p)})` }))),
+            error: () => this.periods.set([])
+        });
+    }
 
     switchTab(tab: AdminElectionsTab): void {
         this.activeTab.set(tab);
@@ -94,11 +123,16 @@ export class AdminElections {
         });
     }
 
+    tieRuleHelp(rule: ElectionTieRule | undefined): string {
+        return this.text.TIE_RULES.find(option => option.value === rule)?.description ?? '';
+    }
+
     private emptyForm(): CreateElectionRequest {
         return {
             title: '', ecPeriodId: 0, nominationOpensOn: '', nominationClosesOn: '',
             pollingOpensOn: '', pollingClosesOn: '',
-            description: '', positions: [{ title: '', seats: 1 }]
+            tieRule: 'DrawingLots', scrutinyOn: null, withdrawalClosesOn: null,
+            description: '', positions: [{ title: '', seats: 1 }], isTest: false
         };
     }
 
@@ -117,16 +151,34 @@ export class AdminElections {
             this.notify.warning('Add a title and each election position.');
             return;
         }
+        if (this.selectedPeriodId === null) {
+            this.notify.warning('Choose the governance period this election is for.');
+            return;
+        }
+        const { nominationOpensOn, nominationClosesOn, pollingOpensOn, pollingClosesOn } = this.form;
+        if (![nominationOpensOn, nominationClosesOn, pollingOpensOn, pollingClosesOn].every(Boolean)) {
+            this.notify.warning(this.text.DATES_MISSING);
+            return;
+        }
         this.saving.set(true);
-        this.electionsService.create(this.form).subscribe({
+        // An emptied date input gives '', which the server would reject as a date.
+        const request: CreateElectionRequest = {
+            ...this.form,
+            ecPeriodId: this.selectedPeriodId,
+            scrutinyOn: this.form.scrutinyOn || null,
+            withdrawalClosesOn: this.form.withdrawalClosesOn || null
+        };
+        this.electionsService.create(request).subscribe({
             next: election => {
                 this.elections.set([election, ...this.elections()]);
                 this.showForm.set(false);
                 this.saving.set(false);
                 this.form = this.emptyForm();
+                this.selectedPeriodId = null;
                 this.notify.success('Election created.');
             },
-            error: () => { this.saving.set(false); this.notify.error('Failed to create election.'); }
+            // The HTTP interceptor already shows the server's 400 detail as a toast.
+            error: () => this.saving.set(false)
         });
     }
 
@@ -156,6 +208,38 @@ export class AdminElections {
         });
     }
 
+    canEditRoll(election: AdminElectionDto): boolean {
+        return (election.phase === 'Announced' || election.phase === 'Nomination') && this.can(election, 'ManageVoterRoll');
+    }
+
+    freezeRoll(election: AdminElectionDto): void {
+        if (this.freezingId() !== null) return;
+        this.freezingId.set(election.id);
+        this.electionsService.freezeVoterRoll(election.id).subscribe({
+            next: result => { this.freezingId.set(null); this.notify.success(`${result.count} voters frozen onto the roll.`); this.load(); },
+            error: () => { this.freezingId.set(null); this.notify.error('Failed to freeze the voter roll.'); }
+        });
+    }
+
+    openUnfreeze(election: AdminElectionDto): void {
+        this.unfreezeReason = '';
+        this.unfreezeOpenId.set(election.id);
+    }
+
+    unfreezeRoll(election: AdminElectionDto): void {
+        const reason = this.unfreezeReason.trim();
+        if (!reason) {
+            this.notify.error('Give a reason for unfreezing the voter roll.');
+            return;
+        }
+        if (this.freezingId() !== null) return;
+        this.freezingId.set(election.id);
+        this.electionsService.unfreezeVoterRoll(election.id, reason).subscribe({
+            next: () => { this.freezingId.set(null); this.unfreezeOpenId.set(null); this.notify.success('Voter roll unfrozen.'); this.load(); },
+            error: err => { this.freezingId.set(null); this.notify.error(err?.error?.detail ?? 'Failed to unfreeze the voter roll.'); }
+        });
+    }
+
     async removeCandidate(election: AdminElectionDto, candidateId: number): Promise<void> {
         if (this.removingCandidateId() !== null) return;
         const confirmed = await firstValueFrom(this.confirmDialog.confirm({
@@ -170,6 +254,29 @@ export class AdminElections {
         this.electionsService.removeCandidate(election.id, candidateId).subscribe({
             next: () => { this.removingCandidateId.set(null); this.load(); },
             error: () => { this.removingCandidateId.set(null); this.notify.error('Failed to remove candidate.'); }
+        });
+    }
+
+    // The server sends MyPermissions on every reply. Without it, show nothing.
+    can(election: AdminElectionDto, permission: ElectionPermissionName): boolean {
+        return election.myPermissions?.includes(permission) ?? false;
+    }
+
+    canOnSelected(permission: ElectionPermissionName): boolean {
+        const election = this.elections().find(item => item.id === this.selectedElectionId());
+        return election ? this.can(election, permission) : false;
+    }
+
+    // FR-050. The box records that the key file was destroyed. It cannot be unticked once saved.
+    keyDestroyed(election: AdminElectionDto, checked: boolean): void {
+        if (!checked || this.destroyingKeyId() !== null) return;
+        this.destroyingKeyId.set(election.id);
+        this.electionsService.keyDestroyed(election.id).subscribe({
+            next: () => { this.destroyingKeyId.set(null); this.notify.success('Recorded in the audit log.'); },
+            error: (err: HttpErrorResponse) => {
+                this.destroyingKeyId.set(null);
+                if (err.status === 409) this.notify.info('The key was already recorded as destroyed.');
+            }
         });
     }
 
@@ -303,13 +410,7 @@ export class AdminElections {
 
     async reject(approval: ElectionApprovalDto): Promise<void> {
         if (this.decidingApprovalId() !== null) return;
-        const confirmed = await firstValueFrom(this.confirmDialog.confirm({
-            title: 'Reject request',
-            message: `Reject "${ELECTION_APPROVAL_ACTION_LABELS[approval.action]}" asked for by ${approval.requestedBy}? It will not happen.`,
-            confirmLabel: 'Reject',
-            danger: true
-        }));
-        if (!confirmed) return;
+        if (!await confirmRejectApproval(this.confirmDialog, approval)) return;
 
         this.decidingApprovalId.set(approval.id);
         this.electionsService.reject(approval.id, null).subscribe({

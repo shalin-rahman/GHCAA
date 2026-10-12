@@ -37,20 +37,25 @@ namespace GHCAA.Infrastructure
             // integration tests set DatabaseProvider=Sqlite with ASP_SEED_PROFILE=Visual, which
             // skips MigrationBootstrapper entirely and calls EnsureCreated() instead — see
             // GHCAA.API/Program.cs's Visual-profile branch). It is not a supported deployment target.
+            // Warning 10622 is ignored on purpose. Four relationships (94.1 to 94.3, 94.5) must not take the
+            // matching query filter, and the queries on them skip the filtered navigation. See each
+            // entity configuration for the reason.
             switch (provider.ToLower())
             {
                 case "sqlite":
                     services.AddDbContextPool<ApplicationDbContext, SqliteApplicationDbContext>((sp, options) =>
                     {
                         options.UseSqlite(connectionString, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
-                        options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+                        options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning,
+                            Microsoft.EntityFrameworkCore.Diagnostics.CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning));
                     });
                     break;
                 default: // PgSql
                     services.AddDbContextPool<ApplicationDbContext, PgSqlApplicationDbContext>((sp, options) =>
                     {
                         options.UseNpgsql(connectionString, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
-                        options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+                        options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning,
+                            Microsoft.EntityFrameworkCore.Diagnostics.CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning));
                     });
                     break;
             }

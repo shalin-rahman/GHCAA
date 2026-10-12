@@ -638,7 +638,7 @@ reductions then apply, each carrying a one-line reason a reader can accept or re
 They multiply rather than add because they compound, and the product is 0.41, giving a
 **reuse-adjusted effort of 406 working days** for the code delivered so far, against 170 the
 record evidences. The work still outstanding is counted the same way — 86 unwritten chapter
-sections, 77 figures and tables not yet made, and 117 open tracker items priced by priority,
+sections, 77 figures and tables not yet made, and 123 open tracker items priced by priority,
 being 49 working days — so the **completed project comes to about 454 working days**. The item
 rates cover a defect fix and the test that pins it together, because §3.5's definition of done
 requires both.

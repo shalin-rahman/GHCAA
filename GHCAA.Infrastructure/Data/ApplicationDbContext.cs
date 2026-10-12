@@ -291,6 +291,7 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<PendingBallot> PendingBallots { get; set; } = null!;
         public DbSet<BallotReceipt> BallotReceipts { get; set; } = null!;
         public DbSet<ElectionResult> ElectionResults { get; set; } = null!;
+        public DbSet<ElectionAuditEntry> ElectionAuditEntries { get; set; } = null!;
         public DbSet<ElectionPersona> ElectionPersonas { get; set; } = null!;
         public DbSet<ScholarshipFund> ScholarshipFunds { get; set; } = null!;
         public DbSet<ScholarshipCall> ScholarshipCalls { get; set; } = null!;

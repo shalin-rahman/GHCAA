@@ -3,6 +3,7 @@ using System.Text;
 using GHCAA.API.Controllers;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
+using GHCAA.Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.Logging;
@@ -89,6 +90,7 @@ namespace GHCAA.API.Middleware
                 $"User {username} voted in election {electionId}",
                 userId,
                 source: "API",
+                metadata: UserAgentParser.ToMetadata(context.Request.Headers.UserAgent.ToString()),
                 timestamp: DateTime.UtcNow.Date);
         }
     }

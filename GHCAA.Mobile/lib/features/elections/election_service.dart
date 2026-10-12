@@ -60,9 +60,38 @@ const nominationStatusLabels = <String, String>{
   'Withdrawn': 'Withdrawn',
 };
 
+// Same wording as ELECTION_APPROVAL_ACTION_LABELS on the web.
+const electionApprovalActionLabels = <String, String>{
+  'Publish': 'Publish the election',
+  'OpenPolling': 'Open polling',
+  'ReplaceBallotKey': 'Replace the ballot key',
+  'ClosePolling': 'Close polling',
+  'Declare': 'Declare results',
+  'Archive': 'Archive',
+  'Count': 'Count the ballots',
+  'EmergencyRevoke': 'Remove an official in an emergency',
+};
+
 String electionPhaseLabel(String phase) => electionPhaseLabels[phase] ?? phase;
+String electionApprovalActionLabel(String action) =>
+    electionApprovalActionLabels[action] ?? action;
 String nominationStatusLabel(String status) =>
     nominationStatusLabels[status] ?? status;
+
+// How a tie for the last place is settled. [wire] is the API name.
+enum ElectionTieRule {
+  drawingLots('DrawingLots', 'Drawing lots',
+      'A tie is settled by drawing lots in front of the candidates.'),
+  runOff('RunOff', 'Run-off poll',
+      'A tie goes to a second poll between the tied candidates.'),
+  chairCastingVote('ChairCastingVote', "Returning officer's casting vote",
+      "The returning officer's casting vote settles a tie.");
+
+  final String wire;
+  final String label;
+  final String description;
+  const ElectionTieRule(this.wire, this.label, this.description);
+}
 
 class ElectionSummary {
   final int id;
@@ -153,6 +182,8 @@ class AdminElection {
   final bool adminHandedOver;
   // 37.13t. Fewer live officials with Approve than an emergency revocation needs.
   final bool tooFewApprovers;
+  // FR-047 (37.13d). A test run: hidden from members and the public, declares nobody.
+  final bool isTest;
 
   const AdminElection({
     required this.id,
@@ -171,6 +202,7 @@ class AdminElection {
     this.myPermissions = const [],
     this.adminHandedOver = false,
     this.tooFewApprovers = false,
+    this.isTest = false,
   });
 
   factory AdminElection.fromJson(Map<String, dynamic> json) => AdminElection(
@@ -195,6 +227,7 @@ class AdminElection {
             const [],
         adminHandedOver: json['adminHandedOver'] as bool? ?? false,
         tooFewApprovers: json['tooFewApprovers'] as bool? ?? false,
+        isTest: json['isTest'] as bool? ?? false,
       );
 }
 
@@ -333,6 +366,313 @@ String? rulesUnlockProblem(String reason, int? minutes) {
   );
 }
 
+// One candidate on the paper from GET /elections/{id}/ballot.
+class BallotCandidate {
+  final int nominationId;
+  final String name;
+  final String? photoUrl;
+  final String statement;
+
+  const BallotCandidate({
+    required this.nominationId,
+    required this.name,
+    this.photoUrl,
+    this.statement = '',
+  });
+
+  factory BallotCandidate.fromJson(Map<String, dynamic> json) =>
+      BallotCandidate(
+        nominationId: json['nominationId'] as int,
+        name: json['name'] as String? ?? '',
+        photoUrl: json['photoUrl'] as String?,
+        statement: json['statement'] as String? ?? '',
+      );
+}
+
+class BallotSeat {
+  final int seatId;
+  final String positionTitle;
+  final int places;
+  final List<BallotCandidate> candidates;
+
+  const BallotSeat({
+    required this.seatId,
+    required this.positionTitle,
+    required this.places,
+    required this.candidates,
+  });
+
+  factory BallotSeat.fromJson(Map<String, dynamic> json) => BallotSeat(
+        seatId: json['seatId'] as int,
+        positionTitle: json['positionTitle'] as String? ?? '',
+        places: json['places'] as int? ?? 1,
+        candidates: (json['candidates'] as List<dynamic>? ?? const [])
+            .map((c) => BallotCandidate.fromJson(c as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
+class Ballot {
+  final int electionId;
+  final String title;
+  final String phase;
+  final bool hasVoted;
+  final String? ballotKeyFingerprint;
+  final List<BallotSeat> seats;
+  // Null until the voter roll is frozen. It only warns early; the server checks the roll again on cast.
+  final bool? isEligible;
+  final String? ineligibilityReason;
+
+  const Ballot({
+    required this.electionId,
+    required this.title,
+    required this.phase,
+    required this.hasVoted,
+    this.ballotKeyFingerprint,
+    required this.seats,
+    this.isEligible,
+    this.ineligibilityReason,
+  });
+
+  factory Ballot.fromJson(Map<String, dynamic> json) => Ballot(
+        electionId: json['electionId'] as int,
+        title: json['title'] as String? ?? '',
+        phase: json['phase']?.toString() ?? 'Announced',
+        hasVoted: json['hasVoted'] as bool? ?? false,
+        ballotKeyFingerprint: json['ballotKeyFingerprint'] as String?,
+        seats: (json['seats'] as List<dynamic>? ?? const [])
+            .map((s) => BallotSeat.fromJson(s as Map<String, dynamic>))
+            .toList(),
+        isEligible: json['isEligible'] as bool?,
+        ineligibilityReason: json['ineligibilityReason'] as String?,
+      );
+}
+
+// Same words as the web ballot, so both clients explain abstaining the same way.
+const ballotAbstainOption = 'Abstain on this seat';
+const ballotAbstainHelp =
+    'Your ballot still counts, but no candidate on this seat gets your vote.';
+const ballotUndecidedHint =
+    'Pick a candidate or abstain on every seat to continue.';
+const ballotNotOnRoll = 'You are not on the voter roll for this election.';
+
+// A seat is decided once it has an entry: picks, or an empty list for abstain. A seat the
+// member never touched has no entry, so it is never taken as an abstention.
+bool allSeatsDecided(List<BallotSeat> seats, Map<int, List<int>> picks) =>
+    seats.isNotEmpty && seats.every((s) => picks.containsKey(s.seatId));
+
+// The picks after a tap on [nominationId]. A second tap removes it. With one place the pick
+// replaces the old one; with more places a pick over the limit is ignored.
+List<int> togglePick(List<int> current, int nominationId, int places) {
+  if (current.contains(nominationId)) {
+    return current.where((id) => id != nominationId).toList();
+  }
+  if (places <= 1) return [nominationId];
+  if (current.length >= places) return current;
+  return [...current, nominationId];
+}
+
+// The whole paper for the vote call. The server needs every listed seat, so an abstained seat
+// goes in as an empty list. The screen only calls this once [allSeatsDecided] is true. Picks
+// beyond the places are cut off.
+Map<int, List<int>> buildBallotChoices(
+    List<BallotSeat> seats, Map<int, List<int>> picks) {
+  return {
+    for (final seat in seats)
+      seat.seatId: [
+        for (final id in (picks[seat.seatId] ?? const <int>[]))
+          if (seat.candidates.any((c) => c.nominationId == id)) id
+      ].take(seat.places).toList(),
+  };
+}
+
+class SeatResultCandidate {
+  final int nominationId;
+  final String name;
+  final int voteCount;
+  final bool isElected;
+  final bool isTie;
+
+  const SeatResultCandidate({
+    required this.nominationId,
+    required this.name,
+    required this.voteCount,
+    required this.isElected,
+    required this.isTie,
+  });
+
+  factory SeatResultCandidate.fromJson(Map<String, dynamic> json) =>
+      SeatResultCandidate(
+        nominationId: json['nominationId'] as int,
+        name: json['name'] as String? ?? '',
+        voteCount: json['voteCount'] as int? ?? 0,
+        isElected: json['isElected'] as bool? ?? false,
+        isTie: json['isTie'] as bool? ?? false,
+      );
+}
+
+class SeatResult {
+  final int seatId;
+  final String positionTitle;
+  final int places;
+  final int abstentions;
+  final List<SeatResultCandidate> candidates;
+
+  const SeatResult({
+    required this.seatId,
+    required this.positionTitle,
+    required this.places,
+    required this.abstentions,
+    required this.candidates,
+  });
+
+  factory SeatResult.fromJson(Map<String, dynamic> json) => SeatResult(
+        seatId: json['seatId'] as int,
+        positionTitle: json['positionTitle'] as String? ?? '',
+        places: json['places'] as int? ?? 1,
+        abstentions: json['abstentions'] as int? ?? 0,
+        candidates: (json['candidates'] as List<dynamic>? ?? const [])
+            .map((c) => SeatResultCandidate.fromJson(c as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
+class ElectionResults {
+  final int electionId;
+  final String title;
+  final String phase;
+  final DateTime? declaredOn;
+  final int eligibleVoters;
+  final int ballotsCast;
+  final int spoiledBallots;
+  final List<SeatResult> seats;
+
+  const ElectionResults({
+    required this.electionId,
+    required this.title,
+    required this.phase,
+    this.declaredOn,
+    required this.eligibleVoters,
+    required this.ballotsCast,
+    required this.spoiledBallots,
+    required this.seats,
+  });
+
+  factory ElectionResults.fromJson(Map<String, dynamic> json) =>
+      ElectionResults(
+        electionId: json['electionId'] as int,
+        title: json['title'] as String? ?? '',
+        phase: json['phase']?.toString() ?? 'Declared',
+        declaredOn: AppUtils.parseDate(json['declaredOn'] as String?),
+        eligibleVoters: json['eligibleVoters'] as int? ?? 0,
+        ballotsCast: json['ballotsCast'] as int? ?? 0,
+        spoiledBallots: json['spoiledBallots'] as int? ?? 0,
+        seats: (json['seats'] as List<dynamic>? ?? const [])
+            .map((s) => SeatResult.fromJson(s as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
+// Codes that contain [query], ignoring case and spaces at the ends. An empty query keeps all.
+List<String> filterTrackingCodes(List<String> codes, String query) {
+  final q = query.trim().toLowerCase();
+  if (q.isEmpty) return codes;
+  return codes.where((c) => c.toLowerCase().contains(q)).toList();
+}
+
+// Spec 023 FR-033. One accepted official on the public board. No contact details.
+class BoardMember {
+  final String personaName;
+  final String displayName;
+
+  const BoardMember({required this.personaName, required this.displayName});
+
+  factory BoardMember.fromJson(Map<String, dynamic> json) => BoardMember(
+        personaName: json['personaName'] as String? ?? '',
+        displayName: json['displayName'] as String? ?? '',
+      );
+}
+
+class BoardGroup {
+  final String groupName;
+  final List<BoardMember> members;
+
+  const BoardGroup({required this.groupName, required this.members});
+
+  factory BoardGroup.fromJson(Map<String, dynamic> json) => BoardGroup(
+        groupName: json['groupName'] as String? ?? '',
+        members: (json['members'] as List? ?? const [])
+            .map((m) => BoardMember.fromJson(m as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
+class ElectionBoard {
+  final bool isTest;
+  final List<BoardGroup> groups;
+  // The server sends no turnout while polling is open.
+  final int? ballotsCast;
+  final int? rollSize;
+
+  const ElectionBoard({
+    required this.isTest,
+    required this.groups,
+    this.ballotsCast,
+    this.rollSize,
+  });
+
+  factory ElectionBoard.fromJson(Map<String, dynamic> json) {
+    final turnout = json['turnout'] as Map<String, dynamic>?;
+    return ElectionBoard(
+      isTest: json['isTest'] as bool? ?? false,
+      groups: (json['groups'] as List? ?? const [])
+          .map((g) => BoardGroup.fromJson(g as Map<String, dynamic>))
+          .toList(),
+      ballotsCast: turnout?['ballotsCast'] as int?,
+      rollSize: turnout?['rollSize'] as int?,
+    );
+  }
+}
+
+// A two-person step waiting for a second official (37.13h).
+class ElectionApproval {
+  final int id;
+  final int electionId;
+  final String action;
+  final String requestedBy;
+  final DateTime requestedAt;
+  final DateTime expiresAt;
+  final DateTime? approvedAt;
+  // True when the caller asked for it. The server flags it, so the screen
+  // never offers Approve on the caller's own request.
+  final bool requestedByMe;
+
+  const ElectionApproval({
+    required this.id,
+    required this.electionId,
+    required this.action,
+    required this.requestedBy,
+    required this.requestedAt,
+    required this.expiresAt,
+    this.approvedAt,
+    this.requestedByMe = false,
+  });
+
+  factory ElectionApproval.fromJson(Map<String, dynamic> json) =>
+      ElectionApproval(
+        id: json['id'] as int,
+        electionId: json['electionId'] as int,
+        action: json['action'] as String? ?? '',
+        requestedBy: json['requestedBy'] as String? ?? '',
+        requestedAt: DateTime.parse(json['requestedAt'] as String),
+        expiresAt: DateTime.parse(json['expiresAt'] as String),
+        approvedAt: json['approvedAt'] == null
+            ? null
+            : DateTime.parse(json['approvedAt'] as String),
+        requestedByMe: json['requestedByMe'] as bool? ?? false,
+      );
+}
+
 class ElectionService {
   final Dio _dio;
   ElectionService(this._dio);
@@ -349,6 +689,10 @@ class ElectionService {
     required DateTime pollingOpensOn,
     required DateTime pollingClosesOn,
     String? description,
+    bool isTest = false,
+    ElectionTieRule tieRule = ElectionTieRule.drawingLots,
+    DateTime? scrutinyOn,
+    DateTime? withdrawalClosesOn,
   }) async {
     final response = await _dio.post('/admin/elections', data: {
       'title': title,
@@ -361,6 +705,11 @@ class ElectionService {
       'pollingClosesOn': AppUtils.toWire(pollingClosesOn, includeTime: true),
       if (description != null && description.isNotEmpty)
         'description': description,
+      'isTest': isTest,
+      'tieRule': tieRule.wire,
+      if (scrutinyOn != null) 'scrutinyOn': AppUtils.toWire(scrutinyOn),
+      if (withdrawalClosesOn != null)
+        'withdrawalClosesOn': AppUtils.toWire(withdrawalClosesOn),
     });
     return AdminElection.fromJson(response.data as Map<String, dynamic>);
   }
@@ -376,6 +725,18 @@ class ElectionService {
     final response = await _dio.get('/elections/current');
     if (response.statusCode == 204 || response.data == null) return null;
     return ElectionSummary.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  // Anonymous route. The newest declared or archived election, null on a 404.
+  // /elections/current has no election once one is declared, so results use this.
+  Future<ElectionSummary?> getLatestDeclared() async {
+    try {
+      final response = await _dio.get('/elections/latest-declared');
+      return ElectionSummary.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return null;
+      rethrow;
+    }
   }
 
   Future<ElectionSummary> get(int id) async {
@@ -407,6 +768,69 @@ class ElectionService {
     return (response.data as Map<String, dynamic>)['trackingCode'] as String;
   }
 
+  // Anonymous route. Null when the server answers 404.
+  Future<ElectionBoard?> getBoard(int id) async {
+    try {
+      final response = await _dio.get('/elections/$id/board');
+      return ElectionBoard.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return null;
+      rethrow;
+    }
+  }
+
+  Future<Ballot> getBallot(int id) async {
+    final response = await _dio.get('/elections/$id/ballot');
+    return Ballot.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  // Null while the result is not declared (the server answers 404).
+  Future<ElectionResults?> getResults(int id) async {
+    try {
+      final response = await _dio.get('/elections/$id/results');
+      return ElectionResults.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return null;
+      rethrow;
+    }
+  }
+
+  // Each inner list is one ballot's choices for the seat. Null until Declared, or when the
+  // organisation does not publish them (404).
+  Future<Map<int, List<List<int>>>?> getOpenedBallots(int id) async {
+    try {
+      final response = await _dio.get('/elections/$id/opened-ballots');
+      final seats = (response.data as Map<String, dynamic>)['seats'] as List<dynamic>;
+      return {
+        for (final s in seats.cast<Map<String, dynamic>>())
+          s['electionSeatId'] as int: [
+            for (final b in s['ballots'] as List<dynamic>)
+              (b as List<dynamic>).cast<int>()
+          ]
+      };
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return null;
+      rethrow;
+    }
+  }
+
+  // Null when the chain is whole, otherwise the first broken entry number.
+  Future<int?> firstBrokenAuditEntry(int id) async {
+    final response = await _dio.get('/elections/$id/audit/verify');
+    return (response.data as Map<String, dynamic>)['firstBrokenSeq'] as int?;
+  }
+
+  // Null until the count has run (404).
+  Future<List<String>?> getTrackingCodes(int id) async {
+    try {
+      final response = await _dio.get('/elections/$id/tracking-codes');
+      return (response.data as List<dynamic>).map((c) => c.toString()).toList();
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return null;
+      rethrow;
+    }
+  }
+
   Future<bool> withdrawNomination(int nominationId) async {
     final response =
         await _dio.post('/elections/nominations/$nominationId/withdraw');
@@ -421,6 +845,11 @@ class ElectionService {
   Future<int> freezeVoterRoll(int id) async =>
       (await _dio.post('/elections/$id/voter-roll/freeze')).data['count']
           as int;
+  // 37.12q. Throws the frozen roll away. The server refuses after nominations
+  // open, inside the cutoff window, or once a nomination exists.
+  Future<int> unfreezeVoterRoll(int id, String reason) async => (await _dio
+          .post('/elections/$id/voter-roll/unfreeze', data: {'reason': reason}))
+      .data['removed'] as int;
   // The first count needs the returning officer's key file, which only the
   // web admin can read. After that this returns the stored results. With no
   // key the server never counts or asks a second person to approve (37.13h).
@@ -487,6 +916,20 @@ class ElectionService {
         .toList();
   }
 
+  // 37.13h. The list needs step-up; StepUpInterceptor asks for the code.
+  Future<List<ElectionApproval>> getApprovals(int electionId) async {
+    final response = await _dio.get('/elections/$electionId/approvals');
+    return (response.data as List)
+        .map((item) => ElectionApproval.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> approve(int approvalId) =>
+      _dio.post('/elections/approvals/$approvalId/approve', data: {});
+
+  Future<void> reject(int approvalId, String? reason) => _dio
+      .post('/elections/approvals/$approvalId/reject', data: {'reason': reason});
+
   // 37.13z. Every call needs step-up. A 204 means nothing is open.
   Future<ElectionRulesUnlock?> getRulesUnlock() async {
     final response = await _dio.get('/admin/elections/rules-unlock');
@@ -514,6 +957,17 @@ final currentElectionProvider =
     return await service.getCurrent();
   } on DioException catch (e) {
     service.logFailure('getCurrent', e);
+    rethrow;
+  }
+});
+
+final latestDeclaredElectionProvider =
+    FutureProvider.autoDispose<ElectionSummary?>((ref) async {
+  final service = ref.read(electionServiceProvider);
+  try {
+    return await service.getLatestDeclared();
+  } on DioException catch (e) {
+    service.logFailure('getLatestDeclared', e);
     rethrow;
   }
 });

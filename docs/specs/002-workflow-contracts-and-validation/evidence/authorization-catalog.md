@@ -330,6 +330,7 @@ Base policy: `ElectionStaff`: SuperAdmin, Admin or ElectionOfficial.
 | POST | `/api/elections/{id:int}/phase` | `ElectionsController.SetPhase` (line 55) |  |
 | POST | `/api/elections/{id:int}/seats` | `ElectionsController.AddSeat` (line 70) |  |
 | POST | `/api/elections/{id:int}/voter-roll/freeze` | `ElectionsController.FreezeRoll` (line 78) |  |
+| POST | `/api/elections/{id:int}/voter-roll/unfreeze` | `ElectionsController.UnfreezeRoll` |  |
 
 ### 3.11 AdminOnly
 

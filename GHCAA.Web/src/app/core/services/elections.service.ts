@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import {
-    AdminElectionDto, AdminElectionStepResult, AppointRequest, CastBallotDto, ElectionApprovalDto, CastBallotResultDto, CreateElectionRequest, ElectionAppointmentDto, ElectionPhase,
+    AdminElectionDto, AdminElectionStepResult, ElectionBoardDto, ElectionAuditEntryDto, ElectionAuditVerifyDto, OpenedBallotsDto, BallotViewDto, PublicElectionResultsDto, AppointRequest, CastBallotDto, ElectionApprovalDto, CastBallotResultDto, CreateElectionRequest, ElectionAppointmentDto, ElectionPhase,
     ElectionCountStepResult, ElectionResultDto, ElectionRulesUnlockDto, ElectionSummaryDto,
     NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto
 } from '../models/election.models';
@@ -12,6 +12,8 @@ import {
 @Injectable({ providedIn: 'root' })
 export class ElectionsService {
     private http = inject(HttpClient);
+    // A 404 on the public result calls means "not yet", so the page explains it instead of a toast.
+    private readonly quietHeaders = new HttpHeaders().set('X-Skip-Error-Notify', 'true');
 
     getDocumentText(url: string): Observable<string> {
         return this.http.get(url, { responseType: 'text' });
@@ -21,8 +23,18 @@ export class ElectionsService {
         return this.http.get<ElectionSummaryDto | null>(API_ENDPOINTS.ELECTIONS.CURRENT);
     }
 
+    // Anonymous. The newest declared or archived election. A 404 means none has been declared yet.
+    getLatestDeclared(): Observable<ElectionSummaryDto> {
+        return this.http.get<ElectionSummaryDto>(API_ENDPOINTS.ELECTIONS.LATEST_DECLARED, { headers: this.quietHeaders });
+    }
+
     getById(id: number): Observable<ElectionSummaryDto> {
         return this.http.get<ElectionSummaryDto>(`${API_ENDPOINTS.ELECTIONS.BASE}/${id}`);
+    }
+
+    // Anonymous. A 404 means the election does not exist, so the page just hides the board.
+    getBoard(id: number): Observable<ElectionBoardDto> {
+        return this.http.get<ElectionBoardDto>(API_ENDPOINTS.ELECTIONS.BOARD(id), { headers: this.quietHeaders });
     }
 
     getAdminElections(): Observable<AdminElectionDto[]> {
@@ -77,6 +89,10 @@ export class ElectionsService {
         return this.http.post<{ count: number }>(API_ENDPOINTS.ELECTIONS.FREEZE_VOTER_ROLL(id), {});
     }
 
+    unfreezeVoterRoll(id: number, reason: string): Observable<{ removed: number }> {
+        return this.http.post<{ removed: number }>(API_ENDPOINTS.ELECTIONS.UNFREEZE_VOTER_ROLL(id), { reason });
+    }
+
     getNominations(id: number): Observable<NominationViewDto[]> {
         return this.http.get<NominationViewDto[]>(API_ENDPOINTS.ELECTIONS.NOMINATIONS(id));
     }
@@ -95,6 +111,35 @@ export class ElectionsService {
 
     castBallot(id: number, request: CastBallotDto): Observable<CastBallotResultDto> {
         return this.http.post<CastBallotResultDto>(API_ENDPOINTS.ELECTIONS.VOTE(id), request);
+    }
+
+    getBallot(id: number): Observable<BallotViewDto> {
+        return this.http.get<BallotViewDto>(API_ENDPOINTS.ELECTIONS.BALLOT(id));
+    }
+
+    // Anonymous. 404 until Declared, or when the organisation does not publish per-seat ballots.
+    getOpenedBallots(id: number): Observable<OpenedBallotsDto> {
+        return this.http.get<OpenedBallotsDto>(API_ENDPOINTS.ELECTIONS.OPENED_BALLOTS(id), { headers: this.quietHeaders });
+    }
+
+    // Anonymous. Names the first broken audit entry when the chain fails.
+    verifyAudit(id: number): Observable<ElectionAuditVerifyDto> {
+        return this.http.get<ElectionAuditVerifyDto>(API_ENDPOINTS.ELECTIONS.AUDIT_VERIFY(id), { headers: this.quietHeaders });
+    }
+
+    // Officials with the ViewAudit permission.
+    getAudit(id: number): Observable<ElectionAuditEntryDto[]> {
+        return this.http.get<ElectionAuditEntryDto[]>(API_ENDPOINTS.ELECTIONS.AUDIT(id));
+    }
+
+    // Anonymous. The server answers 404 until the result is declared.
+    getPublicResults(id: number): Observable<PublicElectionResultsDto> {
+        return this.http.get<PublicElectionResultsDto>(API_ENDPOINTS.ELECTIONS.RESULTS(id), { headers: this.quietHeaders });
+    }
+
+    // Anonymous. The server answers 404 until the count has run.
+    getTrackingCodes(id: number): Observable<string[]> {
+        return this.http.get<string[]>(API_ENDPOINTS.ELECTIONS.TRACKING_CODES(id), { headers: this.quietHeaders });
     }
 
     setBallotKey(id: number, publicKey: string): Observable<AdminElectionStepResult> {
@@ -117,6 +162,11 @@ export class ElectionsService {
 
     declare(id: number): Observable<void> {
         return this.http.post<void>(API_ENDPOINTS.ELECTIONS.DECLARE(id), {});
+    }
+
+    // FR-050. Needs a step-up. 409 when it was already recorded, 400 before the declare.
+    keyDestroyed(id: number): Observable<void> {
+        return this.http.post<void>(API_ENDPOINTS.ELECTIONS.KEY_DESTROYED(id), {});
     }
 
     getOfficialDocument(id: number, formCode: string): Observable<Blob> {

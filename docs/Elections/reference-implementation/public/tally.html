@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Count the votes</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main>
+    <nav><a href="admin.html">Set up</a><a href="vote.html">Vote</a><a href="tally.html">Count</a></nav>
+    <h1>Count the votes</h1>
+
+    <section class="card">
+        <label for="user">Signed in as</label>
+        <input id="user" type="text" value="returning.officer">
+        <label for="election-id">Election number</label>
+        <input id="election-id" type="number" min="1" value="1">
+    </section>
+
+    <section class="card">
+        <div id="dropzone" class="dropzone" tabindex="0">Drop the key file here, or click to choose it.</div>
+        <input id="file" type="file" accept=".pem" class="hidden">
+        <p id="file-name" class="mono"></p>
+        <p><button id="tally" class="danger" disabled>Count the ballots</button></p>
+        <div id="status" class="status hidden"></div>
+    </section>
+
+    <section id="chart-card" class="card hidden">
+        <h2>Result</h2>
+        <div id="chart"></div>
+        <p id="summary"></p>
+    </section>
+</main>
+<script type="module" src="tally.mjs"></script>
+</body>
+</html>

@@ -15,6 +15,9 @@ namespace GHCAA.Application.Interfaces
         // Backs AuthController's refresh/step-up flows: loading the current user by id (with
         // Roles, and optionally Member) and the username fallback used when SetAuthCookiesAsync
         // can't resolve the id from the JWT claim yet.
+        // 37.12g. True when the user is a non-member election official with no live appointment left.
+        // Their access is ended before it returns, and the caller must refuse the sign-in or refresh.
+        Task<bool> EndExpiredOfficialAccessAsync(User user, CancellationToken cancellationToken = default);
         Task<User?> GetUserWithRolesAsync(int userId, CancellationToken cancellationToken = default);
         Task<User?> GetUserWithRolesAndMemberAsync(int userId, CancellationToken cancellationToken = default);
         Task<User?> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default);

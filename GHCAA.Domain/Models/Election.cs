@@ -19,6 +19,8 @@ public class Election
     public DateTime PollingClosesOn { get; set; }
     public DateTime? DeclaredOn { get; set; }
     public ElectionTieRule TieRule { get; set; } = ElectionTieRule.DrawingLots;
+    // Spec 023 FR-047 (37.13d). A rehearsal run. Public reads hide it and Declare writes no ECMember rows.
+    public bool IsTest { get; set; }
     // The returning officer's public key (SPKI, base64). Choices are sealed under it at cast and
     // only the officer's private key, brought to the count, opens them.
     public string? BallotPublicKey { get; set; }
@@ -147,6 +149,9 @@ public class Nomination
     public NominationStatus Status { get; set; } = NominationStatus.Submitted;
     public DateTime SubmittedAt { get; set; }
     public DateTime? WithdrawnAt { get; set; }
+    // Spec 023 FR-046 (37.13b). Place on the ballot within the seat, set once when the election
+    // enters CandidateList. Null for nominations made before that change.
+    public int? BallotOrder { get; set; }
     public Election? Election { get; set; }
     public ElectionSeat? ElectionSeat { get; set; }
 }
@@ -237,4 +242,19 @@ public class ElectionRulesUnlock
     public DateTime? ClosedAt { get; set; }
 
     public bool IsOpenAt(DateTime now) => ClosedAt == null && ExpiresAt > now;
+}
+
+// Spec 023 FR-048 (37.13a). One link in an election's hash chain. It never holds a voter. Hash is
+// SHA-256 over the previous hash, Seq, At, Action and DetailJson, so a changed or removed row shows.
+public class ElectionAuditEntry
+{
+    public int Id { get; set; }
+    public int ElectionId { get; set; }
+    public int Seq { get; set; }
+    public DateTime At { get; set; }
+    public int? ActorUserId { get; set; }
+    public string Action { get; set; } = string.Empty;
+    public string DetailJson { get; set; } = "{}";
+    public string PrevHash { get; set; } = string.Empty;
+    public string Hash { get; set; } = string.Empty;
 }

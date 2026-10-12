@@ -33,11 +33,10 @@ wrote them, not a model. This applies to every new or edited comment/doc/TODO, i
   (`// ===== SECTION =====`) unless the surrounding file already uses that convention.
 - TODOs name the actual gap and, where known, why it's not done yet — not a vague "TODO: improve this".
 - Don't add a comment just to prove a change was made ("// updated per review", "// fixed bug here").
-- This applies retroactively too: when a file is touched for any reason, clean up any AI-sounding
-  comments/docs/TODOs you pass over in it, not just the lines you're actively changing.
-  Git history already carries that.
-- When editing a file, match whatever comment style already exists there before applying this rule to
-  new lines — don't rewrite untouched comments just to align tone.
+- Existing comments: rewrite one only if it is wrong, out of date after your change, or sounds
+  machine-written and sits on a line or block you are already editing. Leave every other comment alone.
+  When you do rewrite, make it specific and short, but enough to understand.
+- Match the comment style already in the file before applying this rule to new lines.
 
 # Documentation book (docs/book/)
 

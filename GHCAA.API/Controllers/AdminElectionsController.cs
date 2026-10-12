@@ -53,7 +53,7 @@ public sealed class AdminElectionsController(IElectionService service, IElection
         if (!int.TryParse(this.CurrentMemberIdRaw(), out var memberId))
             return Unauthorized();
 
-        var created = await service.CreateAsync(new CreateElectionDto(
+        var (created, error) = await service.CreateAsync(new CreateElectionDto(
             request.Title,
             request.ECPeriodId,
             request.NominationOpensOn,
@@ -61,7 +61,12 @@ public sealed class AdminElectionsController(IElectionService service, IElection
             request.PollingOpensOn,
             request.PollingClosesOn,
             memberId,
-            request.TieRule), ct);
+            request.TieRule,
+            request.IsTest,
+            request.ScrutinyOn,
+            request.WithdrawalClosesOn), ct);
+        if (created is null)
+            return Problem(detail: ElectionsController.CreateErrorDetail(error), statusCode: StatusCodes.Status400BadRequest);
 
         foreach (var position in request.Positions ?? Array.Empty<AdminElectionPositionRequest>())
         {
@@ -96,7 +101,7 @@ public sealed class AdminElectionsController(IElectionService service, IElection
         if (run.Error is null) return Ok(await DetailAsync(id, ct));
         return run.Error switch
         {
-            "not-found" => NotFound(),
+            Elections.Replies.NotFound => NotFound(),
             "phase-closed" => Problem(detail: "The key cannot change once polling has opened.", statusCode: StatusCodes.Status400BadRequest),
             _ => Problem(detail: $"The key must be an RSA public key of at least {Elections.BallotKeyMinBits} bits.", statusCode: StatusCodes.Status400BadRequest),
         };

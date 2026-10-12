@@ -33,7 +33,7 @@ namespace GHCAA.Application.DTOs
         // Decision 1: off by default, an emergency switch only.
         public bool SuperAdminActsAlone { get; init; } = false;
         public int ApprovalExpiryHours { get; init; } = 48;
-        // 7-day appeal window plus 14 days for the tribunal (Election Regulations §12).
+        // 7-day appeal window plus 14 days for the tribunal (Election Regulations Articles 5 and 16).
         public int AccessEndsDaysAfterDeclare { get; init; } = 21;
         public int InviteLinkHours { get; init; } = 72;
         // Stored as a name so ConfigJson stays readable; OrgConfigService has no enum converter.
@@ -44,6 +44,9 @@ namespace GHCAA.Application.DTOs
         // 37.13n. Off: any official with Count except the approver may run an approved count.
         // On: only the official who asked for it.
         public bool CountRequesterOnly { get; init; } = false;
+        // 37.12q. The frozen voter roll can be thrown away until this many days before nominations
+        // close, and only while no nomination has been filed.
+        public int UnfreezeCutoffDaysBeforeNominationClose { get; init; } = 2;
     }
 
     public record DocumentEntryDto

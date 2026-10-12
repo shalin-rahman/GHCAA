@@ -162,7 +162,10 @@ safeguard applies.
 20. **A member logs in and confirms their identity with a one-time code** sent to them at the point
     of voting. *Member web and mobile.*
 21. **The member is shown every seat up for election, with every candidate's name and photo**, and
-    chooses a candidate or abstains, seat by seat.
+    chooses a candidate or abstains, seat by seat. Abstaining is a choice the member makes on
+    purpose. A seat left untouched holds back the review step; it is never counted as an
+    abstention. A member who is not eligible is told why before the paper opens, and the server
+    still checks the voter roll when the ballot is cast.
 22. **The member reviews their full set of choices once, then casts the whole ballot in one action.**
     There's no way to submit part of a ballot, or submit it before reviewing it.
 23. **The member receives a receipt**: their marked ballot plus a personal tracking code, theirs to
@@ -256,6 +259,11 @@ green is everything after the result is fixed.
 
 The rules freeze (stage F) is not a status of its own. It runs from an open-polling request waiting
 for approval, through Polling and Counting, so it covers the whole of the amber part.
+
+The candidate order on the ballot is set when the election enters the candidate list stage,
+shuffled or by name as the `CandidateOrder` setting says, and it does not change after that.
+An election created as a test run goes through every stage, but the public never sees it and
+declaring it puts nobody on the committee.
 
 ### 4.2 Which role writes which record, and when
 

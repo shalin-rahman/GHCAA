@@ -31,6 +31,14 @@ describe('ElectionsService', () => {
         request.flush(ELECTION);
     });
 
+    it('gets the latest declared election and skips the error toast', () => {
+        service.getLatestDeclared().subscribe(value => expect(value).toEqual(ELECTION));
+        const request = http.expectOne(API_ENDPOINTS.ELECTIONS.LATEST_DECLARED);
+        expect(request.request.method).toBe('GET');
+        expect(request.request.headers.get('X-Skip-Error-Notify')).toBe('true');
+        request.flush(ELECTION);
+    });
+
     it('casts the whole ballot in one request and returns the tracking code', () => {
         const ballot: CastBallotDto = { seats: [{ electionSeatId: 1, nominationIds: [5] }, { electionSeatId: 2, nominationIds: [] }] };
         let code: string | undefined;
@@ -48,6 +56,14 @@ describe('ElectionsService', () => {
         const request = http.expectOne(API_ENDPOINTS.ELECTIONS.COUNT(ELECTION.id));
         expect(request.request.method).toBe('POST');
         request.flush(results);
+    });
+
+    it('sends the reason when the voter roll is unfrozen', () => {
+        service.unfreezeVoterRoll(ELECTION.id, 'Wrong roll').subscribe(value => expect(value.removed).toBe(3));
+        const request = http.expectOne(API_ENDPOINTS.ELECTIONS.UNFREEZE_VOTER_ROLL(ELECTION.id));
+        expect(request.request.method).toBe('POST');
+        expect(request.request.body).toEqual({ reason: 'Wrong roll' });
+        request.flush({ removed: 3 });
     });
 
     it('sends the returning officer key with the first count', () => {
@@ -101,6 +117,37 @@ describe('ElectionsService', () => {
         const request = http.expectOne(API_ENDPOINTS.ADMIN_ELECTIONS.BASE);
         expect(request.request.method).toBe('GET');
         request.flush([ADMIN_ELECTION]);
+    });
+
+    it('reads the ballot, the declared results and the tracking codes', () => {
+        service.getBallot(12).subscribe();
+        const ballot = http.expectOne(API_ENDPOINTS.ELECTIONS.BALLOT(12));
+        expect(ballot.request.method).toBe('GET');
+        ballot.flush({});
+
+        service.getPublicResults(12).subscribe();
+        const results = http.expectOne(API_ENDPOINTS.ELECTIONS.RESULTS(12));
+        expect(results.request.headers.has('X-Skip-Error-Notify')).toBe(true);
+        results.flush({});
+
+        service.getOpenedBallots(12).subscribe();
+        const opened = http.expectOne(API_ENDPOINTS.ELECTIONS.OPENED_BALLOTS(12));
+        expect(opened.request.method).toBe('GET');
+        expect(opened.request.headers.has('X-Skip-Error-Notify')).toBe(true);
+        opened.flush({ electionId: 12, seats: [] });
+
+        service.verifyAudit(12).subscribe();
+        const verify = http.expectOne(API_ENDPOINTS.ELECTIONS.AUDIT_VERIFY(12));
+        expect(verify.request.headers.has('X-Skip-Error-Notify')).toBe(true);
+        verify.flush({ ok: true, entries: 0, firstBrokenSeq: null });
+
+        service.getAudit(12).subscribe();
+        http.expectOne(API_ENDPOINTS.ELECTIONS.AUDIT(12)).flush([]);
+
+        service.getTrackingCodes(12).subscribe();
+        const codes = http.expectOne(API_ENDPOINTS.ELECTIONS.TRACKING_CODES(12));
+        expect(codes.request.headers.has('X-Skip-Error-Notify')).toBe(true);
+        codes.flush([]);
     });
 
     it('creates an election through the admin route', () => {

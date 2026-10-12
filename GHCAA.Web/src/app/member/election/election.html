@@ -7,51 +7,103 @@
         <app-loading-panel label="Loading election..."></app-loading-panel>
     } @else if (error()) {
         <div class="empty-state"><h2>Election unavailable</h2><p>Try again later.</p></div>
-    } @else if (!election()) {
+    } @else if (!election() || !ballot()) {
         <div class="empty-state"><h2>No election is open</h2><p>The election commission has not opened voting.</p></div>
-    } @else if (seatBallots().length === 0) {
+    } @else if (seats().length === 0) {
         <div class="empty-state"><h2>No accepted candidates yet</h2><p>Candidates appear here once scrutiny is complete.</p></div>
     } @else {
-        @if (trackingCode()) {
-            <div class="glass-card">
+        @if (receipt(); as r) {
+            <div class="glass-card stack gap-2 no-print">
                 <h2>Your ballot was recorded</h2>
-                <p>Tracking code: <strong>{{ trackingCode() }}</strong></p>
+                <p>Tracking code: <strong>{{ r.trackingCode }}</strong></p>
                 <p class="text-muted">Keep this code. It shows your ballot was counted and does not show who cast it.</p>
+                <div>
+                    <button type="button" class="btn btn-primary" (click)="printReceipt()">Print receipt</button>
+                    <p class="text-muted">You can print the receipt only on this screen. Once you leave it, it cannot be shown again.</p>
+                </div>
+            </div>
+            <div class="vote-receipt glass-card stack gap-2">
+                <h2>{{ r.title }}</h2>
+                <p>Date: {{ r.date }}</p>
+                <p>Tracking code: <strong>{{ r.trackingCode }}</strong></p>
+                @for (line of r.lines; track line.position) {
+                    <p><strong>{{ line.position }}:</strong> {{ line.names.length ? line.names.join(', ') : 'Abstained' }}</p>
+                }
             </div>
         } @else if (alreadyVoted()) {
             <div class="glass-card"><p class="text-muted">You have already voted in this election.</p></div>
-        } @else if (election()!.phase !== 'Polling') {
+        } @else if (notEligible()) {
+            <div class="glass-card stack gap-2" role="status">
+                <h2>You cannot vote in this election</h2>
+                <p>{{ ballot()!.ineligibilityReason || 'You are not on the voter roll for this election.' }}</p>
+                <p class="text-muted">If you think this is wrong, contact the election commission before polling closes.</p>
+            </div>
+        } @else if (ballot()!.phase !== 'Polling') {
             <p class="text-muted">Voting opens once this election reaches the polling phase.</p>
         }
-        @if (election()!.ballotKeyFingerprint) {
-            <p class="text-muted">Ballots are sealed with the returning officer's key. Its fingerprint is <code>{{ election()!.ballotKeyFingerprint }}</code>. It should match the one the commission announced.</p>
+        @if (onTheRoll()) {
+            <p class="text-muted" id="roll-status">You are on the roll.
+                @if (alreadyVoted() || trackingCode()) { You have voted. }</p>
         }
-        <div class="stack gap-6">
-            @for (seat of seatBallots(); track seat.seatId) {
-                <div class="glass-card">
-                    <h2>Seat {{ seat.seatId }}</h2>
-                    <div class="stack gap-2">
-                        @for (nomination of seat.nominations; track nomination.id) {
-                            <button type="button" class="btn text-left"
-                                [class.btn-primary]="isChosen(seat.seatId, nomination.id)"
-                                [class.btn-outline]="!isChosen(seat.seatId, nomination.id)"
-                                [attr.aria-pressed]="isChosen(seat.seatId, nomination.id)"
-                                [disabled]="closed"
-                                (click)="choose(seat.seatId, nomination.id)">
-                                {{ nomination.statement }}
-                            </button>
-                        }
-                    </div>
-                    @if (!closed && !choices()[seat.seatId]) {
-                        <p class="text-muted">No choice yet. This seat will be left blank.</p>
-                    }
+        @if (fingerprint) {
+            <p class="text-muted">Ballots are sealed with the returning officer's key. Its fingerprint is <code>{{ fingerprint }}</code>. It should match the one the commission announced.</p>
+        }
+        @if (!closed && step() === 'review') {
+            <div class="glass-card stack gap-2">
+                <h2>Review your ballot</h2>
+                @for (line of reviewLines(); track line.position) {
+                    <p><strong>{{ line.position }}:</strong> {{ line.names.length ? line.names.join(', ') : 'Abstained' }}</p>
+                }
+                <p class="text-muted">You cannot change your vote after you confirm.</p>
+                <div class="flex gap-2">
+                    <button type="button" class="btn btn-outline" [disabled]="submitting()" (click)="backToPaper()">Back</button>
+                    <button type="button" class="btn btn-primary" [disabled]="submitting()" (click)="confirm()">
+                        {{ submitting() ? 'Recording...' : 'Confirm and cast ballot' }}
+                    </button>
                 </div>
-            }
-            @if (!closed) {
-                <button type="button" class="btn btn-primary" [disabled]="submitting()" (click)="submit()">
-                    {{ submitting() ? 'Recording...' : 'Cast ballot' }}
-                </button>
-            }
-        </div>
+            </div>
+        } @else if (!receipt()) {
+            <div class="stack gap-6">
+                @for (seat of seats(); track seat.seatId) {
+                    <div class="glass-card" role="group" [attr.aria-labelledby]="'seat-title-' + seat.seatId">
+                        <h2 [id]="'seat-title-' + seat.seatId">{{ seat.positionTitle }}</h2>
+                        <p class="text-muted">{{ seat.places === 1 ? 'Choose one candidate.' : pickUpTo(seat.places) }}</p>
+                        <div class="stack gap-2">
+                            @for (candidate of seat.candidates; track candidate.nominationId) {
+                                <label class="flex gap-2 items-center">
+                                    <input [type]="seat.places === 1 ? 'radio' : 'checkbox'"
+                                        [name]="'seat-' + seat.seatId"
+                                        [checked]="isPicked(seat.seatId, candidate.nominationId)"
+                                        [disabled]="closed || atLimit(seat, candidate.nominationId)"
+                                        (click)="toggle(seat, candidate.nominationId)">
+                                    @if (candidate.photoUrl) {
+                                        <img [src]="candidate.photoUrl" [alt]="candidate.name" width="48" height="48">
+                                    }
+                                    <span><strong>{{ candidate.name }}</strong>
+                                        @if (candidate.statement) { <br><small class="text-muted">{{ candidate.statement }}</small> }
+                                    </span>
+                                </label>
+                            }
+                            <label class="flex gap-2 items-center">
+                                <input type="radio" [name]="'seat-' + seat.seatId"
+                                    [checked]="isAbstained(seat.seatId)" [disabled]="closed"
+                                    [attr.aria-describedby]="'abstain-help-' + seat.seatId"
+                                    (click)="abstain(seat)">
+                                <span><strong>Abstain on this seat</strong><br>
+                                    <small class="text-muted" [id]="'abstain-help-' + seat.seatId">{{ abstainHelp }}</small>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                }
+                @if (!closed) {
+                    <button type="button" class="btn btn-primary" [disabled]="!allDecided()"
+                        [attr.aria-describedby]="allDecided() ? null : 'review-hint'" (click)="review()">Review ballot</button>
+                    @if (!allDecided()) {
+                        <p class="text-muted" id="review-hint">Pick a candidate or abstain on every seat to continue.</p>
+                    }
+                }
+            </div>
+        }
     }
 </section>

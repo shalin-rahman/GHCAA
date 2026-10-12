@@ -244,6 +244,9 @@ export class Login implements OnInit, OnDestroy {
     if (user.role === 'Admin' || user.role === 'SuperAdmin') {
       return this.router.navigate(['/admin/approvals']);
     }
+    if (user.role === 'ElectionOfficial' && !user.memberId) {
+      return this.router.navigate([ROUTES.OFFICIALS_DASHBOARD]);
+    }
     return this.router.navigate([ROUTES.PORTAL_DASHBOARD]);
   }
 

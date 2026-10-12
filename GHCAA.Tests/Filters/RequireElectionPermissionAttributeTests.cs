@@ -126,6 +126,39 @@ public class RequireElectionPermissionAttributeTests
         context.Result.Should().BeOfType<NotFoundResult>();
     }
 
+    // FR-050. The attribute on the action is the one under test, so a changed permission shows up here.
+    [Test]
+    public async Task KeyDestroyed_WithoutPermission_Forbidden()
+    {
+        var attribute = typeof(GHCAA.API.Controllers.ElectionsController).GetMethod("KeyDestroyed")!
+            .GetCustomAttributes(typeof(RequireElectionPermissionAttribute), false).Cast<RequireElectionPermissionAttribute>().Single();
+        _access.Setup(a => a.ElectionIdForAsync(ElectionIdLookup.Election, 3, It.IsAny<CancellationToken>())).ReturnsAsync(3);
+        _access.Setup(a => a.HasAsync(3, 5, It.IsAny<IReadOnlyCollection<string>>(), ElectionPermission.SetBallotKey, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        var context = BuildContext(new RouteValueDictionary { ["id"] = "3" });
+
+        var ran = await RunAsync(attribute, context);
+
+        ran.Should().BeFalse();
+        context.Result.Should().BeOfType<ObjectResult>().Subject.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
+    }
+
+    // The forms hold nominations and tallies, so the action asks for ViewDashboard on the election.
+    [Test]
+    public async Task Document_WithoutViewDashboard_Forbidden()
+    {
+        var attribute = typeof(GHCAA.API.Controllers.ElectionsController).GetMethod("Document")!
+            .GetCustomAttributes(typeof(RequireElectionPermissionAttribute), false).Cast<RequireElectionPermissionAttribute>().Single();
+        attribute.Needed.Should().Be(ElectionPermission.ViewDashboard);
+        _access.Setup(a => a.ElectionIdForAsync(ElectionIdLookup.Election, 3, It.IsAny<CancellationToken>())).ReturnsAsync(3);
+        _access.Setup(a => a.HasAsync(3, 5, It.IsAny<IReadOnlyCollection<string>>(), ElectionPermission.ViewDashboard, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        var context = BuildContext(new RouteValueDictionary { ["id"] = "3" });
+
+        var ran = await RunAsync(attribute, context);
+
+        ran.Should().BeFalse();
+        context.Result.Should().BeOfType<ObjectResult>().Subject.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
+    }
+
     [Test]
     public async Task NoUserId_Returns401()
     {

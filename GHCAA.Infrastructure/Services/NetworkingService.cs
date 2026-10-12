@@ -74,7 +74,7 @@ namespace GHCAA.Infrastructure.Services
                 query = query.Where(m => m.ProfessionalHistory.Any(p => p.IsCurrent && p.Designation.Contains(filter.Designation)));
 
             if (!string.IsNullOrEmpty(filter.ECPosition) && System.Enum.TryParse<Enums.ECPosition>(filter.ECPosition, true, out var pos))
-                query = query.Where(m => m.ECMembers.Any(em => em.Position == pos && em.EndDate == null));
+                query = query.Where(m => m.ECMembers.Any(em => em.Position == pos && em.EndDate == null && em.ECPeriod!.IsActive));
 
             if (!string.IsNullOrEmpty(filter.Category) && System.Enum.TryParse<Enums.MemberCategory>(filter.Category, true, out var cat))
                 query = query.Where(m => m.Category == cat);

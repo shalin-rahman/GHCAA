@@ -3341,6 +3341,304 @@
         }
       }
     },
+    "/api/elections/{id}/board": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionBoardDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionBoardDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionBoardDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/ballot": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BallotViewDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BallotViewDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BallotViewDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/results": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicElectionResultsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicElectionResultsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicElectionResultsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/opened-ballots": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenedBallotsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenedBallotsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenedBallotsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/audit/verify": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionAuditVerifyDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionAuditVerifyDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionAuditVerifyDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/audit": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectionAuditEntryDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectionAuditEntryDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectionAuditEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/tracking-codes": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/elections/current": {
       "get": {
         "tags": [
@@ -3691,6 +3989,35 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/key-destroyed": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "409": {
+            "description": "Conflict"
           }
         }
       }
@@ -7268,6 +7595,48 @@
         }
       }
     },
+    "/api/mentorship/admin/{id}/close": {
+      "post": {
+        "tags": [
+          "Mentorship"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminCloseMentorshipDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminCloseMentorshipDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminCloseMentorshipDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/messaging/recent": {
       "get": {
         "tags": [
@@ -10417,6 +10786,17 @@
         },
         "additionalProperties": false
       },
+      "AdminCloseMentorshipDto": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "maxLength": 400,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "AdminElectionCandidateDto": {
         "type": "object",
         "properties": {
@@ -10551,6 +10931,9 @@
             "type": "boolean"
           },
           "tooFewApprovers": {
+            "type": "boolean"
+          },
+          "isTest": {
             "type": "boolean"
           }
         },
@@ -11058,6 +11441,28 @@
         },
         "additionalProperties": false
       },
+      "BallotCandidateDto": {
+        "type": "object",
+        "properties": {
+          "nominationId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "photoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "statement": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "BallotSeatChoiceDto": {
         "type": "object",
         "properties": {
@@ -11071,6 +11476,70 @@
               "type": "integer",
               "format": "int32"
             },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BallotSeatViewDto": {
+        "type": "object",
+        "properties": {
+          "seatId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "positionTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "places": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BallotCandidateDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BallotViewDto": {
+        "type": "object",
+        "properties": {
+          "electionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "phase": {
+            "$ref": "#/components/schemas/ElectionPhase"
+          },
+          "hasVoted": {
+            "type": "boolean"
+          },
+          "ballotKeyFingerprint": {
+            "type": "string",
+            "nullable": true
+          },
+          "seats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BallotSeatViewDto"
+            },
+            "nullable": true
+          },
+          "isEligible": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "ineligibilityReason": {
+            "type": "string",
             "nullable": true
           }
         },
@@ -11415,6 +11884,19 @@
           },
           "tieRule": {
             "$ref": "#/components/schemas/ElectionTieRule"
+          },
+          "isTest": {
+            "type": "boolean"
+          },
+          "scrutinyOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "withdrawalClosesOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -11538,6 +12020,19 @@
           },
           "tieRule": {
             "$ref": "#/components/schemas/ElectionTieRule"
+          },
+          "isTest": {
+            "type": "boolean"
+          },
+          "scrutinyOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "withdrawalClosesOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -12427,6 +12922,185 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
+          },
+          "requestedByMe": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectionAuditEntryDto": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorUserId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "action": {
+            "type": "string",
+            "nullable": true
+          },
+          "detailJson": {
+            "type": "string",
+            "nullable": true
+          },
+          "hash": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectionAuditVerifyDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "entries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstBrokenSeq": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectionBoardDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "phase": {
+            "$ref": "#/components/schemas/ElectionPhase"
+          },
+          "isTest": {
+            "type": "boolean"
+          },
+          "announcedOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "nominationOpensOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "nominationClosesOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "scrutinyOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "withdrawalClosesOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "pollingOpensOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "pollingClosesOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "declaredOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ElectionBoardGroupDto"
+            },
+            "nullable": true
+          },
+          "turnout": {
+            "$ref": "#/components/schemas/ElectionBoardTurnoutDto"
+          },
+          "keyFingerprint": {
+            "type": "string",
+            "nullable": true
+          },
+          "auditHeadHash": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectionBoardGroupDto": {
+        "type": "object",
+        "properties": {
+          "groupName": {
+            "type": "string",
+            "nullable": true
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ElectionBoardMemberDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectionBoardMemberDto": {
+        "type": "object",
+        "properties": {
+          "personaName": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "acceptedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectionBoardTurnoutDto": {
+        "type": "object",
+        "properties": {
+          "ballotsCast": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rollSize": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -13684,6 +14358,44 @@
         },
         "additionalProperties": false
       },
+      "OpenedBallotsDto": {
+        "type": "object",
+        "properties": {
+          "electionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpenedSeatBallotsDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OpenedSeatBallotsDto": {
+        "type": "object",
+        "properties": {
+          "electionSeatId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ballots": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "OrgConfigDto": {
         "type": "object",
         "properties": {
@@ -14001,7 +14713,7 @@
             "nullable": true
           }
         },
-        "additionalProperties": { }
+        "additionalProperties": {}
       },
       "ProfessionalRecord": {
         "required": [
@@ -14100,6 +14812,100 @@
           },
           "isCurrent": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PublicCandidateResultDto": {
+        "type": "object",
+        "properties": {
+          "nominationId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "voteCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isElected": {
+            "type": "boolean"
+          },
+          "isTie": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PublicElectionResultsDto": {
+        "type": "object",
+        "properties": {
+          "electionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "phase": {
+            "$ref": "#/components/schemas/ElectionPhase"
+          },
+          "declaredOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "eligibleVoters": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ballotsCast": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "spoiledBallots": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicSeatResultDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PublicSeatResultDto": {
+        "type": "object",
+        "properties": {
+          "seatId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "positionTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "places": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "abstentions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicCandidateResultDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false

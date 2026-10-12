@@ -60,7 +60,7 @@ public sealed class ElectionPersonaService(ApplicationDbContext db, IElectionFre
         await freeze.EnsureNotFrozenAsync(Constants.Elections.FrozenRules.Persona, new { id, dto }, ct: ct);
         var entity = await db.ElectionPersonas.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (entity is null)
-            return (false, "not-found", null);
+            return (false, Constants.Elections.Replies.NotFound, null);
         // A row made before the group list existed may hold another group. It can keep it, but
         // cannot be moved to a new one outside the list.
         if (dto.GroupName != entity.GroupName && !IsKnownGroup(dto.GroupName))
@@ -102,7 +102,7 @@ public sealed class ElectionPersonaService(ApplicationDbContext db, IElectionFre
         await freeze.EnsureNotFrozenAsync(Constants.Elections.FrozenRules.Persona, new { id, deleted = true }, ct: ct);
         var entity = await db.ElectionPersonas.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (entity is null)
-            return (false, "not-found");
+            return (false, Constants.Elections.Replies.NotFound);
 
         // Appointments keep their persona for the record, even revoked ones. Deactivate instead.
         if (await db.ElectionAppointments.AnyAsync(x => x.PersonaId == id, ct))

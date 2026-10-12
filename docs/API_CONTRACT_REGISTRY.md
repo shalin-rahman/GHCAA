@@ -47,6 +47,41 @@ a gap someone still needs to close.
 
 ## Log
 
+### 2026-10-11 — GET /api/elections/{id}/documents/{formCode}, GET /api/elections/latest-declared, GET /api/elections/{id}, GET /api/elections/{id}/audit/verify
+- Change: the official PDF route is no longer anonymous. It needs sign-in and the `ViewDashboard` election permission on that election. A new anonymous route `GET /api/elections/latest-declared` returns the newest declared or archived non-test election for the results pages. `GET /api/elections/{id}` and `GET /api/elections/{id}/audit/verify` answer 404 for a test election. The board stays readable for a test election. A test election no longer holds its EC period, so a rehearsal does not block the real election for that period.
+- Reason: Decided 2026-10-11. TODO 37.12l, 37.13d. Spec 023 FR-042 and FR-047.
+- Web and mobile: callers of the PDF route must send the token. Use of `latest-declared` by the results pages is not wired yet.
+
+### 2026-10-10 — GET /api/elections/{id}/board
+- Change: new anonymous route. Returns `id`, `title`, `phase`, `isTest`, the timeline dates, `groups` (group name, then members with persona name, display name and `acceptedAt`), `turnout` (`ballotsCast`, `rollSize`), `keyFingerprint` and `auditHeadHash`. Only accepted, signed appointments on active personas shown on the public board are listed, with no email or phone. `turnout` is null until polling has closed (or during polling when `ShowTurnoutDuringPolling` is on) and while fewer than 10 ballots are cast. `auditHeadHash` is null before Declared. Answers 404 for an unknown election; a test election is readable and has `isTest` true. An archived election still lists the officials ended by the archive.
+- Reason: TODO 37.12i. Spec 023 FR-033.
+- Web: `ElectionBoardDto` and its parts in `core/models/election.models.ts`, `ElectionsService.getBoard`, the "Who runs this election" section in `public/elections`, and the roll and voted lines in `member/election`.
+- Mobile: `ElectionBoard`, `BoardGroup`, `BoardMember` and `ElectionService.getBoard` (null on 404) in `features/elections/election_service.dart`; the officials card in `election_screen.dart`.
+
+### 2026-10-10 — POST /api/admin/elections, POST /api/elections/{id}/vote
+- Change: the create request takes `scrutinyOn` and `withdrawalClosesOn` (date-time, optional). Dates out of phase order (nominations, scrutiny, withdrawals, polling) answer 400 with the detail "The dates must follow the phase order: nominations, scrutiny, withdrawals, then polling." A missing nomination or polling date now answers 400 too ("Set the dates nominations open and close and polling opens and closes."); before, it was stored as year 1. `tieRule` was already accepted and is now sent by both clients. The vote body is unchanged; both clients now send several nomination ids for a seat with more than one place.
+- Reason: TODO 37.1o. Spec 023 FR-018, FR-019, decisions D2 and D3.
+- Web: `CreateElectionRequest.tieRule`, `scrutinyOn` and `withdrawalClosesOn`, and `AdminElectionDto.tieRule`, in `core/models/election.models.ts`, sent by the create form in `admin/elections`, which now also has inputs for the four main dates; the ballot in `member/election` sends every pick.
+- Mobile: `ElectionTieRule` and `ElectionService.create(tieRule:, scrutinyOn:, withdrawalClosesOn:)` in `features/elections/election_service.dart`, sent by the create dialog in `election_management_screen.dart`; the ballot in `election_screen.dart` sends every pick.
+
+### 2026-10-10 — GET /api/elections/{id}/audit/verify, GET /api/elections/{id}/audit, GET /api/elections/{id}/opened-ballots
+- Change: new routes. `audit/verify` is anonymous and returns `ok`, `entries` and `firstBrokenSeq`. `audit` lists the entries for ElectionStaff holding ViewAudit. `opened-ballots` is anonymous and returns, per seat, the nomination ids of each non-spoiled ballot; it answers 404 before Declared, for a test election, or when `PublishPerSeatBallots` is off.
+- Reason: TODO 37.13a and 37.13c. Spec 023 FR-048 and FR-049.
+- Web: `ElectionsService.verifyAudit`, `getAudit` and `getOpenedBallots`, with the models in `core/models/election.models.ts`.
+- Mobile: `ElectionService.firstBrokenAuditEntry` and `getOpenedBallots` in `features/elections/election_service.dart`.
+
+### 2026-10-10 — POST /api/admin/elections, GET /api/admin/elections, GET /api/elections/{id}/results, /document, /tracking-codes, GET /api/elections/{id}/ballot
+- Change: the create request takes `isTest` (boolean, default false) and `AdminElectionDto` returns it. For a test election the anonymous results, documents and tracking-codes reads answer 404, the current-election read leaves it out, and declaring it writes no committee members. The ballot read now lists candidates in the order fixed when the election entered CandidateList; elections made before this keep the order by name. No field was added to the ballot.
+- Reason: TODO 37.13b and 37.13d. Spec 023 FR-046 and FR-047.
+- Web: `CreateElectionRequest.isTest` and `AdminElectionDto.isTest` in `core/models/election.models.ts`, sent by the create form in `admin/elections`, which also marks the row.
+- Mobile: `AdminElection.isTest` and `ElectionService.create(isTest:)` in `features/elections/election_service.dart`, sent by the create dialog in `election_management_screen.dart`, which also marks the card.
+
+### 2026-10-09 — GET /api/elections/{id}/ballot
+- Change: new route, the member's ballot paper. Returns seats by position title, candidates by name, photo and statement, places per seat, `hasVoted`, `ballotKeyFingerprint`, and `isEligible` with `ineligibilityReason`. `isEligible` is null until the roll is frozen. It only warns; `POST /api/elections/{id}/vote` checks the roll again and answers 400 to an ineligible member.
+- Reason: TODO 37.1l and 37.1z. Spec 023 FR-011, FR-014 and FR-044.
+- Web: `ElectionsService.getBallot`, read by `member/election`.
+- Mobile: `ElectionService.getBallot` and `Ballot.fromJson` in `features/elections/election_service.dart`, read by `election_screen.dart`.
+
 ### 2026-10-06 — /api/elections/appointments/{appointmentId}/emergency-revoke, /api/elections/{id}/approvals, /api/elections/approvals/{approvalId}/approve, /api/elections/approvals/{approvalId}/reject
 - Change: new routes. `POST .../emergency-revoke` answers 202 with an approval. Another active official with Approve on that election approves it; a SuperAdmin has no bypass. `GET api/elections/{id}/approvals` lists approvals. `POST approvals/{approvalId}/approve` and `.../reject` answer one. A second open request for the same step is refused.
 - Reason: TODO 37.13, spec 023. An emergency revoke always needs two people.
@@ -184,6 +219,13 @@ a gap someone still needs to close.
 - Reason: Work Package 37.1 requires an auditable eligibility snapshot.
 - Web: phase and voter-roll calls are implemented in the election service; administrative surfaces consume the lifecycle routes.
 - Mobile: the typed election service exposes the shared election contract; voter-roll administration remains an administrative API concern.
+
+### 2026-10-12 — /api/elections/{id}/voter-roll/unfreeze
+- Change: added `POST /api/elections/{id}/voter-roll/unfreeze`. Body `{ reason }` (required, up to 400 characters). Returns `{ removed }`. 404 for an unknown election, 409 when the phase is past Nomination, the cutoff window has passed, or a nomination exists.
+- Reason: TODO 37.12q. A wrongly frozen roll could not be rebuilt.
+- Web: `ElectionsService.unfreezeVoterRoll` and the admin elections page.
+- Mobile: `ElectionService.unfreezeVoterRoll` and the admin election screen.
+- Config: `ElectionSettingsDto.UnfreezeCutoffDaysBeforeNominationClose`, default 2.
 
 ### 2026-09-21 — /api/elections/{id}/seats, /api/elections/{id}/officers
 - Change: added election seat and officer assignment endpoints.

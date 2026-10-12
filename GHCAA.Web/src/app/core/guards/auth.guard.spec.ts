@@ -102,14 +102,22 @@ describe('AuthGuards', () => {
     describe('electionStaffGuard', () => {
         it.each(['SuperAdmin', 'Admin', 'ElectionOfficial'])('FR-39: allows a user holding %s', async (role) => {
             (authServiceMock.hasRole as any).mockImplementation((r: string) => r === role);
-            const result = await runGuard(TestBed.runInInjectionContext(() => electionStaffGuard()));
+            const result = await runGuard(TestBed.runInInjectionContext(() => electionStaffGuard(anyRoute, stateFor('/officials/elections/5'))));
             expect(result).toBe(true);
         });
 
-        it('FR-39: sends a plain member to the login page', async () => {
+        it('FR-39: sends a signed-in plain member to the portal home', async () => {
             (authServiceMock.hasRole as any).mockImplementation((r: string) => r === 'Member');
-            const result = await runGuard(TestBed.runInInjectionContext(() => electionStaffGuard()));
+            const result = await runGuard(TestBed.runInInjectionContext(() => electionStaffGuard(anyRoute, stateFor('/officials/elections/5'))));
+            expect(result).toBe('/portal/dashboard');
+        });
+
+        it('FR-39: sends a signed-out visitor to login with the attempted url', async () => {
+            (authServiceMock.hasRole as any).mockReturnValue(false);
+            (authServiceMock.isAuthenticated as any).mockReturnValue(false);
+            const result = await runGuard(TestBed.runInInjectionContext(() => electionStaffGuard(anyRoute, stateFor('/officials/elections/5'))));
             expect(result).toBe('/login');
+            expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/login'], { queryParams: { returnUrl: '/officials/elections/5' } });
         });
     });
 
@@ -129,6 +137,12 @@ describe('AuthGuards', () => {
             const result = await runGuard(TestBed.runInInjectionContext(() => memberGuard(anyRoute, stateFor('/portal/payments'))));
             expect(result).toBe('/admin/dashboard');
             expect(routerMock.parseUrl).toHaveBeenCalledWith('/admin/dashboard');
+        });
+
+        it('redirects a memberless official to the officials dashboard', async () => {
+            (authServiceMock.currentUser as any).mockReturnValue({ role: 'ElectionOfficial', memberId: undefined });
+            const result = await runGuard(TestBed.runInInjectionContext(() => memberGuard(anyRoute, stateFor('/portal/dashboard'))));
+            expect(result).toBe('/officials');
         });
 
         it('lets a memberless admin through to change-password specifically, to avoid a redirect loop with authGuard', async () => {

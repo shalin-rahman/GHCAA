@@ -25,6 +25,8 @@ namespace GHCAA.Tests.Services
         private Mock<IEmailService> _mockEmail = null!;
         private Mock<ICommunicationService> _mockCommunicationService = null!;
         private Mock<IOrgConfigService> _mockOrgConfigService = null!;
+        private Mock<IElectionAccessService> _mockElectionAccess = null!;
+        private Mock<IElectionAppointmentService> _mockAppointments = null!;
         private AuthService _service = null!;
 
         [SetUp]
@@ -40,7 +42,11 @@ namespace GHCAA.Tests.Services
             _mockOrgConfigService = new Mock<IOrgConfigService>();
             _mockOrgConfigService.Setup(x => x.GetConfigAsync())
                 .ReturnsAsync(new OrgConfigDto { Branding = new BrandingDto { ShortName = "GHCAA" } });
-            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object, _appSettings, _mockHttp.Object, _mockEmail.Object, _mockCommunicationService.Object, _mockOrgConfigService.Object, new SocialAuthConfigService(_context, _mockOrgConfigService.Object));
+            _mockElectionAccess = new Mock<IElectionAccessService>();
+            _mockElectionAccess.Setup(x => x.ElectionIdsWithLiveAppointmentAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Array.Empty<int>());
+            _mockAppointments = new Mock<IElectionAppointmentService>();
+            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object, _appSettings, _mockHttp.Object, _mockEmail.Object, _mockCommunicationService.Object, _mockOrgConfigService.Object, new SocialAuthConfigService(_context, _mockOrgConfigService.Object), _mockElectionAccess.Object, _mockAppointments.Object);
             _service.PasswordResetResponseFloor = TimeSpan.Zero;
         }
 
@@ -474,6 +480,119 @@ namespace GHCAA.Tests.Services
             var result = await _service.GetUserByUsernameAsync("nobody");
 
             result.Should().BeNull();
+        }
+
+        // 37.12g. A login for someone brought in only to run an election, after their access ended.
+        private async Task<User> CreateNonMemberUserAsync(string username, string password, params string[] roleNames)
+        {
+            var user = new User { Username = username, PasswordHash = BCrypt.Net.BCrypt.HashPassword(password), IsActive = true, CreatedAt = DateTime.UtcNow };
+            foreach (var name in roleNames)
+                user.Roles.Add(new Role { Name = name });
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        [Category("FR-39")]
+        [Test]
+        public async Task Login_NonMemberOfficialAfterExpiry_Refused()
+        {
+            await CreateNonMemberUserAsync("officer@e.com", "TestPassword123", Constants.Roles.ElectionOfficial);
+            _mockTokenService.Setup(x => x.CreateToken(It.IsAny<User>())).Returns("jwt");
+
+            var result = await _service.LoginAsync(new LoginDto { Username = "officer@e.com", Password = "TestPassword123" });
+
+            result.Should().BeNull();
+            _mockAppointments.Verify(x => x.EndAccessIfNoneLeftAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Category("FR-39")]
+        [Test]
+        public async Task Login_NonMemberOfficialWithLiveAppointment_Allowed()
+        {
+            var user = await CreateNonMemberUserAsync("officer2@e.com", "TestPassword123", Constants.Roles.ElectionOfficial);
+            _mockElectionAccess.Setup(x => x.ElectionIdsWithLiveAppointmentAsync(user.Id, It.IsAny<CancellationToken>())).ReturnsAsync(new[] { 1 });
+            _mockTokenService.Setup(x => x.CreateToken(It.IsAny<User>())).Returns("jwt");
+
+            var result = await _service.LoginAsync(new LoginDto { Username = "officer2@e.com", Password = "TestPassword123" });
+
+            result.Should().NotBeNull();
+            _mockAppointments.Verify(x => x.EndAccessIfNoneLeftAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Category("FR-39")]
+        [Test]
+        public async Task Login_MemberOfficialAfterExpiry_Allowed()
+        {
+            var member = await CreateAndSaveTestMemberAsync("Member Official", "mo@e.com", "321", "321");
+            var user = await CreateAndSaveTestUserAsync(member.Id, "GHC-2007-0042");
+            user.Roles.Add(new Role { Name = Constants.Roles.ElectionOfficial });
+            await _context.SaveChangesAsync();
+            _mockTokenService.Setup(x => x.CreateToken(It.IsAny<User>())).Returns("jwt");
+
+            var result = await _service.LoginAsync(new LoginDto { Username = "GHC-2007-0042", Password = "TestPassword123" });
+
+            result.Should().NotBeNull();
+            _mockAppointments.Verify(x => x.EndAccessIfNoneLeftAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Category("FR-39")]
+        [Test]
+        public async Task Login_NonMemberAdminWithNoAppointment_Allowed()
+        {
+            await CreateNonMemberUserAsync("sysadmin@e.com", "TestPassword123", Constants.Roles.Admin);
+            _mockTokenService.Setup(x => x.CreateToken(It.IsAny<User>())).Returns("jwt");
+
+            var result = await _service.LoginAsync(new LoginDto { Username = "sysadmin@e.com", Password = "TestPassword123" });
+
+            result.Should().NotBeNull();
+        }
+
+        [Category("FR-39")]
+        [Test]
+        public async Task Refresh_NonMemberOfficialAfterExpiry_Refused()
+        {
+            var user = await CreateNonMemberUserAsync("officer3@e.com", "TestPassword123", Constants.Roles.ElectionOfficial);
+
+            var ended = await _service.EndExpiredOfficialAccessAsync(user);
+
+            ended.Should().BeTrue();
+            _mockAppointments.Verify(x => x.EndAccessIfNoneLeftAsync(user.Id, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Category("FR-39")]
+        [Test]
+        public async Task Refresh_MemberOfficialAfterExpiry_NotEnded()
+        {
+            var member = await CreateAndSaveTestMemberAsync("Member Official 2", "mo2@e.com", "654", "654");
+            var user = await CreateAndSaveTestUserAsync(member.Id, "GHC-2007-0043");
+            user.Roles.Add(new Role { Name = Constants.Roles.ElectionOfficial });
+            await _context.SaveChangesAsync();
+
+            (await _service.EndExpiredOfficialAccessAsync(user)).Should().BeFalse();
+        }
+
+        [Category("FR-39")]
+        [Test]
+        public async Task Login_NonMemberOfficialWithPendingInvite_Allowed()
+        {
+            var user = await CreateNonMemberUserAsync("officer4@e.com", "TestPassword123", Constants.Roles.ElectionOfficial);
+            var period = new ECPeriod { Title = "2027", StartDate = DateTime.UtcNow.AddDays(-1) };
+            _context.ECPeriods.Add(period);
+            await _context.SaveChangesAsync();
+            var election = new Election { Title = "E", ECPeriodId = period.Id, NominationOpensOn = DateTime.UtcNow, NominationClosesOn = DateTime.UtcNow.AddDays(1), PollingOpensOn = DateTime.UtcNow.AddDays(2), PollingClosesOn = DateTime.UtcNow.AddDays(3) };
+            var persona = new ElectionPersona { Name = "Scrutineer", GroupName = "Officials", Description = "d", DeclarationText = "d", IsActive = true };
+            _context.Elections.Add(election);
+            _context.ElectionPersonas.Add(persona);
+            await _context.SaveChangesAsync();
+            _context.ElectionAppointments.Add(new ElectionAppointment { ElectionId = election.Id, PersonaId = persona.Id, UserId = user.Id, DisplayName = "o", Email = "o@e.com", AppointedByUserId = user.Id, AppointedAt = DateTime.UtcNow });
+            await _context.SaveChangesAsync();
+            _mockTokenService.Setup(x => x.CreateToken(It.IsAny<User>())).Returns("jwt");
+
+            var result = await _service.LoginAsync(new LoginDto { Username = "officer4@e.com", Password = "TestPassword123" });
+
+            result.Should().NotBeNull();
+            _mockAppointments.Verify(x => x.EndAccessIfNoneLeftAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }

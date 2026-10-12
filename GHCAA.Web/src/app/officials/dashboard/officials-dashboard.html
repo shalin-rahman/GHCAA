@@ -1,0 +1,117 @@
+<section class="admin-feature">
+    <app-page-header title="Election officials" emptySubtitle="Your election appointments"></app-page-header>
+
+    @if (loading()) {
+        <app-loading-panel label="Loading elections..."></app-loading-panel>
+    } @else if (error()) {
+        <div class="empty-state"><h2>Elections unavailable</h2><p>Try again later.</p></div>
+    } @else if (list().length === 0) {
+        <div class="empty-state">
+            <h2>No elections</h2>
+            <p>You have no live election appointment.</p>
+            <a routerLink="/officials/my-appointments" class="btn btn-outline">My appointments</a>
+        </div>
+    } @else {
+        @if (list().length > 1) {
+            <div class="form-group">
+                <label for="officials-election">Election</label>
+                <select id="officials-election" class="form-control" (change)="select(+$any($event.target).value)">
+                    @for (e of list(); track e.id) {
+                        <option [value]="e.id" [selected]="e.id === selectedId()">{{ e.title }}</option>
+                    }
+                </select>
+            </div>
+        }
+
+        @if (selected(); as election) {
+            <div class="flex flex-col gap-2">
+                <div class="glass-card" data-card="phase">
+                    <h2>{{ election.title }}</h2>
+                    <span class="status-badge" [class]="getElectionPhaseClass(election.phase)">{{ getElectionPhaseLabel(election.phase) }}</span>
+                    @if (election.pollingOpensOn) {
+                        <p class="text-muted">Polling {{ election.pollingOpensOn | date: 'medium' }} to {{ election.pollingClosesOn | date: 'medium' }}.</p>
+                    }
+                    <a [routerLink]="['/officials/elections', election.id]" class="btn btn-primary btn-sm">Open election</a>
+                </div>
+
+                @if (can('ViewDashboard')) {
+                    <div class="glass-card" data-card="approvals">
+                        <h2>Open approvals</h2>
+                        @if (approvals() === null) {
+                            <button type="button" class="btn btn-outline btn-sm" (click)="loadApprovals()">Load approvals</button>
+                        } @else if (approvals()!.length === 0) {
+                            <p class="text-muted">Nothing is waiting for approval.</p>
+                        } @else {
+                            @for (a of approvals(); track a.id) {
+                                <div class="flex justify-between items-center" data-row="approval">
+                                    <span>{{ approvalLabels[a.action] }}, asked for by {{ a.requestedBy }}. Expires {{ a.expiresAt | date: 'medium' }}.</span>
+                                    @if (canApprove(a)) {
+                                        <span class="flex gap-2">
+                                            <button type="button" class="btn btn-primary btn-sm" [disabled]="decidingId() === a.id" (click)="approve(a)">Approve</button>
+                                            <button type="button" class="btn btn-outline btn-sm" [disabled]="decidingId() === a.id" (click)="reject(a)">Reject</button>
+                                        </span>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+
+                @if (can('DecideNominations')) {
+                    <div class="glass-card" data-card="nominations">
+                        <h2>Nominations waiting</h2>
+                        <p>{{ waitingNominations() }}</p>
+                    </div>
+                }
+
+                @if (showKeyCard()) {
+                    <div class="glass-card" data-card="key">
+                        <h2>Ballot key</h2>
+                        @if (election.ballotKeyFingerprint) {
+                            <p>Fingerprint <code>{{ election.ballotKeyFingerprint }}</code></p>
+                        } @else {
+                            <p class="text-muted">No key set yet.</p>
+                        }
+                        @if (showDestroyKey()) {
+                            <label class="flex gap-2">
+                                <input type="checkbox" (change)="markKeyDestroyed($any($event.target))">
+                                I destroyed the key file after the declare
+                            </label>
+                        }
+                    </div>
+                }
+
+                @if (can('ViewDashboard')) {
+                    <div class="glass-card" data-card="roll">
+                        <h2>Roll size</h2>
+                        <p>{{ election.eligibleVoterCount ?? 0 }}</p>
+                    </div>
+                    @if (turnout(); as t) {
+                        <div class="glass-card" data-card="turnout">
+                            <h2>Ballots cast</h2>
+                            <p>{{ t.ballotsCast }} of {{ t.rollSize }}</p>
+                        </div>
+                    }
+                    <div class="glass-card" data-card="appointments">
+                        <h2>Appointments</h2>
+                        @if (warnings().length === 0) {
+                            <p class="text-muted">Every role is within its limits.</p>
+                        }
+                        @for (w of warnings(); track w.persona) {
+                            <p class="text-warning">{{ w.persona }}: {{ w.text }}</p>
+                        }
+                    </div>
+                }
+
+                @if (can('ViewAudit')) {
+                    <div class="glass-card" data-card="audit">
+                        <h2>Latest audit entries</h2>
+                        @for (a of audit(); track a.seq) {
+                            <p>{{ a.seq }}. {{ a.action }}, {{ a.at | date: 'medium' }}</p>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    }
+</section>

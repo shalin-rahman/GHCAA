@@ -139,6 +139,28 @@ public class NetworkingServiceTests : TestBase
         summary.Subject.Should().Be("Political Science");
     }
 
+    [Category("FR-34")]
+    [Test]
+    public async Task SearchMembersAsync_ECPositionFilter_IgnoresAPeriodThatIsNotActive()
+    {
+        // 37.1u. Winners are written into the next period on Declare, before it is made active.
+        var sitting = await CreateAndSaveTestMemberAsync("Sitting President", "sitting.nt@example.com", "01155556666", "NTST5556");
+        sitting.Status = Enums.MembershipStatus.Active;
+        var elected = await CreateAndSaveTestMemberAsync("Elected President", "elected.nt@example.com", "01155557777", "NTST5557");
+        elected.Status = Enums.MembershipStatus.Active;
+        var current = new ECPeriod { Title = "Current", StartDate = DateTime.UtcNow.AddYears(-1), IsActive = true };
+        var next = new ECPeriod { Title = "Next", StartDate = DateTime.UtcNow.AddDays(30) };
+        _context.ECPeriods.AddRange(current, next);
+        _context.ECMembers.Add(new ECMember { MemberId = sitting.Id, ECPeriod = current, Position = Enums.ECPosition.President, StartDate = current.StartDate });
+        _context.ECMembers.Add(new ECMember { MemberId = elected.Id, ECPeriod = next, Position = Enums.ECPosition.President, StartDate = next.StartDate });
+        await _context.SaveChangesAsync();
+
+        var results = await _service.SearchMembersAsync(new MemberSearchFilterDto { ECPosition = "President", PageSize = 100 });
+
+        results.Items.Select(x => x.FullName).Should().Equal("Sitting President");
+        (await _service.GetExecutiveCommitteeAsync()).Select(x => x.FullName).Should().Contain("Sitting President").And.NotContain("Elected President");
+    }
+
     [Category("FR-05")]
     [Test]
     public async Task SearchMembersAsync_ShouldHideInactiveAndArchivedMembers()

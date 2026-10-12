@@ -5,6 +5,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { ElectionsService } from '../../core/services/elections.service';
+import { ElectionBoardDto } from '../../core/models/election.models';
+import { API_ENDPOINTS, getElectionPhaseLabel } from '../../core/constants/app.constants';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import {
     extractHeadings, renderFormMarkdown, renderMarkdownWithAnchors, MarkdownHeading
@@ -47,6 +49,9 @@ export class ElectionsPage implements OnInit {
     loadError = signal(false);
     /** Within the forms handbook, the single form the visitor drilled into. */
     openForm = signal<ElectionForm | null>(null);
+    /** The current election's public board. Stays null when there is no election or the call fails. */
+    board = signal<ElectionBoardDto | null>(null);
+    getElectionPhaseLabel = getElectionPhaseLabel;
 
     forms = computed<ElectionForm[]>(() =>
         this.selected()?.isFormsHandbook ? splitForms(this.source()) : []
@@ -139,7 +144,23 @@ export class ElectionsPage implements OnInit {
         return ASSET_BASE + doc.file;
     }
 
+    /** Link to the audit chain check, which anyone can open. */
+    get auditVerifyUrl(): string {
+        const board = this.board();
+        return board ? API_ENDPOINTS.ELECTIONS.AUDIT_VERIFY(board.id) : '';
+    }
+
     ngOnInit() {
+        this.electionsService.getCurrent().subscribe({
+            next: election => {
+                if (!election) return;
+                this.electionsService.getBoard(election.id).subscribe({
+                    next: board => this.board.set(board),
+                    error: () => this.board.set(null)
+                });
+            },
+            error: () => this.board.set(null)
+        });
         // `?doc=` keeps a specific document linkable and survives a refresh.
         this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
             const id = params.get('doc');

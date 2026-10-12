@@ -302,7 +302,7 @@ and confirm rejection, then confirm the member vote status and result percentage
 | FR-015 | POST api/elections/{id}/phase | ElectionService.SetPhaseAsync | GHCAA.Web/src/app/core/services/elections.service.ts (setPhase, no caller in admin-elections.ts) | GHCAA.Mobile/lib/features/elections/election_service.dart | none found |
 | FR-016 | POST api/elections/{id}/seats | ElectionService.AddSeatAsync | none found | none found | none found |
 | FR-017 | POST api/elections/{id}/officers | ElectionService.AssignOfficerAsync | none found | none found | none found |
-| FR-018 | POST api/elections/{id}/voter-roll/freeze | ElectionService.FreezeVoterRollAsync | GHCAA.Web/src/app/core/services/elections.service.ts (freezeVoterRoll, no caller in admin-elections.ts) | GHCAA.Mobile/lib/features/elections/election_service.dart | GHCAA.Tests/Services/ElectionServiceTests.cs::FreezeVoterRollAsync_UsesMembershipAndDuesSnapshot |
+| FR-018 | POST api/elections/{id}/voter-roll/freeze | ElectionService.FreezeVoterRollAsync | GHCAA.Web/src/app/core/services/elections.service.ts (freezeVoterRoll and unfreezeVoterRoll, called from admin-elections.ts) | GHCAA.Mobile/lib/features/elections/election_service.dart | GHCAA.Tests/Services/ElectionServiceTests.cs::FreezeVoterRollAsync_UsesMembershipAndDuesSnapshot |
 | FR-019 | GET api/elections/{id}/nominations | ElectionService.GetNominationsAsync | GHCAA.Web/src/app/member/election/election.ts, GHCAA.Web/src/app/admin/elections/admin-elections.ts | GHCAA.Mobile/lib/features/elections/election_service.dart | none found |
 | FR-020 | POST api/elections/{id}/nominations | ElectionService.SubmitNominationAsync | none found | GHCAA.Mobile/lib/features/elections/election_service.dart | none found |
 | FR-021 | POST api/elections/nominations/{nominationId}/scrutiny | ElectionService.DecideNominationAsync | GHCAA.Web/src/app/admin/elections/admin-elections.ts | none found | none found |
@@ -350,9 +350,8 @@ and confirm rejection, then confirm the member vote status and result percentage
   body only adds the ECMember row and optionally notifies; no Member-record mutation is
   visible in GovernanceService.cs.
   [NEEDS CLARIFICATION: where does the profile sync named in that test happen, if anywhere?]
-- CreateAdminElectionRequest.CreatedBy is never read by AdminElectionsController.Create; the
-  controller re-derives the member id from the auth claim instead, so that request field is
-  dead input.
+- CreateAdminElectionRequest.CreatedBy was never read by AdminElectionsController.Create, which
+  takes the member id from the auth claim. The field was removed on 2026-10-12 (TODO 84.17).
 - RequireStepUp is applied action-by-action on ElectionsController but once at the class
   level on AdminElectionsController; the same security requirement is placed inconsistently,
   which risks a new ElectionsController action shipping without it.

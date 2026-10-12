@@ -58,7 +58,11 @@ import '../../screens/member/governance_screen.dart';
 import '../../core/widgets/main_shell.dart';
 import '../../features/polls/polls_screen.dart';
 import '../../screens/member/election_screen.dart';
+import '../../screens/member/election_results_screen.dart';
 import '../../screens/officials/my_appointments_screen.dart';
+import '../../screens/officials/officials_approvals_screen.dart';
+import '../../screens/officials/officials_dashboard_screen.dart';
+import '../../screens/officials/officials_election_detail_screen.dart';
 import '../../screens/member/forum/forum_categories_screen.dart';
 import '../../screens/member/forum/forum_topics_screen.dart';
 import '../../screens/member/forum/forum_topic_detail_screen.dart';
@@ -209,7 +213,15 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/professionals', name: 'professionals', builder: (context, state) => const ProfessionalHubScreen()),
           GoRoute(path: '/polls', name: 'polls', builder: (context, state) => const PollsScreen()),
           GoRoute(path: '/election', name: 'election', builder: (context, state) => const ElectionScreen()),
+          GoRoute(path: '/election/results', name: 'election_results', builder: (context, state) => const ElectionResultsScreen()),
           GoRoute(path: '/officials/appointments', name: 'my-appointments', builder: (context, state) => const MyAppointmentsScreen()),
+          GoRoute(path: '/officials', name: 'officials', builder: (context, state) => const OfficialsDashboardScreen()),
+          GoRoute(path: '/officials/approvals', name: 'officials-approvals', builder: (context, state) => OfficialsApprovalsScreen(electionId: int.tryParse(state.uri.queryParameters['electionId'] ?? '') ?? 0)),
+          GoRoute(
+            path: '/officials/elections/:id',
+            name: 'officials-election',
+            builder: (context, state) => OfficialsElectionDetailScreen(electionId: int.tryParse(state.pathParameters['id'] ?? '') ?? 0),
+          ),
           GoRoute(path: '/messages', name: 'messages', builder: (context, state) => const ChatsScreen()),
           GoRoute(path: '/forum', name: 'forum', builder: (context, state) => const ForumCategoriesScreen()),
           GoRoute(

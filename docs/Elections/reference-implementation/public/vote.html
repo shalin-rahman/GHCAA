@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cast a ballot</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main>
+    <nav><a href="admin.html">Set up</a><a href="vote.html">Vote</a><a href="tally.html">Count</a></nav>
+    <h1>Cast a ballot</h1>
+
+    <section class="card">
+        <label for="user">Signed in as</label>
+        <input id="user" type="text" value="voter.one">
+        <label for="election-id">Election number</label>
+        <input id="election-id" type="number" min="1" value="1">
+        <p><button id="load">Open the ballot</button></p>
+    </section>
+
+    <section id="ballot" class="card hidden">
+        <h2 id="election-title"></h2>
+        <p>Election key fingerprint, to compare with the one announced:</p>
+        <p id="fingerprint" class="mono"></p>
+        <label for="choice">Your choice</label>
+        <select id="choice"></select>
+        <p><button id="cast">Seal and cast</button></p>
+    </section>
+
+    <div id="result" class="status hidden"></div>
+</main>
+<script type="module" src="vote.mjs"></script>
+</body>
+</html>

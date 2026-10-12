@@ -21,7 +21,8 @@ namespace GHCAA.API.Controllers;
 public sealed class ElectionsController(
     IElectionService service,
     IElectionDocumentService documentService,
-    IElectionApprovalService approvals) : ControllerBase
+    IElectionApprovalService approvals,
+    IElectionAuditWriter audit) : ControllerBase
 {
     /// <summary>FR-37.1a: creates an election and its persisted timetable.</summary>
     [HttpPost]
@@ -31,20 +32,111 @@ public sealed class ElectionsController(
     {
         if (!int.TryParse(this.CurrentMemberIdRaw(), out var memberId))
             return Unauthorized();
-        return Ok(await service.CreateAsync(request with { CreatedBy = memberId }, ct));
+        var (created, error) = await service.CreateAsync(request with { CreatedBy = memberId }, ct);
+        return created is null ? Problem(detail: CreateErrorDetail(error), statusCode: StatusCodes.Status400BadRequest) : Ok(created);
     }
+
+    // Shared with AdminElectionsController.Create.
+    internal static string CreateErrorDetail(string? error) => error switch
+    {
+        "dates-missing" => "Set the dates nominations open and close and polling opens and closes.",
+        "dates-out-of-order" => "The dates must follow the phase order: nominations, scrutiny, withdrawals, then polling.",
+        "no-period" => "Choose an EC period for this election.",
+        "period-starts-early" => "The EC period must start on or after the day polling closes.",
+        "period-has-members" => "That EC period already has committee members. Choose a new period.",
+        "period-in-use" => "Another election already fills that EC period. Choose a new period.",
+        _ => "The election could not be created.",
+    };
 
     /// <summary>FR-37.1a: returns the public election summary.</summary>
     [HttpGet("{id:int}")]
     [AllowAnonymous]
     public async Task<IActionResult> Get(int id, CancellationToken ct)
-        => (await service.GetAsync(id, ct)) is { } result ? Ok(result) : NotFound();
+    {
+        // FR-047. Reading it by id would show a test election exists.
+        if (await service.IsTestAsync(id, ct)) return NotFound();
+        return (await service.GetAsync(id, ct)) is { } result ? Ok(result) : NotFound();
+    }
+
+    /// <summary>Spec 023 FR-033 (37.12i): who runs the election, the timeline, turnout when it may be shown, and the key and audit fingerprints. No contact details.</summary>
+    [HttpGet("{id:int}/board")]
+    [AllowAnonymous]
+    [ProducesResponseType<ElectionBoardDto>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> Board(int id, CancellationToken ct)
+        => (await service.GetBoardAsync(id, ct)) is { } result ? Ok(result) : NotFound();
+
+    /// <summary>Spec 023 FR-011 to FR-014 (37.1l): the caller's ballot paper, with names and whether they have voted.</summary>
+    [HttpGet("{id:int}/ballot")]
+    [ProducesResponseType<BallotViewDto>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> Ballot(int id, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentMemberIdRaw(), out var memberId))
+            return Unauthorized();
+        return (await service.GetBallotAsync(id, memberId, ct)) is { } result ? Ok(result) : NotFound();
+    }
+
+    /// <summary>Spec 023 FR-017 (37.1n): the declared result. 404 until the election is Declared.</summary>
+    [HttpGet("{id:int}/results")]
+    [AllowAnonymous]
+    [ProducesResponseType<PublicElectionResultsDto>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> Results(int id, CancellationToken ct)
+    {
+        // FR-047. A test election is never published.
+        if (await service.IsTestAsync(id, ct)) return NotFound();
+        return (await service.GetPublicResultsAsync(id, ct)) is { } result ? Ok(result) : NotFound();
+    }
+
+    /// <summary>Spec 023 FR-049 (37.13c): the opened ballots per seat. 404 until Declared or when the setting is off.</summary>
+    [HttpGet("{id:int}/opened-ballots")]
+    [AllowAnonymous]
+    [ProducesResponseType<OpenedBallotsDto>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> OpenedBallots(int id, CancellationToken ct)
+    {
+        if (await service.IsTestAsync(id, ct)) return NotFound();
+        return (await service.GetOpenedBallotsAsync(id, ct)) is { } result ? Ok(result) : NotFound();
+    }
+
+    /// <summary>Spec 023 FR-048 (37.13a): whether the election's audit chain is whole. Names the first broken entry.</summary>
+    [HttpGet("{id:int}/audit/verify")]
+    [AllowAnonymous]
+    [ProducesResponseType<ElectionAuditVerifyDto>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> VerifyAudit(int id, CancellationToken ct)
+    {
+        // FR-047. Officials read a test election's chain through the audit list.
+        if (await service.IsTestAsync(id, ct)) return NotFound();
+        return Ok(await audit.VerifyAsync(id, ct));
+    }
+
+    /// <summary>Spec 023 FR-048 (37.13a): the audit entries, for officials who hold ViewAudit.</summary>
+    [HttpGet("{id:int}/audit")]
+    [Authorize(Policy = Policies.ElectionStaff)]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ViewAudit)]
+    [ProducesResponseType<IReadOnlyList<ElectionAuditEntryDto>>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> Audit(int id, CancellationToken ct) => Ok(await audit.ListAsync(id, ct));
+
+    /// <summary>Spec 023 FR-016 (37.1m): every tracking code, sorted, with no choices. 404 until the count has run.</summary>
+    [HttpGet("{id:int}/tracking-codes")]
+    [AllowAnonymous]
+    [ProducesResponseType<IReadOnlyList<string>>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> TrackingCodes(int id, CancellationToken ct)
+    {
+        // FR-047. The codes would show a test election exists and how many voted in it.
+        if (await service.IsTestAsync(id, ct)) return NotFound();
+        return (await service.GetTrackingCodesAsync(id, ct)) is { } result ? Ok(result) : NotFound();
+    }
 
     /// <summary>FR-37.1h: returns the single election currently in an active phase, if any.</summary>
     [HttpGet("current")]
     [AllowAnonymous]
     public async Task<IActionResult> GetCurrent(CancellationToken ct)
         => (await service.GetCurrentAsync(ct)) is { } result ? Ok(result) : NoContent();
+
+    /// <summary>The newest Declared or Archived election that is not a test, in the same shape as current. 404 when there is none.</summary>
+    [HttpGet("latest-declared")]
+    [AllowAnonymous]
+    [ProducesResponseType<ElectionSummaryDto>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetLatestDeclared(CancellationToken ct)
+        => (await service.GetLatestDeclaredAsync(ct)) is { } result ? Ok(result) : NotFound();
 
     /// <summary>FR-37.1a: advances the election through its controlled phases. Spec 023 (37.12f):
     /// publishing, opening and closing polling and archiving may wait for a second person (202).</summary>
@@ -77,6 +169,28 @@ public sealed class ElectionsController(
     [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ManageVoterRoll)]
     public async Task<IActionResult> FreezeRoll(int id, CancellationToken ct)
         => Ok(new { Count = await service.FreezeVoterRollAsync(id, ct) });
+
+    /// <summary>37.12q: throws the frozen voter roll away so it can be frozen again. Needs a reason.</summary>
+    [HttpPost("{id:int}/voter-roll/unfreeze")]
+    [Authorize(Policy = Policies.ElectionStaff)]
+    [GHCAA.API.Filters.RequireStepUp]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ManageVoterRoll)]
+    public async Task<IActionResult> UnfreezeRoll(int id, [FromBody] UnfreezeVoterRollDto request, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var (ok, error, removed) = await service.UnfreezeVoterRollAsync(id, userId, request.Reason, ct);
+        if (ok) return Ok(new { Removed = removed });
+        return error == "not-found"
+            ? NotFound()
+            : Problem(detail: error switch
+            {
+                "reason-required" => "A reason is required.",
+                "phase-closed" => "The voter roll cannot be unfrozen after nominations open.",
+                "window-closed" => "The unfreeze window has closed.",
+                _ => "The voter roll cannot be unfrozen once a nomination has been filed."
+            }, statusCode: StatusCodes.Status409Conflict);
+    }
 
     /// <summary>FR-37.1b: returns nominations for an election.</summary>
     [HttpGet("{id:int}/nominations")]
@@ -144,7 +258,7 @@ public sealed class ElectionsController(
         if (results is not null) return Ok(results);
         var waiting = this.ApprovalReply(new ElectionApprovalRunResult(false, error, pending));
         if (waiting is not null) return waiting;
-        if (error is "same-person" or "not-requester" or "closed") return ApprovalError(error);
+        if (error is Elections.Replies.SamePerson or "not-requester" or "closed") return ApprovalError(error);
         var detail = error switch
         {
             "no-key" => "Upload the returning officer's private key file to count.",
@@ -177,7 +291,32 @@ public sealed class ElectionsController(
     [GHCAA.API.Filters.RequireStepUp]
     [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ViewDashboard)]
     [ProducesResponseType<IReadOnlyList<ElectionApprovalDto>>(StatusCodes.Status200OK)]
-    public async Task<IActionResult> Approvals(int id, CancellationToken ct) => Ok(await approvals.ListOpenAsync(id, ct));
+    public async Task<IActionResult> Approvals(int id, CancellationToken ct)
+    {
+        var open = await approvals.ListOpenAsync(id, ct);
+        // The clients hide Approve on the caller's own request. The service still refuses it.
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Ok(open);
+        return Ok(open.Select(a => a with { RequestedByMe = a.RequestedByUserId == userId }).ToList());
+    }
+
+    /// <summary>FR-050: an official with the key records that the key file was destroyed after the declare.</summary>
+    [HttpPost("{id:int}/key-destroyed")]
+    [Authorize(Policy = Policies.ElectionStaff)]
+    [GHCAA.API.Filters.RequireStepUp]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.SetBallotKey)]
+    public async Task<IActionResult> KeyDestroyed(int id, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        return await service.RecordKeyDestroyedAsync(id, userId, ct) switch
+        {
+            null => NoContent(),
+            Elections.Replies.NotFound => NotFound(),
+            Elections.Replies.AlreadyRecorded => Problem(detail: "The key is already recorded as destroyed.", statusCode: StatusCodes.Status409Conflict),
+            _ => Problem(detail: "The key can be recorded as destroyed once the result is declared.", statusCode: StatusCodes.Status400BadRequest),
+        };
+    }
 
     /// <summary>Spec 023 (37.12f): a second person agrees, and the stored step runs.</summary>
     [HttpPost("approvals/{approvalId:int}/approve")]
@@ -220,9 +359,11 @@ public sealed class ElectionsController(
 
     /// <summary>FR-37.1e: generates a completed official election form from persisted records.</summary>
     [HttpGet("{id:int}/documents/{formCode}")]
-    [AllowAnonymous]
+    [Authorize(Policy = Policies.ElectionStaff)]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ViewDashboard)]
     public async Task<IActionResult> Document(int id, string formCode, CancellationToken ct)
     {
+        // Officials with ViewDashboard may print a rehearsal's forms, so there is no test check here.
         var pdf = await documentService.GeneratePdfAsync(id, formCode, ct);
         return pdf is null
             ? NotFound()
@@ -243,9 +384,9 @@ public sealed class ElectionsController(
 
     private IActionResult ApprovalError(string? error) => error switch
     {
-        "not-found" => NotFound(),
+        Elections.Replies.NotFound => NotFound(),
         "forbidden" => this.ProblemWithCode(ErrorCodes.ElectionPermission, "You need the Approve permission on this election.", StatusCodes.Status403Forbidden),
-        "same-person" => Problem(detail: "The person who asked for this step cannot also approve it, and the person who approved a count cannot run it.", statusCode: StatusCodes.Status403Forbidden),
+        Elections.Replies.SamePerson => Problem(detail: "The person who asked for this step cannot also approve it, and the person who approved a count cannot run it.", statusCode: StatusCodes.Status403Forbidden),
         "not-requester" => Problem(detail: "Only the official who asked for this count can run it.", statusCode: StatusCodes.Status403Forbidden),
         "expired" => Problem(detail: "This request has expired. Ask again.", statusCode: StatusCodes.Status400BadRequest),
         "closed" => Problem(detail: "This request has already been decided.", statusCode: StatusCodes.Status409Conflict),
@@ -256,6 +397,7 @@ public sealed class ElectionsController(
         "target-not-live" => Problem(detail: "This official is no longer active, so there is nothing to revoke.", statusCode: StatusCodes.Status409Conflict),
         "phase-closed" => Problem(detail: "The key cannot change once polling has opened.", statusCode: StatusCodes.Status400BadRequest),
         "invalid-key" => Problem(detail: "The stored key is not valid.", statusCode: StatusCodes.Status400BadRequest),
+        "period-has-members" => Problem(detail: "The EC period this election fills already has committee members. Remove them before declaring.", statusCode: StatusCodes.Status409Conflict),
         _ => Problem(detail: "The election is not ready for this step.", statusCode: StatusCodes.Status400BadRequest),
     };
 }

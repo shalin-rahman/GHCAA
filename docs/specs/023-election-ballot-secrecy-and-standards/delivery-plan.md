@@ -1,0 +1,529 @@
+# Spec 023 delivery plan for the remaining election work
+
+Written 2026-10-09 on Opus. It covers every open WP37 item that code can close, split into six
+sessions (S1 to S6). Each session runs on Sonnet from a cleared context and should need no
+exploration beyond the anchors given here.
+
+The design behind each item is in [plan-officials.md](plan-officials.md): section 4 for 37.12g to
+37.12j, section 5 for 37.13a to 37.13g. The rules are in [spec.md](spec.md). This file says where
+the code goes, which tests to add and which docs to change. It does not repeat the design.
+
+## Rules for every session
+
+1. Start with `/clear`, then paste the kickoff prompt for that session.
+2. Read only the anchors listed for the session. Line numbers were taken on 2026-10-09 and move
+   as code is added. If a line does not match, grep for the symbol named next to it. Do not read
+   whole files to find it.
+3. Follow the build order inside the session: backend, backend tests, web, web tests, mobile,
+   mobile tests, docs.
+4. Python edit scripts go in the session scratchpad. Use a new file name each time and run them
+   with `PYTHONIOENCODING=utf-8 python <script> </dev/null`. Keep BOM and CRLF as found. Never
+   pipe a heredoc into `python -`. Never run `dart format` on a whole file.
+5. A migration is written by hand as `yyyyMMddHHmmss_Name.cs` plus `.Designer.cs` in
+   `GHCAA.Infrastructure/Data/Migrations/PgSql/`, and the snapshot is edited to match. Never run
+   `dotnet ef migrations add` followed by `remove`; that cycle truncates the snapshot. The last
+   migration on 2026-10-09 is `20261009120000_AddElectionPeriodLiveIndex`.
+6. Controllers never touch `ApplicationDbContext`. Error codes go through the switch in the
+   controller that already maps them (`ElectionsController.cs` near line 43,
+   `AdminElectionsController.cs` near lines 102, 133 and 151).
+7. New literals go in the constants files: backend `GHCAA.Domain/Constants.cs` class `Elections`
+   (near line 123), web `GHCAA.Web/src/app/core/constants/app.constants.ts` blocks `ELECTIONS`
+   (near line 724) and `ADMIN_ELECTIONS` (near line 743).
+8. Web screens use the shared components in `GHCAA.Web/src/app/common/` (page-header,
+   modal-header, confirm-dialog, step-up-dialog, logo-spinner, pagination) and theme tokens only.
+   Mobile gets its own card and list layout, not a port of the web screen.
+9. Tag each new backend test `[Category("FR-39")]`. Use `[Category("NFR-R5")]` for a test that
+   pins a failure or retry path. Name tests `Method_Condition_Result`, as the existing election
+   tests do.
+10. Comments read as a person wrote them. Short, plain, no em dashes.
+11. When the code builds, run `python scripts/verify-election.py`. It runs the election backend
+    tests, the web type-check and specs, `flutter analyze` and the mobile tests, then the tracker
+    checks. All seven steps must pass. Logs are in `%TEMP%\ghcaa-verify\`. A new web spec or
+    Flutter test file must be added to `WEB_SPECS` or `MOBILE_TESTS` in that script in the same
+    session.
+12. Then run the `code-reviewer` agent once on the session's diff, fix what it confirms, and run
+    the verify script again.
+13. Then `graphify update .`, and the doc checklist for the session.
+14. Never commit. Stop with a short list of changed files and the verify output.
+
+### Doc checklist (the session names which rows apply)
+
+| Doc | What changes |
+|---|---|
+| `docs/TODO.md` | Close the item with the date and a one-line analyst note. Add a new item for anything found and left. |
+| `spec.md` | New FR lines, or a change to an existing one. FR numbers follow the last one in the file (FR-047 on 2026-10-10, after S1). |
+| `plan-officials.md` | Mark the item built in its section, note any design change and why. |
+| `docs/API_CONTRACT_REGISTRY.md` | A dated entry at the top of the list (near line 50) for each new or changed route. |
+| `docs/api/swagger.json` | Add the route. Edit by JSON load and dump with `indent=2, ensure_ascii=False`. |
+| `docs/FEATURES.md` | §5.1a, the document library (near line 220), §5.1b, officials and rules (near line 256), or §5.1c, the member ballot (near line 296). |
+| `docs/SRS.md` | §3.6, the election requirements (near line 96). |
+| `docs/PROJECT_MAP.md` | Election controller and service rows (near line 998). |
+| `docs/ARCHITECTURE.md` | Only if a new service, table or hosted job is added (election lines near 77, 85, 1053). |
+| `docs/Elections/00-Election-Master-Overview.md` | The phase flow (near line 215), when a phase does something new. |
+| `docs/Elections/02-Election-Operational-Manual.md` | The life cycle (near line 148), when an official does something new. |
+
+Do not edit `docs/RENDER_DEPLOYMENT.md`. Do not edit JSON seed data or any secret.
+
+## Order
+
+| Session | Items | Model | Migration | Size |
+|---|---|---|---|---|
+| S1 | 37.13b ballot order, 37.13d test elections | Sonnet | `AddBallotOrderAndTestElection` | S+S |
+| S2 | 37.1o tie rule and dates on the create forms, picks per seat on the clients | Sonnet | none | M |
+| S3 | 37.12g access ends, 37.1r device details | Sonnet | none | M |
+| S4 | 37.13a audit chain, then 37.13c opened ballots | Opus for the 37.13a writer, Sonnet for the rest | `AddElectionAuditChain` | M |
+| S5 | 37.12i public board, 37.1q ER forms from records | Sonnet | none | M |
+| S6 | 37.12h officials area, then 37.13e, 37.13f, 37.12j docs | Opus for the 37.12h screen layout, Sonnet to build it | none | L |
+
+S4 must come before S5 (the board shows the audit head hash) and before S6 (the destroy-key
+record goes into the chain). S1 must come before S4 (the shuffle seed goes into the chain; S1
+writes it to an activity row and S4 moves it). Otherwise the order can change.
+
+## S1. Ballot order and test elections (37.13b, 37.13d)
+
+**Design:** plan-officials.md section 5, rows 37.13b and 37.13d.
+
+**New FRs in spec.md** (P2 election rules section, after FR-025):
+- FR-046 Candidates appear on the ballot in a fixed order set when the election enters
+  CandidateList, either shuffled or alphabetical as the `CandidateOrder` setting says. The order
+  does not change after that.
+- FR-047 An election can be marked as a test at creation. A test election is left out of the
+  public reads, and declaring it writes no committee members.
+
+**Anchors**
+- `GHCAA.Domain/Models/Election.cs:7` `Election` (add `bool IsTest`), `:137` `Nomination` (add
+  `int? BallotOrder`).
+- `GHCAA.Infrastructure/Data/Configurations/ElectionConfigurations.cs:108`
+  `NominationConfiguration`. `IsTest` defaults to false in the config.
+- `GHCAA.Infrastructure/Services/ElectionService.cs`:
+  - `:25` `CreateAsync`. Set `IsTest` from the DTO next to `TieRule` at `:46`.
+  - `:91-103` `SetPhaseAsync`. When the new phase is `CandidateList`, assign `BallotOrder` to the
+    accepted nominations of each seat. `CandidateOrder` comes from `IOrgConfigService`; check
+    how `ElectionService` is built first (it is `new ElectionService(_context)` in tests, so a
+    new constructor argument needs those call sites changed, or read the setting through an
+    optional argument as other services do).
+  - Random order: `RandomNumberGenerator.GetInt32` Fisher-Yates per seat. Alphabetical: by
+    `Member.FullName`, ordinal ignore case.
+  - Record the order type and, for random, the seed-free result list in an activity row
+    (`ElectionCandidateOrderSet`, a new constant beside the audit types at `Constants.cs:123`).
+    S4 moves this into the audit chain.
+  - `:436` `GetBallotAsync`, order at about `:450`. Sort by `BallotOrder`, then `FullName` for
+    rows with no order (elections made before this change).
+  - `:434` `GetNominationsAsync` and `:474` `GetPublicResultsAsync` keep their present order.
+  - `:70` `GetCurrentAsync`. Leave out `IsTest` elections.
+  - `:319` `DeclareAsync`. Skip the ECMember write at `:335` and the guard at `:330` when
+    `IsTest`.
+  - `:543` `ToAdminElection`. Map `IsTest`.
+- `GHCAA.Application/DTOs/ElectionDtos.cs:8-9` `CreateElectionDto`, `CreateAdminElectionRequest`
+  (add `bool IsTest = false`), `:29` `AdminElectionDto` (add `IsTest`).
+- `GHCAA.API/Controllers/AdminElectionsController.cs:46` create, passes the flag through.
+- The public results and documents reads (`ElectionsController.cs:65`, `:257`) answer 404 for a
+  test election. Admin reads still show it.
+- Web: `admin-elections.html` create form (about lines 6-20) gets a "Test run" checkbox;
+  `admin-elections.ts:73` form, `:115` `emptyForm`, `:141` `create`. A "Test" badge on the row.
+  Model in `core/models/election.models.ts`.
+- Mobile: `election_management_screen.dart:142` `_createElection` gets a switch; the card shows
+  a badge. Model in `features/elections/election_service.dart`.
+
+**Migration** `yyyyMMddHHmmss_AddBallotOrderAndTestElection`: `Nominations.BallotOrder int null`,
+`Elections.IsTest boolean not null default false`. Snapshot in
+`PgSqlApplicationDbContextModelSnapshot.cs`.
+
+**Tests** (`GHCAA.Tests/Services/ElectionServiceTests.cs`, helpers `Make(phase)` at `:552`,
+`CreatePollingElectionAsync` at `:741`)
+- `SetPhaseAsync_ToCandidateList_NumbersEachSeatFromOne`
+- `SetPhaseAsync_AlphabeticalSetting_OrdersByName`
+- `SetPhaseAsync_PastCandidateList_KeepsTheOrder`
+- `GetBallotAsync_SortsByBallotOrder`
+- `GetBallotAsync_NominationsWithoutAnOrder_FallBackToName`
+- `GetCurrentAsync_SkipsATestElection`
+- `DeclareAsync_TestElection_WritesNoCommitteeMembers`
+- `CreateAsync_KeepsTheTestFlag`
+- `Results_TestElection_Returns404` and `TrackingCodes_TestElection_Returns404` (in
+  `ElectionsControllerTests.cs`)
+- Web: one case in `admin-elections.spec.ts` that the checkbox reaches the request.
+- Mobile: one case in `test/election_service_test.dart` that `isTest` parses.
+
+The names were changed when S1 was built to follow the existing style in each file
+(`MethodAsync_Case_Result` in the service tests, `Route_Case_ReturnsNNN` in the controller tests).
+
+**Docs:** TODO, spec, plan-officials, API_CONTRACT_REGISTRY (create request shape), swagger,
+FEATURES §5.1c (Member Ballot; §5.1a is the document library), SRS §3.6, PROJECT_MAP, master
+overview phase flow (CandidateList sets the order).
+
+**Done when** the verify script passes, a declared test election leaves `ECMembers` untouched,
+and the ballot order survives a phase change.
+
+**Kickoff prompt**
+```
+Session S1 of docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md.
+Read that file's "Rules for every session" and the S1 section, then build S1 exactly as written.
+Do not explore beyond the S1 anchors; grep a symbol if a line has moved.
+Finish with python scripts/verify-election.py, then the code-reviewer agent, then the S1 doc rows.
+Do not commit.
+```
+
+## S2. Tie rule, dates and picks per seat on the clients (37.1o)
+
+**Design:** spec.md FR-018 (pick up to SeatCount), FR-019 and decision D2 (tie rule picked at
+setup with a one-line description), decision D3 (`ScrutinyOn` and `WithdrawalClosesOn` on the
+create screen).
+
+The backend already accepts several picks per seat: `CastBallotDto(IReadOnlyList<BallotSeatChoiceDto> Seats)`
+and `BallotSeatChoiceDto(int ElectionSeatId, IReadOnlyList<int> NominationIds)` at
+`ElectionDtos.cs:22-23`, checked in `CastBallotAsync` at `ElectionService.cs:179`. Only the
+clients stop at one. `BallotSeatViewDto.Places` gives the limit.
+
+**Anchors**
+- `ElectionDtos.cs:8-9`: add `DateTime? ScrutinyOn`, `DateTime? WithdrawalClosesOn` to both create
+  DTOs. `CreateAsync` (`ElectionService.cs:25`) sets them, and refuses dates out of phase order
+  with error `dates-out-of-order` (map it in `AdminElectionsController`). Entity fields already
+  exist at `Election.cs:16-17`.
+- Tie rule enum `ElectionTieRule` at `Enums.cs:64`; the DTO already carries `TieRule`.
+- Web create form: `admin-elections.html` (about lines 6-20), `admin-elections.ts:73`, `:115`,
+  `:141`. Add a tie-rule select with the three one-line descriptions as constants in
+  `ADMIN_ELECTIONS`, and two date inputs. Dates go out as ISO date strings, per the
+  `ghcaa-date-standard` skill.
+- Web ballot: `member/election/election.ts` `choices` at `:43`, `allDecided` at `:51`, toggle at
+  `:85-94`, abstain at `:99`, cast at `:129-131`. A seat with `places > 1` uses checkboxes that
+  stop at `places`, and shows "Pick up to N". Abstain clears the seat. A seat counts as decided
+  when it has at least one pick or an abstain.
+- Mobile create form: `election_management_screen.dart:142`, controllers at `:155-159`. Same tie
+  rule dropdown and two date pickers.
+- Mobile ballot: `screens/member/election_screen.dart` `_picks` at `:57`, toggle at `:76-81`,
+  abstain at `:88`, cast at `:95-99`; `castBallot` at `features/elections/election_service.dart:614`.
+  Same rules as web.
+- Receipt text on both clients lists every name picked for a seat.
+
+**Tests**
+- Backend: `Create_SetsScrutinyAndWithdrawalDates`, `Create_DatesOutOfOrder_Refused`,
+  `CastBallot_TwoPicksOnTwoPlaceSeat_Counted`, `CastBallot_MorePicksThanPlaces_Refused` (skip
+  the last two if an existing test already pins them; grep `Places` in `ElectionServiceTests.cs`).
+- Web `admin-elections.spec.ts`: tie rule and dates reach the request.
+- Web `election.spec.ts`: third pick on a two-place seat is blocked; abstain clears picks; cast
+  sends both ids.
+- Mobile `election_service_test.dart`: cast body carries two ids for one seat. A widget test at
+  phone viewport (`tester.view.physicalSize = Size(390, 1400)`, pattern in
+  `test/my_appointments_screen_test.dart:33`) for the pick limit.
+
+**Docs:** TODO (close 37.1o, and the 37.1z leftovers if this covers them), spec (FR-018 and D3
+note that it is built), API_CONTRACT_REGISTRY, swagger, FEATURES §5.1a, operational manual
+(setup step names the tie rule).
+
+**Done when** a two-place seat takes two picks on web and mobile and the count shows both.
+
+**Kickoff prompt**
+```
+Session S2 of docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md.
+Read "Rules for every session" and the S2 section, then build S2 exactly as written.
+Do not explore beyond the S2 anchors. Finish with the verify script, code-reviewer, then the S2 doc rows.
+Do not commit.
+```
+
+## S3. Access ends by itself, device details on the vote row (37.12g, 37.1r)
+
+**Design:** plan-officials.md section 4 "37.12g Access ends by itself"; spec.md FR-032; spec.md
+"What the vote record keeps about the request" for 37.1r.
+
+**Anchors, 37.12g**
+- `ElectionService.cs:319` `DeclareAsync`: set `ExpiresAt = DeclaredOn + AccessEndsDaysAfterDeclare`
+  on each appointment of the election that is live and has no `ExpiresAt`. The setting is at
+  `OrgConfigDto.cs:37` (default 21) and nothing reads it yet. Same constructor question as S1.
+- `ElectionAppointment` at `Election.cs:50`, `ExpiresAt` at `:69`, `IsLive(now)` at `:79`.
+- `IElectionAppointmentService.cs:15` and `ElectionAppointmentService.cs:211`
+  `EndAccessIfNoneLeftAsync`: removes the role, rotates `SecurityStamp`, deactivates a user with
+  no member link and no roles, revokes refresh tokens. Reuse it; do not copy it.
+- New `EndAllAsync(int electionId, string reason)` on the same interface and service: revokes
+  every live appointment with reason `"Election archived"` (a constant), then calls
+  `EndAccessIfNoneLeftAsync` per user.
+- Archive: `SetPhaseAsync` (`ElectionService.cs:91-103`) has no Archived branch; archive arrives
+  through the approval path, `ElectionApprovalService.cs:569-576` `PhaseFor`. Call `EndAllAsync`
+  where the archive phase is applied. Check whether it runs inside the approval's transaction and
+  keep it there.
+- Login: `AuthService.cs:60` `LoginAsync`, inactive check at `:112-116`. Before it, for a user
+  with no member link whose only role is ElectionOfficial and who has no live appointment (use
+  the live query in `ElectionAccessService.cs:27`, not a new one), call
+  `EndAccessIfNoneLeftAsync`, then refuse with the same generic message. Same check for social
+  login at `:331`.
+- Refresh: `AuthController.cs` near `:85-96`, check at `:120`. The controller calls a service; put
+  the check in the service, not the controller.
+- `AuthController.Me` near `:135-145` already uses live summaries. No change.
+
+**Anchors, 37.1r**
+- `AuditLogMiddleware.cs` `LogVoteAsync` (near `:72-93`) passes no metadata.
+  `ActivityService.cs:26-45` fills IP and user agent; there is a crude mobile check at `:32`.
+- Parse the user agent into `{ "device": "mobile|tablet|desktop", "os": "...", "browser": "..." }`
+  with a small static parser (no package), and pass it as `Metadata` on the vote row only. The
+  row's time stays date only (FR-004). No location lookup.
+- Put the parser in `GHCAA.Infrastructure` beside `ActivityService`, with its strings in
+  `Constants.cs`.
+
+**Tests**
+- `ElectionServiceTests`: `Declare_SetsAppointmentExpiryFromSetting`,
+  `Declare_KeepsExistingExpiry`.
+- `ElectionAppointmentServiceTests` ([SetUp] at `:27`, builder `NewAppointments(...)`):
+  `EndAll_RevokesEveryAppointment`, `EndAll_DeactivatesNonMemberWithNoOtherRole`,
+  `EndAll_MemberOfficialKeepsMemberAccess`, `EndAll_RotatesSecurityStamp`.
+- `ElectionApprovalServiceTests` (`SetUpRevokeAsync` at `:411` shows the shape):
+  `ApproveArchive_EndsAllAppointments`.
+- `AuthServiceTests`: `Login_NonMemberOfficialAfterExpiry_Refused`,
+  `Login_MemberOfficialAfterExpiry_Allowed`, `Refresh_NonMemberOfficialAfterExpiry_Refused`.
+- A parser test class `UserAgentParserTests`: iPhone Safari, Android Chrome, Windows Edge, the
+  Flutter `Dart/` agent, empty string. Plus `LogVote_WritesDeviceMetadata_NoTime` if the
+  middleware has a test file; grep `LogVoteAsync` in `GHCAA.Tests`.
+
+**Docs:** TODO (close 37.12g; split 37.1r into a closed device part and an open location part
+that waits on the committee), spec FR-032 built, plan-officials 37.12g built, FEATURES §5.1b,
+SRS §3.6, operational manual (what happens on archive and after the access window), ARCHITECTURE
+if the parser is a new service.
+
+**Done when** a non-member official cannot sign in the day after the window ends, a member
+official still can, and archive leaves no live appointment.
+
+**Kickoff prompt**
+```
+Session S3 of docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md.
+Read "Rules for every session" and the S3 section, then build S3 exactly as written.
+Auth is touched: after code-reviewer, also run the security-reviewer agent on the AuthService and
+AuthController changes. Finish with the verify script and the S3 doc rows. Do not commit.
+```
+
+## S4. Audit chain, then opened ballots (37.13a, 37.13c)
+
+**Design:** plan-officials.md section 5 rows 37.13a and 37.13c.
+
+**New FRs in spec.md** (after FR-047):
+- FR-048 Each election keeps a hash-chained audit list. Anyone can ask whether the chain is whole,
+  and the answer names the first broken entry. No entry holds voter identity.
+- FR-049 After Declared, and when `PublishPerSeatBallots` is on, the opened ballots are published
+  per seat, each seat's list shuffled on its own so rows cannot be joined across seats.
+
+Use Opus for the 37.13a writer and its concurrency (Seq allocation under two writers). Switch
+back to Sonnet for wiring the call sites, 37.13c, tests and docs.
+
+**Anchors, 37.13a**
+- New entity `ElectionAuditEntry` in `GHCAA.Domain/Models/Election.cs` (Id, ElectionId, Seq, At,
+  ActorUserId nullable, Action, DetailJson, PrevHash, Hash). Unique index on (ElectionId, Seq).
+  Config in `ElectionConfigurations.cs`.
+- `Hash = SHA-256(PrevHash + "|" + Seq + "|" + At.ToString("O") + "|" + Action + "|" + DetailJson)`,
+  lower hex. Use `Convert.ToHexStringLower(SHA256.HashData(...))` as `BallotSeal.cs:32` does.
+  `PrevHash` of the first entry is 64 zeros.
+- New `IElectionAuditWriter` in `GHCAA.Application/Interfaces`, `ElectionAuditWriter` in
+  `GHCAA.Infrastructure/Services`. It adds the entry to the caller's context without saving, so it
+  shares the caller's `SaveChanges`. Seq is max+1; a unique-index clash retries once (tag that
+  test NFR-R5).
+- Call sites: phase changes in `ElectionService.SetPhaseAsync`, declare, count; the approval
+  service (activity calls at `ElectionApprovalService.cs:277`, `:478`); the freeze service
+  (`ElectionFreezeService.cs:34, 42, 92, 110`); the appointment service on appoint, accept,
+  revoke. Keep the existing activity rows; the chain is added beside them.
+- Move S1's candidate-order record into the chain.
+- `GET api/elections/{id}/audit/verify`, anonymous, on `ElectionsController`, returns
+  `{ ok, entries, firstBrokenSeq }`. Exempt in the reflection test only if the test lists GETs.
+- Audit list for officials: `GET api/elections/{id}/audit`, needs the ViewAudit permission through
+  `ElectionAccessService`. S6's dashboard reads it.
+
+**Anchors, 37.13c**
+- `CountAsync` at `ElectionService.cs:229`, `BallotSeal.Open` gives `PendingChoice[]` (fields `S`,
+  `N[]`) at about `:270`, opened ballots shuffled and stored at about `:277-285`.
+- Setting `PublishPerSeatBallots` at `OrgConfigDto.cs:43`, default true, not read yet.
+- `GET api/elections/{id}/opened-ballots`, anonymous, only after Declared and only when the
+  setting is on, else 404. For each seat: the list of choice sets, shuffled per seat with
+  `RandomNumberGenerator` on each read or once at declare (pick once at declare and store, so two
+  reads cannot be compared; record the choice in plan-officials).
+- DTOs in `ElectionDtos.cs` next to `PublicElectionResultsDto`.
+
+**Migration** `yyyyMMddHHmmss_AddElectionAuditChain`: table `ElectionAuditEntries`, plus a table
+or column for the stored per-seat lists if that option is taken.
+
+**Tests**
+- `ElectionAuditWriterTests`: `Chain_VerifiesAfterSeveralEntries`,
+  `Chain_EditedRow_BreaksAtThatSeq`, `Chain_DeletedRow_Breaks`, `Writer_FirstEntry_UsesZeroPrevHash`,
+  `Writer_SeqClash_RetriesOnce` (NFR-R5), `Entry_NeverHoldsVoterId` (reflection or scan of
+  DetailJson for member ids after a cast).
+- `ElectionServiceTests`: `SetPhase_WritesAuditEntry`, `Declare_WritesAuditEntry`.
+- `ElectionsControllerTests`: `AuditVerify_Anonymous_ReturnsOk`.
+- `OpenedBallots_BeforeDeclared_NotFound`, `OpenedBallots_SettingOff_NotFound`,
+  `OpenedBallots_CountsMatchResults`, `OpenedBallots_NotInCastOrder` (use
+  `CreatePollingElectionAsync(voters: 12)` and `CloseAndStartCountingAsync` at `:796`).
+- Web and mobile: service methods `verifyAudit`, `getAudit`, `getOpenedBallots` with one spec
+  each in `elections.service.spec.ts` and `election_service_test.dart`. No screens yet; S5 and S6
+  use them.
+
+**Docs:** TODO, spec FR-048 and FR-049, plan-officials, API_CONTRACT_REGISTRY (three routes),
+swagger, FEATURES, SRS, PROJECT_MAP, ARCHITECTURE (new table and writer), master overview.
+`docs/Elections/09-Election-Security-and-Compliance.md` compliance table: point §11 and §10 at
+the new code.
+
+**Done when** the verify endpoint reports ok on a full election run and names the right Seq
+after a row is edited in a test.
+
+**Kickoff prompt**
+```
+Session S4 of docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md.
+Run this session on Opus until ElectionAuditWriter and its tests pass, then /model sonnet.
+Read "Rules for every session" and the S4 section, then build S4 exactly as written.
+Finish with the verify script, code-reviewer, then the S4 doc rows. Do not commit.
+```
+
+## S5. Public board and ER forms from records (37.12i, 37.1q)
+
+**Design:** plan-officials.md section 4 "37.12i Public board"; spec.md FR-033 and FR-025.
+
+**Anchors, 37.12i**
+- `GET api/elections/{id}/board`, anonymous, on `ElectionsController` beside the other
+  anonymous reads (`:49`, `:65`, `:72`, `:79`, `:117`, `:257`).
+- `ElectionBoardDto` in `ElectionDtos.cs`: Title, Phase, the timeline dates, IsTest, Groups of
+  `{ GroupName, Members: [{ PersonaName, DisplayName, AcceptedAt }] }`, Turnout
+  `{ BallotsCast, RollSize }` or null, KeyFingerprint, AuditHeadHash (after Declared).
+- Personas: `ElectionPersona.cs:18` `ShowOnPublicBoard`, `:21` `SortOrder`. Only accepted, live
+  appointments on public personas.
+- Turnout is null during polling unless `ShowTurnoutDuringPolling` (`OrgConfigDto.cs:42`), and
+  null when ballots cast is below `Constants.Elections.MinimumBallotsToCount` (`Constants.cs:127`).
+- Web `public/elections/elections.ts` and `.html`: a "Who runs this election" section, turnout
+  line, Test badge, fingerprint and audit hash with a "Check the audit chain" link to the S4
+  verify route.
+- Web `member/election/election.ts`: "You are on the roll" and "You have voted" from
+  `BallotViewDto.HasVoted` (`ElectionDtos.cs:36`) and the eligibility already returned by the
+  ballot read (37.1z).
+- Mobile `screens/member/election_screen.dart`: a read-only officials list from the same route.
+
+**Anchors, 37.1q**
+- `ElectionDocumentService.cs` (QuestPDF, QRCoder). `SupportedForms` at `:20-24`, `GeneratePdfAsync`
+  at `:26` loads Seats, VoterRoll and ECPeriod. Titles at `:110-125`. Bodies at `:131-133`; only
+  ER-07 uses records.
+- Fill each form from what is stored. Load nominations, results and the board only for the forms
+  that need them. The mapping:
+
+| Form | Filled from |
+|---|---|
+| ER-07 voter roll | already done |
+| ER-10 consent | nominations with consent time |
+| ER-23 count sheet | per-seat, per-candidate counts plus spoiled and abstain (FR-025) |
+| Result and declaration forms | the declared result per seat, tie rule, declared date |
+| Officials forms | board groups from 37.12i |
+| Others | keep the generic line and list them in TODO as needing the regulation text |
+
+  Read the 16 codes at `:20-24` first and fit each into one row above. A form the code cannot
+  place goes in the last row; do not guess its content.
+
+**Tests**
+- `ElectionBoardTests` (new): `Board_OnlyAcceptedPublicPersonas`, `Board_SortedBySortOrder`,
+  `Board_TurnoutHiddenDuringPolling`, `Board_TurnoutShownWhenSettingOn`,
+  `Board_TurnoutHiddenBelowMinimum`, `Board_AuditHashOnlyAfterDeclared`,
+  `BoardDto_ContainsNoContactFields` (reflection, model on
+  `CredentialCodeGeneratorTests.cs:24-33`).
+- `ElectionDocumentServiceTests`: `ER23_CarriesPerCandidateCounts`, `ER10_ListsConsentTimes`, and
+  one test that every supported code renders without error.
+- Web: `public/elections/elections.spec.ts` (new; add to `WEB_SPECS`) for the board section and
+  turnout hidden; one case in `election.spec.ts` for the two lines.
+- Mobile: a widget test for the officials list at phone viewport; add to `MOBILE_TESTS`.
+
+**Docs:** TODO (close 37.12i, 37.1q; new item for forms left on the generic line), spec FR-033
+and FR-025 built, plan-officials, API_CONTRACT_REGISTRY, swagger, FEATURES, SRS, PROJECT_MAP,
+operational manual (which forms fill themselves).
+
+**Done when** the board shows only public, accepted officials with no contact fields, and ER-23
+prints the counts of a test run.
+
+**Kickoff prompt**
+```
+Session S5 of docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md.
+Read "Rules for every session" and the S5 section, then build S5 exactly as written.
+Finish with the verify script, code-reviewer, then the S5 doc rows. Do not commit.
+```
+
+## S6. Officials area, key procedure, compliance and docs (37.12h, 37.13e, 37.13f, 37.12j)
+
+**Design:** plan-officials.md section 4 "37.12h Officials area" and decision 4 (mobile gets its
+own screens); section 5 rows 37.13e and 37.13f; section 4 "37.12j Docs".
+
+Start on Opus to settle the dashboard card list and the mobile screen flow in a short note added
+to plan-officials 37.12h. Then `/model sonnet` and build.
+
+**New FR in spec.md:** FR-050 After Declared, an official with the key records that the key file
+was destroyed. The record goes into the audit chain with who and when.
+
+**Anchors, web**
+- `app.routes.ts:147-158` `officials` route group (authGuard, under PortalLayout), child
+  `my-appointments` at `:155`. Add `electionStaffGuard` (`auth.guard.ts:117`, unused today), a
+  dashboard child at `''` and `elections/:id`.
+- `elections/:id` reuses `AdminElections` and hides buttons from `MyPermissions` on
+  `AdminElectionDto` (`ElectionDtos.cs:29`). Do not copy the component. Existing helpers
+  `canSetBallotKey()` at `admin-elections.ts:199` and `pollingApproverWarning()` at `:205` show
+  the pattern.
+- Nav: `core/services/nav.service.ts`, `roles?: string[]` at `:13`, elections item at `:62`,
+  SuperAdmin pattern at `:67-74`. Roles from `ELECTION_STAFF_ROLES` (`app.constants.ts:10`).
+- Dashboard cards read existing service methods in `core/services/elections.service.ts`:
+  approvals `getApprovals` `:54`, `approve` `:58`, `reject` `:62`; nominations `:82`; roll
+  `freezeVoterRoll` `:78`; key `setBallotKey` `:116` (status from the fingerprint on the DTO);
+  count `:121`, `:127`; declare `:134`; appointments `:142-169`; unlock `:174-182`; audit from S4.
+  Turnout from the S5 board route. Min and max count warnings from the persona settings.
+- Approve hidden on the user's own request. Step-up through `step-up-dialog` on approve.
+- Destroy-key checkbox after Declared: new `POST api/elections/{id}/key-destroyed`, guarded
+  through `ElectionAccessService`, writes an audit chain entry. Add it to the reflection test's
+  guarded list.
+
+**Anchors, mobile**
+- Router `core/router/app_router.dart:214` `/officials/appointments`. Add `/officials` (dashboard),
+  `/officials/elections/:id`, `/officials/approvals`.
+- `screens/officials/` holds only `my_appointments_screen.dart`. Add
+  `officials_dashboard_screen.dart`, `officials_election_detail_screen.dart`,
+  `officials_approvals_screen.dart`.
+- `features/elections/election_service.dart` (methods `:558-744`) has no approvals methods; add
+  `getApprovals`, `approve`, `reject` matching the web routes.
+- A member with an appointment reaches it from the member drawer; a pure official lands on
+  `/officials`.
+
+**Tests**
+- Backend: `KeyDestroyed_WritesAuditEntry`, `KeyDestroyed_BeforeDeclared_Refused`,
+  `KeyDestroyed_WithoutPermission_Forbidden`; reflection test still passes.
+- Web `officials/dashboard/officials-dashboard.spec.ts` (new, add to `WEB_SPECS`): cards hidden
+  without permission, approve hidden on own request, turnout hidden during polling.
+- Web `admin-elections.spec.ts`: buttons hidden by `MyPermissions`.
+- Mobile `officials_dashboard_screen_test.dart`, `officials_approvals_screen_test.dart` (new, add
+  to `MOBILE_TESTS`), the same three cases at phone viewport, using `MaterialApp.router`.
+- Mobile `election_service_test.dart`: the three approvals methods.
+
+**Docs, 37.13e:** `docs/Elections/11-Election-Key-Procedure.md`: who makes the key, where the file
+lives, two-person replacement, destroying it after declare with the dashboard record. Name the
+trusted-custodian assumption from spec.md "Not adopted".
+
+**Docs, 37.13f:** finish `docs/Elections/09-Election-Security-and-Compliance.md`: threat model,
+incident steps, logging and retention, and a compliance table row for every "must" in
+`docs/Elections/00-election-standards-requirements.md`, each pointing at a TODO id or a file.
+Write only what the code and earlier sessions show; mark anything unverified as open.
+
+**Docs, 37.12j:** spec.md user stories for personas, appointments, approvals and the board;
+operational manual (appoint, accept, approve, the dashboard); API_CONTRACT_REGISTRY, swagger,
+PROJECT_MAP, FEATURES, SRS, ARCHITECTURE. Then the book: if a chapter quotes election features,
+run `python docs/book/build/build.py --pdf --strict` and fix what it names.
+
+**Done when** a pure official signs in on web and mobile, lands on the dashboard, sees only the
+cards their permissions allow, and cannot approve their own request.
+
+**Kickoff prompt**
+```
+Session S6 of docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md.
+Run on Opus until the dashboard card list and mobile flow note is added to plan-officials 37.12h,
+then /model sonnet. Read "Rules for every session" and the S6 section, then build S6 exactly as written.
+Finish with the verify script, code-reviewer, then the S6 doc rows. Do not commit.
+```
+
+## Left for the owner or a person
+
+These cannot be closed by a session. They stay open in TODO.md.
+
+| Item | Who | What is needed |
+|---|---|---|
+| 37.1p | Owner | Read the constitution's election Article and confirm the tie rule, unopposed seats (FR-024) and the recount window (FR-020). |
+| 37.1r location | Committee | Approve or refuse IP location lookup. It sends voter IPs to a third party. |
+| 37.1m font | Owner | Pick a Bengali font for the receipt PDF; it ships as an asset. |
+| 37.1m browser check | Person | Print a receipt from Chrome and Edge and check the layout. |
+| 37.1z device check | Person | Cast on a phone with TalkBack or VoiceOver. |
+| 37.13g | Person | Run `docs/Elections/10-Election-Accessibility-Checklist.md` with keyboard only and a screen reader; write the results into it. |
+
+## Cost guard
+
+Each session should finish inside one context. If a session passes about 60% of the context
+window before the verify script runs, stop, write what is left as a TODO.md note under the item,
+and start a fresh session with the same kickoff prompt plus "continue from the TODO note".

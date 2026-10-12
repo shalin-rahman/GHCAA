@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Set up an election</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main>
+    <nav><a href="admin.html">Set up</a><a href="vote.html">Vote</a><a href="tally.html">Count</a></nav>
+    <h1>Set up an election</h1>
+
+    <section class="card">
+        <label for="user">Signed in as</label>
+        <input id="user" type="text" value="returning.officer">
+    </section>
+
+    <section id="step-warning" class="card warning">
+        <h2>Read this before the key is made</h2>
+        <p>The private key downloads once, as a file, to this device. The server never stores it. If the
+            file is lost, the ballots cannot be opened and nobody can recover them. Whoever holds the file can
+            open every ballot of this election.</p>
+        <label><input id="ack-lost" type="checkbox"> I understand a lost key file cannot be recovered.</label>
+        <label><input id="ack-hold" type="checkbox"> I understand anyone holding the file can open every ballot.</label>
+        <label><input id="ack-store" type="checkbox"> I will keep one copy on a device I control, not in email, chat or a shared drive.</label>
+        <p><button id="continue" disabled>Continue</button></p>
+    </section>
+
+    <section id="step-form" class="card hidden">
+        <label for="title">Election title</label>
+        <input id="title" type="text">
+        <label for="choices">Choices, one per line</label>
+        <textarea id="choices" rows="4"></textarea>
+        <p><button id="create">Make the key and create the election</button></p>
+        <div id="result" class="status hidden"></div>
+    </section>
+</main>
+<script type="module" src="admin.mjs"></script>
+</body>
+</html>

@@ -27,6 +27,8 @@ namespace GHCAA.Infrastructure.Services
         private readonly ICommunicationService _communicationService;
         private readonly IOrgConfigService _orgConfigService;
         private readonly ISocialAuthConfigService _socialAuth;
+        private readonly IElectionAccessService _electionAccess;
+        private readonly IElectionAppointmentService _appointments;
 
         public AuthService(ApplicationDbContext db,
             ITokenService tokenService,
@@ -37,7 +39,9 @@ namespace GHCAA.Infrastructure.Services
             IEmailService email,
             ICommunicationService communicationService,
             IOrgConfigService orgConfigService,
-            ISocialAuthConfigService socialAuth)
+            ISocialAuthConfigService socialAuth,
+            IElectionAccessService electionAccess,
+            IElectionAppointmentService appointments)
         {
             _db = db;
             _tokenService = tokenService;
@@ -49,6 +53,8 @@ namespace GHCAA.Infrastructure.Services
             _communicationService = communicationService;
             _orgConfigService = orgConfigService;
             _socialAuth = socialAuth;
+            _electionAccess = electionAccess;
+            _appointments = appointments;
         }
 
         // Tests set this to zero so they do not wait on every forgot-password call.
@@ -138,6 +144,13 @@ namespace GHCAA.Infrastructure.Services
             // Reset lockout on successful login.
             user.FailedLoginAttempts = 0;
             user.LockoutUntil = null;
+
+            // 37.12g. Checked after the password, so a guess at a username cannot end anyone's access.
+            if (await EndExpiredOfficialAccessAsync(user, cancellationToken))
+            {
+                _logger.LogWarning("Login failed: Election access for {Username} has ended", loginDto.Username);
+                return null;
+            }
 
             var token = _tokenService.CreateToken(user);
 
@@ -328,6 +341,7 @@ namespace GHCAA.Infrastructure.Services
             }
 
             // Standard login logic from here
+            if (await EndExpiredOfficialAccessAsync(user, cancellationToken)) return null;
             if (!user.IsActive) return null;
 
             var token = _tokenService.CreateToken(user);
@@ -558,6 +572,24 @@ namespace GHCAA.Infrastructure.Services
 
             await _activityService.LogActivityAsync(member?.Id, "Password Reset", "User reset their password via email link.", cancellationToken: cancellationToken);
 
+            return true;
+        }
+
+        // 37.12g. A user with no member link whose only role is ElectionOfficial has no other reason
+        // to sign in. Once the last appointment ends, the role and the login are tidied up here, on
+        // the next attempt, so no job has to run on the expiry date. Needs Roles loaded.
+        public async Task<bool> EndExpiredOfficialAccessAsync(User user, CancellationToken cancellationToken = default)
+        {
+            if (user.MemberId != null || user.Roles.Count == 0 || user.Roles.Any(r => r.Name != Constants.Roles.ElectionOfficial))
+                return false;
+            if ((await _electionAccess.ElectionIdsWithLiveAppointmentAsync(user.Id, cancellationToken)).Count > 0)
+                return false;
+            // An invite not yet accepted must still let the person sign in to accept it.
+            var now = DateTime.UtcNow;
+            if (await _db.ElectionAppointments.AnyAsync(x => x.UserId == user.Id && x.AcceptedAt == null && x.RevokedAt == null && (x.ExpiresAt == null || x.ExpiresAt > now), cancellationToken))
+                return false;
+
+            await _appointments.EndAccessIfNoneLeftAsync(user.Id, cancellationToken);
             return true;
         }
 

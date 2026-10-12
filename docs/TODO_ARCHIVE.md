@@ -1,11 +1,11 @@
 # TODO Archive
 
 Closed Work Packages moved out of docs/TODO.md on 2026-09-15 to keep that file
-lean. Every item here is [DONE]; nothing in this file is still open. docs/book/build/wbs.py
+lean. Every item here is [DONE] or closed by user decision ([WONTDO]); nothing in this file is still open. docs/book/build/wbs.py
 reads this file together with docs/TODO.md for its tracker counts, so moving a
 Work Package here does not change its Chapter 11 figures.
 
-Work Packages archived: 51 (of 82 total): 1, 2, 3, 4, 5, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 29, 30, 31, 32, 33, 35, 36, 38, 39, 41, 44, 45, 46, 50, 51, 53, 54, 55, 56, 57, 58, 59, 61, 66, 68, 69, 70, 71, 80.
+Work Packages archived: 57: 1, 2, 3, 4, 5, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 29, 30, 31, 32, 33, 35, 36, 38, 39, 41, 44, 45, 46, 50, 51, 53, 54, 55, 56, 57, 58, 59, 61, 66, 68, 69, 70, 71, 80, 43, 48, 83, 85, 87, 89 (the last six on 2026-10-11).
 See docs/TODO.md for the current Priority Index and all open work.
 
 ---
@@ -3022,7 +3022,7 @@ ungated, while sibling fields were correctly privacy-gated. Fixed: stripped thes
 `CertificatePath`) from `NetworkingService.MapToDto` — that DTO only backs the public directory
 profile; the authenticated owner/admin profile is a separate build in `MemberService.GetProfileAsync`.
 
-48.2 [ONHOLD 2026-09-06, per SR-9] **Priority: P0.** **CRITICAL — committed secrets, live JWT signing key and a live password both in git history.**
+48.2 [WONTDO 2026-09-18, user decision] **Priority: P0.** **CRITICAL — committed secrets, live JWT signing key and a live password both in git history.**
 **Merged 2026-09-15:** this item now also carries 47.10's credentials half and all of 48.13 — three
 tracker entries recording the same underlying exposure from three different audit passes. 47.10 keeps
 only its unrelated photo-gap fact; 48.13 now points here.
@@ -7385,3 +7385,238 @@ it. Tests: `AdminNotificationServiceTests` — 3 new cases (`NotifyPendingApprov
 plus the 3 pre-existing ones, all 6 passing; full `GHCAA.Tests` OrgConfig + AdminNotificationService
 filter run: 27 passed, 0 failed. `dotnet build` clean, `npx tsc --noEmit` clean.
 
+# Work Package 43 — Application-wide exception handling & logging audit (raised by user 2026-08-27: "make sure entire application have propers exception handling with logging. best error management")
+
+47.13 [DONE 2026-09-18] **Priority: P2.** **Mutation (POST/PUT/DELETE) coverage remediation — task breakdown.** 47.9 closed the top
+2 items (`RolesController.DeleteUser`, `AdminGovernanceController.DeleteECMember`). Remaining ~35%,
+broken into independently-completable tasks below. Common approach for all of them: one new
+`GHCAA.Tests/Controllers/*Tests.cs` file per controller, mocking the underlying service interface
+(same pattern as `DestructiveStepUpActionsTests.cs`/`GalleryControllerTests.cs`) — one success-path
+test + one failure-path test per action is the target depth; this is breadth-over-depth work, not
+deep edge-case testing. Run `dotnet test` after each task, not just at the end.
+
+47.13.1 [DONE 2026-09-04] **`AuthController` non-Login actions** (highest priority — the security surface, and
+this session's own new step-up endpoints are among the untested ones): `GoogleLogin`, `FacebookLogin`,
+`Refresh`, `RefreshMobile`, `Logout`, `RequestStepUp`, `VerifyStepUp`, `ResetPassword`. New file
+`AuthControllerMutationTests.cs`.
+
+`GHCAA.Tests/Controllers/AuthControllerMutationTests.cs` added, mocking `IAuthService`/`ITokenService`/
+`IOtpService` directly with Moq and reusing `ControllerTestBase.SetUserContext` for the claims-principal
+setup `Refresh`/`Logout`/`RequestStepUp`/`VerifyStepUp` need, per this project's existing controller-test
+pattern (`GalleryControllerTests.cs`, `DestructiveStepUpActionsTests.cs`). 20 tests: one success-path
+and one failure-path test per action, plus extra failure cases for `Refresh`/`RefreshMobile` (no cookie,
+rotated-but-invalid token, inactive/archived user are genuinely distinct failure modes) and for
+`RequestStepUp`/`VerifyStepUp` (missing email-on-file vs. an invalid/expired OTP code). All 20 pass, and
+the full suite (`dotnet test GHCAA.Tests/GHCAA.Tests.csproj`) is green at 564/564.
+
+47.13.2 [DONE 2026-09-04] **`LookupsController` full CRUD** (`CreateLookup`/`UpdateLookup`/`DeleteLookup`) — zero
+coverage today, controls dropdown/lookup master data; same "silent bad data" risk class as this
+Area's seed-integrity bugs (47.1). New file `LookupsControllerTests.cs`.
+
+`GHCAA.Tests/Controllers/LookupsControllerTests.cs` added, covering every action on the controller
+rather than just the three named above (`GetPublicStats`, `GetAllLookups`, `GetByGroup` included for
+completeness): one success-path and one failure-path test per action, 12 tests total, mocking
+`ILookupService`/`IMemberService` directly with Moq per this project's existing controller-test
+pattern (`GalleryControllerTests.cs`, `DestructiveStepUpActionsTests.cs`). All 12 pass, and the full
+suite (`dotnet test GHCAA.Tests/GHCAA.Tests.csproj`) is green at 564/564.
+
+47.13.3 [DONE 2026-09-06] `GHCAA.Tests/Controllers/RolesControllerTests.cs` added, covering
+`CreateAdmin`, `CreateRole`, `AssignRole`, `RemoveRole`, `GetUsers`, `GetRoles` (success + failure
+path each), plus `DeleteUser`/`DisableUser`/`EnableUser`/`ResetPasswordAdmin` landed here too as part
+of 49.5. Folded into the same file/PR as instructed there.
+
+47.13.4 [DONE 2026-09-16] **`AdminPollController`** (`DeletePoll`, `ToggleStatus` — `CreatePoll` already covered). Added one controller-contract test class instead of duplicating `PollServiceTests`: it covers the list response, propagation of the acting member claim on create, both active states, a missing toggle target, and both delete outcomes. Focused run: 7/7 passed.
+
+47.13.5 [DONE 2026-09-06] **`PaymentConfigController`** (`Create`, `Toggle`, `Delete` —
+`Update`/`SeedDefaults` already covered per the mutation-coverage audit). Added as part of 80.13's
+sweep, since that item rewrote `PaymentConfigController` to depend on the new `IPaymentConfigService`
+anyway: `CreateConfig_PersistsAndReturnsMaskedSecrets`, `ToggleConfig_FlipsIsEnabled`,
+`ToggleConfig_ReturnsNotFound_WhenConfigDoesNotExist`, `DeleteConfig_RemovesConfig`,
+`DeleteConfig_ReturnsNotFound_WhenConfigDoesNotExist` in `PaymentConfigControllerTests.cs`.
+
+47.13.6 [DONE 2026-09-18] Added one success + one failure test per action for all four
+controllers. `AdminControllerTests.cs`: `SyncMembers`, `BulkArchiveInactive`, `RestoreMember`,
+`UpdateMemberPhoto`, `UpdateMemberSignature`, `UpdateMemberDocuments` (12 tests). `GalleryControllerTests.cs`:
+`UploadPhoto`, `ToggleActive`, `ToggleFeatured`, `SubmitMemberPhoto` (8 tests). New file
+`CommunicationControllerTests.cs`: `CreateTemplate`, `UpdateTemplate`, `DeleteTemplate` (6 tests,
+all via the throws-propagates pattern since none of the three have a NotFound/validation branch
+of their own). New file `FamilyLinkControllerTests.cs`: `Remove`, `Cancel` (4 tests). **Naming
+correction:** the `CancelRequest`/`UnlinkMember` names in the original text don't exist on
+`FamilyLinkController` — the controller only has `Remove` and `Cancel`; those are the two that got
+tests. **Correction 2026-09-06:** the original text also named `FamilyController` here; that
+controller was deleted in 80.2 (2026-09-04) and no longer exists — dropped from this item rather
+than left as a dead reference.
+
+47.13.7 [DONE 2026-09-18] The two gaps flagged by the interrupted re-audit are closed:
+`CommunicationControllerTests.cs` gained `SendBatch`, `SendType`, `SendCustom` (6 tests,
+success + 400-validation-branch pairs), and `FamilyLinkControllerTests.cs` gained `Send`,
+`Respond` (4 tests, success + not-found pairs). Full suite confirmed via `dotnet test`:
+841 passed, 0 failed, 0 skipped-that-matter. No other `[HttpPost]/[HttpPut]/[HttpPatch]/
+[HttpDelete]` actions were found uncovered in the same pass; this closes the 47.13 series.
+
+---
+
+# Work Package 85 — NFR catalogue currency for vote integrity and mobile diagnostics
+
+<!-- wbs: component=C17 start=2026-09-21 end=2026-09-21 after=12,37 -->
+
+Raised while grounding a book-content request in the actual codebase. Two features were built and
+verified but never carried into the Chapter 3 NFR catalogue: the election engine's atomic vote-cast
+update (Work Package 37) and the mobile client's rotating on-device diagnostic log (Work Package 12.3).
+The requirements model had drifted behind delivered behaviour.
+
+85.1 [DONE] **Priority: P2 | Depends on: none.** Add NFR-R5 (vote-cast integrity) and NFR-R6 (mobile
+diagnostic log capture) to `docs/book/03-requirements.md`'s Reliability subsection, sourced from
+`ElectionService.CastVoteAsync`'s single conditional `ExecuteUpdateAsync` and
+`LogCaptureService`'s 256 KB oldest-half-drop rotation. NFR-R5's wording states the verified scope
+precisely: the atomicity of the conditional update is the actual guarantee; the existing test
+(`CastVoteAsync_RejectsReplayAfterTheFirstVote`) exercises sequential resubmission, not two literally
+simultaneous requests, and the entry does not claim otherwise. **Acceptance:** both rows added; done.
+
+85.2 [DONE] **Priority: P3 | Depends on: 85.1.** Update Figure 3.11's classification-tree Reliability
+range label, add QAS-11 for NFR-R5 to the quality-attribute scenario table, and update §3.13's stated
+NFR and QAS totals so the summary counts match the catalogue. **Acceptance:** figure label, QAS-11 row,
+and totals updated in the same edit as 85.1; done.
+
+85.3 [DONE] **Priority: P3 | Depends on: 85.1.** Append `"85"` to Work Package C17's tracked area list
+in `docs/book/build/wbs.py`. **Acceptance:** done; `python docs/book/build/build.py --pdf --strict` was
+run afterward and reported no new drift beyond the pre-existing stale commit/work-package counts in
+04-methodology.md, 07-implementation.md and 11-project-management.md, which predate this change.
+
+---
+
+# Work Package 87 — Login authentication progress status
+
+<!-- wbs: component=C13 start=2026-09-22 end=2026-09-22 after=86 -->
+
+Two commits (894567f3, 6eec298a) shipped a new public login flow — `docs/specs/007-login-authentication-status/spec.md`
+and `plan.md`, plus `login.html`/`login.scss`/`login.spec.ts`/`login.ts` — with no matching tracker
+entry, found during a routine review of recent implementations against `docs/TODO.md`.
+
+87.1 [DONE] **Priority: P3 | Depends on: none.** Replace the static `Authenticating...` label with a
+timed sequence of technical-sounding status verbs (`Connecting`, `Validating`, `Hashing`, etc., a
+6-to-7-item subset chosen per attempt) shown in strict forward order while the request is pending, each
+transition a 1.2s crossfade using the login page's existing theme tokens and button styling. Submit and
+social-login buttons stay disabled for the duration to block duplicate requests.
+**Acceptance:** done; `docs/specs/007-login-authentication-status/spec.md` FR-1/FR-2/FR-3.
+
+87.2 [DONE] **Priority: P3 | Depends on: 87.1.** Lifecycle safety: an 8-second timeout stops the
+sequence, restores the idle form, and shows `Login timed out. Please try again.` if the request hangs;
+`ngOnDestroy` clears the interval and timeout timers so no callback fires after the component is gone;
+the progress indicator and label both return to their idle state immediately on success or failure.
+**Acceptance:** done; `npx vitest run src/app/public/login/login.spec.ts` (6 passed, run 2026-09-22).
+
+87.3 [DONE] **Priority: P1 | Depends on: 87.2.** Reported by the user 2026-10-02: the status words ran
+out before the login reply came back and the page stayed on the login form. Two causes. The 8-second
+timeout fired while the request was still running, and a reply after that was ignored even though
+`AuthService` had already stored the session. And once the 6 or 7 words were used up, the last one stayed
+on screen. The timeout is now 60 seconds and cancels the request when it fires. The words loop from the
+second one until the reply arrives. The three login paths (password, Google, Facebook) share one
+`runLogin` helper, so the request handle is kept in one place.
+**Acceptance:** done; `npx vitest run src/app/public/login/login.spec.ts` (8 passed, run 2026-10-02).
+
+87.4 [DONE] **Priority: P2 | Depends on: 87.3.** Raised by the user 2026-10-02: "i want more relevant
+words". Words like `Salting`, `Intercepting` and `Ingesting` meant nothing to a member. The button now
+reads `Signing in`, and a status line under it steps through `Checking your details`, `Verifying your
+password`, `Loading your profile` and `Opening your portal` every 2 seconds. After those it repeats
+`Waking up the server`, `This can take up to a minute` and `Still signing you in`, because a reply that
+slow is almost always a Render cold start. Spec 007 FR-1, FR-2, FR-4 and its plan updated to match.
+**Acceptance:** done; `login.spec.ts` 8 passed and checked in the browser against a login held for 15s
+(2026-10-03).
+
+87.5 [DONE] **Priority: P2 | Depends on: none.** Raised by the user 2026-10-02: "overall login page
+doesnt look a good design, and laypout to me". Found on screenshots: at 360x640 the card was taller than
+the screen and `height: 100vh; overflow: hidden` cut off the logo at the top and the membership link at
+the bottom; the photo stopped short of both screen edges on desktop because of `<main>`'s padding;
+labels were 0.65rem heavy uppercase and placeholders were at 15% opacity. The page now grows and
+scrolls, breaks out to full width, and shows a two-panel layout from 900px (welcome text and org name on
+the left, form on the right) and a single compact card below that. Labels and the button use normal
+case, placeholders are readable, `Forgot password?` sits beside the password label, and all colors come
+from theme tokens. `.field-error` had no styles anywhere, so it now has them here.
+**Acceptance:** done; checked at 360x640, 390x844 and 1440x900 with no horizontal scroll; full web
+unit suite 566 passed and `ng build` clean (2026-10-03).
+
+87.6 [DONE] **Priority: P2 | Depends on: 87.4.** Raised by the user 2026-10-06: the login progress words
+should not repeat, should add more lines when the wait is long, and should follow the order of what is
+really happening. 87.4 looped three waking lines, and 37.1y then left one static line for up to 60s. The
+line now reads `Checking your username and password` during the request, then moves once each to a
+server-starting line at 5s, a still-starting line at 20s and a nearly-there line at 40s, and shows
+`Signed in. Opening your portal` once the reply succeeds. No line repeats the button's `Signing in`, and
+the waiting lines stop as soon as the reply comes. Spec 007 FR-1 and scenarios 1-2 updated.
+**Acceptance:** done; `login.spec.ts` 17 passed, with tests for the order, exact times and no line after
+the reply (2026-10-06).
+
+---
+
+# Work Package 89 — Mentorship web UI (raised by user 2026-09-23: "campaigns, ad-hoc reporting, and mentoring are the three genuine feature gaps")
+
+Raised alongside Work Package 90 while checking whether campaigns, ad-hoc reporting and mentoring
+were genuinely missing. Mentoring is not: `MentorshipRequest`, `IMentorshipService`, a 6-route
+`MentorshipController` (send/sent/received/respond/complete/admin-all, class-level `[Authorize]`)
+and a full Flutter screen (`lib/screens/member/mentorship_hub_screen.dart`) are already committed
+and the tables are in `InitialBaseline` (properly migrated). Only Angular web has no consuming page —
+`core/services/mentorship.service.ts` exists and is unused.
+
+89.1 [DONE] **Priority: P2 | Depends on: none.** Admin oversight page at `admin/mentorship` against
+the existing `GET api/mentorship/admin/all` route — list all requests with status, requester, mentor.
+No new backend.
+**Acceptance:** `admin-mentorship.ts`/`.html`/`.scss` built and routed at `/admin/mentorship`, nav
+entry added under Content section, vitest spec covers load + search filter.
+
+89.2 [DONE] **Priority: P2 | Depends on: none.** Member mentorship UI: the send-request form and
+sent/received lists already existed on the combined `member/requests` page (built for family links,
+tabbed to include mentorship) — the only missing action was mark-complete, added as `completeMentorship()`
+wired to the existing `mentorship.service.ts` and the existing `MentorshipController` routes. No
+separate `portal/mentorship` page was needed; extending the existing combined page matches how family
+links and mentorship were already sharing it.
+**Acceptance:** "Mark Complete" button added to both received and sent mentorship rows when
+`status === 'Accepted'`; `completeMentorship()` calls `MentorshipService.markComplete` and reloads.
+
+89.3 [DONE] **Priority: P2 | Depends on: 89.1, 89.2.** `MENTORSHIP` already existed in
+`API_ENDPOINTS`; no separate `ADMIN_MENTORSHIP` block was needed since the admin list reuses the same
+base path (`/admin/all` suffix). `mentorship.service.ts` was typed properly (`MentorshipRequestDto`,
+`MentorshipAdminRow`) and gained `getAllForAdmin()`/`markComplete()`; `MENTORSHIP_STATUS_MAP` +
+`getMentorshipStatusLabel`/`getMentorshipStatusClass` added to `app.constants.ts`, mirroring the
+`PLEDGE_STATUS_MAP` convention.
+**Acceptance:** `npm run type-check` passes clean.
+
+89.4 [DONE] **Priority: P3 | Depends on: 89.1, 89.2.** Correct `docs/FEATURES.md` (~line 167), which
+currently describes Mentorship only as a `JobCategory` enum value — add a section for the real
+request/respond/complete workflow that ships in this item.
+**Acceptance:** see below, same change.
+
+89.5 [DONE] **Priority: P2 | Depends on: 89.1, 89.2.** Vitest specs for both new pages (send/respond/
+complete flow, admin list rendering). Backend and mobile tests already exist and are not duplicated.
+**Acceptance:** `admin-mentorship.spec.ts` (3 tests: create, load, filter) and 2 new tests added to
+`requests.spec.ts` (`completeMentorship` success/error) — 14/14 passing, `npm run test:unit`.
+
+---
+
+# Work Package 83 — Registration transaction bug found via the error-logs table
+
+<!-- wbs: component=C3 start=2026-09-16 end=2026-09-16 after=43 -->
+
+Found while closing 43.4's live-verification pass: the same `ErrorLogs` query used to confirm the
+diagnostic trigger also returned a real, pre-existing row. `ErrorLogs.Id=1`, dated 2026-09-13, logs a
+genuine production failure at `/api/auth/register`: "This NpgsqlTransaction has completed; it is no
+longer usable." Not a diagnostic artifact — a real registration attempt hit this. Recorded here rather
+than folded into 43.4, since 43.4 was about the logging pipeline working, not about this specific bug.
+
+[DONE 2026-10-11] Checked 2026-10-11: items 83.1 to 83.3 are [DONE 2026-09-16]. 83.1 moved the OTP and alert calls out of the Serializable transaction, with two regression tests in `MemberServiceTests.cs`.
+
+# Work Package 48 — Full security audit (raised by user 2026-08-29: "plan for vulnurability check, check for
+web security best paractices")
+
+A `security-reviewer` subagent audit of the whole app (verifying prior S1-S9/Work Package 24 hardening is
+still genuinely wired, and hunting for anything new) found 2 Critical, 4 High, 4 Medium, and several
+Low findings. All code-fixable items below are done (511/511 backend tests green, `ng build` clean);
+the two Critical items include work the user must do outside this codebase (external secret rotation).
+
+## Round 2 — OWASP Top 10 gap-fill audit (2026-08-29, raised by user: "make sure OWASPs are covered")
+
+Round 1 covered A01 (Access Control), A07 (Auth Failures), and SQL injection in depth. This round
+targeted the categories round 1 didn't verify: A02 (crypto/headers), A03 (frontend XSS), A05
+(misconfiguration), A06 (component versions), A08 (integrity), A10 (SSRF). 511/511 backend tests
+and 352/352 frontend tests green after all fixes; `ng build`/`type-check` clean.
+
+[DONE 2026-10-11] Package closed. Item 48.2 (committed secrets, rotation and history purge) is [WONTDO 2026-09-18, user decision]: closed without remediation, also listed under "Closed by user decision" in TODO.md.

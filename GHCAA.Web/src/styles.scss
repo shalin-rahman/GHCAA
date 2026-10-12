@@ -443,6 +443,22 @@ p {
   }
 }
 
+/* A flex td drops out of the table row, so its border and background stop short.
+   Keep the cell a table cell and space the buttons with a margin. */
+td.actions-cell {
+  display: table-cell;
+  vertical-align: middle;
+  white-space: nowrap;
+
+  > * + * {
+    margin-left: 0.5rem;
+  }
+
+  &.justify-end {
+    text-align: right;
+  }
+}
+
 .title-cell {
   font-weight: 700;
   font-size: 0.95rem;
@@ -3280,6 +3296,26 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
     display: none !important;
   }
 }
+/* The vote receipt is the only thing printed from the member election screen. */
+@media print {
+  body:has(.vote-receipt) * {
+    visibility: hidden !important;
+  }
+
+  .vote-receipt,
+  .vote-receipt * {
+    visibility: visible !important;
+  }
+
+  .vote-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    box-shadow: none !important;
+  }
+}
+
 /* ==========================================================================
    PUBLIC DOCUMENT PAGES — shared shell for /constitution and /elections
    --------------------------------------------------------------------------

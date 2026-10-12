@@ -69,6 +69,8 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
         if (!mounted) return;
         if (role.isStaffAdminRole) {
           context.go('/admin_dashboard');
+        } else if (role.isElectionOfficialRole) {
+          context.go('/officials');
         } else {
           context.go('/dashboard');
         }
@@ -109,6 +111,8 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
         if (!mounted) return;
         if (role.isStaffAdminRole) {
           context.go('/admin_dashboard');
+        } else if (role.isElectionOfficialRole) {
+          context.go('/officials');
         } else {
           context.go('/dashboard');
         }

@@ -12,9 +12,9 @@ namespace GHCAA.Infrastructure.Data.Configurations
             builder.Property(x => x.ShortCode).HasMaxLength(10).IsRequired();
             builder.HasIndex(x => x.ShortCode).IsUnique();
             builder.Property(x => x.RevokedReason).HasMaxLength(500);
-            // EF warning 10622 asks for a filter on Member.IsArchived. Adding it means an archived member's
-            // credential stops verifying at /verify/{shortCode}. Decide that per credential type first.
-            // TODO 94.4.
+            // Matches Member's own filter. An archived member's credential stops verifying at
+            // /verify/{shortCode}, for every credential type (decided 2026-10-12, TODO 94.4).
+            builder.HasQueryFilter(x => x.Member != null && !x.Member.IsArchived);
             builder.HasOne(x => x.Member).WithMany().HasForeignKey(x => x.MemberId)
                 .OnDelete(DeleteBehavior.Cascade);
         }

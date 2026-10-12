@@ -1,5 +1,10 @@
 # Election ballot secrecy and standards: implementation plan
 
+> **Status 2026-10-09:** Phase 2 is built on API, web and mobile, with 37.1t and 37.1u (FR-042,
+> FR-043). Left from Phase 2: a visual check of the printed receipt and a Unicode font for the mobile
+> PDF (37.1m). The web and mobile ballots also take up to `places` picks per seat now, which is the
+> client half of 37.1o.
+>
 > **Status 2026-10-06:** Phase 4 is built as far as 37.12f (see the note under Phase 4 below). The
 > status below is the 2026-09-28 position, kept for the record.
 >
@@ -103,14 +108,19 @@ Phase 3 needs the tie rule from D2 on the setup screen and a reading of the cons
 - `ElectionServiceTests`: no key blocks the vote, wrong key and short count refused, totals right
 - web `ballot-key.util.spec.ts` and `admin-elections.spec.ts`; mobile fingerprint parse test
 
-## Phase 2: P1 clients (37.1l, 37.1m, 37.1n)
+## Phase 2: P1 clients (37.1l, 37.1m, 37.1n) [built 2026-10-09]
 
 ### Backend
 
 - member election read returns `hasVoted` from `SeatVote`
 - public `GET /api/elections/{id}/results`, Declared or Archived only: every accepted candidate
   with votes (zero included), abstentions, spoiled ballots, turnout
-- public `GET /api/elections/{id}/tracking-codes`, after polling closes, sorted, codes only
+- public `GET /api/elections/{id}/tracking-codes`, after the count has run, sorted, codes only.
+  Built 2026-10-09; it waits for the count because the receipt rows are in cast order until then.
+- member `GET /api/elections/{id}/ballot` returns the paper with names, places per seat and
+  `hasVoted`. Built 2026-10-09, along with the public results read.
+- the same read returns `isEligible` and `ineligibilityReason` from the frozen roll (FR-044,
+  tracker 37.1z). It only warns. `CastBallotAsync` keeps its own roll check.
 
 ### Web
 
@@ -127,6 +137,9 @@ Phase 3 needs the tie rule from D2 on the setup screen and a reading of the cons
 ### Mobile
 
 - same ballot, review and confirm flow in `election_screen.dart` and `election_service.dart`
+- abstain is an option on every seat with the web wording, and review waits until every seat is
+  decided (FR-045, tracker 37.1z). `allSeatsDecided` in `election_service.dart` holds the rule.
+- on both clients, `isEligible == false` shows the reason and locks the paper (FR-044)
 - remove the serial number field
 - receipt as a PDF built on the device, handed to the share sheet
 - results screen reads the public results endpoint

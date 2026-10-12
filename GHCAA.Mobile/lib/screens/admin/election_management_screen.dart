@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
@@ -7,6 +8,7 @@ import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/widgets/confirm_dialog.dart';
 import '../../core/utils/app_utils.dart';
+import '../../features/admin/admin_service.dart';
 import '../../features/auth/auth_service.dart';
 import '../../features/elections/election_service.dart';
 import 'election_officials_sheet.dart';
@@ -105,6 +107,54 @@ class _ElectionManagementScreenState
     });
   }
 
+  Future<void> _unfreezeVoterRoll(AdminElection election) async {
+    final reason = await _askReason('Unfreeze voter roll');
+    if (reason == null) return;
+    await _runAction(election.id, 'freeze', () async {
+      final removed = await ref
+          .read(electionServiceProvider)
+          .unfreezeVoterRoll(election.id, reason);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Voter roll unfrozen. $removed removed.')));
+      }
+    });
+  }
+
+  Future<String?> _askReason(String title) async {
+    final ctrl = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          maxLines: 3,
+          maxLength: 400,
+          decoration: const InputDecoration(labelText: 'Reason'),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('CANCEL')),
+          ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('CONTINUE')),
+        ],
+      ),
+    );
+    final reason = ctrl.text.trim();
+    ctrl.dispose();
+    if (ok != true) return null;
+    if (reason.isEmpty && mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('A reason is required.')));
+      return null;
+    }
+    return reason;
+  }
+
   Future<void> _count(AdminElection election) async {
     final confirmed = await showConfirmDialog(
       context,
@@ -133,13 +183,32 @@ class _ElectionManagementScreenState
     });
   }
 
-  void _createElection() {
+  // The server's detail text for a failed call (the API client puts it in message).
+  String _reason(Object e) =>
+      e is DioException ? (e.message ?? e.toString()) : e.toString();
+
+  Future<void> _createElection() async {
+    final List<dynamic> periods;
+    try {
+      periods = await ref.read(adminServiceProvider).getECPeriods();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not load EC periods: ${_reason(e)}')));
+      }
+      return;
+    }
+    if (!mounted) return;
+    int? ecPeriodId;
     final titleCtrl = TextEditingController();
-    final ecPeriodCtrl = TextEditingController();
     final nomOpenCtrl = TextEditingController();
     final nomCloseCtrl = TextEditingController();
     final pollOpenCtrl = TextEditingController();
     final pollCloseCtrl = TextEditingController();
+    final scrutinyCtrl = TextEditingController();
+    final withdrawCtrl = TextEditingController();
+    ElectionTieRule tieRule = ElectionTieRule.drawingLots;
+    bool isTest = false;
     bool saving = false;
 
     showDialog(
@@ -161,12 +230,18 @@ class _ElectionManagementScreenState
                     style: const TextStyle(color: Colors.white),
                     decoration:
                         const InputDecoration(labelText: 'Election title')),
-                TextField(
-                    controller: ecPeriodCtrl,
-                    keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.white),
-                    decoration:
-                        const InputDecoration(labelText: 'EC period id')),
+                DropdownButtonFormField<int>(
+                    initialValue: ecPeriodId,
+                    isExpanded: true,
+                    decoration: const InputDecoration(labelText: 'EC period'),
+                    items: [
+                      for (final p in periods)
+                        DropdownMenuItem<int>(
+                            value: p['id'] as int,
+                            child: Text((p['title'] ?? 'EC period').toString(),
+                                overflow: TextOverflow.ellipsis)),
+                    ],
+                    onChanged: (v) => setDialogState(() => ecPeriodId = v)),
                 TextField(
                     controller: nomOpenCtrl,
                     style: const TextStyle(color: Colors.white),
@@ -178,6 +253,16 @@ class _ElectionManagementScreenState
                     decoration: const InputDecoration(
                         labelText: 'Nomination closes (YYYY-MM-DD)')),
                 TextField(
+                    controller: scrutinyCtrl,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                        labelText: 'Scrutiny date, optional (YYYY-MM-DD)')),
+                TextField(
+                    controller: withdrawCtrl,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                        labelText: 'Withdrawal closes, optional (YYYY-MM-DD)')),
+                TextField(
                     controller: pollOpenCtrl,
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
@@ -187,6 +272,51 @@ class _ElectionManagementScreenState
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
                         labelText: 'Polling closes (YYYY-MM-DD)')),
+                DropdownButtonFormField<ElectionTieRule>(
+                    initialValue: tieRule,
+                    isExpanded: true,
+                    decoration: const InputDecoration(labelText: 'If votes tie'),
+                    selectedItemBuilder: (_) => [
+                          for (final r in ElectionTieRule.values)
+                            Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(r.label,
+                                    overflow: TextOverflow.ellipsis)),
+                        ],
+                    items: [
+                      for (final r in ElectionTieRule.values)
+                        DropdownMenuItem<ElectionTieRule>(
+                            value: r,
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(r.label),
+                                  Text(r.description,
+                                      style: const TextStyle(
+                                          color: AppTheme.textMuted,
+                                          fontSize: 11)),
+                                ])),
+                    ],
+                    onChanged: (v) => setDialogState(
+                        () => tieRule = v ?? ElectionTieRule.drawingLots)),
+                Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(tieRule.description,
+                            style: const TextStyle(
+                                color: AppTheme.textMuted, fontSize: 11)))),
+                SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: isTest,
+                    activeThumbColor: AppTheme.royalGold,
+                    title: const Text('Test run',
+                        style: TextStyle(color: Colors.white, fontSize: 13)),
+                    subtitle: const Text(
+                        'Hidden from members and the public. Puts nobody on the committee.',
+                        style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                    onChanged: (v) => setDialogState(() => isTest = v)),
               ],
             ),
           ),
@@ -201,11 +331,20 @@ class _ElectionManagementScreenState
               onPressed: saving
                   ? null
                   : () async {
-                      final ecPeriodId = int.tryParse(ecPeriodCtrl.text);
                       final nomOpen = AppUtils.parseDate(nomOpenCtrl.text);
                       final nomClose = AppUtils.parseDate(nomCloseCtrl.text);
                       final pollOpen = AppUtils.parseDate(pollOpenCtrl.text);
                       final pollClose = AppUtils.parseDate(pollCloseCtrl.text);
+                      final scrutiny = AppUtils.parseDate(scrutinyCtrl.text);
+                      final withdraw = AppUtils.parseDate(withdrawCtrl.text);
+                      final optionalBad =
+                          (scrutinyCtrl.text.trim().isNotEmpty && scrutiny == null) ||
+                              (withdrawCtrl.text.trim().isNotEmpty && withdraw == null);
+                      if (optionalBad) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
+                            content: Text('Enter the scrutiny and withdrawal dates as YYYY-MM-DD, or leave them empty.')));
+                        return;
+                      }
                       if (titleCtrl.text.trim().isEmpty ||
                           ecPeriodId == null ||
                           nomOpen == null ||
@@ -213,25 +352,29 @@ class _ElectionManagementScreenState
                           pollOpen == null ||
                           pollClose == null) {
                         ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
-                            content: Text('Fill in every field with a valid date.')));
+                            content: Text('Choose an EC period and fill in every date.')));
                         return;
                       }
                       setDialogState(() => saving = true);
                       try {
                         await ref.read(electionServiceProvider).create(
                               title: titleCtrl.text.trim(),
-                              ecPeriodId: ecPeriodId,
+                              ecPeriodId: ecPeriodId!,
                               nominationOpensOn: nomOpen,
                               nominationClosesOn: nomClose,
                               pollingOpensOn: pollOpen,
                               pollingClosesOn: pollClose,
+                              isTest: isTest,
+                              tieRule: tieRule,
+                              scrutinyOn: scrutiny,
+                              withdrawalClosesOn: withdraw,
                             );
                         ref.invalidate(adminElectionsProvider);
                         if (ctx.mounted) Navigator.pop(ctx);
                       } catch (e) {
                         if (ctx.mounted) {
-                          ScaffoldMessenger.of(ctx).showSnackBar(
-                              SnackBar(content: Text('Could not create election: $e')));
+                          ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+                              content: Text('Could not create election: ${_reason(e)}')));
                         }
                       } finally {
                         if (ctx.mounted) setDialogState(() => saving = false);
@@ -338,6 +481,11 @@ class _ElectionCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text('${election.eligibleVoterCount} eligible voters',
                 style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+            if (election.isTest) ...[
+              const SizedBox(height: 4),
+              const Text('Test run. Members and the public do not see it.',
+                  style: TextStyle(color: AppTheme.royalGold, fontSize: 11)),
+            ],
             const SizedBox(height: 4),
             Text(
                 election.ballotKeyFingerprint == null
@@ -361,6 +509,12 @@ class _ElectionCard extends StatelessWidget {
                   icon: Icons.lock_outline,
                   busy: parent._isBusy(election.id, 'freeze'),
                   onPressed: () => parent._freezeVoterRoll(election),
+                ),
+                _actionButton(
+                  label: 'Unfreeze roll',
+                  icon: Icons.lock_open_outlined,
+                  busy: parent._isBusy(election.id, 'freeze'),
+                  onPressed: () => parent._unfreezeVoterRoll(election),
                 ),
                 _actionButton(
                   label: 'Count',
