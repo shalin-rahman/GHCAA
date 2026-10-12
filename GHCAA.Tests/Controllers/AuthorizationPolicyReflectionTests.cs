@@ -147,7 +147,7 @@ namespace GHCAA.Tests.Controllers
             [("ElectionsController", "KeyDestroyed")] = new(Constants.Policies.ElectionStaff, false, true),
             [("ElectionsController", "Document")] = new(Constants.Policies.ElectionStaff, false, false),
             [("ElectionsController", "FreezeRoll")] = new(Constants.Policies.ElectionStaff, false, true),
-        [("ElectionsController", "UnfreezeRoll")] = new(Constants.Policies.ElectionStaff, false, true),
+            [("ElectionsController", "UnfreezeRoll")] = new(Constants.Policies.ElectionStaff, false, true),
             [("ElectionsController", "Get")] = new(null, true, false),
             [("ElectionsController", "GetCurrent")] = new(null, true, false),
             [("ElectionsController", "GetLatestDeclared")] = new(null, true, false),

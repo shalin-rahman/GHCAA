@@ -67,12 +67,19 @@ def run(step):
 
 
 def format_code_ignoring_windows_eol(text):
-    """Windows `dotnet format` wants CRLF where the Linux runner wants LF. An error whose only
-    fix is a CRLF newline is that difference, not a real finding, so it does not fail the run."""
+    """Windows `dotnet format` wants CRLF where the Linux runner wants LF, so it reports every
+    LF line of a file as an error, and a real indent error hides among them. Only errors in files
+    with no uncommitted change are treated as that noise. An error in a file you edited counts,
+    even if it is only the CRLF difference: check it by hand."""
     errors = [l for l in text.splitlines() if ": error " in l]
-    real = [l for l in errors if "with '\\r\\n" not in l]
+    real = []
+    for line in errors:
+        path = line.split("(", 1)[0].strip()
+        changed = subprocess.run(["git", "diff", "--quiet", "HEAD", "--", path], cwd=ROOT).returncode != 0
+        if changed or r"with '\r\n" not in line:
+            real.append(line)
     if errors and not real:
-        print(f"      note: {len(errors)} format errors are Windows CRLF only; the Linux runner is the judge")
+        print(f"      note: {len(errors)} format errors are in unchanged files and ask only for CRLF; the Linux runner is the judge")
         return 0
     return 1
 
