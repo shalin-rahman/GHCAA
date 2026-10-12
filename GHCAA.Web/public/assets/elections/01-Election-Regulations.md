@@ -340,6 +340,10 @@ All officials shall sign
 
 before assuming duties.
 
+An official shall declare a conflict if a candidate is a spouse, parent, child or sibling, or if the
+official proposed or seconded a candidate. That official takes no part in that candidate's scrutiny,
+appeals or recount. An official shall not stand as a candidate in the same election.
+
 ---
 
 # 8. Voter Roll
@@ -438,6 +442,15 @@ Rejected candidates receive written reasons.
 
 Appeals permitted.
 
+A seat with one valid candidate is declared elected unopposed. That candidate is left off the ballot
+and is certified at the declaration.
+
+A seat with no valid candidate: the Chief Election Commissioner reopens nominations for that seat only.
+The Commission fixes the period for each election, three days by default. It ends before the voter roll
+is frozen. The poll date does not move. A seat still empty stays vacant until a by-election.
+
+A nominee's consent is recorded with the nomination.
+
 ---
 
 # 10. Campaign Rules
@@ -502,6 +515,26 @@ Voting methods
 
 Proxy voting prohibited unless approved by Constitution.
 
+Polling shall not open until every item below is settled. The Commission records each in the minutes.
+
+• Voter roll frozen and checked
+
+• Final candidate list fixed and ballot built
+
+• Ballot key set, its fingerprint announced, and every sealed copy held and confirmed
+
+• Every official's appointment accepted and declarations signed
+
+• Polling window set, and mock election and technical audit done
+
+• Every open appeal and complaint on nominations decided
+
+• Paper ballots and registers ready where paper is used
+
+The Commission may extend an open poll for up to 24 hours at a time, at most twice. Each extension
+needs a written reason and is announced to voters. A third extension is not allowed. The election is
+void and is held again.
+
 ---
 
 # 12. Electronic Voting
@@ -529,6 +562,15 @@ System shall support
 Commission shall conduct Mock Election before Election Day.
 
 Technical Audit mandatory.
+
+Online voting shall not be used if the hosting is not secure enough for a secret ballot, if the key
+ceremony failed, if the voter roll cannot be frozen, or if too many voters lack digital access. The
+Commission judges the last and records its reasons in the minutes.
+
+The ballot key exists as the original and sealed copies. The Association sets the number of copies,
+two by default and at least one. Each copy is held by a different appointed official who is not a
+candidate. All copies are destroyed together after the recount window. If every copy is lost, the
+election is void and is held again.
 
 ---
 
@@ -562,6 +604,10 @@ Commission signs.
 
 No counting begins until Poll Closing Certificate completed.
 
+The Polling Officer enters the issued, unused and spoiled paper counts. The Chief Election Commissioner
+approves them before counting. They must satisfy issued equals used plus unused plus spoiled. They are
+printed on the Poll Closing Certificate. An electronic ballot is never spoiled.
+
 ---
 
 # 14. Vote Counting
@@ -584,7 +630,13 @@ Counting conducted publicly.
 
 Every count recorded.
 
-Recount permitted by Commission.
+Recount permitted by Commission. The Commission fixes the end date of the recount window for each
+election and states it in the Election Calendar (ER-02). The ballot key is not destroyed until that
+date is set and has passed.
+
+A candidate on a seat may file one recount request for that seat on ER-28 within the window. The Chief
+Election Commissioner decides it. The count is run again and both results are recorded. No second
+request is heard for that seat. The key is not destroyed while a request is open.
 
 ---
 
@@ -646,7 +698,11 @@ Appeals
 
 Results
 
-for minimum ten years.
+for minimum ten years from the declaration of the result. The same period applies to every other
+election record, including those listed in Appendix C of the Forms Appendices.
+
+Nothing is deleted automatically. After ten years the records are purged only on a request approved by
+a second person. The summary result and the purge record stay.
 
 ---
 

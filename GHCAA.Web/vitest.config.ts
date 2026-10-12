@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -23,7 +25,8 @@ export default defineConfig({
         if (id.endsWith('.ts')) {
           return {
             code: code
-              .replace(/templateUrl\s*:\s*['"].*?['"]/g, 'template: ""')
+              .replace(/templateUrl\s*:\s*['"](.*?)['"]/g, (_m, file) =>
+                `template: ${JSON.stringify(readFileSync(resolve(dirname(id), file), 'utf8'))}`)
               .replace(/styleUrl\s*:\s*['"].*?['"]/g, 'styles: []')
               .replace(/styleUrls\s*:\s*\[.*?\]/g, 'styles: []')
           };

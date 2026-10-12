@@ -8,6 +8,8 @@ Related Documents:
 - Constitution
 - Election Code of Conduct
 - Digital Voting Security Standard
+- Election Key Procedure (11-Election-Key-Procedure.md)
+- Election Officials Handbook (12-Election-Officials-Handbook.md)
 
 ---
 
@@ -54,6 +56,8 @@ This manual describes every operational activity required to conduct an election
 Every Election Commissioner, Polling Officer, Observer and Technical Administrator shall follow this manual.
 
 Deviation shall only occur by written order of the Chief Election Commissioner.
+
+The platform fills some forms from its own records, so the officials do not retype them. These are ER-09 (nomination), ER-10 (nominations received), ER-13 (withdrawals), ER-14, ER-19 (officials on the board), ER-23 (count sheet, with the counts of the run), ER-29, ER-30 and ER-31. ER-01, ER-02, ER-11, ER-26, ER-28 and ER-33 print as blank forms and are completed by hand.
 
 ---
 
@@ -313,6 +317,26 @@ Outputs
 
 ✓ Calendar Approved
 
+System procedure: appointing officials
+
+Appointments are made from the officials panel, on the admin web or in the mobile app.
+
+The panel takes an existing member, or a name and email.
+
+Member search is for administrators only. An official on mobile gives a name and email.
+
+The post is live only after the appointee accepts and signs the neutrality declaration.
+
+The Returning Officer post carries a flag.
+
+An election has one live Returning Officer.
+
+Appointing a new one expires the earlier appointment.
+
+A user who holds election records cannot be deleted.
+
+The system refuses and keeps the record. The user is deactivated instead.
+
 ---
 
 # 6. Phase 3 – Planning
@@ -370,6 +394,11 @@ Approve Ballot Format
 Approve Symbol List
 
 Minutes recorded.
+
+When the election is created in the system, the Technical Administrator enters the calendar
+dates in phase order (nominations, scrutiny, withdrawals, polling) and picks the tie rule the
+constitution names: drawing lots, a run-off, or the returning officer's casting vote. The rule
+decides a tie for the last place on a seat.
 
 ---
 
@@ -615,6 +644,8 @@ Configure OTP
 
 Generate audit logs
 
+Generate the ballot key and announce its fingerprint
+
 Perform penetration test
 
 Generate readiness certificate
@@ -721,6 +752,50 @@ Any unusual event
 
 must be recorded immediately.
 
+System procedure: rules freeze and emergency revoke
+
+Before polling is requested, the panel warns if fewer than two live officials hold Approve.
+
+The warning does not block the request.
+
+The election rules freeze when a request to open polling is waiting for approval.
+
+They stay frozen through Polling and Counting.
+
+While frozen, the system refuses changes to election settings, posts, appointments and the ballot key.
+
+A plain revoke is refused as well.
+
+Each refusal is recorded in the audit history.
+
+Rules unlock
+
+Only a SuperAdmin can open one.
+
+It needs a written reason of 20 to 1000 characters.
+
+It lasts 30 minutes unless a shorter or longer time is set, up to 60 minutes.
+
+It can be closed early.
+
+It never allows a plain revoke.
+
+Emergency revoke
+
+Used to remove an official while the rules are frozen.
+
+One official asks and gives a reason.
+
+A second active official with Approve on that election must approve.
+
+The second official cannot be the requester or the person being revoked.
+
+A SuperAdmin cannot approve in their place.
+
+A request nobody acts on expires.
+
+The system checks every 15 minutes and records the expiry.
+
 ---
 
 # 13. Poll Closing
@@ -796,6 +871,36 @@ Disputed ballots separated.
 Rejected ballots documented.
 
 Recount if ordered.
+
+System procedure: ballot key
+
+The Returning Officer holds the ballot-sealing key.
+
+The key is made before polling opens and cannot be changed after it.
+
+The key file is uploaded once at the count.
+
+The key is destroyed after the result is declared and the recount window closes.
+
+The written procedure is in 11-Election-Key-Procedure.md.
+
+Step by step instructions for every post are in 12-Election-Officials-Handbook.md.
+
+---
+
+System procedure: count approval and run
+
+The count is requested and a second person approves it.
+
+Approval does not run the count.
+
+The requester runs it with the ballot-sealing key.
+
+If the CountRequesterOnly setting is on, only the requester may run it.
+
+If it is off, any other official with the Count permission, except the approver, may run it.
+
+The system records who ran the count.
 
 ---
 
@@ -900,6 +1005,24 @@ Contracts
 Passwords
 
 using official handover forms.
+
+Official access after the result
+
+Declaring the result starts a fixed access period for every appointed official.
+
+The default is 21 days. The Association can change it in the election settings.
+
+When the period ends, the official can no longer act on the election. Nothing has to be switched off.
+
+An official who is not a member cannot sign in after that day.
+
+An official who is a member signs in as before and loses only the official role.
+
+Archiving the election ends every appointment at once, even before the period runs out.
+
+Archive needs the second approver when the two-person rule is on.
+
+After archive no official appointment stays live. The audit record is kept.
 
 ---
 
