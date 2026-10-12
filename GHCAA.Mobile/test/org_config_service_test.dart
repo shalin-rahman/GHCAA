@@ -124,12 +124,14 @@ void main() {
         'candidateOrder': 'Alphabetical',
         'inviteLinkHours': 5,
         'publishPerSeatBallots': false,
+        'unfreezeCutoffDaysBeforeNominationClose': 4,
       },
     }).elections;
     expect(e.twoPersonActions, ['Declare']);
     expect(e.candidateOrder, 'Alphabetical');
     expect(e.inviteLinkHours, 5);
     expect(e.publishPerSeatBallots, isFalse);
+    expect(e.unfreezeCutoffDaysBeforeNominationClose, 4);
     expect(e.approvalExpiryHours, 48);
   });
 }

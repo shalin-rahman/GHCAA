@@ -166,7 +166,8 @@ CREATE UNIQUE INDEX "IX_OrganizationConfigs_OrgId" ON "OrganizationConfigs" ("Or
     "candidateOrder": "Random",
     "showTurnoutDuringPolling": false,
     "publishPerSeatBallots": true,
-    "countRequesterOnly": false
+    "countRequesterOnly": false,
+    "unfreezeCutoffDaysBeforeNominationClose": 2
   },
   "localization": {
     "defaultLocale": "en",

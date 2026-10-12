@@ -219,6 +219,11 @@
         <input type="number" min="1" [(ngModel)]="elections.inviteLinkHours" name="inviteLinkHours">
       </div>
       <div class="form-group">
+        <label>Last Day To Unfreeze The Voter Roll (days before nominations close)</label>
+        <input type="number" min="0" [(ngModel)]="elections.unfreezeCutoffDaysBeforeNominationClose" name="unfreezeCutoffDaysBeforeNominationClose">
+        <small class="text-muted">Unfreezing is refused inside this window, and once any nomination exists.</small>
+      </div>
+      <div class="form-group">
         <label>Candidate Order on the Ballot</label>
         <select [(ngModel)]="elections.candidateOrder" name="candidateOrder">
           @for (order of candidateOrders; track order) {

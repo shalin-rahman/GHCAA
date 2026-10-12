@@ -3651,6 +3651,35 @@
         }
       }
     },
+    "/api/elections/latest-declared": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionSummaryDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionSummaryDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionSummaryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/elections/{id}/phase": {
       "post": {
         "tags": [
@@ -3751,6 +3780,48 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/voter-roll/unfreeze": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnfreezeVoterRollDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnfreezeVoterRollDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnfreezeVoterRollDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -3993,35 +4064,6 @@
         }
       }
     },
-    "/api/elections/{id}/key-destroyed": {
-      "post": {
-        "tags": [
-          "Elections"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "409": {
-            "description": "Conflict"
-          }
-        }
-      }
-    },
     "/api/elections/{id}/approvals": {
       "get": {
         "tags": [
@@ -4067,6 +4109,29 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/key-destroyed": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -11867,10 +11932,6 @@
             "type": "string",
             "format": "date-time"
           },
-          "createdBy": {
-            "type": "integer",
-            "format": "int32"
-          },
           "description": {
             "type": "string",
             "nullable": true
@@ -13227,6 +13288,43 @@
           },
           "countRequesterOnly": {
             "type": "boolean"
+          },
+          "unfreezeCutoffDaysBeforeNominationClose": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectionSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "phase": {
+            "$ref": "#/components/schemas/ElectionPhase"
+          },
+          "ecPeriodId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "voterCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "eligibleVoterCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ballotKeyFingerprint": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -14713,7 +14811,7 @@
             "nullable": true
           }
         },
-        "additionalProperties": {}
+        "additionalProperties": { }
       },
       "ProfessionalRecord": {
         "required": [
@@ -15480,6 +15578,20 @@
             "maxLength": 2000,
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UnfreezeVoterRollDto": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 400,
+            "minLength": 1,
+            "type": "string"
           }
         },
         "additionalProperties": false

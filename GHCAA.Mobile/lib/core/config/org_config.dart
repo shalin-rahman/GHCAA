@@ -249,6 +249,7 @@ class ElectionSettings {
   final bool showTurnoutDuringPolling;
   final bool publishPerSeatBallots;
   final bool countRequesterOnly;
+  final int unfreezeCutoffDaysBeforeNominationClose;
 
   static const allApprovalActions = [
     'Publish', 'OpenPolling', 'ReplaceBallotKey', 'ClosePolling', 'Declare', 'Archive', 'Count',
@@ -265,6 +266,7 @@ class ElectionSettings {
     this.showTurnoutDuringPolling = false,
     this.publishPerSeatBallots = true,
     this.countRequesterOnly = false,
+    this.unfreezeCutoffDaysBeforeNominationClose = 2,
   });
 
   factory ElectionSettings.fromJson(Map<String, dynamic> json) {
@@ -280,6 +282,8 @@ class ElectionSettings {
       showTurnoutDuringPolling: json['showTurnoutDuringPolling'] ?? d.showTurnoutDuringPolling,
       publishPerSeatBallots: json['publishPerSeatBallots'] ?? d.publishPerSeatBallots,
       countRequesterOnly: json['countRequesterOnly'] ?? d.countRequesterOnly,
+      unfreezeCutoffDaysBeforeNominationClose:
+          json['unfreezeCutoffDaysBeforeNominationClose'] ?? d.unfreezeCutoffDaysBeforeNominationClose,
     );
   }
 }

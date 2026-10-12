@@ -55,6 +55,7 @@ export interface ElectionSettings {
     showTurnoutDuringPolling: boolean;
     publishPerSeatBallots: boolean;
     countRequesterOnly: boolean;
+    unfreezeCutoffDaysBeforeNominationClose: number;
 }
 
 // Same values as ElectionSettingsDto. Used when a stored config or the build fallback has no section.
@@ -68,7 +69,8 @@ export const DEFAULT_ELECTION_SETTINGS: ElectionSettings = {
     candidateOrder: 'Random',
     showTurnoutDuringPolling: false,
     publishPerSeatBallots: true,
-    countRequesterOnly: false
+    countRequesterOnly: false,
+    unfreezeCutoffDaysBeforeNominationClose: 2
 };
 
 export interface AdminElectionPositionDto {
