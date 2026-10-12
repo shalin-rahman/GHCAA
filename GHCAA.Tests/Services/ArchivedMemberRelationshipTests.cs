@@ -24,15 +24,27 @@ public class ArchivedMemberRelationshipTests : TestBase
         await _context.SaveChangesAsync();
         var call = new ScholarshipCall
         {
-            ScholarshipFundId = fund.Id, AcademicYear = "2026", OpensOn = DateTime.UtcNow.AddDays(-1),
-            ClosesOn = DateTime.UtcNow.AddDays(1), SlotCount = 1, AwardAmount = 100m, EligibilityCriteria = "x"
+            ScholarshipFundId = fund.Id,
+            AcademicYear = "2026",
+            OpensOn = DateTime.UtcNow.AddDays(-1),
+            ClosesOn = DateTime.UtcNow.AddDays(1),
+            SlotCount = 1,
+            AwardAmount = 100m,
+            EligibilityCriteria = "x"
         };
         _context.ScholarshipCalls.Add(call);
         await _context.SaveChangesAsync();
         var app = new ScholarshipApplication
         {
-            ScholarshipCallId = call.Id, ApplicantName = "A", ApplicantEmail = "a@example.com", ApplicantPhone = "017",
-            InstitutionName = "I", Class = "10", GuardianName = "G", NeedStatement = "n", MeritStatement = "m",
+            ScholarshipCallId = call.Id,
+            ApplicantName = "A",
+            ApplicantEmail = "a@example.com",
+            ApplicantPhone = "017",
+            InstitutionName = "I",
+            Class = "10",
+            GuardianName = "G",
+            NeedStatement = "n",
+            MeritStatement = "m",
             ReferenceCode = "REF-1"
         };
         _context.ScholarshipApplications.Add(app);

@@ -33,8 +33,12 @@ public sealed class ElectionDocumentServiceTests : TestBase
         await _context.SaveChangesAsync();
         _election = new Election
         {
-            Title = "Forms Election", ECPeriodId = period.Id, NominationOpensOn = DateTime.UtcNow, NominationClosesOn = DateTime.UtcNow.AddDays(1),
-            PollingOpensOn = DateTime.UtcNow.AddDays(2), PollingClosesOn = DateTime.UtcNow.AddDays(3)
+            Title = "Forms Election",
+            ECPeriodId = period.Id,
+            NominationOpensOn = DateTime.UtcNow,
+            NominationClosesOn = DateTime.UtcNow.AddDays(1),
+            PollingOpensOn = DateTime.UtcNow.AddDays(2),
+            PollingClosesOn = DateTime.UtcNow.AddDays(3)
         };
         _seat = new ElectionSeat { Position = ECPosition.President };
         _election.Seats.Add(_seat);
@@ -53,9 +57,17 @@ public sealed class ElectionDocumentServiceTests : TestBase
     {
         var member = new Member
         {
-            FullName = name, FatherName = "F", MotherName = "Mo", Email = $"m{n}@example.com", NID = "N" + n,
-            MobileNo = "0170" + n.ToString("D7"), PresentAddress = "A", PermanentAddress = "A",
-            EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0"
+            FullName = name,
+            FatherName = "F",
+            MotherName = "Mo",
+            Email = $"m{n}@example.com",
+            NID = "N" + n,
+            MobileNo = "0170" + n.ToString("D7"),
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0"
         };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
@@ -66,8 +78,15 @@ public sealed class ElectionDocumentServiceTests : TestBase
     {
         var nomination = new Nomination
         {
-            ElectionId = _election.Id, ElectionSeatId = _seat.Id, CandidateMemberId = candidate, ProposerMemberId = proposer,
-            SeconderMemberId = seconder, Statement = "s", Status = NominationStatus.Accepted, SubmittedAt = new DateTime(2026, 10, 1, 9, 30, 0, DateTimeKind.Utc), BallotOrder = order
+            ElectionId = _election.Id,
+            ElectionSeatId = _seat.Id,
+            CandidateMemberId = candidate,
+            ProposerMemberId = proposer,
+            SeconderMemberId = seconder,
+            Statement = "s",
+            Status = NominationStatus.Accepted,
+            SubmittedAt = new DateTime(2026, 10, 1, 9, 30, 0, DateTimeKind.Utc),
+            BallotOrder = order
         };
         _context.Nominations.Add(nomination);
         await _context.SaveChangesAsync();

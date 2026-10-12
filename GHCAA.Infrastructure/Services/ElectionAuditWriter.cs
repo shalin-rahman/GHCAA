@@ -99,8 +99,14 @@ public sealed class ElectionAuditWriter(ApplicationDbContext db) : IElectionAudi
         var at = new DateTime(now.Ticks - now.Ticks % 10, DateTimeKind.Utc);
         return new ElectionAuditEntry
         {
-            ElectionId = electionId, Seq = seq, At = at, ActorUserId = actorUserId, Action = action,
-            DetailJson = detailJson, PrevHash = prevHash, Hash = ComputeHash(prevHash, electionId, seq, at, actorUserId, action, detailJson),
+            ElectionId = electionId,
+            Seq = seq,
+            At = at,
+            ActorUserId = actorUserId,
+            Action = action,
+            DetailJson = detailJson,
+            PrevHash = prevHash,
+            Hash = ComputeHash(prevHash, electionId, seq, at, actorUserId, action, detailJson),
         };
     }
 

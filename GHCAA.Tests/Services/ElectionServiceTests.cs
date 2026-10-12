@@ -612,8 +612,13 @@ public sealed class ElectionServiceTests : TestBase
 
         _context.ElectionAuditEntries.Add(new ElectionAuditEntry
         {
-            ElectionId = id, Seq = 9999, Action = Constants.Elections.AuditActions.KeyDestroyed,
-            DetailJson = "{}", PrevHash = new string('0', 64), Hash = new string('1', 64), At = DateTime.UtcNow
+            ElectionId = id,
+            Seq = 9999,
+            Action = Constants.Elections.AuditActions.KeyDestroyed,
+            DetailJson = "{}",
+            PrevHash = new string('0', 64),
+            Hash = new string('1', 64),
+            At = DateTime.UtcNow
         });
         var save = async () => await _context.SaveChangesAsync();
 
@@ -922,9 +927,13 @@ public sealed class ElectionServiceTests : TestBase
         await _context.SaveChangesAsync();
         Election Make(ElectionPhase phase) => new()
         {
-            Title = "Election", ECPeriodId = period.Id, Phase = phase,
-            NominationOpensOn = DateTime.UtcNow, NominationClosesOn = DateTime.UtcNow.AddDays(1),
-            PollingOpensOn = DateTime.UtcNow.AddDays(2), PollingClosesOn = DateTime.UtcNow.AddDays(3)
+            Title = "Election",
+            ECPeriodId = period.Id,
+            Phase = phase,
+            NominationOpensOn = DateTime.UtcNow,
+            NominationClosesOn = DateTime.UtcNow.AddDays(1),
+            PollingOpensOn = DateTime.UtcNow.AddDays(2),
+            PollingClosesOn = DateTime.UtcNow.AddDays(3)
         };
         _context.Elections.AddRange(Make(ElectionPhase.Archived), Make(ElectionPhase.Polling));
         await _context.SaveChangesAsync();
@@ -945,9 +954,15 @@ public sealed class ElectionServiceTests : TestBase
 
     private static Election MakeElection(int periodId, ElectionPhase phase, bool isTest = false, DateTime? declaredOn = null) => new()
     {
-        Title = "Election", ECPeriodId = periodId, Phase = phase, IsTest = isTest, DeclaredOn = declaredOn,
-        NominationOpensOn = DateTime.UtcNow, NominationClosesOn = DateTime.UtcNow.AddDays(1),
-        PollingOpensOn = DateTime.UtcNow.AddDays(2), PollingClosesOn = DateTime.UtcNow.AddDays(3)
+        Title = "Election",
+        ECPeriodId = periodId,
+        Phase = phase,
+        IsTest = isTest,
+        DeclaredOn = declaredOn,
+        NominationOpensOn = DateTime.UtcNow,
+        NominationClosesOn = DateTime.UtcNow.AddDays(1),
+        PollingOpensOn = DateTime.UtcNow.AddDays(2),
+        PollingClosesOn = DateTime.UtcNow.AddDays(3)
     };
 
     [Test]

@@ -80,9 +80,17 @@ public sealed class ElectionBoardTests : TestBase
         {
             var member = new Member
             {
-                FullName = "M" + ++_next, FatherName = "F", MotherName = "Mo", Email = $"m{_next}@example.com", NID = "N" + _next,
-                MobileNo = "0170" + _next.ToString("D7"), PresentAddress = "A", PermanentAddress = "A",
-                EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0"
+                FullName = "M" + ++_next,
+                FatherName = "F",
+                MotherName = "Mo",
+                Email = $"m{_next}@example.com",
+                NID = "N" + _next,
+                MobileNo = "0170" + _next.ToString("D7"),
+                PresentAddress = "A",
+                PermanentAddress = "A",
+                EmergencyContactName = "E",
+                EmergencyContactRelation = "R",
+                EmergencyContactPhone = "0"
             };
             _context.Members.Add(member);
             await _context.SaveChangesAsync();
