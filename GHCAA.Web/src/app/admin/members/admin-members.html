@@ -77,6 +77,7 @@
                 @for (member of allMembers(); track member.id) {
                 <tr class="animate-fade-in">
                     <td class="member-cell" (click)="openDetail(member)">
+                        <div class="member-cell-row">
                         @if (member.photoPath) {
                         <img [src]="getImageUrl(member.photoPath)" class="member-avatar photo" alt="Photo" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                         } @else {
@@ -85,6 +86,7 @@
                         <div class="member-info">
                             <span class="member-name">{{ member.fullName }}</span>
                             <small>{{ member.email }}</small>
+                        </div>
                         </div>
                     </td>
                     <td><code class="text-accent">{{ member.membershipNumber || '—' }}</code></td>

@@ -5,10 +5,19 @@
     max-width: 460px;
 }
 
+.step-up-box .modal-body > p:first-child {
+    margin-bottom: 1rem;
+}
+
 .step-up-info,
 .step-up-error {
     margin: 0 0 1rem;
     font-size: 0.9rem;
+}
+
+/* Keeps the Resend button off the input. */
+.step-up-box .form-group {
+    margin-bottom: 1rem;
 }
 
 .step-up-info {

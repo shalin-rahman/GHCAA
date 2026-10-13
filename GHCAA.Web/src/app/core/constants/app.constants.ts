@@ -526,6 +526,12 @@ export const FINANCIAL_CATEGORY_OPTIONS = [
     { value: 'Other', label: 'Other' }
 ];
 
+/** Ledger categories that make sense for each record type. The API accepts any pairing. */
+export const LEDGER_CATEGORIES_BY_TYPE: Record<'Income' | 'Expense', string[]> = {
+    Income: ['MembershipFee', 'RegistrationFee', 'Donation', 'Event', 'ReunionFee', 'Sponsorship', 'Grant', 'Other'],
+    Expense: ['Event', 'Maintenance', 'Salary', 'Utilities', 'Refund', 'Other']
+};
+
 export const ACADEMIC_CERTIFICATES = [
     'HSC',
     'Bachelor (Pass)',

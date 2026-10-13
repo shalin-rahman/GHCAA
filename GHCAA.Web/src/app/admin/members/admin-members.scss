@@ -2,12 +2,16 @@
 
 /* .actions-cell and .icon-btn live in central styles.scss — do NOT re-add them here. */
 
-/* Member Cell Styling */
+/* The td stays a table cell so the row border and height hold; the flex layout sits on the inner div. */
 .member-cell {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
     cursor: pointer;
+    vertical-align: middle;
+
+    .member-cell-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
 
     .member-avatar {
         width: 40px;

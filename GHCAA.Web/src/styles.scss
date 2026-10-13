@@ -450,6 +450,12 @@ td.actions-cell {
   vertical-align: middle;
   white-space: nowrap;
 
+  /* .icon-btn is display:flex, which would stack the buttons inside a table cell. */
+  > .icon-btn {
+    display: inline-flex;
+    vertical-align: middle;
+  }
+
   > * + * {
     margin-left: 0.5rem;
   }

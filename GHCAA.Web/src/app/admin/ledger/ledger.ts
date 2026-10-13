@@ -10,7 +10,7 @@ import { PaginationComponent } from '../../common/pagination/pagination.componen
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { ExportUtil } from '../../core/utils/export.util';
-import { getFinancialCategoryLabel } from '../../core/constants/app.constants';
+import { FINANCIAL_CATEGORY_OPTIONS, LEDGER_CATEGORIES_BY_TYPE, getFinancialCategoryLabel } from '../../core/constants/app.constants';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { toWireDate, toDisplayDate, parseDisplayDate } from '../../core/utils/date.util';
 import { OrgConfigService } from '../../core/services/org-config.service';
@@ -74,16 +74,16 @@ export class Ledger implements OnInit {
   };
 
 
-  categories = [
-    { id: 'MembershipFee', name: 'Membership Fee' },
-    { id: 'RegistrationFee', name: 'Registration Fee' },
-    { id: 'Donation', name: 'Donation' },
-    { id: 'Event', name: 'Event' },
-    { id: 'Maintenance', name: 'Maintenance' },
-    { id: 'Salary', name: 'Salary' },
-    { id: 'Utilities', name: 'Utilities' },
-    { id: 'Other', name: 'Other' }
-  ];
+  categoryOptions(): { value: string; label: string }[] {
+    const allowed = LEDGER_CATEGORIES_BY_TYPE[this.newRecord.recordType as 'Income' | 'Expense'] ?? [];
+    return FINANCIAL_CATEGORY_OPTIONS.filter(o => allowed.includes(o.value));
+  }
+
+  onTypeChange() {
+    if (!this.categoryOptions().some(o => o.value === this.newRecord.financialCategory)) {
+      this.newRecord.financialCategory = this.categoryOptions()[0]?.value ?? 'Other';
+    }
+  }
 
   ngOnInit() {
     this.loadData();

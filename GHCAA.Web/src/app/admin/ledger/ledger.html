@@ -58,7 +58,7 @@
                 </div>
                 <div class="form-group">
                     <label>Type *</label>
-                    <select [(ngModel)]="newRecord.recordType" name="type" required>
+                    <select [(ngModel)]="newRecord.recordType" (ngModelChange)="onTypeChange()" name="type" required>
 
                         <option value="Income">Credit (Income)</option>
                         <option value="Expense">Debit (Expense)</option>
@@ -67,13 +67,7 @@
                 <div class="form-group">
                     <label>Category *</label>
                     <select [(ngModel)]="newRecord.financialCategory" name="financialCategory" required>
-                        <option value="MembershipFee">Membership Fee</option>
-                        <option value="Donation">Donation</option>
-                        <option value="Event">Event</option>
-                        <option value="Maintenance">Maintenance</option>
-                        <option value="Salary">Salary</option>
-                        <option value="Utilities">Utilities</option>
-                        <option value="Other">Other</option>
+                        <option *ngFor="let c of categoryOptions()" [value]="c.value">{{ c.label }}</option>
                     </select>
                 </div>
                 <div class="form-group">
