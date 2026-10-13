@@ -19,7 +19,11 @@ namespace GHCAA.API.Extensions
         public static IActionResult? ApprovalReply(this ControllerBase controller, GHCAA.Application.DTOs.ElectionApprovalRunResult run) =>
             run.Pending is not null ? controller.Accepted(run.Pending)
             : run.Error == "already-pending" ? controller.ProblemWithCode(GHCAA.Domain.Constants.ErrorCodes.ApprovalPending, "This step is already waiting for a second person.", StatusCodes.Status409Conflict)
+            : run.Error == GHCAA.Domain.Constants.Elections.Replies.Busy ? controller.ElectionBusy()
             : null;
+
+        public static ObjectResult ElectionBusy(this ControllerBase controller) =>
+            controller.ProblemWithCode(GHCAA.Domain.Constants.ErrorCodes.ElectionBusy, "Another change to this election was saved at the same moment. Nothing was changed. Try again.", StatusCodes.Status409Conflict);
 
         // Filters and middleware run outside a ControllerBase, so they build the same shape here
         // instead of going through the extension method above.

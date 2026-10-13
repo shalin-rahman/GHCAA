@@ -158,6 +158,9 @@ namespace GHCAA.Domain
                 public const string NotDeclared = "not-declared";
                 public const string AlreadyRecorded = "already-recorded";
                 public const string SamePerson = "same-person";
+                // 37.12p. Another audit write on the same election landed first and the step was
+                // rolled back. Nothing changed, so the caller can try again.
+                public const string Busy = "busy";
             }
             // 37.13a. Action names written to the election's audit chain.
             public static class AuditActions
@@ -188,6 +191,9 @@ namespace GHCAA.Domain
             public const string AppointmentExpiredReason = "Expired";
             // 37.12g. RevokedReason written on every appointment when an election is archived.
             public const string ElectionArchivedReason = "Election archived";
+            // 37.1t. The unique index that keeps one live election per EC period. Startup warns when
+            // it is missing (37.14e).
+            public const string LiveIndexName = "IX_Elections_ECPeriodId_Live";
             // 37.13v. A SuperAdmin unlock of the frozen rules. Short by default, capped, and it
             // needs a written reason long enough to say what went wrong.
             public const int RulesUnlockDefaultMinutes = 30;
@@ -329,6 +335,8 @@ namespace GHCAA.Domain
             public const string ApprovalPending = "APPROVAL_PENDING";
             // Spec 023 (37.13q): election rules are frozen from an OpenPolling request until Declared.
             public const string ElectionRulesFrozen = "ELECTION_RULES_FROZEN";
+            // 37.12p: a step clashed with another write on the same election and was rolled back.
+            public const string ElectionBusy = "ELECTION_BUSY";
             public const string AlreadyVoted = "ALREADY_VOTED";
             public const string OtpInvalid = "OTP_INVALID";
             public const string PaymentMethodDisabled = "PAYMENT_METHOD_DISABLED";

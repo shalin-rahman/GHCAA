@@ -381,7 +381,7 @@ this tree). The web client's `package.json` lists 13 runtime dependencies; the m
 `pubspec.yaml` lists roughly 51 dependency entries once dev-only and transitive-only lines are
 included in the count. Most of these were adopted without a recorded alternatives comparison —
 `QuestPDF` (2026.2.3) for PDF generation, `QRCoder` (1.8.0) for the verification codes described in
-§7.9, `MailKit` (4.16.0) for outbound email, `ClosedXML` (0.105.0) for spreadsheet export, `Dapper`
+§7.9, `MailKit` (4.18.1) for outbound email, `ClosedXML` (0.105.1) for spreadsheet export, `Dapper`
 (2.1.72) alongside EF Core for the handful of read paths that favour a raw query over LINQ — and
 this chapter does not manufacture a selection rationale for choices the repository itself does not
 document.
@@ -582,9 +582,9 @@ considered" is left blank except where a repository record documents one.
 | QuestPDF | 2026.2.3 | ID card, certificate and financial document PDFs (§7.9) | *[Not documented]* |
 | QRCoder | 1.8.0 | Verification QR codes embedded in ID cards and certificates (§7.9) | *[Not documented]* |
 | Npgsql.EntityFrameworkCore.PostgreSQL | 9.0.4 | Production database provider | Pomelo MySQL provider — removed, ADR-0006 |
-| Microsoft.EntityFrameworkCore.Sqlite | 9.0.19 | Test/dev database provider only | — |
-| MailKit | 4.16.0 | Outbound email (OTP, notifications) | *[Not documented]* |
-| ClosedXML | 0.105.0 | Spreadsheet export | *[Not documented]* |
+| Microsoft.EntityFrameworkCore.Sqlite | 9.0.20 | Test/dev database provider only | — |
+| MailKit | 4.18.1 | Outbound email (OTP, notifications) | *[Not documented]* |
+| ClosedXML | 0.105.1 | Spreadsheet export | *[Not documented]* |
 | @microsoft/signalr | ^10.0.0 | Web client hub connections (§7.7) | *[Not documented]* |
 | flutter_secure_storage | ^10.3.2 | Mobile token/credential storage (§7.13) | *[Not documented]* |
 

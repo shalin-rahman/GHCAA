@@ -39,13 +39,13 @@ namespace GHCAA.Tests
         // One place to build the services election tests share, so a constructor change edits one line.
         protected ActivityService NewActivity() => new(_context, new HttpContextAccessor());
         protected ElectionFreezeService NewFreeze() => new(_context, new HttpContextAccessor(), NewActivity());
-        protected ElectionAppointmentService NewAppointments(GHCAA.Application.Interfaces.IOrgConfigService orgConfig, GHCAA.Application.Interfaces.ITokenService? tokens = null) =>
+        protected ElectionAppointmentService NewAppointments(GHCAA.Application.Interfaces.IOrgConfigService orgConfig, GHCAA.Application.Interfaces.ITokenService? tokens = null, GHCAA.Application.Interfaces.IElectionAuditWriter? audit = null) =>
             new(_context, orgConfig, new ElectionAccessService(_context, orgConfig),
                 new Moq.Mock<GHCAA.Application.Interfaces.ICommunicationService>().Object,
                 new Moq.Mock<GHCAA.Application.Interfaces.INotificationService>().Object,
                 tokens ?? new Moq.Mock<GHCAA.Application.Interfaces.ITokenService>().Object,
                 Microsoft.Extensions.Options.Options.Create(new GHCAA.Infrastructure.Options.AppSettingsOptions()),
-                Microsoft.Extensions.Logging.Abstractions.NullLogger<ElectionAppointmentService>.Instance, NewFreeze());
+                Microsoft.Extensions.Logging.Abstractions.NullLogger<ElectionAppointmentService>.Instance, NewFreeze(), audit);
 
         protected void DetachAll()
         {

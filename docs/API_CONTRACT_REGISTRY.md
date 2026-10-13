@@ -47,6 +47,12 @@ a gap someone still needs to close.
 
 ## Log
 
+### 2026-10-13 — GET /api/elections/{id}/board, election approval and emergency-revoke routes
+- Change: `auditHeadHash` on the board is now the hash of the Declared audit row, not the newest row, so it stays the same after archiving adds revoke rows. A two-person step, an approval or an emergency revoke that clashes with another audit write on the same election now answers 409 with code `ELECTION_BUSY` instead of 500. Nothing is saved, so the caller can try again.
+- Reason: TODO 37.12p, spec 023.
+- Web: the board label reads "Audit chain head at declaration" in `public/elections/elections.html`. The 409 shows its `detail` like any other refusal.
+- Mobile: not applicable. The board on mobile does not show the hash, and the 409 `detail` is shown through `ApiException.serverMessage`.
+
 ### 2026-10-11 — GET /api/elections/{id}/documents/{formCode}, GET /api/elections/latest-declared, GET /api/elections/{id}, GET /api/elections/{id}/audit/verify
 - Change: the official PDF route is no longer anonymous. It needs sign-in and the `ViewDashboard` election permission on that election. A new anonymous route `GET /api/elections/latest-declared` returns the newest declared or archived non-test election for the results pages. `GET /api/elections/{id}` and `GET /api/elections/{id}/audit/verify` answer 404 for a test election. The board stays readable for a test election. A test election no longer holds its EC period, so a rehearsal does not block the real election for that period.
 - Reason: Decided 2026-10-11. TODO 37.12l, 37.13d. Spec 023 FR-042 and FR-047.

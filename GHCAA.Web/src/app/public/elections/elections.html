@@ -42,7 +42,7 @@
             <p>Ballot key fingerprint: <code>{{ b.keyFingerprint }}</code></p>
             }
             @if (b.auditHeadHash) {
-            <p>Audit chain head: <code>{{ b.auditHeadHash }}</code>
+            <p>Audit chain head at declaration: <code>{{ b.auditHeadHash }}</code>
                 <a [href]="auditVerifyUrl" target="_blank" rel="noopener">Check the audit chain</a></p>
             }
         </article>

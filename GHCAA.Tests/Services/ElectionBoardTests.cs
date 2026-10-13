@@ -223,6 +223,22 @@ public sealed class ElectionBoardTests : TestBase
         (await NewService().GetBoardAsync(_election.Id))!.AuditHeadHash.Should().Be(head);
     }
 
+    // 37.12p: archiving adds a revoke row per appointment after the declaration. The board
+    // head must stay on the Declared row so a hash copied on the day still matches.
+    [Test]
+    public async Task Board_AuditHeadStaysOnDeclaredRowAfterLaterRows()
+    {
+        var writer = new ElectionAuditWriter(_context);
+        await writer.AppendAsync(_election.Id, Constants.Elections.AuditActions.Declared, null, null);
+        await writer.SaveAsync();
+        var declared = _context.ElectionAuditEntries.Single().Hash;
+        await writer.AppendAsync(_election.Id, Constants.Elections.AuditActions.AppointmentRevoked, null, null);
+        await writer.SaveAsync();
+        await SetPhaseAsync(ElectionPhase.Declared);
+
+        (await NewService().GetBoardAsync(_election.Id))!.AuditHeadHash.Should().Be(declared);
+    }
+
     [Test]
     public async Task Board_IsReadableForATestElection()
     {

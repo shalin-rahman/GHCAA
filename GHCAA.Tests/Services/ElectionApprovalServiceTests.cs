@@ -719,4 +719,41 @@ public sealed class ElectionApprovalServiceTests : TestBase
         var rows = await _context.ElectionAppointments.AsNoTracking().Where(x => x.ElectionId == _election.Id).ToListAsync();
         rows.Should().OnlyContain(x => x.RevokedAt != null && x.RevokedReason == Constants.Elections.ElectionArchivedReason);
     }
+
+    // 37.12p: inside the archive transaction the audit writer cannot retry a Seq clash. The step
+    // must roll back and say "busy" rather than throw a 500.
+    [Test]
+    [Category("NFR-R5")]
+    public async Task ApproveArchive_AuditClash_RollsBackAndReturnsBusy()
+    {
+        UseSettings(new ElectionSettingsDto { TwoPersonActions = [] });
+        var clashing = new ClashingAuditWriter(new ElectionAuditWriter(_context));
+        var service = new ElectionApprovalService(_context, new ElectionService(_context), new ElectionAccessService(_context, _orgConfig.Object), _orgConfig.Object, NewAppointments(_orgConfig.Object, audit: clashing), NewActivity(), NullLogger<ElectionApprovalService>.Instance, NewFreeze());
+        _context.Elections.Single(x => x.Id == _election.Id).Phase = ElectionPhase.Declared;
+        var persona = new ElectionPersona { Name = "Scrutineer", GroupName = "Officials", Description = "d", DeclarationText = "d" };
+        _context.ElectionPersonas.Add(persona);
+        await _context.SaveChangesAsync();
+        _context.ElectionAppointments.Add(new ElectionAppointment { ElectionId = _election.Id, PersonaId = persona.Id, UserId = _carol, DisplayName = "o", Email = "c@example.com", AppointedByUserId = _alice, AppointedAt = DateTime.UtcNow, AcceptedAt = DateTime.UtcNow, DeclarationSignedAt = DateTime.UtcNow });
+        await _context.SaveChangesAsync();
+        DetachAll();
+
+        var run = await service.RunOrRequestAsync(_election.Id, ElectionApprovalAction.Archive, _alice, SuperAdmin);
+
+        run.Error.Should().Be(Constants.Elections.Replies.Busy);
+        (await ReloadAsync()).Phase.Should().Be(ElectionPhase.Declared);
+        (await _context.ElectionAppointments.AsNoTracking().Where(x => x.ElectionId == _election.Id).ToListAsync())
+            .Should().OnlyContain(x => x.RevokedAt == null);
+        (await _context.ElectionAuditEntries.AsNoTracking().CountAsync()).Should().Be(0);
+    }
+
+    // Stands in for another request that took the same Seq first. Appends really happen, so the
+    // service sees pending audit rows when the save fails.
+    private sealed class ClashingAuditWriter(IElectionAuditWriter inner) : IElectionAuditWriter
+    {
+        public Task AppendAsync(int electionId, string action, int? actorUserId, object? detail, CancellationToken ct = default) =>
+            inner.AppendAsync(electionId, action, actorUserId, detail, ct);
+        public Task SaveAsync(CancellationToken ct = default) => throw new DbUpdateException("Seq clash");
+        public Task<ElectionAuditVerifyDto> VerifyAsync(int electionId, CancellationToken ct = default) => inner.VerifyAsync(electionId, ct);
+        public Task<IReadOnlyList<ElectionAuditEntryDto>> ListAsync(int electionId, CancellationToken ct = default) => inner.ListAsync(electionId, ct);
+    }
 }

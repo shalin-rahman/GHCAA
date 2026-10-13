@@ -173,10 +173,18 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
                 turnout = new ElectionBoardTurnoutDto(voted, size);
         }
 
+        // 37.12p. The head shown is the Declared row, not the newest row. Archiving adds a revoke row
+        // per appointment, so a head noted on the day of the result would no longer match. The
+        // check link still covers the rows after it. An election declared before the chain existed
+        // has no Declared row and shows the newest one.
         string? head = null;
         if (e.Phase >= ElectionPhase.Declared)
-            head = await _db.ElectionAuditEntries.AsNoTracking().Where(x => x.ElectionId == id)
-                .OrderByDescending(x => x.Seq).Select(x => x.Hash).FirstOrDefaultAsync(ct);
+        {
+            var chain = _db.ElectionAuditEntries.AsNoTracking().Where(x => x.ElectionId == id);
+            head = await chain.Where(x => x.Action == Elections.AuditActions.Declared)
+                .OrderByDescending(x => x.Seq).Select(x => x.Hash).FirstOrDefaultAsync(ct)
+                ?? await chain.OrderByDescending(x => x.Seq).Select(x => x.Hash).FirstOrDefaultAsync(ct);
+        }
 
         return new ElectionBoardDto(e.Id, e.Title, e.Phase, e.IsTest, e.AnnouncedOn, e.NominationOpensOn, e.NominationClosesOn,
             e.ScrutinyOn, e.WithdrawalClosesOn, e.PollingOpensOn, e.PollingClosesOn, e.DeclaredOn, groups, turnout, e.BallotKeyFingerprint, head);

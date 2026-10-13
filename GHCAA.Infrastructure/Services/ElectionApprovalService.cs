@@ -52,10 +52,32 @@ public sealed class ElectionApprovalService(
         await EnsureKeyNotFrozenAsync(electionId, action, payload, ct);
         // The phase change and the appointment cleanup for Archive commit together, or not at all.
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
-        var error = await ExecuteAsync(electionId, action, payload, ct);
-        if (error == null)
-            await transaction.CommitAsync(ct);
-        return new ElectionApprovalRunResult(true, error, null);
+        try
+        {
+            var error = await ExecuteAsync(electionId, action, payload, ct);
+            if (error == null)
+                await transaction.CommitAsync(ct);
+            return new ElectionApprovalRunResult(true, error, null);
+        }
+        catch (DbUpdateException) when (HasPendingAudit())
+        {
+            await RollBackAfterClashAsync(transaction, electionId, action);
+            return new ElectionApprovalRunResult(true, Constants.Elections.Replies.Busy, null);
+        }
+    }
+
+    // 37.12p. Inside these transactions the audit writer cannot retry a Seq clash, because Postgres
+    // has already aborted the transaction. Without this the loser of two writes at once got a 500.
+    // The whole step is rolled back instead and the caller is told to try again.
+    private bool HasPendingAudit() =>
+        db.ChangeTracker.Entries<ElectionAuditEntry>().Any(x => x.State == EntityState.Added);
+
+    private async Task RollBackAfterClashAsync(Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction transaction, int electionId, ElectionApprovalAction action)
+    {
+        try { await transaction.RollbackAsync(CancellationToken.None); }
+        catch (InvalidOperationException) { }
+        db.ChangeTracker.Clear();
+        logger.LogWarning("Election {ElectionId}: {Action} clashed with another audit write and was rolled back.", electionId, action);
     }
 
     public async Task<(bool Success, string? Error, ElectionApprovalDto? Approval)> RequestAsync(int electionId, ElectionApprovalAction action, int userId, string? newPublicKey = null, CancellationToken ct = default)
@@ -178,11 +200,20 @@ public sealed class ElectionApprovalService(
         if (claimed != 1)
             return (false, "closed");
 
-        var error = await ExecuteAsync(approval.ElectionId, approval.Action, approval.PayloadJson, ct);
-        if (error != null)
-            return (false, error);
+        try
+        {
+            var error = await ExecuteAsync(approval.ElectionId, approval.Action, approval.PayloadJson, ct);
+            if (error != null)
+                return (false, error);
 
-        await transaction.CommitAsync(ct);
+            await transaction.CommitAsync(ct);
+        }
+        catch (DbUpdateException) when (HasPendingAudit())
+        {
+            // The claim rolls back too, so the approval stays open for another try.
+            await RollBackAfterClashAsync(transaction, approval.ElectionId, approval.Action);
+            return (false, Constants.Elections.Replies.Busy);
+        }
         logger.LogInformation("Election {ElectionId}: user {UserId} approved {Action} (approval {ApprovalId}).", approval.ElectionId, userId, approval.Action, approvalId);
         return (true, null);
     }
@@ -363,9 +394,17 @@ public sealed class ElectionApprovalService(
         target!.RevokedAt = now;
         target.RevokedByUserId = approval.RequestedByUserId;
         target.RevokedReason = payload!.Reason;
-        await appointments.EndAccessIfNoneLeftAsync(target.UserId, ct);
-        await AuditRevokeAsync(Constants.Elections.EmergencyRevokeOutcomes.Revoked, approval.ElectionId, approval.Id, approval.RequestedByUserId, userId, target.Id, payload.Reason, before, Snapshot(target), ct);
-        await transaction.CommitAsync(ct);
+        try
+        {
+            await appointments.EndAccessIfNoneLeftAsync(target.UserId, ct);
+            await AuditRevokeAsync(Constants.Elections.EmergencyRevokeOutcomes.Revoked, approval.ElectionId, approval.Id, approval.RequestedByUserId, userId, target.Id, payload.Reason, before, Snapshot(target), ct);
+            await transaction.CommitAsync(ct);
+        }
+        catch (DbUpdateException) when (HasPendingAudit())
+        {
+            await RollBackAfterClashAsync(transaction, approval.ElectionId, approval.Action);
+            return (false, Constants.Elections.Replies.Busy);
+        }
         logger.LogWarning("Election {ElectionId}: appointment {AppointmentId} revoked in an emergency, asked by {RequestedBy}, approved by {ApprovedBy}.", approval.ElectionId, target.Id, approval.RequestedByUserId, userId);
         return (true, null);
     }

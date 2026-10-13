@@ -65,6 +65,50 @@ namespace GHCAA.Infrastructure.Data
             await SelfHealFalselyBaselinedMigrationsAsync(ctx, logger, applied);
             await ctx.Database.MigrateAsync();
             await RepairMissingColumnsAsync(ctx, logger);
+            await WarnIfLiveElectionIndexMissingAsync(ctx, logger);
+        }
+
+        // 37.14e. AddBallotOrderAndTestElection skips IX_Elections_ECPeriodId_Live when two live
+        // elections already share a period, and Postgres only prints that once in the migration
+        // output. Without the index, two admins who create at the same moment can both succeed.
+        // Say so on every boot and name the rows, so someone archives one and recreates the index.
+        // Nothing is changed here: which election to archive is a human decision.
+        private static async Task WarnIfLiveElectionIndexMissingAsync(ApplicationDbContext ctx, ILogger logger)
+        {
+            if (!ctx.Database.IsNpgsql())
+            {
+                return;
+            }
+
+            var exists = await ctx.Database.SqlQueryRaw<int>(
+                "SELECT 1 AS \"Value\" FROM pg_indexes WHERE schemaname = current_schema() AND indexname = {0}",
+                GHCAA.Domain.Constants.Elections.LiveIndexName).AnyAsync();
+            if (exists)
+            {
+                return;
+            }
+
+            var clashes = await LiveElectionsSharingAPeriodAsync(ctx);
+            logger.LogWarning(
+                "Index {Index} is missing, so one live election per EC period is not enforced by the database. Live elections sharing a period: {Clashes}. Archive all but one per period, then run: CREATE UNIQUE INDEX \"{Index}\" ON \"Elections\" (\"ECPeriodId\") WHERE \"Phase\" <> {Archived} AND NOT \"IsTest\";",
+                GHCAA.Domain.Constants.Elections.LiveIndexName,
+                clashes.Count == 0 ? "none" : string.Join("; ", clashes.Select(c => $"period {c.ECPeriodId}: election {c.Id} \"{c.Title}\"")),
+                GHCAA.Domain.Constants.Elections.LiveIndexName,
+                (int)GHCAA.Domain.Enums.ElectionPhase.Archived);
+        }
+
+        // The rows the live-election index would reject: more than one non-archived, non-test
+        // election in the same EC period. Plain LINQ so it can be tested on SQLite.
+        public static async Task<List<(int Id, string Title, int ECPeriodId)>> LiveElectionsSharingAPeriodAsync(ApplicationDbContext ctx)
+        {
+            var live = ctx.Elections.IgnoreQueryFilters().AsNoTracking()
+                .Where(e => e.Phase != GHCAA.Domain.Enums.ElectionPhase.Archived && !e.IsTest);
+            var periods = live.GroupBy(e => e.ECPeriodId).Where(g => g.Count() > 1).Select(g => g.Key);
+            var rows = await live.Where(e => periods.Contains(e.ECPeriodId))
+                .OrderBy(e => e.ECPeriodId).ThenBy(e => e.Id)
+                .Select(e => new { e.Id, e.Title, e.ECPeriodId })
+                .ToListAsync();
+            return rows.Select(r => (r.Id, r.Title, r.ECPeriodId)).ToList();
         }
 
         // The self-heal above only catches migrations of one risky shape. Preprod still ended up with

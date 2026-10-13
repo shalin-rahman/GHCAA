@@ -36,6 +36,20 @@ namespace GHCAA.Tests.Data
             return assembly.CreateMigration(assembly.Migrations[migrationId], ctx.Database.ProviderName!).UpOperations;
         }
 
+        // RenameIsGhcToIsOrgProfile shipped without its Designer file, so EF never saw it and every
+        // directory card showed "Batch: N/A". A migration class EF cannot find fails silently.
+        [Test]
+        public void EveryMigrationClass_IsDiscoveredByEf()
+        {
+            using var ctx = NewPgSqlContext();
+            var discovered = ctx.GetService<IMigrationsAssembly>().Migrations.Values.Select(t => t.AsType()).ToHashSet();
+
+            var declared = typeof(PgSqlApplicationDbContext).Assembly.GetTypes()
+                .Where(t => !t.IsAbstract && typeof(Migration).IsAssignableFrom(t));
+
+            declared.Should().NotBeEmpty().And.OnlyContain(t => discovered.Contains(t));
+        }
+
         [Test]
         public void AddElectionEngine_DoesNotCheckTheDroppedElectionOfficersTable()
         {

@@ -390,6 +390,7 @@ public sealed class ElectionsController(
         "not-requester" => Problem(detail: "Only the official who asked for this count can run it.", statusCode: StatusCodes.Status403Forbidden),
         "expired" => Problem(detail: "This request has expired. Ask again.", statusCode: StatusCodes.Status400BadRequest),
         "closed" => Problem(detail: "This request has already been decided.", statusCode: StatusCodes.Status409Conflict),
+        Elections.Replies.Busy => this.ElectionBusy(),
         "already-pending" => this.ProblemWithCode(ErrorCodes.ApprovalPending, "This step is already waiting for a second person.", StatusCodes.Status409Conflict),
         "reason-required" => Problem(detail: "Give a reason for the revocation.", statusCode: StatusCodes.Status400BadRequest),
         "no-eligible-approver" => Problem(detail: "Another authorized election official with Approve permission is required.", statusCode: StatusCodes.Status409Conflict),

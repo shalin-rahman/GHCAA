@@ -20,7 +20,7 @@ public sealed class ElectionConfiguration : IEntityTypeConfiguration<Election>
         // number 9, so reordering ElectionPhase needs a migration that rebuilds this index.
         // A rehearsal (IsTest) is left out so it cannot block the real election.
         b.HasIndex(x => x.ECPeriodId).IsUnique().HasFilter($"\"Phase\" <> {(int)Enums.ElectionPhase.Archived} AND NOT \"IsTest\"")
-            .HasDatabaseName("IX_Elections_ECPeriodId_Live");
+            .HasDatabaseName(Constants.Elections.LiveIndexName);
         b.HasOne(x => x.ECPeriod).WithMany().HasForeignKey(x => x.ECPeriodId).OnDelete(DeleteBehavior.Restrict);
     }
 }

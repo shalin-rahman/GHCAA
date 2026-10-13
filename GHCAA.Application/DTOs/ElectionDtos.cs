@@ -41,7 +41,8 @@ public record BallotCandidateDto(int NominationId, string Name, string? PhotoUrl
 // Spec 023 FR-017: the declared result. Abstentions on a seat are valid ballots that named
 // nobody for it. Turnout is BallotsCast against EligibleVoters on the frozen roll.
 // Spec 023 FR-033 (37.12i): the public board. No email, phone or user id on any member of it.
-// Turnout is null while it must stay hidden. AuditHeadHash is set only once the election is Declared.
+// Turnout is null while it must stay hidden. AuditHeadHash is set only once the election is Declared,
+// and it is the hash of the Declared audit row.
 public record ElectionBoardMemberDto(string PersonaName, string DisplayName, DateTime AcceptedAt);
 public record ElectionBoardGroupDto(string GroupName, IReadOnlyList<ElectionBoardMemberDto> Members);
 public record ElectionBoardTurnoutDto(int BallotsCast, int RollSize);

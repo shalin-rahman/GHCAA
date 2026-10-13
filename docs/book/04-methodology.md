@@ -233,7 +233,7 @@ numbers.
 
 | Metric | Formula / method | Tool | Target |
 | --- | --- | --- | --- |
-| Statement and branch coverage | Lines and branches exercised ÷ total, per test run | `coverlet.collector` 6.0.2 via `dotnet test`, per NUnit 4.2.2 project | Risk-weighted by module criticality; see §9.12.5 |
+| Statement and branch coverage | Lines and branches exercised ÷ total, per test run | `coverlet.collector` 10.1.0 via `dotnet test`, per NUnit 4.2.2 project | Risk-weighted by module criticality; see §9.12.5 |
 | Mutation score | Mutants killed ÷ mutants generated | Planned, not run; §9.12.5 states why | Not reported |
 | Cyclomatic complexity | McCabe's independent-path count per method [57] | Static analysis over the solution | Flagged above 10 per method |
 | Coupling between objects (CBO), afferent/efferent coupling, instability | Chidamber and Kemerer's suite [56]; instability = efferent ÷ (afferent + efferent) | Static analysis over the solution | Plotted against Martin's main sequence, §9.12.3 |
