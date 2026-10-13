@@ -1,7 +1,7 @@
 import { Component, inject, signal, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import * as XLSX from 'xlsx';
+import { readSheet } from 'read-excel-file/browser';
 import { AdminService } from '../../../core/services/admin.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LogoSpinnerComponent } from '../../../common/logo-spinner/logo-spinner';
@@ -49,33 +49,25 @@ export class MemberImportModalComponent {
   }
 
   extractHeaders(file: File) {
-    const reader = new FileReader();
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      try {
-        const data = new Uint8Array(e.target!.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json<any>(firstSheet, { header: 1 });
-
-        if (jsonData.length > 0) {
-          const headers = (jsonData[0] as any[])
-            .filter((h: any) => h != null && String(h).trim() !== '')
-            .map((h: any) => String(h).trim());
-          this.excelHeaders.set(headers);
-          this.columnMapping = {};
-          this._autoMap(headers);
-          this.notify.success(`Found ${headers.length} columns in the Excel file.`);
-        } else {
-          this.notify.warning('The Excel file appears to be empty.');
-          this.excelHeaders.set([]);
-        }
-      } catch (err) {
-        console.error('Excel parse error:', err);
-        this.notify.error("Couldn't read that file. Check that it's a valid .xlsx file.");
+    readSheet(file).then(rows => {
+      const jsonData = rows as unknown[][];
+      if (jsonData.length > 0) {
+        const headers = (jsonData[0] as any[])
+          .filter((h: any) => h != null && String(h).trim() !== '')
+          .map((h: any) => String(h).trim());
+        this.excelHeaders.set(headers);
+        this.columnMapping = {};
+        this._autoMap(headers);
+        this.notify.success(`Found ${headers.length} columns in the Excel file.`);
+      } else {
+        this.notify.warning('The Excel file appears to be empty.');
         this.excelHeaders.set([]);
       }
-    };
-    reader.readAsArrayBuffer(file);
+    }).catch(err => {
+      console.error('Excel parse error:', err);
+      this.notify.error("Couldn't read that file. Check that it's a valid .xlsx file.");
+      this.excelHeaders.set([]);
+    });
   }
 
   executeImport() {

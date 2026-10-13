@@ -131,7 +131,7 @@ namespace GHCAA.Tests.Services
             locked.Should().BeNull();
 
             var updated = await _context.Users.FindAsync(user.Id);
-            updated!.FailedLoginAttempts.Should().BeGreaterOrEqualTo(5);
+            updated!.FailedLoginAttempts.Should().BeGreaterThanOrEqualTo(5);
             updated.LockoutUntil.Should().NotBeNull();
             updated.LockoutUntil!.Value.Should().BeAfter(DateTime.UtcNow);
         }

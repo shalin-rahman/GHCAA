@@ -7,9 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.PixelFormats;
+using SkiaSharp;
 
 namespace GHCAA.Tests.Services;
 
@@ -284,10 +282,10 @@ public class LocalFileStorageServiceTests
 
     private static MemoryStream CreateJpeg(int width, int height)
     {
-        using var image = new Image<Rgba32>(width, height);
-        var stream = new MemoryStream();
-        image.SaveAsJpeg(stream, new JpegEncoder { Quality = 90 });
-        stream.Position = 0;
+        using var bitmap = new SKBitmap(width, height);
+        using var skImage = SKImage.FromBitmap(bitmap);
+        using var data = skImage.Encode(SKEncodedImageFormat.Jpeg, 90);
+        var stream = new MemoryStream(data.ToArray());
         return stream;
     }
 
@@ -308,9 +306,9 @@ public class LocalFileStorageServiceTests
         // Assert
         Path.GetFileName(relativePath).Should().StartWith("galleryphoto_");
         var fullPath = Path.Combine(_testDirectory, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
-        using var saved = await Image.LoadAsync(fullPath);
+        using var saved = SKBitmap.Decode(fullPath);
         saved.Width.Should().Be(800);
-        saved.Height.Should().Be(533); // 2000/3000 * 800, rounded by ImageSharp's Max resize mode
+        saved.Height.Should().Be(533); // 2000/3000 * 800, rounded to the nearest pixel
     }
 
     [Test]
@@ -342,7 +340,7 @@ public class LocalFileStorageServiceTests
 
         // Assert
         var fullPath = Path.Combine(_testDirectory, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
-        using var saved = await Image.LoadAsync(fullPath);
+        using var saved = SKBitmap.Decode(fullPath);
         saved.Width.Should().Be(200);
         saved.Height.Should().Be(150);
     }

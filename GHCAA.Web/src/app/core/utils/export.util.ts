@@ -4,15 +4,19 @@ export class ExportUtil {
    */
   static toExcel(data: any[], fileName: string = 'export'): void {
     if (!data || data.length === 0) { console.warn('ExportUtil: No data to export'); return; }
-    import('xlsx').then(XLSX => {
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Data');
-      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-      ExportUtil.saveFile(
-        new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
-        `${fileName}.xlsx`
-      );
+    import('write-excel-file/browser').then(async ({ default: writeExcelFile }) => {
+      const headers = Object.keys(data[0]);
+      const toCell = (v: unknown) => {
+        if (v === null || v === undefined || v === '') return null;
+        if (typeof v === 'number' || typeof v === 'boolean' || v instanceof Date) return { value: v };
+        return { value: String(v) };
+      };
+      const sheetData = [
+        headers.map(h => ({ value: h, fontWeight: 'bold' as const })),
+        ...data.map(row => headers.map(h => toCell(row[h])))
+      ];
+      const blob = await writeExcelFile(sheetData as any, { sheet: 'Data' }).toBlob();
+      ExportUtil.saveFile(blob, `${fileName}.xlsx`);
     }).catch(err => console.error('Excel export failed:', err));
   }
 

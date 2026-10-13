@@ -2077,7 +2077,7 @@ approvers and do not trigger handover. No filter added on the relationship; the 
 `ElectionConfigurations.cs` says why. Test:
 `ElectionAccessServiceTests.ArchivedUser_KeepsTheAppointmentOnRecord_ButGetsNoPermissions`.
 
-94.6 [ONHOLD 2026-10-12] **Priority: P2 | Depends on: a Six Labors licence key.** `SixLabors.ImageSharp` stays at 3.1.12, so Release builds still print NU1902 and NU1903 for it. Version 4.x and 3.2.0 both need a `SixLaborsLicenseKey` or a `sixlabors.lic` file for a Release build, and 3.2.0 is still flagged as vulnerable. Decided 2026-10-12 to hold. Revisit when the project has a key: move to 4.x, check the three projects that reference it, and run the full backend suite.
+94.6 [DONE 2026-10-13] **Priority: P2 | Depends on: none.** `SixLabors.ImageSharp` needed a paid licence key for a Release build and 3.1.12 carried open advisories, so it is replaced by SkiaSharp (MIT). `LocalFileStorageService` and the Export seed tool now decode and re-encode with `SKBitmap`; Infrastructure also takes `SkiaSharp.NativeAssets.Linux.NoDependencies` for the Docker image. The same change replaced `xlsx` (npm advisories) with `read-excel-file` and `write-excel-file`, and removed the unused `FluentValidation.AspNetCore`. Backend package bumps from 10.0.12 were set back to 9.0.20, since 10.x Microsoft packages do not support net9.0. The vulnerable-package gate and `npm audit` are both clean. Left to check: a Linux/Docker run of the image compression path.
 
 # Work Package 95 — Step-up for email-less admins and by-elections (raised by user 2026-10-03: "if superadmin logged in and he dont have email, how did he get 6 digit code for election menu" and "if any specefic position(s) got empty, there masy needed another elction")
 

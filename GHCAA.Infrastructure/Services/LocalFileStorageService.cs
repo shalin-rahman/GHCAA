@@ -4,9 +4,7 @@ using GHCAA.Infrastructure.Options;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
 
 namespace GHCAA.Infrastructure.Services
 {
@@ -129,52 +127,51 @@ namespace GHCAA.Infrastructure.Services
                     // Reset position just in case
                     if (fileStream.CanSeek) fileStream.Position = 0;
 
-                    using var image = await Image.LoadAsync(fileStream, cancellationToken);
+                    // SKBitmap.Decode(Stream) closes the stream, and the fallback below needs it open.
+                    using var buffer = new MemoryStream();
+                    await fileStream.CopyToAsync(buffer, cancellationToken);
+                    var image = SKBitmap.Decode(buffer.ToArray())
+                        ?? throw new InvalidDataException("The uploaded file is not a readable image.");
 
-                    if (image.Width > MaxDimensionPx || image.Height > MaxDimensionPx)
+                    try
                     {
-                        image.Mutate(x => x.Resize(new ResizeOptions
+                        if (image.Width > MaxDimensionPx || image.Height > MaxDimensionPx)
+                            image = FitWithin(image, MaxDimensionPx, MaxDimensionPx);
+
+                        var targetBytes = TargetSizeKB * 1024L;
+                        var quality = Math.Clamp(DefaultQuality, 1, 100);
+                        var minimumQuality = Math.Clamp(FallbackQuality, 1, quality);
+                        byte[] encoded;
+
+                        while (true)
                         {
-                            Mode = ResizeMode.Max,
-                            Size = new Size(MaxDimensionPx, MaxDimensionPx)
-                        }));
-                    }
+                            encoded = EncodeJpeg(image, quality);
 
-                    var targetBytes = TargetSizeKB * 1024L;
-                    var quality = Math.Clamp(DefaultQuality, 1, 100);
-                    var minimumQuality = Math.Clamp(FallbackQuality, 1, quality);
-                    using var encoded = new MemoryStream();
+                            if (encoded.Length <= targetBytes)
+                                break;
 
-                    while (true)
-                    {
-                        encoded.SetLength(0);
-                        encoded.Position = 0;
-                        await image.SaveAsJpegAsync(encoded, new JpegEncoder { Quality = quality }, cancellationToken);
+                            if (quality > minimumQuality)
+                            {
+                                quality = Math.Max(minimumQuality, quality - 10);
+                                continue;
+                            }
 
-                        if (encoded.Length <= targetBytes)
-                            break;
+                            if (Math.Max(image.Width, image.Height) <= 320)
+                            {
+                                throw new InvalidOperationException(
+                                    $"Unable to encode {uploadType} within the configured image size cap of {TargetSizeKB} KB.");
+                            }
 
-                        if (quality > minimumQuality)
-                        {
-                            quality = Math.Max(minimumQuality, quality - 10);
-                            continue;
+                            image = FitWithin(image, Math.Max(320, (int)(image.Width * 0.85)), Math.Max(320, (int)(image.Height * 0.85)));
+                            quality = Math.Clamp(DefaultQuality, 1, 100);
                         }
 
-                        if (Math.Max(image.Width, image.Height) <= 320)
-                        {
-                            throw new InvalidOperationException(
-                                $"Unable to encode {uploadType} within the configured image size cap of {TargetSizeKB} KB.");
-                        }
-
-                        image.Mutate(x => x.Resize(new ResizeOptions
-                        {
-                            Mode = ResizeMode.Max,
-                            Size = new Size(Math.Max(320, (int)(image.Width * 0.85)), Math.Max(320, (int)(image.Height * 0.85)))
-                        }));
-                        quality = Math.Clamp(DefaultQuality, 1, 100);
+                        await File.WriteAllBytesAsync(diskPath, encoded, cancellationToken);
                     }
-
-                    await File.WriteAllBytesAsync(diskPath, encoded.ToArray(), cancellationToken);
+                    finally
+                    {
+                        image.Dispose();
+                    }
                 }
                 catch (Exception ex) when (ex is not InvalidOperationException)
                 {
@@ -193,6 +190,25 @@ namespace GHCAA.Infrastructure.Services
             var webRelative = Path.Combine(relativePrefix, memberId.ToString(), prefix, uniqueName).Replace("\\", "/");
             _logger.LogInformation("Saved {Type} file to {Path}", isSecure ? "secure" : "public", webRelative);
             return webRelative;
+        }
+
+        // Scales down to fit inside maxW x maxH, keeping the aspect ratio. Disposes the source bitmap.
+        private static SKBitmap FitWithin(SKBitmap source, int maxW, int maxH)
+        {
+            var scale = Math.Min((double)maxW / source.Width, (double)maxH / source.Height);
+            if (scale >= 1) return source;
+            var info = new SKImageInfo(Math.Max(1, (int)Math.Round(source.Width * scale)), Math.Max(1, (int)Math.Round(source.Height * scale)));
+            var resized = source.Resize(info, new SKSamplingOptions(SKCubicResampler.Mitchell));
+            if (resized == null) return source;
+            source.Dispose();
+            return resized;
+        }
+
+        private static byte[] EncodeJpeg(SKBitmap image, int quality)
+        {
+            using var skImage = SKImage.FromBitmap(image);
+            using var data = skImage.Encode(SKEncodedImageFormat.Jpeg, quality);
+            return data.ToArray();
         }
 
         public Task DeleteFileAsync(string relativePath, CancellationToken cancellationToken = default)

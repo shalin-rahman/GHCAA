@@ -42,10 +42,11 @@
     "@microsoft/signalr": "^10.0.0",
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.7",
+    "read-excel-file": "^9.3.12",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "undici": "^7.24.5",
-    "xlsx": "^0.18.5"
+    "write-excel-file": "^4.1.1"
   },
   "devDependencies": {
     "@angular/build": "^21.2.25",

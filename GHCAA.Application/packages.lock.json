@@ -4,25 +4,25 @@
     "net9.0": {
       "FluentValidation": {
         "type": "Direct",
-        "requested": "[11.4.0, )",
-        "resolved": "11.4.0",
-        "contentHash": "WZJyrNf4suiaI6avVG32W9kmBLC3+V5rDTcLeRJjeU4tDmTyDIOz1459DzCKppXs34YpZg9rCUzDY3M4XxG7Ug=="
+        "requested": "[12.2.0, )",
+        "resolved": "12.2.0",
+        "contentHash": "DR3lFbdnKucaaj1/8zMNOACMz/64igzox1yVZSFVsLxYB5mxAB+wFP1WZ8fjwrZnbU1KA1DoMzHKYKxUfuZ4wQ=="
       },
       "FluentValidation.DependencyInjectionExtensions": {
         "type": "Direct",
-        "requested": "[11.4.0, )",
-        "resolved": "11.4.0",
-        "contentHash": "iZXtoDqfRnggHwIbFWnK1sFs3KlTadH5ezNDiXz411OSkUNowBRboaZBcSvx4gEot7CNZdoReUKWYJwow2+mbg==",
+        "requested": "[12.2.0, )",
+        "resolved": "12.2.0",
+        "contentHash": "QpKXgiO9E6wXCh19X2Musn8MZM0xt7KQt/QrD6GDBn3MCUfy8a+rkhCzrYJNCfoxTsTRQ7bpKP8T3geTnJNNeQ==",
         "dependencies": {
-          "FluentValidation": "11.4.0",
-          "Microsoft.Extensions.Dependencyinjection.Abstractions": "2.1.0"
+          "FluentValidation": "12.2.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "2.1.0"
         }
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {
         "type": "Direct",
-        "requested": "[9.0.19, )",
-        "resolved": "9.0.19",
-        "contentHash": "XgQ0aVWClYjYSBqbYrKC/xyZ1KHf+VVwNF3+d54jcaqnst30Q//ugs/FJwUztLZiph0gp85g7i/eB0556twO0Q=="
+        "requested": "[9.0.20, )",
+        "resolved": "9.0.20",
+        "contentHash": "EsRc4piTdI3Ti5+cZwdpxn+mHwDCqT+b9ecmgYTTttpHFkYDyc4CenRNC9LrU0A+lTYsbQE8EvWC6sNp1Op0YA=="
       },
       "ghcaa.domain": {
         "type": "Project"

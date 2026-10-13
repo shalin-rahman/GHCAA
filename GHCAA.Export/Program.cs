@@ -3,9 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Npgsql;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Formats.Jpeg;
+using SkiaSharp;
 
 var config = new ConfigurationBuilder()
     .AddJsonFile(@"c:\Users\HabiburRahmanShalin\workstation\shaleen\shalin\GHC\Application\GHCAA\GHCAA.API\appsettings.json")
@@ -74,12 +72,12 @@ foreach(var m in members)
         var targetFile = $"{nid}.jpg";
         var dest = Path.Combine(photoTargetRoot, targetFile);
         try {
-            using var img = await Image.LoadAsync(src);
-            var enc = new JpegEncoder { Quality = 85 };
-            using var ms = new MemoryStream();
-            await img.SaveAsJpegAsync(ms, enc);
-            if (ms.Length > 351 * 1024) enc = new JpegEncoder { Quality = 70 };
-            await img.SaveAsJpegAsync(dest, enc);
+            using var img = SKBitmap.Decode(src);
+            using var skImage = SKImage.FromBitmap(img);
+            using var first = skImage.Encode(SKEncodedImageFormat.Jpeg, 85);
+            var quality = first.Size > 351 * 1024 ? 70 : 85;
+            using var final = skImage.Encode(SKEncodedImageFormat.Jpeg, quality);
+            await File.WriteAllBytesAsync(dest, final.ToArray());
             // In Dapper/dynamic, we might need to handle the dictionary if it's dynamic
             var mDict = (IDictionary<string, object>)m;
             mDict["PhotoPath"] = $"uploads/members/seed/{targetFile}";

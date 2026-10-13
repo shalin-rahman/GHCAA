@@ -12,9 +12,9 @@
   <ItemGroup>
     <ProjectReference Include="..\GHCAA.Domain\GHCAA.Domain.csproj" />
     <!-- FluentValidation pinned to available version -->
-    <PackageReference Include="FluentValidation" Version="11.4.0" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.4.0" />
+    <PackageReference Include="FluentValidation" Version="12.2.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
     <!-- Provide IServiceCollection types for DI extension methods -->
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.19" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.20" />
   </ItemGroup>
 </Project>
