@@ -1,22 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using QuestPDF.Previewer;
-using Microsoft.Extensions.Options;
-using GHCAA.Infrastructure.Options;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace GHCAA.Infrastructure.Services
 {
@@ -485,11 +479,15 @@ namespace GHCAA.Infrastructure.Services
                 feeMap[type] = await GetApplicableMembershipFeeAsync(type, year, cancellationToken);
             }
 
+            // 98.15. One query for the members already billed this year, not one per member.
+            var alreadyBilled = (await _db.MembershipDues
+                .Where(d => d.Year == year)
+                .Select(d => d.MemberId)
+                .ToListAsync(cancellationToken)).ToHashSet();
+
             foreach (var member in activeMembers)
             {
-                // Check if due already exists for this year
-                var exists = await _db.MembershipDues.AnyAsync(d => d.MemberId == member.Id && d.Year == year, cancellationToken);
-                if (exists) continue;
+                if (alreadyBilled.Contains(member.Id)) continue;
 
                 if (!feeMap.TryGetValue(member.MembershipType, out var amount))
                 {

@@ -1,10 +1,9 @@
 using FluentAssertions;
+using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
-using GHCAA.Application.Interfaces;
 using Moq;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Services;
 

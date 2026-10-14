@@ -1,12 +1,10 @@
+using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
-using System.Linq;
 using GHCAA.Domain;
+using GHCAA.Infrastructure.Options;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using GHCAA.Application.Security;
-using GHCAA.API.Extensions;
-using GHCAA.Infrastructure.Options;
 using Microsoft.Extensions.Options;
 
 namespace GHCAA.API.Controllers

@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Hosting;
 using global::Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
 
 namespace GHCAA.Tests.Integration

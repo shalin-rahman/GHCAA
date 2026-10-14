@@ -1,7 +1,5 @@
 using GHCAA.Application.Security;
 using GHCAA.Domain;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 
 namespace GHCAA.API.Middleware
 {

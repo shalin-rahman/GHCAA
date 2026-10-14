@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using System.Linq;
 
 namespace GHCAA.Tests.Services;
 
@@ -177,6 +176,25 @@ public class FinancialServiceTests : TestBase
         due.Should().NotBeNull();
         due!.Amount.Should().Be(1000);
         due.Year.Should().Be(2024);
+    }
+
+    // 98.15. Existing dues are now read once for the year. A member billed this year is skipped,
+    // and a due from another year does not stop a new one.
+    [Category("FR-20")]
+    [Test]
+    public async Task GenerateAnnualDuesAsync_SkipsMembersAlreadyBilledThatYearOnly()
+    {
+        var billed = await CreateActiveMemberWithHistoryAsync("Billed User", "fsb@e.com", "FSB1");
+        var lastYear = await CreateActiveMemberWithHistoryAsync("Last Year User", "fsl@e.com", "FSL1");
+        _context.MembershipDues.Add(new MembershipDue { MemberId = billed.Id, Year = 2024, Amount = 700, DueDate = DateTime.UtcNow });
+        _context.MembershipDues.Add(new MembershipDue { MemberId = lastYear.Id, Year = 2023, Amount = 700, DueDate = DateTime.UtcNow });
+        await _context.SaveChangesAsync();
+
+        await _service.GenerateAnnualDuesAsync(2024);
+
+        var dues2024 = await _context.MembershipDues.AsNoTracking().Where(d => d.Year == 2024).ToListAsync();
+        dues2024.Where(d => d.MemberId == billed.Id).Should().ContainSingle().Which.Amount.Should().Be(700);
+        dues2024.Where(d => d.MemberId == lastYear.Id).Should().ContainSingle().Which.Amount.Should().Be(1000);
     }
 
     [Test]

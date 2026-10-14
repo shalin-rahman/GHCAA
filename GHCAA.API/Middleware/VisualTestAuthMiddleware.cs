@@ -1,8 +1,5 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using GHCAA.Application.Security;
+using System.Security.Claims;
 
 namespace GHCAA.API.Middleware
 {

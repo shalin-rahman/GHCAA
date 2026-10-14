@@ -1,15 +1,11 @@
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
-using GHCAA.Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Domain;
 using Moq;
-using NUnit.Framework;
+using System.Security.Claims;
 
 namespace GHCAA.Tests.Controllers
 {
@@ -41,9 +37,21 @@ namespace GHCAA.Tests.Controllers
             _jobServiceMock.Setup(x => x.GetActiveJobsAsync(null, null, It.IsAny<CancellationToken>()))
                            .ReturnsAsync(new List<JobDto>());
 
-            var result = await _controller.GetActiveJobs(null, null, CancellationToken.None);
+            var result = await _controller.GetActiveJobs(null, null, null, null, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Category("NFR-P1")]
+        [Test]
+        public async Task GetActiveJobs_WithPage_PassesFiltersToThePagedQuery()
+        {
+            _jobServiceMock.Setup(x => x.GetActiveJobsPageAsync(1, 5, Enums.JobCategory.IT, "dev", It.IsAny<CancellationToken>()))
+                           .ReturnsAsync(new PagedResult<JobDto>());
+
+            var result = await _controller.GetActiveJobs(Enums.JobCategory.IT, "dev", 1, 5, CancellationToken.None);
+
+            Assert.That(((OkObjectResult)result).Value, Is.InstanceOf<PagedResult<JobDto>>());
         }
 
         [Category("FR-54")]

@@ -6,7 +6,6 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using NUnit.Framework;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Tests.Services;

@@ -82,7 +82,7 @@
                         <tr>
                             <td class="member-cell" style="display: flex; gap: 1rem; align-items: center;">
                                 @if (em.member?.photoPath) {
-                                <img [src]="getImageUrl(em.member.photoPath)" class="member-avatar photo" alt="Photo" style="width:40px;height:40px;border-radius:10px;object-fit:cover;border:1px solid var(--glass-border)" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
+                                <img appLazyImg width="40" height="40" [src]="getImageUrl(em.member.photoPath)" class="member-avatar photo" alt="Photo" style="width:40px;height:40px;border-radius:10px;object-fit:cover;border:1px solid var(--glass-border)" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                                 } @else {
                                 <div class="avatar avatar-fallback" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:bold;">{{ em.member?.fullName?.[0] }}</div>
                                 }
@@ -245,7 +245,7 @@
             <div class="form-group">
                 <label>Position <span class="required-star">*</span></label>
                 <select class="form-control" [(ngModel)]="assignData().position" #posInput="ngModel" required>
-                    @for (pos of ecPositions; track pos.value) {
+                    @for (pos of ecPositions(); track pos.value) {
                         <option [value]="pos.value">{{ pos.label }}</option>
                     }
                 </select>

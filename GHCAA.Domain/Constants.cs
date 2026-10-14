@@ -368,6 +368,13 @@ namespace GHCAA.Domain
             public const int MaxPageSize = 100;
         }
 
+        // 98.17: page sizes for the public events, jobs and gallery lists when a client asks for a page.
+        public static class Paging
+        {
+            public const int DefaultPageSize = 20;
+            public const int MaxPageSize = 100;
+        }
+
         // 84.45: machine-readable codes on ProblemDetails.Extensions["code"], for clients that need
         // to branch on the failure rather than just show its text. Only failures a client actually
         // reacts to get a code — everything else stays a plain Problem(detail:, statusCode:).

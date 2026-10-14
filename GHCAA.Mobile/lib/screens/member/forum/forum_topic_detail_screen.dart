@@ -1,3 +1,4 @@
+import '../../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -127,8 +128,7 @@ class _ForumTopicDetailScreenState
                                               topic.authorPhotoUrl != null &&
                                                       topic.authorPhotoUrl!
                                                           .isNotEmpty
-                                                  ? NetworkImage(
-                                                      topic.authorPhotoUrl!)
+                                                  ? cachedImageProvider(context, topic.authorPhotoUrl!, size: 36)
                                                   : null,
                                           child: topic.authorPhotoUrl == null ||
                                                   topic.authorPhotoUrl!.isEmpty
@@ -241,7 +241,7 @@ class _ForumTopicDetailScreenState
                                         backgroundImage: post.authorPhotoUrl !=
                                                     null &&
                                                 post.authorPhotoUrl!.isNotEmpty
-                                            ? NetworkImage(post.authorPhotoUrl!)
+                                            ? cachedImageProvider(context, post.authorPhotoUrl!, size: 24)
                                             : null,
                                         child: post.authorPhotoUrl == null ||
                                                 post.authorPhotoUrl!.isEmpty

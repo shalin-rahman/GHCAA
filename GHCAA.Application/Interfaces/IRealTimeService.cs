@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace GHCAA.Application.Interfaces
 {
     public interface IRealTimeService

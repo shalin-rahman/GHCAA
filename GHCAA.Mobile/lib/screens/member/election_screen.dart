@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -447,7 +448,7 @@ class _CandidateCard extends StatelessWidget {
       subtitle: candidate.statement.isEmpty ? null : candidate.statement,
       leading: photoUrl == null
           ? const CircleAvatar(child: Icon(Icons.person_outline))
-          : CircleAvatar(backgroundImage: NetworkImage(photoUrl)),
+          : CircleAvatar(backgroundImage: cachedImageProvider(context, photoUrl, size: 40)),
       chosen: chosen,
       single: single,
       onChoose: onChoose,

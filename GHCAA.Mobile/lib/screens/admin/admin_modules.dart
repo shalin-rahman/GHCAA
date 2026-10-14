@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
@@ -241,6 +242,14 @@ final adminGalleriesProvider =
   return response.data as List<dynamic>;
 });
 
+/// 98.21: EventPhoto has no filePath, so the old lookup never found an image.
+/// The 80 px tile takes the small copy when the photo has one.
+String? adminGalleryCoverUrl(dynamic photo) {
+  if (photo is! Map) return null;
+  return AppConfig.resolveImageUrl(photo['thumbnailPath']?.toString()) ??
+      AppConfig.resolveImageUrl(photo['photoPath']?.toString());
+}
+
 final adminGallerySearchQueryProvider =
     StateProvider.autoDispose<String>((ref) => "");
 
@@ -351,22 +360,7 @@ class AdminCMS extends ConsumerWidget {
                         itemBuilder: (context, index) {
                           final g = filtered[index];
                           final photo = (g['photos'] as List?)?.firstOrNull;
-                          String? photoUrl;
-                          if (photo != null && photo['filePath'] != null) {
-                            final path = photo['filePath'].toString();
-                            if (path.startsWith('http')) {
-                              photoUrl = path;
-                            } else {
-                              final base = AppConfig.apiBaseUrl.endsWith('/')
-                                  ? AppConfig.apiBaseUrl.substring(
-                                      0, AppConfig.apiBaseUrl.length - 1)
-                                  : AppConfig.apiBaseUrl;
-                              final cleanP = path.startsWith('/')
-                                  ? path.substring(1)
-                                  : path;
-                              photoUrl = '$base/$cleanP';
-                            }
-                          }
+                          final photoUrl = adminGalleryCoverUrl(photo);
 
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 12.0),
@@ -383,7 +377,7 @@ class AdminCMS extends ConsumerWidget {
                                       borderRadius: BorderRadius.circular(8),
                                       image: photoUrl != null
                                           ? DecorationImage(
-                                              image: NetworkImage(photoUrl),
+                                              image: cachedImageProvider(context, photoUrl, size: 80),
                                               fit: BoxFit.cover)
                                           : null,
                                     ),

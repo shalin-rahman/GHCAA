@@ -1,11 +1,10 @@
-﻿using GHCAA.Application.DTOs;
+﻿using GHCAA.API.Extensions;
+using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
-using GHCAA.Application.Security;
-using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {
@@ -24,8 +23,12 @@ namespace GHCAA.API.Controllers
         [HttpGet]
         [AllowAnonymous]
         [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
-        public async Task<IActionResult> GetActiveJobs([FromQuery] Enums.JobCategory? jobCategory, [FromQuery] string? query, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetActiveJobs([FromQuery] Enums.JobCategory? jobCategory, [FromQuery] string? query, [FromQuery] int? page, [FromQuery] int? pageSize, CancellationToken cancellationToken)
         {
+            // 98.17: paged only when the client sends page, so older app builds keep the plain list.
+            if (page.HasValue)
+                return Ok(await _jobService.GetActiveJobsPageAsync(page.Value, pageSize ?? Constants.Paging.DefaultPageSize, jobCategory, query, cancellationToken));
+
             var jobs = await _jobService.GetActiveJobsAsync(jobCategory, query, cancellationToken);
             return Ok(jobs);
         }

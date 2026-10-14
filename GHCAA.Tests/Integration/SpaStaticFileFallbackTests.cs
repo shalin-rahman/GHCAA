@@ -1,9 +1,8 @@
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using FluentAssertions;
+using GHCAA.API.Extensions;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Mvc.Testing;
-using NUnit.Framework;
+using System.Net;
 
 namespace GHCAA.Tests.Integration
 {
@@ -110,6 +109,68 @@ namespace GHCAA.Tests.Integration
             var response = await _client.GetAsync("/api/this-route-does-not-exist");
 
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        // NFR-P3. A repeat visit should not re-check build chunks whose names change with their content (98.6).
+        [Test]
+        public async Task HashedBuildChunk_IsCachedForAYear()
+        {
+            var response = await _client.GetAsync("/main-TESTHASH.js");
+
+            string.Join(", ", response.Headers.GetValues("Cache-Control")).Should().Be(StaticFilesExtensions.ImmutableCacheControl);
+        }
+
+        [Test]
+        public async Task IndexHtml_IsNeverCached()
+        {
+            var direct = await _client.GetAsync("/index.html");
+            var deepLink = await _client.GetAsync("/portal/members");
+
+            // HttpClient re-orders the directives when it parses the header, so check each one.
+            foreach (var cache in new[] { direct.Headers.CacheControl!, deepLink.Headers.CacheControl! })
+            {
+                cache.NoStore.Should().BeTrue();
+                cache.NoCache.Should().BeTrue();
+                cache.MustRevalidate.Should().BeTrue();
+            }
+        }
+
+        [Test]
+        public async Task ExistingUpload_GetsTheShortUploadCache()
+        {
+            var response = await _client.GetAsync("/api/uploads/sample/existing.txt");
+
+            string.Join(", ", response.Headers.GetValues("Cache-Control")).Should().Be(StaticFilesExtensions.UploadCacheControl);
+        }
+
+        [Test]
+        public async Task MissingUploadPlaceholder_MustBeRevalidated()
+        {
+            var response = await _client.GetAsync("/uploads/members/2/newsimage/does-not-exist.jpg");
+
+            string.Join(", ", response.Headers.GetValues("Cache-Control")).Should().Be(StaticFilesExtensions.RevalidateCacheControl);
+        }
+
+        // NFR-R5. The host's liveness probe must answer without touching the database (98.10).
+        [Test]
+        public async Task LivenessProbe_AnswersHealthy_NotSpaShell()
+        {
+            var response = await _client.GetAsync(Constants.Deploy.LivenessPath);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            (await response.Content.ReadAsStringAsync()).Should().Be("Healthy");
+        }
+
+        [TestCase("main-ABCD1234.js", true)]
+        [TestCase("styles-EDLDB46M.css", true)]
+        [TestCase("chunk-4AX5YQCX.js", true)]
+        [TestCase("index.html", false)]
+        [TestCase("favicon-32.png", false)]
+        [TestCase("quill.min.js", false)]
+        [TestCase("main-abcd1234.js", false)]
+        public void IsHashedBuildFile_MatchesOnlyAngularHashedNames(string name, bool expected)
+        {
+            StaticFilesExtensions.IsHashedBuildFile(name).Should().Be(expected);
         }
     }
 }

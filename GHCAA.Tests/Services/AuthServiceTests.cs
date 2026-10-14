@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
@@ -10,7 +8,6 @@ using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Services
 {
@@ -175,6 +172,20 @@ namespace GHCAA.Tests.Services
             updatedUser.ResetTokenExpiry.Should().NotBeNull().And.BeAfter(DateTime.UtcNow);
             _mockTokenService.Verify(x => x.RevokeAllRefreshTokensAsync(user.Id, It.IsAny<CancellationToken>()), Times.Once);
             _mockEmail.Verify(x => x.SendEmailAsync(email, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        // 98.13. Not every write lowers the email (an admin edit keeps what was typed), so the lookup
+        // stays case-free and is served by a lower("Email") index rather than an exact match.
+        [Category("FR-09")]
+        [Test]
+        public async Task RequestPasswordResetAsync_MemberEmailStoredInMixedCase_StillFound()
+        {
+            var member = await CreateAndSaveTestMemberAsync("Mixed Case", "Mixed.Case@Example.com", "445", "445");
+            var user = await CreateAndSaveTestUserAsync(member.Id, "testuser_mixed", "old_password");
+
+            await _service.RequestPasswordResetAsync("  mixed.case@EXAMPLE.com ");
+
+            (await _context.Users.FindAsync(user.Id))!.ResetToken.Should().NotBeNullOrEmpty();
         }
 
         [Category("FR-09")]

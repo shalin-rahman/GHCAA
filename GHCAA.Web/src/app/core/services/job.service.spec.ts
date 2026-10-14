@@ -92,4 +92,14 @@ describe('JobService', () => {
         expect(req.request.method).toBe('PUT');
         req.flush({ success: true });
     });
+
+    // NFR-P1
+    it('should send the filters with the page request', () => {
+        service.getJobsPage(3, 20, { jobCategory: 'IT', query: 'dev' }).subscribe(page => expect(page.page).toBe(3));
+        const req = httpMock.expectOne(r => r.url === API_ENDPOINTS.JOBS);
+        expect(req.request.params.get('page')).toBe('3');
+        expect(req.request.params.get('jobCategory')).toBe('IT');
+        expect(req.request.params.get('query')).toBe('dev');
+        req.flush({ items: [], totalItems: 0, totalPages: 0, page: 3, pageSize: 20 });
+    });
 });

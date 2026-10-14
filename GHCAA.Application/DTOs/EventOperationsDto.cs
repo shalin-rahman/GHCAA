@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace GHCAA.Application.DTOs
 {
     public class EventTaskDto

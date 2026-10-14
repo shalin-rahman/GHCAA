@@ -1,9 +1,6 @@
-using System.Threading.Tasks;
 using FluentAssertions;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
-using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Services;
 

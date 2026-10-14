@@ -13,6 +13,7 @@ import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import 'package:local_auth/local_auth.dart';
 
+import 'package:ghcaa_mobile/core/models/paged_list.dart';
 import 'package:ghcaa_mobile/core/services/biometric_service.dart';
 import 'package:ghcaa_mobile/core/storage/storage_service.dart';
 import 'package:ghcaa_mobile/features/activity/activity_service.dart';
@@ -195,13 +196,15 @@ class FakeNetworkingService implements NetworkingService {
 
 class FakeEventsService implements EventsService {
   @override
-  Future<List<dynamic>> getUpcomingEvents() async => [];
+  Future<PagedList> getUpcomingEventsPage(int page) async => PagedList.single(const []);
   @override
   Future<bool> registerForEvent(int eventId, {double? amount, String? paymentRef, dynamic receipt}) async => true;
   @override
   Future<bool> createEvent(Map<String, dynamic> data) async => true;
   @override
   Future<bool> deleteEvent(int id) async => true;
+  @override
+  void clearCache() {}
 }
 
 class FakeNewsService implements NewsService {
@@ -225,11 +228,13 @@ class FakeNewsService implements NewsService {
 
 class FakeJobService implements JobService {
   @override
-  Future<List<dynamic>> getAllJobs() async => [];
+  Future<PagedList> getJobsPage(int page) async => PagedList.single(const []);
   @override
   Future<bool> postJob(Map<String, dynamic> data) async => true;
   @override
   Future<bool> deleteJob(int id) async => true;
+  @override
+  void clearCache() {}
   @override
   Future<List<dynamic>> getPendingJobs() async => [];
   @override

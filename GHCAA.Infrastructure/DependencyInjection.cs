@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using GHCAA.Application.Interfaces;
 using GHCAA.Infrastructure.Data;
-using GHCAA.Infrastructure.Repositories;
-using GHCAA.Infrastructure.Services;
 using GHCAA.Infrastructure.Gateways;
 using GHCAA.Infrastructure.Options;
+using GHCAA.Infrastructure.Repositories;
+using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +20,9 @@ namespace GHCAA.Infrastructure
             // 1. Configure DbContext dynamically
             var provider = configuration.GetValue<string>("DatabaseProvider") ?? "PgSql";
             var connectionString = GetConnectionString(provider, configuration);
+
+            services.AddMemoryCache();
+            services.AddSingleton<SecurityStampCacheInterceptor>();
 
             // Every migration file is tagged [DbContext(typeof(<Provider>ApplicationDbContext))] (see
             // DbContextShims.cs), and EF's IMigrationsAssembly matches migrations to the pooled
@@ -46,6 +46,7 @@ namespace GHCAA.Infrastructure
                     services.AddDbContextPool<ApplicationDbContext, SqliteApplicationDbContext>((sp, options) =>
                     {
                         options.UseSqlite(connectionString, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
+                        options.AddInterceptors(sp.GetRequiredService<SecurityStampCacheInterceptor>());
                         options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning,
                             Microsoft.EntityFrameworkCore.Diagnostics.CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning));
                     });
@@ -53,7 +54,10 @@ namespace GHCAA.Infrastructure
                 default: // PgSql
                     services.AddDbContextPool<ApplicationDbContext, PgSqlApplicationDbContext>((sp, options) =>
                     {
-                        options.UseNpgsql(connectionString, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
+                        options.UseNpgsql(connectionString, o => o
+                            .MigrationsAssembly("GHCAA.Infrastructure")
+                            .ExecutionStrategy(d => new TransactionAwareRetryStrategy(d)));
+                        options.AddInterceptors(sp.GetRequiredService<SecurityStampCacheInterceptor>());
                         options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning,
                             Microsoft.EntityFrameworkCore.Diagnostics.CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning));
                     });

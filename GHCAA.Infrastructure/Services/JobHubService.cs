@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
@@ -29,6 +24,25 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<IEnumerable<JobDto>> GetActiveJobsAsync(Enums.JobCategory? category = null, string? query = null, CancellationToken cancellationToken = default)
         {
+            var jobs = await ActiveJobsQuery(category, query).ToListAsync(cancellationToken);
+            return jobs.Select(MapToDto);
+        }
+
+        public async Task<PagedResult<JobDto>> GetActiveJobsPageAsync(int page, int pageSize, Enums.JobCategory? category = null, string? query = null, CancellationToken cancellationToken = default)
+        {
+            var result = await ActiveJobsQuery(category, query).ToPagedResultAsync(page, pageSize, cancellationToken);
+            return new PagedResult<JobDto>
+            {
+                Items = result.Items.Select(MapToDto).ToList(),
+                TotalItems = result.TotalItems,
+                TotalPages = result.TotalPages,
+                Page = result.Page,
+                PageSize = result.PageSize
+            };
+        }
+
+        private IQueryable<JobOpportunity> ActiveJobsQuery(Enums.JobCategory? category, string? query)
+        {
             var qry = _db.JobOpportunities
                 .Include(j => j.PostedBy)
                 .Where(j => j.IsActive && j.Status == Enums.SubmissionStatus.Approved && (j.ExpiryDate == null || j.ExpiryDate > DateTime.UtcNow));
@@ -46,11 +60,9 @@ namespace GHCAA.Infrastructure.Services
                     j.Location.ToLower().Contains(s));
             }
 
-            var jobs = await qry
+            return qry
                 .OrderByDescending(j => j.PostedDate)
-                .ToListAsync(cancellationToken);
-
-            return jobs.Select(MapToDto);
+                .ThenByDescending(j => j.Id);
         }
 
         public async Task<bool> UpdateJobAsync(int id, CreateJobDto dto, int memberId, bool isAdmin, CancellationToken cancellationToken = default)

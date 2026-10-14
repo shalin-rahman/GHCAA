@@ -1,16 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
-using static GHCAA.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using NUnit.Framework;
+using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Tests.Controllers
 {

@@ -515,12 +515,232 @@ These cannot be closed by a session. They stay open in TODO.md.
 
 | Item | Who | What is needed |
 |---|---|---|
-| 37.1p | Owner | Read the constitution's election Article and confirm the tie rule, unopposed seats (FR-024) and the recount window (FR-020). |
-| 37.1r location | Committee | Approve or refuse IP location lookup. It sends voter IPs to a third party. |
-| 37.1m font | Owner | Pick a Bengali font for the receipt PDF; it ships as an asset. |
+| 37.1p | Owner | Decided 2026-10-11 and 2026-10-14. Built in Fast track sessions F2 and F3. |
+| 37.1r location | Committee | Closed 2026-10-11 without building. No IP location lookup. |
+| 37.1m font | Owner | Decided 2026-10-14: Noto Sans Bengali. Built in Fast track session F1. |
 | 37.1m browser check | Person | Print a receipt from Chrome and Edge and check the layout. |
 | 37.1z device check | Person | Cast on a phone with TalkBack or VoiceOver. |
 | 37.13g | Person | Run `docs/Elections/10-Election-Accessibility-Checklist.md` with keyboard only and a screen reader; write the results into it. |
+
+## Fast track for the rest of WP37 (2026-10-14)
+
+S1 to S6 covered twelve items, the ones in the Order table above. Most of what is still open in
+WP37 was raised after that table was written: by the S5 code review (2026-10-10), the handbook
+review and the owner's rules of 2026-10-11, and the S6 review (2026-10-12). Three items were
+parked for the owner, and the non-election areas were never part of spec 023. This section plans
+all of it. The rules for every session above still apply (anchors only, build order, hand-written
+migration with its Designer file, constants, shared components, test tags, `verify-election.py`,
+`code-reviewer`, `graphify update .`, never commit).
+
+The code was checked on 2026-10-14, and line numbers are from that day. Every decision below was
+made by the owner on 2026-10-11 or 2026-10-14. Nothing in this section is left to decide in a
+session, except the items in "What stays with a person".
+
+### Code check of S1 to S6
+
+| Session | State | Short against its own plan |
+|---|---|---|
+| S1, S2, S3 | Built | nothing |
+| S4 | Partial | tests `OpenedBallots_CountsMatchResults` and `OpenedBallots_NotInCastOrder` missing; mobile `election_service.dart` has no `getAudit` and no full `verifyAudit` (web has both) |
+| S5 | Built | ER-19 has a case (`ElectionDocumentService.cs:150`) but its body text is still generic (`:272`) |
+| S6 | Partial | `09-Election-Security-and-Compliance.md` still has 11 *[to confirm]* points (37.13f) |
+
+These go into 37.14g and are fixed in F1. 37.12x did not fail when its spec ran alone on
+2026-10-14 (33 of 33 passed).
+
+### Decisions taken on 2026-10-14
+
+| Item | Decision |
+|---|---|
+| 37.12w | Five conditions are read from stored data. Mock election and technical audit, open appeals decided and paper stock ready are attested by the Chief Commissioner. Each attestation is an audit-chain entry (`ReadinessAttested`, with the condition key). No new table. |
+| 37.14b | A member gets seats and candidates from CandidateList through Polling. Before CandidateList the read returns the phase and no seats. After Polling the board and results routes serve. |
+| 37.14d | The audit foreign key becomes Restrict. The chain head hash is printed on ER-29 and on the public board, so a cut tail shows against the published value. |
+| 37.1m | Noto Sans Bengali (SIL Open Font License), bundled in the mobile assets. |
+| 37.1p, all seats uncontested | When every seat is unopposed or vacant, the Chief Commissioner moves the election from CandidateList straight to Declared, as a two-person step with step-up. No key, no poll. ER-29 says every seat was uncontested. |
+| 37.1p, conflicts | The official declares conflicts when accepting the appointment and can add more later. The Chief Commissioner can also add one. Each is logged. |
+| 37.12x | One full web run in F1. If it passes, close as not reproducible. If it fails, fix the test-order leak. |
+| 37.12y | Voters are told through the existing notification service on the channels they allow, and the board shows the new closing time. Email does not leave preprod (Render blocks SMTP); check `EmailLogs` there. |
+| Schema | One migration for every new election column and table. |
+| 37.12n | The F7 mapping comes first. The owner approves it before any form code. ER-02 and ER-28 are filled in F2 because the recount rules need them. |
+| 37.4, 37.5, 37.9, 37.10 | Mobile gets the member views only. Admin moderation and curation stay on the web. |
+| 37.7 | The same keys on web and mobile. Bengali strings are drafted in the session and listed as unreviewed until a Bengali speaker signs them off. Admin stays English on both clients. |
+| 37.5, frozen roll | Marking a member deceased never changes a frozen roll. The officials dashboard warns and names the entry; the Chief Commissioner removes it through unfreeze and refreeze, which is logged. |
+
+### What makes it faster
+
+1. One election migration (F2), so the PostgreSQL dry run of the chain and the migration review
+   happen once.
+2. Backend first for every new rule (F2 to F4), then web and mobile as two sessions in separate
+   worktrees at the same time (F5, F6). The clients do not touch the same files.
+3. Small fixes with no schema change go first in one session (F1).
+4. Doc work (F7) and the reference server run (F8) wait on no code and fill gaps.
+5. The non-election areas (N1 to N7) are specified to the field in `docs/TODO.md`. Each is one
+   session with no design step, except 37.7, which is split by client.
+
+### Sessions
+
+| Session | Items | Model | Migration | Size | Depends on |
+|---|---|---|---|---|---|
+| F1 | 37.12x, 37.14b, 37.12s pinning test, 37.1m font, 37.14g S1-S6 shortfalls | Sonnet | none | M | none |
+| F2 | Schema for every new rule, 37.12r, 37.12o, 37.1p recount and conflicts, 37.14d, ER-02 and ER-28 | Opus for the schema, Sonnet for services | `AddElectionRulesAndRecount` | M | F1 |
+| F3 | 37.14a, 37.1p unopposed seats and paper counts, 37.12z, 37.12y, 37.14f | Sonnet | none | M | F2 |
+| F4 | 37.12w readiness gate | Sonnet | none | S | F3 |
+| F5 | Web screens for F2 to F4 | Sonnet | none | M | F4, runs with F6 |
+| F6 | Mobile screens for F2 to F4 | Sonnet | none | M | F4, runs with F5 |
+| F7 | 37.13e protocol, 37.13f hosting facts, 37.12t and 37.12n inventory for approval | Sonnet | none | M | none |
+| F8 | 37.12v reference server on PostgreSQL in Docker | Sonnet | none | S | Docker on |
+| F9 | Election close-out: tracker, outline figures, `wbs.py`, full verify, memory | Sonnet | none | S | F1 to F8 |
+| N1 | 37.1h-1 seat list from org config | Sonnet | none or one seed | M | F9 |
+| N2 | 37.7 web: service, pipe, dictionaries, toggle, self-hosted font | Sonnet | none | L | none |
+| N3 | 37.7 mobile: Bengali in `app_localizations.dart` on the N2 keys | Sonnet | none | M | N2 |
+| N4 | 37.5 In Memoriam | Sonnet | `AddMemorialRegister` | M | F9 (roll warning) |
+| N5 | 37.4 cohorts and reunions | Sonnet | `AddBatchCohortsAndReunions` | M | none |
+| N6 | 37.10 impact report | Sonnet | none | M | N5 |
+| N7 | 37.9 chapters | Sonnet | `AddChapters` | M | none |
+| N8 | 37.11 gate: full suites, non-empty database run of every N migration, docs list | Sonnet | none | S | N1 to N7 |
+
+N2, N5 and N7 do not depend on the election track and can start any time a session is free.
+
+### F1. Small fixes
+
+- 37.12x: run the full web suite once. Pass means close; fail means find the spec that leaks state
+  into `admin-elections.spec.ts`.
+- 37.14b: `ElectionService.GetBallotAsync` (`ElectionService.cs:652`). Tests
+  `GetBallotAsync_BeforeCandidateList_ReturnsNoSeats` and
+  `GetBallotAsync_InCandidateList_ReturnsSeats`. Both clients show the phase when no seats come
+  back.
+- 37.12s: no code deletes election rows (`DataRetentionService.cs:8` leaves them out; the only
+  election delete is the voter-roll unfreeze at `ElectionService.cs:271`, by design). Add a test
+  that pins `DataRetentionService.PurgedTables` against every election entity.
+- 37.1m: font file in `GHCAA.Mobile/assets/fonts/`, asset entry in `pubspec.yaml` (`:84`),
+  `pw.ThemeData.withFont` in `ballot_receipt.dart`. Check the goldens do not shift.
+- 37.14g: the two opened-ballot tests, `getAudit` and `verifyAudit` in mobile
+  `election_service.dart` with tests, ER-19 body filled from records.
+
+### F2. Schema and the recount rules
+
+One hand-written migration with its Designer file, after
+`20261014120000_AddEventPhotoThumbnail`. It adds:
+
+- `Election.RecountWindowEndsOn` (nullable), `Election.PollingExtensionCount` (int, default 0).
+- `Nomination.ConsentAt` (nullable). ER-10 prints "not recorded" when null
+  (`ElectionDocumentService.cs:180`).
+- `ElectionRecountRequest` (election, seat, candidate, reason, filed at, status, decided by,
+  decided at), unique on election and seat.
+- `ElectionConflictDeclaration` (appointment, candidate nomination, relation: spouse, parent,
+  child, sibling, proposer, seconder; declared by, declared at).
+- `ElectionKeyCopy` (election, holder appointment, confirmed at). Used in F3.
+- `ElectionPaperCount` (election, issued, unused, spoiled, entered by, approved by). Used in F3.
+- `NominationsReopenedUntil` (nullable) on the seat record. Used in F3.
+- Audit foreign key from Cascade to Restrict (`ElectionConfigurations.cs:215`).
+
+Rules built in F2:
+
+- Key destruction is refused until `RecountWindowEndsOn` is set and has passed, and while a
+  recount request is open. The dashboard warns from declare while the date is unset.
+- A candidate on a seat files one recount request inside the window (ER-28). The Chief
+  Commissioner approves it through `ElectionApprovalService` as a two-person step. The count
+  re-runs for that seat and both results are kept.
+- An appointed official cannot be a nominee in the same election, and a nominee cannot be
+  appointed. An official with a declared conflict is kept out of that candidate's scrutiny,
+  appeals and recount. The check goes in `ElectionAccessService`.
+- ER-02 prints the recount window; ER-28 prints the request and its decision.
+- The chain head hash is printed on ER-29 and the board (37.14d).
+
+Before the session ends: PostgreSQL dry run of the whole migration chain on a non-empty copy, and
+`code-reviewer` on the migration with the standard sweep (idempotency, rollback, provider).
+
+### F3. Key copies, seats, paper and polling
+
+- 37.14a: copy count in the election settings (`OrgConfigDto.cs:27`, default 2, minimum 1). The
+  Chief Commissioner names holders at key set. Holders are different appointed officials and not
+  candidates. Each confirms receipt. Key destroy also records the copies destroyed.
+- 37.1p unopposed: a seat with one valid candidate is left off the ballot (today it is not,
+  `ElectionService.cs:675`), and the candidate is declared elected unopposed at declare and on
+  the certificate. When every seat is unopposed or vacant, the CandidateList to Declared step
+  applies (decision above).
+- 37.12z: the Chief Commissioner can reopen nominations for a seat with no valid candidate, for
+  that seat only, for a period set per election (default 3 days) that ends before the roll
+  freeze. Still empty at polling means vacant until a 95.5 by-election.
+- 37.1p paper counts: a polling officer enters issued, unused and spoiled. The Chief Commissioner
+  approves as a two-person step before the count. Refused unless issued equals used plus unused
+  plus spoiled. Printed on the poll-closing certificate. Online ballots are never spoiled.
+- 37.12y: extend polling by up to 24 hours, at most twice, while Polling is open. Chief
+  Commissioner, two-person, step-up, reason required, logged, voters notified. A third request is
+  refused with a message that points to the L3 void-and-rerun procedure.
+- 37.14f: the dashboard lists elections more than ten years past declare. Purge by request plus a
+  second approver (SuperAdmin when no Commission sits). The summary result and the purge record
+  stay.
+
+### F4. Readiness gate (37.12w)
+
+Add `GetReadinessAsync` to `ElectionService` next to `SetPhaseAsync` (`ElectionService.cs:117`).
+It returns each condition as met or unmet:
+
+| Condition | Read from |
+|---|---|
+| Roll frozen | `VoterRoll.FrozenAt` |
+| Candidate list final and ballot built | phase, accepted nominations, ballot order |
+| Key set and every copy confirmed | `BallotPublicKey`, `ElectionKeyCopy.ConfirmedAt` |
+| Appointments accepted, declarations signed | appointment `AcceptedAt`, `DeclarationSignedAt` |
+| Polling window valid | opens before closes, opens in the future |
+| Mock election and technical audit, open appeals, paper stock | `ReadinessAttested` audit entries |
+
+`SetPhaseAsync` to Polling and the OpenPolling approval (`ElectionApprovalService.cs:625`) both
+refuse with the unmet list. The `TooFewApprovers` warning joins the same list.
+
+### F5 and F6. Clients
+
+Both at once in separate worktrees. Screens: readiness list and attestation buttons, recount
+request and decision, conflict declaration at acceptance, key holders and confirm, paper counts,
+extend polling, reopen nominations, ten-year list and purge request, `ConsentAt` on nomination,
+the all-uncontested declare. Mobile uses its own card and list layout. Each new spec or test file
+goes into `WEB_SPECS` or `MOBILE_TESTS` in `scripts/verify-election.py`.
+
+### F7. Docs that wait on no code
+
+- 37.13e: the longer ballot protocol in `11-Election-Key-Procedure.md` (padding, test vectors
+  taken from the existing crypto tests).
+- 37.13f: replace the 11 *[to confirm]* points in `09-Election-Security-and-Compliance.md` with
+  quotes from Neon and Render public docs, each with link and date. The point at `:123` (the
+  regulations do not name key loss after polling opens) goes to the owner as a regulation change.
+  Plan-specific facts stay marked until the owner confirms the plan.
+- 37.12t and 37.12n: one table of every form with its ER-<phase>.<nn> number, old number and the
+  records that fill it. Shown to the owner; nothing applied until approved.
+
+### F8. Reference server
+
+`docs/Elections/reference-implementation/`: `npm install`, throwaway PostgreSQL in Docker, one
+election through key set, voting, count and key destroy. Write the result into 37.12v.
+
+### N1 to N8. Non-election areas
+
+Each follows its tracker item as written, with these additions:
+
+- N1 (37.1h-1): the active seat list comes from org config with today's 15 values as the default,
+  so GHC sees no change. `ParsePosition` (`AdminElectionsController.cs:182`) checks against the
+  active list. Closes ENH-003 and ENH-009.
+- N2 and N3 (37.7): N2 builds the web mechanism and drafts `bn.ts`; N3 adds Bengali to the mobile
+  localizations with the same keys. The unreviewed list lives under 37.7 in the tracker, and 37.7
+  stays PARTIAL until a Bengali speaker signs it off.
+- N4 (37.5): marking a member deceased with a frozen roll open warns on the officials dashboard
+  and changes nothing (decision above). Mobile: list, entry page, condolence form.
+- N5 (37.4): mobile gets "my batch" and the cohort page.
+- N6 (37.10): mobile gets the report view and a link to the PDF.
+- N7 (37.9): mobile gets the chapter list, join and leave, and the chapter feed.
+- N8 (37.11): refresh the baselines from a run on the day, not the old 351 and 306 figures.
+
+### What stays with a person
+
+| Item | Who | When |
+|---|---|---|
+| 37.12t, 37.12n | Owner | Approve the F7 form table before it is applied |
+| 37.13f | Owner | Confirm the Neon and Render plans, and the key-loss regulation point, after F7 |
+| 37.1m | Person | Print a receipt in Chrome and Edge, and on a phone, after F1 |
+| 84.42 | Person | Step-up on a real device |
+| 37.13g | Person | Accessibility run when F5 and F6 close |
+| 37.7 | Bengali speaker | Sign off the unreviewed strings after N2 and N3 |
+| Handbook v2.0 | Executive Committee | Approve at a meeting after F9 |
 
 ## Cost guard
 

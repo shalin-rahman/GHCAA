@@ -4,6 +4,7 @@ import { Observable, map } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { AlumniEvent, EventRegistration, EventParticipantSummary, EventTask, EventBudget, EventExpense, PagedRegistrations } from '../models/business.models';
 import { buildHttpParams, getSilentHeaders } from '../utils/http.util';
+import { PagedResult } from './networking.service';
 
 
 @Injectable({
@@ -16,6 +17,10 @@ export class EventsService {
     getEvents(silent: boolean = false): Observable<AlumniEvent[]> {
         const headers = getSilentHeaders(silent);
         return this.http.get<AlumniEvent[]>(this.apiUrl, { headers });
+    }
+
+    getEventsPage(page: number, pageSize: number): Observable<PagedResult<AlumniEvent>> {
+        return this.http.get<PagedResult<AlumniEvent>>(this.apiUrl, { params: buildHttpParams({ page, pageSize }) });
     }
 
 

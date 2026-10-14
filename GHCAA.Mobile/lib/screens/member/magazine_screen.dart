@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -143,7 +144,7 @@ class _MagazineScreenState extends ConsumerState<MagazineScreen> {
                                               color: AppTheme.royalGold.withValues(alpha: 0.05),
                                               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                                               image: fullImgUrl != null ? DecorationImage(
-                                                image: NetworkImage(fullImgUrl),
+                                                image: cachedImageProvider(context, fullImgUrl, size: 300),
                                                 fit: BoxFit.cover,
                                                 opacity: 0.8,
                                               ) : null,

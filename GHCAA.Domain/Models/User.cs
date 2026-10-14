@@ -1,5 +1,3 @@
-using System;
-
 namespace GHCAA.Domain.Models
 {
     public class User
@@ -28,6 +26,10 @@ namespace GHCAA.Domain.Models
         public string? ResetToken { get; set; }
         public DateTime? ResetTokenExpiry { get; set; }
         public string SecurityStamp { get; set; } = Guid.NewGuid().ToString("N");
+
+        // 98.8. The only place a stamp changes. SecurityStampCacheInterceptor sees the change on
+        // save and drops the cached copy, and a guard test fails on a direct assignment elsewhere.
+        public void RotateSecurityStamp() => SecurityStamp = Guid.NewGuid().ToString("N");
 
         // Brute-force lockout (S5.1)
         public int FailedLoginAttempts { get; set; } = 0;

@@ -12,7 +12,7 @@
             <div class="recent-member-card glass-card">
                 <div class="rm-photo">
                     @if (member.photoPath) {
-                    <img [src]="'/' + member.photoPath" [alt]="member.fullName" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
+                    <img appLazyImg [src]="'/' + member.photoPath" [alt]="member.fullName" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else {
                     <div class="rm-avatar-ph">{{ member.fullName?.[0] || '?' }}</div>
                     }

@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
+import '../../core/constants/app_constants.dart';
+import '../../core/models/paged_list.dart';
 import '../../core/utils/upload_file_naming.dart';
 
 final newsServiceProvider = Provider<NewsService>((ref) => NewsService(ref.read(dioProvider)));
@@ -99,13 +101,18 @@ class GalleryService {
   final Dio _dio;
   GalleryService(this._dio);
 
-  Future<List<dynamic>> getGalleries({bool onlyActive = true}) async {
+  /// Admins see every gallery from /gallery/all, which is not paged, so they get it as one page.
+  Future<PagedList> getGalleriesPage(int page, {bool onlyActive = true}) async {
     try {
-      final endpoint = onlyActive ? '/gallery' : '/gallery/all';
-      final response = await _dio.get(endpoint);
-      return response.data as List<dynamic>;
+      if (!onlyActive) {
+        final response = await _dio.get('/gallery/all');
+        return PagedList.single(response.data as List<dynamic>);
+      }
+      final response = await _dio.get('/gallery',
+          queryParameters: {'page': page, 'pageSize': PagingConstants.listPageSize});
+      return PagedList.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
-      debugPrint('GalleryService.getGalleries failed: $e');
+      debugPrint('GalleryService.getGalleriesPage failed: $e');
       rethrow;
     }
   }

@@ -2,8 +2,6 @@ using FluentAssertions;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace GHCAA.Tests.Services;
 

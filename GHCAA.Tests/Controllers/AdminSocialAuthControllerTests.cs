@@ -1,10 +1,8 @@
-using System.Threading.Tasks;
 using GHCAA.API.Controllers;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using NUnit.Framework;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Tests.Controllers

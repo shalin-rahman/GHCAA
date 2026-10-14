@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -120,7 +121,7 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
                                     radius: 64,
                                     backgroundColor: Colors.black,
                                     backgroundImage: photoUrl != null
-                                        ? NetworkImage(photoUrl)
+                                        ? cachedImageProvider(context, photoUrl, size: 128)
                                         : null,
                                     child: photoUrl == null
                                         ? Text(data['fullName']?[0] ?? '?',

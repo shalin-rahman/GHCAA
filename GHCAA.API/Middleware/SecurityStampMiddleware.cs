@@ -1,6 +1,8 @@
-using System.Security.Claims;
+using GHCAA.Domain;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using System.Security.Claims;
 
 namespace GHCAA.API.Middleware
 {
@@ -13,10 +15,12 @@ namespace GHCAA.API.Middleware
     public class SecurityStampMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly IMemoryCache _cache;
 
-        public SecurityStampMiddleware(RequestDelegate next)
+        public SecurityStampMiddleware(RequestDelegate next, IMemoryCache cache)
         {
             _next = next;
+            _cache = cache;
         }
 
         public async Task InvokeAsync(HttpContext context, ApplicationDbContext db)
@@ -24,14 +28,20 @@ namespace GHCAA.API.Middleware
             if (context.User.Identity?.IsAuthenticated == true)
             {
                 var userIdClaim = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var stampClaim = context.User.FindFirstValue("SecurityStamp");
+                var stampClaim = context.User.FindFirstValue(Constants.SecurityStamps.ClaimType);
 
                 if (int.TryParse(userIdClaim, out int userId) && !string.IsNullOrEmpty(stampClaim))
                 {
-                    var dbStamp = await db.Users
-                        .Where(u => u.Id == userId)
-                        .Select(u => u.SecurityStamp)
-                        .FirstOrDefaultAsync();
+                    // 98.8. One query per user every 30 seconds instead of one per request.
+                    // SecurityStampCacheInterceptor drops the entry when a save rotates the stamp.
+                    var dbStamp = await _cache.GetOrCreateAsync(Constants.SecurityStamps.CacheKey(userId), entry =>
+                    {
+                        entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(Constants.SecurityStamps.CacheSeconds);
+                        return db.Users
+                            .Where(u => u.Id == userId)
+                            .Select(u => u.SecurityStamp)
+                            .FirstOrDefaultAsync();
+                    });
 
                     if (dbStamp != stampClaim)
                     {

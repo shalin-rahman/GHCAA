@@ -153,4 +153,13 @@ describe('EventsService', () => {
         expect(req.request.method).toBe('GET');
         req.flush([mockRegistration]);
     });
+
+    // NFR-P1
+    it('should get one page of events', () => {
+        service.getEventsPage(2, 20).subscribe(page => expect(page.page).toBe(2));
+        const req = httpMock.expectOne(r => r.url === API_ENDPOINTS.EVENTS);
+        expect(req.request.params.get('page')).toBe('2');
+        expect(req.request.params.get('pageSize')).toBe('20');
+        req.flush({ items: [], totalItems: 0, totalPages: 0, page: 2, pageSize: 20 });
+    });
 });

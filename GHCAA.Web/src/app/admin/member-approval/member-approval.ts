@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { LazyImgDirective } from '../../common/directives/lazy-img.directive';
 import { AdminService } from '../../core/services/admin.service';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -17,7 +18,7 @@ import { SearchBarComponent } from '../../common/search-bar/search-bar.component
 @Component({
   selector: 'app-member-approval',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LazyImgDirective],
   templateUrl: './member-approval.html',
   styleUrl: './member-approval.scss'
 })

@@ -1,8 +1,7 @@
-﻿using GHCAA.Application.Interfaces;
+﻿using GHCAA.API.Extensions;
+using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {

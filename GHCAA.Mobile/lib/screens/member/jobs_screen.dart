@@ -8,6 +8,9 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/models/paged_list.dart';
+import '../../core/utils/paged_list_notifier.dart';
+import '../../core/widgets/load_more_footer.dart';
 import '../../features/jobs/job_service.dart';
 import '../../features/auth/auth_service.dart';
 import '../../core/utils/app_utils.dart';
@@ -15,9 +18,8 @@ import '../../core/widgets/confirm_dialog.dart';
 
 final jobSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
 
-final jobsListProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
-  return ref.read(jobServiceProvider).getAllJobs();
-});
+final jobsListProvider = AsyncNotifierProvider.autoDispose<PagedListNotifier, PagedList>(
+    () => PagedListNotifier((ref, page) => ref.read(jobServiceProvider).getJobsPage(page)));
 
 class JobsScreen extends ConsumerStatefulWidget {
   const JobsScreen({super.key});
@@ -123,22 +125,36 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
             ),
           ),
           Expanded(
-            child: AsyncValueWidget<List<dynamic>>(
+            child: AsyncValueWidget<PagedList>(
               value: jobsAsync,
               loadingMessage: 'Loading jobs...',
-              onRetry: () => ref.invalidate(jobsListProvider),
-              data: (jobs) {
+              onRetry: () {
+                ref.read(jobServiceProvider).clearCache();
+                ref.invalidate(jobsListProvider);
+              },
+              data: (paged) {
+                final jobs = paged.items;
+                final loadMore = ref.read(jobsListProvider.notifier).loadMore;
                 final filtered = jobs.where((job) {
                   final title = job['title']?.toString().toLowerCase() ?? '';
                   final company = job['companyName']?.toString().toLowerCase() ?? '';
                   return title.contains(searchQuery) || company.contains(searchQuery);
                 }).toList();
 
-                return RefreshIndicator(
+                return NotificationListener<ScrollNotification>(
+                  onNotification: (n) => loadMoreNearEnd(n, loadMore),
+                  child: RefreshIndicator(
                   color: AppTheme.royalGold,
                   onRefresh: () async {
                     HapticFeedback.mediumImpact();
-                    ref.invalidate(jobsListProvider);
+                    // A pull means fresh data, so skip the cached first page.
+                    ref.read(jobServiceProvider).clearCache();
+                    try {
+                      ref.invalidate(jobsListProvider);
+                      await ref.read(jobsListProvider.future);
+                    } catch (_) {
+                      // The error state renders through the provider.
+                    }
                   },
                   child: Column(
                     children: [
@@ -154,12 +170,19 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                           ),
                         ),
                       Expanded(
+                        // The footer stays, since a search only covers the pages loaded so far.
                         child: filtered.isEmpty
-                          ? EmptyStateWidget(searchQuery.isEmpty ? 'No active jobs found.' : 'No jobs match your search.', icon: Icons.work_outline)
+                          ? Column(children: [
+                              Expanded(child: EmptyStateWidget(searchQuery.isEmpty ? 'No active jobs found.' : 'No jobs match your search.', icon: Icons.work_outline)),
+                              LoadMoreFooter(paged: paged, onLoadMore: loadMore),
+                            ])
                           : ListView.builder(
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              itemCount: filtered.length,
+                              itemCount: filtered.length + 1,
                               itemBuilder: (context, index) {
+                                if (index == filtered.length) {
+                                  return LoadMoreFooter(paged: paged, onLoadMore: loadMore);
+                                }
                                 final job = filtered[index];
                                 final isMine = myMemberId != null && job['memberId'] == myMemberId;
 
@@ -237,7 +260,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                       ),
                     ],
                   ),
-                );
+                ));
               },
             ),
           ),

@@ -1,12 +1,8 @@
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using FluentAssertions;
 using GHCAA.Infrastructure.Data;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using NUnit.Framework;
+using System.Net;
+using System.Net.Http.Headers;
 
 namespace GHCAA.Tests.Integration
 {
@@ -122,6 +118,37 @@ namespace GHCAA.Tests.Integration
             // tests above, and proof the attribute is actually wired up, not just present.
             secondBody.Should().Contain(KnownLookupLabel);
             secondBody.Should().NotContain(updatedLabel);
+        }
+
+        [Test]
+        [Category("NFR-P1")]
+        public async Task PublicLookups_UnknownQueryValue_SharesTheCachedEntry()
+        {
+            await _client.GetAsync(LookupsRoute);
+
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var lookup = await db.Lookups.FindAsync(KnownLookupId);
+                lookup!.Label = "Cache Bust Label";
+                await db.SaveChangesAsync();
+            }
+
+            var body = await (await _client.GetAsync(LookupsRoute + "?bust=12345")).Content.ReadAsStringAsync();
+
+            body.Should().Contain(KnownLookupLabel);
+            body.Should().NotContain("Cache Bust Label");
+        }
+
+        [Test]
+        [Category("NFR-P1")]
+        public async Task PublicEvents_PageNumber_StillGetsItsOwnEntry()
+        {
+            var first = await (await _client.GetAsync("/api/events?page=1&pageSize=1")).Content.ReadAsStringAsync();
+            var second = await (await _client.GetAsync("/api/events?page=2&pageSize=1")).Content.ReadAsStringAsync();
+
+            first.Should().Contain("\"page\":1");
+            second.Should().Contain("\"page\":2");
         }
     }
 }

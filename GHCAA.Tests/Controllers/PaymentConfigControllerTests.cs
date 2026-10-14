@@ -1,15 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.API.Controllers;
 using GHCAA.Domain.Models;
-using GHCAA.Infrastructure.Data;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Controllers
 {

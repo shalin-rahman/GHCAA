@@ -1,9 +1,9 @@
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
-using static GHCAA.Domain.Constants;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using static GHCAA.Domain.Constants;
 
 namespace GHCAA.API.Extensions
 {

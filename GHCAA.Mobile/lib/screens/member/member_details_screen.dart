@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -296,7 +297,7 @@ class _MemberDetailsScreenState extends ConsumerState<MemberDetailsScreen> {
         color: Colors.black,
         shape: BoxShape.circle,
         border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.5), width: 3),
-        image: url != null ? DecorationImage(image: NetworkImage(url), fit: BoxFit.cover) : null,
+        image: url != null ? DecorationImage(image: cachedImageProvider(context, url, size: 120), fit: BoxFit.cover) : null,
         boxShadow: [
           BoxShadow(color: AppTheme.royalGold.withValues(alpha: 0.2), blurRadius: 20, spreadRadius: 5),
         ],

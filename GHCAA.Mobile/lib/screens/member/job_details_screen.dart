@@ -8,6 +8,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/api/api_client.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../features/auth/auth_service.dart';
+import '../../features/jobs/job_service.dart';
 import '../../core/widgets/confirm_dialog.dart';
 
 final jobDetailsProvider = FutureProvider.family<Map<String, dynamic>?, int>((ref, jobId) async {
@@ -148,6 +149,7 @@ class JobDetailsScreen extends ConsumerWidget {
                   try {
                     final dio = ref.read(dioProvider);
                     await dio.put('/jobs/$jobId', data: buildJobUpdateBody(job, titleCtrl.text, descCtrl.text));
+                    ref.read(jobServiceProvider).clearCache();
                     ref.invalidate(jobDetailsProvider(jobId));
                     if (ctx.mounted) Navigator.pop(ctx);
                     if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Job posting updated.')));
@@ -181,6 +183,7 @@ class JobDetailsScreen extends ConsumerWidget {
     try {
       final dio = ref.read(dioProvider);
       await dio.delete('/jobs/$jobId');
+      ref.read(jobServiceProvider).clearCache();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Job posting removed.')));
         context.pop();

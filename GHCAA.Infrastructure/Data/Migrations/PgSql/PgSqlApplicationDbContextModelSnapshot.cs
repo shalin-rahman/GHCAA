@@ -111,6 +111,8 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 
                     b.HasIndex("MemberId", "Timestamp");
 
+                    b.HasIndex("Timestamp");
+
                     b.ToTable("ActivityLogs");
                 });
 
@@ -1231,6 +1233,8 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 
                     b.HasKey("Id");
 
+                    b.HasIndex("SentDate");
+
                     b.ToTable("EmailLogs");
                 });
 
@@ -1550,6 +1554,9 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ThumbnailPath")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("UploadedAt")
                         .HasColumnType("timestamp with time zone");
@@ -3366,6 +3373,8 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ContributionPoints");
 
                     b.HasIndex("Email")
                         .IsUnique();

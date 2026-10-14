@@ -1,7 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
@@ -10,7 +6,6 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Services
 {

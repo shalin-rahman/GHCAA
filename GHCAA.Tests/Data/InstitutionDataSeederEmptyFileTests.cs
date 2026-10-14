@@ -1,6 +1,5 @@
 using FluentAssertions;
 using GHCAA.Infrastructure.Data;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Data
 {

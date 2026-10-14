@@ -1,9 +1,9 @@
-using GHCAA.Domain.Models;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
+using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static GHCAA.Domain.Enums;
-using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
 {

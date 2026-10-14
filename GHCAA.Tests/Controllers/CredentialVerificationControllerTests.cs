@@ -1,11 +1,8 @@
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
-using Moq;
-using NUnit.Framework;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 
 namespace GHCAA.Tests.Controllers
 {

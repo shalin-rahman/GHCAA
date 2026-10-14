@@ -1,7 +1,5 @@
 using FluentValidation;
 using GHCAA.Application.DTOs;
-using System;
-using System.Linq;
 
 namespace GHCAA.Application.Validators
 {

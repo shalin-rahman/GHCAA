@@ -47,8 +47,12 @@ namespace GHCAA.API.Controllers
         [HttpGet]
         [AllowAnonymous]
         [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
-        public async Task<IActionResult> GetGalleries(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetGalleries([FromQuery] int? page, [FromQuery] int? pageSize, CancellationToken cancellationToken)
         {
+            // 98.17: paged only when the client sends page, so older app builds keep the plain list.
+            if (page.HasValue)
+                return Ok(await _galleryService.GetActiveGalleriesPageAsync(page.Value, pageSize ?? Constants.Paging.DefaultPageSize, cancellationToken));
+
             // Public viewing shows only active galleries
             var galleries = await _galleryService.GetAllGalleriesAsync(onlyActive: true, cancellationToken);
             return Ok(galleries);

@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -104,7 +105,7 @@ class _NewsDetailsScreenState extends ConsumerState<NewsDetailsScreen> {
                      padding: const EdgeInsets.only(bottom: 12.0),
                      decoration: BoxDecoration(
                        borderRadius: BorderRadius.circular(16),
-                       image: DecorationImage(image: NetworkImage(fullImgUrl), fit: BoxFit.cover),
+                       image: DecorationImage(image: cachedImageProvider(context, fullImgUrl, size: 600), fit: BoxFit.cover),
                        boxShadow: [
                           BoxShadow(color: AppTheme.royalGold.withValues(alpha: 0.1), blurRadius: 10, spreadRadius: 2),
                        ],

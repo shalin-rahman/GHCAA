@@ -1,7 +1,6 @@
 using GHCAA.API.Extensions;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 

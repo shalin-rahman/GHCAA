@@ -1,24 +1,17 @@
-using GHCAA.Infrastructure.Options;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NUnit.Framework;
+using System.Text;
 
 namespace GHCAA.Tests.Controllers
 {

@@ -1,3 +1,6 @@
+using FluentAssertions;
+using GHCAA.Domain;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Headers;
@@ -5,10 +8,6 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using FluentAssertions;
-using GHCAA.Domain;
-using Microsoft.IdentityModel.Tokens;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Integration
 {

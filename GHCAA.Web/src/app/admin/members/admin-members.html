@@ -22,21 +22,21 @@
         <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); onFilterChange()"
             class="status-select ml-2">
             <option value="all">All Membership Statuses</option>
-            @for (s of statusOptions; track s.value) {
+            @for (s of statusOptions(); track s.value) {
             <option [value]="s.value">{{ s.label }}</option>
             }
         </select>
         <select [ngModel]="membershipTypeFilter()" (ngModelChange)="membershipTypeFilter.set($event); onFilterChange()"
             class="status-select ml-2">
             <option value="all">Every Membership Tier</option>
-            @for (t of membershipTypes; track t.value) {
+            @for (t of membershipTypes(); track t.value) {
             <option [value]="t.value">{{ t.label }}</option>
             }
         </select>
         <select [ngModel]="categoryFilter()" (ngModelChange)="categoryFilter.set($event); onFilterChange()"
             class="status-select ml-2">
             <option value="all">Every Special Category</option>
-            @for (c of memberCategories; track c.value) {
+            @for (c of memberCategories(); track c.value) {
             <option [value]="c.value">{{ c.label }}</option>
             }
         </select>
@@ -79,7 +79,7 @@
                     <td class="member-cell" (click)="openDetail(member)">
                         <div class="member-cell-row">
                         @if (member.photoPath) {
-                        <img [src]="getImageUrl(member.photoPath)" class="member-avatar photo" alt="Photo" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
+                        <img appLazyImg width="40" height="40" [src]="getImageUrl(member.photoPath)" class="member-avatar photo" alt="Photo" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                         } @else {
                         <div class="member-avatar">{{ member.fullName?.[0] }}</div>
                         }
@@ -280,10 +280,10 @@
                         <label>Gender</label>
                         @if (isEditing()) {
                             <select [(ngModel)]="selectedMember().gender" #genderI="ngModel">
-                                @for (g of genderOptions; track g.value) { <option [value]="g.value">{{ g.label }}</option> }
+                                @for (g of genderOptions(); track g.value) { <option [value]="g.value">{{ g.label }}</option> }
                             </select>
                         } @else {
-                            <div class="view-value">{{ getLabel(genderOptions, selectedMember().gender) }}</div>
+                            <div class="view-value">{{ getLabel(genderOptions(), selectedMember().gender) }}</div>
                         }
                     </div>
 
@@ -291,10 +291,10 @@
                         <label>Blood Group</label>
                         @if (isEditing()) {
                             <select [(ngModel)]="selectedMember().bloodGroup" #bloodI="ngModel">
-                                @for (bg of bloodGroupOptions; track bg.value) { <option [value]="bg.value">{{ bg.label }}</option> }
+                                @for (bg of bloodGroupOptions(); track bg.value) { <option [value]="bg.value">{{ bg.label }}</option> }
                             </select>
                         } @else {
-                            <div class="view-value">{{ getLabel(bloodGroupOptions, selectedMember().bloodGroup) }}</div>
+                            <div class="view-value">{{ getLabel(bloodGroupOptions(), selectedMember().bloodGroup) }}</div>
                         }
                     </div>
                     <div class="form-group">
@@ -319,20 +319,20 @@
                         <label>Membership Tier</label>
                         @if (isEditing()) {
                             <select [(ngModel)]="selectedMember().membershipType">
-                                @for (t of membershipTypes; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+                                @for (t of membershipTypes(); track t.value) { <option [value]="t.value">{{ t.label }}</option> }
                             </select>
                         } @else {
-                            <div class="view-value">{{ getLabel(membershipTypes, selectedMember().membershipType) }}</div>
+                            <div class="view-value">{{ getLabel(membershipTypes(), selectedMember().membershipType) }}</div>
                         }
                     </div>
                     <div class="form-group">
                         <label>Special Category</label>
                         @if (isEditing()) {
                             <select [(ngModel)]="selectedMember().category">
-                                @for (cat of memberCategories; track cat.value) { <option [value]="cat.value">{{ cat.label }}</option> }
+                                @for (cat of memberCategories(); track cat.value) { <option [value]="cat.value">{{ cat.label }}</option> }
                             </select>
                         } @else {
-                            <div class="view-value">{{ getLabel(memberCategories, selectedMember().category) }}</div>
+                            <div class="view-value">{{ getLabel(memberCategories(), selectedMember().category) }}</div>
                         }
                     </div>
 
@@ -624,7 +624,7 @@
                                     <div class="form-group">
                                         <label class="text-[10px]">Position</label>
                                         <select [(ngModel)]="h.position">
-                                            @for (role of ecPositions; track role.value) { 
+                                            @for (role of ecPositions(); track role.value) { 
                                                 <option [value]="role.value">{{ role.label }}</option> 
                                             }
                                         </select>
@@ -807,8 +807,8 @@
 
 
 <!-- Shared Datalists -->
-<datalist id="years-list"> @for (y of yearsList; track y) { <option [value]="y"></option> } </datalist>
+<datalist id="years-list"> @for (y of yearsList(); track y) { <option [value]="y"></option> } </datalist>
 <datalist id="degree-list"> @for (d of degreeOptions; track d) { <option [value]="d"></option> } </datalist>
 <datalist id="sector-list"> @for (s of sectorOptions; track s) { <option [value]="s"></option> } </datalist>
 
-<datalist id="subject-list"> @for (s of subjectOptions; track s) { <option [value]="s"></option> } </datalist>
+<datalist id="subject-list"> @for (s of subjectOptions; track s) { <option [value]="s"></option> } </datalist>

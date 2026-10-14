@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -108,12 +109,15 @@ class EventDetailsScreen extends ConsumerWidget {
                     event['imageUrl'].toString().isNotEmpty)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16),
-                    child: Image.network(
-                      AppConfig.resolveImageUrl(event['imageUrl']) ?? '',
+                    child: CustomNetworkImage(
+                      imageUrl: AppConfig.resolveImageUrl(event['imageUrl']) ?? '',
                       height: 180,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const SizedBox(),
+                      borderRadius: 0,
+                      decodeSize: 600,
+                      placeholderBuilder: (_) => const SizedBox(),
+                      errorBuilder: (_) => const SizedBox(),
                     ),
                   ),
                 if (event['imageUrl'] != null &&
@@ -225,7 +229,7 @@ class EventDetailsScreen extends ConsumerWidget {
                 child: CircleAvatar(
                   radius: 20,
                   backgroundColor: Colors.black26,
-                  backgroundImage: photo != null ? NetworkImage(photo) : null,
+                  backgroundImage: photo != null ? cachedImageProvider(ctx, photo, size: 40) : null,
                   child: photo == null
                       ? Text(m['fullName']?[0] ?? '?',
                           style: const TextStyle(
@@ -327,6 +331,7 @@ class EventDetailsScreen extends ConsumerWidget {
                             'title': titleCtrl.text,
                             'description': descCtrl.text
                           });
+                          ref.read(eventsServiceProvider).clearCache();
                           ref.invalidate(eventDetailsProvider(eventId));
                           if (ctx.mounted) Navigator.pop(ctx);
                           if (context.mounted) {
@@ -527,6 +532,7 @@ class EventDetailsScreen extends ConsumerWidget {
       final response =
           await dio.post('/events/admin/$eventId/logo', data: formData);
       if (response.statusCode == 200) {
+        ref.read(eventsServiceProvider).clearCache();
         ref.invalidate(eventDetailsProvider(eventId));
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -556,6 +562,7 @@ class EventDetailsScreen extends ConsumerWidget {
     try {
       final dio = ref.read(dioProvider);
       await dio.delete('/events/$eventId');
+      ref.read(eventsServiceProvider).clearCache();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Event deleted successfully.')));

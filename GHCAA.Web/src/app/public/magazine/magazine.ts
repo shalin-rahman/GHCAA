@@ -5,12 +5,13 @@ import { NewsService } from '../../core/services/news.service';
 import { NewsPost } from '../../core/models/business.models';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { LazyImgDirective } from '../../common/directives/lazy-img.directive';
 import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
   selector: 'app-magazine',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, LoadingPanelComponent, ImgFallbackDirective],
+  imports: [CommonModule, AppDatePipe, LoadingPanelComponent, ImgFallbackDirective, LazyImgDirective],
   templateUrl: './magazine.html',
   styleUrl: './magazine.scss'
 })

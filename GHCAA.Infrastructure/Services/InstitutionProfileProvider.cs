@@ -1,8 +1,8 @@
-using System.Text.Json;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using System.Text.Json;
 
 namespace GHCAA.Infrastructure.Services
 {

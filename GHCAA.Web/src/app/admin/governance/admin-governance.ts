@@ -1,8 +1,9 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { LazyImgDirective } from '../../common/directives/lazy-img.directive';
 import { LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS, getECPositionName, getMembershipTypeLabel, getCategoryLabel, VACANCY_REASON_OPTIONS, VACANCY_REASON_OTHER, VACANCY_NOTE_MAX_LENGTH, getVacancyReasonLabel } from '../../core/constants/app.constants';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { debounce } from '../../core/utils/debounce.util';
@@ -20,8 +21,9 @@ import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 @Component({
     selector: 'app-admin-governance',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ImgFallbackDirective, ModalHeaderComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ImgFallbackDirective, LazyImgDirective, ModalHeaderComponent],
     templateUrl: './admin-governance.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './admin-governance.scss'
 })
 export class AdminGovernance implements OnInit {
@@ -74,7 +76,7 @@ export class AdminGovernance implements OnInit {
     });
 
     // 82.42: sourced from the ECPosition lookup group instead of a local index-based copy of EC_ROLES.
-    ecPositions: LookupOption[] = [];
+    ecPositions = signal<LookupOption[]>([]);
 
     getImageUrl(path: string | null | undefined): string {
         if (!path) return '';
@@ -88,7 +90,7 @@ export class AdminGovernance implements OnInit {
 
     ngOnInit() {
         this.loadPeriods();
-        this.lookupService.getOptions(LOOKUP_GROUPS.ECPosition).subscribe(opts => this.ecPositions = opts);
+        this.lookupService.getOptions(LOOKUP_GROUPS.ECPosition).subscribe(opts => this.ecPositions.set(opts));
     }
 
     loadPeriods() {

@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
@@ -13,6 +7,7 @@ using GHCAA.Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Infrastructure.Services;
@@ -173,7 +168,7 @@ public sealed class ElectionAppointmentService(
                 ?? db.Roles.Add(new Role { Name = Constants.Roles.ElectionOfficial }).Entity;
             user.Roles.Add(role);
         }
-        user.SecurityStamp = Guid.NewGuid().ToString("N");
+        user.RotateSecurityStamp();
 
         await _audit.SaveAsync(ct);
         return (true, null);
@@ -247,7 +242,7 @@ public sealed class ElectionAppointmentService(
         if (role is not null)
         {
             user.Roles.Remove(role);
-            user.SecurityStamp = Guid.NewGuid().ToString("N");
+            user.RotateSecurityStamp();
         }
         // Someone let in only to run an election has nothing left to sign in for.
         if (user.MemberId is null && user.Roles.Count == 0)

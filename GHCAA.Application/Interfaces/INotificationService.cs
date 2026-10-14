@@ -1,5 +1,5 @@
-using GHCAA.Domain.Models;
 using GHCAA.Domain;
+using GHCAA.Domain.Models;
 
 namespace GHCAA.Application.Interfaces
 {

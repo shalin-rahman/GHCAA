@@ -1,5 +1,4 @@
 using FluentAssertions;
-using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;

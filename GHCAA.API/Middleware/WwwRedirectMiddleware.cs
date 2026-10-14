@@ -1,8 +1,6 @@
-using System.Net;
 using GHCAA.Domain;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.Extensions.Configuration;
+using System.Net;
 
 namespace GHCAA.API.Middleware
 {

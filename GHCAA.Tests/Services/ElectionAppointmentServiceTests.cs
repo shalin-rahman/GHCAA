@@ -3,13 +3,9 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
-using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using NUnit.Framework;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Tests.Services;

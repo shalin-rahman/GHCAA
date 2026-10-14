@@ -1,7 +1,6 @@
 using FluentValidation.TestHelper;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Validators;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Validators
 {

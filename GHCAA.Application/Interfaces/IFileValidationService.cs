@@ -1,5 +1,3 @@
-using System.IO;
-
 namespace GHCAA.Application.Interfaces
 {
     public enum FileCategory

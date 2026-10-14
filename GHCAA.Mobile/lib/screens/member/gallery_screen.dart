@@ -15,15 +15,18 @@ import '../../core/widgets/admin_action_circle.dart';
 import '../../core/widgets/app_search_field.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/models/paged_list.dart';
+import '../../core/utils/paged_list_notifier.dart';
+import '../../core/widgets/load_more_footer.dart';
 import '../../core/widgets/glass_tile.dart';
 import '../../core/widgets/confirm_dialog.dart';
 
 final galleryItemsProvider =
-    FutureProvider.autoDispose<List<dynamic>>((ref) async {
+    AsyncNotifierProvider.autoDispose<PagedListNotifier, PagedList>(() => PagedListNotifier((ref, page) async {
   final role = await ref.read(authServiceProvider).getRole();
   final isAdmin = role.isStaffAdminRole;
-  return ref.read(galleryServiceProvider).getGalleries(onlyActive: !isAdmin);
-});
+  return ref.read(galleryServiceProvider).getGalleriesPage(page, onlyActive: !isAdmin);
+}));
 
 final myAlbumsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(galleryServiceProvider).getMyAlbums();
@@ -586,7 +589,9 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           ),
           Expanded(
             child: galleryAsync.when(
-              data: (galleries) {
+              data: (paged) {
+                final galleries = paged.items;
+                final loadMore = ref.read(galleryItemsProvider.notifier).loadMore;
                 final filtered = galleries
                     .where((g) => g['title']
                         .toString()
@@ -601,16 +606,22 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                       _buildMyAlbumsSection(context),
                       const EmptyStateWidget('No galleries found.',
                           icon: Icons.photo_library_outlined),
+                      LoadMoreFooter(paged: paged, onLoadMore: loadMore),
                     ],
                   );
                 }
 
-                return ListView.builder(
+                return NotificationListener<ScrollNotification>(
+                  onNotification: (n) => loadMoreNearEnd(n, loadMore),
+                  child: ListView.builder(
                   padding: const EdgeInsets.fromLTRB(
                       AppTheme.spaceL, 0, AppTheme.spaceL, 104),
-                  itemCount: filtered.length + 1,
+                  itemCount: filtered.length + 2,
                   itemBuilder: (context, index) {
                     if (index == 0) return _buildMyAlbumsSection(context);
+                    if (index == filtered.length + 1) {
+                      return LoadMoreFooter(paged: paged, onLoadMore: loadMore);
+                    }
                     final gallery = filtered[index - 1];
                     final photos = gallery['photos'] as List? ?? [];
                     final fullThumb = AppConfig.resolveImageUrl(
@@ -864,7 +875,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                       ),
                     );
                   },
-                );
+                ));
               },
               loading: () => const Center(child: LogoSpinner(size: 120)),
               error: (e, s) => Center(

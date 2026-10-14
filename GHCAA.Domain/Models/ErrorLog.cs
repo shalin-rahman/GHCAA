@@ -1,5 +1,3 @@
-using System;
-
 namespace GHCAA.Domain.Models
 {
     // 45.2: captured from ExceptionMiddleware only (unhandled exceptions), not every ILogger call

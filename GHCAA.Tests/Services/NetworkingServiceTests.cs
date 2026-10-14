@@ -3,7 +3,6 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
-using System.Linq;
 
 namespace GHCAA.Tests.Services;
 

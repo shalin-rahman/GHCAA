@@ -1,9 +1,6 @@
-using System.Collections.Generic;
-using System.IO;
 using FluentAssertions;
 using GHCAA.Application.Interfaces;
 using GHCAA.Infrastructure.Services;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Services
 {

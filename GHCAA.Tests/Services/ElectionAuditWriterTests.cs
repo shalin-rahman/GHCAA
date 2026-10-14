@@ -3,7 +3,6 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Services;
 

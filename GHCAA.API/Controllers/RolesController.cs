@@ -1,7 +1,7 @@
 ﻿using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using GHCAA.Domain;
 using System.ComponentModel.DataAnnotations;
 
 namespace GHCAA.API.Controllers

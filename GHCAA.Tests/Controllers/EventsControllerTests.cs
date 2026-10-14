@@ -1,16 +1,11 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Domain;
 using Moq;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Controllers
 {
@@ -41,8 +36,22 @@ namespace GHCAA.Tests.Controllers
             _eventServiceMock.Setup(x => x.GetActiveEventsAsync(It.IsAny<CancellationToken>()))
                              .ReturnsAsync(new List<EventDto>());
 
-            var result = await _controller.GetActiveEvents(CancellationToken.None);
+            var result = await _controller.GetActiveEvents(null, null, CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            Assert.That(((OkObjectResult)result).Value, Is.InstanceOf<IEnumerable<EventDto>>());
+        }
+
+        [Category("NFR-P1")]
+        [Test]
+        public async Task GetActiveEvents_WithPage_ReturnsPagedResult_WithDefaultPageSize()
+        {
+            _eventServiceMock.Setup(x => x.GetActiveEventsPageAsync(2, Constants.Paging.DefaultPageSize, It.IsAny<CancellationToken>()))
+                             .ReturnsAsync(new PagedResult<EventDto> { Page = 2 });
+
+            var result = await _controller.GetActiveEvents(2, null, CancellationToken.None);
+
+            Assert.That(((OkObjectResult)result).Value, Is.InstanceOf<PagedResult<EventDto>>());
+            _eventServiceMock.Verify(x => x.GetActiveEventsAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Test]

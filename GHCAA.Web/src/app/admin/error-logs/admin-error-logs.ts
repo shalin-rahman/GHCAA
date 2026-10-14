@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
@@ -13,6 +13,7 @@ import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel'
     standalone: true,
     imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, PaginationComponent, LoadingPanelComponent],
     templateUrl: './admin-error-logs.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './admin-error-logs.scss'
 })
 export class AdminErrorLogs implements OnInit {

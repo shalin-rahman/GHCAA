@@ -11,6 +11,7 @@ import '../../core/router/app_router.dart';
 import '../../core/models/auth_models.dart';
 import '../../core/models/member_profile.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/api/session_caches.dart';
 
 
 final authServiceProvider = Provider<AuthService>((ref) {
@@ -48,6 +49,7 @@ class AuthService {
         // SECURITY: Clear ALL previous session data before saving new credentials.
         // This prevents role/profile leakage when switching between admin and member accounts.
         await _storage.clearAll();
+        invalidateSessionCaches(_ref);
 
         await _storage.saveToken(parsed.token);
         if (parsed.refreshToken != null) await _storage.saveRefreshToken(parsed.refreshToken!);
@@ -110,6 +112,7 @@ class AuthService {
         // Refresh token was revoked or expired server-side — clear it so the biometric
         // option disappears until the member logs in with a password again.
         await _storage.clearAll();
+        invalidateSessionCaches(_ref);
         return "Your saved session has expired. Please log in with your password.";
       }
       return "Something went wrong. Try again.";
@@ -144,6 +147,7 @@ class AuthService {
         final parsed = LoginResponse.fromJson(Map<String, dynamic>.from(response.data));
 
         await _storage.clearAll();
+        invalidateSessionCaches(_ref);
         await _storage.saveToken(parsed.token);
         if (parsed.refreshToken != null) await _storage.saveRefreshToken(parsed.refreshToken!);
         await _storage.saveRole(parsed.role);
@@ -227,6 +231,8 @@ class AuthService {
     // role/profile (including admin-only UI) until something else triggered a refetch.
     _ref.invalidate(roleProvider);
     _ref.invalidate(userProfileProvider);
+    // 98.18: the next user must not see this user's cached lists.
+    invalidateSessionCaches(_ref);
     await _storage.clearAll();
     // Invalidating alone isn't enough: the new stream doesn't emit until its
     // create callback actually runs, and callers navigate away right after

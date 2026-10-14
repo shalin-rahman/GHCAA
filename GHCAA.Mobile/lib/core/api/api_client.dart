@@ -7,6 +7,7 @@ import '../config/app_config.dart';
 import '../logging/log_capture_service.dart';
 import '../storage/storage_service.dart';
 import 'api_exception.dart';
+import 'session_caches.dart';
 import 'retry_interceptor.dart';
 import 'step_up_interceptor.dart';
 import '../router/navigator_key.dart';
@@ -120,6 +121,7 @@ final dioProvider = Provider<Dio>((ref) {
             }
           }
           await storage.clearAll();
+          invalidateSessionCaches(ref);
         }
 
         String message = 'The GHCAA portal encountered a connection hiccup.';

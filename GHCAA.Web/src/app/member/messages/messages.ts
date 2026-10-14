@@ -6,6 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ChatService, RecentChat, ChatMessage } from '../../core/services/chat.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { LazyImgDirective } from '../../common/directives/lazy-img.directive';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
@@ -17,7 +18,7 @@ import { ModalHeaderComponent } from '../../common/modal-header/modal-header.com
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImgFallbackDirective, LogoSpinnerComponent, ModalHeaderComponent, SearchBarComponent],
+  imports: [CommonModule, FormsModule, ImgFallbackDirective, LazyImgDirective, LogoSpinnerComponent, ModalHeaderComponent, SearchBarComponent],
   templateUrl: './messages.html',
   styleUrl: './messages.scss'
 })

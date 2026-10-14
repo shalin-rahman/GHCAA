@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
@@ -177,7 +178,7 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen>
             CircleAvatar(
               radius: 25,
               backgroundColor: AppTheme.royalGold.withValues(alpha: 0.1),
-              backgroundImage: fullUrl != null ? NetworkImage(fullUrl) : null,
+              backgroundImage: fullUrl != null ? cachedImageProvider(context, fullUrl, size: 50) : null,
               child: fullUrl == null
                   ? const Icon(Icons.person, color: AppTheme.royalGold)
                   : null,

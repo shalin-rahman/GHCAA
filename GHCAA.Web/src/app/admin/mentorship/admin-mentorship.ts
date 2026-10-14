@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { MentorshipService } from '../../core/services/mentorship.service';
@@ -17,7 +17,8 @@ export type MentorshipTab = 'All' | 'Pending' | 'Accepted' | 'Completed' | 'Decl
     selector: 'app-admin-mentorship',
     standalone: true,
     imports: [CommonModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ModalHeaderComponent],
-    templateUrl: './admin-mentorship.html'
+    templateUrl: './admin-mentorship.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminMentorship implements OnInit {
     private mentorshipService = inject(MentorshipService);

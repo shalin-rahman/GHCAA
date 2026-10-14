@@ -1,6 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace GHCAA.Application.Interfaces
 {
     public interface ISmsService

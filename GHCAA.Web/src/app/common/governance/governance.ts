@@ -9,12 +9,13 @@ import { formatPeriodRange } from '../../core/utils/date.util';
 import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { PageHeaderComponent } from '../page-header/page-header.component';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
+import { LazyImgDirective } from '../directives/lazy-img.directive';
 
 @Component({
     // ... (rest of metadata)
     selector: 'app-governance',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective],
+    imports: [CommonModule, FormsModule, RouterLink, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective, LazyImgDirective],
     templateUrl: './governance.html',
     styleUrl: './governance.scss'
 })

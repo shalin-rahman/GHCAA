@@ -3,9 +3,8 @@ using GHCAA.Application.DTOs;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
-using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
+using System.Security.Cryptography;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Tests.Services;

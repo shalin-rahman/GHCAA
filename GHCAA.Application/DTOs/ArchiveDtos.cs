@@ -1,4 +1,3 @@
-using System;
 using GHCAA.Domain;
 
 namespace GHCAA.Application.DTOs

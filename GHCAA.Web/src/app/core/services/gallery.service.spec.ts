@@ -59,4 +59,13 @@ describe('GalleryService', () => {
         expect(req.request.method).toBe('POST');
         req.flush({ id: 1, title: 'New', isActive: true, photos: [] });
     });
+
+    // NFR-P1
+    it('should get one page of galleries', () => {
+        service.getGalleriesPage(1, 20).subscribe(page => expect(page.items).toEqual([]));
+        const req = httpMock.expectOne(r => r.url === API_ENDPOINTS.GALLERY);
+        expect(req.request.params.get('page')).toBe('1');
+        expect(req.request.params.get('pageSize')).toBe('20');
+        req.flush({ items: [], totalItems: 0, totalPages: 0, page: 1, pageSize: 20 });
+    });
 });

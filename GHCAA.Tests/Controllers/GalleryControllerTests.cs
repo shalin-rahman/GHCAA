@@ -43,9 +43,22 @@ namespace GHCAA.Tests.Controllers
             _galleryServiceMock.Setup(x => x.GetAllGalleriesAsync(true, It.IsAny<CancellationToken>()))
                                .ReturnsAsync(new List<EventGallery>());
 
-            var result = await _controller.GetGalleries(CancellationToken.None);
+            var result = await _controller.GetGalleries(null, null, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Category("NFR-P1")]
+        [Test]
+        public async Task GetGalleries_WithPage_ReturnsPagedResult()
+        {
+            _galleryServiceMock.Setup(x => x.GetActiveGalleriesPageAsync(1, 12, It.IsAny<CancellationToken>()))
+                               .ReturnsAsync(new PagedResult<EventGallery>());
+
+            var result = await _controller.GetGalleries(1, 12, CancellationToken.None);
+
+            Assert.That(((OkObjectResult)result).Value, Is.InstanceOf<PagedResult<EventGallery>>());
+            _galleryServiceMock.Verify(x => x.GetAllGalleriesAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Test]

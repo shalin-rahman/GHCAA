@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, computed, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
@@ -12,19 +12,24 @@ import { ActivatedRoute } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
 import { FinancialService } from '../../core/services/financial.service';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
-import { ROUTES } from '../../core/constants/app.constants';
+import { LazyImgDirective } from '../directives/lazy-img.directive';
+import { ROUTES, LIST_PAGE_SIZE } from '../../core/constants/app.constants';
+import { appendById } from '../../core/utils/paging.util';
+import { Subscription } from 'rxjs';
 import { getEventStatusMeta } from '../../core/utils/date.util';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { ModalHeaderComponent } from '../modal-header/modal-header.component';
 import { PageHeaderComponent } from '../page-header/page-header.component';
 import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
+import { LoadMoreComponent } from '../load-more/load-more';
 
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, ReactiveFormsModule, PaymentPortalComponent, ImgFallbackDirective, ModalHeaderComponent, PageHeaderComponent, LoadingPanelComponent, AppCurrencyPipe],
+  imports: [CommonModule, AppDatePipe, FormsModule, ReactiveFormsModule, PaymentPortalComponent, ImgFallbackDirective, LazyImgDirective, ModalHeaderComponent, PageHeaderComponent, LoadingPanelComponent, AppCurrencyPipe, LoadMoreComponent],
   templateUrl: './events.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './events.scss'
 })
 export class Events implements OnInit {
@@ -38,6 +43,10 @@ export class Events implements OnInit {
   private finService = inject(FinancialService);
 
   events = signal<AlumniEvent[]>([]);
+  hasMore = signal(false);
+  loadingMore = signal(false);
+  private page = 1;
+  private pageSub?: Subscription;
   activeTab = signal<'upcoming' | 'my-registrations'>('upcoming');
   myRegistrations = signal<EventRegistration[]>([]);
 
@@ -96,23 +105,59 @@ export class Events implements OnInit {
   }
 
   loadEvents() {
-    this.eventsService.getEvents().subscribe({
-      next: data => {
-        this.events.set(data);
-        
+    this.page = 1;
+    // A next page still in flight belongs to the old list.
+    this.pageSub?.unsubscribe();
+    this.loadingMore.set(false);
+    this.pageSub = this.eventsService.getEventsPage(1, LIST_PAGE_SIZE).subscribe({
+      next: result => {
+        this.events.set(result.items);
+        this.hasMore.set(result.page < result.totalPages);
+
         // Handle deep-link to auto-open a specific event registration
         // Check both query param (legacy) and route param (new /events/:id context)
-        const targetEventId = this.route.snapshot.paramMap.get('id') || this.route.snapshot.queryParamMap.get('eventId');
-        
-        if (targetEventId) {
-            const ev = data.find(e => e.id.toString() === targetEventId);
-            if (ev) {
-                // Defer to the effect above until auth state is confirmed (see 30.26 note).
-                this.pendingDeepLinkEvent.set(ev);
-            }
-        }
+        this.resolveDeepLink(this.route.snapshot.paramMap?.get('id') || this.route.snapshot.queryParamMap.get('eventId'));
       },
       error: () => this.events.set([])
+    });
+  }
+
+  loadNextPage() {
+    if (!this.hasMore() || this.loadingMore()) return;
+    this.loadingMore.set(true);
+    this.pageSub?.unsubscribe();
+    this.pageSub = this.eventsService.getEventsPage(this.page + 1, LIST_PAGE_SIZE).subscribe({
+      next: result => {
+        this.page = result.page;
+        // A deep-linked event may already sit at the top of the list.
+        this.events.update(list => appendById(list, result.items));
+        this.hasMore.set(result.page < result.totalPages);
+        this.loadingMore.set(false);
+      },
+      error: () => this.loadingMore.set(false)
+    });
+  }
+
+  // The linked event may sit past the first page, so it is fetched on its own when not loaded.
+  // It goes to the top of the list, because the registration form renders inside its row.
+  // Only active events open, as before paging.
+  private resolveDeepLink(targetEventId: string | null) {
+    if (!targetEventId) return;
+    const loaded = this.events().find(e => e.id.toString() === targetEventId);
+    if (loaded) {
+      // Defer to the effect above until auth state is confirmed (see 30.26 note).
+      this.pendingDeepLinkEvent.set(loaded);
+      return;
+    }
+    const id = Number(targetEventId);
+    if (!Number.isInteger(id)) return;
+    this.eventsService.getEventById(id).subscribe({
+      next: ev => {
+        if (!ev?.isActive) return;
+        this.events.update(list => list.some(e => e.id === ev.id) ? list : [ev, ...list]);
+        this.pendingDeepLinkEvent.set(ev);
+      },
+      error: () => {}
     });
   }
 

@@ -4,9 +4,7 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
-using NUnit.Framework;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Tests.Services;

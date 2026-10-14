@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -282,7 +283,7 @@ class _GatekeeperScreenState extends ConsumerState<GatekeeperScreen> {
                   CircleAvatar(
                     radius: 60,
                     backgroundColor: Colors.black26,
-                    backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+                    backgroundImage: photoUrl != null ? cachedImageProvider(context, photoUrl, size: 120) : null,
                     child: photoUrl == null ? const Icon(Icons.person, size: 60, color: AppTheme.royalGold) : null,
                   ),
                   const SizedBox(height: 24),

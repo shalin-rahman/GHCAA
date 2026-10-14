@@ -55,7 +55,7 @@ Figure 6.2 draws the four layers and the single direction dependencies are permi
 
 ### 6.3.1 Domain layer
 
-`GHCAA.Domain` holds the seventy-one entity sets enumerated in §5.6, the thirty-eight enumerations
+`GHCAA.Domain` holds seventy-eight entity sets, which extend the analysis model of §5.6, the forty-one enumerations
 of `Enums.cs`, and constants. Figure 6.7 draws the membership, payment, event and governance
 classes at design level, with the attributes and multiplicities the analysis model of Figure 3.8
 left out. It references nothing else in the solution, which is the dependency rule's
@@ -63,7 +63,7 @@ starting point: if the domain depended on anything, the rule would already be br
 
 ### 6.3.2 Application layer
 
-`GHCAA.Application` holds the service interfaces (forty-four are declared, and the forty-two
+`GHCAA.Application` holds the service interfaces (sixty are declared, and the fifty-two
 implementations in `GHCAA.Infrastructure/Services` are bound to them by the assembly-scanning
 registration of §6.9.9) and the data transfer objects that cross the API boundary. It depends only on
 `GHCAA.Domain`.
@@ -136,14 +136,14 @@ generated OpenAPI document.
 
 ### 6.5.1 Conceptual, logical and physical progression
 
-The conceptual model is Figure 3.8; the logical model is the seventy-one mapped entity sets of §5.6,
-forty-five of which have a Fluent API configuration class under
+The conceptual model is Figure 3.8; the logical model is the seventy-eight mapped entity sets that grew from §5.6,
+sixty-six of which have a Fluent API configuration class under
 `GHCAA.Infrastructure/Data/Configurations/` rather than attribute-only mapping, which keeps
-persistence concerns out of the domain classes themselves; the remaining twenty-six are mapped by EF
+persistence concerns out of the domain classes themselves; the remaining twelve are mapped by EF
 Core's conventions alone, which is a gap rather than a decision and is recorded as such; the physical model is whichever of the two schemas in §6.5.4 the running environment
 selects. Figures 6.3 to 6.8 draw that schema as four sub-models, being identity and records, standing and
 money, events and participation, and governance, each with its keys and cardinalities. They are split
-this way rather than drawn as one diagram because one diagram of seventy-one tables cannot be printed
+this way rather than drawn as one diagram because one diagram of seventy-eight tables cannot be printed
 at a size anyone can read; the content, communication and configuration tables are in the generated
 schema documentation.
 
@@ -201,7 +201,7 @@ more honest record of the cost than a tidy retrospective claim would be.
 
 ### 6.5.5 Data dictionary
 
-Table 6.2 gives a representative slice of the seventy-one mapped entities; the full dictionary is
+Table 6.2 gives a representative slice of the seventy-eight mapped entities; the full dictionary is
 generated from the schema and delivered beside this dissertation.
 
 ### 6.5.6 Seeding and runtime data-synchronisation strategy
@@ -631,11 +631,11 @@ flowchart TB
     subgraph API_L["GHCAA.API"]
       direction TB
       MW[Middleware pipeline]
-      CTRL[38 Controllers]
+      CTRL[48 Controllers]
       HUB[2 SignalR hubs]
     end
     subgraph APP_L["GHCAA.Application"]
-      IFACE[46 service interfaces + DTOs]
+      IFACE[60 service interfaces + DTOs]
     end
     subgraph INF_L["GHCAA.Infrastructure"]
       direction TB
@@ -644,7 +644,7 @@ flowchart TB
       DBC[2 DbContext provider shims]
     end
     subgraph DOM_L["GHCAA.Domain"]
-      ENT[71 entity sets, 38 enums]
+      ENT[78 entity sets, 42 enums]
     end
     subgraph STORE["Storage"]
       direction TB

@@ -237,7 +237,7 @@
             <div class="compact-member-card">
                 <div class="m-photo">
                     @if (m.photoPath) {
-                    <img [src]="m.photoPath" [alt]="m.fullName" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
+                    <img appLazyImg [src]="m.photoPath" [alt]="m.fullName" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else {
                     <div class="m-avatar-ph">{{ m.fullName?.[0] || '?' }}</div>
                     }

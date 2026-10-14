@@ -1,8 +1,7 @@
-using System.Security.Cryptography;
 using FluentAssertions;
 using GHCAA.Domain;
 using GHCAA.Infrastructure.Services;
-using NUnit.Framework;
+using System.Security.Cryptography;
 
 namespace GHCAA.Tests.Services;
 

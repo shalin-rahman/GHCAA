@@ -1,8 +1,7 @@
-using System.Reflection;
-using System.Text.RegularExpressions;
 using FluentAssertions;
 using GHCAA.Infrastructure.Data;
-using NUnit.Framework;
+using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace GHCAA.Tests.Data
 {

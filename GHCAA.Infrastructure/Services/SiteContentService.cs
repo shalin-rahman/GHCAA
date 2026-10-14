@@ -1,9 +1,9 @@
+using Ganss.Xss;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Ganss.Xss;
 
 namespace GHCAA.Infrastructure.Services
 {

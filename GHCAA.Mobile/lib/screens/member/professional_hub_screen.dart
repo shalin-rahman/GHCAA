@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -212,7 +213,7 @@ class _ProfessionalHubScreenState extends ConsumerState<ProfessionalHubScreen> {
               CircleAvatar(
                 radius: 28,
                 backgroundColor: Colors.white10,
-                backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+                backgroundImage: photoUrl != null ? cachedImageProvider(context, photoUrl, size: 56) : null,
                 child: photoUrl == null
                     ? Text(member['fullName']?[0] ?? '?', style: const TextStyle(fontSize: 20, color: AppTheme.royalGold))
                     : null,

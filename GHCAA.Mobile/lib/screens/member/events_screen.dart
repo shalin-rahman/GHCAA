@@ -16,14 +16,16 @@ import '../../core/utils/app_utils.dart';
 import '../../core/widgets/app_search_field.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/models/paged_list.dart';
+import '../../core/utils/paged_list_notifier.dart';
+import '../../core/widgets/load_more_footer.dart';
 import '../../core/services/org_config_service.dart';
 
 final eventSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
 
 final eventsListProvider =
-    FutureProvider.autoDispose<List<dynamic>>((ref) async {
-  return ref.read(eventsServiceProvider).getUpcomingEvents();
-});
+    AsyncNotifierProvider.autoDispose<PagedListNotifier, PagedList>(() => PagedListNotifier(
+        (ref, page) => ref.read(eventsServiceProvider).getUpcomingEventsPage(page)));
 
 class EventsScreen extends ConsumerStatefulWidget {
   const EventsScreen({super.key});
@@ -165,21 +167,35 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
             ),
           ),
           Expanded(
-            child: AsyncValueWidget<List<dynamic>>(
+            child: AsyncValueWidget<PagedList>(
               value: eventsAsync,
               loadingMessage: 'Loading events...',
-              onRetry: () => ref.invalidate(eventsListProvider),
-              data: (events) {
+              onRetry: () {
+                ref.read(eventsServiceProvider).clearCache();
+                ref.invalidate(eventsListProvider);
+              },
+              data: (paged) {
+                final events = paged.items;
+                final loadMore = ref.read(eventsListProvider.notifier).loadMore;
                 final filtered = events.where((e) {
                   final title = e['title']?.toString().toLowerCase() ?? '';
                   return title.contains(searchQuery);
                 }).toList();
 
-                return RefreshIndicator(
+                return NotificationListener<ScrollNotification>(
+                  onNotification: (n) => loadMoreNearEnd(n, loadMore),
+                  child: RefreshIndicator(
                   color: AppTheme.royalGold,
                   onRefresh: () async {
                     HapticFeedback.mediumImpact();
-                    ref.invalidate(eventsListProvider);
+                    // A pull means fresh data, so skip the cached first page.
+                    ref.read(eventsServiceProvider).clearCache();
+                    try {
+                      ref.invalidate(eventsListProvider);
+                      await ref.read(eventsListProvider.future);
+                    } catch (_) {
+                      // The error state renders through the provider.
+                    }
                   },
                   child: Column(
                     children: [
@@ -204,18 +220,27 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                           ),
                         ),
                       Expanded(
+                        // The footer stays, since a search only covers the pages loaded so far.
                         child: filtered.isEmpty
-                            ? EmptyStateWidget(
-                                searchQuery.isEmpty
-                                    ? 'No active events found.'
-                                    : 'No events match your search.',
-                                icon: Icons.event_outlined)
+                            ? Column(children: [
+                                Expanded(
+                                  child: EmptyStateWidget(
+                                      searchQuery.isEmpty
+                                          ? 'No active events found.'
+                                          : 'No events match your search.',
+                                      icon: Icons.event_outlined),
+                                ),
+                                LoadMoreFooter(paged: paged, onLoadMore: loadMore),
+                              ])
                             : ListView.builder(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: AppTheme.spaceL,
                                     vertical: AppTheme.spaceM),
-                                itemCount: filtered.length,
+                                itemCount: filtered.length + 1,
                                 itemBuilder: (context, index) {
+                                  if (index == filtered.length) {
+                                    return LoadMoreFooter(paged: paged, onLoadMore: loadMore);
+                                  }
                                   final ev = filtered[index];
                                   final isOpen = _isRegistrationOpen(ev);
                                   final requiresReg =
@@ -523,7 +548,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                       ),
                     ],
                   ),
-                );
+                ));
               },
             ),
           ),

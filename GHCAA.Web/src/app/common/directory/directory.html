@@ -18,7 +18,7 @@
                 <label>Batch / Year</label>
                 <select [(ngModel)]="filters.year" (change)="search()">
                     <option [ngValue]="null">All Batches</option>
-                    @for (year of years; track year) {
+                    @for (year of years(); track year) {
                     <option [ngValue]="year">{{ year }}</option>
                     }
                 </select>
@@ -50,7 +50,7 @@
                 <label>Category</label>
                 <select [(ngModel)]="filters.category" (change)="search()">
                     <option value="">All Categories</option>
-                    @for (cat of memberCategories; track cat.value) {
+                    @for (cat of memberCategories(); track cat.value) {
                     <option [value]="cat.value">{{ cat.label }}</option>
                     }
                 </select>
@@ -63,7 +63,7 @@
                          members from the directory. 62.33: now sourced from
                          LOOKUP_GROUPS.MembershipType via LookupService, filled in ngOnInit, so a
                          different institution's tier labels are a lookups-table change. -->
-                    @for (t of membershipTypes; track t.value) {
+                    @for (t of membershipTypes(); track t.value) {
                     <option [value]="t.value">{{ t.label }}</option>
                     }
                 </select>
@@ -103,7 +103,7 @@
                             <div class="flex items-center gap-3">
                                 <div class="avatar-container" style="width:36px;height:36px;flex-shrink:0;">
                                     @if (m.photoPath) {
-                                    <img [src]="m.photoPath" alt="Profile" class="avatar-img"
+                                    <img appLazyImg [src]="m.photoPath" alt="Profile" class="avatar-img"
                                         appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                                     } @else {
                                     <div class="avatar">{{ m.fullName[0] }}</div>
@@ -134,18 +134,12 @@
         </div>
 
         <!-- Infinite Scroll Sentinel & Fallbacks (table view) -->
-        <div #sentinel class="scroll-sentinel">
-            @if (loadingMore()) {
-            <div class="load-more-spinner">
-                <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
-                <span>Syncing {{ orgConfig.config()?.branding?.memberNickname }} records...</span>
-            </div>
-            } @else if (hasMore()) {
-            <div class="manual-load">
-                <p class="scroll-instruction">Scroll down for all {{ totalItems() }} members</p>
-                <button class="btn btn-outline btn-sm" (click)="loadNextPage()">Load More Members ↓</button>
-            </div>
-            } @else if (members().length > 0) {
+        <div class="scroll-sentinel">
+            @if (hasMore() && !loadingMore()) {
+            <p class="scroll-instruction">Scroll down for all {{ totalItems() }} members</p>
+            }
+            <app-load-more [hasMore]="hasMore()" [loading]="loadingMore()" (more)="loadNextPage()" />
+            @if (!hasMore() && members().length > 0) {
             <div class="all-loaded">
                 <span class="divider-line"></span>
                 <span class="all-loaded-text">✓ All {{ totalItems() }} members loaded</span>
@@ -160,7 +154,7 @@
                 <div class="member-header">
                     <div class="avatar-container">
                         @if (m.photoPath) {
-                        <img [src]="m.photoPath" alt="Profile" class="avatar-img"
+                        <img appLazyImg [src]="m.photoPath" alt="Profile" class="avatar-img"
                             appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                         } @else {
                         <div class="avatar">{{ m.fullName[0] }}</div>
@@ -219,18 +213,12 @@
         </div>
 
         <!-- Infinite Scroll Sentinel & Fallbacks -->
-        <div #sentinel class="scroll-sentinel">
-            @if (loadingMore()) {
-            <div class="load-more-spinner">
-                <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
-                <span>Syncing {{ orgConfig.config()?.branding?.memberNickname }} records...</span>
-            </div>
-            } @else if (hasMore()) {
-            <div class="manual-load">
-                <p class="scroll-instruction">Scroll down for all {{ totalItems() }} members</p>
-                <button class="btn btn-outline btn-sm" (click)="loadNextPage()">Load More Members ↓</button>
-            </div>
-            } @else if (members().length > 0) {
+        <div class="scroll-sentinel">
+            @if (hasMore() && !loadingMore()) {
+            <p class="scroll-instruction">Scroll down for all {{ totalItems() }} members</p>
+            }
+            <app-load-more [hasMore]="hasMore()" [loading]="loadingMore()" (more)="loadNextPage()" />
+            @if (!hasMore() && members().length > 0) {
             <div class="all-loaded">
                 <span class="divider-line"></span>
                 <span class="all-loaded-text">✓ All {{ totalItems() }} members loaded</span>

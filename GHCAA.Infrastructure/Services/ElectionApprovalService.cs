@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
@@ -11,6 +5,7 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Infrastructure.Services;
@@ -59,9 +54,9 @@ public sealed class ElectionApprovalService(
                 await transaction.CommitAsync(ct);
             return new ElectionApprovalRunResult(true, error, null);
         }
-        catch (DbUpdateException) when (HasPendingAudit())
+        catch (DbUpdateException ex) when (HasPendingAudit() && IsUniqueViolation(ex))
         {
-            await RollBackAfterClashAsync(transaction, electionId, action);
+            await RollBackAfterClashAsync(transaction, electionId, action, ex);
             return new ElectionApprovalRunResult(true, Constants.Elections.Replies.Busy, null);
         }
     }
@@ -72,12 +67,24 @@ public sealed class ElectionApprovalService(
     private bool HasPendingAudit() =>
         db.ChangeTracker.Entries<ElectionAuditEntry>().Any(x => x.State == EntityState.Added);
 
-    private async Task RollBackAfterClashAsync(Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction transaction, int electionId, ElectionApprovalAction action)
+    // 98.20. Only a duplicate key means another write got there first. Any other save error
+    // (a dropped connection, a bad value) is a real fault and must not be shown as "busy".
+    // SQLite reports the same clash as error 19 with extended code 2067 in the tests.
+    private static bool IsUniqueViolation(DbUpdateException ex) => ex.InnerException switch
+    {
+        Npgsql.PostgresException pg => pg.SqlState == Npgsql.PostgresErrorCodes.UniqueViolation,
+        Microsoft.Data.Sqlite.SqliteException lite => lite.SqliteExtendedErrorCode == SqliteUniqueConstraint,
+        _ => false
+    };
+
+    private const int SqliteUniqueConstraint = 2067;
+
+    private async Task RollBackAfterClashAsync(Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction transaction, int electionId, ElectionApprovalAction action, DbUpdateException ex)
     {
         try { await transaction.RollbackAsync(CancellationToken.None); }
         catch (InvalidOperationException) { }
         db.ChangeTracker.Clear();
-        logger.LogWarning("Election {ElectionId}: {Action} clashed with another audit write and was rolled back.", electionId, action);
+        logger.LogWarning(ex, "Election {ElectionId}: {Action} clashed with another audit write and was rolled back.", electionId, action);
     }
 
     public async Task<(bool Success, string? Error, ElectionApprovalDto? Approval)> RequestAsync(int electionId, ElectionApprovalAction action, int userId, string? newPublicKey = null, CancellationToken ct = default)
@@ -208,10 +215,10 @@ public sealed class ElectionApprovalService(
 
             await transaction.CommitAsync(ct);
         }
-        catch (DbUpdateException) when (HasPendingAudit())
+        catch (DbUpdateException ex) when (HasPendingAudit() && IsUniqueViolation(ex))
         {
             // The claim rolls back too, so the approval stays open for another try.
-            await RollBackAfterClashAsync(transaction, approval.ElectionId, approval.Action);
+            await RollBackAfterClashAsync(transaction, approval.ElectionId, approval.Action, ex);
             return (false, Constants.Elections.Replies.Busy);
         }
         logger.LogInformation("Election {ElectionId}: user {UserId} approved {Action} (approval {ApprovalId}).", approval.ElectionId, userId, approval.Action, approvalId);
@@ -400,9 +407,9 @@ public sealed class ElectionApprovalService(
             await AuditRevokeAsync(Constants.Elections.EmergencyRevokeOutcomes.Revoked, approval.ElectionId, approval.Id, approval.RequestedByUserId, userId, target.Id, payload.Reason, before, Snapshot(target), ct);
             await transaction.CommitAsync(ct);
         }
-        catch (DbUpdateException) when (HasPendingAudit())
+        catch (DbUpdateException ex) when (HasPendingAudit() && IsUniqueViolation(ex))
         {
-            await RollBackAfterClashAsync(transaction, approval.ElectionId, approval.Action);
+            await RollBackAfterClashAsync(transaction, approval.ElectionId, approval.Action, ex);
             return (false, Constants.Elections.Replies.Busy);
         }
         logger.LogWarning("Election {ElectionId}: appointment {AppointmentId} revoked in an emergency, asked by {RequestedBy}, approved by {ApprovedBy}.", approval.ElectionId, target.Id, approval.RequestedByUserId, userId);

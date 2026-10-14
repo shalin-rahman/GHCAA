@@ -1,13 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
 using FluentAssertions;
 using GHCAA.Application.DTOs;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
+using System.ComponentModel.DataAnnotations;
 
 namespace GHCAA.Tests.Services
 {

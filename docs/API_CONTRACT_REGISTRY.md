@@ -47,6 +47,18 @@ a gap someone still needs to close.
 
 ## Log
 
+### 2026-10-14 — GET /api/events, GET /api/jobs, GET /api/gallery
+- Change: added optional `page` and `pageSize` query params. When `page` is sent the
+  response is `PagedResult<T>` (default 20 per page, at most 100). Without it the
+  response is the same plain list as before, so this is additive per ADR-0005 and
+  older mobile builds keep working. `docs/api/swagger.json` was regenerated.
+- Reason: TODO 98.17. These three lists came back whole on every open.
+- Web: the events, jobs and gallery pages load by page through the shared
+  `app-load-more` control. Admin screens still call the unpaged routes.
+- Mobile: `events_service.dart`, `job_service.dart` and `content_service.dart`
+  send the page; the three member screens load more on scroll. The admin gallery
+  still reads `/api/gallery/all` unpaged.
+
 ### 2026-10-13 — GET /api/elections/{id}/board, election approval and emergency-revoke routes
 - Change: `auditHeadHash` on the board is now the hash of the Declared audit row, not the newest row, so it stays the same after archiving adds revoke rows. A two-person step, an approval or an emergency revoke that clashes with another audit write on the same election now answers 409 with code `ELECTION_BUSY` instead of 500. Nothing is saved, so the caller can try again.
 - Reason: TODO 37.12p, spec 023.

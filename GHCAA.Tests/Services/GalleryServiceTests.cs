@@ -160,6 +160,28 @@ public class GalleryServiceTests : TestBase
         loaded.Photos.Should().ContainSingle().Which.PhotoPath.Should().Be("/a.jpg");
     }
 
+    [Category("NFR-P1")]
+    [Test]
+    public async Task GetActiveGalleriesPageAsync_SkipsUnapprovedGalleries_AndPendingPhotos()
+    {
+        var memberId = await CreateMemberIdAsync();
+        await _service.CreateMemberAlbumAsync(memberId, "Still Pending", null);
+        var older = await _service.CreateEventGalleryAsync(new EventGallery { Title = "Older", EventDate = DateTime.UtcNow.AddDays(-2), Status = Enums.SubmissionStatus.Approved, IsActive = true });
+        var newer = await _service.CreateEventGalleryAsync(new EventGallery { Title = "Newer", EventDate = DateTime.UtcNow, Status = Enums.SubmissionStatus.Approved, IsActive = true });
+        _context.EventPhotos.Add(new EventPhoto { EventGalleryId = newer.Id, PhotoPath = "/a.jpg", Status = Enums.SubmissionStatus.Approved });
+        _context.EventPhotos.Add(new EventPhoto { EventGalleryId = newer.Id, PhotoPath = "/b.jpg", Status = Enums.SubmissionStatus.Pending });
+        await _context.SaveChangesAsync();
+
+        var first = await _service.GetActiveGalleriesPageAsync(1, 1);
+        var second = await _service.GetActiveGalleriesPageAsync(2, 1);
+
+        first.TotalItems.Should().Be(2);
+        first.Items.Should().ContainSingle().Which.Id.Should().Be(newer.Id);
+        first.Items.Single().Photos.Should().ContainSingle().Which.PhotoPath.Should().Be("/a.jpg");
+        second.Items.Should().ContainSingle().Which.Id.Should().Be(older.Id);
+        second.HasNextPage.Should().BeFalse();
+    }
+
     [Test]
     public async Task GetGalleryByIdAsync_FiltersPendingPhotos_WhenGalleryIsApproved()
     {

@@ -1,11 +1,9 @@
-using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using NUnit.Framework;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Tests.Services

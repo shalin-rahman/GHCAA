@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using FluentAssertions;
 using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
@@ -6,7 +5,7 @@ using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using NUnit.Framework;
+using System.Security.Claims;
 
 namespace GHCAA.Tests.Integration
 {

@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -114,7 +115,7 @@ class _MentorshipHubScreenState extends ConsumerState<MentorshipHubScreen> with 
                         CircleAvatar(
                           radius: 20,
                           backgroundColor: Colors.white10,
-                          backgroundImage: photoPath != null ? NetworkImage(photoPath) : null,
+                          backgroundImage: photoPath != null ? cachedImageProvider(context, photoPath, size: 40) : null,
                           child: photoPath == null ? Text(person['fullName']?[0] ?? '?', style: const TextStyle(color: AppTheme.royalGold)) : null,
                         ),
                         const SizedBox(width: 12),

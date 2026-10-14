@@ -3,7 +3,6 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
-using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -1224,5 +1223,76 @@ public class MemberServiceTests : TestBase
         var snapshot = await _service.GetMembershipSnapshotAsync(999);
 
         snapshot.Should().BeNull();
+    }
+
+    private static int _listedMemberCount;
+
+    private static Member ListedMember(string name, int points, bool archived = false) => new()
+    {
+        FullName = name,
+        Email = $"{name.Replace(" ", "").ToLowerInvariant()}@example.com",
+        NID = $"9{_listedMemberCount + 1:D9}",
+        MobileNo = $"0179{Interlocked.Increment(ref _listedMemberCount):D7}",
+        Status = Enums.MembershipStatus.Active,
+        FatherName = "Father",
+        MotherName = "Mother",
+        PresentAddress = "Address",
+        PermanentAddress = "Address",
+        EmergencyContactName = "Contact",
+        EmergencyContactRelation = "Relation",
+        EmergencyContactPhone = "01999999999",
+        ContributionPoints = points,
+        IsArchived = archived
+    };
+
+    private static List<MemberSummaryDto> ItemsOf(object page) =>
+        (List<MemberSummaryDto>)page.GetType().GetProperty("Items")!.GetValue(page)!;
+
+    // 98.11. The page's ranks now come from one query. They must match the old per-member rule:
+    // 1 plus the number of active members with more points, ties sharing a rank.
+    [Test]
+    public async Task GetAllMembersAsync_RanksThePageInOneQuery_WithTiesAndArchivedLeftOut()
+    {
+        _context.Members.AddRange(
+            ListedMember("Top A", 50), ListedMember("Top B", 50), ListedMember("Mid", 10),
+            ListedMember("Zero", 0), ListedMember("Gone", 999, archived: true));
+        await _context.SaveChangesAsync();
+
+        var items = ItemsOf(await _service.GetAllMembersAsync(pageSize: 10));
+
+        items.Single(x => x.FullName == "Top A").Rank.Should().Be(1);
+        items.Single(x => x.FullName == "Top B").Rank.Should().Be(1);
+        items.Single(x => x.FullName == "Mid").Rank.Should().Be(3);
+        items.Single(x => x.FullName == "Zero").Rank.Should().Be(4);
+        items.Single(x => x.FullName == "Mid").CategoryBadge.Should().Be("Member");
+    }
+
+    // 98.12. Only the org record and the current job are loaded now. The summary must still pick
+    // them, and a search on a record that is not loaded must still find the member.
+    [Test]
+    public async Task GetAllMembersAsync_SummaryUsesOrgRecordAndCurrentJob_SearchStillSeesAllHistory()
+    {
+        var member = ListedMember("History Holder", 0);
+        member.AcademicHistory = new List<AcademicRecord>
+        {
+            new() { InstitutionName = "Other School", Degree = "SSC", Subject = "Arts", PassingYear = 2000 },
+            new() { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2002, IsOrgProfile = true }
+        };
+        member.ProfessionalHistory = new List<ProfessionalRecord>
+        {
+            new() { OrganizationName = "Old Org", Designation = "Clerk", StartDate = new DateTime(2005, 1, 1) },
+            new() { OrganizationName = "New Org", Designation = "Manager", StartDate = new DateTime(2015, 1, 1), IsCurrent = true }
+        };
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+
+        var dto = ItemsOf(await _service.GetAllMembersAsync()).Single();
+        dto.GHCLastCertificate.Should().Be("HSC");
+        dto.GHCLastCertificatePassingYear.Should().Be(2002);
+        dto.Designation.Should().Be("Manager");
+        dto.OrganizationName.Should().Be("New Org");
+
+        ItemsOf(await _service.GetAllMembersAsync(searchQuery: "old org")).Should().ContainSingle();
+        ItemsOf(await _service.GetAllMembersAsync(searchQuery: "other school")).Should().ContainSingle();
     }
 }

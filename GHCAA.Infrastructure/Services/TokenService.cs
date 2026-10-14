@@ -1,9 +1,6 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 using GHCAA.Application.Interfaces;
 using GHCAA.Application.Security;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Options;
@@ -13,6 +10,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GHCAA.Infrastructure.Services
 {
@@ -82,7 +83,7 @@ namespace GHCAA.Infrastructure.Services
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim("SecurityStamp", user.SecurityStamp)
+                new Claim(Constants.SecurityStamps.ClaimType, user.SecurityStamp)
             };
 
             if (user.MemberId.HasValue)
@@ -157,9 +158,13 @@ namespace GHCAA.Infrastructure.Services
                     // Same reasoning as ChangePasswordAsync/SetUserActiveAsync: revoking refresh
                     // tokens alone leaves any still-live access token (up to 60 minutes) valid.
                     // Rotating the stamp kills that too, so "kill the session" is actually true.
-                    var newStamp = Guid.NewGuid().ToString("N");
-                    await _db.Users.Where(u => u.Id == reused.UserId)
-                        .ExecuteUpdateAsync(s => s.SetProperty(u => u.SecurityStamp, newStamp), cancellationToken);
+                    // Tracked save, not ExecuteUpdate, so the stamp cache interceptor sees it (98.8).
+                    var user = await _db.Users.FindAsync([reused.UserId], cancellationToken);
+                    if (user != null)
+                    {
+                        user.RotateSecurityStamp();
+                        await _db.SaveChangesAsync(cancellationToken);
+                    }
                 }
                 return null;
             }

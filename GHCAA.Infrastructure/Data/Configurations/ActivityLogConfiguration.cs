@@ -11,6 +11,10 @@ namespace GHCAA.Infrastructure.Data.Configurations
             builder.HasKey(a => a.Id);
 
             builder.HasIndex(a => new { a.MemberId, a.Timestamp });
+
+            // 98.14: the retention sweep deletes by Timestamp across all members, which the
+            // composite index above cannot serve.
+            builder.HasIndex(a => a.Timestamp);
         }
     }
 }

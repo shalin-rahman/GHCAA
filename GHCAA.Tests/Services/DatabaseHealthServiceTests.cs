@@ -1,6 +1,4 @@
-using System.Threading.Tasks;
 using GHCAA.Infrastructure.Services;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Services
 {

@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using FluentAssertions;
 using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Moq;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Services;
 

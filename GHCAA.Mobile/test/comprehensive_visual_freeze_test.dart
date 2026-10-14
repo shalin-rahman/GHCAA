@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:ghcaa_mobile/screens/app_home_screen.dart';
 import 'package:ghcaa_mobile/screens/auth/login_screen.dart';
 import 'package:ghcaa_mobile/features/auth/auth_service.dart';
+import 'package:ghcaa_mobile/core/models/paged_list.dart';
 import 'package:ghcaa_mobile/core/storage/storage_service.dart';
 
 import 'package:ghcaa_mobile/screens/member/about_screen.dart';
@@ -103,7 +104,7 @@ class FakeDropdownService implements DropdownService {
 
 class FakeGalleryService implements GalleryService {
   @override
-  Future<List<dynamic>> getGalleries({bool onlyActive = true}) async => [];
+  Future<PagedList> getGalleriesPage(int page, {bool onlyActive = true}) async => PagedList.single(const []);
   @override
   Future<bool> createGallery(Map<String, dynamic> gallery) async => true;
   @override
@@ -142,7 +143,7 @@ class FakeAdminGalleryService extends FakeGalleryService {
   int? toggleFeaturedCalledWith;
 
   @override
-  Future<List<dynamic>> getGalleries({bool onlyActive = true}) async => [
+  Future<PagedList> getGalleriesPage(int page, {bool onlyActive = true}) async => PagedList.single([
         {
           'id': 1,
           'title': 'Annual Picnic',
@@ -155,7 +156,7 @@ class FakeAdminGalleryService extends FakeGalleryService {
             {'id': 1, 'photoPath': '/assets/gallery/annual-picnic/01.jpg', 'uploadedAt': '2026-01-01T00:00:00Z'},
           ],
         },
-      ];
+      ]);
 
   @override
   Future<bool?> toggleActive(int id) async {

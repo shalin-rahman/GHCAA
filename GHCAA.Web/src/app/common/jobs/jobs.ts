@@ -4,22 +4,24 @@ import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { JobService } from '../../core/services/job.service';
 import { Job } from '../../core/models/business.models';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { AuthService } from '../../core/services/auth.service';
-import { getJobCategoryLabel, SUBMISSION_STATUS_MAP, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS } from '../../core/constants/app.constants';
+import { getJobCategoryLabel, SUBMISSION_STATUS_MAP, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS, LIST_PAGE_SIZE } from '../../core/constants/app.constants';
+import { appendById } from '../../core/utils/paging.util';
 import { LookupService } from '../../core/services/lookup.service';
 import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { PageHeaderComponent } from '../page-header/page-header.component';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
+import { LoadMoreComponent } from '../load-more/load-more';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 import { debounce } from '../../core/utils/debounce.util';
 
 @Component({
   selector: 'app-jobs',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, LoadMoreComponent],
   templateUrl: './jobs.html',
   styleUrl: './jobs.scss'
 })
@@ -31,6 +33,11 @@ export class Jobs implements OnInit {
 
   jobs = signal<Job[]>([]);
   loading = signal(true);
+  loadingMore = signal(false);
+  hasMore = signal(false);
+  private page = 1;
+  private jobCategory?: any;
+  private pageSub?: Subscription;
   showForm = signal(false);
   // 58.2: table is the default view; card view stays available via a toggle.
   viewMode = signal<'table' | 'card'>('table');
@@ -64,18 +71,38 @@ export class Jobs implements OnInit {
     );
   }
 
-  loadJobs(jobCategory?: any) {
+  // Reloads with the current category and search, so a post, delete or search keeps the filter.
+  loadJobs() {
     this.loading.set(true);
-    const params: any = {};
-    if (jobCategory !== undefined) params.jobCategory = jobCategory;
-    if (this.searchQuery) params.query = this.searchQuery;
+    this.fetchPage(1);
+  }
 
-    this.jobService.getJobs(params).subscribe({
-      next: (data) => {
-        this.jobs.set(data);
+  loadNextPage() {
+    if (!this.hasMore() || this.loading() || this.loadingMore()) return;
+    this.loadingMore.set(true);
+    this.fetchPage(this.page + 1);
+  }
+
+  // A filter or search change drops any page still in flight, so old results never land in the new list.
+  // The page number is kept only on success, so a failed page is asked for again.
+  private fetchPage(page: number) {
+    const filter: { jobCategory?: string | number; query?: string } = {};
+    if (this.jobCategory !== undefined) filter.jobCategory = this.jobCategory;
+    if (this.searchQuery) filter.query = this.searchQuery;
+
+    this.pageSub?.unsubscribe();
+    this.pageSub = this.jobService.getJobsPage(page, LIST_PAGE_SIZE, filter).subscribe({
+      next: (result) => {
+        this.page = result.page;
+        this.jobs.set(result.page > 1 ? appendById(this.jobs(), result.items) : result.items);
+        this.hasMore.set(result.page < result.totalPages);
         this.loading.set(false);
+        this.loadingMore.set(false);
       },
-      error: () => this.loading.set(false)
+      error: () => {
+        this.loading.set(false);
+        this.loadingMore.set(false);
+      }
     });
   }
 
@@ -141,7 +168,8 @@ export class Jobs implements OnInit {
 
   onFilterChange(e: any) {
     const val = e.target.value;
-    this.loadJobs(val === '' ? undefined : val);
+    this.jobCategory = val === '' ? undefined : val;
+    this.loadJobs();
   }
 
   getCategoryName(categoryStr: string): string {

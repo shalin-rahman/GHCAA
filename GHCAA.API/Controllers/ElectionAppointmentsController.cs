@@ -1,10 +1,7 @@
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static GHCAA.Domain.Constants;
 using static GHCAA.Domain.Enums;

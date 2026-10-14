@@ -4,11 +4,12 @@ import { RouterLink } from '@angular/router';
 import { EventsService } from '../../../../core/services/events.service';
 import { AlumniEvent } from '../../../../core/models/business.models';
 import { ImgFallbackDirective } from '../../../../common/directives/img-fallback.directive';
+import { LazyImgDirective } from '../../../../common/directives/lazy-img.directive';
 
 @Component({
     selector: 'landing-events',
     standalone: true,
-    imports: [CommonModule, RouterLink, ImgFallbackDirective],
+    imports: [CommonModule, RouterLink, ImgFallbackDirective, LazyImgDirective],
     templateUrl: './events-preview.html',
     styleUrl: './events-preview.scss',
 })

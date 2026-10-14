@@ -1,7 +1,6 @@
-using GHCAA.Application.Interfaces;
 using GHCAA.API.Hubs;
+using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.SignalR;
-using System.Threading.Tasks;
 
 namespace GHCAA.API.Services
 {

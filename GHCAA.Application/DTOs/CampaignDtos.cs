@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using GHCAA.Domain;
+using System.ComponentModel.DataAnnotations;
 
 namespace GHCAA.Application.DTOs
 {

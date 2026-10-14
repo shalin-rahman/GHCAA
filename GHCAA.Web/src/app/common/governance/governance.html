@@ -20,7 +20,7 @@
                 <div class="card-content">
                     <div class="avatar-large">
                         @if (member.photoPath) {
-                        <img [src]="member.photoPath" alt="{{ member.fullName }}" class="avatar-img"
+                        <img appLazyImg [src]="member.photoPath" alt="{{ member.fullName }}" class="avatar-img"
                             appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                         } @else {
                         <span>{{ member.fullName[0] }}</span>

@@ -11,6 +11,7 @@ import { ElectionsService } from '../../core/services/elections.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { LazyImgDirective } from '../../common/directives/lazy-img.directive';
 import { Icon } from '../../common/icon/icon';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
@@ -20,7 +21,7 @@ import { ElectionAppointmentDto } from '../../core/models/election.models';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, RouterLink, DatePipe, Icon, ImgFallbackDirective, LoadingPanelComponent, PageHeaderComponent],
+  imports: [CommonModule, AppDatePipe, RouterLink, DatePipe, Icon, ImgFallbackDirective, LazyImgDirective, LoadingPanelComponent, PageHeaderComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })

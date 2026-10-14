@@ -4,11 +4,12 @@ import { NetworkingService } from '../../../../core/services/networking.service'
 import { getECPositionName, getCurrentECPosition } from '../../../../core/constants/app.constants';
 import { formatPeriodRange } from '../../../../core/utils/date.util';
 import { ImgFallbackDirective } from '../../../../common/directives/img-fallback.directive';
+import { LazyImgDirective } from '../../../../common/directives/lazy-img.directive';
 
 @Component({
     selector: 'landing-ec-preview',
     standalone: true,
-    imports: [CommonModule, ImgFallbackDirective],
+    imports: [CommonModule, ImgFallbackDirective, LazyImgDirective],
     templateUrl: './ec-preview.html',
     styleUrl: './ec-preview.scss',
 })

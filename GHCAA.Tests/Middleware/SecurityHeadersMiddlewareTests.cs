@@ -1,11 +1,8 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using FluentAssertions;
 using GHCAA.API.Middleware;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Middleware
 {

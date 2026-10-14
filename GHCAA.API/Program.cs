@@ -6,11 +6,11 @@ using GHCAA.Application;
 using GHCAA.Application.Interfaces;
 using GHCAA.Application.Security;
 using GHCAA.Domain;
-using static GHCAA.Domain.Constants;
 using GHCAA.Infrastructure;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -61,7 +61,8 @@ builder.Services.Configure<FormOptions>(x =>
     var capped = Math.Min(maxBodySize, 128L * 1024 * 1024);
     x.ValueLengthLimit = (int)Math.Min(capped, int.MaxValue);
     x.MultipartBodyLengthLimit = maxBodySize;
-    x.MemoryBufferThreshold = (int)Math.Min(maxBodySize, int.MaxValue);
+    // MemoryBufferThreshold stays at the 64 KB default (98.9). Larger uploads spill to a temp
+    // file instead of each one holding up to the full body size in memory.
 });
 
 // ProblemDetails & Controllers
@@ -85,6 +86,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IRealTimeService, RealTimeService>();
 builder.Services.AddHostedService<ExpiredRevokeSweep>();
+builder.Services.AddHostedService<DataRetentionSweep>();
 
 // Checked here rather than inside AddCors, whose options callback only runs on the first request.
 var allowedOrigins = configuration.GetSection(Constants.ConfigKeys.AllowedOrigins).Get<string[]>() ?? Array.Empty<string>();
@@ -197,7 +199,9 @@ app.UseAuthorization();
 // It's now a GlobalLimiter in RateLimitingExtensions.cs, which runs alongside a route's own
 // policy instead of replacing it.
 app.MapControllers();
-app.MapHealthChecks("/health").AllowAnonymous();
+app.MapHealthChecks(Constants.Deploy.HealthPath).AllowAnonymous();
+// No checks run here, so it answers 200 while the process is up even if the database is not.
+app.MapHealthChecks(Constants.Deploy.LivenessPath, new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
 app.MapHub<GHCAA.API.Hubs.ChatHub>("/api/hubs/chat");
 app.MapHub<GHCAA.API.Hubs.NotificationHub>("/api/hubs/notifications");
 

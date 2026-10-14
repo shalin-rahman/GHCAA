@@ -1,8 +1,6 @@
 using FluentAssertions;
-using GHCAA.Application.DTOs;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.OrgConfig
 {

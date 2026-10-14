@@ -3,7 +3,6 @@ using GHCAA.Application.Security;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Configuration;
 
 namespace GHCAA.API.Filters
 {

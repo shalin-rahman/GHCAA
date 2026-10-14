@@ -225,7 +225,7 @@
             </app-modal-header>
             <div class="modal-body">
                 @if (post.imageUrl) {
-                <img [src]="post.imageUrl"
+                <img appLazyImg [src]="post.imageUrl"
                     class="w-full h-80 object-cover rounded-2xl mb-10 border border-primary/5 shadow-2xl" appImgFallback>
                 }
                 <div class="prose prose-invert max-w-none">

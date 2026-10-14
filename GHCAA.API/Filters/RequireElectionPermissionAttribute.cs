@@ -1,9 +1,9 @@
-using System.Security.Claims;
 using GHCAA.API.Extensions;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Security.Claims;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.API.Filters

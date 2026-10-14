@@ -1,19 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using GHCAA.Application.Interfaces;
 using GHCAA.Application.DTOs;
-using GHCAA.Domain;
+using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
-using static GHCAA.Domain.Enums;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using QRCoder;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Infrastructure.Services
 {

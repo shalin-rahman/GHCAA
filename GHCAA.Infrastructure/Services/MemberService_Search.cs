@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
@@ -71,8 +66,9 @@ namespace GHCAA.Infrastructure.Services
                 .AsSplitQuery() // Prevent duplicates from collection includes
                 .Include(m => m.ECMembers)
                 .ThenInclude(em => em.ECPeriod)
-                .Include(m => m.AcademicHistory)
-                .Include(m => m.ProfessionalHistory);
+                // 98.12. The summary shows only the org record and the current job, so load just those.
+                .Include(m => m.AcademicHistory.Where(a => a.IsOrgProfile))
+                .Include(m => m.ProfessionalHistory.Where(p => p.IsCurrent));
 
             if (includeArchived)
             {
@@ -160,10 +156,10 @@ namespace GHCAA.Infrastructure.Services
 
             var members = await membersQuery.ToListAsync(cancellationToken);
             var memberDtos = new List<MemberSummaryDto>();
+            var ranks = await GetRanksAsync(members.Select(m => m.ContributionPoints).ToList(), cancellationToken);
 
             foreach (var member in members)
             {
-                var gains = await GetMemberGainsAsync(member.Id, member.ContributionPoints, cancellationToken);
                 var dto = new MemberSummaryDto
                 {
                     Id = member.Id,
@@ -183,8 +179,8 @@ namespace GHCAA.Infrastructure.Services
 
                     // Gamification
                     ContributionPoints = member.ContributionPoints,
-                    Rank = gains.rank,
-                    CategoryBadge = gains.badge,
+                    Rank = ranks[member.ContributionPoints],
+                    CategoryBadge = GetCategoryBadge(member.ContributionPoints),
 
                     // Mask PII if not privileged (SuperAdmin or self) AND not public
                     Email = (isPrivileged || member.IsEmailPublic) ? (member.Email ?? "") : (MaskPii(member.Email, 3, 3) ?? ""),
@@ -414,7 +410,7 @@ namespace GHCAA.Infrastructure.Services
                 var user = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == id, cancellationToken);
                 if (user != null)
                 {
-                    user.SecurityStamp = Guid.NewGuid().ToString("N");
+                    user.RotateSecurityStamp();
                     await _db.SaveChangesAsync(cancellationToken);
                     await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
                     _logger.LogWarning("SecurityStamp rotated for member {MemberId} — all existing sessions terminated.", id);

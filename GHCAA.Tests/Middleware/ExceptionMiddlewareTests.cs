@@ -1,15 +1,10 @@
-using System;
-using System.IO;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.API.Middleware;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NUnit.Framework;
+using System.Text.Json;
 
 namespace GHCAA.Tests.Middleware
 {

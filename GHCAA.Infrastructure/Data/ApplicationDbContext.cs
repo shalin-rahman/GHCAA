@@ -1,4 +1,3 @@
-using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

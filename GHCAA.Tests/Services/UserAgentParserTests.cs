@@ -1,7 +1,6 @@
 using FluentAssertions;
 using GHCAA.Domain;
 using GHCAA.Infrastructure.Services;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Services;
 

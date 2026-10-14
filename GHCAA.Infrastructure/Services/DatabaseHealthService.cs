@@ -1,6 +1,5 @@
 using GHCAA.Application.Interfaces;
 using GHCAA.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace GHCAA.Infrastructure.Services
 {

@@ -4,6 +4,7 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
+using GHCAA.Domain;
 using Moq;
 using static GHCAA.Domain.Enums;
 
@@ -154,6 +155,67 @@ public class EventServiceTests : TestBase
 
         result.Should().ContainSingle();
         result.Single().Title.Should().Be("Active Event");
+    }
+
+    private async Task SeedActiveEventsAsync(int count)
+    {
+        var start = DateTime.UtcNow;
+        for (var i = 1; i <= count; i++)
+            _context.AlumniEvents.Add(new AlumniEvent { Title = $"Event {i}", Description = "D", StartDate = start.AddDays(i), EndDate = start.AddDays(i).AddHours(2), Location = "L", IsActive = true });
+        _context.AlumniEvents.Add(new AlumniEvent { Title = "Unpublished", Description = "D", StartDate = start, EndDate = start.AddHours(2), Location = "L", IsActive = false });
+        await _context.SaveChangesAsync();
+    }
+
+    [Category("NFR-P1")]
+    [Test]
+    public async Task GetActiveEventsPageAsync_ReturnsTheRequestedSlice_InStartDateOrder()
+    {
+        await SeedActiveEventsAsync(5);
+
+        var result = await _service.GetActiveEventsPageAsync(page: 2, pageSize: 2);
+
+        result.Items.Select(e => e.Title).Should().Equal("Event 3", "Event 4");
+        result.TotalItems.Should().Be(5);
+        result.TotalPages.Should().Be(3);
+        result.HasNextPage.Should().BeTrue();
+    }
+
+    [Category("NFR-P1")]
+    [Test]
+    public async Task GetActiveEventsPageAsync_ClampsPageAndPageSize()
+    {
+        await SeedActiveEventsAsync(3);
+
+        var result = await _service.GetActiveEventsPageAsync(page: 0, pageSize: 10_000);
+
+        result.Page.Should().Be(1);
+        result.PageSize.Should().Be(Constants.Paging.MaxPageSize);
+        result.Items.Should().HaveCount(3);
+    }
+
+    [Category("NFR-P1")]
+    [Test]
+    public async Task GetActiveEventsPageAsync_PastTheLastPage_ReturnsNoItems()
+    {
+        await SeedActiveEventsAsync(3);
+
+        var result = await _service.GetActiveEventsPageAsync(page: 5, pageSize: 2);
+
+        result.Items.Should().BeEmpty();
+        result.TotalItems.Should().Be(3);
+        result.HasNextPage.Should().BeFalse();
+    }
+
+    [Category("NFR-P1")]
+    [Test]
+    public async Task GetActiveEventsPageAsync_HugePageNumber_ReturnsNoItemsInsteadOfOverflowing()
+    {
+        await SeedActiveEventsAsync(3);
+
+        var result = await _service.GetActiveEventsPageAsync(page: int.MaxValue, pageSize: Constants.Paging.MaxPageSize);
+
+        result.Items.Should().BeEmpty();
+        result.TotalItems.Should().Be(3);
     }
 
     [Category("FR-13")]

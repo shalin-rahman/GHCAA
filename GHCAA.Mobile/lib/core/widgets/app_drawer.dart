@@ -1,3 +1,4 @@
+import './custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -138,7 +139,7 @@ class AppDrawer extends ConsumerWidget {
               CircleAvatar(
                 radius: 36,
                 backgroundColor: AppTheme.royalGold.withValues(alpha: 0.1),
-                backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+                backgroundImage: photoUrl != null ? cachedImageProvider(context, photoUrl, size: 72) : null,
                 child: photoUrl == null ? const Icon(Icons.person, color: AppTheme.royalGold, size: 36) : null,
               ),
               const SizedBox(height: 16),

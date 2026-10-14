@@ -19,7 +19,7 @@
                 <div class="event-card glass-card">
                     <!-- Column 1: Asset & Date -->
                     <div class="event-banner">
-                        <img [src]="ev.imageUrl || '/assets/images/event-placeholder.jpg'" alt="Event Image"
+                        <img appLazyImg [src]="ev.imageUrl || '/assets/images/event-placeholder.jpg'" alt="Event Image"
                             appImgFallback="/assets/images/event-placeholder.jpg"
                             class="banner-img">
                         <div class="date-badge">
@@ -257,6 +257,7 @@
             </div>
             }
         </div>
+        <app-load-more [hasMore]="hasMore()" [loading]="loadingMore()" (more)="loadNextPage()" />
     </div>
 
     <!-- My Participations Tab -->

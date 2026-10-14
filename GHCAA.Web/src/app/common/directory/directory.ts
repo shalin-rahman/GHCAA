@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy, Input, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, OnDestroy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
@@ -10,22 +10,23 @@ import { debounce } from '../../core/utils/debounce.util';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
+import { LazyImgDirective } from '../directives/lazy-img.directive';
 import { OrgConfigService } from '../../core/services/org-config.service';
-import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
+import { LoadMoreComponent } from '../load-more/load-more';
 import { PageHeaderComponent } from '../page-header/page-header.component';
 import { ModalHeaderComponent } from '../modal-header/modal-header.component';
 
 @Component({
     selector: 'app-directory',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, LogoSpinnerComponent, ImgFallbackDirective, PageHeaderComponent, ModalHeaderComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, ImgFallbackDirective, LazyImgDirective, PageHeaderComponent, ModalHeaderComponent, LoadMoreComponent],
     templateUrl: './directory.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './directory.scss'
 })
-export class Directory implements OnInit, AfterViewInit, OnDestroy {
+export class Directory implements OnInit, OnDestroy {
     @Input() isCompact: boolean = false;
     @Input() disableProfile: boolean = false;
-    @ViewChild('sentinel') sentinelRef!: ElementRef<HTMLElement>;
 
     getECPositionName = getECPositionName;
     getCurrentECPosition = getCurrentECPosition;
@@ -47,10 +48,10 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     totalItems = signal(0);
 
     // 82.42: sourced from /lookups/{group} via LookupService, filled in ngOnInit.
-    years: number[] = [];
-    memberCategories: LookupOption[] = [];
+    years = signal<number[]>([]);
+    memberCategories = signal<LookupOption[]>([]);
     sectors = PROFESSIONAL_SECTORS;
-    membershipTypes: LookupOption[] = []; // 62.33: sourced from LOOKUP_GROUPS.MembershipType, filled in ngOnInit
+    membershipTypes = signal<LookupOption[]>([]); // 62.33: sourced from LOOKUP_GROUPS.MembershipType, filled in ngOnInit
 
     selectedMember = signal<any | null>(null);
 
@@ -74,15 +75,10 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private currentPage = 1;
+    // Bumped by each new search so a page still loading for the old filters is dropped.
+    private searchVersion = 0;
     private readonly PAGE_SIZE = 20;
     private debouncedSearch = debounce(() => this.doSearch(), SEARCH_DEBOUNCE_MS);
-    private observer!: IntersectionObserver;
-
-    @ViewChild('sentinel') set sentinel(element: ElementRef<HTMLElement>) {
-        if (element) {
-            this.setupIntersectionObserver(element.nativeElement);
-        }
-    }
 
     filters = {
         query: '',
@@ -95,38 +91,13 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
 
     ngOnInit() {
         this.doSearch(); // Initial load
-        this.lookupService.getAcademicYears().subscribe(years => this.years = years);
-        this.lookupService.getOptions(LOOKUP_GROUPS.MemberCategory).subscribe(opts => this.memberCategories = opts);
-        this.lookupService.getOptions(LOOKUP_GROUPS.MembershipType).subscribe(opts => this.membershipTypes = opts);
-    }
-
-    ngAfterViewInit() {
-        // Observer setup handled by ViewChild setter
+        this.lookupService.getAcademicYears().subscribe(years => this.years.set(years));
+        this.lookupService.getOptions(LOOKUP_GROUPS.MemberCategory).subscribe(opts => this.memberCategories.set(opts));
+        this.lookupService.getOptions(LOOKUP_GROUPS.MembershipType).subscribe(opts => this.membershipTypes.set(opts));
     }
 
     ngOnDestroy() {
-        if (this.observer) this.observer.disconnect();
         this.debouncedSearch.cancel();
-    }
-
-    private setupIntersectionObserver(element: HTMLElement) {
-        if (this.observer) this.observer.disconnect();
-        
-        this.observer = new IntersectionObserver(
-            (entries) => {
-                const entry = entries[0];
-                if (entry.isIntersecting && this.hasMore() && !this.loading() && !this.loadingMore()) {
-                    this.loadNextPage();
-                }
-            },
-            { 
-                root: null, // use viewport
-                rootMargin: '600px', // Trigger even earlier
-                threshold: 0.1
-            }
-        );
-
-        this.observer.observe(element);
     }
 
     /** Called when filters change — resets to page 1 */
@@ -135,25 +106,29 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private doSearch() {
+        const version = ++this.searchVersion;
         this.currentPage = 1;
         this.members.set([]);
         this.hasMore.set(true);
+        this.loadingMore.set(false);
         this.loading.set(true);
         this.fetchPage(1).then(() => {
-            this.loading.set(false);
+            if (version === this.searchVersion) this.loading.set(false);
         });
     }
 
     loadNextPage() {
         if (!this.hasMore() || this.loadingMore()) return;
+        const version = this.searchVersion;
         this.loadingMore.set(true);
         const nextPage = this.currentPage + 1;
         this.fetchPage(nextPage).then(() => {
-            this.loadingMore.set(false);
+            if (version === this.searchVersion) this.loadingMore.set(false);
         });
     }
 
     private fetchPage(page: number): Promise<boolean> {
+        const version = this.searchVersion;
         return new Promise(resolve => {
             const apiFilter: any = {
                 query: this.filters.query || undefined,
@@ -171,6 +146,7 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
 
             this.networkService.searchMembers(apiFilter).subscribe({
                 next: (result) => {
+                    if (version !== this.searchVersion) return resolve(false);
                     this.currentPage = result.page;
                     this.totalItems.set(result.totalItems);
                     this.hasMore.set(result.hasNextPage ?? (result.page < result.totalPages));
@@ -179,19 +155,12 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
                     resolve(true);
                 },
                 error: () => {
+                    if (version !== this.searchVersion) return resolve(false);
                     this.hasMore.set(false);
                     resolve(false);
                 }
             });
         });
-    }
-
-    /** Re-observe sentinel after DOM update */
-    private reobserve() {
-        if (this.observer && this.sentinelRef?.nativeElement) {
-            this.observer.unobserve(this.sentinelRef.nativeElement);
-            this.observer.observe(this.sentinelRef.nativeElement);
-        }
     }
 
     viewProfile(id: number) {

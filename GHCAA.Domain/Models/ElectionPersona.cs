@@ -1,4 +1,3 @@
-using System;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Domain.Models;

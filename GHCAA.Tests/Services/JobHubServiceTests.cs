@@ -6,8 +6,6 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using NUnit.Framework;
-using System.Linq;
 
 namespace GHCAA.Tests.Services
 {
@@ -129,6 +127,23 @@ namespace GHCAA.Tests.Services
 
             result.Should().HaveCount(1);
             result.First().Title.Should().Be("Active Job");
+        }
+
+        [Category("NFR-P1")]
+        [Test]
+        public async Task GetActiveJobsPageAsync_PagesWithinTheCategoryFilter()
+        {
+            var member = await CreatePosterMemberAsync("JHP1");
+            for (var i = 1; i <= 3; i++)
+                _context.JobOpportunities.Add(new JobOpportunity { Title = $"IT {i}", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, PostedDate = DateTime.UtcNow.AddDays(-i), JobCategory = Enums.JobCategory.IT });
+            _context.JobOpportunities.Add(new JobOpportunity { Title = "Finance", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, JobCategory = Enums.JobCategory.Finance });
+            await _context.SaveChangesAsync();
+
+            var result = await _service.GetActiveJobsPageAsync(1, 2, Enums.JobCategory.IT);
+
+            result.Items.Select(j => j.Title).Should().Equal("IT 1", "IT 2");
+            result.TotalItems.Should().Be(3);
+            result.HasNextPage.Should().BeTrue();
         }
 
         [Test]

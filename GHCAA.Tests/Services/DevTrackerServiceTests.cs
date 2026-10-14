@@ -1,13 +1,9 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using FluentAssertions;
 using GHCAA.Application.DTOs;
 using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Services;
 

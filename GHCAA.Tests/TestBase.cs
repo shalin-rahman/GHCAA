@@ -5,7 +5,6 @@ using GHCAA.Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
 
 namespace GHCAA.Tests
 {

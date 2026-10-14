@@ -1,11 +1,7 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Domain;
 using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Logging.Abstractions;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Services
 {

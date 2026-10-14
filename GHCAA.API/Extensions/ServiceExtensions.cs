@@ -1,11 +1,9 @@
-using System.Text;
 using GHCAA.Application.Security;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace GHCAA.API.Extensions
 {

@@ -8,13 +8,59 @@ import {
     OnDestroy,
     Output,
     SimpleChanges,
-    ViewChild
+    ViewChild,
+    signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { QUILL_ASSETS } from '../../core/constants/app.constants';
+
+let quillLoad: Promise<void> | null = null;
 
 /**
- * Shared rich-text editor built on the globally-loaded Quill script (see index.html).
+ * Adds Quill's script and stylesheet to the page once (98.1). Editors that open while it is
+ * loading share one promise. A failed load clears it so the next editor can try again.
+ */
+export function loadQuill(doc: Document = document): Promise<void> {
+    if (typeof (window as any).Quill !== 'undefined') {
+        return Promise.resolve();
+    }
+    if (!quillLoad) {
+        quillLoad = new Promise<void>((resolve, reject) => {
+            const style = doc.createElement('link');
+            style.rel = 'stylesheet';
+            style.href = QUILL_ASSETS.STYLE;
+            style.integrity = QUILL_ASSETS.STYLE_SRI;
+            style.crossOrigin = 'anonymous';
+            doc.head.appendChild(style);
+
+            const script = doc.createElement('script');
+            script.src = QUILL_ASSETS.SCRIPT;
+            script.integrity = QUILL_ASSETS.SCRIPT_SRI;
+            script.crossOrigin = 'anonymous';
+            const fail = () => {
+                script.remove();
+                quillLoad = null;
+                reject(new Error('Quill failed to load'));
+            };
+            script.onload = () => {
+                if (typeof (window as any).Quill === 'undefined') {
+                    fail();
+                    return;
+                }
+                // Later calls take the window.Quill check above, so the promise is not kept.
+                quillLoad = null;
+                resolve();
+            };
+            script.onerror = fail;
+            doc.head.appendChild(script);
+        });
+    }
+    return quillLoad;
+}
+
+/**
+ * Shared rich-text editor built on Quill, which it loads on first use rather than on every page.
  *
  * Root cause it fixes: previously each caller used `document.getElementById(...)` inside a
  * `setTimeout` to initialise Quill against a container hidden behind an `@if`. Because the
@@ -42,17 +88,23 @@ export class RichTextEditor implements AfterViewInit, OnChanges, OnDestroy {
 
     @ViewChild('editorContainer') private editorContainer?: ElementRef<HTMLDivElement>;
 
-    /** True when the global Quill script has loaded; otherwise a plain textarea is rendered. */
-    readonly quillAvailable = typeof (window as any).Quill !== 'undefined';
+    /** Set when Quill could not be loaded; the template then shows a plain textarea. */
+    readonly quillFailed = signal(false);
 
     private quill: any = null;
     private viewReady = false;
+    private destroyed = false;
 
     ngAfterViewInit(): void {
         this.viewReady = true;
-        if (this.quillAvailable) {
-            this.initQuill();
-        }
+        loadQuill().then(
+            () => {
+                if (!this.destroyed) {
+                    this.initQuill();
+                }
+            },
+            () => this.quillFailed.set(true)
+        );
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -75,6 +127,7 @@ export class RichTextEditor implements AfterViewInit, OnChanges, OnDestroy {
         // `scroll`/`observer` are undocumented internals that could change between builds.
         (this.quill as any)?.scroll?.observer?.disconnect?.();
         this.quill = null;
+        this.destroyed = true;
     }
 
     onTextareaInput(text: string): void {

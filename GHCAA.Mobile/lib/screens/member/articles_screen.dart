@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -183,7 +184,7 @@ class _MemberArticlesScreenState extends ConsumerState<MemberArticlesScreen> {
                                           if (fullImgUrl != null)
                                             ClipRRect(
                                               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                                              child: Image.network(fullImgUrl, height: 140, fit: BoxFit.cover, errorBuilder: (c, e, s) => Container(height: 140, color: Colors.black26)),
+                                              child: CustomNetworkImage(imageUrl: fullImgUrl, height: 140, width: double.infinity, fit: BoxFit.cover, borderRadius: 0, decodeSize: 600, errorBuilder: (_) => Container(height: 140, color: Colors.black26)),
                                             ),
                                           Padding(
                                             padding: const EdgeInsets.all(16.0),

@@ -6,7 +6,6 @@ using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Services;
 

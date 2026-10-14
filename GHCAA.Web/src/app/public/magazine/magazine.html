@@ -38,7 +38,7 @@
                         @if (i > 0) {
                             <div class="magazine-card secondary reveal-card" (click)="selectArticle(article)">
                                 <div class="card-image">
-                                    <img [src]="article.imageUrl || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2069'" alt="Article" appImgFallback="/assets/logo.png">
+                                    <img appLazyImg [src]="article.imageUrl || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2069'" alt="Article" appImgFallback="/assets/logo.png">
                                 </div>
                                 <div class="card-content">
                                     <div class="meta">

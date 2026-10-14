@@ -1,5 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 using FluentAssertions;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
@@ -11,9 +9,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Moq;
-using NUnit.Framework;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace GHCAA.Tests.Services
 {

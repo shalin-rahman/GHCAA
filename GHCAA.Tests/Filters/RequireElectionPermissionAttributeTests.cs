@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using FluentAssertions;
 using GHCAA.API.Filters;
 using GHCAA.Application.Interfaces;
@@ -10,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using NUnit.Framework;
+using System.Security.Claims;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Tests.Filters;

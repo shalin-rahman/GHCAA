@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -169,12 +170,14 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
                                                     const BorderRadius.vertical(
                                                         top: Radius.circular(
                                                             AppTheme.radiusL)),
-                                                child: Image.network(
-                                                  fullImgUrl,
+                                                child: CustomNetworkImage(
+                                                  imageUrl: fullImgUrl,
                                                   height: 192,
+                                                  width: double.infinity,
                                                   fit: BoxFit.cover,
-                                                  errorBuilder: (context, error,
-                                                          stackTrace) =>
+                                                  borderRadius: 0,
+                                                  decodeSize: 600,
+                                                  errorBuilder: (_) =>
                                                       Container(
                                                     height: 192,
                                                     color: Colors.black26,

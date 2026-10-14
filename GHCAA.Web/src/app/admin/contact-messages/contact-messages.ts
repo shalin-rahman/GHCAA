@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
@@ -16,6 +16,7 @@ import { ModalHeaderComponent } from '../../common/modal-header/modal-header.com
   standalone: true,
   imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ModalHeaderComponent],
   templateUrl: './contact-messages.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './contact-messages.scss'
 })
 export class ContactMessages implements OnInit {

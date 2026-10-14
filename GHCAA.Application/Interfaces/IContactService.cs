@@ -1,6 +1,4 @@
 using GHCAA.Application.DTOs;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace GHCAA.Application.Interfaces
 {

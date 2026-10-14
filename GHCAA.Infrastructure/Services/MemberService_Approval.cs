@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
-using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using Microsoft.EntityFrameworkCore;
@@ -105,7 +99,7 @@ namespace GHCAA.Infrastructure.Services
                     else
                     {
                         existingUser.IsActive = true;
-                        existingUser.SecurityStamp = Guid.NewGuid().ToString("N");
+                        existingUser.RotateSecurityStamp();
                         await _tokenService.RevokeAllRefreshTokensAsync(existingUser.Id, cancellationToken);
                         await _db.SaveChangesAsync(cancellationToken);
                     }
@@ -171,7 +165,7 @@ namespace GHCAA.Infrastructure.Services
                 if (user != null)
                 {
                     user.IsActive = false;
-                    user.SecurityStamp = Guid.NewGuid().ToString("N");
+                    user.RotateSecurityStamp();
                     await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
                 }
 
@@ -252,7 +246,7 @@ namespace GHCAA.Infrastructure.Services
             if (user != null)
             {
                 user.IsArchived = true;
-                user.SecurityStamp = Guid.NewGuid().ToString("N"); // Invalidate all active JWTs
+                user.RotateSecurityStamp(); // Invalidate all active JWTs
                 // Rotating the stamp alone doesn't stop /api/auth/refresh from minting a fresh
                 // access token carrying the new stamp — the refresh token itself must be revoked.
                 await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
@@ -360,7 +354,7 @@ namespace GHCAA.Infrastructure.Services
             foreach (var user in usersToArchive)
             {
                 user.IsArchived = true;
-                user.SecurityStamp = Guid.NewGuid().ToString("N");
+                user.RotateSecurityStamp();
             }
 
             if (usersToArchive.Count > 0)

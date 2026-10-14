@@ -1,11 +1,9 @@
+using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
+using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
-using GHCAA.Application.Interfaces;
-using GHCAA.Domain;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace GHCAA.API.Middleware
 {

@@ -1,6 +1,5 @@
 using FluentAssertions;
 using GHCAA.Infrastructure.Services;
-using System.Linq;
 
 namespace GHCAA.Tests.Services;
 

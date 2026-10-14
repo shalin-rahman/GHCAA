@@ -1,10 +1,8 @@
 using GHCAA.Application.DTOs;
-using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace GHCAA.Infrastructure.Gateways
 {

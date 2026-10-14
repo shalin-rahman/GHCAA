@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace GHCAA.Application.DTOs
 {
     public class LookupDto

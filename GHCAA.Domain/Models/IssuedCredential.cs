@@ -1,5 +1,3 @@
-using System;
-
 namespace GHCAA.Domain.Models
 {
     public class IssuedCredential

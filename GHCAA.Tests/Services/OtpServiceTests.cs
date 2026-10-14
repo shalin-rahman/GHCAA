@@ -3,11 +3,11 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using Microsoft.EntityFrameworkCore;
 
 namespace GHCAA.Tests.Services;
 

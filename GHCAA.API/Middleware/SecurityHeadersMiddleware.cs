@@ -1,9 +1,4 @@
 using GHCAA.Domain;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace GHCAA.API.Middleware
 {
@@ -53,11 +48,11 @@ namespace GHCAA.API.Middleware
             context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
 
             // 6. Content Security Policy (CSP)
-            // index.html loads Font Awesome + Quill (CSS/JS/webfonts) from cdnjs.cloudflare.com,
-            // each pinned with an SRI integrity hash, so the cdnjs origin is whitelisted in
-            // script-src / style-src / font-src. Google Fonts stay whitelisted for the Outfit
-            // font. Without cdnjs here the CSP silently blocks those assets in prod (icons and
-            // editor styling disappear). It looks fine in local dev only because `ng serve` hosts
+            // The rich-text editor loads Quill's script and stylesheet from cdnjs.cloudflare.com
+            // when it first opens (98.1), each pinned with an SRI hash, so the cdnjs origin is
+            // whitelisted in script-src / style-src / font-src. Google Fonts stay whitelisted for
+            // the Outfit font. Without cdnjs here the CSP silently blocks Quill in prod and the
+            // editor falls back to a plain textarea. It looks fine in local dev only because `ng serve` hosts
             // the SPA on a separate origin, so this API-set CSP header never gates its assets;
             // in the combined prod deploy the API serves index.html and the CSP does apply.
             context.Response.Headers.Append("Content-Security-Policy",

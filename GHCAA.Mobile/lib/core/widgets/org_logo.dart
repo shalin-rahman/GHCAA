@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/app_config.dart';
 import '../services/org_config_service.dart';
+import 'custom_network_image.dart';
 
 class OrgLogo extends ConsumerWidget {
   const OrgLogo({
@@ -30,12 +31,14 @@ class OrgLogo extends ConsumerWidget {
         ? logoPath
         : '${AppConfig.apiBaseUrl.replaceFirst(RegExp(r'/$'), '')}/${logoPath.replaceFirst(RegExp(r'^/'), '')}';
 
-    return Image.network(
-      image,
+    return CustomNetworkImage(
+      imageUrl: image,
       width: width,
       height: height,
       fit: fit,
-      errorBuilder: (context, error, stackTrace) => Image.asset(
+      borderRadius: 0,
+      placeholderBuilder: (_) => SizedBox(width: width, height: height),
+      errorBuilder: (_) => Image.asset(
         'assets/logo.png',
         width: width,
         height: height,

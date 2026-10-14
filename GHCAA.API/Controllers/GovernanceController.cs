@@ -1,14 +1,9 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using GHCAA.API.Extensions;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
-using System.Security.Claims;
-using GHCAA.Application.Security;
-using GHCAA.Domain;
-using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {

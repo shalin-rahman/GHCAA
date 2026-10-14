@@ -1,11 +1,11 @@
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using FluentAssertions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Caching.Memory;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace GHCAA.Tests.OrgConfig;
 

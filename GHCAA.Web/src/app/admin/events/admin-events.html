@@ -235,7 +235,7 @@
                 <!-- Event Asset -->
                 <div class="admin-event-asset">
                     @if (ev.imageUrl) {
-                    <img [src]="'/' + ev.imageUrl" alt="Event Asset" appImgFallback="/assets/images/event-placeholder.jpg">
+                    <img appLazyImg [src]="'/' + ev.imageUrl" alt="Event Asset" appImgFallback="/assets/images/event-placeholder.jpg">
                     } @else {
                     <div class="placeholder">🖼️</div>
                     }

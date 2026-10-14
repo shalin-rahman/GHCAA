@@ -6,7 +6,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { NavService } from '../../core/services/nav.service';
 import { LookupService } from '../../core/services/lookup.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 
 import { ActivatedRoute, Router } from '@angular/router';
@@ -89,5 +89,17 @@ describe('AdminMembers Component', () => {
         component.sendResetLink(member.id);
         expect(adminServiceMock.sendPasswordResetLink).toHaveBeenCalledWith(member.id);
         expect(notificationServiceMock.success).toHaveBeenCalledWith('Success');
+    });
+
+    it('should re-enable Save when the document upload fails after the data saved', () => {
+        adminServiceMock.updateMember = vi.fn().mockReturnValue(of({}));
+        adminServiceMock.updateMemberDocuments = vi.fn().mockReturnValue(throwError(() => new Error('upload')));
+        component.selectedMember.set({ id: 7, fullName: 'Test User', mobileNo: '01712345678', email: 't@example.com' });
+        component.certToUpload = new File(['x'], 'cert.pdf');
+
+        component.saveMember();
+
+        expect(notificationServiceMock.error).toHaveBeenCalledWith('Data updated, but document upload failed.');
+        expect(component.submitting()).toBe(false);
     });
 });

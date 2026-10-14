@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;

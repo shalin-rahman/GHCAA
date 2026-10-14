@@ -11,11 +11,12 @@ import { ForumTopic, ForumPost, CreateForumPostDto } from '../../core/models/bus
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { LazyImgDirective } from '../../common/directives/lazy-img.directive';
 
 @Component({
     selector: 'app-topic-detail',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective],
+    imports: [CommonModule, RouterModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective, LazyImgDirective],
     templateUrl: './topic-detail.html',
     styleUrls: ['./topic-detail.scss']
 })

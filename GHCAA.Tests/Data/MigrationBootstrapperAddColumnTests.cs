@@ -1,7 +1,6 @@
-using System.Reflection;
 using FluentAssertions;
 using GHCAA.Infrastructure.Data;
-using NUnit.Framework;
+using System.Reflection;
 
 namespace GHCAA.Tests.Data
 {

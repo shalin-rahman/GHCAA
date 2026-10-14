@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace GHCAA.Domain.Models;
 
 public class ScholarshipFund

@@ -1,8 +1,7 @@
-using System.Threading.RateLimiting;
 using GHCAA.Domain;
-using static GHCAA.Domain.Constants;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+using static GHCAA.Domain.Constants;
 
 namespace GHCAA.API.Extensions
 {

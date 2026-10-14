@@ -2,6 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
+import '../../core/constants/app_constants.dart';
+import '../../core/models/paged_list.dart';
+import '../../core/utils/ttl_cache.dart';
 
 final jobServiceProvider = Provider<JobService>((ref) {
   return JobService(ref.read(dioProvider));
@@ -9,14 +12,28 @@ final jobServiceProvider = Provider<JobService>((ref) {
 
 class JobService {
   final Dio _dio;
+  final _jobs = TtlCache<String, PagedList>(CacheConstants.listCacheTtl);
+  static const _firstPageKey = 'first';
+
   JobService(this._dio);
 
-  Future<List<dynamic>> getAllJobs() async {
+  /// For callers that change jobs through dio directly, and for session changes.
+  void clearCache() => _jobs.clear();
+
+  /// Only the first page is cached; it is the one a return to the screen shows.
+  Future<PagedList> getJobsPage(int page) async {
+    if (page == 1) {
+      final cached = _jobs.get(_firstPageKey);
+      if (cached != null) return cached;
+    }
     try {
-      final response = await _dio.get('/jobs');
-      return response.data as List<dynamic>;
+      final response = await _dio.get('/jobs',
+          queryParameters: {'page': page, 'pageSize': PagingConstants.listPageSize});
+      final jobs = PagedList.fromJson(response.data as Map<String, dynamic>);
+      if (page == 1) _jobs.set(_firstPageKey, jobs);
+      return jobs;
     } catch (e) {
-      debugPrint('JobService.getAllJobs failed: $e');
+      debugPrint('JobService.getJobsPage failed: $e');
       rethrow;
     }
   }
@@ -24,6 +41,7 @@ class JobService {
   Future<bool> postJob(Map<String, dynamic> data) async {
     try {
       final response = await _dio.post('/jobs', data: data);
+      _jobs.clear();
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
       debugPrint('JobService.postJob failed: $e');
@@ -34,6 +52,7 @@ class JobService {
   Future<bool> deleteJob(int id) async {
     try {
       final response = await _dio.delete('/jobs/$id');
+      _jobs.clear();
       return response.statusCode == 200;
     } catch (e) {
       debugPrint('JobService.deleteJob failed: $e');
@@ -61,6 +80,7 @@ class JobService {
         queryParameters: approve ? {'notifyMember': notifyMember} : null,
         data: approve ? null : {'reason': reason, 'notifyMember': notifyMember},
       );
+      _jobs.clear();
       return response.statusCode == 200;
     } catch (e) {
       debugPrint('JobService.resolveJobApproval failed: $e');

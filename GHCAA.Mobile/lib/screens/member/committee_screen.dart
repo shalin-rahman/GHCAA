@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -229,7 +230,7 @@ class _CommitteeScreenState extends ConsumerState<CommitteeScreen> {
       child: CircleAvatar(
         radius: 26,
         backgroundColor: Colors.black26,
-        backgroundImage: url != null ? NetworkImage(url) : null,
+        backgroundImage: url != null ? cachedImageProvider(context, url, size: 52) : null,
         child: url == null ? Text(name?[0] ?? '?', style: const TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold)) : null,
       ),
     );

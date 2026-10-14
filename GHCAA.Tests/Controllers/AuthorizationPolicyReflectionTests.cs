@@ -1,9 +1,8 @@
-using System.Reflection;
 using GHCAA.API.Filters;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NUnit.Framework;
+using System.Reflection;
 
 namespace GHCAA.Tests.Controllers
 {

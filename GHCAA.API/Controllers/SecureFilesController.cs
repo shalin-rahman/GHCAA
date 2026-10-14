@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using GHCAA.API.Extensions;
 using GHCAA.Application.Interfaces;
-using GHCAA.Application.Security;
-using GHCAA.API.Extensions;
 using GHCAA.Domain;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GHCAA.API.Controllers
 {
@@ -93,8 +92,8 @@ namespace GHCAA.API.Controllers
             else if (normalizedPath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || normalizedPath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)) contentType = "image/jpeg";
             else if (normalizedPath.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) contentType = "image/png";
 
-            var fileBytes = await System.IO.File.ReadAllBytesAsync(fullPath, cancellationToken);
-            return File(fileBytes, contentType, fileUpload.FileName);
+            // 98.9. Stream from disk instead of reading the whole file into memory first.
+            return PhysicalFile(fullPath, contentType, fileUpload.FileName, enableRangeProcessing: true);
         }
     }
 }

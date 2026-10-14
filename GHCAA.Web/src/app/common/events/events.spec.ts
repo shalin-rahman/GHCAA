@@ -20,7 +20,8 @@ describe('Events Component', () => {
 
     beforeEach(async () => {
         eventsServiceMock = {
-            getEvents: vi.fn().mockReturnValue(of([])),
+            getEventsPage: vi.fn().mockReturnValue(of({ items: [], totalItems: 0, totalPages: 0, page: 1, pageSize: 20 })),
+            getEventById: vi.fn(),
             getUpcomingEvents: vi.fn().mockReturnValue(of([])),
             getMyRegistrations: vi.fn().mockReturnValue(of([])),
             registerForEvent: vi.fn().mockReturnValue(of({ success: true })),
@@ -70,8 +71,63 @@ describe('Events Component', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should load events on init', () => {
-        expect(eventsServiceMock.getEvents).toHaveBeenCalled();
+    it('should load the first page of events on init', () => {
+        expect(eventsServiceMock.getEventsPage).toHaveBeenCalledWith(1, 20);
+    });
+
+    // NFR-P1: events load a page at a time.
+    it('appends the next page until none is left', () => {
+        eventsServiceMock.getEventsPage
+            .mockReturnValueOnce(of({ items: [{ id: 1 }], totalItems: 2, totalPages: 2, page: 1, pageSize: 20 }))
+            .mockReturnValueOnce(of({ items: [{ id: 2 }], totalItems: 2, totalPages: 2, page: 2, pageSize: 20 }));
+
+        component.loadEvents();
+        component.loadNextPage();
+
+        expect(eventsServiceMock.getEventsPage).toHaveBeenLastCalledWith(2, 20);
+        expect(component.events().map(e => e.id)).toEqual([1, 2]);
+        expect(component.hasMore()).toBe(false);
+    });
+
+    it('fetches a deep-linked event that is not on the first page', () => {
+        vi.useFakeTimers();
+        const openSpy = vi.spyOn(component, 'openRegisterModal').mockImplementation(() => {});
+        eventsServiceMock.getEventById.mockReturnValue(of({ id: 42, isActive: true, startDate: '2026-11-01T10:00:00Z' }));
+
+        (component as any).resolveDeepLink('42');
+        vi.advanceTimersByTime(200);
+
+        expect(eventsServiceMock.getEventById).toHaveBeenCalledWith(42);
+        expect(openSpy).toHaveBeenCalledWith(expect.objectContaining({ id: 42 }));
+        expect(component.events()[0].id).toBe(42);
+        vi.useRealTimers();
+    });
+
+    // NFR-P1: the registration form renders inside the event's row, so the row must exist.
+    it('lists a deep-linked event once when its page loads later', () => {
+        eventsServiceMock.getEventsPage
+            .mockReturnValueOnce(of({ items: [{ id: 1 }], totalItems: 2, totalPages: 2, page: 1, pageSize: 20 }))
+            .mockReturnValueOnce(of({ items: [{ id: 42, isActive: true, startDate: '2026-11-01T10:00:00Z' }], totalItems: 2, totalPages: 2, page: 2, pageSize: 20 }));
+        eventsServiceMock.getEventById.mockReturnValue(of({ id: 42, isActive: true, startDate: '2026-11-01T10:00:00Z' }));
+        vi.spyOn(component, 'openRegisterModal').mockImplementation(() => {});
+
+        component.loadEvents();
+        (component as any).resolveDeepLink('42');
+        component.loadNextPage();
+
+        expect(component.events().map(e => e.id)).toEqual([42, 1]);
+    });
+
+    it('ignores a deep link to an inactive event', () => {
+        vi.useFakeTimers();
+        const openSpy = vi.spyOn(component, 'openRegisterModal').mockImplementation(() => {});
+        eventsServiceMock.getEventById.mockReturnValue(of({ id: 7, isActive: false }));
+
+        (component as any).resolveDeepLink('7');
+        vi.advanceTimersByTime(200);
+
+        expect(openSpy).not.toHaveBeenCalled();
+        vi.useRealTimers();
     });
 
     it('should correctly prefix online gateway references', () => {

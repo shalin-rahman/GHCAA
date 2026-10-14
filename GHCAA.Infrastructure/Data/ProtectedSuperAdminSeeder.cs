@@ -1,6 +1,5 @@
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
-using GHCAA.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

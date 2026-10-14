@@ -56,7 +56,7 @@
             <div class="reply-header">
               <div class="author-info">
                 @if (post.authorPhotoUrl) {
-                  <img [src]="post.authorPhotoUrl" alt="Avatar" class="avatar-img" appImgFallback="/assets/placeholders/avatar-placeholder.svg" />
+                  <img appLazyImg width="38" height="38" [src]="post.authorPhotoUrl" alt="Avatar" class="avatar-img" appImgFallback="/assets/placeholders/avatar-placeholder.svg" />
                 } @else {
                   <div class="avatar-placeholder">{{ post.authorName[0]?.toUpperCase() }}</div>
                 }

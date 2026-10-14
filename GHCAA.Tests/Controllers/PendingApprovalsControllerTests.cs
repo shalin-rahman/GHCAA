@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
@@ -9,7 +5,7 @@ using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using NUnit.Framework;
+using System.Security.Claims;
 
 namespace GHCAA.Tests.Controllers
 {

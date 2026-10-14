@@ -1,10 +1,10 @@
+using FluentAssertions;
+using GHCAA.Application.DTOs;
+using GHCAA.Infrastructure.Services;
 using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using FluentAssertions;
-using GHCAA.Application.DTOs;
-using GHCAA.Infrastructure.Services;
 
 namespace GHCAA.Tests.OrgConfig;
 

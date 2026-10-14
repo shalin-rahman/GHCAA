@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
+import '../../core/constants/app_constants.dart';
+import '../../core/utils/ttl_cache.dart';
 
 final lookupServiceProvider = Provider<LookupService>((ref) => LookupService(ref.read(dioProvider)));
 
@@ -21,15 +23,31 @@ final sectorListProvider = FutureProvider<List<String>>((ref) async {
 
 class LookupService {
   final Dio _dio;
+  final _groups = TtlCache<String, List<dynamic>>(CacheConstants.listCacheTtl);
+  final _all = TtlCache<String, Map<String, List<dynamic>>>(CacheConstants.listCacheTtl);
+  static const _allKey = 'all';
+
   LookupService(this._dio);
 
+  void clearCache() {
+    _groups.clear();
+    _all.clear();
+  }
+
   Future<Map<String, List<dynamic>>> getAllLookups() async {
+    final cachedAll = _all.get(_allKey);
+    if (cachedAll != null) return cachedAll;
     try {
       final response = await _dio.get('/lookups');
       // Only the Map shape is handled; a List response (e.g. flat items with a
       // 'lookupGroup' field) falls through to the empty map below, ungrouped.
       if (response.data is Map) {
-         return Map<String, List<dynamic>>.from(response.data);
+         final all = Map<String, List<dynamic>>.unmodifiable({
+           for (final e in (response.data as Map).entries)
+             e.key as String: List<dynamic>.unmodifiable(e.value as List),
+         });
+         _all.set(_allKey, all);
+         return all;
       }
       return {};
     } catch (e) {
@@ -39,9 +57,13 @@ class LookupService {
   }
 
   Future<List<dynamic>> getByGroup(String group) async {
+    final cached = _groups.get(group);
+    if (cached != null) return cached;
     try {
       final response = await _dio.get('/lookups/$group');
-      return response.data as List<dynamic>;
+      final items = List<dynamic>.unmodifiable(response.data as List<dynamic>);
+      _groups.set(group, items);
+      return items;
     } catch (e) {
       debugPrint('LookupService.getByGroup($group) failed: $e');
       return [];

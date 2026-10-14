@@ -4,7 +4,6 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
 
 using Microsoft.AspNetCore.RateLimiting;
 

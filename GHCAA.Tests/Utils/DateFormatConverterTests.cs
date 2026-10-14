@@ -1,8 +1,6 @@
-using System;
-using System.Text.Json;
 using FluentAssertions;
 using GHCAA.API.Utils;
-using NUnit.Framework;
+using System.Text.Json;
 
 namespace GHCAA.Tests.Utils
 {

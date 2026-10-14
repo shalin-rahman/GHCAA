@@ -1,8 +1,9 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { LazyImgDirective } from '../../common/directives/lazy-img.directive';
 import { NewsService } from '../../core/services/news.service';
 import { NewsPost, PostType } from '../../core/models/business.models';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
@@ -19,8 +20,9 @@ import { ModalHeaderComponent } from '../../common/modal-header/modal-header.com
 @Component({
     selector: 'app-admin-news',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, ModalHeaderComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LazyImgDirective, ModalHeaderComponent],
     templateUrl: './admin-news.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './admin-news.scss'
 })
 export class AdminNews implements OnInit {

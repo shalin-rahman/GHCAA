@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -798,7 +799,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 border: Border.all(color: AppTheme.royalGold, width: 2),
                 image: photoUrl != null
                     ? DecorationImage(
-                        image: NetworkImage(photoUrl), fit: BoxFit.cover)
+                        image: cachedImageProvider(context, photoUrl, size: 100), fit: BoxFit.cover)
                     : null,
                 color: Colors.black26,
               ),

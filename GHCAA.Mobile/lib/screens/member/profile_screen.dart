@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -113,7 +114,7 @@ class ProfileScreen extends ConsumerWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildMemberPhoto(data['photoPath'], data['fullName']),
+              _buildMemberPhoto(context, data['photoPath'], data['fullName']),
               const SizedBox(width: AppTheme.spaceM),
               Expanded(
                 child: Column(
@@ -162,7 +163,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMemberPhoto(String? path, String name) {
+  Widget _buildMemberPhoto(BuildContext context, String? path, String name) {
     final fullUrl = AppConfig.resolveImageUrl(path);
     
     return Container(
@@ -172,7 +173,7 @@ class ProfileScreen extends ConsumerWidget {
         color: Colors.black,
         borderRadius: BorderRadius.circular(AppTheme.radiusS),
         border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.2)),
-        image: fullUrl != null ? DecorationImage(image: NetworkImage(fullUrl), fit: BoxFit.cover) : null,
+        image: fullUrl != null ? DecorationImage(image: cachedImageProvider(context, fullUrl, size: 104), fit: BoxFit.cover) : null,
       ),
       child: fullUrl == null 
         ? Center(child: Text(name[0], style: const TextStyle(color: AppTheme.royalGold, fontSize: 32, fontWeight: FontWeight.bold)))

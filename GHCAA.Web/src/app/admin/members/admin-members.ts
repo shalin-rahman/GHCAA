@@ -1,8 +1,9 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { LazyImgDirective } from '../../common/directives/lazy-img.directive';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
@@ -27,9 +28,10 @@ import { MemberImportModalComponent } from './member-import-modal/member-import-
 @Component({
   selector: 'app-admin-members',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon, AppCurrencyPipe, MemberImportModalComponent, ModalHeaderComponent],
+  imports: [CommonModule, AppDatePipe, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LazyImgDirective, Icon, AppCurrencyPipe, MemberImportModalComponent, ModalHeaderComponent],
   providers: [DatePipe],
   templateUrl: './admin-members.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './admin-members.scss'
 })
 export class AdminMembers implements OnInit {
@@ -72,15 +74,15 @@ export class AdminMembers implements OnInit {
   // Import State
   showImportModal = signal(false);
   // 82.42: these seven populate from /lookups/{group} via LookupService, filled in loadLookupOptions().
-  ecPositions: LookupOption[] = [];
-  memberCategories: LookupOption[] = [];
-  statusOptions: LookupOption[] = [];
-  genderOptions: LookupOption[] = [];
-  bloodGroupOptions: LookupOption[] = [];
+  ecPositions = signal<LookupOption[]>([]);
+  memberCategories = signal<LookupOption[]>([]);
+  statusOptions = signal<LookupOption[]>([]);
+  genderOptions = signal<LookupOption[]>([]);
+  bloodGroupOptions = signal<LookupOption[]>([]);
   // 62.33: was a static import of MEMBERSHIP_TYPE_OPTIONS; a different institution's tier
   // labels are now a lookups-table change instead of a code change.
-  membershipTypes: LookupOption[] = [];
-  yearsList: number[] = [];
+  membershipTypes = signal<LookupOption[]>([]);
+  yearsList = signal<number[]>([]);
 
   ACADEMIC = ACADEMIC_DATA;
   IS_HSC = IS_HSC;
@@ -114,13 +116,13 @@ export class AdminMembers implements OnInit {
 
   // 82.42: single place these five lists come from now, instead of each screen hardcoding its own copy.
   private loadLookupOptions() {
-    this.lookupService.getOptions(LOOKUP_GROUPS.MembershipStatus).subscribe(opts => this.statusOptions = opts);
-    this.lookupService.getOptions(LOOKUP_GROUPS.MemberCategory).subscribe(opts => this.memberCategories = opts);
-    this.lookupService.getOptions(LOOKUP_GROUPS.Gender).subscribe(opts => this.genderOptions = opts);
-    this.lookupService.getOptions(LOOKUP_GROUPS.BloodGroup).subscribe(opts => this.bloodGroupOptions = opts);
-    this.lookupService.getOptions(LOOKUP_GROUPS.MembershipType).subscribe(opts => this.membershipTypes = opts);
-    this.lookupService.getOptions(LOOKUP_GROUPS.ECPosition).subscribe(opts => this.ecPositions = opts);
-    this.lookupService.getAcademicYears().subscribe(years => this.yearsList = years);
+    this.lookupService.getOptions(LOOKUP_GROUPS.MembershipStatus).subscribe(opts => this.statusOptions.set(opts));
+    this.lookupService.getOptions(LOOKUP_GROUPS.MemberCategory).subscribe(opts => this.memberCategories.set(opts));
+    this.lookupService.getOptions(LOOKUP_GROUPS.Gender).subscribe(opts => this.genderOptions.set(opts));
+    this.lookupService.getOptions(LOOKUP_GROUPS.BloodGroup).subscribe(opts => this.bloodGroupOptions.set(opts));
+    this.lookupService.getOptions(LOOKUP_GROUPS.MembershipType).subscribe(opts => this.membershipTypes.set(opts));
+    this.lookupService.getOptions(LOOKUP_GROUPS.ECPosition).subscribe(opts => this.ecPositions.set(opts));
+    this.lookupService.getAcademicYears().subscribe(years => this.yearsList.set(years));
   }
 
   loadECPeriods() {
@@ -509,7 +511,10 @@ export class AdminMembers implements OnInit {
               this.notify.success('Member information and documents updated.');
               this.finalizeSave();
             },
-            error: () => this.notify.error('Data updated, but document upload failed.')
+            error: () => {
+              this.notify.error('Data updated, but document upload failed.');
+              this.submitting.set(false);
+            }
           });
         } else {
           this.notify.success('Member information updated.');

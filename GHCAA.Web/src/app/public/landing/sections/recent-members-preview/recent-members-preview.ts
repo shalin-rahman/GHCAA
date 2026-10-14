@@ -2,11 +2,12 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NetworkingService } from '../../../../core/services/networking.service';
 import { ImgFallbackDirective } from '../../../../common/directives/img-fallback.directive';
+import { LazyImgDirective } from '../../../../common/directives/lazy-img.directive';
 
 @Component({
     selector: 'landing-recent-members-preview',
     standalone: true,
-    imports: [CommonModule, ImgFallbackDirective],
+    imports: [CommonModule, ImgFallbackDirective, LazyImgDirective],
     templateUrl: './recent-members-preview.html',
     styleUrl: './recent-members-preview.scss',
 })

@@ -144,10 +144,14 @@ void main() {
               return Response(
                 requestOptions: RequestOptions(path: path),
                 statusCode: 200,
-                data: [
-                  {'id': 1, 'title': 'Reunion 2026'},
-                  {'id': 2, 'title': 'AGM Meeting'},
-                ],
+                data: {
+                  'items': [
+                    {'id': 1, 'title': 'Reunion 2026'},
+                    {'id': 2, 'title': 'AGM Meeting'},
+                  ],
+                  'page': 1,
+                  'totalPages': 1,
+                },
               );
             }
             throw Exception('Unexpected get request');
@@ -155,7 +159,7 @@ void main() {
         );
 
         final eventsService = EventsService(dio);
-        final events = await eventsService.getUpcomingEvents();
+        final events = (await eventsService.getUpcomingEventsPage(1)).items;
 
         expect(events.length, 2);
         expect(events[0]['title'], 'Reunion 2026');

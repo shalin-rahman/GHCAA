@@ -1,11 +1,8 @@
-using System;
-using System.Threading.Tasks;
 using FluentAssertions;
 using GHCAA.Application.DTOs;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Caching.Memory;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Services;
 

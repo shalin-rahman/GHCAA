@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { EventGallery, EventPhoto } from '../models/business.models';
 import { buildHttpParams, getSilentHeaders } from '../utils/http.util';
+import { PagedResult } from './networking.service';
 
 
 @Injectable({
@@ -16,6 +17,10 @@ export class GalleryService {
     getGalleries(silent: boolean = false): Observable<EventGallery[]> {
         const headers = getSilentHeaders(silent);
         return this.http.get<EventGallery[]>(this.apiUrl, { headers });
+    }
+
+    getGalleriesPage(page: number, pageSize: number): Observable<PagedResult<EventGallery>> {
+        return this.http.get<PagedResult<EventGallery>>(this.apiUrl, { params: buildHttpParams({ page, pageSize }) });
     }
 
     getAllGalleries(): Observable<EventGallery[]> {

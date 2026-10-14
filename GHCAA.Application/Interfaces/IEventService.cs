@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Domain.Models;
 
@@ -10,6 +7,7 @@ namespace GHCAA.Application.Interfaces
     {
         // Event Management
         Task<IEnumerable<EventDto>> GetActiveEventsAsync(CancellationToken cancellationToken = default);
+        Task<PagedResult<EventDto>> GetActiveEventsPageAsync(int page, int pageSize, CancellationToken cancellationToken = default);
         Task<IEnumerable<EventDto>> GetAllEventsForAdminAsync(CancellationToken cancellationToken = default);
         Task<EventDto?> GetEventByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<AlumniEvent> CreateEventAsync(CreateEventDto dto, CancellationToken cancellationToken = default);

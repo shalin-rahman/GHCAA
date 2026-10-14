@@ -1,9 +1,8 @@
+using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
 using System.Security.Claims;
-using GHCAA.Application.Interfaces;
-using GHCAA.Domain.Models;
 
 namespace GHCAA.API.Hubs
 {

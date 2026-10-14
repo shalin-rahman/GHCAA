@@ -1,17 +1,14 @@
-using System.Diagnostics;
-using System.Linq;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using GHCAA.Infrastructure.Options;
+using System.Diagnostics;
 using System.Net;
-using System.Net.Http;
-using BCrypt.Net;
 
 namespace GHCAA.Infrastructure.Services
 {
@@ -561,7 +558,7 @@ namespace GHCAA.Infrastructure.Services
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
             user.ResetToken = null;
             user.ResetTokenExpiry = null;
-            user.SecurityStamp = Guid.NewGuid().ToString("N");
+            user.RotateSecurityStamp();
             // The new password came from the owner through their email, so there is nothing left
             // to force a change for.
             user.MustChangePassword = false;

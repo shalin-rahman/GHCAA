@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text.Json;
 using FluentAssertions;
 using GHCAA.Domain.Models;
-using NUnit.Framework;
+using System.Reflection;
+using System.Text.Json;
 
 namespace GHCAA.Tests.Data
 {

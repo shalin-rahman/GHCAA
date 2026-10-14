@@ -1,4 +1,3 @@
-using System.Text.Json;
 using ClosedXML.Excel;
 using FluentAssertions;
 using GHCAA.Application.DTOs;
@@ -10,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NUnit.Framework;
+using System.Text.Json;
 
 namespace GHCAA.Tests.Services;
 

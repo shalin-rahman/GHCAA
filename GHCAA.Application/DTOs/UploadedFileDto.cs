@@ -1,5 +1,3 @@
-using System.IO;
-
 namespace GHCAA.Application.DTOs
 {
     // Lightweight, transport-safe file DTO so Application layer does not depend on ASP.NET types

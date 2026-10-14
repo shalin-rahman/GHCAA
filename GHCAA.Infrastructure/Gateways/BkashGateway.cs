@@ -1,5 +1,4 @@
 using GHCAA.Application.DTOs;
-using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Options;

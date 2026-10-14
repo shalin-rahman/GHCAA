@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -131,7 +132,7 @@ class DashboardScreen extends ConsumerWidget {
                       const SizedBox(height: AppTheme.spaceL),
 
                       // Compact variant of the profile banner.
-                      _buildMajesticBanner(fullName, profile, photoUrl),
+                      _buildMajesticBanner(context, fullName, profile, photoUrl),
                       const SizedBox(height: AppTheme.spaceM),
                       _buildCompletenessCheck(context, profile),
                       const SizedBox(height: AppTheme.spaceL),
@@ -304,6 +305,7 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildMajesticBanner(
+      BuildContext context,
       String fullName, Map<String, dynamic>? profile, String? photoUrl) {
     final membershipType = profile?['membershipType']?.toString() ?? 'MEMBER';
     final membershipCategory = profile?['category']?.toString() ?? '';
@@ -402,7 +404,7 @@ class DashboardScreen extends ConsumerWidget {
                   ],
                   image: photoUrl != null
                       ? DecorationImage(
-                          image: NetworkImage(photoUrl), fit: BoxFit.cover)
+                          image: cachedImageProvider(context, photoUrl, size: 64), fit: BoxFit.cover)
                       : null,
                 ),
                 child: photoUrl == null

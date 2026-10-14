@@ -1,7 +1,7 @@
 using FluentAssertions;
+using GHCAA.Application.DTOs;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
-using GHCAA.Application.DTOs;
 using GHCAA.Infrastructure.Services;
 
 namespace GHCAA.Tests.Services;

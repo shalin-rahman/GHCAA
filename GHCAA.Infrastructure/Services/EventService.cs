@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using GHCAA.Domain;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Infrastructure.Services
@@ -35,9 +30,20 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<IEnumerable<EventDto>> GetActiveEventsAsync(CancellationToken cancellationToken = default)
         {
-            return await _context.AlumniEvents
+            return await ActiveEventsQuery().ToListAsync(cancellationToken);
+        }
+
+        public Task<PagedResult<EventDto>> GetActiveEventsPageAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+        {
+            return ActiveEventsQuery().ToPagedResultAsync(page, pageSize, cancellationToken);
+        }
+
+        private IQueryable<EventDto> ActiveEventsQuery()
+        {
+            return _context.AlumniEvents
                 .Where(e => e.IsActive)
                 .OrderBy(e => e.StartDate)
+                .ThenBy(e => e.Id)
                 .Select(e => new EventDto
                 {
                     Id = e.Id,
@@ -57,8 +63,7 @@ namespace GHCAA.Infrastructure.Services
                     RequiresRegistration = e.RequiresRegistration,
                     ParticipantLimit = e.ParticipantLimit,
                     HasWaitlist = e.HasWaitlist
-                })
-                .ToListAsync(cancellationToken);
+                });
         }
 
         public async Task<IEnumerable<EventDto>> GetAllEventsForAdminAsync(CancellationToken cancellationToken = default)

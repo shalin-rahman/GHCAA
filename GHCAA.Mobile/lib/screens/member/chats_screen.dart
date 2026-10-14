@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -285,7 +286,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen>
         shape: BoxShape.circle,
         border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.3)),
         image: url != null
-            ? DecorationImage(image: NetworkImage(url), fit: BoxFit.cover)
+            ? DecorationImage(image: cachedImageProvider(context, url, size: 48), fit: BoxFit.cover)
             : null,
       ),
       child: url == null

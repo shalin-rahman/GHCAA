@@ -1,7 +1,5 @@
 using GHCAA.Application.DTOs;
-using GHCAA.Domain.Models;
 using static GHCAA.Domain.Enums;
-using System.Threading;
 
 namespace GHCAA.Application.Interfaces
 {

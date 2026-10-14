@@ -1,15 +1,10 @@
 using FluentAssertions;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
-using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
-using Moq;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Moq;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Tests.Services;

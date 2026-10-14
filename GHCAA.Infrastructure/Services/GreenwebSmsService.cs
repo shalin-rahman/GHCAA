@@ -1,11 +1,6 @@
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Options;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

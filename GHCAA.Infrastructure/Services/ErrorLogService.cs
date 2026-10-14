@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
@@ -100,15 +95,11 @@ namespace GHCAA.Infrastructure.Services
                     (e.StackTrace != null && e.StackTrace.ToLower().Contains(term)));
             }
 
-            var totalItems = await query.CountAsync(cancellationToken);
-
             var pageSize = filter.PageSize <= 0 ? 20 : Math.Min(filter.PageSize, Constants.ErrorLogs.MaxPageSize);
-            var page = filter.Page <= 0 ? 1 : filter.Page;
 
-            var items = await query
+            return await query
                 .OrderByDescending(e => e.OccurredAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                .ThenByDescending(e => e.Id)
                 .Select(e => new ErrorLogDto
                 {
                     Id = e.Id,
@@ -123,16 +114,7 @@ namespace GHCAA.Infrastructure.Services
                     UserId = e.UserId,
                     Username = e.Username
                 })
-                .ToListAsync(cancellationToken);
-
-            return new PagedResult<ErrorLogDto>
-            {
-                Items = items,
-                TotalItems = totalItems,
-                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize),
-                Page = page,
-                PageSize = pageSize
-            };
+                .ToPagedResultAsync(filter.Page, pageSize, cancellationToken);
         }
     }
 }

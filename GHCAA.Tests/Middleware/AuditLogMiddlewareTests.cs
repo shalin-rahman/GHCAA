@@ -1,12 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Security.Claims;
-using System.Threading;
-using System.Text;
-using System.Threading.Tasks;
 using FluentAssertions;
 using GHCAA.API.Controllers;
 using GHCAA.API.Middleware;
@@ -17,7 +8,9 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using NUnit.Framework;
+using System.Reflection;
+using System.Security.Claims;
+using System.Text;
 
 namespace GHCAA.Tests.Middleware
 {

@@ -11,7 +11,7 @@
         @for (c of campaigns(); track c.id) {
           <a [routerLink]="['/campaigns', c.slug]" class="campaign-card">
             @if (c.coverImagePath) {
-              <img [src]="c.coverImagePath" [alt]="c.title" class="cover" />
+              <img appLazyImg [src]="c.coverImagePath" [alt]="c.title" class="cover" />
             }
             <h3>{{ c.title }}</h3>
             <div class="progress-track md my-2">

@@ -1,6 +1,5 @@
 using FluentAssertions;
 using GHCAA.Application.Security;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Utils
 {

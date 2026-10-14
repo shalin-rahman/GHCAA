@@ -1,11 +1,10 @@
-﻿using System.Security.Claims;
+﻿using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
-using GHCAA.Domain;
-using GHCAA.API.Extensions;
 
 namespace GHCAA.API.Controllers
 {

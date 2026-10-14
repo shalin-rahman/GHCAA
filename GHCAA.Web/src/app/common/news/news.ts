@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
@@ -15,6 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
   standalone: true,
   imports: [CommonModule, AppDatePipe, ImgFallbackDirective, LoadingPanelComponent, PageHeaderComponent],
   templateUrl: './news.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './news.scss'
 })
 export class News implements OnInit {

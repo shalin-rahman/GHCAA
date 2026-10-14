@@ -1,4 +1,4 @@
-@if (quillAvailable) {
+@if (!quillFailed()) {
 <div #editorContainer class="rich-text-editor-quill" [style.height]="height"></div>
 } @else {
 <textarea class="rich-text-editor-fallback" [style.height]="height" [ngModel]="value"

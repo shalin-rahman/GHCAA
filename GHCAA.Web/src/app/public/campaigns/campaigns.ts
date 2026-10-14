@@ -9,6 +9,7 @@ import { Campaign, CampaignHonourRoll, CreatePledgePayload } from '../../core/mo
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
+import { LazyImgDirective } from '../../common/directives/lazy-img.directive';
 
 // TODO 37.3: fundraising campaigns + donor honour roll. One component for both the list
 // (/campaigns) and a single campaign's page (/campaigns/:slug), same convention the Events
@@ -16,7 +17,7 @@ import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 @Component({
     selector: 'app-campaigns',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, LoadingPanelComponent, AppCurrencyPipe],
+    imports: [CommonModule, FormsModule, RouterLink, LoadingPanelComponent, AppCurrencyPipe, LazyImgDirective],
     templateUrl: './campaigns.html',
     styleUrl: './campaigns.scss'
 })

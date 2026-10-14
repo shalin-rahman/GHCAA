@@ -306,20 +306,23 @@ highlighted and lists after every build. Where a number is reported, name the ar
 a log file, a test run, a commit range — so an examiner can check it. Figures included: a diagram
 states what the code does, and where the two disagree the code is right.
 
-**Keeping the numbers true.** Repository figures quoted in the text go stale as the code moves. The
-`DbSet`, entity, enumeration, endpoint/controller and service-interface counts were re-taken on
-3 October 2026 for the Chapter 11 re-date: 77 `DbSet` properties (76 domain models plus
+**Keeping the numbers true.** Repository figures quoted in the text go stale as the code moves. These
+were re-taken on 14 October 2026 against the tree: 79 `DbSet` properties (78 domain entity sets plus
 `DataProtectionKeys`, a framework table added per `docs/adr/0007-data-protection-keys-in-database.md`),
-41 enumerations, 351 endpoint attributes across 47 controllers, and 57 service interfaces declared in
-55 files under `GHCAA.Application/Interfaces`. §6.3.2's "seventy-one entity sets", in the design
-chapter's data model, and Chapter 6's "46 service interfaces" predate this re-take and still need
-re-taking against the tree. The remaining figures were last taken on 14 September 2026 and have not
-been re-verified since: 43 service
-implementations, 1 migration (`GHCAA.Infrastructure/Data/Migrations/PgSql/20260907193705_InitialBaseline.cs`
-— the prior 31-file history was squashed to this single baseline on 8 September 2026), 3,468 lines of
-`styles.scss`. The test totals (859/859 backend tests, 511/511 web tests) were re-taken on
-23 September 2026. Re-take the rest before submission with the commands in `docs/PROJECT_MAP.md` and
-the two test suites, and correct the sentences that carry them.
+66 of them with a Fluent API configuration class, 41 enumerations in `Enums.cs` and 42 in
+`GHCAA.Domain` in all, 367 endpoint attributes across 48 controllers, 60 interfaces declared in 58
+files under `GHCAA.Application/Interfaces`, 52 classes in `GHCAA.Infrastructure/Services` that
+implement them, 28 migrations under `GHCAA.Infrastructure/Data/Migrations/PgSql` (the squashed
+`20260907193705_InitialBaseline.cs` and 27 since), and 3,992 lines of `styles.scss`. Chapter 6 quotes
+this set. Chapter 5's analysis-time count of seventy-two `DbSet` properties is a figure for that
+stage and is left as it is. The test totals (1,365 of 1,365 backend tests and 740 of 740 web tests in 108 files, all passing) were taken from the
+`scripts/ci-local.py` run of the same day. Re-take them all before submission with the commands in
+`docs/PROJECT_MAP.md` and the two test suites, and correct the sentences that carry them.
+
+The Chapter 11 effort figures (tasks, commit-days, critical path, line counts and the effort
+estimates) come from one run of `python docs/book/build/wbs.py`, taken on 14 October 2026. The
+chapter and the outline's Chapter 11 block must quote the same run. Re-run it and refresh both
+together.
 
 ## Before submission
 

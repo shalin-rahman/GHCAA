@@ -1,11 +1,10 @@
-using System.Text.Json;
 using FluentAssertions;
 using GHCAA.Application.DTOs;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using NUnit.Framework;
+using System.Text.Json;
 
 namespace GHCAA.Tests.OrgConfig
 {

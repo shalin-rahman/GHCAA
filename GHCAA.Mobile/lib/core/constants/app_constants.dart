@@ -45,3 +45,25 @@ class ElectionConstants {
   static const int unlockReasonMax = 1000;
   static const int appointmentReasonMax = 400;
 }
+
+// 98.18: how long lookups, events and jobs stay cached in memory.
+class CacheConstants {
+  static const Duration listCacheTtl = Duration(minutes: 5);
+}
+
+// 98.17: page size for the events, jobs and gallery lists. Matches the web client.
+class PagingConstants {
+  static const int listPageSize = 20;
+}
+
+// 98.19: share of traces sent to Sentry.
+class ObservabilityConstants {
+  static const double releaseTracesSampleRate = 0.1;
+  static const double debugTracesSampleRate = 1.0;
+}
+
+// 98.16: decode size uses the device pixel ratio up to this cap, so a 4x screen
+// does not decode a thumbnail at 4x.
+class ImageConstants {
+  static const double maxDecodePixelRatio = 3.0;
+}

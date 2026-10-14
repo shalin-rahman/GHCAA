@@ -1,17 +1,12 @@
-using System;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using GHCAA.Infrastructure.Options;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using BCrypt.Net;
+using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
 
 namespace GHCAA.Infrastructure.Services
 {
@@ -119,7 +114,7 @@ namespace GHCAA.Infrastructure.Services
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
             user.MustChangePassword = false;
-            user.SecurityStamp = Guid.NewGuid().ToString("N"); // S5.4: invalidate existing JWTs
+            user.RotateSecurityStamp(); // S5.4: invalidate existing JWTs
             await _db.SaveChangesAsync(cancellationToken);
             // A rotated SecurityStamp only invalidates access tokens — /api/auth/refresh mints a
             // fresh one carrying the new stamp and sails through, so a still-valid refresh token
@@ -161,7 +156,7 @@ namespace GHCAA.Infrastructure.Services
                 // Same reasoning as ChangePasswordAsync: disabling an account must kill both
                 // the access token (via the stamp) and any still-valid refresh token, or the
                 // account can keep working until its current JWT happens to expire.
-                user.SecurityStamp = Guid.NewGuid().ToString("N");
+                user.RotateSecurityStamp();
                 await _tokenService.RevokeAllRefreshTokensAsync(userId, cancellationToken);
             }
             await _db.SaveChangesAsync(cancellationToken);

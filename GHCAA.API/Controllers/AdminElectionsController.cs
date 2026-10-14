@@ -1,17 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static GHCAA.Domain.Enums;
+using System.Security.Claims;
 using static GHCAA.Domain.Constants;
+using static GHCAA.Domain.Enums;
 
 namespace GHCAA.API.Controllers;
 

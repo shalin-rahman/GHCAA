@@ -1,7 +1,4 @@
-using System.IO;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using FluentAssertions;
 using GHCAA.API.Controllers;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
@@ -9,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NUnit.Framework;
+using System.Text;
 
 namespace GHCAA.Tests.Controllers
 {
@@ -85,7 +82,12 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.GetSecureFile(relativePath, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<FileContentResult>());
+            // NFR-P3. The file is streamed from disk, not loaded into memory (98.9).
+            var file = result.Should().BeOfType<PhysicalFileResult>().Subject;
+            file.FileName.Should().Be(Path.GetFullPath(fullPath));
+            file.FileDownloadName.Should().Be("mine.pdf");
+            file.ContentType.Should().Be("application/pdf");
+            file.EnableRangeProcessing.Should().BeTrue();
         }
 
         [Test]
@@ -114,7 +116,7 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.GetSecureFile(relativePath, CancellationToken.None);
 
-            Assert.That(result, Is.InstanceOf<FileContentResult>());
+            Assert.That(result, Is.InstanceOf<PhysicalFileResult>());
         }
     }
 }

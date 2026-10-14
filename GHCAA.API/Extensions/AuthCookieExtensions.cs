@@ -1,7 +1,5 @@
-using System.Security.Cryptography;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Cryptography;
 
 namespace GHCAA.API.Extensions
 {

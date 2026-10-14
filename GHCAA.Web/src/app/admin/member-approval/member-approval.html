@@ -32,7 +32,7 @@
                         <div class="member-cell">
                             <div class="avatar-box">
                                 @if (reg.photoPath) {
-                                <img [src]="reg.photoPath" alt="Profile" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
+                                <img appLazyImg [src]="reg.photoPath" alt="Profile" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                                 } @else {
                                 <div class="avatar">{{ reg.fullName?.[0] || '?' }}</div>
                                 }

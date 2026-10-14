@@ -185,6 +185,9 @@
             }
         </div>
         }
+        @if (!loading()) {
+        <app-load-more [hasMore]="hasMore()" [loading]="loadingMore()" (more)="loadNextPage()" />
+        }
     </div>
     }
     }

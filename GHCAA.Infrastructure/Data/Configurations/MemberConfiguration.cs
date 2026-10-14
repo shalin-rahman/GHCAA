@@ -20,6 +20,9 @@ namespace GHCAA.Infrastructure.Data.Configurations
             // 24.37: Admin member listing queries filter heavily on both Status and IsArchived.
             builder.HasIndex(m => new { m.Status, m.IsArchived });
 
+            // 98.11: the member list ranks a page by counting members with more points.
+            builder.HasIndex(m => m.ContributionPoints);
+
             builder.HasQueryFilter(m => !m.IsArchived);
         }
     }

@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
@@ -122,6 +117,23 @@ namespace GHCAA.Infrastructure.Services
                 .CountAsync(cancellationToken) + 1;
 
             return (rank, GetCategoryBadge(points));
+        }
+
+        // 98.11. Ranks for a whole page in one query. Each rank is 1 plus the number of active
+        // members with more points, the same rule GetMemberGainsAsync uses for one member.
+        private async Task<Dictionary<int, int>> GetRanksAsync(IReadOnlyCollection<int> pagePoints, CancellationToken cancellationToken)
+        {
+            if (pagePoints.Count == 0)
+                return new Dictionary<int, int>();
+
+            var lowest = pagePoints.Min();
+            var above = await _db.Members
+                .Where(m => m.ContributionPoints > lowest && !m.IsArchived)
+                .GroupBy(m => m.ContributionPoints)
+                .Select(g => new { Points = g.Key, Count = g.Count() })
+                .ToListAsync(cancellationToken);
+
+            return pagePoints.Distinct().ToDictionary(p => p, p => above.Where(a => a.Points > p).Sum(a => a.Count) + 1);
         }
 
         public async Task<(Enums.MembershipStatus Status, Enums.MembershipType MembershipType)?> GetMembershipSnapshotAsync(int memberId, CancellationToken cancellationToken = default)

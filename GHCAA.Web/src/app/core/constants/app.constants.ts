@@ -5,6 +5,18 @@ import { ELECTION_PHASE_LABELS, NOMINATION_STATUS_LABELS } from '../models/elect
 // amount of time before firing.
 export const SEARCH_DEBOUNCE_MS = 300;
 
+// 98.17: page size for the events, jobs and gallery lists. The API caps any request at 100.
+export const LIST_PAGE_SIZE = 20;
+
+// 98.1: Quill is loaded by the rich-text editor when it first opens, not by index.html.
+// The CSP whitelists cdnjs for these. Change a URL and its SRI hash together.
+export const QUILL_ASSETS = {
+    SCRIPT: 'https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.6/quill.min.js',
+    SCRIPT_SRI: 'sha512-3OiXhM6bvRST0JlpR++aDMUh4n9QETHJdKEZ4U2gpDtyS8ZZF3h0072MaPDbjg/Q9W8Ki7G36Ay8I3xoUosPFg==',
+    STYLE: 'https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.6/quill.snow.css',
+    STYLE_SRI: 'sha512-PVNMdkw+2UbxMaF03ZTxkRCySBl5QvZgSQPO0vuIpYIzb5h+Q18y8A/W/N4Vpo8EerHoi2DTZta/UxrdKPG0dA=='
+} as const;
+
 // 37.12c: mirrors Constants.Policies.ElectionStaff on the API.
 export const SUPER_ADMIN_ROLE = 'SuperAdmin';
 export const ADMIN_ROLE = 'Admin';

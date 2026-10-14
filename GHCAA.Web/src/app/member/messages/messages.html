@@ -17,7 +17,7 @@
                 (click)="selectThread(c.userId)">
                 <div class="avatar-box">
                     @if (c.photoPath) {
-                    <img [src]="c.photoPath" alt="Profile" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
+                    <img appLazyImg [src]="c.photoPath" alt="Profile" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else {
                     <div class="avatar-ph">{{ c.fullName[0] }}</div>
                     }

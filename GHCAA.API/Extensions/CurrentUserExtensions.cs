@@ -1,6 +1,6 @@
-using System.Security.Claims;
 using GHCAA.Application.Security;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace GHCAA.API.Extensions
 {

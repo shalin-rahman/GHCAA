@@ -68,13 +68,31 @@ namespace GHCAA.Infrastructure.Services
 
             if (onlyActive)
             {
-                foreach (var gallery in galleries)
-                {
-                    gallery.Photos = gallery.Photos.Where(p => p.Status == Enums.SubmissionStatus.Approved).ToList();
-                }
+                KeepApprovedPhotos(galleries);
             }
 
             return galleries;
+        }
+
+        public async Task<PagedResult<EventGallery>> GetActiveGalleriesPageAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+        {
+            var result = await _db.EventGalleries
+                .Include(g => g.Photos)
+                .Where(g => g.IsActive && g.Status == Enums.SubmissionStatus.Approved)
+                .OrderByDescending(g => g.EventDate)
+                .ThenByDescending(g => g.Id)
+                .ToPagedResultAsync(page, pageSize, cancellationToken);
+
+            KeepApprovedPhotos(result.Items);
+            return result;
+        }
+
+        private static void KeepApprovedPhotos(IEnumerable<EventGallery> galleries)
+        {
+            foreach (var gallery in galleries)
+            {
+                gallery.Photos = gallery.Photos.Where(p => p.Status == Enums.SubmissionStatus.Approved).ToList();
+            }
         }
 
         public async Task<EventGallery?> GetGalleryByIdAsync(int id, CancellationToken cancellationToken = default)

@@ -1,5 +1,4 @@
 using GHCAA.Application.Interfaces;
-using Microsoft.AspNetCore.Http;
 
 namespace GHCAA.API.Extensions
 {

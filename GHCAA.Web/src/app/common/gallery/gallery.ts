@@ -12,13 +12,16 @@ import { PageHeaderComponent } from '../page-header/page-header.component';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { LazyImgDirective } from '../directives/lazy-img.directive';
 import { safeImageUrl } from '../../core/utils/image.util';
-import { SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
+import { SUBMISSION_STATUS_MAP, LIST_PAGE_SIZE } from '../../core/constants/app.constants';
+import { appendById } from '../../core/utils/paging.util';
+import { Subscription } from 'rxjs';
+import { LoadMoreComponent } from '../load-more/load-more';
 import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
   selector: 'app-gallery',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective, LazyImgDirective],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective, LazyImgDirective, LoadMoreComponent],
   templateUrl: './gallery.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './gallery.scss'
@@ -31,6 +34,10 @@ export class Gallery implements OnInit {
 
   galleries = signal<EventGallery[]>([]);
   loading = signal(true);
+  hasMore = signal(false);
+  loadingMore = signal(false);
+  private page = 1;
+  private pageSub?: Subscription;
   // 58.2: table is the default view; the visual card/cover-photo grid stays available via a toggle.
   viewMode = signal<'table' | 'card'>('table');
   selectedGallery = signal<EventGallery | null>(null);
@@ -142,13 +149,33 @@ export class Gallery implements OnInit {
   }
 
   refresh() {
+    this.page = 1;
+    // A next page still in flight belongs to the old list.
+    this.pageSub?.unsubscribe();
+    this.loadingMore.set(false);
     this.loading.set(true);
-    this.galleryService.getGalleries().subscribe({
-      next: (data) => {
-        this.galleries.set(data);
+    this.pageSub = this.galleryService.getGalleriesPage(1, LIST_PAGE_SIZE).subscribe({
+      next: (result) => {
+        this.galleries.set(result.items);
+        this.hasMore.set(result.page < result.totalPages);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
+    });
+  }
+
+  loadNextPage() {
+    if (!this.hasMore() || this.loading() || this.loadingMore()) return;
+    this.loadingMore.set(true);
+    this.pageSub?.unsubscribe();
+    this.pageSub = this.galleryService.getGalleriesPage(this.page + 1, LIST_PAGE_SIZE).subscribe({
+      next: (result) => {
+        this.page = result.page;
+        this.galleries.update(list => appendById(list, result.items));
+        this.hasMore.set(result.page < result.totalPages);
+        this.loadingMore.set(false);
+      },
+      error: () => this.loadingMore.set(false)
     });
   }
 

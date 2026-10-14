@@ -15,7 +15,7 @@ describe('Gallery Component', () => {
 
     beforeEach(async () => {
         galleryServiceMock = {
-            getGalleries: vi.fn().mockReturnValue(of([]))
+            getGalleriesPage: vi.fn().mockReturnValue(of({ items: [], totalItems: 0, totalPages: 0, page: 1, pageSize: 20 }))
         };
 
         const authServiceMock = {
@@ -51,7 +51,25 @@ describe('Gallery Component', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should load galleries on init', () => {
-        expect(galleryServiceMock.getGalleries).toHaveBeenCalled();
+    it('should load the first page of galleries on init', () => {
+        expect(galleryServiceMock.getGalleriesPage).toHaveBeenCalledWith(1, 20);
+    });
+
+    // NFR-P1: galleries load a page at a time, and a refresh starts again from page 1.
+    it('appends the next page and starts over on refresh', () => {
+        const page = (ids: number[], p: number) => of({ items: ids.map(id => ({ id, photos: [] })), totalItems: 2, totalPages: 2, page: p, pageSize: 20 });
+        galleryServiceMock.getGalleriesPage
+            .mockReturnValueOnce(page([1], 1))
+            .mockReturnValueOnce(page([2], 2))
+            .mockReturnValueOnce(page([1], 1));
+
+        component.refresh();
+        component.loadNextPage();
+        expect(component.galleries().map(g => g.id)).toEqual([1, 2]);
+        expect(component.hasMore()).toBe(false);
+
+        component.refresh();
+        expect(galleryServiceMock.getGalleriesPage).toHaveBeenLastCalledWith(1, 20);
+        expect(component.galleries().map(g => g.id)).toEqual([1]);
     });
 });

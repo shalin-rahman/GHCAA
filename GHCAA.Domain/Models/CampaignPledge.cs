@@ -1,5 +1,3 @@
-using System;
-
 namespace GHCAA.Domain.Models
 {
     // TODO 37.3: a pledge against a Campaign. MemberId is nullable so a non-alumni donor can give —

@@ -1,14 +1,10 @@
-﻿using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
-using GHCAA.API.Extensions;
+﻿using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
-using GHCAA.Domain;
-using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -30,8 +26,12 @@ namespace GHCAA.API.Controllers
         [AllowAnonymous]
         [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
         [HttpGet]
-        public async Task<IActionResult> GetActiveEvents(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetActiveEvents([FromQuery] int? page, [FromQuery] int? pageSize, CancellationToken cancellationToken)
         {
+            // 98.17: a client that sends page gets a PagedResult. Without it the plain list stays, for older app builds.
+            if (page.HasValue)
+                return Ok(await _eventService.GetActiveEventsPageAsync(page.Value, pageSize ?? Constants.Paging.DefaultPageSize, cancellationToken));
+
             var events = await _eventService.GetActiveEventsAsync(cancellationToken);
             return Ok(events);
         }

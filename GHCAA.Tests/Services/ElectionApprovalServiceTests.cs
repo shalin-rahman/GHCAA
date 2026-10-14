@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using FluentAssertions;
 using GHCAA.API.Services;
 using GHCAA.Application.DTOs;
@@ -10,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using NUnit.Framework;
+using System.Security.Cryptography;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Tests.Services;
@@ -746,13 +745,41 @@ public sealed class ElectionApprovalServiceTests : TestBase
         (await _context.ElectionAuditEntries.AsNoTracking().CountAsync()).Should().Be(0);
     }
 
+    // 98.20. A save error that is not a duplicate key is a real fault. It must reach the caller
+    // instead of being reported as "busy", and nothing may be half written.
+    [Test]
+    [Category("NFR-R5")]
+    public async Task ApproveArchive_NonUniqueSaveError_IsNotReportedAsBusy()
+    {
+        UseSettings(new ElectionSettingsDto { TwoPersonActions = [] });
+        var failing = new ClashingAuditWriter(new ElectionAuditWriter(_context), new DbUpdateException("connection dropped"));
+        var service = new ElectionApprovalService(_context, new ElectionService(_context), new ElectionAccessService(_context, _orgConfig.Object), _orgConfig.Object, NewAppointments(_orgConfig.Object, audit: failing), NewActivity(), NullLogger<ElectionApprovalService>.Instance, NewFreeze());
+        _context.Elections.Single(x => x.Id == _election.Id).Phase = ElectionPhase.Declared;
+        var persona = new ElectionPersona { Name = "Scrutineer", GroupName = "Officials", Description = "d", DeclarationText = "d" };
+        _context.ElectionPersonas.Add(persona);
+        await _context.SaveChangesAsync();
+        _context.ElectionAppointments.Add(new ElectionAppointment { ElectionId = _election.Id, PersonaId = persona.Id, UserId = _carol, DisplayName = "o", Email = "c@example.com", AppointedByUserId = _alice, AppointedAt = DateTime.UtcNow, AcceptedAt = DateTime.UtcNow, DeclarationSignedAt = DateTime.UtcNow });
+        await _context.SaveChangesAsync();
+        DetachAll();
+
+        await FluentActions.Awaiting(() => service.RunOrRequestAsync(_election.Id, ElectionApprovalAction.Archive, _alice, SuperAdmin))
+            .Should().ThrowAsync<DbUpdateException>().WithMessage("connection dropped");
+        _context.ChangeTracker.Clear();
+        (await ReloadAsync()).Phase.Should().Be(ElectionPhase.Declared);
+        (await _context.ElectionAuditEntries.AsNoTracking().CountAsync()).Should().Be(0);
+    }
+
     // Stands in for another request that took the same Seq first. Appends really happen, so the
     // service sees pending audit rows when the save fails.
-    private sealed class ClashingAuditWriter(IElectionAuditWriter inner) : IElectionAuditWriter
+    private sealed class ClashingAuditWriter(IElectionAuditWriter inner, DbUpdateException? failure = null) : IElectionAuditWriter
     {
+        // SQLite's own duplicate-key error: code 19, extended code 2067.
+        public static DbUpdateException SeqClash() =>
+            new("Seq clash", new Microsoft.Data.Sqlite.SqliteException("UNIQUE constraint failed: ElectionAuditEntries.ElectionId, ElectionAuditEntries.Seq", 19, 2067));
+
         public Task AppendAsync(int electionId, string action, int? actorUserId, object? detail, CancellationToken ct = default) =>
             inner.AppendAsync(electionId, action, actorUserId, detail, ct);
-        public Task SaveAsync(CancellationToken ct = default) => throw new DbUpdateException("Seq clash");
+        public Task SaveAsync(CancellationToken ct = default) => throw (failure ?? SeqClash());
         public Task<ElectionAuditVerifyDto> VerifyAsync(int electionId, CancellationToken ct = default) => inner.VerifyAsync(electionId, ct);
         public Task<IReadOnlyList<ElectionAuditEntryDto>> ListAsync(int electionId, CancellationToken ct = default) => inner.ListAsync(electionId, ct);
     }

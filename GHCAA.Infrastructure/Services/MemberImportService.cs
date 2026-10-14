@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using ClosedXML.Excel;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
@@ -13,6 +6,7 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace GHCAA.Infrastructure.Services
 {

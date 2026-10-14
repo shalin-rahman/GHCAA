@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { Job, CreateJobDto, UpdateJobDto } from '../models/business.models';
 import { buildHttpParams, getSilentHeaders } from '../utils/http.util';
+import { PagedResult } from './networking.service';
 
 
 @Injectable({
@@ -16,6 +17,10 @@ export class JobService {
     getJobs(params?: any, silent: boolean = false): Observable<Job[]> {
         const headers = getSilentHeaders(silent);
         return this.http.get<Job[]>(this.apiUrl, { params, headers });
+    }
+
+    getJobsPage(page: number, pageSize: number, filter: { jobCategory?: string | number; query?: string } = {}): Observable<PagedResult<Job>> {
+        return this.http.get<PagedResult<Job>>(this.apiUrl, { params: buildHttpParams({ ...filter, page, pageSize }) });
     }
 
     getJobById(id: number): Observable<Job> {
