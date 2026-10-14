@@ -71,6 +71,7 @@ namespace GHCAA.Infrastructure
             // to, instead of that service parsing IConfiguration["Section:Key"] by hand.
             services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
             services.Configure<GmailSettingsOptions>(configuration.GetSection("GmailSettings"));
+            services.Configure<BrevoSettingsOptions>(configuration.GetSection("BrevoSettings"));
             services.Configure<SmsSettingsOptions>(configuration.GetSection("SmsSettings"));
             services.Configure<OtpSettingsOptions>(configuration.GetSection("OtpSettings"));
             services.Configure<ContactUsSettingsOptions>(configuration.GetSection("ContactUsSettings"));
@@ -90,6 +91,9 @@ namespace GHCAA.Infrastructure
                     // here too would leave ISmsService double-registered, correct today only because the
                     // HttpClient one happens to run second; excluding it here removes that fragility.
                     && t != typeof(GreenwebSmsService)
+                    // Both email services implement IEmailService; EmailSettings:Provider picks one below.
+                    && t != typeof(GmailEmailService)
+                    && t != typeof(BrevoEmailService)
                     // InstitutionProfileProvider reads its profile pack once at construction and never
                     // changes afterward (the "boot plane", ADR-3 in docs/WHITE_LABEL_PLAN.md) — it needs
                     // AddSingleton below, not the Scoped lifetime this loop applies to everything else.
@@ -144,8 +148,24 @@ namespace GHCAA.Infrastructure
             services.AddScoped<IPaymentGatewayService, NagadGateway>();
             services.AddScoped<IPaymentGatewayService, DGePayGateway>();
             services.AddHttpClient<ISmsService, GreenwebSmsService>();
+            AddEmailService(services, configuration);
 
             return services;
+        }
+
+        private static void AddEmailService(IServiceCollection services, IConfiguration configuration)
+        {
+            var provider = configuration.GetSection("EmailSettings").Get<EmailSettingsOptions>()?.Provider
+                ?? EmailSettingsOptions.Gmail;
+
+            if (provider.Equals(EmailSettingsOptions.Brevo, StringComparison.OrdinalIgnoreCase))
+                services.AddHttpClient<IEmailService, BrevoEmailService>();
+            else if (provider.Equals(EmailSettingsOptions.Gmail, StringComparison.OrdinalIgnoreCase))
+                services.AddScoped<IEmailService, GmailEmailService>();
+            else
+                // A typo would otherwise fall back to Gmail and fail quietly on a host that blocks SMTP.
+                throw new InvalidOperationException(
+                    $"EmailSettings:Provider '{provider}' is not supported. Use '{EmailSettingsOptions.Gmail}' or '{EmailSettingsOptions.Brevo}'.");
         }
 
         private static string GetConnectionString(string provider, IConfiguration configuration)

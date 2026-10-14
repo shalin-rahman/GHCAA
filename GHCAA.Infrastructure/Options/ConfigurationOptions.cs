@@ -24,6 +24,24 @@ namespace GHCAA.Infrastructure.Options
         public int Port { get; set; } = 587;
     }
 
+    // Picks the IEmailService at startup. Render's free tier blocks outbound SMTP, so preprod
+    // sends through Brevo's HTTPS API instead of Gmail.
+    public class EmailSettingsOptions
+    {
+        public const string Gmail = "Gmail";
+        public const string Brevo = "Brevo";
+
+        public string Provider { get; set; } = Gmail;
+    }
+
+    public class BrevoSettingsOptions
+    {
+        public string? ApiKey { get; set; }
+        public string? SenderEmail { get; set; }
+        public string? SenderName { get; set; }
+        public string BaseUrl { get; set; } = "https://api.brevo.com/v3/smtp/email";
+    }
+
     public class SmsSettingsOptions
     {
         public string Token { get; set; } = string.Empty;

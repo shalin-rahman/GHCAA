@@ -1,4 +1,5 @@
 using GHCAA.Application.Interfaces;
+using GHCAA.Infrastructure.Options;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -68,8 +69,10 @@ namespace GHCAA.API.Controllers
             }
 
             // 3. Email Config check
-            var emailConfig = _config.GetSection("GmailSettings");
-            bool emailOk = !string.IsNullOrEmpty(emailConfig["Email"]) && !string.IsNullOrEmpty(emailConfig["AppPassword"]);
+            // Checks the provider DependencyInjection.AddEmailService picked, not always Gmail.
+            bool emailOk = string.Equals(_config["EmailSettings:Provider"], EmailSettingsOptions.Brevo, StringComparison.OrdinalIgnoreCase)
+                ? !string.IsNullOrEmpty(_config["BrevoSettings:ApiKey"]) && !string.IsNullOrEmpty(_config["BrevoSettings:SenderEmail"])
+                : !string.IsNullOrEmpty(_config["GmailSettings:Email"]) && !string.IsNullOrEmpty(_config["GmailSettings:AppPassword"]);
             health.Checks.Add(new { Name = "EmailService", Status = emailOk ? "Healthy" : "Misconfigured" });
             if (!emailOk) allHealthy = false;
 
