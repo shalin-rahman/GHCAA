@@ -8516,6 +8516,9 @@ Done 2026-10-14. `directory.html` uses `<app-load-more>` in both list views, and
 98.36 [DONE 2026-10-14] **Priority: P3 | Depends on: none.** Raised by user 2026-10-14: fix the open review items. `ElectionApprovalService.TryInsertAsync` caught every `DbUpdateException` when an open key was set and treated it as a duplicate approval, so a different save failure was hidden as "already approved". The catch now runs only for a unique-key clash, checked by the existing `IsUniqueViolation` helper (PostgreSQL and SQLite).
 **Acceptance:** the 50 election approval tests pass; a save failure that is not a unique clash is rethrown.
 
+98.37 [DONE 2026-10-14] **Priority: P1 | Depends on: none.** Raised by user 2026-10-14: CI failed `dotnet format --verify-no-changes` with "Replace 22 characters" on `DependencyInjection.cs` and `MemberService_Search.cs`. The 98.17 to 98.33 commit turned `DependencyInjection.cs` from LF to CRLF, and the Linux formatter rewrites the newline before a comment line inside a fluent chain as LF. The file is back to LF with no code change. `MemberService_Search.cs` stays CRLF; its new comment line inside the `Include` chain is now a trailing comment, the same shape the `AsSplitQuery` line already uses. A single stray CR on a `using` line in `EventsControllerTests.cs` and `JobHubControllerTests.cs` was removed. 140 other C# files went from LF to CRLF in the same period; CI does not flag them because none has a comment line inside a chain, so they were left as they are.
+**Acceptance:** the CI format step passes on the next push.
+
 ---
 
 # Work Package 86 — Book sync after the election-navigation, communication-visibility and

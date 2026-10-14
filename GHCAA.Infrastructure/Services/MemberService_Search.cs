@@ -66,9 +66,8 @@ namespace GHCAA.Infrastructure.Services
                 .AsSplitQuery() // Prevent duplicates from collection includes
                 .Include(m => m.ECMembers)
                 .ThenInclude(em => em.ECPeriod)
-                // 98.12. The summary shows only the org record and the current job, so load just those.
-                .Include(m => m.AcademicHistory.Where(a => a.IsOrgProfile))
-                .Include(m => m.ProfessionalHistory.Where(p => p.IsCurrent));
+                .Include(m => m.AcademicHistory.Where(a => a.IsOrgProfile)) // The summary shows only the org record
+                .Include(m => m.ProfessionalHistory.Where(p => p.IsCurrent)); // and the current job
 
             if (includeArchived)
             {
