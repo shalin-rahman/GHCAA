@@ -3,20 +3,16 @@ using GHCAA.Domain;
 
 namespace GHCAA.API.Services;
 
-// 98.14. Trims old log rows once a day. The first pass waits a few minutes, so it does not race the
-// database bootstrap.
+// 98.14. Trims old log rows once a day. Program.cs awaits the database bootstrap before the host
+// starts, so the first pass runs straight away. The schedule is not saved anywhere: Render restarts
+// the service more often than once a day, and a purge is safe to repeat, so each boot runs one pass
+// rather than waiting out an interval it may not live through.
 public sealed class DataRetentionSweep(IServiceScopeFactory scopes, ILogger<DataRetentionSweep> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        try
-        {
-            await Task.Delay(TimeSpan.FromMinutes(Constants.Retention.FirstSweepDelayMinutes), stoppingToken);
-        }
-        catch (OperationCanceledException)
-        {
-            return;
-        }
+        // Leave the host's start path before touching the database.
+        await Task.Yield();
         await RunOnceAsync(stoppingToken);
 
         using var timer = new PeriodicTimer(TimeSpan.FromHours(Constants.Retention.SweepHours));

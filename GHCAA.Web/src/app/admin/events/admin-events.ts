@@ -12,6 +12,8 @@ import { PaginationComponent } from '../../common/pagination/pagination.componen
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { ExportUtil } from '../../core/utils/export.util';
+import { fetchAllPages } from '../../core/utils/paging.util';
+import { EXPORT_PAGE_SIZE } from '../../core/constants/app.constants';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
@@ -194,28 +196,25 @@ export class AdminEvents implements OnInit {
         this.loadAllRegistrations();
     }
 
-    handleExport(format: string) {
+    async handleExport(format: string) {
         this.isExporting.set(true);
-        this.eventsService.getAllRegistrations(
-            1, 10000, 
-            this.selectedEventIdFilter() || undefined, 
-            this.statusFilter(), 
-            this.searchQuery()
-        ).subscribe({
-            next: (res: any) => {
-                const data = res.items || [];
-                if (format === 'excel') ExportUtil.toExcel(data, 'event_registrations');
-                if (format === 'csv') ExportUtil.toCsv(data, 'event_registrations');
-                if (format === 'pdf') {
-                    const pData = data.map(this.pdfMapper);
-                    ExportUtil.toPdf(this.pdfHeaders, pData, 'event_registrations', 'Event Registrations Export');
-                }
-                this.isExporting.set(false);
-            },
-            error: () => {
-                this.isExporting.set(false);
+        const eventId = this.selectedEventIdFilter() || undefined;
+        const status = this.statusFilter();
+        const search = this.searchQuery();
+        try {
+            const data: any[] = await fetchAllPages(page => firstValueFrom(
+                this.eventsService.getAllRegistrations(page, EXPORT_PAGE_SIZE, eventId, status, search)));
+            if (format === 'excel') ExportUtil.toExcel(data, 'event_registrations');
+            if (format === 'csv') ExportUtil.toCsv(data, 'event_registrations');
+            if (format === 'pdf') {
+                const pData = data.map(this.pdfMapper);
+                ExportUtil.toPdf(this.pdfHeaders, pData, 'event_registrations', 'Event Registrations Export');
             }
-        });
+        } catch {
+            // The export just stops; the list on screen is unchanged.
+        } finally {
+            this.isExporting.set(false);
+        }
     }
 
     openCreateForm() {

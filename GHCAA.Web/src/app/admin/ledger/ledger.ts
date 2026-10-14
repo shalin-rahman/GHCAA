@@ -10,7 +10,9 @@ import { PaginationComponent } from '../../common/pagination/pagination.componen
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { ExportUtil } from '../../core/utils/export.util';
-import { FINANCIAL_CATEGORY_OPTIONS, LEDGER_CATEGORIES_BY_TYPE, getFinancialCategoryLabel } from '../../core/constants/app.constants';
+import { fetchAllPages } from '../../core/utils/paging.util';
+import { firstValueFrom } from 'rxjs';
+import { EXPORT_PAGE_SIZE, FINANCIAL_CATEGORY_OPTIONS, LEDGER_CATEGORIES_BY_TYPE, getFinancialCategoryLabel } from '../../core/constants/app.constants';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { toWireDate, toDisplayDate, parseDisplayDate } from '../../core/utils/date.util';
 import { OrgConfigService } from '../../core/services/org-config.service';
@@ -123,32 +125,29 @@ export class Ledger implements OnInit {
     this.loadData();
   }
 
-  handleExport(format: string) {
+  async handleExport(format: string) {
     this.isExporting.set(true);
-    const year = new Date().getFullYear();
     const params: any = {
-      page: 1,
-      pageSize: 10000,
-      year: year,
+      pageSize: EXPORT_PAGE_SIZE,
+      year: new Date().getFullYear(),
       search: this.searchQuery()
     };
     if (this.typeFilter() !== null) params.type = this.typeFilter();
 
-    this.ledgerService.getRecords(params).subscribe({
-      next: (res: any) => {
-        const data = res.items || [];
-        if (format === 'excel') ExportUtil.toExcel(data, 'ghcaa_ledger');
-        if (format === 'csv') ExportUtil.toCsv(data, 'ghcaa_ledger');
-        if (format === 'pdf') {
-          const pData = data.map(this.pdfMapper);
-          ExportUtil.toPdf(this.pdfHeaders, pData, 'ghcaa_ledger', 'Financial Ledger Export');
-        }
-        this.isExporting.set(false);
-      },
-      error: () => {
-        this.isExporting.set(false);
+    try {
+      const data: any[] = await fetchAllPages(page =>
+        firstValueFrom(this.ledgerService.getRecords({ ...params, page })));
+      if (format === 'excel') ExportUtil.toExcel(data, 'ghcaa_ledger');
+      if (format === 'csv') ExportUtil.toCsv(data, 'ghcaa_ledger');
+      if (format === 'pdf') {
+        const pData = data.map(this.pdfMapper);
+        ExportUtil.toPdf(this.pdfHeaders, pData, 'ghcaa_ledger', 'Financial Ledger Export');
       }
-    });
+    } catch {
+      // The export just stops; the list on screen is unchanged.
+    } finally {
+      this.isExporting.set(false);
+    }
   }
 
   getCategoryName(id: any): string {

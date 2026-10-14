@@ -4,6 +4,7 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace GHCAA.Tests.Services;
@@ -24,7 +25,7 @@ public class GalleryServiceTests : TestBase
         _adminNotification = new Mock<IAdminNotificationService>();
         _notification = new Mock<INotificationService>();
         _fileStorage = new Mock<IFileStorageService>();
-        _service = new GalleryService(_context, _adminNotification.Object, _notification.Object, _fileStorage.Object);
+        _service = new GalleryService(_context, _adminNotification.Object, _notification.Object, _fileStorage.Object, NullLogger<GalleryService>.Instance);
     }
 
     private async Task<int> CreateMemberIdAsync(string name = "Album Owner")
@@ -158,6 +159,24 @@ public class GalleryServiceTests : TestBase
 
         var loaded = visible.Single(g => g.Id == gallery.Id);
         loaded.Photos.Should().ContainSingle().Which.PhotoPath.Should().Be("/a.jpg");
+    }
+
+    // Two galleries on the same date must keep one order, or a page boundary can show one twice.
+    [Category("NFR-P1")]
+    [Test]
+    public async Task GalleriesOnTheSameDate_AreOrderedNewestIdFirst()
+    {
+        var date = DateTime.UtcNow.Date;
+        var first = await _service.CreateEventGalleryAsync(new EventGallery { Title = "First", EventDate = date, Status = Enums.SubmissionStatus.Approved, IsActive = true });
+        var second = await _service.CreateEventGalleryAsync(new EventGallery { Title = "Second", EventDate = date, Status = Enums.SubmissionStatus.Approved, IsActive = true });
+
+        var all = await _service.GetAllGalleriesAsync(onlyActive: true);
+        var page1 = await _service.GetActiveGalleriesPageAsync(1, 1);
+        var page2 = await _service.GetActiveGalleriesPageAsync(2, 1);
+
+        all.Where(g => g.EventDate == date).Select(g => g.Id).Should().Equal(second.Id, first.Id);
+        page1.Items.Single().Id.Should().Be(second.Id);
+        page2.Items.Single().Id.Should().Be(first.Id);
     }
 
     [Category("NFR-P1")]
@@ -450,5 +469,42 @@ public class GalleryServiceTests : TestBase
 
         (await _service.RemovePhotoAsync(photo.Id)).Should().BeTrue();
         (await _service.RemovePhotoAsync(photo.Id)).Should().BeFalse();
+    }
+
+    [Test]
+    public async Task RemovePhotoAsync_DeletesTheStoredFile()
+    {
+        var gallery = await _service.CreateEventGalleryAsync(new EventGallery { Title = "Gallery", EventDate = DateTime.UtcNow, IsActive = true });
+        await _service.AddPhotosToGalleryAsync(gallery.Id, new[] { "/uploads/a.jpg" });
+        var photo = await _context.EventPhotos.FirstAsync(p => p.EventGalleryId == gallery.Id);
+
+        await _service.RemovePhotoAsync(photo.Id);
+
+        _fileStorage.Verify(s => s.DeleteFileAsync("/uploads/a.jpg", It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
+    public async Task RemovePhotoAsync_FileThatWillNotDelete_StillRemovesTheRow()
+    {
+        var gallery = await _service.CreateEventGalleryAsync(new EventGallery { Title = "Gallery", EventDate = DateTime.UtcNow, IsActive = true });
+        await _service.AddPhotosToGalleryAsync(gallery.Id, new[] { "/uploads/a.jpg" });
+        var photo = await _context.EventPhotos.FirstAsync(p => p.EventGalleryId == gallery.Id);
+        _fileStorage.Setup(s => s.DeleteFileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ThrowsAsync(new IOException("locked"));
+
+        (await _service.RemovePhotoAsync(photo.Id)).Should().BeTrue();
+
+        (await _context.EventPhotos.AnyAsync(p => p.Id == photo.Id)).Should().BeFalse();
+    }
+
+    [Test]
+    public async Task DeleteGalleryAsync_DeletesEveryPhotoFile()
+    {
+        var gallery = await _service.CreateEventGalleryAsync(new EventGallery { Title = "Gallery", EventDate = DateTime.UtcNow, IsActive = true });
+        await _service.AddPhotosToGalleryAsync(gallery.Id, new[] { "/uploads/a.jpg", "/uploads/b.jpg" });
+
+        (await _service.DeleteGalleryAsync(gallery.Id)).Should().BeTrue();
+
+        _fileStorage.Verify(s => s.DeleteFileAsync("/uploads/a.jpg", It.IsAny<CancellationToken>()), Times.Once);
+        _fileStorage.Verify(s => s.DeleteFileAsync("/uploads/b.jpg", It.IsAny<CancellationToken>()), Times.Once);
     }
 }

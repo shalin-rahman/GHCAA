@@ -64,6 +64,35 @@ namespace GHCAA.Infrastructure.Data
             {
                 await entry.SeedAsync(context, realDataDirectory, logger, ct);
             }
+
+            await BackfillPhotoThumbnailsAsync(context, LoadSeedFile<EventPhoto>("photos.json", realDataDirectory), logger, ct);
+        }
+
+        /// <summary>
+        /// 98.3: EventPhotos is seeded only while empty, so a database seeded before thumbnails existed
+        /// never gets the ThumbnailPath values the profile's photos.json now carries. This copies them
+        /// across by PhotoPath, from whichever profile is active, and never overwrites a value already set.
+        /// </summary>
+        public static async Task BackfillPhotoThumbnailsAsync(
+            ApplicationDbContext context, IReadOnlyList<EventPhoto> seedPhotos, ILogger logger, CancellationToken ct = default)
+        {
+            var thumbsByPhoto = seedPhotos
+                .Where(p => !string.IsNullOrWhiteSpace(p.PhotoPath) && !string.IsNullOrWhiteSpace(p.ThumbnailPath))
+                .GroupBy(p => p.PhotoPath)
+                .ToDictionary(g => g.Key, g => g.First().ThumbnailPath!);
+            if (thumbsByPhoto.Count == 0) return;
+
+            var paths = thumbsByPhoto.Keys.ToList();
+            var missing = await context.EventPhotos
+                .Where(p => (p.ThumbnailPath == null || p.ThumbnailPath == "") && paths.Contains(p.PhotoPath))
+                .ToListAsync(ct);
+            if (missing.Count == 0) return;
+
+            foreach (var photo in missing)
+                photo.ThumbnailPath = thumbsByPhoto[photo.PhotoPath];
+
+            await context.SaveChangesAsync(ct);
+            logger.LogInformation("Institution data seed: filled ThumbnailPath on {Count} existing EventPhotos rows.", missing.Count);
         }
 
         private static List<T> LoadSeedFile<T>(string fileName, string? realDataDirectory)

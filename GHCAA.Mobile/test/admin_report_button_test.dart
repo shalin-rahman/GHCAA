@@ -81,7 +81,16 @@ void main() {
 
   tearDown(() async {
     container.dispose();
-    if (await docsDir.exists()) await docsDir.delete(recursive: true);
+    // Error logs are appended without being awaited, so on Windows the last one can still hold
+    // the log file open here. Give it a moment before the final attempt throws.
+    for (var attempt = 1; await docsDir.exists(); attempt++) {
+      try {
+        await docsDir.delete(recursive: true);
+      } on FileSystemException {
+        if (attempt == 5) rethrow;
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+      }
+    }
   });
 
   Future<void> pumpButton(WidgetTester tester) async {

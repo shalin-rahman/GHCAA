@@ -85,7 +85,7 @@ defined once, here, and used by name everywhere else in the book:
   shape.
 
 `docs/TODO.md` had 98 numbered work packages holding 1,132 tracker tasks between them, tied to 18 WBS
-activities and 351 commits, as of 14 October 2026 (`git rev-list --count HEAD`) — five different
+activities and 353 commits, as of 14 October 2026 (`git rev-list --count HEAD`) — five different
 counts of one project, each answering a different question about it.
 
 Five streams, one of them carrying no commit at all: the back-scheduled P1–P5 research and design

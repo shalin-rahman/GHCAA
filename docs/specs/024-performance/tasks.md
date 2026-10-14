@@ -78,6 +78,8 @@
 - [x] T026 [98.18] Add a short in-session cache on mobile for lookups, events and jobs.
 - [ ] T027 [98.7] Serve pre-compressed static assets.
 - [x] T028 [98.12] Project the admin member list to the fields it shows.
+- [x] T029 [98.25] Read the ledger and registration exports page by page so they hold every row.
+- [x] T030 [98.36] Catch only a unique-key clash in the election approval insert.
 
 ## Every phase
 

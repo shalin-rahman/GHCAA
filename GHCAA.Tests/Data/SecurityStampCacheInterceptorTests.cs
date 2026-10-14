@@ -61,6 +61,21 @@ namespace GHCAA.Tests.Data
             _cache.TryGetValue(Constants.SecurityStamps.CacheKey(user.Id), out _).Should().BeFalse();
         }
 
+        // The row is gone before the save, so the update fails and the stored stamp never changes.
+        [Test]
+        [Category("NFR-S5")]
+        public async Task FailedSave_KeepsTheCachedCopy()
+        {
+            var user = await AddUserAsync();
+            await _context.Database.ExecuteSqlRawAsync("DELETE FROM Users WHERE Id = {0}", user.Id);
+
+            user.RotateSecurityStamp();
+            var act = () => _context.SaveChangesAsync();
+
+            await act.Should().ThrowAsync<DbUpdateConcurrencyException>();
+            _cache.TryGetValue(Constants.SecurityStamps.CacheKey(user.Id), out _).Should().BeTrue();
+        }
+
         [Test]
         [Category("NFR-S5")]
         public void RotatedStamp_SyncSave_DropsTheCachedCopy()
@@ -98,6 +113,67 @@ namespace GHCAA.Tests.Data
             await _context.SaveChangesAsync();
 
             _cache.TryGetValue(Constants.SecurityStamps.CacheKey(second.Id), out _).Should().BeTrue();
+        }
+
+        // The middleware can read the old stamp from the database and cache it again between the
+        // save and the commit. The commit has to drop that copy too.
+        [Test]
+        [Category("NFR-S5")]
+        public async Task RotationInATransaction_StampCachedBeforeCommit_IsDroppedAtCommit()
+        {
+            var user = await AddUserAsync();
+            var oldStamp = user.SecurityStamp;
+            await using var tx = await _context.Database.BeginTransactionAsync();
+
+            user.RotateSecurityStamp();
+            await _context.SaveChangesAsync();
+            _cache.Set(Constants.SecurityStamps.CacheKey(user.Id), oldStamp);
+            await tx.CommitAsync();
+
+            _cache.TryGetValue(Constants.SecurityStamps.CacheKey(user.Id), out _).Should().BeFalse();
+        }
+
+        [Test]
+        [Category("NFR-S5")]
+        public async Task RolledBackRotation_IsNotEvictedByALaterCommit()
+        {
+            var user = await AddUserAsync();
+            await using (var tx = await _context.Database.BeginTransactionAsync())
+            {
+                user.RotateSecurityStamp();
+                await _context.SaveChangesAsync();
+                await tx.RollbackAsync();
+            }
+            _context.ChangeTracker.Clear();
+            var stamp = (await _context.Users.SingleAsync(u => u.Id == user.Id)).SecurityStamp;
+            _cache.Set(Constants.SecurityStamps.CacheKey(user.Id), stamp);
+
+            await using (var next = await _context.Database.BeginTransactionAsync())
+                await next.CommitAsync();
+
+            _cache.TryGetValue(Constants.SecurityStamps.CacheKey(user.Id), out string? cached).Should().BeTrue();
+            cached.Should().Be(stamp);
+        }
+
+        // Disposing a transaction without commit or rollback raises neither event. Its ids must not
+        // wait for the next commit on the context.
+        [Test]
+        [Category("NFR-S5")]
+        public async Task AbandonedTransaction_IsNotEvictedByALaterCommit()
+        {
+            var user = await AddUserAsync();
+            await using (var tx = await _context.Database.BeginTransactionAsync())
+            {
+                user.RotateSecurityStamp();
+                await _context.SaveChangesAsync();
+            }
+            _cache.Set(Constants.SecurityStamps.CacheKey(user.Id), "fresh");
+
+            await using (var next = await _context.Database.BeginTransactionAsync())
+                await next.CommitAsync();
+
+            _cache.TryGetValue(Constants.SecurityStamps.CacheKey(user.Id), out string? cached).Should().BeTrue();
+            cached.Should().Be("fresh");
         }
 
         // A stamp written any other way (a direct assignment, or ExecuteUpdate, which skips the

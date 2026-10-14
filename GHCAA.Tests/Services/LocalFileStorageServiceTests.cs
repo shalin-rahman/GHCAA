@@ -280,6 +280,106 @@ public class LocalFileStorageServiceTests
         act.Should().ThrowAsync<InvalidOperationException>();
     }
 
+    // Left half red, right half blue, with an EXIF tag saying the camera was turned. The tag goes
+    // in an APP1 segment straight after the JPEG start marker.
+    // A grayscale copy keeps the halves apart: red comes out lighter than blue.
+    private static MemoryStream CreateSidewaysJpeg(int width, int height, byte orientation, bool grayscale = false)
+    {
+        using var colour = new SKBitmap(width, height);
+        using (var canvas = new SKCanvas(colour))
+        using (var red = new SKPaint { Color = SKColors.Red })
+        {
+            canvas.Clear(SKColors.Blue);
+            canvas.DrawRect(0, 0, width / 2f, height, red);
+        }
+        using var bitmap = grayscale ? colour.Copy(SKColorType.Gray8) : colour.Copy();
+        using var skImage = SKImage.FromBitmap(bitmap);
+        using var encoded = skImage.Encode(SKEncodedImageFormat.Jpeg, 90);
+        var jpeg = encoded.ToArray();
+        byte[] exif =
+        [
+            0xFF, 0xE1, 0x00, 0x22, 0x45, 0x78, 0x69, 0x66, 0x00, 0x00,
+            0x49, 0x49, 0x2A, 0x00, 0x08, 0x00, 0x00, 0x00,
+            0x01, 0x00,
+            0x12, 0x01, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, orientation, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+        ];
+        return new MemoryStream([.. jpeg[..2], .. exif, .. jpeg[2..]]);
+    }
+
+    // Orientation 6 means turn clockwise to view, so the red left half ends up on top.
+    private static void ShouldBeUprightPortrait(string physicalPath)
+    {
+        using var image = SKBitmap.Decode(physicalPath);
+        image.Height.Should().BeGreaterThan(image.Width);
+        var top = image.GetPixel(image.Width / 2, image.Height / 8);
+        var bottom = image.GetPixel(image.Width / 2, image.Height * 7 / 8);
+        top.Red.Should().BeGreaterThan(top.Blue);
+        bottom.Blue.Should().BeGreaterThan(bottom.Red);
+    }
+
+    [Category("NFR-P4")]
+    [Test]
+    public async Task SaveFileAsync_SidewaysPhoto_CompressedCopyAndThumbnailAreUpright()
+    {
+        var relativePath = await _service.SaveFileAsync(CreateSidewaysJpeg(1600, 1200, 6), "phone.jpg", 1, Enums.FileUploadType.GalleryPhoto);
+
+        ShouldBeUprightPortrait(Path.Combine(_testDirectory, relativePath));
+        ShouldBeUprightPortrait(Path.Combine(_testDirectory, _service.GetThumbnailPath(relativePath)!));
+    }
+
+    // A grayscale JPEG decodes to a color type a canvas cannot draw into.
+    [Category("NFR-P4")]
+    [Test]
+    public async Task SaveFileAsync_SidewaysGrayscalePhoto_ThumbnailIsUpright()
+    {
+        var service = ServiceWithCompressionOff();
+
+        var relativePath = await service.SaveFileAsync(CreateSidewaysJpeg(1600, 1200, 6, grayscale: true), "grey.jpg", 1, Enums.FileUploadType.GalleryPhoto);
+
+        using var image = SKBitmap.Decode(Path.Combine(_testDirectory, service.GetThumbnailPath(relativePath)!));
+        image.Height.Should().BeGreaterThan(image.Width);
+        image.GetPixel(image.Width / 2, image.Height / 8).Red
+            .Should().BeGreaterThan(image.GetPixel(image.Width / 2, image.Height * 7 / 8).Red);
+    }
+
+    // Skia cannot write a GIF, so no thumbnail beats JPEG bytes under a .gif name.
+    [Category("NFR-P4")]
+    [Test]
+    public async Task SaveFileAsync_GalleryPhotoWithAnExtensionSkiaCannotWrite_HasNoThumbnail()
+    {
+        var service = ServiceWithCompressionOff();
+
+        var relativePath = await service.SaveFileAsync(CreateJpeg(600, 600), "odd.gif", 1, Enums.FileUploadType.GalleryPhoto);
+
+        File.Exists(Path.Combine(_testDirectory, relativePath)).Should().BeTrue();
+        service.GetThumbnailPath(relativePath).Should().BeNull();
+    }
+
+    [Category("NFR-P4")]
+    [Test]
+    public async Task SaveFileAsync_SidewaysPhoto_CompressionOff_ThumbnailIsUpright()
+    {
+        var service = ServiceWithCompressionOff();
+
+        var relativePath = await service.SaveFileAsync(CreateSidewaysJpeg(1600, 1200, 6), "phone.jpg", 1, Enums.FileUploadType.GalleryPhoto);
+
+        ShouldBeUprightPortrait(Path.Combine(_testDirectory, service.GetThumbnailPath(relativePath)!));
+    }
+
+    [Category("NFR-S7")]
+    [Test]
+    public async Task DeleteFileAsync_PathThatClimbsOutOfTheUploads_DeletesNothing()
+    {
+        Directory.CreateDirectory(_testDirectory);
+        var outside = Path.Combine(_testDirectory, "outside.txt");
+        await File.WriteAllTextAsync(outside, "keep");
+
+        await _service.DeleteFileAsync("uploads/members/../../outside.txt");
+
+        File.Exists(outside).Should().BeTrue();
+    }
+
     private static MemoryStream CreateJpeg(int width, int height)
     {
         using var bitmap = new SKBitmap(width, height);
@@ -387,6 +487,121 @@ public class LocalFileStorageServiceTests
     public void GetThumbnailPath_ReturnsNull_ForMissingOrOutsideUploads(string path)
     {
         _service.GetThumbnailPath(path).Should().BeNull();
+    }
+
+    private LocalFileStorageService ServiceWithCompressionOff() => new(
+        BuildOptions(new Dictionary<string, string?> {
+            {"FileStorage:BasePhysicalPath", _testDirectory},
+            {"FileStorage:ImageCompression:Enabled", "false"}
+        }),
+        _mockLogger.Object, _mockWebHostEnvironment.Object);
+
+    [Category("NFR-P4")]
+    [Test]
+    public async Task SaveFileAsync_WithCompressionOff_GalleryPhotoStillGetsThumbnail()
+    {
+        var service = ServiceWithCompressionOff();
+
+        var relativePath = await service.SaveFileAsync(CreateJpeg(1600, 1200), "album.jpg", 1, Enums.FileUploadType.GalleryPhoto);
+
+        var thumbPath = service.GetThumbnailPath(relativePath);
+        thumbPath.Should().NotBeNull();
+        using var thumb = SKBitmap.Decode(Path.Combine(_testDirectory, thumbPath!));
+        thumb.Width.Should().Be(Constants.Defaults.GalleryThumbnailMaxPx);
+    }
+
+    [Category("NFR-P4")]
+    [Test]
+    public async Task SaveFileAsync_PngGalleryPhoto_ThumbnailIsPngToo()
+    {
+        var service = ServiceWithCompressionOff();
+        using var bitmap = new SKBitmap(1000, 800);
+        using var image = SKImage.FromBitmap(bitmap);
+        using var png = image.Encode(SKEncodedImageFormat.Png, 100);
+
+        var relativePath = await service.SaveFileAsync(new MemoryStream(png.ToArray()), "album.png", 1, Enums.FileUploadType.GalleryPhoto);
+
+        using var codec = SKCodec.Create(Path.Combine(_testDirectory, service.GetThumbnailPath(relativePath)!));
+        codec.EncodedFormat.Should().Be(SKEncodedImageFormat.Png);
+    }
+
+    [Category("NFR-P4")]
+    [Test]
+    public async Task SaveFileAsync_GalleryPhotoThatIsNotAnImage_SavesWithoutThumbnail()
+    {
+        var service = ServiceWithCompressionOff();
+
+        var relativePath = await service.SaveFileAsync(new MemoryStream(new byte[] { 1, 2, 3 }), "album.jpg", 1, Enums.FileUploadType.GalleryPhoto);
+
+        File.Exists(Path.Combine(_testDirectory, relativePath)).Should().BeTrue();
+        service.GetThumbnailPath(relativePath).Should().BeNull();
+    }
+
+    // 144 MP of black in an 18 KB file. Decoding it would take hundreds of megabytes.
+    [Category("NFR-P4")]
+    [Test]
+    public async Task SaveFileAsync_GalleryPhotoPastThePixelCap_SavesWithoutThumbnail()
+    {
+        var service = ServiceWithCompressionOff();
+
+        var relativePath = await service.SaveFileAsync(CreateBlankPng(12000, 12000), "huge.png", 1, Enums.FileUploadType.GalleryPhoto);
+
+        File.Exists(Path.Combine(_testDirectory, relativePath)).Should().BeTrue();
+        service.GetThumbnailPath(relativePath).Should().BeNull();
+    }
+
+    // A 1-bit grayscale PNG built by hand, since Skia would need the full bitmap in memory to write one.
+    private static MemoryStream CreateBlankPng(int width, int height)
+    {
+        var rows = new byte[((width + 7) / 8 + 1) * height];
+        using var deflated = new MemoryStream();
+        using (var zlib = new System.IO.Compression.ZLibStream(deflated, System.IO.Compression.CompressionLevel.Optimal, leaveOpen: true))
+            zlib.Write(rows);
+
+        var header = new byte[13];
+        System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(header, width);
+        System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(header.AsSpan(4), height);
+        header[8] = 1; // bit depth; color type 0 (grayscale) and the rest stay 0
+
+        var png = new MemoryStream();
+        png.Write(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 });
+        WriteChunk(png, "IHDR", header);
+        WriteChunk(png, "IDAT", deflated.ToArray());
+        WriteChunk(png, "IEND", []);
+        png.Position = 0;
+        return png;
+    }
+
+    private static void WriteChunk(Stream png, string type, byte[] body)
+    {
+        var typeAndBody = System.Text.Encoding.ASCII.GetBytes(type).Concat(body).ToArray();
+        var length = new byte[4];
+        System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(length, body.Length);
+        png.Write(length);
+        png.Write(typeAndBody);
+
+        var crc = 0xFFFFFFFFu;
+        foreach (var b in typeAndBody)
+        {
+            crc ^= b;
+            for (var i = 0; i < 8; i++) crc = (crc & 1) != 0 ? (crc >> 1) ^ 0xEDB88320u : crc >> 1;
+        }
+        var crcBytes = new byte[4];
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(crcBytes, ~crc);
+        png.Write(crcBytes);
+    }
+
+    [Category("NFR-P4")]
+    [Test]
+    public async Task DeleteFileAsync_GalleryPhoto_RemovesItsThumbnail()
+    {
+        var relativePath = await _service.SaveFileAsync(CreateJpeg(1600, 1200), "album.jpg", 1, Enums.FileUploadType.GalleryPhoto);
+        var thumbPath = Path.Combine(_testDirectory, _service.GetThumbnailPath(relativePath)!);
+        File.Exists(thumbPath).Should().BeTrue();
+
+        await _service.DeleteFileAsync(relativePath);
+
+        File.Exists(thumbPath).Should().BeFalse();
     }
 
     [Test]

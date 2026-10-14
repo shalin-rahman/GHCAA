@@ -5,11 +5,6 @@ namespace GHCAA.API.Extensions
 {
     public static class CachingAndCompressionExtensions
     {
-        // The query names the PublicContent actions read. Any other name is left out of the
-        // cache key, so made-up query strings cannot add entries.
-        private static readonly string[] PublicContentQueryKeys =
-            { "page", "pageSize", "jobCategory", "query", "articleCategory", "postType", "group" };
-
         public static IServiceCollection AddAppCachingAndCompression(this IServiceCollection services)
         {
             // Response Compression (Brotli/Gzip)
@@ -34,7 +29,7 @@ namespace GHCAA.API.Extensions
 
                 // Content that admins edit more often (news, events, gallery, jobs, site content): 30s
                 options.AddPolicy(OutputCachePolicies.PublicContent, build =>
-                    build.Expire(TimeSpan.FromSeconds(30)).SetVaryByQuery(PublicContentQueryKeys));
+                    build.Expire(TimeSpan.FromSeconds(30)).SetVaryByQuery(OutputCachePolicies.PublicContentQueryKeys.ToArray()));
             });
 
             return services;

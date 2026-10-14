@@ -31,14 +31,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<PagedResult<JobDto>> GetActiveJobsPageAsync(int page, int pageSize, Enums.JobCategory? category = null, string? query = null, CancellationToken cancellationToken = default)
         {
             var result = await ActiveJobsQuery(category, query).ToPagedResultAsync(page, pageSize, cancellationToken);
-            return new PagedResult<JobDto>
-            {
-                Items = result.Items.Select(MapToDto).ToList(),
-                TotalItems = result.TotalItems,
-                TotalPages = result.TotalPages,
-                Page = result.Page,
-                PageSize = result.PageSize
-            };
+            return result.Map(MapToDto);
         }
 
         private IQueryable<JobOpportunity> ActiveJobsQuery(Enums.JobCategory? category, string? query)

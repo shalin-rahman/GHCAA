@@ -130,7 +130,7 @@ namespace GHCAA.Infrastructure.Services
                     // SKBitmap.Decode(Stream) closes the stream, and the fallback below needs it open.
                     using var buffer = new MemoryStream();
                     await fileStream.CopyToAsync(buffer, cancellationToken);
-                    var image = SKBitmap.Decode(buffer.ToArray())
+                    var image = DecodeUpright(buffer.ToArray())
                         ?? throw new InvalidDataException("The uploaded file is not a readable image.");
 
                     try
@@ -180,14 +180,20 @@ namespace GHCAA.Infrastructure.Services
                 {
                     _logger.LogError(ex, "Failed to compress/save photo. Falling back to direct copy.");
                     if (fileStream.CanSeek) fileStream.Position = 0;
-                    using var fs = new FileStream(diskPath, FileMode.Create, FileAccess.Write, FileShare.None);
-                    await fileStream.CopyToAsync(fs, cancellationToken);
+                    await using (var fs = new FileStream(diskPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                        await fileStream.CopyToAsync(fs, cancellationToken);
+
+                    if (uploadType == Enums.FileUploadType.GalleryPhoto)
+                        await WriteThumbnailFromFileAsync(diskPath, targetDir, uniqueName, cancellationToken);
                 }
             }
             else
             {
-                using var fs = new FileStream(diskPath, FileMode.Create, FileAccess.Write, FileShare.None);
-                await fileStream.CopyToAsync(fs, cancellationToken);
+                await using (var fs = new FileStream(diskPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    await fileStream.CopyToAsync(fs, cancellationToken);
+
+                if (uploadType == Enums.FileUploadType.GalleryPhoto)
+                    await WriteThumbnailFromFileAsync(diskPath, targetDir, uniqueName, cancellationToken);
             }
 
             var webRelative = Path.Combine(relativePrefix, memberId.ToString(), prefix, uniqueName).Replace("\\", "/");
@@ -205,9 +211,38 @@ namespace GHCAA.Infrastructure.Services
                 Directory.CreateDirectory(thumbDir);
 
                 var maxPx = Constants.Defaults.GalleryThumbnailMaxPx;
+                var format = FormatFor(fileName);
+                if (format == null)
+                {
+                    _logger.LogWarning("No thumbnail format matches {File}, so it has no gallery thumbnail", fileName);
+                    return;
+                }
+
                 var copy = image.Copy() ?? throw new InvalidDataException("Could not copy the image for its thumbnail.");
                 using var thumb = FitWithin(copy, maxPx, maxPx);
-                await File.WriteAllBytesAsync(Path.Combine(thumbDir, fileName), EncodeJpeg(thumb, DefaultQuality), cancellationToken);
+                await File.WriteAllBytesAsync(Path.Combine(thumbDir, fileName), Encode(thumb, format.Value, DefaultQuality), cancellationToken);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogWarning(ex, "Could not write gallery thumbnail for {File}", fileName);
+            }
+        }
+
+        // A photo stored as uploaded (compression off, or the compressor fell back) still gets its
+        // grid copy. A file that will not decode as an image just goes without one, and the upload
+        // still succeeds.
+        private async Task WriteThumbnailFromFileAsync(string diskPath, string targetDir, string fileName, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var image = DecodeUpright(await File.ReadAllBytesAsync(diskPath, cancellationToken));
+                if (image == null)
+                {
+                    _logger.LogWarning("Could not read {File} as an image, so it has no gallery thumbnail", fileName);
+                    return;
+                }
+
+                await WriteThumbnailAsync(image, targetDir, fileName, cancellationToken);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
@@ -235,6 +270,50 @@ namespace GHCAA.Infrastructure.Services
         }
 
         // Scales down to fit inside maxW x maxH, keeping the aspect ratio. Disposes the source bitmap.
+        // Phone cameras store the pixels sideways and record the turn in EXIF. SKBitmap.Decode ignores
+        // the tag and a re-encoded copy drops it, so the pixels are turned upright here.
+        private static SKBitmap? DecodeUpright(byte[] bytes)
+        {
+            using var data = SKData.CreateCopy(bytes);
+            using var codec = SKCodec.Create(data);
+            if (codec == null || (long)codec.Info.Width * codec.Info.Height > Constants.Defaults.MaxDecodePixels) return null;
+            var decoded = SKBitmap.Decode(codec);
+            var origin = codec.EncodedOrigin;
+            if (decoded == null || origin == SKEncodedOrigin.TopLeft) return decoded;
+            using var source = decoded;
+
+            float w = decoded.Width, h = decoded.Height;
+            // Each matrix moves a stored pixel to where it belongs on screen.
+            var matrix = origin switch
+            {
+                SKEncodedOrigin.TopRight => new SKMatrix(-1, 0, w, 0, 1, 0, 0, 0, 1),
+                SKEncodedOrigin.BottomRight => new SKMatrix(-1, 0, w, 0, -1, h, 0, 0, 1),
+                SKEncodedOrigin.BottomLeft => new SKMatrix(1, 0, 0, 0, -1, h, 0, 0, 1),
+                SKEncodedOrigin.LeftTop => new SKMatrix(0, 1, 0, 1, 0, 0, 0, 0, 1),
+                SKEncodedOrigin.RightTop => new SKMatrix(0, -1, h, 1, 0, 0, 0, 0, 1),
+                SKEncodedOrigin.RightBottom => new SKMatrix(0, -1, h, -1, 0, w, 0, 0, 1),
+                _ => new SKMatrix(0, 1, 0, -1, 0, w, 0, 0, 1),
+            };
+            var turned = origin is SKEncodedOrigin.LeftTop or SKEncodedOrigin.RightTop or SKEncodedOrigin.RightBottom or SKEncodedOrigin.LeftBottom;
+            // A canvas cannot draw into every decoded color type (grayscale JPEGs among them), so the
+            // upright copy uses the platform's own.
+            var info = new SKImageInfo(turned ? decoded.Height : decoded.Width, turned ? decoded.Width : decoded.Height,
+                SKImageInfo.PlatformColorType, decoded.AlphaType == SKAlphaType.Unknown ? SKAlphaType.Premul : decoded.AlphaType);
+            var upright = new SKBitmap(info);
+            try
+            {
+                using var canvas = new SKCanvas(upright);
+                canvas.SetMatrix(matrix);
+                canvas.DrawBitmap(decoded, 0, 0);
+            }
+            catch
+            {
+                upright.Dispose();
+                throw;
+            }
+            return upright;
+        }
+
         private static SKBitmap FitWithin(SKBitmap source, int maxW, int maxH)
         {
             var scale = Math.Min((double)maxW / source.Width, (double)maxH / source.Height);
@@ -244,6 +323,25 @@ namespace GHCAA.Infrastructure.Services
             if (resized == null) return source;
             source.Dispose();
             return resized;
+        }
+
+        // The thumbnail keeps the photo's file name, so it is encoded to match that extension. Skia
+        // cannot write GIF, BMP or HEIC, so those get no thumbnail rather than JPEG bytes under the
+        // wrong name. Uploads only allow the four below today.
+        private static SKEncodedImageFormat? FormatFor(string fileName) =>
+            Path.GetExtension(fileName).ToLowerInvariant() switch
+            {
+                ".jpg" or ".jpeg" => SKEncodedImageFormat.Jpeg,
+                ".png" => SKEncodedImageFormat.Png,
+                ".webp" => SKEncodedImageFormat.Webp,
+                _ => null,
+            };
+
+        private static byte[] Encode(SKBitmap image, SKEncodedImageFormat format, int quality)
+        {
+            using var skImage = SKImage.FromBitmap(image);
+            using var data = skImage.Encode(format, quality);
+            return data.ToArray();
         }
 
         private static byte[] EncodeJpeg(SKBitmap image, int quality)
@@ -258,21 +356,34 @@ namespace GHCAA.Infrastructure.Services
             var basePath = _options.BasePhysicalPath;
 
             // Try public first
-            var publicPath = Path.Combine(basePath ?? "wwwroot", relativePath.TrimStart('/', '\\'));
-            if (File.Exists(publicPath))
+            var publicPath = Path.GetFullPath(Path.Combine(basePath ?? "wwwroot", relativePath.TrimStart('/', '\\')));
+            if (IsInside(publicPath, _publicRoot) && File.Exists(publicPath))
             {
                 File.Delete(publicPath);
+
+                // A gallery photo's thumbnail sits beside it under thumbs/ with the same name.
+                var thumbPath = Path.Combine(Path.GetDirectoryName(publicPath)!, Constants.Defaults.ThumbnailFolder, Path.GetFileName(publicPath));
+                if (File.Exists(thumbPath)) File.Delete(thumbPath);
                 return Task.CompletedTask;
             }
 
             // Try secure
-            var securePath = Path.Combine(basePath ?? AppDomain.CurrentDomain.BaseDirectory, relativePath.TrimStart('/', '\\'));
-            if (File.Exists(securePath))
+            var securePath = Path.GetFullPath(Path.Combine(basePath ?? AppDomain.CurrentDomain.BaseDirectory, relativePath.TrimStart('/', '\\')));
+            if (IsInside(securePath, _secureRoot) && File.Exists(securePath))
             {
                 File.Delete(securePath);
             }
 
             return Task.CompletedTask;
+        }
+
+        // The path comes from a database row. A "..", or a seeded asset path outside the uploads
+        // folders, must not reach File.Delete.
+        private static bool IsInside(string fullPath, string root)
+        {
+            var rootFull = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)) + Path.DirectorySeparatorChar;
+            var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+            return fullPath.StartsWith(rootFull, comparison);
         }
     }
 }

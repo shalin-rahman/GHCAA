@@ -8,6 +8,10 @@ export const SEARCH_DEBOUNCE_MS = 300;
 // 98.17: page size for the events, jobs and gallery lists. The API caps any request at 100.
 export const LIST_PAGE_SIZE = 20;
 
+// 98.25: the ledger and event registration lists cap a page at 200 on the server, so an
+// export reads them 200 rows at a time.
+export const EXPORT_PAGE_SIZE = 200;
+
 // 98.1: Quill is loaded by the rich-text editor when it first opens, not by index.html.
 // The CSP whitelists cdnjs for these. Change a URL and its SRI hash together.
 export const QUILL_ASSETS = {

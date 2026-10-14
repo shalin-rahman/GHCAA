@@ -45,6 +45,12 @@ namespace GHCAA.Domain
         {
             public const string PublicReference = "PublicReference";
             public const string PublicContent = "PublicContent";
+
+            // The query names the PublicContent actions read. Any other name is left out of the
+            // cache key, so made-up query strings cannot add entries. OutputCacheVaryKeyTests fails
+            // when an action reads a name missing here.
+            public static readonly IReadOnlyList<string> PublicContentQueryKeys =
+                ["page", "pageSize", "jobCategory", "query", "articleCategory", "postType", "group"];
         }
 
         public static class ConfigKeys
@@ -98,6 +104,9 @@ namespace GHCAA.Domain
             public const int ImageMaxDimensionPx = 1920; // longest side; display images never need more
             public const int GalleryThumbnailMaxPx = 480; // grid tiles are at most ~400px wide
             public const string ThumbnailFolder = "thumbs"; // sits beside the full photo, same file name
+            // A small file can claim huge dimensions and take gigabytes to decode. 100 MP is past any
+            // normal camera; a bigger image is stored as uploaded, without compression or thumbnail.
+            public const long MaxDecodePixels = 100_000_000;
 
             // ImportEmailBase/MembershipPrefix moved to the org-config pack (ContactDto.ImportEmailBase,
             // BrandingDto.MembershipNumberPrefix) — see MemberImportService for the new consumer.
@@ -319,9 +328,6 @@ namespace GHCAA.Domain
         public static class Retention
         {
             public const int SweepHours = 24;
-            // Render restarts the service more often than once a day, so waiting a full interval
-            // before the first pass could mean it never runs.
-            public const int FirstSweepDelayMinutes = 5;
             // Rows per DELETE. The first pass on an old database can have a large backlog, and one
             // statement for all of it holds locks and can hit the command timeout.
             public const int DeleteBatchSize = 5000;

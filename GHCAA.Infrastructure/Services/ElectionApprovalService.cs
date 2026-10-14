@@ -501,7 +501,7 @@ public sealed class ElectionApprovalService(
             await db.SaveChangesAsync(ct);
             return true;
         }
-        catch (DbUpdateException) when (approval.OpenKey != null)
+        catch (DbUpdateException ex) when (approval.OpenKey != null && IsUniqueViolation(ex))
         {
             db.Entry(approval).State = EntityState.Detached;
             if (await db.ElectionApprovals.AnyAsync(x => x.OpenKey == approval.OpenKey, ct))

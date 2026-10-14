@@ -3,6 +3,7 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace GHCAA.Infrastructure.Services
 {
@@ -12,9 +13,11 @@ namespace GHCAA.Infrastructure.Services
         private readonly IAdminNotificationService _adminNotification;
         private readonly INotificationService _notification;
         private readonly IFileStorageService _fileStorage;
+        private readonly ILogger<GalleryService> _logger;
 
-        public GalleryService(ApplicationDbContext db, IAdminNotificationService adminNotification, INotificationService notification, IFileStorageService fileStorage)
+        public GalleryService(ApplicationDbContext db, IAdminNotificationService adminNotification, INotificationService notification, IFileStorageService fileStorage, ILogger<GalleryService> logger)
         {
+            _logger = logger;
             _db = db;
             _adminNotification = adminNotification;
             _notification = notification;
@@ -52,47 +55,31 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<IEnumerable<EventGallery>> GetAllGalleriesAsync(bool onlyActive = false, CancellationToken cancellationToken = default)
         {
-            var query = _db.EventGalleries
-                .Include(g => g.Photos)
-                .AsQueryable();
+            // Public listings only ever show admin-approved galleries and photos. The photo filter
+            // runs in SQL so pending and rejected photos are never loaded. No tracking, or photos the
+            // context already holds would be fixed up into the list past the filter.
+            var query = onlyActive
+                ? _db.EventGalleries
+                    .AsNoTracking()
+                    .Include(g => g.Photos.Where(p => p.Status == Enums.SubmissionStatus.Approved))
+                    .Where(g => g.IsActive && g.Status == Enums.SubmissionStatus.Approved)
+                : _db.EventGalleries.Include(g => g.Photos);
 
-            if (onlyActive)
-            {
-                // Public listings only ever show admin-approved galleries.
-                query = query.Where(g => g.IsActive && g.Status == Enums.SubmissionStatus.Approved);
-            }
-
-            var galleries = await query
+            return await query
                 .OrderByDescending(g => g.EventDate)
+                .ThenByDescending(g => g.Id)
                 .ToListAsync(cancellationToken);
-
-            if (onlyActive)
-            {
-                KeepApprovedPhotos(galleries);
-            }
-
-            return galleries;
         }
 
         public async Task<PagedResult<EventGallery>> GetActiveGalleriesPageAsync(int page, int pageSize, CancellationToken cancellationToken = default)
         {
-            var result = await _db.EventGalleries
-                .Include(g => g.Photos)
+            return await _db.EventGalleries
+                .AsNoTracking()
+                .Include(g => g.Photos.Where(p => p.Status == Enums.SubmissionStatus.Approved))
                 .Where(g => g.IsActive && g.Status == Enums.SubmissionStatus.Approved)
                 .OrderByDescending(g => g.EventDate)
                 .ThenByDescending(g => g.Id)
                 .ToPagedResultAsync(page, pageSize, cancellationToken);
-
-            KeepApprovedPhotos(result.Items);
-            return result;
-        }
-
-        private static void KeepApprovedPhotos(IEnumerable<EventGallery> galleries)
-        {
-            foreach (var gallery in galleries)
-            {
-                gallery.Photos = gallery.Photos.Where(p => p.Status == Enums.SubmissionStatus.Approved).ToList();
-            }
         }
 
         public async Task<EventGallery?> GetGalleryByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -122,8 +109,14 @@ namespace GHCAA.Infrastructure.Services
             var gallery = await _db.EventGalleries.FindAsync(new object[] { id }, cancellationToken);
             if (gallery == null) return false;
 
+            // The photo rows go with the gallery, so their paths are read first.
+            var paths = await _db.EventPhotos
+                .Where(p => p.EventGalleryId == id)
+                .Select(p => p.PhotoPath)
+                .ToListAsync(cancellationToken);
             _db.EventGalleries.Remove(gallery);
             await _db.SaveChangesAsync(cancellationToken);
+            foreach (var path in paths) await DeletePhotoFileAsync(path);
             return true;
         }
 
@@ -134,7 +127,20 @@ namespace GHCAA.Infrastructure.Services
 
             _db.EventPhotos.Remove(photo);
             await _db.SaveChangesAsync(cancellationToken);
+            await DeletePhotoFileAsync(photo.PhotoPath);
             return true;
+        }
+
+        // The row is already gone, so a file that will not delete is logged and left behind.
+        // It ignores the caller's token, so a client abort cannot stop the cleanup halfway. Storage
+        // itself refuses seeded asset paths, since those are not under the uploads folder.
+        private async Task DeletePhotoFileAsync(string path)
+        {
+            try { await _fileStorage.DeleteFileAsync(path, CancellationToken.None); }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogWarning(ex, "Could not delete gallery photo file {Path}", path);
+            }
         }
 
         public async Task<EventGallery> CreateMemberAlbumAsync(int memberId, string title, string? description, CancellationToken cancellationToken = default)

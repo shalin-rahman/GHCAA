@@ -32,5 +32,17 @@ namespace GHCAA.Infrastructure.Services
                 PageSize = pageSize
             };
         }
+
+        // For a mapping EF cannot translate to SQL. Every paging field is carried over, so a field
+        // added to PagedResult later only needs adding here.
+        public static PagedResult<TOut> Map<T, TOut>(this PagedResult<T> source, Func<T, TOut> map) => new()
+        {
+            Items = source.Items.Select(map).ToList(),
+            TotalItems = source.TotalItems,
+            TotalPages = source.TotalPages,
+            Page = source.Page,
+            PageSize = source.PageSize,
+            NextCursor = source.NextCursor
+        };
     }
 }
