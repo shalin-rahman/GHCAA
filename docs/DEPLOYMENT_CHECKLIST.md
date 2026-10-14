@@ -49,8 +49,12 @@ variable registry.
 | `ORG_PROFILE` | `ghc` | Type it. It names a folder under `profiles/` | Wrong branding and seed profile |
 | `DATABASE_URL` | Postgres URL | Neon console (console.neon.tech), open the project, **Connect**, pick the database, copy the pooled connection string | No database |
 | `Jwt__Key` | 32 or more random characters | Make one in PowerShell: `[Convert]::ToBase64String((1..48 \| % {Get-Random -Max 256}))`. Keep it only on Render; changing it signs everyone out | App will not start (exit 139) |
-| `GmailSettings__Email` | the sending Gmail address | The Google account the association sends mail from | Email sending throws |
-| `GmailSettings__AppPassword` | 16-character app password | Sign in to that Google account, turn on 2-Step Verification, then myaccount.google.com/apppasswords, create one, copy it without spaces | Email sending throws |
+| `EmailSettings__Provider` | `Brevo` on Render, else leave unset (`Gmail`) | Type it. Render's free tier blocks outbound SMTP, so Gmail cannot send from there | Gmail is used, and on Render every email fails; any other value stops the app at startup |
+| `BrevoSettings__ApiKey` | Brevo API key, when the provider is `Brevo` | brevo.com, sign up, then **SMTP & API**, **API keys**, create one | Email sending throws |
+| `BrevoSettings__SenderEmail` | the sending address, when the provider is `Brevo` | Brevo, **Senders, domains & dedicated IPs**, add the address and click the link Brevo emails to it | Email sending throws; Brevo refuses an unverified sender |
+| `BrevoSettings__SenderName` | optional display name | Type it | Mail shows the bare address |
+| `GmailSettings__Email` | the sending Gmail address, when the provider is `Gmail` | The Google account the association sends mail from | Email sending throws |
+| `GmailSettings__AppPassword` | 16-character app password, when the provider is `Gmail` | Sign in to that Google account, turn on 2-Step Verification, then myaccount.google.com/apppasswords, create one, copy it without spaces | Email sending throws |
 | `AppSettings__AllowedOrigins__0` | `<origin>` | Render shows the service URL at the top of the service page. For production use the custom domain | App will not start |
 | `AppSettings__ClientUrl` | `<origin>`, same as above | Same as above | App will not start; payment returns and the `www` redirect go to the wrong host |
 | `DOTNET_hostBuilder__reloadConfigOnChange` | `false` | Type it | File watchers on a read-only container |

@@ -26,7 +26,7 @@ Built, not a ground-up implementation task. `Campaign`/`CampaignPledge` domain m
 `ICampaignService`/`CampaignService`, a 12-route `CampaignsController`, admin, public,
 and member giving-history Angular pages are all committed (`f960d216`) and covered by
 `CampaignServiceTests.cs`. The tables are already in the `InitialBaseline` migration —
-no new EF migration is needed. What remains — tracked as `docs/TODO.md` item 37.3 — is
+no new EF migration is needed. What remains — tracked as `docs/TODO.md` item 37.3a — is
 Flutter mobile coverage only. The requirements below describe what was built and remain
 the acceptance bar for the missing piece; they are not a request to rebuild the backend
 or web UI.
@@ -151,6 +151,7 @@ The platform shall support moderated oral-history collections and items with tra
 
 - Confirmed 2026-09-23: the existing fundraising services, controller routes, and admin/public Angular surfaces are consistent with the 37.3 contract.
 - Tracker item number reconciled to the implementation: this section and `docs/TODO.md` now both read 37.3. The stale `// TODO 37.8` code comment that appeared in five files (`Campaign.cs`, `CampaignsController.cs`, `ICampaignService.cs`, `CampaignService.cs`, `CampaignDtos.cs`) has been removed — the feature they describe is built, so the comment was not a TODO any more, and the remaining rollout work is tracked in `docs/TODO.md` 37.3 instead.
+- Renumbered 2026-10-14: the mobile rollout was the second tracker item numbered 37.3. It is now 37.3a in `docs/TODO_ARCHIVE.md`. The first 37.3, the build itself, keeps its number because the code comments name it.
 - Backend service and controller tests for campaign create, pledge, and receipt-confirmation idempotency already exist in `CampaignServiceTests.cs` — do not duplicate.
 - Remaining before this phase can close: the Flutter mobile counterpart to the already-built public browse/pledge and member giving-history flows. No new migration is needed — `Campaign`/`CampaignPledge` are already in `InitialBaseline`.
 

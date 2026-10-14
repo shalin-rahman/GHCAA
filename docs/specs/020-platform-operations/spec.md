@@ -246,8 +246,10 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
 - FR-015: The system shall check that the directory named by `FileStorage:BasePhysicalPath` (or
   `wwwroot` if unset) exists as part of `GET healthz`, marking the response `503` if it does not.
   [code]
-- FR-016: The system shall check that both `GmailSettings:Email` and `GmailSettings:AppPassword`
-  are non-empty as part of `GET healthz`, marking the response `503` if either is missing. [code]
+- FR-016: The system shall check the settings of the email provider that `EmailSettings:Provider`
+  picks as part of `GET healthz`, marking the response `503` if either is missing: with `Brevo`,
+  `BrevoSettings:ApiKey` and `BrevoSettings:SenderEmail`; otherwise `GmailSettings:Email` and
+  `GmailSettings:AppPassword`. [code]
 - FR-017: The system shall check that `SmsSettings:Token` is non-empty as part of `GET healthz`, but
   shall not fail the overall health status when it is empty, since SMS is optional in the current
   phase. [code]

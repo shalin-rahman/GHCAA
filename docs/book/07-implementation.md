@@ -399,7 +399,7 @@ one.
 
 ## 7.12 Software Configuration Management
 
-The repository carries 353 commits on `HEAD` and eight local branches: `dev`, `preprod`,
+The repository carries 356 commits on `HEAD` and eight local branches: `dev`, `preprod`,
 `release-1`, `release-2`, `release-3_b4_generic_N_refactor`, `release-4_white_paper`,
 `prepod-election-refactoring` and `backup/2026-10-01-column-repair`, plus `dev-mobile` and
 `mobile_app` that exist only on the remote, as of 14 October 2026. `dev` is named as the integration

@@ -30,8 +30,12 @@
 | `PORT` | [`Program.cs`](../GHCAA.API/Program.cs) | *(set by Render automatically)* | *(set by Render automatically)* |
 | `Jwt__Key` | [`JwtSigningKeyResolver.cs`](../GHCAA.Application/Security/JwtSigningKeyResolver.cs) | *(blank = ephemeral dev key)* | **Required, ≥32 chars** |
 | `OtpSettings__HashKey` | [`OtpService.cs`](../GHCAA.Infrastructure/Services/OtpService.cs) | *(blank = falls back to Jwt:Key)* | *(blank = falls back to Jwt:Key)* |
-| `GmailSettings__Email` | [`GmailEmailService.cs`](../GHCAA.Infrastructure/Services/GmailEmailService.cs) | `dev-placeholder@localhost` | **Required** (throws on null) |
-| `GmailSettings__AppPassword` | `GmailEmailService.cs` | `dev-not-used` | **Required** (throws on null) |
+| `EmailSettings__Provider` | [`DependencyInjection.cs`](../GHCAA.Infrastructure/DependencyInjection.cs) | *(blank = `Gmail`)* | `Brevo` (Render's free tier blocks SMTP); an unknown value stops startup |
+| `BrevoSettings__ApiKey` | [`BrevoEmailService.cs`](../GHCAA.Infrastructure/Services/BrevoEmailService.cs) | *(not needed with Gmail)* | **Required with Brevo** (throws on null) |
+| `BrevoSettings__SenderEmail` | `BrevoEmailService.cs` | *(not needed with Gmail)* | **Required with Brevo**; must be a sender verified in Brevo |
+| `BrevoSettings__SenderName` | `BrevoEmailService.cs` | *(optional)* | *(optional)* |
+| `GmailSettings__Email` | [`GmailEmailService.cs`](../GHCAA.Infrastructure/Services/GmailEmailService.cs) | `dev-placeholder@localhost` | Required with Gmail (throws on null) |
+| `GmailSettings__AppPassword` | `GmailEmailService.cs` | `dev-not-used` | Required with Gmail (throws on null) |
 | `SmsSettings__Token` | [`GreenwebSmsService.cs`](../GHCAA.Infrastructure/Services/GreenwebSmsService.cs) | *(blank = SMS silently disabled)* | Fill to enable SMS |
 | `PaymentGateways__Bkash__SandboxPassword` | [`BkashGateway.cs`](../GHCAA.Infrastructure/Gateways/BkashGateway.cs) | *(default `sandbox_pass`)* | `sandbox_pass` |
 | `PaymentGateways__Bkash__ProductionPassword` | `BkashGateway.cs` | *(not needed in dev)* | Fill for prod Bkash |

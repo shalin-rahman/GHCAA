@@ -528,7 +528,8 @@ S1 to S6 covered twelve items, the ones in the Order table above. Most of what i
 WP37 was raised after that table was written: by the S5 code review (2026-10-10), the handbook
 review and the owner's rules of 2026-10-11, and the S6 review (2026-10-12). Three items were
 parked for the owner, and the non-election areas were never part of spec 023. This section plans
-all of it. The rules for every session above still apply (anchors only, build order, hand-written
+all of it. A second round of decisions the same day added the open election items outside WP37
+(WP34, WP42, WP82, WP84, WP95) and the removal of GHC from the whole app (WP62). The rules for every session above still apply (anchors only, build order, hand-written
 migration with its Designer file, constants, shared components, test tags, `verify-election.py`,
 `code-reviewer`, `graphify update .`, never commit).
 
@@ -560,46 +561,89 @@ These go into 37.14g and are fixed in F1. 37.12x did not fail when its spec ran 
 | 37.1p, conflicts | The official declares conflicts when accepting the appointment and can add more later. The Chief Commissioner can also add one. Each is logged. |
 | 37.12x | One full web run in F1. If it passes, close as not reproducible. If it fails, fix the test-order leak. |
 | 37.12y | Voters are told through the existing notification service on the channels they allow, and the board shows the new closing time. Email does not leave preprod (Render blocks SMTP); check `EmailLogs` there. |
-| Schema | One migration for every new election column and table. |
+| Schema | One migration for every new election-rule column and table (F2). The second round adds two more: positions and terms (N1) and election content (F11). Migrations land one at a time, in the order under Sessions. |
 | 37.12n | The F7 mapping comes first. The owner approves it before any form code. ER-02 and ER-28 are filled in F2 because the recount rules need them. |
 | 37.4, 37.5, 37.9, 37.10 | Mobile gets the member views only. Admin moderation and curation stay on the web. |
 | 37.7 | The same keys on web and mobile. Bengali strings are drafted in the session and listed as unreviewed until a Bengali speaker signs them off. Admin stays English on both clients. |
 | 37.5, frozen roll | Marking a member deceased never changes a frozen roll. The officials dashboard warns and names the entry; the Chief Commissioner removes it through unfreeze and refreeze, which is logged. |
 
+Second round, the open election items outside WP37 and the GHC cleanup:
+
+| Item | Decision |
+|---|---|
+| 95.2, 37.1h-1 | Committee positions are rows in a `CommitteePosition` table per organisation, not an enum. Each organisation sets its own number and names of positions. The GHC profile seeds today's 15 under the same ids, so existing rows map one to one; the default profile seeds a short generic set. `ECMember.Position` and `ElectionSeat.Position` become foreign keys. 37.1h-1 closes through 95.2. |
+| 95.4, 95.5, 95.12 | Declare never ends a current holder. A by-election takes vacant seats only and refuses a held one. A term ends in two ways: by date, when a daily job ends it with reason TermEnded once the period's `ECPeriod.EndDate` has passed, or early, when an admin ends it with a reason at any time. Whether the job runs, and the default term length used for a new period's end date, are organisation settings. The end reasons are rows per organisation like the positions; TermEnded and Died are system rows the code relies on and cannot be removed. One general election and one by-election can be live in the same period. |
+| 84.42, 84.16 | Mobile keeps its create-election call. 84.42 finishes with the device check. 84.16 closes by recording in spec 011 that the web runs every admin step and mobile creates a draft, votes and views. An official's own steps (accept, declare a conflict, confirm a key copy) are on both clients; every step that changes the election's state is web only. |
+| 42.1 to 42.5 | Built as F11: the handbook pages and the form wording become admin-editable content, seeded from the profile, and the public pages read from it. The GHC wording moves into `profiles/ghc/` in F11, so 82.59 in N9 only checks nothing is left. |
+| 82.59, GHC | No GHC literal anywhere outside `profiles/ghc/`. The code name `GHCAA` in projects, namespaces and the solution stays; brand-lint stops counting it. |
+| 62.31 | Done now, with no git-history rewrite. The real alumni files leave the repo for an operator path read through `AppSettings:RealDataPath`. `profiles/ghc/demo-data/` keeps synthetic records only. The session lists the exact files and waits for the owner's yes before it changes any JSON. |
+| 84.36 | Every `ElectionValidators` rule is checked in F1. The rest of the app follows in N10. |
+| 84.31 | `010-election-engine-fixes` moves to the next free spec number, and every reference follows. |
+| 34.D18 | The preprod boot fix must be confirmed on a deploy before F2 adds a migration on the same chain. |
+
+### Review rule
+
+Every review in these sessions sorts each finding into one of three kinds.
+
+1. A defect in the work of that session. Fixed in the same session. No tracker item.
+2. A new rule or a decision only the owner can make. A tracker item, and a question to the owner.
+3. A nice-to-have. A line in the undecided list (`project_undecided_items_2026_10_06`), not an
+   open item.
+
+Only kind 2 adds work. The review report names the kind next to each finding.
+
 ### What makes it faster
 
-1. One election migration (F2), so the PostgreSQL dry run of the chain and the migration review
-   happen once.
+1. One migration for the election rules (F2), so the PostgreSQL dry run of the chain and the
+   migration review happen once. N1 (positions and terms) and F11 (election content) add one each.
 2. Backend first for every new rule (F2 to F4), then web and mobile as two sessions in separate
    worktrees at the same time (F5, F6). The clients do not touch the same files.
 3. Small fixes with no schema change go first in one session (F1).
 4. Doc work (F7) and the reference server run (F8) wait on no code and fill gaps.
-5. The non-election areas (N1 to N7) are specified to the field in `docs/TODO.md`. Each is one
-   session with no design step, except 37.7, which is split by client.
+5. The non-election areas (N2 to N7) are specified to the field in `docs/TODO.md`. Each is one
+   session with no design step, except 37.7, which is split by client. N0, N1 and N9 to N11 are
+   specified in this section.
 
 ### Sessions
 
 | Session | Items | Model | Migration | Size | Depends on |
 |---|---|---|---|---|---|
-| F1 | 37.12x, 37.14b, 37.12s pinning test, 37.1m font, 37.14g S1-S6 shortfalls | Sonnet | none | M | none |
-| F2 | Schema for every new rule, 37.12r, 37.12o, 37.1p recount and conflicts, 37.14d, ER-02 and ER-28 | Opus for the schema, Sonnet for services | `AddElectionRulesAndRecount` | M | F1 |
+| N0 | 62.31 real alumni files out of the repo | Sonnet | none | S | owner's yes on the file list |
+| F1 | 37.12x, 37.14b, 37.12s pinning test, 37.1m font, 37.14g S1-S6 shortfalls, 84.36 election rules, 84.42 election call | Sonnet | none | M | none |
+| F2 | Schema for every new rule, 37.12r, 37.12o, 37.1p recount and conflicts, 37.14d, ER-02 and ER-28 | Opus for the schema, Sonnet for services | `AddElectionRulesAndRecount` | M | F1, 34.D17 to 34.D19 confirmed |
 | F3 | 37.14a, 37.1p unopposed seats and paper counts, 37.12z, 37.12y, 37.14f | Sonnet | none | M | F2 |
 | F4 | 37.12w readiness gate | Sonnet | none | S | F3 |
 | F5 | Web screens for F2 to F4 | Sonnet | none | M | F4, runs with F6 |
 | F6 | Mobile screens for F2 to F4 | Sonnet | none | M | F4, runs with F5 |
-| F7 | 37.13e protocol, 37.13f hosting facts, 37.12t and 37.12n inventory for approval | Sonnet | none | M | none |
+| F7 | 37.13e protocol, 37.13f hosting facts, 37.12t and 37.12n inventory for approval, 84.31, 84.16 | Sonnet | none | M | none |
 | F8 | 37.12v reference server on PostgreSQL in Docker | Sonnet | none | S | Docker on |
-| F9 | Election close-out: tracker, outline figures, `wbs.py`, full verify, memory | Sonnet | none | S | F1 to F8 |
-| N1 | 37.1h-1 seat list from org config | Sonnet | none or one seed | M | F9 |
+| N1 | 95.2 committee positions (closes 37.1h-1), schema for 95.4, 95.5 and 95.12 | Opus for the schema, Sonnet for services | `AddCommitteePositionsAndTerms` | L | F4 |
+| F10 | 95.4 vacant seats, 95.5 by-election, 95.12 term ending | Sonnet | none | M | N1 |
+| F11 | 42.1 to 42.5 admin-editable election content | Sonnet | `AddElectionContent` | M | F7 table approved, N1 merged |
+| F9 | Election close-out: tracker, outline figures, `wbs.py`, full verify, memory | Sonnet | none | S | F1 to F8, F10, F11 |
 | N2 | 37.7 web: service, pipe, dictionaries, toggle, self-hosted font | Sonnet | none | L | none |
 | N3 | 37.7 mobile: Bengali in `app_localizations.dart` on the N2 keys | Sonnet | none | M | N2 |
 | N4 | 37.5 In Memoriam | Sonnet | `AddMemorialRegister` | M | F9 (roll warning) |
 | N5 | 37.4 cohorts and reunions | Sonnet | `AddBatchCohortsAndReunions` | M | none |
 | N6 | 37.10 impact report | Sonnet | none | M | N5 |
 | N7 | 37.9 chapters | Sonnet | `AddChapters` | M | none |
-| N8 | 37.11 gate: full suites, non-empty database run of every N migration, docs list | Sonnet | none | S | N1 to N7 |
+| N9 | GHC out of the whole app: 82.59, 62.2, 62.6b | Sonnet | none | M | N1, F11 |
+| N11 | 62.41 generic run on an empty database, then 62.42 blocking brand-lint | Sonnet | none | M | N9 |
+| N10 | 84.36 for the rest of the app | Sonnet | none | S | F1 |
+| N8 | 37.11 gate: full suites, non-empty database run of every N migration, docs list | Sonnet | none | S | N0 to N7, N9 to N11 |
 
-N2, N5 and N7 do not depend on the election track and can start any time a session is free.
+N1 moved forward because F10 needs its positions, end reasons and election kind. N2, N5, N7 and
+N10 do not depend on the election track and can start any time a session is free.
+
+Migrations land in this order: F2, N1, F11, then N4, N5 and N7 in whichever order they run. A
+session that adds a migration starts only after the previous one is merged, takes the next
+timestamp, and builds from that model snapshot. Two migration sessions never run at the same
+time, even in separate worktrees, because both would rewrite `ApplicationDbContextModelSnapshot`.
+
+N1 waits for F4 because `ElectionService.cs` still uses the `ECPosition` enum and F3 and F4 edit
+the same file. N0 changes no code, so it goes first: 62.31 is P0 and should not wait behind N1
+and F11. F2 waits for 34.D17, 34.D18 and 34.D19, the three startup repairs on the same
+migration chain, to be confirmed on preprod.
 
 ### F1. Small fixes
 
@@ -616,6 +660,12 @@ N2, N5 and N7 do not depend on the election track and can start any time a sessi
   `pw.ThemeData.withFont` in `ballot_receipt.dart`. Check the goldens do not shift.
 - 37.14g: the two opened-ballot tests, `getAudit` and `verifyAudit` in mobile
   `election_service.dart` with tests, ER-19 body filled from records.
+- 84.36, election part: for each rule in `GHCAA.Application/Validators/ElectionValidators.cs`,
+  find where the service or a DataAnnotation enforces it. A rule enforced nowhere moves into the
+  service with a test. Leave the file for N10 to remove.
+- 84.42, election call: create election on mobile (`election_service.dart:697`) goes through the
+  step-up prompt, with a test on the 403 path. It needs nothing from F2 to F4, so it does not
+  wait for F6. The device check stays with a person.
 
 ### F2. Schema and the recount rules
 
@@ -671,6 +721,7 @@ Before the session ends: PostgreSQL dry run of the whole migration chain on a no
 - 37.14f: the dashboard lists elections more than ten years past declare. Purge by request plus a
   second approver (SuperAdmin when no Commission sits). The summary result and the purge record
   stay.
+- `security-reviewer` on the two-person steps, the extension and the purge.
 
 ### F4. Readiness gate (37.12w)
 
@@ -691,11 +742,16 @@ refuse with the unmet list. The `TooFewApprovers` warning joins the same list.
 
 ### F5 and F6. Clients
 
-Both at once in separate worktrees. Screens: readiness list and attestation buttons, recount
-request and decision, conflict declaration at acceptance, key holders and confirm, paper counts,
-extend polling, reopen nominations, ten-year list and purge request, `ConsentAt` on nomination,
-the all-uncontested declare. Mobile uses its own card and list layout. Each new spec or test file
-goes into `WEB_SPECS` or `MOBILE_TESTS` in `scripts/verify-election.py`.
+Both at once in separate worktrees. Split by the 84.16 decision.
+
+- Web (F5): readiness list and attestation buttons, recount decision, key holders, paper counts,
+  extend polling, reopen nominations, ten-year list and purge request, the all-uncontested
+  declare, and every member and official screen below.
+- Mobile (F6): recount request by a candidate, `ConsentAt` on nomination, the readiness and
+  phase shown read-only, and the official's own steps: conflict declaration at acceptance and
+  confirming a key copy. Mobile uses its own card and list layout.
+
+Each new spec or test file goes into `WEB_SPECS` or `MOBILE_TESTS` in `scripts/verify-election.py`.
 
 ### F7. Docs that wait on no code
 
@@ -707,19 +763,66 @@ goes into `WEB_SPECS` or `MOBILE_TESTS` in `scripts/verify-election.py`.
   Plan-specific facts stay marked until the owner confirms the plan.
 - 37.12t and 37.12n: one table of every form with its ER-<phase>.<nn> number, old number and the
   records that fill it. Shown to the owner; nothing applied until approved.
+- 84.31: rename `docs/specs/010-election-engine-fixes/` to the next free spec number (check
+  `docs/TODO.md` for a reserved "spec NNN" first) and fix every reference.
+- 84.16: spec 011 gets a table of election steps and the client that runs each one: web for every
+  admin step, mobile for create draft, vote and view.
 
 ### F8. Reference server
 
 `docs/Elections/reference-implementation/`: `npm install`, throwaway PostgreSQL in Docker, one
 election through key set, voting, count and key destroy. Write the result into 37.12v.
 
+### F10. Vacant seats, by-election and term ending
+
+- 95.12: a daily job, written like `DataRetentionSweep` and `ExpiredRevokeSweep` in
+  `GHCAA.API/Services/`, ends every open `ECMember` row whose period's `ECPeriod.EndDate` has
+  passed, with the TermEnded reason and an audit entry, when the organisation turns this on
+  (off by default, so nothing changes for anyone until they choose). The default term length
+  fills the end date when a period is created and can be changed on the period. An admin can end
+  any term early through `POST members/{ecMemberId}/end-term` (`AdminGovernanceController.cs:84`) with a reason row and a note. Admin
+  screen for the reason rows next to the positions screen.
+- 95.4: vacant seats on the admin governance page with a filter. A seat is vacant when the
+  active period has fewer current holders for a position than its seat count.
+- 95.5: election kind General or ByElection, shown on the ballot, results and ER forms. A
+  by-election offers vacant seats only and refuses a held one at create and again at declare.
+  Declare never ends a holder. `GetCurrentAsync` (`ElectionService.cs:84`) returns the general
+  election and any live by-election, and both clients show both.
+- Clients: web gets the reasons screen, the vacant filter, kind on create and the early-end form.
+  Mobile shows kind and the two live elections; admin steps stay on the web (84.16).
+- Tests: declare leaves holders alone, the vacant-only guard at create and declare, two live
+  elections, the job with the setting on and off, early end with each reason, a system reason
+  cannot be removed.
+- `security-reviewer` on the end-term route and the job.
+
+### F11. Admin-editable election content
+
+42.1 first: list what is static today (the files in `GHCAA.Web/public/assets/elections/`, the
+form wording in `ElectionDocumentService.cs`, seeders). Then one table for content pages and form
+wording, seeded from the profile, with admin create, edit and publish on the web. The public
+pages and the generated forms read from it. Mobile reads the same API where it shows this
+content today (42.4). The numbering approved in F7 is applied here. Admin text reaches public pages, so `security-reviewer` checks it cannot carry script.
+
 ### N1 to N8. Non-election areas
 
 Each follows its tracker item as written, with these additions:
 
-- N1 (37.1h-1): the active seat list comes from org config with today's 15 values as the default,
-  so GHC sees no change. `ParsePosition` (`AdminElectionsController.cs:182`) checks against the
-  active list. Closes ENH-003 and ENH-009.
+- N1 (95.2, closes 37.1h-1): `CommitteePosition` table (organisation, key, label, sort order,
+  seats, active). The GHC profile seeds today's 15 under the enum's ids; the default profile seeds
+  a short generic set. `ECMember.Position` and `ElectionSeat.Position` become foreign keys, and
+  `ECPosition` (`GHCAA.Domain/Enums.cs:8`), the list in `lookup.service.ts` and `ParsePosition`
+  (`AdminElectionsController.cs:182`) go. Admin can add, rename, reorder and retire positions;
+  both clients read the list from the API. The same migration does three things for F10:
+  - an end-reason table built the same way, seeded with today's five `VacancyReason` values
+    under the same ids; `ECMember.EndReason` becomes a foreign key and the enum goes (38 uses
+    today);
+  - `Election.Kind`, default General;
+  - rebuilds `IX_Elections_ECPeriodId_Live` on period and kind, and updates the matching SQL
+    and clash query in `MigrationBootstrapper.cs:85`.
+
+  The term-job setting and default term length are org config fields, added to the DTO, the
+  defaults and `golden.json` together. PostgreSQL dry run on a non-empty copy and
+  `code-reviewer`, as in F2. Closes ENH-003 and ENH-009.
 - N2 and N3 (37.7): N2 builds the web mechanism and drafts `bn.ts`; N3 adds Bengali to the mobile
   localizations with the same keys. The unreviewed list lives under 37.7 in the tracker, and 37.7
   stays PARTIAL until a Bengali speaker signs it off.
@@ -729,6 +832,25 @@ Each follows its tracker item as written, with these additions:
 - N6 (37.10): mobile gets the report view and a link to the PDF.
 - N7 (37.9): mobile gets the chapter list, join and leave, and the chapter feed.
 - N8 (37.11): refresh the baselines from a run on the day, not the old 351 and 306 figures.
+- N9 (GHC out of the whole app). Brand-lint found 2,605 hits on 2026-10-14. Most are the code name
+  `GHCAA`, which stays; `scripts/brand-lint.config.json` stops counting it in namespaces and
+  project names. The rest are in about 40 code and test files, 59 files that say "GHC", and the
+  election files in `GHCAA.Web/public/assets/elections/` (82.59, moved in F11; N9 checks none
+  are left). Each moves into profile config or the default profile. The remaining 62.2 profile
+  files are written. 62.6b: delete `OrgConfigService.BuildGhcaaDefaults()` and its guard once a
+  person has confirmed `ORG_PROFILE=ghc` on every deployment, and update `ProfileDrivenConfigTests`
+  as the item says.
+- N0 (62.31): copy the real files in `profiles/ghc/demo-data/` to the operator path, check the
+  copy, replace the committed files with synthetic records, and point GHC's deployment at
+  `AppSettings:RealDataPath`. A file found there wins over the demo-data copy, and the seeder
+  only fills empty tables, so GHC's live database is untouched either way. `security-reviewer`
+  on the step.
+- N11 (62.41, 62.42): committed migrations are not edited. A startup step removes the rows they
+  bake in, only when the profile is not `ghc` and the database holds nothing else, so the generic
+  run on an empty database can pass. Then 62.42 adds brand-lint to the CI workflows, where it runs in none today, and
+  makes it blocking. `security-reviewer` on the startup step.
+- N10 (84.36, rest of the app): the same check as F1 for every other validator. Then remove the
+  unused FluentValidation registration and package, since DataAnnotations is what runs.
 
 ### What stays with a person
 
@@ -737,7 +859,12 @@ Each follows its tracker item as written, with these additions:
 | 37.12t, 37.12n | Owner | Approve the F7 form table before it is applied |
 | 37.13f | Owner | Confirm the Neon and Render plans, and the key-loss regulation point, after F7 |
 | 37.1m | Person | Print a receipt in Chrome and Edge, and on a phone, after F1 |
-| 84.42 | Person | Step-up on a real device |
+| 34.D17, 34.D18, 34.D19 | Person | Deploy preprod and find `history row restored` in the startup log, with no 42703 error and batch shown on directory cards, before F2 |
+| 84.42 | Person | Step-up on a real device for roles and create election, after F1 |
+| 62.31 | Owner | Say yes to the file list before any JSON changes, keep the copy of the real alumni files outside git, and set `AppSettings:RealDataPath` on GHC's deployment, in N0 |
+| 62.6b | Person | Confirm `ORG_PROFILE=ghc` in the Render settings of every deployment, before N9 |
+| 95.12 | Owner | Turn the term-end job on for GHC and set the term length, after F10 |
+| 62.31 limit | Owner | The eight committed migrations still hold the real records in the repo and its history. Removing them needs a history rewrite, which was not chosen |
 | 37.13g | Person | Accessibility run when F5 and F6 close |
 | 37.7 | Bengali speaker | Sign off the unreviewed strings after N2 and N3 |
 | Handbook v2.0 | Executive Committee | Approve at a meeting after F9 |

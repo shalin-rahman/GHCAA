@@ -2020,11 +2020,12 @@ edits), per this session's explicit ask.
 > 62.46-62.49. Do not start a separate pass for them; if Work Package 62 is cancelled or deferred, re-open
 > them here as originally written.
 
-61.1 [TODO → tracked in 62.47] **Priority: P3 | Depends on: none.** No dedicated dynamic/runtime code-analysis pass has
+61.1 [DONE 2026-09-07, through 62.47] **Priority: P3 | Depends on: none.** No dedicated dynamic/runtime code-analysis pass has
 been run against this app (dead-route detection, unused Angular providers/services, unreferenced
 .NET classes, unused Flutter widgets). `graphify query`/`graphify explain` can narrow this cheaply
 per-module instead of a blind full-repo sweep — run it module by module next time this is picked up,
 not as one pass, to keep token usage down.
+  - **Review, 2026-10-14.** 62.47 closed on 2026-09-07 and carried this pass, so the status now says done.
 
 61.2 [DONE 2026-09-18] **Priority: P3 | Depends on: 61.1.** Once dead/unused code is identified, do the actual
 refactor pass (remove or consolidate) — deferred until 61.1 gives real targets instead of guessing.
@@ -2032,9 +2033,10 @@ refactor pass (remove or consolidate) — deferred until 61.1 gives real targets
 `[DONE 2026-09-07]`; this item's own status tag was never updated to match. Marking done here too —
 no further work needed, the removal already happened.
 
-61.3 [TODO → absorbed by 62.46] **Priority: P4 | Depends on: none.** Spot-check `GHCAA.Tools/db_diag.cs` next time it's
+61.3 [DONE 2026-09-07, through 62.46] **Priority: P4 | Depends on: none.** Spot-check `GHCAA.Tools/db_diag.cs` next time it's
 touched and drop the `Summary:`-style banner comment for a plain one-line comment, matching the new
 tone rule. Not worth a standalone edit today — it's a diagnostic script, not shipped app code.
+  - **Review, 2026-10-14.** 62.46 closed on 2026-09-07. `GHCAA.Tools/db_diag.cs:8` now has a plain one-line comment.
 
 # Work Package 66 — Print legibility: overprinted and clipped diagram labels
 
@@ -2980,6 +2982,10 @@ per existing CI convention). No admin events-registration screen exists on mobil
   - **37.14c Key-destroyed lock is per process [DONE 2026-10-12] Priority: P3 | Depends on: 37.13e.** The once-only check on the key-destroyed record is a lock inside one API process, so two instances could each write a record. `docs/Elections/11-Election-Key-Procedure.md` says so. The lasting fix is a unique index on `(ElectionId, Action)` in the audit table limited to the key-destroyed action. Done 2026-10-12 with migration `20261012100000_AddKeyDestroyedOnceIndex`; see 37.13e.
   - **37.14e Election migration index skipped when duplicates exist [DONE 2026-10-13] Priority: P3 | Depends on: 37.12l.** The migration that adds the unique `IX_Elections_ECPeriodId_Live` index skips it without an error when duplicates already exist. The database then lacks the rule FR-042 states. Decide whether to warn at startup when the index is missing and list the duplicate rows. Decided and built 2026-10-13: yes, warn and change nothing, because which election to archive is a human decision. After migrating, `MigrationBootstrapper` checks `pg_indexes` on Postgres and, when the index is missing, logs a warning on every boot naming each live election that shares a period and the `CREATE UNIQUE INDEX` statement to run once they are cleared. The index name is now `Constants.Elections.LiveIndexName`. Tests: `LiveElectionIndexCheckTests` cover the duplicate query on SQLite; the `pg_indexes` lookup itself has no Postgres test.
   - **37.14h Fast-track plan for the rest of WP37 [DONE 2026-10-14] Priority: P2 | Depends on: none.** Open WP37 items checked against the code, owner decisions taken on 2026-10-14, and sessions F1 to F9 and N1 to N8 written into the delivery plan. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
+  - **37.14i Fast-track plan, round 2 [DONE 2026-10-14] Priority: P2 | Depends on: 37.14h.** Added the review rule (fix in session, new item only for a new rule or owner decision, nice-to-have to the undecided list), the open election items outside WP37 (34.D18, 42.1 to 42.5, 82.59, 84.16, 84.31, 84.36, 84.42, 95.2, 95.4, 95.5, new 95.12) and the whole-app GHC cleanup (62.2, 62.31, 62.41, 62.42) as sessions F10, F11, N1 rewritten, N9 and N10, with a migration order. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
+  - **37.14j Fast-track plan review [DONE 2026-10-14] Priority: P2 | Depends on: 37.14i.** Requirements review of the session table against every open election and WP62 item. Fixed: 62.31 (P0) moved from N9 to its own first session N0; 84.42 (P1) moved from F6 to F1; F2 now also waits for 34.D17 and 34.D19; 62.6b added to N9; N9 split so 62.41 and 62.42 sit in N11; `security-reviewer` added to F3, F10 and F11; the reason N1 waits for F4 written down. Left out on purpose: 84.14, 93.4, 95.6, 96.3 (no election work) and 91.5, 91.6 (on hold). Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
+  - **37.14k Review of all open items [DONE 2026-10-14] Priority: P2 | Depends on: 37.14j.** Requirements review of the 118 open items in both tracker files against the plans, specs and code. No dependency cycles, no dangling dependencies and no priority inversions. Fixed: wrong paths in 60.2, 93.3 and 93.4; §4.8 to §4.7 in 64.8 (the RMMM plan is §4.7); 97.1 now says `EmailVerify` is a new `OtpPurpose` value; 62.41 and 62.42 no longer wait for a history rewrite, and 62.42 adds brand-lint to CI first; 82.59 options closed by the 2026-10-14 decision; 62.2 given P2; 96.3 cut down to what is still open; stale counts in 63.8 and 67.3; notes on 7.22, 96.15, 12.8, 67.2, 67.4, 67.5 and 72.5; 61.1 and 61.3 marked done through 62.47 and 62.46; 98.26 closed and moved to the archive. Duplicate ids left as history: 37.3 and 67.6 are each closed twice in the archive, and 67.5 is open here and closed in the archive. Delivery plan N11 bullet updated for the brand-lint CI step.
+  - **37.14l Repeated item numbers and book figures [DONE 2026-10-14] Priority: P2 | Depends on: 37.14k.** 37.14k left three repeated numbers as history; each was checked against the code and the copy no code names was given the next free number. The 37.3 mobile rollout is now 37.3a and spec 009 points to it; the 2026-09-02 outline item 67.5 is now 67.8; the 2026-09-02 renumber item 67.6 is now 67.9. Same pass: the Chapter 11 effort, size and arrival figures and the outline's Chapter 11 block were refreshed from a `wbs.py` run of 2026-10-14, after these tracker edits, with the commit count in chapters 4 and 7 (355). Owner answers on 7.22, 12.8, 62.31, 75.5 and 77.4 recorded, and 77.11 raised for the three reuse parts not yet measured.
 37.2 [DONE] **Priority: P4.** Specified in
 `docs/specs/003-alumni-programs-and-verification/spec.md` Story 4.
 **Scholarship & student-aid programme** — fund → open call → application → blind review → award → disbursement. New enums: `ScholarshipApplicationStatus { Draft, Submitted, UnderReview, Shortlisted, Awarded, Rejected, Withdrawn }`, `DisbursementStatus { Pending, Approved, Paid, Cancelled }`.
@@ -2990,7 +2996,7 @@ per existing CI convention). No admin events-registration screen exists on mobil
   - **Service/API/UI.** `IScholarshipService` + `ScholarshipService`; `ScholarshipsController` at `api/scholarships`. Flag `enableScholarships`. Public `/scholarships` (call listing + apply + status check), member `portal/scholarships` (reviewer queue for panel members), admin `admin/scholarships` (funds, calls, shortlist, award, disburse). New `API_ENDPOINTS.SCHOLARSHIPS` block.
   - **Tests.** NUnit: review DTO carries no identifying field; application rejected outside the `OpensOn`–`ClosesOn` window; award → paid writes exactly one `Grant` `FinancialRecord` and is idempotent on repeat. Vitest: apply-form validation, status lookup with an unknown code.
 **Acceptance:** done; `ScholarshipServiceTests` covers the blind-review projection, the call-window rejection and the idempotent `Grant` disbursement; `scholarship.service.spec.ts` covers apply-form validation and the unknown-code status lookup. `enableScholarships` is not wired to any feature-flag mechanism, since none exists project-wide yet; the flag column exists in `OrgConfigDto`/profile packs for when one lands. Verified 2026-09-23 against the WP37.11 gate (`dotnet test`: 859/859; `npx vitest run`: 511/511; `npm run type-check` and `npx ng build`: clean).
-37.3 [DONE] **Priority: P2.** **Fundraising campaigns — complete the rollout.** Unlike the rest of this Area, this item is not a ground-up build: `Campaign`/`CampaignPledge` models, `ICampaignService`/`CampaignService`, a 12-route `CampaignsController` (public browse/pledge, member `my-pledges`, admin CRUD + donor tiers + pledge-receipt confirmation), an admin Angular page (`admin-campaigns.ts`), a public Angular page (`campaigns.ts`), and a member giving-history page (`member/giving/giving.ts`) are all already committed (`f960d216`) and covered by `CampaignServiceTests.cs`. What is missing is Flutter mobile coverage, not the web feature.
+37.3a [DONE] **Priority: P2.** **Fundraising campaigns — complete the rollout.** Unlike the rest of this Area, this item is not a ground-up build: `Campaign`/`CampaignPledge` models, `ICampaignService`/`CampaignService`, a 12-route `CampaignsController` (public browse/pledge, member `my-pledges`, admin CRUD + donor tiers + pledge-receipt confirmation), an admin Angular page (`admin-campaigns.ts`), a public Angular page (`campaigns.ts`), and a member giving-history page (`member/giving/giving.ts`) are all already committed (`f960d216`) and covered by `CampaignServiceTests.cs`. What is missing is Flutter mobile coverage, not the web feature.
   - **Reuse — do not rebuild.** `ICampaignService`, `CampaignsController`, and all three existing Angular pages (public, admin, member giving-history) are done. `ConfirmPledgeReceiptAsync` is already idempotent (confirming an already-confirmed pledge does not write a second `FinancialRecord`) — that is the pattern 37.2's disbursement and 37.4's reunion fees follow, not the other way round.
   - **Migration: already done.** `Campaign`/`CampaignPledge` are already in the `InitialBaseline` migration, so they exist on a migrated database, not only under `EnsureCreated()`. No new migration is needed for this item.
   - **Web: already done.** `member/giving/giving.ts` (route `member/giving`, `git log` shows it landed in `f960d216` alongside the rest of the feature) already calls `GET api/campaigns/my-pledges` and renders pledge history with a running total. No Angular work remains.
@@ -2998,6 +3004,7 @@ per existing CI convention). No admin events-registration screen exists on mobil
   - **Missing: docs.** `docs/FEATURES.md` has zero mentions of Campaigns despite being shipped — add a section. [DONE 2026-09-23] The stale `// TODO 37.8` comment (real 37.8 is Credential Verification) was removed from all five files it appeared in (`Campaign.cs`, `CampaignsController.cs`, `ICampaignService.cs`, `CampaignService.cs`, `CampaignDtos.cs`) rather than renumbered, since the feature it described is already built.
   - **Tests.** [DONE 2026-09-23] `test/campaign_service_test.dart` — 4 cases (public list, get-by-slug, honour roll tiers/untiered, submit pledge + my-pledges), all passing. Backend and admin/public/member Angular tests already exist and are not duplicated here.
 **Acceptance:** done; the web feature was already shipped in `f960d216`, and the remaining gap — Flutter mobile coverage — is now built and routed, closing the item. Verified 2026-09-23: `flutter test test/campaign_service_test.dart` (4/4 passing) and `flutter analyze` on all new/changed files (no issues found).
+  - **Renumbered 2026-10-14.** This was the second item numbered 37.3. The first, the 2026-09-05 build, keeps 37.3 because the code comments name it (`GHCAA.Domain/Enums.cs:59`, `CampaignServiceTests.cs:10`, `admin-campaigns.ts:15`). This one is the mobile rollout: `GHCAA.Mobile/lib/features/campaigns/` and `test/campaign_service_test.dart`. Spec 009 now points here.
 37.6 [DONE] **Priority: P4.** **Oral-history / legacy archive** — recorded memories from senior alumni, which is the one asset an alumni association can create that nobody else can. `ArchiveCollection` (`Id`, `Title`, `Description`, `IsPublished`, `SortOrder`) and `ArchiveItem` (`Id`, `ArchiveCollectionId`, `Title`, `NarratorName`, `NarratorMemberId?`, `RecordedOn?`, `Summary`, `Transcript?`, `MediaFileUploadId?`, `ExternalMediaUrl?`, `PhotoPath?`, `DecadeTag`, `IsPublished`, `SubmissionStatus Status`).
   - **Storage decision, settled before building:** `MediaFileUploadId` reuses `FileUpload` + `IFileStorageService`; `ExternalMediaUrl` covers a link to already-hosted audio/video. **Both fields exist deliberately** — audio is heavy and the Render deployment has no object store configured, so the external-link path is the default and the upload path is opt-in behind the existing size limits in `IFileValidationService`.
   - **The transcript is the product**, not the audio: it is searchable, printable, quotable in 37.10, and readable on a bad connection. Treat a missing transcript as an incomplete item in the admin queue, not merely an empty field.
@@ -3592,6 +3599,22 @@ from `gallery_screen.dart`'s own create flow.
 the original ask and stays a separate cleanup decision. Closing rather than leaving this tagged
 `[TODO]` indefinitely for a scope call that's already been made.
 60.1 [DONE 2026-09-09] **Priority: P4 | Depends on: none.** Mobile News screen layout verification.
+60.2 [DONE 2026-10-14] **Priority: P3 | Depends on: none.** Confirm this session's two *behavioral* (not
+visual) fixes protect mobile automatically, since both are enforced server-side, not client-side:
+  - 54.6 — event registration blocked past `EndDate` even with no `RegistrationEndDate` set. Mobile's
+    event registration call hits the same `RegisterForEventAsync` backend method, so this should
+    already be covered with no mobile code change — but verify mobile's own UI doesn't *also* have a
+    client-side "can register" check duplicating the old (pre-fix) logic, which would show a
+    misleading enabled button that the server then rejects.
+  - 58.3 — poll voting already correctly blocked past `ExpiryDate`/inactive server-side
+    (`PollService.VoteAsync`), confirmed already correct — no web fix was needed, so nothing to
+    check on mobile for this one specifically, included here only for completeness of the sweep.
+Audit 2026-10-09: the duplicate check exists. `_isRegistrationOpen` in `GHCAA.Mobile/lib/screens/member/events_screen.dart:560-575` and
+`event_details_screen.dart:370-382` looks only at `isActive` and the registration start and end
+dates. An event past its `EndDate` with no `RegistrationEndDate` shows an enabled Register button,
+and the server then rejects the call. Fix: add the `EndDate` check in both places, with a test.
+  - **Review, 2026-10-14.** Paths corrected above. The bug still stands: neither screen checks `EndDate`.
+**Done:** the two copies of `_isRegistrationOpen` were replaced by one shared check, `AppUtils.isEventRegistrationOpen` in `GHCAA.Mobile/lib/core/utils/app_utils.dart`. It follows the server rule in `EventService.RegisterForEventAsync`: inactive, before the registration start, after the registration end, or after the event `EndDate` all close registration. The events list and the event details screen both call it. Six tests in `test/event_registration_open_test.dart`, tagged FR-002 of spec 014 (events registration rules), cover each rule.
 Verified `GHCAA.Mobile/lib/screens/member/news_screen.dart`. Mobile News uses standard `AppScaffold`, `AppSearchField`, filter chips, `GlassContainer` card items with image fallbacks and category chips — fully consistent with mobile's list patterns (Jobs, Gallery, Events). `dart analyze` clean.
 
 
@@ -3874,7 +3897,7 @@ matching `OrgConfig.offlineDefaults`'s neutral colors from 62.27) are used only 
 sites. `flutter analyze` clean; no new test failures (59 pre-existing failures unchanged: 58 golden-image
 baseline from 62.28, 1 unrelated device-info-plugin test issue).
 
-62.31 [ONHOLD 2026-09-06, per SR-9] **Priority: P0 | Depends on: 62.3 (done — unblocked, still on hold by decision, not by dependency).** DATA PROTECTION: `Seed/members.json` holds 631 real
+62.31 [TODO, hold lifted 2026-10-14] **Priority: P0 | Depends on: 62.3 (done).** DATA PROTECTION: `Seed/members.json` holds 631 real
 alumni records (names, emails, mobile numbers, NIDs, addresses). Once the repo is handed to other
 institutions this is a personal-data disclosure. Decide before Phase E ships: (a) keep real member
 data out of the repo and load it from an operator-supplied file at deploy time (recommended), or
@@ -3884,6 +3907,8 @@ item is independent of the refactor and is the highest-priority thing in the are
 same records are already literal `InsertData` values in eight committed migrations, so a clean clone
 still builds a database full of real alumni whatever `members.json` says. Whichever option is chosen
 here has to be paired with 82.31, which covers the committed chain.
+  - **Plan, 2026-10-14 (round 2).** Owner lifted the hold: do it now, with no git-history rewrite. The real alumni files move to an operator path read through `AppSettings:RealDataPath` and the owner keeps that copy outside git; `profiles/ghc/demo-data/` keeps synthetic records only. The session lists the exact files and waits for the owner's yes before changing any JSON. The eight committed migrations still hold the records in the repo and its history; that stays open by choice. Session N9. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
+  - **Plan review, 2026-10-14.** Moved from N9 to its own session N0, which goes first. It is P0 and changes no code, so it should not wait behind N1 and F11. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 **Update 2026-09-16:** the mechanism is fixed — `HasData` no longer declares any Tier 3 entity (see
 82.31 below for the migration side), and `InstitutionDataSeeder` seeds those tables at boot from
@@ -3894,6 +3919,7 @@ only when the table is empty. What is still open: the committed copies at
 empty arrays and point GHC's deployment at `AppSettings:RealDataPath`) was proposed and the project
 owner's answer was "ignore this ... wont do" — parked by decision, not forgotten. Nothing was moved
 or deleted; the real files are untouched in the git tree.
+  - **Owner answer, 2026-10-14.** Not yet. The owner holds the move of the per-person files (members, users, user_roles, academic_records, professional_records, payment_histories, ec_members) for now.
 
 62.32 [DONE 2026-09-05] All 15 Tier 3 files (including `users.json`/`user_roles.json`) moved to
 `profiles/ghc/demo-data/`; a synthetic 2-member equivalent authored for `profiles/default/demo-data/`.
@@ -4624,8 +4650,9 @@ was fixed by 68.1: all seven files now exist and are wired into `build.py`. What
 asked for — Work Package 64's evidence and the Work Package 65 security model reaching the book — is
 still open; see 67.2 below for the real remaining gap, which is content, not files.
 
-67.5 [DONE 2026-09-02] **Priority: P2.** `docs/DOCUMENTATION_BOOK_OUTLINE.md` drifted in three ways
+67.8 [DONE 2026-09-02] **Priority: P2.** `docs/DOCUMENTATION_BOOK_OUTLINE.md` drifted in three ways
 and now matches the tree:
+  - **Renumbered 2026-10-14.** Was 67.5, which the open book-pipeline item in `docs/TODO.md` also uses. That one keeps 67.5 because `docs/book/build/pages.py`, `folios.py` and the outline name it.
 
   - Its per-chapter page budget still read "8 Verification, validation and quality assurance" and
     "9 Security, privacy and trust". The 65.1 swap did not reach it, so the budget was attached to
@@ -4638,9 +4665,10 @@ and now matches the tree:
     615 tasks, 67% unplanned, 409 reactive, 3,839 lines. These move every session, which is why the
     chapter states the script is authoritative where the two disagree.
 
-67.6 [DONE 2026-09-02] **Priority: P3.** Two tracker items were both numbered 63.26, one open (the
+67.9 [DONE 2026-09-02] **Priority: P3.** Two tracker items were both numbered 63.26, one open (the
 appendix policy question) and one closed (the page budget the user decided, which answered it). The
 closed one is renumbered 63.28.
+  - **Renumbered 2026-10-14.** Was 67.6, which the 2026-09-27 page-count item also uses. That one keeps 67.6 because `docs/book/build/pages.py`, `test_pages.py` and `DevTrackerServiceTests.cs` name it.
 65.5 [DONE 2026-10-09, not needed] **Priority: P3.** Within Chapter 6, §6.11 Design Principles (twelve subsections) and §6.12
 Patterns (seven) come after §6.8 to §6.10 on user interface, mobile and configuration. Principles are
 more fundamental than the specific designs that apply them, so the conventional order would put them
@@ -8520,6 +8548,10 @@ Done 2026-10-14. `directory.html` uses `<app-load-more>` in both list views, and
 **Acceptance:** the CI format step passes on the next push.
 
 ---
+
+98.26 [DONE 2026-10-14] **Priority: P4 | Depends on: none.** Many files in the working tree differ from HEAD only in line endings, which hides real changes in the diff. Normalising them touches files in the staged 98.3 chunk, so it waits until that chunk is committed. The author decides whether to add a `.gitattributes` rule or renormalise once. Found 2026-10-14.
+**Acceptance:** `git diff --ignore-cr-at-eol --stat` and `git diff --stat` list the same files.
+  - **Review, 2026-10-14.** `.gitattributes` has held `* -text` since 2026-09-12 and the 98.3 chunk is committed (54fa986c). `git diff HEAD --stat` and `git diff HEAD --ignore-cr-at-eol --stat` now list the same three files, so the acceptance holds with no renormalise.
 
 # Work Package 86 — Book sync after the election-navigation, communication-visibility and
 organisation-profile commits

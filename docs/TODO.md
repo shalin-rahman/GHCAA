@@ -194,7 +194,7 @@ incident dates carry 9, 7, 10 and 2 commits, so the fix work is already inside t
 counting it twice would inflate the figure.
 
 64.8 unblocks now that U1/U3/U4 are confirmed and U2 is the only open rate, since risk exposure
-RE = P × C in §4.8 needs an impact cost per risk on the same basis.
+RE = P × C in §4.7 needs an impact cost per risk on the same basis.
 
 ### P0 — CRITICAL (blocked on the user; cannot be closed from a coding session)
 - **82.31 / 62.31** — 631 real alumni records, including all 631 password hashes, are literal
@@ -225,7 +225,9 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
 - **37.1w** (P0) — Done 2026-09-29. Step-up is open to any signed-in user, so members can vote
   on web and mobile.
 - **37.1y** (P0) - Done 2026-10-05. A failed code email now says so on web and mobile. Preprod
-  email itself is still down until the owner moves off blocked SMTP.
+  email itself is still down; 7.26 tracks the fix.
+- **7.26** - Code done 2026-10-14: a Brevo sender picked by `EmailSettings:Provider`, since
+  Render blocks SMTP. Owner step: Brevo account, verified sender, API key, Render settings.
 - **37.12a–37.12b** — Done 2026-09-29. Election settings section in OrgConfig, and a configurable
   `ElectionPersona` table with its own admin screen.
 - **37.12c** — Done 2026-09-30. ElectionOfficial role, and role lists on web and mobile.
@@ -332,6 +334,9 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
 7.16 [IN-PROGRESS] **Priority: P3.** Hardening: SSL Pinning and Binary Obfuscation. Obfuscation is done: `mobile_deployment.yml`'s Android and iOS release build steps now pass `--obfuscate --split-debug-info=build/debug-info`, and that directory is uploaded as a separate `android-debug-info`/`ios-debug-info` artifact (90-day retention) so a crash report from a given release build can still be symbolicated later. SSL pinning is scaffolded, not enforced: `GHCAA.Mobile/lib/core/api/ssl_pinning.dart` gates pinning on `AppConfig.environment == 'production'` (dev/preprod are never affected) and only enforces it once `kProductionCertificateSha1Pins` holds a real value — `ssl_pinning_io.dart` wires the check into Dio via a `SecurityContext(withTrustedRoots: false)` + `badCertificateCallback`, `ssl_pinning_stub.dart` is the web no-op, `api_client.dart`'s `dioProvider` calls it. `kProductionCertificateSha1Pins` is still empty: there is no `.env.production` in this repo (only `.env` for dev and `.env.preprod`) and no way from this environment to fetch or confirm the real production certificate, so pinning stays a documented no-op rather than risk pinning a guessed value and locking out every user until an app update. Remaining step for someone with access to the live production host: run the `openssl s_client`/`openssl x509 -fingerprint` command documented at the top of `ssl_pinning.dart`, add the fingerprint to `kProductionCertificateSha1Pins`, and update `ssl_pinning_test.dart`'s placeholder-state test to assert `isPinningEnforceable('production')` is true. VERIFIED 2026-09-17: `flutter test test/ssl_pinning_test.dart test/mobile_deployment_obfuscation_test.dart` (9 tests: environment gating, enforceability-while-placeholder, fingerprint hex encoding, and a grep-assertion that both CI release build lines carry `--obfuscate`/`--split-debug-info`) and `flutter analyze` on all touched files, both clean.
 7.21 [TODO] **Priority: P2 | Depends on: 7.20, owner DNS.** Check the `www` redirect on the live site. haragangian.com, www.haragangian.com and preprod.haragangian.com did not resolve on 2026-10-05. Once DNS is live the owner adds the Render custom-domain redirect, then `curl -I https://www.haragangian.com/x?y=1` must answer 301 with `Location: https://haragangian.com/x?y=1`. Owner step. Raised 2026-10-05.
 7.22 [TODO] **Priority: P1 | Depends on: none.** Preprod origin settings point at a domain that does not resolve. On 2026-10-05 `https://ghcaa-ryl6.onrender.com` answered CORS with `access-control-allow-origin: https://preprod.haragangian.com`, so Render's `AppSettings__AllowedOrigins__0` is the dead domain, and ClientUrl very likely is too, which would send payment returns there. Owner step: set both to `https://ghcaa-ryl6.onrender.com` on Render, and change the preprod lines in the root `.env.preprod` and `GHCAA.Mobile/.env.preprod`. The code does not change; `docs/ENV_REVIEW.md` already shows the right value. Raised 2026-10-05.
+  - **Review, 2026-10-14.** `GHCAA.API/appsettings.Preprod.json:6-9`, added by 96.15, also names the dead domain `preprod.haragangian.com`. It belongs in the owner's fix list with the Render settings; it is not edited here because it is a settings file.
+  - **Owner answer, 2026-10-14.** The preprod origin is the Render web address. The API serves the web client from the same host, so the origin is `https://ghcaa-ryl6.onrender.com`; the owner sets it in `GHCAA.API/appsettings.Preprod.json:6-9` and in Render's `AppSettings__AllowedOrigins__0` and ClientUrl. The owner confirms the address when making the change.
+7.26 [PARTIAL 2026-10-14] **Priority: P1 | Depends on: 37.1y.** Preprod sends no email, so sign-in codes, step-up codes and every notice fail. Render's free tier blocks outbound SMTP and `GmailEmailService` connects to `smtp.gmail.com:587`. 37.1y made the failure show; this item makes sending work. Code done 2026-10-14: a second sender, `BrevoEmailService`, posts to Brevo's HTTPS API, and `EmailSettings:Provider` picks `Gmail` (the default, so local and dev setups do not change) or `Brevo` at startup in `DependencyInjection.AddEmailService`. Any other value stops startup instead of falling back to Gmail. `GET healthz` checks the settings of the picked provider (spec 020 FR-016). Docs: `docs/DEPLOYMENT_CHECKLIST.md` §1, `docs/ENV_REVIEW.md`, `docs/CONFIG_DRIVEN_FRAMEWORK.md`, `GHCAA.API/.env.example`. Tests: `BrevoEmailServiceTests` (missing settings, the request sent, no sender name, a refused send, a network failure) and `HealthControllerTests` (checks follow the provider). Owner steps left: create a free Brevo account, add and verify the sending address under Senders, create an API key, then set `EmailSettings__Provider=Brevo`, `BrevoSettings__ApiKey`, `BrevoSettings__SenderEmail` and optionally `BrevoSettings__SenderName` on Render and redeploy. Close when a step-up code reaches an inbox from preprod and the `EmailLogs` row reads Sent. Local env files (`.env`, `.env.dev`, `.env.preprod`, and `GHCAA.API/.env`, `.env.dev`, `.env.preprod`, `.env.prod`) still need the commented Brevo block from `.env.example`; they hold real values, so the owner pastes it.
 
 ## WORK PACKAGE 8: MOBILE ENGINEERING (TIER-1 STANDARDS)
 
@@ -341,6 +346,8 @@ RE = P × C in §4.8 needs an impact cost per risk on the same basis.
 ## WORK PACKAGE 12: PROCESS & ENGINEERING STANDARDS
 
 12.8 [TODO] **Priority: P3 | Depends on: user approval.** `docs/` holds dated reviews, old plans, duplicate proposal versions and two files that carry secrets, next to the live docs. An audit on 2026-10-06 listed what to archive, merge, fix or untrack. Nothing gets moved or deleted until the user approves the list, and any move updates the book build refs and README links in the same change. Requested 2026-10-06.
+  - **Review, 2026-10-14.** A third file with secrets sits in `docs/`: `docs/deploy_conn_Info.txt`, untracked. The tracked two are `docs/appsettings.txt` and `docs/dgepay_info.txt`. The approval list should name all three.
+  - **Owner answer, 2026-10-14.** Leave the three secret files as they are for now. Asked again when the docs clean-up runs.
 
 ## WORK PACKAGE 27: TEST COVERAGE IMPROVEMENT
 
@@ -539,10 +546,13 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
 
 34.D16 [DONE 2026-08-21] Fixed: `portal-layout.ts` now injects `OrgConfigService` (exposed as `orgConfig`) and both portal logos bind `[src]="orgConfig.config()?.branding?.logoUrl || '/assets/logo.png'"` + `[alt]="...shortName || 'Logo'"` with `appImgFallback="/assets/logo.png"`, mirroring `admin-layout.html` exactly. Two adjacent hardcodes in the same branding-opt-out class were fixed with it: the top-bar text `GHCAA Member Portal` and the `document.title` suffix now use `branding.shortName` (fallback `'GHCAA'`). The sidebar wordmark `HARAGANGIAN` was **left hardcoded on purpose** — it is the member nickname styled as a wordmark, and swapping it to `shortName` would visibly change the portal's sidebar text, which is beyond this item. Verified: `ng build` clean, vitest 60 files / 244 tests pass. Original finding follows. `portal-layout.html` hardcoded `src="/assets/logo.png"` in two places (the sidebar mini-logo and the collapsed-rail logo) instead of binding `orgConfigService.config()?.branding?.logoUrl` the way admin-layout and the public footer do — `portal-layout.ts` does not inject `OrgConfigService` at all. Harmless today because the configured default *is* `/assets/logo.png`, but it silently opts the portal out of org-config branding, so a tenant that sets a custom logo gets it everywhere except the member portal.
 34.D17 [IN PROGRESS 2026-10-01] [P0] Preprod log (2026-10-01) shows Postgres `42703 errorMissingColumn` on member-summary queries. The log never names the column. Preprod was first built by `EnsureCreated`, so a column the model has can be absent live even though every migration is marked applied. Fix: `MigrationBootstrapper.RepairMissingColumnsAsync` runs after `MigrateAsync` on Postgres. It compares the EF model with `information_schema.columns`, replays a migration rename when the old column is still there, and otherwise adds the column with `ADD COLUMN IF NOT EXISTS` and the model default (or the type's zero value for NOT NULL). Identity, computed and jsonb NOT NULL columns are logged for a manual fix, not guessed. A failed repair is logged and does not stop startup. 10 new unit tests pin the SQL (`MigrationBootstrapperAddColumnTests`). Code backup on local branch `backup/2026-10-01-column-repair`. Open: not yet run against a real Postgres (the local boot against the prod-data database was blocked by the tool permission check); confirm on the next preprod deploy by searching the startup log for `was missing from the live schema`. The same repair runs on production at startup. Depends on: user redeploying preprod.
+  - **Plan review, 2026-10-14.** F2 waits for this to be confirmed on preprod, with 34.D18 and 34.D19, because F2 adds a migration on the same chain. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 34.D18 [IN PROGRESS 2026-10-02] [P0] Preprod has not started since 2026-10-01. The Render log shows every boot failing on `42P07 relation "Elections" already exists` while it re-runs `20260920183944_AddElectionEngine`. Cause: the self-heal step in `MigrationBootstrapper` checked every table a migration created, including `ElectionOfficers`, which `20260930020138_ElectionAppointments` drops on purpose. It took the missing table to mean a false baseline, deleted AddElectionEngine's history row, and the re-run failed. Fix: self-heal now checks only tables and columns the current model still maps (`StillMappedTargets`). A new step, `RestoreWronglyRemovedHistoryRowsAsync`, puts back the history row of any migration that is unapplied while a newer one is applied, but only when all of its mapped tables and columns exist. 6 new tests in `MigrationBootstrapperSelfHealTests`. Open: confirm on the next preprod deploy by searching the startup log for `history row restored`. If the boot still fails, run `INSERT INTO "__EFMigrationsHistory" ("MigrationId","ProductVersion") VALUES ('20260920183944_AddElectionEngine','9.0.0') ON CONFLICT DO NOTHING;` against the preprod database. Dry run 2026-10-12: the whole chain (24 migrations, through `20261010100000_AddElectionAuditEntries`) applied to an empty local PostgreSQL 18 database. Rolling back to `20261005144927_AddApprovalOpenKey` and forward again worked, and `IX_Elections_ECPeriodId_Live` came back with the `NOT "IsTest"` filter. This does not cover the preprod history-row case. Render log checked 2026-10-12 (commit ee673f78): the boot reached "No migrations were applied. The database is already up to date." and "Application started", with no 42P07. There was no `history row restored` line, so the history row was already in place. The boot is healthy; this item needs only the next deploy to confirm the new migrations. The same log shows five EF 10622 warnings (tracked as 94.1 to 94.5) and one `EnsureCreatorAccountAsync` failure: account 'shalin' belongs to MemberId 2, so SuperAdmin is not granted. That one is preprod data, not code. Creator account fixed 2026-10-12: the `shalin` user row in the preprod database had its MemberId set to NULL and nothing else changed. The seeder guard stays as it is. Confirm after the next deploy that `shalin` holds the SuperAdmin role. Depends on: user committing and redeploying preprod.
+  - **Plan, 2026-10-14 (round 2).** Before F2 adds a migration on the same chain, a person deploys preprod and finds `history row restored` in the startup log. Listed under "What stays with a person". Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 34.D19 [IN PROGRESS 2026-10-13] [P1] Every member directory card shows "Batch: N/A (N/A )" (raised by user 2026-10-13: "there was a logic for displaying like, batch of HSC 2001"). The card code is fine: it reads `PassingYear` and `Degree` from the academic record with `IsOrgProfile` set. The data is not. On the local database all 586 `AcademicRecords` rows have the old `IsGHC = true` and an empty `IsOrgProfile = false`, so no member has an org record. Cause: `20260921110115_RenameIsGhcToIsOrgProfile` was committed without its Designer file, so it had no `[Migration]` attribute and EF never ran it. `RepairMissingColumnsAsync` (34.D17, the startup column repair) then saw the model column missing and added it with the zero value. Fix: the migration now carries its attributes and runs guarded SQL. With `IsGHC` alone it renames the column; with both columns it sets `IsOrgProfile` where `IsGHC` is true and drops `IsGHC`. Dry run on a copy of the local database: 586 rows flagged, a second run changes nothing, and the rename-only shape also ends with 586 flagged. Guard test `MigrationBootstrapperSelfHealTests.EveryMigrationClass_IsDiscoveredByEf` fails for any migration class EF cannot find. Open: the fix applies at the next API start; confirm locally and on the next preprod deploy that directory cards show a year and degree. Preprod has not been queried, but it ran the same code, so it is very likely affected.
+  - **Plan review, 2026-10-14.** F2 waits for this to be confirmed on preprod, with 34.D17 and 34.D18, because F2 adds a migration on the same chain. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 ## WORK PACKAGE 37: ALUMNI-ASSOCIATION DEPTH — ELECTION ENGINE, SCHOLARSHIPS, PHILANTHROPY, MEMORY (raised by "what outstanding/extra ordinary matters can be incorporated on this project", 2026-08-23)
 
@@ -620,7 +630,7 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
 > scheduled at any point after 37.0.
 
   - **37.1h Election module client redesign (web + mobile) [DONE 2026-09-25, depends on 37.1g].** Stages 1-4 shipped in commit `e7bafbfd` (`feat: election enngineering`): backend `GET /elections/current` + `GetCurrentAsync`, Angular model/service consolidation and admin/member/results rebuilds, new Flutter `screens/admin/election_management_screen.dart`, `ElectionServiceTests.cs`. Confirmed by diffing `e7bafbfd --stat` against this item's stage list and against `docs/specs/018-governance-elections-polls/spec.md`'s as-built FR evidence table (2026-09-25 audit) — not left as an assumption. A follow-up review of the Angular and Flutter election clients (not covered by 37.1g, which was backend-only) found the Angular member voting page calls three routes that don't exist on the backend at all (`GET /elections/current`, `GET /elections/{id}/results`, `POST /elections/{id}/ballot`), so voting through the web UI is broken in production today. Also found: two parallel, half-wired Angular model/service families (an unused-but-correct per-seat DTO set alongside a used-but-wrong whole-election set); no in-flight guard on Angular admin `publish`/`close`; a Flutter provider that reaches into a service's private field and swallows all errors; no per-seat voted tracking on either client; no Flutter admin election screen despite most of the service methods existing unused; dead `createdBy`-in-body code on both clients mirroring the identity-spoofing pattern already fixed server-side in 37.1g. Full spec at `docs/specs/011-election-module-redesign/spec.md`. Staged: (1) spec — this item; (2) backend `GET /elections/current` addition; (3) Angular rebuild against the real per-seat API, reusing the campaigns module's `saving`-signal pattern; (4) Flutter fixes + new admin election screen modeled on `governance_registry_screen.dart`; (5) doc sync + full three-client test run. Sequenced to stay inside the user's stated weekly usage cap — stage 2 (Angular, the currently-broken client) is prioritized over stage 4 (Flutter admin screen), and this item's status will be updated per stage actually completed rather than left ambiguous if the session stops early.
-    - **37.1h-1 EC positions must come from org config, not the 15-GHC assumption [PLANNED, unblocked — 37.1h stages 2-4 shipped in e7bafbfd].** User instruction 2026-09-25: the 15-position committee is a GHC fact, not a platform one — another institution's EC shape has to come from configuration, never be assumed fixed. This is the same gap independently found and recorded as ENH-009 in `docs/specs/018-governance-elections-polls/spec.md` (reverse-engineered as-built baseline, 2026-09-25): `ECPosition` display labels already moved to `Lookups` (`SeedEcPositionLookup` migration), but the *set* of seats is still a fixed enum, and `AdminElectionsController.ParsePosition` free-text-matches against every enum value regardless of org. Design (added to spec 011, not a new spec — see "EC seat/position configurability" section there): org-scoped active-position list (which enum values, order, default seat count) sourced from `Lookups`/`OrgConfig`, same pattern WP62 already used for `MembershipType` via `membership-tiers.json`; new `GET /api/elections/positions` (or an `/api/config` addition); both clients' seat-creation UI reads it instead of a hardcoded list, also closing ENH-003 (governance.ts's duplicated position-order array) with the same source-of-truth change. Explicitly not in scope: letting an org invent a position name outside the enum's defined values — that still needs a code change, consistent with the "enum int values fixed" trap already accepted for `MembershipType`. Sequenced after 37.1h's stages 2-4 (fixing the currently-broken production voting flow stays higher priority than this architectural gap) inside the same 80%-of-week budget cap; stops cleanly and is marked `deferred` here if the cap is reached first. Session N1: the default active list is today's 15 values, so GHC sees no change. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
+    - **37.1h-1 EC positions must come from org config, not the 15-GHC assumption [PLANNED, unblocked — 37.1h stages 2-4 shipped in e7bafbfd].** User instruction 2026-09-25: the 15-position committee is a GHC fact, not a platform one — another institution's EC shape has to come from configuration, never be assumed fixed. This is the same gap independently found and recorded as ENH-009 in `docs/specs/018-governance-elections-polls/spec.md` (reverse-engineered as-built baseline, 2026-09-25): `ECPosition` display labels already moved to `Lookups` (`SeedEcPositionLookup` migration), but the *set* of seats is still a fixed enum, and `AdminElectionsController.ParsePosition` free-text-matches against every enum value regardless of org. Design (added to spec 011, not a new spec — see "EC seat/position configurability" section there): org-scoped active-position list (which enum values, order, default seat count) sourced from `Lookups`/`OrgConfig`, same pattern WP62 already used for `MembershipType` via `membership-tiers.json`; new `GET /api/elections/positions` (or an `/api/config` addition); both clients' seat-creation UI reads it instead of a hardcoded list, also closing ENH-003 (governance.ts's duplicated position-order array) with the same source-of-truth change. Explicitly not in scope: letting an org invent a position name outside the enum's defined values — that still needs a code change, consistent with the "enum int values fixed" trap already accepted for `MembershipType`. Sequenced after 37.1h's stages 2-4 (fixing the currently-broken production voting flow stays higher priority than this architectural gap) inside the same 80%-of-week budget cap; stops cleanly and is marked `deferred` here if the cap is reached first. Session N1: the default active list is today's 15 values, so GHC sees no change. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track. **Plan, 2026-10-14 (round 2).** Superseded by 95.2: positions are rows per organisation, not a subset of the enum. Closes when N1 ships 95.2. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
   - **Election standards review, 2026-09-27.** User asked that votes stay anonymous, that a voter can print their ballot, and that the engine be checked against normal election practice. Findings and requirements are in `docs/specs/023-election-ballot-secrecy-and-standards/spec.md`, phases in its `plan.md`. Open decisions: D1 receipt content (recommended: marked ballot plus tracking code, printable only on the confirmation screen), D2 tie rule (must match the constitution), D3 start date (before the next live election).
   - **37.1m Printable receipt and published tracking codes [PARTIAL 2026-10-09] Priority: P1 | Depends on: 37.1i, 37.1l, decision D1.** No receipt exists. Web print stylesheet with `window.print()`, mobile PDF on the device, both built on the client only. Tracking-code list published after close with no choices. Spec 023 FR-015, FR-016 and its receipt and print standard. Built 2026-10-09: the receipt is made from the choices held in memory on the confirmation screen and printed once (web print rule on `.vote-receipt` in `styles.scss`, mobile PDF through `Printing.sharePdf`, nothing written to disk). `GET /api/elections/{id}/tracking-codes` is anonymous and waits for the count, not only for polling to close, because receipt rows are in cast order until the count rewrites them. Test: `GetTrackingCodesAsync_StaysHiddenUntilTheCountHasRun`. Left: look at the printed receipt in a browser and on a phone, and bundle a Unicode font for the mobile PDF, since the default Helvetica cannot draw Bengali names. Decided 2026-10-14: Noto Sans Bengali, bundled in the mobile assets. Session F1. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
   - **37.1p Recount, candidate consent, officer conflict, spoiled and unopposed seats [TODO] Priority: P2 | Depends on: 37.1k.** None of these rules exist in code. Spec 023 FR-020 to FR-024. The unopposed rule and the recount window need the constitution checked first. Decided 2026-10-11 and 2026-10-14, no constitution read needed: recount request per seat, approved by the Chief Commissioner as a two-person step; officials cannot be nominees in the same election and declared conflicts (self-declared at acceptance, the Chief Commissioner can add) keep them out of that candidate's decisions; unopposed seats are left off the ballot and declared at declare, and an election with every seat uncontested goes from CandidateList to Declared as a two-person step with step-up; paper counts entered by a polling officer and approved before the count. Sessions F2 and F3. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
@@ -688,6 +698,7 @@ had happened, and it has. Visual profile keeps its own recreate/seed path, unaff
 
 37.11 [TODO] **Priority: P2.** Per 12.6, nothing in Work Package 37 is `[DONE]` until `dotnet test`, `npx vitest run`, `npm run type-check` and `npx ng build` all pass. Baselines to beat at the start of this Area: **351 NUnit tests** and **64 vitest files / 306 tests**. Additionally, every item that adds a table must be verified against the 37.0 migration path on a **non-empty** database — a passing suite against a fresh SQLite file proves nothing about preprod (`gotcha_ensurecreated_no_op_existing_db`). Update `docs/FEATURES.md`, `docs/PROJECT_MAP.md`, `docs/SRS.md` and `docs/ARCHITECTURE.md` as each item lands, per `feedback_docs_update_scope`. Reviewed 2026-09-17: stays open. This is a standing gate on the rest of the Area, not a one-time task — it can't be marked done while 37.2-37.10 are still unbuilt.
   - **Plan, 2026-10-14.** Session N8 closes it; baselines are refreshed from a run on the day. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
+37.12 [TODO] **Priority: P2.** Election admin forms show bare fields with no help text. Raised 2026-10-14 on the rules unlock form: "Minutes (1 to 60)", the default 30 and the Unlock button say nothing about what an unlock does, why it is time-boxed or what happens when it ends. Add a short what-and-why line under each election field that needs one, on web (`admin-elections.html`, `election-rules-unlock`) and mobile (`election_rules_unlock_sheet.dart` and the other election admin screens), keeping the wording the same on both. Text goes through the existing label constants, not inline strings. Check each line against spec 023 and the officials handbook so the help text matches what the code enforces.
 
 ---
 
@@ -708,12 +719,17 @@ admin+public/Mobile): inventory exactly what's static today under the elections 
 seeders, controllers, public/portal components) before designing the admin-editable model — do not
 assume it mirrors SiteContent without checking field/document shape differences (forms likely need
 file/PDF attachments, not just rich text).
+  - **Plan, 2026-10-14 (round 2).** Session F11, after the F7 form table is approved and N1 is merged. Content pages and form wording go into one admin-editable table seeded from the profile; the GHC wording moves into `profiles/ghc/`. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 42.2 [TODO] **Priority: P3.** Design admin CRUD screens + API for whatever the inventory in 42.1 finds (forms list,
 per-form fields/attachment, publish state) following `ghcaa-design` conventions.
+  - **Plan, 2026-10-14 (round 2).** Session F11. Admin create, edit and publish on the web only (84.16). Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 42.3 [TODO] **Priority: P3.** Web public/portal elections pages read from the new admin-managed source instead of the
 seeder/static content.
+  - **Plan, 2026-10-14 (round 2).** Session F11. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 42.4 [TODO] **Priority: P3.** Mobile: sync if elections content is surfaced there.
+  - **Plan, 2026-10-14 (round 2).** Session F11. Mobile reads the same API where it shows this content today. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 42.5 [TODO] **Priority: P3.** Tests + docs update per usual closing convention.
+  - **Plan, 2026-10-14 (round 2).** Session F11. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 ---
 
@@ -731,21 +747,6 @@ toggle to mobile Directory/Jobs/Gallery/News" as a gap. That is **not applicable
 wide multi-column data table is a desktop/web affordance; phone-width screens already use a
 card/list layout for exactly the reason a table wouldn't fit, and that's the *correct* mobile
 pattern, not a missing feature. Do not port table views to mobile.
-
-60.2 [TODO] **Priority: P3 | Depends on: none.** Confirm this session's two *behavioral* (not
-visual) fixes protect mobile automatically, since both are enforced server-side, not client-side:
-  - 54.6 — event registration blocked past `EndDate` even with no `RegistrationEndDate` set. Mobile's
-    event registration call hits the same `RegisterForEventAsync` backend method, so this should
-    already be covered with no mobile code change — but verify mobile's own UI doesn't *also* have a
-    client-side "can register" check duplicating the old (pre-fix) logic, which would show a
-    misleading enabled button that the server then rejects.
-  - 58.3 — poll voting already correctly blocked past `ExpiryDate`/inactive server-side
-    (`PollService.VoteAsync`), confirmed already correct — no web fix was needed, so nothing to
-    check on mobile for this one specifically, included here only for completeness of the sweep.
-Audit 2026-10-09: the duplicate check exists. `_isRegistrationOpen` in `events_screen.dart:535-549` and
-`event_details_screen.dart:365-376` looks only at `isActive` and the registration start and end
-dates. An event past its `EndDate` with no `RegistrationEndDate` shows an enabled Register button,
-and the server then rejects the call. Fix: add the `EndDate` check in both places, with a test.
 
 60.3 [TODO] **Priority: P4 | Depends on: none.** Messages vs. Chat+Forum naming mismatch: web has a
 single "Messages" page (`member/messages`); mobile splits the same networking space into a separate
@@ -802,7 +803,7 @@ anything is actually missing; flagged as needs-verification, not a confirmed gap
 
 ### PHASE A: PROFILE PACK FOUNDATION (blocking, no user-visible change)
 
-62.2 [PARTIAL 2026-09-16] `org-config.json` and `seo.json` and `site-content.json` (hyphen-named)
+62.2 [PARTIAL 2026-09-16] **Priority: P2 | Depends on: none.** `org-config.json` and `seo.json` and `site-content.json` (hyphen-named)
 now exist for both `profiles/default/` and `profiles/ghc/` — `seo.json` drives
 `scripts/apply-brand.mjs`'s SEO meta tags, `site-content.json` drives
 `scripts/generate-site-content.mjs` → `site-content.generated.ts`. `documents.json`'s governing-
@@ -814,6 +815,8 @@ them, but no per-profile files exist), `themes.json`, and `membership-tiers.json
 taxonomy across every institution, not a per-profile override. `assets/`/`demo-data/` folders:
 still deferred to the phase that needs each one. Building schema for a consumer that doesn't
 exist yet is the premature-abstraction risk the project's own rule warns against.
+  - **Plan, 2026-10-14 (round 2).** Session N9 writes the remaining profile files. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
+  - **Review, 2026-10-14.** Priority added (P2), session N9. `constitution.json` exists in `profiles/default/` only; N9 writes the GHC copy.
 
 ### PHASE B: API DE-BRANDING
 
@@ -834,6 +837,7 @@ service reading the pack unconditionally. **Why it is a separate item rather tha
 hardcoded copy is the fallback that stops an unconfigured deployment serving sample branding to a
 live association, so it cannot be removed while any deployment still lacks `ORG_PROFILE`. Removing it
 first would reintroduce exactly the failure 62.6's guard exists to prevent.
+  - **Plan review, 2026-10-14.** Session N9, after a person confirms `ORG_PROFILE=ghc` on every deployment. Part of the 2026-10-14 decision that GHC is hardcoded nowhere. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 **Acceptance:** `ORG_PROFILE` is confirmed set on every running deployment (preprod and any other);
 `BuildGhcaaDefaults()` and the guard are gone; `ProfileDrivenConfigTests` is updated so the cases that
@@ -863,16 +867,21 @@ Written and confirmed to compile and load (`npx playwright test --list`); not ex
    now creates the first protected username with a generated password on a database that holds no
    SuperAdmin yet, wired into `DatabaseBootstrapperExtensions.cs`, covered by
    `ProtectedSuperAdminSeederTests.cs`.
-**Still blocked on reason 1 alone.** 62.31 stays ONHOLD by decision (see line 212) — the git-history
-rewrite and real-data externalization it needs haven't happened, so a fresh clone still applies the
-eight already-committed migrations that `InsertData` the 631 real rows regardless of `ORG_PROFILE`.
-This item can't go green until that rewrite runs.
+**Still blocked on reason 1 alone.** The 62.31 hold was lifted on 2026-10-14 with no git-history
+rewrite. The eight committed migrations stay as they are; session N11 adds a startup step that
+removes the rows they bake in, only when the profile is not `ghc` and the database holds nothing
+else. This item goes green when that step lets the test pass on an empty database.
 This is the item that proves the area is done, so it stays open until it's actually green, not just
 written.
+  - **Plan, 2026-10-14 (round 2).** Session N9. Committed migrations are not edited; a startup step removes the rows they bake in, only when the profile is not `ghc` and the database holds nothing else. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
+  - **Plan review, 2026-10-14.** Moved from N9 to session N11, which depends on N9. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 62.42 [TODO] **Priority: P2 | Depends on: 62.41.** Flip `brand-lint` from warn-only to blocking in
-CI. Inherits 62.41's block: it can't run until 62.41 is green, and 62.41 can't go green until 62.31's
-git-history rewrite happens.
+CI. It waits for 62.41 to go green. brand-lint runs in no CI workflow today (not in
+`.github/workflows/` and not in `scripts/ci-local.py`), and `scripts/brand-lint.mjs` always exits 0,
+so N11 adds the step to CI and then changes the exit code.
+  - **Plan, 2026-10-14 (round 2).** Decided 2026-10-14: the code name `GHCAA` stays, and `brand-lint.config.json` stops counting it in namespaces and project names. Session N9 makes the check blocking after 62.41 is green. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
+  - **Plan review, 2026-10-14.** Moved from N9 to session N11, after 62.41. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 ### PHASE G: WORK PACKAGE 61 CARRY-OVER (runs inside phases A-F, not after them)
 
@@ -881,7 +890,8 @@ git-history rewrite happens.
 
 63.8 [TODO] **Priority: P3 | Depends on: nothing.** Re-take the repository figures listed in
 `docs/book/README.md` under "Keeping the numbers true" immediately before any submission, and correct
-the sentences that carry them. They were taken on 2026-09-01 and go stale with every feature.
+the sentences that carry them. They were re-taken on 2026-10-14 (`docs/book/README.md`) and go stale with every feature.
+  - **Review, 2026-10-14.** Stays open for the re-take just before submission.
 
 63.34 [TODO] **Priority: P4 | Depends on: none.** Chapter page budgets in the outline were set before Chapters 7 to 13 were written. The strict build of 2026-10-14 printed 93 of 99 pages, with five chapters over budget: Chapter 1 by 1 page, Chapter 3 by 3, Chapter 6 by 3, Chapter 8 by 1 and Chapter 11 by 1. The author decided on 2026-10-14 to keep the book at its current length for now and review the budgets later. Found 2026-10-14.
 **Acceptance:** each chapter's page count from `build.py --pdf` sits inside its stated budget, or the budget is changed with a reason.
@@ -892,10 +902,10 @@ Chrome's footer template is one template for every page, so neither can be varie
 two prints (front matter and body, each with its own template) merged into one file, which needs a PDF
 library beyond the standard library. Worth doing only if a supervisor asks for it.
 
-64.8 [PARTIAL 2026-10-09] **Priority: P2 | Depends on: 64.7.** Revise §4.8 to carry risk exposure **RE = P × C** and
+64.8 [PARTIAL 2026-10-09] **Priority: P2 | Depends on: 64.7.** Revise §4.7 to carry risk exposure **RE = P × C** and
 impact on the 1–5 scale, which is the convention the course material uses. The probabilities are
 already there; the impact costs are author-stated and blocked on 64.7.
-Audit 2026-10-09: RE = P × C is now used in §11.9, the project risk register. §4.8 and Table 4.2 still lack the
+Audit 2026-10-09: RE = P × C is now used in §11.9, the project risk register. §4.7 and Table 4.2 still lack the
 1–5 impact scale.
 
 64.9 [TODO] **Priority: P2.** Chapter 11 figure set is seventeen per-component activity diagrams plus
@@ -928,15 +938,17 @@ Recounted 2026-10-09 by counting `*[` in each chapter file: `07-implementation.m
 and this file, so writing it was prose around generated numbers rather than gathering anything;
 Chapter 8 went next as the WP82.6 refactor left it well scoped; the remaining four still need that
 gathering done chapter by chapter.
+  - **Review, 2026-10-14.** Chapter 11 still holds one placeholder: the hours-per-function-point figure at `docs/book/11-project-management.md:269`. Counts on 2026-10-14: chapter 7 has 6, 9 has 43, 10 has 16, 11 has 1, 12 has 16, 13 has 11, 93 in all.
 
 67.3 [TODO] **Priority: P2 | Depends on: 67.2.** Seventeen per-component activity diagrams (64.9)
 plus the six chapter-level charts, for chapters 7 to 13. Author decided on 2026-09-27 to keep all
 seventeen, drawn left-to-right with single-line box labels so each one costs as little height as
 possible (see 67.5). Confirmed still at zero: none of the seven
-new chapter files contains a single ```mermaid``` block (all 57 existing diagrams belong to chapters 1
-to 6). They cannot be drawn before the surrounding prose exists to hold them, and under Work Package 66
+new chapter files contains a single ```mermaid``` block (all 63 existing diagrams belong to chapters 1
+to 6 and 8, recounted 2026-10-14). They cannot be drawn before the surrounding prose exists to hold them, and under Work Package 66
 every one of them has to survive the overprint and clipping checks, which the two quadrant charts and
 the DFD did not on first attempt.
+  - **Review, 2026-10-14.** Mermaid count on 2026-10-14: chapter 1 has 4, 2 has 4, 3 has 12, 4 has 5, 5 has 19, 6 has 13, 8 has 6; chapters 7 and 9 to 13 have none.
 
 67.4 [TODO] **Priority: P2.** The reference list still carries seventeen entries no written chapter
 cites (confirmed unchanged 2026-09-05: `build.py --strict` reports the same seventeen numbers). They
@@ -944,6 +956,7 @@ are not stale: each was collected for a chapter in Part III or IV. The build rep
 while those parts are unwritten, and `--final` is the gate that stops accepting that excuse. Do not
 delete a reference to quieten the report; write the chapter that uses it, or remove it deliberately
 with the reason recorded here.
+  - **Review, 2026-10-14.** Confirmed 2026-10-14: the book lint still lists seventeen uncited references, numbers 19, 20, 22, 31, 32, 38, 39, 40, 42, 43, 44, 59, 60, 61, 62, 63 and 68.
 
 67.5 [IN PROGRESS] **Priority: P1 | Depends on: none; 67.2 and 67.3 must be written to it.** The book
 has to print in under 100 pages from Chapter 1 to the References (decided 2026-09-27, replacing the
@@ -963,6 +976,7 @@ and Fig. 2.2 (concept map of the reviewed literature). Every other diagram of th
 gets the same treatment. Figs. 3.11, 3.12, 5.1 and 5.19 get the single-line redraw first, and the
 author sees the result before deciding whether any of them goes. Each redraw still has to fit one A4
 page with labels at 7pt or larger and no overlaps, and the build's diagram audit is the check.
+  - **Review, 2026-10-14.** The archived 67.5 of 2026-09-02 was renumbered to 67.8 the same day, so this item is the only 67.5.
 
 67.7 [PARTIAL 2026-09-27] **Priority: P1 | Depends on: none; merge list confirmed 2026-09-27.** The 24 confirmed
 merges: 3.4+3.5, 3.6+3.7, 3.8+3.9, 3.11+3.12, 4.5+4.6, 5.3+5.4, 5.7+5.8, 6.4+6.6, 6.8+6.9,
@@ -989,6 +1003,7 @@ turning Dependabot off.
 72.5 [TODO] **Priority: P3 | Depends on: user.** If the repository is ever made public, CodeQL becomes
 free and 72.2 is worth revisiting; §10.4.2 would then need rewriting, since it currently states cost
 as the reason static analysis is absent.
+  - **Review, 2026-10-14.** The §10.4.2 section this item points at was not found on 2026-10-14. Check the reference when the item is picked up.
 
 # Work Package 73 — Traceability and constitutional alignment: what is true, and what was claimed
 
@@ -1027,6 +1042,7 @@ commit dates, which is the case for the research and review work of U1 to U5.
 script's. Ten days for the governing-document study and eight for requirements analysis are the two
 worth challenging: they set the pre-development total and therefore the person-month figure the
 dissertation prints. Confirm or correct them the way 64.7 asks for the assumption rates.
+  - **Owner answer, 2026-10-14.** The 27 pre-commit days stand as written, ending on 9 February 2026. The five durations are confirmed; the item stays open only for the P1 day count against the corrected word count.
 
 # Work Package 76 — Sizing the delivered system, and the reuse that paid for it
 
@@ -1055,6 +1071,17 @@ proportion is not.
   **Still open.** Roughly what share of the delivered code has an ancestor in that library. Even a
   banded answer — a quarter, a third, a half — would let §11.5.2 replace the ×0.78 judgement with a
   measured proportion, which is the difference between a defensible section and an evidenced one.
+  - **Owner answer, 2026-10-14.** Banded answer: about a quarter of the delivered code has an ancestor in the 2019 to 2024 library. The five measured modules give 18.5%; the owner names three more that are not yet measured, which 77.11 adds.
+
+77.11 [TODO] **Priority: P2 | Depends on: 77.4.** The owner named three more parts carried over from the
+2019 to 2024 library that `wbs.py` does not yet count as prior reuse: backend base services (generic
+repository, base service and DTO patterns), deploy and CI configuration (Dockerfile, `render.yaml`, the
+GitHub workflows and scripts), and test scaffolding (fixtures, factories and helpers). Add each to the
+reuse list in `docs/book/build/wbs.py` with the exact paths, after the owner confirms which files descend
+from the library, then refresh §11.0, §11.5.2, §11.5.3 and the outline's Chapter 11 block from the new
+run. The owner puts the total at about a quarter, against the 18.5% measured now.
+**Acceptance:** the reuse share comes from a `wbs.py` run against the tree, dated, and lands near a quarter;
+`build.py --pdf --strict` ends clean.
 
 78.9 [TODO] **Priority: P1. Depends on 78.4.** Administer the evaluation sessions: ordinary members
 plus the three office holders, at least half of the member sessions on a handset, against the
@@ -1082,6 +1109,8 @@ left as GHC-specific policy text that is correct to be hardcoded. Update `brand-
 to catch any newly templated tokens. Mirror the same audit to `docs/Elections/` (01–08) which serve
 as the source-of-truth drafts. Add the `default` profile equivalents for any file moved to the
 profile pack.
+  - **Plan, 2026-10-14 (round 2).** Decided 2026-10-14: no GHC literal anywhere outside `profiles/ghc/`. The election files move in F11; N9 checks none are left. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
+  - **Review, 2026-10-14.** The 2026-10-14 decision settles the options above: no GHC literal outside `profiles/ghc/`. The election files move in session F11, and N9 checks that none are left. Options (a) to (c) are no longer open.
 
 (82.115 done 2026-09-18 — see docs/TODO_ARCHIVE.md)
 
@@ -1148,6 +1177,7 @@ election engine. Web admin calls only `api/admin/elections`. Mobile calls only `
 has no seat, officer, publish, close or candidate calls. Neither client can run an election end to
 end. **Acceptance:** one client can take an election from draft to declared, or spec 011 (the
 election redesign) records which client owns which step. Spec 018 Gaps has the call lists.
+  - **Plan, 2026-10-14 (round 2).** Decided 2026-10-14: the web runs every admin step; mobile creates a draft, votes and views; an official's own steps (accept, declare a conflict, confirm a key copy) are on both. Written into spec 011 in session F7. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 84.18 [TODO] **Priority: P2 | Depends on: 84.8.** Review each entity feature against what a
 standard association platform offers, using the domain specs 012 to 020 as the baseline. Each
@@ -1208,6 +1238,7 @@ and operations) Gaps has the detail.
 84.31 [TODO] **Priority: P3 | Depends on: none.** Two spec folders share number 010:
 `010-ad-hoc-reporting` and `010-election-engine-fixes`. **Acceptance:** one is renumbered and every
 link to it is updated, or the clash is accepted and noted in the 001 index.
+  - **Plan, 2026-10-14 (round 2).** Session F7: `010-election-engine-fixes` moves to the next free spec number (check for a reserved "spec NNN" first) and every reference follows. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 84.35 [TODO] **Priority: P2 | Depends on: none.** The strict book build fails on 7 repository
 counts (run 2026-09-25). Chapters 4, 7 and 11 quote 299 commits and 88 work packages, and the tree
@@ -1225,6 +1256,7 @@ that actually runs is DataAnnotations through `[ApiController]`. Found while fix
 DTO validation. **Acceptance:** either wire the validators into the request pipeline, with a test
 that a bad request gets a 400 from a validator rule, or remove them and move any rule that matters
 onto the DTO.
+  - **Plan, 2026-10-14 (round 2).** Session F1 for `ElectionValidators`, session N10 for the rest, then the unused registration and package go. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 84.39 [TODO] **Priority: P2 | Depends on: 84.37, 84.38.** The proposal
 (`docs/proposal-docs/FINAL_PROPOSAL_AND_PRESENTATION.md`) needs the new title and a requirements
@@ -1244,6 +1276,8 @@ Audit 2026-10-09: the first version of this item predates 37.1w. `GHCAA.Mobile/l
 `STEP_UP_REQUIRED` and is wired in `api_client.dart`, so the actions should no longer always fail.
 What is left is a device check that `POST /roles/users`, `POST /roles/assign` and
 `POST /admin/elections` succeed through the prompt.
+  - **Plan, 2026-10-14 (round 2).** Decided 2026-10-14: mobile keeps create election. Session F6 routes it through the step-up prompt with a 403 test; the device check stays with a person. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
+  - **Plan review, 2026-10-14.** Moved from F6 to session F1: the election call needs nothing from F2 to F4. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 ---
 
@@ -1436,12 +1470,12 @@ book changes.
 
 # Work Package 93 — Member portal menu on small screens (raised by user 2026-10-03: "review member menu navigation panel items for not showing all, from smaller device browser")
 
-93.3 [TODO] **Priority: P2 | Depends on: none.** `tests/e2e/portal-mobile-nav.spec.ts` covers 93.1 but
+93.3 [TODO] **Priority: P2 | Depends on: none.** `GHCAA.Web/tests/e2e/portal-mobile-nav.spec.ts` covers 93.1 but
 could not run locally: `registerNewMemberViaUi` gets "Registration failed" from the local API, and
 `gallery.spec.ts` fails the same way, so the cause is in registration or the local DB, not the menu.
 **Acceptance:** both specs pass against a fresh local stack.
 
-93.4 [TODO] **Priority: P3 | Depends on: none.** Flutter drawer (`app_drawer.dart`) has no entry for
+93.4 [TODO] **Priority: P3 | Depends on: none.** Flutter drawer (`GHCAA.Mobile/lib/core/widgets/app_drawer.dart`) has no entry for
 `/communications`, `/legacy` or `/professionals`, and nothing else in the app links to them. It also
 shows Events, Job Hub, Discussions, Gallery and the rest without checking the OrgConfig feature flags
 the web menu honours. Decide which of these screens should be reachable before adding them.
@@ -1459,11 +1493,13 @@ both columns become a foreign key; admin screen to add, rename, reorder and reti
 and mobile read the list from the API instead of the enum.
 **Acceptance:** adding a position makes it selectable for assignment and elections without a code
 change; retiring one hides it from new use and leaves past terms and results intact.
+  - **Plan, 2026-10-14 (round 2).** Decided 2026-10-14: positions are rows per organisation with no fixed set; GHC's 15 are seeded only by `profiles/ghc`, the default profile seeds a short generic set. Session N1, migration `AddCommitteePositionsAndTerms`, which also carries the end-reason table, `Election.Kind` and the live-election index rebuild for F10. Closes 37.1h-1. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 95.4 [TODO] **Priority: P2 | Depends on: 95.3.** Vacant-seat view and filter. A seat is vacant when
 no `ECMember` row for it in the active period has `EndDate == null`. Show vacant seats on the admin
 governance page with a filter, and use the same query for the by-election form.
 **Acceptance:** after a term is ended the seat appears in the vacant filter; once filled it leaves it.
+  - **Plan, 2026-10-14 (round 2).** Session F10. Vacant means fewer current holders than the position's seat count in the active period. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 95.5 [TODO] **Priority: P2 | Depends on: 95.2, 95.4.** By-election type. Add an election kind
 (General or ByElection) shown on the ballot and results. For a by-election the form offers only
@@ -1473,6 +1509,20 @@ end any current holder of that seat with reason TermEnded. `GetCurrentAsync` ret
 open election, so two open elections in one period need handling.
 **Acceptance:** a by-election for two vacant seats fills only those seats and leaves every other
 committee member untouched; tests cover declare, the vacant-only guard and two open elections.
+  - **Plan, 2026-10-14 (round 2).** Decided 2026-10-14: declare never ends a current holder. A by-election offers vacant seats only and refuses a held one at create and at declare, so the TermEnded step above is dropped. `IX_Elections_ECPeriodId_Live` is rebuilt on period and kind in N1 so a by-election can run next to a declared general election. Session F10. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
+
+95.12 [TODO] **Priority: P2 | Depends on: 95.2, 95.3.** Term ending by date and configurable end
+reasons (user decision 2026-10-14: "any person can be removed anytime due to a valid reason, let make
+this configurable"). A daily job, built like `DataRetentionSweep` and `ExpiredRevokeSweep`, ends each
+open `ECMember` row whose `ECPeriod.EndDate` has passed, with reason TermEnded and an audit entry. It
+runs only when the organisation turns it on (off by default). A default term length fills a new
+period's end date. An admin can still end any term early with a reason and a note through
+`POST members/{ecMemberId}/end-term`. The `VacancyReason` enum becomes an end-reason table per
+organisation, seeded with today's five under the same ids; TermEnded and Died are system rows that
+cannot be removed. Session N1 (schema) and F10 (job, screens, tests). Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
+**Acceptance:** with the setting on, a term past its period end date is ended by the job with
+TermEnded; with it off nothing changes; an admin can add a reason and use it to end a term early;
+a system reason cannot be removed.
 
 95.6 [TODO] **Priority: P3 | Depends on: 95.1.** Authenticator app (TOTP) as a second way to pass
 step-up, for admins who would rather not rely on email. Needs a secret per user, enrolment with a
@@ -1486,6 +1536,7 @@ instead of the shared ones: member giving, forum and polls (own h1), messages, a
 election personas and the directory (own search CSS), and the Fundraising donor-tier inputs (raw
 inputs). Move them onto `app-page-header`, `app-search-bar` and the form tokens.
 **Acceptance:** each listed page uses the shared header and search, with no page-level size overrides.
+  - **Review, 2026-10-14.** Rechecked against the code. Giving, forum, polls, admin governance, election personas and the directory header already use `<app-page-header>`. Still open: messages (no page header, raw composer input, `<h3>` panes), the directory's raw search `<input>` (`common/directory/directory.html:14`), and the donor-tier and campaign form inputs (`admin/campaigns/admin-campaigns.html:49-51` and `:59-64`). 96.1 is done (archive).
 
 96.15 [IN PROGRESS] **Priority: P0 | Depends on: 7.19.** The preprod deploy of 2026-10-07 exited
 at startup with "AppSettings:ClientUrl is not set". The 7.19 check needs ClientUrl in every
@@ -1498,11 +1549,14 @@ before its first deploy with this code. The same build warned CS8602 in
 is non-empty after the early returns. The reason is now held in a non-null local.
 **Acceptance:** Release build of the API has 0 warnings, and 150 election approval, origin and
 config tests pass. Still open: the Render variable, and a deploy that starts.
+  - **Review, 2026-10-14.** 7.19 is done (archive). The preprod origin in `GHCAA.API/appsettings.Preprod.json` is the dead domain from 7.22, so the deploy can start but the origin check still points at the wrong host. The owner fixes both together.
+  - **Owner answer, 2026-10-14.** Origin settled under 7.22: the Render web address. The owner makes the settings change.
 
 # Work Package 97 — Email verification from the member profile (raised by user 2026-10-12: "add todo for email verification of member from their profile")
 
-97.1 [TODO] **Priority: P2 | Depends on: none.** A member can verify an email only during registration (`MemberService.cs`, where `EmailVerified` is set after the OTP). The profile page has no way to verify or re-verify it. Imported members arrive with `EmailVerified = true` and no check, and a member who changes the email on the profile keeps the old flag. Add to the profile: a status badge (verified or not), a "Verify email" action that sends an OTP with the existing `EmailVerify` purpose, and a rule that editing the email clears `EmailVerified` until the new address is confirmed. Reuse the registration OTP service and its 5-attempt lock; do not write a second one. Web and mobile together. Decided 2026-10-12: an unverified email only shows the badge and never blocks sign-in. Social sign-in links by email only when `EmailVerified` is true (`AuthService.cs`), so a cleared flag stops auto-linking until the member verifies.
+97.1 [TODO] **Priority: P2 | Depends on: none.** A member can verify an email only during registration (`MemberService.cs`, where `EmailVerified` is set after the OTP). The profile page has no way to verify or re-verify it. Imported members arrive with `EmailVerified = true` and no check, and a member who changes the email on the profile keeps the old flag. Add to the profile: a status badge (verified or not), a "Verify email" action that sends an OTP with the `EmailVerify` purpose, added to `OtpPurpose`, and a rule that editing the email clears `EmailVerified` until the new address is confirmed. Reuse the registration OTP service and its 5-attempt lock; do not write a second one. Web and mobile together. Decided 2026-10-12: an unverified email only shows the badge and never blocks sign-in. Social sign-in links by email only when `EmailVerified` is true (`AuthService.cs`), so a cleared flag stops auto-linking until the member verifies.
 **Acceptance:** a member sees the verified state on the profile, can verify by OTP, and changing the email clears the flag; tests cover the OTP path, the lockout and the clear-on-change rule on the backend, web and mobile.
+  - **Review, 2026-10-14.** `OtpPurpose` today is `Registration`, `PasswordReset` and `AdminStepUp` (`GHCAA.Domain/Enums.cs:18`), so `EmailVerify` is a new value. The verify path today is `RegistrationController.cs:89-94` to `MemberService.VerifyEmailAsync`.
 
 # Work Package 98 — Performance pass across database, API, web and mobile (raised by user 2026-10-14: "i want all specs plans, tasks for performance improvement, that mat db, api, FE,design or else first, than start fix")
 
@@ -1513,8 +1567,5 @@ Raised by user 2026-10-14: "make sure nothing left open of perprmance,and releva
 98.7 [TODO] **Priority: P4 | Depends on: 98.6.** Static assets are compressed on each request and nothing serves pre-compressed files. Worth doing only if 98.6 leaves a measurable cost.
 Deferred 2026-10-14. It needs a measurement on the deployed site after 98.6, which has not shipped yet.
 **Acceptance:** Brotli files served for the built chunks, or the item closed with the measurement.
-
-98.26 [TODO] **Priority: P4 | Depends on: none.** Many files in the working tree differ from HEAD only in line endings, which hides real changes in the diff. Normalising them touches files in the staged 98.3 chunk, so it waits until that chunk is committed. The author decides whether to add a `.gitattributes` rule or renormalise once. Found 2026-10-14.
-**Acceptance:** `git diff --ignore-cr-at-eol --stat` and `git diff --stat` list the same files.
 
 98.34 [ONHOLD 2026-10-14, until a patched 9.0.x ships or the API moves to .NET 10] **Priority: P4 | Depends on: none.** The `vulnerable-packages` gate in `scripts/ci-local.py` still fails on two transitive packages: `System.Security.Cryptography.Pkcs` 10.0.0 (GHSA-846f-f764-76mx) and `System.Security.Cryptography.Xml` 9.0.20 (GHSA-r955-8q5j-3h83), both High, in the API, Infrastructure and Tests projects. The fixed versions are 10.x builds that fail restore on net9.0, and the other way out needs a paid licence. Decided by the user 2026-10-14: leave them, and treat the other gates as the release check.
