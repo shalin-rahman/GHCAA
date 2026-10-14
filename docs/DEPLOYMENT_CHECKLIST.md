@@ -49,7 +49,7 @@ variable registry.
 | `ORG_PROFILE` | `ghc` | Type it. It names a folder under `profiles/` | Wrong branding and seed profile |
 | `DATABASE_URL` | Postgres URL | Neon console (console.neon.tech), open the project, **Connect**, pick the database, copy the pooled connection string | No database |
 | `Jwt__Key` | 32 or more random characters | Make one in PowerShell: `[Convert]::ToBase64String((1..48 \| % {Get-Random -Max 256}))`. Keep it only on Render; changing it signs everyone out | App will not start (exit 139) |
-| `EmailSettings__Provider` | `Brevo` on Render, else leave unset (`Gmail`) | Type it. Render's free tier blocks outbound SMTP, so Gmail cannot send from there | Gmail is used, and on Render every email fails; any other value stops the app at startup |
+| `EmailSettings__Provider` | `Brevo` on Render, else leave unset (`Gmail`) | Type it, or leave it unset and pick Brevo under admin Settings, Workflow tab, Email Sender. The admin pick wins and needs no restart. Render's free tier blocks outbound SMTP, so Gmail cannot send from there | Gmail is used unless an admin picks Brevo, and on Render Gmail fails every email; any other value stops the app at startup |
 | `BrevoSettings__ApiKey` | Brevo API key, when the provider is `Brevo` | brevo.com, sign up, then **SMTP & API**, **API keys**, create one | Email sending throws |
 | `BrevoSettings__SenderEmail` | the sending address, when the provider is `Brevo` | Brevo, **Senders, domains & dedicated IPs**, add the address and click the link Brevo emails to it | Email sending throws; Brevo refuses an unverified sender |
 | `BrevoSettings__SenderName` | optional display name | Type it | Mail shows the bare address |
