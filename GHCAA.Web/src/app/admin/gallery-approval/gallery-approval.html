@@ -30,7 +30,7 @@
                 <tr>
                     <td>
                         <div class="article-info">
-                            <img class="thumb" [src]="validImg(album.photos[0]?.photoPath)" alt="" appImgFallback>
+                            <img appLazyImg class="thumb" [src]="validImg(album.photos[0]?.thumbnailPath || album.photos[0]?.photoPath)" alt="" appImgFallback>
                             <div class="txt">
                                 <strong>{{ album.title }}</strong>
                                 <p>{{ album.description }}</p>
@@ -71,7 +71,7 @@
                 @for (photo of filteredPhotos(); track photo.id) {
                 <tr>
                     <td>
-                        <img class="thumb" [src]="validImg(photo.photoPath)" alt="" appImgFallback>
+                        <img appLazyImg class="thumb" [src]="validImg(photo.thumbnailPath || photo.photoPath)" alt="" appImgFallback>
                     </td>
                     <td>{{ photo.caption }}</td>
                     <td>{{ photo.uploadedByMemberId }}</td>
@@ -113,7 +113,7 @@
                 </div>
                 <div class="photo-grid-preview mt-8">
                     @for (p of item.album.photos; track p.id) {
-                    <img [src]="validImg(p.photoPath)" alt="" appImgFallback>
+                    <img appLazyImg [src]="validImg(p.thumbnailPath || p.photoPath)" alt="" appImgFallback>
                     }
                 </div>
             </div>

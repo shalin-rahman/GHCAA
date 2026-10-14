@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { GalleryService } from '../../../../core/services/gallery.service';
 import { EventGallery, EventPhoto } from '../../../../core/models/business.models';
 import { ImgFallbackDirective } from '../../../../common/directives/img-fallback.directive';
+import { LazyImgDirective } from '../../../../common/directives/lazy-img.directive';
 
 const SLIDE_INTERVAL_MS = 3000;
 const MAX_ALBUMS = 8;
@@ -11,7 +12,7 @@ const MAX_ALBUMS = 8;
 @Component({
     selector: 'landing-gallery-preview',
     standalone: true,
-    imports: [CommonModule, RouterLink, ImgFallbackDirective],
+    imports: [CommonModule, RouterLink, ImgFallbackDirective, LazyImgDirective],
     templateUrl: './gallery-preview.html',
     styleUrl: './gallery-preview.scss'
 })

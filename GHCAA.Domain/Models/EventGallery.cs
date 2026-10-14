@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace GHCAA.Domain.Models
 {
     public class EventGallery
@@ -30,6 +27,8 @@ namespace GHCAA.Domain.Models
         public int Id { get; set; }
         public int EventGalleryId { get; set; }
         public string PhotoPath { get; set; } = null!;
+        // Small copy for grids. Null on photos stored before 98.3; clients fall back to PhotoPath.
+        public string? ThumbnailPath { get; set; }
         public string? Caption { get; set; }
         public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
 

@@ -11,7 +11,7 @@
             @for (album of albums(); track album.id) {
             @if (currentPhoto(album); as photo) {
             <div class="gallery-item glass-card" (click)="viewFull(photo.photoPath)">
-                <img [src]="photo.photoPath" [alt]="album.title" appImgFallback="/assets/placeholders/image-placeholder.svg">
+                <img appLazyImg [src]="photo.thumbnailPath || photo.photoPath" [alt]="album.title" appImgFallback="/assets/placeholders/image-placeholder.svg">
                 <div class="gallery-overlay">
                     <span>{{ album.title }}</span>
                 </div>

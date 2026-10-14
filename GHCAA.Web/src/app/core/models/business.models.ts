@@ -444,6 +444,8 @@ export interface EventPhoto {
     id: number;
     eventGalleryId: number;
     photoPath: string;
+    // Small copy for grids; null on photos stored before 98.3.
+    thumbnailPath?: string | null;
     caption?: string;
     uploadedAt: string | Date;
     uploadedByMemberId?: number;

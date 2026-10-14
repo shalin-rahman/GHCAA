@@ -164,7 +164,7 @@
                 @for (g of galleries(); track g.id) {
                 <tr (click)="selectedGallery.set(g)">
                     <td>
-                        <div class="table-thumb" [style.background-image]="'url(' + validImg(g.photos[0]?.photoPath) + ')'"></div>
+                        <div class="table-thumb" [style.background-image]="'url(' + validImg(g.photos[0]?.thumbnailPath || g.photos[0]?.photoPath) + ')'"></div>
                     </td>
                     <td class="title-cell">{{ g.title }}</td>
                     <td>{{ g.eventDate | appDate }}</td>
@@ -187,7 +187,7 @@
         @for (g of galleries(); track g.id) {
         <div class="gallery-card glass-card reveal-card" (click)="selectedGallery.set(g)">
             <div class="card-img"
-                [style.background-image]="'url(' + validImg(g.photos[0]?.photoPath) + ')'">
+                [style.background-image]="'url(' + validImg(g.photos[0]?.thumbnailPath || g.photos[0]?.photoPath) + ')'">
                 <div class="photo-count">{{ g.photos.length }} Photos</div>
             </div>
             <div class="card-body">
@@ -227,7 +227,7 @@
             <div class="photo-grid-immersive">
                 @for (p of gallery?.photos; track p.id) {
                 <div class="photo-reveal">
-                    <img [src]="validImg(p.photoPath)" [alt]="gallery?.title" appImgFallback="/assets/logo.png" (click)="viewFull(p.photoPath)">
+                    <img appLazyImg [src]="validImg(p.thumbnailPath || p.photoPath)" [alt]="gallery?.title" appImgFallback="/assets/logo.png" (click)="viewFull(p.photoPath)">
                 </div>
                 }
             </div>

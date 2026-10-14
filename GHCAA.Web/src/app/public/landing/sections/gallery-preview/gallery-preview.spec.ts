@@ -120,6 +120,19 @@ describe('LandingGalleryPreview Component', () => {
         expect(clearIntervalSpy).toHaveBeenCalled();
     });
 
+    // NFR-P4: the grid loads the small copy and falls back to the full photo (98.3).
+    it('should show the thumbnail when there is one and the full photo otherwise', () => {
+        const thumbed = { id: 1, title: 'A', photos: [{ id: 1, photoPath: '/p/a.jpg', thumbnailPath: '/p/thumbs/a.jpg' }] } as any;
+        const plain = { id: 2, title: 'B', photos: [{ id: 2, photoPath: '/p/b.jpg', thumbnailPath: null }] } as any;
+        galleryServiceMock.getGalleries.mockReturnValue(of([thumbed, plain]));
+
+        fixture.detectChanges();
+
+        const srcs = Array.from(fixture.nativeElement.querySelectorAll('.gallery-item img'))
+            .map((img: any) => img.getAttribute('src'));
+        expect(srcs).toEqual(['/p/thumbs/a.jpg', '/p/b.jpg']);
+    });
+
     it('viewFull should open the given path in a new tab', () => {
         fixture.detectChanges();
         const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);

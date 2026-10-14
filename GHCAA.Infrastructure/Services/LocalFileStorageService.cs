@@ -167,6 +167,9 @@ namespace GHCAA.Infrastructure.Services
                         }
 
                         await File.WriteAllBytesAsync(diskPath, encoded, cancellationToken);
+
+                        if (uploadType == Enums.FileUploadType.GalleryPhoto)
+                            await WriteThumbnailAsync(image, targetDir, uniqueName, cancellationToken);
                     }
                     finally
                     {
@@ -190,6 +193,45 @@ namespace GHCAA.Infrastructure.Services
             var webRelative = Path.Combine(relativePrefix, memberId.ToString(), prefix, uniqueName).Replace("\\", "/");
             _logger.LogInformation("Saved {Type} file to {Path}", isSecure ? "secure" : "public", webRelative);
             return webRelative;
+        }
+
+        // 98.3: gallery grids load this instead of the full photo. A failure here only costs the
+        // grid its small copy, so it is logged and the upload still succeeds.
+        private async Task WriteThumbnailAsync(SKBitmap image, string targetDir, string fileName, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var thumbDir = Path.Combine(targetDir, Constants.Defaults.ThumbnailFolder);
+                Directory.CreateDirectory(thumbDir);
+
+                var maxPx = Constants.Defaults.GalleryThumbnailMaxPx;
+                var copy = image.Copy() ?? throw new InvalidDataException("Could not copy the image for its thumbnail.");
+                using var thumb = FitWithin(copy, maxPx, maxPx);
+                await File.WriteAllBytesAsync(Path.Combine(thumbDir, fileName), EncodeJpeg(thumb, DefaultQuality), cancellationToken);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogWarning(ex, "Could not write gallery thumbnail for {File}", fileName);
+            }
+        }
+
+        public string? GetThumbnailPath(string relativePath)
+        {
+            if (string.IsNullOrWhiteSpace(relativePath)) return null;
+
+            var normalized = relativePath.Replace("\\", "/").TrimStart('/');
+            var uploadsPrefix = _options.UploadsRelativePath.Replace("\\", "/").Trim('/') + "/";
+            if (!normalized.StartsWith(uploadsPrefix, StringComparison.OrdinalIgnoreCase)
+                || normalized.Split('/').Any(part => part == ".."))
+                return null;
+
+            var lastSlash = normalized.LastIndexOf('/');
+            var thumbRelative = $"{normalized[..lastSlash]}/{Constants.Defaults.ThumbnailFolder}/{normalized[(lastSlash + 1)..]}";
+            var physical = Path.Combine(_options.BasePhysicalPath ?? "wwwroot", thumbRelative);
+            if (!File.Exists(physical)) return null;
+
+            // Same leading-slash shape the caller passed in.
+            return relativePath.StartsWith('/') ? "/" + thumbRelative : thumbRelative;
         }
 
         // Scales down to fit inside maxW x maxH, keeping the aspect ratio. Disposes the source bitmap.

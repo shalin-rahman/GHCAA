@@ -1,3 +1,4 @@
+import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -63,13 +64,12 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           children: [
             Center(
               child: InteractiveViewer(
-                child: Image.network(
-                  url,
+                child: CustomNetworkImage(
+                  imageUrl: url,
                   fit: BoxFit.contain,
-                  loadingBuilder: (c, child, progress) => progress == null
-                      ? child
-                      : Center(child: LogoSpinner.small()),
-                  errorBuilder: (c, e, s) => Container(
+                  borderRadius: 0,
+                  placeholderBuilder: (_) => Center(child: LogoSpinner.small()),
+                  errorBuilder: (_) => Container(
                     padding: const EdgeInsets.all(AppTheme.spaceXXL),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -615,6 +615,12 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                     final photos = gallery['photos'] as List? ?? [];
                     final fullThumb = AppConfig.resolveImageUrl(
                         photos.isNotEmpty ? photos[0]['photoPath'] : null);
+                    // Decoded at 400 px anyway, so the 480 px copy loses nothing.
+                    final coverThumb = AppConfig.resolveImageUrl(
+                            photos.isNotEmpty
+                                ? photos[0]['thumbnailPath']
+                                : null) ??
+                        fullThumb;
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: AppTheme.spaceXL),
@@ -636,17 +642,17 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                             const BorderRadius.vertical(
                                                 top: Radius.circular(
                                                     AppTheme.radiusL)),
-                                        child: Image.network(fullThumb,
+                                        child: CustomNetworkImage(
+                                            imageUrl: coverThumb!,
                                             fit: BoxFit.cover,
-                                            errorBuilder: (context, error,
-                                                    stackTrace) =>
-                                                Container(
-                                                    color: Colors.black12,
-                                                    child: const Icon(
-                                                        Icons
-                                                            .image_not_supported_outlined,
-                                                        color:
-                                                            Colors.white10))),
+                                            borderRadius: 0,
+                                            decodeSize: 400,
+                                            errorBuilder: (_) => Container(
+                                                color: Colors.black12,
+                                                child: const Icon(
+                                                    Icons
+                                                        .image_not_supported_outlined,
+                                                    color: Colors.white10))),
                                       ),
                                     ),
                                   ),
@@ -799,9 +805,10 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                         scrollDirection: Axis.horizontal,
                                         itemCount: photos.length - 1,
                                         itemBuilder: (c, i) {
+                                          final p = photos[i + 1];
                                           final fUrl =
                                               AppConfig.resolveImageUrl(
-                                                  photos[i + 1]['photoPath']);
+                                                  p['photoPath']);
                                           if (fUrl == null) {
                                             return const SizedBox();
                                           }
@@ -823,13 +830,17 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           AppTheme.radiusS),
-                                                  child: Image.network(fUrl,
+                                                  child: CustomNetworkImage(
+                                                      // 98.3: the strip loads the small copy, the preview the full photo.
+                                                      imageUrl: AppConfig
+                                                              .resolveImageUrl(p[
+                                                                  'thumbnailPath']) ??
+                                                          fUrl,
                                                       width: 72,
                                                       height: 72,
                                                       fit: BoxFit.cover,
-                                                      errorBuilder: (context,
-                                                              error,
-                                                              stackTrace) =>
+                                                      borderRadius: 0,
+                                                      errorBuilder: (_) =>
                                                           const SizedBox(
                                                               width: 72,
                                                               child: Icon(

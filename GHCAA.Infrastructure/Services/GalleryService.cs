@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
@@ -16,12 +11,14 @@ namespace GHCAA.Infrastructure.Services
         private readonly ApplicationDbContext _db;
         private readonly IAdminNotificationService _adminNotification;
         private readonly INotificationService _notification;
+        private readonly IFileStorageService _fileStorage;
 
-        public GalleryService(ApplicationDbContext db, IAdminNotificationService adminNotification, INotificationService notification)
+        public GalleryService(ApplicationDbContext db, IAdminNotificationService adminNotification, INotificationService notification, IFileStorageService fileStorage)
         {
             _db = db;
             _adminNotification = adminNotification;
             _notification = notification;
+            _fileStorage = fileStorage;
         }
 
         public async Task<EventGallery> CreateEventGalleryAsync(EventGallery gallery, CancellationToken cancellationToken = default)
@@ -43,6 +40,7 @@ namespace GHCAA.Infrastructure.Services
                 {
                     EventGalleryId = galleryId,
                     PhotoPath = path,
+                    ThumbnailPath = _fileStorage.GetThumbnailPath(path),
                     UploadedAt = DateTime.UtcNow
                 };
                 await _db.EventPhotos.AddAsync(photo, cancellationToken);
@@ -152,6 +150,7 @@ namespace GHCAA.Infrastructure.Services
             {
                 EventGalleryId = galleryId,
                 PhotoPath = photoPath,
+                ThumbnailPath = _fileStorage.GetThumbnailPath(photoPath),
                 Caption = caption,
                 UploadedAt = DateTime.UtcNow,
                 UploadedByMemberId = memberId,

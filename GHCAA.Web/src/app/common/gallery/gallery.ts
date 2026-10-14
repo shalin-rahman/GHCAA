@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { GalleryService } from '../../core/services/gallery.service';
@@ -10,6 +10,7 @@ import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { PageHeaderComponent } from '../page-header/page-header.component';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
+import { LazyImgDirective } from '../directives/lazy-img.directive';
 import { safeImageUrl } from '../../core/utils/image.util';
 import { SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
 import { OrgConfigService } from '../../core/services/org-config.service';
@@ -17,8 +18,9 @@ import { OrgConfigService } from '../../core/services/org-config.service';
 @Component({
   selector: 'app-gallery',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective, LazyImgDirective],
   templateUrl: './gallery.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './gallery.scss'
 })
 export class Gallery implements OnInit {

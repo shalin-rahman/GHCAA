@@ -345,6 +345,50 @@ public class LocalFileStorageServiceTests
         saved.Height.Should().Be(150);
     }
 
+    [Category("NFR-P4")]
+    [Test]
+    public async Task SaveFileAsync_WithGalleryPhoto_ShouldWriteThumbnailBesideIt()
+    {
+        var stream = CreateJpeg(1600, 1200);
+
+        var relativePath = await _service.SaveFileAsync(stream, "album.jpg", 1, Enums.FileUploadType.GalleryPhoto);
+        var thumbPath = _service.GetThumbnailPath(relativePath);
+
+        thumbPath.Should().Be(relativePath.Replace("/galleryphoto/", "/galleryphoto/thumbs/"));
+        using var thumb = SKBitmap.Decode(Path.Combine(_testDirectory, thumbPath!));
+        thumb.Width.Should().Be(Constants.Defaults.GalleryThumbnailMaxPx);
+        thumb.Height.Should().Be(360);
+    }
+
+    [Category("NFR-P4")]
+    [Test]
+    public async Task GetThumbnailPath_KeepsLeadingSlashOfInput()
+    {
+        var relativePath = await _service.SaveFileAsync(CreateJpeg(600, 600), "album.jpg", 1, Enums.FileUploadType.GalleryPhoto);
+
+        _service.GetThumbnailPath("/" + relativePath).Should().StartWith("/uploads/members/1/galleryphoto/thumbs/");
+    }
+
+    [Category("NFR-P4")]
+    [TestCase(Enums.FileUploadType.Photo)]
+    [TestCase(Enums.FileUploadType.NewsImage)]
+    public async Task SaveFileAsync_WithOtherImageTypes_ShouldNotWriteThumbnail(Enums.FileUploadType type)
+    {
+        var relativePath = await _service.SaveFileAsync(CreateJpeg(1600, 1200), "pic.jpg", 1, type);
+
+        _service.GetThumbnailPath(relativePath).Should().BeNull();
+    }
+
+    [TestCase("")]
+    [TestCase("uploads/members/1/galleryphoto/missing.jpg")]
+    [TestCase("uploads/members/../../secret.jpg")]
+    [TestCase("secure_uploads/1/certificate/cert.jpg")]
+    [TestCase("/assets/gallery/iftar/01.jpg")]
+    public void GetThumbnailPath_ReturnsNull_ForMissingOrOutsideUploads(string path)
+    {
+        _service.GetThumbnailPath(path).Should().BeNull();
+    }
+
     [Test]
     public void Constructor_WithInvalidMaxFileSize_ShouldFailFastInsteadOfSilentlyDefaulting()
     {

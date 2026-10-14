@@ -87,7 +87,7 @@
                     <td>
                         <div class="table-thumb" (click)="selectGallery(gallery)">
                             @if (gallery.photos && gallery.photos.length > 0) {
-                            <img [src]="getImageUrl(gallery.photos[0].photoPath)" alt="Cover" appImgFallback>
+                            <img appLazyImg [src]="getImageUrl(gallery.photos[0].thumbnailPath || gallery.photos[0].photoPath)" alt="Cover" appImgFallback>
                             } @else {
                             <span class="text-2xl">📸</span>
                             }
@@ -128,7 +128,7 @@
         <div class="album-card reveal-top" [style.animation-delay]="($index * 50) + 'ms'">
             <div class="album-preview" (click)="selectGallery(gallery)">
                 @if (gallery.photos && gallery.photos.length > 0) {
-                <img [src]="getImageUrl(gallery.photos[0].photoPath)" alt="Cover" appImgFallback>
+                <img [src]="getImageUrl(gallery.photos[0].thumbnailPath || gallery.photos[0].photoPath)" alt="Cover" appImgFallback>
                 } @else {
                 <div class="flex items-center justify-center h-full bg-primary/5 text-primary/20">
                     <span class="text-4xl">📸</span>
@@ -205,7 +205,7 @@
             <div class="photo-grid">
                 @for (photo of gallery.photos || []; track photo.id) {
                 <div class="photo-item group">
-                    <img [src]="getImageUrl(photo.photoPath)" alt="Gallery photo" appImgFallback>
+                    <img appLazyImg [src]="getImageUrl(photo.thumbnailPath || photo.photoPath)" alt="Gallery photo" appImgFallback>
                     <div class="photo-overlay">
                         <button (click)="removePhoto(photo.id)" class="remove-btn" title="Remove Photo">
                             ✕

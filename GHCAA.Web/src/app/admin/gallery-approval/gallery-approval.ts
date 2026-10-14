@@ -1,8 +1,9 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { LazyImgDirective } from '../../common/directives/lazy-img.directive';
 import { GalleryService } from '../../core/services/gallery.service';
 import { EventGallery, EventPhoto } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
@@ -17,8 +18,9 @@ type PendingItem = { kind: 'album'; album: EventGallery } | { kind: 'photo'; pho
 @Component({
   selector: 'app-gallery-approval',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, NotifyToggleComponent, ModalHeaderComponent],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LazyImgDirective, NotifyToggleComponent, ModalHeaderComponent],
   templateUrl: './gallery-approval.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './gallery-approval.scss'
 })
 export class GalleryApproval implements OnInit {

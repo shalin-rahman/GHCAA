@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using FluentAssertions;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
@@ -6,7 +5,6 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using NUnit.Framework;
 
 namespace GHCAA.Tests.Services;
 
@@ -17,6 +15,7 @@ public class GalleryServiceTests : TestBase
 {
     private Mock<IAdminNotificationService> _adminNotification = null!;
     private Mock<INotificationService> _notification = null!;
+    private Mock<IFileStorageService> _fileStorage = null!;
     private GalleryService _service = null!;
 
     [SetUp]
@@ -24,7 +23,8 @@ public class GalleryServiceTests : TestBase
     {
         _adminNotification = new Mock<IAdminNotificationService>();
         _notification = new Mock<INotificationService>();
-        _service = new GalleryService(_context, _adminNotification.Object, _notification.Object);
+        _fileStorage = new Mock<IFileStorageService>();
+        _service = new GalleryService(_context, _adminNotification.Object, _notification.Object, _fileStorage.Object);
     }
 
     private async Task<int> CreateMemberIdAsync(string name = "Album Owner")
@@ -66,6 +66,32 @@ public class GalleryServiceTests : TestBase
         photo.UploadedByMemberId.Should().Be(memberId);
         _adminNotification.Verify(x => x.NotifyPendingApprovalAsync(
             "Photo", "Reunion 2026", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Category("NFR-P4")]
+    [Test]
+    public async Task AddMemberPhotoToAlbumAsync_RecordsThumbnailFromStorage()
+    {
+        var memberId = await CreateMemberIdAsync();
+        var album = await _service.CreateMemberAlbumAsync(memberId, "Reunion 2026", null);
+        _fileStorage.Setup(s => s.GetThumbnailPath("/uploads/reunion1.jpg")).Returns("/uploads/thumbs/reunion1.jpg");
+
+        var photo = await _service.AddMemberPhotoToAlbumAsync(memberId, album.Id, "/uploads/reunion1.jpg", null);
+
+        photo!.ThumbnailPath.Should().Be("/uploads/thumbs/reunion1.jpg");
+    }
+
+    [Category("NFR-P4")]
+    [Test]
+    public async Task AddPhotosToGalleryAsync_KeepsThumbnailNull_WhenStorageHasNone()
+    {
+        var gallery = await _service.CreateEventGalleryAsync(new EventGallery { Title = "Iftar", EventDate = DateTime.UtcNow });
+        _fileStorage.Setup(s => s.GetThumbnailPath("a.jpg")).Returns("thumbs/a.jpg");
+
+        await _service.AddPhotosToGalleryAsync(gallery.Id, new[] { "a.jpg", "b.jpg" });
+
+        var photos = await _context.EventPhotos.Where(p => p.EventGalleryId == gallery.Id).OrderBy(p => p.PhotoPath).ToListAsync();
+        photos.Select(p => p.ThumbnailPath).Should().Equal("thumbs/a.jpg", null);
     }
 
     [Category("FR-53")]

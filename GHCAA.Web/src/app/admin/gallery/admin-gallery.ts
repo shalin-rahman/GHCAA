@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, computed } from '@angular/core';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { LazyImgDirective } from '../../common/directives/lazy-img.directive';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { firstValueFrom } from 'rxjs';
 import { GalleryService } from '../../core/services/gallery.service';
@@ -17,8 +18,9 @@ import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 @Component({
     selector: 'app-admin-gallery',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, ModalHeaderComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LoadingPanelComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, ModalHeaderComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LazyImgDirective, LoadingPanelComponent],
     templateUrl: './admin-gallery.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './admin-gallery.scss'
 })
 export class AdminGallery implements OnInit {
@@ -86,6 +88,7 @@ export class AdminGallery implements OnInit {
                     result.photos = photos.map((p: any) => ({
                         id: p.id || p.Id,
                         photoPath: p.photoPath || p.PhotoPath,
+                        thumbnailPath: p.thumbnailPath || p.ThumbnailPath,
                         uploadedAt: p.uploadedAt || p.UploadedAt
                     }));
                     return result;

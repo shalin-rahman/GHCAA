@@ -96,6 +96,8 @@ namespace GHCAA.Domain
             public const int FallbackImageQuality = 70;
             public const int TargetImageSizeKB = 350;
             public const int ImageMaxDimensionPx = 1920; // longest side; display images never need more
+            public const int GalleryThumbnailMaxPx = 480; // grid tiles are at most ~400px wide
+            public const string ThumbnailFolder = "thumbs"; // sits beside the full photo, same file name
 
             // ImportEmailBase/MembershipPrefix moved to the org-config pack (ContactDto.ImportEmailBase,
             // BrandingDto.MembershipNumberPrefix) — see MemberImportService for the new consumer.
@@ -289,6 +291,49 @@ namespace GHCAA.Domain
             // Its metadata holds the list, so the newest row is the record to compare against.
             public const string AllowedOriginsChangedAuditType = "AllowedOriginsChanged";
             public const string WildcardOrigin = "*";
+
+            // 98.10. /health opens a database connection. /health/live does not, so a Neon cold
+            // start does not make the host restart a process that is running fine.
+            public const string HealthPath = "/health";
+            public const string LivenessPath = "/health/live";
+
+            // 98.10. Retries for a dropped or timed-out Postgres call outside a transaction.
+            public const int DbRetryCount = 3;
+            public const int DbRetryMaxDelaySeconds = 5;
+        }
+
+        public static class SecurityStamps
+        {
+            // 98.8. How long the middleware trusts a cached stamp. A rotation evicts it at once,
+            // so this only bounds the gap when the eviction misses: another instance, a rolled-back
+            // save, or a request that reads the old stamp before the rotating transaction commits.
+            public const int CacheSeconds = 30;
+            public const string ClaimType = "SecurityStamp";
+
+            public static string CacheKey(int userId) => $"security-stamp:{userId}";
+        }
+
+        // 98.14. How long each log table keeps its rows. Periods agreed 2026-10-14. Election tables
+        // are never trimmed (37.12s, the ten-year rule), and neither is an election audit row in
+        // ActivityLogs: every election audit type starts with KeptActivityTypePrefix.
+        public static class Retention
+        {
+            public const int SweepHours = 24;
+            // Render restarts the service more often than once a day, so waiting a full interval
+            // before the first pass could mean it never runs.
+            public const int FirstSweepDelayMinutes = 5;
+            // Rows per DELETE. The first pass on an old database can have a large backlog, and one
+            // statement for all of it holds locks and can hit the command timeout.
+            public const int DeleteBatchSize = 5000;
+            public const int OtpDays = 7;
+            // Counted from expiry for a live token, or from creation for a revoked one.
+            public const int RefreshTokenDays = 30;
+            // Read notifications only. Unread ones are kept.
+            public const int ReadNotificationDays = 90;
+            public const int EmailLogDays = 180;
+            public const int ActivityLogDays = 365;
+            public const string KeptActivityTypePrefix = "Election";
+            public static readonly string[] KeptActivityTypes = [Deploy.AllowedOriginsChangedAuditType];
         }
 
         public static class Governance
