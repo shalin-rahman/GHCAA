@@ -73,7 +73,7 @@ class EventDetailsScreen extends ConsumerWidget {
         data: (event) {
           if (event == null) return null;
           if (event['requiresRegistration'] == false) return null;
-          final isOpen = _isRegistrationOpen(event);
+          final isOpen = AppUtils.isEventRegistrationOpen(event);
           if (!isOpen && !isAdmin) {
             return null;
           }
@@ -110,7 +110,8 @@ class EventDetailsScreen extends ConsumerWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: CustomNetworkImage(
-                      imageUrl: AppConfig.resolveImageUrl(event['imageUrl']) ?? '',
+                      imageUrl:
+                          AppConfig.resolveImageUrl(event['imageUrl']) ?? '',
                       height: 180,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -229,7 +230,9 @@ class EventDetailsScreen extends ConsumerWidget {
                 child: CircleAvatar(
                   radius: 20,
                   backgroundColor: Colors.black26,
-                  backgroundImage: photo != null ? cachedImageProvider(ctx, photo, size: 40) : null,
+                  backgroundImage: photo != null
+                      ? cachedImageProvider(ctx, photo, size: 40)
+                      : null,
                   child: photo == null
                       ? Text(m['fullName']?[0] ?? '?',
                           style: const TextStyle(
@@ -365,20 +368,6 @@ class EventDetailsScreen extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  bool _isRegistrationOpen(Map<String, dynamic> ev) {
-    if (ev['isActive'] == false) return false;
-    final now = DateTime.now();
-    if (ev['registrationStartDate'] != null) {
-      final sd = DateTime.tryParse(ev['registrationStartDate'].toString());
-      if (sd != null && sd.isAfter(now)) return false;
-    }
-    if (ev['registrationEndDate'] != null) {
-      final ed = DateTime.tryParse(ev['registrationEndDate'].toString());
-      if (ed != null && ed.isBefore(now)) return false;
-    }
-    return true;
   }
 
   void _showRegisterDialog(

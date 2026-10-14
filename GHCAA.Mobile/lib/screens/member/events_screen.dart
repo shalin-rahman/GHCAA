@@ -242,7 +242,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                     return LoadMoreFooter(paged: paged, onLoadMore: loadMore);
                                   }
                                   final ev = filtered[index];
-                                  final isOpen = _isRegistrationOpen(ev);
+                                  final isOpen = AppUtils.isEventRegistrationOpen(ev);
                                   final requiresReg =
                                       ev['requiresRegistration'] != false;
                                   final fullImgUrl = AppConfig.resolveImageUrl(
@@ -557,23 +557,6 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
     );
   }
 
-  bool _isRegistrationOpen(Map<String, dynamic> ev) {
-    if (ev['isActive'] == false) return false;
-    final now = DateTime.now();
-    if (ev['registrationStartDate'] != null &&
-        AppUtils.parseDate(ev['registrationStartDate'].toString())
-                ?.isAfter(now) ==
-            true) {
-      return false;
-    }
-    if (ev['registrationEndDate'] != null &&
-        AppUtils.parseDate(ev['registrationEndDate'].toString())
-                ?.isBefore(now) ==
-            true) {
-      return false;
-    }
-    return true;
-  }
 
   void _showCreateEvent(BuildContext context, WidgetRef ref) {
     final currency = ref.read(orgCurrencyProvider);

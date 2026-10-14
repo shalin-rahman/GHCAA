@@ -4,6 +4,22 @@ import 'package:screen_protector/screen_protector.dart';
 import '../config/org_config.dart';
 
 class AppUtils {
+  /// Mirrors the server rule in `EventService.RegisterForEventAsync`. With no
+  /// registration end date the event's own end date closes registration, so
+  /// the Register button is not shown for an event that has already finished.
+  static bool isEventRegistrationOpen(Map<String, dynamic> ev,
+      {DateTime? now}) {
+    if (ev['isActive'] == false) return false;
+    final at = now ?? DateTime.now();
+    final start = parseDate(ev['registrationStartDate']?.toString());
+    if (start != null && at.isBefore(start)) return false;
+    final regEnd = parseDate(ev['registrationEndDate']?.toString());
+    if (regEnd != null && at.isAfter(regEnd)) return false;
+    final end = parseDate(ev['endDate']?.toString());
+    if (end != null && at.isAfter(end)) return false;
+    return true;
+  }
+
   /// screen_protector only ships Android/iOS platform channels, so calling
   /// it on desktop/web throws MissingPluginException. Screenshot blocking is
   /// a mobile-only concern anyway, so swallow the failure there.
