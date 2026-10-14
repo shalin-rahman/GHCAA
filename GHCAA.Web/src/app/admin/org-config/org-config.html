@@ -188,6 +188,16 @@
         </select>
         <small class="text-muted">Which channel member alerts (approvals, reminders) go out on.</small>
       </div>
+      <div class="form-group">
+        <label>Email Sender</label>
+        <select [(ngModel)]="config.workflow.emailProvider" name="emailProvider">
+          <option [ngValue]="null">Server default</option>
+          @for (provider of emailProviders; track provider) {
+          <option [ngValue]="provider">{{ provider }}</option>
+          }
+        </select>
+        <small class="text-muted">Which service sends all email, including login and OTP codes. Use Brevo on a host that blocks SMTP. The chosen service also needs its key set on the server, or mail stops. Takes effect on the next email, so check one arrives after a switch.</small>
+      </div>
     </div>
     <div class="toggle-grid">
       <label class="toggle-row">

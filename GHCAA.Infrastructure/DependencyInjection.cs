@@ -158,14 +158,17 @@ namespace GHCAA.Infrastructure
             var provider = configuration.GetSection("EmailSettings").Get<EmailSettingsOptions>()?.Provider
                 ?? EmailSettingsOptions.Gmail;
 
-            if (provider.Equals(EmailSettingsOptions.Brevo, StringComparison.OrdinalIgnoreCase))
-                services.AddHttpClient<IEmailService, BrevoEmailService>();
-            else if (provider.Equals(EmailSettingsOptions.Gmail, StringComparison.OrdinalIgnoreCase))
-                services.AddScoped<IEmailService, GmailEmailService>();
-            else
+            if (EmailSettingsOptions.Normalize(provider) is null)
                 // A typo would otherwise fall back to Gmail and fail quietly on a host that blocks SMTP.
                 throw new InvalidOperationException(
                     $"EmailSettings:Provider '{provider}' is not supported. Use '{EmailSettingsOptions.Gmail}' or '{EmailSettingsOptions.Brevo}'.");
+
+            // Both senders are registered; EmailServiceRouter picks one per send from the admin setting,
+            // with EmailSettings:Provider as the default when the admin has not chosen.
+            services.Configure<EmailSettingsOptions>(configuration.GetSection("EmailSettings"));
+            services.AddHttpClient<BrevoEmailService>();
+            services.AddScoped<GmailEmailService>();
+            services.AddScoped<IEmailService, EmailServiceRouter>();
         }
 
         private static string GetConnectionString(string provider, IConfiguration configuration)

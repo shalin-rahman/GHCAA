@@ -42,8 +42,8 @@ namespace GHCAA.Tests.Integration
             Environment.SetEnvironmentVariable("AppSettings__AllowedOrigins__0", "http://localhost");
             Environment.SetEnvironmentVariable("DatabaseProvider", "Sqlite");
             Environment.SetEnvironmentVariable("ConnectionStrings__SqliteConnection", $"Data Source={_dbPath}");
-            // MemberService's constructor chain reaches GmailEmailService, which throws at
-            // construction time if these are unset — never actually sent, just needs a value.
+            // GmailEmailService throws at construction if these are unset. EmailServiceRouter only
+            // builds it on a send, which these tests never make, but a value keeps that path safe.
             Environment.SetEnvironmentVariable("GmailSettings__Email", "test@example.invalid");
             Environment.SetEnvironmentVariable("GmailSettings__AppPassword", "test-dummy-app-password");
         }

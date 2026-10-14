@@ -45,6 +45,8 @@ export class AdminOrgConfig implements OnInit {
 
   readonly approvalModes = ['ManualReview', 'AutoApprove', 'PaymentGated'];
   readonly notificationChannels = ['Both', 'Email', 'Sms'];
+  // Must match EmailSettingsOptions on the server; an unknown value is saved as "server default".
+  readonly emailProviders = ['Gmail', 'Brevo'];
 
   // Example text for the empty-state placeholder only — sourced from this build's own
   // institution profile pack, not hardcoded to GHC/BDT, so a different profile's build
@@ -136,6 +138,7 @@ export class AdminOrgConfig implements OnInit {
     this.config = structuredClone(cfg);
     this.config.contact.phoneNumbers ??= [];
     this.config.workflow.notificationChannel ??= 'Both';
+    this.config.workflow.emailProvider ??= null;
     this.config.elections = { ...structuredClone(DEFAULT_ELECTION_SETTINGS), ...this.config.elections };
     this.config.localization ??= { dateFormat: DEFAULT_DATE_FORMAT, locales: {} };
     this.config.localization.dateFormat ??= DEFAULT_DATE_FORMAT;

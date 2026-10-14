@@ -1,4 +1,5 @@
 using GHCAA.API.Controllers;
+using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +17,7 @@ namespace GHCAA.Tests.Controllers
         private Mock<IEmailService> _emailMock = null!;
         private IConfiguration _config = null!;
         private Mock<ILogger<HealthController>> _loggerMock = null!;
+        private Mock<IOrgConfigService> _orgConfigMock = null!;
         private HealthController _controller = null!;
 
         [SetUp]
@@ -25,7 +27,9 @@ namespace GHCAA.Tests.Controllers
             _emailMock = new Mock<IEmailService>();
             _config = new ConfigurationBuilder().Build();
             _loggerMock = new Mock<ILogger<HealthController>>();
-            _controller = new HealthController(_dbHealthMock.Object, _emailMock.Object, _config, _loggerMock.Object);
+            _orgConfigMock = new Mock<IOrgConfigService>();
+            _orgConfigMock.Setup(x => x.GetConfigAsync()).ReturnsAsync(new OrgConfigDto());
+            _controller = new HealthController(_dbHealthMock.Object, _emailMock.Object, _config, _orgConfigMock.Object, _loggerMock.Object);
         }
 
         [Test]
@@ -101,13 +105,47 @@ namespace GHCAA.Tests.Controllers
             Assert.That(StatusOf(result), Is.EqualTo(503));
         }
 
+        [TestCase("Brevo", 503)]
+        [TestCase("Gmail", 200)]
+        public async Task GetHealth_FollowsAdminEmailProvider_OverServerDefault(string adminChoice, int expected)
+        {
+            // The server default is Brevo but only Gmail is configured, so the result shows which one was checked.
+            _orgConfigMock.Setup(x => x.GetConfigAsync())
+                .ReturnsAsync(new OrgConfigDto { Workflow = new WorkflowDto { EmailProvider = adminChoice } });
+            var controller = HealthyController(new Dictionary<string, string?>
+            {
+                ["EmailSettings:Provider"] = "Brevo",
+                ["GmailSettings:Email"] = "test@gmail.com",
+                ["GmailSettings:AppPassword"] = "password"
+            });
+
+            var result = await controller.GetHealth(CancellationToken.None);
+
+            Assert.That(StatusOf(result), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public async Task GetHealth_UsesServerDefault_WhenConfigReadFails()
+        {
+            _orgConfigMock.Setup(x => x.GetConfigAsync()).ThrowsAsync(new System.Exception("db down"));
+            var controller = HealthyController(new Dictionary<string, string?>
+            {
+                ["GmailSettings:Email"] = "test@gmail.com",
+                ["GmailSettings:AppPassword"] = "password"
+            });
+
+            var result = await controller.GetHealth(CancellationToken.None);
+
+            Assert.That(StatusOf(result), Is.EqualTo(200));
+        }
+
         // Database and storage pass, so the status code only depends on the email settings.
         private HealthController HealthyController(Dictionary<string, string?> settings)
         {
             _dbHealthMock.Setup(x => x.CanConnectAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
             settings["FileStorage:BasePhysicalPath"] = Path.GetTempPath();
             var config = new ConfigurationBuilder().AddInMemoryCollection(settings).Build();
-            return new HealthController(_dbHealthMock.Object, _emailMock.Object, config, _loggerMock.Object);
+            return new HealthController(_dbHealthMock.Object, _emailMock.Object, config, _orgConfigMock.Object, _loggerMock.Object);
         }
 
         private static int? StatusOf(IActionResult result) => result switch

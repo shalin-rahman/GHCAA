@@ -73,6 +73,8 @@ export interface OrgWorkflow {
   adminEmailOnNewRegistration: boolean;
   /** 'Sms' | 'Email' | 'Both' — which channel member alerts go out on. */
   notificationChannel: string;
+  /** 'Gmail' | 'Brevo'. Null or absent means the server's EmailSettings:Provider. */
+  emailProvider?: string | null;
 }
 
 export interface NavLabels {

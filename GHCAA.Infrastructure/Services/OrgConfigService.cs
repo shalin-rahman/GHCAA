@@ -3,6 +3,7 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using GHCAA.Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
@@ -88,6 +89,12 @@ namespace GHCAA.Infrastructure.Services
                     DateFormat = Constants.Localization.NormalizeDateFormat(
                         dto.Localization?.DateFormat,
                         profileDateFormat)
+                },
+                // An unknown name saves as null, which falls back to the server setting rather
+                // than to a sender that does not exist.
+                Workflow = (dto.Workflow ?? new WorkflowDto()) with
+                {
+                    EmailProvider = EmailSettingsOptions.Normalize(dto.Workflow?.EmailProvider)
                 }
             };
 

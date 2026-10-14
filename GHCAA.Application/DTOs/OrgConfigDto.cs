@@ -147,6 +147,9 @@ namespace GHCAA.Application.DTOs
         // Which channel member-facing alerts go out on. "Both" matches the behavior before this
         // setting existed (in-app notification always fires; email and SMS were never gated).
         public string NotificationChannel { get; init; } = "Both";
+        // "Gmail" or "Brevo". Null means use the server's EmailSettings:Provider. The API key
+        // and sender address stay in env vars; only the choice of sender is stored here.
+        public string? EmailProvider { get; init; }
     }
 
     public record LocalizationDto

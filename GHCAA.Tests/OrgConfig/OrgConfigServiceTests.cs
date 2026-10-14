@@ -307,6 +307,34 @@ namespace GHCAA.Tests.OrgConfig
             (await service.GetConfigAsync()).Localization.DateFormat.Should().Be("dd-MM-yyyy");
         }
 
+        [TestCase("Brevo", "Brevo")]
+        [TestCase(" brevo ", "Brevo")]
+        [TestCase("GMAIL", "Gmail")]
+        [TestCase("SendGrid", null)]
+        [TestCase("", null)]
+        [TestCase(null, null)]
+        public async Task UpdateConfigAsync_NormalizesEmailProvider(string? saved, string? expected)
+        {
+            var dbContext = GetDbContext($"TestDb_EmailProvider_{saved?.Trim()}_{expected}");
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var config = await service.GetConfigAsync();
+
+            await service.UpdateConfigAsync(
+                config with { Workflow = config.Workflow with { EmailProvider = saved } },
+                "admin-1");
+
+            (await service.GetConfigAsync()).Workflow.EmailProvider.Should().Be(expected);
+        }
+
+        [Test]
+        public async Task GetConfigAsync_DefaultsEmailProviderToNull()
+        {
+            var dbContext = GetDbContext("TestDb_EmailProviderDefault");
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+
+            (await service.GetConfigAsync()).Workflow.EmailProvider.Should().BeNull();
+        }
+
         [Test]
         public async Task UpdateConfigAsync_DoesNotRewriteExistingDateValues()
         {

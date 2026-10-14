@@ -12,13 +12,15 @@ namespace GHCAA.API.Controllers
         private readonly IDatabaseHealthService _dbHealth;
         private readonly IEmailService _email;
         private readonly IConfiguration _config;
+        private readonly IOrgConfigService _orgConfig;
         private readonly ILogger<HealthController> _logger;
 
-        public HealthController(IDatabaseHealthService dbHealth, IEmailService email, IConfiguration config, ILogger<HealthController> logger)
+        public HealthController(IDatabaseHealthService dbHealth, IEmailService email, IConfiguration config, IOrgConfigService orgConfig, ILogger<HealthController> logger)
         {
             _dbHealth = dbHealth;
             _email = email;
             _config = config;
+            _orgConfig = orgConfig;
             _logger = logger;
         }
 
@@ -69,8 +71,17 @@ namespace GHCAA.API.Controllers
             }
 
             // 3. Email Config check
-            // Checks the provider DependencyInjection.AddEmailService picked, not always Gmail.
-            bool emailOk = string.Equals(_config["EmailSettings:Provider"], EmailSettingsOptions.Brevo, StringComparison.OrdinalIgnoreCase)
+            // Checks the sender EmailServiceRouter would use now: the admin's choice, else the server default.
+            string? adminChoice = null;
+            try
+            {
+                adminChoice = (await _orgConfig.GetConfigAsync()).Workflow?.EmailProvider;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Health check: could not read the email provider setting");
+            }
+            bool emailOk = EmailSettingsOptions.Resolve(adminChoice, _config["EmailSettings:Provider"]) == EmailSettingsOptions.Brevo
                 ? !string.IsNullOrEmpty(_config["BrevoSettings:ApiKey"]) && !string.IsNullOrEmpty(_config["BrevoSettings:SenderEmail"])
                 : !string.IsNullOrEmpty(_config["GmailSettings:Email"]) && !string.IsNullOrEmpty(_config["GmailSettings:AppPassword"]);
             health.Checks.Add(new { Name = "EmailService", Status = emailOk ? "Healthy" : "Misconfigured" });

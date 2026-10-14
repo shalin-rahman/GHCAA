@@ -32,6 +32,17 @@ namespace GHCAA.Infrastructure.Options
         public const string Brevo = "Brevo";
 
         public string Provider { get; set; } = Gmail;
+
+        // Returns the canonical name, or null for anything that is not a known provider.
+        public static string? Normalize(string? provider) =>
+            string.Equals(provider?.Trim(), Gmail, StringComparison.OrdinalIgnoreCase) ? Gmail
+            : string.Equals(provider?.Trim(), Brevo, StringComparison.OrdinalIgnoreCase) ? Brevo
+            : null;
+
+        // The admin's choice in Workflow.EmailProvider wins. Null there means the server's
+        // EmailSettings:Provider, which startup has already checked is a known value.
+        public static string Resolve(string? adminChoice, string? serverDefault) =>
+            Normalize(adminChoice) ?? Normalize(serverDefault) ?? Gmail;
     }
 
     public class BrevoSettingsOptions

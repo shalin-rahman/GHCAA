@@ -46,4 +46,19 @@ describe('AdminOrgConfig', () => {
     expect(component.isTwoPersonAction('Publish')).toBe(false);
     expect(component.isTwoPersonAction('Declare')).toBe(true);
   });
+
+  // 7.26
+  it('treats a missing email provider as the server default', () => {
+    const cfg = structuredClone(ORG_CONFIG_FALLBACK) as OrgConfig;
+    delete cfg.workflow.emailProvider;
+    (component as any).hydrate(cfg);
+    expect(component.config?.workflow.emailProvider).toBeNull();
+  });
+
+  it('keeps a stored email provider', () => {
+    const cfg = structuredClone(ORG_CONFIG_FALLBACK) as OrgConfig;
+    cfg.workflow.emailProvider = 'Brevo';
+    (component as any).hydrate(cfg);
+    expect(component.config?.workflow.emailProvider).toBe('Brevo');
+  });
 });
