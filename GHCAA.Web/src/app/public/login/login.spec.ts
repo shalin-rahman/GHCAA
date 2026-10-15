@@ -273,4 +273,27 @@ describe('Login Component', () => {
 
         expect(notificationServiceMock.error).toHaveBeenCalledWith(expect.stringContaining('Too many'));
     });
+
+    // Spec 012 FR-012. Chrome autofill shows saved values but hides them from the page until the
+    // user clicks or types, so the form reads as empty. Sign in has to stay clickable then.
+    it('should keep Sign in enabled while the fields read as empty', async () => {
+        await vi.advanceTimersByTimeAsync(0);
+        fixture.detectChanges();
+        const button: HTMLButtonElement = fixture.nativeElement.querySelector('.login-submit');
+        expect(button.disabled).toBe(false);
+    });
+
+    it('should disable Sign in only while a sign-in is running', () => {
+        component.loading.set(true);
+        fixture.detectChanges();
+        const button: HTMLButtonElement = fixture.nativeElement.querySelector('.login-submit');
+        expect(button.disabled).toBe(true);
+    });
+
+    it('should show the field errors instead of sending an empty form', () => {
+        const form = { invalid: true, control: { markAllAsTouched: vi.fn() } };
+        component.onLogin(form);
+        expect(form.control.markAllAsTouched).toHaveBeenCalled();
+        expect(authServiceMock.login).not.toHaveBeenCalled();
+    });
 });
