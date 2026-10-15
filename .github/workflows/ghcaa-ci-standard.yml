@@ -136,8 +136,14 @@ jobs:
       # a live host, so it can't hand an attacker a request-firing form for the whole API. This
       # step produces the same contract as a build artefact instead: no runtime surface, but a
       # reviewer still sees a diff the moment a field is renamed or a route disappears.
+      # The CLI runs Program.cs up to builder.Build(). Left on its default Production environment,
+      # the AllowedOrigins checks reject the localhost origins in appsettings.json and the CLI
+      # reports "Startup type not found". Development has no such check. No routes depend on the
+      # environment, so the contract comes out the same.
       - name: Generate current swagger.json
         working-directory: GHCAA.API
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
         run: dotnet tool run swagger tofile --output /tmp/swagger.generated.json bin/Release/net9/GHCAA.API.dll v1
 
       - name: Compare against committed snapshot

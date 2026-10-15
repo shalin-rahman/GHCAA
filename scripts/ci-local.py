@@ -53,9 +53,17 @@ E2E = ("web", "e2e", "npm run test:e2e", WEB, False)
 def run(step):
     group, name, cmd, cwd, _ = step
     log = os.path.join(LOGS, f"{group}-{name}.log")
+    env = None
+    if name == "swagger-generate":
+        # A file left by an earlier run would let swagger-diff pass after a failed generate.
+        if os.path.exists(SWAGGER_OUT):
+            os.remove(SWAGGER_OUT)
+        # The CLI starts Program.cs as Production by default, and the Production origin checks
+        # reject the localhost origins in appsettings.json. See the same step in the CI workflow.
+        env = {**os.environ, "ASPNETCORE_ENVIRONMENT": "Development"}
     start = time.time()
     with open(log, "wb") as out:
-        code = subprocess.run(cmd, cwd=cwd, shell=True, stdin=subprocess.DEVNULL,
+        code = subprocess.run(cmd, cwd=cwd, shell=True, stdin=subprocess.DEVNULL, env=env,
                               stdout=out, stderr=subprocess.STDOUT).returncode
     text = open(log, "rb").read().decode("utf-8", "replace")
     # `dotnet list package --vulnerable` exits 0 on a finding, so the CI greps its text.

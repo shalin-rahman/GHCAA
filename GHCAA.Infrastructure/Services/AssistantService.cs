@@ -45,7 +45,8 @@ namespace GHCAA.Infrastructure.Services
                 //                 else if (query.Contains("education") || query.Contains("teacher")) queryable = queryable.Where(m => m.ProfessionalSector == "Education");
                 //                 else if (query.Contains("medical") || query.Contains("doctor")) queryable = queryable.Where(m => m.ProfessionalSector == "Medical");
 
-                var results = await queryable.Take(10).ToListAsync(cancellationToken);
+                var results = await queryable.OrderBy(m => m.FullName).ThenBy(m => m.Id)
+                    .Take(10).ToListAsync(cancellationToken);
 
                 if (results.Any())
                 {

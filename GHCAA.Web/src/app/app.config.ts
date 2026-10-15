@@ -7,6 +7,7 @@ import { globalHttpInterceptor } from './core/interceptors/global-http.intercept
 import { OrgConfigService } from './core/services/org-config.service';
 import { GlobalErrorHandler } from './core/services/global-error-handler';
 import { BrandingTitleStrategy } from './core/strategies/branding-title.strategy';
+import { XSRF } from './core/constants/app.constants';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,7 +17,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' })),
     provideHttpClient(
       withInterceptors([globalHttpInterceptor]),
-      withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' })
+      withXsrfConfiguration({ cookieName: XSRF.COOKIE, headerName: XSRF.HEADER })
     ),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     { provide: TitleStrategy, useClass: BrandingTitleStrategy },

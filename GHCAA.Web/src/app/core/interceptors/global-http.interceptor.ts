@@ -1,10 +1,11 @@
-import { HttpInterceptorFn, HttpErrorResponse, HttpRequest, HttpHandlerFn } from '@angular/common/http';
+import { HttpInterceptorFn, HttpErrorResponse, HttpRequest, HttpHandlerFn, HttpXsrfTokenExtractor } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError, BehaviorSubject, switchMap, filter, take, Observable, retry, timer } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
 import { StepUpService } from '../services/step-up.service';
 import { environment } from '../../../environments/environment';
+import { XSRF } from '../constants/app.constants';
 
 // 24.44: Shared refresh state — one in-flight refresh serves all concurrent 401s.
 let isRefreshing = false;
@@ -14,6 +15,7 @@ export const globalHttpInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService);
     const notify = inject(NotificationService);
     const stepUp = inject(StepUpService);
+    const xsrf = inject(HttpXsrfTokenExtractor);
 
     let outReq = req;
 
@@ -60,7 +62,7 @@ export const globalHttpInterceptor: HttpInterceptorFn = (req, next) => {
                 && !req.url.includes('/api/auth/refresh')
                 && !req.url.includes('/api/auth/me')
                 && !req.url.includes('/api/auth/logout')) {
-                return handle401(outReq, next, authService, notify, error);
+                return handle401(outReq, next, authService, notify, error, xsrf);
             }
 
             // 7.13: The action is allowed for this role but needs a fresh OTP verification.
@@ -69,7 +71,7 @@ export const globalHttpInterceptor: HttpInterceptorFn = (req, next) => {
             if (error.status === 403
                 && (error.error?.code ?? error.error?.Code) === 'STEP_UP_REQUIRED') {
                 return stepUp.challenge().pipe(
-                    switchMap(verified => verified ? next(outReq) : throwError(() => error))
+                    switchMap(verified => verified ? next(withCurrentXsrf(outReq, xsrf)) : throwError(() => error))
                 );
             }
 
@@ -78,19 +80,30 @@ export const globalHttpInterceptor: HttpInterceptorFn = (req, next) => {
     );
 };
 
+// Angular's XSRF interceptor runs before this one, so a request reaching here already carries the
+// header it stamped from the cookie at send time. A refresh or step-up sets a new XSRF-TOKEN
+// cookie, and replaying the request with the old header gets a 403 from XsrfMiddleware.
+// Re-read the cookie for the retry. A request without the header was cross-origin, so leave it.
+function withCurrentXsrf(req: HttpRequest<unknown>, xsrf: HttpXsrfTokenExtractor): HttpRequest<unknown> {
+    const token = xsrf.getToken();
+    if (!token || !req.headers.has(XSRF.HEADER)) return req;
+    return req.clone({ setHeaders: { [XSRF.HEADER]: token } });
+}
+
 function handle401(
     req: HttpRequest<unknown>,
     next: HttpHandlerFn,
     authService: AuthService,
     notify: NotificationService,
-    originalError: HttpErrorResponse
+    originalError: HttpErrorResponse,
+    xsrf: HttpXsrfTokenExtractor
 ): Observable<any> {
     if (isRefreshing) {
         // Queue behind the ongoing refresh.
         return refreshDone$.pipe(
             filter(done => done),
             take(1),
-            switchMap(success => success ? next(req) : throwError(() => originalError))
+            switchMap(success => success ? next(withCurrentXsrf(req, xsrf)) : throwError(() => originalError))
         );
     }
 
@@ -101,7 +114,7 @@ function handle401(
         switchMap(success => {
             isRefreshing = false;
             refreshDone$.next(success);
-            if (success) return next(req);
+            if (success) return next(withCurrentXsrf(req, xsrf));
             authService.logout();
             return throwError(() => originalError);
         }),

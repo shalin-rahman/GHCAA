@@ -21,6 +21,9 @@ export const QUILL_ASSETS = {
     STYLE_SRI: 'sha512-PVNMdkw+2UbxMaF03ZTxkRCySBl5QvZgSQPO0vuIpYIzb5h+Q18y8A/W/N4Vpo8EerHoi2DTZta/UxrdKPG0dA=='
 } as const;
 
+// Must match the cookie XsrfMiddleware compares against the header on the API.
+export const XSRF = { COOKIE: 'XSRF-TOKEN', HEADER: 'X-XSRF-TOKEN' } as const;
+
 // 37.12c: mirrors Constants.Policies.ElectionStaff on the API.
 export const SUPER_ADMIN_ROLE = 'SuperAdmin';
 export const ADMIN_ROLE = 'Admin';

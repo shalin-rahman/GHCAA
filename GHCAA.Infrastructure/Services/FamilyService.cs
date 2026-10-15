@@ -208,6 +208,8 @@ namespace GHCAA.Infrastructure.Services
                             m.IsFamilyPublic &&
                             m.Status == MembershipStatus.Active &&
                             m.FullName.Contains(name))
+                .OrderBy(m => m.FullName)
+                .ThenBy(m => m.Id)
                 .Take(20)
                 .ToListAsync(cancellationToken);
 
