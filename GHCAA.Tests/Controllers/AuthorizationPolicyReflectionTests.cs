@@ -288,7 +288,7 @@ namespace GHCAA.Tests.Controllers
             [("NetworkingController", "GetExecutiveCommittee")] = new(null, true, false),
             [("NetworkingController", "GetLatestUpdates")] = new(null, true, false),
             [("NetworkingController", "GetPeriods")] = new(null, true, false),
-            [("NetworkingController", "GetPublicProfile")] = new(null, true, false),
+            [("NetworkingController", "GetPublicProfile")] = new(null, false, false),
             [("NetworkingController", "Search")] = new(null, true, false),
             [("NewsController", "AddCollaborator")] = new(Constants.Policies.AdminOnly, false, false),
             [("NewsController", "ApproveArticle")] = new(Constants.Policies.AdminOnly, false, false),

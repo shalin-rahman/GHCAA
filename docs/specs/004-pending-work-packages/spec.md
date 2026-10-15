@@ -256,6 +256,16 @@ registration, login, portal, identity document, and admin shell without GHC
 branding. 62.42 MUST make brand lint blocking after all generated and runtime
 assets pass the generic-profile rules.
 
+### 62.56 Profile and settings export and import
+
+62.56 MUST let a SuperAdmin export the live profile and settings as a zip pack
+and import a pack into a running site, with a dry-run preview and "add only" or
+"override" per section, in one transaction, without exporting secrets or
+deleting rows. The requirements, section map and task list are in spec 025
+(`docs/specs/025-org-config-pack-export-import/`, the profile and settings
+export and import spec). Themes, fee configs and payment settings MUST get
+unique keys first (62.56g, spec 025 FR-18).
+
 ### 63.x, 64.x, 65.5, and 67.x dissertation evidence
 
 The documentation book MUST keep outline, chapters, figures, tables, front

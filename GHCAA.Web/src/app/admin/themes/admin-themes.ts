@@ -122,10 +122,9 @@ export class AdminThemes implements OnInit {
                 this.isSaving.set(false);
                 this.loadThemes();
             },
-            error: () => {
-                this.notify.error('Failed to save theme');
-                this.isSaving.set(false);
-            }
+            // The global interceptor already toasts the server's reason, such as a duplicate
+            // title and start date (62.56g).
+            error: () => this.isSaving.set(false)
         });
     }
 

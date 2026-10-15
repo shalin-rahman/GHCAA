@@ -86,14 +86,17 @@ describe('AdminFeeConfig Component', () => {
         expect(notificationServiceMock.success).toHaveBeenCalledWith('Configuration updated');
     });
 
-    it('should handle error during submission', () => {
-        financialServiceMock.addFeeConfig.mockReturnValue(throwError(() => ({ error: { message: 'Api Error' } })));
+    // FR-42 (62.56g): the global interceptor shows the server's reason. A second toast from the
+    // page would be generic and hide it.
+    it('should leave the error toast to the interceptor and re-enable the form', () => {
+        financialServiceMock.addFeeConfig.mockReturnValue(throwError(() => ({ status: 400, error: { detail: 'Duplicate' } })));
         component.openCreateForm();
         component.form.patchValue({ amount: 1000, effectiveDate: '31-12-2023' });
-        
+
         component.submitForm();
-        
-        expect(notificationServiceMock.error).toHaveBeenCalledWith('Api Error');
+
+        expect(notificationServiceMock.error).not.toHaveBeenCalled();
+        expect(component.submitting()).toBe(false);
     });
 
     it('should show info on delete attempt', async () => {

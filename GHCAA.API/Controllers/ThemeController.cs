@@ -38,8 +38,15 @@ namespace GHCAA.API.Controllers
         [HttpPost]
         public async Task<ActionResult<SpecialDayTheme>> CreateTheme([FromBody] SpecialDayThemeSaveDto theme)
         {
-            var created = await _themeService.CreateThemeAsync(theme);
-            return CreatedAtAction(nameof(GetAllThemes), new { id = created.Id }, created);
+            try
+            {
+                var created = await _themeService.CreateThemeAsync(theme);
+                return CreatedAtAction(nameof(GetAllThemes), new { id = created.Id }, created);
+            }
+            catch (DuplicateKeyException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
         }
 
         [Authorize(Policy = Constants.Policies.AdminOnly)]
@@ -47,7 +54,14 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> UpdateTheme(int id, [FromBody] SpecialDayThemeSaveDto theme)
         {
             if (id != theme.Id) return Problem(statusCode: StatusCodes.Status400BadRequest);
-            return await _themeService.UpdateThemeAsync(id, theme) ? NoContent() : NotFound();
+            try
+            {
+                return await _themeService.UpdateThemeAsync(id, theme) ? NoContent() : NotFound();
+            }
+            catch (DuplicateKeyException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
         }
 
         [Authorize(Policy = Constants.Policies.AdminOnly)]

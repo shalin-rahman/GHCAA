@@ -401,6 +401,7 @@ namespace GHCAA.Infrastructure.Services
                 CreatedAt = DateTime.UtcNow
             };
 
+            await EnsureFeeConfigKeyFreeAsync(config, cancellationToken);
             _db.MembershipFeeConfigs.Add(config);
             await _db.SaveChangesAsync(cancellationToken);
 
@@ -422,6 +423,7 @@ namespace GHCAA.Infrastructure.Services
             var config = await _db.MembershipFeeConfigs.FindAsync(new object[] { dto.Id }, cancellationToken);
             if (config == null) throw new KeyNotFoundException($"MembershipFeeConfig with ID {dto.Id} not found.");
 
+            var oldKey = (config.Category, config.MembershipType, config.EffectiveDate);
             if (dto.Category.HasValue) config.Category = dto.Category.Value;
             config.Amount = dto.Amount;
             config.EffectiveDate = DateTime.SpecifyKind(dto.EffectiveDate, DateTimeKind.Utc);
@@ -430,6 +432,10 @@ namespace GHCAA.Infrastructure.Services
             config.Description = dto.Description;
             // distinct from "CreatedBy", we might want "UpdatedBy" later, but for now simple update.
 
+            // Only when the key moves. A row that already shares its key with another, left over
+            // from before the index, must still be editable.
+            if (oldKey != (config.Category, config.MembershipType, config.EffectiveDate))
+                await EnsureFeeConfigKeyFreeAsync(config, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
 
             return new MembershipFeeConfigDto
@@ -443,6 +449,19 @@ namespace GHCAA.Infrastructure.Services
                 IsActive = config.IsActive,
                 Description = config.Description
             };
+        }
+
+        // 62.56g: Category + MembershipType + EffectiveDate is unique
+        // (IX_MembershipFeeConfigs_Category_MembershipType_EffectiveDate). Checked here so the admin
+        // gets a 400 with a reason instead of a 500 from the index.
+        private async Task EnsureFeeConfigKeyFreeAsync(MembershipFeeConfig config, CancellationToken cancellationToken)
+        {
+            var taken = await _db.MembershipFeeConfigs.AnyAsync(f =>
+                f.Category == config.Category && f.MembershipType == config.MembershipType &&
+                f.EffectiveDate == config.EffectiveDate && f.Id != config.Id, cancellationToken);
+            if (taken)
+                throw new DuplicateKeyException(
+                    $"A {config.Category} fee for {config.MembershipType} effective {config.EffectiveDate:yyyy-MM-dd} already exists.");
         }
 
         public async Task<decimal> GetApplicableMembershipFeeAsync(Enums.MembershipType type, int year, CancellationToken cancellationToken = default)

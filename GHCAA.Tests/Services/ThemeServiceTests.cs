@@ -1,7 +1,9 @@
 using FluentAssertions;
 using GHCAA.Application.DTOs;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace GHCAA.Tests.Services;
@@ -110,6 +112,69 @@ public class ThemeServiceTests : TestBase
         var result = await _service.CreateThemeAsync(new SpecialDayThemeSaveDto { Id = 777, Title = "X", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow });
 
         result.Id.Should().NotBe(777);
+    }
+
+    // 62.56g: Title + StartDate is the theme's key (IX_SpecialDayThemes_Title_StartDate).
+    private static SpecialDayThemeSaveDto KeyedTheme(string title, DateTime start) => new()
+    {
+        Title = title,
+        StartDate = start,
+        EndDate = start.AddDays(1),
+        BackgroundColor = "#000000",
+        TextColor = "#ffffff"
+    };
+
+    [Test]
+    [Category("FR-47")]
+    public async Task CreateThemeAsync_Throws_WhenTitleAndStartDateTaken()
+    {
+        var start = new DateTime(2026, 2, 21, 0, 0, 0, DateTimeKind.Utc);
+        await _service.CreateThemeAsync(KeyedTheme("Language Day", start));
+
+        var act = () => _service.CreateThemeAsync(KeyedTheme("Language Day", start));
+
+        await act.Should().ThrowAsync<DuplicateKeyException>().WithMessage("*Language Day*2026-02-21*");
+        (await _context.SpecialDayThemes.CountAsync(t => t.Title == "Language Day")).Should().Be(1);
+    }
+
+    [Test]
+    [Category("FR-47")]
+    public async Task CreateThemeAsync_AllowsSameTitle_OnAnotherStartDate()
+    {
+        await _service.CreateThemeAsync(KeyedTheme("Language Day", new DateTime(2026, 2, 21, 0, 0, 0, DateTimeKind.Utc)));
+
+        await _service.CreateThemeAsync(KeyedTheme("Language Day", new DateTime(2027, 2, 21, 0, 0, 0, DateTimeKind.Utc)));
+
+        (await _context.SpecialDayThemes.CountAsync(t => t.Title == "Language Day")).Should().Be(2);
+    }
+
+    [Test]
+    [Category("FR-47")]
+    public async Task UpdateThemeAsync_Throws_WhenMovedOntoAnotherThemesKey()
+    {
+        var start = new DateTime(2026, 2, 21, 0, 0, 0, DateTimeKind.Utc);
+        await _service.CreateThemeAsync(KeyedTheme("Language Day", start));
+        var other = await _service.CreateThemeAsync(KeyedTheme("Victory Day", start.AddMonths(10)));
+
+        var edit = KeyedTheme("Language Day", start);
+        edit.Id = other.Id;
+        var act = () => _service.UpdateThemeAsync(other.Id, edit);
+
+        await act.Should().ThrowAsync<DuplicateKeyException>();
+    }
+
+    [Test]
+    [Category("FR-47")]
+    public async Task UpdateThemeAsync_KeepingItsOwnKey_Succeeds()
+    {
+        var start = new DateTime(2026, 2, 21, 0, 0, 0, DateTimeKind.Utc);
+        var created = await _service.CreateThemeAsync(KeyedTheme("Language Day", start));
+
+        var edit = KeyedTheme("Language Day", start);
+        edit.Id = created.Id;
+        edit.TextColor = "#eeeeee";
+
+        (await _service.UpdateThemeAsync(created.Id, edit)).Should().BeTrue();
     }
 
     // 30.30: GetActiveThemeAsync must honour the theme's date window server-side (not just the

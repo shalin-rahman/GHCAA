@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,10 +56,19 @@ class FeeConfigScreen extends ConsumerWidget {
               };
               
               bool success;
-              if (existing == null) {
-                success = await ref.read(adminServiceProvider).addFeeConfig(payload);
-              } else {
-                success = await ref.read(adminServiceProvider).updateFeeConfig(payload);
+              try {
+                if (existing == null) {
+                  success = await ref.read(adminServiceProvider).addFeeConfig(payload);
+                } else {
+                  success = await ref.read(adminServiceProvider).updateFeeConfig(payload);
+                }
+              } catch (e) {
+                // The API client puts the server's detail in message.
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(
+                      'Could not save: ${e is DioException ? (e.message ?? e.toString()) : e}')));
+                }
+                return;
               }
 
               if (success) {

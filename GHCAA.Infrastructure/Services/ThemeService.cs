@@ -1,4 +1,5 @@
 using GHCAA.Application.DTOs;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -69,6 +70,7 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<SpecialDayTheme> CreateThemeAsync(SpecialDayThemeSaveDto dto)
         {
+            await EnsureKeyFreeAsync(dto, excludeId: null);
             _cache.Remove(CacheKey); // Invalidate cache on change
             var theme = new SpecialDayTheme();
             Apply(dto, theme);
@@ -82,10 +84,25 @@ namespace GHCAA.Infrastructure.Services
             var theme = await _context.SpecialDayThemes.FindAsync(id);
             if (theme == null) return false;
 
+            // Only when the key moves, so a row left sharing its key from before the index stays
+            // editable.
+            if (theme.Title != dto.Title || theme.StartDate != dto.StartDate)
+                await EnsureKeyFreeAsync(dto, excludeId: id);
             _cache.Remove(CacheKey); // Invalidate cache on change
             Apply(dto, theme);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        // 62.56g: Title + StartDate is unique (IX_SpecialDayThemes_Title_StartDate). Checked here so
+        // the admin gets a 400 with a reason instead of a 500 from the index.
+        private async Task EnsureKeyFreeAsync(SpecialDayThemeSaveDto dto, int? excludeId)
+        {
+            var taken = await _context.SpecialDayThemes.AnyAsync(t =>
+                t.Title == dto.Title && t.StartDate == dto.StartDate && t.Id != excludeId);
+            if (taken)
+                throw new DuplicateKeyException(
+                    $"A theme titled '{dto.Title}' starting on {dto.StartDate:yyyy-MM-dd} already exists.");
         }
 
         private static void Apply(SpecialDayThemeSaveDto dto, SpecialDayTheme theme)

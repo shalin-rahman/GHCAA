@@ -66,6 +66,7 @@ repeat them.
 | [021](../021-pluggable-feature-modules/spec.md) | Pluggable feature modules (deferred, Work Package 91) |
 | [023](../023-election-ballot-secrecy-and-standards/spec.md) | Election ballot secrecy and standards (draft, Work Package 37 items 37.1i to 37.1q) |
 | [024](../024-performance/spec.md) | Performance pass across database, API, web and mobile (draft, Work Package 98) |
+| [025](../025-org-config-pack-export-import/spec.md) | Export and import of the organisation profile and settings (draft, Work Package 62 items 62.56a to 62.56g) |
 
 Two folders share the number 010. Tracker item 84.31 in docs/TODO.md decides whether one is
 renumbered.

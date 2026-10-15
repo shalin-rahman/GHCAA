@@ -157,8 +157,15 @@ namespace GHCAA.API.Controllers
                 return Unauthorized();
             }
 
-            var result = await _financialService.AddMembershipFeeConfigAsync(dto, adminId, cancellationToken);
-            return Ok(result);
+            try
+            {
+                var result = await _financialService.AddMembershipFeeConfigAsync(dto, adminId, cancellationToken);
+                return Ok(result);
+            }
+            catch (DuplicateKeyException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
         }
 
         [HttpPut("fees/config")]
@@ -171,8 +178,15 @@ namespace GHCAA.API.Controllers
                 return Unauthorized();
             }
 
-            var result = await _financialService.UpdateMembershipFeeConfigAsync(dto, adminId, cancellationToken);
-            return Ok(result);
+            try
+            {
+                var result = await _financialService.UpdateMembershipFeeConfigAsync(dto, adminId, cancellationToken);
+                return Ok(result);
+            }
+            catch (DuplicateKeyException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
         }
 
         [HttpGet("membership-history/{memberId}")]

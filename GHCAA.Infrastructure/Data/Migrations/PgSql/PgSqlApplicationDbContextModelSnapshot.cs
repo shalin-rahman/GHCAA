@@ -3466,6 +3466,9 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Category", "MembershipType", "EffectiveDate")
+                        .IsUnique();
+
                     b.ToTable("MembershipFeeConfigs");
 
                     b.HasData(
@@ -3946,6 +3949,9 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Method", "Gateway")
+                        .IsUnique();
 
                     b.ToTable("PaymentConfigurations");
 
@@ -4921,6 +4927,9 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Title", "StartDate")
+                        .IsUnique();
 
                     b.ToTable("SpecialDayThemes");
 

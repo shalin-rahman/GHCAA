@@ -156,10 +156,9 @@ export class AdminPaymentConfig implements OnInit {
         this.submitting.set(false);
         this.loadConfigs();
       },
-      error: (err) => {
-        this.notify.error(err.error?.message || 'Failed to save configuration');
-        this.submitting.set(false);
-      }
+      // The global interceptor already toasts the server's reason, such as a method and
+      // gateway that already exist (62.56g).
+      error: () => this.submitting.set(false)
     });
   }
 

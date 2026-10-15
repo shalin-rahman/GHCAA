@@ -1,4 +1,5 @@
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,7 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<PaymentConfiguration> CreateAsync(PaymentConfiguration config, CancellationToken cancellationToken = default)
         {
+            await EnsureKeyFreeAsync(config.Method, config.Gateway, excludeId: null, cancellationToken);
             config.CreatedAt = DateTime.UtcNow;
             await _db.PaymentConfigurations.AddAsync(config, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
@@ -38,6 +40,11 @@ namespace GHCAA.Infrastructure.Services
         {
             var existing = await _db.PaymentConfigurations.FindAsync(new object[] { id }, cancellationToken);
             if (existing == null) return null;
+
+            // Method is never changed by an update, only Gateway. Checked only when the gateway
+            // moves, so a row left sharing its key from before the index stays editable.
+            if (existing.Gateway != config.Gateway)
+                await EnsureKeyFreeAsync(existing.Method, config.Gateway, excludeId: id, cancellationToken);
 
             existing.DisplayName = config.DisplayName;
             existing.Description = config.Description;
@@ -70,6 +77,18 @@ namespace GHCAA.Infrastructure.Services
 
             await _db.SaveChangesAsync(cancellationToken);
             return existing;
+        }
+
+        // 62.56g: Method + Gateway is unique (IX_PaymentConfigurations_Method_Gateway). Method alone
+        // is not, since Credit Card has one row per gateway. Checked here so the admin gets a 400
+        // with a reason instead of a 500 from the index.
+        private async Task EnsureKeyFreeAsync(PaymentMethod method, PaymentGateway gateway, int? excludeId, CancellationToken cancellationToken)
+        {
+            var taken = await _db.PaymentConfigurations.AnyAsync(p =>
+                p.Method == method && p.Gateway == gateway && p.Id != excludeId, cancellationToken);
+            if (taken)
+                throw new DuplicateKeyException(
+                    $"A {method} payment setting for gateway {gateway} already exists.");
         }
 
         public async Task<PaymentConfiguration?> ToggleAsync(int id, CancellationToken cancellationToken = default)

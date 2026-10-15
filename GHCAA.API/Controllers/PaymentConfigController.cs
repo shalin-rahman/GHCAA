@@ -74,8 +74,15 @@ namespace GHCAA.API.Controllers
         [Authorize(Policy = Constants.Policies.SuperAdminOnly)] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> CreateConfig([FromBody] PaymentConfiguration config, CancellationToken cancellationToken)
         {
-            var created = await _paymentConfigService.CreateAsync(config, cancellationToken);
-            return Ok(MaskSecrets(created));
+            try
+            {
+                var created = await _paymentConfigService.CreateAsync(config, cancellationToken);
+                return Ok(MaskSecrets(created));
+            }
+            catch (DuplicateKeyException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
         }
 
         // ADMIN: Update payment config
@@ -84,9 +91,16 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> UpdateConfig(int id, [FromBody] PaymentConfiguration config, CancellationToken cancellationToken)
         {
             // Only SuperAdmin can update gateway secrets
-            var updated = await _paymentConfigService.UpdateAsync(id, config, allowSecretUpdate: User.IsInRole(Constants.Roles.SuperAdmin), cancellationToken);
-            if (updated == null) return NotFound();
-            return Ok(MaskSecrets(updated));
+            try
+            {
+                var updated = await _paymentConfigService.UpdateAsync(id, config, allowSecretUpdate: User.IsInRole(Constants.Roles.SuperAdmin), cancellationToken);
+                if (updated == null) return NotFound();
+                return Ok(MaskSecrets(updated));
+            }
+            catch (DuplicateKeyException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
         }
 
         // ADMIN: Toggle enable/disable

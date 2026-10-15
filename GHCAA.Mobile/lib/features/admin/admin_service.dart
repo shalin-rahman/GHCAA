@@ -157,13 +157,14 @@ class AdminService {
     }
   }
 
+  // Rethrows so the screen can show the server's reason, such as a duplicate key (62.56g).
   Future<bool> addFeeConfig(Map<String, dynamic> data) async {
     try {
       final response = await _dio.post('/financials/fees/config', data: data);
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
       debugPrint('AdminService.addFeeConfig failed: $e');
-      return false;
+      rethrow;
     }
   }
 
@@ -173,7 +174,7 @@ class AdminService {
       return response.statusCode == 200;
     } catch (e) {
       debugPrint('AdminService.updateFeeConfig failed: $e');
-      return false;
+      rethrow;
     }
   }
 

@@ -319,6 +319,56 @@ public class FinancialServiceTests : TestBase
         updated!.Amount.Should().Be(9999);
     }
 
+    // 62.56g: Category + MembershipType + EffectiveDate is the fee row's key.
+    [Test]
+    [Category("FR-42")]
+    public async Task AddMembershipFeeConfig_Throws_WhenSameKeyExists()
+    {
+        var date = new DateTime(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        await _service.AddMembershipFeeConfigAsync(new CreateMembershipFeeConfigDto { MembershipType = "General", Amount = 1500, EffectiveDate = date }, 1);
+
+        var act = () => _service.AddMembershipFeeConfigAsync(new CreateMembershipFeeConfigDto { MembershipType = "General", Amount = 1800, EffectiveDate = date }, 1);
+
+        await act.Should().ThrowAsync<DuplicateKeyException>().WithMessage("*General*2030-01-01*");
+    }
+
+    [Test]
+    [Category("FR-42")]
+    public async Task AddMembershipFeeConfig_AllowsSameDate_ForAnotherMembershipType()
+    {
+        var date = new DateTime(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        await _service.AddMembershipFeeConfigAsync(new CreateMembershipFeeConfigDto { MembershipType = "General", Amount = 1500, EffectiveDate = date }, 1);
+
+        var result = await _service.AddMembershipFeeConfigAsync(new CreateMembershipFeeConfigDto { MembershipType = "Associate", Amount = 800, EffectiveDate = date }, 1);
+
+        result.Id.Should().BeGreaterThan(0);
+    }
+
+    [Test]
+    [Category("FR-42")]
+    public async Task UpdateMembershipFeeConfigAsync_Throws_WhenMovedOntoAnotherRowsKey()
+    {
+        var taken = new DateTime(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        await _service.AddMembershipFeeConfigAsync(new CreateMembershipFeeConfigDto { MembershipType = "General", Amount = 1500, EffectiveDate = taken }, 1);
+        var other = await _service.AddMembershipFeeConfigAsync(new CreateMembershipFeeConfigDto { MembershipType = "General", Amount = 1600, EffectiveDate = taken.AddYears(1) }, 1);
+
+        var act = () => _service.UpdateMembershipFeeConfigAsync(new UpdateMembershipFeeConfigDto { Id = other.Id, Amount = 1600, EffectiveDate = taken }, 1);
+
+        await act.Should().ThrowAsync<DuplicateKeyException>();
+    }
+
+    [Test]
+    [Category("FR-42")]
+    public async Task UpdateMembershipFeeConfigAsync_KeepingItsOwnKey_Succeeds()
+    {
+        var date = new DateTime(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var row = await _service.AddMembershipFeeConfigAsync(new CreateMembershipFeeConfigDto { MembershipType = "General", Amount = 1500, EffectiveDate = date }, 1);
+
+        var result = await _service.UpdateMembershipFeeConfigAsync(new UpdateMembershipFeeConfigDto { Id = row.Id, Amount = 1750, EffectiveDate = date }, 1);
+
+        result.Amount.Should().Be(1750);
+    }
+
     [Test]
     public async Task RecordMembershipChangeAsync_ShouldCreateHistoryRecord()
     {
