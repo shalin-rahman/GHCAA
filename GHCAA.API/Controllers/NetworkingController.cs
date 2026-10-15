@@ -22,12 +22,14 @@ namespace GHCAA.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Search([FromQuery] MemberSearchFilterDto filter, CancellationToken cancellationToken)
         {
-            var result = await _networkingService.SearchMembersAsync(filter, cancellationToken);
+            var result = User.Identity?.IsAuthenticated == true
+                ? await _networkingService.SearchMembersAsync(filter, cancellationToken)
+                : await _networkingService.SearchPublicDirectoryAsync(filter, cancellationToken);
             return Ok(result);
         }
 
+        // Members only. It was anonymous, which let anyone read any member's full profile.
         [HttpGet("member/{id}")]
-        [AllowAnonymous]
         public async Task<IActionResult> GetPublicProfile(int id, CancellationToken cancellationToken)
         {
             var profile = await _networkingService.GetMemberProfileAsync(id, cancellationToken);

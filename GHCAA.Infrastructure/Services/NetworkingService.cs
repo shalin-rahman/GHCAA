@@ -36,7 +36,27 @@ namespace GHCAA.Infrastructure.Services
             return member == null ? null : MapToDto(member);
         }
 
-        public async Task<PagedResult<MemberSummaryDto>> SearchMembersAsync(MemberSearchFilterDto filter, CancellationToken cancellationToken = default)
+        public Task<PagedResult<MemberSummaryDto>> SearchMembersAsync(MemberSearchFilterDto filter, CancellationToken cancellationToken = default)
+            => SearchAsync(filter, publicView: false, cancellationToken);
+
+        // Anonymous visitors see name and batch only, and may search by name and batch only.
+        // Any other filter would leak the field it filters on, e.g. blood group.
+        public async Task<PagedResult<MemberSummaryDto>> SearchPublicDirectoryAsync(MemberSearchFilterDto filter, CancellationToken cancellationToken = default)
+        {
+            var publicFilter = new MemberSearchFilterDto
+            {
+                Query = filter.Query,
+                PassingYear = filter.PassingYear,
+                Page = filter.Page,
+                PageSize = filter.PageSize,
+                Cursor = filter.Cursor
+            };
+            var result = await SearchAsync(publicFilter, publicView: true, cancellationToken);
+            result.Items = result.Items.Select(ToPublicListing).ToList();
+            return result;
+        }
+
+        private async Task<PagedResult<MemberSummaryDto>> SearchAsync(MemberSearchFilterDto filter, bool publicView, CancellationToken cancellationToken)
         {
             var query = _db.Members
                 .AsNoTracking()
@@ -46,14 +66,16 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrEmpty(filter.Query))
             {
                 var q = filter.Query.ToLower();
-                // This endpoint is [AllowAnonymous] (public directory search). Matching on Email
-                // regardless of IsEmailPublic turns a non-empty result into an oracle: an attacker
-                // submits a guessed address and confirms it belongs to a real member even though
-                // MapToSummary correctly masks that same address as "Confidential" in the response.
-                query = query.Where(m =>
-                    m.FullName.ToLower().Contains(q) ||
-                    (m.MembershipNumber != null && m.MembershipNumber.ToLower().Contains(q)) ||
-                    (m.IsEmailPublic && m.Email != null && m.Email.ToLower().Contains(q)));
+                // Matching on Email regardless of IsEmailPublic turns a non-empty result into an
+                // oracle: a caller submits a guessed address and learns it belongs to a member even
+                // though MapToSummary masks that address as "Confidential" in the response.
+                // The public listing matches on name only, for the same reason.
+                query = publicView
+                    ? query.Where(m => m.FullName.ToLower().Contains(q))
+                    : query.Where(m =>
+                        m.FullName.ToLower().Contains(q) ||
+                        (m.MembershipNumber != null && m.MembershipNumber.ToLower().Contains(q)) ||
+                        (m.IsEmailPublic && m.Email != null && m.Email.ToLower().Contains(q)));
             }
 
             if (filter.PassingYear.HasValue)
@@ -341,6 +363,14 @@ namespace GHCAA.Infrastructure.Services
 
             return dto;
         }
+
+        private static MemberSummaryDto ToPublicListing(MemberSummaryDto s) => new()
+        {
+            Id = s.Id,
+            FullName = s.FullName,
+            PassingYear = s.PassingYear,
+            PhotoPath = s.PhotoPath
+        };
 
         private MemberSummaryDto MapToSummary(Member m)
         {

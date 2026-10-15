@@ -160,10 +160,12 @@ The platform operates without live payment-gateway credentials. All payment meth
 - **User roles**: Public (limited), Member (full).
 - **Inputs / outputs**:
   - Screen: `/directory`.
-  - API: `GET /api/networking/search`, `GET /api/networking/member/{id}`.
+  - API: `GET /api/networking/search`, `GET /api/networking/member/{id}` (signed-in only since 2026-10-15).
+  - Anonymous visitors get name, photo and batch only, and can filter by name and batch only. The other filters and the membership details are hidden on the public page.
+  - A signed-in Admin or SuperAdmin sees an Edit button on each public directory card. It opens `/admin/members?edit=<id>` with that member's modal already in edit mode.
   - Key fields: search query, batch/department filters.
 - **Validations & rules**: results are strictly governed by each member's privacy toggles; masked fields never leak in response DTOs.
-- **Display**: defaults to a `.data-table` view (Table/Card toggle) on the full `/directory` page; the compact embedded mode (used as an in-app picker elsewhere) always stays card-based regardless. The public landing page also shows a "Recently Joined Haragangians" preview (photo/name/batch, no membership number) between the Membership and Jobs sections, reusing this same anonymous `search` endpoint (2026-08-31).
+- **Display**: defaults to a `.data-table` view (Table/Card toggle) on the full `/directory` page; the compact embedded mode (used as an in-app picker elsewhere) always stays card-based regardless. The public landing page also shows a "Recently Joined Haragangians" preview (photo/name/batch, no membership number) between the Membership and Jobs sections, reusing this same anonymous `search` endpoint (2026-08-31). Since 2026-10-15 that endpoint returns only name, photo and batch to anonymous callers, which is all the preview uses.
 - **Dependencies**: Networking service.
 
 ### 4.2 Professional Job Hub

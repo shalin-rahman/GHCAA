@@ -1,11 +1,12 @@
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit, OnDestroy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName, getCurrentECPosition, PROFESSIONAL_SECTORS, getBloodGroupName, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS } from '../../core/constants/app.constants';
+import { getECPositionName, getCurrentECPosition, PROFESSIONAL_SECTORS, getBloodGroupName, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS, ADMIN_ROLE, SUPER_ADMIN_ROLE, ROUTES } from '../../core/constants/app.constants';
+import { AuthService } from '../../core/services/auth.service';
 import { debounce } from '../../core/utils/debounce.util';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { LoadingPanelComponent } from '../loading-panel/loading-panel';
@@ -36,6 +37,15 @@ export class Directory implements OnInit, OnDestroy {
     private router = inject(Router);
     private lookupService = inject(LookupService);
     orgConfig = inject(OrgConfigService);
+    private auth = inject(AuthService);
+
+    // The API returns name and batch only to anonymous visitors, so the page hides
+    // the filters and fields it has no data for.
+    get publicListing(): boolean {
+        return this.disableProfile && !this.auth.isAuthenticated();
+    }
+
+    canAdminEdit = computed(() => this.auth.hasRole(ADMIN_ROLE) || this.auth.hasRole(SUPER_ADMIN_ROLE));
 
     // 58.2: table is the default view for the full page; the compact embedded mode (used inside
     // e.g. the messages "start conversation" picker) always stays card-based regardless of this.
@@ -168,6 +178,10 @@ export class Directory implements OnInit, OnDestroy {
             next: (p) => this.selectedMember.set(p),
             error: () => this.notify.error('Failed to load profile details')
         });
+    }
+
+    editAsAdmin(id: number) {
+        this.router.navigate([ROUTES.ADMIN_MEMBERS], { queryParams: { edit: id } });
     }
 
     sendMessage(id: number) {

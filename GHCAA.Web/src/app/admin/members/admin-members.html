@@ -146,8 +146,8 @@
     <div class="modal-box" (click)="$event.stopPropagation()">
         <app-modal-header (closed)="closeDetail()">
             <div lead class="flex items-center gap-3">
-                <div class="relative group cursor-pointer" (click)="isEditing() && photoInput.click()"
-                    [title]="isEditing() ? 'Click to change photo' : ''">
+                <div class="relative group cursor-pointer" (click)="isEditing() ? photoInput.click() : toggleEdit()"
+                    [title]="isEditing() ? 'Click to change photo' : 'Edit profile to change photo'">
                     @if (photoPreview()) {
                     <img [src]="photoPreview()" class="modal-avatar photo" alt="Preview" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else if (selectedMember()?.photoPath) {
@@ -180,13 +180,16 @@
 
             <!-- Administrative Signature Oversight (Inline) -->
             <div aside class="header-photo-controls flex items-center gap-4 bg-black/10 p-2 rounded-xl border border-white/5">
-                <div class="relative group cursor-pointer" (click)="isEditing() && signatureInput.click()" [title]="isEditing() ? 'Click to change signature' : ''">
+                <!-- In view mode a click opens edit mode, so the box never looks like a dead button. -->
+                <div class="relative group cursor-pointer" (click)="isEditing() ? signatureInput.click() : toggleEdit()" [title]="isEditing() ? 'Click to change signature' : 'Edit profile to change signature'">
                     @if (signaturePreview()) {
                         <img [src]="signaturePreview()" class="h-12 w-24 object-contain bg-white/20 rounded-md" alt="Signature Preview" appImgFallback>
                     } @else if (selectedMember()?.signaturePath) {
                         <img [src]="getImageUrl(selectedMember().signaturePath)" class="h-12 w-24 object-contain bg-white/20 rounded-md" alt="Signature" appImgFallback>
                     } @else {
-                        <div class="h-12 w-24 border border-dashed border-white/20 rounded-md flex items-center justify-center text-lg"><app-icon name="pen" [size]="18"></app-icon></div>
+                        <div class="signature-empty h-12 w-24 border border-dashed border-white/20 rounded-md flex items-center justify-center">
+                            @if (isEditing()) { <app-icon name="pen" [size]="18"></app-icon> } @else { No signature }
+                        </div>
                     }
                     @if (isEditing()) {
                         <div class="absolute inset-0 bg-black/50 rounded-md opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity pointer-events-none"><app-icon name="pen" [size]="14"></app-icon></div>

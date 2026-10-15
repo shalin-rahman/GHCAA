@@ -39,6 +39,7 @@ export class AdminMembers implements OnInit {
   private notify = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private datePipe = inject(DatePipe);
   private lookupService = inject(LookupService);
   nav = inject(NavService);
@@ -112,6 +113,12 @@ export class AdminMembers implements OnInit {
     this.loadMembers();
     this.loadECPeriods();
     this.loadLookupOptions();
+
+    // The public directory's admin Edit button links here with ?edit=<memberId>.
+    const editId = Number(this.route.snapshot.queryParamMap.get('edit'));
+    if (Number.isInteger(editId) && editId > 0) {
+      this.openDetail({ id: editId }, true);
+    }
   }
 
   // 82.42: single place these five lists come from now, instead of each screen hardcoding its own copy.
@@ -310,7 +317,7 @@ export class AdminMembers implements OnInit {
     });
   }
 
-  openDetail(member: any) { 
+  openDetail(member: any, startEditing = false) {
     this.loading.set(true);
     this.adminService.getMemberById(member.id).subscribe({
       next: (fullMember: any) => {
@@ -353,8 +360,8 @@ export class AdminMembers implements OnInit {
         }
 
         this.selectedMember.set(mappedMember);
-        this.isEditing.set(false); 
-        this.photoToUpload = null; 
+        this.isEditing.set(startEditing);
+        this.photoToUpload = null;
         this.photoPreview.set(null); 
         this.loadPayments(member.id);
         this.loading.set(false);

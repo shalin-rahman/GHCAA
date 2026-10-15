@@ -136,10 +136,12 @@ status transition.
 
 - FR-001: `NetworkingController.Search` shall accept `GET api/networking/search` (also mapped
   as `api/networking/directory`) with a `MemberSearchFilterDto` and return a paged result of
-  `MemberSummaryDto` via `INetworkingService.SearchMembersAsync`. [code+test]
+  `MemberSummaryDto` via `INetworkingService.SearchMembersAsync`. An anonymous caller goes to
+  `SearchPublicDirectoryAsync` instead, which returns name, photo and batch only and
+  applies only the name and batch filters (2026-10-15). [code+test]
 - FR-002: `NetworkingController.GetPublicProfile` shall accept `GET api/networking/member/{id}`
-  and return 404 when `GetMemberProfileAsync` finds no active, non-archived member with that
-  id. [code+test]
+  from a signed-in caller only, and return 404 when `GetMemberProfileAsync` finds no active,
+  non-archived member with that id. It was anonymous until 2026-10-15. [code+test]
 - FR-003: `NetworkingController.GetExecutiveCommittee` shall accept `GET api/networking/committee`
   with an optional `periodId` query parameter and return the members holding an EC role in that
   period, or the active period when `periodId` is omitted. [code+test]
@@ -241,8 +243,8 @@ status transition.
 
 | FR | API (verb + route) | Service method | Web (file) | Mobile (file) | Test (file::test name) |
 |----|---------------------|-----------------|------------|----------------|--------------------------|
-| FR-001 | GET api/networking/search | NetworkingService.SearchMembersAsync | GHCAA.Web/src/app/core/services/networking.service.ts | GHCAA.Mobile/lib/features/networking/networking_service.dart | GHCAA.Tests/Controllers/NetworkingControllerTests.cs::Search_ReturnsOk |
-| FR-002 | GET api/networking/member/{id} | NetworkingService.GetMemberProfileAsync | GHCAA.Web/src/app/core/services/networking.service.ts | none found | GHCAA.Tests/Controllers/NetworkingControllerTests.cs::GetPublicProfile_ReturnsOk_IfFound |
+| FR-001 | GET api/networking/search | NetworkingService.SearchMembersAsync | GHCAA.Web/src/app/core/services/networking.service.ts | GHCAA.Mobile/lib/features/networking/networking_service.dart | GHCAA.Tests/Controllers/NetworkingControllerTests.cs::Search_ReturnsOk, Search_Anonymous_UsesPublicListing, Search_SignedIn_UsesFullSearch; GHCAA.Tests/Services/NetworkingServiceTests.cs::SearchPublicDirectoryAsync_ReturnsNameAndBatchOnly, SearchPublicDirectoryAsync_IgnoresFiltersOtherThanNameAndBatch |
+| FR-002 | GET api/networking/member/{id} | NetworkingService.GetMemberProfileAsync | GHCAA.Web/src/app/core/services/networking.service.ts | none found | GHCAA.Tests/Controllers/NetworkingControllerTests.cs::GetPublicProfile_ReturnsOk_IfFound, GetPublicProfile_IsNotAnonymous |
 | FR-003 | GET api/networking/committee | NetworkingService.GetExecutiveCommitteeAsync | GHCAA.Web/src/app/core/services/networking.service.ts | GHCAA.Mobile/lib/screens/member/committee_screen.dart | GHCAA.Tests/Controllers/NetworkingControllerTests.cs::GetCommittee_ReturnsOk |
 | FR-004 | GET api/networking/periods | NetworkingService.GetECPeriodsAsync | GHCAA.Web/src/app/core/services/networking.service.ts | GHCAA.Mobile/lib/screens/member/committee_screen.dart | GHCAA.Tests/Controllers/NetworkingControllerTests.cs::GetPeriods_ReturnsOk |
 | FR-005 | GET api/networking/updates | NetworkingService.GetLatestAlumniUpdatesAsync | GHCAA.Web/src/app/core/services/networking.service.ts | none found | GHCAA.Tests/Controllers/NetworkingControllerTests.cs::GetLatestUpdates_ReturnsOk |

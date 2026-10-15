@@ -7,6 +7,8 @@ import { Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { LOOKUP_GROUPS, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
 import { LookupService } from '../../core/services/lookup.service';
+import { AuthService } from '../../core/services/auth.service';
+import { signal, WritableSignal } from '@angular/core';
 
 describe('Directory Component', () => {
     let component: Directory;
@@ -14,6 +16,8 @@ describe('Directory Component', () => {
     let networkServiceMock: any;
     let notificationServiceMock: any;
     let routerMock: any;
+    let signedIn: WritableSignal<boolean>;
+    let roles: WritableSignal<string[]>;
 
     beforeEach(async () => {
         vi.useFakeTimers();
@@ -25,6 +29,12 @@ describe('Directory Component', () => {
         routerMock = {
             navigate: vi.fn()
         };
+        signedIn = signal(true);
+        roles = signal<string[]>([]);
+        const authServiceMock = {
+            isAuthenticated: signedIn,
+            hasRole: (name: string) => roles().includes(name)
+        };
 
         await TestBed.configureTestingModule({
             imports: [Directory],
@@ -32,6 +42,7 @@ describe('Directory Component', () => {
                 { provide: NetworkingService, useValue: networkServiceMock },
                 { provide: NotificationService, useValue: notificationServiceMock },
                 { provide: Router, useValue: routerMock },
+                { provide: AuthService, useValue: authServiceMock },
                 {
                     provide: LookupService, useValue: {
                         // 62.33: MembershipType now goes through getOptions() like MemberCategory —
@@ -155,6 +166,50 @@ describe('Directory Component', () => {
         expect(networkServiceMock.searchMembers).toHaveBeenCalledWith(expect.objectContaining({
             membershipType: 'Guest'
         }));
+    });
+
+    describe('public directory', () => {
+        const member = { id: 9, fullName: 'Test User', passingYear: 2010, bloodGroup: 1, degree: 'Honours' };
+
+        function showPublic(loggedIn: boolean, userRoles: string[] = []) {
+            signedIn.set(loggedIn);
+            roles.set(userRoles);
+            fixture.componentRef.setInput('disableProfile', true);
+            component.members.set([member as any]);
+            component.loading.set(false);
+            component.viewMode.set('card');
+            fixture.detectChanges();
+            return fixture.nativeElement as HTMLElement;
+        }
+
+        it('hides the extra filters and blood group from anonymous visitors', () => {
+            const el = showPublic(false);
+
+            expect(component.publicListing).toBe(true);
+            expect(el.textContent).not.toContain('Blood Group');
+            expect(el.textContent).not.toContain('Membership Type');
+            expect(el.textContent).toContain('2010');
+            expect(el.textContent).not.toContain('Honours');
+        });
+
+        it('keeps the full filters for a signed-in member', () => {
+            const el = showPublic(true);
+
+            expect(component.publicListing).toBe(false);
+            expect(el.textContent).toContain('Blood Group');
+            expect(el.textContent).toContain('Honours');
+        });
+
+        it('shows the Edit button to an admin only', () => {
+            expect(showPublic(true).querySelector('.admin-edit')).toBeNull();
+            expect(showPublic(true, ['Admin']).querySelector('.admin-edit')).not.toBeNull();
+        });
+
+        it('sends the admin Edit button to the admin members page in edit mode', () => {
+            component.editAsAdmin(9);
+
+            expect(routerMock.navigate).toHaveBeenCalledWith(['/admin/members'], { queryParams: { edit: 9 } });
+        });
     });
 });
 

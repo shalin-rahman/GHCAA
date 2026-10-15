@@ -9,7 +9,7 @@ import { LookupService } from '../../core/services/lookup.service';
 import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 
 describe('AdminMembers Component', () => {
     let component: AdminMembers;
@@ -42,7 +42,7 @@ describe('AdminMembers Component', () => {
             navigate: vi.fn()
         };
         activatedRouteMock = {
-            snapshot: {}
+            snapshot: { queryParamMap: convertToParamMap({}) }
         };
 
         const lookupServiceMock = {
@@ -101,5 +101,36 @@ describe('AdminMembers Component', () => {
 
         expect(notificationServiceMock.error).toHaveBeenCalledWith('Data updated, but document upload failed.');
         expect(component.submitting()).toBe(false);
+    });
+
+    // The public directory's admin Edit button lands here with ?edit=<id>.
+    it('opens the member in edit mode when the edit query param is set', () => {
+        adminServiceMock.getMemberById = vi.fn().mockReturnValue(of({ id: 7, fullName: 'Test User' }));
+        adminServiceMock.getMemberPayments = vi.fn().mockReturnValue(of([]));
+        activatedRouteMock.snapshot.queryParamMap = convertToParamMap({ edit: '7' });
+
+        component.ngOnInit();
+
+        expect(adminServiceMock.getMemberById).toHaveBeenCalledWith(7);
+        expect(component.selectedMember()?.id).toBe(7);
+        expect(component.isEditing()).toBe(true);
+    });
+
+    it('ignores an edit query param that is not a member id', () => {
+        adminServiceMock.getMemberById = vi.fn();
+        activatedRouteMock.snapshot.queryParamMap = convertToParamMap({ edit: 'abc' });
+
+        component.ngOnInit();
+
+        expect(adminServiceMock.getMemberById).not.toHaveBeenCalled();
+    });
+
+    it('opens a member in view mode from the list', () => {
+        adminServiceMock.getMemberById = vi.fn().mockReturnValue(of({ id: 8, fullName: 'Test User' }));
+        adminServiceMock.getMemberPayments = vi.fn().mockReturnValue(of([]));
+
+        component.openDetail({ id: 8 });
+
+        expect(component.isEditing()).toBe(false);
     });
 });

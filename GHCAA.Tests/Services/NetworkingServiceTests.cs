@@ -53,6 +53,54 @@ public class NetworkingServiceTests : TestBase
         privateResult.MobileNo.Should().Be("Confidential");
     }
 
+    [Category("FR-05")]
+    [Test]
+    public async Task SearchPublicDirectoryAsync_ReturnsNamePhotoAndBatchOnly()
+    {
+        var member = await CreateAndSaveTestMemberAsync("Public Listing", "listing.nt@example.com", "01155556666", "NTST5555");
+        member.Status = Enums.MembershipStatus.Active;
+        member.IsEmailPublic = true;
+        member.IsMobilePublic = true;
+        member.BloodGroup = Enums.BloodGroup.APositive;
+        member.PhotoPath = "/uploads/photos/listing.jpg";
+        member.AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "Honours", Subject = "Physics", PassingYear = 2008, IsOrgProfile = true } };
+        await _context.SaveChangesAsync();
+
+        var results = (await _service.SearchPublicDirectoryAsync(new MemberSearchFilterDto { Query = "Public Listing", PageSize = 100 })).Items.ToList();
+
+        var result = results.Single();
+        result.Id.Should().Be(member.Id);
+        result.FullName.Should().Be("Public Listing");
+        result.PhotoPath.Should().Be("/uploads/photos/listing.jpg");
+        result.PassingYear.Should().Be(2008);
+        result.Degree.Should().BeNull();
+        result.Subject.Should().BeNull();
+        result.Email.Should().BeNull();
+        result.MobileNo.Should().BeNull();
+        result.MembershipNumber.Should().BeNull();
+        result.BloodGroup.Should().Be(Enums.BloodGroup.Unknown);
+        result.ECHistory.Should().BeEmpty();
+    }
+
+    [Category("FR-05")]
+    [Test]
+    public async Task SearchPublicDirectoryAsync_IgnoresFiltersOtherThanNameAndBatch()
+    {
+        var member = await CreateAndSaveTestMemberAsync("Filter Probe", "probe.nt@example.com", "01177778888", "NTST7777");
+        member.Status = Enums.MembershipStatus.Active;
+        member.IsEmailPublic = true;
+        member.BloodGroup = Enums.BloodGroup.APositive;
+        await _context.SaveChangesAsync();
+
+        // A blood group filter that would exclude the member is dropped, so the member is still listed.
+        var byBlood = await _service.SearchPublicDirectoryAsync(new MemberSearchFilterDto { Query = "Filter Probe", BloodGroup = "ONegative", PageSize = 100 });
+        byBlood.Items.Should().ContainSingle();
+
+        // Email and membership number do not match in the public listing.
+        (await _service.SearchPublicDirectoryAsync(new MemberSearchFilterDto { Query = "probe.nt@example.com" })).Items.Should().BeEmpty();
+        (await _service.SearchPublicDirectoryAsync(new MemberSearchFilterDto { Query = "NTST7777" })).Items.Should().BeEmpty();
+    }
+
     [Category("FR-34")]
     [Test]
     public async Task GetExecutiveCommitteeAsync_ShouldReturnMembersWithECPosition()

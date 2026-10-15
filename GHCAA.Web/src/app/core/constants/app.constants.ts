@@ -648,6 +648,7 @@ export const ROUTES = {
     LOGIN: '/login',
     PORTAL_DASHBOARD: '/portal/dashboard',
     ADMIN_DASHBOARD: '/admin/dashboard',
+    ADMIN_MEMBERS: '/admin/members',
     OFFICIALS_DASHBOARD: '/officials'
 };
 

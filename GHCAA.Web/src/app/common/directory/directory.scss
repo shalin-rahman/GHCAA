@@ -118,6 +118,7 @@
             height: 100%;
             border-radius: var(--radius-lg);
             object-fit: cover;
+            object-position: center top;
             border: 2px solid var(--glass-border);
         }
 
@@ -223,6 +224,7 @@
         height: 100%;
         border-radius: 50%;
         object-fit: cover;
+        object-position: center top;
     }
 
     .avatar {
@@ -340,6 +342,7 @@
         height: 100%;
         border-radius: var(--radius-lg);
         object-fit: cover;
+        object-position: center top;
         border: 3px solid var(--primary-color);
     }
 

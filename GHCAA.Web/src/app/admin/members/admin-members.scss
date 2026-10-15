@@ -63,10 +63,17 @@
     font-size: 1.5rem;
     font-weight: 900;
 
+    // Portrait uploads lost the top of the head when cropped from the centre.
     &.photo {
         object-fit: cover;
+        object-position: center top;
         border: 2px solid var(--accent-color);
     }
+}
+
+.signature-empty {
+    font-size: 0.7rem;
+    color: var(--text-muted);
 }
 
 .privacy-grid {

@@ -1278,8 +1278,8 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 |---|---|---|
 | `getCommittee()` | `(params?, silent?) => Observable<MemberSummary[]>` | `GET /networking/committee` |
 | `getPeriods()` | `() => Observable<any[]>` | `GET /networking/periods` |
-| `searchMembers()` | `(filter) => Observable<PagedResult<MemberSummary>>` | `GET /networking/search` |
-| `getMemberProfile()` | `(id) => Observable<any>` | `GET /networking/member/:id` (`[AllowAnonymous]`; since the 2026-08-29 security review, `NetworkingService.MapToDto` leaves `NID`/`DateOfBirth`/`FatherName`/`MotherName`/`EmergencyContact*`/`CertificatePath` unset on this path — those only populate on the authenticated owner/admin profile via `MemberService.GetProfileAsync`) |
+| `searchMembers()` | `(filter) => Observable<PagedResult<MemberSummary>>` | `GET /networking/search` (anonymous callers go to `SearchPublicDirectoryAsync`: name, photo and batch only, filtered by name and batch only) |
+| `getMemberProfile()` | `(id) => Observable<any>` | `GET /networking/member/:id` (signed-in only since 2026-10-15, was `[AllowAnonymous]`; since the 2026-08-29 security review, `NetworkingService.MapToDto` leaves `NID`/`DateOfBirth`/`FatherName`/`MotherName`/`EmergencyContact*`/`CertificatePath` unset on this path — those only populate on the authenticated owner/admin profile via `MemberService.GetProfileAsync`) |
 | `getUpdates()` | `(params) => Observable<MemberSummary[]>` | `GET /networking/updates` |
 | `getRecentlyJoined()` | `(limit?) => Observable<PagedResult<MemberSummary>>` | `GET /networking/search?sortBy=joinDate` |
 
