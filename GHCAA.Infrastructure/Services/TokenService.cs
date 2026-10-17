@@ -103,8 +103,11 @@ namespace GHCAA.Infrastructure.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                // 24.27: 60-minute access token. Refresh tokens extend sessions without re-login.
-                Expires = DateTime.UtcNow.AddMinutes(60),
+                // 24.27: short-lived access token, Jwt:ExpiryMinutes (60 by default). Refresh tokens
+                // extend sessions without re-login.
+                Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiryMinutes > 0
+                    ? _jwtOptions.ExpiryMinutes
+                    : Domain.Constants.Defaults.AccessTokenExpiryMinutes),
                 SigningCredentials = creds,
                 Issuer = _jwtOptions.Issuer,
                 Audience = _jwtOptions.Audience

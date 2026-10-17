@@ -87,6 +87,23 @@ namespace GHCAA.Tests.Services
             jwtToken.ValidTo.Should().BeCloseTo(before.AddMinutes(60), TimeSpan.FromSeconds(10));
         }
 
+        // 98.43: Jwt:ExpiryMinutes is read from config; zero or negative falls back to 60.
+        [Category("FR-11")]
+        [TestCase(15, 15)]
+        [TestCase(0, 60)]
+        [TestCase(-5, 60)]
+        public void CreateToken_UsesConfiguredExpiry_OrFallsBackTo60(int configured, int expected)
+        {
+            var jwtOptions = Options.Create(new JwtOptions { Issuer = "GHCAA", Audience = "GHCAA", ExpiryMinutes = configured });
+            var service = new TokenService(_mockConfig.Object, jwtOptions, _mockEnv.Object, NullLogger<TokenService>.Instance, _context);
+            var before = DateTime.UtcNow;
+
+            var token = service.CreateToken(new User { Id = 1, Username = "testuser" });
+
+            var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+            jwtToken.ValidTo.Should().BeCloseTo(before.AddMinutes(expected), TimeSpan.FromSeconds(10));
+        }
+
         [Category("FR-11")]
         [Test]
         public void GenerateRefreshToken_ShouldReturnBase64String()

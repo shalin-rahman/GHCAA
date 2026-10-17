@@ -4,18 +4,21 @@
 
 ---
 
-## 1. API (Root `.env` files — loaded by `DotNetEnv.Env.Load()` in `Program.cs`)
+## 1. API (`.env` files, loaded by `DotNetEnv.Env.Load()` in `Program.cs`)
 
 ### Three environments
 
 | File | Loaded by | Purpose |
 |---|---|---|
-| [`.env`](../.env) | `DotNetEnv.Env.Load()` (always) | Local Development |
+| [`.env`](../.env) | `DotNetEnv.Env.Load()` when the API runs from the repo root | Local Development |
 | [`.env.dev`](../.env.dev) | Manual rename to `.env` when needed | Dev alias (not loaded automatically) |
 | [`.env.preprod`](../.env.preprod) | Render/CI env vars (not DotNetEnv) | Pre-production Render deployment |
 
 > [!IMPORTANT]
-> `DotNetEnv.Env.Load()` in `Program.cs` loads only `.env` (not `.env.preprod`). The preprod/production
+> `DotNetEnv.Env.Load()` in `Program.cs` loads only the `.env` in the current working directory (not
+> `.env.preprod`). `dotnet run` from `GHCAA.API/` and `GHCAA.Tools/run-app.ps1` both start there, so they
+> read [`GHCAA.API/.env`](../GHCAA.API/.env), not the root `.env`. Keep the two in step, or put local
+> overrides in `GHCAA.API/.env`. The preprod/production
 > env vars must be set as **host environment variables** on Render — not committed as `.env` files.
 > `.env.preprod` serves as a reference template for what to configure on Render.
 

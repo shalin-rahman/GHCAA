@@ -18,7 +18,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly ILogger<OtpService> _logger;
         private readonly int _expiryMinutes;
         private readonly string _hashKey;
-        private const int MaxOtpAttempts = 5;
+        private readonly int _maxAttempts;
 
         public OtpService(ApplicationDbContext db, ICommunicationService communication, IOptions<OtpSettingsOptions> otpSettings, IConfiguration config, ILogger<OtpService> logger)
         {
@@ -26,6 +26,9 @@ namespace GHCAA.Infrastructure.Services
             _communication = communication;
             _logger = logger;
             _expiryMinutes = otpSettings.Value.ExpiryMinutes;
+            _maxAttempts = otpSettings.Value.MaxAttempts > 0
+                ? otpSettings.Value.MaxAttempts
+                : Domain.Constants.Defaults.OtpMaxAttempts;
             // SECURITY AUDIT (2026-08-29): previously keyed on the email address, which is not a
             // secret — that made this an effectively unkeyed hash of a 6-digit code, brute-forceable
             // in microseconds from a DB dump. Reuses the JWT signing key as the HMAC secret (a real
@@ -92,9 +95,9 @@ namespace GHCAA.Infrastructure.Services
 
             if (otp == null) return false;
 
-            if (otp.Attempts >= MaxOtpAttempts)
+            if (otp.Attempts >= _maxAttempts)
             {
-                _logger.LogWarning("OTP for {Email} is locked after {Max} failed attempts", email, MaxOtpAttempts);
+                _logger.LogWarning("OTP for {Email} is locked after {Max} failed attempts", email, _maxAttempts);
                 return false;
             }
 

@@ -14,6 +14,7 @@ namespace GHCAA.Infrastructure.Options
         // IConfiguration plus IHostEnvironment to do that; it stays as-is.
         public string Issuer { get; set; } = "GHCAA";
         public string Audience { get; set; } = "GHCAA";
+        public int ExpiryMinutes { get; set; } = Domain.Constants.Defaults.AccessTokenExpiryMinutes;
     }
 
     public class GmailSettingsOptions
@@ -62,6 +63,7 @@ namespace GHCAA.Infrastructure.Options
     public class OtpSettingsOptions
     {
         public int ExpiryMinutes { get; set; } = 10;
+        public int MaxAttempts { get; set; } = Domain.Constants.Defaults.OtpMaxAttempts;
         public string? HashKey { get; set; }
     }
 

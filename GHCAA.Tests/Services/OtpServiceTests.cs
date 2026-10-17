@@ -121,6 +121,29 @@ public class OtpServiceTests : TestBase
         otp!.IsVerified.Should().BeTrue();
     }
 
+    // 98.43: OtpSettings:MaxAttempts is read from config; zero or negative falls back to 5.
+    // After that many wrong codes even the right one is refused.
+    [Category("FR-09")]
+    [TestCase(2, 2, "otp-max-2@example.com")]
+    [TestCase(0, 5, "otp-max-0@example.com")]
+    [TestCase(-1, 5, "otp-max-neg@example.com")]
+    public async Task VerifyOtpAsync_LocksAfterConfiguredAttempts(int configured, int expected, string email)
+    {
+        var otpSettings = Options.Create(new OtpSettingsOptions { ExpiryMinutes = 10, MaxAttempts = configured });
+        var service = new OtpService(_context, _mockCommunication.Object, otpSettings, _mockConfig.Object, _mockLogger.Object);
+        var code = await service.GenerateAndSendOtpAsync(email);
+
+        for (var i = 0; i < expected - 1; i++)
+            (await service.VerifyOtpAsync(email, "000000")).Should().BeFalse();
+        (await service.VerifyOtpAsync(email, code)).Should().BeTrue("one attempt is still left");
+
+        var locked = "locked-" + email;
+        var lockedCode = await service.GenerateAndSendOtpAsync(locked);
+        for (var i = 0; i < expected; i++)
+            (await service.VerifyOtpAsync(locked, "000000")).Should().BeFalse();
+        (await service.VerifyOtpAsync(locked, lockedCode)).Should().BeFalse("the code is locked");
+    }
+
     [Category("FR-09")]
     [Test]
     public async Task VerifyOtpAsync_WithInvalidCode_ShouldReturnFalse()

@@ -121,6 +121,10 @@ namespace GHCAA.Domain
             // an unknown email answers at once while a known one waits on the mail server, which
             // tells anyone which emails have accounts. Set above a normal SMTP send.
             public const int PasswordResetResponseFloorMs = 3000;
+
+            // Fallbacks for Jwt:ExpiryMinutes and OtpSettings:MaxAttempts when the key is missing or not positive.
+            public const int AccessTokenExpiryMinutes = 60;
+            public const int OtpMaxAttempts = 5;
         }
 
         // The creator's account. ProtectedSuperAdminSeeder recreates it on boot if it is missing,
