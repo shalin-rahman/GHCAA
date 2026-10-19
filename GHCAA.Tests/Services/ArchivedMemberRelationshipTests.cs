@@ -107,7 +107,9 @@ public class ArchivedMemberRelationshipTests : TestBase
         var member = await CreateAndSaveTestMemberAsync();
         _context.IssuedCredentials.Add(new IssuedCredential { MemberId = member.Id, ShortCode = "ABC123" });
         await _context.SaveChangesAsync();
-        var service = new IDCardService(_context, new Mock<GHCAA.Application.Interfaces.IOrgConfigService>().Object);
+        var service = new IDCardService(_context, new Mock<GHCAA.Application.Interfaces.IOrgConfigService>().Object,
+            new Mock<GHCAA.Application.Interfaces.IFileStorageService>().Object,
+            new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>().Object);
         (await service.VerifyCredentialAsync("ABC123")).Should().NotBeNull();
 
         await ArchiveAsync(member);

@@ -604,6 +604,23 @@ public class LocalFileStorageServiceTests
         File.Exists(thumbPath).Should().BeFalse();
     }
 
+    // A thumbnail has no thumbnail of its own, so nothing under thumbs/thumbs/ is touched.
+    [Test]
+    public async Task DeleteFileAsync_Thumbnail_DeletesOnlyItself()
+    {
+        var thumbDir = Path.Combine(_testDirectory, "uploads", "members", "1", "galleryphoto", Constants.Defaults.ThumbnailFolder);
+        Directory.CreateDirectory(Path.Combine(thumbDir, Constants.Defaults.ThumbnailFolder));
+        var thumb = Path.Combine(thumbDir, "a.jpg");
+        var nested = Path.Combine(thumbDir, Constants.Defaults.ThumbnailFolder, "a.jpg");
+        await File.WriteAllTextAsync(thumb, "t");
+        await File.WriteAllTextAsync(nested, "n");
+
+        await _service.DeleteFileAsync("uploads/members/1/galleryphoto/" + Constants.Defaults.ThumbnailFolder + "/a.jpg");
+
+        File.Exists(thumb).Should().BeFalse();
+        File.Exists(nested).Should().BeTrue();
+    }
+
     [Test]
     public void Constructor_WithInvalidMaxFileSize_ShouldFailFastInsteadOfSilentlyDefaulting()
     {
@@ -640,5 +657,43 @@ public class LocalFileStorageServiceTests
         // Assert
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("*secure uploads root*web root*");
+    }
+
+    [TestCase(Enums.FileUploadType.NoticeDocument)]
+    [TestCase(Enums.FileUploadType.Certificate)]
+    public async Task OpenReadAsync_ReadsBackASavedFile(Enums.FileUploadType uploadType)
+    {
+        var path = await _service.SaveFileAsync(new MemoryStream("body"u8.ToArray()), "doc.pdf", 5, uploadType);
+
+        var file = await _service.OpenReadAsync(path);
+
+        file.Should().NotBeNull();
+        await using var stream = file!.Content;
+        stream.CanSeek.Should().BeTrue();
+        file.ETag.Should().StartWith("\"").And.EndWith("\"");
+        file.LastModified.Should().NotBeNull();
+        using var reader = new StreamReader(stream);
+        (await reader.ReadToEndAsync()).Should().Be("body");
+    }
+
+    [Category("NFR-S7")]
+    [TestCase("uploads/members/5/noticedocument/missing.pdf")]
+    [TestCase("uploads/members/../../../outside.txt")]
+    [TestCase("uploads/../secure_uploads/members/5/certificate/doc.pdf")]
+    public async Task OpenReadAsync_ReturnsNull_ForMissingOrEscapingPath(string path)
+    {
+        (await _service.OpenReadAsync(path)).Should().BeNull();
+    }
+
+    [Category("NFR-R4")]
+    [Test]
+    public async Task IsAvailableAsync_FollowsWhetherTheUploadFolderExists()
+    {
+        await _service.SaveFileAsync(new MemoryStream("x"u8.ToArray()), "a.pdf", 5, Enums.FileUploadType.NoticeDocument);
+        (await _service.IsAvailableAsync()).Should().BeTrue();
+
+        Directory.Delete(_testDirectory, true);
+
+        (await _service.IsAvailableAsync()).Should().BeFalse();
     }
 }

@@ -2,7 +2,7 @@
 
 **Feature Branch**: 025-org-config-pack-export-import
 **Created**: 2026-10-15
-**Status**: Draft, not started
+**Status**: Partly built. FR-18 (unique keys on themes, fee configs and payment settings, tasks T033 to T036, tracker 62.56g) was done on 2026-10-15. FR-1 to FR-17, the export and import pack itself, are not started
 **Input**: Owner request of 2026-10-15: "add a tasks for export and import organisational profile
 data like seed, ability to override and add only, also ashould able to map what are going import
 or export, a valid json directory or zip/rar could be imported also export zip/rar", extended the

@@ -2,12 +2,12 @@
 
 **Feature Branch**: 024-performance
 **Created**: 2026-10-14
-**Status**: Draft, not started
+**Status**: Mostly built. As of 2026-10-20 the tracker items under Work Package 98 run to 98.43. Of the items this spec raised only 98.7 (pre-compressed static files) is still open, and 98.34 is on hold
 **Input**: User request of 2026-10-14: "i want all specs plans, tasks for performance improvement,
 that mat db, api, FE,design or else first, than start fix". Four read-only audits of the same day
 (database and EF, API, Angular web with its assets, Flutter mobile) supplied the findings.
 **Depends on**: [001-platform-baseline](../001-platform-baseline/spec.md) (the as-built platform)
-**Tracker**: `docs/TODO.md` items 98.1 to 98.20, under Work Package 98
+**Tracker**: `docs/TODO.md` items 98.1 to 98.20 for the findings below, under Work Package 98. Later items in that package (to 98.43) came from other reviews
 
 ## Purpose and scope
 

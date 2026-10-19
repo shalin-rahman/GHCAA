@@ -70,9 +70,9 @@ Acceptance Scenarios:
   match always returns the first 10 Member rows in table order regardless of the year or
   sector named in the query.
 - `AssistantController` carries no `[EnableRateLimiting]` attribute, so it falls back to the
-  application-wide `RateLimitPolicies.Api` default (100 requests/minute, queue 2) applied by
-  `app.MapControllers().RequireRateLimiting(RateLimitPolicies.Api)` in `GHCAA.API/Program.cs`
-  line 176; there is no assistant-specific throttle.
+  application-wide per-IP limit of 100 requests a minute. Since the rate-limit fix this is a
+  `GlobalLimiter` in `GHCAA.API/Extensions/RateLimitingExtensions.cs`, not a
+  `RequireRateLimiting` call in `Program.cs`. There is no assistant-specific throttle.
 - `GHCAA.Mobile/lib/features/assistant/assistant_service.dart` line 11 posts the body key
   `question`, but `AssistantQueryDto` (`GHCAA.API/Controllers/AssistantController.cs` line 34)
   binds the field `Query`; a mobile request therefore always arrives with `Query` unset.
@@ -116,7 +116,7 @@ Acceptance Scenarios:
 | FR-004 | POST api/assistant/ask | AssistantService.cs::AskAsync | assistant.ts | assistant_service.dart | none found |
 | FR-005 | POST api/assistant/ask | AssistantService.cs::AskAsync | assistant.ts | assistant_service.dart | none found |
 | FR-006 | POST api/assistant/ask | AssistantService.cs::AskAsync | assistant.ts | assistant_service.dart | none found |
-| FR-007 | POST api/assistant/ask | GHCAA.API/Program.cs line 176, GHCAA.API/Extensions/RateLimitingExtensions.cs::AddAppRateLimiting | none found | none found | none found |
+| FR-007 | POST api/assistant/ask | GHCAA.API/Extensions/RateLimitingExtensions.cs::AddAppRateLimiting (GlobalLimiter) | none found | none found | none found |
 
 GHCAA.Web/src/app/core/services/assistant.service.spec.ts exists but tests only the Angular
 HTTP wrapper (request shape and response passthrough), not any of the above FRs at the API

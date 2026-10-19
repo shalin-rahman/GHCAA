@@ -313,6 +313,9 @@ namespace GHCAA.Domain
             // 98.10. Retries for a dropped or timed-out Postgres call outside a transaction.
             public const int DbRetryCount = 3;
             public const int DbRetryMaxDelaySeconds = 5;
+
+            // 7.28. The SDK's own timeout and retries can hold /health for minutes on a dead endpoint.
+            public const int StorageProbeTimeoutSeconds = 5;
         }
 
         public static class SecurityStamps

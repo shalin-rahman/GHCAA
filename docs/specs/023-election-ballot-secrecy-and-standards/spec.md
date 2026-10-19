@@ -2,7 +2,7 @@
 
 **Feature Branch**: 023-election-ballot-secrecy-and-standards
 **Created**: 2026-09-27
-**Status**: Draft, not started
+**Status**: In progress. As of 2026-10-20 the secrecy, whole-ballot, phase and declaration fixes are built (tracker 37.1i to 37.1l, 37.1n, 37.1o, 37.1q). Still open: 37.1m (receipt checks) and 37.1p (recount, consent, conflict, spoiled and unopposed seats)
 **Input**: Review of the election engine on 2026-09-27. The user asked that votes stay anonymous,
 that a voter can print their ballot after voting, and that the engine be checked against common
 election practice.
@@ -51,7 +51,7 @@ here so a reviewer can check each requirement against a rule, not against taste.
 
 ## Current state (2026-09-27)
 
-Line numbers are from the tree on 2026-09-27 and will drift.
+Line numbers are from the tree on 2026-09-27 and will drift. This section records the gaps as found that day. Most are fixed since; the status line above says which remain.
 
 ### How a ballot can be joined back to a voter
 

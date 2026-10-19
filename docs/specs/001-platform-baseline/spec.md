@@ -37,11 +37,11 @@ and measurable outcomes below still apply to every domain.
 | 5 Pay dues and keep financial governance | [015 Payments and finance](../015-payments-finance/spec.md) | Financials, FinancialLedger, Gateways, PaymentConfig, Campaigns, Scholarships |
 | 6 Find alumni and exchange opportunities | [016 Networking and careers](../016-networking-careers/spec.md) | Networking, JobHub, Mentorship |
 | 7 Communicate in real time, 9 (support channel part) | [017 Communication](../017-communication/spec.md) | Messaging, Communication, MemberCommunications, Notification, Forum, Contact |
-| 8 Read and administer governance | [018 Governance, elections and polls](../018-governance-elections-polls/spec.md) | Governance, AdminGovernance, Elections, AdminElections, Poll, AdminPoll |
+| 8 Read and administer governance | [018 Governance, elections and polls](../018-governance-elections-polls/spec.md) | Governance, AdminGovernance, Elections, AdminElections, ElectionAppointments, ElectionPersonas, ElectionRulesUnlock, Poll, AdminPoll |
 | 9 Use the rule-based assistant | [019 Assistant](../019-assistant/spec.md) | Assistant |
 | 10 Operate a secure, configurable platform | [020 Platform and operations](../020-platform-operations/spec.md) | OrgConfig, Theme, Lookups, Health, Admin, Activity, AdminErrorLogs, AdminDevTracker |
 
-All 45 files in `GHCAA.API/Controllers` are owned by one domain spec. AdminController, Events,
+All 48 files in `GHCAA.API/Controllers` (counted 2026-10-20) are owned by one domain spec. AdminController, Events,
 Networking and PendingApprovals are also named in other specs, but only where a boundary is
 described.
 

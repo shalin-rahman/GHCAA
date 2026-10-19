@@ -82,10 +82,10 @@ resulting vote row carries no member identity.
 3. **Given** a member not on the frozen, eligible voter roll, **When** they vote, **Then**
    the request is rejected.
 
-As built, scenario 1 holds only for foreign keys. The ballot can still be joined to the voter
-by time, key order, Postgres transaction id and the audit log. Spec 023 (election ballot
-secrecy and standards, FR-001 to FR-004) sets the fix, and adds scenarios for a whole-ballot
-submit, a review-then-confirm step and a printable receipt.
+Since 2026-10-09 scenario 1 holds in full. Ballots are sealed under the returning officer's
+key and cannot be joined back to the voter (spec 023, election ballot secrecy and standards,
+FR-001 to FR-004, tracker 37.1i). Spec 023 also added the whole-ballot submit, the
+review-then-confirm step and the printable receipt.
 
 ### User Story 3 - Administer EC periods and the committee roster (Priority: P2)
 
@@ -162,17 +162,16 @@ and confirm rejection, then confirm the member vote status and result percentage
 - A nomination candidate, proposer and seconder must be three distinct eligible voters.
 - Only the nominated candidate can withdraw their own accepted nomination, and only during
   Withdrawal.
-- AdminElectionsController.AddCandidate inserts a nomination as already Accepted
-  (self-proposed and self-seconded), bypassing scrutiny, a different path from
-  ElectionsController.Nominate plus Scrutinise.
-- Removing a candidate is refused once votes already exist for that nomination. It is
-  allowed in any phase before that, including Polling. Spec 023 FR-009 limits add and
-  remove to CandidateList or earlier.
-- CountAsync has no phase check, so it can run while polling is open (spec 023 FR-007).
-- SetPhaseAsync can move an election to Declared without writing ECMember rows; only
-  DeclareAsync writes them (spec 023 FR-008).
-- A tie for a seat elects no one, and SeatCount above 1 is ignored (spec 023 FR-018,
-  FR-019).
+- AdminElectionsController.AddCandidate adds a Submitted nomination with a proposer and
+  seconder from the eligible roll, so it still goes through scrutiny. It is refused after
+  Scrutiny (spec 023 FR-009).
+- Removing a candidate is refused from CandidateList on. After that a candidate leaves only
+  by withdrawing.
+- CountAsync runs only in Counting (spec 023 FR-007).
+- SetPhaseAsync refuses Declared. Only DeclareAsync declares, so the ECMember rows are always
+  written (spec 023 FR-008).
+- A seat elects SeatCount candidates. A tie at the cut-off elects none of the tied candidates
+  until the election's tie rule settles it (spec 023 FR-018, FR-019, tracker 37.1o).
 - Requesting a document for an unsupported form code returns 404.
 - An unrecognised position title in AdminElectionsController.Create returns 400 rather
   than creating an unlabelled seat.
@@ -229,11 +228,11 @@ and confirm rejection, then confirm the member vote status and result percentage
 - FR-022: The nominated candidate shall withdraw their own accepted nomination only
   during the Withdrawal phase. [code]
 - FR-023: An eligible voter shall cast exactly one secret ballot per seat during the
-  Polling phase and within the polling window. [code+test] The "secret" part is not met
-  as built; see spec 023 FR-001 to FR-006.
+  Polling phase and within the polling window. [code+test] The ballot is sealed and
+  cannot be joined to the voter since 2026-10-09 (spec 023 FR-001 to FR-006).
 - FR-024: The admin, under step-up authentication, shall count ballots per seat for
-  accepted nominations and persist the results. [code] As built it runs in any phase;
-  spec 023 FR-007 limits it to Counting.
+  accepted nominations and persist the results. [code] It runs only in Counting (spec 023
+  FR-007).
 - FR-025: The admin, under step-up authentication, shall declare an election results once
   it is in the Counting phase, and the system shall create one ECMember record per elected
   candidate. [code]
@@ -246,8 +245,8 @@ and confirm rejection, then confirm the member vote status and result percentage
   [code]
 - FR-030: The admin shall close an election by advancing its phase to Counting. [code]
 - FR-031: The admin shall add a candidate directly to a seat as an accepted nomination,
-  rejecting a duplicate member-and-seat pair. [code] Spec 023 FR-009 replaces this with
-  the normal nomination rules.
+  rejecting a duplicate member-and-seat pair. [code] The nomination goes through
+  scrutiny like any other, and the admin can add one only up to Scrutiny (spec 023 FR-009).
 - FR-032: The admin shall remove a candidate, rejecting removal once votes exist for that
   nomination. [code]
 - FR-033: A member shall list active, non-expired, non-archived polls with their own vote
@@ -339,12 +338,11 @@ and confirm rejection, then confirm the member vote status and result percentage
 - FR-012, FR-016, FR-017, FR-019 (web has no submit UI for FR-020), FR-021 (mobile has none),
   FR-022, FR-024, FR-025 have no automated test at any layer. The phase-advance, seat,
   officer, nomination-submit, scrutiny, withdraw, count and declare paths of
-  ElectionsController and ElectionService are effectively verified only by the six
-  ElectionServiceTests covering FreezeVoterRollAsync, GetCurrentAsync and CastVoteAsync.
-  AddCandidateAsync and RemoveCandidateAsync (FR-031, FR-032) and the whole
-  AdminElectionsController also have no tests. GovernanceController, AdminGovernanceController,
-  ElectionsController and AdminElectionsController have no controller-level tests at all;
-  only the underlying service logic is exercised.
+  ElectionsController and ElectionService were first covered only by six ElectionServiceTests.
+  On 2026-10-20 `ElectionServiceTests.cs` holds 83 test cases, and `ElectionsControllerTests`
+  and `AdminElectionsControllerTests` exist. GovernanceController and AdminGovernanceController
+  still have no controller-level tests. Which FR rows above are still untested was not
+  re-checked.
 - The GovernanceServiceTests test name AssignMemberToRoleAsync_ShouldCreateRecordAndSyncProfile
   implies a member-profile sync side effect, but the current AssignMemberToRoleAsync method
   body only adds the ECMember row and optionally notifies; no Member-record mutation is
@@ -355,13 +353,12 @@ and confirm rejection, then confirm the member vote status and result percentage
 - RequireStepUp is applied action-by-action on ElectionsController but once at the class
   level on AdminElectionsController; the same security requirement is placed inconsistently,
   which risks a new ElectionsController action shipping without it.
-  [NEEDS CLARIFICATION: is AdminElectionsController.AddCandidate, which bypasses scrutiny by
-  design, an intended admin override, or should it also write a ScrutinyDecision record for
-  audit parity with ElectionsController.Nominate plus Scrutinise?]
 
 - Ballot secrecy, receipt, results publication and election-rule gaps found in the
-  2026-09-27 review are listed in spec 023, election ballot secrecy and standards, and
-  tracked as docs/TODO.md items 37.1i to 37.1q.
+  2026-09-27 review are listed in spec 023, election ballot secrecy and standards. As of
+  2026-10-20 only two remain open in docs/TODO.md: 37.1m (receipt still needs a browser and
+  phone check, and a Bengali font for the mobile PDF) and 37.1p (recount, candidate consent,
+  officer conflict, spoiled and unopposed seats).
 
 ## Enhancements: modularisation and reusability
 
@@ -443,8 +440,7 @@ and confirm rejection, then confirm the member vote status and result percentage
 - SC-001: every ElectionPhase transition enforced by SetPhaseAsync moves exactly one step
   forward and only when its documented precondition holds.
 - SC-002: no BallotVote row is ever joinable to a MemberId; ballot secrecy is structural, not
-  merely policy. Not met as built: spec 023 lists four ways to join them and sets the test
-  in its acceptance criterion 1.
+  merely policy. Met since 2026-10-09 (spec 023 acceptance criterion 1, tracker 37.1i).
 - SC-003: no member holds two AmendmentVote rows for the same ConstitutionId, two PollVote
   participations for a single-choice poll, or two SeatVote rows for the same election seat.
 - SC-004: every hard-delete of an ECMember record leaves DeletedAt and DeletedByAdminId

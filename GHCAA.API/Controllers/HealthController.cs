@@ -13,14 +13,16 @@ namespace GHCAA.API.Controllers
         private readonly IEmailService _email;
         private readonly IConfiguration _config;
         private readonly IOrgConfigService _orgConfig;
+        private readonly IFileStorageService _storage;
         private readonly ILogger<HealthController> _logger;
 
-        public HealthController(IDatabaseHealthService dbHealth, IEmailService email, IConfiguration config, IOrgConfigService orgConfig, ILogger<HealthController> logger)
+        public HealthController(IDatabaseHealthService dbHealth, IEmailService email, IConfiguration config, IOrgConfigService orgConfig, IFileStorageService storage, ILogger<HealthController> logger)
         {
             _dbHealth = dbHealth;
             _email = email;
             _config = config;
             _orgConfig = orgConfig;
+            _storage = storage;
             _logger = logger;
         }
 
@@ -57,9 +59,7 @@ namespace GHCAA.API.Controllers
             // 2. Storage Check
             try
             {
-                var uploadsBasePath = _config["FileStorage:BasePhysicalPath"]
-                    ?? Path.Combine(AppContext.BaseDirectory, "wwwroot");
-                var storageOk = Directory.Exists(uploadsBasePath);
+                var storageOk = await _storage.IsAvailableAsync(ct);
                 health.Checks.Add(new { Name = "FileStorage", Status = storageOk ? "Healthy" : "Unhealthy" });
                 if (!storageOk) allHealthy = false;
             }

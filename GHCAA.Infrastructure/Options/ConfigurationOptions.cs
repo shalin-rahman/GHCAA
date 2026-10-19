@@ -83,11 +83,30 @@ namespace GHCAA.Infrastructure.Options
 
     public class FileStorageOptions
     {
+        public const string LocalProvider = "Local";
+        public const string S3Provider = "S3";
+
+        // "Local" keeps files on the container disk. "S3" keeps them in a bucket, which survives
+        // a redeploy on hosts whose disk is wiped (Render).
+        public string Provider { get; set; } = LocalProvider;
+        public S3StorageOptions S3 { get; set; } = new();
+        public bool UsesS3 => string.Equals(Provider, S3Provider, StringComparison.OrdinalIgnoreCase);
+
         public string? BasePhysicalPath { get; set; }
         public string UploadsRelativePath { get; set; } = "uploads/members";
         public string SecureRelativePath { get; set; } = "secure_uploads/members";
         public long MaxFileSizeBytes { get; set; } = Domain.Constants.Defaults.MaxFileSizeBytes;
         public ImageCompressionOptions ImageCompression { get; set; } = new();
+    }
+
+    // Keys and region come from AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_REGION, and the
+    // endpoint from AWS_ENDPOINT_URL_S3, which the AWS SDK reads itself. ServiceUrl overrides it.
+    public class S3StorageOptions
+    {
+        public string BucketName { get; set; } = "";
+        public string? ServiceUrl { get; set; }
+        // Most S3-compatible services want bucket/key URLs rather than bucket.host ones.
+        public bool ForcePathStyle { get; set; } = true;
     }
 
     public class SslCommerzOptions

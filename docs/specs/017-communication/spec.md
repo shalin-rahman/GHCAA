@@ -22,7 +22,7 @@ This spec covers direct messaging, admin broadcast communication, a member's own
 - Reviewing, marking read, and deleting contact enquiries is exposed on `AdminController` (`GET/POST/DELETE api/admin/contact-messages`, `GHCAA.API/Controllers/AdminController.cs:326-347`), not on `ContactController`. `ContactController` only accepts new submissions. `AdminController` is not one of the six controllers in scope for this spec and is not traced further here.
 - Real-time delivery (`IRealTimeService`, the SignalR hubs at `api/hubs/chat` and `api/hubs/notifications`) is a transport detail called by `ChatService` and `NotificationService`; it has no controller of its own and is noted only where it affects an FR.
 - Sending a push notification to a registered FCM device token is not built. `NotificationController.RegisterDeviceToken` only persists the token (`GHCAA.Infrastructure/Services/DeviceTokenService.cs:1-10`, comment references work package 82.53a).
-- `GHCAA.Mobile/lib/screens/member/ai_chat_screen.dart` was not traced as part of this domain; it appears to serve the AI assistant feature (`api/assistant/ask`, see the untracked spec 019, the assistant workflow) rather than `MessagingController`. Not read in this pass to confirm.
+- `GHCAA.Mobile/lib/screens/member/ai_chat_screen.dart` was not traced as part of this domain; it appears to serve the AI assistant feature (`api/assistant/ask`, see spec 019, the assistant workflow) rather than `MessagingController`. Not read in this pass to confirm.
 
 ## User Scenarios & Testing
 

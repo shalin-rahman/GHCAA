@@ -114,10 +114,9 @@ status transition.
 
 ### Edge Cases
 
-- `NetworkingController` carries a class-level `[Authorize]` but every action is individually
-  marked `[AllowAnonymous]` (`GHCAA.API/Controllers/NetworkingController.cs:15-20`), so the
-  whole directory, profile, committee and updates surface is public despite the class
-  attribute suggesting otherwise.
+- `NetworkingController` carries a class-level `[Authorize]`. Search, committee, periods and
+  updates are marked `[AllowAnonymous]`; `member/{id}` is not, so a full profile needs sign-in
+  (FR-002). Checked against `GHCAA.API/Controllers/NetworkingController.cs` on 2026-10-20.
 - A missing or corrupt search cursor does not error; `TryDecodeCursor` falls back to the first
   page (`GHCAA.Infrastructure/Services/NetworkingService.cs`, cursor-decode block).
 - `DeactivateJob` is mapped to both `[HttpDelete("{id}")]` and `[HttpPatch("deactivate/{id}")]`

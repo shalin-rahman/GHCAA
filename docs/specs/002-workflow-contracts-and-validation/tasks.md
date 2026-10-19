@@ -33,7 +33,7 @@ These tasks do not authorize application changes.
 
   **Scope note**: Phases 1-3 cover the 7 domains named in `spec.md` Story 1
   (events, news/article, jobs, mentorship, payments, polls, governance) —
-  the controllers/services backing those domains — not all 35 `GHCAA.API`
+  the controllers/services backing those domains — not all 48 (as of 2026-10-20) `GHCAA.API`
   controllers. This scope cap was a deliberate decision to keep the
   deliverable to what Story 1 actually names; controllers outside these
   7 domains are not covered by this specification pass.

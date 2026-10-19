@@ -86,8 +86,21 @@ actual backup policy in place as its own item in `docs/TODO.md`.
 
 ## Scenario 3 — uploaded files (photos, documents) are gone
 
-Out of scope for this runbook's data-loss case above, but worth stating here since it's the other
-kind of "restore the platform" question an operator will ask: uploads are stored on local disk
-(`wwwroot/uploads`), which Render does not persist across a redeploy or restart on the current plan —
-see the `project_uploads_ephemeral_storage` note in project memory. There is no restore path for a
-lost upload; the member or admin has to re-upload it.
+Where uploads live depends on `FileStorage__Provider`. With `S3`, they sit in the bucket named by
+`FileStorage__S3__BucketName` (`ghcaa-storage` on preprod) and survive a redeploy. With it unset
+(`Local`), they sit in `wwwroot/uploads` on the container's disk, which Render wipes on every
+redeploy and restart.
+
+When every photo shows the placeholder after a deploy:
+
+1. Open `<origin>/healthz`. If `FileStorage` is `Unhealthy` or `Error`, the app cannot reach the
+   bucket. Check the `FileStorage__*` and `AWS_*` variables on Render against
+   `DEPLOYMENT_CHECKLIST.md` section 1, Render variables.
+2. If `FileStorage` is `Healthy` but files are missing, list the bucket with the AWS CLI
+   (`aws s3 ls s3://<bucket>/uploads/ --recursive --endpoint-url <endpoint>`) and compare with the
+   paths the database holds.
+3. If the provider was `Local` during the lost period, files uploaded then are gone. Nothing in
+   this repo backs them up, and the member or admin has to upload them again.
+
+The bucket itself has no backup set up from this repo. If the storage provider offers versioning
+or snapshots, record the steps here once they are turned on.

@@ -1,3 +1,5 @@
+using Amazon.Runtime;
+using Amazon.S3;
 using GHCAA.Application.Interfaces;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Gateways;
@@ -94,6 +96,9 @@ namespace GHCAA.Infrastructure
                     // Both email services implement IEmailService; EmailSettings:Provider picks one below.
                     && t != typeof(GmailEmailService)
                     && t != typeof(BrevoEmailService)
+                    // Both storage services implement IFileStorageService; FileStorage:Provider picks one below.
+                    && t != typeof(LocalFileStorageService)
+                    && t != typeof(S3FileStorageService)
                     // InstitutionProfileProvider reads its profile pack once at construction and never
                     // changes afterward (the "boot plane", ADR-3 in docs/WHITE_LABEL_PLAN.md) — it needs
                     // AddSingleton below, not the Scoped lifetime this loop applies to everything else.
@@ -129,7 +134,7 @@ namespace GHCAA.Infrastructure
             // which DependencyInjection.cs's caller resolves eagerly at boot so a bad pack fails loudly
             // before the app starts serving traffic rather than on first use.
             services.AddSingleton<IInstitutionProfileProvider, InstitutionProfileProvider>();
-            services.AddScoped<IFileStorageService, LocalFileStorageService>();
+            AddFileStorage(services, configuration);
             services.AddScoped<IThemeService, ThemeService>();
             services.AddScoped<IFileUploadRepository, FileUploadRepository>();
             services.AddScoped<IPaymentGatewayFactory, PaymentGatewayFactory>();
@@ -151,6 +156,39 @@ namespace GHCAA.Infrastructure
             AddEmailService(services, configuration);
 
             return services;
+        }
+
+        private static void AddFileStorage(IServiceCollection services, IConfiguration configuration)
+        {
+            var options = configuration.GetSection("FileStorage").Get<FileStorageOptions>() ?? new FileStorageOptions();
+
+            if (!options.UsesS3)
+            {
+                // A typo would otherwise fall back to the container disk, which Render wipes on redeploy.
+                if (!string.Equals(options.Provider, FileStorageOptions.LocalProvider, StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidOperationException(
+                        $"FileStorage:Provider '{options.Provider}' is not supported. Use '{FileStorageOptions.LocalProvider}' or '{FileStorageOptions.S3Provider}'.");
+
+                services.AddScoped<IFileStorageService, LocalFileStorageService>();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(options.S3.BucketName))
+                throw new InvalidOperationException("FileStorage:S3:BucketName must be set when FileStorage:Provider is S3.");
+
+            // Keys, region and endpoint come from the AWS_* environment variables (see S3StorageOptions).
+            var s3Config = new AmazonS3Config
+            {
+                ForcePathStyle = options.S3.ForcePathStyle,
+                // S3-compatible services other than AWS often reject the newer default checksums.
+                RequestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED,
+                ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED,
+            };
+            if (!string.IsNullOrWhiteSpace(options.S3.ServiceUrl))
+                s3Config.ServiceURL = options.S3.ServiceUrl;
+
+            services.AddSingleton<IAmazonS3>(_ => new AmazonS3Client(s3Config));
+            services.AddScoped<IFileStorageService, S3FileStorageService>();
         }
 
         private static void AddEmailService(IServiceCollection services, IConfiguration configuration)

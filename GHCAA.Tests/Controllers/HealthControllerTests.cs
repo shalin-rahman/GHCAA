@@ -18,6 +18,7 @@ namespace GHCAA.Tests.Controllers
         private IConfiguration _config = null!;
         private Mock<ILogger<HealthController>> _loggerMock = null!;
         private Mock<IOrgConfigService> _orgConfigMock = null!;
+        private Mock<IFileStorageService> _storageMock = null!;
         private HealthController _controller = null!;
 
         [SetUp]
@@ -29,7 +30,9 @@ namespace GHCAA.Tests.Controllers
             _loggerMock = new Mock<ILogger<HealthController>>();
             _orgConfigMock = new Mock<IOrgConfigService>();
             _orgConfigMock.Setup(x => x.GetConfigAsync()).ReturnsAsync(new OrgConfigDto());
-            _controller = new HealthController(_dbHealthMock.Object, _emailMock.Object, _config, _orgConfigMock.Object, _loggerMock.Object);
+            _storageMock = new Mock<IFileStorageService>();
+            _storageMock.Setup(x => x.IsAvailableAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            _controller = new HealthController(_dbHealthMock.Object, _emailMock.Object, _config, _orgConfigMock.Object, _storageMock.Object, _loggerMock.Object);
         }
 
         [Test]
@@ -54,6 +57,23 @@ namespace GHCAA.Tests.Controllers
             var objectResult = result as ObjectResult;
             Assert.That(objectResult, Is.Not.Null);
             Assert.That(objectResult!.StatusCode, Is.EqualTo(503));
+        }
+
+        // The check asks the store itself, so a bucket that cannot be reached shows up here.
+        [Test]
+        [Category("NFR-R4")]
+        public async Task GetHealth_ReturnsDegraded_WhenStorageIsUnavailable()
+        {
+            _storageMock.Setup(x => x.IsAvailableAsync(It.IsAny<CancellationToken>())).ReturnsAsync(false);
+            var controller = HealthyController(new Dictionary<string, string?>
+            {
+                ["GmailSettings:Email"] = "test@gmail.com",
+                ["GmailSettings:AppPassword"] = "password"
+            });
+
+            var result = await controller.GetHealth(CancellationToken.None);
+
+            Assert.That(StatusOf(result), Is.EqualTo(503));
         }
 
         [TestCase("Brevo", "key", "sender@example.com", 200)]
@@ -143,9 +163,8 @@ namespace GHCAA.Tests.Controllers
         private HealthController HealthyController(Dictionary<string, string?> settings)
         {
             _dbHealthMock.Setup(x => x.CanConnectAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
-            settings["FileStorage:BasePhysicalPath"] = Path.GetTempPath();
             var config = new ConfigurationBuilder().AddInMemoryCollection(settings).Build();
-            return new HealthController(_dbHealthMock.Object, _emailMock.Object, config, _orgConfigMock.Object, _loggerMock.Object);
+            return new HealthController(_dbHealthMock.Object, _emailMock.Object, config, _orgConfigMock.Object, _storageMock.Object, _loggerMock.Object);
         }
 
         private static int? StatusOf(IActionResult result) => result switch

@@ -151,8 +151,9 @@ storage, and email config are all reachable, and `503` when the database is down
    failure).
 2. **Given** the SMS config key `SmsSettings:Token` is empty, **When** `GET healthz` is called,
    **Then** the response still reports healthy, because SMS is optional in the current phase.
-3. **Given** the upload directory configured at `FileStorage:BasePhysicalPath` (or the `wwwroot`
-   fallback) does not exist, **When** `GET healthz` is called, **Then** the response is `503`.
+3. **Given** the upload store cannot be reached (with `FileStorage:Provider` `Local`, the directory
+   at `FileStorage:BasePhysicalPath` or the `wwwroot` fallback does not exist; with `S3`, the
+   bucket cannot be listed), **When** `GET healthz` is called, **Then** the response is `503`.
 
 ---
 
@@ -243,14 +244,17 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
 - FR-014: The system shall serve `GET healthz` to any caller, checking database connectivity via
   `IDatabaseHealthService.CanConnectAsync`, returning `503` with `Status: "Degraded"` on failure
   without including the raw exception text. [code+test]
-- FR-015: The system shall check that the directory named by `FileStorage:BasePhysicalPath` (or
-  `wwwroot` if unset) exists as part of `GET healthz`, marking the response `503` if it does not.
-  [code]
+- FR-015: The system shall check the upload store through `IFileStorageService.IsAvailableAsync`
+  as part of `GET healthz`, marking the response `503` if it is not reachable. For the `Local`
+  provider that is the directory named by `FileStorage:BasePhysicalPath` (or `wwwroot` if unset);
+  for `S3` it is a one-key listing of the bucket. The listing runs on every call, like the database
+  check, so the result is never stale; the per-IP rate limit on `healthz` caps how often it runs.
+  [code+test]
 - FR-016: The system shall check the settings of the email provider in use as part of
   `GET healthz`, marking the response `503` if either is missing: with `Brevo`,
   `BrevoSettings:ApiKey` and `BrevoSettings:SenderEmail`; otherwise `GmailSettings:Email` and
   `GmailSettings:AppPassword`. The provider in use is the admin's `Workflow.EmailProvider` in
-  OrganizationConfig, then `EmailSettings:Provider`, then `Gmail`. [code]
+  OrganizationConfig, then `EmailSettings:Provider`, then `Gmail`. [code+test]
 - FR-017: The system shall check that `SmsSettings:Token` is non-empty as part of `GET healthz`, but
   shall not fail the overall health status when it is empty, since SMS is optional in the current
   phase. [code]
@@ -380,9 +384,9 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
 | FR-011 | POST api/lookups | LookupService.AddLookupItemAsync | GHCAA.Web/src/app/core/services/lookup.service.ts | none found | GHCAA.Tests/Controllers/LookupsControllerTests.cs:106 |
 | FR-012 | PUT api/lookups/{id} | LookupService.UpdateLookupItemAsync | GHCAA.Web/src/app/core/services/lookup.service.ts | none found | GHCAA.Tests/Controllers/LookupsControllerTests.cs:132,143 |
 | FR-013 | DELETE api/lookups/{id} | LookupService.DeleteLookupItemAsync | GHCAA.Web/src/app/core/services/lookup.service.ts | none found | GHCAA.Tests/Controllers/LookupsControllerTests.cs:154,164 |
-| FR-014 | GET healthz | DatabaseHealthService.CanConnectAsync | GHCAA.Web/src/app/common/health/health.ts | none found | GHCAA.Tests/Controllers/HealthControllerTests.cs:35,47 |
-| FR-015 | GET healthz | HealthController (inline check) | GHCAA.Web/src/app/common/health/health.ts | none found | none found |
-| FR-016 | GET healthz | HealthController (inline check) | GHCAA.Web/src/app/common/health/health.ts | none found | none found |
+| FR-014 | GET healthz | DatabaseHealthService.CanConnectAsync | GHCAA.Web/src/app/common/health/health.ts | none found | GHCAA.Tests/Controllers/HealthControllerTests.cs:39,51 |
+| FR-015 | GET healthz | IFileStorageService.IsAvailableAsync (LocalFileStorageService, S3FileStorageService) | GHCAA.Web/src/app/common/health/health.ts | none found | GHCAA.Tests/Controllers/HealthControllerTests.cs:65 |
+| FR-016 | GET healthz | HealthController (email provider check) | GHCAA.Web/src/app/common/health/health.ts | none found | GHCAA.Tests/Controllers/HealthControllerTests.cs:83,100,115,130,148 |
 | FR-017 | GET healthz | HealthController (inline check) | GHCAA.Web/src/app/common/health/health.ts | none found | none found |
 | FR-018 | GET api/admin/stats | MemberService_Search.GetDashboardStatsAsync | GHCAA.Web/src/app/core/services/admin.service.ts | GHCAA.Mobile/lib/screens/admin/admin_dashboard_screen.dart | none found |
 | FR-019 | GET api/admin/analytics | MemberService_Search.GetDashboardStatsAsync | GHCAA.Web/src/app/core/services/admin.service.ts | none found | none found |

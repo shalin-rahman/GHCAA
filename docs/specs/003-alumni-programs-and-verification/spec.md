@@ -2,7 +2,7 @@
 
 **Feature Branch**: `003-alumni-programs-and-verification`
 **Created**: 2026-09-21
-**Status**: Draft
+**Status**: Partly built. As of 2026-10-20, 37.2 (scholarships) and 37.8 (credential verification) are done, and so is the 37.0 prerequisite. 37.5 (in-memoriam), 37.9 (geographic chapters) and 37.10 (impact report) are still open
 **Input**: `docs/TODO.md` Work Package 37 items 37.2, 37.5, 37.8, 37.9, 37.10
 **Depends on**: 37.0 (real EF migration path at deploy time — every story below adds at
 least one table, and `Database.EnsureCreated()` is a no-op on preprod's non-empty
@@ -14,7 +14,7 @@ against a non-empty database, not just a fresh one).
 
 ## Purpose and scope
 
-This spec covers five independent, unbuilt Work Package 37 backlog items chosen
+This spec covers five independent Work Package 37 backlog items, unbuilt when it was written, chosen
 because they carry no dependency on each other beyond the shared 37.0 prerequisite:
 a scholarship programme, an in-memoriam register, public credential verification,
 geographic chapters, and an annual impact report. Each is written as its own user

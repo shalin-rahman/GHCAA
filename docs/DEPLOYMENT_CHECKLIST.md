@@ -59,6 +59,12 @@ variable registry.
 | `AppSettings__ClientUrl` | `<origin>`, same as above | Same as above | App will not start; payment returns and the `www` redirect go to the wrong host |
 | `DOTNET_hostBuilder__reloadConfigOnChange` | `false` | Type it | File watchers on a read-only container |
 | `SmsSettings__Token` | optional | The Greenweb SMS account dashboard | SMS is silently off |
+| `FileStorage__Provider` | `S3` | Type it | Uploads go to the container disk, and Render wipes them on every redeploy and restart. Any value other than `Local` or `S3` stops the app at startup |
+| `FileStorage__S3__BucketName` | `ghcaa-storage` | The bucket name in the storage provider's console | App will not start when the provider is `S3` |
+| `AWS_ENDPOINT_URL_S3` | the bucket's S3 endpoint URL | The storage provider's console, next to the bucket | The SDK calls Amazon's own endpoint and every upload fails |
+| `AWS_REGION` | the region the provider gives for the endpoint | Same place as the endpoint | The SDK cannot sign requests |
+| `AWS_ACCESS_KEY_ID` | access key ID | Generate a credential for the bucket in the provider's console | Every upload and file read fails; `/healthz` shows `FileStorage` as `Unhealthy` |
+| `AWS_SECRET_ACCESS_KEY` | the secret shown once with that key ID | Same as above. Keep it only on Render. The credential needs list rights on the bucket as well as read, write and delete, because `/health` lists one key | Same as above |
 
 `PORT` is set by Render itself; don't add it. AllowedOrigins rules, checked at startup outside
 Development: no `*`, no empty list, each entry a bare `https://` origin with no path, query or
@@ -107,8 +113,9 @@ trailing slash, and ClientUrl must be in the list. Use `__0`, `__1` for more ent
 - [ ] Check no election is waiting for polling, polling or counting. If one is, hold any change to
       Render environment variables until it is declared. A change to AllowedOrigins during that time
       is written to the activity log with the frozen election's name, and auditors will ask why.
-- [ ] Warn admins that uploads will be lost. Uploaded files sit on the container's disk, and Render
-      wipes them on every redeploy and restart (see `RECOVERY_RUNBOOK.md` Scenario 3).
+- [ ] Check `FileStorage__Provider` is `S3` on Render. With it unset, uploads sit on the container's
+      disk and Render wipes them on every redeploy and restart (see `RECOVERY_RUNBOOK.md` Scenario 3,
+      uploads lost).
 
 ## 3. During the deploy
 
@@ -138,6 +145,8 @@ trailing slash, and ClientUrl must be in the list. Use `__0`, `__1` for more ent
 - [ ] Sign in with an admin account. Step-up or OTP codes arrive by email. If not, check the
       `EmailLogs` table first; Render can block outgoing SMTP.
 - [ ] Open the admin dashboard and one member list. Data loads, which proves the database link.
+- [ ] Member photos on that list show real pictures, not the grey placeholder. That proves the
+      bucket link. `<origin>/healthz` also lists a `FileStorage` check, which should say `Healthy`.
 - [ ] Browser dev tools show no CORS errors and no `/api` 404s. API calls go to `/api` on the same
       origin.
 - [ ] Hard refresh once. If old screens come back, `index.html` is being cached; see the
@@ -165,7 +174,8 @@ a `v*` tag or by hand.
 - Migration failed, or the schema is stale: `RECOVERY_RUNBOOK.md` Scenario 1, a deploy's migration
   step failed.
 - Data lost: `RECOVERY_RUNBOOK.md` Scenario 2.
-- Uploads gone: `RECOVERY_RUNBOOK.md` Scenario 3. There is no restore; files must be re-uploaded.
+- Uploads gone: `RECOVERY_RUNBOOK.md` Scenario 3, uploads lost. First check the `FileStorage__*`
+  and `AWS_*` variables; a missing one makes every photo show the placeholder.
 - Bad code with no schema change: in Render, roll back to the previous deploy from the service's
   deploy list, then fix forward on `preprod`.
 - Never roll back a migration without a backup. Several of them drop columns.

@@ -40,6 +40,11 @@
 | `GmailSettings__Email` | [`GmailEmailService.cs`](../GHCAA.Infrastructure/Services/GmailEmailService.cs) | `dev-placeholder@localhost` | Required with Gmail (throws on null) |
 | `GmailSettings__AppPassword` | `GmailEmailService.cs` | `dev-not-used` | Required with Gmail (throws on null) |
 | `SmsSettings__Token` | [`GreenwebSmsService.cs`](../GHCAA.Infrastructure/Services/GreenwebSmsService.cs) | *(blank = SMS silently disabled)* | Fill to enable SMS |
+| `FileStorage__Provider` | [`DependencyInjection.cs`](../GHCAA.Infrastructure/DependencyInjection.cs) | *(blank = `Local`, files under `wwwroot`)* | `S3`; Render wipes the disk on redeploy. An unknown value stops startup |
+| `FileStorage__S3__BucketName` | [`S3FileStorageService.cs`](../GHCAA.Infrastructure/Services/S3FileStorageService.cs) | *(not needed with Local)* | `ghcaa-storage`; **required with S3**, startup stops without it |
+| `AWS_ENDPOINT_URL_S3` | AWS SDK, read by itself | *(not needed with Local)* | The bucket's S3 endpoint |
+| `AWS_REGION` | AWS SDK | *(not needed with Local)* | The region given with the endpoint |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | AWS SDK | *(not needed with Local)* | **Required with S3**; secret, Render only |
 | `PaymentGateways__Bkash__SandboxPassword` | [`BkashGateway.cs`](../GHCAA.Infrastructure/Gateways/BkashGateway.cs) | *(default `sandbox_pass`)* | `sandbox_pass` |
 | `PaymentGateways__Bkash__ProductionPassword` | `BkashGateway.cs` | *(not needed in dev)* | Fill for prod Bkash |
 | `AppSettings__AllowedOrigins__0..N` | `Program.cs` | `http://localhost:4200/1/5087` (Development file only; the base file is empty) | `https://ghcaa-ryl6.onrender.com` |
