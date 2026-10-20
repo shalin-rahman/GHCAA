@@ -786,6 +786,17 @@ export const API_ENDPOINTS = {
         TIE_RULE_LABEL: 'If the vote is tied',
         SCRUTINY_ON_LABEL: 'Scrutiny date',
         WITHDRAWAL_CLOSES_ON_LABEL: 'Withdrawals close',
+        NOMINATION_OPENS_ON_HINT: 'First day nominations can be sent in.',
+        NOMINATION_CLOSES_ON_HINT: 'Last day nominations can be sent in. It must not be before the day they open.',
+        SCRUTINY_ON_HINT: 'Optional. The day nominations are checked. It must fall after nominations close and before polling opens.',
+        WITHDRAWAL_CLOSES_ON_HINT: 'Optional. The last day a candidate can withdraw. It must fall after nominations close and before polling opens.',
+        POLLING_OPENS_ON_HINT: 'First day members can vote. Voting cannot open until the returning officer key is set.',
+        POLLING_CLOSES_ON_HINT: 'Last day members can vote. The governance period must start on or after this day, unless this is a test run.',
+        TEST_RUN_LABEL: 'Test run',
+        TEST_RUN_HINT: 'Hidden from members and the public. Puts nobody on the committee.',
+        SEATS_HINT: 'How many people win this position. It cannot be changed once nominations open.',
+        UNFREEZE_REASON_HINT: 'Unfreezing deletes the frozen voter roll so it can be frozen again. It is refused once a nomination is in or the cutoff before nominations close has passed. The reason is logged.',
+        KEY_DESTROYED_HINT: 'Tick this only after the key file is deleted. It is logged once and cannot be taken back.',
         TIE_RULES: [
             { value: 'DrawingLots', label: 'Drawing lots', description: 'A tie is settled by drawing lots in front of the candidates.' },
             { value: 'RunOff', label: 'Run-off poll', description: 'A tie goes to a second poll between the tied candidates.' },
@@ -815,9 +826,13 @@ export const API_ENDPOINTS = {
     // Work Package 37.13v SuperAdmin unlock of the frozen election rules.
     ELECTION_RULES_UNLOCK: {
         BASE: '/api/admin/elections/rules-unlock',
-        CLOSE: '/api/admin/elections/rules-unlock/close'
+        CLOSE: '/api/admin/elections/rules-unlock/close',
+        WHAT_HINT: 'While an unlock is open, frozen election rules can be changed and every change is logged with the reason. It closes by itself when the time is up, or sooner with Close now, and the rules lock again. Revoking an appointment stays locked.',
+        REASON_HINT: 'Say what went wrong. It is logged and shown while the unlock is open.',
+        MINUTES_HINT: (defaultMinutes: number, maxMinutes: number) =>
+            `How long the unlock stays open. The default is ${defaultMinutes} minutes and the most is ${maxMinutes}. It is short on purpose, so the rules are not left open by mistake.`
     },
     CONFIG: '/api/config',
     FORUM: '/api/forum',
-    HEALTH: '/healthz'
+    HEALTH: '/health'
 } as const;

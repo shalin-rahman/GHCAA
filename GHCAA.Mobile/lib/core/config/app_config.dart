@@ -50,6 +50,9 @@ class AppConfig {
   static String get memberNoun {
     return dotenv.env['MEMBER_NOUN'] ?? OrgConfig.offlineDefaults.branding.memberNickname;
   }
+  // The health report sits at the site root, not under /api.
+  static String get healthUrl => '${apiBaseUrl.replaceFirst('/api', '')}/health';
+
   static String? resolveImageUrl(String? path) {
     if (path == null || path.trim().isEmpty) return null;
     if (path.startsWith('http')) return path;

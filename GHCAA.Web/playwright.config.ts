@@ -22,7 +22,8 @@ export default defineConfig({
   webServer: [
     {
       command: 'dotnet run --project ../GHCAA.API --urls http://localhost:5087',
-      url: 'http://localhost:5087/health',
+      // /health/live needs no email or storage settings, so the local run starts without them.
+      url: 'http://localhost:5087/health/live',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

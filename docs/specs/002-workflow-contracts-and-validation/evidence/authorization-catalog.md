@@ -158,7 +158,7 @@ Base policy: `[AllowAnonymous]`, no sign-in.
 | GET | `/api/scholarships/status/{referenceCode}` | `ScholarshipsController.Status` (line 33) | ScholarshipStatus |
 | GET | `/api/site-content` | `SiteContentController.GetByGroup` (line 25) |  |
 | GET | `/api/verify/{shortCode}` | `CredentialVerificationController.Verify` (line 19) | CredentialVerification |
-| GET | `/healthz` | `HealthController.GetHealth` (line 29) |  |
+| GET | `/health` | `HealthController.GetHealth` (line 29) |  |
 
 ### 3.2 Authenticated
 

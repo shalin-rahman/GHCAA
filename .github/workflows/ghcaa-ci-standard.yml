@@ -210,7 +210,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       # 82.23: playwright.config.ts boots both the API and the Angular dev server itself and
-      # polls /healthz, so this job needs no separate "start the app" step.
+      # polls /health/live, so this job needs no separate "start the app" step.
       - name: Run Playwright E2E Suite
         working-directory: GHCAA.Web
         run: npm run test:e2e

@@ -136,6 +136,25 @@ class _ElectionAdapter implements HttpClientAdapter {
     if (options.path == '/elections/12/audit/verify') {
       return _json({'ok': false, 'entries': 5, 'firstBrokenSeq': 3});
     }
+    if (options.path == '/elections/12/audit') {
+      return _json([
+        {
+          'seq': 1,
+          'at': '2026-10-01T09:00:00Z',
+          'actorUserId': 4,
+          'action': 'PhaseChanged',
+          'detailJson': '{"to":"Nomination"}',
+          'hash': 'ab12'
+        },
+        {
+          'seq': 2,
+          'at': '2026-10-02T09:00:00Z',
+          'action': 'BallotCast',
+          'detailJson': '{}',
+          'hash': 'cd34'
+        }
+      ]);
+    }
     if (options.path == '/elections/12/tracking-codes') {
       return _json(['AAAA-1111', 'BBBB-2222']);
     }
@@ -706,6 +725,30 @@ void main() {
         ElectionService(Dio()..httpClientAdapter = _ElectionAdapter());
 
     expect(await service.firstBrokenAuditEntry(12), 3);
+  });
+
+  test('FR-49: audit verify reads the whole check', () async {
+    final service =
+        ElectionService(Dio()..httpClientAdapter = _ElectionAdapter());
+
+    final check = await service.verifyAudit(12);
+
+    expect(check.ok, isFalse);
+    expect(check.entries, 5);
+    expect(check.firstBrokenSeq, 3);
+  });
+
+  test('FR-49: getAudit reads the entries in order, actor optional', () async {
+    final service =
+        ElectionService(Dio()..httpClientAdapter = _ElectionAdapter());
+
+    final entries = await service.getAudit(12);
+
+    expect(entries.map((e) => e.seq), [1, 2]);
+    expect(entries.first.actorUserId, 4);
+    expect(entries.first.at, DateTime.utc(2026, 10, 1, 9));
+    expect(entries.last.actorUserId, isNull);
+    expect(entries.last.hash, 'cd34');
   });
 
   test('loads the tracking codes and filters them', () async {

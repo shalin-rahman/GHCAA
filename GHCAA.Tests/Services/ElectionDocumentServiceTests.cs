@@ -150,6 +150,44 @@ public sealed class ElectionDocumentServiceTests : TestBase
         rows.Select(r => r[^1]).Should().Equal("Elected", "Not elected");
     }
 
+    // 37.14d. The printed result sheet carries the same head hash as the public board.
+    [Test]
+    public async Task ER29_PrintsTheAuditChainHead()
+    {
+        var before = (await _service.LoadTablesAsync(_election.Id, "ER-29"))[0].Rows;
+        before.Should().ContainSingle(r => r[0] == "Audit chain head").Which[1].Should().Be("Not declared");
+
+        var writer = new ElectionAuditWriter(_context);
+        await writer.AppendAsync(_election.Id, GHCAA.Domain.Constants.Elections.AuditActions.Declared, null, null);
+        await writer.SaveAsync();
+        _election.Phase = ElectionPhase.Declared;
+        await _context.SaveChangesAsync();
+        var head = _context.ElectionAuditEntries.Single().Hash;
+
+        var rows = (await _service.LoadTablesAsync(_election.Id, "ER-29"))[0].Rows;
+
+        rows.Should().ContainSingle(r => r[0] == "Audit chain head").Which[1].Should().Be(head);
+        (await _service.LoadTablesAsync(_election.Id, "ER-30"))[0].Rows.Should().NotContain(r => r[0] == "Audit chain head");
+    }
+
+    // 37.14g. ER-19 states the turnout, the seal key and whether the audit trail still checks out.
+    [Test]
+    public async Task ER19_CarriesThePollRecord()
+    {
+        _election.BallotKeyFingerprint = "ab:cd:ef";
+        _context.VoterRolls.AddRange(
+            new VoterRoll { ElectionId = _election.Id, MemberId = _first.CandidateMemberId, IsEligible = true, FrozenAt = DateTime.UtcNow, VotedAt = DateTime.UtcNow.Date },
+            new VoterRoll { ElectionId = _election.Id, MemberId = _second.CandidateMemberId, IsEligible = true, FrozenAt = DateTime.UtcNow });
+        await _context.SaveChangesAsync();
+
+        var record = (await _service.LoadTablesAsync(_election.Id, "ER-19"))[0].Rows.ToDictionary(r => r[0], r => r[1]);
+
+        record["Eligible voters"].Should().Be("2");
+        record["Voters who cast a ballot"].Should().Be("1");
+        record["Ballot seal key fingerprint"].Should().Be("ab:cd:ef");
+        record["Audit trail"].Should().StartWith("Intact");
+    }
+
     [Test]
     public async Task LoadTables_FormWithoutRecords_ReturnsNothing()
     {

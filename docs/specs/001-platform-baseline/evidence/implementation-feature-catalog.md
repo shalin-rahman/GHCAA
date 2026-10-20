@@ -339,7 +339,7 @@ election engine as follow-on work.
 ### Lookups, health, imports, and operational administration
 
 `LookupsController` manages grouped lookup reads and admin CRUD. `HealthController`
-serves `healthz`; `AdminDevTrackerController` and `AdminErrorLogsController`
+serves `health`; `AdminDevTrackerController` and `AdminErrorLogsController`
 expose operational diagnostics. `MemberImportController` imports members and
 exports them. `PendingApprovalsController` exposes admin/member approval summaries.
 `AdminController` exposes stats, analytics, sync-members, contact messages, and
@@ -374,7 +374,7 @@ attributes; it is included to make omissions auditable.
 | Messaging/Notifications | `api/messaging`, `api/notifications` | conversations, messages/read state, device tokens/notifications |
 | Governance/Roles | `api/governance`, `api/admin/governance`, `api/roles` | committees, constitution voting, periods, roles/users |
 | Configuration | `api/config`, `api/theme`, `api/payment-config`, `api/lookups` | organization/theme/payment/lookup configuration |
-| Operations | `healthz`, `api/admin/dev-tracker`, `api/admin/error-logs`, `api/admin/members/import`, `api/pending` | health, diagnostics, import/export, approval summaries |
+| Operations | `health`, `api/admin/dev-tracker`, `api/admin/error-logs`, `api/admin/members/import`, `api/pending` | health, diagnostics, import/export, approval summaries |
 
 ## Implementation gaps and unknowns
 

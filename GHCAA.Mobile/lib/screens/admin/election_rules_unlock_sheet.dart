@@ -117,7 +117,7 @@ class _ElectionRulesUnlockSheetState
     return Padding(
       padding: EdgeInsets.fromLTRB(AppTheme.spaceM, AppTheme.spaceM,
           AppTheme.spaceM, AppTheme.spaceM + MediaQuery.of(context).viewInsets.bottom),
-      child: Column(
+      child: SingleChildScrollView(child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -137,7 +137,7 @@ class _ElectionRulesUnlockSheetState
           else
             _openForm(),
         ],
-      ),
+      )),
     );
   }
 
@@ -166,19 +166,27 @@ class _ElectionRulesUnlockSheetState
         const Text(
             'Nothing is open. An unlock lets frozen rules be changed for a short time.',
             style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+        const SizedBox(height: 4),
+        const Text(ElectionConstants.unlockWhatHint,
+            style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
         TextField(
           controller: _reason,
           maxLength: ElectionConstants.unlockReasonMax,
           maxLines: 3,
           style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(labelText: 'Reason'),
+          decoration: const InputDecoration(
+              labelText: 'Reason',
+              helperText: ElectionConstants.unlockReasonHint,
+              helperMaxLines: 2),
         ),
         TextField(
           controller: _minutes,
           keyboardType: TextInputType.number,
           style: const TextStyle(color: Colors.white),
           decoration: const InputDecoration(
-              labelText: 'Minutes (1 to ${ElectionConstants.unlockMaxMinutes})'),
+              labelText: 'Minutes (1 to ${ElectionConstants.unlockMaxMinutes})',
+              helperText: ElectionConstants.unlockMinutesHint,
+              helperMaxLines: 3),
         ),
         const SizedBox(height: AppTheme.spaceS),
         Align(

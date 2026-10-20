@@ -253,6 +253,19 @@ describe('AdminElections ballot key', () => {
         });
     });
 
+    it('FR-39: the new election form explains each date and links the hint to its field', () => {
+        const fixture = TestBed.createComponent(AdminElections);
+        fixture.componentInstance.showForm.set(true);
+        fixture.detectChanges();
+        const el: HTMLElement = fixture.nativeElement;
+
+        const polling = el.querySelector('#election-polling-opens-on')!;
+        expect(polling.getAttribute('aria-describedby')).toBe('election-polling-opens-on-hint');
+        expect(el.querySelector('#election-polling-opens-on-hint')!.textContent).toContain('returning officer key');
+        expect(el.querySelector('#election-is-test-hint')!.textContent).toContain('Puts nobody on the committee');
+        expect(el.querySelector('#seats-hint-0')!.textContent).toContain('once nominations open');
+    });
+
     it('shows the New election button to an admin', () => {
         const fixture = TestBed.createComponent(AdminElections);
         fixture.detectChanges();

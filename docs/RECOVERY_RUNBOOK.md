@@ -93,7 +93,7 @@ redeploy and restart.
 
 When every photo shows the placeholder after a deploy:
 
-1. Open `<origin>/healthz`. If `FileStorage` is `Unhealthy` or `Error`, the app cannot reach the
+1. Open `<origin>/health`. If `FileStorage` is `Unhealthy` or `Error`, the app cannot reach the
    bucket. Check the `FileStorage__*` and `AWS_*` variables on Render against
    `DEPLOYMENT_CHECKLIST.md` section 1, Render variables.
 2. If `FileStorage` is `Healthy` but files are missing, list the bucket with the AWS CLI

@@ -662,9 +662,9 @@ public sealed class ElectionServiceTests : TestBase
         error.Should().Be(Constants.Elections.Replies.NotFound);
     }
 
-    private async Task<(ElectionService Service, int ElectionId, int Cast)> DeclaredPollAsync(bool publish = true)
+    private async Task<(ElectionService Service, int ElectionId, int Cast)> DeclaredPollAsync(bool publish = true, int voters = 12)
     {
-        var poll = await CreatePollingElectionAsync(voters: 12);
+        var poll = await CreatePollingElectionAsync(voters);
         var config = new Moq.Mock<GHCAA.Application.Interfaces.IOrgConfigService>();
         config.Setup(x => x.GetConfigAsync()).Returns(Task.FromResult(new OrgConfigDto { Elections = new ElectionSettingsDto { PublishPerSeatBallots = publish } }));
         var service = new ElectionService(_context, null, config.Object);
@@ -707,6 +707,40 @@ public sealed class ElectionServiceTests : TestBase
         opened.Seats.Sum(s => s.Ballots.Sum(b => b.Count)).Should().Be(_context.BallotVotes.Count());
         (await service.GetOpenedBallotsAsync(id))!.Seats.Select(s => s.Ballots.Select(b => string.Join(",", b))).Should()
             .BeEquivalentTo(opened.Seats.Select(s => s.Ballots.Select(b => string.Join(",", b))), o => o.WithStrictOrdering());
+    }
+
+    // 37.14g. Anyone can recount the published ballots, so they must add up to the declared result.
+    [Test]
+    [Category("FR-49")]
+    public async Task OpenedBallots_CountsMatchResults()
+    {
+        var (service, id, _) = await DeclaredPollAsync();
+        await service.DeclareAsync(id);
+
+        var opened = (await service.GetOpenedBallotsAsync(id))!;
+        var recount = opened.Seats.SelectMany(s => s.Ballots.SelectMany(b => b.Select(n => (Seat: s.ElectionSeatId, Nomination: n))))
+            .GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
+        var declared = _context.ElectionResults.Where(r => r.ElectionId == id && r.VoteCount > 0)
+            .ToDictionary(r => (Seat: r.ElectionSeatId, Nomination: r.NominationId), r => r.VoteCount);
+
+        recount.Should().BeEquivalentTo(declared);
+    }
+
+    // 37.14g. Voters on seat 1 alternate between two candidates. If the published list kept the cast
+    // order, it would alternate too. With 40 ballots a shuffle lands on that order about once in 10^11.
+    [Test]
+    [Category("FR-49")]
+    public async Task OpenedBallots_NotInCastOrder()
+    {
+        var (service, id, cast) = await DeclaredPollAsync(voters: 40);
+        await service.DeclareAsync(id);
+        var seat = _context.ElectionSeats.Single(x => x.ElectionId == id && x.Position == ECPosition.Member1);
+        var nominations = _context.Nominations.Where(x => x.ElectionSeatId == seat.Id).OrderBy(x => x.Id).Select(x => x.Id).ToArray();
+        var castOrder = Enumerable.Range(0, cast).Select(i => nominations[i % 2]).ToArray();
+
+        var opened = (await service.GetOpenedBallotsAsync(id))!.Seats.Single(s => s.ElectionSeatId == seat.Id);
+
+        opened.Ballots.Select(b => b.Single()).Should().NotEqual(castOrder);
     }
 
     [Test]
@@ -1094,6 +1128,26 @@ public sealed class ElectionServiceTests : TestBase
 
         (await service.GetBallotAsync(poll.Election.Id, poll.Voters[0].Id))!.HasVoted.Should().BeTrue();
         (await service.GetBallotAsync(poll.Election.Id + 100, poll.Voters[0].Id)).Should().BeNull();
+    }
+
+    // 37.14b. Seats and candidates show from CandidateList through Polling only.
+    [TestCase(ElectionPhase.Nomination, 0)]
+    [TestCase(ElectionPhase.Scrutiny, 0)]
+    [TestCase(ElectionPhase.CandidateList, 2)]
+    [TestCase(ElectionPhase.Polling, 2)]
+    [TestCase(ElectionPhase.Counting, 0)]
+    [TestCase(ElectionPhase.Declared, 0)]
+    [Category("FR-39")]
+    public async Task GetBallotAsync_ShowsThePaperOnlyFromCandidateListThroughPolling(ElectionPhase phase, int seatCount)
+    {
+        var poll = await CreatePollingElectionAsync(voters: 1);
+        poll.Election.Phase = phase;
+        await _context.SaveChangesAsync();
+
+        var ballot = await new ElectionService(_context).GetBallotAsync(poll.Election.Id, poll.Voters[0].Id);
+
+        ballot!.Phase.Should().Be(phase);
+        ballot.Seats.Should().HaveCount(seatCount);
     }
 
     [Test]

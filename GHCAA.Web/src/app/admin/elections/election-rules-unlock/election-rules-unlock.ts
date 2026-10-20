@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { ElectionsService } from '../../../core/services/elections.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
-import { ELECTION_RULES_UNLOCK } from '../../../core/constants/app.constants';
+import { API_ENDPOINTS, ELECTION_RULES_UNLOCK } from '../../../core/constants/app.constants';
 import { ElectionRulesUnlockDto } from '../../../core/models/election.models';
 
 // 37.13z. SuperAdmin box for the short unlock of frozen election rules (FR-039). The page only
@@ -23,6 +23,7 @@ export class ElectionRulesUnlock {
     private readonly confirmDialog = inject(ConfirmDialogService);
 
     readonly limits = ELECTION_RULES_UNLOCK;
+    readonly hints = API_ENDPOINTS.ELECTION_RULES_UNLOCK;
 
     unlock = signal<ElectionRulesUnlockDto | null>(null);
     loaded = signal(false);

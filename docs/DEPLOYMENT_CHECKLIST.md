@@ -63,7 +63,7 @@ variable registry.
 | `FileStorage__S3__BucketName` | `ghcaa-storage` | The bucket name in the storage provider's console | App will not start when the provider is `S3` |
 | `AWS_ENDPOINT_URL_S3` | the bucket's S3 endpoint URL | The storage provider's console, next to the bucket | The SDK calls Amazon's own endpoint and every upload fails |
 | `AWS_REGION` | the region the provider gives for the endpoint | Same place as the endpoint | The SDK cannot sign requests |
-| `AWS_ACCESS_KEY_ID` | access key ID | Generate a credential for the bucket in the provider's console | Every upload and file read fails; `/healthz` shows `FileStorage` as `Unhealthy` |
+| `AWS_ACCESS_KEY_ID` | access key ID | Generate a credential for the bucket in the provider's console | Every upload and file read fails; `/health` shows `FileStorage` as `Unhealthy` |
 | `AWS_SECRET_ACCESS_KEY` | the secret shown once with that key ID | Same as above. Keep it only on Render. The credential needs list rights on the bucket as well as read, write and delete, because `/health` lists one key | Same as above |
 
 `PORT` is set by Render itself; don't add it. AllowedOrigins rules, checked at startup outside
@@ -139,14 +139,15 @@ trailing slash, and ClientUrl must be in the list. Use `__0`, `__1` for more ent
 
 ## 4. After the deploy (smoke test)
 
-- [ ] `<origin>/health` answers `Healthy`.
+- [ ] `<origin>/health` answers 200 with `"status": "Healthy"`, and each check (Database,
+      FileStorage, Email) says `Healthy`. Render's own probe is `/health/live`, which runs no checks.
 - [ ] `<origin>/` shows the web app, not a 401.
 - [ ] Open a deep link such as `/portal/...` and press refresh. The page still loads.
 - [ ] Sign in with an admin account. Step-up or OTP codes arrive by email. If not, check the
       `EmailLogs` table first; Render can block outgoing SMTP.
 - [ ] Open the admin dashboard and one member list. Data loads, which proves the database link.
 - [ ] Member photos on that list show real pictures, not the grey placeholder. That proves the
-      bucket link. `<origin>/healthz` also lists a `FileStorage` check, which should say `Healthy`.
+      bucket link.
 - [ ] Browser dev tools show no CORS errors and no `/api` 404s. API calls go to `/api` on the same
       origin.
 - [ ] Hard refresh once. If old screens come back, `index.html` is being cached; see the

@@ -11,13 +11,16 @@
     </ng-container>
     <ng-template #closedBox><ng-container *ngIf="loaded()">
         <p class="text-muted">Only for when something has gone wrong after the rules froze. A plain revoke stays locked; use the emergency revoke for that.</p>
+        <p class="text-muted text-xs">{{ hints.WHAT_HINT }}</p>
         <div class="form-group">
             <label for="unlock-reason">Reason (at least {{ limits.REASON_MIN }} characters)</label>
-            <textarea id="unlock-reason" [maxlength]="limits.REASON_MAX" [(ngModel)]="reason"></textarea>
+            <textarea id="unlock-reason" aria-describedby="unlock-reason-hint" [maxlength]="limits.REASON_MAX" [(ngModel)]="reason"></textarea>
+            <small id="unlock-reason-hint" class="text-muted text-xs">{{ hints.REASON_HINT }}</small>
         </div>
         <div class="form-group">
             <label for="unlock-minutes">Minutes (1 to {{ limits.MAX_MINUTES }})</label>
-            <input id="unlock-minutes" type="number" min="1" [max]="limits.MAX_MINUTES" [(ngModel)]="minutes">
+            <input id="unlock-minutes" type="number" min="1" aria-describedby="unlock-minutes-hint" [max]="limits.MAX_MINUTES" [(ngModel)]="minutes">
+            <small id="unlock-minutes-hint" class="text-muted text-xs">{{ hints.MINUTES_HINT(limits.DEFAULT_MINUTES, limits.MAX_MINUTES) }}</small>
         </div>
         <div><button class="btn btn-secondary btn-sm" [disabled]="busy()" (click)="open()">{{ busy() ? 'Unlocking...' : 'Unlock' }}</button></div>
     </ng-container></ng-template>

@@ -1,4 +1,5 @@
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Infrastructure.Options;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace GHCAA.API.Controllers
 {
     [ApiController]
-    [Route("healthz")]
+    [Route(Constants.Deploy.HealthPath)]
     public class HealthController : ControllerBase
     {
         private readonly IDatabaseHealthService _dbHealth;

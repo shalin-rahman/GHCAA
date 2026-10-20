@@ -161,6 +161,18 @@ namespace GHCAA.Tests.Integration
             (await response.Content.ReadAsStringAsync()).Should().Be("Healthy");
         }
 
+        // NFR-R4. /health is the full report from HealthController. The bare MapHealthChecks
+        // endpoint that used to sit on the same path would make the route ambiguous.
+        [Test]
+        public async Task HealthPath_ServesTheFullReport()
+        {
+            var response = await _client.GetAsync(Constants.Deploy.HealthPath);
+
+            response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.ServiceUnavailable);
+            response.Content.Headers.ContentType!.MediaType.Should().Be("application/json");
+            (await response.Content.ReadAsStringAsync()).Should().Contain("\"checks\"");
+        }
+
         [TestCase("main-ABCD1234.js", true)]
         [TestCase("styles-EDLDB46M.css", true)]
         [TestCase("chunk-4AX5YQCX.js", true)]

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
@@ -132,7 +133,10 @@ class _ElectionManagementScreenState
           autofocus: true,
           maxLines: 3,
           maxLength: 400,
-          decoration: const InputDecoration(labelText: 'Reason'),
+          decoration: const InputDecoration(
+              labelText: 'Reason',
+              helperText: ElectionConstants.unfreezeReasonHint,
+              helperMaxLines: 5),
         ),
         actions: [
           TextButton(
@@ -246,32 +250,44 @@ class _ElectionManagementScreenState
                     controller: nomOpenCtrl,
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
-                        labelText: 'Nomination opens (YYYY-MM-DD)')),
+                        labelText: 'Nomination opens (YYYY-MM-DD)',
+                        helperText: ElectionConstants.nominationOpensHint,
+                        helperMaxLines: 3)),
                 TextField(
                     controller: nomCloseCtrl,
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
-                        labelText: 'Nomination closes (YYYY-MM-DD)')),
+                        labelText: 'Nomination closes (YYYY-MM-DD)',
+                        helperText: ElectionConstants.nominationClosesHint,
+                        helperMaxLines: 3)),
                 TextField(
                     controller: scrutinyCtrl,
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
-                        labelText: 'Scrutiny date, optional (YYYY-MM-DD)')),
+                        labelText: 'Scrutiny date, optional (YYYY-MM-DD)',
+                        helperText: ElectionConstants.scrutinyHint,
+                        helperMaxLines: 3)),
                 TextField(
                     controller: withdrawCtrl,
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
-                        labelText: 'Withdrawal closes, optional (YYYY-MM-DD)')),
+                        labelText: 'Withdrawal closes, optional (YYYY-MM-DD)',
+                        helperText: ElectionConstants.withdrawalClosesHint,
+                        helperMaxLines: 3)),
                 TextField(
                     controller: pollOpenCtrl,
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
-                        labelText: 'Polling opens (YYYY-MM-DD)')),
+                        labelText: 'Polling opens (YYYY-MM-DD)',
+                        helperText: ElectionConstants.pollingOpensHint,
+                        helperMaxLines: 3)),
                 TextField(
                     controller: pollCloseCtrl,
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
-                        labelText: 'Polling closes (YYYY-MM-DD)')),
+                        labelText: 'Polling closes (YYYY-MM-DD)',
+                        helperText: ElectionConstants.pollingClosesHint,
+                        helperMaxLines: 3)),
                 DropdownButtonFormField<ElectionTieRule>(
                     initialValue: tieRule,
                     isExpanded: true,
@@ -313,8 +329,7 @@ class _ElectionManagementScreenState
                     activeThumbColor: AppTheme.royalGold,
                     title: const Text('Test run',
                         style: TextStyle(color: Colors.white, fontSize: 13)),
-                    subtitle: const Text(
-                        'Hidden from members and the public. Puts nobody on the committee.',
+                    subtitle: const Text(ElectionConstants.testRunHint,
                         style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                     onChanged: (v) => setDialogState(() => isTest = v)),
               ],

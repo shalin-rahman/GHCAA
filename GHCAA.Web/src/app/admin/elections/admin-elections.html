@@ -27,17 +27,18 @@
                 </select>
                 <small class="text-muted">{{ tieRuleHelp(form.tieRule) }}</small>
             </div>
-            <div class="form-group"><label for="election-nomination-opens-on">{{ text.NOMINATION_OPENS_ON_LABEL }}</label><input id="election-nomination-opens-on" type="date" required [(ngModel)]="form.nominationOpensOn"></div>
-            <div class="form-group"><label for="election-nomination-closes-on">{{ text.NOMINATION_CLOSES_ON_LABEL }}</label><input id="election-nomination-closes-on" type="date" required [(ngModel)]="form.nominationClosesOn"></div>
-            <div class="form-group"><label for="election-scrutiny-on">{{ text.SCRUTINY_ON_LABEL }}</label><input id="election-scrutiny-on" type="date" [(ngModel)]="form.scrutinyOn"></div>
-            <div class="form-group"><label for="election-withdrawal-closes-on">{{ text.WITHDRAWAL_CLOSES_ON_LABEL }}</label><input id="election-withdrawal-closes-on" type="date" [(ngModel)]="form.withdrawalClosesOn"></div>
-            <div class="form-group"><label for="election-polling-opens-on">{{ text.POLLING_OPENS_ON_LABEL }}</label><input id="election-polling-opens-on" type="date" required [(ngModel)]="form.pollingOpensOn"></div>
-            <div class="form-group"><label for="election-polling-closes-on">{{ text.POLLING_CLOSES_ON_LABEL }}</label><input id="election-polling-closes-on" type="date" required [(ngModel)]="form.pollingClosesOn"></div>
-            <div class="form-group checkbox-group"><input type="checkbox" id="election-is-test" [(ngModel)]="form.isTest" /><label for="election-is-test">Test run (hidden from members and the public, puts nobody on the committee)</label></div>
+            <div class="form-group"><label for="election-nomination-opens-on">{{ text.NOMINATION_OPENS_ON_LABEL }}</label><input id="election-nomination-opens-on" type="date" required aria-describedby="election-nomination-opens-on-hint" [(ngModel)]="form.nominationOpensOn"><small id="election-nomination-opens-on-hint" class="text-muted text-xs">{{ text.NOMINATION_OPENS_ON_HINT }}</small></div>
+            <div class="form-group"><label for="election-nomination-closes-on">{{ text.NOMINATION_CLOSES_ON_LABEL }}</label><input id="election-nomination-closes-on" type="date" required aria-describedby="election-nomination-closes-on-hint" [(ngModel)]="form.nominationClosesOn"><small id="election-nomination-closes-on-hint" class="text-muted text-xs">{{ text.NOMINATION_CLOSES_ON_HINT }}</small></div>
+            <div class="form-group"><label for="election-scrutiny-on">{{ text.SCRUTINY_ON_LABEL }}</label><input id="election-scrutiny-on" type="date" aria-describedby="election-scrutiny-on-hint" [(ngModel)]="form.scrutinyOn"><small id="election-scrutiny-on-hint" class="text-muted text-xs">{{ text.SCRUTINY_ON_HINT }}</small></div>
+            <div class="form-group"><label for="election-withdrawal-closes-on">{{ text.WITHDRAWAL_CLOSES_ON_LABEL }}</label><input id="election-withdrawal-closes-on" type="date" aria-describedby="election-withdrawal-closes-on-hint" [(ngModel)]="form.withdrawalClosesOn"><small id="election-withdrawal-closes-on-hint" class="text-muted text-xs">{{ text.WITHDRAWAL_CLOSES_ON_HINT }}</small></div>
+            <div class="form-group"><label for="election-polling-opens-on">{{ text.POLLING_OPENS_ON_LABEL }}</label><input id="election-polling-opens-on" type="date" required aria-describedby="election-polling-opens-on-hint" [(ngModel)]="form.pollingOpensOn"><small id="election-polling-opens-on-hint" class="text-muted text-xs">{{ text.POLLING_OPENS_ON_HINT }}</small></div>
+            <div class="form-group"><label for="election-polling-closes-on">{{ text.POLLING_CLOSES_ON_LABEL }}</label><input id="election-polling-closes-on" type="date" required aria-describedby="election-polling-closes-on-hint" [(ngModel)]="form.pollingClosesOn"><small id="election-polling-closes-on-hint" class="text-muted text-xs">{{ text.POLLING_CLOSES_ON_HINT }}</small></div>
+            <div class="form-group checkbox-group"><input type="checkbox" id="election-is-test" aria-describedby="election-is-test-hint" [(ngModel)]="form.isTest" /><label for="election-is-test">{{ text.TEST_RUN_LABEL }}</label></div>
+            <small id="election-is-test-hint" class="text-muted text-xs">{{ text.TEST_RUN_HINT }}</small>
             <div class="form-group"><label for="election-description">Description</label><textarea id="election-description" [(ngModel)]="form.description"></textarea></div>
             <div class="glass-card" *ngFor="let position of form.positions; let i = index">
                 <div class="form-group"><label [for]="'position-' + i">Position</label><input [id]="'position-' + i" [(ngModel)]="position.title"></div>
-                <div class="form-group"><label [for]="'seats-' + i">Seats</label><input [id]="'seats-' + i" type="number" min="1" [(ngModel)]="position.seats"></div>
+                <div class="form-group"><label [for]="'seats-' + i">Seats</label><input [id]="'seats-' + i" type="number" min="1" [attr.aria-describedby]="'seats-hint-' + i" [(ngModel)]="position.seats"><small [id]="'seats-hint-' + i" class="text-muted text-xs">{{ text.SEATS_HINT }}</small></div>
                 <button class="btn btn-secondary btn-sm" *ngIf="(form.positions?.length ?? 0) > 1" (click)="removePosition(i)">Remove position</button>
             </div>
             <div class="flex gap-2"><button class="btn btn-secondary" (click)="addPosition()">Add position</button><button class="btn btn-primary" [disabled]="saving()" (click)="create()">{{ saving() ? 'Saving...' : 'Create election' }}</button></div>
@@ -71,7 +72,8 @@
             <div class="stack gap-2" *ngIf="unfreezeOpenId() === election.id">
                 <div class="form-group">
                     <label [for]="'unfreeze-reason-' + election.id">Reason for unfreezing the voter roll</label>
-                    <textarea [id]="'unfreeze-reason-' + election.id" [maxlength]="reasonMax" [(ngModel)]="unfreezeReason"></textarea>
+                    <textarea [id]="'unfreeze-reason-' + election.id" [maxlength]="reasonMax" [attr.aria-describedby]="'unfreeze-reason-hint-' + election.id" [(ngModel)]="unfreezeReason"></textarea>
+                    <small [id]="'unfreeze-reason-hint-' + election.id" class="text-muted text-xs">{{ text.UNFREEZE_REASON_HINT }}</small>
                 </div>
                 <div class="flex gap-2">
                     <button class="btn btn-primary btn-sm" [disabled]="freezingId() === election.id" (click)="unfreezeRoll(election)">Unfreeze</button>
@@ -79,7 +81,8 @@
                 </div>
             </div>
             <div class="flex items-center gap-2" *ngIf="election.phase === 'Declared' && can(election, 'SetBallotKey') && election.ballotKeyFingerprint">
-                <label class="flex gap-2"><input type="checkbox" [disabled]="destroyingKeyId() === election.id" (change)="keyDestroyed(election, $any($event.target).checked)"> I destroyed the key file after the declare</label>
+                <label class="flex gap-2"><input type="checkbox" [attr.aria-describedby]="'key-destroyed-hint-' + election.id" [disabled]="destroyingKeyId() === election.id" (change)="keyDestroyed(election, $any($event.target).checked)"> I destroyed the key file after the declare</label>
+                <small [id]="'key-destroyed-hint-' + election.id" class="text-muted text-xs">{{ text.KEY_DESTROYED_HINT }}</small>
             </div>
             <div class="stack gap-2" *ngIf="(approvals()[election.id] ?? []).length > 0">
                 <div class="flex justify-between items-center" *ngFor="let approval of approvals()[election.id]">

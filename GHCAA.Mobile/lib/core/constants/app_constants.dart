@@ -44,6 +44,31 @@ class ElectionConstants {
   static const int unlockReasonMin = 20;
   static const int unlockReasonMax = 1000;
   static const int appointmentReasonMax = 400;
+
+  // Help lines under the election fields. Same wording as app.constants.ts
+  // (API_ENDPOINTS.ADMIN_ELECTIONS and ELECTION_RULES_UNLOCK).
+  static const String nominationOpensHint =
+      'First day nominations can be sent in.';
+  static const String nominationClosesHint =
+      'Last day nominations can be sent in. It must not be before the day they open.';
+  static const String scrutinyHint =
+      'Optional. The day nominations are checked. It must fall after nominations close and before polling opens.';
+  static const String withdrawalClosesHint =
+      'Optional. The last day a candidate can withdraw. It must fall after nominations close and before polling opens.';
+  static const String pollingOpensHint =
+      'First day members can vote. Voting cannot open until the returning officer key is set.';
+  static const String pollingClosesHint =
+      'Last day members can vote. The governance period must start on or after this day, unless this is a test run.';
+  static const String testRunHint =
+      'Hidden from members and the public. Puts nobody on the committee.';
+  static const String unfreezeReasonHint =
+      'Unfreezing deletes the frozen voter roll so it can be frozen again. It is refused once a nomination is in or the cutoff before nominations close has passed. The reason is logged.';
+  static const String unlockWhatHint =
+      'While an unlock is open, frozen election rules can be changed and every change is logged with the reason. It closes by itself when the time is up, or sooner with Close now, and the rules lock again. Revoking an appointment stays locked.';
+  static const String unlockReasonHint =
+      'Say what went wrong. It is logged and shown while the unlock is open.';
+  static const String unlockMinutesHint =
+      'How long the unlock stays open. The default is $unlockDefaultMinutes minutes and the most is $unlockMaxMinutes. It is short on purpose, so the rules are not left open by mistake.';
 }
 
 // 98.18: how long lookups, events and jobs stay cached in memory.

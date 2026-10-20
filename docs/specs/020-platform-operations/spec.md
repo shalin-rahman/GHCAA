@@ -140,20 +140,20 @@ list.
 **Why this priority**: Used by uptime monitors and deploy scripts, not by end users, so it is lower
 priority than the workflows above but still needs to report accurately.
 
-**Independent Test**: `GET healthz` with no auth header and confirm `200` when the database, file
+**Independent Test**: `GET health` with no auth header and confirm `200` when the database, file
 storage, and email config are all reachable, and `503` when the database is down.
 
 **Acceptance Scenarios**:
 
-1. **Given** the database is unreachable, **When** `GET healthz` is called, **Then** the response is
+1. **Given** the database is unreachable, **When** `GET health` is called, **Then** the response is
    `503` with `Status: "Degraded"`, and the raw connection exception text is never included in the
    response (only a generic message, to avoid leaking host or credential details from a Npgsql
    failure).
-2. **Given** the SMS config key `SmsSettings:Token` is empty, **When** `GET healthz` is called,
+2. **Given** the SMS config key `SmsSettings:Token` is empty, **When** `GET health` is called,
    **Then** the response still reports healthy, because SMS is optional in the current phase.
 3. **Given** the upload store cannot be reached (with `FileStorage:Provider` `Local`, the directory
    at `FileStorage:BasePhysicalPath` or the `wwwroot` fallback does not exist; with `S3`, the
-   bucket cannot be listed), **When** `GET healthz` is called, **Then** the response is `503`.
+   bucket cannot be listed), **When** `GET health` is called, **Then** the response is `503`.
 
 ---
 
@@ -241,21 +241,21 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
 
 **Health**
 
-- FR-014: The system shall serve `GET healthz` to any caller, checking database connectivity via
+- FR-014: The system shall serve `GET health` to any caller, checking database connectivity via
   `IDatabaseHealthService.CanConnectAsync`, returning `503` with `Status: "Degraded"` on failure
   without including the raw exception text. [code+test]
 - FR-015: The system shall check the upload store through `IFileStorageService.IsAvailableAsync`
-  as part of `GET healthz`, marking the response `503` if it is not reachable. For the `Local`
+  as part of `GET health`, marking the response `503` if it is not reachable. For the `Local`
   provider that is the directory named by `FileStorage:BasePhysicalPath` (or `wwwroot` if unset);
   for `S3` it is a one-key listing of the bucket. The listing runs on every call, like the database
-  check, so the result is never stale; the per-IP rate limit on `healthz` caps how often it runs.
+  check, so the result is never stale; the per-IP rate limit on `health` caps how often it runs.
   [code+test]
 - FR-016: The system shall check the settings of the email provider in use as part of
-  `GET healthz`, marking the response `503` if either is missing: with `Brevo`,
+  `GET health`, marking the response `503` if either is missing: with `Brevo`,
   `BrevoSettings:ApiKey` and `BrevoSettings:SenderEmail`; otherwise `GmailSettings:Email` and
   `GmailSettings:AppPassword`. The provider in use is the admin's `Workflow.EmailProvider` in
   OrganizationConfig, then `EmailSettings:Provider`, then `Gmail`. [code+test]
-- FR-017: The system shall check that `SmsSettings:Token` is non-empty as part of `GET healthz`, but
+- FR-017: The system shall check that `SmsSettings:Token` is non-empty as part of `GET health`, but
   shall not fail the overall health status when it is empty, since SMS is optional in the current
   phase. [code]
 
@@ -384,10 +384,10 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
 | FR-011 | POST api/lookups | LookupService.AddLookupItemAsync | GHCAA.Web/src/app/core/services/lookup.service.ts | none found | GHCAA.Tests/Controllers/LookupsControllerTests.cs:106 |
 | FR-012 | PUT api/lookups/{id} | LookupService.UpdateLookupItemAsync | GHCAA.Web/src/app/core/services/lookup.service.ts | none found | GHCAA.Tests/Controllers/LookupsControllerTests.cs:132,143 |
 | FR-013 | DELETE api/lookups/{id} | LookupService.DeleteLookupItemAsync | GHCAA.Web/src/app/core/services/lookup.service.ts | none found | GHCAA.Tests/Controllers/LookupsControllerTests.cs:154,164 |
-| FR-014 | GET healthz | DatabaseHealthService.CanConnectAsync | GHCAA.Web/src/app/common/health/health.ts | none found | GHCAA.Tests/Controllers/HealthControllerTests.cs:39,51 |
-| FR-015 | GET healthz | IFileStorageService.IsAvailableAsync (LocalFileStorageService, S3FileStorageService) | GHCAA.Web/src/app/common/health/health.ts | none found | GHCAA.Tests/Controllers/HealthControllerTests.cs:65 |
-| FR-016 | GET healthz | HealthController (email provider check) | GHCAA.Web/src/app/common/health/health.ts | none found | GHCAA.Tests/Controllers/HealthControllerTests.cs:83,100,115,130,148 |
-| FR-017 | GET healthz | HealthController (inline check) | GHCAA.Web/src/app/common/health/health.ts | none found | none found |
+| FR-014 | GET health | DatabaseHealthService.CanConnectAsync | GHCAA.Web/src/app/common/health/health.ts | none found | GHCAA.Tests/Controllers/HealthControllerTests.cs:39,51 |
+| FR-015 | GET health | IFileStorageService.IsAvailableAsync (LocalFileStorageService, S3FileStorageService) | GHCAA.Web/src/app/common/health/health.ts | none found | GHCAA.Tests/Controllers/HealthControllerTests.cs:65 |
+| FR-016 | GET health | HealthController (email provider check) | GHCAA.Web/src/app/common/health/health.ts | none found | GHCAA.Tests/Controllers/HealthControllerTests.cs:83,100,115,130,148 |
+| FR-017 | GET health | HealthController (inline check) | GHCAA.Web/src/app/common/health/health.ts | none found | none found |
 | FR-018 | GET api/admin/stats | MemberService_Search.GetDashboardStatsAsync | GHCAA.Web/src/app/core/services/admin.service.ts | GHCAA.Mobile/lib/screens/admin/admin_dashboard_screen.dart | none found |
 | FR-019 | GET api/admin/analytics | MemberService_Search.GetDashboardStatsAsync | GHCAA.Web/src/app/core/services/admin.service.ts | none found | none found |
 | FR-020 | POST api/admin/sync-members | MemberService_Sync (not read in this pass) | GHCAA.Web/src/app/core/services/admin.service.ts | none found | GHCAA.Tests/Controllers/AdminControllerTests.cs:159,169 |
@@ -489,7 +489,7 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
   for lookups).
 - SC-002: A member approval, rejection, or archive action always records the acting admin's id from
   the JWT claim, never from a client-supplied field.
-- SC-003: `GET healthz` returns `503` whenever the database is unreachable, and never includes the
+- SC-003: `GET health` returns `503` whenever the database is unreachable, and never includes the
   raw database exception text in its response body.
 - SC-004: `GET api/admin/dev-tracker` never throws when `docs/TODO.md` is missing; it returns an
   empty list and logs a warning instead.

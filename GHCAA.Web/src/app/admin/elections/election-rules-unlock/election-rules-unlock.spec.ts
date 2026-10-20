@@ -96,4 +96,16 @@ describe('ElectionRulesUnlock', () => {
         expect(electionsMock.getRulesUnlock).toHaveBeenCalled();
         expect(component.busy()).toBe(false);
     });
+
+    it('FR-39: the unlock form says what an unlock does, with the real limits', () => {
+        const fixture = TestBed.createComponent(ElectionRulesUnlock);
+        fixture.componentInstance.loaded.set(true);
+        fixture.detectChanges();
+        const el: HTMLElement = fixture.nativeElement;
+
+        expect(el.querySelector('#unlock-minutes')!.getAttribute('aria-describedby')).toBe('unlock-minutes-hint');
+        expect(el.querySelector('#unlock-minutes-hint')!.textContent).toContain('default is 30 minutes and the most is 60');
+        expect(el.querySelector('#unlock-reason-hint')!.textContent).toContain('Say what went wrong');
+        expect(el.textContent).toContain('the rules lock again');
+    });
 });

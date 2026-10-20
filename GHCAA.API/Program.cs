@@ -199,7 +199,6 @@ app.UseAuthorization();
 // It's now a GlobalLimiter in RateLimitingExtensions.cs, which runs alongside a route's own
 // policy instead of replacing it.
 app.MapControllers();
-app.MapHealthChecks(Constants.Deploy.HealthPath).AllowAnonymous();
 // No checks run here, so it answers 200 while the process is up even if the database is not.
 app.MapHealthChecks(Constants.Deploy.LivenessPath, new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
 app.MapHub<GHCAA.API.Hubs.ChatHub>("/api/hubs/chat");

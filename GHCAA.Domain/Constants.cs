@@ -305,8 +305,9 @@ namespace GHCAA.Domain
             public const string AllowedOriginsChangedAuditType = "AllowedOriginsChanged";
             public const string WildcardOrigin = "*";
 
-            // 98.10. /health opens a database connection. /health/live does not, so a Neon cold
-            // start does not make the host restart a process that is running fine.
+            // 98.10. /health is HealthController's full report (database, storage, email) and
+            // answers 503 when one fails. /health/live runs no checks, so a Neon cold start does
+            // not make the host restart a process that is running fine. Render polls the latter.
             public const string HealthPath = "/health";
             public const string LivenessPath = "/health/live";
 

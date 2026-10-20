@@ -146,15 +146,33 @@ public sealed class ElectionDocumentService(
             case "ER-23":
                 return await CountTablesAsync(election, ct);
             case "ER-29" or "ER-30" or "ER-31":
-                return await DeclarationTablesAsync(election, ct);
+                return await DeclarationTablesAsync(election, code, ct);
             case "ER-19":
                 var board = await _elections.GetBoardAsync(election.Id, ct);
-                return [new FormTable("Appointed officials",
+                return [await PollRecordTableAsync(election, ct), new FormTable("Appointed officials",
                     ["Group", "Role", "Name", "Accepted"],
                     (board?.Groups ?? []).SelectMany(g => g.Members.Select(m => (IReadOnlyList<string>)[g.GroupName, m.PersonaName, m.DisplayName, $"{m.AcceptedAt:yyyy-MM-dd}"])).ToArray())];
             default:
                 return [];
         }
+    }
+
+    // 37.14g. What the platform itself can certify about the poll. The seals, queue and
+    // supervision lines on the paper form are still ticked by hand.
+    private async Task<FormTable> PollRecordTableAsync(Election election, CancellationToken ct)
+    {
+        var eligible = await db.VoterRolls.CountAsync(x => x.ElectionId == election.Id && x.IsEligible, ct);
+        var voted = await db.VoterRolls.CountAsync(x => x.ElectionId == election.Id && x.VotedAt != null, ct);
+        var chain = await new ElectionAuditWriter(db).VerifyAsync(election.Id, ct);
+        return new FormTable("Poll record", ["Item", "Recorded"],
+        [
+            ["Polling opened", $"{election.PollingOpensOn:yyyy-MM-dd HH:mm} UTC"],
+            ["Polling closed", $"{election.PollingClosesOn:yyyy-MM-dd HH:mm} UTC"],
+            ["Eligible voters", eligible.ToString()],
+            ["Voters who cast a ballot", voted.ToString()],
+            ["Ballot seal key fingerprint", election.BallotKeyFingerprint ?? "No key registered"],
+            ["Audit trail", chain.Ok ? $"Intact, {chain.Entries} entries" : $"Broken at entry {chain.FirstBrokenSeq} of {chain.Entries}"],
+        ]);
     }
 
     private async Task<FormTable> NominationsTableAsync(Election election, string code, CancellationToken ct)
@@ -214,7 +232,16 @@ public sealed class ElectionDocumentService(
         return tables;
     }
 
-    private async Task<IReadOnlyList<FormTable>> DeclarationTablesAsync(Election election, CancellationToken ct)
+    // 37.14d. ER-29 carries the same head hash as the public board, so a printed sheet can be
+    // checked against the audit trail later.
+    private async Task<IReadOnlyList<IReadOnlyList<string>>> AuditHeadRowAsync(int electionId, string code, CancellationToken ct)
+    {
+        if (code != "ER-29") return [];
+        var head = (await _elections.GetBoardAsync(electionId, ct))?.AuditHeadHash;
+        return [["Audit chain head", head ?? "Not declared"]];
+    }
+
+    private async Task<IReadOnlyList<FormTable>> DeclarationTablesAsync(Election election, string code, CancellationToken ct)
     {
         var results = await db.ElectionResults.AsNoTracking().Where(r => r.ElectionId == election.Id).ToListAsync(ct);
         var names = await CandidateNamesAsync(election.Id, ct);
@@ -225,7 +252,8 @@ public sealed class ElectionDocumentService(
             new FormTable("Declaration", ["Item", "Value"],
             [
                 ["Tie rule", election.TieRule.ToString()],
-                ["Declared on", election.DeclaredOn is { } on ? $"{on:yyyy-MM-dd}" : "Not declared"]
+                ["Declared on", election.DeclaredOn is { } on ? $"{on:yyyy-MM-dd}" : "Not declared"],
+                .. await AuditHeadRowAsync(election.Id, code, ct)
             ]),
             new FormTable("Result per seat", ["Seat", "Candidate", "Votes", "Outcome"],
                 results.OrderBy(Seat).ThenByDescending(r => r.VoteCount)
@@ -269,7 +297,7 @@ public sealed class ElectionDocumentService(
     private static string FormSummary(string formCode, int voterCount, int seatCount) => formCode switch
     {
         "ER-07" => $"This certificate records the frozen voter-roll snapshot containing {voterCount} voter records.",
-        "ER-19" => "This certificate records the polling integrity state for the election.",
+        "ER-19" => "The officials named below certify that polling has closed and the ballot box was kept sealed. The platform figures in the poll record are taken from the voter roll and the audit trail. Each ballot was sealed with the returning officer's key when it was cast and stays sealed until the count.",
         "ER-23" or "ER-28" or "ER-29" or "ER-30" or "ER-31" => "This record is generated from the persisted count and declaration workflow.",
         _ => $"This record covers {seatCount} configured election seat(s) and is generated from the persisted election record."
     };

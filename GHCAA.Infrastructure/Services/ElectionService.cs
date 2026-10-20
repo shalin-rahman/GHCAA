@@ -661,6 +661,10 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         var reason = isEligible != false ? null
             : roll == null ? "You are not on the voter roll for this election."
             : roll.IneligibilityReason ?? "You are not eligible to vote in this election.";
+        // 37.14b. The paper exists only from CandidateList through Polling. Outside that window
+        // the member sees the phase and nothing else.
+        if (e.Phase < ElectionPhase.CandidateList || e.Phase > ElectionPhase.Polling)
+            return new BallotViewDto(e.Id, e.Title, e.Phase, hasVoted, e.BallotKeyFingerprint, [], isEligible, reason);
         var candidates = await (from n in _db.Nominations.AsNoTracking()
                                 join m in _db.Members.AsNoTracking() on n.CandidateMemberId equals m.Id
                                 where n.ElectionId == id && n.Status == NominationStatus.Accepted

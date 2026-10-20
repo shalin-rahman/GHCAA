@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
+import '../../core/config/app_config.dart';
 
 final supportServiceProvider = Provider<SupportService>((ref) => SupportService(ref.read(dioProvider)));
 
@@ -11,7 +12,7 @@ class SupportService {
 
   Future<bool> checkSystemHealth() async {
     try {
-      final response = await _dio.get('/health');
+      final response = await _dio.get(AppConfig.healthUrl);
       return response.statusCode == 200;
     } catch (e) {
       debugPrint('SupportService.checkSystemHealth failed: $e');

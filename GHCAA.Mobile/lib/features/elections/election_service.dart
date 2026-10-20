@@ -634,6 +634,50 @@ class ElectionBoard {
   }
 }
 
+// Result of re-hashing the election's audit chain on the server.
+class AuditCheck {
+  final bool ok;
+  final int entries;
+  final int? firstBrokenSeq;
+
+  const AuditCheck(
+      {required this.ok, required this.entries, this.firstBrokenSeq});
+
+  factory AuditCheck.fromJson(Map<String, dynamic> json) => AuditCheck(
+        ok: json['ok'] as bool? ?? false,
+        entries: json['entries'] as int? ?? 0,
+        firstBrokenSeq: json['firstBrokenSeq'] as int?,
+      );
+}
+
+class AuditEntry {
+  final int seq;
+  final DateTime at;
+  final int? actorUserId;
+  final String action;
+  final String detailJson;
+  final String hash;
+
+  const AuditEntry({
+    required this.seq,
+    required this.at,
+    this.actorUserId,
+    required this.action,
+    required this.detailJson,
+    required this.hash,
+  });
+
+  factory AuditEntry.fromJson(Map<String, dynamic> json) => AuditEntry(
+        seq: json['seq'] as int? ?? 0,
+        at: DateTime.tryParse(json['at'] as String? ?? '') ??
+            DateTime.fromMillisecondsSinceEpoch(0),
+        actorUserId: json['actorUserId'] as int?,
+        action: json['action'] as String? ?? '',
+        detailJson: json['detailJson'] as String? ?? '',
+        hash: json['hash'] as String? ?? '',
+      );
+}
+
 // A two-person step waiting for a second official (37.13h).
 class ElectionApproval {
   final int id;
@@ -814,10 +858,22 @@ class ElectionService {
     }
   }
 
-  // Null when the chain is whole, otherwise the first broken entry number.
-  Future<int?> firstBrokenAuditEntry(int id) async {
+  // Anonymous. Says whether the chain is whole and how many entries it holds.
+  Future<AuditCheck> verifyAudit(int id) async {
     final response = await _dio.get('/elections/$id/audit/verify');
-    return (response.data as Map<String, dynamic>)['firstBrokenSeq'] as int?;
+    return AuditCheck.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  // Null when the chain is whole, otherwise the first broken entry number.
+  Future<int?> firstBrokenAuditEntry(int id) async =>
+      (await verifyAudit(id)).firstBrokenSeq;
+
+  // Officials with the ViewAudit permission. Oldest entry first.
+  Future<List<AuditEntry>> getAudit(int id) async {
+    final response = await _dio.get('/elections/$id/audit');
+    return (response.data as List<dynamic>)
+        .map((e) => AuditEntry.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   // Null until the count has run (404).
