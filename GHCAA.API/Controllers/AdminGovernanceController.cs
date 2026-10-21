@@ -1,4 +1,5 @@
 ﻿using GHCAA.API.Extensions;
+using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
@@ -94,6 +95,111 @@ namespace GHCAA.API.Controllers
             {
                 return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
             }
+        }
+
+        // 95.2: committee positions.
+        [HttpGet("positions")]
+        public async Task<IActionResult> GetPositions([FromQuery] bool includeRetired = true, CancellationToken cancellationToken = default)
+            => Ok(await _governanceService.GetPositionsAsync(includeRetired, cancellationToken));
+
+        [HttpPost("positions")]
+        public async Task<IActionResult> CreatePosition([FromBody] SaveEcPositionRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return Ok(await _governanceService.CreatePositionAsync(request, cancellationToken));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
+        }
+
+        [HttpPut("positions/{id:int}")]
+        public async Task<IActionResult> UpdatePosition(int id, [FromBody] SaveEcPositionRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var position = await _governanceService.UpdatePositionAsync(id, request, cancellationToken);
+                return position == null ? NotFound() : Ok(position);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
+        }
+
+        [HttpPost("positions/{id:int}/retire")]
+        public Task<IActionResult> RetirePosition(int id, CancellationToken cancellationToken) => SetPositionActive(id, false, cancellationToken);
+
+        [HttpPost("positions/{id:int}/restore")]
+        public Task<IActionResult> RestorePosition(int id, CancellationToken cancellationToken) => SetPositionActive(id, true, cancellationToken);
+
+        [HttpDelete("positions/{id:int}")]
+        public async Task<IActionResult> DeletePosition(int id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await _governanceService.DeletePositionAsync(id, cancellationToken) ? NoContent() : NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
+        }
+
+        [HttpGet("positions/invalid-rows")]
+        public async Task<IActionResult> GetInvalidPositionRows(CancellationToken cancellationToken)
+            => Ok(await _governanceService.GetInvalidPositionRowsAsync(cancellationToken));
+
+        [HttpPost("positions/repair")]
+        public async Task<IActionResult> RepairPosition([FromBody] RepairPositionRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await _governanceService.RepairPositionAsync(request, cancellationToken) ? NoContent() : NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
+        }
+
+        private async Task<IActionResult> SetPositionActive(int id, bool isActive, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await _governanceService.SetPositionActiveAsync(id, isActive, cancellationToken) ? NoContent() : NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
+        }
+
+        // 37.14m: ER-34 handover checklist for a committee term.
+        [HttpGet("periods/{id:int}/handover-checks")]
+        public async Task<IActionResult> GetHandoverChecks(int id, CancellationToken cancellationToken)
+            => await _governanceService.GetHandoverChecksAsync(id, cancellationToken) is { } checks ? Ok(checks) : NotFound();
+
+        [HttpPut("periods/{id:int}/handover-checks")]
+        public async Task<IActionResult> SetHandoverCheck(int id, [FromBody] SetHandoverCheckRequest request, CancellationToken cancellationToken)
+        {
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+                return Unauthorized();
+            try
+            {
+                if (!await _governanceService.SetHandoverCheckAsync(id, request, userId, cancellationToken)) return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
+            return await _governanceService.GetHandoverChecksAsync(id, cancellationToken) is { } checks ? Ok(checks) : NotFound();
         }
 
         [HttpDelete("members/{ecMemberId}/hard-delete")]

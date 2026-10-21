@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NetworkingService } from '../../../../core/services/networking.service';
-import { getECPositionName, getCurrentECPosition } from '../../../../core/constants/app.constants';
+import { getCurrentECLabel } from '../../../../core/constants/app.constants';
 import { formatPeriodRange } from '../../../../core/utils/date.util';
 import { ImgFallbackDirective } from '../../../../common/directives/img-fallback.directive';
 import { LazyImgDirective } from '../../../../common/directives/lazy-img.directive';
@@ -23,11 +23,8 @@ export class LandingEcPreview implements OnInit {
     ngOnInit() {
         this.networking.getCommittee({}, true).subscribe({
             next: (data) => {
-                // Filter out any members that have 'None' position or no position at all
-                const validCommittee = (data || []).filter((m: any) => {
-                    const p = getCurrentECPosition(m.ecHistory);
-                    return p !== null && p !== undefined && p !== 0 && p !== '0' && p !== 'None';
-                });
+                // Members with no committee record have no label and are left out.
+                const validCommittee = (data || []).filter((m: any) => !!getCurrentECLabel(m.ecHistory));
                 this.committee.set(validCommittee);
             },
             error: () => {
@@ -50,7 +47,7 @@ export class LandingEcPreview implements OnInit {
     }
 
     getRoleName(member: any) {
-        return getECPositionName(getCurrentECPosition(member.ecHistory));
+        return getCurrentECLabel(member.ecHistory);
     }
 }
 

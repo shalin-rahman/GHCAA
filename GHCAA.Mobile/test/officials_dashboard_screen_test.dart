@@ -24,7 +24,7 @@ void main() {
   setUpAll(() => dotenv.testLoad(fileInput: 'PORTAL_TITLE=GHCAA'));
 
   Future<void> pump(WidgetTester tester, AdminElection election,
-      {ElectionBoard? board}) async {
+      {ElectionBoard? board, ElectionReadiness? readiness}) async {
     tester.view.physicalSize = const Size(390, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -32,6 +32,7 @@ void main() {
       overrides: [
         officialsElectionsProvider.overrideWith((ref) async => [election]),
         officialsBoardProvider.overrideWith((ref, id) async => board),
+        officialsReadinessProvider.overrideWith((ref, id) async => readiness),
         roleProvider.overrideWith((ref) => Future.value('ElectionOfficial')),
         activeSpecialThemeProvider.overrideWith((ref) async => null),
       ],
@@ -81,5 +82,62 @@ void main() {
             isTest: false, groups: [], ballotsCast: 12, rollSize: 40));
 
     expect(find.text('Ballots cast: 12 of 40'), findsOneWidget);
+  });
+
+  group('readiness (37.12w)', () {
+    const readiness = ElectionReadiness(ready: false, items: [
+      ElectionReadinessItem(key: 'ballot-key', met: true),
+      ElectionReadinessItem(key: 'mock-election', met: false, attestation: true),
+      ElectionReadinessItem(key: 'approvers', met: false, advisory: true),
+    ]);
+
+    testWidgets('lists each item before polling, folding in the approver warning',
+        (tester) async {
+      await pump(tester, _election(['ViewDashboard'], phase: 'Campaign'),
+          readiness: readiness);
+
+      expect(find.text('Polling cannot open until each item below is met.'),
+          findsOneWidget);
+      expect(find.text('Done: The ballot key is set'), findsOneWidget);
+      expect(find.text('Not yet: A mock election was run'), findsOneWidget);
+      expect(find.text('Warning: $electionTooFewApproversWarning'),
+          findsOneWidget);
+    });
+
+    testWidgets('offers no button, since items are recorded on the web',
+        (tester) async {
+      await pump(
+          tester, _election(['ViewDashboard', 'ChangePhase'], phase: 'Campaign'),
+          readiness: readiness);
+
+      expect(find.byKey(const Key('readiness-mock-election')), findsOneWidget);
+      expect(find.text('Record as done'), findsNothing);
+    });
+
+    testWidgets('hides the list once polling is open', (tester) async {
+      await pump(tester, _election(['ViewDashboard']), readiness: readiness);
+
+      expect(find.byKey(const Key('card-readiness')), findsNothing);
+    });
+
+    testWidgets('hides the list without the dashboard permission',
+        (tester) async {
+      await pump(tester, _election(['ChangePhase'], phase: 'Campaign'),
+          readiness: readiness);
+
+      expect(find.byKey(const Key('card-readiness')), findsNothing);
+    });
+  });
+
+  test('an unknown readiness key shows as itself', () {
+    expect(electionReadinessLabel('new-item'), 'new-item');
+    expect(
+        ElectionReadiness.fromJson({
+          'ready': true,
+          'items': [
+            {'key': 'paper-stock', 'met': true, 'attestation': true}
+          ]
+        }).items.single.attestation,
+        isTrue);
   });
 }

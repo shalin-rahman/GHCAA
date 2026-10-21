@@ -4,12 +4,13 @@ import 'package:flutter/services.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
-import '../../core/api/api_client.dart';
+import '../../core/api/governance_api.dart';
 import '../../features/admin/admin_service.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/widgets/app_dropdown_field.dart';
 import '../../core/constants/app_constants.dart';
+import 'handover_checklist_sheet.dart';
 
 final ecPeriodsAdminProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(adminServiceProvider).getECPeriods();
@@ -48,8 +49,7 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
     if (_activatingPeriodId != null) return;
     setState(() => _activatingPeriodId = id);
     try {
-      final dio = ref.read(dioProvider);
-      await dio.post('/admin/governance/periods/$id/activate');
+      await ref.read(adminServiceProvider).activateECPeriod(id);
       ref.invalidate(ecPeriodsAdminProvider);
     } catch (_) {
     } finally {
@@ -94,17 +94,21 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
               onPressed: saving ? null : () async {
                 setDialogState(() => saving = true);
                 try {
-                  final dio = ref.read(dioProvider);
+                  final admin = ref.read(adminServiceProvider);
                   final payload = {
                     'title': titleCtrl.text,
                     'startDate': startCtrl.text,
                     if (endCtrl.text.isNotEmpty) 'endDate': endCtrl.text,
                   };
 
-                  if (period == null) {
-                    await dio.post('/admin/governance/periods', data: payload);
-                  } else {
-                    await dio.put('/admin/governance/periods/${period['id']}', data: payload);
+                  final ok = period == null
+                      ? await admin.createECPeriod(payload)
+                      : await admin.updateECPeriod(period['id'], payload);
+                  if (!ok) {
+                    if (ctx.mounted) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Error saving term.')));
+                    }
+                    return;
                   }
 
                   ref.invalidate(ecPeriodsAdminProvider);
@@ -228,12 +232,24 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
                                         const Divider(color: Colors.white10, height: 32),
                                         Row(
                                           children: [
-                                            TextButton.icon(
-                                              onPressed: () => _showMembers(p['id'], p['title']),
-                                              icon: const Icon(Icons.people_alt_outlined, size: 16, color: AppTheme.royalGold),
-                                              label: const Text('GOVERNANCE NODES', style: TextStyle(color: AppTheme.royalGold, fontSize: 11, fontWeight: FontWeight.bold)),
+                                            // The handover button drops to a second line on a narrow phone.
+                                            Expanded(
+                                              child: Wrap(
+                                                children: [
+                                                  TextButton.icon(
+                                                    onPressed: () => _showMembers(p['id'], p['title']),
+                                                    icon: const Icon(Icons.people_alt_outlined, size: 16, color: AppTheme.royalGold),
+                                                    label: const Text('GOVERNANCE NODES', style: TextStyle(color: AppTheme.royalGold, fontSize: 11, fontWeight: FontWeight.bold)),
+                                                  ),
+                                                  TextButton.icon(
+                                                    key: Key('handover-${p['id']}'),
+                                                    onPressed: () => showHandoverChecklistSheet(context, periodId: p['id'], title: p['title'] ?? ''),
+                                                    icon: const Icon(Icons.fact_check_outlined, size: 16, color: AppTheme.royalGold),
+                                                    label: const Text('HANDOVER', style: TextStyle(color: AppTheme.royalGold, fontSize: 11, fontWeight: FontWeight.bold)),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                            const Spacer(),
                                             if (p['isActive'] != true)
                                               IconButton(
                                                 icon: const Icon(Icons.bolt, color: AppTheme.royalGold, size: 18),
@@ -290,7 +306,9 @@ class _CommitteeMemberPanel extends ConsumerStatefulWidget {
 
 class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
   final _idController = TextEditingController();
-  final _posController = TextEditingController();
+  // 95.2: picked from the API list, so positions an admin adds show up here too.
+  List<dynamic> _positions = [];
+  int? _positionId;
   bool _isAdding = false;
   bool _notifyOnAssign = false;
   List<dynamic>? _members;
@@ -299,6 +317,21 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
   void initState() {
     super.initState();
     _load();
+    _loadPositions();
+  }
+
+  Future<void> _loadPositions() async {
+    try {
+      final list = await ref.read(governanceApiProvider).getPositions();
+      if (mounted) setState(() => _positions = list);
+    } catch (e) {
+      debugPrint('Committee positions failed to load: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not load committee positions.')),
+        );
+      }
+    }
   }
 
   Future<void> _load() async {
@@ -317,8 +350,13 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
 
   Future<void> _assign() async {
     final mid = int.tryParse(_idController.text);
-    final pos = int.tryParse(_posController.text) ?? 5; // Default position
-    if (mid == null) return;
+    final pos = _positionId;
+    if (mid == null || pos == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter a member ID and pick a position.')),
+      );
+      return;
+    }
 
     setState(() => _isAdding = true);
     final success = await ref.read(adminServiceProvider).assignMemberToCommittee(widget.periodId, {
@@ -330,7 +368,7 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
 
     if (success) {
       _idController.clear();
-      _posController.clear();
+      setState(() => _positionId = null);
       _load();
     } else if (mounted) {
       // The API refuses a seat that is already held, so point the admin at the end-term action.
@@ -455,18 +493,24 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: TextField(
-                    controller: _posController,
-                    keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
-                    decoration: const InputDecoration(hintText: 'Pos'),
+                  flex: 2,
+                  child: AppDropdownField<int>(
+                    key: const Key('assignPosition'),
+                    value: _positionId,
+                    hintText: 'Position',
+                    items: _positions
+                        .map((p) => DropdownMenuItem<int>(value: p['id'] as int, child: Text(p['name']?.toString() ?? '')))
+                        .toList(),
+                    onChanged: (v) => setState(() => _positionId = v),
                   ),
                 ),
                 const SizedBox(width: 12),
                 _isAdding
                   ? LogoSpinner.small()
                   : IconButton.filled(
-                      onPressed: _assign,
+                      key: const Key('assignButton'),
+                      // No positions means nothing valid to send, so Assign stays off.
+                      onPressed: _positions.isEmpty ? null : _assign,
                       style: IconButton.styleFrom(backgroundColor: AppTheme.royalGold),
                       icon: const Icon(Icons.person_add_alt_1, color: Colors.black, size: 20)
                     ),
@@ -493,9 +537,9 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
                         final m = _members![index];
                         return ListTile(
                           contentPadding: EdgeInsets.zero,
-                          leading: CircleAvatar(backgroundColor: Colors.white10, radius: 18, child: Text(m['position'].toString(), style: const TextStyle(color: AppTheme.royalGold, fontSize: 12))),
+                          leading: const CircleAvatar(backgroundColor: Colors.white10, radius: 18, child: Icon(Icons.badge_outlined, color: AppTheme.royalGold, size: 16)),
                           title: Text(m['fullName'] ?? 'Alumnus', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                          subtitle: Text('ID: ${m['memberId']} | ROLE: ${m['positionName'] ?? 'Member'}', style: const TextStyle(color: Colors.white38, fontSize: 10)),
+                          subtitle: Text('ID: ${m['memberId']} | ROLE: ${m['positionName'] ?? ''}', style: const TextStyle(color: Colors.white38, fontSize: 10)),
                           trailing: IconButton(
                             icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent, size: 18),
                             onPressed: () => _confirmRemove(m),

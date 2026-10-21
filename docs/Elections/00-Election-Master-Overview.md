@@ -456,7 +456,7 @@ No entity class ever leaves the server: the clients only ever see the request an
 | Layer | Where it lives | What is defined there |
 | --- | --- | --- |
 | The records themselves | `GHCAA.Domain/Models/Election.cs` | Every election record as a plain class. `ECMember` and `ECPeriod` sit in their own files beside it |
-| Fixed value sets | `GHCAA.Domain/Enums.cs` | `ElectionPhase`, `ElectionTieRule`, `NominationStatus`, `ECPosition`, and the `ElectionPermission` flags |
+| Fixed value sets | `GHCAA.Domain/Enums.cs` | `ElectionPhase`, `ElectionTieRule`, `NominationStatus`, `ECPosition`, and the `ElectionPermission` flags. `ECPosition` is due to become a settings table with head and secretary flags (TODO 95.2, configurable committee positions) |
 | Table mapping | `GHCAA.Infrastructure/Data/Configurations/ElectionConfigurations.cs` | One configuration class per record: keys, relationships, indexes, delete behaviour, column limits |
 | Registration | `GHCAA.Infrastructure/Data/ApplicationDbContext.cs` | One `DbSet` per record, which is what makes it a table |
 | Schema changes | `GHCAA.Infrastructure/Data/Migrations/PgSql` | Every table and column change, in order. The only place the schema actually changes |

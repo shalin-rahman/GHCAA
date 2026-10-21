@@ -94,6 +94,18 @@ class AppUtils {
     }
   }
 
+  /// Reads a server timestamp as UTC and returns it in local time. The API
+  /// sends UTC without a zone, which [parseDate] would take as local.
+  static DateTime? parseUtc(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    final s = value.trim();
+    final hasZone = RegExp(r'(Z|[+-]\d{2}:?\d{2})$').hasMatch(s);
+    return DateTime.tryParse(hasZone ? s : '${s}Z')?.toLocal();
+  }
+
+  /// A local time as a UTC ISO timestamp for the API.
+  static String toWireUtc(DateTime local) => local.toUtc().toIso8601String();
+
   /// Converts a date to an ISO date or timestamp for the API.
   static String? toWire(dynamic date,
       {bool includeTime = false, String? format}) {

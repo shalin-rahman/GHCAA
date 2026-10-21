@@ -11,6 +11,10 @@ How to complete a form: a ruled line is a field to be written on, a square is a 
 be ticked, and every signature panel must be signed by each officer named beneath it.
 Where a form offers Yes / No, tick one only. Do not alter, renumber or omit a field.
 
+Form numbers follow the Election Regulations, as the owner decided on 2026-10-20. A form the
+Regulations do not list takes a letter after the form it follows, for example ER-17A. Annex B of
+`12-Election-Officials-Handbook.md` lists all 50 forms with the number each one had before.
+
 ---
 
 # FORM ER-01
@@ -73,7 +77,7 @@ Prepared On: ___
 
 ---
 
-# FORM ER-03
+# FORM ER-04
 # Election Commissioner Acceptance
 
 ## Appointee
@@ -96,7 +100,7 @@ I accept my appointment as Election Commissioner. I declare that:
 
 ---
 
-# FORM ER-04
+# FORM ER-05
 # Declaration of Neutrality
 
 I hereby solemnly declare that I shall:
@@ -120,7 +124,7 @@ Date: ___
 
 ---
 
-# FORM ER-05
+# FORM ER-06
 # Conflict of Interest Declaration
 
 ## Declarant
@@ -152,7 +156,7 @@ immediately any change in these circumstances.
 
 ---
 
-# FORM ER-06
+# FORM ER-07
 # Confidentiality Agreement
 
 I agree to maintain confidentiality regarding:
@@ -179,7 +183,7 @@ Date: ___
 
 ---
 
-# FORM ER-07
+# FORM ER-08
 # Preliminary Voter Roll Certification
 
 :: grid
@@ -206,7 +210,7 @@ register and verified against it.
 
 ---
 
-# FORM ER-08
+# FORM ER-09
 # Voter Roll Objection
 
 :: grid
@@ -242,7 +246,7 @@ Decision: [ ] Accepted [ ] Rejected
 
 ---
 
-# FORM ER-09
+# FORM ER-10
 # Candidate Nomination Form
 
 Election: ___
@@ -284,8 +288,9 @@ Membership No.: ___
 
 [ ] Membership certificate copy
 [ ] Photograph
-[ ] Declaration (ER-04)
-[ ] Candidate consent (ER-10)
+[ ] Eligibility declaration (ER-12)
+[ ] Political neutrality declaration (ER-13)
+[ ] Candidate consent (ER-11)
 [ ] Nomination fee receipt
 
 :: sign Candidate / Signature and date | Received By / Commission officer
@@ -297,7 +302,7 @@ Date and Time Received: ___
 
 ---
 
-# FORM ER-10
+# FORM ER-11
 # Candidate Consent
 
 I consent to contest the election for the position of:
@@ -323,7 +328,7 @@ Date: ___
 
 ---
 
-# FORM ER-11
+# FORM ER-17
 # Nomination Scrutiny Checklist
 
 :: grid
@@ -353,7 +358,7 @@ Decision: [ ] Accepted [ ] Rejected
 
 ---
 
-# FORM ER-12
+# FORM ER-17A
 # Nomination Acceptance Order
 
 :: grid
@@ -376,7 +381,7 @@ After scrutiny under the Election Regulations, the Election Commission hereby:
 
 ---
 
-# FORM ER-13
+# FORM ER-18
 # Candidate Withdrawal
 
 :: grid
@@ -398,7 +403,7 @@ Reference No.: ___
 
 ---
 
-# FORM ER-14
+# FORM ER-19
 # Final Candidate List
 
 :: grid
@@ -426,7 +431,7 @@ permitted after publication except by order of the Commission.
 
 ---
 
-# FORM ER-15
+# FORM ER-23
 # Poll Opening Certificate
 
 :: grid
@@ -457,7 +462,7 @@ Polling officially commenced at the time recorded above.
 
 ---
 
-# FORM ER-16
+# FORM ER-23A
 # Poll Incident Register
 
 :: grid
@@ -486,7 +491,7 @@ Reported To: ___
 
 ---
 
-# FORM ER-17
+# FORM ER-23B
 # Spoiled Ballot Register
 
 :: grid
@@ -514,7 +519,7 @@ Total Replacements Issued: ___
 
 ---
 
-# FORM ER-18
+# FORM ER-24
 # Poll Closing Certificate
 
 :: grid

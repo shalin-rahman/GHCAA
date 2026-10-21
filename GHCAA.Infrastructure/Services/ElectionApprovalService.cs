@@ -95,6 +95,9 @@ public sealed class ElectionApprovalService(
         // Checked again when the key is set, but there is no point asking for a key that can no longer change.
         if (action == ElectionApprovalAction.ReplaceBallotKey && election.Phase >= ElectionPhase.Polling)
             return (false, "phase-closed", null);
+        // 37.12w. Nobody is asked to approve polling while a readiness item is unmet.
+        if (action == ElectionApprovalAction.OpenPolling && !await IsReadyForPollingAsync(electionId, ct))
+            return (false, Constants.Elections.Replies.PollingNotReady, null);
 
         var (payloadError, payload) = BuildPayload(action, newPublicKey);
         if (payloadError != null)
@@ -622,6 +625,9 @@ public sealed class ElectionApprovalService(
                 // Approving only allows the count. It runs when the requester brings the key.
                 return await db.Elections.AnyAsync(x => x.Id == electionId && x.Phase == ElectionPhase.Counting, ct) ? null : "not-ready";
             default:
+                // 37.12w. Checked again on approval because the request may be hours old.
+                if (action == ElectionApprovalAction.OpenPolling && !await IsReadyForPollingAsync(electionId, ct))
+                    return Constants.Elections.Replies.PollingNotReady;
                 if (!await elections.SetPhaseAsync(electionId, PhaseFor(action), ct))
                     return "not-ready";
                 // FR-032: archiving closes every appointment, in the same run as the phase change.
@@ -630,6 +636,9 @@ public sealed class ElectionApprovalService(
                 return null;
         }
     }
+
+    private async Task<bool> IsReadyForPollingAsync(int electionId, CancellationToken ct) =>
+        (await elections.GetReadinessAsync(electionId, ct))?.Ready == true;
 
     private static ElectionPhase PhaseFor(ElectionApprovalAction action) => action switch
     {

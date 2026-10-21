@@ -70,7 +70,6 @@ function localePack(l) {
         membershipLabel: l.MembershipLabel,
         membershipTypeLabels: l.MembershipTypeLabels ?? {},
         memberCategoryLabels: l.MemberCategoryLabels ?? {},
-        ecRoleLabels: l.EcRoleLabels ?? {},
         nav: navLabels(l.Nav)
     };
 }

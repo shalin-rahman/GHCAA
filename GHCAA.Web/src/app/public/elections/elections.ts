@@ -12,7 +12,7 @@ import {
     extractHeadings, renderFormMarkdown, renderMarkdownWithAnchors, MarkdownHeading
 } from '../../core/utils/markdown.util';
 import {
-    ELECTION_DOCS, ELECTION_DOC_GROUPS, ElectionDoc, ElectionForm, formStage, splitForms
+    ELECTION_DOCS, ELECTION_DOC_GROUPS, ElectionDoc, ElectionForm, formNumber, formStage, splitForms
 } from './election-docs';
 
 /** Public assets written by `npm run sync:docs`. */
@@ -58,12 +58,14 @@ export class ElectionsPage implements OnInit {
     );
 
     /**
-     * The register is grouped by election stage and kept in handbook order, so an officer
-     * finds a form by when it is used rather than by remembering its number.
+     * The register is grouped by election stage and sorted by form number, so an officer
+     * finds a form by when it is used rather than by remembering its number. The handbook
+     * files keep some lettered forms away from their number, so file order is not enough.
      */
     formGroups = computed<FormStageGroup[]>(() => {
         const groups: FormStageGroup[] = [];
-        for (const form of this.forms()) {
+        const sorted = [...this.forms()].sort((a, b) => formNumber(a.code) - formNumber(b.code));
+        for (const form of sorted) {
             const stage = formStage(form.code);
             const last = groups[groups.length - 1];
             if (last?.stage === stage) last.forms.push(form);

@@ -7,8 +7,9 @@ import { NotificationService } from '../../core/services/notification.service';
 import { confirmRejectApproval } from '../../core/utils/election-approval.util';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import {
-    AdminElectionDto, ELECTION_APPROVAL_ACTION_LABELS, ElectionApprovalDto, ElectionAppointmentDto, ElectionAuditEntryDto,
-    ElectionBoardDto, ElectionPermissionName, ElectionPersonaDto, NominationViewDto
+    AdminElectionDto, ELECTION_APPROVAL_ACTION_LABELS, ELECTION_PHASE_ORDER, ELECTION_READINESS_LABELS, ElectionApprovalDto,
+    ElectionAppointmentDto, ElectionAuditEntryDto, ElectionBoardDto, ElectionPermissionName, ElectionPersonaDto,
+    ElectionReadinessDto, ElectionReadinessItemDto, NominationViewDto
 } from '../../core/models/election.models';
 import { getElectionPhaseClass, getElectionPhaseLabel } from '../../core/constants/app.constants';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
@@ -49,6 +50,8 @@ export class OfficialsDashboard {
     approvals = signal<ElectionApprovalDto[] | null>(null);
     decidingId = signal<number | null>(null);
     keyDestroyedSaved = signal(false);
+    readiness = signal<ElectionReadinessDto | null>(null);
+    attestingKey = signal<string | null>(null);
 
     waitingNominations = computed(() => this.nominations().filter(n => n.status === 'Submitted' || n.status === 'UnderScrutiny').length);
     // The board sends no turnout while polling is open, so the card follows what the server returns.
@@ -56,6 +59,12 @@ export class OfficialsDashboard {
     showKeyCard = computed(() => this.can('SetBallotKey') || this.can('ViewDashboard'));
     showDestroyKey = computed(() =>
         this.selected()?.phase === 'Declared' && this.can('SetBallotKey') && !this.keyDestroyedSaved());
+
+    // 37.12w. The list matters only until polling opens.
+    showReadiness = computed(() => {
+        const phase = this.selected()?.phase;
+        return !!phase && this.can('ViewDashboard') && ELECTION_PHASE_ORDER.indexOf(phase) < ELECTION_PHASE_ORDER.indexOf('Polling');
+    });
 
     constructor() {
         this.load();
@@ -86,6 +95,8 @@ export class OfficialsDashboard {
         this.warnings.set([]);
         this.approvals.set(null);
         this.keyDestroyedSaved.set(false);
+        this.readiness.set(null);
+        if (this.showReadiness()) this.loadReadiness();
         this.elections.getBoard(id).subscribe({ next: b => this.board.set(b), error: () => this.board.set(null) });
         if (this.can('DecideNominations')) {
             this.elections.getNominations(id).subscribe({ next: n => this.nominations.set(n), error: () => this.nominations.set([]) });
@@ -115,6 +126,38 @@ export class OfficialsDashboard {
             }
         }
         return result;
+    }
+
+    loadReadiness(): void {
+        const id = this.selectedId();
+        if (id === null) return;
+        this.elections.getReadiness(id).subscribe({ next: r => this.readiness.set(r), error: () => this.readiness.set(null) });
+    }
+
+    readinessLabel(item: ElectionReadinessItemDto): string {
+        return ELECTION_READINESS_LABELS[item.key] ?? item.key;
+    }
+
+    canAttest(item: ElectionReadinessItemDto): boolean {
+        return item.attestation && !item.met && this.can('ChangePhase');
+    }
+
+    attest(item: ElectionReadinessItemDto): void {
+        const id = this.selectedId();
+        if (id === null || this.attestingKey() !== null) return;
+        this.attestingKey.set(item.key);
+        this.elections.attestReadiness(id, item.key).subscribe({
+            next: () => {
+                this.attestingKey.set(null);
+                this.notify.success('Recorded in the audit log.');
+                this.loadReadiness();
+            },
+            // 409 means someone else recorded it first, so the reload shows it ticked.
+            error: (err: { status?: number }) => {
+                this.attestingKey.set(null);
+                if (err.status === 409) this.loadReadiness();
+            }
+        });
     }
 
     // Loaded on request, since the list needs a step-up.

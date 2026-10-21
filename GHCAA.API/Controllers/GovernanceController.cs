@@ -32,6 +32,12 @@ namespace GHCAA.API.Controllers
             return Ok(new { Period = period, Members = members });
         }
 
+        // 95.2: active committee positions in display order, for pickers and labels.
+        [HttpGet("positions")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPositions(CancellationToken cancellationToken)
+            => Ok(await _governanceService.GetPositionsAsync(false, cancellationToken));
+
         [HttpGet("ec/history")]
         [AllowAnonymous]
         [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicReference)]

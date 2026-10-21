@@ -121,6 +121,78 @@ export interface AdminElectionDto {
     tooFewApprovers?: boolean;
     // Spec 023 FR-047. A rehearsal run: hidden from public reads, and declaring it writes no committee.
     isTest?: boolean;
+    // 37.14m. Details the printed forms need that the setup form does not ask for.
+    formDetails?: ElectionFormDetailsDto | null;
+}
+
+// Times come back in UTC with no zone mark. Silence and the recount window end are moments, the rest are days.
+export interface ElectionFormDetailsDto {
+    finalListOn?: string | null;
+    campaignOpensOn?: string | null;
+    campaignClosesOn?: string | null;
+    silenceStartsAt?: string | null;
+    venue?: string | null;
+    noticeReference?: string | null;
+    recountWindowEndsOn?: string | null;
+}
+
+// The whole set is sent each time. A field left null is cleared.
+export type UpdateElectionFormDetailsRequest = { [K in keyof ElectionFormDetailsDto]-?: string | null };
+
+// Names match the backend ScrutinyCheckItem enum, in the order the checklist shows them.
+export const SCRUTINY_CHECK_LABELS = {
+    MembershipVerified: 'Membership verified',
+    VotingMember: 'Is a voting member',
+    MinimumMembershipPeriod: 'Minimum membership period met',
+    FoundingMemberRequirement: 'Founding member rule met, where the seat needs it',
+    DocumentsComplete: 'Documents complete',
+    NominationFeePaid: 'Nomination fee paid',
+    DeclarationSigned: 'Declaration signed'
+} as const;
+export type ScrutinyCheckItem = keyof typeof SCRUTINY_CHECK_LABELS;
+export const SCRUTINY_CHECK_ITEMS = Object.keys(SCRUTINY_CHECK_LABELS) as ScrutinyCheckItem[];
+
+export interface ScrutinyCheckDto {
+    item: ScrutinyCheckItem;
+    isChecked: boolean;
+    setByUserId: number;
+    setAt: string;
+}
+
+export interface RecountFigureDto {
+    nominationId: number;
+    voteCount: number;
+}
+
+// ER-11. allowed is null until the returning officer decides.
+export interface ElectionRecountDto {
+    id: number;
+    electionSeatId: number;
+    positionTitle: string;
+    applicantName: string;
+    applicantMemberId?: number | null;
+    grounds: string;
+    explanation?: string | null;
+    receivedAt: string;
+    allowed?: boolean | null;
+    decisionReason?: string | null;
+    decidedAt?: string | null;
+    recountedAt?: string | null;
+    figures: RecountFigureDto[];
+}
+
+export interface RecordRecountRequest {
+    electionSeatId: number;
+    applicantName: string;
+    applicantMemberId: number | null;
+    grounds: string;
+    explanation: string | null;
+    receivedAt: string;
+}
+
+export interface DecideRecountRequest {
+    allowed: boolean;
+    reason: string | null;
 }
 
 // 37.13t. Shown when polling is asked for and the server says too few officials can approve.
@@ -131,6 +203,33 @@ export const ELECTION_TOO_FEW_APPROVERS_WARNING =
 export function pollingApproverWarning(election: AdminElectionDto, next: ElectionPhase): string | null {
     return next === 'Polling' && election.tooFewApprovers ? ELECTION_TOO_FEW_APPROVERS_WARNING : null;
 }
+
+// 37.12w. Advisory items warn but do not hold polling shut. Attestation items are ticked by hand.
+export interface ElectionReadinessItemDto {
+    key: string;
+    met: boolean;
+    attestation: boolean;
+    advisory: boolean;
+}
+
+export interface ElectionReadinessDto {
+    ready: boolean;
+    items: ElectionReadinessItemDto[];
+}
+
+// Keys match Constants.Elections.Readiness on the server. An unknown key shows as itself.
+export const ELECTION_READINESS_LABELS: Record<string, string> = {
+    'roll-frozen': 'The voter roll is frozen',
+    'candidate-list': 'Every candidate has a place on the ballot',
+    'ballot-key': 'The ballot key is set',
+    'appointments': 'Every appointed official has signed the declaration',
+    'polling-window': 'The polling window has not closed',
+    'mock-election': 'A mock election was run',
+    'technical-audit': 'The technical audit is done',
+    'appeals-decided': 'Every nomination appeal is decided',
+    'paper-stock': 'Paper stock is ready',
+    'approvers': ELECTION_TOO_FEW_APPROVERS_WARNING
+};
 
 export interface CreateElectionRequest {
     title: string;
@@ -246,6 +345,8 @@ export interface NominationViewDto {
     candidateMemberId: number;
     status: NominationStatus;
     statement: string;
+    // ER-10. When the candidate signed consent, in UTC. Null until it is recorded.
+    consentAt?: string | null;
 }
 
 export interface ScrutinyDto {

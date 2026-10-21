@@ -22,6 +22,8 @@ import { AdminService } from '../../core/services/admin.service';
 import { formatPeriodRange } from '../../core/utils/date.util';
 import { ElectionOfficials } from './election-officials/election-officials';
 import { ElectionRulesUnlock } from './election-rules-unlock/election-rules-unlock';
+import { ElectionFormRecords } from './election-form-records/election-form-records';
+import { NominationRecords } from './nomination-records/nomination-records';
 import {
     getElectionPhaseLabel, getElectionPhaseClass,
     getNominationStatusLabel, getNominationStatusClass, SUPER_ADMIN_ROLE, ADMIN_ROLE, API_ENDPOINTS, ELECTION_APPOINTMENT_REASON_MAX
@@ -32,7 +34,7 @@ type AdminElectionsTab = 'elections' | 'nominations';
 @Component({
     selector: 'app-admin-elections',
     standalone: true,
-    imports: [CommonModule, FormsModule, LoadingPanelComponent, SearchBarComponent, PageHeaderComponent, ElectionOfficials, ElectionRulesUnlock],
+    imports: [CommonModule, FormsModule, LoadingPanelComponent, SearchBarComponent, PageHeaderComponent, ElectionOfficials, ElectionRulesUnlock, ElectionFormRecords, NominationRecords],
     templateUrl: './admin-elections.html'
 })
 export class AdminElections {
@@ -72,6 +74,7 @@ export class AdminElections {
     decidingApprovalId = signal<number | null>(null);
     approvalLabels = ELECTION_APPROVAL_ACTION_LABELS;
     officialsOpenId = signal<number | null>(null);
+    formRecordsOpenId = signal<number | null>(null);
     destroyingKeyId = signal<number | null>(null);
     readonly isSuperAdmin = computed(() => this.auth.hasRole(SUPER_ADMIN_ROLE));
     // Creating an election and listing governance periods are admin-only on the server.
@@ -262,8 +265,10 @@ export class AdminElections {
         return election.myPermissions?.includes(permission) ?? false;
     }
 
+    readonly selectedElection = computed(() => this.elections().find(item => item.id === this.selectedElectionId()) ?? null);
+
     canOnSelected(permission: ElectionPermissionName): boolean {
-        const election = this.elections().find(item => item.id === this.selectedElectionId());
+        const election = this.selectedElection();
         return election ? this.can(election, permission) : false;
     }
 
@@ -362,6 +367,14 @@ export class AdminElections {
         this.officialsOpenId.update(id => id === election.id ? null : election.id);
     }
 
+    toggleFormRecords(election: AdminElectionDto): void {
+        this.formRecordsOpenId.update(id => id === election.id ? null : election.id);
+    }
+
+    onFormRecordsChanged(updated: AdminElectionDto): void {
+        this.replace(updated);
+    }
+
     // The officials panel has already shown its own toast for an emergency revoke.
     onOfficialPending(pending: ElectionApprovalDto): void {
         this.addApproval(pending);
@@ -432,7 +445,7 @@ export class AdminElections {
         const id = this.selectedElectionId();
         if (id === null) return;
         this.nominationsLoading.set(true);
-        this.electionsService.getNominations(id).subscribe({
+        this.electionsService.getAdminNominations(id).subscribe({
             next: values => { this.nominations.set(values); this.nominationsLoading.set(false); },
             error: () => { this.nominationsLoading.set(false); this.notify.error('Failed to load nominations.'); }
         });

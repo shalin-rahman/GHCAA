@@ -12,6 +12,9 @@ public interface IElectionService
     // The newest Declared or Archived election that is not a test. Null when there is none.
     Task<ElectionSummaryDto?> GetLatestDeclaredAsync(CancellationToken ct = default);
     Task<int> AddSeatAsync(int id, ElectionSeatRequestDto request, CancellationToken ct = default);
+    Task<string?> CheckSeatAsync(int? electionId, ElectionSeatRequestDto request, CancellationToken ct = default);
+    // 95.2: an active position whose key or name matches the title, ignoring case, spaces and punctuation.
+    Task<int?> FindPositionIdAsync(string? title, CancellationToken ct = default);
     Task<bool> SetPhaseAsync(int id, Enums.ElectionPhase phase, CancellationToken ct = default);
     Task<int> FreezeVoterRollAsync(int id, CancellationToken ct = default);
     // Deletes the frozen roll so it can be frozen again. Error codes: not-found, reason-required, phase-closed, window-closed, has-nominations.
@@ -26,7 +29,13 @@ public interface IElectionService
     Task<bool> DeclareAsync(int id, CancellationToken ct = default);
     /// <summary>FR-050. Null when recorded, else one of Elections.Replies: NotFound, NotDeclared or AlreadyRecorded.</summary>
     Task<string?> RecordKeyDestroyedAsync(int id, int actorUserId, CancellationToken ct = default);
+    /// <summary>37.12w. Null when the election is not found.</summary>
+    Task<ElectionReadinessDto?> GetReadinessAsync(int id, CancellationToken ct = default);
+    /// <summary>37.12w. Null when recorded, else NotFound, Invalid (not an attestation item), WrongPhase or AlreadyRecorded.</summary>
+    Task<string?> AttestReadinessAsync(int id, int actorUserId, string condition, CancellationToken ct = default);
     Task<IReadOnlyList<NominationViewDto>> GetNominationsAsync(int id, CancellationToken ct = default);
+    // 37.14m. The same list with the ER-10 consent time, for officials only.
+    Task<IReadOnlyList<NominationViewDto>> GetNominationsWithConsentAsync(int id, CancellationToken ct = default);
     Task<BallotViewDto?> GetBallotAsync(int id, int memberId, CancellationToken ct = default);
     // Null until the count has stored results. Sorted, with no choices (spec 023 FR-016).
     Task<IReadOnlyList<string>?> GetTrackingCodesAsync(int id, CancellationToken ct = default);

@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName, getCurrentECPosition, PROFESSIONAL_SECTORS, getBloodGroupName, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS, ADMIN_ROLE, SUPER_ADMIN_ROLE, ROUTES } from '../../core/constants/app.constants';
+import { getPositionLabel, getCurrentECLabel, PROFESSIONAL_SECTORS, getBloodGroupName, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS, ADMIN_ROLE, SUPER_ADMIN_ROLE, ROUTES } from '../../core/constants/app.constants';
 import { AuthService } from '../../core/services/auth.service';
 import { debounce } from '../../core/utils/debounce.util';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
@@ -29,8 +29,8 @@ export class Directory implements OnInit, OnDestroy {
     @Input() isCompact: boolean = false;
     @Input() disableProfile: boolean = false;
 
-    getECPositionName = getECPositionName;
-    getCurrentECPosition = getCurrentECPosition;
+    getPositionLabel = getPositionLabel;
+    getCurrentECLabel = getCurrentECLabel;
     getBloodGroupName = getBloodGroupName;
     private networkService = inject(NetworkingService);
     private notify = inject(NotificationService);

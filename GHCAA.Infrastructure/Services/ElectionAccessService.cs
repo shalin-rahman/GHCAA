@@ -18,8 +18,15 @@ public sealed class ElectionAccessService(ApplicationDbContext db, IOrgConfigSer
 
     // An archived user's appointment stays on record for admins but grants nothing (94.5). The
     // navigation join applies User's !IsArchived filter, which is the point here.
-    private IQueryable<ElectionAppointment> LiveAppointments() =>
+    private IQueryable<ElectionAppointment> LiveAppointments() => LiveAppointments(db);
+
+    private static IQueryable<ElectionAppointment> LiveAppointments(ApplicationDbContext db) =>
         db.ElectionAppointments.Where(ElectionAppointment.LiveAt(DateTime.UtcNow)).Where(x => !x.User!.IsArchived);
+
+    // 37.12w. ElectionService counts approvers for the readiness list without taking this service.
+    internal static Task<int> LiveApproverCountAsync(ApplicationDbContext db, int electionId, CancellationToken ct) =>
+        LiveAppointments(db).Where(ElectionAppointment.GrantsApprove)
+            .Where(x => x.ElectionId == electionId).Select(x => x.UserId).Distinct().CountAsync(ct);
 
     public async Task<ElectionPermission> GetPermissionsAsync(int electionId, int userId, IReadOnlyCollection<string> roles, CancellationToken ct = default)
     {
@@ -51,8 +58,7 @@ public sealed class ElectionAccessService(ApplicationDbContext db, IOrgConfigSer
             .AnyAsync(x => x.ElectionId == electionId && x.Persona!.TakesOverFromAdmin, ct);
 
     public Task<int> LiveApproverCountAsync(int electionId, CancellationToken ct = default) =>
-        LiveAppointments().Where(ElectionAppointment.GrantsApprove)
-            .Where(x => x.ElectionId == electionId).Select(x => x.UserId).Distinct().CountAsync(ct);
+        LiveApproverCountAsync(db, electionId, ct);
 
     public async Task<int?> ElectionIdForAsync(ElectionIdLookup kind, int id, CancellationToken ct = default) => kind switch
     {

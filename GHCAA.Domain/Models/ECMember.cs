@@ -9,7 +9,8 @@ namespace GHCAA.Domain.Models
         public int MemberId { get; set; }
         public int ECPeriodId { get; set; }
 
-        public ECPosition Position { get; set; }
+        // 95.2: EcPosition.Id. Named Position so the ec_members.json seed files still bind.
+        public int Position { get; set; }
 
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
@@ -32,5 +33,6 @@ namespace GHCAA.Domain.Models
         // Navigation
         public Member? Member { get; set; }
         public ECPeriod? ECPeriod { get; set; }
+        public EcPosition? EcPosition { get; set; }
     }
 }

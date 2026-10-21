@@ -1,0 +1,134 @@
+<div class="modal-overlay" (click)="closed.emit()">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-label="EC Positions" (click)="$event.stopPropagation()">
+        <app-modal-header title="EC Positions" (closed)="closed.emit()"></app-modal-header>
+
+        @if (editingId() === null) {
+        <div class="modal-body">
+            @if (loading()) {
+            <p>Loading positions...</p>
+            } @else {
+            @if (invalidRows().length) {
+            <div class="table-wrap">
+                <p class="field-error">These terms and seats hold a position that no longer exists. Pick the right position for each.</p>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Record</th><th>Old value</th><th>Position</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        @for (row of invalidRows(); track rowKey(row)) {
+                        <tr>
+                            <td>{{ row.description }}</td>
+                            <td>{{ row.position }}</td>
+                            <td>
+                                <select class="form-control" [attr.aria-label]="'Position for ' + row.description"
+                                    [ngModel]="repairChoice()[rowKey(row)] ?? 0" (ngModelChange)="pickRepair(row, +$event)">
+                                    <option [ngValue]="0" disabled>Pick a position</option>
+                                    @for (p of positions(); track p.id) {
+                                    @if (p.isActive) { <option [ngValue]="p.id">{{ p.name }}</option> }
+                                    }
+                                </select>
+                            </td>
+                            <td><button class="btn btn-accent" (click)="repair(row)" [disabled]="!repairChoice()[rowKey(row)]">Repair</button></td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            }
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Name</th>
+                            <th>Seats</th>
+                            <th>Board</th>
+                            <th>Signs as</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (p of positions(); track p.id) {
+                        <tr>
+                            <td>{{ p.displayOrder }}</td>
+                            <td>
+                                {{ p.name }}
+                                @if (p.nameBn) { <div><small>{{ p.nameBn }}</small></div> }
+                                <div><small>{{ p.key }}</small></div>
+                            </td>
+                            <td>{{ p.seatCount }}</td>
+                            <td>{{ p.showOnBoard ? 'Yes' : 'No' }}</td>
+                            <td>
+                                @if (p.signsAsHead) { Head }
+                                @if (p.signsAsSecretary) { Secretary }
+                                @if (!p.signsAsHead && !p.signsAsSecretary) { - }
+                            </td>
+                            <td>
+                                <span class="status-badge" [class.active]="p.isActive" [class.warning]="!p.isActive">
+                                    {{ p.isActive ? 'Active' : 'Retired' }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="icon-btn" title="Edit" [attr.aria-label]="'Edit ' + p.name" (click)="openEdit(p)">✏️</button>
+                                @if (p.isActive) {
+                                <button class="icon-btn" title="Retire" [attr.aria-label]="'Retire ' + p.name" (click)="retire(p)">⏸️</button>
+                                } @else {
+                                <button class="icon-btn" title="Restore" [attr.aria-label]="'Restore ' + p.name" (click)="restore(p)">↩️</button>
+                                }
+                                <button class="icon-btn" title="Delete" [attr.aria-label]="'Delete ' + p.name" (click)="remove(p)">🗑️</button>
+                            </td>
+                        </tr>
+                        } @empty {
+                        <tr><td colspan="7">No positions yet.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            }
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" (click)="closed.emit()">Close</button>
+            <button class="btn btn-accent" (click)="openNew()">Add Position</button>
+        </div>
+        } @else {
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="pos-name">Name <span class="required-star">*</span></label>
+                <input id="pos-name" type="text" class="form-control" [maxlength]="nameMax" [ngModel]="form().name" (ngModelChange)="patch({ name: $event })">
+            </div>
+            <div class="form-group">
+                <label for="pos-name-bn">Name (Bangla)</label>
+                <input id="pos-name-bn" type="text" class="form-control" [maxlength]="nameMax" [ngModel]="form().nameBn" (ngModelChange)="patch({ nameBn: $event })">
+            </div>
+            <div class="form-group">
+                <label for="pos-order">Display Order</label>
+                <input id="pos-order" type="number" class="form-control" min="0" [max]="maxDisplayOrder" [ngModel]="form().displayOrder" (ngModelChange)="patch({ displayOrder: +$event })">
+            </div>
+            <div class="form-group">
+                <label for="pos-seats">Seats <span class="required-star">*</span></label>
+                <input id="pos-seats" type="number" class="form-control" min="1" [max]="maxSeats" [ngModel]="form().seatCount" (ngModelChange)="patch({ seatCount: +$event })">
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="pos-board" [ngModel]="form().showOnBoard" (ngModelChange)="patch({ showOnBoard: $event })">
+                <label for="pos-board">Show on the public board</label>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="pos-head" [ngModel]="form().signsAsHead" (ngModelChange)="patch({ signsAsHead: $event })">
+                <label for="pos-head">Signs certificates as head</label>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="pos-secretary" [ngModel]="form().signsAsSecretary" (ngModelChange)="patch({ signsAsSecretary: $event })">
+                <label for="pos-secretary">Signs certificates as secretary</label>
+            </div>
+            @if (formError(); as error) { <p class="field-error" role="alert">{{ error }}</p> }
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" (click)="cancelEdit()">Back</button>
+            <button class="btn btn-accent" (click)="save()" [disabled]="saving() || !!formError()">
+                {{ saving() ? 'Saving...' : (editingId() ? 'Update' : 'Add') }}
+            </button>
+        </div>
+        }
+    </div>
+</div>

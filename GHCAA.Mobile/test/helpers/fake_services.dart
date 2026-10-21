@@ -127,6 +127,8 @@ class FakeAdminService implements AdminService {
   @override
   Future<bool> updateECPeriod(int id, Map<String, dynamic> data) async => true;
   @override
+  Future<void> activateECPeriod(int id) async {}
+  @override
   Future<List<dynamic>> getLedgerRecords({String? search, int page = 1}) async => [];
   @override
   Future<Map<String, dynamic>> getLedgerSummary(int year) async => {'totalRevenue': 1000, 'totalExpenses': 500, 'netPosition': 500};
@@ -140,6 +142,10 @@ class FakeAdminService implements AdminService {
   Future<bool> updateFeeConfig(Map<String, dynamic> data) async => true;
   @override
   Future<List<dynamic>> getCommitteeMembers(int periodId) async => [];
+  @override
+  Future<List<dynamic>> getHandoverChecks(int periodId) async => [];
+  @override
+  Future<List<dynamic>> setHandoverCheck(int periodId, String item, bool isChecked) async => [];
   @override
   Future<bool> assignMemberToCommittee(int periodId, Map<String, dynamic> data) async => true;
   @override

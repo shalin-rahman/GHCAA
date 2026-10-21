@@ -1,0 +1,123 @@
+<div class="stack gap-4">
+    <h3>{{ text.FORM_RECORDS_TITLE }}</h3>
+
+    <div class="stack gap-2" *ngIf="can('ManageSetup')">
+        <p class="text-muted">{{ text.FORM_DETAILS_HINT }}</p>
+        <div class="form-group">
+            <label for="final-list-on-{{ election.id }}">{{ text.FINAL_LIST_ON_LABEL }}</label>
+            <input id="final-list-on-{{ election.id }}" type="date" [(ngModel)]="details.finalListOn" />
+        </div>
+        <div class="form-group">
+            <label for="campaign-opens-on-{{ election.id }}">{{ text.CAMPAIGN_OPENS_ON_LABEL }}</label>
+            <input id="campaign-opens-on-{{ election.id }}" type="date" [(ngModel)]="details.campaignOpensOn" />
+        </div>
+        <div class="form-group">
+            <label for="campaign-closes-on-{{ election.id }}">{{ text.CAMPAIGN_CLOSES_ON_LABEL }}</label>
+            <input id="campaign-closes-on-{{ election.id }}" type="date" [(ngModel)]="details.campaignClosesOn" />
+        </div>
+        <div class="form-group">
+            <label for="silence-starts-at-{{ election.id }}">{{ text.SILENCE_STARTS_AT_LABEL }}</label>
+            <input id="silence-starts-at-{{ election.id }}" type="datetime-local" [(ngModel)]="details.silenceStartsAt" />
+        </div>
+        <div class="form-group">
+            <label for="venue-{{ election.id }}">{{ text.VENUE_LABEL }}</label>
+            <input id="venue-{{ election.id }}" type="text" maxlength="300" [(ngModel)]="details.venue" />
+        </div>
+        <div class="form-group">
+            <label for="notice-reference-{{ election.id }}">{{ text.NOTICE_REFERENCE_LABEL }}</label>
+            <input id="notice-reference-{{ election.id }}" type="text" maxlength="100" [(ngModel)]="details.noticeReference" />
+        </div>
+        <div class="form-group">
+            <label for="recount-window-ends-on-{{ election.id }}">{{ text.RECOUNT_WINDOW_ENDS_ON_LABEL }}</label>
+            <input id="recount-window-ends-on-{{ election.id }}" type="datetime-local" [(ngModel)]="details.recountWindowEndsOn" />
+        </div>
+        <div>
+            <button class="btn btn-primary btn-sm" [disabled]="savingDetails()" (click)="saveDetails()">Save details</button>
+        </div>
+    </div>
+
+    <div class="stack gap-2" *ngIf="can('ViewDashboard')">
+        <h4>{{ text.RECOUNTS_TITLE }}</h4>
+        <app-loading-panel *ngIf="loadingRecounts()" [compact]="true" [size]="32" label="Loading recount requests..." />
+        <p *ngIf="!loadingRecounts() && recounts().length === 0" class="text-muted">{{ text.RECOUNTS_EMPTY }}</p>
+
+        <div class="stack gap-2" *ngFor="let recount of recounts()">
+            <div class="flex justify-between items-center">
+                <span>
+                    <strong>{{ recount.positionTitle }}</strong>, {{ recount.applicantName }}
+                    <span class="text-muted"> {{ text.RECOUNT_RECEIVED_AT_LABEL }} {{ utcToLocal(recount.receivedAt) | date:'medium' }}</span>
+                </span>
+                <span class="status-badge" [class.pending]="recount.allowed == null" [class.active]="recount.allowed === true" [class.inactive]="recount.allowed === false">
+                    {{ recount.allowed == null ? text.RECOUNT_PENDING : recount.allowed ? text.RECOUNT_ALLOWED : text.RECOUNT_REFUSED }}
+                </span>
+            </div>
+            <p class="text-muted">{{ recount.grounds }}</p>
+            <p class="text-muted" *ngIf="recount.decisionReason">{{ recount.decisionReason }}</p>
+
+            <div class="stack gap-2" *ngIf="recount.allowed == null && can('DecideAppeals')">
+                <div class="form-group">
+                    <label [for]="'refuse-reason-' + recount.id">{{ text.RECOUNT_REFUSE_REASON_LABEL }}</label>
+                    <textarea [id]="'refuse-reason-' + recount.id" maxlength="2000" [(ngModel)]="refuseReasons[recount.id]"></textarea>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-primary btn-sm" [disabled]="busyRecountId() === recount.id" (click)="decide(recount, true)">Allow</button>
+                    <button class="btn btn-secondary btn-sm" [disabled]="busyRecountId() === recount.id" (click)="decide(recount, false)">Refuse</button>
+                </div>
+            </div>
+
+            <div class="stack gap-2" *ngIf="recount.figures.length > 0">
+                <h5>{{ text.RECOUNT_FIGURES_TITLE }}</h5>
+                <p class="text-muted" *ngFor="let figure of recount.figures">Nomination {{ figure.nominationId }}: {{ figure.voteCount }}</p>
+            </div>
+
+            <div *ngIf="canEnterFigures(recount) && figuresOpenId() !== recount.id">
+                <button class="btn btn-secondary btn-sm" (click)="openFigures(recount)">Enter recount figures</button>
+            </div>
+            <div class="stack gap-2" *ngIf="figuresOpenId() === recount.id">
+                <h5>{{ text.RECOUNT_FIGURES_TITLE }}</h5>
+                <div class="form-group" *ngFor="let row of figureRows()">
+                    <label [for]="'figure-' + recount.id + '-' + row.nominationId">{{ row.name }}</label>
+                    <input [id]="'figure-' + recount.id + '-' + row.nominationId" type="number" min="0" step="1" [(ngModel)]="figureVotes[row.nominationId]" />
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-primary btn-sm" [disabled]="!figuresReady() || busyRecountId() === recount.id" (click)="saveFigures(recount)">Save figures</button>
+                    <button class="btn btn-secondary btn-sm" (click)="figuresOpenId.set(null)">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stack gap-2" *ngIf="can('DecideAppeals')">
+            <h4>Record a recount request</h4>
+            <div class="form-group">
+                <label for="recount-seat-{{ election.id }}">{{ text.RECOUNT_SEAT_LABEL }}</label>
+                <select id="recount-seat-{{ election.id }}" [(ngModel)]="recountForm.electionSeatId">
+                    <option [ngValue]="null">Choose a position</option>
+                    <option *ngFor="let position of election.positions" [ngValue]="position.id">{{ position.title }}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="recount-applicant-{{ election.id }}">{{ text.RECOUNT_APPLICANT_LABEL }}</label>
+                <input id="recount-applicant-{{ election.id }}" type="text" maxlength="150" [(ngModel)]="recountForm.applicantName" />
+            </div>
+            <div class="form-group">
+                <label for="recount-member-{{ election.id }}">{{ text.RECOUNT_APPLICANT_MEMBER_LABEL }}</label>
+                <input id="recount-member-{{ election.id }}" type="number" min="1" [(ngModel)]="recountForm.applicantMemberId" />
+            </div>
+            <div class="form-group">
+                <label for="recount-grounds-{{ election.id }}">{{ text.RECOUNT_GROUNDS_LABEL }}</label>
+                <textarea id="recount-grounds-{{ election.id }}" maxlength="2000" [(ngModel)]="recountForm.grounds"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="recount-explanation-{{ election.id }}">{{ text.RECOUNT_EXPLANATION_LABEL }}</label>
+                <textarea id="recount-explanation-{{ election.id }}" maxlength="4000" [(ngModel)]="recountForm.explanation"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="recount-received-{{ election.id }}">{{ text.RECOUNT_RECEIVED_AT_LABEL }}</label>
+                <input id="recount-received-{{ election.id }}" type="datetime-local" [(ngModel)]="recountForm.receivedAt" />
+            </div>
+            <div>
+                <button class="btn btn-primary btn-sm" [disabled]="!canRecord() || savingRecount()" (click)="recordRecount()">Record request</button>
+            </div>
+        </div>
+    </div>
+</div>

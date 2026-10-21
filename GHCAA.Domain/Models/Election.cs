@@ -16,6 +16,16 @@ public class Election
     public DateTime PollingOpensOn { get; set; }
     public DateTime PollingClosesOn { get; set; }
     public DateTime? DeclaredOn { get; set; }
+    // 37.14m. Printed on the notice and calendar (ER-01, ER-02). Silence runs from SilenceStartsAt
+    // until polling closes, so it has no end date of its own.
+    public DateTime? FinalListOn { get; set; }
+    public DateTime? CampaignOpensOn { get; set; }
+    public DateTime? CampaignClosesOn { get; set; }
+    public DateTime? SilenceStartsAt { get; set; }
+    public string? Venue { get; set; }
+    public string? NoticeReference { get; set; }
+    // The ballot key may not be recorded as destroyed until this has passed.
+    public DateTime? RecountWindowEndsOn { get; set; }
     public ElectionTieRule TieRule { get; set; } = ElectionTieRule.DrawingLots;
     // Spec 023 FR-047 (37.13d). A rehearsal run. Public reads hide it and Declare writes no ECMember rows.
     public bool IsTest { get; set; }
@@ -38,9 +48,11 @@ public class ElectionSeat
 {
     public int Id { get; set; }
     public int ElectionId { get; set; }
-    public ECPosition Position { get; set; }
+    // 95.2: EcPosition.Id.
+    public int Position { get; set; }
     public int SeatCount { get; set; } = 1;
     public Election? Election { get; set; }
+    public EcPosition? EcPosition { get; set; }
     public ICollection<Nomination> Nominations { get; set; } = new List<Nomination>();
 }
 
@@ -150,8 +162,12 @@ public class Nomination
     // Spec 023 FR-046 (37.13b). Place on the ballot within the seat, set once when the election
     // enters CandidateList. Null for nominations made before that change.
     public int? BallotOrder { get; set; }
+    // 37.14m. When the candidate consented (ER-10). Null on nominations made before the field
+    // existed, which print "not recorded".
+    public DateTime? ConsentAt { get; set; }
     public Election? Election { get; set; }
     public ElectionSeat? ElectionSeat { get; set; }
+    public ICollection<NominationScrutinyCheck> ScrutinyChecks { get; set; } = new List<NominationScrutinyCheck>();
 }
 
 public class ScrutinyDecision
@@ -162,6 +178,49 @@ public class ScrutinyDecision
     public bool Accepted { get; set; }
     public string? Reason { get; set; }
     public DateTime DecidedAt { get; set; }
+}
+
+// 37.14m. One row per check per nomination, kept when unticked so the sheet (ER-17) still shows
+// who last changed it. Any commissioner may tick; the Chief still decides acceptance.
+public class NominationScrutinyCheck
+{
+    public int Id { get; set; }
+    public int NominationId { get; set; }
+    public ScrutinyCheckItem Item { get; set; }
+    public bool IsChecked { get; set; }
+    public int SetByUserId { get; set; }
+    public DateTime SetAt { get; set; }
+}
+
+// 37.14m. One recount request per filing (ER-28), its decision (ER-28A) and, when allowed, the
+// recounted figures that ER-28B prints beside the stored result.
+public class ElectionRecountRequest
+{
+    public int Id { get; set; }
+    public int ElectionId { get; set; }
+    public int ElectionSeatId { get; set; }
+    public string ApplicantName { get; set; } = null!;
+    public int? ApplicantMemberId { get; set; }
+    public string Grounds { get; set; } = null!;
+    public string? Explanation { get; set; }
+    public DateTime ReceivedAt { get; set; }
+    public int RecordedByUserId { get; set; }
+    public bool? Allowed { get; set; }
+    public string? DecisionReason { get; set; }
+    public int? DecidedByUserId { get; set; }
+    public DateTime? DecidedAt { get; set; }
+    public DateTime? RecountedAt { get; set; }
+    public int? RecountedByUserId { get; set; }
+    public Election? Election { get; set; }
+    public ICollection<ElectionRecountFigure> Figures { get; set; } = new List<ElectionRecountFigure>();
+}
+
+public class ElectionRecountFigure
+{
+    public int Id { get; set; }
+    public int RecountRequestId { get; set; }
+    public int NominationId { get; set; }
+    public int VoteCount { get; set; }
 }
 
 // Ballot and BallotVote hold what was voted, never who voted. Keys are random GUIDs set in

@@ -65,7 +65,7 @@ namespace GHCAA.Tests.Services
                 new ECHistoryDto
                 {
                     PeriodTitle = "Interim Executive Committee",
-                    Position = Enums.ECPosition.President,
+                    PositionId = EcPositionIds.President,
                     StartDate = DateTime.UtcNow,
                     IsCurrent = true
                 }
@@ -77,7 +77,7 @@ namespace GHCAA.Tests.Services
             // Assert
             var ecMember = await _context.ECMembers.Include(em => em.ECPeriod).FirstOrDefaultAsync(em => em.MemberId == member.Id);
             ecMember.Should().NotBeNull();
-            ecMember!.Position.Should().Be(Enums.ECPosition.President);
+            ecMember!.Position.Should().Be(EcPositionIds.President);
             ecMember.ECPeriod!.Title.Should().Be("Interim Executive Committee");
         }
 
@@ -91,7 +91,7 @@ namespace GHCAA.Tests.Services
 
             var member = await CreateAndSaveTestMemberAsync("Tester");
 
-            var oldRecord = new ECMember { MemberId = member.Id, ECPeriodId = period!.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow.AddMonths(-2) };
+            var oldRecord = new ECMember { MemberId = member.Id, ECPeriodId = period!.Id, Position = EcPositionIds.President, StartDate = DateTime.UtcNow.AddMonths(-2) };
             _context.ECMembers.Add(oldRecord);
             await _context.SaveChangesAsync();
 
@@ -101,7 +101,7 @@ namespace GHCAA.Tests.Services
             updateDto.ECHistory.Add(new ECHistoryDto
             {
                 PeriodTitle = "Interim Executive Committee",
-                Position = Enums.ECPosition.President,
+                PositionId = EcPositionIds.President,
                 StartDate = DateTime.UtcNow.AddMonths(-2),
                 EndDate = DateTime.UtcNow,
                 ChangeReason = "Resigned"
@@ -115,6 +115,101 @@ namespace GHCAA.Tests.Services
             records.Should().HaveCount(1);
             records[0].EndDate.Should().NotBeNull();
             records[0].ChangeReason.Should().Be("Resigned");
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task AdminUpdateMemberAsync_FallsBackToThePositionKey_WhenNoIdIsSent()
+        {
+            var member = await CreateAndSaveTestMemberAsync("Tester");
+            var updateDto = CreateUpdateDto(member);
+            updateDto.ECHistory = new List<ECHistoryDto>
+            {
+                new ECHistoryDto { PeriodTitle = "Interim Executive Committee", Position = "Treasurer", StartDate = DateTime.UtcNow, IsCurrent = true }
+            };
+
+            await _service.AdminUpdateMemberAsync(member.Id, updateDto, 1, isPrivilegedCaller: true);
+
+            var ecMember = await _context.ECMembers.SingleAsync(em => em.MemberId == member.Id);
+            ecMember.Position.Should().Be(EcPositionIds.Treasurer);
+        }
+
+        // The member search filter ignores case, so the history sync has to match keys the same way.
+        [Category("FR-34")]
+        [Test]
+        public async Task AdminUpdateMemberAsync_PositionKeyFallback_IgnoresCase()
+        {
+            var member = await CreateAndSaveTestMemberAsync("Tester");
+            var updateDto = CreateUpdateDto(member);
+            updateDto.ECHistory = new List<ECHistoryDto>
+            {
+                new ECHistoryDto { PeriodTitle = "Interim Executive Committee", Position = "treasurer", StartDate = DateTime.UtcNow, IsCurrent = true }
+            };
+
+            await _service.AdminUpdateMemberAsync(member.Id, updateDto, 1, isPrivilegedCaller: true);
+
+            var ecMember = await _context.ECMembers.SingleAsync(em => em.MemberId == member.Id);
+            ecMember.Position.Should().Be(EcPositionIds.Treasurer);
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task AdminUpdateMemberAsync_RefusesAnUnknownPosition()
+        {
+            var member = await CreateAndSaveTestMemberAsync("Tester");
+            var updateDto = CreateUpdateDto(member);
+            updateDto.ECHistory = new List<ECHistoryDto>
+            {
+                new ECHistoryDto { PeriodTitle = "Interim Executive Committee", Position = "ChiefWhip", StartDate = DateTime.UtcNow, IsCurrent = true }
+            };
+
+            var act = () => _service.AdminUpdateMemberAsync(member.Id, updateDto, 1, isPrivilegedCaller: true);
+
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*committee position*");
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task AdminUpdateMemberAsync_AllowsASecondHolder_WhenThePositionHasASpareSeat()
+        {
+            var period = await _context.ECPeriods.FirstAsync(p => p.Title == "Interim Executive Committee");
+            var position = await _context.EcPositions.FirstAsync(p => p.Id == EcPositionIds.Member1);
+            position.SeatCount = 2;
+            var first = await CreateAndSaveTestMemberAsync("First", "first@example.com", "01711111111", "1111111111");
+            _context.ECMembers.Add(new ECMember { MemberId = first.Id, ECPeriodId = period.Id, Position = position.Id, StartDate = DateTime.UtcNow });
+            await _context.SaveChangesAsync();
+
+            var second = await CreateAndSaveTestMemberAsync("Second", "second@example.com", "01722222222", "2222222222");
+            var updateDto = CreateUpdateDto(second);
+            updateDto.ECHistory = new List<ECHistoryDto>
+            {
+                new ECHistoryDto { PeriodTitle = period.Title, PositionId = position.Id, StartDate = DateTime.UtcNow, IsCurrent = true }
+            };
+
+            await _service.AdminUpdateMemberAsync(second.Id, updateDto, 1, isPrivilegedCaller: true);
+
+            (await _context.ECMembers.CountAsync(em => em.Position == position.Id && em.EndDate == null)).Should().Be(2);
+        }
+
+        [Category("FR-34")]
+        [Test]
+        public async Task AdminUpdateMemberAsync_RefusesAHolder_WhenEverySeatIsTaken()
+        {
+            var period = await _context.ECPeriods.FirstAsync(p => p.Title == "Interim Executive Committee");
+            var holder = await CreateAndSaveTestMemberAsync("Holder", "holder@example.com", "01733333333", "3333333333");
+            _context.ECMembers.Add(new ECMember { MemberId = holder.Id, ECPeriodId = period.Id, Position = EcPositionIds.Treasurer, StartDate = DateTime.UtcNow });
+            await _context.SaveChangesAsync();
+
+            var other = await CreateAndSaveTestMemberAsync("Other", "other@example.com", "01744444444", "4444444444");
+            var updateDto = CreateUpdateDto(other);
+            updateDto.ECHistory = new List<ECHistoryDto>
+            {
+                new ECHistoryDto { PeriodTitle = period.Title, PositionId = EcPositionIds.Treasurer, StartDate = DateTime.UtcNow, IsCurrent = true }
+            };
+
+            var act = () => _service.AdminUpdateMemberAsync(other.Id, updateDto, 1, isPrivilegedCaller: true);
+
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*already has a current holder*");
         }
 
         private AdminMemberUpdateDto CreateUpdateDto(Member m)

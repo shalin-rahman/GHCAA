@@ -14,6 +14,7 @@ namespace GHCAA.Tests.Controllers
         private Mock<IElectionService> _electionServiceMock;
         private Mock<IElectionAccessService> _accessMock;
         private Mock<IElectionApprovalService> _approvalsMock;
+        private Mock<IElectionFormService> _formsMock;
         private AdminElectionsController _controller;
 
         [SetUp]
@@ -22,7 +23,8 @@ namespace GHCAA.Tests.Controllers
             _electionServiceMock = new Mock<IElectionService>();
             _accessMock = new Mock<IElectionAccessService>();
             _approvalsMock = new Mock<IElectionApprovalService>();
-            _controller = new AdminElectionsController(_electionServiceMock.Object, _accessMock.Object, _approvalsMock.Object);
+            _formsMock = new Mock<IElectionFormService>();
+            _controller = new AdminElectionsController(_electionServiceMock.Object, _accessMock.Object, _approvalsMock.Object, _formsMock.Object);
             SetUserContext(_controller, memberId: 1, role: "Admin");
         }
 
@@ -121,6 +123,69 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(((IEnumerable<AdminElectionDto>)result!.Value!).Count(), Is.EqualTo(2));
             _accessMock.Verify(x => x.ElectionIdsWithLiveAppointmentAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        // 37.14m. How the form-record replies from the service map onto HTTP answers.
+        [Test]
+        [Category("FR-21")]
+        public async Task RecordConsent_AfterPollingOpens_Returns400WithReason()
+        {
+            var at = DateTime.UtcNow;
+            _formsMock.Setup(x => x.RecordConsentAsync(1, 5, at, 1, It.IsAny<CancellationToken>())).ReturnsAsync(Constants.Elections.Replies.WrongPhase);
+
+            var obj = await _controller.RecordConsent(1, 5, new RecordConsentRequest { ConsentAt = at }, CancellationToken.None) as ObjectResult;
+
+            Assert.That(obj!.StatusCode, Is.EqualTo(400));
+            Assert.That(((ProblemDetails)obj.Value!).Detail, Is.EqualTo("Consent cannot be recorded once polling has opened."));
+        }
+
+        [Test]
+        [Category("FR-21")]
+        public async Task RecordConsent_Saved_Returns204()
+        {
+            var at = DateTime.UtcNow;
+            _formsMock.Setup(x => x.RecordConsentAsync(1, 5, at, 1, It.IsAny<CancellationToken>())).ReturnsAsync((string?)null);
+
+            var result = await _controller.RecordConsent(1, 5, new RecordConsentRequest { ConsentAt = at }, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<NoContentResult>());
+        }
+
+        [Test]
+        public async Task SetScrutinyCheck_UnknownNomination_Returns404()
+        {
+            _formsMock.Setup(x => x.SetScrutinyCheckAsync(1, 9, It.IsAny<SetScrutinyCheckRequest>(), 1, It.IsAny<CancellationToken>()))
+                      .ReturnsAsync(Constants.Elections.Replies.NotFound);
+
+            var result = await _controller.SetScrutinyCheck(1, 9, new SetScrutinyCheckRequest { Item = ScrutinyCheckItem.VotingMember, IsChecked = true }, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<NotFoundResult>());
+        }
+
+        [Test]
+        [Category("FR-20")]
+        public async Task DecideRecount_AlreadyDecided_Returns409()
+        {
+            _formsMock.Setup(x => x.DecideRecountAsync(1, 3, It.IsAny<DecideRecountRequest>(), 1, It.IsAny<CancellationToken>()))
+                      .ReturnsAsync(Constants.Elections.Replies.AlreadyRecorded);
+
+            var obj = await _controller.DecideRecount(1, 3, new DecideRecountRequest { Allowed = true }, CancellationToken.None) as ObjectResult;
+
+            Assert.That(obj!.StatusCode, Is.EqualTo(409));
+            Assert.That(((ProblemDetails)obj.Value!).Detail, Is.EqualTo("This request has already been decided."));
+        }
+
+        [Test]
+        [Category("FR-20")]
+        public async Task RecordRecountFigures_Mismatch_Returns400WithServiceDetail()
+        {
+            _formsMock.Setup(x => x.RecordRecountFiguresAsync(1, 3, It.IsAny<IReadOnlyList<RecountFigureInput>>(), 1, It.IsAny<CancellationToken>()))
+                      .ReturnsAsync((Constants.Elections.Replies.Invalid, "Give one figure for each candidate."));
+
+            var obj = await _controller.RecordRecountFigures(1, 3, new RecordRecountFiguresRequest(), CancellationToken.None) as ObjectResult;
+
+            Assert.That(obj!.StatusCode, Is.EqualTo(400));
+            Assert.That(((ProblemDetails)obj.Value!).Detail, Is.EqualTo("Give one figure for each candidate."));
         }
     }
 }

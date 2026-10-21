@@ -2,7 +2,8 @@ export type MembershipStatus = 'Applied' | 'Active' | 'InactivePayment' | 'Inact
 // 35.4: keep in sync with MembershipType in GHCAA.Domain/Enums.cs (Guest is index 6).
 export type MembershipType = 'Founding' | 'Executive' | 'General' | 'Associate' | 'Honorary' | 'Advisory' | 'Guest';
 export type MemberCategory = 'None' | 'LifelongPatron' | 'Sponsor' | 'Advisor' | 'Mentor' | 'Recruiter' | 'Active' | 'Volunteer' | 'Contributor' | 'Guest' | 'Student';
-export type ECPosition = 'None' | 'President' | 'VicePresident' | 'GeneralSecretary' | 'OfficeSecretary' | 'JointSecretary1' | 'JointSecretary2' | 'Treasurer' | 'MediaCulturalAndSportsSecretary' | 'OrganizationalSecretary' | 'InformationAndTechnologySecretary' | 'Member1' | 'Member2' | 'LawSecretary' | 'ImmediatePastPresident' | 'InstitutionalRepresentative';
+// 95.2: the key of a row in the EcPositions table. Admins add positions, so this is not a fixed list.
+export type ECPosition = string;
 export type Gender = 'Male' | 'Female' | 'Other';
 export type BloodGroup = 'APositive' | 'ANegative' | 'BPositive' | 'BNegative' | 'OPositive' | 'ONegative' | 'ABPositive' | 'ABNegative';
 export type RecordType = 'Income' | 'Expense';
@@ -164,11 +165,41 @@ export interface ECPeriod {
     ecMembers?: ECMember[];
 }
 
+// 37.14m, ER-34. Names match the backend HandoverCheckItem enum, in the order the form lists them.
+export const HANDOVER_CHECK_LABELS = {
+    Constitution: 'Constitution',
+    MinuteBooks: 'Minute books',
+    MembershipRegister: 'Membership register',
+    BankDocuments: 'Bank documents',
+    ChequeBooks: 'Cheque books',
+    FinancialRecords: 'Financial records',
+    FixedAssets: 'Fixed assets',
+    OfficeKeys: 'Office keys',
+    WebsiteAccess: 'Website access',
+    EmailAccounts: 'Email accounts',
+    SocialMediaAccounts: 'Social media accounts',
+    DigitalArchive: 'Digital archive',
+    ElectionArchive: 'Election archive',
+    Contracts: 'Contracts',
+    OfficialSeal: 'Official seal'
+} as const;
+export type HandoverCheckItem = keyof typeof HANDOVER_CHECK_LABELS;
+export const HANDOVER_CHECK_ITEMS = Object.keys(HANDOVER_CHECK_LABELS) as HandoverCheckItem[];
+
+export interface HandoverCheckDto {
+    item: HandoverCheckItem;
+    isChecked: boolean;
+    setByUserId: number;
+    setAt: string;
+}
+
 export interface ECMember {
     id: number;
     ecPeriodId: number;
     memberId: number;
     position: ECPosition;
+    positionId: number;
+    positionName?: string;
     startDate: string | Date;
     endDate?: string | Date;
     changeReason?: string;
@@ -551,6 +582,8 @@ export interface ProfessionalRecord {
 export interface ECHistoryRecord {
     periodTitle: string;
     position: ECPosition;
+    positionId: number;
+    positionName?: string;
     startDate: string | Date;
     endDate?: string | Date;
     changeReason?: string;

@@ -9,10 +9,12 @@ public record CreateAdminElectionRequest(string Title, int ECPeriodId, DateTime 
 public record SetBallotKeyRequest(string PublicKey);
 // The private key, base64 PKCS#8. It is used for the count and not stored. Left out once the count has run, to read the stored results.
 public record CountElectionRequest(string? PrivateKey);
-public record AdminElectionPositionRequest(string Title, int Seats = 1, string? Description = null);
+// 95.2: PositionId is an EcPosition.Id. Title is matched against position keys and names when it is left out.
+public record AdminElectionPositionRequest(string Title, int Seats = 1, string? Description = null, int? PositionId = null);
 public record SaveCandidateRequest(int MemberId, int PositionId, string? Statement, int ProposerMemberId, int SeconderMemberId);
-public record ElectionSeatDto(ECPosition Position, int SeatCount);
-public record ElectionSeatRequestDto(ECPosition Position, int SeatCount = 1);
+public record ElectionSeatDto(int PositionId, int SeatCount);
+// 95.2: PositionId is an EcPosition.Id.
+public record ElectionSeatRequestDto(int PositionId, int SeatCount = 1);
 public record NominationDto(int ElectionSeatId, int CandidateMemberId, int ProposerMemberId, int SeconderMemberId, string Statement, string? PhotoPath);
 public record ScrutinyDto(bool Accepted, string? Reason);
 // Spec 023 FR-005: the whole paper in one request. Every seat appears once. An empty
@@ -24,8 +26,9 @@ public record CastBallotResultDto(string TrackingCode);
 public record ElectionSummaryDto(int Id, string Title, ElectionPhase Phase, int ECPeriodId, int VoterCount, int EligibleVoterCount, string? BallotKeyFingerprint = null);
 public record AdminElectionPositionDto(int Id, string Title, string? Description, int Seats);
 public record AdminElectionCandidateDto(int Id, int MemberId, string Name, string? PhotoUrl, string? Statement, int PositionId, string PositionTitle);
-public record AdminElectionDto(int Id, string Title, string? Description, ElectionPhase Phase, DateTime? AnnouncedOn, DateTime? NominationOpensOn, DateTime? NominationClosesOn, DateTime? ScrutinyOn, DateTime? WithdrawalClosesOn, DateTime? PollingOpensOn, DateTime? PollingClosesOn, DateTime? DeclaredOn, bool IsActive, IReadOnlyList<AdminElectionPositionDto> Positions, IReadOnlyList<AdminElectionCandidateDto> Candidates, int EligibleVoterCount, bool HasVoted, ElectionTieRule TieRule, string? BallotKeyFingerprint = null, IReadOnlyList<string>? MyPermissions = null, bool AdminHandedOver = false, bool TooFewApprovers = false, bool IsTest = false);
-public record NominationViewDto(int Id, int ElectionSeatId, int CandidateMemberId, NominationStatus Status, string Statement);
+public record AdminElectionDto(int Id, string Title, string? Description, ElectionPhase Phase, DateTime? AnnouncedOn, DateTime? NominationOpensOn, DateTime? NominationClosesOn, DateTime? ScrutinyOn, DateTime? WithdrawalClosesOn, DateTime? PollingOpensOn, DateTime? PollingClosesOn, DateTime? DeclaredOn, bool IsActive, IReadOnlyList<AdminElectionPositionDto> Positions, IReadOnlyList<AdminElectionCandidateDto> Candidates, int EligibleVoterCount, bool HasVoted, ElectionTieRule TieRule, string? BallotKeyFingerprint = null, IReadOnlyList<string>? MyPermissions = null, bool AdminHandedOver = false, bool TooFewApprovers = false, bool IsTest = false, ElectionFormDetailsDto? FormDetails = null);
+// ConsentAt is the ER-10 time the candidate signed consent. It is null until recorded, and always null on the public list.
+public record NominationViewDto(int Id, int ElectionSeatId, int CandidateMemberId, NominationStatus Status, string Statement, DateTime? ConsentAt = null);
 public record ElectionResultDto(int ElectionSeatId, int NominationId, int VoteCount, bool IsElected, bool IsTie);
 
 // Spec 023 FR-011 to FR-014: the member's ballot paper. HasVoted comes from SeatVote, so a
@@ -161,3 +164,110 @@ public record ElectionApprovalRunResult(bool Ran, string? Error, ElectionApprova
 public record ElectionCountRunResult(IReadOnlyList<ElectionResultDto>? Results, string? Error, ElectionApprovalDto? Pending);
 
 public record RejectApprovalRequest(string? Reason);
+
+// 37.12w. Key is an Elections.Readiness value; the client owns the wording. Attestation items are
+// met by an official confirming them. An advisory item warns but does not stop polling.
+public record ElectionReadinessItemDto(string Key, bool Met, bool Attestation = false, bool Advisory = false);
+// Ready is true when every item that is not advisory is met.
+public record ElectionReadinessDto(bool Ready, IReadOnlyList<ElectionReadinessItemDto> Items);
+public record AttestReadinessRequest([property: System.ComponentModel.DataAnnotations.Required] string Condition);
+
+// 37.14m. Fields the printed forms need that the setup screen does not ask for (ER-01, ER-02).
+public record ElectionFormDetailsDto(DateTime? FinalListOn, DateTime? CampaignOpensOn, DateTime? CampaignClosesOn, DateTime? SilenceStartsAt, string? Venue, string? NoticeReference, DateTime? RecountWindowEndsOn);
+
+// The whole set is sent each time. A field left empty is cleared.
+public class UpdateElectionFormDetailsRequest : IValidatableObject
+{
+    public DateTime? FinalListOn { get; set; }
+    public DateTime? CampaignOpensOn { get; set; }
+    public DateTime? CampaignClosesOn { get; set; }
+    public DateTime? SilenceStartsAt { get; set; }
+
+    [MaxLength(300)]
+    public string? Venue { get; set; }
+
+    [MaxLength(100)]
+    public string? NoticeReference { get; set; }
+
+    public DateTime? RecountWindowEndsOn { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (CampaignOpensOn is { } opens && CampaignClosesOn is { } closes && closes < opens)
+            yield return new ValidationResult("The campaign cannot close before it opens.", new[] { nameof(CampaignClosesOn) });
+    }
+}
+
+// ER-10. The time the candidate gave consent, taken from the signed form.
+public class RecordConsentRequest
+{
+    [Required]
+    public DateTime? ConsentAt { get; set; }
+}
+
+// ER-17. SetByUserId and SetAt show who last changed the tick.
+public record ScrutinyCheckDto(ScrutinyCheckItem Item, bool IsChecked, int SetByUserId, DateTime SetAt);
+
+public class SetScrutinyCheckRequest
+{
+    [EnumDataType(typeof(ScrutinyCheckItem))]
+    public ScrutinyCheckItem Item { get; set; }
+
+    public bool IsChecked { get; set; }
+}
+
+// ER-28, 28A and 28B. Figures is empty until the recount has been run.
+public record RecountFigureDto(int NominationId, int VoteCount);
+public record ElectionRecountDto(int Id, int ElectionSeatId, string PositionTitle, string ApplicantName, int? ApplicantMemberId, string Grounds, string? Explanation,
+    DateTime ReceivedAt, bool? Allowed, string? DecisionReason, DateTime? DecidedAt, DateTime? RecountedAt, IReadOnlyList<RecountFigureDto> Figures);
+
+public class RecordRecountRequest
+{
+    [Range(1, int.MaxValue)]
+    public int ElectionSeatId { get; set; }
+
+    [Required, MaxLength(150)]
+    public string ApplicantName { get; set; } = string.Empty;
+
+    [Range(1, int.MaxValue)]
+    public int? ApplicantMemberId { get; set; }
+
+    [Required, MaxLength(2000)]
+    public string Grounds { get; set; } = string.Empty;
+
+    [MaxLength(4000)]
+    public string? Explanation { get; set; }
+
+    // When the paper request was received. It may be earlier than the time it is entered.
+    [Required]
+    public DateTime? ReceivedAt { get; set; }
+}
+
+public class DecideRecountRequest : IValidatableObject
+{
+    public bool Allowed { get; set; }
+
+    [MaxLength(2000)]
+    public string? Reason { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (!Allowed && string.IsNullOrWhiteSpace(Reason))
+            yield return new ValidationResult("Give the reason a recount is refused.", new[] { nameof(Reason) });
+    }
+}
+
+public class RecordRecountFiguresRequest
+{
+    [Required, MinLength(1)]
+    public List<RecountFigureInput> Figures { get; set; } = new();
+}
+
+public class RecountFigureInput
+{
+    [Range(1, int.MaxValue)]
+    public int NominationId { get; set; }
+
+    [Range(0, int.MaxValue)]
+    public int VoteCount { get; set; }
+}

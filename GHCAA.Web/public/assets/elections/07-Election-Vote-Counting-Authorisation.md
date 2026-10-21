@@ -1,4 +1,10 @@
-# FORM ER-20
+Form numbers follow the Election Regulations, as the owner decided on 2026-10-20. A form the
+Regulations do not list takes a letter after the form it follows, for example ER-17A. Annex B of
+`12-Election-Officials-Handbook.md` lists all 50 forms with the number each one had before.
+
+---
+
+# FORM ER-25A
 # Vote Counting Authorization Certificate
 
 :: grid
@@ -30,7 +36,7 @@ The Election Commission hereby authorises the commencement of vote counting.
 
 ---
 
-# FORM ER-21
+# FORM ER-25B
 # Ballot Box Opening Certificate
 
 :: grid
@@ -64,7 +70,7 @@ Date: ___
 
 ---
 
-# FORM ER-22
+# FORM ER-25C
 # Ballot Paper Reconciliation Sheet
 
 :: grid
@@ -90,7 +96,7 @@ Polling Station: ___
 
 ---
 
-# FORM ER-23
+# FORM ER-27
 # Vote Counting Sheet
 
 :: grid
@@ -120,7 +126,7 @@ Total Count: ___
 
 ---
 
-# FORM ER-24
+# FORM ER-27A
 # Independent Tally Sheet
 
 :: grid
@@ -150,7 +156,7 @@ Counts Reconciled: [ ] Yes [ ] No
 
 ---
 
-# FORM ER-25
+# FORM ER-27B
 # Rejected Ballot Register
 
 :: grid
@@ -181,7 +187,7 @@ Position: ___
 
 ---
 
-# FORM ER-26
+# FORM ER-28
 # Recount Request
 
 :: grid
@@ -216,7 +222,7 @@ Evidence attached: [ ] Yes [ ] No
 
 ---
 
-# FORM ER-27
+# FORM ER-28A
 # Recount Decision
 
 :: grid
@@ -236,7 +242,7 @@ Decision: [ ] Approved [ ] Rejected
 
 ---
 
-# FORM ER-28
+# FORM ER-28B
 # Recount Report
 
 :: grid
@@ -263,7 +269,7 @@ Reference No.: ___
 
 ---
 
-# FORM ER-29
+# FORM ER-27C
 # Final Result Sheet
 
 :: grid
@@ -292,7 +298,7 @@ Total Votes: ___
 
 ---
 
-# FORM ER-30
+# FORM ER-29
 # Election Result Certification
 
 :: grid
@@ -322,7 +328,7 @@ Date of Certification: ___
 
 ---
 
-# FORM ER-31
+# FORM ER-30
 # Result Declaration
 
 :: grid
@@ -351,7 +357,7 @@ The Election Commission hereby declares the following candidates elected.
 
 ---
 
-# FORM ER-32
+# FORM ER-30A
 # Election Complaint Form
 
 :: grid
@@ -388,7 +394,7 @@ Phone: ___
 
 ---
 
-# FORM ER-33
+# FORM ER-30B
 # Election Investigation Report
 
 :: grid
@@ -414,7 +420,7 @@ Submitted To: ___
 
 ---
 
-# FORM ER-34
+# FORM ER-31
 # Appeal to Election Appeals Tribunal
 
 :: grid
@@ -436,7 +442,7 @@ Membership No.: ___
 
 ---
 
-# FORM ER-35
+# FORM ER-32
 # Tribunal Decision
 
 :: grid
@@ -464,7 +470,7 @@ Appellant: ___
 
 ---
 
-# FORM ER-36
+# FORM ER-33
 # Election Completion Report
 
 :: grid
@@ -488,7 +494,7 @@ Security Incidents: ___
 
 ---
 
-# FORM ER-37
+# FORM ER-34
 # Executive Committee Handover Certificate
 
 :: grid
@@ -526,7 +532,7 @@ Venue: ___
 
 ---
 
-# FORM ER-38
+# FORM ER-35
 # Election Archive Register
 
 :: grid
@@ -547,7 +553,7 @@ Prepared On: ___
 
 ---
 
-# FORM ER-39
+# FORM ER-22A
 # Election Material Receipt Register
 
 :: grid
@@ -570,7 +576,7 @@ Polling Station: ___
 
 ---
 
-# FORM ER-40
+# FORM ER-35A
 # Election Closure Certificate
 
 :: grid

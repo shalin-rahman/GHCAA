@@ -109,24 +109,6 @@ export const ORG_CONFIG_FALLBACK: OrgConfig = {
           "Guest": "Guest",
           "Student": "Student"
         },
-        "ecRoleLabels": {
-          "None": "None",
-          "President": "President",
-          "VicePresident": "Vice President",
-          "GeneralSecretary": "General Secretary",
-          "OfficeSecretary": "Office Secretary",
-          "JointSecretary1": "Joint Secretary (1)",
-          "JointSecretary2": "Joint Secretary (2)",
-          "Treasurer": "Treasurer",
-          "MediaCulturalAndSportsSecretary": "Media Cultural & Sports Secretary",
-          "OrganizationalSecretary": "Organizational Secretary",
-          "InformationAndTechnologySecretary": "Information and Technology Secretary",
-          "Member1": "Member-1",
-          "Member2": "Member-2",
-          "LawSecretary": "Law Secretary",
-          "ImmediatePastPresident": "Immediate Past President",
-          "InstitutionalRepresentative": "Institutional Representative"
-        },
         "nav": {
           "administration": "ADMINISTRATION",
           "myAccount": "MY ACCOUNT",
@@ -166,24 +148,6 @@ export const ORG_CONFIG_FALLBACK: OrgConfig = {
           "Contributor": "অবদানকারী",
           "Guest": "অতিথি",
           "Student": "ছাত্র"
-        },
-        "ecRoleLabels": {
-          "None": "কোনোটি নয়",
-          "President": "সভাপতি",
-          "VicePresident": "সহ-সভাপতি",
-          "GeneralSecretary": "সাধারণ সম্পাদক",
-          "OfficeSecretary": "কার্যালয় সম্পাদক",
-          "JointSecretary1": "যুগ্ম সম্পাদক (১)",
-          "JointSecretary2": "যুগ্ম সম্পাদক (২)",
-          "Treasurer": "কোষাধ্যক্ষ",
-          "MediaCulturalAndSportsSecretary": "মিডিয়া, সাংস্কৃতিক ও ক্রীড়া সম্পাদক",
-          "OrganizationalSecretary": "সাংগঠনিক সম্পাদক",
-          "InformationAndTechnologySecretary": "তথ্য ও প্রযুক্তি সম্পাদক",
-          "Member1": "সদস্য-১",
-          "Member2": "সদস্য-২",
-          "LawSecretary": "আইন সম্পাদক",
-          "ImmediatePastPresident": "সাবেক সভাপতি",
-          "InstitutionalRepresentative": "প্রাতিষ্ঠানিক প্রতিনিধি"
         },
         "nav": {
           "administration": "প্রশাসন",

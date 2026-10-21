@@ -9,31 +9,31 @@ final electionServiceProvider =
     Provider<ElectionService>((ref) => ElectionService(ref.read(dioProvider)));
 
 const electionPhaseLabels = <String, String>{
-  'Announced': 'Announced',
-  'Nomination': 'Nominations open',
-  'Scrutiny': 'Under scrutiny',
-  'Withdrawal': 'Withdrawal open',
-  'CandidateList': 'Candidate list',
-  'Campaign': 'Campaign',
-  'Polling': 'Voting open',
-  'Counting': 'Counting',
-  'Declared': 'Declared',
-  'Archived': 'Archived',
+  ElectionPhases.announced: 'Announced',
+  ElectionPhases.nomination: 'Nominations open',
+  ElectionPhases.scrutiny: 'Under scrutiny',
+  ElectionPhases.withdrawal: 'Withdrawal open',
+  ElectionPhases.candidateList: 'Candidate list',
+  ElectionPhases.campaign: 'Campaign',
+  ElectionPhases.polling: 'Voting open',
+  ElectionPhases.counting: 'Counting',
+  ElectionPhases.declared: 'Declared',
+  ElectionPhases.archived: 'Archived',
 };
 
 // Matches the backend ElectionPhase enum order (GHCAA.Domain.Enums), used to
 // work out the next phase for the admin "advance phase" action.
 const electionPhaseOrder = <String>[
-  'Announced',
-  'Nomination',
-  'Scrutiny',
-  'Withdrawal',
-  'CandidateList',
-  'Campaign',
-  'Polling',
-  'Counting',
-  'Declared',
-  'Archived',
+  ElectionPhases.announced,
+  ElectionPhases.nomination,
+  ElectionPhases.scrutiny,
+  ElectionPhases.withdrawal,
+  ElectionPhases.candidateList,
+  ElectionPhases.campaign,
+  ElectionPhases.polling,
+  ElectionPhases.counting,
+  ElectionPhases.declared,
+  ElectionPhases.archived,
 ];
 
 String? nextElectionPhase(String phase) {
@@ -48,7 +48,7 @@ const electionTooFewApproversWarning =
 
 // The warning to add when moving [election] to [next], or null.
 String? pollingApproverWarning(AdminElection election, String next) =>
-    next == 'Polling' && election.tooFewApprovers
+    next == ElectionPhases.polling && election.tooFewApprovers
         ? electionTooFewApproversWarning
         : null;
 
@@ -71,6 +71,24 @@ const electionApprovalActionLabels = <String, String>{
   'Count': 'Count the ballots',
   'EmergencyRevoke': 'Remove an official in an emergency',
 };
+
+// 37.12w. Same wording as ELECTION_READINESS_LABELS on the web. Keys match
+// Constants.Elections.Readiness on the server.
+const electionReadinessLabels = <String, String>{
+  'roll-frozen': 'The voter roll is frozen',
+  'candidate-list': 'Every candidate has a place on the ballot',
+  'ballot-key': 'The ballot key is set',
+  'appointments': 'Every appointed official has signed the declaration',
+  'polling-window': 'The polling window has not closed',
+  'mock-election': 'A mock election was run',
+  'technical-audit': 'The technical audit is done',
+  'appeals-decided': 'Every nomination appeal is decided',
+  'paper-stock': 'Paper stock is ready',
+  'approvers': electionTooFewApproversWarning,
+};
+
+String electionReadinessLabel(String key) =>
+    electionReadinessLabels[key] ?? key;
 
 String electionPhaseLabel(String phase) => electionPhaseLabels[phase] ?? phase;
 String electionApprovalActionLabel(String action) =>
@@ -123,7 +141,7 @@ class ElectionSummary {
       ElectionSummary(
         id: json['id'] as int,
         title: json['title'] as String? ?? '',
-        phase: json['phase']?.toString() ?? 'Announced',
+        phase: json['phase']?.toString() ?? ElectionPhases.announced,
         ecPeriodId: json['ecPeriodId'] as int? ?? 0,
         voterCount: json['voterCount'] as int? ?? 0,
         eligibleVoterCount: json['eligibleVoterCount'] as int? ?? 0,
@@ -141,6 +159,8 @@ class Nomination {
   final String status;
   final String statement;
   final String? photoPath;
+  // 37.14m. When the candidate signed the consent form, in local time.
+  final DateTime? consentAt;
 
   const Nomination({
     required this.id,
@@ -149,6 +169,7 @@ class Nomination {
     required this.status,
     required this.statement,
     this.photoPath,
+    this.consentAt,
   });
 
   factory Nomination.fromJson(Map<String, dynamic> json) => Nomination(
@@ -158,7 +179,72 @@ class Nomination {
         status: json['status']?.toString() ?? 'Submitted',
         statement: json['statement'] as String? ?? '',
         photoPath: json['photoPath'] as String?,
+        consentAt: AppUtils.parseUtc(json['consentAt'] as String?),
       );
+}
+
+// One seat on an election, as the admin list sends it. The id is the ElectionSeat id.
+class ElectionPosition {
+  final int id;
+  final String title;
+
+  const ElectionPosition({required this.id, required this.title});
+
+  factory ElectionPosition.fromJson(Map<String, dynamic> json) =>
+      ElectionPosition(
+        id: json['id'] as int,
+        title: json['title'] as String? ?? '',
+      );
+}
+
+// 37.14m. Details the printed notices read. Day fields are local dates. The silence start and recount window
+// end are times, converted from UTC.
+class ElectionFormDetails {
+  final DateTime? finalListOn;
+  final DateTime? campaignOpensOn;
+  final DateTime? campaignClosesOn;
+  final DateTime? silenceStartsAt;
+  final String? venue;
+  final String? noticeReference;
+  final DateTime? recountWindowEndsOn;
+
+  const ElectionFormDetails({
+    this.finalListOn,
+    this.campaignOpensOn,
+    this.campaignClosesOn,
+    this.silenceStartsAt,
+    this.venue,
+    this.noticeReference,
+    this.recountWindowEndsOn,
+  });
+
+  factory ElectionFormDetails.fromJson(Map<String, dynamic> json) =>
+      ElectionFormDetails(
+        finalListOn: AppUtils.parseDate(json['finalListOn'] as String?),
+        campaignOpensOn: AppUtils.parseDate(json['campaignOpensOn'] as String?),
+        campaignClosesOn:
+            AppUtils.parseDate(json['campaignClosesOn'] as String?),
+        silenceStartsAt: AppUtils.parseUtc(json['silenceStartsAt'] as String?),
+        venue: json['venue'] as String?,
+        noticeReference: json['noticeReference'] as String?,
+        recountWindowEndsOn:
+            AppUtils.parseUtc(json['recountWindowEndsOn'] as String?),
+      );
+
+  // The whole set goes each time. A null clears that field on the server.
+  Map<String, dynamic> toJson() => {
+        'finalListOn': AppUtils.toWire(finalListOn),
+        'campaignOpensOn': AppUtils.toWire(campaignOpensOn),
+        'campaignClosesOn': AppUtils.toWire(campaignClosesOn),
+        'silenceStartsAt': silenceStartsAt == null
+            ? null
+            : AppUtils.toWireUtc(silenceStartsAt!),
+        'venue': venue,
+        'noticeReference': noticeReference,
+        'recountWindowEndsOn': recountWindowEndsOn == null
+            ? null
+            : AppUtils.toWireUtc(recountWindowEndsOn!),
+      };
 }
 
 class AdminElection {
@@ -184,6 +270,8 @@ class AdminElection {
   final bool tooFewApprovers;
   // FR-047 (37.13d). A test run: hidden from members and the public, declares nobody.
   final bool isTest;
+  final List<ElectionPosition> positions;
+  final ElectionFormDetails? formDetails;
 
   const AdminElection({
     required this.id,
@@ -203,13 +291,15 @@ class AdminElection {
     this.adminHandedOver = false,
     this.tooFewApprovers = false,
     this.isTest = false,
+    this.positions = const [],
+    this.formDetails,
   });
 
   factory AdminElection.fromJson(Map<String, dynamic> json) => AdminElection(
         id: json['id'] as int,
         title: json['title'] as String? ?? '',
         description: json['description'] as String?,
-        phase: json['phase']?.toString() ?? 'Announced',
+        phase: json['phase']?.toString() ?? ElectionPhases.announced,
         announcedOn: AppUtils.parseDate(json['announcedOn'] as String?),
         nominationOpensOn:
             AppUtils.parseDate(json['nominationOpensOn'] as String?),
@@ -228,6 +318,90 @@ class AdminElection {
         adminHandedOver: json['adminHandedOver'] as bool? ?? false,
         tooFewApprovers: json['tooFewApprovers'] as bool? ?? false,
         isTest: json['isTest'] as bool? ?? false,
+        positions: (json['positions'] as List<dynamic>?)
+                ?.map(
+                    (e) => ElectionPosition.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const [],
+        formDetails: json['formDetails'] == null
+            ? null
+            : ElectionFormDetails.fromJson(
+                json['formDetails'] as Map<String, dynamic>),
+      );
+}
+
+// 37.14m. One scrutiny tick on a nomination. The item is the API's ScrutinyCheckItem name.
+class ScrutinyCheck {
+  final String item;
+  final bool isChecked;
+
+  const ScrutinyCheck({required this.item, required this.isChecked});
+
+  factory ScrutinyCheck.fromJson(Map<String, dynamic> json) => ScrutinyCheck(
+        item: json['item'].toString(),
+        isChecked: json['isChecked'] as bool? ?? false,
+      );
+}
+
+class RecountFigure {
+  final int nominationId;
+  final int voteCount;
+
+  const RecountFigure({required this.nominationId, required this.voteCount});
+
+  factory RecountFigure.fromJson(Map<String, dynamic> json) => RecountFigure(
+        nominationId: json['nominationId'] as int,
+        voteCount: json['voteCount'] as int,
+      );
+
+  Map<String, dynamic> toJson() =>
+      {'nominationId': nominationId, 'voteCount': voteCount};
+}
+
+// ER-11. allowed stays null until the returning officer decides.
+class ElectionRecount {
+  final int id;
+  final int electionSeatId;
+  final String positionTitle;
+  final String applicantName;
+  final int? applicantMemberId;
+  final String grounds;
+  final String? explanation;
+  final DateTime? receivedAt;
+  final bool? allowed;
+  final String? decisionReason;
+  final List<RecountFigure> figures;
+
+  const ElectionRecount({
+    required this.id,
+    required this.electionSeatId,
+    required this.positionTitle,
+    required this.applicantName,
+    this.applicantMemberId,
+    required this.grounds,
+    this.explanation,
+    this.receivedAt,
+    this.allowed,
+    this.decisionReason,
+    this.figures = const [],
+  });
+
+  factory ElectionRecount.fromJson(Map<String, dynamic> json) =>
+      ElectionRecount(
+        id: json['id'] as int,
+        electionSeatId: json['electionSeatId'] as int,
+        positionTitle: json['positionTitle'] as String? ?? '',
+        applicantName: json['applicantName'] as String? ?? '',
+        applicantMemberId: json['applicantMemberId'] as int?,
+        grounds: json['grounds'] as String? ?? '',
+        explanation: json['explanation'] as String?,
+        receivedAt: AppUtils.parseUtc(json['receivedAt'] as String?),
+        allowed: json['allowed'] as bool?,
+        decisionReason: json['decisionReason'] as String?,
+        figures: (json['figures'] as List<dynamic>?)
+                ?.map((e) => RecountFigure.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const [],
       );
 }
 
@@ -437,7 +611,7 @@ class Ballot {
   factory Ballot.fromJson(Map<String, dynamic> json) => Ballot(
         electionId: json['electionId'] as int,
         title: json['title'] as String? ?? '',
-        phase: json['phase']?.toString() ?? 'Announced',
+        phase: json['phase']?.toString() ?? ElectionPhases.announced,
         hasVoted: json['hasVoted'] as bool? ?? false,
         ballotKeyFingerprint: json['ballotKeyFingerprint'] as String?,
         seats: (json['seats'] as List<dynamic>? ?? const [])
@@ -562,7 +736,7 @@ class ElectionResults {
       ElectionResults(
         electionId: json['electionId'] as int,
         title: json['title'] as String? ?? '',
-        phase: json['phase']?.toString() ?? 'Declared',
+        phase: json['phase']?.toString() ?? ElectionPhases.declared,
         declaredOn: AppUtils.parseDate(json['declaredOn'] as String?),
         eligibleVoters: json['eligibleVoters'] as int? ?? 0,
         ballotsCast: json['ballotsCast'] as int? ?? 0,
@@ -679,6 +853,45 @@ class AuditEntry {
 }
 
 // A two-person step waiting for a second official (37.13h).
+// 37.12w. Advisory items warn but do not hold polling shut.
+class ElectionReadinessItem {
+  final String key;
+  final bool met;
+  final bool attestation;
+  final bool advisory;
+
+  const ElectionReadinessItem({
+    required this.key,
+    required this.met,
+    this.attestation = false,
+    this.advisory = false,
+  });
+
+  factory ElectionReadinessItem.fromJson(Map<String, dynamic> json) =>
+      ElectionReadinessItem(
+        key: json['key'] as String? ?? '',
+        met: json['met'] as bool? ?? false,
+        attestation: json['attestation'] as bool? ?? false,
+        advisory: json['advisory'] as bool? ?? false,
+      );
+}
+
+class ElectionReadiness {
+  final bool ready;
+  final List<ElectionReadinessItem> items;
+
+  const ElectionReadiness({required this.ready, required this.items});
+
+  factory ElectionReadiness.fromJson(Map<String, dynamic> json) =>
+      ElectionReadiness(
+        ready: json['ready'] as bool? ?? false,
+        items: ((json['items'] as List?) ?? const [])
+            .map((item) =>
+                ElectionReadinessItem.fromJson(item as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
 class ElectionApproval {
   final int id;
   final int electionId;
@@ -980,6 +1193,12 @@ class ElectionService {
         .toList();
   }
 
+  // 37.12w. Read-only here. Items are recorded as done on the web.
+  Future<ElectionReadiness> getReadiness(int electionId) async {
+    final response = await _dio.get('/elections/$electionId/readiness');
+    return ElectionReadiness.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<void> approve(int approvalId) =>
       _dio.post('/elections/approvals/$approvalId/approve', data: {});
 
@@ -1001,6 +1220,83 @@ class ElectionService {
 
   Future<void> closeRulesUnlock() =>
       _dio.post('/admin/elections/rules-unlock/close', data: {});
+
+  // 37.14m. Form records for the printed notices, scrutiny ticks and recount requests.
+  Future<AdminElection> updateFormDetails(
+      int id, ElectionFormDetails details) async {
+    final response = await _dio.put('/admin/elections/$id/form-details',
+        data: details.toJson());
+    return AdminElection.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  // The public nominations list leaves out consent times, so officials read this one.
+  Future<List<Nomination>> getAdminNominations(int id) async {
+    final response = await _dio.get('/admin/elections/$id/nominations');
+    return (response.data as List)
+        .map((item) => Nomination.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> recordConsent(int id, int nominationId, DateTime consentAt) =>
+      _dio.put('/admin/elections/$id/nominations/$nominationId/consent',
+          data: {'consentAt': AppUtils.toWireUtc(consentAt)});
+
+  Future<List<ScrutinyCheck>> getScrutinyChecks(
+      int id, int nominationId) async {
+    final response = await _dio
+        .get('/admin/elections/$id/nominations/$nominationId/scrutiny-checks');
+    return _scrutinyChecks(response.data);
+  }
+
+  Future<List<ScrutinyCheck>> setScrutinyCheck(
+      int id, int nominationId, String item, bool isChecked) async {
+    final response = await _dio.put(
+        '/admin/elections/$id/nominations/$nominationId/scrutiny-checks',
+        data: {'item': item, 'isChecked': isChecked});
+    return _scrutinyChecks(response.data);
+  }
+
+  List<ScrutinyCheck> _scrutinyChecks(dynamic data) => (data as List)
+      .map((e) => ScrutinyCheck.fromJson(e as Map<String, dynamic>))
+      .toList();
+
+  Future<List<ElectionRecount>> getRecounts(int id) async {
+    final response = await _dio.get('/admin/elections/$id/recounts');
+    return (response.data as List)
+        .map((e) => ElectionRecount.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<ElectionRecount> recordRecount(
+    int id, {
+    required int electionSeatId,
+    required String applicantName,
+    int? applicantMemberId,
+    required String grounds,
+    String? explanation,
+    required DateTime receivedAt,
+  }) async {
+    final response = await _dio.post('/admin/elections/$id/recounts', data: {
+      'electionSeatId': electionSeatId,
+      'applicantName': applicantName,
+      'applicantMemberId': applicantMemberId,
+      'grounds': grounds,
+      'explanation': explanation,
+      'receivedAt': AppUtils.toWireUtc(receivedAt),
+    });
+    return ElectionRecount.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<void> decideRecount(
+          int id, int recountId, bool allowed, String? reason) =>
+      _dio.put('/admin/elections/$id/recounts/$recountId/decision',
+          data: {'allowed': allowed, 'reason': reason});
+
+  Future<void> recordRecountFigures(
+          int id, int recountId, List<RecountFigure> figures) =>
+      _dio.put('/admin/elections/$id/recounts/$recountId/figures', data: {
+        'figures': [for (final f in figures) f.toJson()]
+      });
 
   void logFailure(String operation, Object error) =>
       debugPrint('ElectionService.$operation failed: $error');

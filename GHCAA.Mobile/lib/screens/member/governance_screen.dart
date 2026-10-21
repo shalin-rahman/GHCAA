@@ -113,7 +113,7 @@ class GovernanceScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             ...members.map((m) {
               final member = m['member'];
-              final position = m['positionLabel'] ?? m['positionName'] ?? m['position'].toString();
+              final position = (m['positionName'] ?? '').toString();
               final photoUrl = AppConfig.resolveImageUrl(member['photoPath']);
               
               return Padding(

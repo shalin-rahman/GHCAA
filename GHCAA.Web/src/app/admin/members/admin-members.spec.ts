@@ -6,6 +6,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { NavService } from '../../core/services/nav.service';
 import { LookupService } from '../../core/services/lookup.service';
+import { EcPositionService } from '../../core/services/ec-position.service';
 import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 
@@ -45,6 +46,12 @@ describe('AdminMembers Component', () => {
             snapshot: { queryParamMap: convertToParamMap({}) }
         };
 
+        const positionServiceMock = {
+            getActive: vi.fn().mockReturnValue(of([
+                { id: 1, key: 'President', name: 'President', seatCount: 1 },
+                { id: 16, key: 'Patron', name: 'Patron', seatCount: 2 }
+            ]))
+        };
         const lookupServiceMock = {
             getOptions: vi.fn().mockReturnValue(of([])),
             getAcademicYears: vi.fn().mockReturnValue(of([]))
@@ -59,7 +66,8 @@ describe('AdminMembers Component', () => {
                 { provide: NavService, useValue: navServiceMock },
                 { provide: Router, useValue: routerMock },
                 { provide: ActivatedRoute, useValue: activatedRouteMock },
-                { provide: LookupService, useValue: lookupServiceMock }
+                { provide: LookupService, useValue: lookupServiceMock },
+                { provide: EcPositionService, useValue: positionServiceMock }
             ]
         }).compileComponents();
 
@@ -70,6 +78,27 @@ describe('AdminMembers Component', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('FR-34: picking a position on a history row sets its id, key and name together', () => {
+        const row: any = { positionId: 0, position: '', positionName: '' };
+
+        component.onHistoryPositionChange(row, 16);
+
+        expect(row).toEqual({ positionId: 16, position: 'Patron', positionName: 'Patron' });
+    });
+
+    it('FR-34: the current position label uses the name the API sends', () => {
+        const member = { ecHistory: [{ position: 'Patron', positionName: 'Patron', isCurrent: true }] };
+
+        expect(component.getCurrentPosition(member)).toBe('Patron');
+        expect(component.getCurrentPosition({ ecHistory: [] })).toBe('None');
+    });
+
+    it('FR-34: a term on a retired position keeps its label as a disabled option', () => {
+        expect(component.isRetiredPosition(3)).toBe(true);
+        expect(component.isRetiredPosition(16)).toBe(false);
+        expect(component.isRetiredPosition(0)).toBe(false);
     });
 
     it('should load members on init', () => {

@@ -34,6 +34,24 @@
                     <a [routerLink]="['/officials/elections', election.id]" class="btn btn-primary btn-sm">Open election</a>
                 </div>
 
+                @if (showReadiness() && readiness(); as r) {
+                    <div class="glass-card" data-card="readiness">
+                        <h2>Ready for polling</h2>
+                        <p class="text-muted">{{ r.ready ? 'Every item is met. Polling can open.' : 'Polling cannot open until each item below is met.' }}</p>
+                        @for (item of r.items; track item.key) {
+                            <div class="flex justify-between items-center" data-row="readiness" [attr.data-key]="item.key">
+                                <span class="flex gap-2 items-center">
+                                    <span class="status-badge" [class.done]="item.met" [class.warning]="!item.met">{{ item.met ? 'Done' : (item.advisory ? 'Warning' : 'Not yet') }}</span>
+                                    {{ readinessLabel(item) }}
+                                </span>
+                                @if (canAttest(item)) {
+                                    <button type="button" class="btn btn-outline btn-sm" [disabled]="attestingKey() !== null" (click)="attest(item)">Record as done</button>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
                 @if (can('ViewDashboard')) {
                     <div class="glass-card" data-card="approvals">
                         <h2>Open approvals</h2>

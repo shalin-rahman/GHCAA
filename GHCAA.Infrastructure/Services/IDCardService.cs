@@ -1,5 +1,6 @@
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
@@ -229,6 +230,18 @@ namespace GHCAA.Infrastructure.Services
             return document.GeneratePdf();
         }
 
+        // 95.2: the two signature lines name whichever active positions the admin marked as signatories.
+        // Public so tests can check the captions without reading text back out of the PDF.
+        public static async Task<(string Head, string Secretary)> GetSignatureCaptionsAsync(ApplicationDbContext db, CancellationToken cancellationToken = default)
+        {
+            var signatories = await db.EcPositions.AsNoTracking()
+                .Where(p => p.IsActive && (p.SignsAsHead || p.SignsAsSecretary))
+                .OrderBy(p => p.DisplayOrder).ThenBy(p => p.Id)
+                .ToListAsync(cancellationToken);
+            return (signatories.FirstOrDefault(p => p.SignsAsHead)?.Name ?? Constants.Governance.DefaultHeadCaption,
+                signatories.FirstOrDefault(p => p.SignsAsSecretary)?.Name ?? Constants.Governance.DefaultSecretaryCaption);
+        }
+
         public async Task<byte[]> GenerateCertificatePdfAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var issued = await IssueCredentialAsync(memberId, CredentialType.MembershipCertificate, cancellationToken);
@@ -238,6 +251,8 @@ namespace GHCAA.Infrastructure.Services
             var accentColor = org.Branding.AccentColor;
 
             var verifyUrl = issued.VerifyUrl;
+
+            var (headCaption, secretaryCaption) = await GetSignatureCaptionsAsync(_db, cancellationToken);
 
             var document = Document.Create(container =>
             {
@@ -261,12 +276,12 @@ namespace GHCAA.Infrastructure.Services
                         {
                             row.RelativeItem().Column(c =>
                             {
-                                c.Item().PaddingTop(20).BorderTop(1).AlignCenter().Text("President").FontSize(12).FontColor(Colors.Grey.Medium);
+                                c.Item().PaddingTop(20).BorderTop(1).AlignCenter().Text(headCaption).FontSize(12).FontColor(Colors.Grey.Medium);
                             });
                             row.ConstantItem(100);
                             row.RelativeItem().Column(c =>
                             {
-                                c.Item().PaddingTop(20).BorderTop(1).AlignCenter().Text("General Secretary").FontSize(12).FontColor(Colors.Grey.Medium);
+                                c.Item().PaddingTop(20).BorderTop(1).AlignCenter().Text(secretaryCaption).FontSize(12).FontColor(Colors.Grey.Medium);
                             });
                         });
 

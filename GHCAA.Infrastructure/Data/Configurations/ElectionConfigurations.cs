@@ -14,6 +14,8 @@ public sealed class ElectionConfiguration : IEntityTypeConfiguration<Election>
         b.Property(x => x.BallotPublicKey).HasMaxLength(2000);
         b.Property(x => x.BallotKeyFingerprint).HasMaxLength(64);
         b.Property(x => x.IsTest).HasDefaultValue(false);
+        b.Property(x => x.Venue).HasMaxLength(300);
+        b.Property(x => x.NoticeReference).HasMaxLength(100);
         b.HasIndex(x => new { x.ECPeriodId, x.IsActive });
         // 37.1t. One election per EC period unless the older one is archived. CreateAsync checks
         // first; this stops two admins who create at the same moment. The filter is stored as the
@@ -32,6 +34,7 @@ public sealed class ElectionSeatConfiguration : IEntityTypeConfiguration<Electio
         b.HasKey(x => x.Id);
         b.HasIndex(x => new { x.ElectionId, x.Position }).IsUnique();
         b.HasOne(x => x.Election).WithMany(x => x.Seats).HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne(x => x.EcPosition).WithMany().HasForeignKey(x => x.Position).OnDelete(DeleteBehavior.Restrict);
     }
 }
 
@@ -126,6 +129,47 @@ public sealed class ScrutinyDecisionConfiguration : IEntityTypeConfiguration<Scr
         b.HasKey(x => x.Id);
         b.HasOne<Nomination>().WithMany().HasForeignKey(x => x.NominationId).OnDelete(DeleteBehavior.Cascade);
         b.HasOne<User>().WithMany().HasForeignKey(x => x.DecidedByUserId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public sealed class NominationScrutinyCheckConfiguration : IEntityTypeConfiguration<NominationScrutinyCheck>
+{
+    public void Configure(EntityTypeBuilder<NominationScrutinyCheck> b)
+    {
+        b.HasKey(x => x.Id);
+        b.HasIndex(x => new { x.NominationId, x.Item }).IsUnique();
+        b.HasOne<Nomination>().WithMany(x => x.ScrutinyChecks).HasForeignKey(x => x.NominationId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne<User>().WithMany().HasForeignKey(x => x.SetByUserId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public sealed class ElectionRecountRequestConfiguration : IEntityTypeConfiguration<ElectionRecountRequest>
+{
+    public void Configure(EntityTypeBuilder<ElectionRecountRequest> b)
+    {
+        b.HasKey(x => x.Id);
+        b.Property(x => x.ApplicantName).HasMaxLength(150).IsRequired();
+        b.Property(x => x.Grounds).HasMaxLength(2000).IsRequired();
+        b.Property(x => x.Explanation).HasMaxLength(4000);
+        b.Property(x => x.DecisionReason).HasMaxLength(2000);
+        b.HasIndex(x => new { x.ElectionId, x.ElectionSeatId });
+        b.HasOne(x => x.Election).WithMany().HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne<ElectionSeat>().WithMany().HasForeignKey(x => x.ElectionSeatId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<Member>().WithMany().HasForeignKey(x => x.ApplicantMemberId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<User>().WithMany().HasForeignKey(x => x.RecordedByUserId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<User>().WithMany().HasForeignKey(x => x.DecidedByUserId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<User>().WithMany().HasForeignKey(x => x.RecountedByUserId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public sealed class ElectionRecountFigureConfiguration : IEntityTypeConfiguration<ElectionRecountFigure>
+{
+    public void Configure(EntityTypeBuilder<ElectionRecountFigure> b)
+    {
+        b.HasKey(x => x.Id);
+        b.HasIndex(x => new { x.RecountRequestId, x.NominationId }).IsUnique();
+        b.HasOne<ElectionRecountRequest>().WithMany(x => x.Figures).HasForeignKey(x => x.RecountRequestId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne<Nomination>().WithMany().HasForeignKey(x => x.NominationId).OnDelete(DeleteBehavior.Restrict);
     }
 }
 

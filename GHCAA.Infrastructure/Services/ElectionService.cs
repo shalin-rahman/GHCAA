@@ -108,19 +108,32 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         var election = await _db.Elections.FindAsync([id], ct);
         if (election == null) throw new InvalidOperationException("Election was not found.");
         if (election.Phase != ElectionPhase.Announced) throw new InvalidOperationException("Seats cannot be changed after nominations open.");
-        var seat = new ElectionSeat { ElectionId = id, Position = request.Position, SeatCount = request.SeatCount };
+        var problem = await CheckSeatAsync(id, request, ct);
+        if (problem != null) throw new InvalidOperationException(problem);
+        var seat = new ElectionSeat { ElectionId = id, Position = request.PositionId, SeatCount = request.SeatCount };
         _db.ElectionSeats.Add(seat);
         await _db.SaveChangesAsync(ct);
         return seat.Id;
+    }
+
+    // 95.2: an election cannot elect more people to a position than the committee has seats for,
+    // or the governance page would hide the extra winners.
+    public async Task<string?> CheckSeatAsync(int? electionId, ElectionSeatRequestDto request, CancellationToken ct = default)
+    {
+        var position = await _db.EcPositions.AsNoTracking().FirstOrDefaultAsync(p => p.Id == request.PositionId && p.IsActive, ct);
+        if (position == null) return "That committee position does not exist or is retired.";
+        if (request.SeatCount < 1 || request.SeatCount > position.SeatCount)
+            return $"{position.Name} has {position.SeatCount} seat(s) on the committee, so the election can fill 1 to {position.SeatCount}.";
+        if (electionId.HasValue && await _db.ElectionSeats.AnyAsync(s => s.ElectionId == electionId && s.Position == position.Id, ct))
+            return $"{position.Name} is already on this election.";
+        return null;
     }
 
     public async Task<bool> SetPhaseAsync(int id, ElectionPhase phase, CancellationToken ct = default)
     {
         var e = await _db.Elections.FindAsync([id], ct);
         if (e == null || phase == e.Phase || phase < e.Phase || phase > ElectionPhase.Archived || (int)phase > (int)e.Phase + 1) return false;
-        if (phase == ElectionPhase.Polling && !await _db.VoterRolls.AnyAsync(x => x.ElectionId == id, ct)) return false;
-        // Spec 023 FR-001: no ballot may be cast before there is a key to seal it under.
-        if (phase == ElectionPhase.Polling && string.IsNullOrEmpty(e.BallotPublicKey)) return false;
+        if (phase == ElectionPhase.Polling && !(await ReadinessOfAsync(e, ct)).Ready) return false;
         if (phase == ElectionPhase.Counting && DateTime.UtcNow < e.PollingClosesOn) return false;
         // Spec 023 FR-008: only DeclareAsync may declare, so the ECMember rows are always written.
         if (phase == ElectionPhase.Declared) return false;
@@ -130,6 +143,71 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         await _audit.AppendAsync(id, Elections.AuditActions.PhaseChanged, null, new { from = from.ToString(), to = phase.ToString() }, ct);
         await _audit.SaveAsync(ct);
         return true;
+    }
+
+    public async Task<ElectionReadinessDto?> GetReadinessAsync(int id, CancellationToken ct = default)
+    {
+        var e = await _db.Elections.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
+        return e == null ? null : await ReadinessOfAsync(e, ct);
+    }
+
+    // 37.12w. Regulations Article 11. Polling opens only from Campaign, which follows CandidateList,
+    // where the ballot order is set. Until 37.14a records the key copies, the key item checks only
+    // that a key is set (FR-001: no ballot may be cast before there is a key to seal it under).
+    private async Task<ElectionReadinessDto> ReadinessOfAsync(Election e, CancellationToken ct)
+    {
+        var now = DateTime.UtcNow;
+        var accepted = _db.Nominations.Where(x => x.ElectionId == e.Id && x.Status == NominationStatus.Accepted);
+        var candidateList = e.Phase >= ElectionPhase.Campaign && await accepted.AnyAsync(ct)
+            && !await accepted.AnyAsync(x => x.BallotOrder == null, ct);
+        // An appointment still open must be accepted with its declaration signed, or be revoked.
+        var appointmentsDone = !await _db.ElectionAppointments.AnyAsync(x => x.ElectionId == e.Id
+            && x.RevokedAt == null && (x.ExpiresAt == null || x.ExpiresAt > now)
+            && (x.AcceptedAt == null || x.DeclarationSignedAt == null), ct);
+        // Polling may open early, so only the order and the closing date are checked.
+        var window = e.PollingOpensOn < e.PollingClosesOn && e.PollingClosesOn > now;
+        var attested = await AttestedConditionsAsync(e.Id, ct);
+        var approvers = await ElectionAccessService.LiveApproverCountAsync(_db, e.Id, ct);
+
+        List<ElectionReadinessItemDto> items =
+        [
+            new(Elections.Readiness.RollFrozen, await _db.VoterRolls.AnyAsync(x => x.ElectionId == e.Id, ct)),
+            new(Elections.Readiness.CandidateList, candidateList),
+            new(Elections.Readiness.BallotKey, !string.IsNullOrEmpty(e.BallotPublicKey)),
+            new(Elections.Readiness.Appointments, appointmentsDone),
+            new(Elections.Readiness.PollingWindow, window),
+            // A test run is itself the rehearsal, so it needs none of the attestations.
+            .. Elections.Readiness.Attested.Select(key => new ElectionReadinessItemDto(key, e.IsTest || attested.Contains(key), Attestation: true)),
+            new(Elections.Readiness.Approvers, approvers >= Elections.MinApproversBeforePolling, Advisory: true),
+        ];
+        return new ElectionReadinessDto(items.All(x => x.Met || x.Advisory), items);
+    }
+
+    private async Task<HashSet<string>> AttestedConditionsAsync(int id, CancellationToken ct)
+    {
+        var details = await _db.ElectionAuditEntries.AsNoTracking()
+            .Where(x => x.ElectionId == id && x.Action == Elections.AuditActions.ReadinessAttested)
+            .Select(x => x.DetailJson).ToListAsync(ct);
+        var keys = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var json in details)
+        {
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.TryGetProperty("condition", out var condition) && condition.GetString() is { } key)
+                keys.Add(key);
+        }
+        return keys;
+    }
+
+    public async Task<string?> AttestReadinessAsync(int id, int actorUserId, string condition, CancellationToken ct = default)
+    {
+        var e = await _db.Elections.AsNoTracking().Where(x => x.Id == id).Select(x => new { x.Phase }).FirstOrDefaultAsync(ct);
+        if (e == null) return Elections.Replies.NotFound;
+        if (!Elections.Readiness.Attested.Contains(condition)) return Elections.Replies.Invalid;
+        if (e.Phase >= ElectionPhase.Polling) return Elections.Replies.WrongPhase;
+        if ((await AttestedConditionsAsync(id, ct)).Contains(condition)) return Elections.Replies.AlreadyRecorded;
+        await _audit.AppendAsync(id, Elections.AuditActions.ReadinessAttested, actorUserId, new { condition }, ct);
+        await _audit.SaveAsync(ct);
+        return null;
     }
 
     // Spec 023 FR-033 (37.12i). Only accepted, live appointments on public personas are listed.
@@ -318,7 +396,7 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         var now = DateTime.UtcNow;
         // Spec 023 FR-004. The vote rows keep the date only, so they carry no order to match.
         var votedOn = now.Date;
-        var e = await _db.Elections.Include(x => x.Seats).FirstOrDefaultAsync(x => x.Id == id, ct);
+        var e = await _db.Elections.Include(x => x.Seats).ThenInclude(s => s.EcPosition).FirstOrDefaultAsync(x => x.Id == id, ct);
         if (e == null || e.Phase != ElectionPhase.Polling || now < e.PollingOpensOn || now > e.PollingClosesOn || string.IsNullOrEmpty(e.BallotPublicKey)) return (false, "not-open", null);
         var voter = await _db.VoterRolls.SingleOrDefaultAsync(x => x.ElectionId == id && x.MemberId == memberId && x.IsEligible, ct);
         if (voter == null) return (false, "not-eligible", null);
@@ -486,10 +564,14 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
             var period = await _db.ECPeriods.AsNoTracking().FirstOrDefaultAsync(x => x.Id == e.ECPeriodId, ct);
             if (period == null || await _db.ECMembers.AnyAsync(x => x.ECPeriodId == period.Id, ct)) return false;
             var periodStart = period.StartDate;
-            foreach (var r in results.Where(x => x.IsElected))
+            var seatPositions = await _db.ElectionSeats.Where(x => x.ElectionId == id).ToDictionaryAsync(x => x.Id, x => x.Position, ct);
+            var elected = results.Where(x => x.IsElected).ToList();
+            var nominationIds = elected.Select(x => x.NominationId).ToList();
+            var candidates = await _db.Nominations.Where(x => nominationIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, x => x.CandidateMemberId, ct);
+            foreach (var r in elected)
             {
-                var n = await _db.Nominations.FindAsync([r.NominationId], ct);
-                if (n != null) _db.ECMembers.Add(new ECMember { ECPeriodId = e.ECPeriodId, MemberId = n.CandidateMemberId, Position = (await _db.ElectionSeats.FindAsync([r.ElectionSeatId], ct))!.Position, StartDate = periodStart });
+                if (candidates.TryGetValue(r.NominationId, out var memberId))
+                    _db.ECMembers.Add(new ECMember { ECPeriodId = e.ECPeriodId, MemberId = memberId, Position = seatPositions[r.ElectionSeatId], StartDate = periodStart });
             }
         }
         await SetAppointmentExpiryAsync(id, declaredOn, ct);
@@ -531,6 +613,9 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         var e = await _db.Elections.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
         if (e == null) return Elections.Replies.NotFound;
         if (e.Phase != ElectionPhase.Declared) return Elections.Replies.NotDeclared;
+        // 37.14m. A recount needs the key, so it stays until the recount window has ended.
+        if (e.RecountWindowEndsOn is not { } windowEnds || windowEnds > DateTime.UtcNow)
+            return Elections.Replies.RecountWindowOpen;
         if (await _db.ElectionAuditEntries.AnyAsync(x => x.ElectionId == id && x.Action == Elections.AuditActions.KeyDestroyed, ct))
             return Elections.Replies.AlreadyRecorded;
         await _audit.AppendAsync(id, Elections.AuditActions.KeyDestroyed, actorUserId, new { fingerprint = e.BallotKeyFingerprint }, ct);
@@ -633,7 +718,7 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
     // The web form sends a bare yyyy-MM-dd and mobile some dates with no offset. Those bind as
     // Unspecified, and ToUniversalTime would read them as server local time, so the stored date
     // would move by the server's offset. Same rule as the UTC converter in ApplicationDbContext.
-    private static DateTime AsUtc(DateTime value) =>
+    internal static DateTime AsUtc(DateTime value) =>
         value.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(value, DateTimeKind.Utc) : value.ToUniversalTime();
 
     private static string NewTrackingCode()
@@ -647,11 +732,14 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
     private sealed record PendingChoice(int S, int[] N);
 
     public async Task<IReadOnlyList<NominationViewDto>> GetNominationsAsync(int id, CancellationToken ct = default) =>
-        (await _db.Nominations.Where(x => x.ElectionId == id).OrderBy(x => x.ElectionSeatId).ToListAsync(ct)).Select(ToNomination).ToList();
+        (await _db.Nominations.Where(x => x.ElectionId == id).OrderBy(x => x.ElectionSeatId).ToListAsync(ct)).Select(n => ToNomination(n)).ToList();
+
+    public async Task<IReadOnlyList<NominationViewDto>> GetNominationsWithConsentAsync(int id, CancellationToken ct = default) =>
+        (await _db.Nominations.Where(x => x.ElectionId == id).OrderBy(x => x.ElectionSeatId).ToListAsync(ct)).Select(n => ToNomination(n, withConsent: true)).ToList();
 
     public async Task<BallotViewDto?> GetBallotAsync(int id, int memberId, CancellationToken ct = default)
     {
-        var e = await _db.Elections.AsNoTracking().Include(x => x.Seats).FirstOrDefaultAsync(x => x.Id == id, ct);
+        var e = await _db.Elections.AsNoTracking().Include(x => x.Seats).ThenInclude(s => s.EcPosition).FirstOrDefaultAsync(x => x.Id == id, ct);
         if (e == null) return null;
         var hasVoted = await _db.SeatVotes.AnyAsync(x => x.ElectionId == id && x.MemberId == memberId, ct);
         var roll = await _db.VoterRolls.AsNoTracking().Where(x => x.ElectionId == id && x.MemberId == memberId)
@@ -675,8 +763,8 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         var bySeat = candidates.OrderBy(x => x.BallotOrder ?? int.MaxValue)
             .ThenBy(x => x.FullName, StringComparer.OrdinalIgnoreCase).ToLookup(x => x.ElectionSeatId);
         // A seat with no accepted candidate is not on the paper (see IsWholeBallotValid).
-        var seats = e.Seats.Where(s => bySeat[s.Id].Any()).OrderBy(s => s.Position).ThenBy(s => s.Id)
-            .Select(s => new BallotSeatViewDto(s.Id, SeatTitle(s.Position), Math.Max(1, s.SeatCount),
+        var seats = e.Seats.Where(s => bySeat[s.Id].Any()).OrderBy(s => s.EcPosition?.DisplayOrder ?? s.Position).ThenBy(s => s.Id)
+            .Select(s => new BallotSeatViewDto(s.Id, SeatTitle(s), Math.Max(1, s.SeatCount),
                 bySeat[s.Id].Select(c => new BallotCandidateDto(c.Id, c.FullName, c.Photo, c.Statement)).ToArray()))
             .ToArray();
         return new BallotViewDto(e.Id, e.Title, e.Phase, hasVoted, e.BallotKeyFingerprint, seats, isEligible, reason);
@@ -715,7 +803,7 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
 
     public async Task<PublicElectionResultsDto?> GetPublicResultsAsync(int id, CancellationToken ct = default)
     {
-        var e = await _db.Elections.AsNoTracking().Include(x => x.Seats).FirstOrDefaultAsync(x => x.Id == id, ct);
+        var e = await _db.Elections.AsNoTracking().Include(x => x.Seats).ThenInclude(s => s.EcPosition).FirstOrDefaultAsync(x => x.Id == id, ct);
         if (e == null || (e.Phase != ElectionPhase.Declared && e.Phase != ElectionPhase.Archived)) return null;
 
         var results = await StoredResultsAsync(id, ct);
@@ -733,8 +821,8 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         var valid = cast - spoiled;
 
         var bySeat = results.ToLookup(x => x.ElectionSeatId);
-        var seats = e.Seats.Where(s => bySeat[s.Id].Any()).OrderBy(s => s.Position).ThenBy(s => s.Id)
-            .Select(s => new PublicSeatResultDto(s.Id, SeatTitle(s.Position), Math.Max(1, s.SeatCount),
+        var seats = e.Seats.Where(s => bySeat[s.Id].Any()).OrderBy(s => s.EcPosition?.DisplayOrder ?? s.Position).ThenBy(s => s.Id)
+            .Select(s => new PublicSeatResultDto(s.Id, SeatTitle(s), Math.Max(1, s.SeatCount),
                 valid - ballotsPerSeat.GetValueOrDefault(s.Id),
                 bySeat[s.Id].OrderByDescending(r => r.VoteCount).ThenBy(r => names.GetValueOrDefault(r.NominationId))
                     .Select(r => new PublicCandidateResultDto(r.NominationId, names.GetValueOrDefault(r.NominationId) ?? string.Empty, r.VoteCount, r.IsElected, r.IsTie))
@@ -746,7 +834,7 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
     public async Task<IReadOnlyList<AdminElectionDto>> ListAdminElectionsAsync(CancellationToken ct = default)
     {
         var elections = await _db.Elections.AsNoTracking()
-            .Include(x => x.Seats)
+            .Include(x => x.Seats).ThenInclude(s => s.EcPosition)
             .Include(x => x.VoterRoll)
             .OrderByDescending(x => x.AnnouncedOn)
             .ToListAsync(ct);
@@ -756,7 +844,7 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
     public async Task<AdminElectionDto?> GetAdminElectionAsync(int id, CancellationToken ct = default)
     {
         var election = await _db.Elections.AsNoTracking()
-            .Include(x => x.Seats)
+            .Include(x => x.Seats).ThenInclude(s => s.EcPosition)
             .Include(x => x.VoterRoll)
             .FirstOrDefaultAsync(x => x.Id == id, ct);
         return election is null ? null : ToAdminElection(election);
@@ -826,7 +914,7 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
     {
         var positions = election.Seats
             .OrderBy(x => x.Id)
-            .Select(x => new AdminElectionPositionDto(x.Id, SeatTitle(x.Position), null, x.SeatCount))
+            .Select(x => new AdminElectionPositionDto(x.Id, SeatTitle(x), null, x.SeatCount))
             .ToArray();
 
         return new AdminElectionDto(
@@ -849,29 +937,28 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
             election.VoterRoll.Any(x => x.VotedAt.HasValue),
             election.TieRule,
             election.BallotKeyFingerprint,
-            IsTest: election.IsTest);
+            IsTest: election.IsTest,
+            FormDetails: new ElectionFormDetailsDto(election.FinalListOn, election.CampaignOpensOn, election.CampaignClosesOn, election.SilenceStartsAt,
+                election.Venue, election.NoticeReference, election.RecountWindowEndsOn));
     }
 
-    internal static string SeatTitle(ECPosition position) => position switch
+    // 95.2: callers load Seats with ThenInclude(s => s.EcPosition).
+    internal static string SeatTitle(ElectionSeat seat) => seat.EcPosition?.Name ?? $"Position {seat.Position}";
+
+    public async Task<int?> FindPositionIdAsync(string? title, CancellationToken ct = default)
     {
-        ECPosition.President => "President",
-        ECPosition.VicePresident => "Vice President",
-        ECPosition.GeneralSecretary => "General Secretary",
-        ECPosition.OfficeSecretary => "Office Secretary",
-        ECPosition.JointSecretary1 => "Joint Secretary 1",
-        ECPosition.JointSecretary2 => "Joint Secretary 2",
-        ECPosition.Treasurer => "Treasurer",
-        ECPosition.MediaCulturalAndSportsSecretary => "Media Cultural & Sports Secretary",
-        ECPosition.OrganizationalSecretary => "Organizational Secretary",
-        ECPosition.InformationAndTechnologySecretary => "Information and Technology Secretary",
-        ECPosition.Member1 => "Member 1",
-        ECPosition.Member2 => "Member 2",
-        ECPosition.LawSecretary => "Law Secretary",
-        ECPosition.ImmediatePastPresident => "Immediate Past President",
-        ECPosition.InstitutionalRepresentative => "Institutional Representative",
-        _ => position.ToString(),
-    };
+        var wanted = CompactPositionText(title);
+        if (wanted.Length == 0) return null;
+        var positions = await _db.EcPositions.AsNoTracking().Where(p => p.IsActive).ToListAsync(ct);
+        return positions.FirstOrDefault(p => CompactPositionText(p.Key) == wanted || CompactPositionText(p.Name) == wanted)?.Id;
+    }
+
+    // "Media Cultural & Sports Secretary" and "mediaculturalsportssecretary" compare equal.
+    private static string CompactPositionText(string? value) =>
+        string.Concat((value ?? string.Empty).Where(char.IsLetterOrDigit)).ToLowerInvariant();
 
     private static ElectionSummaryDto ToSummary(Election e, int count, int eligible) => new(e.Id, e.Title, e.Phase, e.ECPeriodId, count, eligible, e.BallotKeyFingerprint);
-    private static NominationViewDto ToNomination(Nomination n) => new(n.Id, n.ElectionSeatId, n.CandidateMemberId, n.Status, n.Statement);
+    // The public nominations list is anonymous, so the consent time only goes out on the admin read.
+    private static NominationViewDto ToNomination(Nomination n, bool withConsent = false) =>
+        new(n.Id, n.ElectionSeatId, n.CandidateMemberId, n.Status, n.Statement, withConsent ? n.ConsentAt : null);
 }

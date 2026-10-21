@@ -18,6 +18,12 @@ class GovernanceApi {
     return response.data;
   }
  
+  // 95.2: active committee positions in display order, from the EcPositions table.
+  Future<List<dynamic>> getPositions() async {
+    final response = await _dio.get('/governance/positions');
+    return response.data as List<dynamic>;
+  }
+
   Future<List<dynamic>> getECHistory() async {
     final response = await _dio.get('/governance/ec/history');
     return response.data;

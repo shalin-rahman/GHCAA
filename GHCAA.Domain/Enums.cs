@@ -5,7 +5,6 @@ namespace GHCAA.Domain
         public enum MembershipStatus { Applied, Active, InactivePayment, InactiveResigned, Terminated, Rejected }
         public enum MembershipType { Founding, Executive, General, Associate, Honorary, Advisory, Guest }
         public enum MemberCategory { None, LifelongPatron, Sponsor, Advisor, Mentor, Recruiter, Active, Volunteer, Contributor, Guest, Student }
-        public enum ECPosition { None, President, VicePresident, GeneralSecretary, OfficeSecretary, JointSecretary1, JointSecretary2, Treasurer, MediaCulturalAndSportsSecretary, OrganizationalSecretary, InformationAndTechnologySecretary, Member1, Member2, LawSecretary, ImmediatePastPresident, InstitutionalRepresentative }
         // 95.3: why a committee seat fell vacant. Other needs a note saying what happened.
         public enum VacancyReason { Died, Resigned, Removed, TermEnded, Other }
         public enum BloodGroup { Unknown, APositive, ANegative, BPositive, BNegative, OPositive, ONegative, ABPositive, ABNegative }
@@ -62,6 +61,10 @@ namespace GHCAA.Domain
         public enum ElectionPhase { Announced, Nomination, Scrutiny, Withdrawal, CandidateList, Campaign, Polling, Counting, Declared, Archived }
         public enum NominationStatus { Submitted, UnderScrutiny, Accepted, Rejected, Withdrawn }
         public enum ElectionTieRule { DrawingLots, RunOff, ChairCastingVote }
+        // 37.14m. The seven checks on the scrutiny sheet (ER-17) and the 15 items on the handover
+        // checklist (ER-34). The columns store the number, so new values go at the end.
+        public enum ScrutinyCheckItem { MembershipVerified, VotingMember, MinimumMembershipPeriod, FoundingMemberRequirement, DocumentsComplete, NominationFeePaid, DeclarationSigned }
+        public enum HandoverCheckItem { Constitution, MinuteBooks, MembershipRegister, BankDocuments, ChequeBooks, FinancialRecords, FixedAssets, OfficeKeys, WebsiteAccess, EmailAccounts, SocialMediaAccounts, DigitalArchive, ElectionArchive, Contracts, OfficialSeal }
         // Spec 023 (37.12b): what an election persona can do. Which persona has which flag is
         // data, not code. See ElectionPersonaSeeder.
         [System.Flags]

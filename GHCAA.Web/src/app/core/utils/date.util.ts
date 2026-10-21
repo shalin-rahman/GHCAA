@@ -47,6 +47,28 @@ export function toWireDate(value: any): string | null {
   return `${y}-${mo}-${da}`;
 }
 
+/** A server UTC time with no zone mark -> Date. Adding the Z makes the browser read it as UTC. null if empty or unparseable. */
+export function utcToLocal(value: string | null | undefined): Date | null {
+  if (!value) return null;
+  const d = new Date(/(?:[zZ]|[+-]\d\d:\d\d)$/.test(value) ? value : `${value}Z`);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/** A server UTC time -> the local 'yyyy-MM-ddTHH:mm' a datetime-local input shows. '' for empty. */
+export function utcToLocalInput(value: string | null | undefined): string {
+  const d = utcToLocal(value);
+  if (!d) return '';
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/** A datetime-local value, read as local time -> ISO with a Z, so the server stores the right UTC moment. */
+export function localInputToUtc(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d.toISOString();
+}
+
 /** An EC (or any) period's start/end -> "YYYY" (no end date) or "YYYY - YYYY". Always the real
  *  stored years — no "Present"/"ongoing" label, regardless of the isActive flag. */
 export function formatPeriodRange(period: { startDate: string | Date; endDate?: string | Date | null; isActive: boolean }): string {

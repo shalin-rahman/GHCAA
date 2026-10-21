@@ -34,6 +34,39 @@ class GovernanceConstants {
   static const String vacancyReasonOther = 'Other';
   // Same limit as Constants.Governance.VacancyNoteMaxLength on the API.
   static const int vacancyNoteMaxLength = 500;
+
+  // 37.14m: values match the API's HandoverCheckItem enum, in the same order as the web list.
+  static const List<Map<String, String>> handoverCheckItems = [
+    {'value': 'Constitution', 'label': 'Constitution'},
+    {'value': 'MinuteBooks', 'label': 'Minute books'},
+    {'value': 'MembershipRegister', 'label': 'Membership register'},
+    {'value': 'BankDocuments', 'label': 'Bank documents'},
+    {'value': 'ChequeBooks', 'label': 'Cheque books'},
+    {'value': 'FinancialRecords', 'label': 'Financial records'},
+    {'value': 'FixedAssets', 'label': 'Fixed assets'},
+    {'value': 'OfficeKeys', 'label': 'Office keys'},
+    {'value': 'WebsiteAccess', 'label': 'Website access'},
+    {'value': 'EmailAccounts', 'label': 'Email accounts'},
+    {'value': 'SocialMediaAccounts', 'label': 'Social media accounts'},
+    {'value': 'DigitalArchive', 'label': 'Digital archive'},
+    {'value': 'ElectionArchive', 'label': 'Election archive'},
+    {'value': 'Contracts', 'label': 'Contracts'},
+    {'value': 'OfficialSeal', 'label': 'Official seal'},
+  ];
+}
+
+// Phase names as the API sends them (ElectionPhase in GHCAA.Domain.Enums).
+class ElectionPhases {
+  static const String announced = 'Announced';
+  static const String nomination = 'Nomination';
+  static const String scrutiny = 'Scrutiny';
+  static const String withdrawal = 'Withdrawal';
+  static const String candidateList = 'CandidateList';
+  static const String campaign = 'Campaign';
+  static const String polling = 'Polling';
+  static const String counting = 'Counting';
+  static const String declared = 'Declared';
+  static const String archived = 'Archived';
 }
 
 // Same limits as the API and the web admin (app.constants.ts ELECTION_RULES_UNLOCK).
@@ -69,6 +102,60 @@ class ElectionConstants {
       'Say what went wrong. It is logged and shown while the unlock is open.';
   static const String unlockMinutesHint =
       'How long the unlock stays open. The default is $unlockDefaultMinutes minutes and the most is $unlockMaxMinutes. It is short on purpose, so the rules are not left open by mistake.';
+
+  // 37.14m. Form records sheet. Same wording as ADMIN_ELECTIONS in app.constants.ts.
+  static const String formRecordsTitle = 'Form records';
+  static const String finalListOnLabel = 'Final candidate list published';
+  static const String campaignOpensOnLabel = 'Campaign opens';
+  static const String campaignClosesOnLabel = 'Campaign closes';
+  static const String silenceStartsAtLabel = 'Campaign silence starts';
+  static const String venueLabel = 'Polling venue';
+  static const String noticeReferenceLabel = 'Notice reference';
+  static const String recountWindowEndsOnLabel = 'Recount requests close';
+  static const String formDetailsHint =
+      'Shown on the printed notices. A field left empty is cleared and the form prints a blank line.';
+  static const String formDetailsSaved = 'Form details saved.';
+  static const String consentLabel = 'Consent signed';
+  static const String consentSaved = 'Consent time saved.';
+  static const String consentMissing = 'No consent recorded';
+  static const String scrutinyChecksTitle = 'Scrutiny checklist';
+  static const String recountsTitle = 'Recount requests';
+  static const String recountsEmpty = 'No recount requests.';
+  static const String recountSeatLabel = 'Position';
+  static const String recountApplicantLabel = 'Applicant name';
+  static const String recountApplicantMemberLabel = 'Applicant member ID';
+  static const String recountGroundsLabel = 'Grounds';
+  static const String recountExplanationLabel = 'Explanation';
+  static const String recountReceivedAtLabel = 'Received';
+  static const String recountRecorded = 'Recount request recorded.';
+  static const String recountRefuseReasonLabel = 'Reason';
+  static const String recountRefuseReasonRequired =
+      'Give a reason when refusing a recount.';
+  static const String recountDecided = 'Decision recorded.';
+  static const String recountPending = 'Waiting for a decision';
+  static const String recountAllowed = 'Allowed';
+  static const String recountRefused = 'Refused';
+  static const String recountFiguresTitle = 'Recount figures';
+  static const String recountFiguresSaved = 'Recount figures saved.';
+  static const String recountNoResult =
+      'This position has no declared result to recount.';
+
+  // ScrutinyCheckItem on the API, in enum order.
+  static const List<Map<String, String>> scrutinyCheckItems = [
+    {'value': 'MembershipVerified', 'label': 'Membership verified'},
+    {'value': 'VotingMember', 'label': 'Is a voting member'},
+    {
+      'value': 'MinimumMembershipPeriod',
+      'label': 'Minimum membership period met'
+    },
+    {
+      'value': 'FoundingMemberRequirement',
+      'label': 'Founding member rule met, where the seat needs it'
+    },
+    {'value': 'DocumentsComplete', 'label': 'Documents complete'},
+    {'value': 'NominationFeePaid', 'label': 'Nomination fee paid'},
+    {'value': 'DeclarationSigned', 'label': 'Declaration signed'},
+  ];
 }
 
 // 98.18: how long lookups, events and jobs stay cached in memory.

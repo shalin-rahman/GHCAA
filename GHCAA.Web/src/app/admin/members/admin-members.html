@@ -626,9 +626,13 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mr-4">
                                     <div class="form-group">
                                         <label class="text-[10px]">Position</label>
-                                        <select [(ngModel)]="h.position">
-                                            @for (role of ecPositions(); track role.value) { 
-                                                <option [value]="role.value">{{ role.label }}</option> 
+                                        <select [ngModel]="h.positionId" (ngModelChange)="onHistoryPositionChange(h, $event)">
+                                            <option [ngValue]="0" disabled>Pick a position</option>
+                                            @if (isRetiredPosition(h.positionId)) {
+                                                <option [ngValue]="h.positionId" disabled>{{ h.positionName }} (retired)</option>
+                                            }
+                                            @for (role of ecPositions(); track role.id) {
+                                                <option [ngValue]="role.id">{{ role.name }}</option>
                                             }
                                         </select>
                                     </div>
@@ -671,7 +675,7 @@
                             } @else {
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2">
-                                        <span class="font-bold text-sm">{{ getECPositionName(h.position) }}</span>
+                                        <span class="font-bold text-sm">{{ getPositionLabel(h) }}</span>
                                         <span class="text-[10px] bg-primary/10 px-2 py-0.5 rounded opacity-70">{{ h.periodTitle }}</span>
                                         @if (h.isCurrent) {
                                         <span class="text-[8px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Active</span>

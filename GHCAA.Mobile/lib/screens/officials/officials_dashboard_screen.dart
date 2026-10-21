@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/empty_state_widget.dart';
@@ -16,6 +17,11 @@ final officialsElectionsProvider =
 final officialsBoardProvider =
     FutureProvider.autoDispose.family<ElectionBoard?, int>((ref, id) async {
   return ref.read(electionServiceProvider).getBoard(id);
+});
+
+final officialsReadinessProvider = FutureProvider.autoDispose
+    .family<ElectionReadiness?, int>((ref, id) async {
+  return ref.read(electionServiceProvider).getReadiness(id);
 });
 
 // Spec 023 (37.12h). One card per election. A line shows only when the
@@ -57,12 +63,22 @@ class _ElectionCard extends ConsumerWidget {
 
   bool _can(String permission) => election.myPermissions.contains(permission);
 
+  // 37.12w. The list matters only until polling opens.
+  bool get _showReadiness =>
+      _can('ViewDashboard') &&
+      electionPhaseOrder.contains(election.phase) &&
+      electionPhaseOrder.indexOf(election.phase) <
+          electionPhaseOrder.indexOf(ElectionPhases.polling);
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final text = Theme.of(context).textTheme;
     final board = ref.watch(officialsBoardProvider(election.id)).value;
     final cast = board?.ballotsCast;
     final roll = board?.rollSize;
+    final readiness = _showReadiness
+        ? ref.watch(officialsReadinessProvider(election.id)).value
+        : null;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppTheme.spaceM),
@@ -85,6 +101,19 @@ class _ElectionCard extends ConsumerWidget {
             // The board sends no turnout while polling is open.
             if (_can('ViewDashboard') && cast != null && roll != null)
               Text('Ballots cast: $cast of $roll', key: const Key('card-turnout')),
+            if (readiness != null) ...[
+              const SizedBox(height: AppTheme.spaceS),
+              Text(
+                  readiness.ready
+                      ? 'Every item is met. Polling can open.'
+                      : 'Polling cannot open until each item below is met.',
+                  key: const Key('card-readiness')),
+              for (final item in readiness.items)
+                Text(
+                    '${item.met ? 'Done' : (item.advisory ? 'Warning' : 'Not yet')}: '
+                    '${electionReadinessLabel(item.key)}',
+                    key: Key('readiness-${item.key}')),
+            ],
             const SizedBox(height: AppTheme.spaceS),
             Wrap(
               spacing: AppTheme.spaceS,

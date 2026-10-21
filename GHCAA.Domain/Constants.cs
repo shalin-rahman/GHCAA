@@ -176,6 +176,12 @@ namespace GHCAA.Domain
                 // 37.12p. Another audit write on the same election landed first and the step was
                 // rolled back. Nothing changed, so the caller can try again.
                 public const string Busy = "busy";
+                // 37.14m. The recount window has no end date yet, or has not ended.
+                public const string RecountWindowOpen = "recount-window-open";
+                public const string WrongPhase = "wrong-phase";
+                public const string Invalid = "invalid";
+                // 37.12w. Polling was asked for while a readiness item is unmet.
+                public const string PollingNotReady = "polling-not-ready";
             }
             // 37.13a. Action names written to the election's audit chain.
             public static class AuditActions
@@ -196,6 +202,32 @@ namespace GHCAA.Domain
                 public const string VoterRollUnfrozen = "VoterRollUnfrozen";
                 // FR-050. An official records that the key file was destroyed after the declare.
                 public const string KeyDestroyed = "KeyDestroyed";
+                // 37.14m. The printed-form fields: calendar, notice details, consent, scrutiny
+                // ticks and recounts.
+                public const string FormDetailsChanged = "FormDetailsChanged";
+                public const string ConsentRecorded = "ConsentRecorded";
+                public const string ScrutinyChecked = "ScrutinyChecked";
+                public const string RecountRequested = "RecountRequested";
+                public const string RecountDecided = "RecountDecided";
+                public const string RecountCounted = "RecountCounted";
+                // 37.12w. An official confirms a readiness item that no stored data can show.
+                public const string ReadinessAttested = "ReadinessAttested";
+            }
+            // 37.12w. The items checked before polling opens (Regulations Article 11). Approvers is
+            // the 37.13t warning and does not stop polling.
+            public static class Readiness
+            {
+                public const string RollFrozen = "roll-frozen";
+                public const string CandidateList = "candidate-list";
+                public const string BallotKey = "ballot-key";
+                public const string Appointments = "appointments";
+                public const string PollingWindow = "polling-window";
+                public const string MockElection = "mock-election";
+                public const string TechnicalAudit = "technical-audit";
+                public const string AppealsDecided = "appeals-decided";
+                public const string PaperStock = "paper-stock";
+                public const string Approvers = "approvers";
+                public static readonly IReadOnlyList<string> Attested = [MockElection, TechnicalAudit, AppealsDecided, PaperStock];
             }
             // Previous hash of the first chain entry.
             public static readonly string AuditGenesisHash = new('0', 64);
@@ -354,6 +386,23 @@ namespace GHCAA.Domain
         {
             // 95.3: longest note an admin can give when a committee term ends.
             public const int VacancyNoteMaxLength = 500;
+
+            // 95.2: committee position key and name lengths.
+            public const int PositionKeyMaxLength = 64;
+            public const int PositionNameMaxLength = 100;
+            public const int PositionMaxSeats = 20;
+            public const int PositionMaxDisplayOrder = 999;
+
+            // Signature captions used when no active position carries the signatory flag.
+            public const string DefaultHeadCaption = "President";
+            public const string DefaultSecretaryCaption = "General Secretary";
+
+            // Row kinds the position repair list returns and accepts.
+            public static class RepairKinds
+            {
+                public const string CommitteeTerm = "committee-term";
+                public const string ElectionSeat = "election-seat";
+            }
         }
 
         public static class Localization
@@ -403,6 +452,8 @@ namespace GHCAA.Domain
             public const string ElectionRulesFrozen = "ELECTION_RULES_FROZEN";
             // 37.12p: a step clashed with another write on the same election and was rolled back.
             public const string ElectionBusy = "ELECTION_BUSY";
+            // 37.12w: polling was asked for while a readiness item is unmet.
+            public const string PollingNotReady = "POLLING_NOT_READY";
             public const string AlreadyVoted = "ALREADY_VOTED";
             public const string OtpInvalid = "OTP_INVALID";
             public const string PaymentMethodDisabled = "PAYMENT_METHOD_DISABLED";

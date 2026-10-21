@@ -34,6 +34,8 @@ namespace GHCAA.Infrastructure.Services
             var period = await _db.ECPeriods
                 .Include(p => p.ECMembers)
                 .ThenInclude(m => m.Member)
+                .Include(p => p.ECMembers)
+                .ThenInclude(m => m.EcPosition)
                 .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
 
             return period == null ? null : MapToPeriodDto(period);
@@ -149,8 +151,9 @@ namespace GHCAA.Infrastructure.Services
         {
             var members = await _db.ECMembers
                 .Include(em => em.Member)
+                .Include(em => em.EcPosition)
                 .Where(em => em.ECPeriodId == periodId && em.EndDate == null)
-                .OrderBy(em => em.Position)
+                .OrderBy(em => em.EcPosition!.DisplayOrder).ThenBy(em => em.Position)
                 .ToListAsync(cancellationToken);
 
             return members.Select(MapToMemberDto);
@@ -160,30 +163,53 @@ namespace GHCAA.Infrastructure.Services
         {
             var rows = await _db.ECMembers
                 .Include(em => em.Member)
+                .Include(em => em.EcPosition)
                 .Where(em => em.ECPeriodId == periodId)
                 .ToListAsync(cancellationToken);
 
+            // 95.2: a retired position still shows in a period where someone held it.
+            var heldIds = rows.Select(r => r.Position).Distinct().ToList();
+            var positions = await _db.EcPositions
+                .Where(p => p.IsActive || heldIds.Contains(p.Id))
+                .OrderBy(p => p.DisplayOrder).ThenBy(p => p.Id)
+                .ToListAsync(cancellationToken);
+
             var seats = new List<CommitteeSeatDto>();
-            foreach (var position in Enum.GetValues<ECPosition>().Where(p => p != ECPosition.None))
+            foreach (var position in positions)
             {
-                var held = rows.Where(r => r.Position == position).ToList();
-                // Older data can hold two open rows for one seat. Show the newest.
-                var holder = held.Where(r => r.EndDate == null).OrderByDescending(r => r.StartDate).FirstOrDefault();
-                if (holder != null)
+                var held = rows.Where(r => r.Position == position.Id).ToList();
+                // Older data can hold more open rows than seats. The newest ones fill the seats.
+                var holders = held.Where(r => r.EndDate == null).OrderByDescending(r => r.StartDate)
+                    .Take(position.SeatCount).ToList();
+                foreach (var holder in holders)
                 {
-                    seats.Add(new CommitteeSeatDto { Position = position, Holder = MapToMemberDto(holder) });
-                    continue;
+                    seats.Add(new CommitteeSeatDto
+                    {
+                        Position = position.Key,
+                        PositionId = position.Id,
+                        PositionName = position.Name,
+                        ShowOnBoard = position.ShowOnBoard,
+                        Holder = MapToMemberDto(holder)
+                    });
                 }
 
-                var last = held.OrderByDescending(r => r.EndDate).FirstOrDefault();
-                seats.Add(new CommitteeSeatDto
+                // Each empty seat shows the most recent term that ended on this position, newest first.
+                var ended = held.Where(r => r.EndDate != null).OrderByDescending(r => r.EndDate).ToList();
+                for (var i = 0; i < position.SeatCount - holders.Count; i++)
                 {
-                    Position = position,
-                    VacancyReason = last?.EndReason,
-                    VacancyNote = last?.EndNote,
-                    VacatedOn = last?.EndDate,
-                    LastHolderName = last?.Member?.FullName
-                });
+                    var last = i < ended.Count ? ended[i] : null;
+                    seats.Add(new CommitteeSeatDto
+                    {
+                        Position = position.Key,
+                        PositionId = position.Id,
+                        PositionName = position.Name,
+                        ShowOnBoard = position.ShowOnBoard,
+                        VacancyReason = last?.EndReason,
+                        VacancyNote = last?.EndNote,
+                        VacatedOn = last?.EndDate,
+                        LastHolderName = last?.Member?.FullName
+                    });
+                }
             }
             return seats;
         }
@@ -197,28 +223,36 @@ namespace GHCAA.Infrastructure.Services
                 throw new InvalidOperationException("Only active members can be assigned to the Executive Committee.");
             }
 
-            if (!Enum.IsDefined((ECPosition)position) || (ECPosition)position == ECPosition.None)
+            // 95.3: one current holder per seat. Replacing someone has to say why their term ended.
+            // Serializable so two admins filling the same seat at once cannot both get in, and a
+            // position retired at the same moment is not filled.
+            await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+            var ecPosition = await _db.EcPositions.FirstOrDefaultAsync(p => p.Id == position && p.IsActive, cancellationToken);
+            if (ecPosition == null)
             {
                 throw new InvalidOperationException("Pick a committee position.");
             }
 
-            // 95.3: one current holder per seat. Replacing someone has to say why their term ended.
-            // Serializable so two admins filling the same seat at once cannot both get in.
-            await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
             var currentHolders = await _db.ECMembers
                 .Include(em => em.Member)
-                .Where(em => em.ECPeriodId == periodId && em.Position == (ECPosition)position && em.EndDate == null)
+                .Where(em => em.ECPeriodId == periodId && em.Position == position && em.EndDate == null)
                 .ToListAsync(cancellationToken);
             if (currentHolders.Any(h => h.MemberId == memberId))
             {
                 throw new InvalidOperationException("This member already holds that seat.");
             }
-            if (currentHolders.Count > 0)
+            // A position with spare seats takes another holder. When a multi-seat position is full
+            // there is no safe guess at whom to replace, so the admin ends one term first.
+            if (currentHolders.Count >= ecPosition.SeatCount && ecPosition.SeatCount > 1)
+            {
+                throw new InvalidOperationException($"All {ecPosition.SeatCount} {ecPosition.Name} seats are held. End one term first.");
+            }
+            if (currentHolders.Count > 0 && ecPosition.SeatCount == 1)
             {
                 if (endCurrentHolderReason == null)
                 {
                     var name = currentHolders[0].Member?.FullName ?? "another member";
-                    throw new InvalidOperationException($"{(ECPosition)position} is held by {name}. End their term first, or replace them and give a reason.");
+                    throw new InvalidOperationException($"{ecPosition.Name} is held by {name}. End their term first, or replace them and give a reason.");
                 }
                 foreach (var holder in currentHolders)
                 {
@@ -230,7 +264,7 @@ namespace GHCAA.Infrastructure.Services
             {
                 ECPeriodId = periodId,
                 MemberId = memberId,
-                Position = (ECPosition)position,
+                Position = position,
                 StartDate = DateTime.UtcNow,
                 ChangeReason = reason
             };
@@ -253,7 +287,7 @@ namespace GHCAA.Infrastructure.Services
                 await _notificationService.CreateNotificationAsync(
                     memberId,
                     "Committee Assignment",
-                    $"You have been assigned to the Executive Committee as {(ECPosition)position}.",
+                    $"You have been assigned to the Executive Committee as {ecPosition.Name}.",
                     NotificationType.CommitteeAssignment,
                     cancellationToken: cancellationToken);
             }
@@ -417,6 +451,283 @@ namespace GHCAA.Infrastructure.Services
             ECMembers = p.ECMembers?.Select(MapToMemberDto).ToList() ?? new List<ECMemberDto>()
         };
 
+        public async Task<IReadOnlyList<EcPositionDto>> GetPositionsAsync(bool includeRetired, CancellationToken cancellationToken = default)
+        {
+            var rows = await _db.EcPositions
+                .Where(p => includeRetired || p.IsActive)
+                .OrderBy(p => p.DisplayOrder).ThenBy(p => p.Id)
+                .ToListAsync(cancellationToken);
+            return rows.Select(MapToPositionDto).ToList();
+        }
+
+        public async Task<EcPositionDto> CreatePositionAsync(SaveEcPositionRequest request, CancellationToken cancellationToken = default)
+        {
+            var name = CleanPositionName(request.Name);
+            var key = PositionKeyFrom(name);
+            if (key.Length == 0)
+            {
+                throw new InvalidOperationException("The name needs at least one letter or digit.");
+            }
+            var lowerKey = key.ToLower();
+            var lowerName = name.ToLower();
+            if (await _db.EcPositions.AnyAsync(p => p.Key.ToLower() == lowerKey || p.Name.ToLower() == lowerName, cancellationToken))
+            {
+                throw new InvalidOperationException($"A position called {name} already exists.");
+            }
+
+            var position = new EcPosition { Key = key, IsActive = true };
+            ApplyPosition(position, name, request);
+            await ClearOtherSignatoriesAsync(position, cancellationToken);
+            _db.EcPositions.Add(position);
+            await _db.SaveChangesAsync(cancellationToken);
+            return MapToPositionDto(position);
+        }
+
+        public async Task<EcPositionDto?> UpdatePositionAsync(int id, SaveEcPositionRequest request, CancellationToken cancellationToken = default)
+        {
+            var position = await _db.EcPositions.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+            if (position == null) return null;
+
+            var name = CleanPositionName(request.Name);
+            var lowerName = name.ToLower();
+            if (await _db.EcPositions.AnyAsync(p => p.Id != id && p.Name.ToLower() == lowerName, cancellationToken))
+            {
+                throw new InvalidOperationException($"A position called {name} already exists.");
+            }
+
+            // Fewer seats than the people holding them, or than an open election is filling,
+            // would hide holders on the governance page.
+            var seats = Math.Clamp(request.SeatCount, 1, Constants.Governance.PositionMaxSeats);
+            if (seats < position.SeatCount)
+            {
+                var periodHolders = await _db.ECMembers
+                    .Where(em => em.Position == id && em.EndDate == null)
+                    .GroupBy(em => em.ECPeriodId).Select(g => g.Count())
+                    .ToListAsync(cancellationToken);
+                var held = periodHolders.Count == 0 ? 0 : periodHolders.Max();
+                if (held > seats)
+                {
+                    throw new InvalidOperationException($"{held} people hold {position.Name} now. End terms before cutting it to {seats} seat(s).");
+                }
+                if (await _db.ElectionSeats.AnyAsync(s => s.Position == id && s.SeatCount > seats
+                        && s.Election!.Phase != ElectionPhase.Declared && s.Election.Phase != ElectionPhase.Archived, cancellationToken))
+                {
+                    throw new InvalidOperationException($"An election still running fills more than {seats} {position.Name} seat(s).");
+                }
+            }
+            if (!request.SignsAsHead && position.SignsAsHead || !request.SignsAsSecretary && position.SignsAsSecretary)
+            {
+                throw new InvalidOperationException("Certificates need a signatory. Mark another position as signatory instead of clearing it here.");
+            }
+
+            ApplyPosition(position, name, request);
+            await ClearOtherSignatoriesAsync(position, cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
+            return MapToPositionDto(position);
+        }
+
+        public async Task<IReadOnlyList<HandoverCheckDto>?> GetHandoverChecksAsync(int periodId, CancellationToken cancellationToken = default)
+        {
+            if (!await _db.ECPeriods.AnyAsync(p => p.Id == periodId, cancellationToken)) return null;
+            return await _db.ECPeriodHandoverChecks.AsNoTracking().Where(c => c.ECPeriodId == periodId)
+                .OrderBy(c => c.Item)
+                .Select(c => new HandoverCheckDto(c.Item, c.IsChecked, c.SetByUserId, c.SetAt)).ToListAsync(cancellationToken);
+        }
+
+        public async Task<bool> SetHandoverCheckAsync(int periodId, SetHandoverCheckRequest request, int actorUserId, CancellationToken cancellationToken = default)
+        {
+            if (!Enum.IsDefined(request.Item)) throw new ArgumentException("Unknown handover item.", nameof(request));
+            if (!await _db.ECPeriods.AnyAsync(p => p.Id == periodId, cancellationToken)) return false;
+
+            var check = await _db.ECPeriodHandoverChecks.FirstOrDefaultAsync(c => c.ECPeriodId == periodId && c.Item == request.Item, cancellationToken);
+            if (check == null)
+            {
+                check = new ECPeriodHandoverCheck { ECPeriodId = periodId, Item = request.Item };
+                _db.ECPeriodHandoverChecks.Add(check);
+            }
+            check.IsChecked = request.IsChecked;
+            check.SetByUserId = actorUserId;
+            check.SetAt = DateTime.UtcNow;
+            try
+            {
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+            // The unique index on (term, item) refused a second first-time tick saved at the same moment.
+            catch (DbUpdateException)
+            {
+                _db.ChangeTracker.Clear();
+                throw new InvalidOperationException("Another admin changed this item at the same time. Reload and try again.");
+            }
+            return true;
+        }
+
+        public async Task<bool> SetPositionActiveAsync(int id, bool isActive, CancellationToken cancellationToken = default)
+        {
+            var position = await _db.EcPositions.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+            if (position == null) return false;
+            if (!isActive && await _db.ECMembers.AnyAsync(em => em.Position == id && em.EndDate == null, cancellationToken))
+            {
+                throw new InvalidOperationException($"{position.Name} has a current holder. End their term before retiring it.");
+            }
+            if (!isActive && (position.SignsAsHead || position.SignsAsSecretary))
+            {
+                throw new InvalidOperationException($"{position.Name} signs certificates. Mark another position as signatory first.");
+            }
+
+            position.IsActive = isActive;
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> DeletePositionAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var position = await _db.EcPositions.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+            if (position == null) return false;
+            // IgnoreQueryFilters so an archived term still counts as use. The FK would refuse it anyway.
+            var used = await _db.ECMembers.IgnoreQueryFilters().AnyAsync(em => em.Position == id, cancellationToken)
+                || await _db.ElectionSeats.IgnoreQueryFilters().AnyAsync(s => s.Position == id, cancellationToken);
+            if (used)
+            {
+                throw new InvalidOperationException($"{position.Name} has past terms or election seats. Retire it instead.");
+            }
+
+            _db.EcPositions.Remove(position);
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        // 95.2: rows left holding a position that matches no row stop the migration adding its key.
+        // IgnoreQueryFilters so archived rows are listed too, since the key covers them as well.
+        public async Task<IReadOnlyList<InvalidPositionRowDto>> GetInvalidPositionRowsAsync(CancellationToken cancellationToken = default)
+        {
+            var terms = await _db.ECMembers.IgnoreQueryFilters().AsNoTracking()
+                .Where(em => !_db.EcPositions.Any(p => p.Id == em.Position))
+                .Select(em => new InvalidPositionRowDto
+                {
+                    Kind = Constants.Governance.RepairKinds.CommitteeTerm,
+                    Id = em.Id,
+                    Position = em.Position,
+                    Description = (em.Member != null ? em.Member.FullName : "Member " + em.MemberId)
+                        + " in " + (em.ECPeriod != null ? em.ECPeriod.Title : "period " + em.ECPeriodId)
+                })
+                .ToListAsync(cancellationToken);
+            var seats = await _db.ElectionSeats.IgnoreQueryFilters().AsNoTracking()
+                .Where(s => !_db.EcPositions.Any(p => p.Id == s.Position))
+                .Select(s => new InvalidPositionRowDto
+                {
+                    Kind = Constants.Governance.RepairKinds.ElectionSeat,
+                    Id = s.Id,
+                    Position = s.Position,
+                    Description = s.Election != null ? s.Election.Title : "Election " + s.ElectionId
+                })
+                .ToListAsync(cancellationToken);
+            return terms.Concat(seats).ToList();
+        }
+
+        public async Task<bool> RepairPositionAsync(RepairPositionRequest request, CancellationToken cancellationToken = default)
+        {
+            var position = await _db.EcPositions.FirstOrDefaultAsync(p => p.Id == request.PositionId, cancellationToken)
+                ?? throw new InvalidOperationException("Pick a committee position.");
+            if (request.Kind == Constants.Governance.RepairKinds.CommitteeTerm)
+            {
+                var term = await _db.ECMembers.IgnoreQueryFilters().FirstOrDefaultAsync(em => em.Id == request.Id, cancellationToken);
+                if (term == null) return false;
+                if (term.EndDate == null && await _db.ECMembers.CountAsync(em => em.Id != term.Id && em.ECPeriodId == term.ECPeriodId
+                        && em.Position == position.Id && em.EndDate == null, cancellationToken) >= position.SeatCount)
+                {
+                    throw new InvalidOperationException($"Every {position.Name} seat in that period is held. End one term first.");
+                }
+                term.Position = position.Id;
+            }
+            else if (request.Kind == Constants.Governance.RepairKinds.ElectionSeat)
+            {
+                var seat = await _db.ElectionSeats.IgnoreQueryFilters().FirstOrDefaultAsync(s => s.Id == request.Id, cancellationToken);
+                if (seat == null) return false;
+                if (await _db.ElectionSeats.AnyAsync(s => s.Id != seat.Id && s.ElectionId == seat.ElectionId && s.Position == position.Id, cancellationToken))
+                {
+                    throw new InvalidOperationException($"{position.Name} is already on that election.");
+                }
+                seat.Position = position.Id;
+            }
+            else
+            {
+                return false;
+            }
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        private static string CleanPositionName(string? name)
+        {
+            var clean = (name ?? string.Empty).Trim();
+            if (clean.Length == 0)
+            {
+                throw new InvalidOperationException("Give the position a name.");
+            }
+            if (clean.Length > Constants.Governance.PositionNameMaxLength)
+            {
+                throw new InvalidOperationException($"The name can be at most {Constants.Governance.PositionNameMaxLength} characters.");
+            }
+            return clean;
+        }
+
+        // "Joint Secretary 2" becomes "JointSecretary2", the same shape as the seeded keys.
+        internal static string PositionKeyFrom(string name)
+        {
+            var key = new string(name.Where(char.IsAsciiLetterOrDigit).ToArray());
+            return key.Length > Constants.Governance.PositionKeyMaxLength
+                ? key[..Constants.Governance.PositionKeyMaxLength]
+                : key;
+        }
+
+        private static void ApplyPosition(EcPosition position, string name, SaveEcPositionRequest request)
+        {
+            var nameBn = request.NameBn?.Trim();
+            if (nameBn != null && nameBn.Length > Constants.Governance.PositionNameMaxLength)
+            {
+                throw new InvalidOperationException($"The Bengali name can be at most {Constants.Governance.PositionNameMaxLength} characters.");
+            }
+            position.Name = name;
+            position.NameBn = string.IsNullOrEmpty(nameBn) ? null : nameBn;
+            if (request.DisplayOrder < 0 || request.DisplayOrder > Constants.Governance.PositionMaxDisplayOrder)
+            {
+                throw new InvalidOperationException($"Display order must be 0 to {Constants.Governance.PositionMaxDisplayOrder}.");
+            }
+            position.DisplayOrder = request.DisplayOrder;
+            position.SeatCount = Math.Clamp(request.SeatCount, 1, Constants.Governance.PositionMaxSeats);
+            position.ShowOnBoard = request.ShowOnBoard;
+            position.SignsAsHead = request.SignsAsHead;
+            position.SignsAsSecretary = request.SignsAsSecretary;
+        }
+
+        // Forms print one head and one secretary, so setting a flag here takes it off the others.
+        private async Task ClearOtherSignatoriesAsync(EcPosition position, CancellationToken cancellationToken)
+        {
+            if (!position.SignsAsHead && !position.SignsAsSecretary) return;
+            var others = await _db.EcPositions
+                .Where(p => p.Id != position.Id && ((position.SignsAsHead && p.SignsAsHead) || (position.SignsAsSecretary && p.SignsAsSecretary)))
+                .ToListAsync(cancellationToken);
+            foreach (var other in others)
+            {
+                if (position.SignsAsHead) other.SignsAsHead = false;
+                if (position.SignsAsSecretary) other.SignsAsSecretary = false;
+            }
+        }
+
+        private static EcPositionDto MapToPositionDto(EcPosition p) => new()
+        {
+            Id = p.Id,
+            Key = p.Key,
+            Name = p.Name,
+            NameBn = p.NameBn,
+            DisplayOrder = p.DisplayOrder,
+            SeatCount = p.SeatCount,
+            IsActive = p.IsActive,
+            ShowOnBoard = p.ShowOnBoard,
+            SignsAsHead = p.SignsAsHead,
+            SignsAsSecretary = p.SignsAsSecretary
+        };
+
         private static void EndTerm(ECMember ecMember, VacancyReason reason, string? note)
         {
             // System.Text.Json lets an unknown number such as 99 through to here.
@@ -443,7 +754,9 @@ namespace GHCAA.Infrastructure.Services
         {
             Id = m.Id,
             MemberId = m.MemberId,
-            Position = m.Position,
+            Position = m.EcPosition?.Key ?? string.Empty,
+            PositionId = m.Position,
+            PositionName = m.EcPosition?.Name ?? string.Empty,
             StartDate = m.StartDate,
             EndDate = m.EndDate,
             Member = m.Member == null ? null : new MemberSummaryDto

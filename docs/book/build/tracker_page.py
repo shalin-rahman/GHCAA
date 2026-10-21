@@ -16,7 +16,11 @@ HEAD = re.compile(r"^#+ *Work Package (\d+)[ \u2014:-]*(.*)$")
 # or "[DONE \u2014 see 40.11]", so the state word and that trailing text are two groups.
 # WP37 writes most items as "- **37.13m Title [TODO] Priority: P1 | ...** text". A title
 # is only allowed after the bullet and bold, so a numbered prose line is not an item.
-ITEM = re.compile(r"^(?P<bold>\s*- \*\*)?(\d+)\.(\d+[a-z]?)(?(bold)(?: (?P<title>[^\[\n]*?))?) *"
+# Other id shapes in the files: WP28 quotes its items ("> 28.21 [TODO]"), WP34 letters
+# them ("34.D17"), some sub-items have three parts ("47.13.1", "49.3.C"), and a few
+# bold only the id ("- **62.56g** [DONE"). Missing any of these drops open work.
+ITEM = re.compile(r"^(?:> )?(?P<bold>\s*- \*\*)?(\d+)\.(\d+[a-z]?(?:\.\d+|\.[A-Z])?|[A-Z]\d+)"
+                  r"(?(bold)(?P<shut>\*\*)?(?: (?P<title>[^\[\n]*?))?) *"
                   r"\[(TODO|IN PROGRESS|BLOCKED|ONHOLD|PARTIAL|DONE)([^\]]*)\]\s*(.*)$")
 
 # Same shape as wbs.py's DEFECT pattern, applied per item instead of per work
@@ -104,28 +108,31 @@ def parse():
             continue
         num = int(m.group(2))
         # Put the opening bold back, so "Priority: P1 | ...**" reads as the usual meta run.
-        body = [("**" if m.group("bold") else "") + m.group(7)]
+        reopen = m.group("bold") and not m.group("shut")
+        body = [("**" if reopen else "") + m.group(8)]
         for nxt in lines[i + 1:]:
             if not nxt.strip() or ITEM.match(nxt) or nxt.startswith("#"):
                 break
-            body.append(nxt.strip())
+            body.append(nxt.strip().removeprefix(">").strip())
         blob = " ".join(body)
         # An item states its priority and dependencies in one bold run:
         # "**Priority: P2 | Depends on: 82.1.**". Older items split them or
         # omit the bold, so both shapes have to parse.
         meta = re.search(r"\*\*([^*]*(?:Priority|Depends on):[^*]*)\*\*", blob)
         meta_text = meta.group(1) if meta else blob
-        pr = re.search(r"Priority:\s*(P\d)", meta_text)
+        # WP34 puts it in a second bracket instead: "[IN PROGRESS 2026-10-01] [P0]".
+        pr = re.search(r"Priority:\s*(P\d)", meta_text) or re.match(r"\[(P\d)\]", blob)
         dep_m = re.search(r"Depends on:?\s*([^|*]+)", meta_text)
         clean = re.sub(r"\*\*[^*]*(?:Priority|Depends on):[^*]*\*\*", "", blob)
         clean = re.sub(r"Priority:\s*P\d\s*[.|]?", "", clean)
         clean = re.sub(r"Depends on:?\s*(?:none|[\d.,a-z\s]+?)\.", "", clean, count=1)
+        clean = re.sub(r"^\[P\d\]", "", clean)
         clean = re.sub(r"^[\s|*.]+", "", clean).strip()
         if m.group("title"):
             clean = f"{m.group('title').strip()}. {clean}"
         cat, cat_note = classify(num, blob)
-        state = m.group(5)
-        note = m.group(6).strip(" —-:")
+        state = m.group(6)
+        note = m.group(7).strip(" —-:")
         pr_val = pr.group(1) if pr else "none"
         items.append(dict(
             id=f"{m.group(2)}.{m.group(3)}", wp=num, state=state,

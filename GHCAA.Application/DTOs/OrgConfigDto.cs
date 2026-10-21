@@ -173,7 +173,6 @@ namespace GHCAA.Application.DTOs
         public string MembershipLabel { get; init; } = string.Empty;
         public Dictionary<string, string> MembershipTypeLabels { get; init; } = [];
         public Dictionary<string, string> MemberCategoryLabels { get; init; } = [];
-        public Dictionary<string, string> EcRoleLabels { get; init; } = [];
         public NavLabelsDto Nav { get; init; } = new();
         public EmailSubjectsDto EmailSubjects { get; init; } = new();
     }

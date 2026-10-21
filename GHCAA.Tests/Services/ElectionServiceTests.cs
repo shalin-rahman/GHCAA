@@ -20,6 +20,43 @@ public sealed class ElectionServiceTests : TestBase
     [OneTimeTearDown]
     public void DisposeKey() => OfficerKey.Dispose();
 
+    // FR-39
+    [TestCase("President", EcPositionIds.President)]
+    [TestCase("general secretary", EcPositionIds.GeneralSecretary)]
+    [TestCase("Media Cultural & Sports Secretary", EcPositionIds.MediaCulturalAndSportsSecretary)]
+    [TestCase("MediaCulturalAndSportsSecretary", EcPositionIds.MediaCulturalAndSportsSecretary)]
+    [TestCase("joint-secretary 2", EcPositionIds.JointSecretary2)]
+    public async Task FindPositionIdAsync_MatchesKeyOrNameIgnoringCaseAndPunctuation(string title, int expected)
+    {
+        var id = await new ElectionService(_context).FindPositionIdAsync(title);
+
+        id.Should().Be(expected);
+    }
+
+    // FR-39
+    [TestCase(null)]
+    [TestCase("  ")]
+    [TestCase("Chief Whip")]
+    public async Task FindPositionIdAsync_ReturnsNullWhenNothingMatches(string? title)
+    {
+        var id = await new ElectionService(_context).FindPositionIdAsync(title);
+
+        id.Should().BeNull();
+    }
+
+    // FR-39
+    [Test]
+    public async Task FindPositionIdAsync_SkipsARetiredPosition()
+    {
+        var law = await _context.EcPositions.SingleAsync(p => p.Id == EcPositionIds.LawSecretary);
+        law.IsActive = false;
+        await _context.SaveChangesAsync();
+
+        var id = await new ElectionService(_context).FindPositionIdAsync("Law Secretary");
+
+        id.Should().BeNull();
+    }
+
     [Test]
     public async Task FreezeVoterRollAsync_UsesMembershipAndDuesSnapshot()
     {
@@ -109,7 +146,7 @@ public sealed class ElectionServiceTests : TestBase
     public async Task UnfreezeVoterRollAsync_RefusesOnceANominationExists()
     {
         var election = await CreateFrozenElectionAsync(DateTime.UtcNow.AddDays(10));
-        var seat = new ElectionSeat { ElectionId = election.Id, Position = ECPosition.President };
+        var seat = new ElectionSeat { ElectionId = election.Id, Position = EcPositionIds.President };
         _context.ElectionSeats.Add(seat);
         await _context.SaveChangesAsync();
         _context.Nominations.Add(new Nomination { ElectionId = election.Id, ElectionSeatId = seat.Id, CandidateMemberId = 1, ProposerMemberId = 1, SeconderMemberId = 1, Statement = "x", SubmittedAt = DateTime.UtcNow });
@@ -591,6 +628,7 @@ public sealed class ElectionServiceTests : TestBase
     {
         var (service, id, _) = await DeclaredPollAsync();
         await service.DeclareAsync(id);
+        await SetRecountWindowEndsAsync(id, DateTime.UtcNow.AddDays(-1));
 
         var error = await service.RecordKeyDestroyedAsync(id, 7);
 
@@ -607,6 +645,7 @@ public sealed class ElectionServiceTests : TestBase
     {
         var (service, id, _) = await DeclaredPollAsync();
         await service.DeclareAsync(id);
+        await SetRecountWindowEndsAsync(id, DateTime.UtcNow.AddDays(-1));
         (await service.RecordKeyDestroyedAsync(id, 7)).Should().BeNull();
 
         _context.ElectionAuditEntries.Add(new ElectionAuditEntry
@@ -631,6 +670,7 @@ public sealed class ElectionServiceTests : TestBase
     {
         var (service, id, _) = await DeclaredPollAsync();
         await service.DeclareAsync(id);
+        await SetRecountWindowEndsAsync(id, DateTime.UtcNow.AddDays(-1));
 
         var replies = await Task.WhenAll(service.RecordKeyDestroyedAsync(id, 7), service.RecordKeyDestroyedAsync(id, 8));
 
@@ -661,6 +701,36 @@ public sealed class ElectionServiceTests : TestBase
 
         error.Should().Be(Constants.Elections.Replies.NotFound);
     }
+
+    [Test]
+    [Category("FR-50")]
+    public async Task KeyDestroyed_RecountWindowNotSet_Refused()
+    {
+        var (service, id, _) = await DeclaredPollAsync();
+        await service.DeclareAsync(id);
+
+        var error = await service.RecordKeyDestroyedAsync(id, 7);
+
+        error.Should().Be(Constants.Elections.Replies.RecountWindowOpen);
+        _context.ElectionAuditEntries.Any(x => x.Action == Constants.Elections.AuditActions.KeyDestroyed).Should().BeFalse();
+    }
+
+    [Test]
+    [Category("FR-50")]
+    public async Task KeyDestroyed_RecountWindowStillOpen_Refused()
+    {
+        var (service, id, _) = await DeclaredPollAsync();
+        await service.DeclareAsync(id);
+        await SetRecountWindowEndsAsync(id, DateTime.UtcNow.AddDays(3));
+
+        var error = await service.RecordKeyDestroyedAsync(id, 7);
+
+        error.Should().Be(Constants.Elections.Replies.RecountWindowOpen);
+        _context.ElectionAuditEntries.Any(x => x.Action == Constants.Elections.AuditActions.KeyDestroyed).Should().BeFalse();
+    }
+
+    private Task SetRecountWindowEndsAsync(int id, DateTime endsOn) =>
+        _context.Elections.Where(x => x.Id == id).ExecuteUpdateAsync(s => s.SetProperty(x => x.RecountWindowEndsOn, endsOn));
 
     private async Task<(ElectionService Service, int ElectionId, int Cast)> DeclaredPollAsync(bool publish = true, int voters = 12)
     {
@@ -734,7 +804,7 @@ public sealed class ElectionServiceTests : TestBase
     {
         var (service, id, cast) = await DeclaredPollAsync(voters: 40);
         await service.DeclareAsync(id);
-        var seat = _context.ElectionSeats.Single(x => x.ElectionId == id && x.Position == ECPosition.Member1);
+        var seat = _context.ElectionSeats.Single(x => x.ElectionId == id && x.Position == EcPositionIds.Member1);
         var nominations = _context.Nominations.Where(x => x.ElectionSeatId == seat.Id).OrderBy(x => x.Id).Select(x => x.Id).ToArray();
         var castOrder = Enumerable.Range(0, cast).Select(i => nominations[i % 2]).ToArray();
 
@@ -757,7 +827,7 @@ public sealed class ElectionServiceTests : TestBase
         (await service.DeclareAsync(poll.Election.Id)).Should().BeTrue();
 
         _context.ECMembers.Should().HaveCount(3);
-        _context.ECMembers.Should().ContainSingle(x => x.MemberId == poll.Nominations[0].CandidateMemberId && x.Position == ECPosition.President);
+        _context.ECMembers.Should().ContainSingle(x => x.MemberId == poll.Nominations[0].CandidateMemberId && x.Position == EcPositionIds.President);
         _context.Elections.AsNoTracking().Single().Phase.Should().Be(ElectionPhase.Declared);
     }
 
@@ -815,15 +885,142 @@ public sealed class ElectionServiceTests : TestBase
     public async Task SetPhaseAsync_WillNotOpenPollingWithoutAKey()
     {
         var poll = await CreatePollingElectionAsync(voters: 1);
-        poll.Election.Phase = ElectionPhase.Campaign;
         poll.Election.BallotPublicKey = null;
-        await _context.SaveChangesAsync();
-        var service = new ElectionService(_context);
+        var service = await BackToCampaignAsync(poll);
+
+        await AttestAllAsync(service, poll.Election.Id);
 
         (await service.SetPhaseAsync(poll.Election.Id, ElectionPhase.Polling)).Should().BeFalse();
         (await service.SetBallotKeyAsync(poll.Election.Id, OfficerPublicKey)).Success.Should().BeTrue();
         _context.ElectionAuditEntries.Select(x => x.Action).Should().Contain(Constants.Elections.AuditActions.BallotKeySet);
         (await service.SetPhaseAsync(poll.Election.Id, ElectionPhase.Polling)).Should().BeTrue();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task Readiness_WithoutAttestations_ListsOnlyThoseUnmet_AndPollingStaysShut()
+    {
+        var poll = await CreatePollingElectionAsync(voters: 1);
+        var service = await BackToCampaignAsync(poll);
+
+        var readiness = await service.GetReadinessAsync(poll.Election.Id);
+
+        readiness!.Ready.Should().BeFalse();
+        readiness.Items.Where(x => !x.Met && !x.Advisory).Select(x => x.Key).Should().BeEquivalentTo(Constants.Elections.Readiness.Attested);
+        readiness.Items.Where(x => x.Attestation).Select(x => x.Key).Should().BeEquivalentTo(Constants.Elections.Readiness.Attested);
+        (await service.SetPhaseAsync(poll.Election.Id, ElectionPhase.Polling)).Should().BeFalse();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task Readiness_TooFewApprovers_IsAdvisory_AndDoesNotBlockPolling()
+    {
+        var poll = await CreatePollingElectionAsync(voters: 1);
+        var service = await BackToCampaignAsync(poll);
+        await AttestAllAsync(service, poll.Election.Id);
+
+        var readiness = await service.GetReadinessAsync(poll.Election.Id);
+
+        readiness!.Ready.Should().BeTrue();
+        readiness.Items.Should().ContainSingle(x => x.Key == Constants.Elections.Readiness.Approvers && !x.Met && x.Advisory);
+        (await service.SetPhaseAsync(poll.Election.Id, ElectionPhase.Polling)).Should().BeTrue();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task Readiness_TestElection_NeedsNoAttestations()
+    {
+        var poll = await CreatePollingElectionAsync(voters: 1);
+        poll.Election.IsTest = true;
+
+        var readiness = await (await BackToCampaignAsync(poll)).GetReadinessAsync(poll.Election.Id);
+
+        readiness!.Ready.Should().BeTrue();
+        readiness.Items.Where(x => x.Attestation).Should().OnlyContain(x => x.Met);
+    }
+
+    [TestCase(Constants.Elections.Readiness.RollFrozen)]
+    [TestCase(Constants.Elections.Readiness.CandidateList)]
+    [TestCase(Constants.Elections.Readiness.BallotKey)]
+    [TestCase(Constants.Elections.Readiness.Appointments)]
+    [TestCase(Constants.Elections.Readiness.PollingWindow)]
+    [Category("FR-39")]
+    public async Task Readiness_EachStoredItem_BlocksPollingWhenUnmet(string key)
+    {
+        var poll = await CreatePollingElectionAsync(voters: 1);
+        var service = await BackToCampaignAsync(poll);
+        await AttestAllAsync(service, poll.Election.Id);
+        switch (key)
+        {
+            case Constants.Elections.Readiness.RollFrozen:
+                _context.VoterRolls.RemoveRange(_context.VoterRolls.Where(x => x.ElectionId == poll.Election.Id));
+                break;
+            case Constants.Elections.Readiness.CandidateList:
+                poll.Nominations[1].BallotOrder = null;
+                break;
+            case Constants.Elections.Readiness.BallotKey:
+                poll.Election.BallotPublicKey = null;
+                break;
+            case Constants.Elections.Readiness.Appointments:
+                var persona = new ElectionPersona { Name = "Scrutineer", GroupName = "Officials", Description = "d", DeclarationText = "d" };
+                var user = new User { Username = "official", PasswordHash = "x" };
+                _context.AddRange(persona, user);
+                await _context.SaveChangesAsync();
+                _context.ElectionAppointments.Add(new ElectionAppointment { ElectionId = poll.Election.Id, PersonaId = persona.Id, UserId = user.Id, DisplayName = "o", Email = "o@example.com", AppointedByUserId = user.Id, AppointedAt = DateTime.UtcNow, AcceptedAt = DateTime.UtcNow });
+                break;
+            case Constants.Elections.Readiness.PollingWindow:
+                poll.Election.PollingClosesOn = DateTime.UtcNow.AddMinutes(-1);
+                break;
+        }
+        await _context.SaveChangesAsync();
+
+        var readiness = await service.GetReadinessAsync(poll.Election.Id);
+
+        readiness!.Ready.Should().BeFalse();
+        readiness.Items.Where(x => !x.Met && !x.Advisory).Select(x => x.Key).Should().Equal(key);
+        (await service.SetPhaseAsync(poll.Election.Id, ElectionPhase.Polling)).Should().BeFalse();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task Readiness_UnknownElection_IsNull()
+    {
+        (await new ElectionService(_context).GetReadinessAsync(999_999)).Should().BeNull();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task AttestReadiness_IsRecordedOnTheAuditChain_WithTheActor()
+    {
+        var poll = await CreatePollingElectionAsync(voters: 1);
+        var user = new User { Username = "chief", PasswordHash = "x" };
+        _context.Users.Add(user);
+        var service = await BackToCampaignAsync(poll);
+
+        (await service.AttestReadinessAsync(poll.Election.Id, user.Id, Constants.Elections.Readiness.MockElection)).Should().BeNull();
+
+        var entry = _context.ElectionAuditEntries.Single(x => x.Action == Constants.Elections.AuditActions.ReadinessAttested);
+        entry.ActorUserId.Should().Be(user.Id);
+        entry.DetailJson.Should().Contain(Constants.Elections.Readiness.MockElection);
+        (await service.GetReadinessAsync(poll.Election.Id))!.Items
+            .Single(x => x.Key == Constants.Elections.Readiness.MockElection).Met.Should().BeTrue();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task AttestReadiness_RefusesUnknownElection_StoredItem_SecondTime_AndAfterPollingOpens()
+    {
+        var poll = await CreatePollingElectionAsync(voters: 1);
+        var service = await BackToCampaignAsync(poll);
+
+        (await service.AttestReadinessAsync(999_999, 0, Constants.Elections.Readiness.MockElection)).Should().Be(Constants.Elections.Replies.NotFound);
+        (await service.AttestReadinessAsync(poll.Election.Id, 0, Constants.Elections.Readiness.BallotKey)).Should().Be(Constants.Elections.Replies.Invalid);
+        (await service.AttestReadinessAsync(poll.Election.Id, 0, Constants.Elections.Readiness.PaperStock)).Should().BeNull();
+        (await service.AttestReadinessAsync(poll.Election.Id, 0, Constants.Elections.Readiness.PaperStock)).Should().Be(Constants.Elections.Replies.AlreadyRecorded);
+
+        poll.Election.Phase = ElectionPhase.Polling;
+        await _context.SaveChangesAsync();
+        (await service.AttestReadinessAsync(poll.Election.Id, 0, Constants.Elections.Readiness.TechnicalAudit)).Should().Be(Constants.Elections.Replies.WrongPhase);
     }
 
     [Test]
@@ -933,7 +1130,7 @@ public sealed class ElectionServiceTests : TestBase
         var fresh = new ECPeriod { Title = "Fresh", StartDate = closes.Date };
         _context.ECPeriods.AddRange(early, taken, fresh);
         var sitting = await CreateAndSaveTestMemberAsync();
-        _context.ECMembers.Add(new ECMember { ECPeriod = taken, MemberId = sitting.Id, Position = ECPosition.President, StartDate = taken.StartDate });
+        _context.ECMembers.Add(new ECMember { ECPeriod = taken, MemberId = sitting.Id, Position = EcPositionIds.President, StartDate = taken.StartDate });
         await _context.SaveChangesAsync();
         var service = new ElectionService(_context);
         CreateElectionDto For(int periodId) => new("Election", periodId, closes.AddDays(-9), closes.AddDays(-5), closes.AddDays(-1), closes, sitting.Id);
@@ -1043,7 +1240,7 @@ public sealed class ElectionServiceTests : TestBase
         var taken = new ECPeriod { Title = "Taken", StartDate = closes.AddDays(5) };
         _context.ECPeriods.AddRange(early, taken);
         var sitting = await CreateAndSaveTestMemberAsync();
-        _context.ECMembers.Add(new ECMember { ECPeriod = taken, MemberId = sitting.Id, Position = ECPosition.President, StartDate = taken.StartDate });
+        _context.ECMembers.Add(new ECMember { ECPeriod = taken, MemberId = sitting.Id, Position = EcPositionIds.President, StartDate = taken.StartDate });
         await _context.SaveChangesAsync();
         var service = new ElectionService(_context);
         CreateElectionDto For(int periodId, bool isTest) => new("Election", periodId, closes.AddDays(-9), closes.AddDays(-5), closes.AddDays(-1), closes, sitting.Id, IsTest: isTest);
@@ -1282,7 +1479,7 @@ public sealed class ElectionServiceTests : TestBase
         await CloseAndStartCountingAsync(service, poll.Election);
         await service.CountAsync(poll.Election.Id, OfficerPrivateKey);
         var outsider = await CreateAndSaveTestMemberAsync();
-        var added = new ECMember { ECPeriodId = poll.Election.ECPeriodId, MemberId = outsider.Id, Position = ECPosition.President, StartDate = DateTime.UtcNow };
+        var added = new ECMember { ECPeriodId = poll.Election.ECPeriodId, MemberId = outsider.Id, Position = EcPositionIds.President, StartDate = DateTime.UtcNow };
         _context.ECMembers.Add(added);
         await _context.SaveChangesAsync();
 
@@ -1533,7 +1730,7 @@ public sealed class ElectionServiceTests : TestBase
             PollingOpensOn = DateTime.UtcNow.AddDays(1),
             PollingClosesOn = DateTime.UtcNow.AddDays(2),
         };
-        var seat = new ElectionSeat { Election = election, Position = ECPosition.President };
+        var seat = new ElectionSeat { Election = election, Position = EcPositionIds.President };
         var nominations = candidates.Select(c => new Nomination
         {
             Election = election,
@@ -1586,8 +1783,8 @@ public sealed class ElectionServiceTests : TestBase
         };
         var seats = new[]
         {
-            new ElectionSeat { Election = election, Position = ECPosition.President },
-            new ElectionSeat { Election = election, Position = ECPosition.Member1, SeatCount = 2 },
+            new ElectionSeat { Election = election, Position = EcPositionIds.President },
+            new ElectionSeat { Election = election, Position = EcPositionIds.Member1, SeatCount = 2 },
         };
         _context.Elections.Add(election);
         _context.ElectionSeats.AddRange(seats);
@@ -1611,6 +1808,22 @@ public sealed class ElectionServiceTests : TestBase
         _context.Nominations.AddRange(nominations);
         await _context.SaveChangesAsync();
         return new PollingElection(election, seats, nominations, electors);
+    }
+
+    // 37.12w. Polling opens from Campaign, once each candidate has a place on the ballot.
+    private async Task<ElectionService> BackToCampaignAsync(PollingElection poll)
+    {
+        poll.Election.Phase = ElectionPhase.Campaign;
+        for (var i = 0; i < poll.Nominations.Length; i++)
+            poll.Nominations[i].BallotOrder = i + 1;
+        await _context.SaveChangesAsync();
+        return new ElectionService(_context);
+    }
+
+    private static async Task AttestAllAsync(ElectionService service, int electionId)
+    {
+        foreach (var key in Constants.Elections.Readiness.Attested)
+            (await service.AttestReadinessAsync(electionId, 0, key)).Should().BeNull();
     }
 
     private async Task ClosePollingAsync(Election election)

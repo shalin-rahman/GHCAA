@@ -69,6 +69,18 @@ class _ElectionAdapter implements HttpClientAdapter {
         }
       ]);
     }
+    if (options.path == '/admin/elections/12/nominations') {
+      return _json([
+        {
+          'id': 4,
+          'electionSeatId': 3,
+          'candidateMemberId': 8,
+          'status': 'Accepted',
+          'statement': 'For service',
+          'consentAt': '2026-10-20T09:30:00'
+        }
+      ]);
+    }
     if (options.path == '/elections/12/ballot') {
       return _json({
         'electionId': 12,
@@ -285,6 +297,16 @@ void main() {
     expect(election.title, 'EC 2026');
     expect(nominations.single.candidateMemberId, 8);
     expect(adapter.path, '/elections/12/nominations');
+  });
+
+  test('the officials nomination list reads the admin route and its consent time as UTC', () async {
+    final adapter = _ElectionAdapter();
+    final service = ElectionService(Dio()..httpClientAdapter = adapter);
+
+    final nominations = await service.getAdminNominations(12);
+
+    expect(adapter.path, '/admin/elections/12/nominations');
+    expect(nominations.single.consentAt!.toUtc(), DateTime.utc(2026, 10, 20, 9, 30));
   });
 
   test('latest declared election reads from its own route', () async {

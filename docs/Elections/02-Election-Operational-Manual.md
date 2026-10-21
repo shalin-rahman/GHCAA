@@ -57,7 +57,7 @@ Every Election Commissioner, Polling Officer, Observer and Technical Administrat
 
 Deviation shall only occur by written order of the Chief Election Commissioner.
 
-The platform fills some forms from its own records, so the officials do not retype them. These are ER-09 (nomination), ER-10 (nominations received), ER-13 (withdrawals), ER-14, ER-19 (officials on the board), ER-23 (count sheet, with the counts of the run), ER-29, ER-30 and ER-31. ER-01, ER-02, ER-11, ER-26, ER-28 and ER-33 print as blank forms and are completed by hand.
+The platform fills some forms from its own records, so the officials do not retype them. Form numbers follow the Regulations from 2026-10-20; the platform still prints the old code shown in brackets until it is renumbered (TODO 37.14n), and the old codes keep working after that. Filled from records: ER-08 (ER-07), ER-10 (ER-09), ER-11 (ER-10), ER-18 (ER-13), ER-19 (ER-14), ER-25 (ER-19), ER-27 (ER-23), ER-27C (ER-29), ER-29 (ER-30) and ER-30 (ER-31). Printed blank and completed by hand: ER-01, ER-02, ER-17 (ER-11), ER-28 (ER-26), ER-28B (ER-28) and ER-34 (ER-33). Any form can be printed blank or filled from records once TODO 37.14s, form wording from settings, is built. Section Annex B of the Officials Handbook lists all 50 forms.
 
 ---
 

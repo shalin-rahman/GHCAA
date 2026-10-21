@@ -33,27 +33,6 @@ export const ELECTION_STAFF_ROLES = [SUPER_ADMIN_ROLE, ADMIN_ROLE, 'ElectionOffi
 export const ELECTION_RULES_UNLOCK = { DEFAULT_MINUTES: 30, MAX_MINUTES: 60, REASON_MIN: 20, REASON_MAX: 1000 } as const;
 export const ELECTION_APPOINTMENT_REASON_MAX = 400;
 
-// Mirrors GHCAA.Domain's ECPosition enum order exactly — index N here must equal enum value N,
-// since getECPositionName() below indexes into this array by the numeric position value.
-export const EC_ROLES = [
-    'None',
-    'President',
-    'Vice President',
-    'General Secretary',
-    'Office Secretary',
-    'Joint Secretary 1',
-    'Joint Secretary 2',
-    'Treasurer',
-    'Media, Cultural & Sports Secretary',
-    'Organizational Secretary',
-    'Information & Technology Secretary',
-    'Member-1',
-    'Member-2',
-    'Law Secretary',
-    'Immediate Past President',
-    'Institutional Representative'
-] as const;
-
 // 82.42: the /lookups/{group} route takes any string and matches it against the Lookups
 // table's LookupGroup column — these are the exact group names GHCAA.Mobile's DropdownService
 // already calls with, so both clients ask the API for the same rows.
@@ -64,8 +43,7 @@ export const LOOKUP_GROUPS = {
     Gender: 'Gender',
     BloodGroup: 'BloodGroup',
     JobCategory: 'JobCategory',
-    PassingYear: 'PassingYear',
-    ECPosition: 'ECPosition'
+    PassingYear: 'PassingYear'
 } as const;
 
 export const DATE_FORMATS = {
@@ -251,44 +229,21 @@ export const SUBMISSION_STATUS_MAP: Record<string | number, { label: string, cla
     3: { label: 'Rejected', class: 'terminated' }
 };
 
-export type ECPositionType = typeof EC_ROLES[number];
-
-// Index here must equal GHCAA.Domain's ECPosition enum member order, since string enum names
-// below are looked up in this same order rather than reformatted with a regex.
-const EC_POSITION_ENUM_NAMES = [
-    'None', 'President', 'VicePresident', 'GeneralSecretary', 'OfficeSecretary',
-    'JointSecretary1', 'JointSecretary2', 'Treasurer', 'MediaCulturalAndSportsSecretary',
-    'OrganizationalSecretary', 'InformationAndTechnologySecretary', 'Member1', 'Member2',
-    'LawSecretary', 'ImmediatePastPresident', 'InstitutionalRepresentative'
-] as const;
-
-export function getECPositionName(pos: number | string): string {
-    if (pos === null || pos === undefined || pos === 'None' || pos === '0' || pos === 0) return 'None';
-
-    if (typeof pos === 'number') {
-        return EC_ROLES[pos] || 'Member';
-    }
-
-    // Handle numeric string "1", "2" etc
-    if (/^\d+$/.test(pos)) {
-        return EC_ROLES[parseInt(pos)] || 'Member';
-    }
-
-    const index = EC_POSITION_ENUM_NAMES.indexOf(pos as typeof EC_POSITION_ENUM_NAMES[number]);
-    if (index !== -1) return EC_ROLES[index];
-
-    // Unknown string — fall back to a spaced-out version rather than showing raw PascalCase.
-    return pos.replace(/([A-Z])/g, ' $1').trim();
+// 95.2: the label is the position name from the EcPositions table. There is no local list to
+// fall back on, so a record with no name shows nothing rather than a guessed title.
+export function getPositionLabel(record: { positionName?: string | null } | null | undefined): string {
+    return record?.positionName ?? '';
 }
 
-export function getCurrentECPosition(ecHistory: any[] | undefined): any {
-    if (!ecHistory || !Array.isArray(ecHistory) || ecHistory.length === 0) return 'None';
-    // Try to find the active one
-    const current = ecHistory.find(h => h.isCurrent && !h.endDate);
-    if (current) return current.position;
+// The open record, or the latest one when none is open.
+export function getCurrentECRecord(ecHistory: any[] | undefined): any | null {
+    if (!ecHistory || !Array.isArray(ecHistory) || ecHistory.length === 0) return null;
+    return ecHistory.find(h => h.isCurrent && !h.endDate) ?? ecHistory[0];
+}
 
-    // Fallback to the latest one if no active found
-    return ecHistory[0].position;
+// Empty when the member holds no committee record.
+export function getCurrentECLabel(ecHistory: any[] | undefined): string {
+    return getPositionLabel(getCurrentECRecord(ecHistory));
 }
 
 export function getCurrentECPeriod(ecHistory: any[] | undefined): string {
@@ -298,17 +253,11 @@ export function getCurrentECPeriod(ecHistory: any[] | undefined): string {
     return ecHistory[0].periodTitle;
 }
 
-export function getECPositionForPeriod(ecHistory: any[] | undefined, periodId: number | null): any {
-    if (!ecHistory || !Array.isArray(ecHistory) || ecHistory.length === 0) return 'None';
-    if (!periodId) return getCurrentECPosition(ecHistory);
-
-    // In our ECHistoryDto, we don't have periodId, we have periodTitle.
-    // Wait, the ECMember interface HAS ecPeriodId.
-    // Let's check what's in the DTO.
-    const record = ecHistory.find(h => h.periodId === periodId);
-    if (record) return record.position;
-
-    return 'None';
+// With no period, falls back to the current record.
+export function getECRecordForPeriod(ecHistory: any[] | undefined, periodId: number | null): any | null {
+    if (!ecHistory || !Array.isArray(ecHistory) || ecHistory.length === 0) return null;
+    if (!periodId) return getCurrentECRecord(ecHistory);
+    return ecHistory.find(h => h.periodId === periodId) ?? null;
 }
 
 export function getStatusLabel(status: string | number): string {
@@ -728,11 +677,12 @@ export const API_ENDPOINTS = {
         UPDATES: '/api/networking/updates'
     },
     // Public governance surface. Distinct from ADMIN.GOVERNANCE ('/api/admin/governance') —
-    // these three are [AllowAnonymous] on GovernanceController; VOTE is member-authenticated.
+    // all are [AllowAnonymous] on GovernanceController except VOTE, which needs a member login.
     GOVERNANCE: {
         CONSTITUTION: '/api/governance/constitution',
         CONSTITUTION_HISTORY: '/api/governance/constitution/history',
-        CONSTITUTION_VOTE: (id: number) => `/api/governance/constitution/${id}/vote`
+        CONSTITUTION_VOTE: (id: number) => `/api/governance/constitution/${id}/vote`,
+        POSITIONS: '/api/governance/positions'
     },
     LOOKUPS: '/api/lookups',
     LEDGER: '/api/ledger',
@@ -770,6 +720,8 @@ export const API_ENDPOINTS = {
         COUNT: (id: number) => `/api/elections/${id}/count`,
         DECLARE: (id: number) => `/api/elections/${id}/declare`,
         KEY_DESTROYED: (id: number) => `/api/elections/${id}/key-destroyed`,
+        READINESS: (id: number) => `/api/elections/${id}/readiness`,
+        READINESS_ATTEST: (id: number) => `/api/elections/${id}/readiness/attest`,
         DOCUMENT: (id: number, formCode: string) => `/api/elections/${id}/documents/${formCode}`,
         APPROVALS: (id: number) => `/api/elections/${id}/approvals`,
         APPROVE: (approvalId: number) => `/api/elections/approvals/${approvalId}/approve`,
@@ -805,7 +757,48 @@ export const API_ENDPOINTS = {
         PUBLISH: (id: number) => `/api/admin/elections/${id}/publish`,
         CLOSE: (id: number) => `/api/admin/elections/${id}/close`,
         BALLOT_KEY: (id: number) => `/api/admin/elections/${id}/ballot-key`,
-        CANDIDATES: (id: number) => `/api/admin/elections/${id}/candidates`
+        CANDIDATES: (id: number) => `/api/admin/elections/${id}/candidates`,
+        // 37.14m. Records the printed forms read.
+        FORM_DETAILS: (id: number) => `/api/admin/elections/${id}/form-details`,
+        NOMINATIONS: (id: number) => `/api/admin/elections/${id}/nominations`,
+        CONSENT: (id: number, nominationId: number) => `/api/admin/elections/${id}/nominations/${nominationId}/consent`,
+        SCRUTINY_CHECKS: (id: number, nominationId: number) => `/api/admin/elections/${id}/nominations/${nominationId}/scrutiny-checks`,
+        RECOUNTS: (id: number) => `/api/admin/elections/${id}/recounts`,
+        RECOUNT_DECISION: (id: number, recountId: number) => `/api/admin/elections/${id}/recounts/${recountId}/decision`,
+        RECOUNT_FIGURES: (id: number, recountId: number) => `/api/admin/elections/${id}/recounts/${recountId}/figures`,
+        FORM_RECORDS_TITLE: 'Form records',
+        FINAL_LIST_ON_LABEL: 'Final candidate list published',
+        CAMPAIGN_OPENS_ON_LABEL: 'Campaign opens',
+        CAMPAIGN_CLOSES_ON_LABEL: 'Campaign closes',
+        SILENCE_STARTS_AT_LABEL: 'Campaign silence starts',
+        VENUE_LABEL: 'Polling venue',
+        NOTICE_REFERENCE_LABEL: 'Notice reference',
+        RECOUNT_WINDOW_ENDS_ON_LABEL: 'Recount requests close',
+        FORM_DETAILS_HINT: 'Shown on the printed notices. A field left empty is cleared and the form prints a blank line.',
+        FORM_DETAILS_SAVED: 'Form details saved.',
+        CONSENT_LABEL: 'Consent signed',
+        CONSENT_HINT: 'The time written on the signed consent form, in local time.',
+        CONSENT_SAVED: 'Consent time saved.',
+        CONSENT_MISSING: 'No consent recorded',
+        SCRUTINY_CHECKS_TITLE: 'Scrutiny checklist',
+        RECOUNTS_TITLE: 'Recount requests',
+        RECOUNTS_EMPTY: 'No recount requests.',
+        RECOUNT_SEAT_LABEL: 'Position',
+        RECOUNT_APPLICANT_LABEL: 'Applicant name',
+        RECOUNT_APPLICANT_MEMBER_LABEL: 'Applicant member ID',
+        RECOUNT_GROUNDS_LABEL: 'Grounds',
+        RECOUNT_EXPLANATION_LABEL: 'Explanation',
+        RECOUNT_RECEIVED_AT_LABEL: 'Received',
+        RECOUNT_RECORDED: 'Recount request recorded.',
+        RECOUNT_REFUSE_REASON_LABEL: 'Reason',
+        RECOUNT_REFUSE_REASON_REQUIRED: 'Give a reason when refusing a recount.',
+        RECOUNT_DECIDED: 'Decision recorded.',
+        RECOUNT_PENDING: 'Waiting for a decision',
+        RECOUNT_ALLOWED: 'Allowed',
+        RECOUNT_REFUSED: 'Refused',
+        RECOUNT_FIGURES_TITLE: 'Recount figures',
+        RECOUNT_FIGURES_SAVED: 'Recount figures saved.',
+        RECOUNT_NO_RESULT: 'This position has no declared result to recount.'
     },
     // Work Package 37.12b election persona routes.
     ADMIN_ELECTION_PERSONAS: {

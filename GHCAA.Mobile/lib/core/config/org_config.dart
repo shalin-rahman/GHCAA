@@ -357,7 +357,6 @@ class LocalePack {
   final String membershipLabel;
   final Map<String, String> membershipTypeLabels;
   final Map<String, String> memberCategoryLabels;
-  final Map<String, String> ecRoleLabels;
   final NavLabels nav;
 
   LocalePack({
@@ -370,7 +369,6 @@ class LocalePack {
     required this.membershipLabel,
     required this.membershipTypeLabels,
     required this.memberCategoryLabels,
-    required this.ecRoleLabels,
     required this.nav,
   });
 
@@ -385,7 +383,6 @@ class LocalePack {
       membershipLabel: json['membershipLabel'] ?? 'Membership',
       membershipTypeLabels: _parseStringMap(json['membershipTypeLabels']),
       memberCategoryLabels: _parseStringMap(json['memberCategoryLabels']),
-      ecRoleLabels: _parseStringMap(json['ecRoleLabels']),
       nav: NavLabels.fromJson(json['nav'] ?? {}),
     );
   }
@@ -601,7 +598,6 @@ class OrgConfig {
               'Guest': 'Guest',
               'Student': 'Student',
             },
-            ecRoleLabels: {},
             nav: NavLabels(
               administration: 'ADMINISTRATION',
               myAccount: 'MY ACCOUNT',

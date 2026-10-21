@@ -39,7 +39,7 @@ public sealed class ElectionDocumentService(
             return null;
 
         var election = await db.Elections
-            .Include(x => x.Seats)
+            .Include(x => x.Seats).ThenInclude(s => s.EcPosition)
             .Include(x => x.VoterRoll)
             .Include(x => x.ECPeriod)
             .SingleOrDefaultAsync(x => x.Id == electionId, cancellationToken);
@@ -133,7 +133,7 @@ public sealed class ElectionDocumentService(
     // Which stored records each form shows. Public so a test can read the rows without opening the PDF.
     public async Task<IReadOnlyList<FormTable>> LoadTablesAsync(int electionId, string formCode, CancellationToken ct = default)
     {
-        var election = await db.Elections.AsNoTracking().Include(x => x.Seats).SingleOrDefaultAsync(x => x.Id == electionId, ct);
+        var election = await db.Elections.AsNoTracking().Include(x => x.Seats).ThenInclude(s => s.EcPosition).SingleOrDefaultAsync(x => x.Id == electionId, ct);
         return election == null ? [] : await LoadTablesAsync(election, formCode.Trim().ToUpperInvariant(), ct);
     }
 
@@ -187,7 +187,7 @@ public sealed class ElectionDocumentService(
         var ids = rows.SelectMany(n => new[] { n.CandidateMemberId, n.ProposerMemberId, n.SeconderMemberId }).Distinct().ToList();
         var names = await db.Members.AsNoTracking().Where(m => ids.Contains(m.Id)).ToDictionaryAsync(m => m.Id, m => m.FullName, ct);
         string Name(int id) => names.GetValueOrDefault(id) ?? string.Empty;
-        var seats = election.Seats.ToDictionary(s => s.Id, s => ElectionService.SeatTitle(s.Position));
+        var seats = election.Seats.ToDictionary(s => s.Id, s => ElectionService.SeatTitle(s));
         string Seat(Nomination n) => seats.GetValueOrDefault(n.ElectionSeatId) ?? string.Empty;
         var ordered = rows.OrderBy(Seat).ThenBy(n => n.BallotOrder ?? int.MaxValue).ThenBy(n => Name(n.CandidateMemberId)).ToList();
 
@@ -196,7 +196,7 @@ public sealed class ElectionDocumentService(
             "ER-09" => new FormTable("Nominations", ["Candidate", "Seat", "Proposer", "Seconder", "Filed"],
                 ordered.Select(n => (IReadOnlyList<string>)[Name(n.CandidateMemberId), Seat(n), Name(n.ProposerMemberId), Name(n.SeconderMemberId), $"{n.SubmittedAt:yyyy-MM-dd HH:mm}"]).ToArray()),
             "ER-10" => new FormTable("Candidate consent", ["Candidate", "Seat", "Consent filed"],
-                ordered.Select(n => (IReadOnlyList<string>)[Name(n.CandidateMemberId), Seat(n), $"{n.SubmittedAt:yyyy-MM-dd HH:mm}"]).ToArray()),
+                ordered.Select(n => (IReadOnlyList<string>)[Name(n.CandidateMemberId), Seat(n), n.ConsentAt is { } consent ? $"{consent:yyyy-MM-dd HH:mm}" : "Not recorded"]).ToArray()),
             "ER-13" => new FormTable("Withdrawn nominations", ["Candidate", "Seat", "Withdrawn"],
                 ordered.Select(n => (IReadOnlyList<string>)[Name(n.CandidateMemberId), Seat(n), $"{n.WithdrawnAt:yyyy-MM-dd HH:mm}"]).ToArray()),
             _ => new FormTable("Final candidate list", ["Seat", "Ballot order", "Candidate"],
@@ -220,14 +220,14 @@ public sealed class ElectionDocumentService(
         var perSeat = (await db.BallotVotes.Where(v => v.Ballot!.ElectionId == election.Id && !v.Ballot.IsSpoiled)
                 .Select(v => new { v.ElectionSeatId, v.BallotId }).Distinct().ToListAsync(ct))
             .GroupBy(x => x.ElectionSeatId).ToDictionary(g => g.Key, g => g.Count());
-        foreach (var seat in election.Seats.OrderBy(s => s.Position).ThenBy(s => s.Id))
+        foreach (var seat in election.Seats.OrderBy(s => s.EcPosition?.DisplayOrder ?? s.Position).ThenBy(s => s.Id))
         {
             var rows = results.Where(r => r.ElectionSeatId == seat.Id).OrderByDescending(r => r.VoteCount)
                 .ThenBy(r => names.GetValueOrDefault(r.NominationId))
                 .Select(r => (IReadOnlyList<string>)[names.GetValueOrDefault(r.NominationId) ?? string.Empty, r.VoteCount.ToString()]).ToList();
             if (rows.Count == 0) continue;
             rows.Add(["Abstain", (cast - spoiled - perSeat.GetValueOrDefault(seat.Id)).ToString()]);
-            tables.Add(new FormTable(ElectionService.SeatTitle(seat.Position), ["Candidate", "Votes"], rows));
+            tables.Add(new FormTable(ElectionService.SeatTitle(seat), ["Candidate", "Votes"], rows));
         }
         return tables;
     }
@@ -245,7 +245,7 @@ public sealed class ElectionDocumentService(
     {
         var results = await db.ElectionResults.AsNoTracking().Where(r => r.ElectionId == election.Id).ToListAsync(ct);
         var names = await CandidateNamesAsync(election.Id, ct);
-        var seats = election.Seats.ToDictionary(s => s.Id, s => ElectionService.SeatTitle(s.Position));
+        var seats = election.Seats.ToDictionary(s => s.Id, s => ElectionService.SeatTitle(s));
         string Seat(ElectionResult r) => seats.GetValueOrDefault(r.ElectionSeatId) ?? string.Empty;
         return
         [

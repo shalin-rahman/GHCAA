@@ -484,7 +484,8 @@ Steps
 1. The ECSC receives nominations for Commissioners.
 2. The ECSC verifies eligibility and interviews nominees if needed.
 3. The ECSC approves the Commissioners and issues appointment letters.
-4. Each appointee accepts in writing and signs the neutrality declaration and the conflict disclosure.
+4. Each appointee accepts in writing (ER-04 Commissioner Acceptance) and signs the neutrality declaration
+   (ER-05) and the conflict disclosure (ER-06). The ECSC chair and one member sign the appointment (ER-03).
 5. The Commission holds its first meeting and assigns the posts.
 6. An administrator or Commissioner with `AppointOfficials` opens the officials panel (web `/admin/elections`,
    mobile `/officials`).
@@ -516,7 +517,10 @@ Steps
 2. At Commission Meeting No. 1 approve the timeline, responsibilities, forms, registers, inspection
    schedule, security plan, technical team, ballot format and symbol list. Record the minutes.
 3. The Technical Administrator opens `/admin/elections` and creates the election.
-4. Enter the calendar dates in phase order: nominations, scrutiny, withdrawals, polling.
+4. Enter the calendar dates in phase order: nominations, scrutiny, withdrawals, polling. The Election
+   Notice (ER-01) and Election Calendar (ER-02) also carry the campaign opening and closing, the silence
+   period, the polling venue, the notice reference number and the recount window end. Until the app
+   stores these (TODO 37.14m, stored fields for the election forms), write them on the printed forms.
 5. Pick the tie rule the Constitution names: drawing lots, a run-off, or the Returning Officer's casting
    vote. The rule decides a tie for the last place on a seat.
 6. Check the posts and the dates once more. They cannot change after the rules freeze.
@@ -573,14 +577,17 @@ Output: locked voter roll.
 Steps
 
 1. The Commission publishes the Nomination Notice and distributes forms.
-2. Receive applications and issue a receipt for each.
+2. Receive applications and issue a Nomination Receipt (ER-16) for each.
 3. Register each application and verify the documents. Record the nominee's consent (`ConsentAt`). A
    nomination made before this field existed prints "not recorded".
 4. Collect the fee. The Commission sets the fee under Article 9.
 5. Scrutiny: check membership, eligibility, founding quota, outstanding dues, political neutrality,
    required documents, fee paid, declarations signed, conflict of interest and criminal disclosure.
+   Record the result on the Nomination Scrutiny Checklist (ER-17). Any Commissioner may tick an item, and
+   the sheet prints who ticked it and when. Until the app stores the ticks (TODO 37.14m, stored fields
+   for the election forms), tick the printed sheet by hand and sign it.
 6. Open the nominations list. Accept or reject each nomination and write the reason. A rejection names
-   the rule.
+   the rule. The Nomination Acceptance Order (ER-17A) records the decisions.
 7. A nominee, proposer or seconder of a candidate does not decide that nomination.
 8. Publish the accepted list. The Withdrawal phase follows.
 9. Record withdrawals.
@@ -830,7 +837,9 @@ Steps
 5. Watch the recount window. The Commission sets its end date for each election and states it in the
    Election Calendar (ER-02). The key is not destroyed until that date is set and has passed. The app
    does not yet check this: it holds no recount end date and shows no dashboard warning (TODO 37.12r).
-6. A recount: one request per seat, filed on ER-28 by a candidate on that seat, within the window. The
+6. A recount: one request per seat, filed on ER-28 (Recount Request) by a candidate on that seat, within
+   the window. The decision goes on ER-28A (Recount Decision), and ER-28B (Recount Report) sets the
+   original count beside the recount. The
    Chief Commissioner decides it, with a second approver. The count is run again and both results are
    logged. After the decision there is no second request for that seat. Do not destroy the key while a
    request is open. The app does not yet refuse the destruction record in that case (TODO 37.12r). An official with a declared conflict does not decide it.
@@ -856,7 +865,11 @@ Steps
    to the audit chain with the key fingerprint.
 3. The outgoing Executive Committee hands over the bank, membership database, accounts, cash book,
    digital platforms, website, email, domain, cloud storage, source code, archives, office keys, assets,
-   minutes, contracts and passwords, using the official handover forms.
+   minutes, contracts and passwords, on the Executive Committee Handover Certificate (ER-34) and its
+   15-item checklist. The outgoing and incoming holders of the positions flagged as head and secretary
+   sign, with two witnesses. The position names come from the committee position settings, not from a
+   fixed title (TODO 95.2, configurable committee positions). The Commission then files the Election
+   Completion Report (ER-33), the Archive Register (ER-35) and the Closure Certificate (ER-35A).
 4. A Commissioner asks to archive. A second official with `Approve` approves.
 5. Archiving ends every official appointment at once, even before the access period runs out. The audit
    record is kept.
@@ -1027,9 +1040,9 @@ Print this handbook first, then attach the documents below. File names are in `d
 | `00-election-standards-requirements.md` | Cybersecurity Auditor, Technical Administrator, Commission, observers |
 | `03-Election-Code-Of-Conduct.md` | Commission, candidates, Scrutineers, campaign monitors |
 | `04-Election-Manual-Ballot.md` | Presiding and Polling Officers, and for incident E |
-| `05-Election-Forms-and-Templates.md` | Everyone who fills a form (forms ER-01 to ER-18) |
+| `05-Election-Forms-and-Templates.md` | Everyone who fills a form (form layouts ER-01 to ER-24; Annex B lists every form) |
 | `06-Election-Ballot-Seal-and-Poll-Integrity-Certificate.md` | Returning Officer, Presiding Officer, observers, candidate agents |
-| `07-Election-Vote-Counting-Authorisation.md` | Returning Officer, Counting Supervisor, Commission (forms ER-20 to ER-40) |
+| `07-Election-Vote-Counting-Authorisation.md` | Returning Officer, Counting Supervisor, Commission (form layouts ER-22A and ER-25A to ER-35A; Annex B lists every form) |
 | `10-Election-Accessibility-Checklist.md` | Technical Administrator, Commission (before polling) |
 
 ## Attach by phase
@@ -1051,17 +1064,82 @@ The PDF `00-Election-Master-Overview.pdf` is a ready print of the master overvie
 
 ---
 
-# Annex B. Forms the system fills and forms printed blank
+# Annex B. Election forms
 
-The Operational Manual (introduction) says the platform fills some forms from its own records and prints
-others blank for hand completion.
+Decided by the owner on 2026-10-20. The forms use the Regulations numbers ER-01 to ER-35 as they stand.
+The 15 forms that exist only as templates in `05-Election-Forms-and-Templates.md` and
+`07-Election-Vote-Counting-Authorisation.md` take a letter after the form they follow, for example
+ER-17A after ER-17. The Source column names the file that holds the layout (05, 06 or 07) and the template number the
+form had there before its FORM heading was renumbered on 2026-10-21.
 
-| Handling | Forms named in the manual |
-|---|---|
-| Filled by the platform | ER-09, ER-10, ER-13, ER-14, ER-19, ER-23, ER-29, ER-30, ER-31 |
-| Printed blank | ER-01, ER-02, ER-11, ER-26, ER-28, ER-33 |
+Rules for every form:
 
-These numbers follow `05-Election-Forms-and-Templates.md` and `07-Election-Vote-Counting-Authorisation.md`, which the manual and the platform also use. Annex C records how they differ from the Regulations.
+1. The 16 codes the platform printed before 2026-10-20 (the Old code column) still open the right form,
+   on the document download and on the verify page, so QR codes already printed keep working.
+2. Any form can be printed at any time, either filled from the election's stored records or blank for
+   hand filling (TODO 37.14s, form wording from settings). Until that is built, a form marked Not built
+   is copied from its template and filled by hand.
+3. The organisation name, address, phone numbers, email and logo on a form come from the org settings
+   (TODO 37.14s). Today the PDF header prints the organisation name only.
+4. A signature line for a committee position prints the label of the position that holds the head or
+   secretary flag in the committee position settings (TODO 95.2, configurable committee positions).
+
+Status means: Filled from records, the platform prints it with the election's data; Printed blank, the
+platform prints the frame and officials fill it; Data stored, not built, the records exist and the PDF
+is planned (TODO 37.14p); Not built, the form is planned (TODO 37.14q).
+
+| # | Code | Form | Old code | Source | Signed by | Status 2026-10-20 |
+|---|---|---|---|---|---|---|
+| 1 | ER-01 | Election Notice | ER-01 | Regulations and file 05 (was template ER-01) | Chief Election Commissioner | Printed blank |
+| 2 | ER-02 | Election Calendar | ER-02 | Regulations and file 05 (was template ER-02) | Chief Election Commissioner; Election Commissioner | Printed blank |
+| 3 | ER-03 | Commissioner Appointment | none | Regulations only | Chair, Selection Committee; Member, Selection Committee | Not built |
+| 4 | ER-04 | Election Commissioner Acceptance | none | Regulations and file 05 (was template ER-03) | Appointee; Witness | Data stored, not built |
+| 5 | ER-05 | Declaration of Neutrality | none | Regulations and file 05 (was template ER-04) | Declarant | Data stored, not built |
+| 6 | ER-06 | Conflict of Interest Declaration | none | Regulations and file 05 (was template ER-05) | Declarant; Chief Election Commissioner (Received) | Not built |
+| 7 | ER-07 | Confidentiality Agreement | none | Regulations and file 05 (was template ER-06) | Signatory; Chief Election Commissioner (Countersigned) | Not built |
+| 8 | ER-08 | Preliminary Voter Roll Certification | ER-07 | Regulations and file 05 (was template ER-07) | Prepared By; Verified By; Approved By (Chief Election Commissioner) | Filled from records |
+| 9 | ER-09 | Voter Roll Objection | none | Regulations and file 05 (was template ER-08) | Election Commissioner; Chief Election Commissioner | Not built |
+| 10 | ER-10 | Candidate Nomination Form | ER-09 | Regulations and file 05 (was template ER-09) | Candidate; Received By (Commission officer) | Filled from records |
+| 11 | ER-11 | Candidate Consent | ER-10 | Regulations and file 05 (was template ER-10) | Candidate | Filled from records |
+| 12 | ER-12 | Eligibility Declaration | none | Regulations only | Candidate | Not built |
+| 13 | ER-13 | Political Neutrality Declaration | none | Regulations only | Candidate; Received By (Commission officer) | Not built |
+| 14 | ER-14 | Proposer Form | none | Regulations only | Proposer; Received By (Commission officer) | Not built |
+| 15 | ER-15 | Seconder Form | none | Regulations only | Seconder; Received By (Commission officer) | Not built |
+| 16 | ER-16 | Nomination Receipt | none | Regulations only | Received By (Commission officer) | Not built |
+| 17 | ER-17 | Nomination Scrutiny Checklist | ER-11 | Regulations and file 05 (was template ER-11) | Election Commissioner; Election Commissioner; Chief Election Commissioner | Printed blank |
+| 18 | ER-17A | Nomination Acceptance Order | none | File 05 only (was template ER-12) | Chief Election Commissioner | Not built |
+| 19 | ER-18 | Candidate Withdrawal | ER-13 | Regulations and file 05 (was template ER-13) | Candidate; Accepted By (Election Commission) | Filled from records |
+| 20 | ER-19 | Final Candidate List | ER-14 | Regulations and file 05 (was template ER-14) | Chief Election Commissioner | Filled from records |
+| 21 | ER-20 | Campaign Undertaking | none | Regulations only | Candidate; Received By (Commission officer) | Not built |
+| 22 | ER-21 | Observer Appointment | none | Regulations only | Chief Election Commissioner; Observer (accepts) | Not built |
+| 23 | ER-22 | Polling Officer Appointment | none | Regulations only | Chief Election Commissioner; Appointee (accepts) | Not built |
+| 24 | ER-22A | Election Material Receipt Register | none | File 07 only (was template ER-39) | Received By; Handed Over By | Not built |
+| 25 | ER-23 | Poll Opening Certificate | none | Regulations and file 05 (was template ER-15) | Presiding Officer; Polling Officer; Observer; Candidate Agent | Data stored, not built |
+| 26 | ER-23A | Poll Incident Register | none | File 05 only (was template ER-16) | Presiding Officer; Observer | Not built |
+| 27 | ER-23B | Spoiled Ballot Register | none | File 05 only (was template ER-17) | Polling Officer; Presiding Officer | Not built |
+| 28 | ER-24 | Poll Closing Certificate | none | Regulations and file 05 (was template ER-18) | Presiding Officer; Polling Officer; Observer; Candidate Agent | Data stored, not built |
+| 29 | ER-25 | Ballot Box Sealing and Poll Integrity Certificate | ER-19 | Regulations and file 06 (was template ER-19) | Chief Election Commissioner; Election Commissioner; Election Commissioner; Presiding Officer; Polling Officer; Security Officer; Observer 1; Observer 2; Candidate Agent A; Candidate Agent B; Candidate Agent C | Filled from records |
+| 30 | ER-26 | Electronic Voting Audit | none | Regulations only | Technical Auditor; Chief Election Commissioner; Election Commissioner; Observer | Not built |
+| 31 | ER-25A | Vote Counting Authorization Certificate | none | File 07 only (was template ER-20) | Chief Election Commissioner; Election Commissioner; Election Commissioner; Observer | Not built |
+| 32 | ER-25B | Ballot Box Opening Certificate | none | File 07 only (was template ER-21) | Opened By (Chief Election Commissioner); Election Commissioner; Election Commissioner; Observer; Candidate Agent | Not built |
+| 33 | ER-25C | Ballot Paper Reconciliation Sheet | none | File 07 only (was template ER-22) | Verified By (Chief Election Commissioner); Election Commissioner; Observer | Not built |
+| 34 | ER-27 | Vote Counting Sheet | ER-23 | Regulations and file 07 (was template ER-23) | Counted By; Verified By | Filled from records |
+| 35 | ER-27A | Independent Tally Sheet | none | File 07 only (was template ER-24) | Counter A; Counter B; Counter C; Verified By (Chief Election Commissioner) | Not built |
+| 36 | ER-27B | Rejected Ballot Register | none | File 07 only (was template ER-25) | Election Commissioner; Chief Election Commissioner | Not built |
+| 37 | ER-27C | Final Result Sheet | ER-29 | File 07 only (was template ER-29) | Certified By (Chief Election Commissioner); Election Commissioner; Election Commissioner | Filled from records |
+| 38 | ER-28 | Recount Request | ER-26 | Regulations and file 07 (was template ER-26) | Applicant; Received By (Commission officer) | Printed blank |
+| 39 | ER-28A | Recount Decision | none | File 07 only (was template ER-27) | Recount Ordered By (Chief Election Commissioner); Election Commissioner; Election Commissioner | Not built |
+| 40 | ER-28B | Recount Report | ER-28 | File 07 only (was template ER-28) | Chief Election Commissioner; Election Commissioner; Observer | Printed blank |
+| 41 | ER-29 | Election Result Certification | ER-30 | Regulations and file 07 (was template ER-30) | Chief Election Commissioner; Election Commissioner; Election Commissioner; Observer; Observer | Filled from records |
+| 42 | ER-30 | Result Declaration | ER-31 | Regulations and file 07 (was template ER-31) | Certified By (Chief Election Commissioner) | Filled from records |
+| 43 | ER-30A | Election Complaint Form | none | File 07 only (was template ER-32) | Complainant; Received By (Commission officer) | Not built |
+| 44 | ER-30B | Election Investigation Report | none | File 07 only (was template ER-33) | Investigating Officer; Received By (Election Commission) | Not built |
+| 45 | ER-31 | Appeal to Election Appeals Tribunal | none | Regulations and file 07 (was template ER-34) | Appellant; Received By (Tribunal registrar) | Not built |
+| 46 | ER-32 | Tribunal Decision | none | Regulations and file 07 (was template ER-35) | Tribunal Member; Tribunal Member; Tribunal Member | Not built |
+| 47 | ER-33 | Election Completion Report | none | Regulations and file 07 (was template ER-36) | Prepared By (Chief Election Commissioner); Election Commissioner | Not built |
+| 48 | ER-34 | Executive Committee Handover Certificate | ER-33 | Regulations and file 07 (was template ER-37) | Outgoing and incoming head; outgoing and incoming secretary; two witnesses | Printed blank |
+| 49 | ER-35 | Election Archive Register | none | Regulations and file 07 (was template ER-38) | Prepared By; Verified By (Chief Election Commissioner) | Not built |
+| 50 | ER-35A | Election Closure Certificate | none | File 07 only (was template ER-40) | Chief Election Commissioner; Election Commissioner; Election Commissioner; association head; association secretary | Not built |
 
 ---
 
@@ -1069,7 +1147,7 @@ These numbers follow `05-Election-Forms-and-Templates.md` and `07-Election-Vote-
 
 | Point | Conflict | What this handbook does |
 |---|---|---|
-| Form numbers | `01-Election-Regulations.md` lists 35 forms (ER-01 to ER-35). Files `05`, `06` and `07` hold 40 forms (ER-01 to ER-40), and they are not the same set. The Regulations have forms with no template (for example Commissioner Appointment, Observer Appointment, Proposer, Seconder). The templates have forms the Regulations do not list (for example Recount Decision, Election Complaint Form, Tribunal Decision). The manual and the platform use the template numbers. | Uses the template numbers and names the form by title. *[to confirm: the Commission chose the Regulations as master, but the two lists differ in content, so a renumber needs the missing forms decided first.]* |
+| Form numbers (resolved 2026-10-20) | `01-Election-Regulations.md` lists 35 forms (ER-01 to ER-35). Files `05`, `06` and `07` hold 40 forms (ER-01 to ER-40), and they are not the same set. The Regulations have forms with no template (for example Commissioner Appointment, Observer Appointment, Proposer, Seconder). The templates have forms the Regulations do not list (for example Recount Decision, Election Complaint Form, Tribunal Decision). The manual and the platform use the template numbers. | Settled 2026-10-20. The Regulations numbers are used as they stand and the 15 template-only forms take a letter after the form they follow. Annex B lists all 50 forms with the template each comes from. |
 | Record retention | Regulation Article 17 said ten years. Appendix C of `08-Election-Forms-Appendices.md` gave a table with permanent and shorter periods. | Settled 2026-10-11. Ten years from the declaration of the result for every record. Article 17 and Appendix C now say so. |
 | Two-person rule | An earlier draft of this handbook said it is always on. It is a setting. Only the emergency revoke is fixed at two. | Corrected in section 5. |
 | Appeal disposal | Article 5 lists appeals within 7 days, then "Appeals disposed" within 14 days, and then the Executive Committee assuming office within 15 days. Article 16 says an appeal is filed within 7 days and the Tribunal decides within 14 days. Article 5 reads as 14 days from the declare. Article 16 does not say what the 14 days count from, so it can read as 14 days from the filing, which is up to day 21 from the declare. The two texts also differ in their end point: Article 5 ends disposal on day 14 and the new committee takes office on day 15. | Treats it as one 14-day clock whose start the Regulations do not fix. The access period of 21 days (phase 12) covers the longer reading. *[to confirm: the Commission states which start applies.]* |
@@ -1081,7 +1159,9 @@ These numbers follow `05-Election-Forms-and-Templates.md` and `07-Election-Vote-
 
 | Point | Where it appears | Who can settle it |
 |---|---|---|
-| One form numbering. The Regulations list and the template files differ in content, so a renumber needs the missing forms decided first. | Annexes B and C | Commission |
+| Platform still prints the old form codes. The renumber, the new stored fields, the four forms whose data exists, and the remaining forms are not built. | Annex B, phases 2, 4, 5, 13, 14 | Technical team (TODO 37.14m, 37.14n, 37.14p, 37.14q) |
+| Committee positions are a fixed list in code. Signature lines and ID cards print fixed titles until the position settings are built. | Annex B, phase 14 | Technical team (TODO 95.2) |
+| Forms print fixed wording and cannot all be printed blank or filled on demand. | Annex B | Technical team (TODO 37.14s) |
 | Manual accessibility run (TODO 37.13g), due when the new rules are built | Section 4 | Technical team |
 | Rules decided 2026-10-11 that the system does not yet enforce: recount end date and request, unopposed seat and reopened nominations, paper counts, declared conflicts, extend polling, key copy count and holders, nominee consent date, ten-year purge request. They bind officials as procedure now. | Sections 5 and 6, phases 3, 5, 9, 10, 13, 14 | Technical team (TODO 37.12o, 37.12r, 37.12s, 37.14a, 37.1p) |
 | Key destruction list on the officials dashboard. Today the dashboard has a "key file destroyed" box and no list of elections whose key is still held. The procedure needs the Returning Officer to see, per election, the declare date, the recount end date and whether destruction is recorded. Not built. | Phase 14, section 13 | Technical team (TODO 37.12r) |

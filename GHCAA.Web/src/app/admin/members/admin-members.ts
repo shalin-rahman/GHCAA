@@ -9,8 +9,9 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { getECPositionName, getCurrentECPosition, getCurrentECPeriod, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, getBloodGroupName, LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { getPositionLabel, getCurrentECRecord, getCurrentECPeriod, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, getBloodGroupName, LOOKUP_GROUPS } from '../../core/constants/app.constants';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
+import { EcPositionService, EcPosition } from '../../core/services/ec-position.service';
 import { DatePipe } from '@angular/common';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
@@ -42,6 +43,7 @@ export class AdminMembers implements OnInit {
   private route = inject(ActivatedRoute);
   private datePipe = inject(DatePipe);
   private lookupService = inject(LookupService);
+  private positionService = inject(EcPositionService);
   nav = inject(NavService);
 
   allMembers = signal<any[]>([]);
@@ -75,8 +77,9 @@ export class AdminMembers implements OnInit {
   // Import State
   showImportModal = signal(false);
   // 82.42: these seven populate from /lookups/{group} via LookupService, filled in loadLookupOptions().
-  ecPositions = signal<LookupOption[]>([]);
   memberCategories = signal<LookupOption[]>([]);
+  // 95.2: committee positions come from the EcPositions table, not a lookup group.
+  ecPositions = signal<EcPosition[]>([]);
   statusOptions = signal<LookupOption[]>([]);
   genderOptions = signal<LookupOption[]>([]);
   bloodGroupOptions = signal<LookupOption[]>([]);
@@ -128,7 +131,10 @@ export class AdminMembers implements OnInit {
     this.lookupService.getOptions(LOOKUP_GROUPS.Gender).subscribe(opts => this.genderOptions.set(opts));
     this.lookupService.getOptions(LOOKUP_GROUPS.BloodGroup).subscribe(opts => this.bloodGroupOptions.set(opts));
     this.lookupService.getOptions(LOOKUP_GROUPS.MembershipType).subscribe(opts => this.membershipTypes.set(opts));
-    this.lookupService.getOptions(LOOKUP_GROUPS.ECPosition).subscribe(opts => this.ecPositions.set(opts));
+    this.positionService.getActive().subscribe({
+      next: list => this.ecPositions.set(list),
+      error: () => this.notify.error('Could not load committee positions.')
+    });
     this.lookupService.getAcademicYears().subscribe(years => this.yearsList.set(years));
   }
 
@@ -572,11 +578,25 @@ export class AdminMembers implements OnInit {
   getStatusClass = getStatusClass;
   getCategoryLabel = getCategoryLabel;
   getMembershipTypeLabel = getMembershipTypeLabel;
-  getECPositionName = getECPositionName;
+  getPositionLabel = getPositionLabel;
   
   getCurrentPosition(member: any) {
-    const pos = getCurrentECPosition(member.ecHistory);
-    return getECPositionName(pos);
+    const record = getCurrentECRecord(member.ecHistory);
+    return record ? getPositionLabel(record) : 'None';
+  }
+
+  // A term can hold a position that was retired later. It is not in the active list, so the
+  // picker adds it back as a disabled option instead of showing a blank select.
+  isRetiredPosition(positionId: number | null | undefined): boolean {
+    return !!positionId && !this.ecPositions().some(p => p.id === positionId);
+  }
+
+  // Keeps the key and name in step with the picked id, so the row reads right before saving.
+  onHistoryPositionChange(h: any, positionId: number) {
+    const position = this.ecPositions().find(p => p.id === positionId);
+    h.positionId = positionId;
+    h.position = position?.key ?? '';
+    h.positionName = position?.name ?? '';
   }
 
   getCurrentPeriod(member: any) {
@@ -639,7 +659,9 @@ export class AdminMembers implements OnInit {
     const activePeriod = this.ecPeriods().find(p => p.isActive);
     this.selectedMember().ecHistory.unshift({
       periodTitle: activePeriod ? activePeriod.title : '',
-      position: 'None',
+      positionId: 0,
+      position: '',
+      positionName: '',
       startDate: this.datePipe.transform(new Date(), 'dd-MM-yyyy') || '',
       isCurrent: true,
       changeReason: ''

@@ -190,7 +190,7 @@ class _CommitteeScreenState extends ConsumerState<CommitteeScreen> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            '${m['positionName'] ?? 'Member'} | Batch ${m['passingYear'] ?? 'N/A'}',
+                                            '${m['positionName'] ?? ''} | Batch ${m['passingYear'] ?? 'N/A'}',
                                             style: TextStyle(fontSize: 10, color: AppTheme.royalGold.withValues(alpha: 0.8), fontWeight: FontWeight.w900, letterSpacing: 1)
                                           ),
                                         ],

@@ -24,6 +24,8 @@ namespace GHCAA.Infrastructure.Services
                 .AsNoTracking()
                 .Include(m => m.ECMembers)
                 .ThenInclude(em => em.ECPeriod)
+                .Include(m => m.ECMembers)
+                .ThenInclude(em => em.EcPosition)
                 .Include(m => m.SentFamilyLinkRequests)
                     .ThenInclude(r => r.TargetMember)
                 .Include(m => m.ReceivedFamilyLinkRequests)
@@ -90,8 +92,12 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrEmpty(filter.Designation))
                 query = query.Where(m => m.ProfessionalHistory.Any(p => p.IsCurrent && p.Designation.Contains(filter.Designation)));
 
-            if (!string.IsNullOrEmpty(filter.ECPosition) && System.Enum.TryParse<Enums.ECPosition>(filter.ECPosition, true, out var pos))
-                query = query.Where(m => m.ECMembers.Any(em => em.Position == pos && em.EndDate == null && em.ECPeriod!.IsActive));
+            // 95.2: the filter carries the EcPosition key.
+            if (!string.IsNullOrEmpty(filter.ECPosition))
+            {
+                var positionKey = filter.ECPosition.Trim().ToLower();
+                query = query.Where(m => m.ECMembers.Any(em => em.EcPosition!.Key.ToLower() == positionKey && em.EndDate == null && em.ECPeriod!.IsActive));
+            }
 
             if (!string.IsNullOrEmpty(filter.Category) && System.Enum.TryParse<Enums.MemberCategory>(filter.Category, true, out var cat))
                 query = query.Where(m => m.Category == cat);
@@ -107,6 +113,8 @@ namespace GHCAA.Infrastructure.Services
             var sortedQuery = query
                 .Include(m => m.ECMembers)
                 .ThenInclude(em => em.ECPeriod)
+                .Include(m => m.ECMembers)
+                .ThenInclude(em => em.EcPosition)
                 .Include(m => m.AcademicHistory)
                 .Include(m => m.ProfessionalHistory)
                 .OrderBy(m => m.FullName)
@@ -188,6 +196,7 @@ namespace GHCAA.Infrastructure.Services
                 .Include(em => em.Member)
                     .ThenInclude(m => m!.AcademicHistory)
                 .Include(em => em.ECPeriod)
+                .Include(em => em.EcPosition)
                 .AsQueryable();
 
             if (periodId.HasValue)
@@ -202,7 +211,7 @@ namespace GHCAA.Infrastructure.Services
             // Only current active roles in that period
             query = query.Where(em => em.EndDate == null);
 
-            var results = await query.OrderBy(em => em.Position).ToListAsync(cancellationToken);
+            var results = await query.OrderBy(em => em.EcPosition!.DisplayOrder).ThenBy(em => em.Position).ToListAsync(cancellationToken);
             return results.Select(em => MapToSummary(em.Member!));
         }
 
@@ -220,6 +229,8 @@ namespace GHCAA.Infrastructure.Services
                 .AsNoTracking()
                 .Include(m => m.ECMembers)
                 .ThenInclude(em => em.ECPeriod)
+                .Include(m => m.ECMembers)
+                .ThenInclude(em => em.EcPosition)
                 .Where(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
                 .OrderByDescending(m => m.LastUpdateDate)
                 .Take(count)
@@ -353,7 +364,9 @@ namespace GHCAA.Infrastructure.Services
                     Id = em.Id,
                     PeriodId = em.ECPeriodId,
                     PeriodTitle = em.ECPeriod?.Title ?? "Unknown Period",
-                    Position = em.Position,
+                    Position = em.EcPosition?.Key ?? string.Empty,
+                    PositionId = em.Position,
+                    PositionName = em.EcPosition?.Name ?? string.Empty,
                     StartDate = (em.ECPeriod?.StartDate ?? em.StartDate).ToLocalTime(),
                     EndDate = (em.ECPeriod?.EndDate ?? em.EndDate)?.ToLocalTime(),
                     ChangeReason = em.ChangeReason,
@@ -397,7 +410,9 @@ namespace GHCAA.Infrastructure.Services
                     Id = em.Id,
                     PeriodId = em.ECPeriodId,
                     PeriodTitle = em.ECPeriod?.Title ?? "Unknown Period",
-                    Position = em.Position,
+                    Position = em.EcPosition?.Key ?? string.Empty,
+                    PositionId = em.Position,
+                    PositionName = em.EcPosition?.Name ?? string.Empty,
                     StartDate = em.ECPeriod?.StartDate ?? DateTime.MinValue,
                     EndDate = em.EndDate,
                     ChangeReason = em.ChangeReason,

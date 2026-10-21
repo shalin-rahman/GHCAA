@@ -66,6 +66,8 @@ namespace GHCAA.Infrastructure.Services
                 .AsSplitQuery() // Prevent duplicates from collection includes
                 .Include(m => m.ECMembers)
                 .ThenInclude(em => em.ECPeriod)
+                .Include(m => m.ECMembers)
+                .ThenInclude(em => em.EcPosition)
                 .Include(m => m.AcademicHistory.Where(a => a.IsOrgProfile)) // The summary shows only the org record
                 .Include(m => m.ProfessionalHistory.Where(p => p.IsCurrent)); // and the current job
 
@@ -194,7 +196,9 @@ namespace GHCAA.Infrastructure.Services
                         Id = em.Id,
                         PeriodId = em.ECPeriodId,
                         PeriodTitle = em.ECPeriod?.Title ?? "Unknown",
-                        Position = em.Position,
+                        Position = em.EcPosition?.Key ?? string.Empty,
+                        PositionId = em.Position,
+                        PositionName = em.EcPosition?.Name ?? string.Empty,
                         StartDate = em.StartDate.ToLocalTime(),
                         EndDate = em.EndDate.HasValue ? em.EndDate.Value.ToLocalTime() : null,
                         ChangeReason = em.ChangeReason,
@@ -361,20 +365,32 @@ namespace GHCAA.Infrastructure.Services
             {
                 var existingEC = await _db.ECMembers.Where(ec => ec.MemberId == id).ToListAsync(cancellationToken);
                 _db.ECMembers.RemoveRange(existingEC);
+                var positions = await _db.EcPositions.AsNoTracking().ToListAsync(cancellationToken);
 
                 foreach (var ec in dto.ECHistory)
                 {
                     var period = await _db.ECPeriods.FirstOrDefaultAsync(p => p.Title == ec.PeriodTitle, cancellationToken);
                     if (period == null) continue;
 
-                    // 95.3: the governance page refuses a second current holder, so this form must too.
+                    // 95.2: older clients send only the position key, so fall back to it.
+                    var position = ec.PositionId > 0
+                        ? positions.FirstOrDefault(p => p.Id == ec.PositionId)
+                        : positions.FirstOrDefault(p => string.Equals(p.Key, ec.Position, StringComparison.OrdinalIgnoreCase));
+                    if (position == null)
+                    {
+                        throw new InvalidOperationException($"Pick a committee position for {period.Title}.");
+                    }
+
+                    // 95.3: the governance page refuses a holder once every seat is taken, so this form must too.
                     if (!ec.EndDate.HasValue)
                     {
-                        var seatTaken = await _db.ECMembers.AnyAsync(other => other.MemberId != id
-                            && other.ECPeriodId == period.Id && other.Position == ec.Position && other.EndDate == null, cancellationToken);
-                        if (seatTaken)
+                        var otherHolders = await _db.ECMembers.CountAsync(other => other.MemberId != id
+                            && other.ECPeriodId == period.Id && other.Position == position.Id && other.EndDate == null, cancellationToken);
+                        if (otherHolders >= position.SeatCount)
                         {
-                            throw new InvalidOperationException($"{ec.Position} in {period.Title} already has a current holder. End their term on the governance page first.");
+                            throw new InvalidOperationException(position.SeatCount == 1
+                                ? $"{position.Name} in {period.Title} already has a current holder. End their term on the governance page first."
+                                : $"All {position.SeatCount} {position.Name} seats in {period.Title} are held. End one term on the governance page first.");
                         }
                     }
 
@@ -382,7 +398,7 @@ namespace GHCAA.Infrastructure.Services
                     {
                         MemberId = id,
                         ECPeriodId = period.Id,
-                        Position = ec.Position,
+                        Position = position.Id,
                         StartDate = DateTime.SpecifyKind(ec.StartDate, DateTimeKind.Utc),
                         EndDate = ec.EndDate.HasValue ? DateTime.SpecifyKind(ec.EndDate.Value, DateTimeKind.Utc) : null,
                         ChangeReason = ec.ChangeReason,

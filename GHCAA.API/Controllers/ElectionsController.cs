@@ -145,7 +145,39 @@ public sealed class ElectionsController(
         if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
             return Unauthorized();
         var run = await approvals.RunOrRequestAsync(id, action, userId, CallerRoles(), ct: ct);
-        return this.ApprovalReply(run) ?? (run.Error is null ? Ok() : Problem(detail: "Invalid phase transition.", statusCode: StatusCodes.Status400BadRequest));
+        return this.ApprovalReply(run) ?? run.Error switch
+        {
+            null => Ok(),
+            Elections.Replies.PollingNotReady => PollingNotReady(),
+            _ => Problem(detail: "Invalid phase transition.", statusCode: StatusCodes.Status400BadRequest),
+        };
+    }
+
+    /// <summary>Spec 023 (37.12w): what must be true before polling opens, and which items are still unmet.</summary>
+    [HttpGet("{id:int}/readiness")]
+    [Authorize(Policy = Policies.ElectionStaff)]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ViewDashboard)]
+    [ProducesResponseType<ElectionReadinessDto>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> Readiness(int id, CancellationToken ct)
+        => (await service.GetReadinessAsync(id, ct)) is { } result ? Ok(result) : NotFound();
+
+    /// <summary>Spec 023 (37.12w): an official records that one of the checks made outside the system is done.</summary>
+    [HttpPost("{id:int}/readiness/attest")]
+    [Authorize(Policy = Policies.ElectionStaff)]
+    [GHCAA.API.Filters.RequireStepUp]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ChangePhase)]
+    public async Task<IActionResult> AttestReadiness(int id, [FromBody] AttestReadinessRequest request, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        return await service.AttestReadinessAsync(id, userId, request.Condition, ct) switch
+        {
+            null => NoContent(),
+            Elections.Replies.NotFound => NotFound(),
+            Elections.Replies.AlreadyRecorded => Problem(detail: "This item is already recorded.", statusCode: StatusCodes.Status409Conflict),
+            Elections.Replies.WrongPhase => Problem(detail: "Readiness can only be recorded before polling opens.", statusCode: StatusCodes.Status400BadRequest),
+            _ => Problem(detail: "This item is not one an official records by hand.", statusCode: StatusCodes.Status400BadRequest),
+        };
     }
 
     /// <summary>FR-37.1a: adds a seat to an election.</summary>
@@ -154,7 +186,16 @@ public sealed class ElectionsController(
     [GHCAA.API.Filters.RequireStepUp]
     [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ManageSetup)]
     public async Task<IActionResult> AddSeat(int id, ElectionSeatRequestDto request, CancellationToken ct)
-        => Ok(new { Id = await service.AddSeatAsync(id, request, ct) });
+    {
+        try
+        {
+            return Ok(new { Id = await service.AddSeatAsync(id, request, ct) });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+        }
+    }
 
     /// <summary>FR-37.1a: freezes the auditable voter-roll snapshot.</summary>
     [HttpPost("{id:int}/voter-roll/freeze")]
@@ -308,6 +349,7 @@ public sealed class ElectionsController(
             null => NoContent(),
             Elections.Replies.NotFound => NotFound(),
             Elections.Replies.AlreadyRecorded => Problem(detail: "The key is already recorded as destroyed.", statusCode: StatusCodes.Status409Conflict),
+            Elections.Replies.RecountWindowOpen => Problem(detail: "Keep the key until the recount window has ended. Set the window's end date first if it is missing.", statusCode: StatusCodes.Status400BadRequest),
             _ => Problem(detail: "The key can be recorded as destroyed once the result is declared.", statusCode: StatusCodes.Status400BadRequest),
         };
     }
@@ -364,6 +406,10 @@ public sealed class ElectionsController(
             : File(pdf, "application/pdf", $"E-{id:D6}_{formCode.ToUpperInvariant()}.pdf");
     }
 
+    // The client reloads the readiness list for the unmet items, so the body does not carry them.
+    private IActionResult PollingNotReady() =>
+        this.ProblemWithCode(ErrorCodes.PollingNotReady, "Polling cannot open until every readiness item is met.", StatusCodes.Status400BadRequest);
+
     private List<string> CallerRoles() => User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
 
     // Phases missing here are not two-person steps. Declared is reached only through Declare.
@@ -393,6 +439,7 @@ public sealed class ElectionsController(
         "phase-closed" => Problem(detail: "The key cannot change once polling has opened.", statusCode: StatusCodes.Status400BadRequest),
         "invalid-key" => Problem(detail: "The stored key is not valid.", statusCode: StatusCodes.Status400BadRequest),
         "period-has-members" => Problem(detail: "The EC period this election fills already has committee members. Remove them before declaring.", statusCode: StatusCodes.Status409Conflict),
+        Elections.Replies.PollingNotReady => PollingNotReady(),
         _ => Problem(detail: "The election is not ready for this step.", statusCode: StatusCodes.Status400BadRequest),
     };
 }

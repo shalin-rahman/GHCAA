@@ -1,4 +1,4 @@
-import { MEMBERSHIP_TYPES, MEMBERSHIP_TYPE_OPTIONS, getMembershipTypeLabel } from './app.constants';
+import { MEMBERSHIP_TYPES, MEMBERSHIP_TYPE_OPTIONS, getMembershipTypeLabel, getPositionLabel, getCurrentECLabel } from './app.constants';
 
 /**
  * Work Package 35. These two lists and the helper below are the single source of truth for rendering a
@@ -55,5 +55,26 @@ describe('MembershipType constants (Work Package 35)', () => {
             // Better a visibly odd string than a confidently wrong tier.
             expect(getMembershipTypeLabel('SomethingNew')).toBe('SomethingNew');
         });
+    });
+});
+
+describe('FR-34: position labels come from the EcPositions table', () => {
+    it('FR-34: shows the name the API sends, including one an admin renamed', () => {
+        expect(getPositionLabel({ positionName: 'Senior Vice President' })).toBe('Senior Vice President');
+    });
+
+    it('FR-34: shows nothing when the record has no name instead of guessing from the key', () => {
+        expect(getPositionLabel({ positionName: null })).toBe('');
+        expect(getPositionLabel({ position: 'GeneralSecretary' } as any)).toBe('');
+        expect(getPositionLabel(null)).toBe('');
+    });
+
+    it('FR-34: the current label reads the open record', () => {
+        const history = [
+            { isCurrent: false, endDate: '2024-01-01', positionName: 'Treasurer' },
+            { isCurrent: true, endDate: null, positionName: 'Patron' },
+        ];
+        expect(getCurrentECLabel(history)).toBe('Patron');
+        expect(getCurrentECLabel([])).toBe('');
     });
 });

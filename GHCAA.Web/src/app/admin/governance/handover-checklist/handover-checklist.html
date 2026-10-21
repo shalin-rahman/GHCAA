@@ -1,0 +1,12 @@
+<details class="handover-checklist">
+    <summary>Handover checklist</summary>
+    <div class="stack gap-2">
+        @for (item of items; track item) {
+        <label class="flex gap-2">
+            <input type="checkbox" [checked]="isChecked(item)" [disabled]="busyItem() !== null"
+                (change)="setCheck(item, $any($event.target).checked)" />
+            {{ labels[item] }}
+        </label>
+        }
+    </div>
+</details>

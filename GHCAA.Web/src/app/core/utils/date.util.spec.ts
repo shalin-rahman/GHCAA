@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { formatPeriodRange, getEventStatus, getEventStatusMeta, parseDisplayDate, toDisplayDate, toWireDate } from './date.util';
+import {
+    formatPeriodRange, getEventStatus, getEventStatusMeta, localInputToUtc, parseDisplayDate, toDisplayDate, toWireDate, utcToLocal, utcToLocalInput
+} from './date.util';
 import { DATE_FORMATS } from '../constants/app.constants';
 
 describe('configurable date formats', () => {
@@ -64,5 +66,34 @@ describe('getEventStatusMeta', () => {
             .toEqual({ label: 'Ongoing', class: 'active' });
         expect(getEventStatusMeta({ isActive: true, startDate: '2000-01-01', endDate: '2000-01-01' }))
             .toEqual({ label: 'Ended', class: 'terminated' });
+    });
+});
+
+// 37.14m. The server sends UTC times without a zone; these turn them into local inputs and back.
+describe('UTC and datetime-local helpers', () => {
+    it('reads a time with no zone as UTC', () => {
+        expect(utcToLocal('2026-10-21T08:30:00')?.toISOString()).toBe('2026-10-21T08:30:00.000Z');
+        expect(utcToLocal('2026-10-21T08:30:00Z')?.toISOString()).toBe('2026-10-21T08:30:00.000Z');
+        expect(utcToLocal('2026-10-21T14:30:00+06:00')?.toISOString()).toBe('2026-10-21T08:30:00.000Z');
+    });
+
+    it('gives null for empty or bad values', () => {
+        expect(utcToLocal(null)).toBeNull();
+        expect(utcToLocal('')).toBeNull();
+        expect(utcToLocal('not a date')).toBeNull();
+        expect(utcToLocalInput(undefined)).toBe('');
+        expect(localInputToUtc('')).toBeNull();
+        expect(localInputToUtc('garbage')).toBeNull();
+    });
+
+    it('fills a datetime-local input in local time', () => {
+        const local = new Date(2026, 9, 21, 9, 5);
+        expect(utcToLocalInput(local.toISOString())).toBe('2026-10-21T09:05');
+    });
+
+    it('round-trips a datetime-local value through UTC', () => {
+        const sent = localInputToUtc('2026-10-21T09:05');
+        expect(sent).toBe(new Date(2026, 9, 21, 9, 5).toISOString());
+        expect(utcToLocalInput(sent)).toBe('2026-10-21T09:05');
     });
 });

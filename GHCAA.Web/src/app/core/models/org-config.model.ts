@@ -97,7 +97,6 @@ export interface LocalePack {
   membershipLabel: string;
   membershipTypeLabels: Record<string, string>;
   memberCategoryLabels: Record<string, string>;
-  ecRoleLabels: Record<string, string>;
   nav: NavLabels;
 }
 

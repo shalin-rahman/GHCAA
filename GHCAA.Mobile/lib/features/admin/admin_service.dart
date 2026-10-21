@@ -111,6 +111,10 @@ class AdminService {
     }
   }
 
+  Future<void> activateECPeriod(int id) async {
+    await _dio.post('/admin/governance/periods/$id/activate');
+  }
+
   // Financial Ledger
   Future<List<dynamic>> getLedgerRecords({String? search, int page = 1}) async {
     try {
@@ -185,6 +189,28 @@ class AdminService {
       return response.data as List<dynamic>;
     } catch (e) {
       debugPrint('AdminService.getCommitteeMembers failed: $e');
+      rethrow;
+    }
+  }
+
+  // 37.14m: the outgoing committee's handover ticks. Both calls return the full list.
+  Future<List<dynamic>> getHandoverChecks(int periodId) async {
+    try {
+      final response = await _dio.get('/admin/governance/periods/$periodId/handover-checks');
+      return response.data as List<dynamic>;
+    } catch (e) {
+      debugPrint('AdminService.getHandoverChecks failed: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<dynamic>> setHandoverCheck(int periodId, String item, bool isChecked) async {
+    try {
+      final response = await _dio.put('/admin/governance/periods/$periodId/handover-checks',
+          data: {'item': item, 'isChecked': isChecked});
+      return response.data as List<dynamic>;
+    } catch (e) {
+      debugPrint('AdminService.setHandoverCheck failed: $e');
       rethrow;
     }
   }

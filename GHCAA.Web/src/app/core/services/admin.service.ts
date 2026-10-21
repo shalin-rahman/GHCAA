@@ -7,7 +7,9 @@ import {
     Gender, 
     BloodGroup,
     AcademicRecord,
-    ProfessionalRecord
+    ProfessionalRecord,
+    HandoverCheckDto,
+    HandoverCheckItem
 } from '../models/business.models';
 
 
@@ -233,6 +235,15 @@ export class AdminService {
 
     endCommitteeTerm(ecMemberId: number, body: { reason: string; note: string | null; notifyMember: boolean }): Observable<any> {
         return this.http.post(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/members/${ecMemberId}/end-term`, body);
+    }
+
+    // 37.14m, ER-34. What the outgoing committee has handed over for this term.
+    getHandoverChecks(periodId: number): Observable<HandoverCheckDto[]> {
+        return this.http.get<HandoverCheckDto[]>(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${periodId}/handover-checks`);
+    }
+
+    setHandoverCheck(periodId: number, item: HandoverCheckItem, isChecked: boolean): Observable<HandoverCheckDto[]> {
+        return this.http.put<HandoverCheckDto[]>(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${periodId}/handover-checks`, { item, isChecked });
     }
 
     // Audit log

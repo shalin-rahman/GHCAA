@@ -114,7 +114,7 @@ public class NetworkingServiceTests : TestBase
         _context.ECPeriods.Add(period);
         await _context.SaveChangesAsync();
 
-        _context.ECMembers.Add(new ECMember { MemberId = president.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow });
+        _context.ECMembers.Add(new ECMember { MemberId = president.Id, ECPeriodId = period.Id, Position = EcPositionIds.President, StartDate = DateTime.UtcNow });
         await _context.SaveChangesAsync();
 
         var results = await _service.GetExecutiveCommitteeAsync();
@@ -175,7 +175,7 @@ public class NetworkingServiceTests : TestBase
         _context.ECPeriods.Add(period);
         await _context.SaveChangesAsync();
 
-        _context.ECMembers.Add(new ECMember { MemberId = president.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow });
+        _context.ECMembers.Add(new ECMember { MemberId = president.Id, ECPeriodId = period.Id, Position = EcPositionIds.President, StartDate = DateTime.UtcNow });
         await _context.SaveChangesAsync();
 
         var results = await _service.GetExecutiveCommitteeAsync();
@@ -198,14 +198,36 @@ public class NetworkingServiceTests : TestBase
         var current = new ECPeriod { Title = "Current", StartDate = DateTime.UtcNow.AddYears(-1), IsActive = true };
         var next = new ECPeriod { Title = "Next", StartDate = DateTime.UtcNow.AddDays(30) };
         _context.ECPeriods.AddRange(current, next);
-        _context.ECMembers.Add(new ECMember { MemberId = sitting.Id, ECPeriod = current, Position = Enums.ECPosition.President, StartDate = current.StartDate });
-        _context.ECMembers.Add(new ECMember { MemberId = elected.Id, ECPeriod = next, Position = Enums.ECPosition.President, StartDate = next.StartDate });
+        _context.ECMembers.Add(new ECMember { MemberId = sitting.Id, ECPeriod = current, Position = EcPositionIds.President, StartDate = current.StartDate });
+        _context.ECMembers.Add(new ECMember { MemberId = elected.Id, ECPeriod = next, Position = EcPositionIds.President, StartDate = next.StartDate });
         await _context.SaveChangesAsync();
 
         var results = await _service.SearchMembersAsync(new MemberSearchFilterDto { ECPosition = "President", PageSize = 100 });
 
         results.Items.Select(x => x.FullName).Should().Equal("Sitting President");
         (await _service.GetExecutiveCommitteeAsync()).Select(x => x.FullName).Should().Contain("Sitting President").And.NotContain("Elected President");
+    }
+
+    [Category("FR-34")]
+    [Test]
+    public async Task SearchMembersAsync_ECPositionFilter_MatchesAnAdminAddedPositionKey_IgnoringCase()
+    {
+        // 95.2: positions an admin adds have no enum value, so the filter has to match on the key.
+        var adviser = await CreateAndSaveTestMemberAsync("Sitting Adviser", "adviser.nt@example.com", "01155558888", "NTST5558");
+        adviser.Status = Enums.MembershipStatus.Active;
+        var treasurer = await CreateAndSaveTestMemberAsync("Sitting Treasurer", "treasurer.nt@example.com", "01155559999", "NTST5559");
+        treasurer.Status = Enums.MembershipStatus.Active;
+        var position = new EcPosition { Key = "SeniorAdviser", Name = "Senior Adviser", DisplayOrder = 30 };
+        var period = new ECPeriod { Title = "Current", StartDate = DateTime.UtcNow.AddYears(-1), IsActive = true };
+        _context.EcPositions.Add(position);
+        _context.ECPeriods.Add(period);
+        _context.ECMembers.Add(new ECMember { MemberId = adviser.Id, ECPeriod = period, EcPosition = position, StartDate = period.StartDate });
+        _context.ECMembers.Add(new ECMember { MemberId = treasurer.Id, ECPeriod = period, Position = EcPositionIds.Treasurer, StartDate = period.StartDate });
+        await _context.SaveChangesAsync();
+
+        var results = await _service.SearchMembersAsync(new MemberSearchFilterDto { ECPosition = " senioradviser ", PageSize = 100 });
+
+        results.Items.Select(x => x.FullName).Should().Equal("Sitting Adviser");
     }
 
     [Category("FR-05")]

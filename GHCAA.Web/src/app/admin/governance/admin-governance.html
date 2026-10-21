@@ -2,6 +2,9 @@
     <app-page-header title="Executive Committee" [total]="committeeMembers().length"
         emptySubtitle="Executive Committee assignments for {{ selectedPeriod()?.title || 'selected term' }}">
         <small subtitle>Showing {{ filteredMembers().length }} of {{ committeeMembers().length }} assignments for {{ selectedPeriod()?.title || 'selected term' }}</small>
+        <button actions class="btn btn-outline btn-md" (click)="showPositionsModal.set(true)">
+            <span class="icon">🏷️</span> EC Positions
+        </button>
         <button actions class="btn btn-accent btn-md" (click)="openNewPeriod()">
             <span class="icon">📅</span> New EC Period
         </button>
@@ -93,7 +96,7 @@
                             </td>
                             <td><code class="text-accent">{{ em.member?.membershipNumber || '—' }}</code></td>
                             <td>
-                                <span class="role-badge">{{ getRoleName(em.position) }}</span>
+                                <span class="role-badge">{{ getRoleName(em) }}</span>
                             </td>
                             <td>
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -136,9 +139,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @for (s of vacantSeats(); track s.position) {
+                        @for (s of vacantSeats(); track $index) {
                         <tr>
-                            <td><span class="role-badge">{{ getRoleName(s.position) }}</span></td>
+                            <td><span class="role-badge">{{ getRoleName(s) }}</span></td>
                             <td>
                                 @if (s.vacancyReason) {
                                 {{ getVacancyReasonLabel(s.vacancyReason) }}
@@ -155,6 +158,7 @@
                 </table>
             </div>
             }
+            <app-handover-checklist [periodId]="selectedPeriod().id"></app-handover-checklist>
             } @else {
             <div class="no-selection">
                 <span>🎗️</span>
@@ -164,6 +168,10 @@
         </div>
     </div>
 </div>
+
+@if (showPositionsModal()) {
+<app-ec-positions (closed)="closePositions()"></app-ec-positions>
+}
 
 <!-- New EC Period Modal -->
 @if (showPeriodModal()) {
@@ -245,8 +253,8 @@
             <div class="form-group">
                 <label>Position <span class="required-star">*</span></label>
                 <select class="form-control" [(ngModel)]="assignData().position" #posInput="ngModel" required>
-                    @for (pos of ecPositions(); track pos.value) {
-                        <option [value]="pos.value">{{ pos.label }}</option>
+                    @for (pos of ecPositions(); track pos.id) {
+                        <option [ngValue]="pos.id">{{ pos.name }}</option>
                     }
                 </select>
             </div>
@@ -291,7 +299,7 @@
     <div class="modal-box" (click)="$event.stopPropagation()">
         <app-modal-header title="End Committee Term" (closed)="removingMemberId.set(null)"></app-modal-header>
         <div class="modal-body">
-            <p>End {{ removingMember()?.member?.fullName || 'this member' }}'s term as {{ removingMember() ? getRoleName(removingMember().position) : 'committee member' }}? The seat stays empty until someone is assigned.</p>
+            <p>End {{ removingMember()?.member?.fullName || 'this member' }}'s term as {{ removingMember() ? getRoleName(removingMember()) : 'committee member' }}? The seat stays empty until someone is assigned.</p>
             <div class="form-group">
                 <label>Reason <span class="required-star">*</span></label>
                 <select class="form-control" [ngModel]="removeReason()" (ngModelChange)="removeReason.set($event)">

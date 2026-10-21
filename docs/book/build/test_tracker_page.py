@@ -59,5 +59,49 @@ class BothItemShapes(unittest.TestCase):
         self.assertTrue(item["text"].startswith("Navigation. bold done"))
 
 
+OTHER_SHAPES = (
+    "## Work Package 34 - Site content\n"
+    "> 28.21 [TODO] quoted item\n"
+    "> Grep: quoted follow-on line\n"
+    "34.D17 [IN PROGRESS 2026-10-01] [P0] lettered item\n"
+    "47.13.1 [DONE 2026-09-04] three-part item\n"
+    "49.3.C [TODO] **Priority: P2 | Depends on: none.** lettered sub-item\n"
+    "- **62.56g** [DONE 2026-10-15] bold id only\n"
+    "\n"
+    "- **34.D7** - a summary line with no bracket is not an item\n"
+)
+
+
+class OtherIdShapes(unittest.TestCase):
+    """Until 2026-10-20 these shapes were skipped, which left nine open items off the page."""
+
+    def setUp(self):
+        self._root = tracker_page.ROOT
+        tracker_page.ROOT = Path(tempfile.mkdtemp())
+        (tracker_page.ROOT / "docs").mkdir()
+        (tracker_page.ROOT / "docs" / "TODO.md").write_text(OTHER_SHAPES, encoding="utf-8")
+        self.items = {i["id"]: i for i in tracker_page.parse()[1]}
+
+    def tearDown(self):
+        tracker_page.ROOT = self._root
+
+    def test_every_shape_is_read_once(self):
+        self.assertEqual(list(self.items), ["28.21", "34.D17", "47.13.1", "49.3.C", "62.56g"])
+
+    def test_quoted_item_drops_the_quote_marks(self):
+        self.assertEqual(self.items["28.21"]["text"], "quoted item Grep: quoted follow-on line")
+
+    def test_bracketed_priority_is_read(self):
+        item = self.items["34.D17"]
+        self.assertEqual((item["state"], item["pr"], item["status"]), ("IN PROGRESS", "P0", "open"))
+        self.assertEqual(item["text"], "lettered item")
+
+    def test_lettered_sub_item_keeps_its_priority(self):
+        self.assertEqual(self.items["49.3.C"]["pr"], "P2")
+
+    def test_bold_id_leaves_no_stray_bold(self):
+        self.assertEqual(self.items["62.56g"]["text"], "bold id only")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

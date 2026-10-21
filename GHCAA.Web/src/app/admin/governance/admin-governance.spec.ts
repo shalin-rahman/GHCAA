@@ -3,15 +3,16 @@ import { createNotificationServiceMock } from '../../core/testing/testing-utils'
 import { AdminGovernance } from './admin-governance';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { LookupService } from '../../core/services/lookup.service';
-import { of } from 'rxjs';
+import { EcPositionService } from '../../core/services/ec-position.service';
+import { of, throwError } from 'rxjs';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 
 describe('AdminGovernance Component', () => {
     let component: AdminGovernance;
     let fixture: ComponentFixture<AdminGovernance>;
     let adminServiceMock: any;
     let notificationServiceMock: any;
-    let lookupServiceMock: any;
+    let positionServiceMock: any;
 
     beforeEach(async () => {
         adminServiceMock = {
@@ -26,8 +27,11 @@ describe('AdminGovernance Component', () => {
             getMembers: vi.fn().mockReturnValue(of([]))
         };
         notificationServiceMock = createNotificationServiceMock();
-        lookupServiceMock = {
-            getOptions: vi.fn().mockReturnValue(of([{ value: '1', label: 'President' }]))
+        positionServiceMock = {
+            getActive: vi.fn().mockReturnValue(of([
+                { id: 1, key: 'President', name: 'President', seatCount: 1 },
+                { id: 16, key: 'ExecutiveMember', name: 'Executive Member', seatCount: 3 }
+            ]))
         };
 
         await TestBed.configureTestingModule({
@@ -35,7 +39,7 @@ describe('AdminGovernance Component', () => {
             providers: [
                 { provide: AdminService, useValue: adminServiceMock },
                 { provide: NotificationService, useValue: notificationServiceMock },
-                { provide: LookupService, useValue: lookupServiceMock }
+                { provide: EcPositionService, useValue: positionServiceMock }
             ]
         }).compileComponents();
 
@@ -56,7 +60,7 @@ describe('AdminGovernance Component', () => {
     // assignment and removal, so an admin's choice per action actually reaches the backend.
     it('assignRole posts notifyMember:false by default', () => {
         component.selectedPeriod.set({ id: 1 });
-        component.assignData.set({ memberId: 5, position: 'President', reason: '', notifyMember: false });
+        component.assignData.set({ memberId: 5, position: 1, reason: '', notifyMember: false });
 
         component.assignRole();
 
@@ -68,7 +72,7 @@ describe('AdminGovernance Component', () => {
 
     it('assignRole posts notifyMember:true when the admin opts in', () => {
         component.selectedPeriod.set({ id: 1 });
-        component.assignData.set({ memberId: 5, position: 'President', reason: '', notifyMember: true });
+        component.assignData.set({ memberId: 5, position: 1, reason: '', notifyMember: true });
 
         component.assignRole();
 
@@ -124,8 +128,8 @@ describe('AdminGovernance Component', () => {
 
     it('FR-34: assignRole to a held seat needs the outgoing holder reason', () => {
         component.selectedPeriod.set({ id: 1 });
-        component.committeeMembers.set([{ id: 3, position: 'President', member: { fullName: 'Old Holder' } }]);
-        component.assignData.set({ memberId: 5, position: 'President', reason: '', notifyMember: false, endCurrentHolderReason: '', endCurrentHolderNote: '' });
+        component.committeeMembers.set([{ id: 3, position: 'President', positionId: 1, member: { fullName: 'Old Holder' } }]);
+        component.assignData.set({ memberId: 5, position: 1, reason: '', notifyMember: false, endCurrentHolderReason: '', endCurrentHolderNote: '' });
 
         component.assignRole();
         expect(adminServiceMock.assignCommitteeRole).not.toHaveBeenCalled();
@@ -138,7 +142,7 @@ describe('AdminGovernance Component', () => {
 
     it('FR-34: assignRole to an empty seat sends no outgoing reason', () => {
         component.selectedPeriod.set({ id: 1 });
-        component.assignData.set({ memberId: 5, position: 'President', reason: '', notifyMember: false, endCurrentHolderReason: 'Died', endCurrentHolderNote: 'x' });
+        component.assignData.set({ memberId: 5, position: 1, reason: '', notifyMember: false, endCurrentHolderReason: 'Died', endCurrentHolderNote: 'x' });
 
         component.assignRole();
 
@@ -152,5 +156,39 @@ describe('AdminGovernance Component', () => {
         ]);
 
         expect(component.vacantSeats().map(s => s.position)).toEqual(['Treasurer']);
+    });
+
+    it('FR-34: the position picker lists positions from the positions service', () => {
+        expect(positionServiceMock.getActive).toHaveBeenCalled();
+        expect(component.ecPositions().map(p => p.id)).toEqual([1, 16]);
+    });
+
+    it('FR-34: a multi-seat position never asks to replace a holder', () => {
+        component.committeeMembers.set([{ id: 3, position: 'ExecutiveMember', positionId: 16, member: { fullName: 'One Holder' } }]);
+
+        expect(component.holderOf(16)).toBeUndefined();
+        expect(component.holderOf(1)).toBeUndefined();
+    });
+
+    it('FR-34: role labels come only from the name the API sends', () => {
+        expect(component.getRoleName({ position: 'ExecutiveMember', positionName: 'Executive Member' })).toBe('Executive Member');
+        expect(component.getRoleName({ position: 'GeneralSecretary' })).toBe('');
+    });
+
+    it('FR-34: activating a period shows the reason the API gives', async () => {
+        vi.spyOn(TestBed.inject(ConfirmDialogService), 'confirm').mockReturnValue(of(true));
+        adminServiceMock.activateGovernancePeriod.mockReturnValue(throwError(() => ({ error: { detail: 'Period not found.' } })));
+
+        await component.activatePeriod(4);
+
+        expect(notificationServiceMock.error).toHaveBeenCalledWith('Period not found.');
+    });
+
+    it('FR-34: a failed positions load is reported', () => {
+        positionServiceMock.getActive.mockReturnValue(throwError(() => new Error('down')));
+
+        component.loadPositions();
+
+        expect(notificationServiceMock.error).toHaveBeenCalledWith('Could not load committee positions.');
     });
 });

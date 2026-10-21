@@ -1,0 +1,338 @@
+<title>Election Forms Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap">
+<style>
+/* Layout: a review desk. Summary and questions on top, then a grid of A4 sheets in lifecycle order. */
+:root {
+  --bg: #e9edf1; --fg: #1b2530; --muted: #5a6875; --line: #c9d1d9; --panel: #f7f9fb;
+  --accent: #1f3a5f; --accent-soft: #dbe5f0;
+  --paper: #ffffff; --paper-ink: #1c2733; --paper-rule: #b9c2cc; --paper-head: #eef1f4; --seal: #a3342b;
+  --ok: #2f6b3a; --ok-bg: #dcefe0; --warn: #8a5a00; --warn-bg: #f6ead2; --todo: #7a2e2e; --todo-bg: #f4dede; --info: #1f4f7a; --info-bg: #dbe8f5;
+  --f-display: "IBM Plex Serif", Georgia, serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11161c; --fg: #dde4ea; --muted: #94a2b0; --line: #2d3843; --panel: #182028;
+  --accent: #8fb3dc; --accent-soft: #22324a;
+  --paper: #eef0f2; --paper-ink: #1c2733; --paper-rule: #aab3bd; --paper-head: #dfe4e9; --seal: #a3342b;
+  --ok: #8fd19e; --ok-bg: #1d3324; --warn: #e8c27a; --warn-bg: #3a2e16; --todo: #f0a3a3; --todo-bg: #3d2020; --info: #9cc7ef; --info-bg: #1c2c40;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11161c; --fg: #dde4ea; --muted: #94a2b0; --line: #2d3843; --panel: #182028;
+  --accent: #8fb3dc; --accent-soft: #22324a;
+  --paper: #eef0f2; --paper-ink: #1c2733; --paper-rule: #aab3bd; --paper-head: #dfe4e9; --seal: #a3342b;
+  --ok: #8fd19e; --ok-bg: #1d3324; --warn: #e8c27a; --warn-bg: #3a2e16; --todo: #f0a3a3; --todo-bg: #3d2020; --info: #9cc7ef; --info-bg: #1c2c40;
+  color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1280px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 28px; }
+h1 { font-family: var(--f-display); font-size: 30px; margin: 0; text-wrap: balance; }
+h2 { font-size: 19px; margin: 0 0 10px; text-wrap: balance; }
+p { margin: 0; max-width: 72ch; }
+.lede { display: grid; gap: 8px; }
+.muted { color: var(--muted); }
+code, .mono { font-family: var(--f-mono); font-size: .92em; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 18px; min-width: 0; }
+.stats { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; font-size: 12.5px; font-weight: 500; white-space: nowrap; }
+.s-built { background: var(--ok-bg); color: var(--ok); }
+.s-generic { background: var(--info-bg); color: var(--info); }
+.s-data { background: var(--warn-bg); color: var(--warn); }
+.s-none { background: var(--todo-bg); color: var(--todo); }
+.s-draft { background: var(--accent-soft); color: var(--accent); }
+.tablebox { overflow-x: auto; }
+table.cmp { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+table.cmp th, table.cmp td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cmp th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+table.cmp td.code { font-family: var(--f-mono); white-space: nowrap; }
+.opts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.opts label, .filters label { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; cursor: pointer; background: var(--bg); font-size: 14px; }
+.opts input:checked + span, .filters input:checked + span { font-weight: 600; color: var(--accent); }
+input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 3px; }
+ol.qs { margin: 0; padding-left: 22px; display: grid; gap: 10px; max-width: 80ch; }
+ol.qs b { font-weight: 600; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 22px; align-items: start; }
+.card { display: grid; gap: 10px; min-width: 0; }
+.meta { display: grid; gap: 6px; font-size: 13.5px; }
+.meta .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.code-big { font-family: var(--f-mono); font-weight: 600; font-size: 15px; color: var(--accent); }
+.note { font-size: 13px; color: var(--muted); }
+.note b { color: var(--fg); font-weight: 600; }
+/* The sheet is a printed page, so it keeps paper colors in both themes. */
+.sheet { background: var(--paper); color: var(--paper-ink); aspect-ratio: 210 / 297; max-width: 100%; padding: 22px 22px 14px; box-shadow: 0 1px 2px rgba(0,0,0,.12), 0 6px 18px rgba(0,0,0,.08); font-size: 10.5px; line-height: 1.35; display: flex; flex-direction: column; gap: 9px; }
+.sheet .org { font-weight: 600; font-size: 13px; color: #1f3a5f; }
+.sheet .sub { font-size: 9px; color: #6b4e16; font-family: var(--f-mono); }
+.sheet .hd { border-bottom: 1.5px solid #1f3a5f; padding-bottom: 6px; }
+.sheet .ttl { text-align: center; font-family: var(--f-display); font-size: 15px; margin: 2px 0; }
+.kv { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 3px 12px; }
+.kv div { display: flex; gap: 4px; align-items: end; min-width: 0; }
+.kv span { white-space: nowrap; color: #44515e; }
+.kv i { flex: 1; border-bottom: 1px solid var(--paper-rule); min-width: 18px; height: 11px; }
+.sec { display: grid; gap: 3px; }
+.sec h4 { margin: 0; font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em; color: #1f3a5f; }
+.ck { display: grid; gap: 2px; }
+.ck div { display: flex; gap: 5px; align-items: start; }
+.ck div::before { content: ""; flex: 0 0 8px; height: 8px; border: 1px solid var(--paper-ink); margin-top: 2px; }
+.yn { margin-left: auto; white-space: nowrap; color: #44515e; padding-left: 6px; }
+.lines { display: grid; gap: 7px; }
+.lines i { display: block; border-bottom: 1px solid var(--paper-rule); height: 7px; }
+.decl { border: 1px solid var(--paper-rule); background: var(--paper-head); padding: 5px 7px; font-style: italic; }
+.ftab { border-collapse: collapse; width: 100%; font-size: 9.5px; }
+.ftab th { background: var(--paper-head); font-weight: 600; text-align: left; }
+.ftab th, .ftab td { border: 1px solid var(--paper-rule); padding: 2px 4px; height: 12px; }
+.sigs { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 14px 10px; margin-top: auto; padding-top: 10px; }
+.sigs div { border-top: 1px solid var(--paper-ink); padding-top: 2px; font-size: 8.5px; color: #44515e; }
+.sealrow { display: flex; justify-content: flex-end; }
+.seal { width: 46px; height: 46px; border: 1.5px dashed var(--seal); border-radius: 50%; color: var(--seal); font-size: 8px; display: grid; place-items: center; text-align: center; }
+.ft { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--paper-rule); padding-top: 5px; font-size: 8px; color: #5a6875; font-family: var(--f-mono); }
+.qr { width: 26px; height: 26px; flex: 0 0 26px; background: repeating-conic-gradient(#1c2733 0 25%, transparent 0 50%) 0 0 / 6px 6px; border: 2px solid #1c2733; }
+.ft .pg { margin-left: auto; }
+.draftmark { align-self: flex-start; font-size: 8.5px; font-family: var(--f-mono); color: var(--seal); border: 1px solid var(--seal); padding: 0 4px; }
+.flag { color: var(--seal); font-weight: 600; }
+@media (prefers-reduced-motion: no-preference) { .card { transition: opacity .15s; } }
+</style>
+
+<div class="wrap">
+  <header class="lede">
+    <h1>Election Forms Review</h1>
+    <p>All 50 election forms, laid out the way the platform prints them: organisation header, the record code, a key and value block, the body, signature lines, the seal and the verification QR footer. The Regulations §18 list (ER-01 to ER-35) sets the numbers. The 15 forms that exist only in the templates take a letter after the form they follow.</p>
+    <p class="muted">Sources: Regulations §18, templates 05, 06 and 07, and the form inventory in spec 023. Drawn and decided 2026-10-20. The owner approved every layout shown here on that date. Sheets marked NEW LAYOUT are the 10 forms the Regulations name without a field list; their layouts were drawn here and approved with the rest.</p>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <section class="panel">
+    <h2>Numbering for the 15 template-only forms</h2>
+    <p class="muted" style="margin-bottom:12px">ER-01 to ER-35 keep their Regulations numbers. Each template-only form takes a letter after the form it follows, so the printed pack reads in the order the forms are used. Two other schemes were considered and not chosen: ER-36 to ER-50 appended at the end, and a separate EA-01 annex series.</p>
+    <div class="tablebox"><table class="cmp" id="numtable"></table></div>
+  </section>
+
+  <section class="panel">
+    <h2>Old platform codes</h2>
+    <p class="muted" style="margin-bottom:12px">The platform printed 16 forms under template numbers before this change. Each old code still opens the same form on the document link and on the verify page, so QR codes already printed keep working. The sheet prints the new code.</p>
+    <div class="tablebox"><table class="cmp" id="oldtable"></table></div>
+  </section>
+
+  <section class="panel">
+    <h2>Decisions, 2026-10-20</h2>
+    <ol class="qs">
+      <li><b>Numbering.</b> Regulations numbers ER-01 to ER-35, with a letter suffix for the 15 template-only forms (table above).</li>
+      <li><b>Old codes.</b> The 16 codes printed before this change still open the right form (table above).</li>
+      <li><b>ER-01 and ER-02 dates.</b> Stored on the election: announced on, nomination opens and closes, scrutiny, withdrawal deadline, final list date, polling opens and closes, campaign opens and closes, silence period, venue, notice reference number and recount window end.</li>
+      <li><b>Recount.</b> One stored record per filing holds the request and the decision: seat, applicant, grounds, received time, decision, reason and who decided. ER-28 prints the request, ER-28A the decision, and ER-28B compares the original count with the recount.</li>
+      <li><b>Handover.</b> Moves to ER-34 with the 15-item checklist from template 07, and each tick is stored. ER-33 is the Election Completion Report, as in the Regulations.</li>
+      <li><b>ER-17 scrutiny ticks.</b> Seven ticks stored on each nomination: membership verified, voting member, minimum period, founding requirement, documents complete, fee paid, declaration signed. Any commissioner may tick, and the sheet prints who ticked and when.</li>
+      <li><b>Title-only matches.</b> All six pairs are one form: ER-08 with 05 ER-07, ER-17 with 05 ER-11, ER-27 with 07 ER-23, ER-29 with 07 ER-30, ER-31 with 07 ER-34, ER-32 with 07 ER-35.</li>
+      <li><b>Signers.</b> ER-03 is signed by the Selection Committee chair and one member. ER-20 stays a separate form from the Code of Conduct acceptance ECC-01.</li>
+      <li><b>ER-13.</b> Reuses the ER-05 neutrality text plus the lines on not holding political office. Candidates sign ER-13; officials sign ER-05.</li>
+      <li><b>Layouts.</b> Approved as shown below.</li>
+      <li><b>Vote receipt.</b> Made on the server as a PDF with Bengali text. It prints the receipt code, the election and the time, and never the choices.</li>
+      <li><b>Build order.</b> ER-04, ER-05, ER-23 and ER-24 are built first, because their data is already stored. The stored fields above come with a migration that waits for the preprod migration gate.</li>
+    </ol>
+  </section>
+
+  <section class="filters" aria-label="Filter forms">
+    <label><input type="radio" name="flt" id="flt-all" value="all" checked><span>All 50</span></label>
+    <label><input type="radio" name="flt" id="flt-built" value="built"><span>Printed from records</span></label>
+    <label><input type="radio" name="flt" id="flt-generic" value="generic"><span>Printed blank</span></label>
+    <label><input type="radio" name="flt" id="flt-data" value="data"><span>Data exists, not built</span></label>
+    <label><input type="radio" name="flt" id="flt-none" value="none"><span>Not built</span></label>
+    <label><input type="radio" name="flt" id="flt-draft" value="draft"><span>Regulations-only, new layouts</span></label>
+    <label><input type="radio" name="flt" id="flt-tpl" value="tpl"><span>Template-only</span></label>
+  </section>
+
+  <main class="grid" id="grid"></main>
+</div>
+
+<script>
+const T = {
+"05 ER-01":{"title":"Election Notice","header":["Election Reference No.","Date of Notice"],"sections":[{"name":"","kind":"text","items":["Notice that the Election Commission announces the Executive Committee election under the Constitution and Election Regulations"]},{"name":"Election Schedule","kind":"fields","items":["Election Date","Polling Time","Polling Venue","Nomination Opens","Nomination Closes","Scrutiny","Withdrawal Deadline","Final Candidate List","Campaign Period","Silence Period"]}],"signatures":["Chief Election Commissioner"],"seal":true},
+"05 ER-02":{"title":"Election Calendar","header":["Election Reference No.","Prepared On"],"sections":[{"name":"Activity Schedule","kind":"table","items":["Activity","Date","Time","Responsible","Completed"],"rows":["Election Notice","Voter List","Nomination","Scrutiny","Withdrawal","Candidate List","Polling","Counting","Result"]}],"signatures":["Chief Election Commissioner","Election Commissioner"],"seal":false},
+"05 ER-03":{"title":"Election Commissioner Acceptance","header":[],"sections":[{"name":"Appointee","kind":"fields","items":["Name","Membership No.","Position","Date of Appointment"]},{"name":"","kind":"checklist","items":["I am not contesting this election.","I have no conflict of interest.","I shall remain neutral throughout the election.","I shall follow the Constitution and the Election Regulations."]}],"signatures":["Appointee","Witness"],"seal":false},
+"05 ER-04":{"title":"Declaration of Neutrality","header":[],"sections":[{"name":"","kind":"checklist","items":["Remain impartial in every act and decision.","Not campaign for or against any candidate.","Not favour any candidate, panel or group.","Not disclose confidential information.","Perform my duties honestly and to the best of my ability."]},{"name":"Declarant","kind":"fields","items":["Name","Membership No.","Election Role","Date"]}],"signatures":["Declarant"],"seal":false},
+"05 ER-05":{"title":"Conflict of Interest Declaration","header":[],"sections":[{"name":"Declarant","kind":"fields","items":["Name","Membership No.","Position","Date"]},{"name":"Disclosure","kind":"checklist","items":["Family relationship with a candidate: Yes / No","Business relationship: Yes / No","Financial relationship: Yes / No","Political relationship: Yes / No"]},{"name":"","kind":"text","items":["If any answer is Yes, describe the relationship in full (4 ruled lines)"]},{"name":"Declaration","kind":"declaration","items":["Information given is true and complete; any change will be reported immediately"]}],"signatures":["Declarant","Chief Election Commissioner (Received)"],"seal":false},
+"05 ER-06":{"title":"Confidentiality Agreement","header":[],"sections":[{"name":"I agree to maintain confidentiality regarding","kind":"checklist","items":["Voting records and voter data","System passwords and access credentials","Election documents and internal correspondence","Audit reports","Complaints and their proceedings","Results before official certification"]},{"name":"","kind":"declaration","items":["Failure to comply may result in disciplinary action under the Constitution"]},{"name":"Signatory","kind":"fields","items":["Name","Membership No.","Election Role","Date"]}],"signatures":["Signatory","Chief Election Commissioner (Countersigned)"],"seal":false},
+"05 ER-07":{"title":"Preliminary Voter Roll Certification","header":["Election","Date of Certification"],"sections":[{"name":"Roll Summary","kind":"fields","items":["Total Members","Eligible Voters","Ineligible Members"]},{"name":"","kind":"text","items":["Basis of ineligibility (arrears, suspension, membership class) (3 ruled lines)"]},{"name":"","kind":"declaration","items":["We certify the preliminary voter roll was prepared from the membership register and verified against it"]}],"signatures":["Prepared By","Verified By","Approved By (Chief Election Commissioner)"],"seal":true},
+"05 ER-08":{"title":"Voter Roll Objection","header":["Reference No.","Date Received"],"sections":[{"name":"Objector","kind":"fields","items":["Member Name","Membership No.","Phone","Email"]},{"name":"Ground of Objection","kind":"checklist","items":["Missing name","Incorrect information","Duplicate entry","Ineligible voter listed"]},{"name":"","kind":"text","items":["Evidence submitted (4 ruled lines)"]},{"name":"Commission Decision","kind":"checklist","items":["Decision: Accepted / Rejected"]},{"name":"","kind":"text","items":["Reason for the decision (3 ruled lines)"]}],"signatures":["Election Commissioner","Chief Election Commissioner"],"seal":false},
+"05 ER-09":{"title":"Candidate Nomination Form","header":["Election"],"sections":[{"name":"Position Applied For","kind":"checklist","items":["President","Vice President","General Secretary","Joint Secretary","Treasurer","Executive Member"]},{"name":"Candidate Information","kind":"fields","items":["Name","Membership Number","Batch","Phone","Email","Employment","Address"]},{"name":"Proposer and Seconder","kind":"fields","items":["Proposed By","Membership No.","Seconded By","Membership No."]},{"name":"Documents Attached","kind":"checklist","items":["Membership certificate copy","Photograph","Declaration (ER-04)","Candidate consent (ER-10)","Nomination fee receipt"]},{"name":"Office use","kind":"fields","items":["Application No.","Date and Time Received"]}],"signatures":["Candidate","Received By (Commission officer)"],"seal":false},
+"05 ER-10":{"title":"Candidate Consent","header":[],"sections":[{"name":"","kind":"fields","items":["Position"]},{"name":"I confirm that","kind":"checklist","items":["I satisfy all constitutional requirements for this position.","The information I have supplied is correct.","I shall follow the Election Regulations and the directions of the Commission."]},{"name":"Candidate","kind":"fields","items":["Name","Membership No.","Application No.","Date"]}],"signatures":["Candidate"],"seal":false},
+"05 ER-11":{"title":"Nomination Scrutiny Checklist","header":["Application Number","Candidate","Position","Date of Scrutiny"],"sections":[{"name":"Verification","kind":"checklist","items":["Membership verified: Yes / No","Voting member: Yes / No","Minimum membership period met: Yes / No","Founding member requirement, if applicable: Yes / No","Required documents complete: Yes / No","Nomination fee paid: Yes / No","Declaration signed: Yes / No"]},{"name":"Decision","kind":"checklist","items":["Decision: Accepted / Rejected"]},{"name":"","kind":"text","items":["Reason, where the nomination is rejected (3 ruled lines)"]}],"signatures":["Election Commissioner","Election Commissioner","Chief Election Commissioner"],"seal":false},
+"05 ER-12":{"title":"Nomination Acceptance Order","header":["Application No.","Order Date","Candidate","Position"],"sections":[{"name":"","kind":"checklist","items":["Accepts the nomination","Rejects the nomination"]},{"name":"","kind":"text","items":["Reasons (4 ruled lines)"]}],"signatures":["Chief Election Commissioner"],"seal":true},
+"05 ER-13":{"title":"Candidate Withdrawal","header":["Candidate","Membership No.","Position","Application No."],"sections":[{"name":"","kind":"declaration","items":["I voluntarily withdraw my nomination; a withdrawal once accepted cannot be revoked"]},{"name":"Acceptance record","kind":"fields","items":["Date and Time of Acceptance","Reference No."]}],"signatures":["Candidate","Accepted By (Election Commission)"],"seal":false},
+"05 ER-14":{"title":"Final Candidate List","header":["Election","Date of Publication"],"sections":[{"name":"Candidates","kind":"table","items":["Position","Candidate Name","Election Symbol","Application No.","Remarks"]},{"name":"","kind":"declaration","items":["Final list of contesting candidates; no addition or alteration after publication except by order of the Commission"]}],"signatures":["Chief Election Commissioner"],"seal":true},
+"05 ER-15":{"title":"Poll Opening Certificate","header":["Election","Polling Station","Date","Opening Time"],"sections":[{"name":"Before Polling Commenced","kind":"checklist","items":["Ballot box shown empty to those present","Ballot box inspected","Ballot box locked","Seal applied"]},{"name":"","kind":"fields","items":["Seal Numbers","Ballot Serial Range Issued"]},{"name":"","kind":"checklist","items":["Observer present: Yes / No","Candidate agents present: Yes / No"]},{"name":"","kind":"declaration","items":["Polling officially commenced at the time recorded above"]}],"signatures":["Presiding Officer","Polling Officer","Observer","Candidate Agent"],"seal":false},
+"05 ER-16":{"title":"Poll Incident Register","header":["Polling Station","Date"],"sections":[{"name":"Incident","kind":"fields","items":["Incident No.","Time"]},{"name":"","kind":"text","items":["Description (4 ruled lines)","Persons involved (3 ruled lines)","Witnesses (2 ruled lines)","Action taken (3 ruled lines)"]},{"name":"","kind":"fields","items":["Reported To"]}],"signatures":["Presiding Officer","Observer"],"seal":false},
+"05 ER-17":{"title":"Spoiled Ballot Register","header":["Polling Station","Date"],"sections":[{"name":"Register","kind":"table","items":["Serial No.","Ballot No.","Reason","Replacement Ballot No.","Officer Initials"]},{"name":"Totals","kind":"fields","items":["Total Spoiled Ballots","Total Replacements Issued"]}],"signatures":["Polling Officer","Presiding Officer"],"seal":false},
+"05 ER-18":{"title":"Poll Closing Certificate","header":["Election","Polling Station","Closing Time","Date"],"sections":[{"name":"Ballot Account","kind":"fields","items":["Registered Voters","Ballots Issued","Unused Ballots","Spoiled Ballots","Votes Cast","Ballots Returned to Commission"]},{"name":"","kind":"declaration","items":["We certify polling closed peacefully at the recorded time and no ballot was issued after official closing time"]}],"signatures":["Presiding Officer","Polling Officer","Observer","Candidate Agent"],"seal":true},
+"06 ER-19":{"title":"Ballot Box Sealing and Poll Integrity Certificate","header":["Election","Polling Station","Date","Time"],"sections":[{"name":"We Certify That","kind":"checklist","items":["Polling has concluded.","All voters in the queue at closing time have voted.","The ballot slot has been closed.","Unused ballots have been counted.","Spoiled ballots have been counted.","The Ballot Issue Register has been reconciled.","The ballot box remained under continuous supervision.","No unauthorised person accessed the ballot box.","The security seals are intact."]},{"name":"Security Seals","kind":"fields","items":["Seal No. 1","Seal No. 2","Seal No. 3"]},{"name":"","kind":"text","items":["Observer remarks (3 ruled lines)","Candidate agent remarks (3 ruled lines)"]},{"name":"Declaration","kind":"declaration","items":["Polling concluded under the Constitution and Election Regulations, with no unauthorised access, substitution, removal, insertion or tampering before counting."]},{"name":"","kind":"fields","items":["Time Counting Authorised"]}],"signatures":["Chief Election Commissioner","Election Commissioner","Election Commissioner","Presiding Officer","Polling Officer","Security Officer","Observer 1","Observer 2","Candidate Agent A","Candidate Agent B","Candidate Agent C"],"seal":true},
+"07 ER-20":{"title":"Vote Counting Authorization Certificate","header":["Election","Polling Station","Date","Time Counting Commenced"],"sections":[{"name":"Prerequisites Verified","kind":"checklist","items":["Poll officially closed","Poll Closing Certificate completed","Ballot Box Sealing Certificate completed","Seal numbers verified","Ballot Issue Register reconciled","Candidate agents present or notified","Observers present","Counting hall secured","Counting materials available"]},{"name":"","kind":"declaration","items":["The Election Commission hereby authorises the commencement of vote counting."]}],"signatures":["Chief Election Commissioner","Election Commissioner","Election Commissioner","Observer"],"seal":false},
+"07 ER-21":{"title":"Ballot Box Opening Certificate","header":["Election","Ballot Box Number","Seal No. 1","Seal No. 2","Seal No. 3"],"sections":[{"name":"Inspection","kind":"checklist","items":["Seals intact","Box undamaged","Lock intact","No evidence of tampering"]},{"name":"","kind":"fields","items":["Opened At (time)","Date"]},{"name":"Remarks","kind":"text","items":["3 lines"]}],"signatures":["Opened By (Chief Election Commissioner)","Election Commissioner","Election Commissioner","Observer","Candidate Agent"],"seal":false},
+"07 ER-22":{"title":"Ballot Paper Reconciliation Sheet","header":["Election","Polling Station"],"sections":[{"name":"Ballot Account","kind":"table","items":["Item","Count"],"rows":["Registered voters","Ballots received","Ballots issued","Unused ballots","Spoiled ballots","Ballots found in box","Difference"]},{"name":"Explanation of any difference","kind":"text","items":["3 lines"]}],"signatures":["Verified By (Chief Election Commissioner)","Election Commissioner","Observer"],"seal":false},
+"07 ER-23":{"title":"Vote Counting Sheet","header":["Election","Position","Round No.","Sheet No."],"sections":[{"name":"Count","kind":"table","items":["Candidate","Symbol","Votes"],"blank":5},{"name":"","kind":"fields","items":["Rejected Ballots","Questionable Ballots","Total Count"]}],"signatures":["Counted By","Verified By"],"seal":false},
+"07 ER-24":{"title":"Independent Tally Sheet","header":["Election","Position"],"sections":[{"name":"Independent Counts","kind":"table","items":["Candidate","Counter A","Counter B","Counter C"],"rows":["","","","Rejected"]},{"name":"","kind":"fields","items":["Difference Between Counters","Counts Reconciled: Yes / No"]},{"name":"Remarks","kind":"text","items":["3 lines"]}],"signatures":["Counter A","Counter B","Counter C","Verified By (Chief Election Commissioner)"],"seal":false},
+"07 ER-25":{"title":"Rejected Ballot Register","header":["Election","Position"],"sections":[{"name":"Register","kind":"table","items":["Serial No.","Ballot No.","Reason","Decision","Initials"],"blank":5},{"name":"Grounds Used","kind":"checklist","items":["No official stamp","Multiple selections","No clear intention","Damaged","Identifiable markings","Other"]}],"signatures":["Election Commissioner","Chief Election Commissioner"],"seal":false},
+"07 ER-26":{"title":"Recount Request","header":["Reference Number","Date","Time Received","Position"],"sections":[{"name":"Applicant","kind":"fields","items":["Applicant","Membership No.","Candidate Represented","Phone"]},{"name":"Grounds","kind":"checklist","items":["Counting error","Mathematical error","Invalid ballots counted","Tally difference between counters","Other"]},{"name":"Detailed explanation","kind":"text","items":["5 lines"]},{"name":"","kind":"fields","items":["Evidence attached: Yes / No"]}],"signatures":["Applicant","Received By (Commission officer)"],"seal":false},
+"07 ER-27":{"title":"Recount Decision","header":["Reference No.","Applicant","Position","Date"],"sections":[{"name":"","kind":"checklist","items":["Decision: Approved / Rejected"]},{"name":"Reason","kind":"text","items":["4 lines"]}],"signatures":["Recount Ordered By (Chief Election Commissioner)","Election Commissioner","Election Commissioner"],"seal":true},
+"07 ER-28":{"title":"Recount Report","header":["Election","Position","Date of Recount","Reference No."],"sections":[{"name":"Comparison","kind":"table","items":["Candidate","Original Count","Recount","Difference"],"rows":["","","","Rejected"]},{"name":"Reason for the difference","kind":"text","items":["3 lines"]},{"name":"Final result and Commission decision","kind":"text","items":["3 lines"]}],"signatures":["Chief Election Commissioner","Election Commissioner","Observer"],"seal":false},
+"07 ER-29":{"title":"Final Result Sheet","header":["Election","Position"],"sections":[{"name":"Result","kind":"table","items":["Candidate","Votes","Percentage","Status"],"blank":4},{"name":"","kind":"fields","items":["Winner","Runner-up","Rejected Ballots","Total Votes"]}],"signatures":["Certified By (Chief Election Commissioner)","Election Commissioner","Election Commissioner"],"seal":false},
+"07 ER-30":{"title":"Election Result Certification","header":["Election Name","Election Date","Polling Stations","Registered Voters","Votes Cast","Turnout Percentage","Rejected Ballots","Date of Certification"],"sections":[{"name":"We Certify That","kind":"checklist","items":["The election was conducted according to the Constitution.","Counting has been completed.","Results have been verified.","All recounts have been completed.","All appeals have been recorded."]}],"signatures":["Chief Election Commissioner","Election Commissioner","Election Commissioner","Observer","Observer"],"seal":true},
+"07 ER-31":{"title":"Result Declaration","header":["Election","Date","Time","Reference No."],"sections":[{"name":"","kind":"declaration","items":["The Election Commission hereby declares the following candidates elected."]},{"name":"","kind":"table","items":["Office","Candidate","Votes"],"rows":["President","Vice President","General Secretary","Joint Secretary","Treasurer","Executive Member","Executive Member","Executive Member"]}],"signatures":["Certified By (Chief Election Commissioner)"],"seal":true},
+"07 ER-32":{"title":"Election Complaint Form","header":["Complaint No.","Date","Time","Election"],"sections":[{"name":"Parties","kind":"fields","items":["Complainant","Membership No.","Respondent","Phone"]},{"name":"Nature of Complaint","kind":"checklist","items":["Campaign","Polling","Counting","Result","Other"]},{"name":"Description","kind":"text","items":["6 lines"]},{"name":"Evidence attached","kind":"text","items":["2 lines"]},{"name":"Requested relief","kind":"text","items":["3 lines"]}],"signatures":["Complainant","Received By (Commission officer)"],"seal":false},
+"07 ER-33":{"title":"Election Investigation Report","header":["Complaint No.","Investigating Officer","Date Assigned","Date Submitted"],"sections":[{"name":"Persons interviewed","kind":"text","items":["4 lines"]},{"name":"Evidence reviewed","kind":"text","items":["3 lines"]},{"name":"Documents reviewed","kind":"text","items":["3 lines"]},{"name":"Findings","kind":"text","items":["6 lines"]},{"name":"Recommendations","kind":"text","items":["4 lines"]},{"name":"","kind":"fields","items":["Submitted To"]}],"signatures":["Investigating Officer","Received By (Election Commission)"],"seal":false},
+"07 ER-34":{"title":"Appeal to Election Appeals Tribunal","header":["Appeal No.","Date","Appellant","Membership No."],"sections":[{"name":"Decision appealed against","kind":"text","items":["2 lines"]},{"name":"Grounds of appeal","kind":"text","items":["6 lines"]},{"name":"Supporting evidence","kind":"text","items":["3 lines"]},{"name":"Requested relief","kind":"text","items":["3 lines"]}],"signatures":["Appellant","Received By (Tribunal registrar)"],"seal":false},
+"07 ER-35":{"title":"Tribunal Decision","header":["Appeal No.","Hearing Date","Decision Date","Appellant"],"sections":[{"name":"Tribunal members","kind":"text","items":["3 lines"]},{"name":"Evidence considered","kind":"text","items":["4 lines"]},{"name":"Decision","kind":"checklist","items":["Appeal allowed","Appeal partially allowed","Appeal dismissed"]},{"name":"Orders","kind":"text","items":["4 lines"]},{"name":"Reasons","kind":"text","items":["6 lines"]}],"signatures":["Tribunal Member","Tribunal Member","Tribunal Member"],"seal":false},
+"07 ER-36":{"title":"Election Completion Report","header":["Election Reference","Election Date","Total Registered Voters","Votes Cast","Turnout Percentage","Candidates","Complaints Received","Appeals Filed","Recounts","Security Incidents"],"sections":[{"name":"Lessons learned","kind":"text","items":["5 lines"]},{"name":"Recommendations for the next election","kind":"text","items":["5 lines"]}],"signatures":["Prepared By (Chief Election Commissioner)","Election Commissioner"],"seal":false},
+"07 ER-37":{"title":"Executive Committee Handover Certificate","header":["Outgoing Committee Term","Incoming Committee Term","Date of Handover","Venue"],"sections":[{"name":"Items Handed Over","kind":"checklist","items":["Constitution","Minute books","Membership register","Bank documents","Cheque books","Financial records","Fixed assets","Office keys","Website access","Email accounts","Social media accounts","Digital archive","Election archive","Contracts","Official seal"]},{"name":"Remarks","kind":"text","items":["3 lines"]}],"signatures":["Outgoing President","Incoming President","Outgoing Secretary","Incoming Secretary","Witness","Witness"],"seal":false},
+"07 ER-38":{"title":"Election Archive Register","header":["Election Year","Prepared On"],"sections":[{"name":"Register","kind":"table","items":["Archive ID","Document Name","Pages","Location","Retention Until","Destroyed On","Destroyed By"],"blank":4}],"signatures":["Prepared By","Verified By (Chief Election Commissioner)"],"seal":false},
+"07 ER-39":{"title":"Election Material Receipt Register","header":["Election","Polling Station"],"sections":[{"name":"Register","kind":"table","items":["Date","Time","Received From","Material","Quantity","Condition","Seal Number"],"blank":4},{"name":"Remarks","kind":"text","items":["2 lines"]}],"signatures":["Received By","Handed Over By"],"seal":false},
+"07 ER-40":{"title":"Election Closure Certificate","header":["Election Reference","Date"],"sections":[{"name":"The Election Commission Certifies That","kind":"checklist","items":["The election is completed.","Results have been certified.","All appeals have concluded.","Tribunal decisions have been implemented.","The Executive Committee has been installed.","Election records have been archived.","Election materials have been secured.","Financial accounts have been closed.","Commission duties are completed."]},{"name":"","kind":"declaration","items":["The Election Commission is hereby dissolved with effect from the date below."]},{"name":"","kind":"fields","items":["Effective Date of Dissolution"]}],"signatures":["Chief Election Commissioner","Election Commissioner","Election Commissioner","Association President","Association Secretary"],"seal":true}
+};
+
+/* Proposed layouts for the forms the Regulations name but do not define. */
+const D = {
+"ER-03":{"title":"Commissioner Appointment","header":["Election Reference","Letter Date"],"sections":[{"name":"Appointee","kind":"fields","items":["Name","Membership No.","Post: Chief Election Commissioner / Election Commissioner","Assumes Office On"]},{"name":"","kind":"declaration","items":["The appointment takes effect when the appointee signs ER-04 Commissioner Acceptance and ER-05 Neutrality Declaration. The Commission assumes office 90 days before the election (Regs §5)."]}],"signatures":["Chair, Selection Committee","Member, Selection Committee"],"seal":true,"src":"Regs §5, §6, §7; Handbook step 3"},
+"ER-12":{"title":"Eligibility Declaration","header":["Application No.","Date"],"sections":[{"name":"Candidate","kind":"fields","items":["Name","Membership No.","Position"]},{"name":"I declare that","kind":"checklist","items":["I am a voting member in good standing.","I meet the minimum membership period for this position.","I meet the founding member requirement, where it applies.","I have no outstanding dues.","I hold no election office in this election.","Criminal record: None / Disclosed below"]},{"name":"","kind":"text","items":["Disclosure (3 ruled lines)"]},{"name":"","kind":"declaration","items":["I understand a false statement is a ground for rejection at scrutiny (ER-17)."]}],"signatures":["Candidate"],"seal":false,"src":"Regs §9; scrutiny list in Ops Manual and Handbook step 5"},
+"ER-13":{"title":"Political Neutrality Declaration","header":["Application No.","Date"],"sections":[{"name":"Candidate","kind":"fields","items":["Name","Membership No.","Position"]},{"name":"I undertake that","kind":"checklist","items":["I will keep the Association's non-political character (Regs §4).","I will not use political party symbols in my campaign (Regs §10).","I will not use religious propaganda (Regs §10).","I will not seek support from a political party for this election."]}],"signatures":["Candidate","Received By (Commission officer)"],"seal":false,"src":"Regs §4, §9, §10"},
+"ER-14":{"title":"Proposer Form","header":["Application No.","Date"],"sections":[{"name":"Candidate","kind":"fields","items":["Name","Membership No.","Position"]},{"name":"Proposer","kind":"fields","items":["Name","Membership No.","Phone"]},{"name":"","kind":"checklist","items":["I am a voting member.","I am an election official in this election: Yes / No. If Yes, I have declared it and take no part in this candidate's scrutiny, recount or appeal (Regs §7)."]},{"name":"","kind":"declaration","items":["I propose the candidate named above for the position stated."]}],"signatures":["Proposer","Received By (Commission officer)"],"seal":false,"src":"Regs §7, §9; Handbook nomination step 7"},
+"ER-15":{"title":"Seconder Form","header":["Application No.","Date"],"sections":[{"name":"Candidate","kind":"fields","items":["Name","Membership No.","Position"]},{"name":"Seconder","kind":"fields","items":["Name","Membership No.","Phone"]},{"name":"","kind":"checklist","items":["I am a voting member.","I am an election official in this election: Yes / No. If Yes, I have declared it and take no part in this candidate's scrutiny, recount or appeal (Regs §7)."]},{"name":"","kind":"declaration","items":["I second the nomination of the candidate named above for the position stated."]}],"signatures":["Seconder","Received By (Commission officer)"],"seal":false,"src":"Regs §7, §9; Handbook nomination step 7"},
+"ER-16":{"title":"Nomination Receipt","header":["Application No.","Date and Time Received"],"sections":[{"name":"Candidate","kind":"fields","items":["Name","Membership No.","Position"]},{"name":"Documents received","kind":"checklist","items":["ER-10 Candidate Nomination","ER-11 Candidate Consent","ER-12 Eligibility Declaration","ER-13 Political Neutrality Declaration","ER-14 Proposer Form","ER-15 Seconder Form","Photograph","Nomination fee receipt"]},{"name":"","kind":"declaration","items":["This receipt confirms the papers were received. It is not acceptance. Scrutiny follows on ER-17."]}],"signatures":["Received By (Commission officer)"],"seal":true,"src":"Regs §9 (acknowledgement); Handbook nomination steps 2 and 3"},
+"ER-20":{"title":"Campaign Undertaking","header":["Election","Date"],"sections":[{"name":"Candidate","kind":"fields","items":["Name","Membership No.","Position","Campaign Opens","Campaign Closes"]},{"name":"During the campaign I will not","kind":"checklist","items":["Buy votes","Intimidate any voter","Spread false information","Damage property","Use Association funds","Use religious propaganda","Use political symbols","Defame another candidate"]},{"name":"","kind":"declaration","items":["I will stop campaigning 24 hours before polling. I will record my campaign spending and the Commission may audit it. I accept the sanctions in Regs §10: warning, show cause, suspension, disqualification."]}],"signatures":["Candidate","Received By (Commission officer)"],"seal":false,"src":"Regs §10; Code of Conduct §6, §20"},
+"ER-21":{"title":"Observer Appointment","header":["Election Reference","Date"],"sections":[{"name":"Observer","kind":"fields","items":["Name","Membership No. or Organisation","Scope (stations or stages)"]},{"name":"Duties","kind":"checklist","items":["Observe every stage independently.","Check that the Regulations are followed.","Report any irregularity to the Commission in writing.","Do not interfere with the process."]},{"name":"Signed before duty","kind":"checklist","items":["ER-05 Neutrality Declaration","ER-06 Conflict of Interest","ER-07 Confidentiality Agreement","ECC-01 Code of Conduct Acceptance"]}],"signatures":["Chief Election Commissioner","Observer (accepts)"],"seal":true,"src":"Regs §3, §7, §11; Code of Conduct §8, §20"},
+"ER-22":{"title":"Polling Officer Appointment","header":["Election","Polling Station"],"sections":[{"name":"Appointee","kind":"fields","items":["Name","Membership No.","Role: Presiding Officer / Polling Officer"]},{"name":"Conflict check (Regs §7)","kind":"checklist","items":["Spouse, parent, child or sibling of a candidate: Yes / No","Proposed or seconded a candidate: Yes / No","Is a candidate: Yes / No"]},{"name":"Signed before duty","kind":"checklist","items":["ER-05 Neutrality Declaration","ER-06 Conflict of Interest","ER-07 Confidentiality Agreement","ECC-01 Code of Conduct Acceptance"]},{"name":"","kind":"declaration","items":["At close the officer counts unused, spoiled and issued ballots and electronic votes, seals the box and prepares ER-24 (Regs §13)."]}],"signatures":["Chief Election Commissioner","Appointee (accepts)"],"seal":true,"src":"Regs §3, §7, §11, §13"},
+"ER-26":{"title":"Electronic Voting Audit","header":["Election","Mock Election Date","Audit Date","Technical Auditor"],"sections":[{"name":"System checks (Regs §12)","kind":"checklist","items":["OTP and email verification: Pass / Fail","Unique login per voter: Pass / Fail","Duplicate vote prevention: Pass / Fail","Vote encryption: Pass / Fail","Immutable audit log: Pass / Fail","Timestamp recording: Pass / Fail","Secure backup taken: Pass / Fail","Database integrity verified: Pass / Fail"]},{"name":"At poll close","kind":"fields","items":["Electronic Votes Recorded","Audit Log Entries","Audit Chain Head Hash"]},{"name":"","kind":"text","items":["Findings (3 ruled lines)"]}],"signatures":["Technical Auditor","Chief Election Commissioner","Election Commissioner","Observer"],"seal":true,"src":"Regs §11, §12, §13, §14; Ops Manual §13 and §14"}
+};
+
+/* Lifecycle order. reg: Regulations number. tpl: template source. plat: platform code today. st: built | generic | data | none. */
+const F = [
+ {reg:"ER-01",tpl:"05 ER-01",plat:"ER-01",st:"generic",n:"Prints blank today. Will print the stored schedule dates, venue and notice reference (decided 2026-10-20)."},
+ {reg:"ER-02",tpl:"05 ER-02",plat:"ER-02",st:"generic",n:"Prints blank today. Same dates as ER-01."},
+ {reg:"ER-03",draft:true,st:"none"},
+ {reg:"ER-04",tpl:"05 ER-03",st:"data",n:"Template title: Election Commissioner Acceptance. Officials' acceptance is stored. Built first."},
+ {reg:"ER-05",tpl:"05 ER-04",st:"data",n:"Template title: Declaration of Neutrality. Officials' declaration is stored. Signed by officials. Built first."},
+ {reg:"ER-06",tpl:"05 ER-05",st:"none"},
+ {reg:"ER-07",tpl:"05 ER-06",st:"none"},
+ {reg:"ER-08",tpl:"05 ER-07",plat:"ER-07",st:"built",n:"Prints the voter count in one line. Title-only match, confirmed."},
+ {reg:"ER-09",tpl:"05 ER-08",st:"none",n:"Regulations title: Voter Objection."},
+ {reg:"ER-10",tpl:"05 ER-09",plat:"ER-09",st:"built",n:"Prints candidate, seat, proposer, seconder, submitted time."},
+ {reg:"ER-11",tpl:"05 ER-10",plat:"ER-10",st:"built",n:"Uses submitted time as the consent date."},
+ {reg:"ER-12",draft:true,st:"none"},
+ {reg:"ER-13",draft:true,st:"none",n:"Reuses the ER-05 neutrality text plus the non-political lines. Signed by candidates."},
+ {reg:"ER-14",draft:true,st:"none"},
+ {reg:"ER-15",draft:true,st:"none"},
+ {reg:"ER-16",draft:true,st:"none",n:"Nomination submitted time is stored, so part of this can print from records."},
+ {reg:"ER-17",tpl:"05 ER-11",plat:"ER-11",st:"generic",n:"Regulations title: Scrutiny Report. Title-only match, confirmed. The seven ticks will be stored per nomination; any commissioner may tick, and the sheet prints who and when."},
+ {key:"accept",tpl:"05 ER-12",st:"none",n:"Not in the Regulations. The stored scrutiny decision could fill it."},
+ {reg:"ER-18",tpl:"05 ER-13",plat:"ER-13",st:"built",n:"Regulations title: Withdrawal Form."},
+ {reg:"ER-19",tpl:"05 ER-14",plat:"ER-14",st:"built",n:"Regulations title: Candidate List."},
+ {reg:"ER-20",draft:true,st:"none",n:"Separate from the Code of Conduct acceptance ECC-01."},
+ {reg:"ER-21",draft:true,st:"none"},
+ {reg:"ER-22",draft:true,st:"none"},
+ {key:"material",tpl:"07 ER-39",st:"none",n:"Not in the Regulations."},
+ {reg:"ER-23",tpl:"05 ER-15",st:"data",n:"Poll opening is recorded on the poll record. Built first."},
+ {key:"incident",tpl:"05 ER-16",st:"none",n:"Not in the Regulations."},
+ {key:"spoiled",tpl:"05 ER-17",st:"none",n:"Not in the Regulations. Spoiled ballot counts exist; per-ballot rows do not."},
+ {reg:"ER-24",tpl:"05 ER-18",st:"data",n:"Poll closing and ballot counts are recorded. Built first."},
+ {reg:"ER-25",tpl:"06 ER-19",plat:"ER-19",st:"built",n:"Prints polling window, ballot key fingerprint and voter roll counts."},
+ {reg:"ER-26",draft:true,st:"none",n:"The election audit chain is the likely source."},
+ {key:"countauth",tpl:"07 ER-20",st:"none",n:"Not in the Regulations."},
+ {key:"boxopen",tpl:"07 ER-21",st:"none",n:"Not in the Regulations."},
+ {key:"reconcile",tpl:"07 ER-22",st:"none",n:"Not in the Regulations."},
+ {reg:"ER-27",tpl:"07 ER-23",plat:"ER-23",st:"built",n:"Regulations title: Vote Counting Register. Title-only match, confirmed."},
+ {key:"tally",tpl:"07 ER-24",st:"none",n:"Not in the Regulations."},
+ {key:"rejected",tpl:"07 ER-25",st:"none",n:"Not in the Regulations."},
+ {key:"finalsheet",tpl:"07 ER-29",plat:"ER-29",st:"built",n:"Not in the Regulations. Prints results, tie rule and audit chain head."},
+ {reg:"ER-28",tpl:"07 ER-26",plat:"ER-26",st:"generic",n:"Template numbers this ER-26. Prints the request from the stored recount record."},
+ {key:"recountdec",tpl:"07 ER-27",st:"none",n:"Not in the Regulations. Prints the decision from the same recount record."},
+ {key:"recountrep",tpl:"07 ER-28",plat:"ER-28",st:"generic",n:"Not in the Regulations. Compares the original count with the recount. Old code ER-28 now means the request, so this report moves to ER-28B."},
+ {reg:"ER-29",tpl:"07 ER-30",plat:"ER-30",st:"built",n:"Title-only match, confirmed."},
+ {reg:"ER-30",tpl:"07 ER-31",plat:"ER-31",st:"built"},
+ {key:"complaint",tpl:"07 ER-32",st:"none",n:"Not in the Regulations."},
+ {key:"investigation",tpl:"07 ER-33",st:"none",n:"Not in the Regulations."},
+ {reg:"ER-31",tpl:"07 ER-34",st:"none",n:"Regulations title: Appeal Form. Title-only match, confirmed."},
+ {reg:"ER-32",tpl:"07 ER-35",st:"none",n:"Regulations title: Appeal Decision. Title-only match, confirmed."},
+ {reg:"ER-33",tpl:"07 ER-36",st:"none",n:"Regulations title: Election Completion Report. Takes ER-33 back from the handover."},
+ {reg:"ER-34",tpl:"07 ER-37",plat:"ER-33",st:"generic",n:"Platform printed this as ER-33. Moves to ER-34 with the 15-item checklist and stored ticks."},
+ {reg:"ER-35",tpl:"07 ER-38",st:"none"},
+ {key:"closure",tpl:"07 ER-40",st:"none",n:"Not in the Regulations."}
+];
+const NUM = {
+ accept:"ER-17A", material:"ER-22A", incident:"ER-23A", spoiled:"ER-23B",
+ countauth:"ER-25A", boxopen:"ER-25B", reconcile:"ER-25C", tally:"ER-27A",
+ rejected:"ER-27B", finalsheet:"ER-27C", recountdec:"ER-28A", recountrep:"ER-28B",
+ complaint:"ER-30A", investigation:"ER-30B", closure:"ER-35A"
+};
+const ST = {built:["s-built","Printed from records"],generic:["s-generic","Printed blank"],data:["s-data","Data exists, not built"],none:["s-none","Not built"]};
+let filter = "all";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const codeOf = f => f.reg || NUM[f.key];
+const layoutOf = f => f.draft ? D[f.reg] : T[f.tpl];
+
+function ynSplit(t) {
+  const m = t.match(/^(.*?):\s*((?:[A-Z][a-z]+ \/ )+[A-Z][a-z]+)\.?$/);
+  return m ? [m[1], m[2]] : null;
+}
+function section(s) {
+  const head = s.name ? `<h4>${esc(s.name)}</h4>` : "";
+  if (s.kind === "fields") return `<div class="sec">${head}<div class="kv">${s.items.map(i => `<div><span>${esc(i)}</span><i></i></div>`).join("")}</div></div>`;
+  if (s.kind === "checklist") return `<div class="sec">${head}<div class="ck">${s.items.map(i => { const y = ynSplit(i); return y ? `<div><span>${esc(y[0])}</span><span class="yn">${esc(y[1])}</span></div>` : `<div><span>${esc(i)}</span></div>`; }).join("")}</div></div>`;
+  if (s.kind === "declaration") return `<div class="sec">${head}<div class="decl">${s.items.map(esc).join(" ")}</div></div>`;
+  if (s.kind === "table") {
+    const rows = s.rows || Array(s.blank || 4).fill("");
+    return `<div class="sec">${head}<table class="ftab"><thead><tr>${s.items.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr><td>${esc(r)}</td>${s.items.slice(1).map(() => "<td></td>").join("")}</tr>`).join("")}</tbody></table></div>`;
+  }
+  return s.items.map(i => {
+    const m = i.match(/^(.*?)\s*\((\d+) ruled lines\)$/), only = i.match(/^(\d+) lines$/);
+    if (only) return `<div class="sec">${head}<div class="lines">${"<i></i>".repeat(+only[1])}</div></div>`;
+    if (m) return `<div class="sec"><h4>${esc(m[1])}</h4><div class="lines">${"<i></i>".repeat(+m[2])}</div></div>`;
+    return `<div class="sec">${head}<p>${esc(i)}</p></div>`;
+  }).join("");
+}
+function sheet(f) {
+  const L = layoutOf(f), code = codeOf(f);
+  const sigs = L.signatures.map(s => `<div>${s.includes("?") ? `<span class="flag">${esc(s)}</span>` : esc(s)}<br>Signature and date</div>`).join("");
+  return `<div class="sheet" aria-label="${esc(code)} sheet mockup">
+    <div class="hd"><div class="org">[Association full name]</div><div class="sub">${esc(code)} | Official Election Record</div></div>
+    ${f.draft ? '<div class="draftmark">NEW LAYOUT</div>' : ""}
+    <div class="ttl">${esc(L.title)}</div>
+    ${L.header.length ? `<div class="kv">${L.header.map(h => `<div><span>${esc(h)}</span><i></i></div>`).join("")}</div>` : ""}
+    ${L.sections.map(section).join("")}
+    <div class="sigs">${sigs}</div>
+    ${L.seal ? '<div class="sealrow"><div class="seal">Commission<br>seal</div></div>' : ""}
+    <div class="ft"><span class="qr" aria-hidden="true"></span><span>Verify: /verify/election/{id}/${esc(code)}</span><span class="pg">Page 1 of 1</span></div>
+  </div>`;
+}
+function matches(f) {
+  if (filter === "all") return true;
+  if (filter === "draft") return !!f.draft;
+  if (filter === "tpl") return !!f.key;
+  return f.st === filter;
+}
+function render() {
+  document.getElementById("grid").innerHTML = F.filter(matches).map(f => {
+    const L = layoutOf(f), [cls, lbl] = ST[f.st];
+    const origin = f.draft ? '<span class="pill s-draft">Regulations only, new layout</span>' : f.key ? '<span class="pill s-draft">Template only</span>' : '<span class="pill s-draft">Regulations and template</span>';
+    return `<article class="card" id="${esc(codeOf(f))}">
+      <div class="meta">
+        <div class="row"><span class="code-big">${esc(codeOf(f))}</span><span>${esc(L.title)}</span></div>
+        <div class="row"><span class="pill ${cls}">${lbl}</span>${origin}</div>
+        <div class="note">${f.tpl ? `Template: <b class="mono">${esc(f.tpl)}</b>. ` : ""}${f.draft ? `Drawn from: ${esc(D[f.reg].src)}. ` : ""}${f.plat ? `Old platform code: <b class="mono">${esc(f.plat)}</b>. ` : "Not printed by the platform yet. "}${f.n ? esc(f.n) : ""}</div>
+      </div>
+      ${sheet(f)}
+    </article>`;
+  }).join("") || '<p class="muted">No forms match this filter.</p>';
+}
+function renderNumTable() {
+  const rows = F.filter(f => f.key).map(f => `<tr><td>${esc(T[f.tpl].title)}</td><td class="code">${esc(f.tpl)}</td><td class="code" style="font-weight:600;color:var(--accent)">${esc(NUM[f.key])}</td></tr>`).join("");
+  document.getElementById("numtable").innerHTML = `<thead><tr><th>Form</th><th>Template</th><th>Code</th></tr></thead><tbody>${rows}</tbody>`;
+  const old = F.filter(f => f.plat).map(f => `<tr><td class="code">${esc(f.plat)}</td><td class="code" style="font-weight:600;color:var(--accent)">${esc(codeOf(f))}</td><td>${esc(layoutOf(f).title)}</td></tr>`).join("");
+  document.getElementById("oldtable").innerHTML = `<thead><tr><th>Old code</th><th>Code now</th><th>Form</th></tr></thead><tbody>${old}</tbody>`;
+}
+function renderStats() {
+  const c = k => F.filter(f => f.st === k).length;
+  document.getElementById("stats").innerHTML =
+    `<span class="pill s-built">${c("built")} printed from records</span><span class="pill s-generic">${c("generic")} printed blank</span><span class="pill s-data">${c("data")} data exists</span><span class="pill s-none">${c("none")} not built</span><span class="pill s-draft">${F.length} forms</span>`;
+}
+document.querySelectorAll('input[name="flt"]').forEach(r => r.addEventListener("change", e => { filter = e.target.value; render(); }));
+renderStats(); renderNumTable(); render();
+</script>

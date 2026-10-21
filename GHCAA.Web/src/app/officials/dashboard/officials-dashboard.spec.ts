@@ -6,11 +6,21 @@ import { ElectionsService } from '../../core/services/elections.service';
 import { ElectionPersonasService } from '../../core/services/election-personas.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
+import { ELECTION_READINESS_LABELS, ELECTION_TOO_FEW_APPROVERS_WARNING } from '../../core/models/election.models';
 
 describe('OfficialsDashboard', () => {
     let elections: any;
     let notify: any;
     let confirm: any;
+
+    const readiness = {
+        ready: false,
+        items: [
+            { key: 'ballot-key', met: true, attestation: false, advisory: false },
+            { key: 'mock-election', met: false, attestation: true, advisory: false },
+            { key: 'approvers', met: false, attestation: false, advisory: true }
+        ]
+    };
 
     function election(myPermissions: string[], phase = 'Polling') {
         return { id: 1, title: 'EC 2026', phase, myPermissions, eligibleVoterCount: 40, ballotKeyFingerprint: 'abcd' };
@@ -26,7 +36,9 @@ describe('OfficialsDashboard', () => {
             getApprovals: vi.fn().mockReturnValue(of([])),
             approve: vi.fn().mockReturnValue(of(undefined)),
             reject: vi.fn().mockReturnValue(of(undefined)),
-            keyDestroyed: vi.fn().mockReturnValue(of(undefined))
+            keyDestroyed: vi.fn().mockReturnValue(of(undefined)),
+            getReadiness: vi.fn().mockReturnValue(of(readiness)),
+            attestReadiness: vi.fn().mockReturnValue(of(undefined))
         };
         notify = { success: vi.fn(), error: vi.fn() };
         confirm = { confirm: vi.fn().mockReturnValue(of(true)) };
@@ -160,5 +172,73 @@ describe('OfficialsDashboard', () => {
 
         expect(elections.reject).not.toHaveBeenCalled();
         expect(page.approvals()!.length).toBe(1);
+    });
+
+    describe('readiness (37.12w)', () => {
+        it('loads the list before polling for a caller who can view the dashboard', () => {
+            const page = create(['ViewDashboard'], { turnout: null }, 'Campaign');
+
+            expect(elections.getReadiness).toHaveBeenCalledWith(1);
+            expect(page.showReadiness()).toBe(true);
+            expect(page.readiness()!.items.length).toBe(3);
+        });
+
+        it('does not load it once polling is open or without the dashboard permission', () => {
+            create(['ViewDashboard'], { turnout: null }, 'Polling');
+            expect(elections.getReadiness).not.toHaveBeenCalled();
+
+            TestBed.resetTestingModule();
+            create(['ChangePhase'], { turnout: null }, 'Campaign');
+            expect(elections.getReadiness).not.toHaveBeenCalled();
+        });
+
+        it('labels each item, folding in the approver warning', () => {
+            const page = create(['ViewDashboard'], { turnout: null }, 'Campaign');
+            const [key, mock, approvers] = page.readiness()!.items;
+
+            expect(page.readinessLabel(key)).toBe(ELECTION_READINESS_LABELS['ballot-key']);
+            expect(page.readinessLabel(approvers)).toBe(ELECTION_TOO_FEW_APPROVERS_WARNING);
+            expect(page.readinessLabel({ ...mock, key: 'new-item' })).toBe('new-item');
+        });
+
+        it('offers the record button only on an unmet attestation, and only with ChangePhase', () => {
+            const viewer = create(['ViewDashboard'], { turnout: null }, 'Campaign');
+            expect(viewer.readiness()!.items.some(i => viewer.canAttest(i))).toBe(false);
+
+            TestBed.resetTestingModule();
+            const chief = create(['ViewDashboard', 'ChangePhase'], { turnout: null }, 'Campaign');
+            expect(chief.readiness()!.items.filter(i => chief.canAttest(i)).map(i => i.key)).toEqual(['mock-election']);
+        });
+
+        it('records an item and reloads the list', () => {
+            const page = create(['ViewDashboard', 'ChangePhase'], { turnout: null }, 'Campaign');
+
+            page.attest(page.readiness()!.items[1]);
+
+            expect(elections.attestReadiness).toHaveBeenCalledWith(1, 'mock-election');
+            expect(elections.getReadiness).toHaveBeenCalledTimes(2);
+            expect(notify.success).toHaveBeenCalled();
+            expect(page.attestingKey()).toBeNull();
+        });
+
+        it('reloads on a 409 because someone else recorded it first', () => {
+            const page = create(['ViewDashboard', 'ChangePhase'], { turnout: null }, 'Campaign');
+            elections.attestReadiness.mockReturnValue(throwError(() => ({ status: 409 })));
+
+            page.attest(page.readiness()!.items[1]);
+
+            expect(elections.getReadiness).toHaveBeenCalledTimes(2);
+            expect(page.attestingKey()).toBeNull();
+        });
+
+        it('does not reload on any other failure', () => {
+            const page = create(['ViewDashboard', 'ChangePhase'], { turnout: null }, 'Campaign');
+            elections.attestReadiness.mockReturnValue(throwError(() => ({ status: 400 })));
+
+            page.attest(page.readiness()!.items[1]);
+
+            expect(elections.getReadiness).toHaveBeenCalledTimes(1);
+            expect(page.attestingKey()).toBeNull();
+        });
     });
 });

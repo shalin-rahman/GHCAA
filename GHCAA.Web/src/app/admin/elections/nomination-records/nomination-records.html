@@ -1,0 +1,25 @@
+<div class="stack gap-2">
+    <p class="text-muted">
+        {{ text.CONSENT_LABEL }}:
+        <ng-container *ngIf="consentShown() as shown; else noConsent">{{ shown | date:'medium' }}</ng-container>
+        <ng-template #noConsent>{{ text.CONSENT_MISSING }}</ng-template>
+    </p>
+    <div class="flex gap-2 items-center" *ngIf="can('ManageSetup')">
+        <div class="form-group">
+            <label [for]="'consent-at-' + nomination.id">{{ text.CONSENT_LABEL }}</label>
+            <input [id]="'consent-at-' + nomination.id" type="datetime-local" [attr.aria-describedby]="'consent-hint-' + nomination.id" [(ngModel)]="consentInput" />
+            <small [id]="'consent-hint-' + nomination.id" class="text-muted text-xs">{{ text.CONSENT_HINT }}</small>
+        </div>
+        <button class="btn btn-secondary btn-sm" [disabled]="!consentInput || savingConsent()" (click)="saveConsent()">Save consent time</button>
+    </div>
+
+    <details *ngIf="can('DecideNominations')">
+        <summary>{{ text.SCRUTINY_CHECKS_TITLE }}</summary>
+        <div class="stack gap-2">
+            <label class="flex gap-2" *ngFor="let item of items">
+                <input type="checkbox" [checked]="isChecked(item)" [disabled]="!canTick()" (change)="setCheck(item, $any($event.target).checked)" />
+                {{ labels[item] }}
+            </label>
+        </div>
+    </details>
+</div>

@@ -3,9 +3,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import {
-    AdminElectionDto, AdminElectionStepResult, ElectionBoardDto, ElectionAuditEntryDto, ElectionAuditVerifyDto, OpenedBallotsDto, BallotViewDto, PublicElectionResultsDto, AppointRequest, CastBallotDto, ElectionApprovalDto, CastBallotResultDto, CreateElectionRequest, ElectionAppointmentDto, ElectionPhase,
+    AdminElectionDto, AdminElectionStepResult, ElectionBoardDto, ElectionAuditEntryDto, ElectionAuditVerifyDto, OpenedBallotsDto, BallotViewDto, PublicElectionResultsDto, AppointRequest, CastBallotDto, ElectionApprovalDto, ElectionReadinessDto, CastBallotResultDto, CreateElectionRequest, ElectionAppointmentDto, ElectionPhase,
     ElectionCountStepResult, ElectionResultDto, ElectionRulesUnlockDto, ElectionSummaryDto,
-    NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto
+    NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto,
+    DecideRecountRequest, ElectionRecountDto, RecordRecountRequest, RecountFigureDto, ScrutinyCheckDto, ScrutinyCheckItem, UpdateElectionFormDetailsRequest
 } from '../models/election.models';
 
 /** Fetches the static markdown election-form assets synced by `npm run sync:docs`. */
@@ -79,6 +80,44 @@ export class ElectionsService {
 
     removeCandidate(electionId: number, candidateId: number): Observable<void> {
         return this.http.delete<void>(`${API_ENDPOINTS.ADMIN_ELECTIONS.CANDIDATES(electionId)}/${candidateId}`);
+    }
+
+    // 37.14m. The records the printed election forms read.
+    updateFormDetails(id: number, request: UpdateElectionFormDetailsRequest): Observable<AdminElectionDto> {
+        return this.http.put<AdminElectionDto>(API_ENDPOINTS.ADMIN_ELECTIONS.FORM_DETAILS(id), request);
+    }
+
+    // The admin list carries consent times. The public one does not.
+    getAdminNominations(id: number): Observable<NominationViewDto[]> {
+        return this.http.get<NominationViewDto[]>(API_ENDPOINTS.ADMIN_ELECTIONS.NOMINATIONS(id));
+    }
+
+    recordConsent(id: number, nominationId: number, consentAt: string): Observable<void> {
+        return this.http.put<void>(API_ENDPOINTS.ADMIN_ELECTIONS.CONSENT(id, nominationId), { consentAt });
+    }
+
+    getScrutinyChecks(id: number, nominationId: number): Observable<ScrutinyCheckDto[]> {
+        return this.http.get<ScrutinyCheckDto[]>(API_ENDPOINTS.ADMIN_ELECTIONS.SCRUTINY_CHECKS(id, nominationId));
+    }
+
+    setScrutinyCheck(id: number, nominationId: number, item: ScrutinyCheckItem, isChecked: boolean): Observable<ScrutinyCheckDto[]> {
+        return this.http.put<ScrutinyCheckDto[]>(API_ENDPOINTS.ADMIN_ELECTIONS.SCRUTINY_CHECKS(id, nominationId), { item, isChecked });
+    }
+
+    getRecounts(id: number): Observable<ElectionRecountDto[]> {
+        return this.http.get<ElectionRecountDto[]>(API_ENDPOINTS.ADMIN_ELECTIONS.RECOUNTS(id));
+    }
+
+    recordRecount(id: number, request: RecordRecountRequest): Observable<ElectionRecountDto> {
+        return this.http.post<ElectionRecountDto>(API_ENDPOINTS.ADMIN_ELECTIONS.RECOUNTS(id), request);
+    }
+
+    decideRecount(id: number, recountId: number, request: DecideRecountRequest): Observable<void> {
+        return this.http.put<void>(API_ENDPOINTS.ADMIN_ELECTIONS.RECOUNT_DECISION(id, recountId), request);
+    }
+
+    recordRecountFigures(id: number, recountId: number, figures: RecountFigureDto[]): Observable<void> {
+        return this.http.put<void>(API_ENDPOINTS.ADMIN_ELECTIONS.RECOUNT_FIGURES(id, recountId), { figures });
     }
 
     setPhase(id: number, phase: ElectionPhase): Observable<void> {
@@ -167,6 +206,16 @@ export class ElectionsService {
     // FR-050. Needs a step-up. 409 when it was already recorded, 400 before the declare.
     keyDestroyed(id: number): Observable<void> {
         return this.http.post<void>(API_ENDPOINTS.ELECTIONS.KEY_DESTROYED(id), {});
+    }
+
+    // 37.12w. What still stands between this election and polling.
+    getReadiness(id: number): Observable<ElectionReadinessDto> {
+        return this.http.get<ElectionReadinessDto>(API_ENDPOINTS.ELECTIONS.READINESS(id));
+    }
+
+    // Needs a step-up. 409 when it was already recorded, 400 once polling is open.
+    attestReadiness(id: number, condition: string): Observable<void> {
+        return this.http.post<void>(API_ENDPOINTS.ELECTIONS.READINESS_ATTEST(id), { condition });
     }
 
     getOfficialDocument(id: number, formCode: string): Observable<Blob> {

@@ -216,12 +216,14 @@ namespace GHCAA.Tests.Controllers
                                 .ReturnsAsync((string?)null)
                                 .ReturnsAsync(Constants.Elections.Replies.AlreadyRecorded)
                                 .ReturnsAsync(Constants.Elections.Replies.NotDeclared)
-                                .ReturnsAsync(Constants.Elections.Replies.NotFound);
+                                .ReturnsAsync(Constants.Elections.Replies.NotFound)
+                                .ReturnsAsync(Constants.Elections.Replies.RecountWindowOpen);
 
             Assert.That(await _controller.KeyDestroyed(1, CancellationToken.None), Is.InstanceOf<NoContentResult>());
             Assert.That(((ObjectResult)await _controller.KeyDestroyed(1, CancellationToken.None)).StatusCode, Is.EqualTo(409));
             Assert.That(((ObjectResult)await _controller.KeyDestroyed(1, CancellationToken.None)).StatusCode, Is.EqualTo(400));
             Assert.That(await _controller.KeyDestroyed(1, CancellationToken.None), Is.InstanceOf<NotFoundResult>());
+            Assert.That(((ObjectResult)await _controller.KeyDestroyed(1, CancellationToken.None)).StatusCode, Is.EqualTo(400));
         }
 
         [Test]

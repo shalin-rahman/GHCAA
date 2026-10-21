@@ -4,8 +4,10 @@ import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { LazyImgDirective } from '../../common/directives/lazy-img.directive';
-import { LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS, getECPositionName, getMembershipTypeLabel, getCategoryLabel, VACANCY_REASON_OPTIONS, VACANCY_REASON_OTHER, VACANCY_NOTE_MAX_LENGTH, getVacancyReasonLabel } from '../../core/constants/app.constants';
-import { LookupService, LookupOption } from '../../core/services/lookup.service';
+import { SEARCH_DEBOUNCE_MS, getPositionLabel, getMembershipTypeLabel, getCategoryLabel, VACANCY_REASON_OPTIONS, VACANCY_REASON_OTHER, VACANCY_NOTE_MAX_LENGTH, getVacancyReasonLabel } from '../../core/constants/app.constants';
+import { EcPositionService, EcPosition } from '../../core/services/ec-position.service';
+import { EcPositionsComponent } from './ec-positions/ec-positions';
+import { HandoverChecklistComponent } from './handover-checklist/handover-checklist';
 import { debounce } from '../../core/utils/debounce.util';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 import { firstValueFrom } from 'rxjs';
@@ -21,7 +23,7 @@ import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 @Component({
     selector: 'app-admin-governance',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ImgFallbackDirective, LazyImgDirective, ModalHeaderComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ImgFallbackDirective, LazyImgDirective, ModalHeaderComponent, EcPositionsComponent, HandoverChecklistComponent],
     templateUrl: './admin-governance.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './admin-governance.scss'
@@ -30,7 +32,7 @@ export class AdminGovernance implements OnInit {
     private adminService = inject(AdminService);
     private notify = inject(NotificationService);
     private confirmDialog = inject(ConfirmDialogService);
-    private lookupService = inject(LookupService);
+    private positionService = inject(EcPositionService);
 
     periods = signal<any[]>([]);
     selectedPeriod = signal<any>(null);
@@ -71,12 +73,13 @@ export class AdminGovernance implements OnInit {
         return this.committeeMembers().filter(m =>
             m.member?.fullName?.toLowerCase().includes(q) ||
             m.member?.membershipNumber?.toLowerCase().includes(q) ||
-            this.getRoleName(m.position).toLowerCase().includes(q)
+            this.getRoleName(m).toLowerCase().includes(q)
         );
     });
 
-    // 82.42: sourced from the ECPosition lookup group instead of a local index-based copy of EC_ROLES.
-    ecPositions = signal<LookupOption[]>([]);
+    // 95.2: active positions from the EcPositions table, in display order.
+    ecPositions = signal<EcPosition[]>([]);
+    showPositionsModal = signal(false);
 
     getImageUrl(path: string | null | undefined): string {
         if (!path) return '';
@@ -90,7 +93,22 @@ export class AdminGovernance implements OnInit {
 
     ngOnInit() {
         this.loadPeriods();
-        this.lookupService.getOptions(LOOKUP_GROUPS.ECPosition).subscribe(opts => this.ecPositions.set(opts));
+        this.loadPositions();
+    }
+
+    loadPositions() {
+        this.positionService.getActive().subscribe({
+            next: list => this.ecPositions.set(list),
+            error: () => this.notify.error('Could not load committee positions.')
+        });
+    }
+
+    // The manager clears the service cache on each change, so this picks up new names and seats.
+    closePositions() {
+        this.showPositionsModal.set(false);
+        this.loadPositions();
+        const period = this.selectedPeriod();
+        if (period) this.loadCommittee(period.id);
     }
 
     loadPeriods() {
@@ -170,8 +188,8 @@ export class AdminGovernance implements OnInit {
                 this.loadPeriods();
                 this.isSavingPeriod.set(false);
             },
-            error: () => {
-                this.notify.error(isEdit ? 'Failed to update period' : 'Failed to create period');
+            error: (err) => {
+                this.notify.error(err?.error?.detail || (isEdit ? 'Failed to update period' : 'Failed to create period'));
                 this.isSavingPeriod.set(false);
             }
         });
@@ -190,7 +208,7 @@ export class AdminGovernance implements OnInit {
                 this.notify.success('Period activated');
                 this.loadPeriods();
             },
-            error: () => this.notify.error('Failed to activate period.')
+            error: (err) => this.notify.error(err?.error?.detail || 'Failed to activate period.')
         });
     }
 
@@ -269,10 +287,12 @@ export class AdminGovernance implements OnInit {
     }
 
     // Read on every change detection because the position select writes into assignData() in place.
-    holderOf(position: number | string | null | undefined) {
-        if (position === null || position === undefined || position === '') return undefined;
-        const name = getECPositionName(position);
-        return this.committeeMembers().find(m => getECPositionName(m.position) === name);
+    // Only a single-seat position is replaced. A full multi-seat position is refused by the API.
+    holderOf(positionId: number | null | undefined) {
+        if (positionId === null || positionId === undefined) return undefined;
+        const position = this.ecPositions().find(p => p.id === positionId);
+        if (position && position.seatCount > 1) return undefined;
+        return this.committeeMembers().find(m => m.positionId === positionId && !m.endDate);
     }
 
     removeMember(ecMemberId: number) {
@@ -309,11 +329,11 @@ export class AdminGovernance implements OnInit {
     }
 
     private emptyAssignData() {
-        return { memberId: null, position: '', reason: '', notifyMember: false, endCurrentHolderReason: '', endCurrentHolderNote: '' };
+        return { memberId: null, position: null as number | null, reason: '', notifyMember: false, endCurrentHolderReason: '', endCurrentHolderNote: '' };
     }
 
-    getRoleName(pos: number | string) {
-        return getECPositionName(pos);
+    getRoleName(record: { positionName?: string | null; position?: number | string | null } | null | undefined) {
+        return getPositionLabel(record);
     }
 }
 

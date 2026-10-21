@@ -14,7 +14,7 @@ namespace GHCAA.API.Controllers;
 [Route("api/admin/elections")]
 [Authorize(Policy = Policies.ElectionStaff)]
 [GHCAA.API.Filters.RequireStepUp]
-public sealed class AdminElectionsController(IElectionService service, IElectionAccessService access, IElectionApprovalService approvals) : ControllerBase
+public sealed class AdminElectionsController(IElectionService service, IElectionAccessService access, IElectionApprovalService approvals, IElectionFormService forms) : ControllerBase
 {
     // Admin sees every election. An official sees only the ones they hold a live appointment on.
     [HttpGet]
@@ -48,6 +48,27 @@ public sealed class AdminElectionsController(IElectionService service, IElection
         if (!int.TryParse(this.CurrentMemberIdRaw(), out var memberId))
             return Unauthorized();
 
+        // Every position is checked before the election is created, so a bad one cannot leave half an election.
+        var seats = new List<ElectionSeatRequestDto>();
+        foreach (var position in request.Positions ?? Array.Empty<AdminElectionPositionRequest>())
+        {
+            if (string.IsNullOrWhiteSpace(position.Title) && position.PositionId is not > 0)
+                continue;
+
+            // 95.2: the id when the client sends one, else a title that matches a position key or name.
+            var positionId = position.PositionId is > 0 ? position.PositionId : await service.FindPositionIdAsync(position.Title, ct);
+            if (positionId is null)
+                return Problem(detail: $"Position '{position.Title}' is not supported.", statusCode: StatusCodes.Status400BadRequest);
+            if (seats.Any(s => s.PositionId == positionId.Value))
+                return Problem(detail: $"Position '{position.Title}' is listed twice.", statusCode: StatusCodes.Status400BadRequest);
+
+            var seat = new ElectionSeatRequestDto(positionId.Value, Math.Max(1, position.Seats));
+            var problem = await service.CheckSeatAsync(null, seat, ct);
+            if (problem != null)
+                return Problem(detail: problem, statusCode: StatusCodes.Status400BadRequest);
+            seats.Add(seat);
+        }
+
         var (created, error) = await service.CreateAsync(new CreateElectionDto(
             request.Title,
             request.ECPeriodId,
@@ -63,17 +84,8 @@ public sealed class AdminElectionsController(IElectionService service, IElection
         if (created is null)
             return Problem(detail: ElectionsController.CreateErrorDetail(error), statusCode: StatusCodes.Status400BadRequest);
 
-        foreach (var position in request.Positions ?? Array.Empty<AdminElectionPositionRequest>())
-        {
-            if (string.IsNullOrWhiteSpace(position.Title))
-                continue;
-
-            var parsed = ParsePosition(position.Title);
-            if (parsed == ECPosition.None)
-                return Problem(detail: $"Position '{position.Title}' is not supported.", statusCode: StatusCodes.Status400BadRequest);
-
-            await service.AddSeatAsync(created.Id, new ElectionSeatRequestDto(parsed, Math.Max(1, position.Seats)), ct);
-        }
+        foreach (var seat in seats)
+            await service.AddSeatAsync(created.Id, seat, ct);
 
         return Ok(await DetailAsync(created.Id, ct));
     }
@@ -153,6 +165,98 @@ public sealed class AdminElectionsController(IElectionService service, IElection
         return Ok();
     }
 
+    // 37.14m. The calendar and notice fields the printed forms need (ER-01, ER-02).
+    [HttpPut("{id:int}/form-details")]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ManageSetup)]
+    public async Task<IActionResult> UpdateFormDetails(int id, [FromBody] UpdateElectionFormDetailsRequest request, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var (error, detail) = await forms.UpdateFormDetailsAsync(id, request, userId, ct);
+        if (error is not null) return FormError(error, detail);
+        return await DetailAsync(id, ct) is { } updated ? Ok(updated) : NotFound();
+    }
+
+    // ER-10 and ER-17. The nominations with their consent times, which the public list leaves out.
+    [HttpGet("{id:int}/nominations")]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ViewDashboard)]
+    public async Task<IActionResult> Nominations(int id, CancellationToken ct)
+        => Ok(await service.GetNominationsWithConsentAsync(id, ct));
+
+    // ER-10. The time on the candidate's signed consent.
+    [HttpPut("{id:int}/nominations/{nominationId:int}/consent")]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ManageSetup)]
+    public async Task<IActionResult> RecordConsent(int id, int nominationId, [FromBody] RecordConsentRequest request, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var error = await forms.RecordConsentAsync(id, nominationId, request.ConsentAt!.Value, userId, ct);
+        return error is null
+            ? NoContent()
+            : FormError(error, error == Elections.Replies.WrongPhase ? "Consent cannot be recorded once polling has opened." : "The consent time cannot be in the future.");
+    }
+
+    // ER-17. The scrutiny sheet for one nomination.
+    [HttpGet("{id:int}/nominations/{nominationId:int}/scrutiny-checks")]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.DecideNominations)]
+    public async Task<IActionResult> GetScrutinyChecks(int id, int nominationId, CancellationToken ct)
+        => await forms.GetScrutinyChecksAsync(id, nominationId, ct) is { } checks ? Ok(checks) : NotFound();
+
+    [HttpPut("{id:int}/nominations/{nominationId:int}/scrutiny-checks")]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.DecideNominations)]
+    public async Task<IActionResult> SetScrutinyCheck(int id, int nominationId, [FromBody] SetScrutinyCheckRequest request, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var error = await forms.SetScrutinyCheckAsync(id, nominationId, request, userId, ct);
+        if (error is not null)
+            return FormError(error, error == Elections.Replies.WrongPhase ? "Scrutiny checks can only be ticked during scrutiny." : null);
+        return await forms.GetScrutinyChecksAsync(id, nominationId, ct) is { } checks ? Ok(checks) : NotFound();
+    }
+
+    // ER-28, 28A and 28B.
+    [HttpGet("{id:int}/recounts")]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ViewDashboard)]
+    public async Task<IActionResult> ListRecounts(int id, CancellationToken ct)
+        => Ok(await forms.ListRecountsAsync(id, ct));
+
+    [HttpPost("{id:int}/recounts")]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.DecideAppeals)]
+    public async Task<IActionResult> RecordRecount(int id, [FromBody] RecordRecountRequest request, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var (recount, error, detail) = await forms.RecordRecountAsync(id, request, userId, ct);
+        return recount is not null ? Ok(recount) : FormError(error!, detail);
+    }
+
+    [HttpPut("{id:int}/recounts/{recountId:int}/decision")]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.DecideAppeals)]
+    public async Task<IActionResult> DecideRecount(int id, int recountId, [FromBody] DecideRecountRequest request, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var error = await forms.DecideRecountAsync(id, recountId, request, userId, ct);
+        return error is null ? NoContent() : FormError(error, error == Elections.Replies.AlreadyRecorded ? "This request has already been decided." : null);
+    }
+
+    [HttpPut("{id:int}/recounts/{recountId:int}/figures")]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.Count)]
+    public async Task<IActionResult> RecordRecountFigures(int id, int recountId, [FromBody] RecordRecountFiguresRequest request, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        var (error, detail) = await forms.RecordRecountFiguresAsync(id, recountId, request.Figures, userId, ct);
+        return error is null ? NoContent() : FormError(error, detail ?? (error == Elections.Replies.AlreadyRecorded ? "The recount figures are already recorded." : null));
+    }
+
+    private IActionResult FormError(string error, string? detail) => error switch
+    {
+        Elections.Replies.NotFound => NotFound(),
+        Elections.Replies.AlreadyRecorded or Elections.Replies.Busy => Problem(detail: detail ?? "Someone else changed this at the same time. Try again.", statusCode: StatusCodes.Status409Conflict),
+        _ => Problem(detail: detail ?? "This change is not allowed now.", statusCode: StatusCodes.Status400BadRequest),
+    };
+
     // Every reply carries the caller's permissions, so the page can swap one election in place.
     private async Task<AdminElectionDto?> DetailAsync(int id, CancellationToken ct)
     {
@@ -178,66 +282,4 @@ public sealed class AdminElectionsController(IElectionService service, IElection
             TooFewApprovers = await access.LiveApproverCountAsync(election.Id, ct) < Constants.Elections.MinApproversBeforePolling,
         };
     }
-
-    private static ECPosition ParsePosition(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return ECPosition.None;
-
-        var normalised = value.Trim();
-        if (normalised.Contains("Joint Secretary", StringComparison.OrdinalIgnoreCase))
-            return normalised.Contains("2", StringComparison.OrdinalIgnoreCase)
-                ? ECPosition.JointSecretary2
-                : ECPosition.JointSecretary1;
-
-        if (normalised.Contains("Media", StringComparison.OrdinalIgnoreCase) && normalised.Contains("Sports", StringComparison.OrdinalIgnoreCase))
-            return ECPosition.MediaCulturalAndSportsSecretary;
-
-        if (normalised.Contains("Information", StringComparison.OrdinalIgnoreCase) && normalised.Contains("Technology", StringComparison.OrdinalIgnoreCase))
-            return ECPosition.InformationAndTechnologySecretary;
-
-        if (normalised.Contains("Member", StringComparison.OrdinalIgnoreCase) && normalised.Contains("1", StringComparison.OrdinalIgnoreCase))
-            return ECPosition.Member1;
-
-        if (normalised.Contains("Member", StringComparison.OrdinalIgnoreCase) && normalised.Contains("2", StringComparison.OrdinalIgnoreCase))
-            return ECPosition.Member2;
-
-        var compact = string.Concat(normalised.Where(char.IsLetterOrDigit)).ToLowerInvariant();
-
-        return compact switch
-        {
-            "president" => ECPosition.President,
-            "vicepresident" => ECPosition.VicePresident,
-            "generalsecretary" => ECPosition.GeneralSecretary,
-            "officesecretary" => ECPosition.OfficeSecretary,
-            "treasurer" => ECPosition.Treasurer,
-            "organizationalsecretary" => ECPosition.OrganizationalSecretary,
-            "lawsecretary" => ECPosition.LawSecretary,
-            "immediatepastpresident" => ECPosition.ImmediatePastPresident,
-            "institutionalrepresentative" => ECPosition.InstitutionalRepresentative,
-            _ => Enum.TryParse<ECPosition>(normalised.Replace("-", string.Empty).Replace("&", string.Empty).Replace(" ", string.Empty), true, out var position)
-                ? position
-                : ECPosition.None,
-        };
-    }
-
-    private static string SeatTitle(ECPosition position) => position switch
-    {
-        ECPosition.President => "President",
-        ECPosition.VicePresident => "Vice President",
-        ECPosition.GeneralSecretary => "General Secretary",
-        ECPosition.OfficeSecretary => "Office Secretary",
-        ECPosition.JointSecretary1 => "Joint Secretary 1",
-        ECPosition.JointSecretary2 => "Joint Secretary 2",
-        ECPosition.Treasurer => "Treasurer",
-        ECPosition.MediaCulturalAndSportsSecretary => "Media Cultural & Sports Secretary",
-        ECPosition.OrganizationalSecretary => "Organizational Secretary",
-        ECPosition.InformationAndTechnologySecretary => "Information and Technology Secretary",
-        ECPosition.Member1 => "Member 1",
-        ECPosition.Member2 => "Member 2",
-        ECPosition.LawSecretary => "Law Secretary",
-        ECPosition.ImmediatePastPresident => "Immediate Past President",
-        ECPosition.InstitutionalRepresentative => "Institutional Representative",
-        _ => position.ToString(),
-    };
 }

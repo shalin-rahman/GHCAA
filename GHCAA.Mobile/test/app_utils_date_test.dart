@@ -48,4 +48,28 @@ void main() {
       );
     });
   });
+
+  // 37.14m. Times the API stores in UTC.
+  group('AppUtils UTC handling', () {
+    test('reads a time with no zone as UTC', () {
+      final expected = DateTime.utc(2026, 10, 21, 8, 30);
+      expect(AppUtils.parseUtc('2026-10-21T08:30:00'), expected.toLocal());
+      expect(AppUtils.parseUtc('2026-10-21T08:30:00Z'), expected.toLocal());
+      expect(AppUtils.parseUtc('2026-10-21T14:30:00+06:00'), expected.toLocal());
+      expect(AppUtils.parseUtc('2026-10-21T08:30:00')!.isUtc, isFalse);
+    });
+
+    test('gives null for empty or bad values', () {
+      expect(AppUtils.parseUtc(null), isNull);
+      expect(AppUtils.parseUtc('  '), isNull);
+      expect(AppUtils.parseUtc('not a date'), isNull);
+    });
+
+    test('round-trips a local time through the wire', () {
+      final local = DateTime(2026, 10, 21, 9, 5);
+      final sent = AppUtils.toWireUtc(local);
+      expect(sent, endsWith('Z'));
+      expect(AppUtils.parseUtc(sent), local);
+    });
+  });
 }

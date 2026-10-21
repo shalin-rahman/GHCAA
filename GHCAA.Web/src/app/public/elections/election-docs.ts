@@ -21,23 +21,35 @@ export interface ElectionDoc {
 }
 
 /**
+ * Sort key for a form code. Codes follow the Election Regulations, and a form the
+ * Regulations do not list carries a letter after the form it follows, so ER-17A sorts
+ * as 17.1 and ER-27C as 27.3. Returns 0 when the code has no number.
+ */
+export function formNumber(code: string): number {
+    const m = /(\d+)([A-Z])?\s*$/i.exec(code);
+    if (!m) return 0;
+    const letter = m[2] ? m[2].toUpperCase().charCodeAt(0) - 64 : 0;
+    return parseInt(m[1], 10) + letter / 10;
+}
+
+/**
  * Which stage of an election a form belongs to, derived from its ER number. The register
- * is grouped by this so an officer looks under "Polling day" rather than scanning forty
- * near-identical cards. Ranges follow the handbook order and are the only place they are
- * encoded — adding a form to the end of a stage needs no change here.
+ * is grouped by this so an officer looks under "Polling day" rather than scanning fifty
+ * near-identical cards. The ranges follow the Regulations numbering and live only here.
  */
 export function formStage(code: string): string {
-    const n = parseInt(code.replace(/\D+/g, ''), 10);
+    const n = formNumber(code);
     if (!n) return 'Other';
-    if (n <= 2) return 'Announcement';
-    if (n <= 6) return 'Commission appointment';
-    if (n <= 8) return 'Voter roll';
-    if (n <= 14) return 'Nomination';
-    if (n <= 19) return 'Polling day';
-    if (n <= 25) return 'Counting';
-    if (n <= 28) return 'Recount';
-    if (n <= 31) return 'Result';
-    if (n <= 35) return 'Complaints and appeals';
+    if (n <= 2.9) return 'Announcement';
+    if (n <= 7.9) return 'Commission appointment';
+    if (n <= 9.9) return 'Voter roll';
+    if (n <= 19.9) return 'Nomination';
+    if (n <= 22.9) return 'Campaign and polling preparation';
+    if (n <= 25) return 'Polling day';
+    if (n <= 27.9) return 'Counting';
+    if (n <= 28.9) return 'Recount';
+    if (n <= 30.9) return 'Result';
+    if (n <= 32.9) return 'Complaints and appeals';
     return 'Closure and handover';
 }
 
@@ -73,15 +85,15 @@ export const ELECTION_DOCS: ElectionDoc[] = [
     {
         id: 'forms',
         file: '05-Election-Forms-and-Templates.md',
-        title: 'Forms Handbook — Part I (ER-01 to ER-18)',
+        title: 'Forms Handbook — Part I (ER-01 to ER-24)',
         blurb: 'Announcement, Commission appointment, voter roll, nomination and polling-day forms. Each one opens as a ready-to-use sheet on the Association letterhead and prints on A4.',
         group: 'Forms',
         isFormsHandbook: true
     },
     {
-        id: 'er-19',
+        id: 'er-25',
         file: '06-Election-Ballot-Seal-and-Poll-Integrity-Certificate.md',
-        title: 'Form ER-19 — Ballot Box Sealing & Poll Integrity Certificate',
+        title: 'Form ER-25 — Ballot Box Sealing & Poll Integrity Certificate',
         blurb: 'Signed at the close of poll to certify that the ballot box was sealed in the presence of the agents present.',
         group: 'Forms',
         isForm: true
@@ -89,7 +101,7 @@ export const ELECTION_DOCS: ElectionDoc[] = [
     {
         id: 'forms-2',
         file: '07-Election-Vote-Counting-Authorisation.md',
-        title: 'Forms Handbook — Part II (ER-20 to ER-40)',
+        title: 'Forms Handbook — Part II (ER-22A, ER-25A to ER-35A)',
         blurb: 'Counting authorisation, tally, recount, result certification, complaints, appeals, handover and closure forms, plus the signature matrix and retention schedule.',
         group: 'Forms',
         isFormsHandbook: true

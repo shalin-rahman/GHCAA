@@ -67,6 +67,7 @@
                     <button class="btn btn-primary btn-sm" *ngIf="election.phase === 'Counting' && can(election, 'Count')" [disabled]="countingId() === election.id" (click)="keyFile.click()">{{ countingId() === election.id ? 'Counting...' : 'Count with officer key' }}</button>
                     <button class="btn btn-secondary btn-sm" *ngIf="can(election, 'ViewDashboard')" (click)="loadApprovals(election)">Waiting approvals</button>
                     <button class="btn btn-secondary btn-sm" *ngIf="can(election, 'AppointOfficials')" (click)="toggleOfficials(election)">{{ officialsOpenId() === election.id ? 'Hide officials' : 'Officials' }}</button>
+                    <button class="btn btn-secondary btn-sm" *ngIf="can(election, 'ManageSetup') || can(election, 'ViewDashboard')" (click)="toggleFormRecords(election)">{{ formRecordsOpenId() === election.id ? 'Hide form records' : text.FORM_RECORDS_TITLE }}</button>
                 </div>
             </div>
             <div class="stack gap-2" *ngIf="unfreezeOpenId() === election.id">
@@ -98,6 +99,7 @@
                 </div>
             </div>
             <app-election-officials *ngIf="officialsOpenId() === election.id" [election]="election" (pending)="onOfficialPending($event)"></app-election-officials>
+            <app-election-form-records *ngIf="formRecordsOpenId() === election.id" [election]="election" (changed)="onFormRecordsChanged($event)"></app-election-form-records>
             <div class="stack gap-2" *ngIf="election.candidates.length > 0">
                 <div class="flex justify-between items-center" *ngFor="let candidate of election.candidates">
                     <span>{{ candidate.name }} — {{ candidate.positionTitle }}</span>
@@ -128,6 +130,7 @@
                     <button class="btn btn-secondary btn-sm" [disabled]="scrutinisingId() === nomination.id" (click)="scrutinise(nomination, false)">Reject</button>
                 </div>
             </div>
+            <app-nomination-records *ngIf="selectedElection() as election" [election]="election" [nomination]="nomination"></app-nomination-records>
         </div>
     </div>
 </section>

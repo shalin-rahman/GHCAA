@@ -12,6 +12,7 @@ import '../../core/utils/app_utils.dart';
 import '../../features/admin/admin_service.dart';
 import '../../features/auth/auth_service.dart';
 import '../../features/elections/election_service.dart';
+import 'election_form_records_sheet.dart';
 import 'election_officials_sheet.dart';
 import 'election_rules_unlock_sheet.dart';
 
@@ -548,6 +549,12 @@ class _ElectionCard extends StatelessWidget {
                   icon: Icons.badge_outlined,
                   busy: false,
                   onPressed: () => showElectionOfficialsSheet(context, election),
+                ),
+                _actionButton(
+                  label: ElectionConstants.formRecordsTitle,
+                  icon: Icons.description_outlined,
+                  busy: false,
+                  onPressed: () => showElectionFormRecordsSheet(context, election),
                 ),
               ],
             ),

@@ -34,7 +34,7 @@ public sealed class ElectionSeatRequestValidator : AbstractValidator<ElectionSea
 {
     public ElectionSeatRequestValidator()
     {
-        RuleFor(x => x.Position).IsInEnum();
+        RuleFor(x => x.PositionId).GreaterThan(0);
         RuleFor(x => x.SeatCount).InclusiveBetween(1, 20);
     }
 }

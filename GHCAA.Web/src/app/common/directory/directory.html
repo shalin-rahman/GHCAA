@@ -180,10 +180,10 @@
                             }
                         </div>
                         }
-                        @if (getCurrentECPosition(m.ecHistory) !== 'None') {
+                        @if (getCurrentECLabel(m.ecHistory)) {
                         <div class="ec-position-tag">
                             <span class="icon">🎗️</span>
-                            {{ getECPositionName(getCurrentECPosition(m.ecHistory)) }}
+                            {{ getCurrentECLabel(m.ecHistory) }}
                         </div>
                         }
                     </div>
@@ -370,7 +370,7 @@
                             <div class="h-dot" [class.current]="!h.endDate"></div>
                             <div class="h-content">
                                 <div class="h-row">
-                                    <span class="h-pos">{{ getECPositionName(h.position) }}</span>
+                                    <span class="h-pos">{{ getPositionLabel(h) }}</span>
                                     <span class="h-period">{{ h.periodTitle }}</span>
                                 </div>
                                 <div class="h-dates">

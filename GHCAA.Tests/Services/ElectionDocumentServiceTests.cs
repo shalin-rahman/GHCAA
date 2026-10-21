@@ -39,7 +39,7 @@ public sealed class ElectionDocumentServiceTests : TestBase
             PollingOpensOn = DateTime.UtcNow.AddDays(2),
             PollingClosesOn = DateTime.UtcNow.AddDays(3)
         };
-        _seat = new ElectionSeat { Position = ECPosition.President };
+        _seat = new ElectionSeat { Position = EcPositionIds.President };
         _election.Seats.Add(_seat);
         _context.Elections.Add(_election);
         await _context.SaveChangesAsync();
@@ -111,12 +111,15 @@ public sealed class ElectionDocumentServiceTests : TestBase
     }
 
     [Test]
-    public async Task ER10_ListsFilingTimes()
+    [Category("FR-21")]
+    public async Task ER10_PrintsConsentTime_OrNotRecorded()
     {
+        _first.ConsentAt = new DateTime(2026, 10, 2, 14, 5, 0, DateTimeKind.Utc);
+        await _context.SaveChangesAsync();
+
         var tables = await _service.LoadTablesAsync(_election.Id, "er-10");
 
-        tables.Single().Rows.Select(r => r[0]).Should().Equal("Alice Candidate", "Bob Candidate");
-        tables.Single().Rows.Should().OnlyContain(r => r[2] == "2026-10-01 09:30");
+        tables.Single().Rows.Select(r => $"{r[0]}:{r[2]}").Should().Equal("Alice Candidate:2026-10-02 14:05", "Bob Candidate:Not recorded");
     }
 
     [Test]

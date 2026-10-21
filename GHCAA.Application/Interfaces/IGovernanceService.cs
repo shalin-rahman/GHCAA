@@ -23,6 +23,22 @@ namespace GHCAA.Application.Interfaces
 
         Task<ECPeriodDto?> GetActivePeriodAsync(CancellationToken cancellationToken = default);
 
+        // 37.14m: the ER-34 handover checklist. Get returns null when the term does not exist.
+        // Set returns false for a missing term and throws InvalidOperationException when another
+        // admin saved the same item at the same moment.
+        Task<IReadOnlyList<HandoverCheckDto>?> GetHandoverChecksAsync(int periodId, CancellationToken cancellationToken = default);
+        Task<bool> SetHandoverCheckAsync(int periodId, SetHandoverCheckRequest request, int actorUserId, CancellationToken cancellationToken = default);
+
+        // 95.2: committee positions. Retire a position that has past terms or seats; delete only
+        // one nobody has used.
+        Task<IReadOnlyList<EcPositionDto>> GetPositionsAsync(bool includeRetired, CancellationToken cancellationToken = default);
+        Task<EcPositionDto> CreatePositionAsync(SaveEcPositionRequest request, CancellationToken cancellationToken = default);
+        Task<EcPositionDto?> UpdatePositionAsync(int id, SaveEcPositionRequest request, CancellationToken cancellationToken = default);
+        Task<bool> SetPositionActiveAsync(int id, bool isActive, CancellationToken cancellationToken = default);
+        Task<bool> DeletePositionAsync(int id, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<InvalidPositionRowDto>> GetInvalidPositionRowsAsync(CancellationToken cancellationToken = default);
+        Task<bool> RepairPositionAsync(RepairPositionRequest request, CancellationToken cancellationToken = default);
+
         // Constitution logic
         Task<Constitution?> GetActiveConstitutionAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<Constitution>> GetConstitutionHistoryAsync(CancellationToken cancellationToken = default);

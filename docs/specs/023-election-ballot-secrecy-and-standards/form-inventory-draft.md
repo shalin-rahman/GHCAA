@@ -91,3 +91,42 @@ The "Records" column names what the platform fills today (from `LoadTablesAsync`
 8. 37.12n, ER-26 and ER-28: approve `ElectionRecountRequest` for the request and decision, and say where the recount result is stored for the report.
 9. 37.12n, ER-33: decide whether it means the Investigation Report (template number, no complaint record exists) or the Handover Certificate (what the platform prints). Then approve the proposed handover records.
 10. Decide whether forms whose records already exist but have no form (Commissioner Acceptance and Neutrality Declaration from `ElectionAppointment`, Poll Opening and Closing from the poll record) are built with this work or later.
+
+## Owner decisions, 2026-10-20
+
+The owner reviewed all 50 forms drawn as A4 sheets and approved the layouts as shown. The review page puts each template layout under its Regulations number and drafts the ten Regulations-only forms.
+
+- Numbering. The Regulations numbers ER-01 to ER-35 are used as they stand. This replaces the ER-<phase>.<nn> scheme decided on 2026-10-11 and the phase table above. The 15 template-only forms take a letter after the form they follow:
+
+  | Form | Template | New code |
+  |---|---|---|
+  | Nomination Acceptance Order | 05 ER-12 | ER-17A |
+  | Election Material Receipt Register | 07 ER-39 | ER-22A |
+  | Poll Incident Register | 05 ER-16 | ER-23A |
+  | Spoiled Ballot Register | 05 ER-17 | ER-23B |
+  | Vote Counting Authorization | 07 ER-20 | ER-25A |
+  | Ballot Box Opening Certificate | 07 ER-21 | ER-25B |
+  | Ballot Paper Reconciliation | 07 ER-22 | ER-25C |
+  | Independent Tally Sheet | 07 ER-24 | ER-27A |
+  | Rejected Ballot Register | 07 ER-25 | ER-27B |
+  | Final Result Sheet | 07 ER-29 | ER-27C |
+  | Recount Decision | 07 ER-27 | ER-28A |
+  | Recount Report | 07 ER-28 | ER-28B |
+  | Election Complaint Form | 07 ER-32 | ER-30A |
+  | Investigation Report | 07 ER-33 | ER-30B |
+  | Election Closure Certificate | 07 ER-40 | ER-35A |
+
+- Old codes. The document endpoint and the verify page keep accepting the 16 platform codes in use today and serve the form under its new number, so QR codes already printed keep working.
+- Keep all 15 template-only forms and write all ten Regulations-only forms to the drafted layouts.
+- Title-only matches confirmed: ER-08 with 05 ER-07, ER-17 with 05 ER-11, ER-27 with 07 ER-23, ER-29 with 07 ER-30, ER-31 with 07 ER-34, ER-32 with 07 ER-35.
+- ER-13 Political Neutrality keeps its number. Its body reuses the five ER-05 neutrality lines plus the non-political lines. Candidates sign ER-13 and officials sign ER-05.
+- ER-01 and ER-02: store on the election the core schedule (announced, nomination opens and closes, scrutiny, withdrawal deadline, final list, polling opens and closes), campaign opens and closes, the silence period, the polling venue, a notice reference number and the recount window end.
+- ER-17: store the seven scrutiny ticks on each nomination. Any commissioner may set them, and the sheet prints who ticked and when. The Chief still decides acceptance.
+- Recount: one stored request per filing holds the seat, applicant, grounds, explanation and time received, then the decision, reason, who decided and when. ER-28 prints the request, ER-28A the decision, and ER-28B compares the original count with the recount.
+- Handover moves to ER-34 with the 15-item checklist from 07 ER-37, and the ticks are stored. ER-33 becomes the Completion Report.
+- Signers for the drafts stay as drawn: ER-03 by the Selection Committee chair and one member. ER-20 stays separate from ECC-01.
+- Build ER-04, ER-05, ER-23 and ER-24 from the records that already exist, in this work.
+- The migration for the new fields is written and tested on local PostgreSQL only. It goes to preprod after the F2 gate clears (34.D17 to 34.D19 confirmed there).
+- Committee positions are rows in a new `EcPosition` table, not the fixed enum (TODO 95.2, the configurable positions item). Each row carries three flags: shown on the board, signs as head and signs as secretary. A signature block such as the outgoing and incoming head on ER-34 or the association head and secretary on ER-35A prints the label of the position holding that flag, never a fixed "President" or "General Secretary". The same rule covers ID cards. This is built before the forms, and its migration joins the form-fields migration under the same local-only rule.
+- Every label a form prints about the organisation comes from org config: the full name, address, phone numbers, email and logo. Nothing about the organisation is fixed in code (TODO 37.14s, form wording from settings).
+- Any of the 50 forms can be printed at any time, either filled from the stored records of an election or blank with ruled lines for hand filling (TODO 37.14s).

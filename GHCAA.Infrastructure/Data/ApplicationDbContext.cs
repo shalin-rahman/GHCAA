@@ -254,7 +254,9 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<SpecialDayTheme> SpecialDayThemes { get; set; } = null!;
         public DbSet<EmailLog> EmailLogs { get; set; } = null!;
         public DbSet<ECPeriod> ECPeriods { get; set; } = null!;
+        public DbSet<ECPeriodHandoverCheck> ECPeriodHandoverChecks { get; set; } = null!;
         public DbSet<ECMember> ECMembers { get; set; } = null!;
+        public DbSet<EcPosition> EcPositions { get; set; } = null!;
         public DbSet<AcademicRecord> AcademicRecords { get; set; } = null!;
         public DbSet<ProfessionalRecord> ProfessionalRecords { get; set; } = null!;
         public DbSet<PaymentConfiguration> PaymentConfigurations { get; set; } = null!;
@@ -284,6 +286,9 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<VoterRoll> VoterRolls { get; set; } = null!;
         public DbSet<Nomination> Nominations { get; set; } = null!;
         public DbSet<ScrutinyDecision> ScrutinyDecisions { get; set; } = null!;
+        public DbSet<NominationScrutinyCheck> NominationScrutinyChecks { get; set; } = null!;
+        public DbSet<ElectionRecountRequest> ElectionRecountRequests { get; set; } = null!;
+        public DbSet<ElectionRecountFigure> ElectionRecountFigures { get; set; } = null!;
         public DbSet<Ballot> Ballots { get; set; } = null!;
         public DbSet<BallotVote> BallotVotes { get; set; } = null!;
         public DbSet<SeatVote> SeatVotes { get; set; } = null!;
@@ -350,6 +355,10 @@ namespace GHCAA.Infrastructure.Data
                     }
                 }
             }
+
+            // 95.2: committee positions are reference data that ECMembers and ElectionSeats point
+            // at, so they are seeded even when the sample data is switched off.
+            modelBuilder.Entity<EcPosition>().HasData(EcPositionIds.Seed());
 
             // Seed Lookups from JSON
             if (IsSeedDisabled) return;

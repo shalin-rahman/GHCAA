@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { splitForms, formStage, ELECTION_DOCS } from './election-docs';
+import { splitForms, formNumber, formStage, ELECTION_DOCS } from './election-docs';
 
 describe('ELECTION_DOCS', () => {
     it('has a unique id per document', () => {
@@ -12,8 +12,8 @@ describe('ELECTION_DOCS', () => {
         expect(new Set(files).size).toBe(files.length);
     });
 
-    /* The forms handbook is split across two files (ER-01..18 and ER-20..40); a document
-       cannot be both a handbook of forms and a single form. */
+    /* The forms handbook is split across two files (ER-01..24 and the lettered forms after
+       ER-25); a document cannot be both a handbook of forms and a single form. */
     it('never marks a document as both a handbook and a single form', () => {
         expect(ELECTION_DOCS.filter(d => d.isFormsHandbook && d.isForm)).toEqual([]);
     });
@@ -25,13 +25,32 @@ describe('ELECTION_DOCS', () => {
     });
 });
 
+// FR-39
+describe('formNumber', () => {
+    it('sorts a lettered form just after the form it follows', () => {
+        expect(formNumber('ER-17')).toBe(17);
+        expect(formNumber('ER-17A')).toBeCloseTo(17.1);
+        expect(formNumber('ER-27C')).toBeCloseTo(27.3);
+        expect(formNumber('ER-27C')).toBeLessThan(formNumber('ER-28'));
+    });
+
+    it('returns 0 for a code with no number', () => {
+        expect(formNumber('ER-')).toBe(0);
+    });
+});
+
+// FR-39
 describe('formStage', () => {
     it('groups a form by the stage of the election it is used in', () => {
         expect(formStage('ER-01')).toBe('Announcement');
         expect(formStage('ER-12')).toBe('Nomination');
-        expect(formStage('ER-19')).toBe('Polling day');
+        expect(formStage('ER-22A')).toBe('Campaign and polling preparation');
+        expect(formStage('ER-25')).toBe('Polling day');
+        expect(formStage('ER-25A')).toBe('Counting');
+        expect(formStage('ER-27C')).toBe('Counting');
+        expect(formStage('ER-28B')).toBe('Recount');
         expect(formStage('ER-30')).toBe('Result');
-        expect(formStage('ER-40')).toBe('Closure and handover');
+        expect(formStage('ER-35A')).toBe('Closure and handover');
     });
 
     it('puts a code with no number in its own bucket rather than guessing', () => {

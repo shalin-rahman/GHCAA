@@ -11,6 +11,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/config/app_config.dart';
 import '../../core/utils/app_utils.dart';
+import '../../core/constants/app_constants.dart';
 import '../../features/elections/ballot_receipt.dart';
 import '../../features/elections/election_service.dart';
 
@@ -52,7 +53,11 @@ final _boardProvider =
 });
 
 // Phases after polling, where the count and the result can be looked at.
-const _resultPhases = {'Counting', 'Declared', 'Archived'};
+const _resultPhases = {
+  ElectionPhases.counting,
+  ElectionPhases.declared,
+  ElectionPhases.archived,
+};
 
 class _ElectionBody extends ConsumerStatefulWidget {
   final ElectionSummary election;
@@ -73,7 +78,7 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
   List<({String position, String choice})>? _receiptLines;
 
   bool _closed(Ballot ballot) =>
-      ballot.phase != 'Polling' ||
+      ballot.phase != ElectionPhases.polling ||
       _trackingCode != null ||
       _alreadyVoted ||
       ballot.hasVoted ||
@@ -166,7 +171,7 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
                   title: 'You cannot vote in this election',
                   body: '${ballot.ineligibilityReason ?? ballotNotOnRoll}\n'
                       'If you think this is wrong, contact the election commission before polling closes.')
-            else if (ballot.phase != 'Polling')
+            else if (ballot.phase != ElectionPhases.polling)
               const _Notice(
                   body:
                       'Voting opens once this election reaches the polling phase.'),

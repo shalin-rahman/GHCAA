@@ -17,6 +17,8 @@ namespace GHCAA.Infrastructure.Services
                 .AsNoTracking()
                 .Include(m => m.ECMembers)
                     .ThenInclude(em => em.ECPeriod)
+                .Include(m => m.ECMembers)
+                    .ThenInclude(em => em.EcPosition)
                 .Include(m => m.SentFamilyLinkRequests)
                     .ThenInclude(r => r.TargetMember)
                 .Include(m => m.ReceivedFamilyLinkRequests)
@@ -164,7 +166,9 @@ namespace GHCAA.Infrastructure.Services
                 {
                     Id = em.Id,
                     PeriodTitle = em.ECPeriod?.Title ?? "Unknown",
-                    Position = em.Position,
+                    Position = em.EcPosition?.Key ?? string.Empty,
+                    PositionId = em.Position,
+                    PositionName = em.EcPosition?.Name ?? string.Empty,
                     StartDate = em.StartDate.ToLocalTime(),
                     EndDate = em.EndDate.HasValue ? em.EndDate.Value.ToLocalTime() : null,
                     ChangeReason = em.ChangeReason,

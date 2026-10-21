@@ -190,7 +190,7 @@ public sealed class ElectionApprovalServiceTests : TestBase
         UseSettings(new ElectionSettingsDto { TwoPersonActions = [] });
         _election.Phase = ElectionPhase.Counting;
         var outsider = await CreateAndSaveTestMemberAsync();
-        _context.ECMembers.Add(new ECMember { ECPeriodId = _election.ECPeriodId, MemberId = outsider.Id, Position = ECPosition.President, StartDate = DateTime.UtcNow });
+        _context.ECMembers.Add(new ECMember { ECPeriodId = _election.ECPeriodId, MemberId = outsider.Id, Position = EcPositionIds.President, StartDate = DateTime.UtcNow });
         await _context.SaveChangesAsync();
 
         var run = await _service.RunOrRequestAsync(_election.Id, ElectionApprovalAction.Declare, _alice, Admin);
@@ -241,6 +241,7 @@ public sealed class ElectionApprovalServiceTests : TestBase
     [Category("FR-39")]
     public async Task KeyReplacement_WhileOpenPollingWaits_IsLocked()
     {
+        await MakeReadyForPollingAsync(setKey: false);
         await _service.RunOrRequestAsync(_election.Id, ElectionApprovalAction.ReplaceBallotKey, _alice, Admin, NewPublicKey());
         var replace = await _service.RunOrRequestAsync(_election.Id, ElectionApprovalAction.ReplaceBallotKey, _alice, Admin, NewPublicKey());
         var fingerprint = (await ReloadAsync()).BallotKeyFingerprint;
@@ -253,6 +254,65 @@ public sealed class ElectionApprovalServiceTests : TestBase
         await again.Should().ThrowAsync<ElectionRulesFrozenException>();
         (await ReloadAsync()).BallotKeyFingerprint.Should().Be(fingerprint);
         (await _context.ActivityLogs.CountAsync(x => x.ActivityType == Constants.Elections.FrozenChangeRefusedAuditType)).Should().Be(2);
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task OpenPolling_WhileNotReady_IsNotEvenRequested()
+    {
+        var run = await _service.RunOrRequestAsync(_election.Id, ElectionApprovalAction.OpenPolling, _alice, Admin);
+
+        run.Error.Should().Be(Constants.Elections.Replies.PollingNotReady);
+        run.Pending.Should().BeNull();
+        (await _service.ListOpenAsync(_election.Id)).Should().BeEmpty();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task OpenPolling_ReadinessLostBeforeApproval_IsRefused_AndStaysOpen()
+    {
+        await MakeReadyForPollingAsync();
+        var run = await _service.RunOrRequestAsync(_election.Id, ElectionApprovalAction.OpenPolling, _alice, Admin);
+        run.Pending.Should().NotBeNull();
+        await _context.Elections.Where(x => x.Id == _election.Id)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.PollingClosesOn, DateTime.UtcNow.AddMinutes(-1)));
+
+        var (success, error) = await _service.ApproveAsync(run.Pending!.Id, _bob, Admin);
+
+        success.Should().BeFalse();
+        error.Should().Be(Constants.Elections.Replies.PollingNotReady);
+        (await ReloadAsync()).Phase.Should().Be(ElectionPhase.Campaign);
+        (await _service.ListOpenAsync(_election.Id)).Should().ContainSingle(x => x.Id == run.Pending.Id);
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task OpenPolling_WhenReady_RunsOnApproval()
+    {
+        await MakeReadyForPollingAsync();
+        var run = await _service.RunOrRequestAsync(_election.Id, ElectionApprovalAction.OpenPolling, _alice, Admin);
+
+        (await _service.ApproveAsync(run.Pending!.Id, _bob, Admin)).Success.Should().BeTrue();
+        (await ReloadAsync()).Phase.Should().Be(ElectionPhase.Polling);
+    }
+
+    // 37.12w. A test election needs no attestations, so this leaves only the stored items to set.
+    private async Task MakeReadyForPollingAsync(bool setKey = true)
+    {
+        var member = await CreateAndSaveTestMemberAsync();
+        var seat = new ElectionSeat { ElectionId = _election.Id, Position = EcPositionIds.President };
+        _context.ElectionSeats.Add(seat);
+        _context.VoterRolls.Add(new VoterRoll { ElectionId = _election.Id, MemberId = member.Id, IsEligible = true, FrozenAt = DateTime.UtcNow });
+        _context.Nominations.Add(new Nomination { ElectionId = _election.Id, ElectionSeat = seat, CandidateMemberId = member.Id, ProposerMemberId = member.Id, SeconderMemberId = member.Id, Statement = "Run", Status = NominationStatus.Accepted, SubmittedAt = DateTime.UtcNow, BallotOrder = 1 });
+        var e = _context.Elections.Single(x => x.Id == _election.Id);
+        e.Phase = ElectionPhase.Campaign;
+        e.IsTest = true;
+        if (setKey)
+        {
+            e.BallotPublicKey = NewPublicKey();
+            e.BallotKeyFingerprint = BallotSeal.Fingerprint(e.BallotPublicKey);
+        }
+        await _context.SaveChangesAsync();
     }
 
     [Test]

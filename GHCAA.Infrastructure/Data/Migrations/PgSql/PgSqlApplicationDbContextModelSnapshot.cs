@@ -17,7 +17,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.19")
+                .HasAnnotation("ProductVersion", "9.0.20")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -109,9 +109,9 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MemberId", "Timestamp");
-
                     b.HasIndex("Timestamp");
+
+                    b.HasIndex("MemberId", "Timestamp");
 
                     b.ToTable("ActivityLogs");
                 });
@@ -689,6 +689,8 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 
                     b.HasIndex("MemberId");
 
+                    b.HasIndex("Position");
+
                     b.ToTable("ECMembers");
                 });
 
@@ -718,6 +720,284 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.ToTable("ECPeriods");
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.ECPeriodHandoverCheck", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ECPeriodId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsChecked")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Item")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("SetAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("SetByUserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SetByUserId");
+
+                    b.HasIndex("ECPeriodId", "Item")
+                        .IsUnique();
+
+                    b.ToTable("ECPeriodHandoverChecks");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.EcPosition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("NameBn")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("SeatCount")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("ShowOnBoard")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("SignsAsHead")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("SignsAsSecretary")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("EcPositions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DisplayOrder = 1,
+                            IsActive = true,
+                            Key = "President",
+                            Name = "President",
+                            NameBn = "সভাপতি",
+                            SeatCount = 1,
+                            ShowOnBoard = true,
+                            SignsAsHead = true,
+                            SignsAsSecretary = false
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DisplayOrder = 2,
+                            IsActive = true,
+                            Key = "VicePresident",
+                            Name = "Vice President",
+                            NameBn = "সহ-সভাপতি",
+                            SeatCount = 1,
+                            ShowOnBoard = true,
+                            SignsAsHead = false,
+                            SignsAsSecretary = false
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DisplayOrder = 3,
+                            IsActive = true,
+                            Key = "GeneralSecretary",
+                            Name = "General Secretary",
+                            NameBn = "সাধারণ সম্পাদক",
+                            SeatCount = 1,
+                            ShowOnBoard = true,
+                            SignsAsHead = false,
+                            SignsAsSecretary = true
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DisplayOrder = 4,
+                            IsActive = true,
+                            Key = "OfficeSecretary",
+                            Name = "Office Secretary",
+                            NameBn = "কার্যালয় সম্পাদক",
+                            SeatCount = 1,
+                            ShowOnBoard = true,
+                            SignsAsHead = false,
+                            SignsAsSecretary = false
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DisplayOrder = 5,
+                            IsActive = true,
+                            Key = "JointSecretary1",
+                            Name = "Joint Secretary 1",
+                            NameBn = "যুগ্ম সম্পাদক (১)",
+                            SeatCount = 1,
+                            ShowOnBoard = true,
+                            SignsAsHead = false,
+                            SignsAsSecretary = false
+                        },
+                        new
+                        {
+                            Id = 6,
+                            DisplayOrder = 6,
+                            IsActive = true,
+                            Key = "JointSecretary2",
+                            Name = "Joint Secretary 2",
+                            NameBn = "যুগ্ম সম্পাদক (২)",
+                            SeatCount = 1,
+                            ShowOnBoard = true,
+                            SignsAsHead = false,
+                            SignsAsSecretary = false
+                        },
+                        new
+                        {
+                            Id = 7,
+                            DisplayOrder = 7,
+                            IsActive = true,
+                            Key = "Treasurer",
+                            Name = "Treasurer",
+                            NameBn = "কোষাধ্যক্ষ",
+                            SeatCount = 1,
+                            ShowOnBoard = true,
+                            SignsAsHead = false,
+                            SignsAsSecretary = false
+                        },
+                        new
+                        {
+                            Id = 8,
+                            DisplayOrder = 8,
+                            IsActive = true,
+                            Key = "MediaCulturalAndSportsSecretary",
+                            Name = "Media Cultural & Sports Secretary",
+                            NameBn = "মিডিয়া, সাংস্কৃতিক ও ক্রীড়া সম্পাদক",
+                            SeatCount = 1,
+                            ShowOnBoard = true,
+                            SignsAsHead = false,
+                            SignsAsSecretary = false
+                        },
+                        new
+                        {
+                            Id = 9,
+                            DisplayOrder = 9,
+                            IsActive = true,
+                            Key = "OrganizationalSecretary",
+                            Name = "Organizational Secretary",
+                            NameBn = "সাংগঠনিক সম্পাদক",
+                            SeatCount = 1,
+                            ShowOnBoard = true,
+                            SignsAsHead = false,
+                            SignsAsSecretary = false
+                        },
+                        new
+                        {
+                            Id = 10,
+                            DisplayOrder = 10,
+                            IsActive = true,
+                            Key = "InformationAndTechnologySecretary",
+                            Name = "Information and Technology Secretary",
+                            NameBn = "তথ্য ও প্রযুক্তি সম্পাদক",
+                            SeatCount = 1,
+                            ShowOnBoard = true,
+                            SignsAsHead = false,
+                            SignsAsSecretary = false
+                        },
+                        new
+                        {
+                            Id = 11,
+                            DisplayOrder = 11,
+                            IsActive = true,
+                            Key = "Member1",
+                            Name = "Member 1",
+                            NameBn = "সদস্য-১",
+                            SeatCount = 1,
+                            ShowOnBoard = false,
+                            SignsAsHead = false,
+                            SignsAsSecretary = false
+                        },
+                        new
+                        {
+                            Id = 12,
+                            DisplayOrder = 12,
+                            IsActive = true,
+                            Key = "Member2",
+                            Name = "Member 2",
+                            NameBn = "সদস্য-২",
+                            SeatCount = 1,
+                            ShowOnBoard = false,
+                            SignsAsHead = false,
+                            SignsAsSecretary = false
+                        },
+                        new
+                        {
+                            Id = 13,
+                            DisplayOrder = 13,
+                            IsActive = true,
+                            Key = "LawSecretary",
+                            Name = "Law Secretary",
+                            NameBn = "আইন সম্পাদক",
+                            SeatCount = 1,
+                            ShowOnBoard = true,
+                            SignsAsHead = false,
+                            SignsAsSecretary = false
+                        },
+                        new
+                        {
+                            Id = 14,
+                            DisplayOrder = 14,
+                            IsActive = true,
+                            Key = "ImmediatePastPresident",
+                            Name = "Immediate Past President",
+                            NameBn = "সাবেক সভাপতি",
+                            SeatCount = 1,
+                            ShowOnBoard = false,
+                            SignsAsHead = false,
+                            SignsAsSecretary = false
+                        },
+                        new
+                        {
+                            Id = 15,
+                            DisplayOrder = 15,
+                            IsActive = true,
+                            Key = "InstitutionalRepresentative",
+                            Name = "Institutional Representative",
+                            NameBn = "প্রাতিষ্ঠানিক প্রতিনিধি",
+                            SeatCount = 1,
+                            ShowOnBoard = false,
+                            SignsAsHead = false,
+                            SignsAsSecretary = false
+                        });
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.Election", b =>
                 {
                     b.Property<int>("Id")
@@ -740,6 +1020,12 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Property<int>("BallotSealVersion")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime?>("CampaignClosesOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("CampaignOpensOn")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("CreatedBy")
                         .HasColumnType("integer");
 
@@ -748,6 +1034,9 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 
                     b.Property<int>("ECPeriodId")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime?>("FinalListOn")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -763,6 +1052,10 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Property<DateTime>("NominationOpensOn")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("NoticeReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<int>("Phase")
                         .HasColumnType("integer");
 
@@ -772,7 +1065,13 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Property<DateTime>("PollingOpensOn")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("RecountWindowEndsOn")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime?>("ScrutinyOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("SilenceStartsAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("TieRule")
@@ -782,6 +1081,10 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Venue")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
 
                     b.Property<DateTime?>("WithdrawalClosesOn")
                         .HasColumnType("timestamp with time zone");
@@ -962,6 +1265,58 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.ToTable("ElectionApprovals");
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.ElectionAuditEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int?>("ActorUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("At")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DetailJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ElectionId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Hash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("PrevHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("Seq")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ElectionId", "Action")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ElectionAuditEntries_KeyDestroyed_Once")
+                        .HasFilter("\"Action\" = 'KeyDestroyed'");
+
+                    b.HasIndex("ElectionId", "Seq")
+                        .IsUnique();
+
+                    b.ToTable("ElectionAuditEntries");
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.ElectionPersona", b =>
                 {
                     b.Property<int>("Id")
@@ -1025,6 +1380,106 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.ToTable("ElectionPersonas");
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.ElectionRecountFigure", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("NominationId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RecountRequestId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("VoteCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NominationId");
+
+                    b.HasIndex("RecountRequestId", "NominationId")
+                        .IsUnique();
+
+                    b.ToTable("ElectionRecountFigures");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ElectionRecountRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool?>("Allowed")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("ApplicantMemberId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ApplicantName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("DecidedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DecisionReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<int>("ElectionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ElectionSeatId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Explanation")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("Grounds")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RecordedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("RecountedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("RecountedByUserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicantMemberId");
+
+                    b.HasIndex("DecidedByUserId");
+
+                    b.HasIndex("ElectionSeatId");
+
+                    b.HasIndex("RecordedByUserId");
+
+                    b.HasIndex("RecountedByUserId");
+
+                    b.HasIndex("ElectionId", "ElectionSeatId");
+
+                    b.ToTable("ElectionRecountRequests");
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.ElectionResult", b =>
                 {
                     b.Property<int>("Id")
@@ -1057,58 +1512,6 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .IsUnique();
 
                     b.ToTable("ElectionResults");
-                });
-
-            modelBuilder.Entity("GHCAA.Domain.Models.ElectionAuditEntry", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int?>("ActorUserId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("At")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DetailJson")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ElectionId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Hash")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<string>("PrevHash")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<int>("Seq")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ElectionId", "Action")
-                        .IsUnique()
-                        .HasDatabaseName("IX_ElectionAuditEntries_KeyDestroyed_Once")
-                        .HasFilter("\"Action\" = 'KeyDestroyed'");
-
-                    b.HasIndex("ElectionId", "Seq")
-                        .IsUnique();
-
-                    b.ToTable("ElectionAuditEntries");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.ElectionRulesUnlock", b =>
@@ -1168,6 +1571,8 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Position");
 
                     b.HasIndex("ElectionId", "Position")
                         .IsUnique();
@@ -3064,141 +3469,6 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Label = "EMAIL",
                             LookupGroup = "BroadcastChannel",
                             Value = "email"
-                        },
-                        new
-                        {
-                            Id = 4001,
-                            DisplayOrder = 1,
-                            IsActive = true,
-                            Label = "President",
-                            LookupGroup = "ECPosition",
-                            Value = "President"
-                        },
-                        new
-                        {
-                            Id = 4002,
-                            DisplayOrder = 2,
-                            IsActive = true,
-                            Label = "Vice President",
-                            LookupGroup = "ECPosition",
-                            Value = "VicePresident"
-                        },
-                        new
-                        {
-                            Id = 4003,
-                            DisplayOrder = 3,
-                            IsActive = true,
-                            Label = "General Secretary",
-                            LookupGroup = "ECPosition",
-                            Value = "GeneralSecretary"
-                        },
-                        new
-                        {
-                            Id = 4004,
-                            DisplayOrder = 4,
-                            IsActive = true,
-                            Label = "Office Secretary",
-                            LookupGroup = "ECPosition",
-                            Value = "OfficeSecretary"
-                        },
-                        new
-                        {
-                            Id = 4005,
-                            DisplayOrder = 5,
-                            IsActive = true,
-                            Label = "Joint Secretary 1",
-                            LookupGroup = "ECPosition",
-                            Value = "JointSecretary1"
-                        },
-                        new
-                        {
-                            Id = 4006,
-                            DisplayOrder = 6,
-                            IsActive = true,
-                            Label = "Joint Secretary 2",
-                            LookupGroup = "ECPosition",
-                            Value = "JointSecretary2"
-                        },
-                        new
-                        {
-                            Id = 4007,
-                            DisplayOrder = 7,
-                            IsActive = true,
-                            Label = "Treasurer",
-                            LookupGroup = "ECPosition",
-                            Value = "Treasurer"
-                        },
-                        new
-                        {
-                            Id = 4008,
-                            DisplayOrder = 8,
-                            IsActive = true,
-                            Label = "Media, Cultural & Sports Secretary",
-                            LookupGroup = "ECPosition",
-                            Value = "MediaCulturalAndSportsSecretary"
-                        },
-                        new
-                        {
-                            Id = 4009,
-                            DisplayOrder = 9,
-                            IsActive = true,
-                            Label = "Organizational Secretary",
-                            LookupGroup = "ECPosition",
-                            Value = "OrganizationalSecretary"
-                        },
-                        new
-                        {
-                            Id = 4010,
-                            DisplayOrder = 10,
-                            IsActive = true,
-                            Label = "Information & Technology Secretary",
-                            LookupGroup = "ECPosition",
-                            Value = "InformationAndTechnologySecretary"
-                        },
-                        new
-                        {
-                            Id = 4011,
-                            DisplayOrder = 11,
-                            IsActive = true,
-                            Label = "Member-1",
-                            LookupGroup = "ECPosition",
-                            Value = "Member1"
-                        },
-                        new
-                        {
-                            Id = 4012,
-                            DisplayOrder = 12,
-                            IsActive = true,
-                            Label = "Member-2",
-                            LookupGroup = "ECPosition",
-                            Value = "Member2"
-                        },
-                        new
-                        {
-                            Id = 4013,
-                            DisplayOrder = 13,
-                            IsActive = true,
-                            Label = "Law Secretary",
-                            LookupGroup = "ECPosition",
-                            Value = "LawSecretary"
-                        },
-                        new
-                        {
-                            Id = 4014,
-                            DisplayOrder = 14,
-                            IsActive = true,
-                            Label = "Immediate Past President",
-                            LookupGroup = "ECPosition",
-                            Value = "ImmediatePastPresident"
-                        },
-                        new
-                        {
-                            Id = 4015,
-                            DisplayOrder = 15,
-                            IsActive = true,
-                            Label = "Institutional Representative",
-                            LookupGroup = "ECPosition",
-                            Value = "InstitutionalRepresentative"
                         });
                 });
 
@@ -3702,6 +3972,9 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Property<int>("CandidateMemberId")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime?>("ConsentAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("ElectionId")
                         .HasColumnType("integer");
 
@@ -3739,6 +4012,39 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .IsUnique();
 
                     b.ToTable("Nominations");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.NominationScrutinyCheck", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsChecked")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Item")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("NominationId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("SetAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("SetByUserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SetByUserId");
+
+                    b.HasIndex("NominationId", "Item")
+                        .IsUnique();
+
+                    b.ToTable("NominationScrutinyChecks");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.Notification", b =>
@@ -5280,9 +5586,32 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("GHCAA.Domain.Models.EcPosition", "EcPosition")
+                        .WithMany()
+                        .HasForeignKey("Position")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("ECPeriod");
 
+                    b.Navigation("EcPosition");
+
                     b.Navigation("Member");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ECPeriodHandoverCheck", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.ECPeriod", null)
+                        .WithMany("HandoverChecks")
+                        .HasForeignKey("ECPeriodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GHCAA.Domain.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("SetByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.Election", b =>
@@ -5360,7 +5689,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Navigation("Election");
                 });
 
-            modelBuilder.Entity("GHCAA.Domain.Models.ElectionResult", b =>
+            modelBuilder.Entity("GHCAA.Domain.Models.ElectionAuditEntry", b =>
                 {
                     b.HasOne("GHCAA.Domain.Models.Election", null)
                         .WithMany()
@@ -5369,7 +5698,60 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("GHCAA.Domain.Models.ElectionAuditEntry", b =>
+            modelBuilder.Entity("GHCAA.Domain.Models.ElectionRecountFigure", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.Nomination", null)
+                        .WithMany()
+                        .HasForeignKey("NominationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GHCAA.Domain.Models.ElectionRecountRequest", null)
+                        .WithMany("Figures")
+                        .HasForeignKey("RecountRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ElectionRecountRequest", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.Member", null)
+                        .WithMany()
+                        .HasForeignKey("ApplicantMemberId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GHCAA.Domain.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("DecidedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GHCAA.Domain.Models.Election", "Election")
+                        .WithMany()
+                        .HasForeignKey("ElectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GHCAA.Domain.Models.ElectionSeat", null)
+                        .WithMany()
+                        .HasForeignKey("ElectionSeatId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GHCAA.Domain.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("RecordedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GHCAA.Domain.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("RecountedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Election");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ElectionResult", b =>
                 {
                     b.HasOne("GHCAA.Domain.Models.Election", null)
                         .WithMany()
@@ -5399,6 +5781,14 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .HasForeignKey("ElectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("GHCAA.Domain.Models.EcPosition", "EcPosition")
+                        .WithMany()
+                        .HasForeignKey("Position")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("EcPosition");
 
                     b.Navigation("Election");
                 });
@@ -5670,6 +6060,21 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Navigation("Election");
 
                     b.Navigation("ElectionSeat");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.NominationScrutinyCheck", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.Nomination", null)
+                        .WithMany("ScrutinyChecks")
+                        .HasForeignKey("NominationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GHCAA.Domain.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("SetByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.Notification", b =>
@@ -5949,6 +6354,8 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
             modelBuilder.Entity("GHCAA.Domain.Models.ECPeriod", b =>
                 {
                     b.Navigation("ECMembers");
+
+                    b.Navigation("HandoverChecks");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.Election", b =>
@@ -5958,6 +6365,11 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Navigation("Seats");
 
                     b.Navigation("VoterRoll");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ElectionRecountRequest", b =>
+                {
+                    b.Navigation("Figures");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.ElectionSeat", b =>
@@ -6005,6 +6417,11 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
             modelBuilder.Entity("GHCAA.Domain.Models.NewsPost", b =>
                 {
                     b.Navigation("Collaborators");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.Nomination", b =>
+                {
+                    b.Navigation("ScrutinyChecks");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.Poll", b =>
