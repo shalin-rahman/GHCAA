@@ -8,7 +8,7 @@ import { ElectionsService } from '../../core/services/elections.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AdminService } from '../../core/services/admin.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
-import { AdminElectionDto, AdminElectionStepResult, ElectionApprovalDto, ELECTION_TOO_FEW_APPROVERS_WARNING, pollingApproverWarning } from '../../core/models/election.models';
+import { AdminElectionDto, AdminElectionStepResult, ElectionApprovalDto, ElectionReadinessDto } from '../../core/models/election.models';
 import { ExportUtil } from '../../core/utils/export.util';
 
 describe('AdminElections ballot key', () => {
@@ -21,6 +21,13 @@ describe('AdminElections ballot key', () => {
     let asAdmin: boolean;
     const election = { id: 7, title: 'EC 2026', phase: 'Campaign', ballotKeyFingerprint: null, positions: [], candidates: [] } as unknown as AdminElectionDto;
     const ran = (updated: AdminElectionDto): AdminElectionStepResult => ({ election: updated, pending: null });
+    const readiness: ElectionReadinessDto = {
+        ready: false,
+        items: [
+            { key: 'ballot-key', met: false, attestation: false, advisory: false },
+            { key: 'approvers', met: false, attestation: false, advisory: true }
+        ]
+    };
     const request: ElectionApprovalDto = {
         id: 30, electionId: 7, action: 'Publish', requestedByUserId: 1, requestedBy: 'alice',
         requestedAt: '2026-10-01T10:00:00Z', expiresAt: '2026-10-03T10:00:00Z'
@@ -33,7 +40,8 @@ describe('AdminElections ballot key', () => {
             publish: vi.fn(),
             approve: vi.fn().mockReturnValue(of(undefined)),
             reject: vi.fn().mockReturnValue(of(undefined)),
-            runCount: vi.fn().mockReturnValue(of({ results: [], pending: null }))
+            runCount: vi.fn().mockReturnValue(of({ results: [], pending: null })),
+            getReadiness: vi.fn().mockReturnValue(of(readiness))
         };
         asAdmin = true;
         authMock = createAuthServiceMock();
@@ -168,10 +176,21 @@ describe('AdminElections ballot key', () => {
         expect(component.canSetBallotKey({ ...election, phase: 'Counting' })).toBe(false);
     });
 
-    it('warns on the row about too few approvers only before polling', () => {
-        expect(component.pollingWarning(election)).toBeNull();
-        expect(component.pollingWarning({ ...election, tooFewApprovers: true })).toBe(ELECTION_TOO_FEW_APPROVERS_WARNING);
-        expect(component.pollingWarning({ ...election, phase: 'Polling', tooFewApprovers: true })).toBeNull();
+    // 37.12w. The full readiness list replaces the single approver warning on the row.
+    it('loads the readiness list only for rows before polling the official may view', () => {
+        const before = { ...election, id: 8, myPermissions: ['ViewDashboard'] } as AdminElectionDto;
+        const polling = { ...election, id: 9, phase: 'Polling', myPermissions: ['ViewDashboard'] } as AdminElectionDto;
+        const noView = { ...election, id: 10, myPermissions: ['ChangePhase'] } as AdminElectionDto;
+        electionsMock.getAdminElections.mockReturnValue(of([before, polling, noView]));
+        electionsMock.getReadiness.mockClear();
+
+        component.load();
+
+        expect(electionsMock.getReadiness).toHaveBeenCalledTimes(1);
+        expect(electionsMock.getReadiness).toHaveBeenCalledWith(8);
+        expect(component.readiness()[8]).toEqual(readiness);
+        expect(component.readinessLabel(readiness.items[0])).toBe('The ballot key is set');
+        expect(component.readinessLabel({ ...readiness.items[0], key: 'new-item' })).toBe('new-item');
     });
 
     // FR-050: a row with myPermissions shows only the buttons those permissions allow.
@@ -410,17 +429,5 @@ describe('AdminElections ballot key', () => {
         await component.reject(request);
         expect(electionsMock.reject).toHaveBeenCalledWith(30, null);
         expect(component.approvals()[7]).toEqual([]);
-    });
-});
-
-// 37.13t. Opening polling with too few approvers carries a warning.
-describe('pollingApproverWarning', () => {
-    const few = { id: 1, phase: 'Campaign', tooFewApprovers: true } as AdminElectionDto;
-    const enough = { id: 2, phase: 'Campaign', tooFewApprovers: false } as AdminElectionDto;
-
-    it('warns only when moving to polling with too few approvers', () => {
-        expect(pollingApproverWarning(few, 'Polling')).toBe(ELECTION_TOO_FEW_APPROVERS_WARNING);
-        expect(pollingApproverWarning(few, 'Counting')).toBeNull();
-        expect(pollingApproverWarning(enough, 'Polling')).toBeNull();
     });
 });

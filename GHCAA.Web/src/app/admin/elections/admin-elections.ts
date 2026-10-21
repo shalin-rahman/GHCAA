@@ -7,7 +7,8 @@ import { firstValueFrom } from 'rxjs';
 import { ElectionsService } from '../../core/services/elections.service';
 import {
     AdminElectionDto, AdminElectionStepResult, CreateElectionRequest, ELECTION_APPROVAL_ACTION_LABELS, ELECTION_PHASE_ORDER,
-    ElectionApprovalDto, ElectionPermissionName, ElectionTieRule, NominationViewDto, pollingApproverWarning
+    ELECTION_READINESS_LABELS, ElectionApprovalDto, ElectionPermissionName, ElectionReadinessDto, ElectionReadinessItemDto,
+    ElectionTieRule, NominationViewDto
 } from '../../core/models/election.models';
 import { ExportUtil } from '../../core/utils/export.util';
 import { ballotKeyFileName, generateBallotKeyPair, readBallotKeyFile, toPem } from '../../core/utils/ballot-key.util';
@@ -71,6 +72,7 @@ export class AdminElections {
     unfreezeReason = '';
     readonly reasonMax = ELECTION_APPOINTMENT_REASON_MAX;
     approvals = signal<Partial<Record<number, ElectionApprovalDto[]>>>({});
+    readiness = signal<Partial<Record<number, ElectionReadinessDto>>>({});
     decidingApprovalId = signal<number | null>(null);
     approvalLabels = ELECTION_APPROVAL_ACTION_LABELS;
     officialsOpenId = signal<number | null>(null);
@@ -120,6 +122,7 @@ export class AdminElections {
             next: values => {
                 this.elections.set(values);
                 this.loading.set(false);
+                this.loadReadiness(values);
                 if (this.selectedElectionId() === null && values.length > 0) this.selectedElectionId.set(values[0].id);
             },
             error: () => { this.loading.set(false); this.notify.error('Failed to load elections.'); }
@@ -290,9 +293,20 @@ export class AdminElections {
         return ELECTION_PHASE_ORDER.indexOf(election.phase) < ELECTION_PHASE_ORDER.indexOf('Polling');
     }
 
-    // 37.13t. Polling opens on its date here, not from a button, so the warning sits on the row until then.
-    pollingWarning(election: AdminElectionDto): string | null {
-        return this.canSetBallotKey(election) ? pollingApproverWarning(election, 'Polling') : null;
+    // 37.12w. Each row before polling shows the whole readiness list, the approver warning among it.
+    // Officials record the attested items on their dashboard, so this list is read only.
+    private loadReadiness(values: AdminElectionDto[]): void {
+        this.readiness.set({});
+        for (const election of values.filter(item => this.canSetBallotKey(item) && this.can(item, 'ViewDashboard'))) {
+            this.electionsService.getReadiness(election.id).subscribe({
+                next: result => this.readiness.update(all => ({ ...all, [election.id]: result })),
+                error: () => undefined
+            });
+        }
+    }
+
+    readinessLabel(item: ElectionReadinessItemDto): string {
+        return ELECTION_READINESS_LABELS[item.key] ?? item.key;
     }
 
     async createBallotKey(election: AdminElectionDto): Promise<void> {

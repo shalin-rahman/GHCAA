@@ -193,7 +193,8 @@ clients stop at one. `BallotSeatViewDto.Places` gives the limit.
 - Mobile ballot: `screens/member/election_screen.dart` `_picks` at `:57`, toggle at `:76-81`,
   abstain at `:88`, cast at `:95-99`; `castBallot` at `features/elections/election_service.dart:614`.
   Same rules as web.
-- Receipt text on both clients lists every name picked for a seat.
+- Receipt text on both clients lists every name picked for a seat. Since 37.14o the mobile app shows
+  the server PDF instead, which has no choices, and the names show in the review step.
 
 **Tests**
 - Backend: `Create_SetsScrutinyAndWithdrawalDates`, `Create_DatesOutOfOrder_Refused`,
@@ -517,7 +518,7 @@ These cannot be closed by a session. They stay open in TODO.md.
 |---|---|---|
 | 37.1p | Owner | Decided 2026-10-11 and 2026-10-14. Built in Fast track sessions F2 and F3. |
 | 37.1r location | Committee | Closed 2026-10-11 without building. No IP location lookup. |
-| 37.1m font | Owner | Decided 2026-10-14: Noto Sans Bengali. Built in Fast track session F1. |
+| 37.1m font | Owner | Decided 2026-10-14: Noto Sans Bengali. Built on 2026-10-21 on the server by 37.14o, not in the mobile assets. |
 | 37.1m browser check | Person | Print a receipt from Chrome and Edge and check the layout. |
 | 37.1z device check | Person | Cast on a phone with TalkBack or VoiceOver. |
 | 37.13g | Person | Run `docs/Elections/10-Election-Accessibility-Checklist.md` with keyboard only and a screen reader; write the results into it. |
@@ -553,10 +554,10 @@ These go into 37.14g and are fixed in F1. 37.12x did not fail when its spec ran 
 
 | Item | Decision |
 |---|---|
-| 37.12w | Five conditions are read from stored data. Mock election and technical audit, open appeals decided and paper stock ready are attested by the Chief Commissioner. Each attestation is an audit-chain entry (`ReadinessAttested`, with the condition key). No new table. |
+| 37.12w | Five conditions are read from stored data. Mock election and technical audit, open appeals decided and paper stock ready are attested by an official with `ChangePhase` (as built). Each attestation is an audit-chain entry (`ReadinessAttested`, with the condition key). No new table. |
 | 37.14b | A member gets seats and candidates from CandidateList through Polling. Before CandidateList the read returns the phase and no seats. After Polling the board and results routes serve. |
 | 37.14d | The audit foreign key becomes Restrict. The chain head hash is printed on ER-29 and on the public board, so a cut tail shows against the published value. |
-| 37.1m | Noto Sans Bengali (SIL Open Font License), bundled in the mobile assets. |
+| 37.1m | Noto Sans Bengali (SIL Open Font License). Built on the server in `GHCAA.Infrastructure/Fonts/` by 37.14o. |
 | 37.1p, all seats uncontested | When every seat is unopposed or vacant, the Chief Commissioner moves the election from CandidateList straight to Declared, as a two-person step with step-up. No key, no poll. ER-29 says every seat was uncontested. |
 | 37.1p, conflicts | The official declares conflicts when accepting the appointment and can add more later. The Chief Commissioner can also add one. Each is logged. |
 | 37.12x | One full web run in F1. If it passes, close as not reproducible. If it fails, fix the test-order leak. |
@@ -657,7 +658,8 @@ migration chain, to be confirmed on preprod.
   election delete is the voter-roll unfreeze at `ElectionService.cs:271`, by design). Add a test
   that pins `DataRetentionService.PurgedTables` against every election entity.
 - 37.1m: font file in `GHCAA.Mobile/assets/fonts/`, asset entry in `pubspec.yaml` (`:84`),
-  `pw.ThemeData.withFont` in `ballot_receipt.dart`. Check the goldens do not shift.
+  `pw.ThemeData.withFont` in `ballot_receipt.dart`. Check the goldens do not shift. Superseded:
+  37.14o put the font on the server and removed the mobile PDF builder.
 - 37.14g: the two opened-ballot tests, `getAudit` and `verifyAudit` in mobile
   `election_service.dart` with tests, ER-19 body filled from records.
 - 84.36, election part: for each rule in `GHCAA.Application/Validators/ElectionValidators.cs`,
@@ -739,6 +741,13 @@ It returns each condition as met or unmet:
 
 `SetPhaseAsync` to Polling and the OpenPolling approval (`ElectionApprovalService.cs:625`) both
 refuse with the unmet list. The `TooFewApprovers` warning joins the same list.
+
+Built 2026-10-21. Differences from the table: the roll item checks that roll rows exist, which
+only a freeze writes. The key item checks only that a key is set until 37.14a records the copies.
+The window item checks the order and that it has not closed, because polling may open early. The
+approver item is advisory: it shows on the list but is left out of the 400 and does not block.
+Attestations are made by an official with `ChangePhase`, after step-up, and test elections need
+them too.
 
 ### F5 and F6. Clients
 
@@ -858,7 +867,7 @@ Each follows its tracker item as written, with these additions:
 |---|---|---|
 | 37.12t, 37.12n | Owner | Approve the F7 form table before it is applied |
 | 37.13f | Owner | Confirm the Neon and Render plans, and the key-loss regulation point, after F7 |
-| 37.1m | Person | Print a receipt in Chrome and Edge, and on a phone, after F1 |
+| 37.1m | Person | Print a receipt in Chrome and Edge, and on a phone, after F1. Also download the 37.14o PDF on both |
 | 34.D17, 34.D18, 34.D19 | Person | Deploy preprod and find `history row restored` in the startup log, with no 42703 error and batch shown on directory cards, before F2 |
 | 84.42 | Person | Step-up on a real device for roles and create election, after F1 |
 | 62.31 | Owner | Say yes to the file list before any JSON changes, keep the copy of the real alumni files outside git, and set `AppSettings:RealDataPath` on GHC's deployment, in N0 |

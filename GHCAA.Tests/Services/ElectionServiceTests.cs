@@ -928,15 +928,15 @@ public sealed class ElectionServiceTests : TestBase
 
     [Test]
     [Category("FR-39")]
-    public async Task Readiness_TestElection_NeedsNoAttestations()
+    public async Task Readiness_TestElection_StillNeedsTheAttestations()
     {
         var poll = await CreatePollingElectionAsync(voters: 1);
         poll.Election.IsTest = true;
 
         var readiness = await (await BackToCampaignAsync(poll)).GetReadinessAsync(poll.Election.Id);
 
-        readiness!.Ready.Should().BeTrue();
-        readiness.Items.Where(x => x.Attestation).Should().OnlyContain(x => x.Met);
+        readiness!.Ready.Should().BeFalse();
+        readiness.Items.Where(x => x.Attestation).Should().HaveCount(4).And.OnlyContain(x => !x.Met);
     }
 
     [TestCase(Constants.Elections.Readiness.RollFrozen)]

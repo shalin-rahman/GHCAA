@@ -356,8 +356,8 @@ and confirm rejection, then confirm the member vote status and result percentage
 
 - Ballot secrecy, receipt, results publication and election-rule gaps found in the
   2026-09-27 review are listed in spec 023, election ballot secrecy and standards. As of
-  2026-10-20 only two remain open in docs/TODO.md: 37.1m (receipt still needs a browser and
-  phone check, and a Bengali font for the mobile PDF) and 37.1p (recount, candidate consent,
+  2026-10-21 only two remain open in docs/TODO.md: 37.1m (receipt still needs a browser and
+  phone check; the Bengali font gap was closed by the server-made receipt, 37.14o) and 37.1p (recount, candidate consent,
   officer conflict, spoiled and unopposed seats).
 
 ## Enhancements: modularisation and reusability

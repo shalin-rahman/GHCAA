@@ -596,6 +596,9 @@ export const ensureValidAcademicData = (member: any) => {
 // file — not a full route table, and not used from templates (Angular routerLink can't
 // import a TS constant without each component re-exposing it, which isn't worth doing for
 // a handful of stable, low-churn destinations).
+// localStorage key prefix for a member's ballot receipt PDF. Logout clears every key under it.
+export const BALLOT_RECEIPT_KEY_PREFIX = 'ghcaa_ballot_receipt_';
+
 export const ROUTES = {
     LOGIN: '/login',
     PORTAL_DASHBOARD: '/portal/dashboard',
@@ -723,6 +726,7 @@ export const API_ENDPOINTS = {
         READINESS: (id: number) => `/api/elections/${id}/readiness`,
         READINESS_ATTEST: (id: number) => `/api/elections/${id}/readiness/attest`,
         DOCUMENT: (id: number, formCode: string) => `/api/elections/${id}/documents/${formCode}`,
+        VERIFY_DOCUMENT: (id: number, formCode: string) => `/api/elections/${id}/documents/${encodeURIComponent(formCode)}/verification`,
         APPROVALS: (id: number) => `/api/elections/${id}/approvals`,
         APPROVE: (approvalId: number) => `/api/elections/approvals/${approvalId}/approve`,
         REJECT: (approvalId: number) => `/api/elections/approvals/${approvalId}/reject`,

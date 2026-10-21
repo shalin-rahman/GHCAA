@@ -79,4 +79,18 @@ describe('AuthService', () => {
         expect(sessionStorage.getItem('user_session')).toBeNull();
         expect(router.navigate).toHaveBeenCalledWith(['/login']);
     });
+
+    it('drops stored ballot receipts on logout and keeps other settings', () => {
+        localStorage.setItem('ghcaa_ballot_receipt_7_5', 'a');
+        localStorage.setItem('ghcaa_ballot_receipt_8_5', 'b');
+        localStorage.setItem('ghcaa_theme', 'dark');
+
+        service.logout();
+        httpMock.expectOne(API_ENDPOINTS.AUTH.LOGOUT).flush(null);
+
+        expect(localStorage.getItem('ghcaa_ballot_receipt_7_5')).toBeNull();
+        expect(localStorage.getItem('ghcaa_ballot_receipt_8_5')).toBeNull();
+        expect(localStorage.getItem('ghcaa_theme')).toBe('dark');
+        localStorage.removeItem('ghcaa_theme');
+    });
 });

@@ -166,6 +166,25 @@ class StorageService {
     return null;
   }
 
+  // 37.14o: the server receipt PDF for a cast ballot, as base64. It holds no choices.
+  // clearAll() on logout drops it, so the next member on this phone never sees it.
+  static const _ballotReceiptPrefix = 'ballot_receipt_';
+
+  Future<void> saveBallotReceipt(int electionId, String pdfBase64) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('$_ballotReceiptPrefix$electionId', pdfBase64);
+  }
+
+  // Removes receipts for every other election, and returns this one's unless [keep] is false.
+  Future<String?> takeBallotReceipt(int electionId, {required bool keep}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final mine = '$_ballotReceiptPrefix$electionId';
+    for (final key in prefs.getKeys().where((k) => k.startsWith(_ballotReceiptPrefix)).toList()) {
+      if (key != mine || !keep) await prefs.remove(key);
+    }
+    return keep ? prefs.getString(mine) : null;
+  }
+
   Future<void> clearAll() async {
     await removeToken();
     await removeRefreshToken();

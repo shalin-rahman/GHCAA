@@ -1,9 +1,12 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ghcaa_mobile/core/theme/app_theme.dart';
 import 'package:ghcaa_mobile/features/auth/auth_service.dart';
 import 'package:ghcaa_mobile/features/elections/election_service.dart';
@@ -14,14 +17,15 @@ class _FakeElectionService extends ElectionService {
   _FakeElectionService() : super(Dio());
 
   Map<int, List<int>>? cast;
+  bool hasVoted = false;
 
   @override
-  Future<Ballot> getBallot(int id) async => const Ballot(
+  Future<Ballot> getBallot(int id) async => Ballot(
         electionId: 12,
         title: 'EC 2026',
         phase: 'Polling',
-        hasVoted: false,
-        seats: [
+        hasVoted: hasVoted,
+        seats: const [
           BallotSeat(seatId: 3, positionTitle: 'Committee', places: 2, candidates: [
             BallotCandidate(nominationId: 10, name: 'Rina'),
             BallotCandidate(nominationId: 11, name: 'Tanvir'),
@@ -43,22 +47,26 @@ class _FakeElectionService extends ElectionService {
       );
 
   @override
-  Future<String> castBallot(int id, Map<int, List<int>> choices) async {
+  Future<CastBallotResult> castBallot(int id, Map<int, List<int>> choices) async {
     cast = choices;
-    return 'ABCD-EFGH';
+    return (trackingCode: 'ABCD-EFGH', receiptPdf: _pdf);
   }
 }
+
+final _pdf = Uint8List.fromList(utf8.encode('%PDF-1.7'));
 
 void main() {
   late _FakeElectionService service;
 
   setUpAll(() => dotenv.testLoad(fileInput: 'PORTAL_TITLE=GHCAA'));
 
-  Future<void> pump(WidgetTester tester) async {
+  Future<void> pump(WidgetTester tester,
+      {bool hasVoted = false, Map<String, Object> prefs = const {}}) async {
     tester.view.physicalSize = const Size(390, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    service = _FakeElectionService();
+    SharedPreferences.setMockInitialValues(prefs);
+    service = _FakeElectionService()..hasVoted = hasVoted;
     await tester.pumpWidget(ProviderScope(
       overrides: [
         electionServiceProvider.overrideWith((ref) => service),
@@ -122,5 +130,44 @@ void main() {
 
     expect(find.byIcon(Icons.check_box), findsNothing);
     expect(find.textContaining('0 picked'), findsOneWidget);
+  });
+
+  // 37.14o
+  testWidgets('a cast keeps the server receipt and offers it for download',
+      (tester) async {
+    await pump(tester);
+
+    await tester.tap(find.text('Rina'));
+    await tester.pump();
+    await tester.tap(find.text('Abstain on this seat'));
+    await tester.pump();
+    await tester.ensureVisible(find.text('Review ballot'));
+    await tester.tap(find.text('Review ballot'));
+    await tester.pump();
+    await tester.ensureVisible(find.text('Confirm and cast ballot'));
+    await tester.tap(find.text('Confirm and cast ballot'));
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    expect(find.text('Download receipt'), findsOneWidget);
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('ballot_receipt_12'), base64Encode(_pdf));
+  });
+
+  // 37.14o
+  testWidgets('a member who already voted can download the stored receipt',
+      (tester) async {
+    await pump(tester,
+        hasVoted: true, prefs: {'ballot_receipt_12': base64Encode(_pdf)});
+
+    expect(find.text('You have already voted in this election.'), findsOneWidget);
+    expect(find.text('Download receipt'), findsOneWidget);
+  });
+
+  testWidgets('no download button without a stored receipt', (tester) async {
+    await pump(tester, hasVoted: true);
+
+    expect(find.text('Download receipt'), findsNothing);
   });
 }

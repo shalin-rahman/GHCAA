@@ -1,4 +1,6 @@
 import '../../core/widgets/custom_network_image.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +14,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/config/app_config.dart';
 import '../../core/utils/app_utils.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/storage/storage_service.dart';
 import '../../features/elections/ballot_receipt.dart';
 import '../../features/elections/election_service.dart';
 
@@ -74,8 +77,28 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
   bool _submitting = false;
   bool _alreadyVoted = false;
   String? _trackingCode;
-  // Kept in memory only so the receipt can be built from the confirmation view.
-  List<({String position, String choice})>? _receiptLines;
+  // The server receipt: code, title and cast time, no choices. Kept on the phone until
+  // the election is archived, so it can be saved again after leaving this screen.
+  Uint8List? _receiptPdf;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReceipt();
+  }
+
+  Future<void> _loadReceipt() async {
+    try {
+      final stored = await ref.read(storageServiceProvider).takeBallotReceipt(
+          widget.election.id,
+          keep: widget.election.phase != ElectionPhases.archived);
+      if (stored != null && mounted) {
+        setState(() => _receiptPdf = base64Decode(stored));
+      }
+    } catch (_) {
+      // A missing or broken receipt only hides the button.
+    }
+  }
 
   bool _closed(Ballot ballot) =>
       ballot.phase != ElectionPhases.polling ||
@@ -109,13 +132,23 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
     setState(() => _submitting = true);
     final choices = buildBallotChoices(ballot.seats, _picks);
     try {
-      final code = await ref
+      final result = await ref
           .read(electionServiceProvider)
           .castBallot(widget.election.id, choices);
+      final pdf = result.receiptPdf;
+      if (pdf != null) {
+        try {
+          await ref
+              .read(storageServiceProvider)
+              .saveBallotReceipt(widget.election.id, base64Encode(pdf));
+        } catch (_) {
+          // The vote is recorded. Without storage the receipt lasts only for this screen.
+        }
+      }
       if (mounted) {
         setState(() {
-          _trackingCode = code;
-          _receiptLines = ballotReceiptLines(ballot.seats, choices);
+          _trackingCode = result.trackingCode;
+          _receiptPdf = pdf;
           _reviewing = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
@@ -134,18 +167,18 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
     }
   }
 
-  Future<void> _saveReceipt(Ballot ballot) async {
-    final lines = _receiptLines;
-    final code = _trackingCode;
-    if (lines == null || code == null) return;
-    final bytes = await buildBallotReceiptPdf(
-      electionTitle: ballot.title,
-      dateText: AppUtils.formatDate(DateTime.now()),
-      trackingCode: code,
-      lines: lines,
-    );
-    await Printing.sharePdf(bytes: bytes, filename: 'ballot-receipt.pdf');
+  Future<void> _saveReceipt() async {
+    final bytes = _receiptPdf;
+    if (bytes == null) return;
+    await Printing.sharePdf(
+        bytes: bytes, filename: 'ballot-receipt-${widget.election.id}.pdf');
   }
+
+  Widget _receiptButton() => FilledButton.icon(
+        onPressed: _saveReceipt,
+        icon: const Icon(Icons.picture_as_pdf_outlined),
+        label: const Text('Download receipt'),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -163,9 +196,14 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
             const SizedBox(height: AppTheme.spaceL),
             _OfficialsCard(electionId: widget.election.id),
             if (_trackingCode != null)
-              _confirmation(ballot)
-            else if (_alreadyVoted || ballot.hasVoted)
-              const _Notice(body: 'You have already voted in this election.')
+              _confirmation()
+            else if (_alreadyVoted || ballot.hasVoted) ...[
+              const _Notice(body: 'You have already voted in this election.'),
+              if (_receiptPdf != null) ...[
+                _receiptButton(),
+                const SizedBox(height: AppTheme.spaceL),
+              ],
+            ]
             else if (ballot.isEligible == false)
               _Notice(
                   title: 'You cannot vote in this election',
@@ -221,7 +259,7 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
         ]));
   }
 
-  Widget _confirmation(Ballot ballot) {
+  Widget _confirmation() {
     return GlassContainer(
         padding: const EdgeInsets.all(AppTheme.spaceL),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -237,16 +275,15 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
           const Text(
               'Keep this code. It shows your ballot was counted and does not show who cast it.',
               style: TextStyle(color: AppTheme.textMuted)),
-          const SizedBox(height: AppTheme.spaceM),
-          FilledButton.icon(
-            onPressed: () => _saveReceipt(ballot),
-            icon: const Icon(Icons.picture_as_pdf_outlined),
-            label: const Text('Save receipt'),
-          ),
-          const SizedBox(height: AppTheme.spaceS),
-          const Text(
-              'You can save the receipt only here. It is gone once you leave this screen.',
-              style: TextStyle(color: AppTheme.textMuted)),
+          if (_receiptPdf != null) ...[
+            const SizedBox(height: AppTheme.spaceM),
+            _receiptButton(),
+            const SizedBox(height: AppTheme.spaceS),
+            const Text(
+                'The receipt has the code and the time you voted, not your choices. '
+                'It stays on this phone until the election is archived or you sign out.',
+                style: TextStyle(color: AppTheme.textMuted)),
+          ],
         ]));
   }
 

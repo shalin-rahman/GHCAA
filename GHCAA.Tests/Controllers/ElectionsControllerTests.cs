@@ -3,6 +3,7 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace GHCAA.Tests.Controllers
@@ -34,7 +35,7 @@ namespace GHCAA.Tests.Controllers
             _electionServiceMock.Setup(x => x.CastBallotAsync(1, 10, Ballot, It.IsAny<CancellationToken>()))
                                  .ReturnsAsync((false, "not-recorded", (string?)null));
 
-            var result = await _controller.Vote(1, Ballot, CancellationToken.None);
+            var result = await _controller.Vote(1, Ballot, NullLogger<ElectionsController>.Instance, CancellationToken.None);
 
             var obj = result as ObjectResult;
             Assert.That(obj, Is.Not.Null);
@@ -49,7 +50,7 @@ namespace GHCAA.Tests.Controllers
             _electionServiceMock.Setup(x => x.CastBallotAsync(1, 10, Ballot, It.IsAny<CancellationToken>()))
                                  .ReturnsAsync((false, "already-voted", (string?)null));
 
-            var result = await _controller.Vote(1, Ballot, CancellationToken.None);
+            var result = await _controller.Vote(1, Ballot, NullLogger<ElectionsController>.Instance, CancellationToken.None);
 
             var obj = result as ObjectResult;
             Assert.That(obj!.StatusCode, Is.EqualTo(409));
@@ -62,12 +63,33 @@ namespace GHCAA.Tests.Controllers
         {
             _electionServiceMock.Setup(x => x.CastBallotAsync(1, 10, Ballot, It.IsAny<CancellationToken>()))
                                  .ReturnsAsync((true, (string?)null, "ABCD-EFGH-JKMN"));
+            _documentServiceMock.Setup(x => x.GenerateBallotReceiptPdfAsync(1, "ABCD-EFGH-JKMN", It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+                                .ReturnsAsync(new byte[] { 1, 2, 3 });
 
-            var result = await _controller.Vote(1, Ballot, CancellationToken.None);
+            var result = await _controller.Vote(1, Ballot, NullLogger<ElectionsController>.Instance, CancellationToken.None);
 
             var ok = result as OkObjectResult;
             Assert.That(ok, Is.Not.Null);
-            Assert.That(((CastBallotResultDto)ok!.Value!).TrackingCode, Is.EqualTo("ABCD-EFGH-JKMN"));
+            var reply = (CastBallotResultDto)ok!.Value!;
+            Assert.That(reply.TrackingCode, Is.EqualTo("ABCD-EFGH-JKMN"));
+            Assert.That(reply.ReceiptPdfBase64, Is.EqualTo(Convert.ToBase64String(new byte[] { 1, 2, 3 })));
+        }
+
+        // 37.14o. The vote is saved by then, so the code must still reach the voter.
+        [Test]
+        [Category("FR-39")]
+        public async Task Vote_ReceiptPdfFails_StillReturnsTheCode()
+        {
+            _electionServiceMock.Setup(x => x.CastBallotAsync(1, 10, Ballot, It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync((true, (string?)null, "ABCD-EFGH-JKMN"));
+            _documentServiceMock.Setup(x => x.GenerateBallotReceiptPdfAsync(1, "ABCD-EFGH-JKMN", It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+                                .ThrowsAsync(new InvalidOperationException("font missing"));
+
+            var result = await _controller.Vote(1, Ballot, NullLogger<ElectionsController>.Instance, CancellationToken.None);
+
+            var reply = (CastBallotResultDto)((OkObjectResult)result).Value!;
+            Assert.That(reply.TrackingCode, Is.EqualTo("ABCD-EFGH-JKMN"));
+            Assert.That(reply.ReceiptPdfBase64, Is.Null);
         }
 
         // 37.13h. The count can wait for a second person, like the other two-person steps.
@@ -284,6 +306,29 @@ namespace GHCAA.Tests.Controllers
             Assert.That(await _controller.Document(1, "nope", CancellationToken.None), Is.InstanceOf<NotFoundResult>());
         }
 
+        // 37.14n. The verify page behind a printed form's QR code.
+        [Test]
+        [Category("FR-25")]
+        public async Task VerifyDocument_KnownForm_ReturnsTheRecord()
+        {
+            var record = new ElectionDocumentVerifyDto("E-000001", 1, "EC 2026", GHCAA.Domain.Enums.ElectionPhase.Declared, "ER-27C", "Final Result Sheet");
+            _documentServiceMock.Setup(x => x.VerifyAsync(1, "ER-27C", It.IsAny<CancellationToken>())).ReturnsAsync(record);
+
+            var result = await _controller.VerifyDocument(1, "ER-27C", CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            Assert.That(((OkObjectResult)result).Value, Is.EqualTo(record));
+        }
+
+        [Test]
+        [Category("FR-25")]
+        public async Task VerifyDocument_UnknownForm_Returns404()
+        {
+            _documentServiceMock.Setup(x => x.VerifyAsync(1, "ER-99", It.IsAny<CancellationToken>())).ReturnsAsync((ElectionDocumentVerifyDto?)null);
+
+            Assert.That(await _controller.VerifyDocument(1, "ER-99", CancellationToken.None), Is.InstanceOf<NotFoundResult>());
+        }
+
         [Test]
         public async Task GetLatestDeclared_ReturnsTheSummary()
         {
@@ -312,6 +357,50 @@ namespace GHCAA.Tests.Controllers
                 .GetCustomAttributes(typeof(Microsoft.AspNetCore.Mvc.HttpGetAttribute), false).Cast<Microsoft.AspNetCore.Mvc.HttpGetAttribute>().Single();
 
             Assert.That(route.Template, Is.EqualTo("latest-declared"));
+        }
+
+        private static readonly ElectionReadinessDto PartlyReady = new(false,
+        [
+            new(Constants.Elections.Readiness.RollFrozen, true),
+            new(Constants.Elections.Readiness.BallotKey, false),
+            new(Constants.Elections.Readiness.PaperStock, false, Attestation: true),
+            new(Constants.Elections.Readiness.Approvers, false, Advisory: true),
+        ]);
+
+        private static void AssertNamesUnmet(IActionResult result)
+        {
+            var obj = result as ObjectResult;
+            Assert.That(obj?.StatusCode, Is.EqualTo(400));
+            var problem = (ProblemDetails)obj!.Value!;
+            Assert.That(problem.Extensions["code"], Is.EqualTo(Constants.ErrorCodes.PollingNotReady));
+            Assert.That(problem.Detail, Is.EqualTo("Polling cannot open until these are met: the ballot key is set; paper stock is ready."));
+            Assert.That(problem.Extensions["unmet"], Is.EqualTo(new[] { Constants.Elections.Readiness.BallotKey, Constants.Elections.Readiness.PaperStock }));
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task SetPhase_PollingNotReady_NamesTheUnmetItems_AndLeavesOutAdvisory()
+        {
+            SetUserContext(_controller, userId: 7);
+            _approvalServiceMock.Setup(x => x.RunOrRequestAsync(3, Enums.ElectionApprovalAction.OpenPolling, 7, It.IsAny<IReadOnlyCollection<string>>(), null, It.IsAny<CancellationToken>()))
+                                .ReturnsAsync(new ElectionApprovalRunResult(false, Constants.Elections.Replies.PollingNotReady, null));
+            _electionServiceMock.Setup(x => x.GetReadinessAsync(3, It.IsAny<CancellationToken>())).ReturnsAsync(PartlyReady);
+
+            AssertNamesUnmet(await _controller.SetPhase(3, Enums.ElectionPhase.Polling, CancellationToken.None));
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task Approve_PollingNotReady_ResolvesTheElection_AndNamesTheUnmetItems()
+        {
+            SetUserContext(_controller, userId: 7);
+            _approvalServiceMock.Setup(x => x.ApproveAsync(55, 7, It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
+                                .ReturnsAsync((false, Constants.Elections.Replies.PollingNotReady));
+            var access = new Mock<IElectionAccessService>();
+            access.Setup(x => x.ElectionIdForAsync(ElectionIdLookup.Approval, 55, It.IsAny<CancellationToken>())).ReturnsAsync(3);
+            _electionServiceMock.Setup(x => x.GetReadinessAsync(3, It.IsAny<CancellationToken>())).ReturnsAsync(PartlyReady);
+
+            AssertNamesUnmet(await _controller.Approve(55, access.Object, CancellationToken.None));
         }
     }
 }

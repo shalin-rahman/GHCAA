@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/app_utils.dart';
+
+typedef CastBallotResult = ({String trackingCode, Uint8List? receiptPdf});
 
 final electionServiceProvider =
     Provider<ElectionService>((ref) => ElectionService(ref.read(dioProvider)));
@@ -1014,15 +1017,21 @@ class ElectionService {
   }
 
   // Sends the whole ballot in one call. [choices] maps each contested seat to
-  // its picks; an empty list casts that seat blank. Returns the tracking code.
-  Future<String> castBallot(int id, Map<int, List<int>> choices) async {
+  // its picks; an empty list casts that seat blank. Returns the tracking code and
+  // the server receipt PDF, which is null when the server could not make it.
+  Future<CastBallotResult> castBallot(int id, Map<int, List<int>> choices) async {
     final response = await _dio.post('/elections/$id/vote', data: {
       'seats': [
         for (final entry in choices.entries)
           {'electionSeatId': entry.key, 'nominationIds': entry.value},
       ],
     });
-    return (response.data as Map<String, dynamic>)['trackingCode'] as String;
+    final data = response.data as Map<String, dynamic>;
+    final pdf = data['receiptPdfBase64'] as String?;
+    return (
+      trackingCode: data['trackingCode'] as String,
+      receiptPdf: pdf == null || pdf.isEmpty ? null : base64Decode(pdf),
+    );
   }
 
   // Anonymous route. Null when the server answers 404.

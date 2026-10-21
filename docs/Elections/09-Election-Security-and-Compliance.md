@@ -66,9 +66,11 @@ the recount window has closed. `11-Election-Key-Procedure.md` has the steps.
 
 ### What the client is trusted with
 
-- The browser or app builds the ballot request and the printed receipt from the choices the voter
-  just confirmed. The server never returns the choices for a tracking code (spec "Receipt and
-  print standard").
+- The browser or app builds the ballot request from the choices the voter just confirmed. The web
+  builds the printed receipt with the choices on the confirmation screen. The server returns a PDF
+  receipt with the vote, holding only the tracking code, the election title and the time of voting.
+  The server never returns the choices for a tracking code (spec 023, "Receipt and print
+  standard").
 - The server does not rely on the client for secrecy. It does rely on the client to show the
   candidate list as the server sent it and to send what the voter picked. A tampered client could
   send other choices. Nothing in the app detects this.

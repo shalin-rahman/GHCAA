@@ -21,7 +21,9 @@ public record ScrutinyDto(bool Accepted, string? Reason);
 // NominationIds list is an abstention for that seat.
 public record CastBallotDto(IReadOnlyList<BallotSeatChoiceDto> Seats);
 public record BallotSeatChoiceDto(int ElectionSeatId, IReadOnlyList<int> NominationIds);
-public record CastBallotResultDto(string TrackingCode);
+// 37.14o. The receipt PDF comes in the same reply, so no later request ties the voter to the code.
+// It is null if the PDF could not be made; the vote still stands.
+public record CastBallotResultDto(string TrackingCode, string? ReceiptPdfBase64 = null);
 // BallotKeyFingerprint lets a voter check the key their ballot is sealed under (37.1v).
 public record ElectionSummaryDto(int Id, string Title, ElectionPhase Phase, int ECPeriodId, int VoterCount, int EligibleVoterCount, string? BallotKeyFingerprint = null);
 public record AdminElectionPositionDto(int Id, string Title, string? Description, int Seats);
@@ -51,6 +53,8 @@ public record ElectionBoardDto(int Id, string Title, ElectionPhase Phase, bool I
     DateTime? ScrutinyOn, DateTime? WithdrawalClosesOn, DateTime? PollingOpensOn, DateTime? PollingClosesOn, DateTime? DeclaredOn,
     IReadOnlyList<ElectionBoardGroupDto> Groups, ElectionBoardTurnoutDto? Turnout, string? KeyFingerprint, string? AuditHeadHash);
 public record ElectionAuditVerifyDto(bool Ok, int Entries, int? FirstBrokenSeq);
+// 37.14n. What the QR code on a printed form confirms: the election and the form exist.
+public record ElectionDocumentVerifyDto(string Reference, int ElectionId, string ElectionTitle, ElectionPhase Phase, string FormCode, string FormTitle);
 public record ElectionAuditEntryDto(int Seq, DateTime At, int? ActorUserId, string Action, string DetailJson, string Hash);
 public record OpenedSeatBallotsDto(int ElectionSeatId, IReadOnlyList<IReadOnlyList<int>> Ballots);
 public record OpenedBallotsDto(int ElectionId, IReadOnlyList<OpenedSeatBallotsDto> Seats);

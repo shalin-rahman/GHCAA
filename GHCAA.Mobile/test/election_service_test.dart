@@ -181,7 +181,7 @@ class _ElectionAdapter implements HttpClientAdapter {
       return _json({'id': 40, 'title': 'EC 2027'});
     }
     if (options.path == '/elections/12/vote') {
-      return _json({'trackingCode': 'ABCD-EFGH'});
+      return _json({'trackingCode': 'ABCD-EFGH', 'receiptPdfBase64': 'JVBERi0xLjc='});
     }
     // The phase change runs at once. Declare waits for a second person (spec 023, 37.12f).
     if (options.path == '/elections/12/phase') {
@@ -331,12 +331,13 @@ void main() {
     final adapter = _ElectionAdapter();
     final service = ElectionService(Dio()..httpClientAdapter = adapter);
 
-    final code = await service.castBallot(12, {
+    final result = await service.castBallot(12, {
       3: [4],
       5: [],
     });
 
-    expect(code, 'ABCD-EFGH');
+    expect(result.trackingCode, 'ABCD-EFGH');
+    expect(String.fromCharCodes(result.receiptPdf!), '%PDF-1.7');
     expect(adapter.method, 'POST');
     expect(adapter.path, '/elections/12/vote');
     expect((adapter.body as Map)['seats'], [
@@ -860,17 +861,6 @@ void main() {
       expect(
           ballotReceiptLines(seats, {}).every((l) => l.choice == 'Abstained'),
           isTrue);
-    });
-
-    test('the receipt PDF builds', () async {
-      final bytes = await buildBallotReceiptPdf(
-        electionTitle: 'EC 2026',
-        dateText: '09-10-2026',
-        trackingCode: 'ABCD-EFGH',
-        lines: ballotReceiptLines(seats, {}),
-      );
-
-      expect(String.fromCharCodes(bytes.take(4)), '%PDF');
     });
   });
 }

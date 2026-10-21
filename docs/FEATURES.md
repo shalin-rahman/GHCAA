@@ -274,7 +274,8 @@ The platform operates without live payment-gateway credentials. All payment meth
     sheet in the mobile app bar.
   - API: `POST/GET api/elections/{id}/appointments`, `POST api/elections/appointments/{id}/revoke`,
     `POST api/elections/appointments/{appointmentId}/emergency-revoke`,
-    `GET/POST api/admin/elections/rules-unlock` and `POST api/admin/elections/rules-unlock/close`.
+    `GET/POST api/admin/elections/rules-unlock`, `POST api/admin/elections/rules-unlock/close`,
+    `GET api/elections/{id}/readiness` and `POST api/elections/{id}/readiness/attest`.
   - Key fields: persona, member or (name and email), Returning Officer flag, revoke reason, unlock
     reason (20 to 1000 characters) and minutes (1 to 60, default 30).
 - **Validations & rules**:
@@ -295,7 +296,13 @@ The platform operates without live payment-gateway credentials. All payment meth
   - Count: approving a count does not run it. The requester runs it with the key file. Unless the
     `CountRequesterOnly` org setting (default off) is on, any official with Count other than the approver
     can run it. The executor is recorded (`ElectionCountRun` audit row).
-  - Pre-polling warning when fewer than 2 live officials hold Approve.
+  - Readiness gate before polling (37.12w). The system checks the frozen roll, the ballot order,
+    the key, the signed declarations and the polling window. Officials with ChangePhase record the
+    mock election, technical audit, decided appeals and paper stock with step-up on the web
+    officials dashboard. A request to open polling and its approval answer 400 `POLLING_NOT_READY`
+    naming the unmet items. The admin elections page shows the same list read-only, and mobile shows
+    it read-only on the officials dashboard. Fewer than 2 live officials holding Approve is a warning
+    on the list and does not block.
   - Access ends by itself: declaring the result sets an end date on every appointment, the declared date
     plus `AccessEndsDaysAfterDeclare` days (default 21). After it the permission check, the current-user
     read, login, social login and token refresh stop treating the appointment as live, with no job running.
@@ -320,7 +327,8 @@ The platform operates without live payment-gateway credentials. All payment meth
 - **User roles**: Member on the frozen voter roll, with step-up.
 - **Inputs / outputs**:
   - Screens: `/member/election` on web, the election screen on mobile.
-  - API: `GET api/elections/{id}/ballot`, `POST api/elections/{id}/vote`.
+  - API: `GET api/elections/{id}/ballot`, `POST api/elections/{id}/vote` (returns the tracking code
+    and `receiptPdfBase64`).
   - Key fields: seats with candidates and places, `hasVoted`, `isEligible`, `ineligibilityReason`.
 - **Validations & rules**:
   - Every seat needs a candidate or an explicit "Abstain on this seat". An untouched seat is undecided and
@@ -332,14 +340,21 @@ The platform operates without live payment-gateway credentials. All payment meth
   - Candidates are listed in an order fixed when the election enters CandidateList, shuffled or by
     name as the `CandidateOrder` setting says. Every voter sees the same order.
   - A seat with more than one place says "Pick up to N" and takes up to that many candidates. A
-    further pick is blocked, and abstain clears the seat. The receipt lists every name picked.
+    further pick is blocked, and abstain clears the seat. The review step and the web printed receipt
+    list every name picked.
+  - Receipt PDF (37.14o): the server returns it with the vote, with the tracking code, the election
+    title and the cast time to the minute in Association time, and no choices. Noto Sans Bengali is
+    the fallback font for every election PDF. Web and mobile keep it on the device behind a Download
+    receipt button until the election is Archived or the member signs out. If the PDF fails, the vote
+    still stands and only the code is returned.
   - The create form asks which rule settles a tie for the last place (drawing lots, a run-off or the
     returning officer's casting vote), each with a one-line description, and takes optional
     scrutiny and withdrawal dates. A missing nomination or polling date, or dates out of phase
     order, are refused.
   - An admin can create an election as a test run. Members and the public do not see it in the
     current-election read, its results, documents and tracking codes answer 404, and declaring it
-    puts nobody on the committee. The admin list marks it "Test".
+    puts nobody on the committee. The admin list marks it "Test". It still needs the four recorded
+    readiness items before polling.
 - **Dependencies**: `ElectionService`, step-up verification (1.2a). Spec 023, FR-011 to FR-014,
   FR-044 to FR-047.
 
@@ -467,6 +482,7 @@ The assistant runs entirely on internal data with a rule-based engine — it has
   - Every generated ID card or certificate records an `IssuedCredential` and embeds a QR code pointing at `/verify/{shortCode}`.
   - Flag `enableCredentialVerification` exists on `OrgConfigDto`/profile packs but is not wired to any runtime feature-flag mechanism — none exists project-wide yet.
 - **Dependencies**: `IIDCardService` (extended, not a new parallel service) + `CredentialCodeGenerator`, existing `QRCoder` helper, `LoginRateLimitMiddleware` rate-limit pattern.
+- **Election forms** (TODO 37.14n): each official election PDF carries a QR code pointing at `/verify/election/{id}/{formCode}`. The page calls `GET api/elections/{id}/documents/{formCode}/verification`, anonymous and rate-limited by the same policy, which returns the election reference, title and phase and the form code and title, or 404 for an unknown election or code and for a test election. It confirms the record exists; it cannot show that a paper copy was not altered.
 
 ---
 

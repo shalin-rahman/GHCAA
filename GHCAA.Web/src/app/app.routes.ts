@@ -105,6 +105,7 @@ export const routes: Routes = [
                 path: 'verify',
                 children: [
                     { path: '', loadComponent: () => import('./public/verify/verify').then(m => m.Verify) },
+                    { path: 'election/:id/:code', loadComponent: () => import('./public/verify/election-document/election-document-verify').then(m => m.ElectionDocumentVerify) },
                     { path: ':shortCode', loadComponent: () => import('./public/verify/verify').then(m => m.Verify) }
                 ]
             },

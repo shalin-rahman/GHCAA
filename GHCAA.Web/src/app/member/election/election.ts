@@ -4,12 +4,17 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ElectionsService } from '../../core/services/elections.service';
 import { BallotSeatDto, BallotViewDto, CastBallotDto, ElectionSummaryDto } from '../../core/models/election.models';
 import { NotificationService } from '../../core/services/notification.service';
+import { AuthService } from '../../core/services/auth.service';
+import { ExportUtil } from '../../core/utils/export.util';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
-import { API_ENDPOINTS, getElectionPhaseLabel } from '../../core/constants/app.constants';
+import { API_ENDPOINTS, BALLOT_RECEIPT_KEY_PREFIX, getElectionPhaseLabel } from '../../core/constants/app.constants';
 import { toDisplayDate } from '../../core/utils/date.util';
 
 type VoteStep = 'pick' | 'review';
+
+// Keyed by member too, so a second member on the same browser never sees it.
+const receiptKey = (memberId: number, electionId: number) => `${BALLOT_RECEIPT_KEY_PREFIX}${memberId}_${electionId}`;
 
 export interface ReceiptLine {
     position: string;
@@ -32,6 +37,7 @@ export interface VoteReceipt {
 export class MemberElection {
     private readonly elections = inject(ElectionsService);
     private readonly notify = inject(NotificationService);
+    private readonly auth = inject(AuthService);
     getElectionPhaseLabel = getElectionPhaseLabel;
     pickUpTo = API_ENDPOINTS.ELECTIONS.PICK_UP_TO;
 
@@ -47,6 +53,8 @@ export class MemberElection {
     alreadyVoted = signal(false);
     // Built from the choices in memory when the vote succeeds. It is never stored or sent anywhere.
     receipt = signal<VoteReceipt | null>(null);
+    // The server PDF (base64). It holds no choices, so it is kept on this device until the election is archived.
+    receiptPdf = signal<string | null>(null);
 
     seats = computed<BallotSeatDto[]>(() => this.ballot()?.seats ?? []);
     allDecided = computed(() => this.seats().length > 0 && this.seats().every(seat => this.choices()[seat.seatId] !== undefined));
@@ -65,6 +73,7 @@ export class MemberElection {
                     next: ballot => {
                         this.ballot.set(ballot);
                         this.alreadyVoted.set(ballot.hasVoted);
+                        this.restoreReceiptPdf(election.id, ballot.phase);
                         this.loading.set(false);
                     },
                     error: () => { this.error.set(true); this.loading.set(false); }
@@ -144,6 +153,10 @@ export class MemberElection {
                     lines: this.linesFor(this.seats(), choices)
                 });
                 this.choices.set({});
+                if (result.receiptPdfBase64) {
+                    this.receiptPdf.set(result.receiptPdfBase64);
+                    this.storeReceiptPdf(ballot.electionId, result.receiptPdfBase64);
+                }
                 this.notify.success('Your ballot was recorded.');
             },
             error: (err: HttpErrorResponse) => {
@@ -160,6 +173,44 @@ export class MemberElection {
 
     printReceipt(): void {
         window.print();
+    }
+
+    downloadReceipt(): void {
+        const pdf = this.receiptPdf();
+        const electionId = this.ballot()?.electionId;
+        if (!pdf || electionId === undefined) return;
+        let bytes: Uint8Array<ArrayBuffer>;
+        try {
+            bytes = Uint8Array.from(atob(pdf), c => c.charCodeAt(0));
+        } catch {
+            // A damaged stored copy. Drop it so the button goes away.
+            const memberId = this.auth.currentUser()?.memberId;
+            if (memberId) try { localStorage.removeItem(receiptKey(memberId, electionId)); } catch { /* storage blocked */ }
+            this.receiptPdf.set(null);
+            this.notify.error('The saved receipt could not be read.');
+            return;
+        }
+        ExportUtil.saveFile(new Blob([bytes], { type: 'application/pdf' }), `ballot-receipt-${electionId}.pdf`);
+    }
+
+    private storeReceiptPdf(electionId: number, pdf: string): void {
+        const memberId = this.auth.currentUser()?.memberId;
+        if (!memberId) return;
+        try { localStorage.setItem(receiptKey(memberId, electionId), pdf); } catch { /* storage full or blocked */ }
+    }
+
+    // Drops receipts for other elections and for this one once it is archived.
+    private restoreReceiptPdf(electionId: number, phase: string): void {
+        const memberId = this.auth.currentUser()?.memberId;
+        if (!memberId) return;
+        const keep = phase === 'Archived' ? null : receiptKey(memberId, electionId);
+        try {
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key?.startsWith(`${BALLOT_RECEIPT_KEY_PREFIX}${memberId}_`) && key !== keep) localStorage.removeItem(key);
+            }
+            if (keep) this.receiptPdf.set(localStorage.getItem(keep));
+        } catch { /* storage blocked */ }
     }
 
     private linesFor(seats: BallotSeatDto[], choices: Record<number, number[]>): ReceiptLine[] {

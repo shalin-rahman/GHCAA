@@ -116,7 +116,7 @@ The owner reviewed all 50 forms drawn as A4 sheets and approved the layouts as s
   | Investigation Report | 07 ER-33 | ER-30B |
   | Election Closure Certificate | 07 ER-40 | ER-35A |
 
-- Old codes. The document endpoint and the verify page keep accepting the 16 platform codes in use today and serve the form under its new number, so QR codes already printed keep working.
+- Old codes. Superseded 2026-10-22: the owner chose new codes only. The 16 platform codes used before are dropped with no aliases, and the document endpoint and the verify page answer 404 for them. A QR code on a form printed before the change no longer resolves, which the owner accepted.
 - Keep all 15 template-only forms and write all ten Regulations-only forms to the drafted layouts.
 - Title-only matches confirmed: ER-08 with 05 ER-07, ER-17 with 05 ER-11, ER-27 with 07 ER-23, ER-29 with 07 ER-30, ER-31 with 07 ER-34, ER-32 with 07 ER-35.
 - ER-13 Political Neutrality keeps its number. Its body reuses the five ER-05 neutrality lines plus the non-political lines. Candidates sign ER-13 and officials sign ER-05.

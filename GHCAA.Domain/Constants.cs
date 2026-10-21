@@ -228,6 +228,19 @@ namespace GHCAA.Domain
                 public const string PaperStock = "paper-stock";
                 public const string Approvers = "approvers";
                 public static readonly IReadOnlyList<string> Attested = [MockElection, TechnicalAudit, AppealsDecided, PaperStock];
+                // Named in the 400 reply when polling is refused. The web and mobile lists keep their own copy.
+                public static readonly IReadOnlyDictionary<string, string> Labels = new Dictionary<string, string>
+                {
+                    [RollFrozen] = "the voter roll is frozen",
+                    [CandidateList] = "every candidate has a place on the ballot",
+                    [BallotKey] = "the ballot key is set",
+                    [Appointments] = "every appointed official has signed the declaration",
+                    [PollingWindow] = "the polling window has not closed",
+                    [MockElection] = "a mock election was run",
+                    [TechnicalAudit] = "the technical audit is done",
+                    [AppealsDecided] = "every nomination appeal is decided",
+                    [PaperStock] = "paper stock is ready",
+                };
             }
             // Previous hash of the first chain entry.
             public static readonly string AuditGenesisHash = new('0', 64);

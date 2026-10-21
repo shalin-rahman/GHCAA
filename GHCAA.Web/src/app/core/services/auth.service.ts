@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, map, catchError, of, switchMap } from 'rxjs';
 import { LoginDto, SocialProviderConfig, TokenResponseDto, User } from '../models/auth.models';
-import { API_ENDPOINTS, ROUTES } from '../constants/app.constants';
+import { API_ENDPOINTS, BALLOT_RECEIPT_KEY_PREFIX, ROUTES } from '../constants/app.constants';
 
 // Non-sensitive display fields stored in sessionStorage (no token).
 type SessionUser = Omit<User, 'token'> & { token?: never };
@@ -157,8 +157,19 @@ export class AuthService {
                 this._currentUser.set(null);
                 sessionStorage.removeItem('user_session');
                 localStorage.removeItem('user_session');
+                this.clearBallotReceipts();
                 this.router.navigate([ROUTES.LOGIN]);
             });
+    }
+
+    // The receipt ties a member to a tracking code, so it does not outlive the sign-in on a shared browser.
+    private clearBallotReceipts(): void {
+        try {
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key?.startsWith(BALLOT_RECEIPT_KEY_PREFIX)) localStorage.removeItem(key);
+            }
+        } catch { /* storage blocked */ }
     }
 
     hasRole(name: string): boolean {

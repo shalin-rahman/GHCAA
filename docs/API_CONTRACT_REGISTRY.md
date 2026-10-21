@@ -47,6 +47,24 @@ a gap someone still needs to close.
 
 ## Log
 
+### 2026-10-22 — GET /api/elections/{id}/documents/{formCode}, GET /api/elections/{id}/documents/{formCode}/verification
+- Change: the form codes follow the Regulations numbers. The route accepts ER-01, ER-02, ER-08, ER-10, ER-11, ER-17, ER-18, ER-19, ER-25, ER-27, ER-27C, ER-28, ER-28B, ER-29, ER-30 and ER-34, any case. The 16 codes it took before are dropped with no aliases, so an old code now answers 404. This is a breaking change to accepted values, against the additive rule in ADR-0005, made on the owner's decision. No client builds a document URL from a code, and the owner accepted that a QR code on a form printed before this change stops resolving. The new anonymous route `.../verification` is the target of the QR code on each form. It answers `reference`, `electionId`, `electionTitle`, `phase`, `formCode` and `formTitle`, or 404 for an unknown election, an unknown code or a test election. Rate limited by the `CredentialVerification` policy.
+- Reason: TODO 37.14n. Spec 023 FR-025. Owner decision 2026-10-22: new codes only.
+- Web: `ElectionDocumentVerifyDto`, `API_ENDPOINTS.ELECTIONS.VERIFY_DOCUMENT` and `ElectionsService.verifyDocument`, shown by the page at `verify/election/:id/:code` (`public/verify/election-document`).
+- Mobile: no change. The app has no form list and does not call either route.
+
+### 2026-10-21 — GET /api/elections/{id}/readiness, POST /api/elections/{id}/readiness/attest, POST /api/elections/{id}/phase, POST /api/elections/approvals/{approvalId}/approve
+- Change: new readiness read (ElectionStaff, `ViewDashboard`) returning `{ ready, items: [{ key, met, attestation, advisory }] }`, and new attest route (ElectionStaff, step-up, `ChangePhase`) taking `{ condition }` for one of `mock-election`, `technical-audit`, `appeals-decided`, `paper-stock`. Attest answers 204, 404, 400 for a key that is not attested or once polling is open, and 409 if already recorded. Asking for or approving Polling now answers 400 with code `POLLING_NOT_READY` when an item is unmet. The `detail` names the unmet items and the `unmet` extension lists their keys. The advisory `approvers` item is left out of both. Test elections are no longer exempt.
+- Reason: TODO 37.12w, spec 023 delivery plan F4. Regulations Article 11.
+- Web: `admin/elections/admin-elections.ts` shows the list read-only. The officials dashboard shows it and offers Record as done. The 400 shows its `detail` as before.
+- Mobile: the officials dashboard shows the list read-only. The 400 `detail` shows through `ApiException.serverMessage`. The admin elections screen still shows only the approver warning.
+
+### 2026-10-21 — POST /api/elections/{id}/vote
+- Change: `CastBallotResultDto` adds `receiptPdfBase64`, a PDF with the tracking code, election title and cast time, no choices. It is null when the PDF could not be made; the vote still stands. Additive.
+- Reason: TODO 37.14o. Spec 023, receipt and print standard.
+- Web: `member/election/election.ts` keeps it in `localStorage` per member and election and offers Download receipt until the election is Archived or the member logs out.
+- Mobile: `election_screen.dart` keeps it in shared preferences per election and passes it to `Printing.sharePdf`. Sign-out clears it.
+
 ### 2026-10-14 — GET /api/events, GET /api/jobs, GET /api/gallery
 - Change: added optional `page` and `pageSize` query params. When `page` is sent the
   response is `PagedResult<T>` (default 20 per page, at most 100). Without it the

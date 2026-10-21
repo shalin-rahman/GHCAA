@@ -5,6 +5,8 @@ import { of, throwError } from 'rxjs';
 import { MemberElection } from './election';
 import { ElectionsService } from '../../core/services/elections.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { AuthService } from '../../core/services/auth.service';
+import { ExportUtil } from '../../core/utils/export.util';
 import { BallotViewDto } from '../../core/models/election.models';
 
 describe('MemberElection', () => {
@@ -26,18 +28,19 @@ describe('MemberElection', () => {
         };
     }
 
-    function create(ballot: BallotViewDto = paper()) {
+    function create(ballot: BallotViewDto = paper(), receiptPdfBase64: string | null = null) {
         elections = {
             getCurrent: vi.fn().mockReturnValue(of({ id: 5, phase: ballot.phase })),
             getBallot: vi.fn().mockReturnValue(of(ballot)),
-            castBallot: vi.fn().mockReturnValue(of({ trackingCode: 'ABCD-EFGH' }))
+            castBallot: vi.fn().mockReturnValue(of({ trackingCode: 'ABCD-EFGH', receiptPdfBase64 }))
         };
         notify = { success: vi.fn(), error: vi.fn() };
         TestBed.configureTestingModule({
             imports: [MemberElection],
             providers: [
                 { provide: ElectionsService, useValue: elections },
-                { provide: NotificationService, useValue: notify }
+                { provide: NotificationService, useValue: notify },
+                { provide: AuthService, useValue: { currentUser: () => ({ memberId: 7 }) } }
             ]
         });
         const fixture = TestBed.createComponent(MemberElection);
@@ -45,7 +48,7 @@ describe('MemberElection', () => {
         return { fixture, component: fixture.componentInstance, el: fixture.nativeElement as HTMLElement };
     }
 
-    afterEach(() => vi.restoreAllMocks());
+    afterEach(() => { vi.restoreAllMocks(); localStorage.clear(); });
 
     it('shows position titles, candidate names and the photo', () => {
         const { el } = create();
@@ -280,8 +283,8 @@ describe('MemberElection', () => {
     });
 
     describe('receipt', () => {
-        function voted() {
-            const ctx = create();
+        function voted(pdf: string | null = null) {
+            const ctx = create(paper(), pdf);
             ctx.component.toggle(ctx.component.seats()[0], 1);
             ctx.component.abstain(ctx.component.seats()[1]);
             ctx.component.review();
@@ -307,21 +310,69 @@ describe('MemberElection', () => {
             expect(printed).toContain('ABCD-EFGH');
         });
 
-        it('prints from the confirmation view and says it is one time', () => {
+        it('prints from the confirmation view and says the choices print only here', () => {
             const print = vi.spyOn(window, 'print').mockImplementation(() => {});
             const { el } = voted();
 
             (Array.from(el.querySelectorAll('button')).find(b => b.textContent?.includes('Print receipt')) as HTMLButtonElement).click();
 
             expect(print).toHaveBeenCalled();
-            expect(el.textContent).toContain('cannot be shown again');
+            expect(el.textContent).toContain('printed only on this screen');
         });
 
-        it('is not kept in browser storage', () => {
+        it('keeps no choices in browser storage', () => {
             const set = vi.spyOn(Storage.prototype, 'setItem');
             voted();
 
             expect(set).not.toHaveBeenCalled();
+        });
+
+        it('has no download button when the server sent no PDF', () => {
+            const { el } = voted();
+
+            expect(el.textContent).not.toContain('Download receipt');
+        });
+
+        it('stores the server PDF under the member and election and downloads it', () => {
+            const save = vi.spyOn(ExportUtil, 'saveFile').mockImplementation(() => {});
+            const { el } = voted(btoa('%PDF-1.7'));
+
+            expect(localStorage.getItem('ghcaa_ballot_receipt_7_5')).toBe(btoa('%PDF-1.7'));
+            (Array.from(el.querySelectorAll('button')).find(b => b.textContent?.includes('Download receipt')) as HTMLButtonElement).click();
+
+            const [blob, name] = save.mock.calls[0];
+            expect(name).toBe('ballot-receipt-5.pdf');
+            expect((blob as Blob).type).toBe('application/pdf');
+        });
+
+        it('offers the stored PDF again after a reload', () => {
+            localStorage.setItem('ghcaa_ballot_receipt_7_5', btoa('%PDF-1.7'));
+            const { el } = create(paper({ hasVoted: true }));
+
+            expect(el.textContent).toContain('You have already voted');
+            expect(el.textContent).toContain('Download receipt');
+        });
+
+        it('drops the stored PDF once the election is archived and clears other elections', () => {
+            localStorage.setItem('ghcaa_ballot_receipt_7_5', 'a');
+            localStorage.setItem('ghcaa_ballot_receipt_7_4', 'b');
+            localStorage.setItem('ghcaa_ballot_receipt_8_5', 'c');
+            const { component } = create(paper({ phase: 'Archived', hasVoted: true }));
+
+            expect(component.receiptPdf()).toBeNull();
+            expect(localStorage.getItem('ghcaa_ballot_receipt_7_5')).toBeNull();
+            expect(localStorage.getItem('ghcaa_ballot_receipt_7_4')).toBeNull();
+            expect(localStorage.getItem('ghcaa_ballot_receipt_8_5')).toBe('c');
+        });
+
+        it('drops a damaged stored PDF instead of throwing', () => {
+            localStorage.setItem('ghcaa_ballot_receipt_7_5', '%%%');
+            const { component } = create(paper({ hasVoted: true }));
+
+            expect(() => component.downloadReceipt()).not.toThrow();
+            expect(component.receiptPdf()).toBeNull();
+            expect(localStorage.getItem('ghcaa_ballot_receipt_7_5')).toBeNull();
+            expect(notify.error).toHaveBeenCalled();
         });
     });
 });

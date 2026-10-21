@@ -199,11 +199,6 @@ export interface DecideRecountRequest {
 export const ELECTION_TOO_FEW_APPROVERS_WARNING =
     'Fewer than two officials can approve on this election. Once polling opens nobody can be appointed, so if an official has to be removed in an emergency there may be nobody left to approve it until the result is declared.';
 
-// The warning to add when moving the election to `next`, or null. The 37.12h phase controls show it.
-export function pollingApproverWarning(election: AdminElectionDto, next: ElectionPhase): string | null {
-    return next === 'Polling' && election.tooFewApprovers ? ELECTION_TOO_FEW_APPROVERS_WARNING : null;
-}
-
 // 37.12w. Advisory items warn but do not hold polling shut. Attestation items are ticked by hand.
 export interface ElectionReadinessItemDto {
     key: string;
@@ -366,6 +361,8 @@ export interface CastBallotDto {
 
 export interface CastBallotResultDto {
     trackingCode: string;
+    // Server-made PDF with the code, title and cast time, no choices. Null when it could not be made.
+    receiptPdfBase64?: string | null;
 }
 
 // 37.1l. The paper the member votes on, from GET /elections/{id}/ballot.
@@ -416,6 +413,16 @@ export interface ElectionAuditVerifyDto {
     ok: boolean;
     entries: number;
     firstBrokenSeq: number | null;
+}
+
+// 37.14n. What the QR code on a printed form confirms.
+export interface ElectionDocumentVerifyDto {
+    reference: string;
+    electionId: number;
+    electionTitle: string;
+    phase: ElectionPhase;
+    formCode: string;
+    formTitle: string;
 }
 
 export interface ElectionAuditEntryDto {

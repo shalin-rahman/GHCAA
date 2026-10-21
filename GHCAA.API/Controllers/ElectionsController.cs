@@ -3,6 +3,8 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using static GHCAA.Domain.Constants;
 using static GHCAA.Domain.Enums;
@@ -148,7 +150,7 @@ public sealed class ElectionsController(
         return this.ApprovalReply(run) ?? run.Error switch
         {
             null => Ok(),
-            Elections.Replies.PollingNotReady => PollingNotReady(),
+            Elections.Replies.PollingNotReady => await PollingNotReadyAsync(id, ct),
             _ => Problem(detail: "Invalid phase transition.", statusCode: StatusCodes.Status400BadRequest),
         };
     }
@@ -265,19 +267,35 @@ public sealed class ElectionsController(
 
     /// <summary>FR-37.1c, spec 023 FR-005: records the whole ballot in one request and returns its
     /// tracking code. The ballot row has no member or time column. The link that remains is the
-    /// batch it was moved in, described in spec 023.</summary>
+    /// batch it was moved in, described in spec 023. 37.14o: the reply also carries the receipt PDF.</summary>
     [HttpPost("{id:int}/vote")]
     [GHCAA.API.Filters.RequireStepUp]
-    public async Task<IActionResult> Vote(int id, CastBallotDto request, CancellationToken ct)
+    public async Task<IActionResult> Vote(int id, CastBallotDto request, [FromServices] ILogger<ElectionsController> logger, CancellationToken ct)
     {
         if (!int.TryParse(this.CurrentMemberIdRaw(), out var memberId))
             return Unauthorized();
         var (success, error, trackingCode) = await service.CastBallotAsync(id, memberId, request, ct);
         if (success)
-            return Ok(new CastBallotResultDto(trackingCode!));
+            return Ok(new CastBallotResultDto(trackingCode!, await ReceiptPdfAsync(id, trackingCode!, logger)));
         return error == "already-voted"
             ? this.ProblemWithCode(ErrorCodes.AlreadyVoted, "You have already voted in this election.", StatusCodes.Status409Conflict)
             : Problem(detail: "Vote could not be recorded.", statusCode: StatusCodes.Status400BadRequest);
+    }
+
+    // The vote is already saved, so a failed PDF must not turn the reply into an error and lose
+    // the code. The log names the election only, never the member or the code.
+    private async Task<string?> ReceiptPdfAsync(int electionId, string trackingCode, ILogger logger)
+    {
+        try
+        {
+            var pdf = await documentService.GenerateBallotReceiptPdfAsync(electionId, trackingCode, DateTime.UtcNow, CancellationToken.None);
+            return pdf is null ? null : Convert.ToBase64String(pdf);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Ballot receipt PDF failed for election {ElectionId}", electionId);
+            return null;
+        }
     }
 
     /// <summary>FR-37.1d, spec 023 FR-001 and FR-003: opens the sealed ballots with the returning officer's key and counts them. 37.13h: may wait for a second person (202).</summary>
@@ -359,12 +377,16 @@ public sealed class ElectionsController(
     [Authorize(Policy = Policies.ElectionStaff)]
     [GHCAA.API.Filters.RequireStepUp]
     [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.Approve, ElectionIdLookup.Approval)]
-    public async Task<IActionResult> Approve(int approvalId, CancellationToken ct)
+    public async Task<IActionResult> Approve(int approvalId, [FromServices] IElectionAccessService access, CancellationToken ct)
     {
         if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
             return Unauthorized();
         var (success, error) = await approvals.ApproveAsync(approvalId, userId, CallerRoles(), ct);
-        return success ? Ok() : ApprovalError(error);
+        if (success) return Ok();
+        if (error == Elections.Replies.PollingNotReady
+            && await access.ElectionIdForAsync(ElectionIdLookup.Approval, approvalId, ct) is { } electionId)
+            return await PollingNotReadyAsync(electionId, ct);
+        return ApprovalError(error);
     }
 
     /// <summary>Spec 023 FR-040 (37.13r): asks to remove one official, the only change allowed while rules are frozen.</summary>
@@ -406,9 +428,31 @@ public sealed class ElectionsController(
             : File(pdf, "application/pdf", $"E-{id:D6}_{formCode.ToUpperInvariant()}.pdf");
     }
 
-    // The client reloads the readiness list for the unmet items, so the body does not carry them.
-    private IActionResult PollingNotReady() =>
-        this.ProblemWithCode(ErrorCodes.PollingNotReady, "Polling cannot open until every readiness item is met.", StatusCodes.Status400BadRequest);
+    /// <summary>37.14n: confirms that the election and form named by a printed form's QR code exist. Shares the credential-check rate limit.</summary>
+    [HttpGet("{id:int}/documents/{formCode}/verification")]
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.CredentialVerification)]
+    [ProducesResponseType<ElectionDocumentVerifyDto>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> VerifyDocument(int id, string formCode, CancellationToken ct)
+    {
+        // VerifyAsync answers null for a test election too (FR-047).
+        return (await documentService.VerifyAsync(id, formCode, ct)) is { } result ? Ok(result) : NotFound();
+    }
+
+    // 37.12w. The detail names the unmet items so the toast and snackbar can show it as it is,
+    // and "unmet" carries their keys for a client that wants to mark them on its own list.
+    private async Task<IActionResult> PollingNotReadyAsync(int electionId, CancellationToken ct)
+    {
+        var unmet = (await service.GetReadinessAsync(electionId, ct))?.Items
+            .Where(i => !i.Met && !i.Advisory).Select(i => i.Key).ToList() ?? [];
+        var detail = unmet.Count == 0
+            ? "Polling cannot open until every readiness item is met."
+            : "Polling cannot open until these are met: "
+              + string.Join("; ", unmet.Select(k => Elections.Readiness.Labels.GetValueOrDefault(k, k))) + ".";
+        var reply = this.ProblemWithCode(ErrorCodes.PollingNotReady, detail, StatusCodes.Status400BadRequest);
+        ((ProblemDetails)reply.Value!).Extensions["unmet"] = unmet;
+        return reply;
+    }
 
     private List<string> CallerRoles() => User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
 
@@ -439,7 +483,7 @@ public sealed class ElectionsController(
         "phase-closed" => Problem(detail: "The key cannot change once polling has opened.", statusCode: StatusCodes.Status400BadRequest),
         "invalid-key" => Problem(detail: "The stored key is not valid.", statusCode: StatusCodes.Status400BadRequest),
         "period-has-members" => Problem(detail: "The EC period this election fills already has committee members. Remove them before declaring.", statusCode: StatusCodes.Status409Conflict),
-        Elections.Replies.PollingNotReady => PollingNotReady(),
+        Elections.Replies.PollingNotReady => this.ProblemWithCode(ErrorCodes.PollingNotReady, "Polling cannot open until every readiness item is met.", StatusCodes.Status400BadRequest),
         _ => Problem(detail: "The election is not ready for this step.", statusCode: StatusCodes.Status400BadRequest),
     };
 }

@@ -150,6 +150,14 @@ describe('ElectionsService', () => {
         codes.flush([]);
     });
 
+    it('FR-25: verifies a printed form on the anonymous route and skips the error toast', () => {
+        service.verifyDocument(12, 'ER-27C').subscribe();
+        const req = http.expectOne('/api/elections/12/documents/ER-27C/verification');
+        expect(req.request.method).toBe('GET');
+        expect(req.request.headers.has('X-Skip-Error-Notify')).toBe(true);
+        req.flush({});
+    });
+
     it('creates an election through the admin route', () => {
         service.create({
             title: ADMIN_ELECTION.title, ecPeriodId: 1, nominationOpensOn: '', nominationClosesOn: '',

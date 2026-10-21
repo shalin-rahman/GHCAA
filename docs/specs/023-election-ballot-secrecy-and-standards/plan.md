@@ -2,7 +2,7 @@
 
 > **Status 2026-10-09:** Phase 2 is built on API, web and mobile, with 37.1t and 37.1u (FR-042,
 > FR-043). Left from Phase 2: a visual check of the printed receipt and a Unicode font for the mobile
-> PDF (37.1m). The web and mobile ballots also take up to `places` picks per seat now, which is the
+> PDF (37.1m). The font gap was closed on 2026-10-21 by the server-made receipt (37.14o). The web and mobile ballots also take up to `places` picks per seat now, which is the
 > client half of 37.1o.
 >
 > **Status 2026-10-06:** Phase 4 is built as far as 37.12f (see the note under Phase 4 below). The
@@ -141,7 +141,8 @@ Phase 3 needs the tie rule from D2 on the setup screen and a reading of the cons
   decided (FR-045, tracker 37.1z). `allSeatsDecided` in `election_service.dart` holds the rule.
 - on both clients, `isEligible == false` shows the reason and locks the paper (FR-044)
 - remove the serial number field
-- receipt as a PDF built on the device, handed to the share sheet
+- receipt as a PDF built on the device, handed to the share sheet (replaced on 2026-10-21 by the
+  server PDF in 37.14o, which the app keeps and hands to the share sheet)
 - results screen reads the public results endpoint
 
 ### Tests
@@ -204,7 +205,8 @@ Built as of 2026-10-06: items 1 to 7 (37.1w, 37.12a to 37.12f). Items 8 to 12 (3
 37.13a to 37.13g) are still open in `docs/TODO.md`. After this plan was written, the code review and
 the rules work added 37.13h to 37.13z, all built: second person before the count, count executor and
 `CountRequesterOnly`, the settings audit, the rules freeze and SuperAdmin unlock, emergency revoke, the
-Returning Officer flag, the pre-polling warning, the duplicate-request guard, the expiry sweep, and the
+Returning Officer flag, the pre-polling warning (now an advisory item on the 37.12w readiness
+list), the duplicate-request guard, the expiry sweep, and the
 officials panel on web and mobile. `plan-officials.md` has the gaps table for those.
 
 All four decisions in `plan-officials.md` §6 are answered: no SuperAdmin bypass by default,

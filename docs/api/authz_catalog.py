@@ -7,7 +7,8 @@ Run from the repo root:
   python docs/api/authz_catalog.py --check    exit 1 if the catalog is stale
 
 It reads attributes as text, one line at a time, so it assumes each attribute list opens and
-closes on one line. It stops with an error if one does not. Line numbers are left out of the
+closes on one line. It stops with an error if one does not. A route given as `Constants.X.Y` is
+looked up in GHCAA.Domain/Constants.cs; any other non-literal route stops the run. Line numbers are left out of the
 --check comparison, so an edit that only shifts code does not count as stale.
 """
 import os
@@ -18,6 +19,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 CONTROLLERS = os.path.join(ROOT, "GHCAA.API", "Controllers")
 CATALOG = os.path.join(ROOT, "docs", "specs", "002-workflow-contracts-and-validation",
                        "evidence", "authorization-catalog.md")
+CONSTANTS = os.path.join(ROOT, "GHCAA.Domain", "Constants.cs")
 START = "## 2. Combinations in use"
 END = "## 4. Findings"
 
@@ -66,6 +68,45 @@ def split_attributes(line):
     return result
 
 
+def load_constants():
+    """'Deploy.HealthPath' -> '/health' for every const string in Constants.cs, keyed by its
+    nested class path below Constants."""
+    with open(CONSTANTS, encoding="utf-8-sig") as f:
+        lines = f.read().splitlines()
+    values, stack, depth = {}, [], 0
+    for raw in lines:
+        text = raw.split("//")[0]
+        c = re.search(r"\bclass\s+(\w+)", text)
+        if c:
+            stack.append([c.group(1), depth, False])
+        k = re.search(r'\bconst\s+string\s+(\w+)\s*=\s*"([^"]*)"', text)
+        if k:
+            values[".".join([e[0] for e in stack[1:]] + [k.group(1)])] = k.group(2)
+        depth += text.count("{") - text.count("}")
+        if stack and depth > stack[-1][1]:
+            stack[-1][2] = True
+        while stack and stack[-1][2] and depth <= stack[-1][1]:
+            stack.pop()
+    return values
+
+
+_CONSTANTS = None
+
+
+def route_text(arg):
+    """Route template from a string literal or a Constants.X.Y reference."""
+    s = STRING_RE.search(arg)
+    if s:
+        return s.group(1)
+    global _CONSTANTS
+    if _CONSTANTS is None:
+        _CONSTANTS = load_constants()
+    key = re.sub(r"^(?:GHCAA\.Domain\.)?Constants\.", "", arg.strip())
+    if key not in _CONSTANTS:
+        sys.exit(f"Cannot resolve route {arg.strip()!r}: not a string literal or a const string in Constants.cs.")
+    return _CONSTANTS[key]
+
+
 def last_name(arg):
     """'Policy = Constants.Policies.AdminOnly' or '"AdminOnly"' -> 'AdminOnly'."""
     s = STRING_RE.search(arg)
@@ -81,10 +122,9 @@ class Attrs:
         self.http = []
         for name, arg in pairs:
             if name in VERBS:
-                s = STRING_RE.search(arg)
-                self.http.append((VERBS[name], s.group(1) if s else ""))
+                self.http.append((VERBS[name], route_text(arg) if arg.strip() else ""))
             elif name == "Route":
-                self.routes.append(STRING_RE.search(arg).group(1))
+                self.routes.append(route_text(arg))
             elif name == "AllowAnonymous":
                 self.anonymous = True
             elif name == "Authorize":
@@ -201,7 +241,7 @@ def extra_routes(path):
     for line in lines:
         s = line.strip()
         if s.startswith("[Route("):
-            routes.append(STRING_RE.search(s).group(1))
+            routes.append(route_text(s[len("[Route("):s.rindex(")")]))
         m = CLASS_RE.search(s)
         if m:
             if len(routes) > 1:

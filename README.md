@@ -28,7 +28,7 @@ A digital platform for the Govt. Haraganga College Alumni Association (GHCAA), c
 | Real-time | SignalR (chat, notifications) |
 | In-app assistant | Rule-based intent/keyword matching over internal data (no external LLM dependency) |
 | Security | JWT (stateless), BCrypt password hashing, role-based access control |
-| Reporting | ClosedXML (Excel), QuestPDF (PDF ID cards and receipts) |
+| Reporting | ClosedXML (Excel), QuestPDF (PDF ID cards, receipts and election documents, with Noto Sans Bengali bundled in `GHCAA.Infrastructure/Fonts/`) |
 | DevOps | Docker (multi-stage), GitHub Actions, PowerShell automation |
 
 The API and Angular app are designed to run as a single combined service in production (the API serves the built SPA from `wwwroot`) or as separate origins during local development (`dotnet run` + `ng serve`).

@@ -6,7 +6,8 @@ import {
     AdminElectionDto, AdminElectionStepResult, ElectionBoardDto, ElectionAuditEntryDto, ElectionAuditVerifyDto, OpenedBallotsDto, BallotViewDto, PublicElectionResultsDto, AppointRequest, CastBallotDto, ElectionApprovalDto, ElectionReadinessDto, CastBallotResultDto, CreateElectionRequest, ElectionAppointmentDto, ElectionPhase,
     ElectionCountStepResult, ElectionResultDto, ElectionRulesUnlockDto, ElectionSummaryDto,
     NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto,
-    DecideRecountRequest, ElectionRecountDto, RecordRecountRequest, RecountFigureDto, ScrutinyCheckDto, ScrutinyCheckItem, UpdateElectionFormDetailsRequest
+    DecideRecountRequest, ElectionRecountDto, RecordRecountRequest, RecountFigureDto, ScrutinyCheckDto, ScrutinyCheckItem, UpdateElectionFormDetailsRequest,
+    ElectionDocumentVerifyDto
 } from '../models/election.models';
 
 /** Fetches the static markdown election-form assets synced by `npm run sync:docs`. */
@@ -220,6 +221,11 @@ export class ElectionsService {
 
     getOfficialDocument(id: number, formCode: string): Observable<Blob> {
         return this.http.get(API_ENDPOINTS.ELECTIONS.DOCUMENT(id, formCode), { responseType: 'blob' });
+    }
+
+    // 37.14n. Anonymous. A 404 is the answer the page shows, so the global toast stays quiet.
+    verifyDocument(id: number, formCode: string): Observable<ElectionDocumentVerifyDto> {
+        return this.http.get<ElectionDocumentVerifyDto>(API_ENDPOINTS.ELECTIONS.VERIFY_DOCUMENT(id, formCode), { headers: this.quietHeaders });
     }
 
     getMyAppointments(): Observable<ElectionAppointmentDto[]> {

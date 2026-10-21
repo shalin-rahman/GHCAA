@@ -753,7 +753,7 @@ number, since it is scope inside the same steps rather than a separate task.
 
 Then Phase 2 of the earlier batch (37.1l, 37.1m, 37.1n), then 37.1o to 37.1r, 37.1t, 37.1u. 37.1v is
 closed by 37.12f. Phase 2, 37.1t and 37.1u were built on 2026-10-09; 37.1m still needs a visual
-check and a Unicode receipt font. The 37.13f and 37.13g drafts are in `docs/Elections/` as files 09
+check. Its receipt font gap was closed on 2026-10-21 by 37.14o. The 37.13f and 37.13g drafts are in `docs/Elections/` as files 09
 and 10, waiting for the committee and a manual test run.
 
 Gate after every item: `dotnet test`, `npx vitest run`, `npm run type-check`, `npx ng build`, and

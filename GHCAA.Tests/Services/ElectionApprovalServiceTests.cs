@@ -296,7 +296,7 @@ public sealed class ElectionApprovalServiceTests : TestBase
         (await ReloadAsync()).Phase.Should().Be(ElectionPhase.Polling);
     }
 
-    // 37.12w. A test election needs no attestations, so this leaves only the stored items to set.
+    // 37.12w. Sets the stored items, then records the four attestations.
     private async Task MakeReadyForPollingAsync(bool setKey = true)
     {
         var member = await CreateAndSaveTestMemberAsync();
@@ -306,13 +306,15 @@ public sealed class ElectionApprovalServiceTests : TestBase
         _context.Nominations.Add(new Nomination { ElectionId = _election.Id, ElectionSeat = seat, CandidateMemberId = member.Id, ProposerMemberId = member.Id, SeconderMemberId = member.Id, Statement = "Run", Status = NominationStatus.Accepted, SubmittedAt = DateTime.UtcNow, BallotOrder = 1 });
         var e = _context.Elections.Single(x => x.Id == _election.Id);
         e.Phase = ElectionPhase.Campaign;
-        e.IsTest = true;
         if (setKey)
         {
             e.BallotPublicKey = NewPublicKey();
             e.BallotKeyFingerprint = BallotSeal.Fingerprint(e.BallotPublicKey);
         }
         await _context.SaveChangesAsync();
+        var elections = new ElectionService(_context);
+        foreach (var key in Constants.Elections.Readiness.Attested)
+            (await elections.AttestReadinessAsync(_election.Id, _alice, key)).Should().BeNull();
     }
 
     [Test]

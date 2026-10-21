@@ -1,0 +1,15 @@
+<main class="verify-page">
+  <section class="verify-card surface">
+    <p class="eyebrow">ELECTION FORM VERIFICATION</p>
+    <h1>Verify an election form</h1>
+    <p *ngIf="loading()">Checking...</p>
+    <p class="error-msg" *ngIf="error()">{{ error() }}</p>
+    <article class="verification-result" *ngIf="result() as doc">
+      <h2>Election form recognised</h2>
+      <p>{{ doc.formCode }} {{ doc.formTitle }}</p>
+      <p>{{ doc.electionTitle }} ({{ doc.reference }})</p>
+      <p>Current phase: {{ phaseLabels[doc.phase] }}</p>
+      <p>This confirms the election and the form exist. Compare the printed copy with the one the election committee holds.</p>
+    </article>
+  </section>
+</main>

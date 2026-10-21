@@ -2,7 +2,7 @@
 
 **Feature Branch**: 023-election-ballot-secrecy-and-standards
 **Created**: 2026-09-27
-**Status**: In progress. As of 2026-10-20 the secrecy, whole-ballot, phase and declaration fixes are built (tracker 37.1i to 37.1l, 37.1n, 37.1o, 37.1q). Still open: 37.1m (receipt checks) and 37.1p (recount, consent, conflict, spoiled and unopposed seats)
+**Status**: In progress. As of 2026-10-20 the secrecy, whole-ballot, phase and declaration fixes are built (tracker 37.1i to 37.1l, 37.1n, 37.1o, 37.1q). On 2026-10-21 the readiness gate (37.12w) was built and the server-made receipt (37.14o) was built pending a look on a phone and in a browser. Still open: 37.1m (receipt checks) and 37.1p (recount, consent, conflict, spoiled and unopposed seats)
 **Input**: Review of the election engine on 2026-09-27. The user asked that votes stay anonymous,
 that a voter can print their ballot after voting, and that the engine be checked against common
 election practice.
@@ -165,8 +165,8 @@ P2 brings the rules in line with the constitution.
   once. Only the confirm sends the request.
 - **FR-014** The member election endpoint returns whether this member has voted, taken from
   `SeatVote`. The screen uses it after a reload and on a second device.
-- **FR-015** After a successful vote the confirmation screen offers a print or save of the receipt.
-  See "Receipt and print standard" below.
+- **FR-015** After a successful vote the confirmation screen offers a print or save of the receipt,
+  and a Download receipt button for the server-made PDF. See "Receipt and print standard" below.
 - **FR-016** After the count has run, the list of tracking codes in the count is published, sorted,
   with no choices beside them. A voter can check their code is on it. The list waits for the count,
   not only for polling to close, because until then the receipt rows sit in the order voters cast
@@ -359,8 +359,13 @@ Standard 2, receipt-freeness, decides what the voter may print.
 - It can be printed only from the confirmation screen, once. Leaving the screen ends it.
 - The published tracking-code list (FR-016) proves the ballot was counted. It does not prove the
   choice, so the receipt alone cannot be used to sell a vote.
-- Web: a print stylesheet on the confirmation view and `window.print()`. Mobile: a PDF built on the
-  device and handed to the share sheet.
+- Web: a print stylesheet on the confirmation view and `window.print()`.
+- Since 2026-10-21 (37.14o) the vote reply also carries a PDF made by the server, with the tracking
+  code, the election title and the cast time to the minute in Association time, and no choices.
+  Noto Sans Bengali is the fallback font, so Bengali titles print. Both clients keep it on the
+  device behind a Download receipt button until the election is Archived or the member signs out.
+  Mobile hands it to the share sheet and no longer builds a PDF itself. If the PDF fails, the vote
+  stands and only the code is returned.
 
 Trade-off: a voter who prints the marked ballot can still show the paper to someone. Paper is easy
 to fake, and nothing on the server backs up the choices, so it is weak proof. If the committee wants
@@ -474,7 +479,8 @@ TODO 37.1s closed the database-access gaps the security review of 2026-09-27 fou
 5. Candidate add and remove after CandidateList return 400.
 6. A ballot with one bad entry writes nothing.
 7. After a reload, a member who voted sees "You have voted" and no vote buttons, on web and mobile.
-8. The receipt prints from the confirmation screen and cannot be fetched from the server later.
+8. The receipt with choices prints from the confirmation screen and cannot be fetched from the
+   server later. The server PDF carries no choices.
 9. The public results show every accepted candidate, including zero votes, plus abstentions,
    spoiled ballots and turnout.
 10. A two-place seat elects two members. A tie applies the stored rule.
@@ -525,7 +531,8 @@ period picker in `admin/elections`. `tsc` is clean and the four election specs p
 Mobile: `election_screen.dart`, the new `election_results_screen.dart`, `ballot_receipt.dart` and
 the period dropdown in `election_management_screen.dart`. `flutter analyze` is clean and
 `test/election_service_test.dart` passes 28 of 28. Neither client has been looked at in a browser
-or on a device yet, and the mobile receipt font cannot draw Bengali names (37.1m).
+or on a device yet, and the mobile receipt font cannot draw Bengali names (37.1m). The font gap was
+closed on 2026-10-21 by the server-made receipt (37.14o).
 
 FR-044 and FR-045 were built on 2026-10-09 (tracker 37.1z) in `ElectionService.GetBallotAsync`,
 `BallotViewDto`, `member/election` on web and `election_screen.dart` on mobile. Tests: `ElectionServiceTests.GetBallotAsync_SaysWhetherTheMemberCanVoteAndWhyNot`, `GetBallotAsync_LeavesEligibilityOpenUntilTheRollIsFrozen`, `GetBallotAsync_GivesAReasonWhenTheRollRowHasNone` and `CastBallotAsync_RejectsAVoterOnTheRollWhoIsNotEligible`; `member/election/election.spec.ts` (four new, 19 in all); mobile `test/election_service_test.dart` (eligibility read and `allSeatsDecided`, 30 in all).

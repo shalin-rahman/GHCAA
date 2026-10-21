@@ -176,8 +176,7 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
             new(Elections.Readiness.BallotKey, !string.IsNullOrEmpty(e.BallotPublicKey)),
             new(Elections.Readiness.Appointments, appointmentsDone),
             new(Elections.Readiness.PollingWindow, window),
-            // A test run is itself the rehearsal, so it needs none of the attestations.
-            .. Elections.Readiness.Attested.Select(key => new ElectionReadinessItemDto(key, e.IsTest || attested.Contains(key), Attestation: true)),
+            .. Elections.Readiness.Attested.Select(key => new ElectionReadinessItemDto(key, attested.Contains(key), Attestation: true)),
             new(Elections.Readiness.Approvers, approvers >= Elections.MinApproversBeforePolling, Advisory: true),
         ];
         return new ElectionReadinessDto(items.All(x => x.Met || x.Advisory), items);

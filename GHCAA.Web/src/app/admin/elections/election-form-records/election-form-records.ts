@@ -30,7 +30,7 @@ interface RecountForm {
 }
 
 // 37.14m. The fields the printed election forms read that the setup screen does not ask for,
-// and the recount requests (ER-11, ER-28). The server checks phase and permission; the buttons
+// and the recount requests (ER-17, ER-28). The server checks phase and permission; the buttons
 // here only hide what the caller cannot do.
 @Component({
     selector: 'app-election-form-records',

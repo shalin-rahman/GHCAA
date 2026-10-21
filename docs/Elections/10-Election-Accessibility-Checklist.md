@@ -66,15 +66,16 @@ and the results screen it opens.
 |---|---|---|---|
 | 1.3.1 Info and relationships | The recorded message, tracking code and each seat line are read in order with their labels. | | |
 | 1.4.3 Contrast (minimum) | Tracking code and receipt text meet 4.5:1 on screen and in the printout. | | |
-| 2.1.1 Keyboard | Print receipt works with Enter and Space. On mobile the share-sheet button works with TalkBack. | | |
+| 2.1.1 Keyboard | Print receipt and Download receipt work with Enter and Space. On mobile the Download receipt button opens the share sheet with TalkBack. | | |
 | 2.4.3 Focus order | After a successful vote, focus lands on the confirmation heading or message, not on a hidden or removed control. | | |
-| 2.4.7 Focus visible | Focus ring on Print receipt and on any link to results. | | |
-| 2.5.8 Target size (minimum) | The print or share button meets the target size. | | |
-| 3.2.2 On input | Print receipt opens the print dialog or share sheet only on activation and does not leave the screen. | | |
-| 3.3.1 Error identification | If printing or building the PDF fails, the message is text and is announced. | | |
+| 2.4.7 Focus visible | Focus ring on Print receipt, Download receipt and on any link to results. | | |
+| 2.5.8 Target size (minimum) | The print and download buttons meet the target size. | | |
+| 3.2.2 On input | Print receipt opens the print dialog, and Download receipt saves the file or opens the share sheet, only on activation and without leaving the screen. | | |
+| 3.3.1 Error identification | If printing fails, or a saved receipt on the web cannot be read, the message is text and is announced. | | |
 | 4.1.2 Name, role, value | The tracking code can be selected and copied with the keyboard, and the screen reader can read it character by character. | | |
-| 4.1.3 Status messages | The message that the ballot was recorded is announced as a status. The note that the receipt can be printed only here is read. | | |
+| 4.1.3 Status messages | The message that the ballot was recorded is announced as a status. The note that the printed receipt can be printed only here, and that the download has no choices, is read. | | |
 | Print output | The printed page has a readable title, date, tracking code and marked ballot. Page chrome, buttons and the vote form do not print. Text is at least 11 pt. | | |
+| Downloaded PDF | The PDF shows the election title, the tracking code and the time of voting, with no choices. A Bengali title reads correctly. | | |
 
 ## Tracking-code check, web and mobile
 

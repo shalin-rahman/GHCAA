@@ -166,6 +166,8 @@ Added 2026-09-27 from spec 023, election ballot secrecy and standards (Phase 2 t
     have voted".
 12. After voting, the confirmation screen offers a receipt to print (web) or save as PDF
     (mobile). The receipt is built on the client and cannot be fetched from the server later.
+    Changed 2026-10-21 by spec 023 (37.14o): the vote reply carries a server-made PDF without
+    choices, which both clients keep for download. Only the web print view shows the choices.
 13. The results page reads a public results endpoint, not the admin-only `/count`. Criterion 2
     above is replaced by this one when spec 023 Phase 2 ships.
 14. Flutter no longer sends a ballot serial number.

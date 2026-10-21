@@ -140,9 +140,13 @@ safeguard applies.
 19. **Polling opens.** This needs the ballot-sealing key in place, and — like every sensitive moment
     — needs two people to agree before it starts. *Admin web to generate the key; officials area for
     the two-person approval.*
-    **Before the request goes in, the screen warns** if fewer than two live officials hold the
-    Approve permission. With only one, an emergency revoke during polling could find nobody to
-    approve it. The warning does not stop the request.
+    **Before the request goes in, the officials see a readiness list.** The system checks the
+    frozen roll, the ballot order, the key, the signed declarations and the polling window. An
+    official records the mock election, the technical audit, the decided appeals and the paper stock
+    by hand. A request to open polling, and its approval, are refused while any item is not met, and
+    the refusal names what is missing. Test elections follow the same rule. The list also warns if
+    fewer than two live officials hold the Approve permission. With only one, an emergency revoke
+    during polling could find nobody to approve it. That warning does not stop the request.
     **From that request until the result is declared, the election rules are frozen.** The freeze
     starts when an open-polling request is waiting for approval, and it lasts while the election is
     in Polling or Counting. Running the count does not end it, because the election stays in
@@ -168,9 +172,12 @@ safeguard applies.
     still checks the voter roll when the ballot is cast.
 22. **The member reviews their full set of choices once, then casts the whole ballot in one action.**
     There's no way to submit part of a ballot, or submit it before reviewing it.
-23. **The member receives a receipt**: their marked ballot plus a personal tracking code, theirs to
-    keep privately. It can never be looked up, reissued or handed back out by anyone else
-    afterwards — which is exactly what stops it being used later to prove or sell a vote.
+23. **The member receives a receipt**, in two forms. On the web, the confirmation screen can print
+    the marked ballot with the tracking code, from that screen only. Both web and mobile also offer
+    a downloadable PDF made by the server, with the tracking code, the election title and the time
+    of voting, but no choices. The PDF stays on the device until the election is archived or the
+    member signs out. The choices can never be looked up, reissued or handed back out by anyone
+    afterwards, which is what stops a receipt being used later to prove or sell a vote.
 24. **No results, running totals or partial counts are visible to anyone while polling is open.**
 
 ### Stage G — Counting
@@ -522,7 +529,9 @@ that already has one open is refused. A count that is approved but not yet run c
 
 ## 7. Decisions on record
 
-- **Vote receipt** shows the member's marked ballot plus their tracking code.
+- **Vote receipt**: the printed copy on the web shows the member's marked ballot plus their tracking
+  code. The downloaded PDF shows the code, the election title and the time of voting, without the
+  choices.
 - **Tie-breaking rule** is chosen for each election when it's set up, from a short list of options
   (drawing lots, a run-off, or the chair having the casting vote), each with a plain description.
 - **The two key dates** — when scrutiny happens and when withdrawal closes — are set at election

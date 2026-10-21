@@ -651,23 +651,35 @@ System steps
 6. Check the key. The election shows a fingerprint. The file opens as text starting `-----BEGIN`.
 7. Store the file on a device the Returning Officer controls, behind a screen lock.
 8. Announce the fingerprint to the Commission. Voters see the same fingerprint on the ballot screen.
-9. Check that at least two live officials hold `Approve`. The screen warns if there are fewer than two.
-   The warning does not block the request. With one approver, an emergency revoke during polling has
-   nobody to approve it. Fix it first.
+9. Check that at least two live officials hold `Approve`. The readiness list shows a warning if there
+   are fewer than two. The warning does not block the request. With one approver, an emergency revoke
+   during polling has nobody to approve it. Fix it first.
 10. **Settle every dependency.** Polling does not open until each item is settled and minuted
-    (Regulations Article 11): voter roll frozen and checked, final candidate list and ballot built, key
-    set with every sealed copy held and confirmed, every appointment accepted and declarations signed,
-    polling window set, mock election and technical audit done, open nomination appeals decided, and paper
-    stock ready where paper is used. The system today refuses only an empty voter roll and a missing key.
-    The rest is the Commission's check until the readiness gate is built (TODO 37.12w).
+    (Regulations Article 11). Before polling, the officials dashboard shows the readiness list, and
+    the system checks each item itself:
+    - the voter roll is frozen
+    - every accepted candidate has a place on the ballot, which is set when the election enters
+      Candidate list
+    - the ballot key is set. The system does not yet check the sealed copies (TODO 37.14a, key
+      copies), so the Commission still confirms every copy is held
+    - every appointment still open is accepted with its declaration signed
+    - the polling window opens before it closes and has not closed yet
+    - the mock election was run, the technical audit is done, every nomination appeal is decided, and
+      paper stock is ready. The system cannot see these four. An official with `ChangePhase` records
+      each one with **Record as done** on the web officials dashboard, after step-up. The record goes
+      into the audit chain, cannot be taken back, and can be made only before polling opens. A test
+      election needs these four too.
+
+    The request to open polling is refused while any item is not met, and the refusal names the
+    items still open. The approval is checked again, because the request may be hours old.
 11. A Commissioner with `ChangePhase` asks to open polling. A second official with `Approve` approves.
 12. The rules freeze as soon as the request is pending.
 
 To replace the key, do it before polling opens and with a second official's approval. Destroy the old
 file and every copy. After polling opens the system refuses a replacement.
 
-Output: ballot key made and announced, readiness certificate, mock election done, open-polling request
-approved.
+Output: ballot key made and announced, every readiness item met, readiness certificate, mock election
+done, open-polling request approved.
 
 ## Phase 8. Poll opening
 
@@ -1074,8 +1086,8 @@ form had there before its FORM heading was renumbered on 2026-10-21.
 
 Rules for every form:
 
-1. The 16 codes the platform printed before 2026-10-20 (the Old code column) still open the right form,
-   on the document download and on the verify page, so QR codes already printed keep working.
+1. The 16 codes the platform printed before 2026-10-22 (the Old code column) no longer open a form, on
+   the document download or on the verify page. A QR code on a form printed before then does not resolve.
 2. Any form can be printed at any time, either filled from the election's stored records or blank for
    hand filling (TODO 37.14s, form wording from settings). Until that is built, a form marked Not built
    is copied from its template and filled by hand.
