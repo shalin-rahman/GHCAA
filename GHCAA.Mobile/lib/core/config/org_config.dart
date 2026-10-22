@@ -250,6 +250,8 @@ class ElectionSettings {
   final bool publishPerSeatBallots;
   final bool countRequesterOnly;
   final int unfreezeCutoffDaysBeforeNominationClose;
+  // 37.14s. 'Blank' or 'Filled': which copy of a form the print button gives first.
+  final String defaultPrintMode;
 
   static const allApprovalActions = [
     'Publish', 'OpenPolling', 'ReplaceBallotKey', 'ClosePolling', 'Declare', 'Archive', 'Count',
@@ -267,6 +269,7 @@ class ElectionSettings {
     this.publishPerSeatBallots = true,
     this.countRequesterOnly = false,
     this.unfreezeCutoffDaysBeforeNominationClose = 2,
+    this.defaultPrintMode = 'Blank',
   });
 
   factory ElectionSettings.fromJson(Map<String, dynamic> json) {
@@ -284,6 +287,7 @@ class ElectionSettings {
       countRequesterOnly: json['countRequesterOnly'] ?? d.countRequesterOnly,
       unfreezeCutoffDaysBeforeNominationClose:
           json['unfreezeCutoffDaysBeforeNominationClose'] ?? d.unfreezeCutoffDaysBeforeNominationClose,
+      defaultPrintMode: json['defaultPrintMode']?.toString() ?? d.defaultPrintMode,
     );
   }
 }

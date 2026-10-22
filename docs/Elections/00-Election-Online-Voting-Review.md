@@ -2,7 +2,7 @@
 
  ## Purpose
 
- This document records the security and architecture review of the GHCAA online-voting design described in:
+ This document records the security and architecture review of the online-voting design described in:
 
  `docs/Elections/00-Election-Master-Overview.md`
 

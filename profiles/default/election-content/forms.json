@@ -1,0 +1,2156 @@
+[
+  {
+    "code": "ER-01",
+    "title": "Election Notice",
+    "header": [
+      "Election Reference No.",
+      "Date of Notice"
+    ],
+    "sections": [
+      {
+        "name": "",
+        "kind": "text",
+        "items": [
+          "Notice that the Election Commission announces the Executive Committee election under the Constitution and Election Regulations"
+        ]
+      },
+      {
+        "name": "Election Schedule",
+        "kind": "fields",
+        "items": [
+          "Election Date",
+          "Polling Time",
+          "Polling Venue",
+          "Nomination Opens",
+          "Nomination Closes",
+          "Scrutiny",
+          "Withdrawal Deadline",
+          "Final Candidate List",
+          "Campaign Period",
+          "Silence Period"
+        ]
+      }
+    ],
+    "signatures": [
+      "Chief Election Commissioner"
+    ],
+    "seal": true
+  },
+  {
+    "code": "ER-02",
+    "title": "Election Calendar",
+    "header": [
+      "Election Reference No.",
+      "Prepared On"
+    ],
+    "sections": [
+      {
+        "name": "Activity Schedule",
+        "kind": "table",
+        "items": [
+          "Activity",
+          "Date",
+          "Time",
+          "Responsible",
+          "Completed"
+        ],
+        "rows": [
+          "Election Notice",
+          "Voter List",
+          "Nomination",
+          "Scrutiny",
+          "Withdrawal",
+          "Candidate List",
+          "Polling",
+          "Counting",
+          "Result"
+        ]
+      }
+    ],
+    "signatures": [
+      "Chief Election Commissioner",
+      "Election Commissioner"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-03",
+    "title": "Commissioner Appointment",
+    "header": [
+      "Election Reference",
+      "Letter Date"
+    ],
+    "sections": [
+      {
+        "name": "Appointee",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Post: Chief Election Commissioner / Election Commissioner",
+          "Assumes Office On"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "The appointment takes effect when the appointee signs ER-04 Commissioner Acceptance and ER-05 Neutrality Declaration. The Commission assumes office 90 days before the election (Regs §5)."
+        ]
+      }
+    ],
+    "signatures": [
+      "Chair, Selection Committee",
+      "Member, Selection Committee"
+    ],
+    "seal": true,
+    "source": "Regs §5, §6, §7; Handbook step 3"
+  },
+  {
+    "code": "ER-04",
+    "title": "Election Commissioner Acceptance",
+    "header": [],
+    "sections": [
+      {
+        "name": "Appointee",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Position",
+          "Date of Appointment"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "checklist",
+        "items": [
+          "I am not contesting this election.",
+          "I have no conflict of interest.",
+          "I shall remain neutral throughout the election.",
+          "I shall follow the Constitution and the Election Regulations."
+        ]
+      }
+    ],
+    "signatures": [
+      "Appointee",
+      "Witness"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-05",
+    "title": "Declaration of Neutrality",
+    "header": [],
+    "sections": [
+      {
+        "name": "",
+        "kind": "checklist",
+        "items": [
+          "Remain impartial in every act and decision.",
+          "Not campaign for or against any candidate.",
+          "Not favour any candidate, panel or group.",
+          "Not disclose confidential information.",
+          "Perform my duties honestly and to the best of my ability."
+        ]
+      },
+      {
+        "name": "Declarant",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Election Role",
+          "Date"
+        ]
+      }
+    ],
+    "signatures": [
+      "Declarant"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-06",
+    "title": "Conflict of Interest Declaration",
+    "header": [],
+    "sections": [
+      {
+        "name": "Declarant",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Position",
+          "Date"
+        ]
+      },
+      {
+        "name": "Disclosure",
+        "kind": "checklist",
+        "items": [
+          "Family relationship with a candidate: Yes / No",
+          "Business relationship: Yes / No",
+          "Financial relationship: Yes / No",
+          "Political relationship: Yes / No"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "text",
+        "items": [
+          "If any answer is Yes, describe the relationship in full (4 ruled lines)"
+        ]
+      },
+      {
+        "name": "Declaration",
+        "kind": "declaration",
+        "items": [
+          "Information given is true and complete; any change will be reported immediately"
+        ]
+      }
+    ],
+    "signatures": [
+      "Declarant",
+      "Chief Election Commissioner (Received)"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-07",
+    "title": "Confidentiality Agreement",
+    "header": [],
+    "sections": [
+      {
+        "name": "I agree to maintain confidentiality regarding",
+        "kind": "checklist",
+        "items": [
+          "Voting records and voter data",
+          "System passwords and access credentials",
+          "Election documents and internal correspondence",
+          "Audit reports",
+          "Complaints and their proceedings",
+          "Results before official certification"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "Failure to comply may result in disciplinary action under the Constitution"
+        ]
+      },
+      {
+        "name": "Signatory",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Election Role",
+          "Date"
+        ]
+      }
+    ],
+    "signatures": [
+      "Signatory",
+      "Chief Election Commissioner (Countersigned)"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-08",
+    "title": "Preliminary Voter Roll Certification",
+    "header": [
+      "Election",
+      "Date of Certification"
+    ],
+    "sections": [
+      {
+        "name": "Roll Summary",
+        "kind": "fields",
+        "items": [
+          "Total Members",
+          "Eligible Voters",
+          "Ineligible Members"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "text",
+        "items": [
+          "Basis of ineligibility (arrears, suspension, membership class) (3 ruled lines)"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "We certify the preliminary voter roll was prepared from the membership register and verified against it"
+        ]
+      }
+    ],
+    "signatures": [
+      "Prepared By",
+      "Verified By",
+      "Approved By (Chief Election Commissioner)"
+    ],
+    "seal": true
+  },
+  {
+    "code": "ER-09",
+    "title": "Voter Roll Objection",
+    "header": [
+      "Reference No.",
+      "Date Received"
+    ],
+    "sections": [
+      {
+        "name": "Objector",
+        "kind": "fields",
+        "items": [
+          "Member Name",
+          "Membership No.",
+          "Phone",
+          "Email"
+        ]
+      },
+      {
+        "name": "Ground of Objection",
+        "kind": "checklist",
+        "items": [
+          "Missing name",
+          "Incorrect information",
+          "Duplicate entry",
+          "Ineligible voter listed"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "text",
+        "items": [
+          "Evidence submitted (4 ruled lines)"
+        ]
+      },
+      {
+        "name": "Commission Decision",
+        "kind": "checklist",
+        "items": [
+          "Decision: Accepted / Rejected"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "text",
+        "items": [
+          "Reason for the decision (3 ruled lines)"
+        ]
+      }
+    ],
+    "signatures": [
+      "Election Commissioner",
+      "Chief Election Commissioner"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-10",
+    "title": "Candidate Nomination Form",
+    "header": [
+      "Election"
+    ],
+    "sections": [
+      {
+        "name": "Position Applied For",
+        "kind": "checklist",
+        "items": [
+          "{{Positions}}"
+        ]
+      },
+      {
+        "name": "Candidate Information",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership Number",
+          "Batch",
+          "Phone",
+          "Email",
+          "Employment",
+          "Address"
+        ]
+      },
+      {
+        "name": "Proposer and Seconder",
+        "kind": "fields",
+        "items": [
+          "Proposed By",
+          "Membership No.",
+          "Seconded By",
+          "Membership No."
+        ]
+      },
+      {
+        "name": "Documents Attached",
+        "kind": "checklist",
+        "items": [
+          "Membership certificate copy",
+          "Photograph",
+          "Declaration (ER-04)",
+          "Candidate consent (ER-10)",
+          "Nomination fee receipt"
+        ]
+      },
+      {
+        "name": "Office use",
+        "kind": "fields",
+        "items": [
+          "Application No.",
+          "Date and Time Received"
+        ]
+      }
+    ],
+    "signatures": [
+      "Candidate",
+      "Received By (Commission officer)"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-11",
+    "title": "Candidate Consent",
+    "header": [],
+    "sections": [
+      {
+        "name": "",
+        "kind": "fields",
+        "items": [
+          "Position"
+        ]
+      },
+      {
+        "name": "I confirm that",
+        "kind": "checklist",
+        "items": [
+          "I satisfy all constitutional requirements for this position.",
+          "The information I have supplied is correct.",
+          "I shall follow the Election Regulations and the directions of the Commission."
+        ]
+      },
+      {
+        "name": "Candidate",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Application No.",
+          "Date"
+        ]
+      }
+    ],
+    "signatures": [
+      "Candidate"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-12",
+    "title": "Eligibility Declaration",
+    "header": [
+      "Application No.",
+      "Date"
+    ],
+    "sections": [
+      {
+        "name": "Candidate",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Position"
+        ]
+      },
+      {
+        "name": "I declare that",
+        "kind": "checklist",
+        "items": [
+          "I am a voting member in good standing.",
+          "I meet the minimum membership period for this position.",
+          "I meet the founding member requirement, where it applies.",
+          "I have no outstanding dues.",
+          "I hold no election office in this election.",
+          "Criminal record: None / Disclosed below"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "text",
+        "items": [
+          "Disclosure (3 ruled lines)"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "I understand a false statement is a ground for rejection at scrutiny (ER-17)."
+        ]
+      }
+    ],
+    "signatures": [
+      "Candidate"
+    ],
+    "seal": false,
+    "source": "Regs §9; scrutiny list in Ops Manual and Handbook step 5"
+  },
+  {
+    "code": "ER-13",
+    "title": "Political Neutrality Declaration",
+    "header": [
+      "Application No.",
+      "Date"
+    ],
+    "sections": [
+      {
+        "name": "Candidate",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Position"
+        ]
+      },
+      {
+        "name": "I undertake that",
+        "kind": "checklist",
+        "items": [
+          "I will keep the Association's non-political character (Regs §4).",
+          "I will not use political party symbols in my campaign (Regs §10).",
+          "I will not use religious propaganda (Regs §10).",
+          "I will not seek support from a political party for this election."
+        ]
+      }
+    ],
+    "signatures": [
+      "Candidate",
+      "Received By (Commission officer)"
+    ],
+    "seal": false,
+    "source": "Regs §4, §9, §10"
+  },
+  {
+    "code": "ER-14",
+    "title": "Proposer Form",
+    "header": [
+      "Application No.",
+      "Date"
+    ],
+    "sections": [
+      {
+        "name": "Candidate",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Position"
+        ]
+      },
+      {
+        "name": "Proposer",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Phone"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "checklist",
+        "items": [
+          "I am a voting member.",
+          "I am an election official in this election: Yes / No. If Yes, I have declared it and take no part in this candidate's scrutiny, recount or appeal (Regs §7)."
+        ]
+      },
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "I propose the candidate named above for the position stated."
+        ]
+      }
+    ],
+    "signatures": [
+      "Proposer",
+      "Received By (Commission officer)"
+    ],
+    "seal": false,
+    "source": "Regs §7, §9; Handbook nomination step 7"
+  },
+  {
+    "code": "ER-15",
+    "title": "Seconder Form",
+    "header": [
+      "Application No.",
+      "Date"
+    ],
+    "sections": [
+      {
+        "name": "Candidate",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Position"
+        ]
+      },
+      {
+        "name": "Seconder",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Phone"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "checklist",
+        "items": [
+          "I am a voting member.",
+          "I am an election official in this election: Yes / No. If Yes, I have declared it and take no part in this candidate's scrutiny, recount or appeal (Regs §7)."
+        ]
+      },
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "I second the nomination of the candidate named above for the position stated."
+        ]
+      }
+    ],
+    "signatures": [
+      "Seconder",
+      "Received By (Commission officer)"
+    ],
+    "seal": false,
+    "source": "Regs §7, §9; Handbook nomination step 7"
+  },
+  {
+    "code": "ER-16",
+    "title": "Nomination Receipt",
+    "header": [
+      "Application No.",
+      "Date and Time Received"
+    ],
+    "sections": [
+      {
+        "name": "Candidate",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Position"
+        ]
+      },
+      {
+        "name": "Documents received",
+        "kind": "checklist",
+        "items": [
+          "ER-10 Candidate Nomination",
+          "ER-11 Candidate Consent",
+          "ER-12 Eligibility Declaration",
+          "ER-13 Political Neutrality Declaration",
+          "ER-14 Proposer Form",
+          "ER-15 Seconder Form",
+          "Photograph",
+          "Nomination fee receipt"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "This receipt confirms the papers were received. It is not acceptance. Scrutiny follows on ER-17."
+        ]
+      }
+    ],
+    "signatures": [
+      "Received By (Commission officer)"
+    ],
+    "seal": true,
+    "source": "Regs §9 (acknowledgement); Handbook nomination steps 2 and 3"
+  },
+  {
+    "code": "ER-17",
+    "title": "Nomination Scrutiny Checklist",
+    "header": [
+      "Application Number",
+      "Candidate",
+      "Position",
+      "Date of Scrutiny"
+    ],
+    "sections": [
+      {
+        "name": "Verification",
+        "kind": "checklist",
+        "items": [
+          "Membership verified: Yes / No",
+          "Voting member: Yes / No",
+          "Minimum membership period met: Yes / No",
+          "Founding member requirement, if applicable: Yes / No",
+          "Required documents complete: Yes / No",
+          "Nomination fee paid: Yes / No",
+          "Declaration signed: Yes / No"
+        ]
+      },
+      {
+        "name": "Decision",
+        "kind": "checklist",
+        "items": [
+          "Decision: Accepted / Rejected"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "text",
+        "items": [
+          "Reason, where the nomination is rejected (3 ruled lines)"
+        ]
+      }
+    ],
+    "signatures": [
+      "Election Commissioner",
+      "Election Commissioner",
+      "Chief Election Commissioner"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-17A",
+    "title": "Nomination Acceptance Order",
+    "header": [
+      "Application No.",
+      "Order Date",
+      "Candidate",
+      "Position"
+    ],
+    "sections": [
+      {
+        "name": "",
+        "kind": "checklist",
+        "items": [
+          "Accepts the nomination",
+          "Rejects the nomination"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "text",
+        "items": [
+          "Reasons (4 ruled lines)"
+        ]
+      }
+    ],
+    "signatures": [
+      "Chief Election Commissioner"
+    ],
+    "seal": true
+  },
+  {
+    "code": "ER-18",
+    "title": "Candidate Withdrawal",
+    "header": [
+      "Candidate",
+      "Membership No.",
+      "Position",
+      "Application No."
+    ],
+    "sections": [
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "I voluntarily withdraw my nomination; a withdrawal once accepted cannot be revoked"
+        ]
+      },
+      {
+        "name": "Acceptance record",
+        "kind": "fields",
+        "items": [
+          "Date and Time of Acceptance",
+          "Reference No."
+        ]
+      }
+    ],
+    "signatures": [
+      "Candidate",
+      "Accepted By (Election Commission)"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-19",
+    "title": "Final Candidate List",
+    "header": [
+      "Election",
+      "Date of Publication"
+    ],
+    "sections": [
+      {
+        "name": "Candidates",
+        "kind": "table",
+        "items": [
+          "Position",
+          "Candidate Name",
+          "Election Symbol",
+          "Application No.",
+          "Remarks"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "Final list of contesting candidates; no addition or alteration after publication except by order of the Commission"
+        ]
+      }
+    ],
+    "signatures": [
+      "Chief Election Commissioner"
+    ],
+    "seal": true
+  },
+  {
+    "code": "ER-20",
+    "title": "Campaign Undertaking",
+    "header": [
+      "Election",
+      "Date"
+    ],
+    "sections": [
+      {
+        "name": "Candidate",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Position",
+          "Campaign Opens",
+          "Campaign Closes"
+        ]
+      },
+      {
+        "name": "During the campaign I will not",
+        "kind": "checklist",
+        "items": [
+          "Buy votes",
+          "Intimidate any voter",
+          "Spread false information",
+          "Damage property",
+          "Use Association funds",
+          "Use religious propaganda",
+          "Use political symbols",
+          "Defame another candidate"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "I will stop campaigning 24 hours before polling. I will record my campaign spending and the Commission may audit it. I accept the sanctions in Regs §10: warning, show cause, suspension, disqualification."
+        ]
+      }
+    ],
+    "signatures": [
+      "Candidate",
+      "Received By (Commission officer)"
+    ],
+    "seal": false,
+    "source": "Regs §10; Code of Conduct §6, §20"
+  },
+  {
+    "code": "ER-21",
+    "title": "Observer Appointment",
+    "header": [
+      "Election Reference",
+      "Date"
+    ],
+    "sections": [
+      {
+        "name": "Observer",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No. or Organisation",
+          "Scope (stations or stages)"
+        ]
+      },
+      {
+        "name": "Duties",
+        "kind": "checklist",
+        "items": [
+          "Observe every stage independently.",
+          "Check that the Regulations are followed.",
+          "Report any irregularity to the Commission in writing.",
+          "Do not interfere with the process."
+        ]
+      },
+      {
+        "name": "Signed before duty",
+        "kind": "checklist",
+        "items": [
+          "ER-05 Neutrality Declaration",
+          "ER-06 Conflict of Interest",
+          "ER-07 Confidentiality Agreement",
+          "ECC-01 Code of Conduct Acceptance"
+        ]
+      }
+    ],
+    "signatures": [
+      "Chief Election Commissioner",
+      "Observer (accepts)"
+    ],
+    "seal": true,
+    "source": "Regs §3, §7, §11; Code of Conduct §8, §20"
+  },
+  {
+    "code": "ER-22",
+    "title": "Polling Officer Appointment",
+    "header": [
+      "Election",
+      "Polling Station"
+    ],
+    "sections": [
+      {
+        "name": "Appointee",
+        "kind": "fields",
+        "items": [
+          "Name",
+          "Membership No.",
+          "Role: Presiding Officer / Polling Officer"
+        ]
+      },
+      {
+        "name": "Conflict check (Regs §7)",
+        "kind": "checklist",
+        "items": [
+          "Spouse, parent, child or sibling of a candidate: Yes / No",
+          "Proposed or seconded a candidate: Yes / No",
+          "Is a candidate: Yes / No"
+        ]
+      },
+      {
+        "name": "Signed before duty",
+        "kind": "checklist",
+        "items": [
+          "ER-05 Neutrality Declaration",
+          "ER-06 Conflict of Interest",
+          "ER-07 Confidentiality Agreement",
+          "ECC-01 Code of Conduct Acceptance"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "At close the officer counts unused, spoiled and issued ballots and electronic votes, seals the box and prepares ER-24 (Regs §13)."
+        ]
+      }
+    ],
+    "signatures": [
+      "Chief Election Commissioner",
+      "Appointee (accepts)"
+    ],
+    "seal": true,
+    "source": "Regs §3, §7, §11, §13"
+  },
+  {
+    "code": "ER-22A",
+    "title": "Election Material Receipt Register",
+    "header": [
+      "Election",
+      "Polling Station"
+    ],
+    "sections": [
+      {
+        "name": "Register",
+        "kind": "table",
+        "items": [
+          "Date",
+          "Time",
+          "Received From",
+          "Material",
+          "Quantity",
+          "Condition",
+          "Seal Number"
+        ],
+        "blank": 4
+      },
+      {
+        "name": "Remarks",
+        "kind": "text",
+        "items": [
+          "2 lines"
+        ]
+      }
+    ],
+    "signatures": [
+      "Received By",
+      "Handed Over By"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-23",
+    "title": "Poll Opening Certificate",
+    "header": [
+      "Election",
+      "Polling Station",
+      "Date",
+      "Opening Time"
+    ],
+    "sections": [
+      {
+        "name": "Before Polling Commenced",
+        "kind": "checklist",
+        "items": [
+          "Ballot box shown empty to those present",
+          "Ballot box inspected",
+          "Ballot box locked",
+          "Seal applied"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "fields",
+        "items": [
+          "Seal Numbers",
+          "Ballot Serial Range Issued"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "checklist",
+        "items": [
+          "Observer present: Yes / No",
+          "Candidate agents present: Yes / No"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "Polling officially commenced at the time recorded above"
+        ]
+      }
+    ],
+    "signatures": [
+      "Presiding Officer",
+      "Polling Officer",
+      "Observer",
+      "Candidate Agent"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-23A",
+    "title": "Poll Incident Register",
+    "header": [
+      "Polling Station",
+      "Date"
+    ],
+    "sections": [
+      {
+        "name": "Incident",
+        "kind": "fields",
+        "items": [
+          "Incident No.",
+          "Time"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "text",
+        "items": [
+          "Description (4 ruled lines)",
+          "Persons involved (3 ruled lines)",
+          "Witnesses (2 ruled lines)",
+          "Action taken (3 ruled lines)"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "fields",
+        "items": [
+          "Reported To"
+        ]
+      }
+    ],
+    "signatures": [
+      "Presiding Officer",
+      "Observer"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-23B",
+    "title": "Spoiled Ballot Register",
+    "header": [
+      "Polling Station",
+      "Date"
+    ],
+    "sections": [
+      {
+        "name": "Register",
+        "kind": "table",
+        "items": [
+          "Serial No.",
+          "Ballot No.",
+          "Reason",
+          "Replacement Ballot No.",
+          "Officer Initials"
+        ]
+      },
+      {
+        "name": "Totals",
+        "kind": "fields",
+        "items": [
+          "Total Spoiled Ballots",
+          "Total Replacements Issued"
+        ]
+      }
+    ],
+    "signatures": [
+      "Polling Officer",
+      "Presiding Officer"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-24",
+    "title": "Poll Closing Certificate",
+    "header": [
+      "Election",
+      "Polling Station",
+      "Closing Time",
+      "Date"
+    ],
+    "sections": [
+      {
+        "name": "Ballot Account",
+        "kind": "fields",
+        "items": [
+          "Registered Voters",
+          "Ballots Issued",
+          "Unused Ballots",
+          "Spoiled Ballots",
+          "Votes Cast",
+          "Ballots Returned to Commission"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "We certify polling closed peacefully at the recorded time and no ballot was issued after official closing time"
+        ]
+      }
+    ],
+    "signatures": [
+      "Presiding Officer",
+      "Polling Officer",
+      "Observer",
+      "Candidate Agent"
+    ],
+    "seal": true
+  },
+  {
+    "code": "ER-25",
+    "title": "Ballot Box Sealing and Poll Integrity Certificate",
+    "header": [
+      "Election",
+      "Polling Station",
+      "Date",
+      "Time"
+    ],
+    "sections": [
+      {
+        "name": "We Certify That",
+        "kind": "checklist",
+        "items": [
+          "Polling has concluded.",
+          "All voters in the queue at closing time have voted.",
+          "The ballot slot has been closed.",
+          "Unused ballots have been counted.",
+          "Spoiled ballots have been counted.",
+          "The Ballot Issue Register has been reconciled.",
+          "The ballot box remained under continuous supervision.",
+          "No unauthorised person accessed the ballot box.",
+          "The security seals are intact."
+        ]
+      },
+      {
+        "name": "Security Seals",
+        "kind": "fields",
+        "items": [
+          "Seal No. 1",
+          "Seal No. 2",
+          "Seal No. 3"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "text",
+        "items": [
+          "Observer remarks (3 ruled lines)",
+          "Candidate agent remarks (3 ruled lines)"
+        ]
+      },
+      {
+        "name": "Declaration",
+        "kind": "declaration",
+        "items": [
+          "Polling concluded under the Constitution and Election Regulations, with no unauthorised access, substitution, removal, insertion or tampering before counting."
+        ]
+      },
+      {
+        "name": "",
+        "kind": "fields",
+        "items": [
+          "Time Counting Authorised"
+        ]
+      }
+    ],
+    "signatures": [
+      "Chief Election Commissioner",
+      "Election Commissioner",
+      "Election Commissioner",
+      "Presiding Officer",
+      "Polling Officer",
+      "Security Officer",
+      "Observer 1",
+      "Observer 2",
+      "Candidate Agent A",
+      "Candidate Agent B",
+      "Candidate Agent C"
+    ],
+    "seal": true
+  },
+  {
+    "code": "ER-26",
+    "title": "Electronic Voting Audit",
+    "header": [
+      "Election",
+      "Mock Election Date",
+      "Audit Date",
+      "Technical Auditor"
+    ],
+    "sections": [
+      {
+        "name": "System checks (Regs §12)",
+        "kind": "checklist",
+        "items": [
+          "OTP and email verification: Pass / Fail",
+          "Unique login per voter: Pass / Fail",
+          "Duplicate vote prevention: Pass / Fail",
+          "Vote encryption: Pass / Fail",
+          "Immutable audit log: Pass / Fail",
+          "Timestamp recording: Pass / Fail",
+          "Secure backup taken: Pass / Fail",
+          "Database integrity verified: Pass / Fail"
+        ]
+      },
+      {
+        "name": "At poll close",
+        "kind": "fields",
+        "items": [
+          "Electronic Votes Recorded",
+          "Audit Log Entries",
+          "Audit Chain Head Hash"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "text",
+        "items": [
+          "Findings (3 ruled lines)"
+        ]
+      }
+    ],
+    "signatures": [
+      "Technical Auditor",
+      "Chief Election Commissioner",
+      "Election Commissioner",
+      "Observer"
+    ],
+    "seal": true,
+    "source": "Regs §11, §12, §13, §14; Ops Manual §13 and §14"
+  },
+  {
+    "code": "ER-25A",
+    "title": "Vote Counting Authorization Certificate",
+    "header": [
+      "Election",
+      "Polling Station",
+      "Date",
+      "Time Counting Commenced"
+    ],
+    "sections": [
+      {
+        "name": "Prerequisites Verified",
+        "kind": "checklist",
+        "items": [
+          "Poll officially closed",
+          "Poll Closing Certificate completed",
+          "Ballot Box Sealing Certificate completed",
+          "Seal numbers verified",
+          "Ballot Issue Register reconciled",
+          "Candidate agents present or notified",
+          "Observers present",
+          "Counting hall secured",
+          "Counting materials available"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "The Election Commission hereby authorises the commencement of vote counting."
+        ]
+      }
+    ],
+    "signatures": [
+      "Chief Election Commissioner",
+      "Election Commissioner",
+      "Election Commissioner",
+      "Observer"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-25B",
+    "title": "Ballot Box Opening Certificate",
+    "header": [
+      "Election",
+      "Ballot Box Number",
+      "Seal No. 1",
+      "Seal No. 2",
+      "Seal No. 3"
+    ],
+    "sections": [
+      {
+        "name": "Inspection",
+        "kind": "checklist",
+        "items": [
+          "Seals intact",
+          "Box undamaged",
+          "Lock intact",
+          "No evidence of tampering"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "fields",
+        "items": [
+          "Opened At (time)",
+          "Date"
+        ]
+      },
+      {
+        "name": "Remarks",
+        "kind": "text",
+        "items": [
+          "3 lines"
+        ]
+      }
+    ],
+    "signatures": [
+      "Opened By (Chief Election Commissioner)",
+      "Election Commissioner",
+      "Election Commissioner",
+      "Observer",
+      "Candidate Agent"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-25C",
+    "title": "Ballot Paper Reconciliation Sheet",
+    "header": [
+      "Election",
+      "Polling Station"
+    ],
+    "sections": [
+      {
+        "name": "Ballot Account",
+        "kind": "table",
+        "items": [
+          "Item",
+          "Count"
+        ],
+        "rows": [
+          "Registered voters",
+          "Ballots received",
+          "Ballots issued",
+          "Unused ballots",
+          "Spoiled ballots",
+          "Ballots found in box",
+          "Difference"
+        ]
+      },
+      {
+        "name": "Explanation of any difference",
+        "kind": "text",
+        "items": [
+          "3 lines"
+        ]
+      }
+    ],
+    "signatures": [
+      "Verified By (Chief Election Commissioner)",
+      "Election Commissioner",
+      "Observer"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-27",
+    "title": "Vote Counting Sheet",
+    "header": [
+      "Election",
+      "Position",
+      "Round No.",
+      "Sheet No."
+    ],
+    "sections": [
+      {
+        "name": "Count",
+        "kind": "table",
+        "items": [
+          "Candidate",
+          "Symbol",
+          "Votes"
+        ],
+        "blank": 5
+      },
+      {
+        "name": "",
+        "kind": "fields",
+        "items": [
+          "Rejected Ballots",
+          "Questionable Ballots",
+          "Total Count"
+        ]
+      }
+    ],
+    "signatures": [
+      "Counted By",
+      "Verified By"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-27A",
+    "title": "Independent Tally Sheet",
+    "header": [
+      "Election",
+      "Position"
+    ],
+    "sections": [
+      {
+        "name": "Independent Counts",
+        "kind": "table",
+        "items": [
+          "Candidate",
+          "Counter A",
+          "Counter B",
+          "Counter C"
+        ],
+        "rows": [
+          "",
+          "",
+          "",
+          "Rejected"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "fields",
+        "items": [
+          "Difference Between Counters",
+          "Counts Reconciled: Yes / No"
+        ]
+      },
+      {
+        "name": "Remarks",
+        "kind": "text",
+        "items": [
+          "3 lines"
+        ]
+      }
+    ],
+    "signatures": [
+      "Counter A",
+      "Counter B",
+      "Counter C",
+      "Verified By (Chief Election Commissioner)"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-27B",
+    "title": "Rejected Ballot Register",
+    "header": [
+      "Election",
+      "Position"
+    ],
+    "sections": [
+      {
+        "name": "Register",
+        "kind": "table",
+        "items": [
+          "Serial No.",
+          "Ballot No.",
+          "Reason",
+          "Decision",
+          "Initials"
+        ],
+        "blank": 5
+      },
+      {
+        "name": "Grounds Used",
+        "kind": "checklist",
+        "items": [
+          "No official stamp",
+          "Multiple selections",
+          "No clear intention",
+          "Damaged",
+          "Identifiable markings",
+          "Other"
+        ]
+      }
+    ],
+    "signatures": [
+      "Election Commissioner",
+      "Chief Election Commissioner"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-27C",
+    "title": "Final Result Sheet",
+    "header": [
+      "Election",
+      "Position"
+    ],
+    "sections": [
+      {
+        "name": "Result",
+        "kind": "table",
+        "items": [
+          "Candidate",
+          "Votes",
+          "Percentage",
+          "Status"
+        ],
+        "blank": 4
+      },
+      {
+        "name": "",
+        "kind": "fields",
+        "items": [
+          "Winner",
+          "Runner-up",
+          "Rejected Ballots",
+          "Total Votes"
+        ]
+      }
+    ],
+    "signatures": [
+      "Certified By (Chief Election Commissioner)",
+      "Election Commissioner",
+      "Election Commissioner"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-28",
+    "title": "Recount Request",
+    "header": [
+      "Reference Number",
+      "Date",
+      "Time Received",
+      "Position"
+    ],
+    "sections": [
+      {
+        "name": "Applicant",
+        "kind": "fields",
+        "items": [
+          "Applicant",
+          "Membership No.",
+          "Candidate Represented",
+          "Phone"
+        ]
+      },
+      {
+        "name": "Grounds",
+        "kind": "checklist",
+        "items": [
+          "Counting error",
+          "Mathematical error",
+          "Invalid ballots counted",
+          "Tally difference between counters",
+          "Other"
+        ]
+      },
+      {
+        "name": "Detailed explanation",
+        "kind": "text",
+        "items": [
+          "5 lines"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "fields",
+        "items": [
+          "Evidence attached: Yes / No"
+        ]
+      }
+    ],
+    "signatures": [
+      "Applicant",
+      "Received By (Commission officer)"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-28A",
+    "title": "Recount Decision",
+    "header": [
+      "Reference No.",
+      "Applicant",
+      "Position",
+      "Date"
+    ],
+    "sections": [
+      {
+        "name": "",
+        "kind": "checklist",
+        "items": [
+          "Decision: Approved / Rejected"
+        ]
+      },
+      {
+        "name": "Reason",
+        "kind": "text",
+        "items": [
+          "4 lines"
+        ]
+      }
+    ],
+    "signatures": [
+      "Recount Ordered By (Chief Election Commissioner)",
+      "Election Commissioner",
+      "Election Commissioner"
+    ],
+    "seal": true
+  },
+  {
+    "code": "ER-28B",
+    "title": "Recount Report",
+    "header": [
+      "Election",
+      "Position",
+      "Date of Recount",
+      "Reference No."
+    ],
+    "sections": [
+      {
+        "name": "Comparison",
+        "kind": "table",
+        "items": [
+          "Candidate",
+          "Original Count",
+          "Recount",
+          "Difference"
+        ],
+        "rows": [
+          "",
+          "",
+          "",
+          "Rejected"
+        ]
+      },
+      {
+        "name": "Reason for the difference",
+        "kind": "text",
+        "items": [
+          "3 lines"
+        ]
+      },
+      {
+        "name": "Final result and Commission decision",
+        "kind": "text",
+        "items": [
+          "3 lines"
+        ]
+      }
+    ],
+    "signatures": [
+      "Chief Election Commissioner",
+      "Election Commissioner",
+      "Observer"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-29",
+    "title": "Election Result Certification",
+    "header": [
+      "Election Name",
+      "Election Date",
+      "Polling Stations",
+      "Registered Voters",
+      "Votes Cast",
+      "Turnout Percentage",
+      "Rejected Ballots",
+      "Date of Certification"
+    ],
+    "sections": [
+      {
+        "name": "We Certify That",
+        "kind": "checklist",
+        "items": [
+          "The election was conducted according to the Constitution.",
+          "Counting has been completed.",
+          "Results have been verified.",
+          "All recounts have been completed.",
+          "All appeals have been recorded."
+        ]
+      }
+    ],
+    "signatures": [
+      "Chief Election Commissioner",
+      "Election Commissioner",
+      "Election Commissioner",
+      "Observer",
+      "Observer"
+    ],
+    "seal": true
+  },
+  {
+    "code": "ER-30",
+    "title": "Result Declaration",
+    "header": [
+      "Election",
+      "Date",
+      "Time",
+      "Reference No."
+    ],
+    "sections": [
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "The Election Commission hereby declares the following candidates elected."
+        ]
+      },
+      {
+        "name": "",
+        "kind": "table",
+        "items": [
+          "Office",
+          "Candidate",
+          "Votes"
+        ],
+        "rows": [
+          "{{PositionSeats}}"
+        ]
+      }
+    ],
+    "signatures": [
+      "Certified By (Chief Election Commissioner)"
+    ],
+    "seal": true
+  },
+  {
+    "code": "ER-30A",
+    "title": "Election Complaint Form",
+    "header": [
+      "Complaint No.",
+      "Date",
+      "Time",
+      "Election"
+    ],
+    "sections": [
+      {
+        "name": "Parties",
+        "kind": "fields",
+        "items": [
+          "Complainant",
+          "Membership No.",
+          "Respondent",
+          "Phone"
+        ]
+      },
+      {
+        "name": "Nature of Complaint",
+        "kind": "checklist",
+        "items": [
+          "Campaign",
+          "Polling",
+          "Counting",
+          "Result",
+          "Other"
+        ]
+      },
+      {
+        "name": "Description",
+        "kind": "text",
+        "items": [
+          "6 lines"
+        ]
+      },
+      {
+        "name": "Evidence attached",
+        "kind": "text",
+        "items": [
+          "2 lines"
+        ]
+      },
+      {
+        "name": "Requested relief",
+        "kind": "text",
+        "items": [
+          "3 lines"
+        ]
+      }
+    ],
+    "signatures": [
+      "Complainant",
+      "Received By (Commission officer)"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-30B",
+    "title": "Election Investigation Report",
+    "header": [
+      "Complaint No.",
+      "Investigating Officer",
+      "Date Assigned",
+      "Date Submitted"
+    ],
+    "sections": [
+      {
+        "name": "Persons interviewed",
+        "kind": "text",
+        "items": [
+          "4 lines"
+        ]
+      },
+      {
+        "name": "Evidence reviewed",
+        "kind": "text",
+        "items": [
+          "3 lines"
+        ]
+      },
+      {
+        "name": "Documents reviewed",
+        "kind": "text",
+        "items": [
+          "3 lines"
+        ]
+      },
+      {
+        "name": "Findings",
+        "kind": "text",
+        "items": [
+          "6 lines"
+        ]
+      },
+      {
+        "name": "Recommendations",
+        "kind": "text",
+        "items": [
+          "4 lines"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "fields",
+        "items": [
+          "Submitted To"
+        ]
+      }
+    ],
+    "signatures": [
+      "Investigating Officer",
+      "Received By (Election Commission)"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-31",
+    "title": "Appeal to Election Appeals Tribunal",
+    "header": [
+      "Appeal No.",
+      "Date",
+      "Appellant",
+      "Membership No."
+    ],
+    "sections": [
+      {
+        "name": "Decision appealed against",
+        "kind": "text",
+        "items": [
+          "2 lines"
+        ]
+      },
+      {
+        "name": "Grounds of appeal",
+        "kind": "text",
+        "items": [
+          "6 lines"
+        ]
+      },
+      {
+        "name": "Supporting evidence",
+        "kind": "text",
+        "items": [
+          "3 lines"
+        ]
+      },
+      {
+        "name": "Requested relief",
+        "kind": "text",
+        "items": [
+          "3 lines"
+        ]
+      }
+    ],
+    "signatures": [
+      "Appellant",
+      "Received By (Tribunal registrar)"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-32",
+    "title": "Tribunal Decision",
+    "header": [
+      "Appeal No.",
+      "Hearing Date",
+      "Decision Date",
+      "Appellant"
+    ],
+    "sections": [
+      {
+        "name": "Tribunal members",
+        "kind": "text",
+        "items": [
+          "3 lines"
+        ]
+      },
+      {
+        "name": "Evidence considered",
+        "kind": "text",
+        "items": [
+          "4 lines"
+        ]
+      },
+      {
+        "name": "Decision",
+        "kind": "checklist",
+        "items": [
+          "Appeal allowed",
+          "Appeal partially allowed",
+          "Appeal dismissed"
+        ]
+      },
+      {
+        "name": "Orders",
+        "kind": "text",
+        "items": [
+          "4 lines"
+        ]
+      },
+      {
+        "name": "Reasons",
+        "kind": "text",
+        "items": [
+          "6 lines"
+        ]
+      }
+    ],
+    "signatures": [
+      "Tribunal Member",
+      "Tribunal Member",
+      "Tribunal Member"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-33",
+    "title": "Election Completion Report",
+    "header": [
+      "Election Reference",
+      "Election Date",
+      "Total Registered Voters",
+      "Votes Cast",
+      "Turnout Percentage",
+      "Candidates",
+      "Complaints Received",
+      "Appeals Filed",
+      "Recounts",
+      "Security Incidents"
+    ],
+    "sections": [
+      {
+        "name": "Lessons learned",
+        "kind": "text",
+        "items": [
+          "5 lines"
+        ]
+      },
+      {
+        "name": "Recommendations for the next election",
+        "kind": "text",
+        "items": [
+          "5 lines"
+        ]
+      }
+    ],
+    "signatures": [
+      "Prepared By (Chief Election Commissioner)",
+      "Election Commissioner"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-34",
+    "title": "Executive Committee Handover Certificate",
+    "header": [
+      "Outgoing Committee Term",
+      "Incoming Committee Term",
+      "Date of Handover",
+      "Venue"
+    ],
+    "sections": [
+      {
+        "name": "Items Handed Over",
+        "kind": "checklist",
+        "items": [
+          "Constitution",
+          "Minute books",
+          "Membership register",
+          "Bank documents",
+          "Cheque books",
+          "Financial records",
+          "Fixed assets",
+          "Office keys",
+          "Website access",
+          "Email accounts",
+          "Social media accounts",
+          "Digital archive",
+          "Election archive",
+          "Contracts",
+          "Official seal"
+        ]
+      },
+      {
+        "name": "Remarks",
+        "kind": "text",
+        "items": [
+          "3 lines"
+        ]
+      }
+    ],
+    "signatures": [
+      "Outgoing {{Head}}",
+      "Incoming {{Head}}",
+      "Outgoing {{Secretary}}",
+      "Incoming {{Secretary}}"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-35",
+    "title": "Election Archive Register",
+    "header": [
+      "Election Year",
+      "Prepared On"
+    ],
+    "sections": [
+      {
+        "name": "Register",
+        "kind": "table",
+        "items": [
+          "Archive ID",
+          "Document Name",
+          "Pages",
+          "Location",
+          "Retention Until",
+          "Destroyed On",
+          "Destroyed By"
+        ],
+        "blank": 4
+      }
+    ],
+    "signatures": [
+      "Prepared By",
+      "Verified By (Chief Election Commissioner)"
+    ],
+    "seal": false
+  },
+  {
+    "code": "ER-35A",
+    "title": "Election Closure Certificate",
+    "header": [
+      "Election Reference",
+      "Date"
+    ],
+    "sections": [
+      {
+        "name": "The Election Commission Certifies That",
+        "kind": "checklist",
+        "items": [
+          "The election is completed.",
+          "Results have been certified.",
+          "All appeals have concluded.",
+          "Tribunal decisions have been implemented.",
+          "The Executive Committee has been installed.",
+          "Election records have been archived.",
+          "Election materials have been secured.",
+          "Financial accounts have been closed.",
+          "Commission duties are completed."
+        ]
+      },
+      {
+        "name": "",
+        "kind": "declaration",
+        "items": [
+          "The Election Commission is hereby dissolved with effect from the date below."
+        ]
+      },
+      {
+        "name": "",
+        "kind": "fields",
+        "items": [
+          "Effective Date of Dissolution"
+        ]
+      }
+    ],
+    "signatures": [
+      "Chief Election Commissioner",
+      "Election Commissioner",
+      "Election Commissioner",
+      "{{Head}}",
+      "{{Secretary}}"
+    ],
+    "seal": true
+  }
+]

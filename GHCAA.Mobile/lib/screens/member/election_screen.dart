@@ -222,6 +222,8 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
               ),
               const SizedBox(height: AppTheme.spaceL),
             ],
+            const _DocumentsButton(),
+            const SizedBox(height: AppTheme.spaceL),
             if (!closed && ballot.seats.isEmpty)
               const EmptyStateWidget('No candidates have been published yet.',
                   icon: Icons.people_outline)
@@ -429,9 +431,23 @@ class _NoOpenElection extends StatelessWidget {
           icon: const Icon(Icons.bar_chart),
           label: const Text('Latest results'),
         ),
+        const SizedBox(height: AppTheme.spaceS),
+        const _DocumentsButton(),
       ],
     );
   }
+}
+
+// 37.14s. Rules, guides and printable forms, open or not.
+class _DocumentsButton extends StatelessWidget {
+  const _DocumentsButton();
+
+  @override
+  Widget build(BuildContext context) => OutlinedButton.icon(
+        onPressed: () => context.push('/election/documents'),
+        icon: const Icon(Icons.menu_book_outlined),
+        label: const Text('Rules and forms'),
+      );
 }
 
 class _Notice extends StatelessWidget {

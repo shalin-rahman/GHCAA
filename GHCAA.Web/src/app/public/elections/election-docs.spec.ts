@@ -1,29 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { splitForms, formNumber, formStage, ELECTION_DOCS } from './election-docs';
-
-describe('ELECTION_DOCS', () => {
-    it('has a unique id per document', () => {
-        const ids = ELECTION_DOCS.map(d => d.id);
-        expect(new Set(ids).size).toBe(ids.length);
-    });
-
-    it('has a unique file per document', () => {
-        const files = ELECTION_DOCS.map(d => d.file);
-        expect(new Set(files).size).toBe(files.length);
-    });
-
-    /* The forms handbook is split across two files (ER-01..24 and the lettered forms after
-       ER-25); a document cannot be both a handbook of forms and a single form. */
-    it('never marks a document as both a handbook and a single form', () => {
-        expect(ELECTION_DOCS.filter(d => d.isFormsHandbook && d.isForm)).toEqual([]);
-    });
-
-    it('keeps every handbook and single form in the Forms group', () => {
-        const forms = ELECTION_DOCS.filter(d => d.isFormsHandbook || d.isForm);
-        expect(forms.length).toBeGreaterThan(0);
-        expect(forms.every(d => d.group === 'Forms')).toBe(true);
-    });
-});
+import { splitForms, formNumber, formStage } from './election-docs';
 
 // FR-39
 describe('formNumber', () => {
@@ -60,7 +36,7 @@ describe('formStage', () => {
 
 describe('splitForms', () => {
     const handbook = [
-        '# HARAGANGIAN',
+        '# HANDBOOK COVER',
         '# Forms & Templates Handbook',
         '',
         '# FORM ER-01',
@@ -85,7 +61,7 @@ describe('splitForms', () => {
     });
 
     it('discards the cover page before the first form', () => {
-        expect(splitForms(handbook)[0].source).not.toContain('HARAGANGIAN');
+        expect(splitForms(handbook)[0].source).not.toContain('HANDBOOK COVER');
     });
 
     it('returns nothing when there are no form headings', () => {

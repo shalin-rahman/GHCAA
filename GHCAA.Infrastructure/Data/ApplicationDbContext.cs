@@ -97,7 +97,9 @@ namespace GHCAA.Infrastructure.Data
             "email_templates.json", "site_content.json", "themes.json", "constitution.json",
         };
 
-        private static string? ResolveProfilePackPath(string fileName)
+        // Internal so ElectionContentSeeder can read election-content/ files with the same
+        // ORG_PROFILE then default order. fileName may hold a subfolder.
+        internal static string? ResolveProfilePackPath(string fileName)
         {
             var orgProfile = Environment.GetEnvironmentVariable("ORG_PROFILE");
             var profileName = string.IsNullOrWhiteSpace(orgProfile) ? "default" : orgProfile;
@@ -257,6 +259,7 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<ECPeriodHandoverCheck> ECPeriodHandoverChecks { get; set; } = null!;
         public DbSet<ECMember> ECMembers { get; set; } = null!;
         public DbSet<EcPosition> EcPositions { get; set; } = null!;
+        public DbSet<ElectionContent> ElectionContents { get; set; } = null!;
         public DbSet<AcademicRecord> AcademicRecords { get; set; } = null!;
         public DbSet<ProfessionalRecord> ProfessionalRecords { get; set; } = null!;
         public DbSet<PaymentConfiguration> PaymentConfigurations { get; set; } = null!;

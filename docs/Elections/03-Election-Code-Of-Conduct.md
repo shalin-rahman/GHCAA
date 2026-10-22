@@ -1,4 +1,4 @@
-# HARAGANGIAN
+# {{OrgFullName}}
 # Election Code of Conduct
 
 Version: 1.0
@@ -655,7 +655,7 @@ Examples of Serious Misconduct
 # Schedule B
 Ethical Oath
 
-"I solemnly affirm that I shall faithfully uphold the Constitution, Election Regulations, and Election Code of Conduct of HARAGANGIAN. I shall discharge my duties honestly, impartially, independently, and without fear, favour, bias, political influence, personal gain, or conflict of interest. I shall preserve the secrecy and integrity of the election process and act solely in the best interests of the Association."
+"I solemnly affirm that I shall faithfully uphold the Constitution, Election Regulations, and Election Code of Conduct of {{OrgFullName}}. I shall discharge my duties honestly, impartially, independently, and without fear, favour, bias, political influence, personal gain, or conflict of interest. I shall preserve the secrecy and integrity of the election process and act solely in the best interests of the Association."
 
 Signature: ______________________
 

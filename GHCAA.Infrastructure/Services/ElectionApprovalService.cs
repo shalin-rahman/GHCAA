@@ -54,7 +54,7 @@ public sealed class ElectionApprovalService(
                 await transaction.CommitAsync(ct);
             return new ElectionApprovalRunResult(true, error, null);
         }
-        catch (DbUpdateException ex) when (HasPendingAudit() && IsUniqueViolation(ex))
+        catch (DbUpdateException ex) when (HasPendingAudit() && DbErrors.IsUniqueViolation(ex))
         {
             await RollBackAfterClashAsync(transaction, electionId, action, ex);
             return new ElectionApprovalRunResult(true, Constants.Elections.Replies.Busy, null);
@@ -66,18 +66,6 @@ public sealed class ElectionApprovalService(
     // The whole step is rolled back instead and the caller is told to try again.
     private bool HasPendingAudit() =>
         db.ChangeTracker.Entries<ElectionAuditEntry>().Any(x => x.State == EntityState.Added);
-
-    // 98.20. Only a duplicate key means another write got there first. Any other save error
-    // (a dropped connection, a bad value) is a real fault and must not be shown as "busy".
-    // SQLite reports the same clash as error 19 with extended code 2067 in the tests.
-    private static bool IsUniqueViolation(DbUpdateException ex) => ex.InnerException switch
-    {
-        Npgsql.PostgresException pg => pg.SqlState == Npgsql.PostgresErrorCodes.UniqueViolation,
-        Microsoft.Data.Sqlite.SqliteException lite => lite.SqliteExtendedErrorCode == SqliteUniqueConstraint,
-        _ => false
-    };
-
-    private const int SqliteUniqueConstraint = 2067;
 
     private async Task RollBackAfterClashAsync(Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction transaction, int electionId, ElectionApprovalAction action, DbUpdateException ex)
     {
@@ -218,7 +206,7 @@ public sealed class ElectionApprovalService(
 
             await transaction.CommitAsync(ct);
         }
-        catch (DbUpdateException ex) when (HasPendingAudit() && IsUniqueViolation(ex))
+        catch (DbUpdateException ex) when (HasPendingAudit() && DbErrors.IsUniqueViolation(ex))
         {
             // The claim rolls back too, so the approval stays open for another try.
             await RollBackAfterClashAsync(transaction, approval.ElectionId, approval.Action, ex);
@@ -410,7 +398,7 @@ public sealed class ElectionApprovalService(
             await AuditRevokeAsync(Constants.Elections.EmergencyRevokeOutcomes.Revoked, approval.ElectionId, approval.Id, approval.RequestedByUserId, userId, target.Id, payload.Reason, before, Snapshot(target), ct);
             await transaction.CommitAsync(ct);
         }
-        catch (DbUpdateException ex) when (HasPendingAudit() && IsUniqueViolation(ex))
+        catch (DbUpdateException ex) when (HasPendingAudit() && DbErrors.IsUniqueViolation(ex))
         {
             await RollBackAfterClashAsync(transaction, approval.ElectionId, approval.Action, ex);
             return (false, Constants.Elections.Replies.Busy);
@@ -504,7 +492,7 @@ public sealed class ElectionApprovalService(
             await db.SaveChangesAsync(ct);
             return true;
         }
-        catch (DbUpdateException ex) when (approval.OpenKey != null && IsUniqueViolation(ex))
+        catch (DbUpdateException ex) when (approval.OpenKey != null && DbErrors.IsUniqueViolation(ex))
         {
             db.Entry(approval).State = EntityState.Detached;
             if (await db.ElectionApprovals.AnyAsync(x => x.OpenKey == approval.OpenKey, ct))

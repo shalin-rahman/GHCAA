@@ -1,0 +1,74 @@
+[
+  {
+    "key": "regulations",
+    "file": "01-Election-Regulations.md",
+    "title": "Election Regulations",
+    "summary": "The governing rules for every association election: eligibility, the Election Commission, nomination, campaigning, polling and dispute resolution.",
+    "group": "Rules",
+    "format": "Prose",
+    "displayOrder": 1
+  },
+  {
+    "key": "code-of-conduct",
+    "file": "03-Election-Code-Of-Conduct.md",
+    "title": "Election Code of Conduct",
+    "summary": "What candidates, proposers, voters and officials may and may not do during an election period, and the penalties for breaching it.",
+    "group": "Rules",
+    "format": "Prose",
+    "displayOrder": 2
+  },
+  {
+    "key": "operations-manual",
+    "file": "02-Election-Operational-Manual.md",
+    "title": "Election Operations Manual",
+    "summary": "The Election Commission’s working manual — the full timeline from announcement to declaration of results, step by step.",
+    "group": "Procedure",
+    "format": "Prose",
+    "displayOrder": 3
+  },
+  {
+    "key": "polling-manual",
+    "file": "04-Election-Manual-Ballot.md",
+    "title": "Polling & Counting Manual",
+    "summary": "How a manual ballot is run on polling day: booth setup, ballot issue, sealing, counting, recounts and the result sheet.",
+    "group": "Procedure",
+    "format": "Prose",
+    "displayOrder": 4
+  },
+  {
+    "key": "forms",
+    "file": "05-Election-Forms-and-Templates.md",
+    "title": "Forms Handbook — Part I (ER-01 to ER-24)",
+    "summary": "Announcement, Commission appointment, voter roll, nomination and polling-day forms. Each one opens as a ready-to-use sheet on the Association letterhead and prints on A4.",
+    "group": "Forms",
+    "format": "FormsHandbook",
+    "displayOrder": 5
+  },
+  {
+    "key": "er-25",
+    "file": "06-Election-Ballot-Seal-and-Poll-Integrity-Certificate.md",
+    "title": "Form ER-25 — Ballot Box Sealing & Poll Integrity Certificate",
+    "summary": "Signed at the close of poll to certify that the ballot box was sealed in the presence of the agents present.",
+    "group": "Forms",
+    "format": "Form",
+    "displayOrder": 6
+  },
+  {
+    "key": "forms-2",
+    "file": "07-Election-Vote-Counting-Authorisation.md",
+    "title": "Forms Handbook — Part II (ER-22A, ER-25A to ER-35A)",
+    "summary": "Counting authorisation, tally, recount, result certification, complaints, appeals, handover and closure forms, plus the signature matrix and retention schedule.",
+    "group": "Forms",
+    "format": "FormsHandbook",
+    "displayOrder": 7
+  },
+  {
+    "key": "forms-appendices",
+    "file": "08-Election-Forms-Appendices.md",
+    "title": "Forms Appendices — Signatures, Custody & Retention",
+    "summary": "Which officers must sign which form, the chain of custody for election material, and how long each record is kept.",
+    "group": "Forms",
+    "format": "Prose",
+    "displayOrder": 8
+  }
+]

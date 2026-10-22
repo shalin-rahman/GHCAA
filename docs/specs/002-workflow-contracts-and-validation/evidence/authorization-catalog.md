@@ -38,11 +38,11 @@ then puts Admin and SuperAdmin callers into the admin group with `IsInRole("Admi
 ## 2. Combinations in use
 
 One row per route template, so an action with a legacy alias route counts once per alias. The
-script found 390 routes. That matches the 390 `[Http*]` attributes in the folder.
+script found 397 routes. That matches the 397 `[Http*]` attributes in the folder.
 
 | Combination | Routes | Controllers |
 |---|---|---|
-| Anonymous | 70 | Archive, Auth, Campaigns, Contact, CredentialVerification, Elections, Events, Financials, Gallery, Gateways, Governance, Health, JobHub, Lookups, Networking, News, OrgConfig, PaymentConfig, Registration, Scholarships, SiteContent, Theme |
+| Anonymous | 72 | Archive, Auth, Campaigns, Contact, CredentialVerification, ElectionContent, Elections, Events, Financials, Gallery, Gateways, Governance, Health, JobHub, Lookups, Networking, News, OrgConfig, PaymentConfig, Registration, Scholarships, SiteContent, Theme |
 | Authenticated | 72 | Activity, Assistant, Auth, Campaigns, ElectionAppointments, ElectionPersonasRead, Elections, FamilyLink, Financials, Forum, Governance, MemberCommunications, Mentorship, Messaging, Networking, News, Notification, PendingApprovals, Poll, Profile |
 | Authenticated + in-body Admin | 1 | Events |
 | Authenticated + in-body Admin or SuperAdmin | 9 | Archive, Financials, JobHub, News, SecureFiles |
@@ -52,7 +52,7 @@ script found 390 routes. That matches the 390 `[Http*]` attributes in the folder
 | MemberOnly + in-body Admin or SuperAdmin | 1 | Gallery |
 | ElectionStaff | 4 | ElectionAppointments, Elections |
 | ElectionStaff + step-up | 29 | AdminElections, ElectionAppointments, Elections |
-| AdminOnly | 140 | Activity, Admin, AdminGovernance, AdminPoll, AdminSocialAuth, Archive, Campaigns, Communication, CredentialVerification, Events, Financials, Gallery, JobHub, Lookups, MemberImport, Mentorship, News, PendingApprovals, Scholarships, SiteContent, Theme |
+| AdminOnly | 145 | Activity, Admin, AdminGovernance, AdminPoll, AdminSocialAuth, Archive, Campaigns, Communication, CredentialVerification, ElectionContent, Elections, Events, Financials, Gallery, JobHub, Lookups, MemberImport, Mentorship, News, PendingApprovals, Scholarships, SiteContent, Theme |
 | AdminOnly + in-body SuperAdmin | 5 | Admin |
 | AdminOnly + step-up | 4 | Admin, AdminElections, AdminGovernance, Elections |
 | AdminOnly + step-up + in-body SuperAdmin | 1 | Admin |
@@ -67,11 +67,11 @@ Where the policy was set:
 
 | Policy | On the action | On the controller | Fallback only |
 |---|---|---|---|
-| Anonymous | 70 | 0 | 0 |
+| Anonymous | 72 | 0 | 0 |
 | Authenticated | 17 | 72 | 0 |
 | MemberOnly | 7 | 0 | 0 |
 | ElectionStaff | 18 | 15 | 0 |
-| AdminOnly | 91 | 59 | 0 |
+| AdminOnly | 96 | 59 | 0 |
 | SuperAdminOnly | 15 | 26 | 0 |
 
 No route relies on the fallback policy alone. Every action or its controller names its rule.
@@ -112,12 +112,14 @@ Base policy: `[AllowAnonymous]`, no sign-in.
 | POST | `/api/campaigns/{slug}/pledges` | `CampaignsController.CreatePledge` (line 49) |  |
 | GET | `/api/config` | `OrgConfigController.GetConfig` (line 18) |  |
 | POST | `/api/contact` | `ContactController.Submit` (line 21) |  |
+| GET | `/api/election-content` | `ElectionContentController.GetPublished` (line 28) |  |
+| GET | `/api/election-content/{kind}/{key}` | `ElectionContentController.GetPublishedByKey` (line 36) |  |
 | GET | `/api/elections/current` | `ElectionsController.GetCurrent` (line 127) |  |
 | GET | `/api/elections/latest-declared` | `ElectionsController.GetLatestDeclared` (line 134) |  |
 | GET | `/api/elections/{id:int}` | `ElectionsController.Get` (line 50) |  |
 | GET | `/api/elections/{id:int}/audit/verify` | `ElectionsController.VerifyAudit` (line 99) |  |
 | GET | `/api/elections/{id:int}/board` | `ElectionsController.Board` (line 61) |  |
-| GET | `/api/elections/{id:int}/documents/{formCode}/verification` | `ElectionsController.VerifyDocument` (line 436) | CredentialVerification |
+| GET | `/api/elections/{id:int}/documents/{formCode}/verification` | `ElectionsController.VerifyDocument` (line 450) | CredentialVerification |
 | GET | `/api/elections/{id:int}/nominations` | `ElectionsController.Nominations` (line 235) |  |
 | GET | `/api/elections/{id:int}/opened-ballots` | `ElectionsController.OpenedBallots` (line 89) |  |
 | GET | `/api/elections/{id:int}/results` | `ElectionsController.Results` (line 78) |  |
@@ -431,6 +433,11 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 | GET | `/api/campaigns/admin/tiers` | `CampaignsController.GetTiers` (line 140) |  |
 | POST | `/api/campaigns/admin/tiers` | `CampaignsController.CreateTier` (line 147) |  |
 | GET | `/api/campaigns/admin/{campaignId}/pledges` | `CampaignsController.GetPledgesForAdmin` (line 122) |  |
+| POST | `/api/election-content` | `ElectionContentController.Create` (line 59) |  |
+| GET | `/api/election-content/admin` | `ElectionContentController.GetAll` (line 44) |  |
+| GET | `/api/election-content/admin/{id:int}` | `ElectionContentController.GetById` (line 51) |  |
+| PUT | `/api/election-content/{id:int}` | `ElectionContentController.Update` (line 70) |  |
+| GET | `/api/elections/forms/{code}/blank` | `ElectionsController.BlankForm` (line 437) |  |
 | POST | `/api/events/admin` | `EventsController.CreateEvent` (line 170) |  |
 | GET | `/api/events/admin/all` | `EventsController.GetAllEventsForAdmin` (line 162) |  |
 | POST | `/api/events/admin/approve-registration` | `EventsController.ApproveRegistration` (line 226) |  |

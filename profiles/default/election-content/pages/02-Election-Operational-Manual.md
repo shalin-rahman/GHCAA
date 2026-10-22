@@ -1,4 +1,4 @@
-# HARAGANGIAN
+# {{OrgFullName}}
 # Election Operations Manual
 
 Version: 1.0
@@ -57,7 +57,7 @@ Every Election Commissioner, Polling Officer, Observer and Technical Administrat
 
 Deviation shall only occur by written order of the Chief Election Commissioner.
 
-The platform fills some forms from its own records, so the officials do not retype them. Form numbers follow the Regulations from 2026-10-20; the platform still prints the old code shown in brackets until it is renumbered (TODO 37.14n), and the old codes keep working after that. Filled from records: ER-08 (ER-07), ER-10 (ER-09), ER-11 (ER-10), ER-18 (ER-13), ER-19 (ER-14), ER-25 (ER-19), ER-27 (ER-23), ER-27C (ER-29), ER-29 (ER-30) and ER-30 (ER-31). Printed blank and completed by hand: ER-01, ER-02, ER-17 (ER-11), ER-28 (ER-26), ER-28B (ER-28) and ER-34 (ER-33). Any form can be printed blank or filled from records once TODO 37.14s, form wording from settings, is built. Section Annex B of the Officials Handbook lists all 50 forms.
+The platform fills some forms from its own records, so the officials do not retype them. Form numbers follow the Regulations, and the platform prints them from 2026-10-22 (TODO 37.14n, forms renumbered to the Regulations). The codes it printed before, shown in brackets, no longer open a form. Filled from records: ER-04 and ER-05 (from 2026-10-22, TODO 37.14p), ER-08 (ER-07), ER-10 (ER-09), ER-11 (ER-10), ER-18 (ER-13), ER-19 (ER-14), ER-23 and ER-24 (from 2026-10-22, TODO 37.14p), ER-25 (ER-19), ER-27 (ER-23), ER-27C (ER-29), ER-29 (ER-30) and ER-30 (ER-31). Printed blank and completed by hand: ER-01, ER-02, ER-17 (ER-11), ER-28 (ER-26), ER-28B (ER-28) and ER-34 (ER-33). The QR code on each form opens a public page that confirms the election and the form exist. Since 2026-10-22 (TODO 37.14s, form wording from settings) any form prints blank or filled. A form with no stored records prints its election facts and ruled lines only. Section Annex B of the Officials Handbook lists all 50 forms.
 
 ---
 
@@ -754,9 +754,11 @@ must be recorded immediately.
 
 System procedure: rules freeze and emergency revoke
 
-Before polling is requested, the panel warns if fewer than two live officials hold Approve.
+Before polling is requested, the officials dashboard shows the readiness list. Each item reads Done
+or Not yet. Officials with ChangePhase record the mock election, technical audit, decided appeals and
+paper stock with Record as done. Polling cannot be requested or approved while an item is not met.
 
-The warning does not block the request.
+The list warns if fewer than two live officials hold Approve. The warning does not block the request.
 
 The election rules freeze when a request to open polling is waiting for approval.
 

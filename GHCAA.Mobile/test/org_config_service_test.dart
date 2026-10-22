@@ -115,6 +115,7 @@ void main() {
     expect(e.accessEndsDaysAfterDeclare, 21);
     expect(e.twoPersonActions, ElectionSettings.allApprovalActions);
     expect(e.candidateOrder, 'Random');
+    expect(e.defaultPrintMode, 'Blank');
   });
 
   test('parses a stored elections section', () {
@@ -125,6 +126,7 @@ void main() {
         'inviteLinkHours': 5,
         'publishPerSeatBallots': false,
         'unfreezeCutoffDaysBeforeNominationClose': 4,
+        'defaultPrintMode': 'Filled',
       },
     }).elections;
     expect(e.twoPersonActions, ['Declare']);
@@ -132,6 +134,7 @@ void main() {
     expect(e.inviteLinkHours, 5);
     expect(e.publishPerSeatBallots, isFalse);
     expect(e.unfreezeCutoffDaysBeforeNominationClose, 4);
+    expect(e.defaultPrintMode, 'Filled');
     expect(e.approvalExpiryHours, 48);
   });
 }

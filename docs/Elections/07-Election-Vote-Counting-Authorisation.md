@@ -342,14 +342,7 @@ The Election Commission hereby declares the following candidates elected.
 
 | Office | Candidate | Votes |
 |--------|-----------|-------|
-| President | | |
-| Vice President | | |
-| General Secretary | | |
-| Joint Secretary | | |
-| Treasurer | | |
-| Executive Member | | |
-| Executive Member | | |
-| Executive Member | | |
+| {{PositionSeats}} | | |
 
 :: sign Certified By / Chief Election Commissioner
 
@@ -524,9 +517,9 @@ Venue: ___
 
 :: lines Remarks | 3
 
-:: sign Outgoing President | Incoming President
+:: sign Outgoing {{Head}} | Incoming {{Head}}
 
-:: sign Outgoing Secretary | Incoming Secretary
+:: sign Outgoing {{Secretary}} | Incoming {{Secretary}}
 
 :: sign Witness | Witness
 
@@ -602,6 +595,6 @@ Effective Date of Dissolution: ___
 
 :: sign Chief Election Commissioner | Election Commissioner | Election Commissioner
 
-:: sign Association President | Association Secretary
+:: sign {{Head}} | {{Secretary}}
 
 :: seal Association Seal

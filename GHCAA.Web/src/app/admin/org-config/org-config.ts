@@ -9,7 +9,7 @@ import { ORG_CONFIG_FALLBACK } from '../../core/config/org-config-fallback.gener
 import { DATE_FORMATS, DATE_FORMAT_LABELS, DEFAULT_DATE_FORMAT } from '../../core/constants/app.constants';
 import {
   DEFAULT_ELECTION_SETTINGS, ELECTION_APPROVAL_ACTIONS, ELECTION_APPROVAL_ACTION_LABELS,
-  ELECTION_CANDIDATE_ORDERS, ElectionApprovalAction
+  ELECTION_CANDIDATE_ORDERS, ELECTION_PRINT_MODES, ElectionApprovalAction
 } from '../../core/models/election.models';
 
 type TabKey = 'branding' | 'contact' | 'currency' | 'features' | 'workflow' | 'elections' | 'localization' | 'advanced';
@@ -57,6 +57,7 @@ export class AdminOrgConfig implements OnInit {
   readonly approvalActions = ELECTION_APPROVAL_ACTIONS;
   readonly approvalActionLabels = ELECTION_APPROVAL_ACTION_LABELS;
   readonly candidateOrders = ELECTION_CANDIDATE_ORDERS;
+  readonly printModes = ELECTION_PRINT_MODES;
 
   ngOnInit() {
     const current = this.configService.config();

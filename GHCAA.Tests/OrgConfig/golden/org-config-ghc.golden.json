@@ -205,6 +205,7 @@
     "ShowTurnoutDuringPolling": false,
     "PublishPerSeatBallots": true,
     "CountRequesterOnly": false,
-    "UnfreezeCutoffDaysBeforeNominationClose": 2
+    "UnfreezeCutoffDaysBeforeNominationClose": 2,
+    "DefaultPrintMode": "Blank"
   }
 }

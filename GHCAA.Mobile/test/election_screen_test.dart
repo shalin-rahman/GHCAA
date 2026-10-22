@@ -85,6 +85,9 @@ void main() {
         theme: AppTheme.midnightTheme,
         routerConfig: GoRouter(routes: [
           GoRoute(path: '/', builder: (_, __) => const ElectionScreen()),
+          GoRoute(
+              path: '/election/documents',
+              builder: (_, __) => const Text('Documents route')),
         ]),
       ),
     ));
@@ -118,6 +121,20 @@ void main() {
     expect(
         find.text('Rahim Uddin, Chief Election Commissioner'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  // FR-25. 37.14s
+  testWidgets('the ballot links to the election rules and forms',
+      (tester) async {
+    await pump(tester);
+
+    await tester.ensureVisible(find.text('Rules and forms'));
+    await tester.tap(find.text('Rules and forms'));
+    for (var i = 0; i < 3; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    expect(find.text('Documents route'), findsOneWidget);
   });
 
   testWidgets('abstain clears the picks on the seat', (tester) async {

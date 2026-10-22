@@ -5,6 +5,7 @@ using GHCAA.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Tests.Controllers
 {
@@ -293,17 +294,56 @@ namespace GHCAA.Tests.Controllers
         public async Task Document_TestElection_StillServesAnOfficial()
         {
             _electionServiceMock.Setup(x => x.IsTestAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
-            _documentServiceMock.Setup(x => x.GeneratePdfAsync(1, "form-1", It.IsAny<CancellationToken>())).ReturnsAsync([1, 2, 3]);
+            _documentServiceMock.Setup(x => x.GeneratePdfAsync(1, "form-1", It.IsAny<ElectionPrintMode?>(), It.IsAny<CancellationToken>())).ReturnsAsync([1, 2, 3]);
 
-            Assert.That(await _controller.Document(1, "form-1", CancellationToken.None), Is.InstanceOf<FileContentResult>());
+            Assert.That(await _controller.Document(1, "form-1", null, CancellationToken.None), Is.InstanceOf<FileContentResult>());
         }
 
         [Test]
         public async Task Document_UnknownForm_Returns404()
         {
-            _documentServiceMock.Setup(x => x.GeneratePdfAsync(1, "nope", It.IsAny<CancellationToken>())).ReturnsAsync((byte[]?)null);
+            _documentServiceMock.Setup(x => x.GeneratePdfAsync(1, "nope", It.IsAny<ElectionPrintMode?>(), It.IsAny<CancellationToken>())).ReturnsAsync((byte[]?)null);
 
-            Assert.That(await _controller.Document(1, "nope", CancellationToken.None), Is.InstanceOf<NotFoundResult>());
+            Assert.That(await _controller.Document(1, "nope", null, CancellationToken.None), Is.InstanceOf<NotFoundResult>());
+        }
+
+        // 37.14s. The mode in the query reaches the service unchanged.
+        [Test]
+        public async Task Document_PassesThePrintMode()
+        {
+            _documentServiceMock.Setup(x => x.GeneratePdfAsync(1, "ER-10", ElectionPrintMode.Blank, It.IsAny<CancellationToken>())).ReturnsAsync([1]);
+
+            Assert.That(await _controller.Document(1, "ER-10", ElectionPrintMode.Blank, CancellationToken.None), Is.InstanceOf<FileContentResult>());
+        }
+
+        // 37.14s. "mode=7" binds to an unnamed value; it must not fall through to a filled print.
+        [Test]
+        [Category("FR-25")]
+        public async Task Document_UnknownPrintMode_Returns400()
+        {
+            var result = await _controller.Document(1, "ER-10", (ElectionPrintMode)7, CancellationToken.None);
+
+            Assert.That((result as ObjectResult)!.StatusCode, Is.EqualTo(400));
+            _documentServiceMock.Verify(x => x.GeneratePdfAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ElectionPrintMode?>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Test]
+        public async Task BlankForm_KnownCode_ReturnsPdfNamedAfterTheCode()
+        {
+            _documentServiceMock.Setup(x => x.GenerateBlankPdfAsync("er-05", It.IsAny<CancellationToken>())).ReturnsAsync([1, 2]);
+
+            var result = await _controller.BlankForm("er-05", CancellationToken.None) as FileContentResult;
+
+            Assert.That(result!.ContentType, Is.EqualTo("application/pdf"));
+            Assert.That(result.FileDownloadName, Is.EqualTo("ER-05_blank.pdf"));
+        }
+
+        [Test]
+        public async Task BlankForm_UnknownCode_Returns404()
+        {
+            _documentServiceMock.Setup(x => x.GenerateBlankPdfAsync("nope", It.IsAny<CancellationToken>())).ReturnsAsync((byte[]?)null);
+
+            Assert.That(await _controller.BlankForm("nope", CancellationToken.None), Is.InstanceOf<NotFoundResult>());
         }
 
         // 37.14n. The verify page behind a printed form's QR code.

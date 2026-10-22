@@ -70,6 +70,10 @@ class FakeStorageService implements StorageService {
   Future<String?> getRefreshToken() async => null;
   @override
   Future<void> removeRefreshToken() async {}
+  @override
+  Future<void> saveBallotReceipt(int electionId, String pdfBase64) async {}
+  @override
+  Future<String?> takeBallotReceipt(int electionId, {required bool keep}) async => null;
 }
 
 class FakeAuthService implements AuthService {

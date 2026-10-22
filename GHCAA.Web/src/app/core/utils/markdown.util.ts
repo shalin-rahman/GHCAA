@@ -1,6 +1,6 @@
 /**
- * Minimal markdown -> HTML renderer for the repo-authored governance documents
- * (`docs/Elections/*.md`, served from `public/assets/elections/`).
+ * Minimal markdown -> HTML renderer for the election pages, which the API serves from
+ * the ElectionContent table (37.14s).
  *
  * Deliberately NOT a general markdown implementation and deliberately not `marked`:
  * a feature survey of all seven election documents (TODO 36.5) found the syntax in use

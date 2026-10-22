@@ -989,6 +989,368 @@
         }
       }
     },
+    "/api/admin/elections/{id}/form-details": {
+      "put": {
+        "tags": [
+          "AdminElections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateElectionFormDetailsRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateElectionFormDetailsRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateElectionFormDetailsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/elections/{id}/nominations": {
+      "get": {
+        "tags": [
+          "AdminElections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/elections/{id}/nominations/{nominationId}/consent": {
+      "put": {
+        "tags": [
+          "AdminElections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "nominationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordConsentRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordConsentRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordConsentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/elections/{id}/nominations/{nominationId}/scrutiny-checks": {
+      "get": {
+        "tags": [
+          "AdminElections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "nominationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "AdminElections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "nominationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetScrutinyCheckRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetScrutinyCheckRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetScrutinyCheckRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/elections/{id}/recounts": {
+      "get": {
+        "tags": [
+          "AdminElections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "AdminElections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordRecountRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordRecountRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordRecountRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/elections/{id}/recounts/{recountId}/decision": {
+      "put": {
+        "tags": [
+          "AdminElections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "recountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecideRecountRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecideRecountRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecideRecountRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/elections/{id}/recounts/{recountId}/figures": {
+      "put": {
+        "tags": [
+          "AdminElections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "recountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordRecountFiguresRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordRecountFiguresRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordRecountFiguresRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/admin/error-logs": {
       "get": {
         "tags": [
@@ -1274,6 +1636,272 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/EndTermRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/governance/positions": {
+      "get": {
+        "tags": [
+          "AdminGovernance"
+        ],
+        "parameters": [
+          {
+            "name": "includeRetired",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "AdminGovernance"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveEcPositionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveEcPositionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveEcPositionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/governance/positions/{id}": {
+      "put": {
+        "tags": [
+          "AdminGovernance"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveEcPositionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveEcPositionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveEcPositionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "AdminGovernance"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/governance/positions/{id}/retire": {
+      "post": {
+        "tags": [
+          "AdminGovernance"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/governance/positions/{id}/restore": {
+      "post": {
+        "tags": [
+          "AdminGovernance"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/governance/positions/invalid-rows": {
+      "get": {
+        "tags": [
+          "AdminGovernance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/governance/positions/repair": {
+      "post": {
+        "tags": [
+          "AdminGovernance"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RepairPositionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RepairPositionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RepairPositionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/governance/periods/{id}/handover-checks": {
+      "get": {
+        "tags": [
+          "AdminGovernance"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "AdminGovernance"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetHandoverCheckRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetHandoverCheckRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetHandoverCheckRequest"
               }
             }
           }
@@ -2979,6 +3607,163 @@
         }
       }
     },
+    "/api/election-content": {
+      "get": {
+        "tags": [
+          "ElectionContent"
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ElectionContentKind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ElectionContent"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertElectionContentDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertElectionContentDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertElectionContentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/election-content/{kind}/{key}": {
+      "get": {
+        "tags": [
+          "ElectionContent"
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ElectionContentKind"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/election-content/admin": {
+      "get": {
+        "tags": [
+          "ElectionContent"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/election-content/admin/{id}": {
+      "get": {
+        "tags": [
+          "ElectionContent"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/election-content/{id}": {
+      "put": {
+        "tags": [
+          "ElectionContent"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertElectionContentDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertElectionContentDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertElectionContentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/admin/election-personas": {
       "get": {
         "tags": [
@@ -3722,6 +4507,88 @@
         }
       }
     },
+    "/api/elections/{id}/readiness": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionReadinessDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionReadinessDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionReadinessDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/readiness/attest": {
+      "post": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttestReadinessRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttestReadinessRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttestReadinessRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/elections/{id}/seats": {
       "post": {
         "tags": [
@@ -4265,11 +5132,88 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ElectionPrintMode"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/forms/{code}/blank": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/elections/{id}/documents/{formCode}/verification": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "formCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionDocumentVerifyDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionDocumentVerifyDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectionDocumentVerifyDto"
+                }
+              }
+            }
           }
         }
       }
@@ -6982,6 +7926,18 @@
         }
       }
     },
+    "/api/governance/positions": {
+      "get": {
+        "tags": [
+          "Governance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/governance/ec/history": {
       "get": {
         "tags": [
@@ -7067,7 +8023,7 @@
         }
       }
     },
-    "/healthz": {
+    "/health": {
       "get": {
         "tags": [
           "Health"
@@ -11052,6 +12008,9 @@
           },
           "isTest": {
             "type": "boolean"
+          },
+          "formDetails": {
+            "$ref": "#/components/schemas/ElectionFormDetailsDto"
           }
         },
         "additionalProperties": false
@@ -11091,6 +12050,11 @@
           },
           "description": {
             "type": "string",
+            "nullable": true
+          },
+          "positionId": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           }
         },
@@ -11554,6 +12518,19 @@
           "query": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AttestReadinessRequest": {
+        "required": [
+          "condition"
+        ],
+        "type": "object",
+        "properties": {
+          "condition": {
+            "minLength": 1,
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -12775,6 +13752,20 @@
         },
         "additionalProperties": false
       },
+      "DecideRecountRequest": {
+        "type": "object",
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "DeviceTokenDto": {
         "type": "object",
         "properties": {
@@ -12827,7 +13818,16 @@
             "nullable": true
           },
           "position": {
-            "$ref": "#/components/schemas/ECPosition"
+            "type": "string",
+            "nullable": true
+          },
+          "positionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "positionName": {
+            "type": "string",
+            "nullable": true
           },
           "startDate": {
             "type": "string",
@@ -12871,7 +13871,8 @@
             "format": "int32"
           },
           "position": {
-            "$ref": "#/components/schemas/ECPosition"
+            "type": "integer",
+            "format": "int32"
           },
           "startDate": {
             "type": "string",
@@ -12921,6 +13922,9 @@
           },
           "ecPeriod": {
             "$ref": "#/components/schemas/ECPeriod"
+          },
+          "ecPosition": {
+            "$ref": "#/components/schemas/EcPosition"
           }
         },
         "additionalProperties": false
@@ -12954,30 +13958,86 @@
               "$ref": "#/components/schemas/ECMember"
             },
             "nullable": true
+          },
+          "handoverChecks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ECPeriodHandoverCheck"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
       },
-      "ECPosition": {
-        "enum": [
-          "None",
-          "President",
-          "VicePresident",
-          "GeneralSecretary",
-          "OfficeSecretary",
-          "JointSecretary1",
-          "JointSecretary2",
-          "Treasurer",
-          "MediaCulturalAndSportsSecretary",
-          "OrganizationalSecretary",
-          "InformationAndTechnologySecretary",
-          "Member1",
-          "Member2",
-          "LawSecretary",
-          "ImmediatePastPresident",
-          "InstitutionalRepresentative"
-        ],
-        "type": "string"
+      "ECPeriodHandoverCheck": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ecPeriodId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "item": {
+            "$ref": "#/components/schemas/HandoverCheckItem"
+          },
+          "isChecked": {
+            "type": "boolean"
+          },
+          "setByUserId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EcPosition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "key": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "nameBn": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seatCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "showOnBoard": {
+            "type": "boolean"
+          },
+          "signsAsHead": {
+            "type": "boolean"
+          },
+          "signsAsSecretary": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
       },
       "ElectionApprovalAction": {
         "enum": [
@@ -13225,6 +14285,89 @@
         ],
         "type": "string"
       },
+      "ElectionContentKind": {
+        "enum": [
+          "Page",
+          "Form"
+        ],
+        "type": "string"
+      },
+      "ElectionDocumentVerifyDto": {
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string",
+            "nullable": true
+          },
+          "electionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "electionTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "phase": {
+            "$ref": "#/components/schemas/ElectionPhase"
+          },
+          "formCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "formTitle": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectionFormDetailsDto": {
+        "type": "object",
+        "properties": {
+          "finalListOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "campaignOpensOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "campaignClosesOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "silenceStartsAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "venue": {
+            "type": "string",
+            "nullable": true
+          },
+          "noticeReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "recountWindowEndsOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectionPageFormat": {
+        "enum": [
+          "Prose",
+          "FormsHandbook",
+          "Form"
+        ],
+        "type": "string"
+      },
       "ElectionPermission": {
         "enum": [
           "None",
@@ -13257,6 +14400,48 @@
           "Archived"
         ],
         "type": "string"
+      },
+      "ElectionPrintMode": {
+        "enum": [
+          "Blank",
+          "Filled"
+        ],
+        "type": "string"
+      },
+      "ElectionReadinessDto": {
+        "type": "object",
+        "properties": {
+          "ready": {
+            "type": "boolean"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ElectionReadinessItemDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectionReadinessItemDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "nullable": true
+          },
+          "met": {
+            "type": "boolean"
+          },
+          "attestation": {
+            "type": "boolean"
+          },
+          "advisory": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
       },
       "ElectionRulesUnlockDto": {
         "type": "object",
@@ -13291,8 +14476,9 @@
       "ElectionSeatRequestDto": {
         "type": "object",
         "properties": {
-          "position": {
-            "$ref": "#/components/schemas/ECPosition"
+          "positionId": {
+            "type": "integer",
+            "format": "int32"
           },
           "seatCount": {
             "type": "integer",
@@ -13344,6 +14530,9 @@
           "unfreezeCutoffDaysBeforeNominationClose": {
             "type": "integer",
             "format": "int32"
+          },
+          "defaultPrintMode": {
+            "$ref": "#/components/schemas/ElectionPrintMode"
           }
         },
         "additionalProperties": false
@@ -13956,6 +15145,26 @@
         ],
         "type": "string"
       },
+      "HandoverCheckItem": {
+        "enum": [
+          "Constitution",
+          "MinuteBooks",
+          "MembershipRegister",
+          "BankDocuments",
+          "ChequeBooks",
+          "FinancialRecords",
+          "FixedAssets",
+          "OfficeKeys",
+          "WebsiteAccess",
+          "EmailAccounts",
+          "SocialMediaAccounts",
+          "DigitalArchive",
+          "ElectionArchive",
+          "Contracts",
+          "OfficialSeal"
+        ],
+        "type": "string"
+      },
       "InitiatePaymentRequest": {
         "type": "object",
         "properties": {
@@ -14038,13 +15247,6 @@
             "nullable": true
           },
           "memberCategoryLabels": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "nullable": true
-          },
-          "ecRoleLabels": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
@@ -15074,6 +16276,96 @@
         },
         "additionalProperties": false
       },
+      "RecordConsentRequest": {
+        "required": [
+          "consentAt"
+        ],
+        "type": "object",
+        "properties": {
+          "consentAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecordRecountFiguresRequest": {
+        "required": [
+          "figures"
+        ],
+        "type": "object",
+        "properties": {
+          "figures": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecountFigureInput"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecordRecountRequest": {
+        "required": [
+          "applicantName",
+          "grounds",
+          "receivedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "electionSeatId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "applicantName": {
+            "maxLength": 150,
+            "minLength": 1,
+            "type": "string"
+          },
+          "applicantMemberId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "grounds": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "explanation": {
+            "maxLength": 4000,
+            "type": "string",
+            "nullable": true
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecountFigureInput": {
+        "type": "object",
+        "properties": {
+          "nominationId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "voteCount": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "RefreshRequestDto": {
         "required": [
           "refreshToken"
@@ -15142,6 +16434,29 @@
           "Other"
         ],
         "type": "string"
+      },
+      "RepairPositionRequest": {
+        "required": [
+          "kind"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "positionId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       },
       "ResendOtpDto": {
         "required": [
@@ -15264,6 +16579,46 @@
         },
         "additionalProperties": false
       },
+      "SaveEcPositionRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "nameBn": {
+            "maxLength": 100,
+            "type": "string",
+            "nullable": true
+          },
+          "displayOrder": {
+            "maximum": 999,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "seatCount": {
+            "maximum": 20,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "showOnBoard": {
+            "type": "boolean"
+          },
+          "signsAsHead": {
+            "type": "boolean"
+          },
+          "signsAsSecretary": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "SaveElectionPersonaDto": {
         "required": [
           "declarationText",
@@ -15320,6 +16675,18 @@
         },
         "additionalProperties": false
       },
+      "ScrutinyCheckItem": {
+        "enum": [
+          "MembershipVerified",
+          "VotingMember",
+          "MinimumMembershipPeriod",
+          "FoundingMemberRequirement",
+          "DocumentsComplete",
+          "NominationFeePaid",
+          "DeclarationSigned"
+        ],
+        "type": "string"
+      },
       "ScrutinyDto": {
         "type": "object",
         "properties": {
@@ -15374,6 +16741,30 @@
           "publicKey": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SetHandoverCheckRequest": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/HandoverCheckItem"
+          },
+          "isChecked": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SetScrutinyCheckRequest": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/ScrutinyCheckItem"
+          },
+          "isChecked": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -15704,6 +17095,47 @@
           },
           "isArchived": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateElectionFormDetailsRequest": {
+        "type": "object",
+        "properties": {
+          "finalListOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "campaignOpensOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "campaignClosesOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "silenceStartsAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "venue": {
+            "maxLength": 300,
+            "type": "string",
+            "nullable": true
+          },
+          "noticeReference": {
+            "maxLength": 100,
+            "type": "string",
+            "nullable": true
+          },
+          "recountWindowEndsOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -16149,6 +17581,56 @@
         },
         "additionalProperties": false
       },
+      "UpsertElectionContentDto": {
+        "required": [
+          "body",
+          "key",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9-]+$",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ElectionContentKind"
+          },
+          "format": {
+            "$ref": "#/components/schemas/ElectionPageFormat"
+          },
+          "group": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "summary": {
+            "maxLength": 1000,
+            "type": "string",
+            "nullable": true
+          },
+          "body": {
+            "maxLength": 200000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "displayOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isPublished": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "UpsertSiteContentDto": {
         "required": [
           "bodyHtml",
@@ -16309,6 +17791,10 @@
             "type": "boolean"
           },
           "notificationChannel": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailProvider": {
             "type": "string",
             "nullable": true
           }

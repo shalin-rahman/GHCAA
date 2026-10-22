@@ -43,6 +43,42 @@ export const ELECTION_APPROVAL_ACTIONS = (Object.keys(ELECTION_APPROVAL_ACTION_L
 
 export type ElectionCandidateOrder = 'Random' | 'Alphabetical';
 export const ELECTION_CANDIDATE_ORDERS: ElectionCandidateOrder[] = ['Random', 'Alphabetical'];
+// 37.14s. Matches the backend ElectionPrintMode enum.
+export type ElectionPrintMode = 'Blank' | 'Filled';
+export const ELECTION_PRINT_MODES: ElectionPrintMode[] = ['Blank', 'Filled'];
+
+// 37.14s. Matches the backend ElectionContentKind and ElectionPageFormat enums.
+export type ElectionContentKind = 'Page' | 'Form';
+export type ElectionPageFormat = 'Prose' | 'FormsHandbook' | 'Form';
+export const ELECTION_PAGE_FORMATS: ElectionPageFormat[] = ['Prose', 'FormsHandbook', 'Form'];
+
+// A list leaves body null. One page or form, or an admin read by id, carries it.
+export interface ElectionContentDto {
+    id: number;
+    key: string;
+    kind: ElectionContentKind;
+    format: ElectionPageFormat | null;
+    group: string | null;
+    title: string;
+    summary: string | null;
+    body: string | null;
+    displayOrder: number;
+    isPublished: boolean;
+    lastModified: string | null;
+}
+
+// A page needs a format and a form has none. Kind and key cannot change after create.
+export interface UpsertElectionContentDto {
+    key: string;
+    kind: ElectionContentKind;
+    format: ElectionPageFormat | null;
+    group: string | null;
+    title: string;
+    summary: string | null;
+    body: string;
+    displayOrder: number;
+    isPublished: boolean;
+}
 
 export interface ElectionSettings {
     adminKeepsControlAfterHandover: boolean;
@@ -56,6 +92,7 @@ export interface ElectionSettings {
     publishPerSeatBallots: boolean;
     countRequesterOnly: boolean;
     unfreezeCutoffDaysBeforeNominationClose: number;
+    defaultPrintMode: ElectionPrintMode;
 }
 
 // Same values as ElectionSettingsDto. Used when a stored config or the build fallback has no section.
@@ -70,7 +107,8 @@ export const DEFAULT_ELECTION_SETTINGS: ElectionSettings = {
     showTurnoutDuringPolling: false,
     publishPerSeatBallots: true,
     countRequesterOnly: false,
-    unfreezeCutoffDaysBeforeNominationClose: 2
+    unfreezeCutoffDaysBeforeNominationClose: 2,
+    defaultPrintMode: 'Blank'
 };
 
 export interface AdminElectionPositionDto {

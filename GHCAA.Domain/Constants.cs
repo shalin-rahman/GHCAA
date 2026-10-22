@@ -50,7 +50,7 @@ namespace GHCAA.Domain
             // cache key, so made-up query strings cannot add entries. OutputCacheVaryKeyTests fails
             // when an action reads a name missing here.
             public static readonly IReadOnlyList<string> PublicContentQueryKeys =
-                ["page", "pageSize", "jobCategory", "query", "articleCategory", "postType", "group"];
+                ["page", "pageSize", "jobCategory", "query", "articleCategory", "postType", "group", "kind"];
         }
 
         public static class ConfigKeys
@@ -166,6 +166,13 @@ namespace GHCAA.Domain
             public const string EmergencyRevokeAuditType = "ElectionEmergencyRevoke";
             // 37.13m. ActivityLog type for a count run under a second person's approval.
             public const string CountRunAuditType = "ElectionCountRun";
+            // 37.14s. Election pages and form layouts an admin edits. Body is a text column;
+            // the cap only stops a runaway paste.
+            public const int ContentKeyMaxLength = 64;
+            public const int ContentTitleMaxLength = 200;
+            public const int ContentSummaryMaxLength = 1000;
+            public const int ContentGroupMaxLength = 50;
+            public const int ContentBodyMaxLength = 200_000;
             // Reply codes a service returns when it refuses a step. Controllers map them to a status.
             public static class Replies
             {

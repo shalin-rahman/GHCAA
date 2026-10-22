@@ -415,17 +415,31 @@ public sealed class ElectionsController(
         return success ? Ok() : ApprovalError(error);
     }
 
-    /// <summary>FR-37.1e: generates a completed official election form from persisted records.</summary>
+    /// <summary>FR-37.1e, 37.14s: prints an election's form, filled from stored records or blank. No mode uses the org's DefaultPrintMode.</summary>
     [HttpGet("{id:int}/documents/{formCode}")]
     [Authorize(Policy = Policies.ElectionStaff)]
     [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.ViewDashboard)]
-    public async Task<IActionResult> Document(int id, string formCode, CancellationToken ct)
+    public async Task<IActionResult> Document(int id, string formCode, [FromQuery] ElectionPrintMode? mode, CancellationToken ct)
     {
+        // Query binding turns "mode=7" into an unnamed enum value, which would print as filled.
+        if (mode is { } m && !Enum.IsDefined(m))
+            return Problem(detail: "Mode must be Blank or Filled.", statusCode: StatusCodes.Status400BadRequest);
         // Officials with ViewDashboard may print a rehearsal's forms, so there is no test check here.
-        var pdf = await documentService.GeneratePdfAsync(id, formCode, ct);
+        var pdf = await documentService.GeneratePdfAsync(id, formCode, mode, ct);
         return pdf is null
             ? NotFound()
             : File(pdf, "application/pdf", $"E-{id:D6}_{formCode.ToUpperInvariant()}.pdf");
+    }
+
+    /// <summary>37.14s: a published form with ruled lines and no election data. Admins only.</summary>
+    [Authorize(Policy = Policies.AdminOnly)]
+    [HttpGet("forms/{code}/blank")]
+    public async Task<IActionResult> BlankForm(string code, CancellationToken ct)
+    {
+        var pdf = await documentService.GenerateBlankPdfAsync(code, ct);
+        return pdf is null
+            ? NotFound()
+            : File(pdf, "application/pdf", $"{code.Trim().ToUpperInvariant()}_blank.pdf");
     }
 
     /// <summary>37.14n: confirms that the election and form named by a printed form's QR code exist. Shares the credential-check rate limit.</summary>

@@ -94,6 +94,21 @@ namespace GHCAA.API.Extensions
                 app.Logger.LogWarning(ex, "Constitution sync skipped — table may not exist yet.");
             }
 
+            // 3b. Add any election page or form layout the profile has and the table lacks (TODO 37.14s).
+            try
+            {
+                using var contentScope = app.Services.CreateScope();
+                var contentCtx = contentScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                if (await contentCtx.Database.CanConnectAsync())
+                {
+                    await ElectionContentSeeder.SyncAsync(contentCtx, app.Logger);
+                }
+            }
+            catch (Exception ex)
+            {
+                app.Logger.LogWarning(ex, "Election content sync skipped; table may not exist yet.");
+            }
+
             // 4. Seed the two demo FamilyLinkRequest rows for the Visual profile. These used to be
             // HasData rows, but HasData runs inside EnsureCreated before step 2b has loaded Members
             // from members.json, so the FK to Members always failed. Runs after Members exist instead.

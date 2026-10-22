@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import {
@@ -7,19 +7,14 @@ import {
     ElectionCountStepResult, ElectionResultDto, ElectionRulesUnlockDto, ElectionSummaryDto,
     NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto,
     DecideRecountRequest, ElectionRecountDto, RecordRecountRequest, RecountFigureDto, ScrutinyCheckDto, ScrutinyCheckItem, UpdateElectionFormDetailsRequest,
-    ElectionDocumentVerifyDto
+    ElectionDocumentVerifyDto, ElectionPrintMode
 } from '../models/election.models';
 
-/** Fetches the static markdown election-form assets synced by `npm run sync:docs`. */
 @Injectable({ providedIn: 'root' })
 export class ElectionsService {
     private http = inject(HttpClient);
     // A 404 on the public result calls means "not yet", so the page explains it instead of a toast.
     private readonly quietHeaders = new HttpHeaders().set('X-Skip-Error-Notify', 'true');
-
-    getDocumentText(url: string): Observable<string> {
-        return this.http.get(url, { responseType: 'text' });
-    }
 
     getCurrent(): Observable<ElectionSummaryDto | null> {
         return this.http.get<ElectionSummaryDto | null>(API_ENDPOINTS.ELECTIONS.CURRENT);
@@ -219,8 +214,15 @@ export class ElectionsService {
         return this.http.post<void>(API_ENDPOINTS.ELECTIONS.READINESS_ATTEST(id), { condition });
     }
 
-    getOfficialDocument(id: number, formCode: string): Observable<Blob> {
-        return this.http.get(API_ENDPOINTS.ELECTIONS.DOCUMENT(id, formCode), { responseType: 'blob' });
+    // 37.14s. With no mode the server uses the org's DefaultPrintMode.
+    getOfficialDocument(id: number, formCode: string, mode?: ElectionPrintMode): Observable<Blob> {
+        const params = mode ? new HttpParams().set('mode', mode) : undefined;
+        return this.http.get(API_ENDPOINTS.ELECTIONS.DOCUMENT(id, formCode), { responseType: 'blob', params });
+    }
+
+    // 37.14s. Any signed-in user. Ruled lines, no election data and no QR.
+    getBlankForm(formCode: string): Observable<Blob> {
+        return this.http.get(API_ENDPOINTS.ELECTIONS.BLANK_FORM(formCode), { responseType: 'blob' });
     }
 
     // 37.14n. Anonymous. A 404 is the answer the page shows, so the global toast stays quiet.

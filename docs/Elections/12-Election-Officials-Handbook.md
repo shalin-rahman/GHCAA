@@ -1,6 +1,6 @@
 # Election Officials Handbook
 
-Complete operating guide for every official who works an election on the GHCAA platform.
+Complete operating guide for every official who works an election on the association's platform.
 
 # Document Control
 
@@ -1097,16 +1097,18 @@ Rules for every form:
    secretary flag in the committee position settings (TODO 95.2, configurable committee positions).
 
 Status means: Filled from records, the platform prints it with the election's data; Printed blank, the
-platform prints the frame and officials fill it; Data stored, not built, the records exist and the PDF
-is planned (TODO 37.14p); Not built, the form is planned (TODO 37.14q).
+platform prints the frame and officials fill it; Not built, the form is planned (TODO 37.14q, the
+remaining election forms). ER-04, ER-05, ER-23 and ER-24 moved to Filled from records on 2026-10-22
+(TODO 37.14p). Lines with no stored record on those forms, such as seal numbers and observers, stay
+for hand.
 
 | # | Code | Form | Old code | Source | Signed by | Status 2026-10-20 |
 |---|---|---|---|---|---|---|
 | 1 | ER-01 | Election Notice | ER-01 | Regulations and file 05 (was template ER-01) | Chief Election Commissioner | Printed blank |
 | 2 | ER-02 | Election Calendar | ER-02 | Regulations and file 05 (was template ER-02) | Chief Election Commissioner; Election Commissioner | Printed blank |
 | 3 | ER-03 | Commissioner Appointment | none | Regulations only | Chair, Selection Committee; Member, Selection Committee | Not built |
-| 4 | ER-04 | Election Commissioner Acceptance | none | Regulations and file 05 (was template ER-03) | Appointee; Witness | Data stored, not built |
-| 5 | ER-05 | Declaration of Neutrality | none | Regulations and file 05 (was template ER-04) | Declarant | Data stored, not built |
+| 4 | ER-04 | Election Commissioner Acceptance | none | Regulations and file 05 (was template ER-03) | Appointee; Witness | Filled from records (2026-10-22) |
+| 5 | ER-05 | Declaration of Neutrality | none | Regulations and file 05 (was template ER-04) | Declarant | Filled from records (2026-10-22) |
 | 6 | ER-06 | Conflict of Interest Declaration | none | Regulations and file 05 (was template ER-05) | Declarant; Chief Election Commissioner (Received) | Not built |
 | 7 | ER-07 | Confidentiality Agreement | none | Regulations and file 05 (was template ER-06) | Signatory; Chief Election Commissioner (Countersigned) | Not built |
 | 8 | ER-08 | Preliminary Voter Roll Certification | ER-07 | Regulations and file 05 (was template ER-07) | Prepared By; Verified By; Approved By (Chief Election Commissioner) | Filled from records |
@@ -1126,10 +1128,10 @@ is planned (TODO 37.14p); Not built, the form is planned (TODO 37.14q).
 | 22 | ER-21 | Observer Appointment | none | Regulations only | Chief Election Commissioner; Observer (accepts) | Not built |
 | 23 | ER-22 | Polling Officer Appointment | none | Regulations only | Chief Election Commissioner; Appointee (accepts) | Not built |
 | 24 | ER-22A | Election Material Receipt Register | none | File 07 only (was template ER-39) | Received By; Handed Over By | Not built |
-| 25 | ER-23 | Poll Opening Certificate | none | Regulations and file 05 (was template ER-15) | Presiding Officer; Polling Officer; Observer; Candidate Agent | Data stored, not built |
+| 25 | ER-23 | Poll Opening Certificate | none | Regulations and file 05 (was template ER-15) | Presiding Officer; Polling Officer; Observer; Candidate Agent | Filled from records (2026-10-22) |
 | 26 | ER-23A | Poll Incident Register | none | File 05 only (was template ER-16) | Presiding Officer; Observer | Not built |
 | 27 | ER-23B | Spoiled Ballot Register | none | File 05 only (was template ER-17) | Polling Officer; Presiding Officer | Not built |
-| 28 | ER-24 | Poll Closing Certificate | none | Regulations and file 05 (was template ER-18) | Presiding Officer; Polling Officer; Observer; Candidate Agent | Data stored, not built |
+| 28 | ER-24 | Poll Closing Certificate | none | Regulations and file 05 (was template ER-18) | Presiding Officer; Polling Officer; Observer; Candidate Agent | Filled from records (2026-10-22) |
 | 29 | ER-25 | Ballot Box Sealing and Poll Integrity Certificate | ER-19 | Regulations and file 06 (was template ER-19) | Chief Election Commissioner; Election Commissioner; Election Commissioner; Presiding Officer; Polling Officer; Security Officer; Observer 1; Observer 2; Candidate Agent A; Candidate Agent B; Candidate Agent C | Filled from records |
 | 30 | ER-26 | Electronic Voting Audit | none | Regulations only | Technical Auditor; Chief Election Commissioner; Election Commissioner; Observer | Not built |
 | 31 | ER-25A | Vote Counting Authorization Certificate | none | File 07 only (was template ER-20) | Chief Election Commissioner; Election Commissioner; Election Commissioner; Observer | Not built |
@@ -1171,9 +1173,8 @@ is planned (TODO 37.14p); Not built, the form is planned (TODO 37.14q).
 
 | Point | Where it appears | Who can settle it |
 |---|---|---|
-| Platform still prints the old form codes. The renumber, the new stored fields, the four forms whose data exists, and the remaining forms are not built. | Annex B, phases 2, 4, 5, 13, 14 | Technical team (TODO 37.14m, 37.14n, 37.14p, 37.14q) |
+| The renumber (TODO 37.14n), the new stored fields (TODO 37.14m) and the four forms filled from appointment and poll records (TODO 37.14p) are built as of 2026-10-22. The remaining forms are not built. | Annex B, phases 2, 4, 5, 13, 14 | Technical team (TODO 37.14q, the remaining election forms) |
 | Committee positions are a fixed list in code. Signature lines and ID cards print fixed titles until the position settings are built. | Annex B, phase 14 | Technical team (TODO 95.2) |
-| Forms print fixed wording and cannot all be printed blank or filled on demand. | Annex B | Technical team (TODO 37.14s) |
 | Manual accessibility run (TODO 37.13g), due when the new rules are built | Section 4 | Technical team |
 | Rules decided 2026-10-11 that the system does not yet enforce: recount end date and request, unopposed seat and reopened nominations, paper counts, declared conflicts, extend polling, key copy count and holders, nominee consent date, ten-year purge request. They bind officials as procedure now. | Sections 5 and 6, phases 3, 5, 9, 10, 13, 14 | Technical team (TODO 37.12o, 37.12r, 37.12s, 37.14a, 37.1p) |
 | Key destruction list on the officials dashboard. Today the dashboard has a "key file destroyed" box and no list of elections whose key is still held. The procedure needs the Returning Officer to see, per election, the declare date, the recount end date and whether destruction is recorded. Not built. | Phase 14, section 13 | Technical team (TODO 37.12r) |

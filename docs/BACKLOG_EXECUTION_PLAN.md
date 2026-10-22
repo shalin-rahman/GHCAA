@@ -244,6 +244,12 @@ path switching off the static manifest. **42.4** is mobile parity if elections c
 surfaced there (check first whether it currently is). **42.5** is tests + docs, last.
 **Depends on:** strict order 42.1→42.2→42.3→42.4→42.5.
 
+**Status, 2026-10-22:** done inside 37.14s (form wording from settings). The pages and forms are
+now rows in the `ElectionContents` set, seeded from `profiles/<org>/election-content/` and edited
+on the web at `/admin/election-content`. Mobile reads them through `api/election-content`. The
+`public/assets/elections/` copies and `sync-election-docs.mjs` are removed, so the paragraph
+above describes the state before the work.
+
 ---
 
 ## Workstream G — Entity feature expansion (spec-gated, sequence before code)

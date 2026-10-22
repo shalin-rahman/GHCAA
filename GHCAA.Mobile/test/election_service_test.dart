@@ -25,6 +25,7 @@ class _ElectionAdapter implements HttpClientAdapter {
   String? method;
   String? path;
   Object? body;
+  Map<String, dynamic>? query;
   bool unlockOpen = false;
   bool noDeclared = false;
 
@@ -37,6 +38,22 @@ class _ElectionAdapter implements HttpClientAdapter {
     method = options.method;
     path = options.path;
     body = options.data;
+    query = options.queryParameters;
+    if (options.path == '/election-content') {
+      return _json([
+        {'key': 'conduct', 'kind': 'Page', 'format': 'Prose', 'group': 'Rules', 'title': 'Code of Conduct', 'displayOrder': 2},
+        {'key': 'regulations', 'kind': 'Page', 'format': 'Prose', 'group': 'Rules', 'title': 'Election Regulations', 'summary': 'The rules', 'displayOrder': 1},
+      ]);
+    }
+    if (options.path == '/election-content/Page/regulations') {
+      return _json({'key': 'regulations', 'kind': 'Page', 'format': 'Prose', 'title': 'Election Regulations', 'body': '# Rules', 'displayOrder': 1});
+    }
+    if (options.path == '/elections/forms/ER-01/blank' ||
+        options.path == '/elections/12/documents/ER-01') {
+      return ResponseBody.fromBytes(utf8.encode('%PDF-1.7'), 200, headers: {
+        Headers.contentTypeHeader: ['application/pdf']
+      });
+    }
     if (options.path == '/elections/latest-declared') {
       if (noDeclared) return _json({'title': 'Not found'}, status: 404);
       return _json({
@@ -286,6 +303,45 @@ class _ElectionAdapter implements HttpClientAdapter {
 }
 
 void main() {
+  // FR-25. 37.14s
+  test('lists election pages by kind in display order', () async {
+    final adapter = _ElectionAdapter();
+    final service = ElectionService(Dio()..httpClientAdapter = adapter);
+
+    final pages = await service.getContent(ElectionContentKinds.page);
+
+    expect(adapter.query, {'kind': 'Page'});
+    expect(pages.map((p) => p.key), ['regulations', 'conduct']);
+    expect(pages.first.summary, 'The rules');
+    expect(pages.first.body, isNull);
+  });
+
+  // FR-25. 37.14s
+  test('reads one page with its body', () async {
+    final adapter = _ElectionAdapter();
+    final service = ElectionService(Dio()..httpClientAdapter = adapter);
+
+    final page = await service.getContentEntry(ElectionContentKinds.page, 'regulations');
+
+    expect(page.body, '# Rules');
+    expect(page.group, isNull);
+  });
+
+  // FR-25. 37.14s
+  test('a blank form needs no election and a filled one sends its mode', () async {
+    final adapter = _ElectionAdapter();
+    final service = ElectionService(Dio()..httpClientAdapter = adapter);
+
+    final blank = await service.downloadBlankForm('ER-01');
+    expect(String.fromCharCodes(blank), '%PDF-1.7');
+    expect(adapter.path, '/elections/forms/ER-01/blank');
+
+    await service.downloadOfficialDocument(12, 'ER-01', mode: ElectionPrintModes.filled);
+    expect(adapter.query, {'mode': 'Filled'});
+    await service.downloadOfficialDocument(12, 'ER-01');
+    expect(adapter.query, isEmpty);
+  });
+
   test('loads an election summary and nominations from the engine routes',
       () async {
     final adapter = _ElectionAdapter();

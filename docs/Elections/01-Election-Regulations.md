@@ -1,4 +1,4 @@
-# HARAGANGIAN
+# {{OrgFullName}}
 ## Election Regulations
 
 Version: 1.0
@@ -47,7 +47,7 @@ Document Classification: Governance Document
 
 # 1. Purpose
 
-These Regulations prescribe the detailed procedures governing the election of the Executive Committee of HARAGANGIAN.
+These Regulations prescribe the detailed procedures governing the election of the Executive Committee of {{OrgFullName}}.
 
 These Regulations derive authority from Article V of the Constitution.
 
@@ -71,7 +71,7 @@ These Regulations apply to
 # 3. Definitions
 
 Association
-: Govt. Haraganga College Alumni Association
+: {{OrgFullName}}
 
 Commission
 : Election Commission

@@ -4,6 +4,7 @@
     { "pattern": "GHC-", "reason": "membership number prefix" },
     { "pattern": "Haragangian", "reason": "association demonym" },
     { "pattern": "Haraganga", "reason": "association name root" },
+    { "pattern": "HARAGANG", "reason": "upper-case name root, as in form headers (matching is case-sensitive)" },
     { "pattern": "ghcaa-ryl6.onrender.com", "reason": "live Render preprod hostname" },
     { "pattern": "1938", "reason": "college founding year" }
   ],

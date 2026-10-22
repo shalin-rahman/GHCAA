@@ -7,6 +7,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../features/assistant/assistant_service.dart';
 import '../../core/services/app_localizations.dart';
+import '../../core/services/org_config_service.dart';
 
 class Message {
   final String text;
@@ -58,9 +59,12 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
   Widget build(BuildContext context) {
     final messages = ref.watch(chatMessagesProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final branding = ref.watch(orgBrandingProvider);
+    // The nickname is what members call themselves; fall back to the short name when a profile has none.
+    final aiName = branding.memberNickname.isNotEmpty ? branding.memberNickname : branding.shortName;
 
     return AppScaffold(
-      title: 'GHC AI Assistant',
+      title: '${branding.shortName} AI Assistant'.trim(),
       breadcrumb: 'Executive Hub > Alumni Intelligence',
       child: Column(
         children: [
@@ -69,7 +73,7 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               itemCount: messages.length,
               itemBuilder: (context, index) {
-                return _buildMessage(context, messages[index].text, messages[index].isMe);
+                return _buildMessage(context, messages[index].text, messages[index].isMe, aiName);
               },
             ),
           ),
@@ -94,7 +98,7 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
     );
   }
 
-  Widget _buildMessage(BuildContext context, String text, bool isMe) {
+  Widget _buildMessage(BuildContext context, String text, bool isMe, String aiName) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Align(
@@ -105,7 +109,7 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
             crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
               Text(
-                isMe ? 'YOU' : 'HARAGANGIAN AI', 
+                isMe ? 'YOU' : '${aiName.toUpperCase()} AI'.trim(),
                 style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: isMe ? Colors.white38 : AppTheme.royalGold, letterSpacing: 1)
               ),
               const SizedBox(height: 6),

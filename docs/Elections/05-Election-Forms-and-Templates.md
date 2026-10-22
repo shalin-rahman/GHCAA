@@ -1,4 +1,4 @@
-# Govt. Haraganga College Alumni Association
+# {{OrgFullName}}
 # Election Forms & Templates Handbook
 
 Version: 1.1 | Issued by: Election Commission | Authority: Constitution, Article on Elections
@@ -26,7 +26,7 @@ Date of Notice: ___
 :: end
 
 The Election Commission hereby announces the election of the Executive Committee of the
-Govt. Haraganga College Alumni Association, to be held on the schedule below. This
+{{OrgFullName}}, to be held on the schedule below. This
 notice is issued to all voting members under the Constitution and the Election
 Regulations.
 
@@ -255,12 +255,7 @@ Election: ___
 
 Tick one office only. A separate nomination form is required for each office.
 
-[ ] President
-[ ] Vice President
-[ ] General Secretary
-[ ] Joint Secretary
-[ ] Treasurer
-[ ] Executive Member
+[ ] {{Positions}}
 
 ## Candidate Information
 

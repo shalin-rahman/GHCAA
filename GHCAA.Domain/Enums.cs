@@ -88,6 +88,12 @@ namespace GHCAA.Domain
         // New values go at the end; the column stores the number.
         public enum ElectionApprovalAction { Publish, OpenPolling, ReplaceBallotKey, ClosePolling, Declare, Archive, Count, EmergencyRevoke }
         public enum ElectionCandidateOrder { Random, Alphabetical }
+        // 37.14s. Which copy of an election form the print button gives first.
+        public enum ElectionPrintMode { Blank, Filled }
+        // 37.14s. A row in ElectionContents is a public page or the layout of one form.
+        public enum ElectionContentKind { Page, Form }
+        // How the public site shows a page. FormsHandbook splits it into one card per form.
+        public enum ElectionPageFormat { Prose, FormsHandbook, Form }
 
         public enum ScholarshipApplicationStatus { Draft, Submitted, UnderReview, Shortlisted, Awarded, Rejected, Withdrawn }
         public enum DisbursementStatus { Pending, Approved, Paid, Cancelled }

@@ -1,8 +1,11 @@
 using FluentAssertions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
+using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using static GHCAA.Domain.Enums;
 
@@ -14,6 +17,7 @@ namespace GHCAA.Tests.Services;
 public sealed class ElectionDocumentServiceTests : TestBase
 {
     private ElectionDocumentService _service = null!;
+    private Mock<IOrgConfigService> _config = null!;
     private Election _election = null!;
     private ElectionSeat _seat = null!;
     private Nomination _first = null!;
@@ -23,9 +27,10 @@ public sealed class ElectionDocumentServiceTests : TestBase
     public async Task SetUpFixture()
     {
         QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
-        var config = new Mock<IOrgConfigService>();
-        config.Setup(x => x.GetConfigAsync()).ReturnsAsync(new OrgConfigDto());
-        _service = new ElectionDocumentService(_context, config.Object);
+        _config = new Mock<IOrgConfigService>();
+        _config.Setup(x => x.GetConfigAsync()).ReturnsAsync(new OrgConfigDto());
+        _service = new ElectionDocumentService(_context, _config.Object);
+        await ElectionContentSeeder.SyncAsync(_context, NullLogger.Instance);
 
         var period = new ECPeriod { Title = "2027", StartDate = DateTime.UtcNow.AddDays(-1) };
         _context.ECPeriods.Add(period);
@@ -191,6 +196,118 @@ public sealed class ElectionDocumentServiceTests : TestBase
         record["Audit trail"].Should().StartWith("Intact");
     }
 
+    // 37.14p. ER-04 lists the live Election Commission only, with the membership number looked up.
+    [Test]
+    public async Task ER04_ListsCommissionAppointments()
+    {
+        var commission = await AddPersonaAsync("Chief Commissioner", Constants.Elections.PersonaGroups.ElectionCommission);
+        var official = await AddPersonaAsync("Polling Officer", Constants.Elections.PersonaGroups.Officials);
+        await AddAppointmentAsync(commission, "Cara Commissioner", _first.CandidateMemberId);
+        await AddAppointmentAsync(commission, "Rex Revoked", null, revoked: true);
+        await AddAppointmentAsync(official, "Olly Official", null);
+        _context.Members.Single(m => m.Id == _first.CandidateMemberId).MembershipNumber = "M-001";
+        await _context.SaveChangesAsync();
+
+        var rows = (await _service.LoadTablesAsync(_election.Id, "ER-04"))[0].Rows;
+
+        rows.Should().ContainSingle();
+        rows[0].Take(3).Should().Equal("Cara Commissioner", "M-001", "Chief Commissioner");
+        rows[0][4].Should().NotBe("Not yet");
+    }
+
+    // 37.14p. ER-05 lists every live appointee. An outsider has no membership number and an
+    // unsigned declaration reads "Not yet".
+    [Test]
+    public async Task ER05_ListsEveryDeclaration()
+    {
+        var commission = await AddPersonaAsync("Chief Commissioner", Constants.Elections.PersonaGroups.ElectionCommission);
+        var official = await AddPersonaAsync("Polling Officer", Constants.Elections.PersonaGroups.Officials);
+        await AddAppointmentAsync(commission, "Cara Commissioner", _first.CandidateMemberId);
+        await AddAppointmentAsync(official, "Olly Official", null, signed: false);
+
+        var rows = (await _service.LoadTablesAsync(_election.Id, "ER-05"))[0].Rows.ToDictionary(r => r[0]);
+
+        rows.Should().HaveCount(2);
+        rows["Olly Official"][1].Should().Be("Not a member");
+        rows["Olly Official"][3].Should().Be("Not yet");
+        rows["Cara Commissioner"][3].Should().NotBe("Not yet");
+    }
+
+    // 37.14p. ER-23 and ER-24 carry the stored poll facts. ER-24 counts every ballot, spoiled ones too.
+    [Test]
+    public async Task ER23_ER24_CarryThePollFacts()
+    {
+        _election.Venue = "Main Hall";
+        _context.VoterRolls.Add(new VoterRoll { ElectionId = _election.Id, MemberId = _first.CandidateMemberId, IsEligible = true, FrozenAt = DateTime.UtcNow });
+        _context.Ballots.AddRange(
+            new Ballot { Id = Guid.NewGuid(), ElectionId = _election.Id },
+            new Ballot { Id = Guid.NewGuid(), ElectionId = _election.Id, IsSpoiled = true });
+        await _context.SaveChangesAsync();
+
+        var opening = (await _service.LoadTablesAsync(_election.Id, "ER-23"))[0].Rows.ToDictionary(r => r[0], r => r[1]);
+        var closing = (await _service.LoadTablesAsync(_election.Id, "ER-24"))[0].Rows.ToDictionary(r => r[0], r => r[1]);
+
+        opening["Venue"].Should().Be("Main Hall");
+        opening["Registered voters"].Should().Be("1");
+        opening["Ballot seal key fingerprint"].Should().Be("No key registered");
+        closing["Ballots cast, spoiled included"].Should().Be("2");
+        closing["Spoiled ballots"].Should().Be("1");
+        closing["Polling closed"].Should().StartWith("Not yet; closes").And.EndWith("UTC");
+        closing["Counts"].Should().Be("So far; polling is still open");
+    }
+
+    [Test]
+    public async Task ER24_AfterClose_PrintsCloseTimeAndNoRunningTotalNote()
+    {
+        _election.PollingOpensOn = DateTime.UtcNow.AddDays(-2);
+        _election.PollingClosesOn = DateTime.UtcNow.AddDays(-1);
+        await _context.SaveChangesAsync();
+
+        var closing = (await _service.LoadTablesAsync(_election.Id, "ER-24"))[0].Rows.ToDictionary(r => r[0], r => r[1]);
+
+        closing["Polling closed"].Should().NotStartWith("Not yet").And.EndWith("UTC");
+        closing.Should().NotContainKey("Counts");
+    }
+
+    [Test]
+    public async Task ER23_NoVenue_SaysNotRecorded()
+    {
+        var opening = (await _service.LoadTablesAsync(_election.Id, "ER-23"))[0].Rows.ToDictionary(r => r[0], r => r[1]);
+
+        opening["Venue"].Should().Be("Not recorded");
+        opening["Registered voters"].Should().Be("0");
+    }
+
+    private async Task<ElectionPersona> AddPersonaAsync(string name, string group)
+    {
+        var persona = new ElectionPersona { Name = name, GroupName = group, Description = "d", DeclarationText = "t", IsActive = true };
+        _context.ElectionPersonas.Add(persona);
+        await _context.SaveChangesAsync();
+        return persona;
+    }
+
+    private async Task AddAppointmentAsync(ElectionPersona persona, string name, int? memberId, bool signed = true, bool revoked = false)
+    {
+        var user = new User { Username = name.Replace(' ', '.'), PasswordHash = "x" };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+        var now = DateTime.UtcNow;
+        _context.ElectionAppointments.Add(new ElectionAppointment
+        {
+            ElectionId = _election.Id,
+            PersonaId = persona.Id,
+            UserId = user.Id,
+            MemberId = memberId,
+            DisplayName = name,
+            Email = name.Replace(' ', '.') + "@example.com",
+            AppointedAt = now.AddDays(-2),
+            AcceptedAt = signed ? now.AddDays(-1) : null,
+            DeclarationSignedAt = signed ? now.AddDays(-1) : null,
+            RevokedAt = revoked ? now : null
+        });
+        await _context.SaveChangesAsync();
+    }
+
     [Test]
     public async Task LoadTables_FormWithoutRecords_ReturnsNothing()
     {
@@ -203,34 +320,112 @@ public sealed class ElectionDocumentServiceTests : TestBase
         (await _service.LoadTablesAsync(9999, "ER-10")).Should().BeEmpty();
     }
 
+    // 37.14s. All 50 seeded forms print in both modes, and blank needs no election.
     [Test]
-    public async Task GeneratePdf_EverySupportedCode_RendersWithoutError()
+    public async Task GeneratePdf_EverySeededForm_RendersBlankAndFilled()
     {
-        foreach (var code in new[] { "ER-01", "ER-02", "ER-08", "ER-10", "ER-11", "ER-17", "ER-18", "ER-19", "ER-25", "ER-27", "ER-27C", "ER-28", "ER-28B", "ER-29", "ER-30", "ER-34" })
+        var codes = _context.ElectionContents.Where(x => x.Kind == ElectionContentKind.Form).Select(x => x.Key).ToList();
+        codes.Should().HaveCount(50);
+
+        foreach (var code in codes)
         {
-            var pdf = await _service.GeneratePdfAsync(_election.Id, code);
-            pdf.Should().NotBeNullOrEmpty(code);
+            (await _service.GenerateBlankPdfAsync(code)).Should().NotBeNullOrEmpty(code);
+            (await _service.GeneratePdfAsync(_election.Id, code, ElectionPrintMode.Blank)).Should().NotBeNullOrEmpty(code);
+            (await _service.GeneratePdfAsync(_election.Id, code, ElectionPrintMode.Filled)).Should().NotBeNullOrEmpty(code);
         }
     }
 
     [Test]
-    public async Task GeneratePdf_UnsupportedCode_ReturnsNull()
+    public async Task GeneratePdf_UnknownCode_ReturnsNull()
     {
         (await _service.GeneratePdfAsync(_election.Id, "ER-99")).Should().BeNull();
+        (await _service.GenerateBlankPdfAsync("ER-99")).Should().BeNull();
+        (await _service.VerifyAsync(_election.Id, "ER-99")).Should().BeNull();
     }
 
-    // 37.14n. The old platform codes were dropped with no aliases, so these no longer print.
-    [TestCase("ER-07")]
-    [TestCase("ER-09")]
-    [TestCase("ER-14")]
-    [TestCase("ER-23")]
-    [TestCase("ER-31")]
-    [TestCase("ER-33")]
-    public async Task GeneratePdf_OldCodeOutsideTheNewSet_ReturnsNull(string code)
+    [Test]
+    public async Task GeneratePdf_UnknownElection_ReturnsNull()
     {
-        (await _service.GeneratePdfAsync(_election.Id, code)).Should().BeNull();
-        (await _service.VerifyAsync(_election.Id, code)).Should().BeNull();
+        (await _service.GeneratePdfAsync(9999, "ER-10", ElectionPrintMode.Filled)).Should().BeNull();
     }
+
+    // An admin can unpublish a form. It stops printing, but a copy printed earlier still verifies.
+    [Test]
+    public async Task UnpublishedForm_DoesNotPrint_ButStillVerifies()
+    {
+        var row = _context.ElectionContents.Single(x => x.Kind == ElectionContentKind.Form && x.Key == "ER-07");
+        row.IsPublished = false;
+        await _context.SaveChangesAsync();
+
+        (await _service.GenerateBlankPdfAsync("ER-07")).Should().BeNull();
+        (await _service.GeneratePdfAsync(_election.Id, "ER-07", ElectionPrintMode.Filled)).Should().BeNull();
+        (await _service.VerifyAsync(_election.Id, "er-07"))!.FormTitle.Should().Be("Confidentiality Agreement");
+    }
+
+    // The table on ER-30 gets one row per seat from the active EC positions, and no token is left.
+    [Test]
+    public async Task LoadForm_FillsTokensFromPositionsAndOrg()
+    {
+        var expected = _context.EcPositions.Where(p => p.IsActive).OrderBy(p => p.DisplayOrder).ThenBy(p => p.Id).ToList()
+            .SelectMany(p => p.SeatCount > 1 ? Enumerable.Range(1, p.SeatCount).Select(n => $"{p.Name} {n}") : [p.Name]).ToList();
+
+        var form = await _service.LoadFormAsync("er-30");
+
+        form!.Code.Should().Be("ER-30");
+        form.Title.Should().Be("Result Declaration");
+        form.Layout.Sections.Single(s => s.Kind == "table").Rows.Should().Equal(expected);
+        form.Layout.Signatures.Should().NotContain(s => s.Contains("{{"));
+    }
+
+    [Test]
+    public async Task GeneratePdf_NoMode_UsesTheOrgDefault()
+    {
+        // Only a filled copy carries the QR code, and with no logo set it is the only image.
+        _config.Setup(x => x.GetConfigAsync()).ReturnsAsync(new OrgConfigDto { Elections = new() { DefaultPrintMode = ElectionPrintMode.Blank } });
+        PdfText(await _service.GeneratePdfAsync(_election.Id, "ER-25")).Should().NotContain("/Subtype /Image");
+
+        _config.Setup(x => x.GetConfigAsync()).ReturnsAsync(new OrgConfigDto { Elections = new() { DefaultPrintMode = ElectionPrintMode.Filled } });
+        PdfText(await _service.GeneratePdfAsync(_election.Id, "ER-25")).Should().Contain("/Subtype /Image");
+    }
+
+    // The header logo comes from LogoUrl. A PNG in the web root prints; anything else is left out.
+    [Test]
+    public async Task GeneratePdf_LogoFromWebRoot_PrintsInTheHeader()
+    {
+        var root = Directory.CreateTempSubdirectory("ghcaa-logo-").FullName;
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(root, "assets"));
+            await File.WriteAllBytesAsync(Path.Combine(root, "assets", "logo.png"), OnePixelPng);
+            _config.Setup(x => x.GetConfigAsync()).ReturnsAsync(new OrgConfigDto { Branding = new() { LogoUrl = "/assets/logo.png" } });
+            var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+            env.SetupGet(x => x.WebRootPath).Returns(root);
+            var withLogo = new ElectionDocumentService(_context, _config.Object, environment: env.Object);
+            var withoutLogo = new ElectionDocumentService(_context, _config.Object);
+
+            var printed = await withLogo.GenerateBlankPdfAsync("ER-01");
+            var plain = await withoutLogo.GenerateBlankPdfAsync("ER-01");
+
+            PdfText(printed).Should().Contain("/Subtype /Image");
+            PdfText(plain).Should().NotContain("/Subtype /Image");
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Test]
+    public void IsPngOrJpeg_ChecksTheFileSignature()
+    {
+        ElectionDocumentService.IsPngOrJpeg(OnePixelPng).Should().BeTrue();
+        ElectionDocumentService.IsPngOrJpeg([0xFF, 0xD8, 0xFF, 0xE0, 0x00]).Should().BeTrue();
+        ElectionDocumentService.IsPngOrJpeg("<svg></svg>"u8.ToArray()).Should().BeFalse();
+        ElectionDocumentService.IsPngOrJpeg([]).Should().BeFalse();
+    }
+
+    private static readonly byte[] OnePixelPng = Convert.FromBase64String(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=");
 
     [Test]
     public async Task Verify_KnownForm_NamesTheElectionAndForm()
@@ -277,7 +472,7 @@ public sealed class ElectionDocumentServiceTests : TestBase
         candidate!.FullName = "আলিস প্রার্থী";
         await _context.SaveChangesAsync();
 
-        var pdf = await WithGlyphCheckAsync(() => _service.GeneratePdfAsync(_election.Id, "ER-10"));
+        var pdf = await WithGlyphCheckAsync(() => _service.GeneratePdfAsync(_election.Id, "ER-10", ElectionPrintMode.Filled));
 
         PdfText(pdf).Should().Contain("NotoSansBengali");
     }
@@ -312,6 +507,18 @@ public sealed class ElectionDocumentServiceTests : TestBase
         QuestPDF.Settings.CheckIfAllTextGlyphsAreAvailable = true;
         try { return await generate(); }
         finally { QuestPDF.Settings.CheckIfAllTextGlyphsAreAvailable = before; }
+    }
+
+    // A row edited by hand into broken JSON is treated as missing, not a 500.
+    [Test]
+    public async Task LoadForm_LayoutThatDoesNotParse_ReturnsNull()
+    {
+        var row = _context.ElectionContents.Single(x => x.Kind == ElectionContentKind.Form && x.Key == "ER-07");
+        row.Body = "{\"sections\": [";
+        await _context.SaveChangesAsync();
+
+        (await _service.LoadFormAsync("ER-07")).Should().BeNull();
+        (await _service.GenerateBlankPdfAsync("ER-07")).Should().BeNull();
     }
 
     private static string PdfText(byte[]? pdf) => System.Text.Encoding.Latin1.GetString(pdf!);

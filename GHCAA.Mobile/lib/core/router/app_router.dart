@@ -59,6 +59,7 @@ import '../../core/widgets/main_shell.dart';
 import '../../features/polls/polls_screen.dart';
 import '../../screens/member/election_screen.dart';
 import '../../screens/member/election_results_screen.dart';
+import '../../screens/member/election_documents_screen.dart';
 import '../../screens/officials/my_appointments_screen.dart';
 import '../../screens/officials/officials_approvals_screen.dart';
 import '../../screens/officials/officials_dashboard_screen.dart';
@@ -214,6 +215,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/polls', name: 'polls', builder: (context, state) => const PollsScreen()),
           GoRoute(path: '/election', name: 'election', builder: (context, state) => const ElectionScreen()),
           GoRoute(path: '/election/results', name: 'election_results', builder: (context, state) => const ElectionResultsScreen()),
+          GoRoute(path: '/election/documents', name: 'election_documents', builder: (context, state) => const ElectionDocumentsScreen()),
+          GoRoute(path: '/election/documents/:key', name: 'election_page', builder: (context, state) => ElectionPageScreen(pageKey: state.pathParameters['key']!)),
           GoRoute(path: '/officials/appointments', name: 'my-appointments', builder: (context, state) => const MyAppointmentsScreen()),
           GoRoute(path: '/officials', name: 'officials', builder: (context, state) => const OfficialsDashboardScreen()),
           GoRoute(path: '/officials/approvals', name: 'officials-approvals', builder: (context, state) => OfficialsApprovalsScreen(electionId: int.tryParse(state.uri.queryParameters['electionId'] ?? '') ?? 0)),

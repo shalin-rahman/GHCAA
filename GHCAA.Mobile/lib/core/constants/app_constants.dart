@@ -72,6 +72,12 @@ class ElectionPhases {
 // Same limits as the API and the web admin (app.constants.ts ELECTION_RULES_UNLOCK).
 class ElectionConstants {
   static const String superAdminRole = 'SuperAdmin';
+  // The ElectionStaff policy on the API. Same list as ELECTION_STAFF_ROLES on the web.
+  static const List<String> electionStaffRoles = [
+    superAdminRole, 'Admin', 'ElectionOfficial',
+  ];
+  // The AdminOnly policy on the API. Same list as ADMIN_ROLES on the web.
+  static const List<String> adminRoles = [superAdminRole, 'Admin'];
   static const int unlockDefaultMinutes = 30;
   static const int unlockMaxMinutes = 60;
   static const int unlockReasonMin = 20;

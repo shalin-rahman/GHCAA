@@ -47,6 +47,9 @@ namespace GHCAA.Application.DTOs
         // 37.12q. The frozen voter roll can be thrown away until this many days before nominations
         // close, and only while no nomination has been filed.
         public int UnfreezeCutoffDaysBeforeNominationClose { get; init; } = 2;
+        // 37.14s. Blank by default; the other copy stays one click away.
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        public Enums.ElectionPrintMode DefaultPrintMode { get; init; } = Enums.ElectionPrintMode.Blank;
     }
 
     public record DocumentEntryDto

@@ -273,6 +273,26 @@ final isSuperAdminProvider = FutureProvider<bool>((ref) async {
   return ref.read(authServiceProvider).hasRole(ElectionConstants.superAdminRole);
 });
 
+// 37.14s. Only election staff can print a form filled from an election.
+final isElectionStaffProvider = FutureProvider<bool>((ref) async {
+  await ref.watch(roleProvider.future);
+  final auth = ref.read(authServiceProvider);
+  for (final role in ElectionConstants.electionStaffRoles) {
+    if (await auth.hasRole(role)) return true;
+  }
+  return false;
+});
+
+// Only admins can print a blank form.
+final isAdminProvider = FutureProvider<bool>((ref) async {
+  await ref.watch(roleProvider.future);
+  final auth = ref.read(authServiceProvider);
+  for (final role in ElectionConstants.adminRoles) {
+    if (await auth.hasRole(role)) return true;
+  }
+  return false;
+});
+
 /// Canonical list of profile fields for completeness calculation.
 /// Uses exact keys returned by the backend /profile endpoint.
 /// Update this one list to affect all completeness indicators across the app.

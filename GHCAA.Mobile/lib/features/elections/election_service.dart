@@ -114,6 +114,53 @@ enum ElectionTieRule {
   const ElectionTieRule(this.wire, this.label, this.description);
 }
 
+// 37.14s. A page or a form's wording from the ElectionContent table. The list
+// route leaves [body] null; the single-entry route fills it with tokens resolved.
+class ElectionContent {
+  final String key;
+  final String kind;
+  final String? format;
+  final String? group;
+  final String title;
+  final String? summary;
+  final String? body;
+  final int displayOrder;
+
+  const ElectionContent({
+    required this.key,
+    required this.kind,
+    this.format,
+    this.group,
+    required this.title,
+    this.summary,
+    this.body,
+    this.displayOrder = 0,
+  });
+
+  factory ElectionContent.fromJson(Map<String, dynamic> json) =>
+      ElectionContent(
+        key: json['key'] as String,
+        kind: json['kind'] as String,
+        format: json['format'] as String?,
+        group: json['group'] as String?,
+        title: json['title'] as String,
+        summary: json['summary'] as String?,
+        body: json['body'] as String?,
+        displayOrder: json['displayOrder'] as int? ?? 0,
+      );
+}
+
+class ElectionContentKinds {
+  static const page = 'Page';
+  static const form = 'Form';
+}
+
+// Which copy of a form the print sheet offers.
+class ElectionPrintModes {
+  static const blank = 'Blank';
+  static const filled = 'Filled';
+}
+
 class ElectionSummary {
   final int id;
   final String title;
@@ -1137,13 +1184,40 @@ class ElectionService {
   Future<bool> declare(int id) async =>
       (await _dio.post('/elections/$id/declare')).statusCode == 202;
 
-  Future<List<int>> downloadOfficialDocument(int id, String formCode) async =>
+  // 37.14s. Election staff only. With no mode the server uses the org's
+  // DefaultPrintMode. Blank keeps the election's QR code but fills in nothing.
+  Future<List<int>> downloadOfficialDocument(int id, String formCode,
+          {String? mode}) async =>
       (await _dio.get<List<int>>(
         '/elections/$id/documents/$formCode',
+        queryParameters: {if (mode != null) 'mode': mode},
         options: Options(responseType: ResponseType.bytes),
       ))
           .data ??
       <int>[];
+
+  // 37.14s. Any signed-in user. No election is needed, so there is no QR code.
+  Future<List<int>> downloadBlankForm(String code) async =>
+      (await _dio.get<List<int>>(
+        '/elections/forms/$code/blank',
+        options: Options(responseType: ResponseType.bytes),
+      ))
+          .data ??
+      <int>[];
+
+  Future<List<ElectionContent>> getContent(String kind) async {
+    final response =
+        await _dio.get('/election-content', queryParameters: {'kind': kind});
+    return (response.data as List)
+        .map((item) => ElectionContent.fromJson(item as Map<String, dynamic>))
+        .toList()
+      ..sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
+  }
+
+  Future<ElectionContent> getContentEntry(String kind, String key) async =>
+      ElectionContent.fromJson(
+          (await _dio.get('/election-content/$kind/$key')).data
+              as Map<String, dynamic>);
 
   Future<List<ElectionAppointment>> getMyAppointments() async {
     final response = await _dio.get('/me/election-appointments');

@@ -20,11 +20,6 @@ COPY ["GHCAA.Web/package.json", "GHCAA.Web/package-lock.json", "./"]
 RUN npm ci
 COPY GHCAA.Web/ ./
 COPY profiles/ ../profiles/
-# Governance documents live in docs/ (the source of truth) and are copied into
-# public/assets/elections/ for the public /elections page. They are committed too, but
-# regenerating here means a docs/ edit can never ship stale — see TODO 36.4.
-COPY docs/Elections/ ../docs/Elections/
-RUN npm run sync:docs
 # gen:org-config / gen:site-content / apply-brand are the profile-driven prebuild steps `npm run
 # build` normally chains (see package.json) — this Dockerfile calls `ng build` directly rather than
 # through that script, so they need running explicitly. type-check is left to CI's own lint/test

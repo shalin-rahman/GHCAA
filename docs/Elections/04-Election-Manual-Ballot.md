@@ -1,4 +1,4 @@
-# HARAGANGIAN
+# {{OrgFullName}}
 # Polling & Counting Manual (Manual Ballot Election)
 
 Version: 1.0

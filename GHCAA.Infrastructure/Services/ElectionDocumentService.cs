@@ -1,26 +1,45 @@
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using GHCAA.Infrastructure.Data;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using QRCoder;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Infrastructure.Services;
 
-// A table printed under the summary of a form, built from stored records.
+// A table of stored records printed on a filled form.
 public sealed record FormTable(string Heading, IReadOnlyList<string> Columns, IReadOnlyList<IReadOnlyList<string>> Rows);
 
+// A form as it prints: its code and title, and the layout with tokens filled in.
+public sealed record PrintableForm(string Code, string Title, ElectionFormLayout Layout);
+
+// 37.14s. Every form in ElectionContents prints at any time. Blank gives the org header, ruled
+// lines and boxes to fill by hand. Filled adds the election facts, the stored records and a
+// QR code that leads to the verify page.
 public sealed class ElectionDocumentService(
     ApplicationDbContext db,
     IOrgConfigService orgConfigService,
     IElectionService? elections = null,
-    ILogger<ElectionDocumentService>? logger = null) : IElectionDocumentService
+    ILogger<ElectionDocumentService>? logger = null,
+    IFileStorageService? storage = null,
+    IWebHostEnvironment? environment = null) : IElectionDocumentService
 {
     private readonly IElectionService _elections = elections ?? new ElectionService(db);
+
+    // A text item that ends "(3 ruled lines)" prints the label and that many lines to write on,
+    // as the :: lines block does on the web page.
+    private static readonly Regex RuledLinesHint = new(@"^(?<label>.*?)\s*\((?<count>\d+) ruled lines?\)\s*$", RegexOptions.Compiled);
+    private const int DefaultBlankRows = 5;
+    private const int MaxRuledLines = 10;
 
     private void RegisterFonts()
     {
@@ -28,41 +47,58 @@ public sealed class ElectionDocumentService(
             logger?.LogWarning(error, "Noto Sans Bengali could not be registered; Bengali letters in election PDFs print as boxes.");
     }
 
-    // Forms the code cannot fill from stored records yet, so they print the generic line.
-    // ER-17 needs the scrutiny rules, ER-28 and ER-28B need recount records, and ER-01, ER-02
-    // and ER-34 need the regulation text. Tracked in docs/TODO.md.
-    // Codes follow the 2026-10-20 form inventory (37.14n). The old platform codes were dropped
-    // with no aliases, so an old code that has no new meaning now returns null.
-
-    private static readonly HashSet<string> SupportedForms = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "ER-01", "ER-02", "ER-08", "ER-10", "ER-11", "ER-17", "ER-18", "ER-19",
-        "ER-25", "ER-27", "ER-27C", "ER-28", "ER-28B", "ER-29", "ER-30", "ER-34"
-    };
-
     // The web route in app.routes.ts (verify/election/:id/:code) must match, or every printed QR code breaks.
     public static string VerificationPath(int electionId, string formCode) => $"/verify/election/{electionId}/{formCode}";
 
     public async Task<ElectionDocumentVerifyDto?> VerifyAsync(int electionId, string formCode, CancellationToken cancellationToken = default)
     {
-        var normalizedCode = formCode.Trim().ToUpperInvariant();
-        if (!SupportedForms.Contains(normalizedCode))
+        // A form unpublished after it was printed still verifies.
+        var form = await ElectionContentService.FindAsync(db, ElectionContentKind.Form, formCode, publishedOnly: false, cancellationToken);
+        if (form is null)
             return null;
         // FR-047. A rehearsal's forms are not public, so its QR code reads as unknown.
         var election = await db.Elections.AsNoTracking().Where(x => x.Id == electionId && !x.IsTest)
             .Select(x => new { x.Id, x.Title, x.Phase }).SingleOrDefaultAsync(cancellationToken);
         return election is null
             ? null
-            : new ElectionDocumentVerifyDto($"E-{election.Id:D6}", election.Id, election.Title, election.Phase, normalizedCode, FormTitle(normalizedCode));
+            : new ElectionDocumentVerifyDto($"E-{election.Id:D6}", election.Id, election.Title, election.Phase, form.Key, form.Title);
+    }
+
+    // The published form with its tokens filled, or null. Public so a test can read the layout without opening the PDF.
+    public async Task<PrintableForm?> LoadFormAsync(string formCode, CancellationToken ct = default)
+    {
+        var row = await ElectionContentService.FindAsync(db, ElectionContentKind.Form, formCode, publishedOnly: true, ct);
+        if (row is null)
+            return null;
+        var tokens = await ElectionContentTokens.LoadAsync(db, await orgConfigService.GetConfigAsync(), ct);
+        ElectionFormLayout? layout;
+        try
+        {
+            layout = JsonSerializer.Deserialize<ElectionFormLayout>(tokens.ResolveLayout(row.Body), ElectionContentTokens.LayoutJson);
+        }
+        catch (JsonException ex)
+        {
+            // Only an admin edit is checked, so a hand-edited row can still hold a broken layout.
+            logger?.LogWarning(ex, "Election form {Code} has a layout that does not parse.", row.Key);
+            return null;
+        }
+        return layout is null ? null : new PrintableForm(row.Key, row.Title, layout);
+    }
+
+    public async Task<byte[]?> GenerateBlankPdfAsync(string formCode, CancellationToken cancellationToken = default)
+    {
+        var form = await LoadFormAsync(formCode, cancellationToken);
+        return form is null ? null : await RenderAsync(form, filled: null, cancellationToken);
     }
 
     public async Task<byte[]?> GeneratePdfAsync(
         int electionId,
         string formCode,
+        ElectionPrintMode? mode = null,
         CancellationToken cancellationToken = default)
     {
-        var normalizedCode = formCode.Trim().ToUpperInvariant();
-        if (!SupportedForms.Contains(normalizedCode))
+        var form = await LoadFormAsync(formCode, cancellationToken);
+        if (form is null)
             return null;
 
         var election = await db.Elections
@@ -73,15 +109,37 @@ public sealed class ElectionDocumentService(
         if (election is null)
             return null;
 
-        var tables = await LoadTablesAsync(election, normalizedCode, cancellationToken);
         var org = await orgConfigService.GetConfigAsync();
+        if ((mode ?? org.Elections.DefaultPrintMode) == ElectionPrintMode.Blank)
+            return await RenderAsync(form, filled: null, cancellationToken);
+
+        var tables = await LoadTablesAsync(election, form.Code, cancellationToken);
+        return await RenderAsync(form, new FilledRecord(election, tables), cancellationToken);
+    }
+
+    private sealed record FilledRecord(Election Election, IReadOnlyList<FormTable> Tables);
+
+    private async Task<byte[]> RenderAsync(PrintableForm form, FilledRecord? filled, CancellationToken ct)
+    {
+        var org = await orgConfigService.GetConfigAsync();
+        var logo = await LoadLogoAsync(org.Branding.LogoUrl, ct);
         RegisterFonts();
-        var generatedAt = DateTime.UtcNow;
-        var verificationUrl = org.Contact.PortalBaseUrl.TrimEnd('/') + VerificationPath(election.Id, normalizedCode);
-        using var qrGenerator = new QRCodeGenerator();
-        using var qrData = qrGenerator.CreateQrCode(verificationUrl, QRCodeGenerator.ECCLevel.Q);
-        using var qrCode = new PngByteQRCode(qrData);
-        var qrBytes = qrCode.GetGraphic(12);
+
+        string? verificationUrl = null;
+        byte[]? qrBytes = null;
+        if (filled is not null)
+        {
+            verificationUrl = org.Contact.PortalBaseUrl.TrimEnd('/') + VerificationPath(filled.Election.Id, form.Code);
+            using var qrGenerator = new QRCodeGenerator();
+            using var qrData = qrGenerator.CreateQrCode(verificationUrl, QRCodeGenerator.ECCLevel.Q);
+            using var qrCode = new PngByteQRCode(qrData);
+            qrBytes = qrCode.GetGraphic(12);
+        }
+
+        var contactLine = string.Join(" | ", org.Contact.PhoneNumbers.Append(org.Contact.SupportEmail).Where(x => !string.IsNullOrWhiteSpace(x)));
+        var layout = form.Layout;
+        // Stored records take the place of the form's own empty tables.
+        var skipLayoutTables = filled is { Tables.Count: > 0 };
 
         var document = Document.Create(container =>
         {
@@ -92,38 +150,52 @@ public sealed class ElectionDocumentService(
                 page.DefaultTextStyle(x => x.FontSize(10).FontFamily(ElectionPdfFonts.Primary, ElectionPdfFonts.Bengali));
                 page.Header().Column(column =>
                 {
-                    column.Item().Text(org.Branding.FullName).Bold().FontSize(16).FontColor(org.Branding.PrimaryColor);
-                    column.Item().Text($"{normalizedCode} | Official Election Record").FontSize(9).FontColor(org.Branding.AccentColor);
-                });
-                page.Content().PaddingTop(20).Column(column =>
-                {
-                    column.Item().AlignCenter().Text(FormTitle(normalizedCode)).Bold().FontSize(20);
-                    column.Item().PaddingTop(16).Table(table =>
+                    column.Item().Row(row =>
                     {
-                        table.ColumnsDefinition(columns =>
+                        if (logo is not null)
+                            row.ConstantItem(48).PaddingRight(10).Image(logo).FitArea();
+                        row.RelativeItem().Column(orgBlock =>
                         {
-                            columns.ConstantColumn(155);
-                            columns.RelativeColumn();
+                            orgBlock.Item().Text(org.Branding.FullName).Bold().FontSize(16).FontColor(org.Branding.PrimaryColor);
+                            if (!string.IsNullOrWhiteSpace(org.Contact.CampusAddress))
+                                orgBlock.Item().Text(org.Contact.CampusAddress).FontSize(8);
+                            if (contactLine.Length > 0)
+                                orgBlock.Item().Text(contactLine).FontSize(8);
                         });
-                        AddRow(table, "Election reference", $"E-{election.Id:D6}");
-                        AddRow(table, "Election title", election.Title);
-                        AddRow(table, "Phase", election.Phase.ToString());
-                        AddRow(table, "Nomination window", $"{election.NominationOpensOn:yyyy-MM-dd} to {election.NominationClosesOn:yyyy-MM-dd}");
-                        AddRow(table, "Polling window", $"{election.PollingOpensOn:yyyy-MM-dd} to {election.PollingClosesOn:yyyy-MM-dd}");
-                        AddRow(table, "Voter-roll status", election.VoterRoll.Count == 0 ? "Not frozen" : $"Frozen; {election.VoterRoll.Count} records");
-                        AddRow(table, "Seat count", election.Seats.Count.ToString());
-                        AddRow(table, "Generated at", generatedAt.ToString("O"));
                     });
-                    column.Item().PaddingTop(22).Text(FormSummary(normalizedCode, election.VoterRoll.Count, election.Seats.Count));
-                    foreach (var table in tables)
+                    column.Item().PaddingTop(4).Text($"{form.Code} | {form.Title}").FontSize(9).FontColor(org.Branding.AccentColor);
+                });
+                page.Content().PaddingTop(16).Column(column =>
+                {
+                    column.Item().AlignCenter().Text(form.Title).Bold().FontSize(18);
+                    if (filled is null)
+                        AddFieldGrid(column, layout.Header);
+                    else
+                        AddFacts(column, filled.Election);
+
+                    foreach (var section in layout.Sections)
+                    {
+                        if (skipLayoutTables && section.Kind == "table")
+                            continue;
+                        AddSection(column, section);
+                    }
+
+                    foreach (var table in filled?.Tables ?? [])
                         AddTable(column, table);
-                    column.Item().PaddingTop(24).Text("Signatory / evidence state").Bold();
-                    column.Item().PaddingTop(5).Text("Generated from persisted election records. Officer signatures and uploaded evidence remain subject to the recorded workflow state.");
+
+                    AddSignatures(column, layout.Signatures, layout.Seal);
                 });
                 page.Footer().Row(row =>
                 {
-                    row.RelativeItem().Text($"Verification: {verificationUrl}").FontSize(7);
-                    row.ConstantItem(55).Image(qrBytes);
+                    if (verificationUrl is not null && qrBytes is not null)
+                    {
+                        row.RelativeItem().Text($"Verification: {verificationUrl}").FontSize(7);
+                        row.ConstantItem(55).Image(qrBytes);
+                    }
+                    else
+                    {
+                        row.RelativeItem();
+                    }
                     row.ConstantItem(45).AlignRight().Text(text =>
                     {
                         text.Span("Page ").FontSize(7);
@@ -134,6 +206,161 @@ public sealed class ElectionDocumentService(
         });
 
         return document.GeneratePdf();
+    }
+
+    // The logo prints only when it is a PNG or JPEG the server can read. An absolute URL or an
+    // SVG is left out rather than fetched or converted.
+    private async Task<byte[]?> LoadLogoAsync(string? logoUrl, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(logoUrl)
+            || Uri.TryCreate(logoUrl, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https")
+            return null;
+        var bytes = await StoredFileReader.ReadAsync(storage, environment?.WebRootPath, logoUrl, ct);
+        return bytes is not null && IsPngOrJpeg(bytes) ? bytes : null;
+    }
+
+    public static bool IsPngOrJpeg(byte[] bytes) =>
+        bytes.Length > 4 && (bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47
+                             || bytes[0] == 0xFF && bytes[1] == 0xD8);
+
+    private static void AddFacts(ColumnDescriptor column, Election election)
+    {
+        column.Item().PaddingTop(14).Table(table =>
+        {
+            table.ColumnsDefinition(columns =>
+            {
+                columns.ConstantColumn(155);
+                columns.RelativeColumn();
+            });
+            AddRow(table, "Election reference", $"E-{election.Id:D6}");
+            AddRow(table, "Election title", election.Title);
+            AddRow(table, "Phase", election.Phase.ToString());
+            AddRow(table, "Nomination window", $"{election.NominationOpensOn:yyyy-MM-dd} to {election.NominationClosesOn:yyyy-MM-dd}");
+            AddRow(table, "Polling window", $"{election.PollingOpensOn:yyyy-MM-dd} to {election.PollingClosesOn:yyyy-MM-dd}");
+            AddRow(table, "Voter-roll status", election.VoterRoll.Count == 0 ? "Not frozen" : $"Frozen; {election.VoterRoll.Count} records");
+            AddRow(table, "Seat count", election.Seats.Count.ToString());
+            AddRow(table, "Generated at", DateTime.UtcNow.ToString("O"));
+        });
+    }
+
+    // Header fields, two to a row, each a label beside a line to write on.
+    private static void AddFieldGrid(ColumnDescriptor column, IReadOnlyList<string> labels)
+    {
+        if (labels.Count == 0)
+            return;
+        column.Item().PaddingTop(10).Table(table =>
+        {
+            table.ColumnsDefinition(columns =>
+            {
+                columns.RelativeColumn();
+                columns.RelativeColumn();
+            });
+            foreach (var label in labels)
+                table.Cell().PaddingRight(12).PaddingTop(8).Element(cell => RuledField(cell, label));
+            if (labels.Count % 2 == 1)
+                table.Cell();
+        });
+    }
+
+    private static void RuledField(IContainer container, string label) =>
+        container.Row(row =>
+        {
+            row.AutoItem().PaddingRight(6).AlignBottom().Text(label + ":").FontSize(9);
+            row.RelativeItem().Height(16).BorderBottom(0.75f).BorderColor(Colors.Grey.Darken1);
+        });
+
+    private static void RuledLines(ColumnDescriptor column, int count)
+    {
+        for (var i = 0; i < count; i++)
+            column.Item().Height(20).BorderBottom(0.75f).BorderColor(Colors.Grey.Darken1);
+    }
+
+    private static void AddSection(ColumnDescriptor column, ElectionFormSection section)
+    {
+        if (!string.IsNullOrWhiteSpace(section.Name))
+            column.Item().PaddingTop(14).Text(section.Name).Bold();
+        switch (section.Kind)
+        {
+            case "fields":
+                foreach (var item in section.Items)
+                    column.Item().PaddingTop(8).Element(cell => RuledField(cell, item));
+                break;
+            case "checklist":
+                foreach (var item in section.Items)
+                    column.Item().PaddingTop(6).Row(row =>
+                    {
+                        row.ConstantItem(11).Height(11).Border(0.75f).BorderColor(Colors.Grey.Darken2);
+                        row.RelativeItem().PaddingLeft(8).Text(item);
+                    });
+                break;
+            case "declaration":
+                foreach (var item in section.Items)
+                    column.Item().PaddingTop(6).Text(item).Italic();
+                break;
+            case "table":
+                AddBlankTable(column, section);
+                break;
+            default:
+                foreach (var item in section.Items)
+                {
+                    var hint = RuledLinesHint.Match(item);
+                    if (!hint.Success)
+                    {
+                        column.Item().PaddingTop(6).Text(item);
+                        continue;
+                    }
+                    column.Item().PaddingTop(8).Text(hint.Groups["label"].Value);
+                    RuledLines(column, Math.Clamp(int.Parse(hint.Groups["count"].Value), 1, MaxRuledLines));
+                }
+                break;
+        }
+    }
+
+    // Column headings, the preset first-column labels, then empty rows to fill by hand.
+    private static void AddBlankTable(ColumnDescriptor column, ElectionFormSection section)
+    {
+        var rows = section.Rows ?? [];
+        var blank = section.Blank ?? (rows.Count == 0 ? DefaultBlankRows : 0);
+        column.Item().PaddingTop(6).Table(table =>
+        {
+            table.ColumnsDefinition(columns =>
+            {
+                foreach (var _ in section.Items) columns.RelativeColumn();
+            });
+            foreach (var heading in section.Items)
+                table.Cell().Background(Colors.Grey.Lighten3).Border(0.75f).BorderColor(Colors.Grey.Darken1).Padding(4).Text(heading).Bold().FontSize(9);
+            foreach (var label in rows.Concat(Enumerable.Repeat(string.Empty, blank)))
+                for (var i = 0; i < section.Items.Count; i++)
+                    table.Cell().Border(0.75f).BorderColor(Colors.Grey.Darken1).MinHeight(20).Padding(4).Text(i == 0 ? label : string.Empty).FontSize(9);
+        });
+    }
+
+    // Three signature blocks to a row, each a line with its label under it, then the seal box.
+    private static void AddSignatures(ColumnDescriptor column, IReadOnlyList<string> signatures, bool seal)
+    {
+        if (signatures.Count > 0)
+        {
+            column.Item().PaddingTop(18).Table(table =>
+            {
+                table.ColumnsDefinition(columns =>
+                {
+                    columns.RelativeColumn();
+                    columns.RelativeColumn();
+                    columns.RelativeColumn();
+                });
+                foreach (var label in signatures)
+                    table.Cell().PaddingRight(14).PaddingTop(30).Column(block =>
+                    {
+                        block.Item().BorderTop(0.75f).BorderColor(Colors.Grey.Darken2).PaddingTop(3).Text(label).FontSize(8);
+                        block.Item().PaddingTop(10).Element(cell => RuledField(cell, "Date"));
+                    });
+                for (var i = signatures.Count % 3; i is > 0 and < 3; i++)
+                    table.Cell();
+            });
+        }
+        if (seal)
+            column.Item().PaddingTop(18).AlignRight().Width(90).Height(90).Border(0.75f).BorderColor(Colors.Grey.Darken1)
+                .AlignCenter().AlignMiddle().Text("Seal").FontSize(8).FontColor(Colors.Grey.Darken1);
     }
 
     public async Task<byte[]?> GenerateBallotReceiptPdfAsync(
@@ -217,7 +444,11 @@ public sealed class ElectionDocumentService(
                 var board = await _elections.GetBoardAsync(election.Id, ct);
                 return [await PollRecordTableAsync(election, ct), new FormTable("Appointed officials",
                     ["Group", "Role", "Name", "Accepted"],
-                    (board?.Groups ?? []).SelectMany(g => g.Members.Select(m => (IReadOnlyList<string>)[g.GroupName, m.PersonaName, m.DisplayName, $"{m.AcceptedAt:yyyy-MM-dd}"])).ToArray())];
+                    (board?.Groups ?? []).SelectMany(g => g.Members.Select(m => (IReadOnlyList<string>)[g.GroupName, m.PersonaName, m.DisplayName, DateOrNotYet(m.AcceptedAt)])).ToArray())];
+            case "ER-04" or "ER-05":
+                return [await AppointmentsTableAsync(election, code, ct)];
+            case "ER-23" or "ER-24":
+                return [await PollOpenCloseTableAsync(election, code, ct)];
             default:
                 return [];
         }
@@ -239,6 +470,65 @@ public sealed class ElectionDocumentService(
             ["Ballot seal key fingerprint", election.BallotKeyFingerprint ?? "No key registered"],
             ["Audit trail", chain.Ok ? $"Intact, {chain.Entries} entries" : $"Broken at entry {chain.FirstBrokenSeq} of {chain.Entries}"],
         ]);
+    }
+
+    // 37.14p. ER-04 lists the Election Commission, ER-05 every appointee, since officials sign the
+    // neutrality declaration too. Revoked appointments are left out. Witness lines stay for hand.
+    private async Task<FormTable> AppointmentsTableAsync(Election election, string code, CancellationToken ct)
+    {
+        var query = db.ElectionAppointments.AsNoTracking().Include(a => a.Persona)
+            .Where(a => a.ElectionId == election.Id && a.RevokedAt == null);
+        if (code == "ER-04")
+            query = query.Where(a => a.Persona!.GroupName == Constants.Elections.PersonaGroups.ElectionCommission);
+        var rows = await query.ToListAsync(ct);
+        var memberIds = rows.Where(a => a.MemberId != null).Select(a => a.MemberId!.Value).Distinct().ToList();
+        var numbers = await db.Members.AsNoTracking().Where(m => memberIds.Contains(m.Id))
+            .ToDictionaryAsync(m => m.Id, m => m.MembershipNumber, ct);
+        string Number(ElectionAppointment a) =>
+            a.MemberId is { } id ? numbers.GetValueOrDefault(id) ?? string.Empty : "Not a member";
+        var ordered = rows.OrderBy(a => a.Persona?.GroupName).ThenBy(a => a.Persona?.Name).ThenBy(a => a.DisplayName).ToList();
+
+        return code == "ER-04"
+            ? new FormTable("Commissioner acceptance", ["Name", "Membership No.", "Position", "Appointed", "Accepted"],
+                ordered.Select(a => (IReadOnlyList<string>)[a.DisplayName, Number(a), a.Persona?.Name ?? string.Empty, DateOrNotYet(a.AppointedAt), DateOrNotYet(a.AcceptedAt)]).ToArray())
+            : new FormTable("Neutrality declarations", ["Name", "Membership No.", "Election Role", "Declaration signed"],
+                ordered.Select(a => (IReadOnlyList<string>)[a.DisplayName, Number(a), a.Persona?.Name ?? string.Empty, DateOrNotYet(a.DeclarationSignedAt)]).ToArray());
+    }
+
+    private static string DateOrNotYet(DateTime? at) => at is { } value ? $"{value:yyyy-MM-dd}" : "Not yet";
+
+    // 37.14p. Only what the platform stores. Seal numbers, ballot serials, observers, agents and
+    // the ballot box checks have no record, so those lines stay for hand.
+    private async Task<FormTable> PollOpenCloseTableAsync(Election election, string code, CancellationToken ct)
+    {
+        var eligible = await db.VoterRolls.CountAsync(x => x.ElectionId == election.Id && x.IsEligible, ct);
+        var venue = string.IsNullOrWhiteSpace(election.Venue) ? "Not recorded" : election.Venue;
+        if (code == "ER-23")
+        {
+            return new FormTable("Poll opening record", ["Item", "Recorded"],
+            [
+                ["Polling opened", $"{election.PollingOpensOn:yyyy-MM-dd HH:mm} UTC"],
+                ["Venue", venue],
+                ["Registered voters", eligible.ToString()],
+                ["Ballot seal key fingerprint", election.BallotKeyFingerprint ?? "No key registered"],
+            ]);
+        }
+        var cast = await db.Ballots.CountAsync(b => b.ElectionId == election.Id, ct);
+        var spoiled = await db.Ballots.CountAsync(b => b.ElectionId == election.Id && b.IsSpoiled, ct);
+        // Printed before the close, the counts are a running total, so the form says so.
+        var closes = $"{election.PollingClosesOn:yyyy-MM-dd HH:mm} UTC";
+        var open = election.PollingClosesOn > DateTime.UtcNow;
+        List<IReadOnlyList<string>> rows =
+        [
+            ["Polling closed", open ? $"Not yet; closes {closes}" : closes],
+            ["Venue", venue],
+            ["Registered voters", eligible.ToString()],
+            ["Ballots cast, spoiled included", cast.ToString()],
+            ["Spoiled ballots", spoiled.ToString()],
+        ];
+        if (open)
+            rows.Add(["Counts", "So far; polling is still open"]);
+        return new FormTable("Poll closing record", ["Item", "Recorded"], rows);
     }
 
     private async Task<FormTable> NominationsTableAsync(Election election, string code, CancellationToken ct)
@@ -338,33 +628,4 @@ public sealed class ElectionDocumentService(
         table.Cell().Background(Colors.Grey.Lighten3).BorderBottom(1).BorderColor(Colors.Grey.Lighten1).Padding(6).Text(label).Bold();
         table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).Padding(6).Text(value);
     }
-
-    private static string FormTitle(string formCode) => formCode switch
-    {
-        "ER-01" => "Election Notice",
-        "ER-02" => "Election Calendar",
-        "ER-08" => "Voter Roll Certification",
-        "ER-10" => "Nomination Paper",
-        "ER-11" => "Candidate Consent",
-        "ER-17" => "Scrutiny Checklist",
-        "ER-18" => "Withdrawal Record",
-        "ER-19" => "Final Candidate List",
-        "ER-25" => "Poll Integrity Certificate",
-        "ER-27" => "Count Sheet",
-        "ER-27C" => "Final Result Sheet",
-        "ER-28" => "Recount Request",
-        "ER-28B" => "Recount Report",
-        "ER-29" => "Result Certification",
-        "ER-30" => "Result Declaration",
-        "ER-34" => "Handover Certificate",
-        _ => "Election Record"
-    };
-
-    private static string FormSummary(string formCode, int voterCount, int seatCount) => formCode switch
-    {
-        "ER-08" => $"This certificate records the frozen voter-roll snapshot containing {voterCount} voter records.",
-        "ER-25" => "The officials named below certify that polling has closed and the ballot box was kept sealed. The platform figures in the poll record are taken from the voter roll and the audit trail. Each ballot was sealed with the returning officer's key when it was cast and stays sealed until the count.",
-        "ER-27" or "ER-27C" or "ER-28B" or "ER-29" or "ER-30" => "This record is generated from the persisted count and declaration workflow.",
-        _ => $"This record covers {seatCount} configured election seat(s) and is generated from the persisted election record."
-    };
 }

@@ -39,39 +39,8 @@ namespace GHCAA.Infrastructure.Services
             return $"data:image/png;base64,{Convert.ToBase64String(qrCodeAsPngByteArr)}";
         }
 
-        // Reads the photo from the upload store, which may be a bucket rather than wwwroot.
-        // Seeded members point at assets/... files that ship in the web root instead.
-        // A missing photo gives null and the card is drawn without it.
-        private async Task<byte[]?> LoadPhotoBytesAsync(string? photoPath, CancellationToken cancellationToken)
-        {
-            if (string.IsNullOrEmpty(photoPath)) return null;
-            var relativePath = photoPath.TrimStart('/', '\\');
-            var file = await _storage.OpenReadAsync(relativePath, cancellationToken);
-            if (file == null)
-            {
-                var webRootFile = WebRootFile(relativePath);
-                return webRootFile == null ? null : await File.ReadAllBytesAsync(webRootFile, cancellationToken);
-            }
-
-            await using (file.Content)
-            {
-                using var buffer = new MemoryStream();
-                await file.Content.CopyToAsync(buffer, cancellationToken);
-                return buffer.ToArray();
-            }
-        }
-
-        // Only a file that sits inside the web root. The path comes from a member row.
-        private string? WebRootFile(string relativePath)
-        {
-            var webRoot = _environment.WebRootPath;
-            if (string.IsNullOrEmpty(webRoot)) return null;
-
-            var rootFull = Path.TrimEndingDirectorySeparator(Path.GetFullPath(webRoot)) + Path.DirectorySeparatorChar;
-            var fullPath = Path.GetFullPath(Path.Combine(rootFull, relativePath));
-            var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-            return fullPath.StartsWith(rootFull, comparison) && File.Exists(fullPath) ? fullPath : null;
-        }
+        private Task<byte[]?> LoadPhotoBytesAsync(string? photoPath, CancellationToken cancellationToken) =>
+            StoredFileReader.ReadAsync(_storage, _environment.WebRootPath, photoPath, cancellationToken);
 
         private async Task<(Member Member, IssuedCredential Credential, string VerifyUrl)> IssueCredentialAsync(
             int memberId, CredentialType type, CancellationToken cancellationToken)

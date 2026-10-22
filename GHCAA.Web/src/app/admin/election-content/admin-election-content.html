@@ -1,0 +1,150 @@
+<div class="admin-feature">
+    <app-page-header title="Election Content" [total]="rows().length"
+        emptySubtitle="Election pages and the wording forms print from">
+        <small subtitle>Showing {{ filtered().length }} of {{ rows().length }} entries</small>
+        <button actions class="btn btn-accent btn-md" (click)="openNew()">
+            <span class="icon">➕</span> New Entry
+        </button>
+    </app-page-header>
+
+    <div class="glass-card content-main">
+        <div class="filter-bar">
+            <app-search-bar [value]="search()" (valueChange)="search.set($event)"
+                placeholder="Search by key, title or group…"></app-search-bar>
+            <select class="form-control kind-filter" [ngModel]="kindFilter()" (ngModelChange)="kindFilter.set($event)">
+                <option value="">All kinds</option>
+                <option value="Page">Pages</option>
+                <option value="Form">Forms</option>
+            </select>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Key</th>
+                        <th>Title</th>
+                        <th>Kind</th>
+                        <th>Group</th>
+                        <th>Order</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (r of filtered(); track r.id) {
+                    <tr>
+                        <td class="font-bold">{{ r.key }}</td>
+                        <td>{{ r.title }}</td>
+                        <td><span class="badge">{{ r.kind }}{{ r.format ? ' / ' + r.format : '' }}</span></td>
+                        <td>{{ r.group || '-' }}</td>
+                        <td>{{ r.displayOrder }}</td>
+                        <td>
+                            <span class="status-badge" [class.active]="r.isPublished" [class.inactive]="!r.isPublished">{{ r.isPublished ? 'Published' : 'Hidden' }}</span>
+                        </td>
+                        <td>
+                            <div class="actions-cell">
+                            <button class="icon-btn" (click)="openEdit(r)" title="Edit">✏️</button>
+                            </div>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <p>{{ loading() ? 'Loading…' : (search() || kindFilter() ? 'No entries match your search.' : 'No election content yet.') }}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (showModal()) {
+<div class="modal-overlay" (click)="showModal.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+        <app-modal-header [title]="(editId() ? 'Edit' : 'Create') + ' Entry'" (closed)="showModal.set(false)"></app-modal-header>
+        <div class="modal-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Kind <span class="required-star">*</span></label>
+                    <select class="form-control" [ngModel]="form().kind" (ngModelChange)="setKind($event)" [disabled]="!!editId()">
+                        <option value="Page">Page</option>
+                        <option value="Form">Form</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Key <span class="required-star">*</span></label>
+                    <input type="text" class="form-control" [ngModel]="form().key" [disabled]="!!editId()"
+                        (ngModelChange)="form.update(f => ({ ...f, key: $event }))" maxlength="64"
+                        [placeholder]="form().kind === 'Form' ? 'e.g. ER-17A' : 'e.g. regulations'">
+                </div>
+                @if (form().kind === 'Page') {
+                <div class="form-group">
+                    <label>Format <span class="required-star">*</span></label>
+                    <select class="form-control" [ngModel]="form().format"
+                        (ngModelChange)="form.update(f => ({ ...f, format: $event }))">
+                        @for (fmt of formats; track fmt) {
+                        <option [value]="fmt">{{ fmt }}</option>
+                        }
+                    </select>
+                </div>
+                }
+            </div>
+
+            <div class="form-group">
+                <label>Title <span class="required-star">*</span></label>
+                <input type="text" class="form-control" [ngModel]="form().title"
+                    (ngModelChange)="form.update(f => ({ ...f, title: $event }))" maxlength="200">
+            </div>
+
+            <div class="form-group">
+                <label>Summary</label>
+                <textarea class="form-control" rows="2" [ngModel]="form().summary"
+                    (ngModelChange)="form.update(f => ({ ...f, summary: $event }))" maxlength="1000"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Group</label>
+                    <input type="text" class="form-control" [ngModel]="form().group"
+                        (ngModelChange)="form.update(f => ({ ...f, group: $event }))" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label>Display order</label>
+                    <input type="number" class="form-control" [ngModel]="form().displayOrder"
+                        (ngModelChange)="form.update(f => ({ ...f, displayOrder: +$event }))">
+                </div>
+                <div class="form-group checkbox-group published-check">
+                    <input type="checkbox" id="content-published" [ngModel]="form().isPublished"
+                        (ngModelChange)="form.update(f => ({ ...f, isPublished: $event }))">
+                    <label for="content-published">Published</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Body <span class="required-star">*</span></label>
+                <small class="field-hint">
+                    {{ form().kind === 'Form' ? 'The form layout as JSON.' : 'Markdown.' }}
+                    Tokens such as <code ngNonBindable>{{org.fullName}}</code> are filled in when the entry is served.
+                </small>
+                @if (loadingBody()) {
+                <p class="field-hint">Loading the stored text…</p>
+                } @else {
+                <textarea class="form-control body-editor" rows="16" [ngModel]="form().body"
+                    (ngModelChange)="form.update(f => ({ ...f, body: $event }))" maxlength="200000"></textarea>
+                }
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" (click)="showModal.set(false)">Cancel</button>
+            <button class="btn btn-accent shadow-gold" (click)="save()" [disabled]="isSaving() || loadingBody()">
+                {{ isSaving() ? 'Saving...' : (editId() ? 'Update' : 'Save') }}
+            </button>
+        </div>
+    </div>
+</div>
+}

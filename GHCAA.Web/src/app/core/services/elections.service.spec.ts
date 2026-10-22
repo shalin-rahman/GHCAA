@@ -167,4 +167,30 @@ describe('ElectionsService', () => {
         expect(request.request.method).toBe('POST');
         request.flush(ADMIN_ELECTION);
     });
+
+    // FR-25
+    it('asks for a filled document when the mode is given', () => {
+        service.getOfficialDocument(12, 'ER-05', 'Filled').subscribe();
+        const request = http.expectOne(r => r.url === API_ENDPOINTS.ELECTIONS.DOCUMENT(12, 'ER-05'));
+        expect(request.request.params.get('mode')).toBe('Filled');
+        expect(request.request.responseType).toBe('blob');
+        request.flush(new Blob());
+    });
+
+    // FR-25
+    it('leaves the mode to the server when none is given', () => {
+        service.getOfficialDocument(12, 'ER-05').subscribe();
+        const request = http.expectOne(r => r.url === API_ENDPOINTS.ELECTIONS.DOCUMENT(12, 'ER-05'));
+        expect(request.request.params.has('mode')).toBe(false);
+        request.flush(new Blob());
+    });
+
+    // FR-25
+    it('gets a blank form without an election id', () => {
+        service.getBlankForm('ER-17A').subscribe();
+        const request = http.expectOne('/api/elections/forms/ER-17A/blank');
+        expect(request.request.method).toBe('GET');
+        expect(request.request.responseType).toBe('blob');
+        request.flush(new Blob());
+    });
 });

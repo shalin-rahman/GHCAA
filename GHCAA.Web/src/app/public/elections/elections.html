@@ -12,7 +12,7 @@
 
 <div class="container main-content">
 
-    @if (!selected()) {
+    @if (!openKey()) {
     @if (board(); as b) {
     <section class="doc-group" id="election-board">
         <h2 class="group-title">
@@ -50,17 +50,25 @@
     }
 
     <!-- Index: the whole document set, grouped so the purpose of each is obvious. -->
-    @for (group of groups; track group) {
+    @if (pagesLoading()) {
+    <app-loading-panel label="Loading election documents..." [size]="64"></app-loading-panel>
+    } @else if (pagesError()) {
+    <div class="glass-card error-card">
+        <p>The election documents could not be loaded. Try again in a moment.</p>
+    </div>
+    }
+    @for (group of pageGroups(); track group.group) {
     <section class="doc-group">
-        <h2 class="group-title">{{ group }}</h2>
+        <h2 class="group-title">{{ group.group }}</h2>
         <div class="doc-grid">
-            @for (doc of docsIn(group); track doc.id) {
+            @for (doc of group.pages; track doc.id) {
             <article class="glass-card doc-card">
                 <h3>{{ doc.title }}</h3>
-                <p>{{ doc.blurb }}</p>
+                @if (doc.summary) {
+                <p>{{ doc.summary }}</p>
+                }
                 <div class="card-actions">
                     <button type="button" class="btn btn-accent btn-sm" (click)="open(doc)">View</button>
-                    <a class="btn btn-outline btn-sm" [href]="downloadUrl(doc)" [attr.download]="doc.file">Download</a>
                 </div>
             </article>
             }
@@ -81,7 +89,7 @@
             <button type="button" class="link-btn" (click)="backToIndex()">&larr; All documents</button>
             @if (openForm()) {
             <span class="crumb-sep">/</span>
-            <button type="button" class="link-btn" (click)="backToForms()">{{ selected()!.title }}</button>
+            <button type="button" class="link-btn" (click)="backToForms()">{{ selected()?.title }}</button>
             <span class="crumb-sep">/</span>
             <span class="crumb-current">Form {{ openForm()!.code }}</span>
             }
@@ -92,23 +100,22 @@
         }
 
         @else if (loadError()) {
-        <!-- The asset failed to load; the file itself is still the deliverable. -->
         <div class="glass-card error-card">
-            <h2>{{ selected()!.title }}</h2>
-            <p>This document could not be displayed in the browser. You can still download the full file.</p>
-            <a class="btn btn-accent" [href]="downloadUrl(selected()!)" [attr.download]="selected()!.file">Download document</a>
+            <p>This document could not be found or is not published.</p>
+            <button type="button" class="btn btn-accent" (click)="backToIndex()">Back to all documents</button>
         </div>
         }
 
-        @else if (selected()!.isFormsHandbook && !openForm()) {
+        @else if (isFormsHandbook() && !openForm()) {
         <!-- 36.6: the handbook is a register of individually usable forms, not one long page.
              Grouped by the stage of the election a form belongs to, because an officer looks
              for "the form I need at close of poll", not for a number. -->
         <header class="reader-head">
             <h1>{{ selected()!.title }}</h1>
-            <p>{{ selected()!.blurb }}</p>
-            <a class="btn btn-outline btn-sm no-print" [href]="downloadUrl(selected()!)"
-                [attr.download]="selected()!.file">Download whole handbook</a>
+            @if (selected()!.summary) {
+            <p>{{ selected()!.summary }}</p>
+            }
+            <button type="button" class="btn btn-outline btn-sm no-print" (click)="downloadPage()">Download whole handbook</button>
         </header>
 
         @for (group of formGroups(); track group.stage) {
@@ -125,6 +132,12 @@
                     <span class="register-actions">
                         <button type="button" class="btn btn-accent btn-sm" (click)="showForm(form)">Open</button>
                         <button type="button" class="btn btn-outline btn-sm" (click)="downloadForm(form)">Download</button>
+                        @if (canPrintPdf(form.code)) {
+                        @for (mode of printModes(); track mode; let first = $first) {
+                        <button type="button" class="btn btn-sm" [class.btn-accent]="first" [class.btn-outline]="!first"
+                            [disabled]="printing()" (click)="downloadPdf(form.code, mode)">{{ mode }} PDF</button>
+                        }
+                        }
                     </span>
                 </li>
                 }
@@ -147,8 +160,13 @@
                 @if (openForm()) {
                 <button type="button" class="btn btn-outline btn-sm" (click)="downloadForm(openForm()!)">Download</button>
                 } @else {
-                <a class="btn btn-outline btn-sm" [href]="downloadUrl(selected()!)"
-                    [attr.download]="selected()!.file">Download</a>
+                <button type="button" class="btn btn-outline btn-sm" (click)="downloadPage()">Download</button>
+                }
+                @if (canPrintPdf(currentFormCode())) {
+                @for (mode of printModes(); track mode) {
+                <button type="button" class="btn btn-outline btn-sm" [disabled]="printing()"
+                    (click)="downloadPdf(currentFormCode()!, mode)">{{ mode }} PDF</button>
+                }
                 }
             </span>
         </div>
@@ -211,8 +229,7 @@
                         }
                     </nav>
                     <div class="toc-actions">
-                        <a class="btn btn-accent btn-sm w-full" [href]="downloadUrl(selected()!)"
-                            [attr.download]="selected()!.file">Download</a>
+                        <button type="button" class="btn btn-accent btn-sm w-full" (click)="downloadPage()">Download</button>
                         <button type="button" class="btn btn-outline btn-sm w-full" (click)="print()">Print</button>
                     </div>
                 </div>

@@ -386,6 +386,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./admin/site-content/site-content').then(m => m.AdminSiteContent)
             },
             {
+                path: 'election-content',
+                loadComponent: () => import('./admin/election-content/admin-election-content').then(m => m.AdminElectionContent)
+            },
+            {
                 path: 'org-config',
                 loadComponent: () => import('./admin/org-config/org-config').then(m => m.AdminOrgConfig),
                 canActivate: [superAdminGuard]

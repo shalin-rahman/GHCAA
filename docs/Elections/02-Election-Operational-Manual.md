@@ -1,4 +1,4 @@
-# HARAGANGIAN
+# {{OrgFullName}}
 # Election Operations Manual
 
 Version: 1.0
@@ -57,7 +57,7 @@ Every Election Commissioner, Polling Officer, Observer and Technical Administrat
 
 Deviation shall only occur by written order of the Chief Election Commissioner.
 
-The platform fills some forms from its own records, so the officials do not retype them. Form numbers follow the Regulations, and the platform prints them from 2026-10-22 (TODO 37.14n, forms renumbered to the Regulations). The codes it printed before, shown in brackets, no longer open a form. Filled from records: ER-08 (ER-07), ER-10 (ER-09), ER-11 (ER-10), ER-18 (ER-13), ER-19 (ER-14), ER-25 (ER-19), ER-27 (ER-23), ER-27C (ER-29), ER-29 (ER-30) and ER-30 (ER-31). Printed blank and completed by hand: ER-01, ER-02, ER-17 (ER-11), ER-28 (ER-26), ER-28B (ER-28) and ER-34 (ER-33). The QR code on each form opens a public page that confirms the election and the form exist. Any form can be printed blank or filled from records once TODO 37.14s, form wording from settings, is built. Section Annex B of the Officials Handbook lists all 50 forms.
+The platform fills some forms from its own records, so the officials do not retype them. Form numbers follow the Regulations, and the platform prints them from 2026-10-22 (TODO 37.14n, forms renumbered to the Regulations). The codes it printed before, shown in brackets, no longer open a form. Filled from records: ER-04 and ER-05 (from 2026-10-22, TODO 37.14p), ER-08 (ER-07), ER-10 (ER-09), ER-11 (ER-10), ER-18 (ER-13), ER-19 (ER-14), ER-23 and ER-24 (from 2026-10-22, TODO 37.14p), ER-25 (ER-19), ER-27 (ER-23), ER-27C (ER-29), ER-29 (ER-30) and ER-30 (ER-31). Printed blank and completed by hand: ER-01, ER-02, ER-17 (ER-11), ER-28 (ER-26), ER-28B (ER-28) and ER-34 (ER-33). The QR code on each form opens a public page that confirms the election and the form exist. Since 2026-10-22 (TODO 37.14s, form wording from settings) any form prints blank or filled. A form with no stored records prints its election facts and ruled lines only. Section Annex B of the Officials Handbook lists all 50 forms.
 
 ---
 

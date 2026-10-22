@@ -28,6 +28,8 @@ export const XSRF = { COOKIE: 'XSRF-TOKEN', HEADER: 'X-XSRF-TOKEN' } as const;
 export const SUPER_ADMIN_ROLE = 'SuperAdmin';
 export const ADMIN_ROLE = 'Admin';
 export const ELECTION_STAFF_ROLES = [SUPER_ADMIN_ROLE, ADMIN_ROLE, 'ElectionOfficial'] as const;
+// Mirrors Constants.Policies.AdminOnly on the API.
+export const ADMIN_ROLES = [SUPER_ADMIN_ROLE, ADMIN_ROLE] as const;
 
 // 37.13y/z: mirror the limits in Constants.Elections and AppointmentReasonDto on the API.
 export const ELECTION_RULES_UNLOCK = { DEFAULT_MINUTES: 30, MAX_MINUTES: 60, REASON_MIN: 20, REASON_MAX: 1000 } as const;
@@ -727,6 +729,7 @@ export const API_ENDPOINTS = {
         READINESS_ATTEST: (id: number) => `/api/elections/${id}/readiness/attest`,
         DOCUMENT: (id: number, formCode: string) => `/api/elections/${id}/documents/${formCode}`,
         VERIFY_DOCUMENT: (id: number, formCode: string) => `/api/elections/${id}/documents/${encodeURIComponent(formCode)}/verification`,
+        BLANK_FORM: (formCode: string) => `/api/elections/forms/${encodeURIComponent(formCode)}/blank`,
         APPROVALS: (id: number) => `/api/elections/${id}/approvals`,
         APPROVE: (approvalId: number) => `/api/elections/approvals/${approvalId}/approve`,
         REJECT: (approvalId: number) => `/api/elections/approvals/${approvalId}/reject`,
@@ -811,6 +814,14 @@ export const API_ENDPOINTS = {
         ACTIVE: (id: number) => `/api/admin/election-personas/${id}/active`
     },
     ELECTION_PERSONAS: '/api/election-personas',
+    // 37.14s. Election pages and form layouts, read by everyone and edited by admins.
+    ELECTION_CONTENT: {
+        BASE: '/api/election-content',
+        BY_KEY: (kind: string, key: string) => `/api/election-content/${kind}/${encodeURIComponent(key)}`,
+        BY_ID: (id: number) => `/api/election-content/${id}`,
+        ADMIN: '/api/election-content/admin',
+        ADMIN_BY_ID: (id: number) => `/api/election-content/admin/${id}`
+    },
     // Work Package 37.12d appointment routes.
     ELECTION_APPOINTMENTS: {
         FOR_ELECTION: (electionId: number) => `/api/elections/${electionId}/appointments`,
