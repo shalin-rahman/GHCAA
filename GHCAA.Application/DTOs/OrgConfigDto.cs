@@ -153,6 +153,8 @@ namespace GHCAA.Application.DTOs
         // "Gmail" or "Brevo". Null means use the server's EmailSettings:Provider. The API key
         // and sender address stay in env vars; only the choice of sender is stored here.
         public string? EmailProvider { get; init; }
+        // News image uploads one account may make per UTC day (TODO 84.28). Below 1 means no limit.
+        public int NewsImageUploadsPerDay { get; init; } = 20;
     }
 
     public record LocalizationDto

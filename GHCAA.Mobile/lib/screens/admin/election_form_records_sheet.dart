@@ -71,6 +71,7 @@ class _ElectionFormRecordsSheetState
   List<Nomination>? _nominations;
   final Map<int, DateTime?> _consent = {};
   int? _consentBusyId;
+  int? _decideBusyId;
   int? _scrutinyOpenId;
   List<ScrutinyCheck>? _checks;
   String? _busyItem;
@@ -302,6 +303,20 @@ class _ElectionFormRecordsSheetState
       _tell('Could not save the consent time: $e');
     } finally {
       if (mounted) setState(() => _consentBusyId = null);
+    }
+  }
+
+  // 84.16. The route needs step-up, which the interceptor asks for.
+  Future<void> _scrutinise(Nomination n, bool accepted) async {
+    if (_decideBusyId != null) return;
+    setState(() => _decideBusyId = n.id);
+    try {
+      await _service.scrutinise(n.id, accepted);
+      await _loadNominations();
+    } catch (e) {
+      _tell('Failed to record the scrutiny decision.');
+    } finally {
+      if (mounted) setState(() => _decideBusyId = null);
     }
   }
 
@@ -658,6 +673,8 @@ class _ElectionFormRecordsSheetState
 
   Widget _nominationTile(Nomination n, String positionTitle) {
     final consent = _consent[n.id] ?? n.consentAt;
+    final undecided = n.status == 'Submitted' || n.status == 'UnderScrutiny';
+    final canDecide = _can('DecideNominations') && undecided;
     return Card(
       key: Key('nomination-${n.id}'),
       color: Colors.white10,
@@ -670,6 +687,7 @@ class _ElectionFormRecordsSheetState
             Text('$positionTitle · member ${n.candidateMemberId}',
                 style: const TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold)),
+            _muted('Status: ${n.status}'),
             _muted(consent == null
                 ? ElectionConstants.consentMissing
                 : '${ElectionConstants.consentLabel} ${_show(consent, includeTime: true)}'),
@@ -685,6 +703,18 @@ class _ElectionFormRecordsSheetState
                     key: Key('nomination-${n.id}-scrutiny'),
                     onPressed: () => _toggleScrutiny(n),
                     child: const Text(ElectionConstants.scrutinyChecksTitle)),
+              if (canDecide) ...[
+                TextButton(
+                    key: Key('nomination-${n.id}-accept'),
+                    onPressed:
+                        _decideBusyId != null ? null : () => _scrutinise(n, true),
+                    child: const Text('Accept')),
+                TextButton(
+                    key: Key('nomination-${n.id}-reject'),
+                    onPressed:
+                        _decideBusyId != null ? null : () => _scrutinise(n, false),
+                    child: const Text('Reject')),
+              ],
             ]),
             if (_scrutinyOpenId == n.id) _scrutinyList(n),
           ],

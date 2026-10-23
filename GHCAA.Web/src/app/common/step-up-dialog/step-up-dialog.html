@@ -4,7 +4,11 @@
         <app-modal-header title="Confirm it's you" headingId="step-up-title" closeLabel="Cancel verification" (closed)="stepUp.cancel()"></app-modal-header>
 
         <div class="modal-body">
+            @if (stepUp.method() === 'app') {
+            <p class="text-main">This action is protected. Enter the 6-digit code from your authenticator app, or one of your recovery codes.</p>
+            } @else {
             <p class="text-main">This action is protected. Enter the 6-digit code from your email to continue.</p>
+            }
 
             @if (stepUp.sending()) {
             <p class="step-up-info">Sending a code…</p>
@@ -18,15 +22,25 @@
 
             <div class="form-group">
                 <label for="stepUpCode">Verification code</label>
-                <input id="stepUpCode" type="text" inputmode="numeric" autocomplete="one-time-code"
-                    maxlength="6" placeholder="000000" [value]="code" (input)="code = $any($event.target).value" name="stepUpCode"
-                    (keyup.enter)="submit()" [disabled]="stepUp.verifying()" />
+                <input id="stepUpCode" type="text" [attr.inputmode]="stepUp.method() === 'app' ? 'text' : 'numeric'" autocomplete="one-time-code"
+                    [attr.maxlength]="stepUp.method() === 'app' ? 11 : 6" placeholder="000000" [value]="code" (input)="code = $any($event.target).value" name="stepUpCode"
+                    (keyup.enter)="submit()" [disabled]="stepUp.verifying() || stepUp.sending()" />
             </div>
 
-            <button type="button" class="btn btn-outline btn-sm" (click)="stepUp.requestCode()"
-                [disabled]="stepUp.sending() || stepUp.verifying()">
-                {{ stepUp.sending() ? 'Sending…' : 'Resend code' }}
-            </button>
+            <div class="step-up-links">
+                @if (stepUp.method() === 'email') {
+                <button type="button" class="btn btn-outline btn-sm" (click)="stepUp.requestCode()"
+                    [disabled]="stepUp.sending() || stepUp.verifying()">
+                    {{ stepUp.sending() ? 'Sending…' : 'Resend code' }}
+                </button>
+                }
+                @if (stepUp.canSwitch()) {
+                <button type="button" class="btn btn-outline btn-sm" (click)="switchMethod()"
+                    [disabled]="stepUp.sending() || stepUp.verifying()">
+                    {{ stepUp.method() === 'app' ? 'Email me a code instead' : 'Use the authenticator app' }}
+                </button>
+                }
+            </div>
         </div>
 
         <div class="modal-footer step-up-actions">

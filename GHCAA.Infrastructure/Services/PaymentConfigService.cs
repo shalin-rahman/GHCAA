@@ -16,9 +16,10 @@ namespace GHCAA.Infrastructure.Services
             _db = db;
         }
 
+        // 84.14: a row on the Nagad gateway stays hidden from members until that gateway is built.
         public async Task<List<PaymentConfiguration>> GetActiveMethodsAsync(CancellationToken cancellationToken = default)
             => await _db.PaymentConfigurations
-                .Where(p => p.IsEnabled)
+                .Where(p => p.IsEnabled && p.Gateway != PaymentGateway.NagadGateway)
                 .OrderBy(p => p.SortOrder)
                 .ToListAsync(cancellationToken);
 
@@ -29,6 +30,7 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<PaymentConfiguration> CreateAsync(PaymentConfiguration config, CancellationToken cancellationToken = default)
         {
+            EnsureGatewayBuilt(config.Gateway);
             await EnsureKeyFreeAsync(config.Method, config.Gateway, excludeId: null, cancellationToken);
             config.CreatedAt = DateTime.UtcNow;
             await _db.PaymentConfigurations.AddAsync(config, cancellationToken);
@@ -44,7 +46,10 @@ namespace GHCAA.Infrastructure.Services
             // Method is never changed by an update, only Gateway. Checked only when the gateway
             // moves, so a row left sharing its key from before the index stays editable.
             if (existing.Gateway != config.Gateway)
+            {
+                EnsureGatewayBuilt(config.Gateway);
                 await EnsureKeyFreeAsync(existing.Method, config.Gateway, excludeId: id, cancellationToken);
+            }
 
             existing.DisplayName = config.DisplayName;
             existing.Description = config.Description;
@@ -89,6 +94,14 @@ namespace GHCAA.Infrastructure.Services
             if (taken)
                 throw new DuplicateKeyException(
                     $"A {method} payment setting for gateway {gateway} already exists.");
+        }
+
+        // 84.14: NagadGateway.InitiatePaymentAsync only answers "coming soon", so no setting may
+        // point at it until the integration is built. Manual Nagad (Gateway None) is not affected.
+        private static void EnsureGatewayBuilt(PaymentGateway gateway)
+        {
+            if (gateway == PaymentGateway.NagadGateway)
+                throw new ArgumentException("The Nagad gateway is not built yet. Use the manual Nagad method instead.");
         }
 
         public async Task<PaymentConfiguration?> ToggleAsync(int id, CancellationToken cancellationToken = default)

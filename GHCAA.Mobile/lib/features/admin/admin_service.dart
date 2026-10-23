@@ -72,7 +72,7 @@ class AdminService {
 
   Future<Map<String, dynamic>> getGlobalAnalytics() async {
     try {
-      final response = await _dio.get('/admin/analytics');
+      final response = await _dio.get('/admin/stats');
       return response.data as Map<String, dynamic>;
     } catch (e) {
       debugPrint('AdminService.getGlobalAnalytics failed: $e');

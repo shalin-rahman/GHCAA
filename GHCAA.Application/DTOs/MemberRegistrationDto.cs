@@ -20,5 +20,23 @@ namespace GHCAA.Application.DTOs
 
         [System.ComponentModel.DataAnnotations.MaxLength(200, ErrorMessage = "Transaction ID must not exceed 200 characters.")]
         public string? TransactionId { get; set; }
+
+        public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            foreach (var result in base.Validate(validationContext))
+            {
+                yield return result;
+            }
+
+            // The first row is the record from this institution; the rest are other study.
+            if (AcademicHistory.Count == 0)
+            {
+                yield return new ValidationResult("At least one academic record is required.", new[] { nameof(AcademicHistory) });
+            }
+            else if (!AcademicHistory[0].IsOrgProfile)
+            {
+                yield return new ValidationResult("The first academic record must be the institutional record.", new[] { nameof(AcademicHistory) });
+            }
+        }
     }
 }

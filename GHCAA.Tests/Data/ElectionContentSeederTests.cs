@@ -43,9 +43,13 @@ public sealed class ElectionContentSeederTests : TestBase
     {
         _context.ElectionContents.Add(new ElectionContent
         {
-            Key = "regulations", Kind = ElectionContentKind.Page, Format = ElectionPageFormat.Prose,
-            Title = "Edited by admin", Body = "Edited body",
-            LastModified = DateTime.UtcNow, UpdatedByAdminId = 1,
+            Key = "regulations",
+            Kind = ElectionContentKind.Page,
+            Format = ElectionPageFormat.Prose,
+            Title = "Edited by admin",
+            Body = "Edited body",
+            LastModified = DateTime.UtcNow,
+            UpdatedByAdminId = 1,
         });
         await _context.SaveChangesAsync();
 
@@ -63,7 +67,9 @@ public sealed class ElectionContentSeederTests : TestBase
     {
         _context.ElectionContents.Add(new ElectionContent
         {
-            Key = "ER-29", Kind = ElectionContentKind.Form, Title = "Old title",
+            Key = "ER-29",
+            Kind = ElectionContentKind.Form,
+            Title = "Old title",
             Body = """{"header":["Rejected Ballots"],"sections":[{"name":"","kind":"text","items":["x"]}]}""",
             IsPublished = false,
         });

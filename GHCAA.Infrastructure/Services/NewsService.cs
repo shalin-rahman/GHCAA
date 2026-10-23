@@ -5,18 +5,43 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using System.Runtime.CompilerServices;
 
 namespace GHCAA.Infrastructure.Services
 {
     public class NewsService : INewsService
     {
         private readonly ApplicationDbContext _db;
+        private readonly IMemoryCache _cache;
+        private readonly IOrgConfigService _orgConfig;
+        private const string UploadCountKeyPrefix = "news-image-uploads";
         // 24.42: Shared, stateless sanitizer instance — HtmlSanitizer is thread-safe.
         private static readonly HtmlSanitizer _sanitizer = new();
 
-        public NewsService(ApplicationDbContext db)
+        public NewsService(ApplicationDbContext db, IMemoryCache cache, IOrgConfigService orgConfig)
         {
             _db = db;
+            _cache = cache;
+            _orgConfig = orgConfig;
+        }
+
+        // TODO 84.28. The count is held in memory until UTC midnight, so an API restart resets it.
+        // That is enough to stop one account filling storage with images.
+        public async Task<bool> TryCountImageUploadAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            var limit = (await _orgConfig.GetConfigAsync()).Workflow.NewsImageUploadsPerDay;
+            if (limit < 1) return true;
+
+            var now = DateTime.UtcNow;
+            var count = _cache.GetOrCreate($"{UploadCountKeyPrefix}:{userId}:{now:yyyyMMdd}", entry =>
+            {
+                entry.AbsoluteExpiration = new DateTimeOffset(now.Date.AddDays(1), TimeSpan.Zero);
+                return new StrongBox<int>();
+            })!;
+            if (Interlocked.Increment(ref count.Value) <= limit) return true;
+            Interlocked.Decrement(ref count.Value);
+            return false;
         }
 
         public async Task<IEnumerable<NewsPostDto>> GetActiveNewsAsync(Enums.ArticleCategory? category = null, Enums.PostType? postType = null, CancellationToken cancellationToken = default)

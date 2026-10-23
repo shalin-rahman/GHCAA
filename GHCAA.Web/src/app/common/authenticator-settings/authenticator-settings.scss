@@ -1,0 +1,49 @@
+.authenticator-title {
+  margin: 0 0 .75rem;
+  font-size: 1.1rem;
+}
+
+.hint {
+  color: var(--text-muted);
+  font-size: .8rem;
+}
+
+.authenticator-error {
+  color: var(--danger-color);
+  font-size: .85rem;
+}
+
+.authenticator-qr {
+  display: block;
+  margin: .75rem auto;
+  // The PNG is dark on white, so it needs a white backing in the dark theme too.
+  background: var(--paper-bg);
+  padding: .5rem;
+  border-radius: var(--radius-sm);
+}
+
+.authenticator-secret {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: 1rem;
+
+  code {
+    word-break: break-all;
+  }
+}
+
+.recovery-codes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .35rem 1rem;
+  margin: .75rem 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.authenticator-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}

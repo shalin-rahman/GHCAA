@@ -1,8 +1,11 @@
 using FluentAssertions;
 using GHCAA.Application.DTOs;
+using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
+using Microsoft.Extensions.Caching.Memory;
+using Moq;
 
 namespace GHCAA.Tests.Services;
 
@@ -15,7 +18,7 @@ public class NewsServiceTests : TestBase
     [SetUp]
     public async Task Setup()
     {
-        _service = new NewsService(_context);
+        _service = NewService(new OrgConfigDto());
 
         // Clear seed data so count assertions are deterministic
         _context.NewsPosts.RemoveRange(_context.NewsPosts);
@@ -25,6 +28,35 @@ public class NewsServiceTests : TestBase
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
         _authorId = user.Id;
+    }
+
+    private NewsService NewService(OrgConfigDto config)
+    {
+        var orgConfig = new Mock<IOrgConfigService>();
+        orgConfig.Setup(x => x.GetConfigAsync()).ReturnsAsync(config);
+        return new NewsService(_context, new MemoryCache(new MemoryCacheOptions()), orgConfig.Object);
+    }
+
+    [Category("FR-26")]
+    [Test]
+    public async Task TryCountImageUploadAsync_StopsAtDailyLimit_PerAccount()
+    {
+        var service = NewService(new OrgConfigDto { Workflow = new WorkflowDto { NewsImageUploadsPerDay = 2 } });
+
+        (await service.TryCountImageUploadAsync(1)).Should().BeTrue();
+        (await service.TryCountImageUploadAsync(1)).Should().BeTrue();
+        (await service.TryCountImageUploadAsync(1)).Should().BeFalse();
+        (await service.TryCountImageUploadAsync(2)).Should().BeTrue();
+    }
+
+    [Category("FR-26")]
+    [Test]
+    public async Task TryCountImageUploadAsync_LimitBelowOne_MeansNoLimit()
+    {
+        var service = NewService(new OrgConfigDto { Workflow = new WorkflowDto { NewsImageUploadsPerDay = 0 } });
+
+        for (var i = 0; i < 50; i++)
+            (await service.TryCountImageUploadAsync(1)).Should().BeTrue();
     }
 
     [Category("FR-26")]

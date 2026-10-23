@@ -247,6 +247,23 @@ class ElectionPosition {
       );
 }
 
+// A candidate on the admin list. The id is the ElectionCandidate id, used to remove it.
+class AdminElectionCandidate {
+  final int id;
+  final String name;
+  final String positionTitle;
+
+  const AdminElectionCandidate(
+      {required this.id, required this.name, required this.positionTitle});
+
+  factory AdminElectionCandidate.fromJson(Map<String, dynamic> json) =>
+      AdminElectionCandidate(
+        id: json['id'] as int,
+        name: json['name'] as String? ?? '',
+        positionTitle: json['positionTitle'] as String? ?? '',
+      );
+}
+
 // 37.14m. Details the printed notices read. Day fields are local dates. The silence start and recount window
 // end are times, converted from UTC.
 class ElectionFormDetails {
@@ -321,6 +338,7 @@ class AdminElection {
   // FR-047 (37.13d). A test run: hidden from members and the public, declares nobody.
   final bool isTest;
   final List<ElectionPosition> positions;
+  final List<AdminElectionCandidate> candidates;
   final ElectionFormDetails? formDetails;
 
   const AdminElection({
@@ -342,6 +360,7 @@ class AdminElection {
     this.tooFewApprovers = false,
     this.isTest = false,
     this.positions = const [],
+    this.candidates = const [],
     this.formDetails,
   });
 
@@ -371,6 +390,11 @@ class AdminElection {
         positions: (json['positions'] as List<dynamic>?)
                 ?.map(
                     (e) => ElectionPosition.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const [],
+        candidates: (json['candidates'] as List<dynamic>?)
+                ?.map((e) =>
+                    AdminElectionCandidate.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             const [],
         formDetails: json['formDetails'] == null
@@ -1163,7 +1187,7 @@ class ElectionService {
   }
 
   // Spec 023 (37.12f). True when the server stored the step for a second
-  // person (202) instead of running it. Approving happens on the web admin.
+  // person (202) instead of running it. Approvals live on the officials screen.
   Future<bool> setPhase(int id, String phase) async =>
       (await _dio.post('/elections/$id/phase', data: phase)).statusCode ==
       202;
@@ -1175,14 +1199,60 @@ class ElectionService {
   Future<int> unfreezeVoterRoll(int id, String reason) async => (await _dio
           .post('/elections/$id/voter-roll/unfreeze', data: {'reason': reason}))
       .data['removed'] as int;
-  // The first count needs the returning officer's key file, which only the
-  // web admin can read. After that this returns the stored results. With no
-  // key the server never counts or asks a second person to approve (37.13h).
+  // Reads the stored results. With no key the server never counts or asks a
+  // second person to approve (37.13h). The first count goes through runCount.
   Future<List<dynamic>> count(int id) async =>
       (await _dio.post('/elections/$id/count')).data as List<dynamic>;
+
+  // 84.44. Same body as the web: base64 SPKI DER. True when the change waits
+  // for a second person (202).
+  Future<bool> setBallotKey(int id, String publicKey) async => (await _dio
+          .post('/admin/elections/$id/ballot-key', data: {'publicKey': publicKey}))
+      .statusCode ==
+      202;
+
+  // 84.44. Counts with the returning officer's key, as the web's runCount
+  // does. The server opens the ballots, so the base64 PKCS#8 key goes in the
+  // body over TLS. Never log it. A 202 returns the approval and the same call
+  // runs the count once a second person approves.
+  Future<({List<dynamic>? results, ElectionApproval? pending})> runCount(
+      int id, String privateKey) async {
+    final response = await _dio
+        .post('/elections/$id/count', data: {'privateKey': privateKey});
+    if (response.statusCode == 202) {
+      return (
+        results: null,
+        pending:
+            ElectionApproval.fromJson(response.data as Map<String, dynamic>),
+      );
+    }
+    return (results: response.data as List<dynamic>, pending: null);
+  }
   // True when the declaration waits for a second person, as with setPhase.
   Future<bool> declare(int id) async =>
       (await _dio.post('/elections/$id/declare')).statusCode == 202;
+
+  // 84.16. The steps the web admin page runs. Publish and close return true
+  // when the server stored them for a second person (202).
+  Future<bool> publish(int id) async =>
+      (await _dio.post('/admin/elections/$id/publish', data: {})).statusCode ==
+      202;
+  Future<bool> close(int id) async =>
+      (await _dio.post('/admin/elections/$id/close', data: {})).statusCode ==
+      202;
+  // The server refuses with 409 once the candidate has votes.
+  Future<void> removeCandidate(int electionId, int candidateId) =>
+      _dio.delete('/admin/elections/$electionId/candidates/$candidateId');
+  Future<void> scrutinise(int nominationId, bool accepted, {String? reason}) =>
+      _dio.post('/elections/nominations/$nominationId/scrutiny',
+          data: {'accepted': accepted, 'reason': reason});
+  // Step-up. 409 when it was already recorded, 400 before the declaration.
+  Future<void> keyDestroyed(int id) =>
+      _dio.post('/elections/$id/key-destroyed', data: {});
+  // Step-up. The condition is a readiness item key with attestation set.
+  Future<void> attestReadiness(int id, String condition) => _dio.post(
+      '/elections/$id/readiness/attest',
+      data: {'condition': condition});
 
   // 37.14s. Election staff only. With no mode the server uses the org's
   // DefaultPrintMode. Blank keeps the election's QR code but fills in nothing.

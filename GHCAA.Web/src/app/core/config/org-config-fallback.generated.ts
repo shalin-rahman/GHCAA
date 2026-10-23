@@ -74,7 +74,8 @@ export const ORG_CONFIG_FALLBACK: OrgConfig = {
     "otpVerificationRequired": true,
     "defaultMembershipType": "General",
     "adminEmailOnNewRegistration": true,
-    "notificationChannel": "Both"
+    "notificationChannel": "Both",
+    "newsImageUploadsPerDay": 20
   },
   "localization": {
     "dateFormat": "dd-MM-yyyy",

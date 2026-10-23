@@ -556,7 +556,6 @@ not block a build yet). For the full mechanism and where it stands, see
 | `GetMemberPaymentHistoryAsync(memberId, ct)` | `IEnumerable<PaymentHistoryDto>` |
 | `RecordPaymentAsync(dto, ct)` | `PaymentHistoryDto` |
 | `UpdatePaymentStatusAsync(paymentId, status, notes, ct)` | `bool` |
-| `ProcessGatewayPaymentAsync(txnId, amount, notes, ct)` | `bool` |
 | `GetMemberMembershipHistoryAsync(memberId, ct)` | `IEnumerable<MembershipHistoryDto>` |
 | `RecordMembershipChangeAsync(memberId, from, to, adminId, reason, ct)` | `Task` |
 | `GetMemberDuesAsync(memberId, ct)` | `IEnumerable<MembershipDueDto>` |
@@ -1206,7 +1205,7 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `getAllForExport()` | `(search, status, category, type) => Observable<any[]>` | `GET /admin/members?pageSize=10000` |
 | `approveMember()` | `(id, adminId) => Observable<any>` | `POST /admin/members/:id/approve` |
 | `rejectMember()` | `(id, adminId, reason) => Observable<any>` | `POST /admin/members/:id/reject` |
-| `getStats()` | `() => Observable<DashboardStats>` | `GET /admin/analytics` |
+| `getStats()` | `() => Observable<DashboardStats>` | `GET /admin/stats` |
 | `archiveMember()` | `(id) => Observable<any>` | `DELETE /admin/members/:id` |
 | `reactivateMember()` | `(id) => Observable<any>` | `POST /admin/members/:id/reactivate` |
 | `updateMember()` | `(id, data) => Observable<any>` | `PUT /admin/members/:id` |
@@ -1625,7 +1624,7 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 | `getContactMessages()` | `() => Future<List>` | `GET /admin/contact-messages` |
 | `markMessageAsRead()` | `(id) => Future<bool>` | `POST /admin/contact-messages/:id/read` |
 | `resolveApproval()` | `(memberId, approve, {adminId, reason?}) => Future<bool>` | `POST /admin/members/:id/approve\|reject` |
-| `getGlobalAnalytics()` | `() => Future<Map>` | `GET /admin/analytics` |
+| `getGlobalAnalytics()` | `() => Future<Map>` | `GET /admin/stats` |
 | `getECPeriods()` | `() => Future<List>` | `GET /admin/governance/periods` |
 | `createECPeriod()` | `(data) => Future<bool>` | `POST /admin/governance/periods` |
 | `updateECPeriod()` | `(id, data) => Future<bool>` | `PUT /admin/governance/periods/:id` |

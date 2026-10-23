@@ -50,6 +50,13 @@ namespace GHCAA.Application.DTOs
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
+            if (PassingYear.HasValue && (PassingYear <= 1950 || PassingYear > DateTime.UtcNow.Year))
+            {
+                yield return new ValidationResult(
+                    $"Passing year must be after 1950 and no later than {DateTime.UtcNow.Year}.",
+                    new[] { nameof(PassingYear) });
+            }
+
             if (AdmissionYear.HasValue && PassingYear < AdmissionYear.Value)
             {
                 yield return new ValidationResult(

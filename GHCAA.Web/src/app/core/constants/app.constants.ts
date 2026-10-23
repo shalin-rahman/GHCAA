@@ -639,6 +639,12 @@ export const API_ENDPOINTS = {
         // 7.13: step-up (re-verify by emailed OTP before a guarded action). 37.1w: any signed-in user, voters included
         STEP_UP_REQUEST: '/api/auth/step-up/request',
         STEP_UP_VERIFY: '/api/auth/step-up/verify',
+        // 95.6: authenticator app step-up. Setup, new recovery codes and removal need a step-up first.
+        AUTHENTICATOR: '/api/auth/authenticator',
+        AUTHENTICATOR_SETUP: '/api/auth/authenticator/setup',
+        AUTHENTICATOR_SETUP_WITH_PASSWORD: '/api/auth/authenticator/setup-with-password',
+        AUTHENTICATOR_CONFIRM: '/api/auth/authenticator/confirm',
+        AUTHENTICATOR_RECOVERY_CODES: '/api/auth/authenticator/recovery-codes',
         GOOGLE: '/api/auth/google',
         FACEBOOK: '/api/auth/facebook',
         REFRESH: '/api/auth/refresh',

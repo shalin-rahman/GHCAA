@@ -157,6 +157,8 @@
                             @if (!user.memberId) {
                             <button class="icon-btn" (click)="resetPassword(user)"
                                 title="Reset Password">🔐</button>
+                            <button class="icon-btn" (click)="resetAuthenticator(user)"
+                                title="Reset Authenticator App">📱</button>
                             <button class="icon-btn" (click)="toggleUserActive(user.id, user.isActive)"
                                 [title]="user.isActive ? 'Disable Account' : 'Enable Account'">
                                 {{ user.isActive ? '⏸️' : '▶️' }}

@@ -371,6 +371,26 @@ namespace GHCAA.Domain
             public const int StorageProbeTimeoutSeconds = 5;
         }
 
+        // 95.6. Authenticator app step-up (RFC 6238). A code is taken one step either side of now,
+        // to allow for a phone clock that runs a little fast or slow.
+        public static class Authenticator
+        {
+            public const int StepSeconds = 30;
+            public const int Digits = 6;
+            public const int DriftSteps = 1;
+            public const int SecretBytes = 20;
+            public const int RecoveryCodeCount = 10;
+            public const int MaxFailedAttempts = 5;
+            public const int LockoutMinutes = 15;
+            public const int RecoveryCodeHalfLength = 5;
+            // No 0, O, 1 or I, so a code copied onto paper reads one way only.
+            public const string RecoveryCodeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            public const string ProtectorPurpose = "GHCAA.Totp.v1";
+            public const string MethodEmail = "email";
+            public const string MethodApp = "app";
+            public const string AdminResetAuditType = "AuthenticatorResetByAdmin";
+        }
+
         public static class SecurityStamps
         {
             // 98.8. How long the middleware trusts a cached stamp. A rotation evicts it at once,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/app_date_picker.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/async_value_widget.dart';
@@ -15,18 +16,30 @@ final feeConfigsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async
   return ref.read(adminServiceProvider).getFeeConfigs();
 });
 
+// TODO 8.15. The API keys a fee on category, type and effective date, so a missing date stored
+// 0001-01-01 and a second add was refused. An edit keeps the row's own date unless changed.
+Map<String, dynamic> buildFeePayload(dynamic existing, double amount, DateTime effectiveDate) => {
+      'id': existing != null ? existing['id'] : 0,
+      'category': existing != null ? existing['category'] : 0, // MembershipFee
+      'membershipType': existing != null ? existing['membershipType'] : 2, // General
+      'amount': amount,
+      'effectiveDate': AppUtils.toWire(effectiveDate),
+      'isActive': true,
+    };
+
 class FeeConfigScreen extends ConsumerWidget {
   const FeeConfigScreen({super.key});
 
   Future<void> _upsertFee(BuildContext context, WidgetRef ref, [dynamic existing]) async {
     final currency = ref.read(orgCurrencyProvider);
     final amountCtrl = TextEditingController(text: existing != null ? existing['amount'].toString() : '');
-    final category = existing != null ? existing['category'] : 0; // MembershipFee
-    final type = existing != null ? existing['membershipType'] : 2; // General
+    final dateFormat = ref.read(orgDateFormatProvider).identifier;
+    var effectiveDate = (existing != null ? AppUtils.parseDate(existing['effectiveDate']?.toString()) : null) ??
+        DateTime.now();
 
     await showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setState) => AlertDialog(
         backgroundColor: AppTheme.midnightSurface,
         title: Text(existing == null ? 'NEW FEE POLICY' : 'ADJUST FEE RULE', style: const TextStyle(color: AppTheme.royalGold, fontSize: 13, fontWeight: FontWeight.bold)),
         content: Column(
@@ -38,6 +51,17 @@ class FeeConfigScreen extends ConsumerWidget {
                style: const TextStyle(color: Colors.white),
                decoration: InputDecoration(labelText: 'Amount (${currency.code})', labelStyle: const TextStyle(color: Colors.white38)),
              ),
+             ListTile(
+               key: const Key('fee-effective-date'),
+               contentPadding: EdgeInsets.zero,
+               title: const Text('Effective from', style: TextStyle(color: Colors.white38, fontSize: 12)),
+               subtitle: Text(displayAppDate(effectiveDate, format: dateFormat), style: const TextStyle(color: Colors.white)),
+               trailing: const Icon(Icons.event, color: AppTheme.royalGold, size: 18),
+               onTap: () async {
+                 final picked = await showAppDatePicker(context: ctx, initialDate: effectiveDate);
+                 if (picked != null) setState(() => effectiveDate = picked);
+               },
+             ),
              const SizedBox(height: 16),
              const Text('Policy metadata is governed by system roles.', style: TextStyle(color: Colors.white54, fontSize: 10)),
           ],
@@ -47,13 +71,7 @@ class FeeConfigScreen extends ConsumerWidget {
           TextButton(
             onPressed: () async {
               final amount = double.tryParse(amountCtrl.text) ?? 0;
-              final payload = {
-                'id': existing != null ? existing['id'] : 0,
-                'category': category,
-                'membershipType': type,
-                'amount': amount,
-                'isActive': true,
-              };
+              final payload = buildFeePayload(existing, amount, effectiveDate);
               
               bool success;
               try {
@@ -79,7 +97,7 @@ class FeeConfigScreen extends ConsumerWidget {
             child: const Text('COMMIT', style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold))
           ),
         ],
-      ),
+      )),
     );
   }
 

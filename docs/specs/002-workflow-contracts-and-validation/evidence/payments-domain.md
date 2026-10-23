@@ -18,17 +18,15 @@ template.
 | (none) | `Pending` | Gateway payment initiation | Anonymous (member optional; required unless `EVT-REG` reference) | `POST /api/gateways/initiate` → `GatewaysController.cs:158` calls `FinancialService.RecordPaymentAsync` with a generated `TransactionId` | Same as above, `FinancialCategory` set to `RegistrationFee` or `MembershipFee` based on reference prefix |
 | `Pending` | `Completed` | Admin manually verifies | Admin (`AdminOnly` policy) | `PATCH /api/financials/update-status/{id}` → `FinancialService.UpdatePaymentStatusAsync` (`FinancialService.cs:166`) | Sends `PaymentStatusUpdated` notification (member only); fires `SendAdminAlertAsync("NEW_PAYMENT", ...)` real-time alert |
 | `Pending`/`Failed` | `Completed` | Gateway callback verified (SSLCommerz form callback, bKash GET callback, DGePay GET callback, generic webhook) | Anonymous (gateway) | `POST /api/gateways/callback/sslcommerz`, `GET /api/gateways/callback/bkashgateway`, `GET /api/gateways/callback/dgepay`, `POST /api/gateways/webhook/{gateway}` → all call `IPaymentCallbackOrchestrator.HandleSuccessfulPaymentAsync` → `UpdatePaymentStatusAsync(..., Completed, ...)` (`PaymentCallbackOrchestrator.cs:74-76`) | Idempotency guard on `gatewayPaymentId` (short-circuits if already processed); notification/alert as above; then event-registration auto-approval if `FinancialCategory == RegistrationFee` and amount sufficient (`EventService.AutoApproveRegistrationAfterPaymentAsync`); membership auto-induction if `FinancialCategory == MembershipFee`, member status `Applied`, and amount sufficient (`MemberService.ApproveMemberAsync`) |
-| `Pending` | `Failed` | Gateway callback reports amount mismatch | Gateway (system) | Same callback/webhook endpoints → `PaymentCallbackOrchestrator.cs:61-71` and `FinancialService.ProcessGatewayPaymentAsync:221-225` (alternate path, not wired to any controller route found — not read further in this pass) | Notes annotated with mismatch detail; no further auto-approval runs |
+| `Pending` | `Failed` | Gateway callback reports amount mismatch | Gateway (system) | Same callback/webhook endpoints → `PaymentCallbackOrchestrator.cs:61-71` | Notes annotated with mismatch detail; no further auto-approval runs |
 | `Completed` | (terminal) | Any repeat callback/admin update | — | Guarded at `PaymentCallbackOrchestrator.cs:53` and `FinancialService.cs:218` (`if (payment.Status == Completed) return`) | No-op — `Completed → Failed` and `Completed → Refunded` are unreachable; no code path re-opens a completed payment |
 | any | `Refunded` | No trigger found in any controller or service in scope | — | — | Unreachable in this codebase slice — `Refunded` is declared on the enum but no assignment to it was found in `FinancialService.cs`, `PaymentCallbackOrchestrator.cs`, or the four controllers |
 | `Pending` | (deleted, not a status transition) | Admin deletes payment record | Admin (`AdminOnly` policy) | `DELETE /api/financials/payment/{id}` → `FinancialService.DeletePaymentAsync` | Row removed, not status-transitioned; records deleting admin id |
 
 **Gaps carried forward, not resolved here:**
-- `FinancialService.ProcessGatewayPaymentAsync` (`FinancialService.cs:215-234`)
-  duplicates much of `PaymentCallbackOrchestrator.HandleSuccessfulPaymentAsync`'s
-  Completed/Failed logic but no controller route calling it was found in this
-  pass — unverified whether it's dead code, used by a gateway strategy class,
-  or called from a path not read.
+- `FinancialService.ProcessGatewayPaymentAsync` had no caller and copied the
+  callback logic. It was removed under TODO 84.13, so the callback in
+  `PaymentCallbackOrchestrator` is the only path that completes a gateway payment.
 - No admin/API path to explicitly issue a `Refunded` status was found —
   flagged as a gap, not confirmed intentional.
 - `FinancialLedgerController` operates on `FinancialRecord` (ledger entries),

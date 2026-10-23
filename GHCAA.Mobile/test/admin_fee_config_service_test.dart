@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ghcaa_mobile/features/admin/admin_service.dart';
+import 'package:ghcaa_mobile/screens/admin/fee_config_screen.dart';
 
 class _FeeConfigAdapter implements HttpClientAdapter {
   int status = 200;
@@ -57,5 +58,27 @@ void main() {
     final service = AdminService(Dio()..httpClientAdapter = _FeeConfigAdapter());
 
     expect(await service.addFeeConfig({'category': 'Annual'}), isTrue);
+  });
+
+  // 8.15: the dialog used to send no date, so the API stored 0001-01-01.
+  test('FR-42: a new fee sends the picked effective date as yyyy-MM-dd', () {
+    final payload = buildFeePayload(null, 500, DateTime(2027, 1, 1));
+
+    expect(payload['effectiveDate'], '2027-01-01');
+    expect(payload['id'], 0);
+    expect(payload['category'], 0);
+    expect(payload['membershipType'], 2);
+  });
+
+  test('FR-42: an edit keeps the row id, category, type and given date', () {
+    final existing = {'id': 9, 'category': 1, 'membershipType': 4, 'effectiveDate': '2025-07-01T00:00:00.000'};
+
+    final payload = buildFeePayload(existing, 750, DateTime.parse(existing['effectiveDate'] as String));
+
+    expect(payload['id'], 9);
+    expect(payload['category'], 1);
+    expect(payload['membershipType'], 4);
+    expect(payload['amount'], 750);
+    expect(payload['effectiveDate'], '2025-07-01');
   });
 }

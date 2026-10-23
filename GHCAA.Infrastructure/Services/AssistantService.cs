@@ -11,6 +11,19 @@ namespace GHCAA.Infrastructure.Services
         private readonly ApplicationDbContext _db;
         private readonly IOrgConfigService _orgConfigService;
 
+        // Query words mapped to a part of a sector name from PROFESSIONAL_SECTORS on the web.
+        // First match wins.
+        private static readonly (string[] Words, string Sector)[] SectorWords =
+        {
+            (new[] { "govt", "government", "public administration", "defense", "army" }, "Public Administration"),
+            (new[] { "bank", "finance", "financial" }, "Banking"),
+            (new[] { "education", "teacher", "professor", "research" }, "Education"),
+            (new[] { "medical", "doctor", "health" }, "Medical"),
+            (new[] { "software", "it sector", "information technology" }, "Information Technology"),
+            (new[] { "garment", "rmg" }, "Garments"),
+            (new[] { "legal", "lawyer", "consult" }, "Legal"),
+        };
+
         public AssistantService(ApplicationDbContext db, IOrgConfigService orgConfigService)
         {
             _db = db;
@@ -29,24 +42,30 @@ namespace GHCAA.Infrastructure.Services
 
             if (isSearchAlumni)
             {
-                var queryable = _db.Members.AsQueryable();
+                // Same base set as the member directory: active, not archived.
+                var queryable = _db.Members.AsNoTracking()
+                    .Where(m => m.Status == Domain.Enums.MembershipStatus.Active && !m.IsArchived);
 
-                // Extract Potential Year (e.g. "2010")
+                // A year means the passing year at this college, as in the directory filter.
                 var matchYear = Regex.Match(query, @"\b(19|20)\d{2}\b");
                 if (matchYear.Success && int.TryParse(matchYear.Value, out var year))
-                {
-                    //                     queryable = queryable.Where(m => m.GHCLastCertificatePassingYear == year);
-                }
+                    queryable = queryable.Where(m => m.AcademicHistory.Any(a => a.IsOrgProfile && a.PassingYear == year));
 
-                // Extract Potential Sector
-                //                 if (query.Contains("corporate")) queryable = queryable.Where(m => m.ProfessionalSector == "Corporate");
-                //                 else if (query.Contains("govt") || query.Contains("government")) queryable = queryable.Where(m => m.ProfessionalSector == "Govt. Service");
-                //                 else if (query.Contains("business")) queryable = queryable.Where(m => m.ProfessionalSector == "Business");
-                //                 else if (query.Contains("education") || query.Contains("teacher")) queryable = queryable.Where(m => m.ProfessionalSector == "Education");
-                //                 else if (query.Contains("medical") || query.Contains("doctor")) queryable = queryable.Where(m => m.ProfessionalSector == "Medical");
+                var sector = SectorWords.FirstOrDefault(s => s.Words.Any(query.Contains)).Sector;
+                if (sector != null)
+                    queryable = queryable.Where(m => m.ProfessionalHistory.Any(p => p.IsCurrent && p.Sector != null && p.Sector.Contains(sector)));
 
                 var results = await queryable.OrderBy(m => m.FullName).ThenBy(m => m.Id)
-                    .Take(10).ToListAsync(cancellationToken);
+                    .Take(10)
+                    .Select(m => new
+                    {
+                        m.Id,
+                        m.FullName,
+                        m.PhotoPath,
+                        Year = m.AcademicHistory.Where(a => a.IsOrgProfile).Select(a => (int?)a.PassingYear).FirstOrDefault(),
+                        Job = m.ProfessionalHistory.Where(p => p.IsCurrent).Select(p => new { p.Sector, p.Designation }).FirstOrDefault(),
+                    })
+                    .ToListAsync(cancellationToken);
 
                 if (results.Any())
                 {
@@ -55,20 +74,20 @@ namespace GHCAA.Infrastructure.Services
                     {
                         Id = m.Id,
                         FullName = m.FullName,
-                        //                         GHCLastCertificatePassingYear = m.GHCLastCertificatePassingYear,
-                        //                         ProfessionalSector = m.ProfessionalSector,
-                        //                         Designation = m.Designation,
+                        GHCLastCertificatePassingYear = m.Year,
+                        ProfessionalSector = m.Job?.Sector,
+                        Designation = m.Job?.Designation,
                         PhotoPath = m.PhotoPath
                     });
                 }
                 else
                 {
-                    response.Answer = "I couldn't find any alumni matching those specific details in our registry. Try a broader search like 'alumni from 2015' or 'members in Corporate'.";
+                    response.Answer = "I couldn't find any alumni matching those specific details in our registry. Try a broader search like 'alumni from 2015' or 'members in banking'.";
                 }
             }
             else if (query.Contains("help") || query.Contains("what can you do"))
             {
-                response.Answer = $"I'm your {institutionName} alumni assistant. You can ask me to find specific alumni, e.g., 'Find members from 2010' or 'Search for alumni in Corporate sector'. I can also help with association rules or governance if you have questions!";
+                response.Answer = $"I'm your {institutionName} alumni assistant. You can ask me to find specific alumni, e.g., 'Find members from 2010' or 'Search for alumni in banking'. I can also help with association rules or governance if you have questions!";
             }
             else
             {

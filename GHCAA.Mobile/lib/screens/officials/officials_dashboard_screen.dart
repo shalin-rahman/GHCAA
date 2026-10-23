@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -108,11 +109,14 @@ class _ElectionCard extends ConsumerWidget {
                       ? 'Every item is met. Polling can open.'
                       : 'Polling cannot open until each item below is met.',
                   key: const Key('card-readiness')),
-              for (final item in readiness.items)
+              for (final item in readiness.items) ...[
                 Text(
                     '${item.met ? 'Done' : (item.advisory ? 'Warning' : 'Not yet')}: '
                     '${electionReadinessLabel(item.key)}',
                     key: Key('readiness-${item.key}')),
+                if (item.attestation && !item.met && _can('ChangePhase'))
+                  _AttestButton(electionId: election.id, condition: item.key),
+              ],
             ],
             const SizedBox(height: AppTheme.spaceS),
             Wrap(
@@ -137,4 +141,49 @@ class _ElectionCard extends ConsumerWidget {
       ),
     );
   }
+}
+
+// 84.16. Records one attested readiness item. The route needs step-up, which
+// the interceptor asks for. A 409 means someone else recorded it first.
+class _AttestButton extends ConsumerStatefulWidget {
+  final int electionId;
+  final String condition;
+  const _AttestButton({required this.electionId, required this.condition});
+
+  @override
+  ConsumerState<_AttestButton> createState() => _AttestButtonState();
+}
+
+class _AttestButtonState extends ConsumerState<_AttestButton> {
+  bool _busy = false;
+
+  Future<void> _attest() async {
+    setState(() => _busy = true);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref
+          .read(electionServiceProvider)
+          .attestReadiness(widget.electionId, widget.condition);
+      messenger.showSnackBar(
+          const SnackBar(content: Text('Recorded in the audit log.')));
+    } on DioException catch (e) {
+      if (e.response?.statusCode != 409) {
+        messenger.showSnackBar(
+            const SnackBar(content: Text('Could not record the item.')));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+      ref.invalidate(officialsReadinessProvider(widget.electionId));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton(
+          key: Key('attest-${widget.condition}'),
+          onPressed: _busy ? null : _attest,
+          child: const Text('Record as done'),
+        ),
+      );
 }

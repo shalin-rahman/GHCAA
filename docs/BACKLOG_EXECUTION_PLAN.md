@@ -135,6 +135,8 @@ production caller, only exercised by tests, and duplicates `PaymentCallbackOrche
 but `FinancialServiceTests.cs` currently covers it, so the test removal must not silently drop
 coverage of the orchestrator path it duplicates. Verify the orchestrator has equivalent test
 coverage before deleting.
+**Done 23-10-2026:** no test called the method, so no coverage was lost. The method and its
+private helper were removed.
 
 ### 84.21 / 84.22 — Duplicate family-link workflow, admin bypass gap (P3)
 `FamilyService.cs` has a full second request/respond/cancel/link/unlink/search workflow

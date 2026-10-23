@@ -35,6 +35,9 @@
     <PackageReference Include="QuestPDF" Version="2026.2.3" />
     <PackageReference Include="SkiaSharp" Version="4.153.1" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.153.1" />
+    <!-- Pinned past GHSA-846f-f764-76mx and GHSA-r955-8q5j-3h83. Both come in transitively, and Pkcs already resolved to 10.0.0. -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="9.0.21" />
   </ItemGroup>
 
   <ItemGroup>

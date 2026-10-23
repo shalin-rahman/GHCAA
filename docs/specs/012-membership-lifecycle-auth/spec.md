@@ -137,6 +137,15 @@ Acceptance Scenarios:
 3. Given the access token is refreshed while the step-up epoch is still within
    StepUpTtlMinutes, a config value defaulting to 30, When the new token is issued, Then the
    step-up claim is carried forward; a fresh login never carries it forward.
+4. Given a user who has added an authenticator app (95.6, the TOTP step-up), When POST
+   api/auth/step-up/verify with method app and a current 6-digit code or an unused recovery code,
+   Then the step-up token is issued and no email is sent. That user may instead ask for an email
+   code and verify with method email, unless there is no email on file. Five wrong app codes
+   lock the app for 15 minutes. Setup, new recovery codes and removal live under
+   api/auth/authenticator and each needs a fresh step-up; a user with no email on file sets up
+   with the password through POST api/auth/authenticator/setup-with-password instead. A
+   SuperAdmin removes a lost app through DELETE api/roles/users/{id}/authenticator, which writes
+   an activity-log row and changes the user's SecurityStamp.
 
 ### User Story 6 - Administer roles, admin accounts, and social login config (Priority: P2)
 
@@ -214,8 +223,8 @@ Acceptance Scenarios:
 - Password reset: response body and timing are constant whether or not the identifier matches.
 - Step-up: TTL is read from AppSettings:StepUpTtlMinutes config, falling back to
   StepUpClaim.DefaultTtlMinutes, 30, if unset or non-positive.
-- Roles: RolesController.CreateRole and RemoveRole are not annotated RequireStepUp, unlike every
-  account-mutating action in the same controller.
+- Roles: every mutating action in RolesController, CreateRole and RemoveRole included, carries
+  RequireStepUp (TODO 84.10). AuthorizationPolicyReflectionTests pins it per action.
 
 ## Requirements
 
@@ -364,7 +373,6 @@ Acceptance Scenarios:
 ## Gaps
 
 - RolesController.GetUsers returns the full user list unpaged; the code comment at line 25 notes this is acceptable only while the admin/system-admin count stays in the dozens, not thousands. No pagination exists today. [NEEDS CLARIFICATION: is an unpaged admin/system-admin listing acceptable long-term, or does RolesController need pagination before the admin count grows?]
-- CreateRole and RemoveRole are not decorated with [RequireStepUp], while CreateAdmin, AssignRole, DeleteUser, DisableUser, EnableUser and ResetPasswordAdmin all are. Role creation and role removal are privilege-affecting actions and this looks like an inconsistency rather than a deliberate exclusion.
 - ResetPasswordAdmin returns the reset URL directly in the API response because system-admin User rows have no email address to send it to. This bypasses the normal reset-password delivery channel and puts a live reset link in the HTTP response body and, by extension, in any client-side logging of that response.
 - SocialLoginAsync auto-links an existing Member/User to a Google or Facebook identity only when the provider's verified email matches an existing account; the actual member-approval workflow (Applied to Active) is owned by AdminController, outside this spec's six controllers, so the boundary between registration/auth and approval is split across two controllers with no shared contract documented in code. [NEEDS CLARIFICATION: should the approve/reject workflow in AdminController be pulled into this spec's boundary, or does it remain a separate domain?]
 - MemberImportController.Import validates the workbook and each photo file but the Evidence table shows no test asserting partial-row-failure behaviour (e.g., row 5 invalid, rows 1-4 valid). GHCAA.Tests/Services/MemberImportServiceTests.cs was not confirmed to cover mixed-outcome batches.

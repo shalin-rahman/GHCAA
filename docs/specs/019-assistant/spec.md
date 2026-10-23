@@ -64,18 +64,18 @@ Acceptance Scenarios:
 
 - The controller has no role restriction beyond `[Authorize]`: Member, Admin, and SuperAdmin
   callers all reach the same lookup with no scoping difference.
-- Two extraction blocks in `AssistantService.AskAsync`, a year regex match and a sector
-  keyword match, are commented out (`GHCAA.Infrastructure/Services/AssistantService.cs`
-  lines 41-51); the `queryable` they were meant to filter is never narrowed, so a keyword
-  match always returns the first 10 Member rows in table order regardless of the year or
-  sector named in the query.
+- A search covers only active, non-archived members, the same base set as the member
+  directory. A four-digit year in the query keeps members whose passing year at this college
+  matches. A sector word (for example "bank", "doctor", "govt") keeps members whose current job
+  sector contains the mapped part of a PROFESSIONAL_SECTORS name. Words with no mapping, such as
+  "corporate" or "business", do not narrow the search (TODO 84.12).
 - `AssistantController` carries no `[EnableRateLimiting]` attribute, so it falls back to the
   application-wide per-IP limit of 100 requests a minute. Since the rate-limit fix this is a
   `GlobalLimiter` in `GHCAA.API/Extensions/RateLimitingExtensions.cs`, not a
   `RequireRateLimiting` call in `Program.cs`. There is no assistant-specific throttle.
-- `GHCAA.Mobile/lib/features/assistant/assistant_service.dart` line 11 posts the body key
-  `question`, but `AssistantQueryDto` (`GHCAA.API/Controllers/AssistantController.cs` line 34)
-  binds the field `Query`; a mobile request therefore always arrives with `Query` unset.
+- `GHCAA.Mobile/lib/features/assistant/assistant_service.dart` posts the body key `query`,
+  which `AssistantQueryDto` binds as `Query`. It posted `question` before TODO 84.11, so every
+  mobile request was rejected as empty.
 
 ## Requirements
 
@@ -88,8 +88,9 @@ Acceptance Scenarios:
 - FR-003: The system shall classify a lower-cased query as an alumni-search request when it
   contains any of "find", "search", "who", "alumni", or "member", and shall query the Member
   table for that branch. [code]
-- FR-004: The system shall return at most 10 Member rows, each mapped to MemberProfileDto with
-  Id, FullName, and PhotoPath, for a matched alumni-search query. [code]
+- FR-004: The system shall return at most 10 active, non-archived Member rows, narrowed by a
+  passing year or sector word found in the query, each mapped to MemberProfileDto with Id,
+  FullName, PhotoPath, passing year, current sector and current designation. [code]
 - FR-005: The system shall return a fixed help-text Answer naming the org config's
   Branding.InstitutionName when the query contains "help" or "what can you do". [code]
 - FR-006: The system shall return a fixed greeting Answer with no FoundMembers when the query
@@ -103,8 +104,9 @@ Acceptance Scenarios:
 - AssistantQueryDto: request body; single required field Query (string).
 - AssistantResponseDto: response body; Answer (string) and an optional FoundMembers collection
   of MemberProfileDto.
-- Member: existing entity queried for alumni-search matches; only Id, FullName, and PhotoPath
-  are read by this feature.
+- Member: existing entity queried for alumni-search matches. The feature reads Id, FullName,
+  PhotoPath, Status and IsArchived, the college AcademicRecord's PassingYear, and the current
+  ProfessionalRecord's Sector and Designation.
 
 ## Evidence
 
@@ -112,31 +114,23 @@ Acceptance Scenarios:
 |---|---|---|---|---|---|
 | FR-001 | POST api/assistant/ask | GHCAA.API/Controllers/AssistantController.cs | GHCAA.Web/src/app/member/assistant/assistant.ts | GHCAA.Mobile/lib/screens/member/ai_chat_screen.dart | none found |
 | FR-002 | POST api/assistant/ask | AssistantController.cs::Ask | assistant.ts | ai_chat_screen.dart | none found |
-| FR-003 | POST api/assistant/ask | GHCAA.Infrastructure/Services/AssistantService.cs::AskAsync | assistant.ts | GHCAA.Mobile/lib/features/assistant/assistant_service.dart | none found |
-| FR-004 | POST api/assistant/ask | AssistantService.cs::AskAsync | assistant.ts | assistant_service.dart | none found |
+| FR-003 | POST api/assistant/ask | GHCAA.Infrastructure/Services/AssistantService.cs::AskAsync | assistant.ts | GHCAA.Mobile/lib/features/assistant/assistant_service.dart | GHCAA.Mobile/test/assistant_service_test.dart::posts the question under query and reads the answer |
+| FR-004 | POST api/assistant/ask | AssistantService.cs::AskAsync | assistant.ts | assistant_service.dart | GHCAA.Tests/Services/AssistantServiceTests.cs::AskAsync_YearInQuery_KeepsOnlyThatPassingYear, AskAsync_SectorWord_MatchesCurrentJobSector, AskAsync_LeavesOutInactiveAndArchivedMembers |
 | FR-005 | POST api/assistant/ask | AssistantService.cs::AskAsync | assistant.ts | assistant_service.dart | none found |
 | FR-006 | POST api/assistant/ask | AssistantService.cs::AskAsync | assistant.ts | assistant_service.dart | none found |
 | FR-007 | POST api/assistant/ask | GHCAA.API/Extensions/RateLimitingExtensions.cs::AddAppRateLimiting (GlobalLimiter) | none found | none found | none found |
 
 GHCAA.Web/src/app/core/services/assistant.service.spec.ts exists but tests only the Angular
-HTTP wrapper (request shape and response passthrough), not any of the above FRs at the API
-layer. No GHCAA.Tests file for AssistantController or AssistantService was found by Glob.
+HTTP wrapper (request shape and response passthrough). AssistantServiceTests covers the search
+filters (TODO 84.12) and assistant_service_test.dart pins the mobile request body (TODO 84.11).
+AssistantController still has no test.
 
 ## Gaps
 
-- No test coverage exists anywhere in GHCAA.Tests for AssistantController or AssistantService;
-  the only test found is the Angular HTTP-client wrapper spec. [NEEDS CLARIFICATION: is
-  controller/service-level test coverage planned for this endpoint, or is it deliberately
-  excluded pending the Agentra AI migration described in 006-project-agentra-ai?]
-- AssistantService.cs lines 41-51: the year-regex match and sector-keyword branches build
-  `matchYear`/checks but never apply them to `queryable`, since the `.Where(...)` calls are
-  commented out. A query like "find alumni from 2010 in Corporate sector" silently ignores
-  both filters and returns the first 10 Member rows in table order. This looks like an
-  unfinished feature left mid-edit rather than a deliberate simplification.
-- GHCAA.Mobile/lib/features/assistant/assistant_service.dart line 11 sends `{'question':
-  question}`, not `{'query': query}`. Since AssistantQueryDto binds `Query`, every mobile
-  request reaches the controller with an empty Query and is rejected by the FR-002 400 check
-  before AskAsync runs. The mobile "AI Assistant" feature appears non-functional as shipped.
+- AssistantController has no test for the empty-query 400 (FR-002) or the authorization
+  requirement (FR-001). [NEEDS CLARIFICATION: is controller-level test coverage planned for
+  this endpoint, or is it deliberately excluded pending the Agentra AI migration described in
+  006-project-agentra-ai?]
 - No role scoping distinguishes Member, Admin, and SuperAdmin callers, and no per-caller or
   per-role rate limit exists separate from the shared Api policy; a single member account can
   consume up to the full 100-requests-per-minute application-wide budget against the Member
@@ -194,18 +188,16 @@ layer. No GHCAA.Tests file for AssistantController or AssistantService was found
 
 - SC-001: An authenticated Member, Admin, or SuperAdmin can submit a query containing an
   alumni-search keyword and receive up to 10 matching Member rows with name and photo (FR-003,
-  FR-004), as evidenced by AssistantService.cs; no automated test currently demonstrates this.
+  FR-004), as shown by AssistantServiceTests.
 - SC-002: An empty query is rejected with 400 before any database access (FR-002), as evidenced
   by AssistantController.cs::Ask; no automated test currently demonstrates this.
 
 ## Assumptions
 
-- The commented-out year and sector filtering code (AssistantService.cs lines 41-51) is dead
-  code left from an earlier iteration, not an intentionally disabled feature flag; there is no
-  configuration key or comment explaining why it is disabled.
-- The mobile `question`/`Query` field-name mismatch is treated as a live bug for this spec's
-  purposes rather than an intentional divergent contract, since no second endpoint or DTO
-  accepting `question` exists anywhere in GHCAA.API.
+- The sector words map to the web's PROFESSIONAL_SECTORS list
+  (`GHCAA.Web/src/app/core/constants/app.constants.ts`). The old filter named sectors such as
+  "Corporate" and "Govt. Service" that are not on that list, so it was rewritten rather than
+  uncommented (TODO 84.12).
 - Test file names referenced in the Evidence table ("none found") were confirmed absent via
   Glob against GHCAA.Tests, GHCAA.Web *.spec.ts, and GHCAA.Mobile/test at the time this spec
   was written.

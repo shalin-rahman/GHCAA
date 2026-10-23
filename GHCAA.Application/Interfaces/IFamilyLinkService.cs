@@ -19,8 +19,8 @@ namespace GHCAA.Application.Interfaces
         /// <summary>Get all pending requests received by this member.</summary>
         Task<List<FamilyLinkRequestDto>> GetReceivedRequestsAsync(int memberId, CancellationToken ct = default);
 
-        /// <summary>Return the approved family network of a member.</summary>
-        Task<List<FamilyLinkRequestDto>> GetFamilyAsync(int memberId, int? requesterMemberId = null, CancellationToken ct = default);
+        /// <summary>Return the approved family network of a member. An admin requester sees a private family too.</summary>
+        Task<List<FamilyLinkRequestDto>> GetFamilyAsync(int memberId, int? requesterMemberId = null, bool requesterIsAdmin = false, CancellationToken ct = default);
 
         /// <summary>Remove an existing family link. Either party can initiate this.</summary>
         Task<bool> RemoveLinkAsync(int currentMemberId, int requestId, CancellationToken ct = default);

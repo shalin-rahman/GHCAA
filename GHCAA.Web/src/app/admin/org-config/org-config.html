@@ -198,6 +198,11 @@
         </select>
         <small class="text-muted">Which service sends all email, including login and OTP codes. Use Brevo on a host that blocks SMTP. The chosen service also needs its key set on the server, or mail stops. Takes effect on the next email, so check one arrives after a switch.</small>
       </div>
+      <div class="form-group">
+        <label>News Image Uploads Per Day</label>
+        <input type="number" min="0" [(ngModel)]="config.workflow.newsImageUploadsPerDay" name="newsImageUploadsPerDay">
+        <small class="text-muted">How many news images one account can upload in a day. Set 0 for no limit.</small>
+      </div>
     </div>
     <div class="toggle-grid">
       <label class="toggle-row">

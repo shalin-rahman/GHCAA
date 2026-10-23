@@ -126,6 +126,33 @@ public sealed class BallotSealTests
         BallotSeal.Fingerprint(PublicKeyOf(huge, [1, 0, 1])).Should().BeNull();
     }
 
+    [Test]
+    [Category("FR-39")]
+    public void Open_ReadsTheFixedVectorSealedOutsideDotNet()
+    {
+        using var rsa = RSA.Create();
+        rsa.ImportPkcs8PrivateKey(Convert.FromBase64String(Compact(BallotSealVector.PrivateKeyPkcs8)), out _);
+
+        BallotSeal.PrivateKeyFingerprint(rsa).Should().Be(BallotSealVector.Fingerprint);
+        BallotSeal.Open(rsa, Compact(BallotSealVector.Sealed), BallotSealVector.ElectionId, Current).Should().Be(BallotSealVector.Plaintext);
+        FluentActions.Invoking(() => BallotSeal.Open(rsa, Compact(BallotSealVector.Sealed), BallotSealVector.ElectionId + 1, Current))
+            .Should().Throw<CryptographicException>();
+    }
+
+    // Prefix, then base64 of 384 (wrapped key) + 12 (nonce) + 16 (tag) + padded body for a
+    // 3072-bit key. A body of exactly one block gets a second block, so the length never shows
+    // where inside a block the choices end.
+    [TestCase(17, 1235)]
+    [TestCase(511, 1235)]
+    [TestCase(512, 1919)]
+    [Category("FR-39")]
+    public void Seal_HasTheDocumentedLength(int bodyBytes, int sealedLength)
+    {
+        BallotSeal.Seal(PublicKey, new string('x', bodyBytes), ElectionId, Current).Length.Should().Be(sealedLength);
+    }
+
+    private static string Compact(string text) => string.Concat(text.Where(c => !char.IsWhiteSpace(c)));
+
     private static string PublicKeyOf(byte[] modulus, byte[] exponent)
     {
         using var rsa = RSA.Create();

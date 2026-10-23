@@ -172,6 +172,9 @@ namespace GHCAA.API.Controllers
                 return Unauthorized();
             }
 
+            if (!await _newsService.TryCountImageUploadAsync(authorId, cancellationToken))
+                return Problem(detail: "You have reached today's limit for news image uploads. Try again tomorrow.", statusCode: StatusCodes.Status429TooManyRequests);
+
             using var stream = file.OpenReadStream();
             var extension = Path.GetExtension(file.FileName);
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();

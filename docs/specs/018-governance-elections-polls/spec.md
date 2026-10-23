@@ -332,9 +332,11 @@ and confirm rejection, then confirm the member vote status and result percentage
   workflow. Web uses the simplified AdminElectionsController path (FR-027 through FR-032)
   and never calls SetPhase, AddSeat, AssignOfficer, FreezeVoterRoll, Count, Declare, or the
   document endpoint. Mobile drives the ElectionsController phase, nomination, vote, count,
-  declare and document flow but has no call to AssignOfficer, AddSeat, or the
-  AdminElectionsController publish, close or candidates endpoints. Neither client exercises
-  the whole engine end to end.
+  declare and document flow. Since TODO 84.16 (mobile election admin, 2026-10-23) mobile
+  also calls the AdminElectionsController publish, close, candidate removal, scrutiny,
+  key-destroyed and readiness routes, so it can take an election from draft to declared.
+  Neither client calls AssignOfficer or AddSeat, and mobile has no key generation or first
+  count (TODO 84.44, the mobile key packages).
 - FR-012, FR-016, FR-017, FR-019 (web has no submit UI for FR-020), FR-021 (mobile has none),
   FR-022, FR-024, FR-025 have no automated test at any layer. The phase-advance, seat,
   officer, nomination-submit, scrutiny, withdraw, count and declare paths of

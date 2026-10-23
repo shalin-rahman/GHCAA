@@ -86,6 +86,8 @@ class ProfileScreen extends ConsumerWidget {
                       children: [
                         _buildActionTile(context, Icons.history_edu_outlined, 'Access Logs', '/activity'),
                         const Divider(color: Colors.white10, height: 1),
+                        _buildActionTile(context, Icons.phonelink_lock_outlined, 'Authenticator App', '/profile/authenticator'),
+                        const Divider(color: Colors.white10, height: 1),
                         _buildActionTile(context, Icons.devices_outlined, 'Registered Device Metadata', null),
                       ],
                     ),

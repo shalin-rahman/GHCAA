@@ -16,6 +16,7 @@ import '../../screens/member/jobs_screen.dart';
 import '../../screens/member/job_details_screen.dart';
 import '../../screens/member/profile_screen.dart';
 import '../../screens/member/profile_edit_screen.dart';
+import '../../screens/member/authenticator_screen.dart';
 import '../../screens/member/financial_portal_screen.dart';
 import '../../screens/financials/payment_web_page.dart';
 import '../../screens/member/news_screen.dart';
@@ -161,6 +162,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/directory', name: 'directory', builder: (context, state) => const DirectoryScreen()),
           GoRoute(path: '/digital_id', name: 'digital_id', builder: (context, state) => const DigitalIDScreen()),
           GoRoute(path: '/profile', name: 'profile', builder: (context, state) => const ProfileScreen()),
+          GoRoute(path: '/profile/authenticator', name: 'profile_authenticator', builder: (context, state) => const AuthenticatorScreen()),
           GoRoute(path: '/profile/edit', name: 'profile_edit', builder: (context, state) => ProfileEditScreen(initialData: state.extra as Map<String, dynamic>?)),
           GoRoute(
             path: '/directory/:id',

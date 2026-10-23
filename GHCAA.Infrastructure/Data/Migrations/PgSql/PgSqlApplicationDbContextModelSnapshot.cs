@@ -5406,6 +5406,48 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.UserAuthenticator", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("ConfirmedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FailedAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("LastUsedStep")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("LockedUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ProtectedSecret")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RecoveryCodeHashes")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserAuthenticators");
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.VoterRoll", b =>
                 {
                     b.Property<int>("Id")
@@ -6351,6 +6393,17 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .HasForeignKey("GHCAA.Domain.Models.User", "MemberId");
 
                     b.Navigation("Member");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.UserAuthenticator", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.VoterRoll", b =>

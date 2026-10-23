@@ -64,18 +64,6 @@
         }
       }
     },
-    "/api/admin/analytics": {
-      "get": {
-        "tags": [
-          "Admin"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/admin/sync-members": {
       "post": {
         "tags": [
@@ -2706,6 +2694,114 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/authenticator": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/authenticator/setup": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/authenticator/setup-with-password": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticatorPasswordDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticatorPasswordDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticatorPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/authenticator/confirm": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticatorCodeDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticatorCodeDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticatorCodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/authenticator/recovery-codes": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -10396,8 +10492,7 @@
                     "format": "date-time"
                   },
                   "NID": {
-                    "maxLength": 20,
-                    "minLength": 6,
+                    "pattern": "^(\\d{10}|\\d{13}|\\d{17})$",
                     "type": "string"
                   },
                   "MobileNo": {
@@ -11038,6 +11133,29 @@
     },
     "/api/roles/users/{id}/reset-password-admin": {
       "post": {
+        "tags": [
+          "Roles"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/roles/users/{id}/authenticator": {
+      "delete": {
         "tags": [
           "Roles"
         ],
@@ -12097,8 +12215,8 @@
             "format": "date-time"
           },
           "nid": {
-            "maxLength": 20,
-            "minLength": 6,
+            "minLength": 1,
+            "pattern": "^(\\d{10}|\\d{13}|\\d{17})$",
             "type": "string"
           },
           "mobileNo": {
@@ -12529,6 +12647,33 @@
         "type": "object",
         "properties": {
           "condition": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AuthenticatorCodeDto": {
+        "required": [
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "pattern": "^\\d{6}$",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AuthenticatorPasswordDto": {
+        "required": [
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "password": {
             "minLength": 1,
             "type": "string"
           }
@@ -16991,8 +17136,17 @@
         "properties": {
           "code": {
             "minLength": 1,
-            "pattern": "^\\d{6}$",
+            "pattern": "^(\\d{6}|[A-Za-z0-9]{5}-?[A-Za-z0-9]{5})$",
             "type": "string"
+          },
+          "method": {
+            "pattern": "^(email|app)$",
+            "type": "string",
+            "nullable": true
+          },
+          "usesApp": {
+            "type": "boolean",
+            "readOnly": true
           }
         },
         "additionalProperties": false
@@ -17397,8 +17551,8 @@
             "format": "date-time"
           },
           "nid": {
-            "maxLength": 20,
-            "minLength": 6,
+            "minLength": 1,
+            "pattern": "^(\\d{10}|\\d{13}|\\d{17})$",
             "type": "string"
           },
           "mobileNo": {
@@ -17760,15 +17914,21 @@
         "type": "string"
       },
       "VerifyEmailDto": {
+        "required": [
+          "email",
+          "otpCode"
+        ],
         "type": "object",
         "properties": {
           "email": {
+            "minLength": 1,
             "type": "string",
-            "nullable": true
+            "format": "email"
           },
           "otpCode": {
-            "type": "string",
-            "nullable": true
+            "minLength": 1,
+            "pattern": "^\\d{6}$",
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -17797,6 +17957,10 @@
           "emailProvider": {
             "type": "string",
             "nullable": true
+          },
+          "newsImageUploadsPerDay": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

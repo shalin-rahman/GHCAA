@@ -3,7 +3,8 @@ import { createNotificationServiceMock } from '../../core/testing/testing-utils'
 import { AdminRoles } from './admin-roles';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { of } from 'rxjs';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
+import { of, throwError } from 'rxjs';
 import { ReactiveFormsModule } from '@angular/forms';
 
 describe('AdminRoles Component', () => {
@@ -11,6 +12,7 @@ describe('AdminRoles Component', () => {
     let fixture: ComponentFixture<AdminRoles>;
     let adminServiceMock: any;
     let notificationServiceMock: any;
+    let confirmMock: any;
 
     beforeEach(async () => {
         adminServiceMock = {
@@ -22,8 +24,10 @@ describe('AdminRoles Component', () => {
             removeUserRole: vi.fn().mockReturnValue(of({ success: true })),
             resetSystemUserPassword: vi.fn().mockReturnValue(of({})),
             setSystemUserActive: vi.fn().mockReturnValue(of({})),
-            deleteSystemUser: vi.fn().mockReturnValue(of({}))
+            deleteSystemUser: vi.fn().mockReturnValue(of({})),
+            resetSystemUserAuthenticator: vi.fn().mockReturnValue(of(undefined))
         };
+        confirmMock = { confirm: vi.fn().mockReturnValue(of(true)) };
 
         notificationServiceMock = createNotificationServiceMock();
 
@@ -31,7 +35,8 @@ describe('AdminRoles Component', () => {
             imports: [AdminRoles, ReactiveFormsModule],
             providers: [
                 { provide: AdminService, useValue: adminServiceMock },
-                { provide: NotificationService, useValue: notificationServiceMock }
+                { provide: NotificationService, useValue: notificationServiceMock },
+                { provide: ConfirmDialogService, useValue: confirmMock }
             ]
         }).compileComponents();
 
@@ -86,5 +91,24 @@ describe('AdminRoles Component', () => {
         component.removeRole(1, 'Editor');
         expect(adminServiceMock.removeUserRole).toHaveBeenCalledWith(1, 'Editor');
         expect(notificationServiceMock.success).toHaveBeenCalledWith('Role Editor removed');
+    });
+
+    it('FR-39: removes a user\'s authenticator app after a danger confirm', async () => {
+        await component.resetAuthenticator({ id: 7, username: 'ops' });
+        expect(confirmMock.confirm).toHaveBeenCalledWith(expect.objectContaining({ danger: true }));
+        expect(adminServiceMock.resetSystemUserAuthenticator).toHaveBeenCalledWith(7);
+        expect(notificationServiceMock.success).toHaveBeenCalledWith('Authenticator app removed.');
+    });
+
+    it('FR-39: says so when the user has no authenticator app', async () => {
+        adminServiceMock.resetSystemUserAuthenticator.mockReturnValue(throwError(() => ({ status: 404 })));
+        await component.resetAuthenticator({ id: 7, username: 'ops' });
+        expect(notificationServiceMock.error).toHaveBeenCalledWith('No authenticator app set up for this user.');
+    });
+
+    it('FR-39: does nothing when the reset is cancelled', async () => {
+        confirmMock.confirm.mockReturnValue(of(false));
+        await component.resetAuthenticator({ id: 7, username: 'ops' });
+        expect(adminServiceMock.resetSystemUserAuthenticator).not.toHaveBeenCalled();
     });
 });

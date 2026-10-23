@@ -3,7 +3,26 @@ using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Application.DTOs;
 
-public record CreateElectionDto(string Title, int ECPeriodId, DateTime NominationOpensOn, DateTime NominationClosesOn, DateTime PollingOpensOn, DateTime PollingClosesOn, int CreatedBy, ElectionTieRule TieRule = ElectionTieRule.DrawingLots, bool IsTest = false, DateTime? ScrutinyOn = null, DateTime? WithdrawalClosesOn = null);
+// 84.36. These rules used to sit in FluentValidation validators that nothing ran. Positional records
+// cannot carry property attributes that MVC will read, so the rules live in Validate.
+public record CreateElectionDto(string Title, int ECPeriodId, DateTime NominationOpensOn, DateTime NominationClosesOn, DateTime PollingOpensOn, DateTime PollingClosesOn, int CreatedBy, ElectionTieRule TieRule = ElectionTieRule.DrawingLots, bool IsTest = false, DateTime? ScrutinyOn = null, DateTime? WithdrawalClosesOn = null) : IValidatableObject
+{
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (string.IsNullOrWhiteSpace(Title) || Title.Length > 200)
+            yield return new ValidationResult("Title is required and must be 200 characters or fewer.", [nameof(Title)]);
+        if (ECPeriodId <= 0)
+            yield return new ValidationResult("Choose the EC period.", [nameof(ECPeriodId)]);
+        if (NominationOpensOn == default)
+            yield return new ValidationResult("Nomination opening date is required.", [nameof(NominationOpensOn)]);
+        if (NominationClosesOn <= NominationOpensOn)
+            yield return new ValidationResult("Nominations must close after they open.", [nameof(NominationClosesOn)]);
+        if (PollingOpensOn <= NominationClosesOn)
+            yield return new ValidationResult("Polling must open after nominations close.", [nameof(PollingOpensOn)]);
+        if (PollingClosesOn <= PollingOpensOn)
+            yield return new ValidationResult("Polling must close after it opens.", [nameof(PollingClosesOn)]);
+    }
+}
 public record CreateAdminElectionRequest(string Title, int ECPeriodId, DateTime NominationOpensOn, DateTime NominationClosesOn, DateTime PollingOpensOn, DateTime PollingClosesOn, string? Description, IReadOnlyList<AdminElectionPositionRequest>? Positions, ElectionTieRule TieRule = ElectionTieRule.DrawingLots, bool IsTest = false, DateTime? ScrutinyOn = null, DateTime? WithdrawalClosesOn = null);
 // Spec 023 FR-001. The returning officer's public key, base64 SPKI. The private half never reaches the server until the count.
 public record SetBallotKeyRequest(string PublicKey);
@@ -14,8 +33,35 @@ public record AdminElectionPositionRequest(string Title, int Seats = 1, string? 
 public record SaveCandidateRequest(int MemberId, int PositionId, string? Statement, int ProposerMemberId, int SeconderMemberId);
 public record ElectionSeatDto(int PositionId, int SeatCount);
 // 95.2: PositionId is an EcPosition.Id.
-public record ElectionSeatRequestDto(int PositionId, int SeatCount = 1);
-public record NominationDto(int ElectionSeatId, int CandidateMemberId, int ProposerMemberId, int SeconderMemberId, string Statement, string? PhotoPath);
+public record ElectionSeatRequestDto(int PositionId, int SeatCount = 1) : IValidatableObject
+{
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (PositionId <= 0)
+            yield return new ValidationResult("Choose a position.", [nameof(PositionId)]);
+        if (SeatCount < 1 || SeatCount > 20)
+            yield return new ValidationResult("Seat count must be from 1 to 20.", [nameof(SeatCount)]);
+    }
+}
+
+// The controller fills ProposerMemberId from the caller after binding, so it is not checked here.
+// The service checks the proposer against the candidate.
+public record NominationDto(int ElectionSeatId, int CandidateMemberId, int ProposerMemberId, int SeconderMemberId, string Statement, string? PhotoPath) : IValidatableObject
+{
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (ElectionSeatId <= 0)
+            yield return new ValidationResult("Choose a seat.", [nameof(ElectionSeatId)]);
+        if (CandidateMemberId <= 0)
+            yield return new ValidationResult("Choose a candidate.", [nameof(CandidateMemberId)]);
+        if (SeconderMemberId <= 0)
+            yield return new ValidationResult("Choose a seconder.", [nameof(SeconderMemberId)]);
+        else if (SeconderMemberId == CandidateMemberId)
+            yield return new ValidationResult("The candidate cannot second their own nomination.", [nameof(SeconderMemberId)]);
+        if (string.IsNullOrWhiteSpace(Statement) || Statement.Length > 4000)
+            yield return new ValidationResult("Statement is required and must be 4000 characters or fewer.", [nameof(Statement)]);
+    }
+}
 public record ScrutinyDto(bool Accepted, string? Reason);
 // Spec 023 FR-005: the whole paper in one request. Every seat appears once. An empty
 // NominationIds list is an abstention for that seat.

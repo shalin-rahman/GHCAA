@@ -215,7 +215,7 @@ class RegisterState {
         'FullName': model.fullName,
         'Email': model.email,
         'MobileNo': model.mobileNo,
-        'NID': model.nid,
+        'NID': model.nid.replaceAll(RegExp(r'\s'), ''),
         'FatherName': model.fatherName,
         'MotherName': model.motherName,
         'EmergencyContactName': model.emergencyContactName,

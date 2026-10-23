@@ -1,6 +1,7 @@
 ﻿using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -98,16 +99,18 @@ namespace GHCAA.API.Controllers
         {
             var memberId = GetMemberId();
             if (memberId == null) return Unauthorized();
-            return Ok(await _familyLinkService.GetFamilyAsync(memberId.Value, memberId.Value, ct));
+            return Ok(await _familyLinkService.GetFamilyAsync(memberId.Value, memberId.Value, ct: ct));
         }
 
         /// <summary>Get the public family network of a specific member.</summary>
         [HttpGet("{memberId}/family")]
         public async Task<IActionResult> GetPublicFamily(int memberId, CancellationToken ct)
         {
+            // Admins see a private family too, including system admins with no member record.
+            var isAdmin = User.IsInRole(Constants.Roles.Admin) || User.IsInRole(Constants.Roles.SuperAdmin);
             var requesterId = GetMemberId();
-            if (requesterId == null) return Unauthorized();
-            return Ok(await _familyLinkService.GetFamilyAsync(memberId, requesterId.Value, ct));
+            if (requesterId == null && !isAdmin) return Unauthorized();
+            return Ok(await _familyLinkService.GetFamilyAsync(memberId, requesterId, isAdmin, ct));
         }
 
         /// <summary>Search for members by name to link as family.</summary>

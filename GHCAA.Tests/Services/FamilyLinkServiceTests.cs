@@ -138,6 +138,47 @@ public class FamilyLinkServiceTests : TestBase
         // Connection removed status is in FamilyLinkRequests
     }
 
+    private async Task<(Member Owner, Member Viewer)> PrivateFamilyAsync()
+    {
+        var owner = await CreateTestMemberAsync("PF01");
+        var spouse = await CreateTestMemberAsync("PF02");
+        var viewer = await CreateTestMemberAsync("PF03");
+        owner.IsFamilyPublic = false;
+        _context.FamilyLinkRequests.Add(new FamilyLinkRequest
+        {
+            RequesterId = owner.Id,
+            TargetMemberId = spouse.Id,
+            Relationship = Enums.RelationshipType.Spouse,
+            Status = Enums.FamilyLinkStatus.Accepted
+        });
+        await _context.SaveChangesAsync();
+        return (owner, viewer);
+    }
+
+    [Test]
+    [Category("FR-018")]
+    public async Task GetFamilyAsync_PrivateFamily_IsHiddenFromAnotherMember()
+    {
+        var (owner, viewer) = await PrivateFamilyAsync();
+
+        var result = await _service.GetFamilyAsync(owner.Id, viewer.Id);
+
+        result.Should().BeEmpty();
+    }
+
+    [Test]
+    [Category("FR-018")]
+    public async Task GetFamilyAsync_PrivateFamily_IsShownToAnAdmin()
+    {
+        var (owner, viewer) = await PrivateFamilyAsync();
+
+        var asAdminMember = await _service.GetFamilyAsync(owner.Id, viewer.Id, requesterIsAdmin: true);
+        var asSystemAdmin = await _service.GetFamilyAsync(owner.Id, null, requesterIsAdmin: true);
+
+        asAdminMember.Should().ContainSingle();
+        asSystemAdmin.Should().ContainSingle();
+    }
+
     private async Task<Member> CreateTestMemberAsync(string membershipNo)
     {
         var member = await CreateAndSaveTestMemberAsync($"Test {membershipNo}", $"test{membershipNo}@example.com", $"017{Guid.NewGuid().ToString("N").Substring(0, 8)}", $"NID{membershipNo}");

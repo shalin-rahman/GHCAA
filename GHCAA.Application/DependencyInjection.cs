@@ -1,5 +1,3 @@
-using FluentValidation;
-using GHCAA.Application.Validators;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GHCAA.Application
@@ -8,9 +6,6 @@ namespace GHCAA.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            // Register validators from this assembly
-            services.AddValidatorsFromAssemblyContaining<MemberRegistrationValidator>();
-
             return services;
         }
     }

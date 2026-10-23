@@ -435,15 +435,28 @@ public sealed class ElectionDocumentServiceTests : TestBase
         var user = await AddUserAsync("clerk");
         var allowed = new ElectionRecountRequest
         {
-            ElectionId = _election.Id, ElectionSeatId = _seat.Id, ApplicantName = "Bob Candidate", Grounds = "Close margin",
-            ReceivedAt = received, RecordedByUserId = user, Allowed = true, DecisionReason = "Margin under 5%", DecidedByUserId = user, DecidedAt = received.AddHours(2),
+            ElectionId = _election.Id,
+            ElectionSeatId = _seat.Id,
+            ApplicantName = "Bob Candidate",
+            Grounds = "Close margin",
+            ReceivedAt = received,
+            RecordedByUserId = user,
+            Allowed = true,
+            DecisionReason = "Margin under 5%",
+            DecidedByUserId = user,
+            DecidedAt = received.AddHours(2),
             RecountedAt = received.AddDays(1)
         };
         allowed.Figures.Add(new ElectionRecountFigure { NominationId = _first.Id, VoteCount = 9 });
         allowed.Figures.Add(new ElectionRecountFigure { NominationId = _second.Id, VoteCount = 8 });
         _context.ElectionRecountRequests.AddRange(allowed, new ElectionRecountRequest
         {
-            ElectionId = _election.Id, ElectionSeatId = _seat.Id, ApplicantName = "Pat Proposer", Grounds = "Other", ReceivedAt = received.AddHours(1), RecordedByUserId = user
+            ElectionId = _election.Id,
+            ElectionSeatId = _seat.Id,
+            ApplicantName = "Pat Proposer",
+            Grounds = "Other",
+            ReceivedAt = received.AddHours(1),
+            RecordedByUserId = user
         });
         await _context.SaveChangesAsync();
 

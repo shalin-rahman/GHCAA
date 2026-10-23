@@ -75,6 +75,8 @@ export interface OrgWorkflow {
   notificationChannel: string;
   /** 'Gmail' | 'Brevo'. Null or absent means the server's EmailSettings:Provider. */
   emailProvider?: string | null;
+  /** News image uploads one account may make per UTC day. Below 1 means no limit. */
+  newsImageUploadsPerDay: number;
 }
 
 export interface NavLabels {

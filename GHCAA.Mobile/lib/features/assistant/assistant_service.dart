@@ -11,7 +11,7 @@ class AssistantService {
 
   Future<String?> ask(String question) async {
     try {
-      final response = await _dio.post('/assistant/ask', data: {'question': question});
+      final response = await _dio.post('/assistant/ask', data: {'query': question});
       if (response.statusCode == 200) {
         return response.data['answer'] as String?;
       }

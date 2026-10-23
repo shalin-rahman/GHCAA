@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,17 @@ import 'package:ghcaa_mobile/features/auth/auth_service.dart';
 import 'package:ghcaa_mobile/features/elections/election_service.dart';
 import 'package:ghcaa_mobile/features/theme/dynamic_theme_service.dart';
 import 'package:ghcaa_mobile/screens/officials/officials_dashboard_screen.dart';
+
+class _FakeElectionService extends ElectionService {
+  _FakeElectionService() : super(Dio());
+
+  final attested = <String>[];
+
+  @override
+  Future<void> attestReadiness(int id, String condition) async {
+    attested.add('$id $condition');
+  }
+}
 
 AdminElection _election(List<String> permissions, {String phase = 'Polling'}) =>
     AdminElection(
@@ -24,7 +36,9 @@ void main() {
   setUpAll(() => dotenv.testLoad(fileInput: 'PORTAL_TITLE=GHCAA'));
 
   Future<void> pump(WidgetTester tester, AdminElection election,
-      {ElectionBoard? board, ElectionReadiness? readiness}) async {
+      {ElectionBoard? board,
+      ElectionReadiness? readiness,
+      ElectionService? service}) async {
     tester.view.physicalSize = const Size(390, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -35,6 +49,8 @@ void main() {
         officialsReadinessProvider.overrideWith((ref, id) async => readiness),
         roleProvider.overrideWith((ref) => Future.value('ElectionOfficial')),
         activeSpecialThemeProvider.overrideWith((ref) async => null),
+        if (service != null)
+          electionServiceProvider.overrideWith((ref) => service),
       ],
       child: MaterialApp.router(
         theme: AppTheme.midnightTheme,
@@ -104,10 +120,28 @@ void main() {
           findsOneWidget);
     });
 
-    testWidgets('offers no button, since items are recorded on the web',
+    // 84.16. Attested items are recorded from the phone too.
+    testWidgets('records an attested item for someone who can change phase',
         (tester) async {
+      final service = _FakeElectionService();
       await pump(
           tester, _election(['ViewDashboard', 'ChangePhase'], phase: 'Campaign'),
+          readiness: readiness, service: service);
+
+      expect(find.byKey(const Key('attest-ballot-key')), findsNothing);
+      expect(find.byKey(const Key('attest-approvers')), findsNothing);
+      await tester.tap(find.byKey(const Key('attest-mock-election')));
+      for (var i = 0; i < 5; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+
+      expect(service.attested, ['1 mock-election']);
+      expect(find.text('Recorded in the audit log.'), findsOneWidget);
+    });
+
+    testWidgets('offers no attest button without the phase permission',
+        (tester) async {
+      await pump(tester, _election(['ViewDashboard'], phase: 'Campaign'),
           readiness: readiness);
 
       expect(find.byKey(const Key('readiness-mock-election')), findsOneWidget);

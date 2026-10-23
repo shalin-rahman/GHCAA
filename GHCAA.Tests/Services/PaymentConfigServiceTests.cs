@@ -208,5 +208,38 @@ namespace GHCAA.Tests.Services
 
             Assert.That(result, Is.Null);
         }
+
+        // 84.14: the Nagad gateway only answers "coming soon", so it stays out of reach.
+        [Test]
+        [Category("FR-42")]
+        public void CreateAsync_Throws_WhenGatewayIsNagad()
+        {
+            Assert.ThrowsAsync<ArgumentException>(() =>
+                _service.CreateAsync(new PaymentConfiguration { DisplayName = "Nagad auto", Method = PaymentMethod.Nagad, Gateway = PaymentGateway.NagadGateway }));
+        }
+
+        [Test]
+        [Category("FR-42")]
+        public async Task UpdateAsync_Throws_WhenGatewayMovesToNagad()
+        {
+            var row = await _service.CreateAsync(new PaymentConfiguration { DisplayName = "Nagad", Method = PaymentMethod.Nagad });
+
+            Assert.ThrowsAsync<ArgumentException>(() =>
+                _service.UpdateAsync(row.Id, new PaymentConfiguration { DisplayName = "Nagad", Gateway = PaymentGateway.NagadGateway }, allowSecretUpdate: false));
+        }
+
+        [Test]
+        [Category("FR-42")]
+        public async Task GetActiveMethodsAsync_HidesNagadGatewayRow_ButKeepsManualNagad()
+        {
+            _context.PaymentConfigurations.AddRange(
+                new PaymentConfiguration { DisplayName = "Manual", IsEnabled = true, Method = PaymentMethod.Nagad },
+                new PaymentConfiguration { DisplayName = "Auto", IsEnabled = true, Method = PaymentMethod.Nagad, Gateway = PaymentGateway.NagadGateway });
+            await _context.SaveChangesAsync();
+
+            var result = await _service.GetActiveMethodsAsync();
+
+            Assert.That(result.Select(r => r.DisplayName), Is.EqualTo(new[] { "Manual" }));
+        }
     }
 }

@@ -263,8 +263,8 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
 
 - FR-018: The system shall require the `AdminOnly` policy for `GET api/admin/stats`, returning
   `GetDashboardStatsAsync` results scoped by the caller's privilege level. [code]
-- FR-019: The system shall require the `AdminOnly` policy for `GET api/admin/analytics`, returning
-  the same `GetDashboardStatsAsync` call as FR-018 (`AdminController.cs:32-43`). [code]
+- FR-019: Removed (TODO 84.29). `GET api/admin/analytics` repeated FR-018's stats call, so the
+  route was dropped and the mobile dashboard now reads `GET api/admin/stats`. [code]
 - FR-020: The system shall require the `AdminOnly` policy and the `RequireStepUp` filter for
   `POST api/admin/sync-members`, returning the count of synced records. [code+test]
 - FR-021: The system shall require the `AdminOnly` policy for `GET api/admin/members`, returning a
@@ -389,7 +389,7 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
 | FR-016 | GET health | HealthController (email provider check) | GHCAA.Web/src/app/common/health/health.ts | none found | GHCAA.Tests/Controllers/HealthControllerTests.cs:83,100,115,130,148 |
 | FR-017 | GET health | HealthController (inline check) | GHCAA.Web/src/app/common/health/health.ts | none found | none found |
 | FR-018 | GET api/admin/stats | MemberService_Search.GetDashboardStatsAsync | GHCAA.Web/src/app/core/services/admin.service.ts | GHCAA.Mobile/lib/screens/admin/admin_dashboard_screen.dart | none found |
-| FR-019 | GET api/admin/analytics | MemberService_Search.GetDashboardStatsAsync | GHCAA.Web/src/app/core/services/admin.service.ts | none found | none found |
+| FR-019 | removed (TODO 84.29) | none | none | none | none |
 | FR-020 | POST api/admin/sync-members | MemberService_Sync (not read in this pass) | GHCAA.Web/src/app/core/services/admin.service.ts | none found | GHCAA.Tests/Controllers/AdminControllerTests.cs:159,169 |
 | FR-021 | GET api/admin/members | MemberService_Search (not fully read in this pass) | GHCAA.Web/src/app/core/services/admin.service.ts | GHCAA.Mobile/lib/screens/admin/approval_queue_screen.dart | GHCAA.Tests/Controllers/AdminControllerTests.cs:40 |
 | FR-022 | GET api/admin/members/{id} | MemberService (not read in this pass) | GHCAA.Web/src/app/core/services/admin.service.ts | GHCAA.Mobile/lib/screens/admin/approval_queue_screen.dart | none found |
@@ -411,9 +411,9 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
 | FR-038 | GET api/admin/contact-messages | IContactService (implementation not read in this pass) | GHCAA.Web/src/app/admin/contact-messages/contact-messages.ts | GHCAA.Mobile/lib/screens/admin/contact_messages_screen.dart | none found |
 | FR-039 | POST api/admin/contact-messages/{id}/read | IContactService (implementation not read in this pass) | GHCAA.Web/src/app/admin/contact-messages/contact-messages.ts | GHCAA.Mobile/lib/screens/admin/contact_messages_screen.dart | none found |
 | FR-040 | DELETE api/admin/contact-messages/{id} | IContactService (implementation not read in this pass) | GHCAA.Web/src/app/admin/contact-messages/contact-messages.ts | GHCAA.Mobile/lib/screens/admin/contact_messages_screen.dart | none found |
-| FR-041 | GET api/activity/me | ActivityService.GetMemberActivityAsync | none found | GHCAA.Mobile/lib/screens/member/member_activity_history_screen.dart | none found |
-| FR-042 | GET api/activity/admin/{memberId} | ActivityService.GetMemberActivityAsync | none found | none found | none found |
-| FR-043 | GET api/activity/admin/global | ActivityService.GetRecentGlobalActivityAsync | GHCAA.Web/src/app/admin/audit/admin-audit.ts | GHCAA.Mobile/lib/screens/admin/audit_screen.dart | none found |
+| FR-041 | GET api/activity/me | ActivityService.GetMemberActivityAsync | none found | GHCAA.Mobile/lib/screens/member/member_activity_history_screen.dart | GHCAA.Tests/Controllers/ActivityControllerTests.cs::GetMyActivity_ReadsCallersMemberId_Last20, GetMyActivity_AccountWithoutMember_Returns400 |
+| FR-042 | GET api/activity/admin/{memberId} | ActivityService.GetMemberActivityAsync | none found | none found | GHCAA.Tests/Controllers/ActivityControllerTests.cs::GetMemberActivity_AsksForThatMember_Last50 |
+| FR-043 | GET api/activity/admin/global | ActivityService.GetRecentGlobalActivityAsync | GHCAA.Web/src/app/admin/audit/admin-audit.ts | GHCAA.Mobile/lib/screens/admin/audit_screen.dart | GHCAA.Tests/Controllers/ActivityControllerTests.cs::GetGlobalActivity_AsksForLast50 |
 | FR-044 | GET api/admin/error-logs | ErrorLogService.GetPagedAsync | GHCAA.Web/src/app/admin/error-logs/admin-error-logs.ts | none found | GHCAA.Tests/Services/ErrorLogServiceTests.cs:67,80,93,114,131 |
 | FR-045 | GET api/admin/dev-tracker | DevTrackerService.GetOpenItemsAsync | GHCAA.Web/src/app/admin/dev-tracker/admin-dev-tracker.ts | none found | GHCAA.Tests/Services/DevTrackerServiceTests.cs:52,72,88,104,114 |
 
@@ -435,9 +435,6 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
   `AdminDevTrackerControllerTests.cs`); the only coverage is at the service layer
   (`ErrorLogServiceTests.cs`, `DevTrackerServiceTests.cs`), so routing, policy enforcement, and query
   binding for these two controllers are untested.
-- `ActivityController` has no test file at all (no `ActivityControllerTests.cs` found under
-  `GHCAA.Tests/Controllers/`), so none of its three endpoints, including the JWT-claim parsing on
-  `GET api/activity/me`, are covered by a named test.
 - No Angular file was found that calls `GET api/activity/me` or `GET api/activity/admin/{memberId}`;
   only the global-activity route (`ADMIN_GLOBAL`) is wired up, in
   `GHCAA.Web/src/app/core/services/admin.service.ts:236` and consumed by

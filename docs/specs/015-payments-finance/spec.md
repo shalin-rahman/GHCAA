@@ -438,16 +438,14 @@ review as a reviewing member, create an award, and disburse it once.
   CampaignServiceTests.cs (4 tests) and ScholarshipServiceTests.cs (4 tests) cover the service
   layer, leaving most campaign and scholarship FRs without controller-level auth/route/status-
   code coverage.
-- FinancialService.ProcessGatewayPaymentAsync and its private
-  HandleAutomatedApprovalsAfterPaymentAsync (GHCAA.Infrastructure/Services/FinancialService.cs)
-  duplicate PaymentCallbackOrchestrator.HandleSuccessfulPaymentAsync and, per a code comment on
-  that method, have no production caller. This is dead code kept alive only by tests, and a
-  second place the same approval rule must be kept in sync by hand.
 - NagadGateway.InitiatePaymentAsync (GHCAA.Infrastructure/Gateways/NagadGateway.cs) always
   returns Success = false with a coming-soon message, and VerifyCallbackAsync and
-  ProcessWebhookAsync always return false or invalid. The gateway is registered in DI and
-  reachable through FR-024 and FR-031, but is fully stubbed, while PaymentMethod.Nagad still
-  appears in seeded payment_configurations.json as an option a member could pick.
+  ProcessWebhookAsync always return false or invalid. It is hidden until built (TODO 84.14).
+  PaymentConfigService refuses to create a setting on that gateway or move one onto it, and
+  GetActiveMethodsAsync leaves out any row already on it. The web admin form does not offer it.
+  Manual Nagad (send money and upload a receipt, gateway None) is still offered. Tests:
+  PaymentConfigServiceTests.cs::CreateAsync_Throws_WhenGatewayIsNagad,
+  UpdateAsync_Throws_WhenGatewayMovesToNagad, GetActiveMethodsAsync_HidesNagadGatewayRow_ButKeepsManualNagad.
 - PaymentConfigController.GetAllConfigs and UpdateConfig re-check User.IsInRole("SuperAdmin")
   even though the admin routes are already restricted to SuperAdmin at the policy level, a
   defensive branch that cannot fail in production traffic.

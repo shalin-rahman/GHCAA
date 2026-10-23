@@ -28,6 +28,12 @@
     color: var(--danger-color);
 }
 
+.step-up-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
 /* .modal-footer supplies the padding, divider and right alignment. */
 .step-up-actions {
     flex-wrap: wrap;

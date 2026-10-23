@@ -20,8 +20,16 @@ export class StepUpDialog {
     stepUp = inject(StepUpService);
     code = '';
 
+    // App mode also takes a recovery code, which is 10 letters or digits with an optional dash.
     isCodeValid(): boolean {
-        return /^\d{6}$/.test((this.code ?? '').trim());
+        const code = (this.code ?? '').trim();
+        if (/^\d{6}$/.test(code)) return true;
+        return this.stepUp.method() === 'app' && /^[A-Za-z0-9]{5}-?[A-Za-z0-9]{5}$/.test(code);
+    }
+
+    switchMethod(): void {
+        this.code = '';
+        this.stepUp.useMethod(this.stepUp.method() === 'app' ? 'email' : 'app');
     }
 
     submit(): void {

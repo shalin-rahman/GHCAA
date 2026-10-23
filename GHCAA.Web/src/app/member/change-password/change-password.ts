@@ -8,11 +8,12 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ROUTES } from '../../core/constants/app.constants';
 import { Icon } from '../../common/icon/icon';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { AuthenticatorSettings } from '../../common/authenticator-settings/authenticator-settings';
 
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [CommonModule, FormsModule, Icon, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, Icon, PageHeaderComponent, AuthenticatorSettings],
   templateUrl: './change-password.html',
   styleUrl: './change-password.scss'
 })

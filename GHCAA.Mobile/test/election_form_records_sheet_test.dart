@@ -62,12 +62,20 @@ class _FakeElectionService extends ElectionService {
     savedFigures = figures;
   }
 
+  String nominationStatus = 'Accepted';
+
   @override
   Future<List<Nomination>> getAdminNominations(int id) async {
     calls.add('nominations $id');
-    return const [
-      Nomination(id: 4, electionSeatId: 3, candidateMemberId: 8, status: 'Accepted', statement: ''),
+    return [
+      Nomination(id: 4, electionSeatId: 3, candidateMemberId: 8, status: nominationStatus, statement: ''),
     ];
+  }
+
+  @override
+  Future<void> scrutinise(int nominationId, bool accepted, {String? reason}) async {
+    calls.add('scrutinise $nominationId $accepted');
+    nominationStatus = accepted ? 'Accepted' : 'Rejected';
   }
 
   @override
@@ -114,11 +122,13 @@ void main() {
   }
 
   Future<_FakeElectionService> pump(WidgetTester tester, AdminElection election,
-      {List<ElectionRecount> recounts = const []}) async {
+      {List<ElectionRecount> recounts = const [], String nominationStatus = 'Accepted'}) async {
     tester.view.physicalSize = const Size(390, 4000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final service = _FakeElectionService()..recounts = recounts;
+    final service = _FakeElectionService()
+      ..recounts = recounts
+      ..nominationStatus = nominationStatus;
     await tester.pumpWidget(ProviderScope(
       overrides: [
         electionServiceProvider.overrideWith((ref) => service),
@@ -292,5 +302,32 @@ void main() {
 
     expect(
         tester.widget<CheckboxListTile>(find.byKey(const Key('scrutiny-VotingMember'))).onChanged, isNull);
+  });
+
+  // 84.16. The scrutiny decision itself, not just the ticks.
+  testWidgets('FR-021 (spec 018): accepting a nomination under scrutiny records it and reloads the list', (tester) async {
+    final service = await pump(tester, _election(phase: 'Scrutiny'), nominationStatus: 'UnderScrutiny');
+
+    await tester.tap(find.byKey(const Key('nomination-4-accept')));
+    await settle(tester);
+
+    expect(service.calls, contains('scrutinise 4 true'));
+    expect(service.calls.lastIndexOf('nominations 12'),
+        greaterThan(service.calls.indexOf('scrutinise 4 true')));
+    expect(find.text('Status: Accepted'), findsOneWidget);
+    expect(find.byKey(const Key('nomination-4-accept')), findsNothing);
+  });
+
+  testWidgets('FR-021 (spec 018): a decided nomination gets no accept or reject', (tester) async {
+    await pump(tester, _election(phase: 'Scrutiny'));
+    expect(find.text('Status: Accepted'), findsOneWidget);
+    expect(find.byKey(const Key('nomination-4-reject')), findsNothing);
+  });
+
+  testWidgets('FR-021 (spec 018): a caller who cannot decide nominations gets no accept or reject', (tester) async {
+    await pump(tester, _election(phase: 'Scrutiny', permissions: const ['ManageSetup']),
+        nominationStatus: 'Submitted');
+    expect(find.text('Status: Submitted'), findsOneWidget);
+    expect(find.byKey(const Key('nomination-4-reject')), findsNothing);
   });
 }

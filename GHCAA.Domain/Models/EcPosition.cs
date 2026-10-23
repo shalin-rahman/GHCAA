@@ -69,17 +69,17 @@ namespace GHCAA.Domain.Models
         // Display order follows the old enum order, which is the order the committee lists used.
         private static EcPosition Row(int id, string key, string name, string nameBn,
             bool board = false, bool head = false, bool secretary = false) => new()
-        {
-            Id = id,
-            Key = key,
-            Name = name,
-            NameBn = nameBn,
-            DisplayOrder = id,
-            SeatCount = 1,
-            IsActive = true,
-            ShowOnBoard = board,
-            SignsAsHead = head,
-            SignsAsSecretary = secretary,
-        };
+            {
+                Id = id,
+                Key = key,
+                Name = name,
+                NameBn = nameBn,
+                DisplayOrder = id,
+                SeatCount = 1,
+                IsActive = true,
+                ShowOnBoard = board,
+                SignsAsHead = head,
+                SignsAsSecretary = secretary,
+            };
     }
 }

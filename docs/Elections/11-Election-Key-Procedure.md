@@ -1,7 +1,8 @@
 # Election ballot key procedure
 
 This is the written procedure for the ballot key (TODO 37.13e). It covers who makes the key, where
-the file lives, how it is replaced, how it is used at the count and how it is destroyed. The design is
+the file lives, how it is replaced, how it is used at the count and how it is destroyed. The ballot
+protocol section gives the formats, the failure reasons and the test vectors. The design is
 in `docs/specs/023-election-ballot-secrecy-and-standards/spec.md` (FR-001 and FR-050). Incidents
 (key lost, key leaked) are in `docs/Elections/09-Election-Security-and-Compliance.md`.
 
@@ -102,6 +103,65 @@ Recording is on the web officials dashboard only. The mobile app has no such act
 The once-only check is a lock inside one server process. A unique index on the election and
 the key-destroyed action in the audit table backs it, so a second instance cannot write a second
 record either.
+
+## Ballot protocol
+
+The technical detail behind the steps above, taken from the code on 2026-10-23
+(`GHCAA.Infrastructure/Services/BallotSeal.cs`, `GHCAA.Web/src/app/core/utils/ballot-key.util.ts` and
+the cast and count methods of `ElectionService`). Limits are in `Constants.Elections`.
+
+**Key pair.** RSA, 3072 bits, public exponent 65537, made in the browser with Web Crypto
+(`RSA-OAEP`, SHA-256). The public key goes to the server as base64 SubjectPublicKeyInfo (SPKI). The
+private key is saved as PKCS#8, either as bare base64 or inside `BEGIN PRIVATE KEY` armour. The server
+accepts a public key of 3072 to 4096 bits with exponent 65537 only, and refuses anything else.
+
+**Fingerprint.** Lower-case hex of SHA-256 over the SPKI bytes of the public key. At the count the
+server works out the same value from the uploaded private key and refuses the key if the two differ.
+
+**What is sealed.** The ballot's choices as JSON, one entry per seat: `[{"S":<seat id>,"N":[<nomination
+ids>]}]`. The voter's id, name and the time are not in it.
+
+**Padding.** The JSON is padded with spaces up to the next multiple of 512 bytes. A body that already
+fills a block gets one more block, so the sealed length never shows how many choices a ballot holds
+inside a block. JSON ignores the trailing spaces, and the count trims them.
+
+**Sealing.** For each ballot the server makes a new 32-byte AES key and a 12-byte nonce.
+
+1. It encrypts the padded body with AES-256-GCM (16-byte tag) under that key and nonce.
+2. It wraps the AES key with RSA-OAEP, SHA-256 for both the hash and MGF1, under the election's public key.
+3. It wipes the AES key and the plain body from memory.
+
+**Sealed format, version 2.** `v2:` followed by base64 of the wrapped key (384 bytes for a 3072-bit
+key), then the nonce, then the tag, then the ciphertext. A ballot with one 512-byte block is 1,235
+characters long. The associated data is the UTF-8 text `ghcaa-ballot:v2:election:<election id>`, so a
+ballot copied into another election fails to open. Version 1 had no prefix and no associated data. An
+election keeps the version it was created with, and the count refuses a ballot whose prefix does not
+match its election.
+
+**Count.** After the integrity check (ballots, receipts and voters marked as voted agree) and the
+10-ballot floor, the server opens every pending ballot in one transaction. It shuffles the opened
+ballots once, then writes them as ballot rows with new random ids, so the stored order says nothing
+about the order of voting. The private key is used for that one request and not stored.
+
+**Failure handling.** The count stops and writes nothing on any failure. The reasons it returns:
+
+| Reason | Meaning |
+|---|---|
+| `wrong-key` | The file is not a PKCS#8 RSA key, or its fingerprint does not match the election |
+| `integrity` | Ballots, receipts and voters marked as voted do not agree |
+| `below-threshold` | Fewer than 10 ballots, so the count is by hand |
+| `unreadable` | A ballot would not open: changed, sealed for another election, in the wrong format, or not valid JSON |
+
+Only `wrong-key` is fixed by trying another file. Every other reason is an incident under the security
+document.
+
+**Test vectors.** `GHCAA.Tests/Services/BallotSealVector.cs` holds a ballot sealed outside .NET with
+Python `cryptography` 46, under a throwaway 3072-bit test key that seals nothing real. Election 7,
+plaintext `[{"S":1,"N":[2]}]`, fingerprint
+`c3679f5a7272d3974469168c0e8cc6932718933071921cd2be96c990eb6e9f2e`. `BallotSealTests` opens it with
+the product code, checks that it fails for election 8, and checks the sealed length for bodies of 17,
+511 and 512 bytes (1,235, 1,235 and 1,919 characters). A change to the layout, the padding or the
+associated data breaks these tests.
 
 ## Who can do what
 

@@ -299,6 +299,12 @@ export class AdminService {
         return this.http.post<any>(`${API_ENDPOINTS.ROLES}/users/${userId}/reset-password-admin`, {});
     }
 
+    // 95.6: SuperAdmin removes a user's authenticator app so they can set it up again.
+    resetSystemUserAuthenticator(userId: number): Observable<void> {
+        return this.http.delete<void>(`${API_ENDPOINTS.ROLES}/users/${userId}/authenticator`,
+            { headers: { 'X-Skip-Error-Notify': 'true' } });
+    }
+
     setSystemUserActive(userId: number, action: 'enable' | 'disable'): Observable<any> {
         return this.http.post(`${API_ENDPOINTS.ROLES}/users/${userId}/${action}`, {});
     }

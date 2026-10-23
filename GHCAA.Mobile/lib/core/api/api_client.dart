@@ -171,12 +171,14 @@ final dioProvider = Provider<Dio>((ref) {
     ),
   );
 
-  // 37.1w: a 403 with STEP_UP_REQUIRED asks for the emailed code and retries once.
+  // 37.1w: a 403 with STEP_UP_REQUIRED asks for a code and retries once.
   dio.interceptors.add(StepUpInterceptor(
     dio: dio,
-    promptForCode: (sentTo) async {
+    promptForCode: (sentTo, useApp, canSwitch) async {
       final context = rootNavigatorKey.currentContext;
-      return context == null ? null : showStepUpDialog(context, sentTo: sentTo);
+      return context == null
+          ? null
+          : showStepUpDialog(context, sentTo: sentTo, useApp: useApp, canSwitch: canSwitch);
     },
     saveToken: storage.saveToken,
   ));

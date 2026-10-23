@@ -30,6 +30,20 @@ namespace GHCAA.Tests.Controllers
             SetUserContext(_controller, null, "Admin", 1); // UserId 1, no specific MemberId
         }
 
+        [Category("FR-27")]
+        [Test]
+        public async Task UploadImage_OverDailyLimit_Returns429WithoutSaving()
+        {
+            _newsServiceMock.Setup(x => x.TryCountImageUploadAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+            var bytes = new byte[] { 0xFF, 0xD8, 0xFF, 0xE0 };
+            var file = new FormFile(new MemoryStream(bytes), 0, bytes.Length, "file", "photo.jpg") { Headers = new HeaderDictionary(), ContentType = "image/jpeg" };
+
+            var result = await _controller.UploadImage(file, CancellationToken.None);
+
+            Assert.That((result as ObjectResult)?.StatusCode, Is.EqualTo(StatusCodes.Status429TooManyRequests));
+            _fileStorageServiceMock.Verify(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<Enums.FileUploadType>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
         [Test]
         public async Task GetActiveNews_ReturnsOk()
         {

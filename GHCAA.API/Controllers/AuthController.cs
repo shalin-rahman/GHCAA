@@ -169,7 +169,7 @@ namespace GHCAA.API.Controllers
         [HttpPost("step-up/request")]
         [HttpPost("admin/step-up/request")]
         [Authorize]
-        public async Task<IActionResult> RequestStepUp([FromServices] IOtpService otpService, CancellationToken cancellationToken)
+        public async Task<IActionResult> RequestStepUp([FromServices] IOtpService otpService, [FromServices] IAuthenticatorService authenticatorService, CancellationToken cancellationToken)
         {
             var user = await LoadCurrentUserAsync(cancellationToken);
             var email = StepUpEmailFor(user);
@@ -192,17 +192,31 @@ namespace GHCAA.API.Controllers
         [HttpPost("step-up/verify")]
         [HttpPost("admin/step-up/verify")]
         [Authorize]
-        public async Task<IActionResult> VerifyStepUp([FromBody] StepUpVerifyDto dto, [FromServices] IOtpService otpService, CancellationToken cancellationToken)
+        public async Task<IActionResult> VerifyStepUp([FromBody] StepUpVerifyDto dto, [FromServices] IOtpService otpService, [FromServices] IAuthenticatorService authenticatorService, CancellationToken cancellationToken)
         {
             var user = await LoadCurrentUserAsync(cancellationToken);
-            var email = StepUpEmailFor(user);
+            bool verified;
+            if (dto.UsesApp)
+            {
+                // 95.6: an app code or recovery code needs no email on file.
+                if (user == null)
+                    return Unauthorized();
+                verified = await authenticatorService.VerifyAsync(user.Id, dto.Code, cancellationToken);
+            }
+            else
+            {
+                // 95.6: an emailed code still passes after an app is set up. The owner chose
+                // app or email, so a lost phone does not lock anyone out.
+                var email = StepUpEmailFor(user);
+                if (user == null || string.IsNullOrWhiteSpace(email))
+                    return Problem(detail: "No email address is on file for this account, so a verification code cannot be sent. Ask a SuperAdmin to add an email to your account.", statusCode: StatusCodes.Status400BadRequest);
+                verified = await otpService.VerifyOtpAsync(email, dto.Code, Domain.Enums.OtpPurpose.AdminStepUp, cancellationToken);
+            }
 
-            if (user == null || string.IsNullOrWhiteSpace(email))
-                return Problem(detail: "No email address is on file for this account, so a verification code cannot be sent. Ask a SuperAdmin to add an email to your account.", statusCode: StatusCodes.Status400BadRequest);
-
-            var verified = await otpService.VerifyOtpAsync(email, dto.Code, Domain.Enums.OtpPurpose.AdminStepUp, cancellationToken);
             if (!verified)
-                return Problem(detail: "That verification code is invalid or has expired.", statusCode: StatusCodes.Status400BadRequest);
+                return Problem(detail: dto.UsesApp
+                    ? $"That code is wrong or was already used. After {Domain.Constants.Authenticator.MaxFailedAttempts} wrong codes the app is locked for {Domain.Constants.Authenticator.LockoutMinutes} minutes."
+                    : "That verification code is invalid or has expired.", statusCode: StatusCodes.Status400BadRequest);
 
             if (await _authService.EndExpiredOfficialAccessAsync(user, cancellationToken)) { ClearAuthCookies(); return Unauthorized(); }
 
@@ -212,6 +226,95 @@ namespace GHCAA.API.Controllers
             this.SetAuthCookie(_env, "access_token", stepUpToken, TimeSpan.FromMinutes(65));
 
             return Ok(new { Token = stepUpToken });
+        }
+
+        // 95.6: authenticator app enrolment. Setting one up, or changing it, needs a fresh
+        // step-up first, so a stolen session alone cannot swap in an attacker's app.
+        [HttpGet("authenticator")]
+        [Authorize]
+        public async Task<IActionResult> GetAuthenticator([FromServices] IAuthenticatorService authenticatorService, CancellationToken cancellationToken)
+        {
+            var user = await LoadCurrentUserAsync(cancellationToken);
+            if (user == null)
+                return Unauthorized();
+            var status = await authenticatorService.GetStatusAsync(user.Id, cancellationToken);
+            return Ok(status with { SetupNeedsPassword = StepUpEmailFor(user) == null });
+        }
+
+        [HttpPost("authenticator/setup")]
+        [Authorize]
+        [GHCAA.API.Filters.RequireStepUp]
+        public async Task<IActionResult> SetupAuthenticator([FromServices] IAuthenticatorService authenticatorService, CancellationToken cancellationToken)
+        {
+            var user = await LoadCurrentUserAsync(cancellationToken);
+            if (user == null)
+                return Unauthorized();
+
+            return await BeginSetupAsync(user, authenticatorService, cancellationToken);
+        }
+
+        // 95.6: a user with no email on file cannot pass an email step-up, so they re-enter
+        // their password instead. Anyone with an email still goes through step-up.
+        [HttpPost("authenticator/setup-with-password")]
+        [Authorize]
+        public async Task<IActionResult> SetupAuthenticatorWithPassword([FromBody] AuthenticatorPasswordDto dto, [FromServices] IAuthenticatorService authenticatorService, CancellationToken cancellationToken)
+        {
+            var user = await LoadCurrentUserAsync(cancellationToken);
+            if (user == null)
+                return Unauthorized();
+            if (StepUpEmailFor(user) != null)
+                return Problem(detail: "This account has an email on file. Verify with the emailed code instead.", statusCode: StatusCodes.Status400BadRequest);
+            if (!await authenticatorService.PasswordMatchesAsync(user.Id, dto.Password, cancellationToken))
+                return Problem(detail: "That password is wrong.", statusCode: StatusCodes.Status400BadRequest);
+            return await BeginSetupAsync(user, authenticatorService, cancellationToken);
+        }
+
+        private async Task<IActionResult> BeginSetupAsync(GHCAA.Domain.Models.User user, IAuthenticatorService authenticatorService, CancellationToken cancellationToken)
+        {
+            var setup = await authenticatorService.BeginSetupAsync(user.Id, StepUpEmailFor(user) ?? user.Username, cancellationToken);
+            if (setup == null)
+                return Problem(detail: "An authenticator app is already set up. Remove it first to set up a new one.", statusCode: StatusCodes.Status409Conflict);
+            return Ok(setup);
+        }
+
+        [HttpPost("authenticator/confirm")]
+        [Authorize]
+        public async Task<IActionResult> ConfirmAuthenticator([FromBody] AuthenticatorCodeDto dto, [FromServices] IAuthenticatorService authenticatorService, CancellationToken cancellationToken)
+        {
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+                return Unauthorized();
+
+            var codes = await authenticatorService.ConfirmAsync(userId, dto.Code, cancellationToken);
+            if (codes == null)
+                return Problem(detail: "That code does not match. Check the phone's clock and try the newest code.", statusCode: StatusCodes.Status400BadRequest);
+            return Ok(codes);
+        }
+
+        [HttpPost("authenticator/recovery-codes")]
+        [Authorize]
+        [GHCAA.API.Filters.RequireStepUp]
+        public async Task<IActionResult> RegenerateRecoveryCodes([FromServices] IAuthenticatorService authenticatorService, CancellationToken cancellationToken)
+        {
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+                return Unauthorized();
+
+            var codes = await authenticatorService.RegenerateRecoveryCodesAsync(userId, cancellationToken);
+            if (codes == null)
+                return Problem(detail: "No authenticator app is set up for this account.", statusCode: StatusCodes.Status404NotFound);
+            return Ok(codes);
+        }
+
+        [HttpDelete("authenticator")]
+        [Authorize]
+        [GHCAA.API.Filters.RequireStepUp]
+        public async Task<IActionResult> RemoveAuthenticator([FromServices] IAuthenticatorService authenticatorService, CancellationToken cancellationToken)
+        {
+            if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+                return Unauthorized();
+
+            if (!await authenticatorService.RemoveAsync(userId, cancellationToken))
+                return Problem(detail: "No authenticator app is set up for this account.", statusCode: StatusCodes.Status404NotFound);
+            return NoContent();
         }
 
         // 7.13: A refresh must not silently reset the ~30-day step-up grace period — the access

@@ -142,7 +142,8 @@ function buildFallback(cfg) {
             otpVerificationRequired: !!cfg.Workflow.OtpVerificationRequired,
             defaultMembershipType: cfg.Workflow.DefaultMembershipType,
             adminEmailOnNewRegistration: !!cfg.Workflow.AdminEmailOnNewRegistration,
-            notificationChannel: cfg.Workflow.NotificationChannel
+            notificationChannel: cfg.Workflow.NotificationChannel,
+            newsImageUploadsPerDay: cfg.Workflow.NewsImageUploadsPerDay ?? 20
         },
         localization: {
             dateFormat: cfg.Localization?.DateFormat,

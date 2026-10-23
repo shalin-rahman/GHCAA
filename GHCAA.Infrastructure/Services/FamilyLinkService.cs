@@ -165,18 +165,15 @@ namespace GHCAA.Infrastructure.Services
             return requests.Select(r => MapToDto(r, r.Requester, r.TargetMember)).ToList();
         }
 
-        public async Task<List<FamilyLinkRequestDto>> GetFamilyAsync(int memberId, int? requesterMemberId = null, CancellationToken ct = default)
+        public async Task<List<FamilyLinkRequestDto>> GetFamilyAsync(int memberId, int? requesterMemberId = null, bool requesterIsAdmin = false, CancellationToken ct = default)
         {
             var member = await _db.Members.FindAsync(new object[] { memberId }, ct);
             if (member == null) return new List<FamilyLinkRequestDto>();
 
-            // Privacy check: If requester is not the member themselves, and not an admin, check IsFamilyPublic
-            if (requesterMemberId.HasValue && requesterMemberId.Value != memberId && !member.IsFamilyPublic)
-            {
-                // Check if requester is an admin (this logic might need refinement based on how roles are handled)
-                // For now, assuming requesterMemberId is only passed for public views.
+            // A private family is shown only to the member and to admins (TODO 84.22). Other members
+            // get an empty list, which looks the same as having no links.
+            if (!requesterIsAdmin && requesterMemberId.HasValue && requesterMemberId.Value != memberId && !member.IsFamilyPublic)
                 return new List<FamilyLinkRequestDto>();
-            }
 
             var requests = await _db.FamilyLinkRequests
                 .Include(r => r.Requester)

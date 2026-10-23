@@ -7,7 +7,7 @@ namespace GHCAA.Application.DTOs
     /// Shared base for member creation and profile update DTOs.
     /// All [Required] and length rules are enforced here and inherited automatically.
     /// </summary>
-    public abstract class BaseMemberDto
+    public abstract class BaseMemberDto : IValidatableObject
     {
         // ── Personal ─────────────────────────────────────────────────────────────
         [Required(ErrorMessage = "Full name is required.")]
@@ -26,8 +26,7 @@ namespace GHCAA.Application.DTOs
         public DateTime DateOfBirth { get; set; }
 
         [Required(ErrorMessage = "National ID (NID) is required.")]
-        [MinLength(6, ErrorMessage = "NID must be at least 6 characters.")]
-        [MaxLength(20, ErrorMessage = "NID must not exceed 20 characters.")]
+        [RegularExpression(@"^(\d{10}|\d{13}|\d{17})$", ErrorMessage = "NID must be 10, 13 or 17 digits.")]
         public string NID { get; set; } = null!;
 
         [Required(ErrorMessage = "Mobile number is required.")]
@@ -112,5 +111,19 @@ namespace GHCAA.Application.DTOs
 
         public List<ProfessionalRecordDto> ProfessionalHistory { get; set; } = new();
         public List<ECHistoryDto> ECHistory { get; set; } = new();
+
+        // 84.36: runs on create and update requests only. Stored rows are never checked again.
+        public virtual IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            var today = DateTime.UtcNow.Date;
+            if (DateOfBirth.Date <= today.AddYears(-120))
+            {
+                yield return new ValidationResult("Date of birth is too far in the past.", new[] { nameof(DateOfBirth) });
+            }
+            else if (DateOfBirth.Date > today.AddYears(-13))
+            {
+                yield return new ValidationResult("Applicant must be at least 13 years old.", new[] { nameof(DateOfBirth) });
+            }
+        }
     }
 }

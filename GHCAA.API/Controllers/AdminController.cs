@@ -33,14 +33,6 @@ namespace GHCAA.API.Controllers
             return Ok(stats);
         }
 
-        [HttpGet("analytics")]
-        public async Task<IActionResult> GetAnalytics(CancellationToken cancellationToken)
-        {
-            var isPrivileged = User.IsInRole(Constants.Roles.SuperAdmin);
-            var stats = await _memberService.GetDashboardStatsAsync(isPrivileged, cancellationToken);
-            return Ok(stats);
-        }
-
         [HttpPost("sync-members")]
         [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> SyncMembers(CancellationToken cancellationToken)

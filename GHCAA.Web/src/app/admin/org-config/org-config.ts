@@ -140,6 +140,7 @@ export class AdminOrgConfig implements OnInit {
     this.config.contact.phoneNumbers ??= [];
     this.config.workflow.notificationChannel ??= 'Both';
     this.config.workflow.emailProvider ??= null;
+    this.config.workflow.newsImageUploadsPerDay ??= 20;
     this.config.elections = { ...structuredClone(DEFAULT_ELECTION_SETTINGS), ...this.config.elections };
     this.config.localization ??= { dateFormat: DEFAULT_DATE_FORMAT, locales: {} };
     this.config.localization.dateFormat ??= DEFAULT_DATE_FORMAT;

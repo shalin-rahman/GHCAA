@@ -1,0 +1,62 @@
+<section class="authenticator-settings" aria-labelledby="authenticator-title">
+    <h2 id="authenticator-title" class="authenticator-title">Authenticator app</h2>
+
+    @if (errorMessage(); as err) {
+    <p class="authenticator-error" role="alert">{{ err }}</p>
+    }
+
+    @if (recoveryCodes(); as codes) {
+    <p class="text-main">Save these recovery codes somewhere safe. Each one works once, if you lose your phone. They will not be shown again.</p>
+    <ul class="recovery-codes">
+        @for (c of codes; track c) {
+        <li><code>{{ c }}</code></li>
+        }
+    </ul>
+    <div class="authenticator-actions">
+        <button type="button" class="btn btn-outline btn-sm" (click)="copy(codes.join('\n'))">Copy codes</button>
+        <button type="button" class="btn btn-primary btn-sm" (click)="doneWithCodes()">I have saved them</button>
+    </div>
+    } @else if (setup(); as s) {
+    <p class="text-main">Scan this code with an authenticator app, then enter the 6-digit code it shows.</p>
+    <img class="authenticator-qr" [src]="s.qrCodeDataUri" alt="QR code for the authenticator app" width="200" height="200" />
+    <p class="hint">Cannot scan it? Enter this key in the app instead.</p>
+    <div class="authenticator-secret">
+        <code>{{ s.secret }}</code>
+        <button type="button" class="btn btn-outline btn-sm" (click)="copy(s.secret)">Copy key</button>
+    </div>
+    <div class="form-group">
+        <label for="authenticatorCode">Code from the app</label>
+        <input id="authenticatorCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6"
+            placeholder="000000" class="form-control" [value]="code" (input)="code = $any($event.target).value"
+            (keyup.enter)="confirmSetup()" [disabled]="busy()" />
+    </div>
+    <div class="authenticator-actions">
+        <button type="button" class="btn btn-primary btn-sm" (click)="confirmSetup()" [disabled]="!isCodeValid() || busy()">
+            {{ busy() ? 'Checking…' : 'Turn on' }}
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="cancelSetup()" [disabled]="busy()">Cancel</button>
+    </div>
+    } @else if (status(); as st) {
+    @if (st.enrolled) {
+    <p class="text-main">Protected actions ask for a code from your authenticator app. If your phone is not at hand, you can ask for an email code instead.</p>
+    <p class="hint">Recovery codes left: {{ st.recoveryCodesLeft }}</p>
+    <div class="authenticator-actions">
+        <button type="button" class="btn btn-outline btn-sm" (click)="regenerateCodes()" [disabled]="busy()">Get new recovery codes</button>
+        <button type="button" class="btn btn-danger btn-sm" (click)="remove()" [disabled]="busy()">Remove app</button>
+    </div>
+    } @else {
+    <p class="text-main">Protected actions ask for a code by email. An authenticator app on your phone works without email.</p>
+    @if (st.setupNeedsPassword) {
+    <div class="form-group">
+        <label for="authenticatorPassword">Your password</label>
+        <input id="authenticatorPassword" type="password" autocomplete="current-password" class="form-control"
+            [value]="password" (input)="password = $any($event.target).value" (keyup.enter)="startSetup()" [disabled]="busy()" />
+        <p class="hint">There is no email on this account, so enter your password to confirm it is you.</p>
+    </div>
+    }
+    <button type="button" class="btn btn-primary btn-sm" (click)="startSetup()" [disabled]="busy() || (st.setupNeedsPassword && !password)">
+        {{ busy() ? 'Starting…' : (st.pending ? 'Finish setting up' : 'Set up an app') }}
+    </button>
+    }
+    }
+</section>

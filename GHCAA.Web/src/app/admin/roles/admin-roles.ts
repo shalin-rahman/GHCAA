@@ -191,6 +191,23 @@ export class AdminRoles implements OnInit {
         });
     }
 
+    async resetAuthenticator(user: any) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Reset authenticator app',
+            message: `Remove the authenticator app for "${user.username}"? They will get codes by email until they set up an app again.`,
+            confirmLabel: 'Remove app',
+            danger: true
+        }));
+        if (!ok) return;
+
+        this.adminService.resetSystemUserAuthenticator(user.id).subscribe({
+            next: () => this.notify.success('Authenticator app removed.'),
+            error: (err) => this.notify.error(err.status === 404
+                ? 'No authenticator app set up for this user.'
+                : err.error?.message || 'Failed to remove the authenticator app')
+        });
+    }
+
     toggleUserActive(userId: number, isActive: boolean) {
         const action = isActive ? 'disable' : 'enable';
         this.adminService.setSystemUserActive(userId, action).subscribe({

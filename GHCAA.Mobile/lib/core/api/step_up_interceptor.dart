@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 
 /// 37.1w: the API answers a step-up-gated action (casting a vote, for one) with
-/// 403 and code STEP_UP_REQUIRED. This asks for the emailed code, verifies it,
-/// stores the re-issued token and retries the original request once.
+/// 403 and code STEP_UP_REQUIRED. This asks for a code, verifies it, stores the
+/// re-issued token and retries the original request once.
+/// 95.6: a user with an authenticator app gets asked for the app code first and
+/// no email goes out, unless they ask for an emailed code instead. The API takes either.
 /// Cancelling the prompt, or a failed verify, hands back the original error.
 class StepUpInterceptor extends Interceptor {
   StepUpInterceptor({
@@ -14,11 +16,16 @@ class StepUpInterceptor extends Interceptor {
   static const errorCode = 'STEP_UP_REQUIRED';
   static const requestPath = '/auth/step-up/request';
   static const verifyPath = '/auth/step-up/verify';
+  static const authenticatorPath = '/auth/authenticator';
   static const _retriedKey = '_stepUpRetried';
+  // The prompt returns this when an app user asks for an emailed code instead.
+  static const emailInstead = '\u0000email-instead';
 
   final Dio _dio;
-  // Gets the masked address the code went to, or null when the API did not say.
-  final Future<String?> Function(String? sentTo) promptForCode;
+  // Gets the masked address the code went to (null when the API did not say),
+  // whether to ask for the authenticator app code instead of the email one, and
+  // whether the user may switch to an emailed code (false when no email is on file).
+  final Future<String?> Function(String? sentTo, bool useApp, bool canSwitch) promptForCode;
   final Future<void> Function(String token) saveToken;
 
   bool _isStepUpChallenge(DioException err) {
@@ -26,6 +33,24 @@ class StepUpInterceptor extends Interceptor {
     final data = err.response?.data;
     if (data is! Map) return false;
     return (data['code'] ?? data['Code']) == errorCode;
+  }
+
+  // A failed status check returns null, which falls back to email.
+  Future<Map?> _authenticatorStatus() async {
+    try {
+      final res = await _dio.get(authenticatorPath, options: Options(extra: {_retriedKey: true}));
+      final body = res.data;
+      return body is Map ? body : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // Returns the masked address the code went to, when the API says.
+  Future<String?> _sendEmailCode() async {
+    final sent = await _dio.post(requestPath);
+    final body = sent.data;
+    return body is Map ? (body['sentTo'] ?? body['SentTo']) as String? : null;
   }
 
   @override
@@ -37,21 +62,36 @@ class StepUpInterceptor extends Interceptor {
       return handler.next(err);
     }
 
-    Response<dynamic> sent;
-    try {
-      sent = await _dio.post(requestPath);
-    } on DioException catch (sendErr) {
-      // Pass on the send failure, not the 403. Its detail says the email did not go out.
-      return handler.next(sendErr);
+    final status = await _authenticatorStatus();
+    var useApp = status != null && (status['enrolled'] ?? status['Enrolled']) == true;
+    final canSwitch = useApp && (status['setupNeedsPassword'] ?? status['SetupNeedsPassword']) != true;
+    String? sentTo;
+    if (!useApp) {
+      try {
+        sentTo = await _sendEmailCode();
+      } on DioException catch (sendErr) {
+        // Pass on the send failure, not the 403. Its detail says the email did not go out.
+        return handler.next(sendErr);
+      }
     }
 
     try {
-      final sentBody = sent.data;
-      final sentTo = sentBody is Map ? (sentBody['sentTo'] ?? sentBody['SentTo']) as String? : null;
-      final code = await promptForCode(sentTo);
+      var code = await promptForCode(sentTo, useApp, canSwitch);
+      if (canSwitch && code == emailInstead) {
+        useApp = false;
+        try {
+          sentTo = await _sendEmailCode();
+        } on DioException catch (sendErr) {
+          return handler.next(sendErr);
+        }
+        code = await promptForCode(sentTo, false, false);
+      }
       if (code == null || code.trim().isEmpty) return handler.next(err);
 
-      final verify = await _dio.post(verifyPath, data: {'code': code.trim()});
+      final verify = await _dio.post(verifyPath, data: {
+        'code': code.trim(),
+        'method': useApp ? 'app' : 'email',
+      });
       final body = verify.data;
       final token = body is Map ? (body['token'] ?? body['Token']) as String? : null;
       if (token == null) return handler.next(err);

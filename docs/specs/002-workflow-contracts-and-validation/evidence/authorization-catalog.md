@@ -38,27 +38,27 @@ then puts Admin and SuperAdmin callers into the admin group with `IsInRole("Admi
 ## 2. Combinations in use
 
 One row per route template, so an action with a legacy alias route counts once per alias. The
-script found 397 routes. That matches the 397 `[Http*]` attributes in the folder.
+script found 403 routes. That matches the 403 `[Http*]` attributes in the folder.
 
 | Combination | Routes | Controllers |
 |---|---|---|
 | Anonymous | 72 | Archive, Auth, Campaigns, Contact, CredentialVerification, ElectionContent, Elections, Events, Financials, Gallery, Gateways, Governance, Health, JobHub, Lookups, Networking, News, OrgConfig, PaymentConfig, Registration, Scholarships, SiteContent, Theme |
-| Authenticated | 72 | Activity, Assistant, Auth, Campaigns, ElectionAppointments, ElectionPersonasRead, Elections, FamilyLink, Financials, Forum, Governance, MemberCommunications, Mentorship, Messaging, Networking, News, Notification, PendingApprovals, Poll, Profile |
+| Authenticated | 74 | Activity, Assistant, Auth, Campaigns, ElectionAppointments, ElectionPersonasRead, Elections, FamilyLink, Financials, Forum, Governance, MemberCommunications, Mentorship, Messaging, Networking, News, Notification, PendingApprovals, Poll, Profile |
 | Authenticated + in-body Admin | 1 | Events |
-| Authenticated + in-body Admin or SuperAdmin | 9 | Archive, Financials, JobHub, News, SecureFiles |
+| Authenticated + in-body Admin or SuperAdmin | 10 | Archive, FamilyLink, Financials, JobHub, News, SecureFiles |
 | Authenticated + in-body SuperAdmin | 5 | Events, Financials, Forum |
-| Authenticated + step-up | 2 | ElectionAppointments, Elections |
+| Authenticated + step-up | 5 | Auth, ElectionAppointments, Elections |
 | MemberOnly | 6 | Gallery, Scholarships |
 | MemberOnly + in-body Admin or SuperAdmin | 1 | Gallery |
 | ElectionStaff | 4 | ElectionAppointments, Elections |
 | ElectionStaff + step-up | 29 | AdminElections, ElectionAppointments, Elections |
 | AdminOnly | 145 | Activity, Admin, AdminGovernance, AdminPoll, AdminSocialAuth, Archive, Campaigns, Communication, CredentialVerification, ElectionContent, Elections, Events, Financials, Gallery, JobHub, Lookups, MemberImport, Mentorship, News, PendingApprovals, Scholarships, SiteContent, Theme |
-| AdminOnly + in-body SuperAdmin | 5 | Admin |
+| AdminOnly + in-body SuperAdmin | 4 | Admin |
 | AdminOnly + step-up | 4 | Admin, AdminElections, AdminGovernance, Elections |
 | AdminOnly + step-up + in-body SuperAdmin | 1 | Admin |
-| SuperAdminOnly | 19 | Activity, Admin, AdminDevTracker, AdminErrorLogs, ElectionPersonas, FinancialLedger, Financials, OrgConfig, PaymentConfig, Roles |
+| SuperAdminOnly | 17 | Activity, Admin, AdminDevTracker, AdminErrorLogs, ElectionPersonas, FinancialLedger, Financials, OrgConfig, PaymentConfig, Roles |
 | SuperAdminOnly + in-body SuperAdmin | 2 | PaymentConfig |
-| SuperAdminOnly + step-up | 20 | Admin, ElectionPersonas, ElectionRulesUnlock, Elections, FinancialLedger, PaymentConfig, Roles |
+| SuperAdminOnly + step-up | 23 | Admin, ElectionPersonas, ElectionRulesUnlock, Elections, FinancialLedger, PaymentConfig, Roles |
 
 "In-body" means the policy lets the caller in and the method then branches on
 `User.IsInRole(...)`, usually to widen what an Admin can see or do. 24 routes do this.
@@ -68,11 +68,11 @@ Where the policy was set:
 | Policy | On the action | On the controller | Fallback only |
 |---|---|---|---|
 | Anonymous | 72 | 0 | 0 |
-| Authenticated | 17 | 72 | 0 |
+| Authenticated | 23 | 72 | 0 |
 | MemberOnly | 7 | 0 | 0 |
 | ElectionStaff | 18 | 15 | 0 |
-| AdminOnly | 96 | 59 | 0 |
-| SuperAdminOnly | 15 | 26 | 0 |
+| AdminOnly | 96 | 58 | 0 |
+| SuperAdminOnly | 15 | 27 | 0 |
 
 No route relies on the fallback policy alone. Every action or its controller names its rule.
 
@@ -95,7 +95,7 @@ Base policy: `[AllowAnonymous]`, no sign-in.
 | GET | `/api/archive/items/{id:int}` | `ArchiveController.PublicItem` (line 24) |  |
 | GET | `/api/archive/public` | `ArchiveController.PublicCollections` (line 19) |  |
 | POST | `/api/auth/facebook` | `AuthController.FacebookLogin` (line 65) | Auth |
-| POST | `/api/auth/forgot-password` | `AuthController.ForgotPassword` (line 265) | Auth, PasswordReset |
+| POST | `/api/auth/forgot-password` | `AuthController.ForgotPassword` (line 368) | Auth, PasswordReset |
 | POST | `/api/auth/google` | `AuthController.GoogleLogin` (line 55) | Auth |
 | POST | `/api/auth/login` | `AuthController.Login` (line 43) | Auth |
 | GET | `/api/auth/providers` | `AuthController.GetProviders` (line 35) | Auth |
@@ -103,7 +103,7 @@ Base policy: `[AllowAnonymous]`, no sign-in.
 | POST | `/api/auth/refresh-mobile` | `AuthController.RefreshMobile` (line 111) | Auth, Refresh |
 | POST | `/api/auth/register` | `RegistrationController.Register` (line 28) | Registration |
 | POST | `/api/auth/resend-otp` | `RegistrationController.ResendOtp` (line 107) | Registration, Auth |
-| POST | `/api/auth/reset-password` | `AuthController.ResetPassword` (line 275) | Auth |
+| POST | `/api/auth/reset-password` | `AuthController.ResetPassword` (line 378) | Auth |
 | GET | `/api/auth/status/{id:int}` | `RegistrationController.GetStatus` (line 74) | Registration |
 | POST | `/api/auth/verify-email` | `RegistrationController.VerifyEmail` (line 92) | Registration, Auth |
 | GET | `/api/campaigns/public` | `CampaignsController.GetPublicCampaigns` (line 23) |  |
@@ -170,8 +170,8 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
-| GET | `/api/Family/links` | `FamilyLinkController.GetFamily` (line 97) |  |
-| GET | `/api/Family/search` | `FamilyLinkController.Search` (line 116) |  |
+| GET | `/api/Family/links` | `FamilyLinkController.GetFamily` (line 98) |  |
+| GET | `/api/Family/search` | `FamilyLinkController.Search` (line 119) |  |
 | GET | `/api/Forum/categories` | `ForumController.GetCategories` (line 23) |  |
 | GET | `/api/Forum/categories/{categoryId}/topics` | `ForumController.GetTopics` (line 29) |  |
 | POST | `/api/Forum/topics` | `ForumController.CreateTopic` (line 50) |  |
@@ -182,6 +182,9 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 | POST | `/api/assistant/ask` | `AssistantController.Ask` (line 20) |  |
 | POST | `/api/auth/admin/step-up/request` | `AuthController.RequestStepUp` (line 172) | Auth |
 | POST | `/api/auth/admin/step-up/verify` | `AuthController.VerifyStepUp` (line 195) | Auth |
+| GET | `/api/auth/authenticator` | `AuthController.GetAuthenticator` (line 235) | Auth |
+| POST | `/api/auth/authenticator/confirm` | `AuthController.ConfirmAuthenticator` (line 282) | Auth |
+| POST | `/api/auth/authenticator/setup-with-password` | `AuthController.SetupAuthenticatorWithPassword` (line 260) | Auth |
 | POST | `/api/auth/logout` | `AuthController.Logout` (line 155) |  |
 | GET | `/api/auth/me` | `AuthController.Me` (line 132) |  |
 | POST | `/api/auth/step-up/request` | `AuthController.RequestStepUp` (line 172) | Auth |
@@ -192,15 +195,14 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 | POST | `/api/elections/nominations/{nominationId:int}/withdraw` | `ElectionsController.Withdraw` (line 261) |  |
 | GET | `/api/elections/{id:int}/ballot` | `ElectionsController.Ballot` (line 67) |  |
 | POST | `/api/elections/{id:int}/nominations` | `ElectionsController.Nominate` (line 240) |  |
-| GET | `/api/family-links/my-family` | `FamilyLinkController.GetFamily` (line 97) |  |
-| GET | `/api/family-links/received` | `FamilyLinkController.GetReceived` (line 86) |  |
-| DELETE | `/api/family-links/remove/{requestId}` | `FamilyLinkController.Remove` (line 57) |  |
-| POST | `/api/family-links/respond` | `FamilyLinkController.Respond` (line 48) |  |
-| GET | `/api/family-links/search` | `FamilyLinkController.Search` (line 116) |  |
-| POST | `/api/family-links/send` | `FamilyLinkController.Send` (line 33) |  |
-| GET | `/api/family-links/sent` | `FamilyLinkController.GetSent` (line 77) |  |
-| GET | `/api/family-links/{memberId}/family` | `FamilyLinkController.GetPublicFamily` (line 106) |  |
-| POST | `/api/family-links/{requestId}/cancel` | `FamilyLinkController.Cancel` (line 67) |  |
+| GET | `/api/family-links/my-family` | `FamilyLinkController.GetFamily` (line 98) |  |
+| GET | `/api/family-links/received` | `FamilyLinkController.GetReceived` (line 87) |  |
+| DELETE | `/api/family-links/remove/{requestId}` | `FamilyLinkController.Remove` (line 58) |  |
+| POST | `/api/family-links/respond` | `FamilyLinkController.Respond` (line 49) |  |
+| GET | `/api/family-links/search` | `FamilyLinkController.Search` (line 119) |  |
+| POST | `/api/family-links/send` | `FamilyLinkController.Send` (line 34) |  |
+| GET | `/api/family-links/sent` | `FamilyLinkController.GetSent` (line 78) |  |
+| POST | `/api/family-links/{requestId}/cancel` | `FamilyLinkController.Cancel` (line 68) |  |
 | POST | `/api/financials/record-payment` | `FinancialsController.RecordPayment` (line 50) |  |
 | GET | `/api/financials/saved-methods` | `FinancialsController.GetSavedPaymentMethods` (line 228) |  |
 | POST | `/api/financials/saved-methods` | `FinancialsController.AddSavedPaymentMethod` (line 238) |  |
@@ -208,8 +210,8 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 | POST | `/api/governance/constitution/{id:int}/vote` | `GovernanceController.VoteOnAmendment` (line 69) |  |
 | GET | `/api/me/election-appointments` | `ElectionAppointmentsController.Mine` (line 52) |  |
 | POST | `/api/me/election-appointments/{id:int}/decline` | `ElectionAppointmentsController.Decline` (line 73) |  |
-| GET | `/api/members/family` | `FamilyLinkController.GetFamily` (line 97) |  |
-| POST | `/api/members/family` | `FamilyLinkController.Send` (line 33) |  |
+| GET | `/api/members/family` | `FamilyLinkController.GetFamily` (line 98) |  |
+| POST | `/api/members/family` | `FamilyLinkController.Send` (line 34) |  |
 | POST | `/api/mentorship` | `MentorshipController.SendRequest` (line 30) |  |
 | GET | `/api/mentorship/received` | `MentorshipController.GetReceived` (line 58) |  |
 | GET | `/api/mentorship/sent` | `MentorshipController.GetSent` (line 49) |  |
@@ -258,6 +260,7 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
 | POST | `/api/archive/items` | `ArchiveController.CreateItem` (line 63) |  |
+| GET | `/api/family-links/{memberId}/family` | `FamilyLinkController.GetPublicFamily` (line 107) |  |
 | GET | `/api/financials/membership-history/{memberId}` | `FinancialsController.GetMembershipHistory` (line 193) |  |
 | GET | `/api/financials/receipt/{paymentId}` | `FinancialsController.DownloadReceipt` (line 86) |  |
 | POST | `/api/jobs` | `JobHubController.PostJob` (line 37) |  |
@@ -285,6 +288,9 @@ Base policy: any signed-in user (`[Authorize]` or the fallback policy).
 
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
+| DELETE | `/api/auth/authenticator` | `AuthController.RemoveAuthenticator` (line 310) | Auth |
+| POST | `/api/auth/authenticator/recovery-codes` | `AuthController.RegenerateRecoveryCodes` (line 296) | Auth |
+| POST | `/api/auth/authenticator/setup` | `AuthController.SetupAuthenticator` (line 247) | Auth |
 | POST | `/api/elections/{id:int}/vote` | `ElectionsController.Vote` (line 273) |  |
 | POST | `/api/me/election-appointments/{id:int}/accept` | `ElectionAppointmentsController.Accept` (line 62) |  |
 
@@ -376,9 +382,9 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 | POST | `/api/admin/comm/templates` | `CommunicationController.CreateTemplate` (line 54) |  |
 | DELETE | `/api/admin/comm/templates/{id}` | `CommunicationController.DeleteTemplate` (line 61) |  |
 | PUT | `/api/admin/comm/templates/{id}` | `CommunicationController.UpdateTemplate` (line 46) |  |
-| GET | `/api/admin/contact-messages` | `AdminController.GetContactMessages` (line 329) |  |
-| DELETE | `/api/admin/contact-messages/{id}` | `AdminController.DeleteContactMessage` (line 344) |  |
-| POST | `/api/admin/contact-messages/{id}/read` | `AdminController.MarkMessageAsRead` (line 336) |  |
+| GET | `/api/admin/contact-messages` | `AdminController.GetContactMessages` (line 321) |  |
+| DELETE | `/api/admin/contact-messages/{id}` | `AdminController.DeleteContactMessage` (line 336) |  |
+| POST | `/api/admin/contact-messages/{id}/read` | `AdminController.MarkMessageAsRead` (line 328) |  |
 | POST | `/api/admin/governance/members/{ecMemberId}/end-term` | `AdminGovernanceController.EndTerm` (line 86) |  |
 | GET | `/api/admin/governance/periods` | `AdminGovernanceController.GetPeriods` (line 25) |  |
 | POST | `/api/admin/governance/periods` | `AdminGovernanceController.CreatePeriod` (line 32) |  |
@@ -399,18 +405,18 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 | POST | `/api/admin/governance/positions/{id:int}/retire` | `AdminGovernanceController.RetirePosition` (line 133) |  |
 | POST | `/api/admin/members/import` | `MemberImportController.Import` (line 26) |  |
 | GET | `/api/admin/members/import/export` | `MemberImportController.Export` (line 42) |  |
-| POST | `/api/admin/members/{id}/approve` | `AdminController.ApproveMember` (line 92) |  |
-| GET | `/api/admin/members/{id}/certificate` | `AdminController.GetMemberCertificate` (line 315) |  |
-| GET | `/api/admin/members/{id}/certificate/pdf` | `AdminController.GetMemberCertificatePdf` (line 322) |  |
-| GET | `/api/admin/members/{id}/documents` | `AdminController.GetDocuments` (line 84) |  |
-| PATCH | `/api/admin/members/{id}/documents` | `AdminController.UpdateMemberDocuments` (line 240) |  |
-| GET | `/api/admin/members/{id}/id-card` | `AdminController.GetMemberIDCard` (line 276) |  |
-| GET | `/api/admin/members/{id}/id-card/pdf` | `AdminController.GetMemberIDCardPdf` (line 283) |  |
-| POST | `/api/admin/members/{id}/photo` | `AdminController.UpdateMemberPhoto` (line 220) |  |
-| POST | `/api/admin/members/{id}/reactivate` | `AdminController.ReactivateMember` (line 183) |  |
-| POST | `/api/admin/members/{id}/reject` | `AdminController.RejectMember` (line 136) |  |
-| POST | `/api/admin/members/{id}/revert-approval` | `AdminController.RevertMemberApproval` (line 119) |  |
-| POST | `/api/admin/members/{id}/signature` | `AdminController.UpdateMemberSignature` (line 230) |  |
+| POST | `/api/admin/members/{id}/approve` | `AdminController.ApproveMember` (line 84) |  |
+| GET | `/api/admin/members/{id}/certificate` | `AdminController.GetMemberCertificate` (line 307) |  |
+| GET | `/api/admin/members/{id}/certificate/pdf` | `AdminController.GetMemberCertificatePdf` (line 314) |  |
+| GET | `/api/admin/members/{id}/documents` | `AdminController.GetDocuments` (line 76) |  |
+| PATCH | `/api/admin/members/{id}/documents` | `AdminController.UpdateMemberDocuments` (line 232) |  |
+| GET | `/api/admin/members/{id}/id-card` | `AdminController.GetMemberIDCard` (line 268) |  |
+| GET | `/api/admin/members/{id}/id-card/pdf` | `AdminController.GetMemberIDCardPdf` (line 275) |  |
+| POST | `/api/admin/members/{id}/photo` | `AdminController.UpdateMemberPhoto` (line 212) |  |
+| POST | `/api/admin/members/{id}/reactivate` | `AdminController.ReactivateMember` (line 175) |  |
+| POST | `/api/admin/members/{id}/reject` | `AdminController.RejectMember` (line 128) |  |
+| POST | `/api/admin/members/{id}/revert-approval` | `AdminController.RevertMemberApproval` (line 111) |  |
+| POST | `/api/admin/members/{id}/signature` | `AdminController.UpdateMemberSignature` (line 222) |  |
 | GET | `/api/admin/polls` | `AdminPollController.GetAllPolls` (line 29) |  |
 | POST | `/api/admin/polls` | `AdminPollController.CreatePoll` (line 36) |  |
 | DELETE | `/api/admin/polls/{id}` | `AdminPollController.DeletePoll` (line 52) |  |
@@ -488,7 +494,7 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 | POST | `/api/news/admin/{id:int}/approve` | `NewsController.ApproveArticle` (line 131) |  |
 | POST | `/api/news/admin/{id:int}/reject` | `NewsController.RejectArticle` (line 140) |  |
 | GET | `/api/news/pending` | `NewsController.GetPendingSubmissions` (line 56) |  |
-| POST | `/api/news/upload-document` | `NewsController.UploadDocument` (line 194) |  |
+| POST | `/api/news/upload-document` | `NewsController.UploadDocument` (line 197) |  |
 | DELETE | `/api/news/{id:int}` | `NewsController.DeleteNews` (line 87) |  |
 | PUT | `/api/news/{id:int}` | `NewsController.UpdateNews` (line 78) |  |
 | POST | `/api/news/{id:int}/approve` | `NewsController.ApproveArticle` (line 131) |  |
@@ -514,10 +520,9 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
-| GET | `/api/admin/analytics` | `AdminController.GetAnalytics` (line 37) |  |
-| GET | `/api/admin/members` | `AdminController.GetAllMembers` (line 53) |  |
-| GET | `/api/admin/members/{id}` | `AdminController.GetMemberById` (line 75) |  |
-| PUT | `/api/admin/members/{id}` | `AdminController.UpdateMemberAdmin` (line 191) |  |
+| GET | `/api/admin/members` | `AdminController.GetAllMembers` (line 45) |  |
+| GET | `/api/admin/members/{id}` | `AdminController.GetMemberById` (line 67) |  |
+| PUT | `/api/admin/members/{id}` | `AdminController.UpdateMemberAdmin` (line 183) |  |
 | GET | `/api/admin/stats` | `AdminController.GetStats` (line 29) |  |
 
 ### 3.13 AdminOnly + step-up
@@ -528,7 +533,7 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 |---|---|---|---|
 | POST | `/api/admin/elections` | `AdminElectionsController.Create` (line 43) |  |
 | DELETE | `/api/admin/governance/members/{ecMemberId}/hard-delete` | `AdminGovernanceController.DeleteECMember` (line 207) |  |
-| POST | `/api/admin/sync-members` | `AdminController.SyncMembers` (line 46) |  |
+| POST | `/api/admin/sync-members` | `AdminController.SyncMembers` (line 38) |  |
 | POST | `/api/elections` | `ElectionsController.Create` (line 27) |  |
 
 ### 3.14 AdminOnly + step-up + in-body SuperAdmin
@@ -537,7 +542,7 @@ Base policy: `AdminOnly`: SuperAdmin or Admin.
 
 | Verb | Path | Action | Rate limit |
 |---|---|---|---|
-| POST | `/api/admin/members/{id}/reset-password-admin` | `AdminController.ResetPasswordAdmin` (line 291) |  |
+| POST | `/api/admin/members/{id}/reset-password-admin` | `AdminController.ResetPasswordAdmin` (line 283) |  |
 
 ### 3.15 SuperAdminOnly
 
@@ -549,7 +554,7 @@ Base policy: `SuperAdminOnly`: SuperAdmin only.
 | GET | `/api/admin/dev-tracker` | `AdminDevTrackerController.GetOpenItems` (line 24) |  |
 | GET | `/api/admin/election-personas` | `ElectionPersonasController.List` (line 16) |  |
 | GET | `/api/admin/error-logs` | `AdminErrorLogsController.GetErrorLogs` (line 22) |  |
-| POST | `/api/admin/members/{id}/restore` | `AdminController.RestoreMember` (line 175) |  |
+| POST | `/api/admin/members/{id}/restore` | `AdminController.RestoreMember` (line 167) |  |
 | PUT | `/api/config` | `OrgConfigController.UpdateConfig` (line 24) |  |
 | GET | `/api/financials/fees/config` | `FinancialsController.GetFeeConfigs` (line 144) |  |
 | POST | `/api/financials/fees/config` | `FinancialsController.AddFeeConfig` (line 152) |  |
@@ -561,8 +566,6 @@ Base policy: `SuperAdminOnly`: SuperAdmin only.
 | POST | `/api/payment-config/admin/seed-defaults` | `PaymentConfigController.SeedDefaults` (line 157) |  |
 | POST | `/api/payment-config/admin/{id}/toggle` | `PaymentConfigController.ToggleConfig` (line 109) |  |
 | GET | `/api/roles` | `RolesController.GetRoles` (line 75) |  |
-| POST | `/api/roles` | `RolesController.CreateRole` (line 82) |  |
-| POST | `/api/roles/remove` | `RolesController.RemoveRole` (line 98) |  |
 | GET | `/api/roles/users` | `RolesController.GetUsers` (line 30) |  |
 
 ### 3.16 SuperAdminOnly + in-body SuperAdmin
@@ -587,19 +590,22 @@ Base policy: `SuperAdminOnly`: SuperAdmin only.
 | GET | `/api/admin/elections/rules-unlock` | `ElectionRulesUnlockController.Get` (line 23) |  |
 | POST | `/api/admin/elections/rules-unlock` | `ElectionRulesUnlockController.Open` (line 30) |  |
 | POST | `/api/admin/elections/rules-unlock/close` | `ElectionRulesUnlockController.Close` (line 50) |  |
-| POST | `/api/admin/members/bulk-archive-inactive` | `AdminController.BulkArchiveInactive` (line 167) |  |
-| DELETE | `/api/admin/members/{id}` | `AdminController.ArchiveMember` (line 157) |  |
+| POST | `/api/admin/members/bulk-archive-inactive` | `AdminController.BulkArchiveInactive` (line 159) |  |
+| DELETE | `/api/admin/members/{id}` | `AdminController.ArchiveMember` (line 149) |  |
 | POST | `/api/elections/appointments/{appointmentId:int}/emergency-revoke` | `ElectionsController.EmergencyRevoke` (line 397) |  |
 | POST | `/api/ledger` | `FinancialLedgerController.AddRecord` (line 38) |  |
 | DELETE | `/api/ledger/{id}` | `FinancialLedgerController.DeleteRecord` (line 69) |  |
 | PUT | `/api/ledger/{id}` | `FinancialLedgerController.UpdateRecord` (line 54) |  |
 | DELETE | `/api/payment-config/admin/{id}` | `PaymentConfigController.DeleteConfig` (line 120) |  |
-| POST | `/api/roles/assign` | `RolesController.AssignRole` (line 90) |  |
+| POST | `/api/roles` | `RolesController.CreateRole` (line 83) |  |
+| POST | `/api/roles/assign` | `RolesController.AssignRole` (line 91) |  |
+| POST | `/api/roles/remove` | `RolesController.RemoveRole` (line 100) |  |
 | POST | `/api/roles/users` | `RolesController.CreateAdmin` (line 47) |  |
-| DELETE | `/api/roles/users/{id}` | `RolesController.DeleteUser` (line 107) |  |
-| POST | `/api/roles/users/{id}/disable` | `RolesController.DisableUser` (line 118) |  |
-| POST | `/api/roles/users/{id}/enable` | `RolesController.EnableUser` (line 127) |  |
-| POST | `/api/roles/users/{id}/reset-password-admin` | `RolesController.ResetPasswordAdmin` (line 136) |  |
+| DELETE | `/api/roles/users/{id}` | `RolesController.DeleteUser` (line 109) |  |
+| DELETE | `/api/roles/users/{id}/authenticator` | `RolesController.ResetAuthenticator` (line 151) |  |
+| POST | `/api/roles/users/{id}/disable` | `RolesController.DisableUser` (line 120) |  |
+| POST | `/api/roles/users/{id}/enable` | `RolesController.EnableUser` (line 129) |  |
+| POST | `/api/roles/users/{id}/reset-password-admin` | `RolesController.ResetPasswordAdmin` (line 138) |  |
 
 ## 4. Findings
 

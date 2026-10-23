@@ -202,8 +202,13 @@ public sealed class ElectionFormService(ApplicationDbContext db, IElectionAuditW
 
     private static object FormDetails(Election e) => new
     {
-        finalListOn = e.FinalListOn, campaignOpensOn = e.CampaignOpensOn, campaignClosesOn = e.CampaignClosesOn,
-        silenceStartsAt = e.SilenceStartsAt, venue = e.Venue, noticeReference = e.NoticeReference, recountWindowEndsOn = e.RecountWindowEndsOn
+        finalListOn = e.FinalListOn,
+        campaignOpensOn = e.CampaignOpensOn,
+        campaignClosesOn = e.CampaignClosesOn,
+        silenceStartsAt = e.SilenceStartsAt,
+        venue = e.Venue,
+        noticeReference = e.NoticeReference,
+        recountWindowEndsOn = e.RecountWindowEndsOn
     };
 
     private Task<Dictionary<int, string>> SeatNamesAsync(int electionId, CancellationToken ct) =>

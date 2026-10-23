@@ -79,6 +79,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost]
+        [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> CreateRole([FromBody] string roleName, CancellationToken cancellationToken)
         {
             var role = await _roleService.CreateRoleAsync(roleName, cancellationToken);
@@ -95,6 +96,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("remove")]
+        [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> RemoveRole(int userId, string roleName, CancellationToken cancellationToken)
         {
             var success = await _roleService.RemoveRoleFromUserAsync(userId, roleName, cancellationToken);
@@ -140,6 +142,19 @@ namespace GHCAA.API.Controllers
             // System admin accounts carry no email, so the link is handed back for the caller to
             // copy and share rather than sent automatically like a member's reset email.
             return Ok(new { ResetUrl = resetUrl });
+        }
+
+        // 95.6: for a user who lost the phone and the recovery codes. They are signed out
+        // everywhere and fall back to email step-up until they set up a new app.
+        [HttpDelete("users/{id}/authenticator")]
+        [GHCAA.API.Filters.RequireStepUp]
+        public async Task<IActionResult> ResetAuthenticator(int id, [FromServices] IAuthenticatorService authenticatorService, CancellationToken cancellationToken)
+        {
+            if (!int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var adminId))
+                return Unauthorized();
+            if (!await authenticatorService.ResetByAdminAsync(id, adminId, cancellationToken))
+                return Problem(detail: "This user has no authenticator app set up.", statusCode: StatusCodes.Status404NotFound);
+            return NoContent();
         }
     }
 }

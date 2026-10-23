@@ -68,7 +68,8 @@
     "OtpVerificationRequired": true,
     "DefaultMembershipType": "General",
     "AdminEmailOnNewRegistration": true,
-    "NotificationChannel": "Both"
+    "NotificationChannel": "Both",
+    "NewsImageUploadsPerDay": 20
   },
   "Localization": {
     "DateFormat": "dd-MM-yyyy",

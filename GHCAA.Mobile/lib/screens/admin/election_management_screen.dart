@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
@@ -11,6 +12,7 @@ import '../../core/widgets/confirm_dialog.dart';
 import '../../core/utils/app_utils.dart';
 import '../../features/admin/admin_service.dart';
 import '../../features/auth/auth_service.dart';
+import '../../features/elections/ballot_key.dart';
 import '../../features/elections/election_service.dart';
 import 'election_form_records_sheet.dart';
 import 'election_officials_sheet.dart';
@@ -86,8 +88,82 @@ class _ElectionManagementScreenState
   void _tellIfWaiting(bool waiting) {
     if (!waiting || !mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Saved. A second person must approve this on the '
-            'web admin before it happens.')));
+        content: Text('Saved. A second official must approve this under '
+            'Approvals before it happens.')));
+  }
+
+  void _tell(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _publish(AdminElection election) async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Publish election',
+      message: 'Publish "${election.title}" and open nominations?',
+    );
+    if (!confirmed) return;
+    await _runAction(election.id, 'phase', () async {
+      _tellIfWaiting(
+          await ref.read(electionServiceProvider).publish(election.id));
+    });
+  }
+
+  Future<void> _close(AdminElection election) async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Close polling',
+      message: 'Close "${election.title}"? Voting will no longer be accepted.',
+      destructive: true,
+    );
+    if (!confirmed) return;
+    await _runAction(election.id, 'phase', () async {
+      _tellIfWaiting(await ref.read(electionServiceProvider).close(election.id));
+    });
+  }
+
+  // The server refuses with 409 once a candidate has votes.
+  Future<void> _removeCandidate(
+      AdminElection election, AdminElectionCandidate candidate) async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Remove candidate',
+      message: 'Remove this candidate from the election?',
+      destructive: true,
+    );
+    if (!confirmed) return;
+    await _runAction(election.id, 'candidate-${candidate.id}', () async {
+      try {
+        await ref
+            .read(electionServiceProvider)
+            .removeCandidate(election.id, candidate.id);
+      } on DioException catch (e) {
+        if (e.response?.statusCode != 409) rethrow;
+        _tell('This candidate has votes and cannot be removed.');
+      }
+    });
+  }
+
+  Future<void> _keyDestroyed(AdminElection election) async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Key destroyed',
+      message: 'Record that every copy of the returning officer key for '
+          '"${election.title}" has been destroyed?',
+      destructive: true,
+    );
+    if (!confirmed) return;
+    await _runAction(election.id, 'key', () async {
+      try {
+        await ref.read(electionServiceProvider).keyDestroyed(election.id);
+        _tell('Recorded in the audit log.');
+      } on DioException catch (e) {
+        if (e.response?.statusCode != 409) rethrow;
+        _tell('The key was already recorded as destroyed.');
+      }
+    });
   }
 
   Future<void> _freezeVoterRoll(AdminElection election) async {
@@ -160,17 +236,128 @@ class _ElectionManagementScreenState
     return reason;
   }
 
+  // 84.44. Same steps as createBallotKey on the web admin. Only the public key
+  // goes to the server. The private key lives in local variables until the
+  // file is saved.
+  Future<void> _makeBallotKey(AdminElection election) async {
+    if (_busyElectionId != null) return;
+    final replacing = election.ballotKeyFingerprint != null;
+    final confirmed = await showConfirmDialog(
+      context,
+      title: replacing
+          ? 'Replace returning officer key'
+          : 'Make returning officer key',
+      message: 'A key file will be saved to this device. Only the returning '
+          'officer should keep it. The count cannot run without it, and '
+          'nobody, including the system, can recover it if it is lost.',
+      confirmLabel: 'Make key',
+    );
+    if (!confirmed || !mounted) return;
+    final tools = ref.read(ballotKeyToolsProvider);
+    await _runAction(election.id, 'ballot-key', () async {
+      final BallotKeyPair pair;
+      try {
+        pair = await _withProgress('Making the key. This can take a minute.',
+            tools.generate());
+      } catch (_) {
+        _tell('This device could not make the key.');
+        return;
+      }
+      // Save before the server takes the public key, so a cancelled or
+      // failed save never seals the election under a key nobody has.
+      final bool saved;
+      try {
+        saved = await tools.save(ballotKeyFileName(election.title),
+            ballotKeyPem(pair.privateKey));
+      } catch (_) {
+        _tell('The key file could not be saved. Nothing was sent.');
+        return;
+      }
+      if (!saved) {
+        _tell('Key file not saved. Nothing was sent.');
+        return;
+      }
+      try {
+        final waiting = await ref
+            .read(electionServiceProvider)
+            .setBallotKey(election.id, pair.publicKey);
+        if (waiting) {
+          // The old key stays in force until a second person approves.
+          _tell('Saved. A second person must approve the new key. Keep both '
+              'key files until then.');
+        } else {
+          _tell('Key stored. Keep the saved file safe until the count.');
+        }
+      } on DioException catch (e) {
+        _tell('The key was not stored: ${_reason(e)}');
+      }
+    });
+  }
+
+  Future<T> _withProgress<T>(String message, Future<T> work) async {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          key: const Key('ballot-key-progress'),
+          content: Row(
+            children: [
+              const SizedBox(
+                  height: 24, width: 24, child: LogoSpinner(size: 24)),
+              const SizedBox(width: 16),
+              Expanded(child: Text(message)),
+            ],
+          ),
+        ),
+      ),
+    );
+    try {
+      return await work;
+    } finally {
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+    }
+  }
+
+  // 84.44. Same call as countWithKeyFile on the web admin. The server opens
+  // the sealed ballots, so the key read from the file goes in the request
+  // body. The step-up interceptor asks for a code and replays the call.
   Future<void> _count(AdminElection election) async {
+    if (_busyElectionId != null) return;
     final confirmed = await showConfirmDialog(
       context,
       title: 'Count votes',
-      message: 'Count votes for "${election.title}"? The first count needs '
-          "the returning officer's key file, so run it from the web admin. "
-          'After that this shows the stored results.',
+      message: 'Count votes for "${election.title}"? Choose the returning '
+          "officer's key file next. After the first count, the same file "
+          'shows the stored results.',
+      confirmLabel: 'Choose key file',
     );
-    if (!confirmed) return;
-    await _runAction(election.id, 'count',
-        () => ref.read(electionServiceProvider).count(election.id));
+    if (!confirmed || !mounted) return;
+    final tools = ref.read(ballotKeyToolsProvider);
+    await _runAction(election.id, 'count', () async {
+      final String? text;
+      try {
+        text = await tools.pick();
+      } catch (_) {
+        _tell('The key file could not be read.');
+        return;
+      }
+      if (text == null) return;
+      try {
+        final run = await ref
+            .read(electionServiceProvider)
+            .runCount(election.id, readBallotKeyFile(text));
+        if (run.results != null) {
+          _tell('Count done. ${run.results!.length} result rows stored.');
+        } else {
+          _tell('Saved. A second person must approve the count. Then count '
+              'again with the same key file.');
+        }
+      } on DioException catch (e) {
+        _tell('Count failed: ${_reason(e)}');
+      }
+    });
   }
 
   Future<void> _declare(AdminElection election) async {
@@ -458,6 +645,26 @@ class _ElectionCard extends StatelessWidget {
 
   const _ElectionCard({required this.election, required this.parent});
 
+  // 84.16. The same gates the web admin uses. The server checks them again.
+  bool _can(String permission) => election.myPermissions.contains(permission);
+  bool _at(String phase) => election.phase == phase;
+
+  // The key can be made or replaced up to the day polling opens.
+  bool get _canSetBallotKey =>
+      electionPhaseOrder.indexOf(election.phase) <
+      electionPhaseOrder.indexOf(ElectionPhases.polling);
+
+  // Publish and close have their own routes, and counting ends with declare.
+  bool get _canAdvance =>
+      _can('ChangePhase') &&
+      !_at(ElectionPhases.announced) &&
+      !_at(ElectionPhases.polling) &&
+      !_at(ElectionPhases.counting);
+
+  bool get _canEditRoll =>
+      _can('ManageVoterRoll') &&
+      (_at(ElectionPhases.announced) || _at(ElectionPhases.nomination));
+
   @override
   Widget build(BuildContext context) {
     final nextPhase = nextElectionPhase(election.phase);
@@ -505,57 +712,139 @@ class _ElectionCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
                 election.ballotKeyFingerprint == null
-                    ? 'No returning officer key yet. Set it from the web admin.'
+                    ? 'No returning officer key yet. Voting cannot open without one.'
                     : 'Officer key ${election.ballotKeyFingerprint}',
                 style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+            if (election.candidates.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              for (final c in election.candidates)
+                Row(
+                  key: Key('candidate-${c.id}'),
+                  children: [
+                    Expanded(
+                      child: Text('${c.positionTitle}: ${c.name}',
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 11)),
+                    ),
+                    if (_can('ManageSetup'))
+                      _actionButton(
+                        key: Key('candidate-${c.id}-remove'),
+                        label: 'Remove',
+                        icon: Icons.person_remove_outlined,
+                        busy: parent._isBusy(election.id, 'candidate-${c.id}'),
+                        onPressed: () => parent._removeCandidate(election, c),
+                      ),
+                  ],
+                ),
+            ],
             const Divider(color: Colors.white10, height: 24),
             Wrap(
               spacing: 8,
               runSpacing: 4,
               children: [
-                if (nextPhase != null)
+                if (_at(ElectionPhases.announced) && _can('ChangePhase'))
                   _actionButton(
+                    key: const Key('action-publish'),
+                    label: 'Publish',
+                    icon: Icons.public,
+                    busy: parent._isBusy(election.id, 'phase'),
+                    onPressed: () => parent._publish(election),
+                  ),
+                if (_at(ElectionPhases.polling) && _can('ChangePhase'))
+                  _actionButton(
+                    key: const Key('action-close'),
+                    label: 'Close polling',
+                    icon: Icons.stop_circle_outlined,
+                    busy: parent._isBusy(election.id, 'phase'),
+                    onPressed: () => parent._close(election),
+                  ),
+                if (nextPhase != null && _canAdvance)
+                  _actionButton(
+                    key: const Key('action-advance'),
                     label: 'Advance to ${electionPhaseLabel(nextPhase)}',
                     icon: Icons.arrow_forward,
                     busy: parent._isBusy(election.id, 'phase'),
                     onPressed: () => parent._advancePhase(election),
                   ),
-                _actionButton(
-                  label: 'Freeze roll',
-                  icon: Icons.lock_outline,
-                  busy: parent._isBusy(election.id, 'freeze'),
-                  onPressed: () => parent._freezeVoterRoll(election),
-                ),
-                _actionButton(
-                  label: 'Unfreeze roll',
-                  icon: Icons.lock_open_outlined,
-                  busy: parent._isBusy(election.id, 'freeze'),
-                  onPressed: () => parent._unfreezeVoterRoll(election),
-                ),
-                _actionButton(
-                  label: 'Count',
-                  icon: Icons.calculate_outlined,
-                  busy: parent._isBusy(election.id, 'count'),
-                  onPressed: () => parent._count(election),
-                ),
-                _actionButton(
-                  label: 'Declare',
-                  icon: Icons.campaign_outlined,
-                  busy: parent._isBusy(election.id, 'declare'),
-                  onPressed: () => parent._declare(election),
-                ),
-                _actionButton(
-                  label: 'Officials',
-                  icon: Icons.badge_outlined,
-                  busy: false,
-                  onPressed: () => showElectionOfficialsSheet(context, election),
-                ),
-                _actionButton(
-                  label: ElectionConstants.formRecordsTitle,
-                  icon: Icons.description_outlined,
-                  busy: false,
-                  onPressed: () => showElectionFormRecordsSheet(context, election),
-                ),
+                if (_canEditRoll) ...[
+                  _actionButton(
+                    key: const Key('action-freeze'),
+                    label: 'Freeze roll',
+                    icon: Icons.lock_outline,
+                    busy: parent._isBusy(election.id, 'freeze'),
+                    onPressed: () => parent._freezeVoterRoll(election),
+                  ),
+                  _actionButton(
+                    key: const Key('action-unfreeze'),
+                    label: 'Unfreeze roll',
+                    icon: Icons.lock_open_outlined,
+                    busy: parent._isBusy(election.id, 'freeze'),
+                    onPressed: () => parent._unfreezeVoterRoll(election),
+                  ),
+                ],
+                if (_canSetBallotKey && _can('SetBallotKey'))
+                  _actionButton(
+                    key: const Key('action-ballot-key'),
+                    label: election.ballotKeyFingerprint == null
+                        ? 'Make officer key'
+                        : 'Replace officer key',
+                    icon: Icons.vpn_key_outlined,
+                    busy: parent._isBusy(election.id, 'ballot-key'),
+                    onPressed: () => parent._makeBallotKey(election),
+                  ),
+                if (_at(ElectionPhases.counting) && _can('Count'))
+                  _actionButton(
+                    key: const Key('action-count'),
+                    label: 'Count with officer key',
+                    icon: Icons.calculate_outlined,
+                    busy: parent._isBusy(election.id, 'count'),
+                    onPressed: () => parent._count(election),
+                  ),
+                if (_at(ElectionPhases.counting) && _can('Declare'))
+                  _actionButton(
+                    key: const Key('action-declare'),
+                    label: 'Declare',
+                    icon: Icons.campaign_outlined,
+                    busy: parent._isBusy(election.id, 'declare'),
+                    onPressed: () => parent._declare(election),
+                  ),
+                if (_at(ElectionPhases.declared) &&
+                    _can('SetBallotKey') &&
+                    election.ballotKeyFingerprint != null)
+                  _actionButton(
+                    key: const Key('action-key-destroyed'),
+                    label: 'Key destroyed',
+                    icon: Icons.key_off_outlined,
+                    busy: parent._isBusy(election.id, 'key'),
+                    onPressed: () => parent._keyDestroyed(election),
+                  ),
+                if (_can('ViewDashboard'))
+                  _actionButton(
+                    key: const Key('action-approvals'),
+                    label: 'Approvals',
+                    icon: Icons.how_to_reg_outlined,
+                    busy: false,
+                    onPressed: () => context.push(
+                        '/officials/approvals?electionId=${election.id}'),
+                  ),
+                if (_can('AppointOfficials'))
+                  _actionButton(
+                    key: const Key('action-officials'),
+                    label: 'Officials',
+                    icon: Icons.badge_outlined,
+                    busy: false,
+                    onPressed: () =>
+                        showElectionOfficialsSheet(context, election),
+                  ),
+                if (_can('ManageSetup') || _can('ViewDashboard'))
+                  _actionButton(
+                    key: const Key('action-form-records'),
+                    label: ElectionConstants.formRecordsTitle,
+                    icon: Icons.description_outlined,
+                    busy: false,
+                    onPressed: () =>
+                        showElectionFormRecordsSheet(context, election),
+                  ),
               ],
             ),
           ],
@@ -565,12 +854,14 @@ class _ElectionCard extends StatelessWidget {
   }
 
   Widget _actionButton({
+    Key? key,
     required String label,
     required IconData icon,
     required bool busy,
     required VoidCallback onPressed,
   }) {
     return TextButton.icon(
+      key: key,
       onPressed: busy ? null : onPressed,
       icon: busy
           ? const SizedBox(

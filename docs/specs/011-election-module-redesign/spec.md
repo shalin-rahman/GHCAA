@@ -84,6 +84,13 @@ no Flutter admin election screen at all, despite `create`, `setPhase`, `freezeVo
 - Reuse `EmptyStateWidget`, `confirm_dialog.dart`'s `showConfirmDialog`, `LoadingPanel`/
   `LogoSpinner`. No new shared status-badge or busy-button widget — neither exists anywhere in
   the app; match the established per-screen convention instead.
+- Client split, decided 2026-10-23 (TODO 84.16, mobile election admin). Mobile runs the admin
+  steps too, through the same `api/admin/elections` routes as the web: publish, close, remove a
+  candidate, nomination scrutiny, key destroyed and readiness attestation. Each button shows only
+  when the caller's election permissions and the phase allow it. A 202 from a step that needs a
+  second official is shown as waiting for approval. Ballot key generation and the first count
+  with the private key stay on the web until the owner approves the mobile packages they need
+  (TODO 84.44, the mobile key packages).
 
 ## EC seat/position configurability (org-scoped)
 
