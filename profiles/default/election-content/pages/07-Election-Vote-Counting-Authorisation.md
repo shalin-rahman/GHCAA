@@ -5,20 +5,21 @@ Regulations do not list takes a letter after the form it follows, for example ER
 ---
 
 # FORM ER-25A
-# Vote Counting Authorization Certificate
+# Vote Counting Authorisation Certificate
 
 :: grid
 Election: ___
-Polling Station: ___
+Election Reference: ___
+Polling Venue: ___
 Date: ___
-Time Counting Commenced: ___
+Time Counting Commenced (24-hour): ___
 :: end
 
 ## Prerequisites Verified
 
 [ ] Poll officially closed
 [ ] Poll Closing Certificate completed
-[ ] Ballot Box Sealing Certificate completed
+[ ] Ballot Box Sealing & Poll Integrity Certificate (ER-25) completed
 [ ] Seal numbers verified
 [ ] Ballot Issue Register reconciled
 [ ] Candidate agents present or notified
@@ -41,6 +42,7 @@ The Election Commission hereby authorises the commencement of vote counting.
 
 :: grid
 Election: ___
+Election Reference: ___
 Ballot Box Number: ___
 :: end
 
@@ -56,15 +58,16 @@ Seal No. 3: ___
 [ ] Box undamaged
 [ ] Lock intact
 [ ] No evidence of tampering
+[ ] Seal numbers match ER-25 (the sealing certificate)
 
 :: grid
-Opened At (time): ___
+Opened At (24-hour): ___
 Date: ___
 :: end
 
 :: sign Opened By / Chief Election Commissioner | Witnessed By / Election Commissioner | Witnessed By / Election Commissioner
 
-:: sign Observer | Candidate Agent
+:: sign Observer | Candidate Agent (if present)
 
 :: lines Remarks | 3
 
@@ -75,7 +78,8 @@ Date: ___
 
 :: grid
 Election: ___
-Polling Station: ___
+Election Reference: ___
+Polling Venue: ___
 :: end
 
 ## Ballot Account
@@ -88,7 +92,8 @@ Polling Station: ___
 | Unused ballots | |
 | Spoiled ballots | |
 | Ballots found in box | |
-| Difference | |
+| Difference (ballots issued minus ballots found in box) | |
+| Received = issued + unused + spoiled | |
 
 :: lines Explanation of any difference | 3
 
@@ -117,7 +122,7 @@ Sheet No.: ___
 | | | |
 
 :: grid3
-Rejected Ballots: ___
+Spoiled Ballots: ___
 Questionable Ballots: ___
 Total Count: ___
 :: end
@@ -131,6 +136,7 @@ Total Count: ___
 
 :: grid
 Election: ___
+Election Reference: ___
 Position: ___
 :: end
 
@@ -142,6 +148,7 @@ Position: ___
 | | | | |
 | | | | |
 | Rejected | | | |
+| Abstain (seat left empty) | | | |
 
 :: grid
 Difference Between Counters: ___
@@ -161,6 +168,7 @@ Counts Reconciled: [ ] Yes [ ] No
 
 :: grid
 Election: ___
+Election Reference: ___
 Position: ___
 :: end
 
@@ -177,11 +185,15 @@ Position: ___
 ## Grounds Used
 
 [ ] No official stamp
-[ ] Multiple selections
-[ ] No clear intention
-[ ] Damaged
-[ ] Identifiable markings
+[ ] No official signature (if required)
+[ ] Marks for multiple candidates where only one permitted
+[ ] No clear voter intention
+[ ] Writing identifies voter
+[ ] Ballot torn so vote unclear
+[ ] Ballot altered
 [ ] Other
+
+[ ] Rejected ballots placed in the Invalid Ballot Envelope
 
 :: sign Election Commissioner | Chief Election Commissioner
 
@@ -289,7 +301,7 @@ Position: ___
 :: grid3
 Winner: ___
 Runner-up: ___
-Rejected Ballots: ___
+Spoiled Ballots: ___
 :: end
 
 Total Votes: ___
@@ -308,7 +320,7 @@ Polling Stations: ___
 Registered Voters: ___
 Votes Cast: ___
 Turnout Percentage: ___
-Rejected Ballots: ___
+Spoiled Ballots: ___
 Date of Certification: ___
 :: end
 
@@ -356,8 +368,9 @@ The Election Commission hereby declares the following candidates elected.
 :: grid
 Complaint No.: ___
 Date: ___
-Time: ___
+Time (24-hour): ___
 Election: ___
+Election Reference: ___
 :: end
 
 ## Parties
@@ -371,17 +384,29 @@ Phone: ___
 
 ## Nature of Complaint
 
+[ ] Nomination
 [ ] Campaign
 [ ] Polling
 [ ] Counting
 [ ] Result
+[ ] Code of Conduct
 [ ] Other
 
 :: lines Description | 6
 
-:: lines Evidence attached | 2
+## Evidence attached
+
+| Evidence | Count |
+|----------|-------|
+| Witness statements | |
+| Photographs | |
+| Video | |
+| Electronic records | |
+| Other | |
 
 :: lines Requested relief | 3
+
+Acknowledged on (date): ___
 
 :: sign Complainant / Signature | Received By / Commission officer and time
 
@@ -399,15 +424,17 @@ Date Submitted: ___
 
 :: lines Persons interviewed | 4
 
-:: lines Evidence reviewed | 3
-
-:: lines Documents reviewed | 3
+:: lines Evidence and documents reviewed | 5
 
 :: lines Findings | 6
 
 :: lines Recommendations | 4
 
 Submitted To: ___
+
+Decision: ___
+
+Decided on: ___
 
 :: sign Investigating Officer / Signature and date | Received By / Election Commission
 
@@ -551,13 +578,22 @@ Prepared On: ___
 
 :: grid
 Election: ___
-Polling Station: ___
+Election Reference: ___
+Polling Venue: ___
 :: end
 
 ## Register
 
-| Date | Time | Received From | Material | Quantity | Condition | Seal Number |
-|------|------|---------------|----------|----------|-----------|-------------|
+| Date | Time | Received From | Material | Quantity | Condition on receipt | Seal Number |
+|------|------|---------------|----------|----------|----------------------|-------------|
+| | | | | | | |
+| | | | | | | |
+| | | | | | | |
+| | | | | | | |
+| | | | | | | |
+| | | | | | | |
+| | | | | | | |
+| | | | | | | |
 | | | | | | | |
 | | | | | | | |
 | | | | | | | |
@@ -581,12 +617,11 @@ Date: ___
 
 [ ] The election is completed.
 [ ] Results have been certified.
-[ ] All appeals have concluded.
+[ ] All appeals have concluded, and the 7-day appeal period has passed.
 [ ] Tribunal decisions have been implemented.
 [ ] The Executive Committee has been installed.
-[ ] Election records have been archived.
+[ ] Election records have been archived for at least ten years, as Regulations section 17 (Election Records) requires.
 [ ] Election materials have been secured.
-[ ] Financial accounts have been closed.
 [ ] Commission duties are completed.
 
 The Election Commission is hereby dissolved effective:

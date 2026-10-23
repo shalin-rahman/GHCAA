@@ -45,6 +45,7 @@ public sealed class ElectionContentSeederTests : TestBase
         {
             Key = "regulations", Kind = ElectionContentKind.Page, Format = ElectionPageFormat.Prose,
             Title = "Edited by admin", Body = "Edited body",
+            LastModified = DateTime.UtcNow, UpdatedByAdminId = 1,
         });
         await _context.SaveChangesAsync();
 
@@ -54,6 +55,28 @@ public sealed class ElectionContentSeederTests : TestBase
         var kept = await _context.ElectionContents.SingleAsync(x => x.Key == "regulations");
         kept.Title.Should().Be("Edited by admin");
         kept.Body.Should().Be("Edited body");
+    }
+
+    // 37.16b. A row seeded before a wording change takes the new text, since no admin saved it.
+    [Test]
+    public async Task Sync_RefreshesRowNoAdminSaved_KeepsPublishFlag()
+    {
+        _context.ElectionContents.Add(new ElectionContent
+        {
+            Key = "ER-29", Kind = ElectionContentKind.Form, Title = "Old title",
+            Body = """{"header":["Rejected Ballots"],"sections":[{"name":"","kind":"text","items":["x"]}]}""",
+            IsPublished = false,
+        });
+        await _context.SaveChangesAsync();
+
+        await ElectionContentSeeder.SyncAsync(_context, NullLogger.Instance);
+
+        var row = await _context.ElectionContents.SingleAsync(x => x.Key == "ER-29");
+        var seeded = ElectionContentSeeder.Load().Single(r => r.Key == "ER-29");
+        row.Title.Should().Be(seeded.Title);
+        row.Body.Should().Be(seeded.Body).And.Contain("Spoiled Ballots");
+        row.IsPublished.Should().BeFalse();
+        row.UpdatedByAdminId.Should().BeNull();
     }
 
     [Test]

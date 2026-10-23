@@ -10,9 +10,9 @@ using static GHCAA.Domain.Enums;
 namespace GHCAA.Infrastructure.Data
 {
     // 37.14s. Loads the election pages and form layouts from profiles/<org>/election-content
-    // (ORG_PROFILE first, then default). It adds a key only when the table lacks it, so an
-    // admin's edit is never overwritten at boot. A new form or page in the profile reaches a
-    // live database on the next start.
+    // (ORG_PROFILE first, then default). It adds a key the table lacks, and refreshes a row no
+    // admin has saved, so a wording change in the profile reaches a live database on the next
+    // start. A row an admin has saved is never overwritten.
     public static class ElectionContentSeeder
     {
         internal const string Folder = "election-content";
@@ -29,18 +29,44 @@ namespace GHCAA.Infrastructure.Data
                 return;
             }
 
-            var existing = await context.ElectionContents.Select(x => new { x.Kind, x.Key }).ToListAsync(ct);
-            var known = existing.Select(x => (x.Kind, x.Key.ToUpperInvariant())).ToHashSet();
-            var added = 0;
-            foreach (var row in seeded.Where(r => known.Add((r.Kind, r.Key.ToUpperInvariant()))))
+            var existing = (await context.ElectionContents.ToListAsync(ct))
+                .GroupBy(x => (x.Kind, x.Key.ToUpperInvariant()))
+                .ToDictionary(g => g.Key, g => g.First());
+            int added = 0, refreshed = 0;
+            foreach (var row in seeded)
             {
-                context.ElectionContents.Add(row);
-                added++;
+                var key = (row.Kind, row.Key.ToUpperInvariant());
+                if (!existing.TryGetValue(key, out var current))
+                {
+                    context.ElectionContents.Add(row);
+                    existing[key] = row;
+                    added++;
+                }
+                // Every admin save sets UpdatedByAdminId, so a null one means the row is still as seeded.
+                else if (current.UpdatedByAdminId == null && Refresh(current, row))
+                {
+                    refreshed++;
+                }
             }
 
-            if (added == 0) return;
+            if (added == 0 && refreshed == 0) return;
             await context.SaveChangesAsync(ct);
-            logger.LogInformation("Election content sync added {Count} rows.", added);
+            logger.LogInformation("Election content sync added {Added} rows and refreshed {Refreshed}.", added, refreshed);
+        }
+
+        // Copies the profile text onto a row still as seeded. IsPublished stays, as only an admin changes it.
+        private static bool Refresh(ElectionContent current, ElectionContent seeded)
+        {
+            if (current.Title == seeded.Title && current.Body == seeded.Body && current.Summary == seeded.Summary
+                && current.Group == seeded.Group && current.Format == seeded.Format && current.DisplayOrder == seeded.DisplayOrder)
+                return false;
+            current.Title = seeded.Title;
+            current.Body = seeded.Body;
+            current.Summary = seeded.Summary;
+            current.Group = seeded.Group;
+            current.Format = seeded.Format;
+            current.DisplayOrder = seeded.DisplayOrder;
+            return true;
         }
 
         // The pages.json path for the active profile, or null. Public so a test can find the profile copies.

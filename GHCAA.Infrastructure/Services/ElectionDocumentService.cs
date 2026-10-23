@@ -36,8 +36,8 @@ public sealed class ElectionDocumentService(
     private readonly IElectionService _elections = elections ?? new ElectionService(db);
 
     // A text item that ends "(3 ruled lines)" prints the label and that many lines to write on,
-    // as the :: lines block does on the web page.
-    private static readonly Regex RuledLinesHint = new(@"^(?<label>.*?)\s*\((?<count>\d+) ruled lines?\)\s*$", RegexOptions.Compiled);
+    // as the :: lines block does on the web page. A bare "3 lines" prints only the lines.
+    private static readonly Regex RuledLinesHint = new(@"^(?:(?<label>.*?)\s*\((?<count>\d+) ruled lines?\)|(?<count>\d+) lines?)\s*$", RegexOptions.Compiled);
     private const int DefaultBlankRows = 5;
     private const int MaxRuledLines = 10;
 
@@ -101,9 +101,8 @@ public sealed class ElectionDocumentService(
         if (form is null)
             return null;
 
-        var election = await db.Elections
+        var election = await db.Elections.AsNoTracking()
             .Include(x => x.Seats).ThenInclude(s => s.EcPosition)
-            .Include(x => x.VoterRoll)
             .Include(x => x.ECPeriod)
             .SingleOrDefaultAsync(x => x.Id == electionId, cancellationToken);
         if (election is null)
@@ -113,11 +112,17 @@ public sealed class ElectionDocumentService(
         if ((mode ?? org.Elections.DefaultPrintMode) == ElectionPrintMode.Blank)
             return await RenderAsync(form, filled: null, cancellationToken);
 
+        var rollCount = await db.VoterRolls.CountAsync(v => v.ElectionId == electionId, cancellationToken);
         var tables = await LoadTablesAsync(election, form.Code, cancellationToken);
-        return await RenderAsync(form, new FilledRecord(election, tables), cancellationToken);
+        var fields = await LoadFieldValuesAsync(election, form.Code, cancellationToken);
+        return await RenderAsync(form, new FilledRecord(election, rollCount, tables, fields), cancellationToken);
     }
 
-    private sealed record FilledRecord(Election Election, IReadOnlyList<FormTable> Tables);
+    private sealed record FilledRecord(
+        Election Election,
+        int RollCount,
+        IReadOnlyList<FormTable> Tables,
+        IReadOnlyDictionary<string, string> Fields);
 
     private async Task<byte[]> RenderAsync(PrintableForm form, FilledRecord? filled, CancellationToken ct)
     {
@@ -171,13 +176,13 @@ public sealed class ElectionDocumentService(
                     if (filled is null)
                         AddFieldGrid(column, layout.Header);
                     else
-                        AddFacts(column, filled.Election);
+                        AddFacts(column, filled.Election, filled.RollCount);
 
                     foreach (var section in layout.Sections)
                     {
                         if (skipLayoutTables && section.Kind == "table")
                             continue;
-                        AddSection(column, section);
+                        AddSection(column, section, filled?.Fields);
                     }
 
                     foreach (var table in filled?.Tables ?? [])
@@ -223,7 +228,7 @@ public sealed class ElectionDocumentService(
         bytes.Length > 4 && (bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47
                              || bytes[0] == 0xFF && bytes[1] == 0xD8);
 
-    private static void AddFacts(ColumnDescriptor column, Election election)
+    private static void AddFacts(ColumnDescriptor column, Election election, int rollCount)
     {
         column.Item().PaddingTop(14).Table(table =>
         {
@@ -235,9 +240,11 @@ public sealed class ElectionDocumentService(
             AddRow(table, "Election reference", $"E-{election.Id:D6}");
             AddRow(table, "Election title", election.Title);
             AddRow(table, "Phase", election.Phase.ToString());
-            AddRow(table, "Nomination window", $"{election.NominationOpensOn:yyyy-MM-dd} to {election.NominationClosesOn:yyyy-MM-dd}");
-            AddRow(table, "Polling window", $"{election.PollingOpensOn:yyyy-MM-dd} to {election.PollingClosesOn:yyyy-MM-dd}");
-            AddRow(table, "Voter-roll status", election.VoterRoll.Count == 0 ? "Not frozen" : $"Frozen; {election.VoterRoll.Count} records");
+            if (!string.IsNullOrWhiteSpace(election.NoticeReference))
+                AddRow(table, "Notice reference", election.NoticeReference);
+            AddRow(table, "Nomination window", Window(election.NominationOpensOn, election.NominationClosesOn));
+            AddRow(table, "Polling window", Window(election.PollingOpensOn, election.PollingClosesOn));
+            AddRow(table, "Voter-roll status", rollCount == 0 ? "Not frozen" : $"Frozen; {rollCount} records");
             AddRow(table, "Seat count", election.Seats.Count.ToString());
             AddRow(table, "Generated at", DateTime.UtcNow.ToString("O"));
         });
@@ -262,11 +269,13 @@ public sealed class ElectionDocumentService(
         });
     }
 
-    private static void RuledField(IContainer container, string label) =>
+    // A stored value prints on the line; without one the line stays blank for hand.
+    private static void RuledField(IContainer container, string label, string? value = null) =>
         container.Row(row =>
         {
             row.AutoItem().PaddingRight(6).AlignBottom().Text(label + ":").FontSize(9);
-            row.RelativeItem().Height(16).BorderBottom(0.75f).BorderColor(Colors.Grey.Darken1);
+            row.RelativeItem().MinHeight(16).BorderBottom(0.75f).BorderColor(Colors.Grey.Darken1)
+                .AlignBottom().Text(value ?? string.Empty).FontSize(9);
         });
 
     private static void RuledLines(ColumnDescriptor column, int count)
@@ -275,7 +284,7 @@ public sealed class ElectionDocumentService(
             column.Item().Height(20).BorderBottom(0.75f).BorderColor(Colors.Grey.Darken1);
     }
 
-    private static void AddSection(ColumnDescriptor column, ElectionFormSection section)
+    private static void AddSection(ColumnDescriptor column, ElectionFormSection section, IReadOnlyDictionary<string, string>? values)
     {
         if (!string.IsNullOrWhiteSpace(section.Name))
             column.Item().PaddingTop(14).Text(section.Name).Bold();
@@ -283,7 +292,7 @@ public sealed class ElectionDocumentService(
         {
             case "fields":
                 foreach (var item in section.Items)
-                    column.Item().PaddingTop(8).Element(cell => RuledField(cell, item));
+                    column.Item().PaddingTop(8).Element(cell => RuledField(cell, item, values?.GetValueOrDefault(item)));
                 break;
             case "checklist":
                 foreach (var item in section.Items)
@@ -303,18 +312,24 @@ public sealed class ElectionDocumentService(
             default:
                 foreach (var item in section.Items)
                 {
-                    var hint = RuledLinesHint.Match(item);
-                    if (!hint.Success)
+                    if (ParseLinesHint(item) is not { } hint)
                     {
                         column.Item().PaddingTop(6).Text(item);
                         continue;
                     }
-                    column.Item().PaddingTop(8).Text(hint.Groups["label"].Value);
-                    RuledLines(column, Math.Clamp(int.Parse(hint.Groups["count"].Value), 1, MaxRuledLines));
+                    if (hint.Label.Length > 0)
+                        column.Item().PaddingTop(8).Text(hint.Label);
+                    RuledLines(column, hint.Lines);
                 }
                 break;
         }
     }
+
+    // Public for tests. The label and line count of a lines hint, or null for plain text.
+    public static (string Label, int Lines)? ParseLinesHint(string item) =>
+        RuledLinesHint.Match(item) is { Success: true } hint
+            ? (hint.Groups["label"].Value, Math.Clamp(int.Parse(hint.Groups["count"].Value), 1, MaxRuledLines))
+            : null;
 
     // Column headings, the preset first-column labels, then empty rows to fill by hand.
     private static void AddBlankTable(ColumnDescriptor column, ElectionFormSection section)
@@ -441,16 +456,126 @@ public sealed class ElectionDocumentService(
             case "ER-27C" or "ER-29" or "ER-30":
                 return await DeclarationTablesAsync(election, code, ct);
             case "ER-25":
-                var board = await _elections.GetBoardAsync(election.Id, ct);
+                // 37.14z. Same rule as ER-04 and ER-05, not the public board, so a copy printed
+                // after access ends still lists who served.
+                var officials = await ServingAppointmentsAsync(election.Id, null, ct);
                 return [await PollRecordTableAsync(election, ct), new FormTable("Appointed officials",
                     ["Group", "Role", "Name", "Accepted"],
-                    (board?.Groups ?? []).SelectMany(g => g.Members.Select(m => (IReadOnlyList<string>)[g.GroupName, m.PersonaName, m.DisplayName, DateOrNotYet(m.AcceptedAt)])).ToArray())];
+                    officials.Select(a => (IReadOnlyList<string>)[a.Persona?.GroupName ?? string.Empty, a.Persona?.Name ?? string.Empty, a.DisplayName, DateOrNotYet(a.AcceptedAt)]).ToArray())];
             case "ER-04" or "ER-05":
                 return [await AppointmentsTableAsync(election, code, ct)];
             case "ER-23" or "ER-24":
                 return [await PollOpenCloseTableAsync(election, code, ct)];
+            case "ER-17":
+                return [await ScrutinyTableAsync(election, ct)];
+            case "ER-28" or "ER-28A" or "ER-28B":
+                return await RecountTablesAsync(election, code, ct);
+            case "ER-34":
+                return [await HandoverTableAsync(election, ct)];
             default:
                 return [];
+        }
+    }
+
+    // Public so a test can read the field values without opening the PDF.
+    public async Task<IReadOnlyDictionary<string, string>> LoadFieldValuesAsync(int electionId, string formCode, CancellationToken ct = default)
+    {
+        var election = await db.Elections.AsNoTracking().SingleOrDefaultAsync(x => x.Id == electionId, ct);
+        return election == null
+            ? new Dictionary<string, string>()
+            : await LoadFieldValuesAsync(election, formCode.Trim().ToUpperInvariant(), ct);
+    }
+
+    // 37.14q. A ruled field whose label matches one here prints the stored value. Labels are the
+    // ones in forms.json, so a renamed label falls back to a blank line rather than failing. A
+    // field with nothing stored stays blank for hand, and labels about one person (Name,
+    // Membership No.) are never filled, since one form serves many people.
+    private async Task<IReadOnlyDictionary<string, string>> LoadFieldValuesAsync(Election e, string code, CancellationToken ct)
+    {
+        var values = new Dictionary<string, string>
+        {
+            ["Election Date"] = Day(e.PollingOpensOn, ""),
+            ["Polling Time"] = Known(e.PollingOpensOn) is null || Known(e.PollingClosesOn) is null
+                ? "" : $"{e.PollingOpensOn:HH:mm} to {e.PollingClosesOn:HH:mm} UTC",
+            ["Polling Venue"] = TextOr(e.Venue, ""),
+            ["Nomination Opens"] = Stamp(e.NominationOpensOn, ""),
+            ["Nomination Closes"] = Stamp(e.NominationClosesOn, ""),
+            ["Scrutiny"] = Stamp(e.ScrutinyOn, ""),
+            ["Withdrawal Deadline"] = Stamp(e.WithdrawalClosesOn, ""),
+            ["Final Candidate List"] = Stamp(e.FinalListOn, ""),
+            ["Campaign Period"] = Known(e.CampaignOpensOn) is null && Known(e.CampaignClosesOn) is null
+                ? "" : $"{Stamp(e.CampaignOpensOn)} to {Stamp(e.CampaignClosesOn)}",
+            // Only the start of the silence is stored; it runs until polling opens.
+            ["Silence Period"] = Known(e.SilenceStartsAt) is null ? "" : $"From {Stamp(e.SilenceStartsAt)}",
+            ["Campaign Opens"] = Stamp(e.CampaignOpensOn, ""),
+            ["Campaign Closes"] = Stamp(e.CampaignClosesOn, ""),
+        };
+
+        switch (code)
+        {
+            case "ER-08":
+                var total = await db.VoterRolls.CountAsync(v => v.ElectionId == e.Id, ct);
+                if (total > 0)
+                {
+                    var eligible = await db.VoterRolls.CountAsync(v => v.ElectionId == e.Id && v.IsEligible, ct);
+                    values["Total Members"] = total.ToString();
+                    values["Eligible Voters"] = eligible.ToString();
+                    values["Ineligible Members"] = (total - eligible).ToString();
+                }
+                break;
+            // ER-29 said "Rejected Ballots" before the 37.16a rename; older layouts still do.
+            case "ER-24" or "ER-29":
+                var cast = await db.Ballots.CountAsync(b => b.ElectionId == e.Id, ct);
+                var spoiled = await db.Ballots.CountAsync(b => b.ElectionId == e.Id && b.IsSpoiled, ct);
+                values["Registered Voters"] = (await db.VoterRolls.CountAsync(v => v.ElectionId == e.Id && v.IsEligible, ct)).ToString();
+                values["Votes Cast"] = (cast - spoiled).ToString();
+                values["Spoiled Ballots"] = values["Rejected Ballots"] = spoiled.ToString();
+                break;
+            case "ER-26":
+                values["Electronic Votes Recorded"] = (await db.Ballots.CountAsync(b => b.ElectionId == e.Id, ct)).ToString();
+                values["Audit Log Entries"] = (await new ElectionAuditWriter(db).VerifyAsync(e.Id, ct)).Entries.ToString();
+                values["Audit Chain Head Hash"] = (await _elections.GetBoardAsync(e.Id, ct))?.AuditHeadHash ?? "";
+                break;
+            // Owner rules 2026-10-23: total votes leave the spoiled ballots out, and the line is
+            // "Spoiled Ballots" (TODO 37.16a). A database seeded earlier keeps the old "Rejected Ballots"
+            // label until an admin edits the layout, so that label gets the same count.
+            case "ER-27" or "ER-27C":
+                var ballots = await db.Ballots.CountAsync(b => b.ElectionId == e.Id, ct);
+                var spoiledBallots = await db.Ballots.CountAsync(b => b.ElectionId == e.Id && b.IsSpoiled, ct);
+                values["Spoiled Ballots"] = values["Rejected Ballots"] = spoiledBallots.ToString();
+                if (code == "ER-27C")
+                {
+                    values["Total Votes"] = (ballots - spoiledBallots).ToString();
+                    await AddWinnerLinesAsync(e.Id, values, ct);
+                }
+                break;
+        }
+
+        return values.Where(kv => kv.Value.Length > 0).ToDictionary(kv => kv.Key, kv => kv.Value);
+    }
+
+    // ER-27C has one Winner and one Runner-up line. They are only filled for a single-seat election;
+    // with more seats the lines point to the result table instead. Tied names share a line. The seat
+    // count comes from the election, not the results, so a seat with no results yet still counts.
+    private async Task AddWinnerLinesAsync(int electionId, Dictionary<string, string> values, CancellationToken ct)
+    {
+        if (await db.ElectionSeats.CountAsync(s => s.ElectionId == electionId, ct) > 1)
+        {
+            values["Winner"] = values["Runner-up"] = "See result per seat";
+            return;
+        }
+        var results = await db.ElectionResults.AsNoTracking().Where(r => r.ElectionId == electionId).ToListAsync(ct);
+        if (results.Count == 0)
+            return;
+        var names = await CandidateNamesAsync(electionId, ct);
+        string Names(IEnumerable<ElectionResult> rows) =>
+            string.Join(", ", rows.Select(r => names.GetValueOrDefault(r.NominationId) ?? string.Empty).Order());
+        values["Winner"] = Names(results.Where(r => r.IsElected));
+        var others = results.Where(r => !r.IsElected).ToList();
+        if (others.Count > 0)
+        {
+            var top = others.Max(o => o.VoteCount);
+            values["Runner-up"] = Names(others.Where(r => r.VoteCount == top));
         }
     }
 
@@ -463,8 +588,8 @@ public sealed class ElectionDocumentService(
         var chain = await new ElectionAuditWriter(db).VerifyAsync(election.Id, ct);
         return new FormTable("Poll record", ["Item", "Recorded"],
         [
-            ["Polling opened", $"{election.PollingOpensOn:yyyy-MM-dd HH:mm} UTC"],
-            ["Polling closed", $"{election.PollingClosesOn:yyyy-MM-dd HH:mm} UTC"],
+            ["Polling opened", Stamp(election.PollingOpensOn)],
+            ["Polling closed", Stamp(election.PollingClosesOn)],
             ["Eligible voters", eligible.ToString()],
             ["Voters who cast a ballot", voted.ToString()],
             ["Ballot seal key fingerprint", election.BallotKeyFingerprint ?? "No key registered"],
@@ -473,20 +598,18 @@ public sealed class ElectionDocumentService(
     }
 
     // 37.14p. ER-04 lists the Election Commission, ER-05 every appointee, since officials sign the
-    // neutrality declaration too. Revoked appointments are left out. Witness lines stay for hand.
+    // neutrality declaration too. Revoked appointments are left out. So is one that expired before
+    // it was accepted: it can no longer be accepted, so "Not yet" would be false. An accepted one
+    // stays after its access ends, since that person served. Witness lines stay for hand.
     private async Task<FormTable> AppointmentsTableAsync(Election election, string code, CancellationToken ct)
     {
-        var query = db.ElectionAppointments.AsNoTracking().Include(a => a.Persona)
-            .Where(a => a.ElectionId == election.Id && a.RevokedAt == null);
-        if (code == "ER-04")
-            query = query.Where(a => a.Persona!.GroupName == Constants.Elections.PersonaGroups.ElectionCommission);
-        var rows = await query.ToListAsync(ct);
-        var memberIds = rows.Where(a => a.MemberId != null).Select(a => a.MemberId!.Value).Distinct().ToList();
+        var ordered = await ServingAppointmentsAsync(election.Id,
+            code == "ER-04" ? Constants.Elections.PersonaGroups.ElectionCommission : null, ct);
+        var memberIds = ordered.Where(a => a.MemberId != null).Select(a => a.MemberId!.Value).Distinct().ToList();
         var numbers = await db.Members.AsNoTracking().Where(m => memberIds.Contains(m.Id))
             .ToDictionaryAsync(m => m.Id, m => m.MembershipNumber, ct);
         string Number(ElectionAppointment a) =>
             a.MemberId is { } id ? numbers.GetValueOrDefault(id) ?? string.Empty : "Not a member";
-        var ordered = rows.OrderBy(a => a.Persona?.GroupName).ThenBy(a => a.Persona?.Name).ThenBy(a => a.DisplayName).ToList();
 
         return code == "ER-04"
             ? new FormTable("Commissioner acceptance", ["Name", "Membership No.", "Position", "Appointed", "Accepted"],
@@ -495,19 +618,137 @@ public sealed class ElectionDocumentService(
                 ordered.Select(a => (IReadOnlyList<string>)[a.DisplayName, Number(a), a.Persona?.Name ?? string.Empty, DateOrNotYet(a.DeclarationSignedAt)]).ToArray());
     }
 
-    private static string DateOrNotYet(DateTime? at) => at is { } value ? $"{value:yyyy-MM-dd}" : "Not yet";
+    private async Task<List<ElectionAppointment>> ServingAppointmentsAsync(int electionId, string? group, CancellationToken ct)
+    {
+        var now = DateTime.UtcNow;
+        var query = db.ElectionAppointments.AsNoTracking().Include(a => a.Persona)
+            .Where(a => a.ElectionId == electionId && a.RevokedAt == null
+                        && (a.AcceptedAt != null || a.ExpiresAt == null || a.ExpiresAt > now));
+        if (group is not null)
+            query = query.Where(a => a.Persona!.GroupName == group);
+        var rows = await query.ToListAsync(ct);
+        return rows.OrderBy(a => a.Persona?.GroupName).ThenBy(a => a.Persona?.Name).ThenBy(a => a.DisplayName).ToList();
+    }
+
+    // "MinuteBooks" reads "Minute books", which is also how forms.json words the checklist.
+    private static string ItemLabel<T>(T item) where T : struct, Enum
+    {
+        var words = Regex.Replace(item.ToString(), "(?<=[a-z])(?=[A-Z])", " ");
+        return words[..1] + words[1..].ToLowerInvariant();
+    }
+
+    // 37.14q. ER-17. One row per nomination. A tick never set counts as not ticked.
+    private async Task<FormTable> ScrutinyTableAsync(Election election, CancellationToken ct)
+    {
+        var nominations = await db.Nominations.AsNoTracking().Include(n => n.ScrutinyChecks)
+            .Where(n => n.ElectionId == election.Id).ToListAsync(ct);
+        var ids = nominations.Select(n => n.Id).ToList();
+        var reasons = (await db.ScrutinyDecisions.AsNoTracking().Where(d => ids.Contains(d.NominationId)).ToListAsync(ct))
+            .GroupBy(d => d.NominationId).ToDictionary(g => g.Key, g => g.OrderBy(d => d.DecidedAt).ThenBy(d => d.Id).Last().Reason);
+        var names = await CandidateNamesAsync(election.Id, ct);
+        var seats = election.Seats.ToDictionary(s => s.Id, s => ElectionService.SeatTitle(s));
+        var items = Enum.GetValues<ScrutinyCheckItem>();
+
+        IReadOnlyList<string> Row(Nomination n)
+        {
+            var ticked = n.ScrutinyChecks.Where(c => c.IsChecked).Select(c => c.Item).ToHashSet();
+            var missing = items.Where(i => !ticked.Contains(i)).Select(ItemLabel).ToList();
+            var decision = n.Status switch
+            {
+                NominationStatus.Accepted => "Accepted",
+                NominationStatus.Rejected => "Rejected",
+                NominationStatus.Withdrawn => "Withdrawn",
+                _ => NotYet
+            };
+            return [names.GetValueOrDefault(n.Id) ?? string.Empty, seats.GetValueOrDefault(n.ElectionSeatId) ?? string.Empty,
+                $"{ticked.Count} of {items.Length}", missing.Count == 0 ? "None" : string.Join(", ", missing),
+                decision, TextOr(reasons.GetValueOrDefault(n.Id), "")];
+        }
+
+        return new FormTable("Scrutiny", ["Candidate", "Position", "Ticked", "Not ticked", "Decision", "Reason"],
+            nominations.OrderBy(n => seats.GetValueOrDefault(n.ElectionSeatId)).ThenBy(n => names.GetValueOrDefault(n.Id))
+                .Select(Row).ToArray());
+    }
+
+    // 37.14q. ER-28 lists the requests, ER-28A the decisions, ER-28B one comparison per recount
+    // carried out. The reference is the request's own id, which never changes.
+    private async Task<IReadOnlyList<FormTable>> RecountTablesAsync(Election election, string code, CancellationToken ct)
+    {
+        var requests = await db.ElectionRecountRequests.AsNoTracking().Include(r => r.Figures)
+            .Where(r => r.ElectionId == election.Id).OrderBy(r => r.ReceivedAt).ToListAsync(ct);
+        var seats = election.Seats.ToDictionary(s => s.Id, s => ElectionService.SeatTitle(s));
+        string Seat(ElectionRecountRequest r) => seats.GetValueOrDefault(r.ElectionSeatId) ?? string.Empty;
+        static string Ref(ElectionRecountRequest r) => $"R-{r.Id:D4}";
+
+        if (code == "ER-28")
+            return [new FormTable("Recount requests", ["Reference", "Received", "Position", "Applicant", "Grounds", "Explanation"],
+                requests.Select(r => (IReadOnlyList<string>)[Ref(r), Stamp(r.ReceivedAt), Seat(r), r.ApplicantName, r.Grounds, TextOr(r.Explanation, "")]).ToArray())];
+        if (code == "ER-28A")
+            return [new FormTable("Recount decisions", ["Reference", "Applicant", "Position", "Decision", "Reason", "Decided"],
+                requests.Select(r => (IReadOnlyList<string>)[Ref(r), r.ApplicantName, Seat(r),
+                    r.Allowed switch { true => "Approved", false => "Rejected", null => NotYet }, TextOr(r.DecisionReason, ""), Stamp(r.DecidedAt, NotYet)]).ToArray())];
+
+        var recounted = requests.Where(r => r.Allowed == true && r.Figures.Count > 0).ToList();
+        if (recounted.Count == 0)
+            return [new FormTable("Recount comparison", ["Candidate", "Original Count", "Recount", "Difference"], [])];
+        var names = await CandidateNamesAsync(election.Id, ct);
+        var original = await db.ElectionResults.AsNoTracking().Where(x => x.ElectionId == election.Id)
+            .ToDictionaryAsync(x => x.NominationId, x => x.VoteCount, ct);
+        return recounted.Select(r => new FormTable($"{Ref(r)}, {Seat(r)}, recounted {Stamp(r.RecountedAt)}",
+            ["Candidate", "Original Count", "Recount", "Difference"],
+            r.Figures.OrderByDescending(f => f.VoteCount).ThenBy(f => names.GetValueOrDefault(f.NominationId)).Select(f =>
+            {
+                var before = original.GetValueOrDefault(f.NominationId);
+                return (IReadOnlyList<string>)[names.GetValueOrDefault(f.NominationId) ?? string.Empty, before.ToString(),
+                    f.VoteCount.ToString(), (f.VoteCount - before).ToString("+0;-0;0", System.Globalization.CultureInfo.InvariantCulture)];
+            }).ToArray())).ToArray();
+    }
+
+    // 37.14q. ER-34. The ticks sit on the term the election fills, which is the term being handed
+    // over to. Every item prints, so an item nobody has ticked shows as not handed over.
+    private async Task<FormTable> HandoverTableAsync(Election election, CancellationToken ct)
+    {
+        var period = await db.ECPeriods.AsNoTracking().Where(p => p.Id == election.ECPeriodId).Select(p => p.Title).SingleOrDefaultAsync(ct);
+        var checks = await db.ECPeriodHandoverChecks.AsNoTracking().Where(c => c.ECPeriodId == election.ECPeriodId)
+            .ToDictionaryAsync(c => c.Item, ct);
+        return new FormTable($"Handover to {TextOr(period)}", ["Item", "Handed over", "Recorded"],
+            Enum.GetValues<HandoverCheckItem>().Select(i => checks.GetValueOrDefault(i) is { } c
+                ? (IReadOnlyList<string>)[ItemLabel(i), c.IsChecked ? "Yes" : "No", Stamp(c.SetAt)]
+                : [ItemLabel(i), "No", NotRecorded]).ToArray());
+    }
+
+    private const string NotRecorded = "Not recorded";
+    private const string NotYet = "Not yet";
+
+    // An unset DateTime is year 0001. Treat it as missing so it never reaches paper.
+    private static DateTime? Known(DateTime? at) => at is { } value && value != default ? value : null;
+
+    private static string Day(DateTime? at, string missing = NotRecorded) =>
+        Known(at) is { } value ? $"{value:yyyy-MM-dd}" : missing;
+
+    // Stored times are UTC, so the stamp says so.
+    private static string Stamp(DateTime? at, string missing = NotRecorded) =>
+        Known(at) is { } value ? $"{value:yyyy-MM-dd HH:mm} UTC" : missing;
+
+    private static string Window(DateTime? opens, DateTime? closes) =>
+        Known(opens) is null && Known(closes) is null ? NotRecorded : $"{Day(opens)} to {Day(closes)}";
+
+    private static string TextOr(string? value, string missing = NotRecorded) =>
+        string.IsNullOrWhiteSpace(value) ? missing : value;
+
+    private static string DateOrNotYet(DateTime? at) => Day(at, NotYet);
 
     // 37.14p. Only what the platform stores. Seal numbers, ballot serials, observers, agents and
     // the ballot box checks have no record, so those lines stay for hand.
     private async Task<FormTable> PollOpenCloseTableAsync(Election election, string code, CancellationToken ct)
     {
         var eligible = await db.VoterRolls.CountAsync(x => x.ElectionId == election.Id && x.IsEligible, ct);
-        var venue = string.IsNullOrWhiteSpace(election.Venue) ? "Not recorded" : election.Venue;
+        var venue = TextOr(election.Venue);
         if (code == "ER-23")
         {
             return new FormTable("Poll opening record", ["Item", "Recorded"],
             [
-                ["Polling opened", $"{election.PollingOpensOn:yyyy-MM-dd HH:mm} UTC"],
+                ["Polling opened", Stamp(election.PollingOpensOn)],
                 ["Venue", venue],
                 ["Registered voters", eligible.ToString()],
                 ["Ballot seal key fingerprint", election.BallotKeyFingerprint ?? "No key registered"],
@@ -516,11 +757,11 @@ public sealed class ElectionDocumentService(
         var cast = await db.Ballots.CountAsync(b => b.ElectionId == election.Id, ct);
         var spoiled = await db.Ballots.CountAsync(b => b.ElectionId == election.Id && b.IsSpoiled, ct);
         // Printed before the close, the counts are a running total, so the form says so.
-        var closes = $"{election.PollingClosesOn:yyyy-MM-dd HH:mm} UTC";
+        var closes = Stamp(election.PollingClosesOn);
         var open = election.PollingClosesOn > DateTime.UtcNow;
         List<IReadOnlyList<string>> rows =
         [
-            ["Polling closed", open ? $"Not yet; closes {closes}" : closes],
+            ["Polling closed", open ? $"{NotYet}; closes {closes}" : closes],
             ["Venue", venue],
             ["Registered voters", eligible.ToString()],
             ["Ballots cast, spoiled included", cast.ToString()],
@@ -550,11 +791,11 @@ public sealed class ElectionDocumentService(
         return code switch
         {
             "ER-10" => new FormTable("Nominations", ["Candidate", "Seat", "Proposer", "Seconder", "Filed"],
-                ordered.Select(n => (IReadOnlyList<string>)[Name(n.CandidateMemberId), Seat(n), Name(n.ProposerMemberId), Name(n.SeconderMemberId), $"{n.SubmittedAt:yyyy-MM-dd HH:mm}"]).ToArray()),
+                ordered.Select(n => (IReadOnlyList<string>)[Name(n.CandidateMemberId), Seat(n), Name(n.ProposerMemberId), Name(n.SeconderMemberId), Stamp(n.SubmittedAt)]).ToArray()),
             "ER-11" => new FormTable("Candidate consent", ["Candidate", "Seat", "Consent filed"],
-                ordered.Select(n => (IReadOnlyList<string>)[Name(n.CandidateMemberId), Seat(n), n.ConsentAt is { } consent ? $"{consent:yyyy-MM-dd HH:mm}" : "Not recorded"]).ToArray()),
+                ordered.Select(n => (IReadOnlyList<string>)[Name(n.CandidateMemberId), Seat(n), Stamp(n.ConsentAt)]).ToArray()),
             "ER-18" => new FormTable("Withdrawn nominations", ["Candidate", "Seat", "Withdrawn"],
-                ordered.Select(n => (IReadOnlyList<string>)[Name(n.CandidateMemberId), Seat(n), $"{n.WithdrawnAt:yyyy-MM-dd HH:mm}"]).ToArray()),
+                ordered.Select(n => (IReadOnlyList<string>)[Name(n.CandidateMemberId), Seat(n), Stamp(n.WithdrawnAt)]).ToArray()),
             _ => new FormTable("Final candidate list", ["Seat", "Ballot order", "Candidate"],
                 ordered.Select(n => (IReadOnlyList<string>)[Seat(n), n.BallotOrder?.ToString() ?? string.Empty, Name(n.CandidateMemberId)]).ToArray())
         };
@@ -608,7 +849,7 @@ public sealed class ElectionDocumentService(
             new FormTable("Declaration", ["Item", "Value"],
             [
                 ["Tie rule", election.TieRule.ToString()],
-                ["Declared on", election.DeclaredOn is { } on ? $"{on:yyyy-MM-dd}" : "Not declared"],
+                ["Declared on", Day(election.DeclaredOn, "Not declared")],
                 .. await AuditHeadRowAsync(election.Id, code, ct)
             ]),
             new FormTable("Result per seat", ["Seat", "Candidate", "Votes", "Outcome"],
@@ -617,9 +858,10 @@ public sealed class ElectionDocumentService(
         ];
     }
 
+    // A signed form must still name a candidate whose member record was archived later.
     private async Task<Dictionary<int, string>> CandidateNamesAsync(int electionId, CancellationToken ct) =>
         await (from n in db.Nominations.AsNoTracking()
-               join m in db.Members.AsNoTracking() on n.CandidateMemberId equals m.Id
+               join m in db.Members.AsNoTracking().IgnoreQueryFilters() on n.CandidateMemberId equals m.Id
                where n.ElectionId == electionId
                select new { n.Id, m.FullName }).ToDictionaryAsync(x => x.Id, x => x.FullName, ct);
 

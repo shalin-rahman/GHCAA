@@ -461,7 +461,9 @@ Polling officially commenced at the time recorded above.
 # Poll Incident Register
 
 :: grid
-Polling Station: ___
+Election: ___
+Election Reference: ___
+Polling Venue: ___
 Date: ___
 :: end
 
@@ -469,8 +471,18 @@ Date: ___
 
 :: grid
 Incident No.: ___
-Time: ___
+Time (24-hour): ___
 :: end
+
+## Category
+
+[ ] Name missing
+[ ] Duplicate voting attempt
+[ ] Disturbance
+[ ] Unauthorised campaigning
+[ ] Security concern
+[ ] Power failure
+[ ] Other
 
 :: lines Description | 4
 
@@ -480,7 +492,10 @@ Time: ___
 
 :: lines Action taken | 3
 
-Reported To: ___
+:: grid
+Reported to (name and role): ___
+Time reported (24-hour): ___
+:: end
 
 :: sign Presiding Officer / Signature and time | Observer / Signature
 
@@ -490,7 +505,9 @@ Reported To: ___
 # Spoiled Ballot Register
 
 :: grid
-Polling Station: ___
+Election: ___
+Election Reference: ___
+Polling Venue: ___
 Date: ___
 :: end
 
@@ -504,6 +521,8 @@ Date: ___
 | | | | | |
 | | | | | |
 | | | | | |
+
+Mark the original SPOILED and keep it.
 
 :: grid
 Total Spoiled Ballots: ___

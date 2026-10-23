@@ -969,7 +969,8 @@
     "title": "Election Material Receipt Register",
     "header": [
       "Election",
-      "Polling Station"
+      "Election Reference",
+      "Polling Venue"
     ],
     "sections": [
       {
@@ -981,10 +982,10 @@
           "Received From",
           "Material",
           "Quantity",
-          "Condition",
+          "Condition on receipt",
           "Seal Number"
         ],
-        "blank": 4
+        "blank": 12
       },
       {
         "name": "Remarks",
@@ -1056,7 +1057,9 @@
     "code": "ER-23A",
     "title": "Poll Incident Register",
     "header": [
-      "Polling Station",
+      "Election",
+      "Election Reference",
+      "Polling Venue",
       "Date"
     ],
     "sections": [
@@ -1065,7 +1068,20 @@
         "kind": "fields",
         "items": [
           "Incident No.",
-          "Time"
+          "Time (24-hour)"
+        ]
+      },
+      {
+        "name": "Category",
+        "kind": "checklist",
+        "items": [
+          "Name missing",
+          "Duplicate voting attempt",
+          "Disturbance",
+          "Unauthorised campaigning",
+          "Security concern",
+          "Power failure",
+          "Other"
         ]
       },
       {
@@ -1082,7 +1098,8 @@
         "name": "",
         "kind": "fields",
         "items": [
-          "Reported To"
+          "Reported to (name and role)",
+          "Time reported (24-hour)"
         ]
       }
     ],
@@ -1096,7 +1113,9 @@
     "code": "ER-23B",
     "title": "Spoiled Ballot Register",
     "header": [
-      "Polling Station",
+      "Election",
+      "Election Reference",
+      "Polling Venue",
       "Date"
     ],
     "sections": [
@@ -1109,6 +1128,13 @@
           "Reason",
           "Replacement Ballot No.",
           "Officer Initials"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "text",
+        "items": [
+          "Mark the original SPOILED and keep it."
         ]
       },
       {
@@ -1288,12 +1314,13 @@
   },
   {
     "code": "ER-25A",
-    "title": "Vote Counting Authorization Certificate",
+    "title": "Vote Counting Authorisation Certificate",
     "header": [
       "Election",
-      "Polling Station",
+      "Election Reference",
+      "Polling Venue",
       "Date",
-      "Time Counting Commenced"
+      "Time Counting Commenced (24-hour)"
     ],
     "sections": [
       {
@@ -1302,7 +1329,7 @@
         "items": [
           "Poll officially closed",
           "Poll Closing Certificate completed",
-          "Ballot Box Sealing Certificate completed",
+          "Ballot Box Sealing & Poll Integrity Certificate (ER-25) completed",
           "Seal numbers verified",
           "Ballot Issue Register reconciled",
           "Candidate agents present or notified",
@@ -1332,6 +1359,7 @@
     "title": "Ballot Box Opening Certificate",
     "header": [
       "Election",
+      "Election Reference",
       "Ballot Box Number",
       "Seal No. 1",
       "Seal No. 2",
@@ -1345,14 +1373,15 @@
           "Seals intact",
           "Box undamaged",
           "Lock intact",
-          "No evidence of tampering"
+          "No evidence of tampering",
+          "Seal numbers match ER-25 (the sealing certificate)"
         ]
       },
       {
         "name": "",
         "kind": "fields",
         "items": [
-          "Opened At (time)",
+          "Opened At (24-hour)",
           "Date"
         ]
       },
@@ -1369,7 +1398,7 @@
       "Election Commissioner",
       "Election Commissioner",
       "Observer",
-      "Candidate Agent"
+      "Candidate Agent (if present)"
     ],
     "seal": false
   },
@@ -1378,7 +1407,8 @@
     "title": "Ballot Paper Reconciliation Sheet",
     "header": [
       "Election",
-      "Polling Station"
+      "Election Reference",
+      "Polling Venue"
     ],
     "sections": [
       {
@@ -1395,7 +1425,8 @@
           "Unused ballots",
           "Spoiled ballots",
           "Ballots found in box",
-          "Difference"
+          "Difference (ballots issued minus ballots found in box)",
+          "Received = issued + unused + spoiled"
         ]
       },
       {
@@ -1437,7 +1468,7 @@
         "name": "",
         "kind": "fields",
         "items": [
-          "Rejected Ballots",
+          "Spoiled Ballots",
           "Questionable Ballots",
           "Total Count"
         ]
@@ -1454,6 +1485,7 @@
     "title": "Independent Tally Sheet",
     "header": [
       "Election",
+      "Election Reference",
       "Position"
     ],
     "sections": [
@@ -1470,7 +1502,8 @@
           "",
           "",
           "",
-          "Rejected"
+          "Rejected",
+          "Abstain (seat left empty)"
         ]
       },
       {
@@ -1502,6 +1535,7 @@
     "title": "Rejected Ballot Register",
     "header": [
       "Election",
+      "Election Reference",
       "Position"
     ],
     "sections": [
@@ -1522,11 +1556,20 @@
         "kind": "checklist",
         "items": [
           "No official stamp",
-          "Multiple selections",
-          "No clear intention",
-          "Damaged",
-          "Identifiable markings",
+          "No official signature (if required)",
+          "Marks for multiple candidates where only one permitted",
+          "No clear voter intention",
+          "Writing identifies voter",
+          "Ballot torn so vote unclear",
+          "Ballot altered",
           "Other"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "checklist",
+        "items": [
+          "Rejected ballots placed in the Invalid Ballot Envelope"
         ]
       }
     ],
@@ -1561,7 +1604,7 @@
         "items": [
           "Winner",
           "Runner-up",
-          "Rejected Ballots",
+          "Spoiled Ballots",
           "Total Votes"
         ]
       }
@@ -1715,7 +1758,7 @@
       "Registered Voters",
       "Votes Cast",
       "Turnout Percentage",
-      "Rejected Ballots",
+      "Spoiled Ballots",
       "Date of Certification"
     ],
     "sections": [
@@ -1781,8 +1824,9 @@
     "header": [
       "Complaint No.",
       "Date",
-      "Time",
-      "Election"
+      "Time (24-hour)",
+      "Election",
+      "Election Reference"
     ],
     "sections": [
       {
@@ -1799,10 +1843,12 @@
         "name": "Nature of Complaint",
         "kind": "checklist",
         "items": [
+          "Nomination",
           "Campaign",
           "Polling",
           "Counting",
           "Result",
+          "Code of Conduct",
           "Other"
         ]
       },
@@ -1815,9 +1861,17 @@
       },
       {
         "name": "Evidence attached",
-        "kind": "text",
+        "kind": "table",
         "items": [
-          "2 lines"
+          "Evidence",
+          "Count"
+        ],
+        "rows": [
+          "Witness statements",
+          "Photographs",
+          "Video",
+          "Electronic records",
+          "Other"
         ]
       },
       {
@@ -1825,6 +1879,13 @@
         "kind": "text",
         "items": [
           "3 lines"
+        ]
+      },
+      {
+        "name": "",
+        "kind": "fields",
+        "items": [
+          "Acknowledged on (date)"
         ]
       }
     ],
@@ -1852,17 +1913,10 @@
         ]
       },
       {
-        "name": "Evidence reviewed",
+        "name": "Evidence and documents reviewed",
         "kind": "text",
         "items": [
-          "3 lines"
-        ]
-      },
-      {
-        "name": "Documents reviewed",
-        "kind": "text",
-        "items": [
-          "3 lines"
+          "5 lines"
         ]
       },
       {
@@ -1883,7 +1937,9 @@
         "name": "",
         "kind": "fields",
         "items": [
-          "Submitted To"
+          "Submitted To",
+          "Decision",
+          "Decided on"
         ]
       }
     ],
@@ -2120,12 +2176,11 @@
         "items": [
           "The election is completed.",
           "Results have been certified.",
-          "All appeals have concluded.",
+          "All appeals have concluded, and the 7-day appeal period has passed.",
           "Tribunal decisions have been implemented.",
           "The Executive Committee has been installed.",
-          "Election records have been archived.",
+          "Election records have been archived for at least ten years, as Regulations section 17 (Election Records) requires.",
           "Election materials have been secured.",
-          "Financial accounts have been closed.",
           "Commission duties are completed."
         ]
       },

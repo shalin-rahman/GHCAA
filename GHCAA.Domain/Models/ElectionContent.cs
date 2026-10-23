@@ -3,8 +3,8 @@ using static GHCAA.Domain.Enums;
 namespace GHCAA.Domain.Models
 {
     // 37.14s. One election page (Regulations, manuals, forms handbook) or the layout of one form.
-    // Seeded from profiles/<org>/election-content and edited by an admin after that, so the seeder
-    // only adds keys it cannot find.
+    // Seeded from profiles/<org>/election-content and edited by an admin after that. The seeder
+    // adds missing keys and refreshes only rows with no UpdatedByAdminId.
     public class ElectionContent
     {
         public int Id { get; set; }

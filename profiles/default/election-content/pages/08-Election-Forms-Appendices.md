@@ -32,7 +32,7 @@ by the form named against it, and no step may be skipped.
 5. Voting
 6. Poll Closing Certificate (ER-24)
 7. Ballot Box Sealing Certificate (ER-25)
-8. Counting Authorization (ER-25A)
+8. Counting Authorisation (ER-25A)
 9. Ballot Box Opening Certificate (ER-25B)
 10. Vote Counting Sheets (ER-27)
 11. Independent Tally Sheets (ER-27A)

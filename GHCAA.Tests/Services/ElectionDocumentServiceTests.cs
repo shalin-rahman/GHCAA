@@ -124,7 +124,7 @@ public sealed class ElectionDocumentServiceTests : TestBase
 
         var tables = await _service.LoadTablesAsync(_election.Id, "er-11");
 
-        tables.Single().Rows.Select(r => $"{r[0]}:{r[2]}").Should().Equal("Alice Candidate:2026-10-02 14:05", "Bob Candidate:Not recorded");
+        tables.Single().Rows.Select(r => $"{r[0]}:{r[2]}").Should().Equal("Alice Candidate:2026-10-02 14:05 UTC", "Bob Candidate:Not recorded");
     }
 
     [Test]
@@ -278,6 +278,371 @@ public sealed class ElectionDocumentServiceTests : TestBase
         opening["Registered voters"].Should().Be("0");
     }
 
+    // An unset poll date is year 0001 in the database. It must read "Not recorded", never 0001-01-01.
+    [Test]
+    public async Task UnsetPollDates_PrintNotRecorded_NeverYearOne()
+    {
+        _election.PollingOpensOn = default;
+        _election.PollingClosesOn = default;
+        await _context.SaveChangesAsync();
+
+        var opening = (await _service.LoadTablesAsync(_election.Id, "ER-23"))[0].Rows.ToDictionary(r => r[0], r => r[1]);
+        var closing = (await _service.LoadTablesAsync(_election.Id, "ER-24"))[0].Rows.ToDictionary(r => r[0], r => r[1]);
+        var record = (await _service.LoadTablesAsync(_election.Id, "ER-25"))[0].Rows.ToDictionary(r => r[0], r => r[1]);
+        var fields = await _service.LoadFieldValuesAsync(_election.Id, "ER-01");
+
+        opening["Polling opened"].Should().Be("Not recorded");
+        closing["Polling closed"].Should().Be("Not recorded");
+        record["Polling opened"].Should().Be("Not recorded");
+        fields.Should().NotContainKeys("Election Date", "Polling Time");
+        opening.Values.Concat(closing.Values).Concat(record.Values).Concat(fields.Values).Should().NotContain(v => v.Contains("0001"));
+    }
+
+    // Access ends some days after the declaration. An accepted appointment stays on the record
+    // after that; one that lapsed before anyone accepted it never served and drops off.
+    [Test]
+    public async Task ER04_ER05_KeepAcceptedAfterExpiry_DropLapsedUnaccepted()
+    {
+        var commission = await AddPersonaAsync("Chief Commissioner", Constants.Elections.PersonaGroups.ElectionCommission);
+        var past = DateTime.UtcNow.AddDays(-1);
+        await AddAppointmentAsync(commission, "Ada Accepted", null, expiresAt: past);
+        await AddAppointmentAsync(commission, "Lou Lapsed", null, signed: false, expiresAt: past);
+        await AddAppointmentAsync(commission, "Pam Pending", null, signed: false, expiresAt: DateTime.UtcNow.AddDays(5));
+
+        var er04 = (await _service.LoadTablesAsync(_election.Id, "ER-04"))[0].Rows.ToDictionary(r => r[0]);
+        var er05 = (await _service.LoadTablesAsync(_election.Id, "ER-05"))[0].Rows.ToDictionary(r => r[0]);
+
+        er04.Keys.Should().BeEquivalentTo("Ada Accepted", "Pam Pending");
+        er05.Keys.Should().BeEquivalentTo("Ada Accepted", "Pam Pending");
+        er04["Pam Pending"][4].Should().Be("Not yet");
+        er05["Pam Pending"][3].Should().Be("Not yet");
+    }
+
+    // 37.14q. Ruled fields on ER-01 take the stored schedule. Unset dates and per-person labels stay blank.
+    [Test]
+    public async Task FieldValues_ER01_FillTheScheduleOnly()
+    {
+        _election.Venue = "Main Hall";
+        _election.NominationOpensOn = new DateTime(2026, 11, 1, 9, 0, 0, DateTimeKind.Utc);
+        _election.PollingOpensOn = new DateTime(2026, 12, 5, 8, 0, 0, DateTimeKind.Utc);
+        _election.PollingClosesOn = new DateTime(2026, 12, 5, 16, 0, 0, DateTimeKind.Utc);
+        _election.SilenceStartsAt = new DateTime(2026, 12, 4, 8, 0, 0, DateTimeKind.Utc);
+        await _context.SaveChangesAsync();
+
+        var fields = await _service.LoadFieldValuesAsync(_election.Id, " er-01 ");
+
+        fields["Election Date"].Should().Be("2026-12-05");
+        fields["Polling Time"].Should().Be("08:00 to 16:00 UTC");
+        fields["Polling Venue"].Should().Be("Main Hall");
+        fields["Nomination Opens"].Should().Be("2026-11-01 09:00 UTC");
+        fields["Silence Period"].Should().Be("From 2026-12-04 08:00 UTC");
+        fields.Should().NotContainKeys("Scrutiny", "Withdrawal Deadline", "Campaign Period", "Name", "Membership No.");
+    }
+
+    [Test]
+    public async Task FieldValues_ER08_CountTheRoll()
+    {
+        _context.VoterRolls.AddRange(
+            new VoterRoll { ElectionId = _election.Id, MemberId = _first.CandidateMemberId, IsEligible = true, FrozenAt = DateTime.UtcNow },
+            new VoterRoll { ElectionId = _election.Id, MemberId = _second.CandidateMemberId, IsEligible = false, FrozenAt = DateTime.UtcNow });
+        await _context.SaveChangesAsync();
+
+        var fields = await _service.LoadFieldValuesAsync(_election.Id, "ER-08");
+
+        fields["Total Members"].Should().Be("2");
+        fields["Eligible Voters"].Should().Be("1");
+        fields["Ineligible Members"].Should().Be("1");
+    }
+
+    // With no roll frozen the counts stay blank rather than printing zeros.
+    [Test]
+    public async Task FieldValues_ER08_NoRoll_LeavesCountsBlank()
+    {
+        (await _service.LoadFieldValuesAsync(_election.Id, "ER-08")).Should().NotContainKey("Total Members");
+    }
+
+    // ER-24 and ER-29 "Votes Cast" leave the spoiled ballots out, which have their own line.
+    [TestCase("ER-24")]
+    [TestCase("ER-29")]
+    public async Task FieldValues_VotesCastExcludeSpoiled(string code)
+    {
+        _context.VoterRolls.Add(new VoterRoll { ElectionId = _election.Id, MemberId = _first.CandidateMemberId, IsEligible = true, FrozenAt = DateTime.UtcNow });
+        _context.Ballots.AddRange(
+            new Ballot { Id = Guid.NewGuid(), ElectionId = _election.Id },
+            new Ballot { Id = Guid.NewGuid(), ElectionId = _election.Id },
+            new Ballot { Id = Guid.NewGuid(), ElectionId = _election.Id, IsSpoiled = true });
+        await _context.SaveChangesAsync();
+
+        var fields = await _service.LoadFieldValuesAsync(_election.Id, code);
+
+        fields["Registered Voters"].Should().Be("1");
+        fields["Votes Cast"].Should().Be("2");
+        fields["Spoiled Ballots"].Should().Be("1");
+    }
+
+    [Test]
+    public async Task FieldValues_ER26_CountBallotsAndAuditEntries()
+    {
+        _context.Ballots.Add(new Ballot { Id = Guid.NewGuid(), ElectionId = _election.Id });
+        await _context.SaveChangesAsync();
+
+        var fields = await _service.LoadFieldValuesAsync(_election.Id, "ER-26");
+
+        fields["Electronic Votes Recorded"].Should().Be("1");
+        fields["Audit Log Entries"].Should().Be("0");
+    }
+
+    [Test]
+    public async Task FieldValues_UnknownElection_ReturnsNothing()
+    {
+        (await _service.LoadFieldValuesAsync(9999, "ER-01")).Should().BeEmpty();
+    }
+
+    // 37.14q. ER-17 counts the ticks per nomination, names the boxes left empty and prints the
+    // decision with its latest reason. A check never set counts as not ticked.
+    [Test]
+    public async Task ER17_PrintsTicksAndDecision()
+    {
+        var at = new DateTime(2026, 10, 3, 10, 0, 0, DateTimeKind.Utc);
+        var user = await AddUserAsync("scrutineer");
+        _context.NominationScrutinyChecks.AddRange(
+            Enum.GetValues<ScrutinyCheckItem>().Where(i => i != ScrutinyCheckItem.NominationFeePaid)
+                .Select(i => new NominationScrutinyCheck { NominationId = _first.Id, Item = i, IsChecked = true, SetByUserId = user, SetAt = at }));
+        _context.NominationScrutinyChecks.Add(new NominationScrutinyCheck { NominationId = _second.Id, Item = ScrutinyCheckItem.VotingMember, IsChecked = false, SetByUserId = user, SetAt = at });
+        _second.Status = NominationStatus.Rejected;
+        _context.ScrutinyDecisions.AddRange(
+            new ScrutinyDecision { NominationId = _second.Id, Accepted = false, Reason = "Old reason", DecidedByUserId = user, DecidedAt = at },
+            new ScrutinyDecision { NominationId = _second.Id, Accepted = false, Reason = "Fee not paid", DecidedByUserId = user, DecidedAt = at.AddHours(1) });
+        await _context.SaveChangesAsync();
+
+        var rows = (await _service.LoadTablesAsync(_election.Id, "ER-17"))[0].Rows.ToDictionary(r => r[0]);
+
+        rows["Alice Candidate"].Skip(2).Should().Equal("6 of 7", "Nomination fee paid", "Accepted", "");
+        rows["Bob Candidate"][2].Should().Be("0 of 7");
+        rows["Bob Candidate"][3].Should().StartWith("Membership verified, Voting member");
+        rows["Bob Candidate"].Skip(4).Should().Equal("Rejected", "Fee not paid");
+    }
+
+    // 37.14q. ER-28 lists the request, ER-28A its decision, and ER-28B compares the recount
+    // with the stored result. An undecided request prints "Not yet".
+    [Test]
+    public async Task ER28_Set_PrintsRequestDecisionAndDifference()
+    {
+        _context.ElectionResults.AddRange(
+            new ElectionResult { ElectionId = _election.Id, ElectionSeatId = _seat.Id, NominationId = _first.Id, VoteCount = 10, IsElected = true },
+            new ElectionResult { ElectionId = _election.Id, ElectionSeatId = _seat.Id, NominationId = _second.Id, VoteCount = 8 });
+        var received = new DateTime(2026, 12, 6, 9, 0, 0, DateTimeKind.Utc);
+        var user = await AddUserAsync("clerk");
+        var allowed = new ElectionRecountRequest
+        {
+            ElectionId = _election.Id, ElectionSeatId = _seat.Id, ApplicantName = "Bob Candidate", Grounds = "Close margin",
+            ReceivedAt = received, RecordedByUserId = user, Allowed = true, DecisionReason = "Margin under 5%", DecidedByUserId = user, DecidedAt = received.AddHours(2),
+            RecountedAt = received.AddDays(1)
+        };
+        allowed.Figures.Add(new ElectionRecountFigure { NominationId = _first.Id, VoteCount = 9 });
+        allowed.Figures.Add(new ElectionRecountFigure { NominationId = _second.Id, VoteCount = 8 });
+        _context.ElectionRecountRequests.AddRange(allowed, new ElectionRecountRequest
+        {
+            ElectionId = _election.Id, ElectionSeatId = _seat.Id, ApplicantName = "Pat Proposer", Grounds = "Other", ReceivedAt = received.AddHours(1), RecordedByUserId = user
+        });
+        await _context.SaveChangesAsync();
+
+        var requests = (await _service.LoadTablesAsync(_election.Id, "ER-28"))[0].Rows;
+        var decisions = (await _service.LoadTablesAsync(_election.Id, "ER-28A"))[0].Rows;
+        var comparison = (await _service.LoadTablesAsync(_election.Id, "ER-28B")).Single();
+
+        requests.Select(r => r[3]).Should().Equal("Bob Candidate", "Pat Proposer");
+        requests[0][1].Should().Be("2026-12-06 09:00 UTC");
+        requests[1][5].Should().BeEmpty();
+        decisions[0].Skip(3).Should().Equal("Approved", "Margin under 5%", "2026-12-06 11:00 UTC");
+        decisions[1].Skip(3).Should().Equal("Not yet", "", "Not yet");
+        comparison.Heading.Should().StartWith($"R-{allowed.Id:D4}");
+        comparison.Rows.Select(r => string.Join(":", r)).Should().Equal("Alice Candidate:10:9:-1", "Bob Candidate:8:8:0");
+    }
+
+    [Test]
+    public async Task ER28B_NoRecount_PrintsEmptyComparison()
+    {
+        var tables = await _service.LoadTablesAsync(_election.Id, "ER-28B");
+
+        tables.Single().Rows.Should().BeEmpty();
+    }
+
+    // 37.14q. ER-34 lists every handover item for the term the election fills. An item with no
+    // stored tick prints as not handed over and not recorded.
+    [Test]
+    public async Task ER34_ListsEveryHandoverItem()
+    {
+        var at = new DateTime(2027, 1, 2, 12, 0, 0, DateTimeKind.Utc);
+        var user = await AddUserAsync("secretary");
+        _context.ECPeriodHandoverChecks.AddRange(
+            new ECPeriodHandoverCheck { ECPeriodId = _election.ECPeriodId, Item = HandoverCheckItem.OfficeKeys, IsChecked = true, SetByUserId = user, SetAt = at },
+            new ECPeriodHandoverCheck { ECPeriodId = _election.ECPeriodId, Item = HandoverCheckItem.ChequeBooks, IsChecked = false, SetByUserId = user, SetAt = at });
+        await _context.SaveChangesAsync();
+
+        var table = (await _service.LoadTablesAsync(_election.Id, "ER-34")).Single();
+        var rows = table.Rows.ToDictionary(r => r[0]);
+
+        table.Heading.Should().Be("Handover to 2027");
+        rows.Should().HaveCount(Enum.GetValues<HandoverCheckItem>().Length);
+        rows["Office keys"].Skip(1).Should().Equal("Yes", "2027-01-02 12:00 UTC");
+        rows["Cheque books"].Skip(1).Should().Equal("No", "2027-01-02 12:00 UTC");
+        rows["Official seal"].Skip(1).Should().Equal("No", "Not recorded");
+    }
+
+    // 37.14z. ER-25 follows the ER-04 rule, so an official who accepted stays listed after access ends.
+    [Test]
+    public async Task ER25_KeepsAcceptedOfficialAfterExpiry()
+    {
+        var official = await AddPersonaAsync("Polling Officer", Constants.Elections.PersonaGroups.Officials);
+        var past = DateTime.UtcNow.AddDays(-1);
+        await AddAppointmentAsync(official, "Ada Accepted", null, expiresAt: past);
+        await AddAppointmentAsync(official, "Lou Lapsed", null, signed: false, expiresAt: past);
+        await AddAppointmentAsync(official, "Rex Revoked", null, revoked: true);
+
+        var rows = (await _service.LoadTablesAsync(_election.Id, "ER-25"))[1].Rows;
+
+        rows.Should().ContainSingle();
+        rows[0].Take(3).Should().Equal(Constants.Elections.PersonaGroups.Officials, "Polling Officer", "Ada Accepted");
+    }
+
+    // Owner rule 2026-10-23. Rejected ballots are the spoiled ones and total votes leave them out.
+    // With one seat the winner and the best placed loser are named.
+    [Test]
+    public async Task FieldValues_ER27C_OneSeat_NamesWinnerAndRunnerUp()
+    {
+        var c = await AddMemberAsync("Cy Candidate", 5);
+        var third = await AddNominationAsync(c, _first.ProposerMemberId, _first.SeconderMemberId, 3);
+        _context.Ballots.AddRange(
+            new Ballot { Id = Guid.NewGuid(), ElectionId = _election.Id },
+            new Ballot { Id = Guid.NewGuid(), ElectionId = _election.Id },
+            new Ballot { Id = Guid.NewGuid(), ElectionId = _election.Id, IsSpoiled = true });
+        _context.ElectionResults.AddRange(
+            new ElectionResult { ElectionId = _election.Id, ElectionSeatId = _seat.Id, NominationId = _first.Id, VoteCount = 5, IsElected = true },
+            new ElectionResult { ElectionId = _election.Id, ElectionSeatId = _seat.Id, NominationId = _second.Id, VoteCount = 3 },
+            new ElectionResult { ElectionId = _election.Id, ElectionSeatId = _seat.Id, NominationId = third.Id, VoteCount = 3 });
+        await _context.SaveChangesAsync();
+
+        var fields = await _service.LoadFieldValuesAsync(_election.Id, "ER-27C");
+        var count = await _service.LoadFieldValuesAsync(_election.Id, "ER-27");
+
+        fields["Spoiled Ballots"].Should().Be("1");
+        fields["Total Votes"].Should().Be("2");
+        fields["Winner"].Should().Be("Alice Candidate");
+        fields["Runner-up"].Should().Be("Bob Candidate, Cy Candidate");
+        count["Spoiled Ballots"].Should().Be("1");
+        count.Should().NotContainKeys("Total Votes", "Winner");
+    }
+
+    // 37.16a. A layout seeded before the rename still says "Rejected Ballots" and must still be filled.
+    [Test]
+    [TestCase("ER-27")]
+    [TestCase("ER-29")]
+    public async Task FieldValues_OldRejectedLabel_StillFilled(string code)
+    {
+        _context.Ballots.Add(new Ballot { Id = Guid.NewGuid(), ElectionId = _election.Id, IsSpoiled = true });
+        await _context.SaveChangesAsync();
+
+        var count = await _service.LoadFieldValuesAsync(_election.Id, code);
+
+        count["Rejected Ballots"].Should().Be("1");
+    }
+
+    // 37.16a. The seeded layouts write "3 lines" with no label; it must print as lines, not as the words.
+    [TestCase("Reasons (4 ruled lines)", "Reasons", 4)]
+    [TestCase("Witnesses (1 ruled line)", "Witnesses", 1)]
+    [TestCase("3 lines", "", 3)]
+    [TestCase("1 line", "", 1)]
+    [TestCase("40 lines", "", 10)]
+    public void ParseLinesHint_ReadsLabelAndCount(string item, string label, int lines)
+    {
+        ElectionDocumentService.ParseLinesHint(item).Should().Be((label, lines));
+    }
+
+    [TestCase("Mark the original SPOILED and keep it.")]
+    [TestCase("Lines 3 to 5 of the roll")]
+    [TestCase("")]
+    public void ParseLinesHint_PlainText_ReturnsNull(string item)
+    {
+        ElectionDocumentService.ParseLinesHint(item).Should().BeNull();
+    }
+
+    // 37.16a. Every text item in the seeded layouts is either a lines hint or a sentence, never "N lines" printed as words.
+    [Test]
+    public void SeededForms_NoBareLineCountPrintsAsText()
+    {
+        var bare = new System.Text.RegularExpressions.Regex(@"\b\d+ (ruled )?lines?\b");
+        var items = _context.ElectionContents.Where(x => x.Kind == ElectionContentKind.Form).AsEnumerable()
+            .SelectMany(x => System.Text.Json.JsonDocument.Parse(x.Body).RootElement.GetProperty("sections").EnumerateArray())
+            .Where(s => s.GetProperty("kind").GetString() == "text")
+            .SelectMany(s => s.GetProperty("items").EnumerateArray().Select(i => i.GetString()!));
+
+        items.Where(i => bare.IsMatch(i) && ElectionDocumentService.ParseLinesHint(i) is null).Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task FieldValues_ER27C_SeveralSeats_PointToTheTable()
+    {
+        var second = new ElectionSeat { ElectionId = _election.Id, Position = EcPositionIds.VicePresident };
+        _context.ElectionSeats.Add(second);
+        await _context.SaveChangesAsync();
+        _context.ElectionResults.AddRange(
+            new ElectionResult { ElectionId = _election.Id, ElectionSeatId = _seat.Id, NominationId = _first.Id, VoteCount = 5, IsElected = true },
+            new ElectionResult { ElectionId = _election.Id, ElectionSeatId = second.Id, NominationId = _second.Id, VoteCount = 3, IsElected = true });
+        await _context.SaveChangesAsync();
+
+        var fields = await _service.LoadFieldValuesAsync(_election.Id, "ER-27C");
+
+        fields["Winner"].Should().Be("See result per seat");
+        fields["Runner-up"].Should().Be("See result per seat");
+    }
+
+    // The seat count comes from the election, so a second seat with no results yet still counts.
+    [Test]
+    public async Task FieldValues_ER27C_SecondSeatWithoutResults_PointsToTheTable()
+    {
+        _context.ElectionSeats.Add(new ElectionSeat { ElectionId = _election.Id, Position = EcPositionIds.VicePresident });
+        _context.ElectionResults.Add(
+            new ElectionResult { ElectionId = _election.Id, ElectionSeatId = _seat.Id, NominationId = _first.Id, VoteCount = 5, IsElected = true });
+        await _context.SaveChangesAsync();
+
+        var fields = await _service.LoadFieldValuesAsync(_election.Id, "ER-27C");
+
+        fields["Winner"].Should().Be("See result per seat");
+    }
+
+    // A member archived after the count must still be named on the signed result sheet.
+    [Test]
+    public async Task FieldValues_ER27C_ArchivedWinner_StillNamed()
+    {
+        var member = (await _context.Members.FindAsync(_first.CandidateMemberId))!;
+        member.IsArchived = true;
+        _context.ElectionResults.Add(
+            new ElectionResult { ElectionId = _election.Id, ElectionSeatId = _seat.Id, NominationId = _first.Id, VoteCount = 5, IsElected = true });
+        await _context.SaveChangesAsync();
+
+        var fields = await _service.LoadFieldValuesAsync(_election.Id, "ER-27C");
+
+        fields["Winner"].Should().Be("Alice Candidate");
+    }
+
+    [Test]
+    public async Task FieldValues_ER27C_NoResults_LeavesWinnerBlank()
+    {
+        var fields = await _service.LoadFieldValuesAsync(_election.Id, "ER-27C");
+
+        fields.Should().NotContainKeys("Winner", "Runner-up");
+        fields["Total Votes"].Should().Be("0");
+    }
+
+    private async Task<int> AddUserAsync(string name)
+    {
+        var user = new User { Username = name, PasswordHash = "x" };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+        return user.Id;
+    }
+
     private async Task<ElectionPersona> AddPersonaAsync(string name, string group)
     {
         var persona = new ElectionPersona { Name = name, GroupName = group, Description = "d", DeclarationText = "t", IsActive = true };
@@ -286,7 +651,7 @@ public sealed class ElectionDocumentServiceTests : TestBase
         return persona;
     }
 
-    private async Task AddAppointmentAsync(ElectionPersona persona, string name, int? memberId, bool signed = true, bool revoked = false)
+    private async Task AddAppointmentAsync(ElectionPersona persona, string name, int? memberId, bool signed = true, bool revoked = false, DateTime? expiresAt = null)
     {
         var user = new User { Username = name.Replace(' ', '.'), PasswordHash = "x" };
         _context.Users.Add(user);
@@ -303,7 +668,8 @@ public sealed class ElectionDocumentServiceTests : TestBase
             AppointedAt = now.AddDays(-2),
             AcceptedAt = signed ? now.AddDays(-1) : null,
             DeclarationSignedAt = signed ? now.AddDays(-1) : null,
-            RevokedAt = revoked ? now : null
+            RevokedAt = revoked ? now : null,
+            ExpiresAt = expiresAt
         });
         await _context.SaveChangesAsync();
     }

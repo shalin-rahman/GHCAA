@@ -408,7 +408,7 @@ Sort ballots by office.
 
 Count votes aloud.
 
-Independent tally maintained by second officer.
+Three counters (A, B and C) each keep an independent tally on the Independent Tally Sheet (ER-27A).
 
 Observers may watch.
 
