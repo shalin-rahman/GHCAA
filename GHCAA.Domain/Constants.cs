@@ -142,7 +142,11 @@ namespace GHCAA.Domain
             public const int MinimumBallotsToCount = 10;
             // Item 84.53. How many times a vote runs its Serializable transaction before giving
             // up, when PostgreSQL drops it for clashing with another vote cast at the same time.
-            public const int CastAttempts = 4;
+            // Ten ballots sent together on local PostgreSQL lost four of them at 4 tries with no pause.
+            public const int CastAttempts = 8;
+            // Each retry waits a random time up to this many ms times the attempt number, so votes
+            // that clashed do not clash again on the next try.
+            public const int CastRetryMaxDelayMs = 50;
             // Spec 023 FR-001. The returning officer's ballot key is RSA-OAEP with SHA-256.
             public const int BallotKeyMinBits = 3072;
             public const int BallotKeyMaxBits = 4096;

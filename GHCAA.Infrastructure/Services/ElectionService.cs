@@ -416,28 +416,30 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
 
         // Item 84.53. Two votes cast at the same moment can make PostgreSQL drop one of them with
         // 40001. The whole transaction runs again, never one statement inside it, because the
-        // execution strategy does not retry while a transaction is open.
+        // execution strategy does not retry while a transaction is open. The reads sit inside the
+        // try as well, since PostgreSQL can raise 40001 on a read, not only on a save.
+        var voterId = voter.Id;
         for (var attempt = 1; ; attempt++)
         {
             await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
-            // Read inside the transaction. A failed attempt clears the change tracker, so the
-            // row read before it is no longer tracked.
-            voter = await _db.VoterRolls.SingleAsync(x => x.Id == voter.Id, ct);
-            if (voter.VotedAt != null || await _db.SeatVotes.AnyAsync(x => x.ElectionId == id && x.MemberId == memberId, ct))
-                return (false, "already-voted", null);
-            // Read again inside the transaction, so a close that commits first makes this vote
-            // fail instead of landing after the count, and a ballot is never kept under a key
-            // the election no longer holds.
-            if (!await _db.Elections.AnyAsync(x => x.Id == id && x.Phase == ElectionPhase.Polling && x.BallotKeyFingerprint == e.BallotKeyFingerprint, ct))
-                return (false, "not-open", null);
-
-            foreach (var seat in e.Seats)
-                _db.SeatVotes.Add(new SeatVote { ElectionId = id, ElectionSeatId = seat.Id, MemberId = memberId, VotedAt = votedOn });
-            voter.VotedAt = votedOn;
-            _db.PendingBallots.Add(new PendingBallot { Id = Guid.NewGuid(), ElectionId = id, SealedChoices = sealedChoices });
-            _db.BallotReceipts.Add(new BallotReceipt { Id = Guid.NewGuid(), ElectionId = id, TrackingCode = trackingCode });
             try
             {
+                // Read inside the transaction. A failed attempt clears the change tracker, so the
+                // row read before it is no longer tracked.
+                voter = await _db.VoterRolls.SingleAsync(x => x.Id == voterId, ct);
+                if (voter.VotedAt != null || await _db.SeatVotes.AnyAsync(x => x.ElectionId == id && x.MemberId == memberId, ct))
+                    return (false, "already-voted", null);
+                // Read again inside the transaction, so a close that commits first makes this vote
+                // fail instead of landing after the count, and a ballot is never kept under a key
+                // the election no longer holds.
+                if (!await _db.Elections.AnyAsync(x => x.Id == id && x.Phase == ElectionPhase.Polling && x.BallotKeyFingerprint == e.BallotKeyFingerprint, ct))
+                    return (false, "not-open", null);
+
+                foreach (var seat in e.Seats)
+                    _db.SeatVotes.Add(new SeatVote { ElectionId = id, ElectionSeatId = seat.Id, MemberId = memberId, VotedAt = votedOn });
+                voter.VotedAt = votedOn;
+                _db.PendingBallots.Add(new PendingBallot { Id = Guid.NewGuid(), ElectionId = id, SealedChoices = sealedChoices });
+                _db.BallotReceipts.Add(new BallotReceipt { Id = Guid.NewGuid(), ElectionId = id, TrackingCode = trackingCode });
                 await _db.SaveChangesAsync(ct);
                 await transaction.CommitAsync(ct);
                 return (true, null, trackingCode);
@@ -446,7 +448,11 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
             {
                 await RollbackQuietlyAsync(transaction);
                 _db.ChangeTracker.Clear();
-                if (DbErrors.IsSerializationFailure(ex) && attempt < Elections.CastAttempts) continue;
+                if (DbErrors.IsSerializationFailure(ex) && attempt < Elections.CastAttempts)
+                {
+                    await Task.Delay(Random.Shared.Next(1, Elections.CastRetryMaxDelayMs * attempt), ct);
+                    continue;
+                }
                 var voted = await _db.SeatVotes.AnyAsync(x => x.ElectionId == id && x.MemberId == memberId, ct);
                 return (false, voted ? "already-voted" : "not-recorded", null);
             }

@@ -71,6 +71,6 @@ GHCAA (Grand Hall Community Association App) is a full-stack platform:
 
 ## Agent Workflow
 1. Check `TODO.md` for current priorities before starting any new task.
-2. For multi-step tasks, create a `PLAN.md` at project root before writing code.
+2. For multi-step tasks, create a `PLAN.md` at project root before writing code. If the TODO item already points to a plan in `docs/` (84.49, 84.50 and 84.51 use `docs/AUTH_AND_DEVICE_FIX_PLAN.md`), follow that one instead.
 3. Run analysis tools (`dart analyze`, `dotnet build`) before declaring a task done.
 4. Update `TODO.md` and `PROJECT_MAP.md` when significant changes are made.

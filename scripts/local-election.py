@@ -14,6 +14,7 @@ Run from the repo root, with the API up on http://localhost:5087:
     python scripts/local-election.py prepare --no-key   # leave the key for the phone to set (84.44)
     python scripts/local-election.py open               # open polling (waits for the opening time)
     python scripts/local-election.py vote --n 10        # ten scripted voters
+    python scripts/local-election.py vote --together    # all ballots at the same moment, then check the database (84.53)
     python scripts/local-election.py close              # waits for the closing time, then Counting
     python scripts/local-election.py count              # count with the saved key, then declare
     python scripts/local-election.py status
@@ -38,6 +39,7 @@ import os
 import re
 import sys
 import tempfile
+import threading
 import time
 from datetime import datetime, timedelta, timezone
 
@@ -432,23 +434,76 @@ def open_cmd(_args):
     say(f"polling open. User {APP_VOTER} ({username(APP_VOTER)}) is left for the phone, password {PASSWORD}")
 
 
+def ballot_for(eid, uid, token):
+    ballot = call("GET", f"/elections/{eid}/ballot", token).json()
+    return [{"ElectionSeatId": field(s, "SeatId"),
+             "NominationIds": [field(field(s, "Candidates")[uid % len(field(s, "Candidates"))], "NominationId")]}
+            for s in field(ballot, "Seats")]
+
+
 def vote(args):
     state = need_election()
     eid = state["election_id"]
     cast = state.setdefault("tracking_codes", {})
+    if args.together:
+        return vote_together(state, eid, cast, [u for u in VOTERS[:args.n] if str(u) not in cast])
     for uid in VOTERS[:args.n]:
         if str(uid) in cast:
             continue
         token = stepped_up(state, uid)
-        ballot = call("GET", f"/elections/{eid}/ballot", token).json()
-        choices = [{"ElectionSeatId": field(s, "SeatId"),
-                    "NominationIds": [field(field(s, "Candidates")[uid % len(field(s, "Candidates"))], "NominationId")]}
-                   for s in field(ballot, "Seats")]
-        r = call("POST", f"/elections/{eid}/vote", token, {"Seats": choices}).json()
+        r = call("POST", f"/elections/{eid}/vote", token, {"Seats": ballot_for(eid, uid, token)}).json()
         cast[str(uid)] = field(r, "TrackingCode")
         save_state(state)
         say(f"  user {uid} voted, tracking code {cast[str(uid)]}, receipt pdf {'yes' if field(r, 'ReceiptPdfBase64') else 'NO'}")
     say(f"{len(cast)} scripted ballots cast")
+
+
+def vote_together(state, eid, cast, uids):
+    """84.53. Sends every ballot at the same moment, then checks the database kept each one once.
+
+    Step-up and the ballot fetch go one at a time first, since they send email and are not
+    what is being tested. A barrier then releases all the POSTs together.
+    """
+    if len(uids) < 2:
+        fail("need at least two voters who have not voted. Run prepare again for a new election.")
+    ready = {uid: (stepped_up(state, uid),) for uid in uids}
+    ready = {uid: (tok, ballot_for(eid, uid, tok)) for uid, (tok,) in ready.items()}
+    gate = threading.Barrier(len(uids))
+    outcome = {}
+
+    def send(uid):
+        token, choices = ready[uid]
+        gate.wait()
+        r = requests.post(f"{API}/elections/{eid}/vote", json={"Seats": choices},
+                          headers={"Authorization": f"Bearer {token}"}, timeout=120)
+        outcome[uid] = r
+
+    say(f"sending {len(uids)} ballots at once")
+    threads = [threading.Thread(target=send, args=(uid,)) for uid in uids]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    refused = {uid: r for uid, r in outcome.items() if r.status_code != 200}
+    for uid, r in sorted(outcome.items()):
+        if r.status_code == 200:
+            cast[str(uid)] = field(r.json(), "TrackingCode")
+        say(f"  user {uid}: {r.status_code} {'' if r.status_code == 200 else r.text[:200]}")
+    save_state(state)
+
+    with db() as conn, conn.cursor() as c:
+        c.execute('select count(*) from "VoterRolls" where "ElectionId" = %s and "VotedAt" is not null', (eid,))
+        voted = c.fetchone()[0]
+        c.execute('select count(*) from "PendingBallots" where "ElectionId" = %s', (eid,))
+        sealed = c.fetchone()[0]
+        c.execute('select count(*) from (select 1 from "SeatVotes" where "ElectionId" = %s '
+                  'group by "ElectionSeatId", "MemberId" having count(*) > 1) d', (eid,))
+        doubled = c.fetchone()[0]
+    say(f"database: {voted} marked voted, {sealed} sealed ballots, {doubled} doubled seat votes")
+    if refused or voted != sealed or sealed != len(cast) or doubled:
+        fail(f"{len(refused)} of {len(uids)} ballots refused, or the database does not add up")
+    say(f"all {len(uids)} ballots sent together were recorded once")
 
 
 def close(_args):
@@ -637,6 +692,7 @@ def main():
     sub.add_parser("open").set_defaults(fn=open_cmd)
     s = sub.add_parser("vote")
     s.add_argument("--n", type=int, default=len(VOTERS))
+    s.add_argument("--together", action="store_true", help="84.53: send every ballot at the same moment")
     s.set_defaults(fn=vote)
     sub.add_parser("close").set_defaults(fn=close)
     sub.add_parser("count").set_defaults(fn=count)

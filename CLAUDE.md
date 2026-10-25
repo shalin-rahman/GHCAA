@@ -6,6 +6,9 @@ AI tool working in this repo. Read it before cross-layer work; keep the two file
 sync when either changes — this file adds Claude-specific rules on top rather than
 repeating that content.
 
+Open work with a written plan: TODO 84.50, 84.49, 84.51 and admin unlock, in that order,
+follow `docs/AUTH_AND_DEVICE_FIX_PLAN.md`.
+
 # Graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.

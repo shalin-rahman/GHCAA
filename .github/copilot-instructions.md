@@ -170,7 +170,9 @@ tracker figures quoted in the outline's Chapter 11 block.
 1. Read the relevant README/docs and inspect the graph with `graphify query`,
    `graphify explain`, or `graphify path` before broad source searches.
 2. Check `docs/TODO.md` and `PROJECT_MAP.md` when present before starting
-   cross-layer work.
+   cross-layer work. Some TODO items point to a step-by-step plan in `docs/`
+   (for 84.49, 84.50 and 84.51, `docs/AUTH_AND_DEVICE_FIX_PLAN.md`). Follow the
+   plan's order and checks, and settle its open decisions with the owner first.
 3. Treat every change as a cross-layer change until proven otherwise. Trace
    retrieval and CRUD changes through persistence, application services and
    DTOs, API controllers, Angular services/components, Flutter services/screens,

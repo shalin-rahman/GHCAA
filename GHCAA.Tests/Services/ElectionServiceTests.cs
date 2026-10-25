@@ -264,6 +264,23 @@ public sealed class ElectionServiceTests : TestBase
         _context.SeatVotes.Should().BeEmpty();
     }
 
+    // 84.53. PostgreSQL can drop the transaction on a read too, before anything is saved.
+    [Test]
+    [Category("NFR-R5")]
+    public async Task CastBallotAsync_RetriesASerializationFailureOnARead()
+    {
+        var poll = await CreatePollingElectionAsync(voters: 1);
+        var clash = new ReadClash();
+        await using var context = ContextWith(clash);
+
+        var (success, error, _) = await new ElectionService(context).CastBallotAsync(poll.Election.Id, poll.Voters[0].Id, poll.BallotFor(0));
+
+        success.Should().BeTrue(error);
+        clash.Thrown.Should().BeTrue();
+        _context.PendingBallots.Should().ContainSingle();
+        _context.SeatVotes.Should().HaveCount(2);
+    }
+
     private ApplicationDbContext ContextWith(Microsoft.EntityFrameworkCore.Diagnostics.IInterceptor interceptor) =>
         new(new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlite(_context.Database.GetDbConnection())
@@ -284,6 +301,23 @@ public sealed class ElectionServiceTests : TestBase
             Thrown++;
             throw new DbUpdateException("save failed",
                 new Npgsql.PostgresException("could not serialize access", "ERROR", "ERROR", Npgsql.PostgresErrorCodes.SerializationFailure));
+        }
+    }
+
+    // Fails the first read made inside a transaction. Npgsql throws that one bare.
+    private sealed class ReadClash : Microsoft.EntityFrameworkCore.Diagnostics.DbCommandInterceptor
+    {
+        public bool Thrown { get; private set; }
+
+        public override ValueTask<Microsoft.EntityFrameworkCore.Diagnostics.InterceptionResult<System.Data.Common.DbDataReader>> ReaderExecutingAsync(
+            System.Data.Common.DbCommand command,
+            Microsoft.EntityFrameworkCore.Diagnostics.CommandEventData eventData,
+            Microsoft.EntityFrameworkCore.Diagnostics.InterceptionResult<System.Data.Common.DbDataReader> result,
+            CancellationToken cancellationToken = default)
+        {
+            if (Thrown || command.Transaction == null) return ValueTask.FromResult(result);
+            Thrown = true;
+            throw new Npgsql.PostgresException("could not serialize access", "ERROR", "ERROR", Npgsql.PostgresErrorCodes.SerializationFailure);
         }
     }
 

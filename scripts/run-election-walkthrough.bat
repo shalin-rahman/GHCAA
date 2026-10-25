@@ -124,8 +124,10 @@ exit /b %RESULT%
 
 rem An earlier run that was closed or failed can leave its Playwright runner and browser
 rem windows open, still logged in and holding the election. taskkill /T takes the browsers too.
+rem Only the runner's own two commands match, so an editor or other tool opened on the
+rem walkthrough folder is left alone.
 :stop_earlier
-for /f %%P in ('powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'node.exe' -and $_.CommandLine -like '*walkthrough*' } | ForEach-Object { $_.ProcessId }"') do (
+for /f %%P in ('powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'node.exe' -and ($_.CommandLine -like '*playwright.walkthrough.config*' -or $_.CommandLine -like '*election-walkthrough*tasks.mjs*') } | ForEach-Object { $_.ProcessId }"') do (
   echo Stopping an earlier walkthrough run, process %%P.
   taskkill /PID %%P /T /F >nul 2>&1
 )
@@ -145,7 +147,9 @@ if not exist "%WEB%\node_modules\@playwright\test" (
   call npm ci || (popd & exit /b 1)
   popd
 )
-rem Quick when the browser is already there.
+rem clean and restore open no browser. Quick when the browser is already there.
+if /i "%MODE%"=="clean" exit /b 0
+if /i "%MODE%"=="restore" exit /b 0
 pushd "%WEB%"
 call npx playwright install chromium || (popd & exit /b 1)
 popd
