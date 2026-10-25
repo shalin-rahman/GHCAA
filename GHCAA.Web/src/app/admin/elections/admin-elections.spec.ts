@@ -8,7 +8,7 @@ import { ElectionsService } from '../../core/services/elections.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AdminService } from '../../core/services/admin.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
-import { AdminElectionDto, AdminElectionStepResult, ElectionApprovalDto, ElectionReadinessDto } from '../../core/models/election.models';
+import { AdminElectionDto, AdminElectionStepResult, ElectionApprovalDto, ElectionReadinessDto, NominationViewDto, ELECTION_TOO_FEW_APPROVERS_WARNING } from '../../core/models/election.models';
 import { ExportUtil } from '../../core/utils/export.util';
 
 describe('AdminElections ballot key', () => {
@@ -193,6 +193,27 @@ describe('AdminElections ballot key', () => {
         expect(component.readinessLabel({ ...readiness.items[0], key: 'new-item' })).toBe('new-item');
     });
 
+    // FR-37.13t
+    it('shows the approver warning only while that item is unmet', () => {
+        const approvers = readiness.items.find(i => i.key === 'approvers')!;
+        expect(component.readinessLabel(approvers)).toBe(ELECTION_TOO_FEW_APPROVERS_WARNING);
+        expect(component.readinessLabel({ ...approvers, met: true })).toBe('At least two officials can approve on this election');
+    });
+
+    // FR-39
+    it('names the candidate and the seat on a scrutiny card, falling back to ids', () => {
+        const fixture = TestBed.createComponent(AdminElections);
+        fixture.componentInstance.activeTab.set('nominations');
+        fixture.componentInstance.nominations.set([
+            { id: 1, electionSeatId: 49, candidateMemberId: 217, status: 'Submitted', statement: '', candidateName: 'Rina Akter', positionTitle: 'General Secretary' },
+            { id: 2, electionSeatId: 50, candidateMemberId: 218, status: 'Submitted', statement: '' }
+        ] as NominationViewDto[]);
+        fixture.detectChanges();
+
+        const cards = Array.from(fixture.nativeElement.querySelectorAll('[data-nomination] > div > div > p:first-child') as NodeListOf<HTMLElement>).map(p => p.textContent?.trim());
+        expect(cards).toEqual(['General Secretary · Rina Akter', 'Seat 50 · Member 218']);
+    });
+
     // FR-050: a row with myPermissions shows only the buttons those permissions allow.
     it('hides a button the official has no permission for', () => {
         const row = { ...election, myPermissions: ['ViewDashboard', 'ChangePhase'] } as AdminElectionDto;
@@ -352,6 +373,47 @@ describe('AdminElections ballot key', () => {
         expect(component.countingId()).toBeNull();
     });
 
+    // FR-37.1a. Publish, close and count have their own buttons, so advance skips those phases.
+    it('offers the next phase only where no other button moves the election', () => {
+        expect(component.nextPhase({ ...election, phase: 'Nomination' })).toBe('Scrutiny');
+        expect(component.nextPhase({ ...election, phase: 'Campaign' })).toBe('Polling');
+        expect(component.nextPhase({ ...election, phase: 'Declared' })).toBe('Archived');
+        for (const phase of ['Announced', 'Polling', 'Counting', 'Archived'] as const) {
+            expect(component.nextPhase({ ...election, phase })).toBeNull();
+        }
+    });
+
+    it('moves the election on when the phase change runs at once', async () => {
+        electionsMock.setPhase = vi.fn().mockReturnValue(of(null));
+        component.elections.set([{ ...election, phase: 'Nomination' }]);
+
+        await component.advance(component.elections()[0]);
+
+        expect(electionsMock.setPhase).toHaveBeenCalledWith(7, 'Scrutiny');
+        expect(component.elections()[0].phase).toBe('Scrutiny');
+        expect(component.advancingId()).toBeNull();
+    });
+
+    it('keeps the phase and lists the request when opening polling waits for approval', async () => {
+        electionsMock.setPhase = vi.fn().mockReturnValue(of({ ...request, action: 'OpenPolling' }));
+        component.elections.set([{ ...election, tooFewApprovers: true }]);
+
+        await component.advance(component.elections()[0]);
+
+        expect(confirmMock.confirm.mock.calls[0][0].danger).toBe(true);
+        expect(component.elections()[0].phase).toBe('Campaign');
+        expect(component.approvals()[7]?.[0].action).toBe('OpenPolling');
+    });
+
+    it('does nothing when the advance is not confirmed', async () => {
+        electionsMock.setPhase = vi.fn();
+        confirmMock.confirm.mockReturnValue(of(false));
+
+        await component.advance({ ...election, phase: 'Nomination' });
+
+        expect(electionsMock.setPhase).not.toHaveBeenCalled();
+    });
+
     // FR-39 (spec 023, 37.12f): a stored step leaves the election as it was and lists the request.
     it('keeps the election and lists the request when a second person is needed', () => {
         electionsMock.publish.mockReturnValue(of({ election: null, pending: request }));
@@ -429,5 +491,57 @@ describe('AdminElections ballot key', () => {
         await component.reject(request);
         expect(electionsMock.reject).toHaveBeenCalledWith(30, null);
         expect(component.approvals()[7]).toEqual([]);
+    });
+
+    describe('scrutiny decisions', () => {
+        const nomination = { id: 41, status: 'Submitted' } as unknown as NominationViewDto;
+        const inScrutiny = { ...election, phase: 'Scrutiny', myPermissions: ['DecideNominations'] } as unknown as AdminElectionDto;
+
+        beforeEach(() => {
+            electionsMock.scrutinise = vi.fn().mockReturnValue(of(undefined));
+            electionsMock.getAdminNominations = vi.fn().mockReturnValue(of([nomination]));
+            component.elections.set([inScrutiny]);
+            component.selectedElectionId.set(7);
+        });
+
+        // FR-37.1a. The server only takes a decision in Scrutiny.
+        it('offers a decision only in the scrutiny phase', () => {
+            expect(component.canDecide(nomination)).toBe(true);
+            expect(component.canDecide({ ...nomination, status: 'Accepted' })).toBe(false);
+
+            component.elections.set([{ ...inScrutiny, phase: 'Nomination' }]);
+            expect(component.canDecide(nomination)).toBe(false);
+
+            component.elections.set([{ ...inScrutiny, myPermissions: [] }]);
+            expect(component.canDecide(nomination)).toBe(false);
+        });
+
+        it('sends nothing on reject until a reason is given', () => {
+            component.setScrutinyReason(41, '   ');
+            component.scrutinise(nomination, false);
+            expect(electionsMock.scrutinise).not.toHaveBeenCalled();
+        });
+
+        it('sends the trimmed reason with a rejection and reloads the list', () => {
+            component.setScrutinyReason(41, '  Seconder not on the roll  ');
+            component.scrutinise(nomination, false);
+
+            expect(electionsMock.scrutinise).toHaveBeenCalledWith(41, { accepted: false, reason: 'Seconder not on the roll' });
+            expect(electionsMock.getAdminNominations).toHaveBeenCalledWith(7);
+            expect(component.scrutinisingId()).toBeNull();
+        });
+
+        it('accepts without a reason when none is given', () => {
+            component.scrutinise(nomination, true);
+            expect(electionsMock.scrutinise).toHaveBeenCalledWith(41, { accepted: true });
+        });
+
+        it('reports a failed decision and frees the buttons', () => {
+            electionsMock.scrutinise.mockReturnValue(throwError(() => new Error('409')));
+            component.scrutinise(nomination, true);
+
+            expect(notifyMock.error).toHaveBeenCalled();
+            expect(component.scrutinisingId()).toBeNull();
+        });
     });
 });

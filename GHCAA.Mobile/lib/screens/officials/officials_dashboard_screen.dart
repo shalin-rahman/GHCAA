@@ -112,7 +112,7 @@ class _ElectionCard extends ConsumerWidget {
               for (final item in readiness.items) ...[
                 Text(
                     '${item.met ? 'Done' : (item.advisory ? 'Warning' : 'Not yet')}: '
-                    '${electionReadinessLabel(item.key)}',
+                    '${electionReadinessLabel(item.key, met: item.met)}',
                     key: Key('readiness-${item.key}')),
                 if (item.attestation && !item.met && _can('ChangePhase'))
                   _AttestButton(electionId: election.id, condition: item.key),

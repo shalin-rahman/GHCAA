@@ -84,6 +84,8 @@ class FakeAuthService implements AuthService {
   @override
   Future<String?> loginWithStoredToken() async => null;
   @override
+  Future<bool> reloadSession() async => false;
+  @override
   Future<void> logout() async {}
   @override
   Future<String?> register(Map<String, dynamic> data) async => null;

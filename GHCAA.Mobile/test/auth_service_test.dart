@@ -75,6 +75,16 @@ class _FakeLoginAdapter implements HttpClientAdapter {
       );
     }
 
+    if (options.path.contains('/auth/me')) {
+      return ResponseBody.fromString(
+        jsonEncode({'role': 'Member', 'roles': ['Member', 'ElectionOfficial']}),
+        200,
+        headers: {
+          Headers.contentTypeHeader: ['application/json'],
+        },
+      );
+    }
+
     throw UnimplementedError('Unhandled path in _FakeLoginAdapter: ${options.path}');
   }
 }
@@ -145,6 +155,34 @@ void main() {
     },
   );
 
+  // FR-37.12d. Accepting an appointment adds a role the stored session does not carry.
+  group('reloadSession', () {
+    test('takes the new tokens and the roles from /auth/me', () async {
+      final storage = container.read(storageServiceProvider);
+      await storage.saveRefreshToken('valid-refresh-token');
+      await storage.saveRoles(['Member']);
+
+      final ok = await container.read(authServiceProvider).reloadSession();
+
+      expect(ok, isTrue);
+      expect(await storage.getToken(), 'refreshed-token');
+      expect(await storage.getRoles(), ['Member', 'ElectionOfficial']);
+    });
+
+    test('keeps the stored session when the refresh is refused', () async {
+      final storage = container.read(storageServiceProvider);
+      await storage.saveToken('old-token');
+      await storage.saveRefreshToken('revoked-refresh-token');
+      await storage.saveRoles(['Member']);
+
+      final ok = await container.read(authServiceProvider).reloadSession();
+
+      expect(ok, isFalse);
+      expect(await storage.getToken(), 'old-token');
+      expect(await storage.getRoles(), ['Member']);
+    });
+  });
+
   group('82.40: biometric re-login via loginWithStoredToken', () {
     test('fails cleanly when no refresh token has been saved', () async {
       final authService = container.read(authServiceProvider);
@@ -162,6 +200,7 @@ void main() {
       expect(error, isNull);
       expect(await storage.getToken(), 'refreshed-token');
       expect(await storage.getRefreshToken(), 'rotated-refresh-token');
+      expect(await storage.getRoles(), ['Member', 'ElectionOfficial']);
     });
 
     test('clears the stored session when the refresh token was revoked/expired', () async {

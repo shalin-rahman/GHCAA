@@ -17,6 +17,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/storage/storage_service.dart';
 import '../../features/elections/ballot_receipt.dart';
 import '../../features/elections/election_service.dart';
+import 'election_nomination_panel.dart';
 
 class ElectionScreen extends ConsumerWidget {
   const ElectionScreen({super.key});
@@ -224,6 +225,10 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
             ],
             const _DocumentsButton(),
             const SizedBox(height: AppTheme.spaceL),
+            if (ballot.phase == ElectionPhases.nomination ||
+                ballot.phase == ElectionPhases.withdrawal)
+              ElectionNominationPanel(
+                  electionId: widget.election.id, phase: ballot.phase),
             if (!closed && ballot.seats.isEmpty)
               const EmptyStateWidget('No candidates have been published yet.',
                   icon: Icons.people_outline)

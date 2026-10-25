@@ -20,6 +20,7 @@ public sealed class AuthenticatorService(
     IDataProtectionProvider dataProtection,
     IOrgConfigService orgConfigService,
     IActivityService activityService,
+    ITokenService tokenService,
     ILogger<AuthenticatorService> logger) : IAuthenticatorService
 {
     private readonly IDataProtector _protector = dataProtection.CreateProtector(Constants.Authenticator.ProtectorPurpose);
@@ -174,14 +175,16 @@ public sealed class AuthenticatorService(
         if (!await RemoveAsync(userId, cancellationToken))
             return false;
 
-        // A new stamp ends every session the user holds, so whoever has the lost phone, or a
-        // session left open on it, has to sign in again before setting up an app of their own.
+        // Whoever has the lost phone, or a session left open on it, has to sign in again before
+        // setting up an app of their own. The new stamp stops the access tokens. The refresh tokens
+        // go too, because a refresh does not check the stamp and would sign the old session back in.
         var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
         if (user != null)
         {
             user.RotateSecurityStamp();
             await db.SaveChangesAsync(cancellationToken);
         }
+        await tokenService.RevokeAllRefreshTokensAsync(userId, cancellationToken);
 
         await activityService.LogActivityAsync(user?.MemberId, Constants.Authenticator.AdminResetAuditType,
             $"Authenticator app removed for user {userId} by SuperAdmin {adminId}. The user was signed out everywhere.",

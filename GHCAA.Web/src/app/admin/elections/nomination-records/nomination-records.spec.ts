@@ -14,7 +14,7 @@ describe('NominationRecords', () => {
     const tick = (item: ScrutinyCheckDto['item'], isChecked = true): ScrutinyCheckDto =>
         ({ item, isChecked, setByUserId: 1, setAt: '2026-10-21T08:00:00Z' });
 
-    const create = async (phase: string, permissions: string[]) => {
+    const create = async (phase: string, permissions: string[], status: NominationViewDto['status'] = 'Submitted') => {
         electionsMock = {
             getScrutinyChecks: vi.fn().mockReturnValue(of([])),
             setScrutinyCheck: vi.fn().mockImplementation((_e: number, _n: number, item: any, isChecked: boolean) => of([tick(item, isChecked)])),
@@ -30,7 +30,7 @@ describe('NominationRecords', () => {
         }).compileComponents();
         const fixture = TestBed.createComponent(NominationRecords);
         fixture.componentRef.setInput('election', { id: 7, phase, myPermissions: permissions } as unknown as AdminElectionDto);
-        fixture.componentRef.setInput('nomination', nomination);
+        fixture.componentRef.setInput('nomination', { ...nomination, status });
         fixture.detectChanges();
         return fixture.componentInstance;
     };
@@ -39,6 +39,19 @@ describe('NominationRecords', () => {
         const component = await create('Scrutiny', ['ManageSetup']);
         expect(component.consentShown()?.toISOString()).toBe('2026-10-20T06:00:00.000Z');
         expect(new Date(component.consentInput).toISOString()).toBe('2026-10-20T06:00:00.000Z');
+    });
+
+    it('lets the setup official edit the consent time on a live nomination', async () => {
+        expect((await create('Scrutiny', ['ManageSetup'])).canEditConsent()).toBe(true);
+    });
+
+    it('shows the consent time read-only without ManageSetup', async () => {
+        expect((await create('Scrutiny', ['DecideNominations'])).canEditConsent()).toBe(false);
+    });
+
+    // A withdrawn or rejected candidate is off the ballot, so the consent form goes.
+    it.each(['Withdrawn', 'Rejected'] as const)('hides the consent form on a %s nomination', async status => {
+        expect((await create('Scrutiny', ['ManageSetup'], status)).canEditConsent()).toBe(false);
     });
 
     it('skips the scrutiny sheet without DecideNominations', async () => {

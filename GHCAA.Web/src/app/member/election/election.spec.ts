@@ -6,6 +6,8 @@ import { MemberElection } from './election';
 import { ElectionsService } from '../../core/services/elections.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
+import { NetworkingService } from '../../core/services/networking.service';
 import { ExportUtil } from '../../core/utils/export.util';
 import { BallotViewDto } from '../../core/models/election.models';
 
@@ -32,7 +34,9 @@ describe('MemberElection', () => {
         elections = {
             getCurrent: vi.fn().mockReturnValue(of({ id: 5, phase: ballot.phase })),
             getBallot: vi.fn().mockReturnValue(of(ballot)),
-            castBallot: vi.fn().mockReturnValue(of({ trackingCode: 'ABCD-EFGH', receiptPdfBase64 }))
+            castBallot: vi.fn().mockReturnValue(of({ trackingCode: 'ABCD-EFGH', receiptPdfBase64 })),
+            getSeats: vi.fn().mockReturnValue(of([])),
+            getNominations: vi.fn().mockReturnValue(of([]))
         };
         notify = { success: vi.fn(), error: vi.fn() };
         TestBed.configureTestingModule({
@@ -40,7 +44,9 @@ describe('MemberElection', () => {
             providers: [
                 { provide: ElectionsService, useValue: elections },
                 { provide: NotificationService, useValue: notify },
-                { provide: AuthService, useValue: { currentUser: () => ({ memberId: 7 }) } }
+                { provide: AuthService, useValue: { currentUser: () => ({ memberId: 7 }) } },
+                { provide: NetworkingService, useValue: { searchMembers: vi.fn() } },
+                { provide: ConfirmDialogService, useValue: { confirm: vi.fn() } }
             ]
         });
         const fixture = TestBed.createComponent(MemberElection);
@@ -49,6 +55,22 @@ describe('MemberElection', () => {
     }
 
     afterEach(() => { vi.restoreAllMocks(); localStorage.clear(); });
+
+    // FR-37.1b. The ballot is empty until the candidate list, so these phases show the nomination panel instead.
+    it.each(['Nomination', 'Withdrawal'] as const)('shows the nomination panel in the %s phase', phase => {
+        const { el } = create(paper({ phase, seats: [] }));
+
+        expect(el.querySelector('app-election-nomination')).not.toBeNull();
+        expect(el.textContent).not.toContain('No accepted candidates yet');
+        expect(elections.getNominations).toHaveBeenCalledWith(5);
+    });
+
+    it('keeps the empty state outside the nomination phases', () => {
+        const { el } = create(paper({ phase: 'Scrutiny', seats: [] }));
+
+        expect(el.querySelector('app-election-nomination')).toBeNull();
+        expect(el.textContent).toContain('No accepted candidates yet');
+    });
 
     it('shows position titles, candidate names and the photo', () => {
         const { el } = create();

@@ -4,7 +4,7 @@ import { createAuthServiceMock, createNotificationServiceMock } from '../../../c
 import { ElectionOfficials } from './election-officials';
 import { ElectionsService } from '../../../core/services/elections.service';
 import { ElectionPersonasService } from '../../../core/services/election-personas.service';
-import { AdminService } from '../../../core/services/admin.service';
+import { NetworkingService } from '../../../core/services/networking.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
@@ -41,7 +41,7 @@ describe('ElectionOfficials', () => {
             providers: [
                 { provide: ElectionsService, useValue: electionsMock },
                 { provide: ElectionPersonasService, useValue: { listActive: vi.fn().mockReturnValue(of([])) } },
-                { provide: AdminService, useValue: { getMembers: vi.fn().mockReturnValue(of({ items: [] })) } },
+                { provide: NetworkingService, useValue: { searchMembers: vi.fn().mockReturnValue(of({ items: [] })) } },
                 { provide: AuthService, useValue: createAuthServiceMock({ hasRole: superAdmin }) },
                 { provide: NotificationService, useValue: notifyMock },
                 { provide: ConfirmDialogService, useValue: confirmMock }
@@ -63,12 +63,23 @@ describe('ElectionOfficials', () => {
     it('drops a member search reply when the query has moved on', async () => {
         const component = await create();
         const reply = new Subject<{ items: { id: number; fullName: string; membershipNumber: string }[] }>();
-        (TestBed.inject(AdminService).getMembers as any).mockReturnValue(reply);
+        (TestBed.inject(NetworkingService).searchMembers as any).mockReturnValue(reply);
         component.memberQuery.set('kar');
         (component as any).runSearch('kar');
         component.memberQuery.set('karim');
         reply.next({ items: [{ id: 11, fullName: 'Karim', membershipNumber: 'M-1' }] });
         expect(component.memberHits()).toEqual([]);
+    });
+
+    // FR-37.12d. A commissioner is not an admin, so the search must not use the admin member list.
+    it('searches the member directory and keeps only the picker fields', async () => {
+        const component = await create();
+        const search = TestBed.inject(NetworkingService).searchMembers as any;
+        search.mockReturnValue(of({ items: [{ id: 11, fullName: 'Karim', membershipNumber: 'M-1', status: 1 }] }));
+        component.memberQuery.set('kar');
+        (component as any).runSearch('kar');
+        expect(search).toHaveBeenCalledWith(expect.objectContaining({ query: 'kar', page: 1, pageSize: 10 }));
+        expect(component.memberHits()).toEqual([{ id: 11, fullName: 'Karim', membershipNumber: 'M-1' }]);
     });
 
     it('needs a role, then a member or a name and email', async () => {

@@ -26,6 +26,7 @@ Run commands from the repository root unless a working directory is shown.
 | Web development server | `cd GHCAA.Web; npm start` |
 | Playwright E2E tests | `cd GHCAA.Web; npx playwright install --with-deps chromium` then `npm run test:e2e` |
 | One Playwright file | `cd GHCAA.Web; npx playwright test tests/e2e/path/to/file.spec.ts` |
+| Local election walkthrough | `scripts\run-election-walkthrough.bat setup` then `resume`; see `GHCAA.Web/tests/e2e/election-walkthrough/README.md` |
 | Mobile dependencies | `cd GHCAA.Mobile; flutter pub get` |
 | Mobile analysis | `cd GHCAA.Mobile; flutter analyze` |
 | Mobile tests | `cd GHCAA.Mobile; flutter test --exclude-tags golden --reporter expanded` |

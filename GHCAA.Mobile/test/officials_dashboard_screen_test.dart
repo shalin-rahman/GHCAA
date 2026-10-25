@@ -163,6 +163,14 @@ void main() {
     });
   });
 
+  // FR-39 (37.13t). A met approvers item must not read as the warning next to Done.
+  test('the approvers item reads as a warning only when it is not met', () {
+    expect(electionReadinessLabel('approvers', met: true),
+        'At least two officials can approve on this election');
+    expect(electionReadinessLabel('approvers', met: false),
+        electionTooFewApproversWarning);
+  });
+
   test('an unknown readiness key shows as itself', () {
     expect(electionReadinessLabel('new-item'), 'new-item');
     expect(

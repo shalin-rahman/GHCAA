@@ -4,6 +4,7 @@ import { Component, inject, signal } from '@angular/core';
 import { ElectionsService } from '../../core/services/elections.service';
 import { ElectionAppointmentDto } from '../../core/models/election.models';
 import { NotificationService } from '../../core/services/notification.service';
+import { AuthService } from '../../core/services/auth.service';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 
@@ -18,6 +19,7 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 export class MyAppointments {
     private readonly elections = inject(ElectionsService);
     private readonly notify = inject(NotificationService);
+    private readonly auth = inject(AuthService);
 
     appointments = signal<ElectionAppointmentDto[]>([]);
     loading = signal(true);
@@ -56,7 +58,10 @@ export class MyAppointments {
             next: () => {
                 this.busyId.set(null);
                 this.notify.success(`You are now ${a.personaName} for ${a.electionTitle}.`);
-                this.load();
+                // Without this the officials pages stay closed until the next login. The list
+                // waits for it: accepting ends the old token, and a load sent at the same time
+                // starts a second refresh, which the API takes as token reuse and logs the user out.
+                this.auth.reloadUser().subscribe(() => this.load());
             },
             error: err => {
                 this.busyId.set(null);

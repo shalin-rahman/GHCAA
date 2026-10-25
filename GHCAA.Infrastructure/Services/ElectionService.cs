@@ -319,7 +319,7 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
     {
         var e = await _db.Elections.Include(x => x.VoterRoll).FirstOrDefaultAsync(x => x.Id == id, ct)
             ?? throw new InvalidOperationException("Election was not found.");
-        if (e.Phase > ElectionPhase.Nomination) throw new InvalidOperationException("The voter roll cannot be frozen after nominations open.");
+        if (e.Phase > ElectionPhase.Nomination) throw new InvalidOperationException("The voter roll cannot be frozen after the Nomination phase ends.");
         if (e.VoterRoll.Count != 0) return e.VoterRoll.Count;
         var now = DateTime.UtcNow;
         var members = await _db.Members.Where(m => !m.IsArchived && m.Status == MembershipStatus.Active &&
@@ -363,6 +363,8 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         if (!roll.Contains(request.CandidateMemberId)) throw new InvalidOperationException("The candidate must be an eligible voter.");
         if (!roll.Contains(request.ProposerMemberId) || !roll.Contains(request.SeconderMemberId)) throw new InvalidOperationException("Proposer and seconder must be eligible voters.");
         if (request.CandidateMemberId == request.ProposerMemberId || request.CandidateMemberId == request.SeconderMemberId) throw new InvalidOperationException("Candidate cannot propose or second their own nomination.");
+        // Spec 018: three different people. AddCandidateAsync already holds the staff path to this.
+        if (request.ProposerMemberId == request.SeconderMemberId) throw new InvalidOperationException("The proposer and the seconder must be different members.");
         var n = new Nomination { ElectionId = id, ElectionSeatId = request.ElectionSeatId, CandidateMemberId = request.CandidateMemberId, ProposerMemberId = request.ProposerMemberId, SeconderMemberId = request.SeconderMemberId, Statement = request.Statement, PhotoPath = request.PhotoPath, SubmittedAt = DateTime.UtcNow };
         _db.Nominations.Add(n);
         await _db.SaveChangesAsync(ct);
@@ -374,8 +376,12 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         var n = await _db.Nominations.Include(x => x.Election).FirstOrDefaultAsync(x => x.Id == nominationId, ct);
         if (n == null || n.Status is NominationStatus.Withdrawn) return false;
         if (n.Election?.Phase != ElectionPhase.Scrutiny) return false;
+        var reason = request.Reason?.Trim();
+        // The candidate is told why they were turned down, so a rejection must carry a reason.
+        if (!request.Accepted && string.IsNullOrEmpty(reason))
+            throw new InvalidOperationException("Give a reason for rejecting the nomination.");
         n.Status = request.Accepted ? NominationStatus.Accepted : NominationStatus.Rejected;
-        _db.ScrutinyDecisions.Add(new ScrutinyDecision { NominationId = nominationId, DecidedByUserId = decidedByUserId, Accepted = request.Accepted, Reason = request.Reason, DecidedAt = DateTime.UtcNow });
+        _db.ScrutinyDecisions.Add(new ScrutinyDecision { NominationId = nominationId, DecidedByUserId = decidedByUserId, Accepted = request.Accepted, Reason = string.IsNullOrEmpty(reason) ? null : reason, DecidedAt = DateTime.UtcNow });
         await _db.SaveChangesAsync(ct);
         return true;
     }
@@ -408,8 +414,15 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
         var choices = request.Seats.Select(x => new PendingChoice(x.ElectionSeatId, x.NominationIds.ToArray())).ToArray();
         var sealedChoices = BallotSeal.Seal(e.BallotPublicKey, JsonSerializer.Serialize(choices), e.Id, e.BallotSealVersion);
 
-        await using (var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct))
+        // Item 84.53. Two votes cast at the same moment can make PostgreSQL drop one of them with
+        // 40001. The whole transaction runs again, never one statement inside it, because the
+        // execution strategy does not retry while a transaction is open.
+        for (var attempt = 1; ; attempt++)
         {
+            await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
+            // Read inside the transaction. A failed attempt clears the change tracker, so the
+            // row read before it is no longer tracked.
+            voter = await _db.VoterRolls.SingleAsync(x => x.Id == voter.Id, ct);
             if (voter.VotedAt != null || await _db.SeatVotes.AnyAsync(x => x.ElectionId == id && x.MemberId == memberId, ct))
                 return (false, "already-voted", null);
             // Read again inside the transaction, so a close that commits first makes this vote
@@ -427,17 +440,17 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
             {
                 await _db.SaveChangesAsync(ct);
                 await transaction.CommitAsync(ct);
+                return (true, null, trackingCode);
             }
             catch (Exception ex) when (ex is DbUpdateException or DbException)
             {
                 await RollbackQuietlyAsync(transaction);
                 _db.ChangeTracker.Clear();
+                if (DbErrors.IsSerializationFailure(ex) && attempt < Elections.CastAttempts) continue;
                 var voted = await _db.SeatVotes.AnyAsync(x => x.ElectionId == id && x.MemberId == memberId, ct);
                 return (false, voted ? "already-voted" : "not-recorded", null);
             }
         }
-
-        return (true, null, trackingCode);
     }
 
     public async Task<(IReadOnlyList<ElectionResultDto>? Results, string? Error)> CountAsync(int id, string? privateKeyPkcs8Base64, CancellationToken ct = default)
@@ -733,8 +746,21 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
     public async Task<IReadOnlyList<NominationViewDto>> GetNominationsAsync(int id, CancellationToken ct = default) =>
         (await _db.Nominations.Where(x => x.ElectionId == id).OrderBy(x => x.ElectionSeatId).ToListAsync(ct)).Select(n => ToNomination(n)).ToList();
 
-    public async Task<IReadOnlyList<NominationViewDto>> GetNominationsWithConsentAsync(int id, CancellationToken ct = default) =>
-        (await _db.Nominations.Where(x => x.ElectionId == id).OrderBy(x => x.ElectionSeatId).ToListAsync(ct)).Select(n => ToNomination(n, withConsent: true)).ToList();
+    public async Task<IReadOnlyList<NominationViewDto>> GetNominationsWithConsentAsync(int id, CancellationToken ct = default)
+    {
+        var rows = await (from n in _db.Nominations.AsNoTracking()
+                          join m in _db.Members.AsNoTracking() on n.CandidateMemberId equals m.Id
+                          where n.ElectionId == id
+                          orderby n.ElectionSeatId, m.FullName
+                          select new { Nomination = n, m.FullName }).ToListAsync(ct);
+        var seats = await _db.ElectionSeats.AsNoTracking().Include(s => s.EcPosition)
+            .Where(s => s.ElectionId == id).ToDictionaryAsync(s => s.Id, ct);
+        return rows.Select(r => ToNomination(r.Nomination, withConsent: true) with
+        {
+            CandidateName = r.FullName,
+            PositionTitle = seats.TryGetValue(r.Nomination.ElectionSeatId, out var seat) ? SeatTitle(seat) : null,
+        }).ToList();
+    }
 
     public async Task<BallotViewDto?> GetBallotAsync(int id, int memberId, CancellationToken ct = default)
     {
@@ -767,6 +793,14 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
                 bySeat[s.Id].Select(c => new BallotCandidateDto(c.Id, c.FullName, c.Photo, c.Statement)).ToArray()))
             .ToArray();
         return new BallotViewDto(e.Id, e.Title, e.Phase, hasVoted, e.BallotKeyFingerprint, seats, isEligible, reason);
+    }
+
+    public async Task<IReadOnlyList<ElectionSeatViewDto>?> GetSeatsAsync(int id, CancellationToken ct = default)
+    {
+        var e = await _db.Elections.AsNoTracking().Include(x => x.Seats).ThenInclude(s => s.EcPosition).FirstOrDefaultAsync(x => x.Id == id, ct);
+        if (e == null) return null;
+        return e.Seats.OrderBy(s => s.EcPosition?.DisplayOrder ?? s.Position).ThenBy(s => s.Id)
+            .Select(s => new ElectionSeatViewDto(s.Id, SeatTitle(s), Math.Max(1, s.SeatCount))).ToArray();
     }
 
     public async Task<IReadOnlyList<string>?> GetTrackingCodesAsync(int id, CancellationToken ct = default)

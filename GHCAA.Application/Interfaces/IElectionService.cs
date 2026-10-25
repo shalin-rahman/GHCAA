@@ -37,6 +37,8 @@ public interface IElectionService
     // 37.14m. The same list with the ER-10 consent time, for officials only.
     Task<IReadOnlyList<NominationViewDto>> GetNominationsWithConsentAsync(int id, CancellationToken ct = default);
     Task<BallotViewDto?> GetBallotAsync(int id, int memberId, CancellationToken ct = default);
+    // Null when the election does not exist.
+    Task<IReadOnlyList<ElectionSeatViewDto>?> GetSeatsAsync(int id, CancellationToken ct = default);
     // Null until the count has stored results. Sorted, with no choices (spec 023 FR-016).
     Task<IReadOnlyList<string>?> GetTrackingCodesAsync(int id, CancellationToken ct = default);
     // Null unless the election is Declared or Archived (spec 023 FR-017).

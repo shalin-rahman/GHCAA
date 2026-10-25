@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject, afterNextRender, effect } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, map, catchError, of, switchMap } from 'rxjs';
+import { Observable, tap, map, catchError, of, switchMap, finalize, shareReplay } from 'rxjs';
 import { LoginDto, SocialProviderConfig, TokenResponseDto, User } from '../models/auth.models';
 import { API_ENDPOINTS, BALLOT_RECEIPT_KEY_PREFIX, ROUTES } from '../constants/app.constants';
 
@@ -29,6 +29,7 @@ export class AuthService {
 
     private inactivityTimer: any;
     private readonly TIMEOUT_MS = 10 * 60 * 1000;
+    private refreshInFlight: Observable<boolean> | null = null;
 
     // Centralizes the "run this once the deferred /auth/me restore has settled AND the user turns
     // out to be logged in" pattern — every consumer of member-only data on a page that doesn't
@@ -73,23 +74,8 @@ export class AuthService {
                         return of(null);
                     }))
                     .subscribe(me => {
-                        if (me) {
-                            const user: User = {
-                                username: me.username,
-                                memberId: me.memberId,
-                                role: me.role ?? 'Member',
-                                token: '',      // token is httpOnly — not accessible to JS
-                                fullName: me.fullName ?? me.username,
-                                email: me.email,
-                                mobileNo: me.mobileNo,
-                                mustChangePassword: me.mustChangePassword ?? false,
-                                roles: me.roles ?? [me.role ?? 'Member'],
-                                electionAppointments: me.electionAppointments ?? []
-                            };
-                            this._currentUser.set(user);
-                            sessionStorage.setItem('user_session', JSON.stringify(this.toSessionUser(user)));
-                            this.resetTimer();
-                        }
+                        // token is httpOnly here, not readable by JS.
+                        if (me) this.setUserFromMe(me, '');
                         this._authChecked.set(true);
                     });
             });
@@ -140,11 +126,56 @@ export class AuthService {
     }
 
     // 24.44: Called by the interceptor on 401 to issue a new access token cookie.
+    // The API reads a Bearer header before the cookie, so the in-memory token from login must
+    // follow the refresh. Otherwise a retry still sends the old token and fails again.
+    // Callers share one request in flight. A second refresh would present the refresh token the
+    // first one just rotated, and the API treats that as reuse and ends every session of the user.
     refresh(): Observable<boolean> {
-        return this.http.post<any>(API_ENDPOINTS.AUTH.REFRESH, {}, { withCredentials: true }).pipe(
+        this.refreshInFlight ??= this.http.post<{ token?: string }>(API_ENDPOINTS.AUTH.REFRESH, {}, { withCredentials: true }).pipe(
+            tap(response => {
+                const current = this._currentUser();
+                if (current) this._currentUser.set({ ...current, token: response?.token ?? '' });
+            }),
             map(() => true),
-            catchError(() => of(false))
+            catchError(() => of(false)),
+            finalize(() => this.refreshInFlight = null),
+            shareReplay(1)
         );
+        return this.refreshInFlight;
+    }
+
+    // A role added since login, such as an accepted election appointment, is missing from both
+    // the token and the stored user. This gets a new token and reloads the user with its roles.
+    reloadUser(): Observable<boolean> {
+        return this.refresh().pipe(
+            switchMap(ok => ok
+                ? this.http.get<any>(API_ENDPOINTS.AUTH.ME, { withCredentials: true }).pipe(
+                    map(me => {
+                        if (!me) return false;
+                        this.setUserFromMe(me, this._currentUser()?.token ?? '');
+                        return true;
+                    }),
+                    catchError(() => of(false)))
+                : of(false))
+        );
+    }
+
+    private setUserFromMe(me: any, token: string): void {
+        const user: User = {
+            username: me.username,
+            memberId: me.memberId,
+            role: me.role ?? 'Member',
+            token,
+            fullName: me.fullName ?? me.username,
+            email: me.email,
+            mobileNo: me.mobileNo,
+            mustChangePassword: me.mustChangePassword ?? false,
+            roles: me.roles ?? [me.role ?? 'Member'],
+            electionAppointments: me.electionAppointments ?? []
+        };
+        this._currentUser.set(user);
+        sessionStorage.setItem('user_session', JSON.stringify(this.toSessionUser(user)));
+        this.resetTimer();
     }
 
     logout() {

@@ -63,18 +63,20 @@ class _FakeElectionService extends ElectionService {
   }
 
   String nominationStatus = 'Accepted';
+  String? candidateName;
 
   @override
   Future<List<Nomination>> getAdminNominations(int id) async {
     calls.add('nominations $id');
     return [
-      Nomination(id: 4, electionSeatId: 3, candidateMemberId: 8, status: nominationStatus, statement: ''),
+      Nomination(id: 4, electionSeatId: 3, candidateMemberId: 8, status: nominationStatus, statement: '',
+          candidateName: candidateName),
     ];
   }
 
   @override
   Future<void> scrutinise(int nominationId, bool accepted, {String? reason}) async {
-    calls.add('scrutinise $nominationId $accepted');
+    calls.add(reason == null ? 'scrutinise $nominationId $accepted' : 'scrutinise $nominationId $accepted $reason');
     nominationStatus = accepted ? 'Accepted' : 'Rejected';
   }
 
@@ -122,13 +124,14 @@ void main() {
   }
 
   Future<_FakeElectionService> pump(WidgetTester tester, AdminElection election,
-      {List<ElectionRecount> recounts = const [], String nominationStatus = 'Accepted'}) async {
+      {List<ElectionRecount> recounts = const [], String nominationStatus = 'Accepted', String? candidateName}) async {
     tester.view.physicalSize = const Size(390, 4000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final service = _FakeElectionService()
       ..recounts = recounts
-      ..nominationStatus = nominationStatus;
+      ..nominationStatus = nominationStatus
+      ..candidateName = candidateName;
     await tester.pumpWidget(ProviderScope(
       overrides: [
         electionServiceProvider.overrideWith((ref) => service),
@@ -294,6 +297,25 @@ void main() {
     expect(tester.widget<CheckboxListTile>(find.byKey(const Key('scrutiny-VotingMember'))).value, isTrue);
   });
 
+  testWidgets('FR-39 (37.13t): a nomination names the candidate, falling back to the member id', (tester) async {
+    await pump(tester, _election(phase: 'Scrutiny'), candidateName: 'Rina Akter');
+    expect(find.textContaining('· Rina Akter'), findsOneWidget);
+    expect(find.textContaining('member 8'), findsNothing);
+  });
+
+  testWidgets('FR-39 (37.13t): an accepted nomination keeps its consent button', (tester) async {
+    await pump(tester, _election(phase: 'Scrutiny'));
+    expect(find.byKey(const Key('nomination-4-consent')), findsOneWidget);
+  });
+
+  // One test per status: pumping twice in one test keeps the sheet's first load.
+  for (final status in ['Withdrawn', 'Rejected']) {
+    testWidgets('FR-39 (37.13t): no consent button on a $status nomination', (tester) async {
+      await pump(tester, _election(phase: 'Scrutiny'), nominationStatus: status);
+      expect(find.byKey(const Key('nomination-4-consent')), findsNothing);
+    });
+  }
+
   testWidgets('ER-28: scrutiny ticks are read-only outside the scrutiny phase', (tester) async {
     await pump(tester, _election(phase: 'Polling'));
 
@@ -328,6 +350,39 @@ void main() {
     await pump(tester, _election(phase: 'Scrutiny', permissions: const ['ManageSetup']),
         nominationStatus: 'Submitted');
     expect(find.text('Status: Submitted'), findsOneWidget);
+    expect(find.byKey(const Key('nomination-4-reject')), findsNothing);
+  });
+
+  // FR-37.1a. A rejection must say why, as on the web.
+  testWidgets('FR-37.1a: reject waits for a reason and sends it trimmed', (tester) async {
+    final service = await pump(tester, _election(phase: 'Scrutiny'), nominationStatus: 'Submitted');
+
+    await tester.tap(find.byKey(const Key('nomination-4-reject')));
+    await settle(tester);
+    expect(tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, 'REJECT')).onPressed, isNull);
+
+    await tester.enterText(find.widgetWithText(TextField, 'Reason'), '  Seconder not on the roll  ');
+    await tester.pump();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'REJECT'));
+    await settle(tester);
+
+    expect(service.calls, contains('scrutinise 4 false Seconder not on the roll'));
+  });
+
+  testWidgets('FR-37.1a: cancelling the reason sends no rejection', (tester) async {
+    final service = await pump(tester, _election(phase: 'Scrutiny'), nominationStatus: 'Submitted');
+
+    await tester.tap(find.byKey(const Key('nomination-4-reject')));
+    await settle(tester);
+    await tester.tap(find.text('CANCEL'));
+    await settle(tester);
+
+    expect(service.calls.where((c) => c.startsWith('scrutinise')), isEmpty);
+  });
+
+  testWidgets('FR-37.1a: no accept or reject outside the scrutiny phase', (tester) async {
+    await pump(tester, _election(phase: 'Nomination'), nominationStatus: 'Submitted');
+    expect(find.byKey(const Key('nomination-4-accept')), findsNothing);
     expect(find.byKey(const Key('nomination-4-reject')), findsNothing);
   });
 }

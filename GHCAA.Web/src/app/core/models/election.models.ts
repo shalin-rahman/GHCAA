@@ -261,8 +261,14 @@ export const ELECTION_READINESS_LABELS: Record<string, string> = {
     'technical-audit': 'The technical audit is done',
     'appeals-decided': 'Every nomination appeal is decided',
     'paper-stock': 'Paper stock is ready',
-    'approvers': ELECTION_TOO_FEW_APPROVERS_WARNING
+    'approvers': 'At least two officials can approve on this election'
 };
+
+// The approvers item shows the long warning only while it is unmet. Mobile has the same rule in electionReadinessLabel.
+export function electionReadinessLabel(item: ElectionReadinessItemDto): string {
+    if (item.key === 'approvers' && !item.met) return ELECTION_TOO_FEW_APPROVERS_WARNING;
+    return ELECTION_READINESS_LABELS[item.key] ?? item.key;
+}
 
 export interface CreateElectionRequest {
     title: string;
@@ -380,6 +386,9 @@ export interface NominationViewDto {
     statement: string;
     // ER-10. When the candidate signed consent, in UTC. Null until it is recorded.
     consentAt?: string | null;
+    // Sent on the admin list only. The public list leaves them null.
+    candidateName?: string | null;
+    positionTitle?: string | null;
 }
 
 export interface ScrutinyDto {
@@ -409,6 +418,13 @@ export interface BallotCandidateDto {
     name: string;
     photoUrl: string | null;
     statement: string;
+}
+
+// The seats a member can be nominated for. The ballot has none until CandidateList.
+export interface ElectionSeatViewDto {
+    seatId: number;
+    positionTitle: string;
+    places: number;
 }
 
 export interface BallotSeatDto {

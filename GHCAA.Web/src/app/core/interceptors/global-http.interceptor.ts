@@ -1,6 +1,6 @@
 import { HttpInterceptorFn, HttpErrorResponse, HttpRequest, HttpHandlerFn, HttpXsrfTokenExtractor } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, throwError, BehaviorSubject, switchMap, filter, take, Observable, retry, timer } from 'rxjs';
+import { catchError, of, throwError, BehaviorSubject, switchMap, filter, take, Observable, retry, timer } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
 import { StepUpService } from '../services/step-up.service';
@@ -9,7 +9,8 @@ import { XSRF } from '../constants/app.constants';
 
 // 24.44: Shared refresh state — one in-flight refresh serves all concurrent 401s.
 let isRefreshing = false;
-const refreshDone$ = new BehaviorSubject<boolean>(false);
+// null while a refresh runs. A failed refresh must still release the requests queued behind it.
+const refreshDone$ = new BehaviorSubject<boolean | null>(null);
 
 export const globalHttpInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService);
@@ -90,6 +91,17 @@ function withCurrentXsrf(req: HttpRequest<unknown>, xsrf: HttpXsrfTokenExtractor
     return req.clone({ setHeaders: { [XSRF.HEADER]: token } });
 }
 
+// The refresh issued a new access token. A retry that still carries the old one in its Bearer
+// header fails again, because the API reads that header before the cookie.
+function afterRefresh(req: HttpRequest<unknown>, authService: AuthService, xsrf: HttpXsrfTokenExtractor): HttpRequest<unknown> {
+    const retry = withCurrentXsrf(req, xsrf);
+    if (!retry.headers.has('Authorization')) return retry;
+    const token = authService.getToken();
+    return token
+        ? retry.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+        : retry.clone({ headers: retry.headers.delete('Authorization') });
+}
+
 function handle401(
     req: HttpRequest<unknown>,
     next: HttpHandlerFn,
@@ -101,28 +113,25 @@ function handle401(
     if (isRefreshing) {
         // Queue behind the ongoing refresh.
         return refreshDone$.pipe(
-            filter(done => done),
+            filter(done => done !== null),
             take(1),
-            switchMap(success => success ? next(withCurrentXsrf(req, xsrf)) : throwError(() => originalError))
+            switchMap(success => success ? next(afterRefresh(req, authService, xsrf)) : throwError(() => originalError))
         );
     }
 
     isRefreshing = true;
-    refreshDone$.next(false);
+    refreshDone$.next(null);
 
+    // The catch covers the refresh only. Placed after switchMap it also caught the retry's own
+    // errors, so a retry that failed with a 500 logged the user out, and a failed refresh logged out twice.
     return authService.refresh().pipe(
+        catchError(() => of(false)),
         switchMap(success => {
             isRefreshing = false;
             refreshDone$.next(success);
-            if (success) return next(withCurrentXsrf(req, xsrf));
+            if (success) return next(afterRefresh(req, authService, xsrf));
             authService.logout();
             return throwError(() => originalError);
-        }),
-        catchError(err => {
-            isRefreshing = false;
-            refreshDone$.next(false);
-            authService.logout();
-            return throwError(() => err);
         })
     );
 }

@@ -1,0 +1,74 @@
+{
+  "title": "Annual General Election",
+  "description": "Election of the executive committee for the coming term. Members vote online during the polling window.",
+  "periodTitle": "Executive Committee",
+  "periodYears": 2,
+  "timing": {
+    "pollingOpensInMinutes": 30,
+    "pollingMinutes": 10,
+    "recountWindowMinutes": 15,
+    "silenceMinutesBeforePolling": 5
+  },
+  "details": {
+    "venue": "Association Hall, Ground Floor",
+    "noticeReference": "EC/ELN/2026/01"
+  },
+  "admin": 2,
+  "officials": {
+    "returningOfficer": 200,
+    "chiefCommissioner": 223,
+    "commissioner": 224,
+    "tribunal": 225,
+    "scrutineerWhoDeclines": 226,
+    "replacementScrutineer": 227,
+    "observerWhoIsRevoked": 228
+  },
+  "seats": [
+    {
+      "positionId": 1,
+      "title": "President",
+      "candidates": [
+        { "member": 211, "proposer": 215, "seconder": 219, "statement": "I will keep the accounts open to every member and hold a members' meeting each quarter." },
+        { "member": 212, "proposer": 220, "seconder": 221, "statement": "I will set up a legal aid desk for members and their families." }
+      ]
+    },
+    {
+      "positionId": 3,
+      "title": "General Secretary",
+      "candidates": [
+        { "member": 213, "proposer": 201, "seconder": 202, "statement": "I will publish the minutes of every committee meeting within two weeks." },
+        { "member": 214, "proposer": 203, "seconder": 204, "statement": "I will move the membership renewals online and answer every letter within a week." },
+        { "member": 216, "proposer": 205, "seconder": 206, "statement": "I will start a mentoring scheme that pairs new members with senior ones.", "withdraws": true }
+      ]
+    },
+    {
+      "positionId": 7,
+      "title": "Treasurer",
+      "candidates": [
+        { "member": 217, "proposer": 207, "seconder": 208, "statement": "I will present a quarterly budget report at every general meeting." },
+        { "member": 218, "proposer": 209, "seconder": 210, "statement": "I will open a second bank account for the welfare fund.", "rejectedBecause": "The proposer's membership was not in good standing on the nomination date." }
+      ]
+    }
+  ],
+  "selfProposalProbe": { "member": 211, "positionId": 7 },
+  "votes": [
+    { "voter": 201, "web": true, "choices": { "1": 211, "3": 213, "7": 217 } },
+    { "voter": 202, "web": true, "choices": { "1": 212, "3": 214, "7": 217 } },
+    { "voter": 203, "web": true, "choices": { "1": 211, "3": 213 } },
+    { "voter": 204, "choices": { "1": 211, "3": 214, "7": 217 } },
+    { "voter": 205, "choices": { "1": 211, "3": 213, "7": 217 } },
+    { "voter": 206, "choices": { "1": 212, "3": 213, "7": 217 } },
+    { "voter": 207, "choices": { "1": 211, "3": 214 } },
+    { "voter": 208, "choices": { "1": 212, "3": 213, "7": 217 } },
+    { "voter": 209, "choices": { "1": 211, "3": 213, "7": 217 } },
+    { "voter": 210, "choices": { "1": 212, "3": 214, "7": 217 } },
+    { "voter": 215, "choices": { "1": 211, "3": 213, "7": 217 } },
+    { "voter": 219, "choices": { "1": 211, "3": 214 } },
+    { "voter": 220, "choices": { "1": 212, "3": 213, "7": 217 } },
+    { "voter": 221, "choices": { "1": 212, "3": 214, "7": 217 } }
+  ],
+  "recounts": [
+    { "positionId": 1, "applicant": 212, "grounds": "Narrow margin", "explanation": "The margin on this seat is small enough that a recount is reasonable.", "allow": true },
+    { "positionId": 3, "applicant": 214, "grounds": "Doubt over the count", "explanation": "No specific ground was given beyond general doubt.", "allow": false, "refusedBecause": "The request gives no ground that could change the result." }
+  ]
+}

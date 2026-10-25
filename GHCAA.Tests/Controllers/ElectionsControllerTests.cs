@@ -261,6 +261,27 @@ namespace GHCAA.Tests.Controllers
 
         [Test]
         [Category("FR-39")]
+        public async Task Seats_TestElection_Returns404()
+        {
+            _electionServiceMock.Setup(x => x.IsTestAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+
+            Assert.That(await _controller.Seats(1, CancellationToken.None), Is.InstanceOf<NotFoundResult>());
+            _electionServiceMock.Verify(x => x.GetSeatsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task Seats_ReturnsTheSeatsOr404()
+        {
+            _electionServiceMock.Setup(x => x.GetSeatsAsync(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new[] { new ElectionSeatViewDto(5, "President", 1) });
+
+            Assert.That(await _controller.Seats(1, CancellationToken.None), Is.InstanceOf<OkObjectResult>());
+            Assert.That(await _controller.Seats(2, CancellationToken.None), Is.InstanceOf<NotFoundResult>());
+        }
+
+        [Test]
+        [Category("FR-39")]
         public async Task Get_TestElection_Returns404()
         {
             _electionServiceMock.Setup(x => x.IsTestAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
@@ -415,6 +436,60 @@ namespace GHCAA.Tests.Controllers
             Assert.That(problem.Extensions["code"], Is.EqualTo(Constants.ErrorCodes.PollingNotReady));
             Assert.That(problem.Detail, Is.EqualTo("Polling cannot open until these are met: the ballot key is set; paper stock is ready."));
             Assert.That(problem.Extensions["unmet"], Is.EqualTo(new[] { Constants.Elections.Readiness.BallotKey, Constants.Elections.Readiness.PaperStock }));
+        }
+
+        [Test]
+        [Category("FR-37.1b")]
+        public async Task Nominate_RuleBroken_Returns400WithTheRule()
+        {
+            var request = new NominationDto(4, 10, 0, 12, "Statement", null);
+            _electionServiceMock.Setup(x => x.SubmitNominationAsync(3, It.IsAny<NominationDto>(), It.IsAny<CancellationToken>()))
+                                .ThrowsAsync(new InvalidOperationException("Candidate cannot propose or second their own nomination."));
+
+            var obj = await _controller.Nominate(3, request, CancellationToken.None) as ObjectResult;
+
+            Assert.That(obj?.StatusCode, Is.EqualTo(400));
+            Assert.That(((ProblemDetails)obj!.Value!).Detail, Is.EqualTo("Candidate cannot propose or second their own nomination."));
+        }
+
+        [Test]
+        [Category("FR-37.1b")]
+        public async Task Scrutinise_RejectWithoutReason_Returns400WithTheRule()
+        {
+            _electionServiceMock.Setup(x => x.DecideNominationAsync(9, It.IsAny<int>(), It.IsAny<ScrutinyDto>(), It.IsAny<CancellationToken>()))
+                                .ThrowsAsync(new InvalidOperationException("Give a reason for rejecting the nomination."));
+
+            var obj = await _controller.Scrutinise(9, new ScrutinyDto(false, " "), CancellationToken.None) as ObjectResult;
+
+            Assert.That(obj?.StatusCode, Is.EqualTo(400));
+            Assert.That(((ProblemDetails)obj!.Value!).Detail, Is.EqualTo("Give a reason for rejecting the nomination."));
+        }
+
+        [Test]
+        [Category("FR-37.1b")]
+        public async Task Withdraw_Refused_Returns400WithTheRule()
+        {
+            _electionServiceMock.Setup(x => x.WithdrawNominationAsync(9, 10, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+
+            var obj = await _controller.Withdraw(9, CancellationToken.None) as ObjectResult;
+
+            Assert.That(obj?.StatusCode, Is.EqualTo(400));
+            Assert.That(((ProblemDetails)obj!.Value!).Detail, Does.Contain("Withdrawal phase"));
+        }
+
+        [Test]
+        [Category("FR-37.1b")]
+        public async Task Nominate_SetsTheCallerAsProposer()
+        {
+            var request = new NominationDto(4, 11, 0, 12, "Statement", null);
+            var view = new NominationViewDto(9, 4, 11, NominationStatus.Submitted, "Statement");
+            var expected = request with { ProposerMemberId = 10 };
+            _electionServiceMock.Setup(x => x.SubmitNominationAsync(3, expected, It.IsAny<CancellationToken>()))
+                                .ReturnsAsync(view);
+
+            var ok = await _controller.Nominate(3, request, CancellationToken.None) as OkObjectResult;
+
+            Assert.That(ok?.Value, Is.EqualTo(view));
         }
 
         [Test]

@@ -7,7 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { ElectionsService } from '../../core/services/elections.service';
 import {
     AdminElectionDto, AdminElectionStepResult, CreateElectionRequest, ELECTION_APPROVAL_ACTION_LABELS, ELECTION_PHASE_ORDER,
-    ELECTION_READINESS_LABELS, ElectionApprovalDto, ElectionPermissionName, ElectionReadinessDto, ElectionReadinessItemDto,
+    ELECTION_TOO_FEW_APPROVERS_WARNING, electionReadinessLabel, ElectionApprovalDto, ElectionPermissionName, ElectionPhase, ElectionReadinessDto, ElectionReadinessItemDto,
     ElectionTieRule, NominationViewDto
 } from '../../core/models/election.models';
 import { ExportUtil } from '../../core/utils/export.util';
@@ -63,6 +63,7 @@ export class AdminElections {
 
     publishingId = signal<number | null>(null);
     closingId = signal<number | null>(null);
+    advancingId = signal<number | null>(null);
     addingCandidateId = signal<number | null>(null);
     removingCandidateId = signal<number | null>(null);
     keyingId = signal<number | null>(null);
@@ -98,6 +99,7 @@ export class AdminElections {
     nominations = signal<NominationViewDto[]>([]);
     nominationsLoading = signal(false);
     scrutinisingId = signal<number | null>(null);
+    scrutinyReasons = signal<Partial<Record<number, string>>>({});
 
     constructor() {
         this.load();
@@ -214,6 +216,42 @@ export class AdminElections {
         });
     }
 
+    // FR-37.1a. Publish and close have their own buttons, and counting ends with declare.
+    nextPhase(election: AdminElectionDto): ElectionPhase | null {
+        if (election.phase === 'Announced' || election.phase === 'Polling' || election.phase === 'Counting') return null;
+        const index = ELECTION_PHASE_ORDER.indexOf(election.phase);
+        return index >= 0 && index < ELECTION_PHASE_ORDER.length - 1 ? ELECTION_PHASE_ORDER[index + 1] : null;
+    }
+
+    async advance(election: AdminElectionDto): Promise<void> {
+        const next = this.nextPhase(election);
+        if (next === null || this.advancingId() !== null) return;
+        const warning = next === 'Polling' && election.tooFewApprovers ? ELECTION_TOO_FEW_APPROVERS_WARNING : '';
+        const confirmed = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Advance phase',
+            message: `Move "${election.title}" from ${getElectionPhaseLabel(election.phase)} to ${getElectionPhaseLabel(next)}? ${warning}`.trim(),
+            confirmLabel: 'Advance',
+            danger: warning !== ''
+        }));
+        if (!confirmed) return;
+
+        this.advancingId.set(election.id);
+        this.electionsService.setPhase(election.id, next).subscribe({
+            next: pending => {
+                this.advancingId.set(null);
+                if (pending) {
+                    this.addApproval(pending);
+                    this.notify.info('Saved. A second person must approve this before it happens.');
+                    return;
+                }
+                this.replace({ ...election, phase: next });
+                this.notify.success(`Moved to ${getElectionPhaseLabel(next)}.`);
+            },
+            // The HTTP interceptor already shows the server's reason.
+            error: () => this.advancingId.set(null)
+        });
+    }
+
     canEditRoll(election: AdminElectionDto): boolean {
         return (election.phase === 'Announced' || election.phase === 'Nomination') && this.can(election, 'ManageVoterRoll');
     }
@@ -306,7 +344,7 @@ export class AdminElections {
     }
 
     readinessLabel(item: ElectionReadinessItemDto): string {
-        return ELECTION_READINESS_LABELS[item.key] ?? item.key;
+        return electionReadinessLabel(item);
     }
 
     async createBallotKey(election: AdminElectionDto): Promise<void> {
@@ -465,10 +503,26 @@ export class AdminElections {
         });
     }
 
+    // The server only takes a decision while the election is in Scrutiny.
+    canDecide(nomination: NominationViewDto): boolean {
+        return (nomination.status === 'Submitted' || nomination.status === 'UnderScrutiny')
+            && this.selectedElection()?.phase === 'Scrutiny' && this.canOnSelected('DecideNominations');
+    }
+
+    setScrutinyReason(nominationId: number, reason: string): void {
+        this.scrutinyReasons.set({ ...this.scrutinyReasons(), [nominationId]: reason });
+    }
+
+    reasonFor(nomination: NominationViewDto): string {
+        return (this.scrutinyReasons()[nomination.id] ?? '').trim();
+    }
+
+    // A rejection must say why, so Reject waits for a reason. Accept sends one only if given.
     scrutinise(nomination: NominationViewDto, accepted: boolean): void {
-        if (this.scrutinisingId() !== null) return;
+        const reason = this.reasonFor(nomination);
+        if (this.scrutinisingId() !== null || (!accepted && !reason)) return;
         this.scrutinisingId.set(nomination.id);
-        this.electionsService.scrutinise(nomination.id, { accepted }).subscribe({
+        this.electionsService.scrutinise(nomination.id, reason ? { accepted, reason } : { accepted }).subscribe({
             next: () => { this.scrutinisingId.set(null); this.loadNominations(); },
             error: () => { this.scrutinisingId.set(null); this.notify.error('Failed to record the scrutiny decision.'); }
         });

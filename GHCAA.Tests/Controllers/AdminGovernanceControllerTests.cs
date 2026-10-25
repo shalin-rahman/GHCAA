@@ -80,5 +80,40 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(await _controller.SetHandoverCheck(7, _tick, CancellationToken.None), Is.InstanceOf<UnauthorizedResult>());
         }
+
+        // 84.50. An overlapping or wrongly dated period used to come back as a 500.
+        [Test]
+        public async Task CreatePeriod_DatesOverlap_Returns409()
+        {
+            _governance.Setup(s => s.CreatePeriodAsync("EC", It.IsAny<DateTime>(), null, It.IsAny<CancellationToken>()))
+                       .ThrowsAsync(new InvalidOperationException("The specified dates overlap with an existing EC Period."));
+
+            var obj = await _controller.CreatePeriod(new CreatePeriodRequest { Title = "EC", StartDate = DateTime.UtcNow }, CancellationToken.None) as ObjectResult;
+
+            Assert.That(obj!.StatusCode, Is.EqualTo(409));
+        }
+
+        [Test]
+        public async Task UpdatePeriod_DatesOverlap_Returns409()
+        {
+            _governance.Setup(s => s.UpdatePeriodAsync(7, "EC", It.IsAny<DateTime>(), null, true, It.IsAny<CancellationToken>()))
+                       .ThrowsAsync(new InvalidOperationException("The specified dates overlap with an existing EC Period."));
+
+            var request = new UpdatePeriodRequest { Title = "EC", StartDate = DateTime.UtcNow, IsActive = true };
+            var obj = await _controller.UpdatePeriod(7, request, CancellationToken.None) as ObjectResult;
+
+            Assert.That(obj!.StatusCode, Is.EqualTo(409));
+        }
+
+        [Test]
+        public async Task ActivatePeriod_NotCoveringToday_Returns409()
+        {
+            _governance.Setup(s => s.ActivatePeriodAsync(7, It.IsAny<CancellationToken>()))
+                       .ThrowsAsync(new InvalidOperationException("Only a period covering the current date can be activated."));
+
+            var obj = await _controller.ActivatePeriod(7, CancellationToken.None) as ObjectResult;
+
+            Assert.That(obj!.StatusCode, Is.EqualTo(409));
+        }
     }
 }

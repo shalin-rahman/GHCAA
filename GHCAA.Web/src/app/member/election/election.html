@@ -9,6 +9,8 @@
         <div class="empty-state"><h2>Election unavailable</h2><p>Try again later.</p></div>
     } @else if (!election() || !ballot()) {
         <div class="empty-state"><h2>No election is open</h2><p>The election commission has not opened voting.</p></div>
+    } @else if (ballot()!.phase === 'Nomination' || ballot()!.phase === 'Withdrawal') {
+        <app-election-nomination [electionId]="election()!.id" [phase]="ballot()!.phase"></app-election-nomination>
     } @else if (seats().length === 0) {
         <div class="empty-state"><h2>No accepted candidates yet</h2><p>Candidates appear here once scrutiny is complete.</p></div>
     } @else {

@@ -87,11 +87,14 @@ const electionReadinessLabels = <String, String>{
   'technical-audit': 'The technical audit is done',
   'appeals-decided': 'Every nomination appeal is decided',
   'paper-stock': 'Paper stock is ready',
-  'approvers': electionTooFewApproversWarning,
+  'approvers': 'At least two officials can approve on this election',
 };
 
-String electionReadinessLabel(String key) =>
-    electionReadinessLabels[key] ?? key;
+// The approvers item is advisory, so when it is not met the label is the warning itself.
+String electionReadinessLabel(String key, {bool met = true}) =>
+    key == 'approvers' && !met
+        ? electionTooFewApproversWarning
+        : electionReadinessLabels[key] ?? key;
 
 String electionPhaseLabel(String phase) => electionPhaseLabels[phase] ?? phase;
 String electionApprovalActionLabel(String action) =>
@@ -211,6 +214,9 @@ class Nomination {
   final String? photoPath;
   // 37.14m. When the candidate signed the consent form, in local time.
   final DateTime? consentAt;
+  // Sent on the admin list only. The public list leaves them null.
+  final String? candidateName;
+  final String? positionTitle;
 
   const Nomination({
     required this.id,
@@ -220,6 +226,8 @@ class Nomination {
     required this.statement,
     this.photoPath,
     this.consentAt,
+    this.candidateName,
+    this.positionTitle,
   });
 
   factory Nomination.fromJson(Map<String, dynamic> json) => Nomination(
@@ -230,6 +238,8 @@ class Nomination {
         statement: json['statement'] as String? ?? '',
         photoPath: json['photoPath'] as String?,
         consentAt: AppUtils.parseUtc(json['consentAt'] as String?),
+        candidateName: json['candidateName'] as String?,
+        positionTitle: json['positionTitle'] as String?,
       );
 }
 
@@ -634,6 +644,21 @@ class BallotCandidate {
         name: json['name'] as String? ?? '',
         photoUrl: json['photoUrl'] as String?,
         statement: json['statement'] as String? ?? '',
+      );
+}
+
+// FR-37.1b. A seat a member can be nominated for. The ballot has no seats until CandidateList.
+class ElectionSeatView {
+  final int seatId;
+  final String positionTitle;
+  final int places;
+
+  const ElectionSeatView({required this.seatId, required this.positionTitle, required this.places});
+
+  factory ElectionSeatView.fromJson(Map<String, dynamic> json) => ElectionSeatView(
+        seatId: json['seatId'] as int,
+        positionTitle: json['positionTitle'] as String? ?? '',
+        places: json['places'] as int? ?? 1,
       );
 }
 
@@ -1116,6 +1141,13 @@ class ElectionService {
     }
   }
 
+  Future<List<ElectionSeatView>> getSeats(int id) async {
+    final response = await _dio.get('/elections/$id/seats');
+    return (response.data as List)
+        .map((item) => ElectionSeatView.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<Ballot> getBallot(int id) async {
     final response = await _dio.get('/elections/$id/ballot');
     return Ballot.fromJson(response.data as Map<String, dynamic>);
@@ -1188,8 +1220,10 @@ class ElectionService {
 
   // Spec 023 (37.12f). True when the server stored the step for a second
   // person (202) instead of running it. Approvals live on the officials screen.
+  // Dio sends a String body as it is, and the API wants a quoted JSON string.
   Future<bool> setPhase(int id, String phase) async =>
-      (await _dio.post('/elections/$id/phase', data: phase)).statusCode ==
+      (await _dio.post('/elections/$id/phase', data: jsonEncode(phase)))
+          .statusCode ==
       202;
   Future<int> freezeVoterRoll(int id) async =>
       (await _dio.post('/elections/$id/voter-roll/freeze')).data['count']

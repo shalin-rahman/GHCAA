@@ -7,8 +7,11 @@ import '../theme/app_theme.dart';
 /// web admin's reject-with-reason modal.
 ///
 /// Returns the trimmed reason string, or `null` if the admin cancelled.
-Future<String?> showRejectReasonDialog(BuildContext context, {String title = 'REJECT SUBMISSION'}) async {
-  final result = await showRejectReasonWithNotifyDialog(context, title: title, showNotifyToggle: false);
+/// With [requireReason], REJECT stays disabled until a reason is typed.
+Future<String?> showRejectReasonDialog(BuildContext context,
+    {String title = 'REJECT SUBMISSION', bool requireReason = false}) async {
+  final result = await showRejectReasonWithNotifyDialog(context,
+      title: title, showNotifyToggle: false, requireReason: requireReason);
   return result?.reason;
 }
 
@@ -20,6 +23,7 @@ Future<({String reason, bool notify})?> showRejectReasonWithNotifyDialog(
   BuildContext context, {
   String title = 'REJECT SUBMISSION',
   bool showNotifyToggle = true,
+  bool requireReason = false,
 }) async {
   final reasonCtrl = TextEditingController();
   bool notify = true;
@@ -41,6 +45,7 @@ Future<({String reason, bool notify})?> showRejectReasonWithNotifyDialog(
               controller: reasonCtrl,
               autofocus: true,
               maxLines: 3,
+              onChanged: (_) => setState(() {}),
               decoration: const InputDecoration(labelText: 'Reason', prefixIcon: Icon(Icons.report_gmailerrorred_rounded)),
             ),
             if (showNotifyToggle)
@@ -57,7 +62,7 @@ Future<({String reason, bool notify})?> showRejectReasonWithNotifyDialog(
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('CANCEL')),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: requireReason && reasonCtrl.text.trim().isEmpty ? null : () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             child: const Text('REJECT'),
           ),

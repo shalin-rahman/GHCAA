@@ -25,18 +25,22 @@ describe('ElectionsService', () => {
     afterEach(() => http.verify());
 
     it('gets the current election from the public route', () => {
-        service.getCurrent().subscribe(value => expect(value).toEqual(ELECTION));
+        let value: any;
+        service.getCurrent().subscribe(v => value = v);
         const request = http.expectOne(API_ENDPOINTS.ELECTIONS.CURRENT);
         expect(request.request.method).toBe('GET');
         request.flush(ELECTION);
+        expect(value).toEqual(ELECTION);
     });
 
     it('gets the latest declared election and skips the error toast', () => {
-        service.getLatestDeclared().subscribe(value => expect(value).toEqual(ELECTION));
+        let value: any;
+        service.getLatestDeclared().subscribe(v => value = v);
         const request = http.expectOne(API_ENDPOINTS.ELECTIONS.LATEST_DECLARED);
         expect(request.request.method).toBe('GET');
         expect(request.request.headers.get('X-Skip-Error-Notify')).toBe('true');
         request.flush(ELECTION);
+        expect(value).toEqual(ELECTION);
     });
 
     it('casts the whole ballot in one request and returns the tracking code', () => {
@@ -52,18 +56,40 @@ describe('ElectionsService', () => {
 
     it('runs the official count through the admin-only count route', () => {
         const results: ElectionResultDto[] = [{ electionSeatId: 1, nominationId: 5, voteCount: 10, isElected: true, isTie: false }];
-        service.count(ELECTION.id).subscribe(value => expect(value).toEqual(results));
+        let value: any;
+        service.count(ELECTION.id).subscribe(v => value = v);
         const request = http.expectOne(API_ENDPOINTS.ELECTIONS.COUNT(ELECTION.id));
         expect(request.request.method).toBe('POST');
         request.flush(results);
+        expect(value).toEqual(results);
+    });
+
+    // FR-37.1a. The API reads a JSON string, so a text/plain body would get a 415.
+    it('sends the phase as a JSON string and reads a 202 as a stored request', () => {
+        let pending: unknown;
+        service.setPhase(ELECTION.id, 'Scrutiny').subscribe(value => pending = value);
+        const request = http.expectOne(API_ENDPOINTS.ELECTIONS.PHASE(ELECTION.id));
+        expect(request.request.body).toBe('"Scrutiny"');
+        expect(request.request.headers.get('Content-Type')).toBe('application/json');
+        request.flush({ id: 30 }, { status: 202, statusText: 'Accepted' });
+        expect(pending).toEqual({ id: 30 });
+    });
+
+    it('reads a 200 phase change as done at once', () => {
+        let pending: unknown = 'unset';
+        service.setPhase(ELECTION.id, 'Scrutiny').subscribe(value => pending = value);
+        http.expectOne(API_ENDPOINTS.ELECTIONS.PHASE(ELECTION.id)).flush(null);
+        expect(pending).toBeNull();
     });
 
     it('sends the reason when the voter roll is unfrozen', () => {
-        service.unfreezeVoterRoll(ELECTION.id, 'Wrong roll').subscribe(value => expect(value.removed).toBe(3));
+        let value: any;
+        service.unfreezeVoterRoll(ELECTION.id, 'Wrong roll').subscribe(v => value = v);
         const request = http.expectOne(API_ENDPOINTS.ELECTIONS.UNFREEZE_VOTER_ROLL(ELECTION.id));
         expect(request.request.method).toBe('POST');
         expect(request.request.body).toEqual({ reason: 'Wrong roll' });
         request.flush({ removed: 3 });
+        expect(value.removed).toBe(3);
     });
 
     it('sends the returning officer key with the first count', () => {
@@ -85,11 +111,13 @@ describe('ElectionsService', () => {
     });
 
     it('stores only the public key for an election', () => {
-        service.setBallotKey(ADMIN_ELECTION.id, 'SPKI').subscribe(value => expect(value).toEqual({ election: ADMIN_ELECTION, pending: null }));
+        let value: any;
+        service.setBallotKey(ADMIN_ELECTION.id, 'SPKI').subscribe(v => value = v);
         const request = http.expectOne(API_ENDPOINTS.ADMIN_ELECTIONS.BALLOT_KEY(ADMIN_ELECTION.id));
         expect(request.request.method).toBe('POST');
         expect(request.request.body).toEqual({ publicKey: 'SPKI' });
         request.flush(ADMIN_ELECTION);
+        expect(value).toEqual({ election: ADMIN_ELECTION, pending: null });
     });
 
     // FR-39 (spec 023, 37.12f): 202 means the step waits for a second person.
@@ -113,10 +141,12 @@ describe('ElectionsService', () => {
     });
 
     it('loads the admin election list', () => {
-        service.getAdminElections().subscribe(value => expect(value).toEqual([ADMIN_ELECTION]));
+        let value: any;
+        service.getAdminElections().subscribe(v => value = v);
         const request = http.expectOne(API_ENDPOINTS.ADMIN_ELECTIONS.BASE);
         expect(request.request.method).toBe('GET');
         request.flush([ADMIN_ELECTION]);
+        expect(value).toEqual([ADMIN_ELECTION]);
     });
 
     it('reads the ballot, the declared results and the tracking codes', () => {
@@ -150,6 +180,17 @@ describe('ElectionsService', () => {
         codes.flush([]);
     });
 
+    // FR-37.1b. The ballot has no seats before the candidate list, so nominations read this route.
+    it('reads the seats a member can be nominated for', () => {
+        const seats = [{ seatId: 10, positionTitle: 'President', places: 1 }];
+        let value: any;
+        service.getSeats(12).subscribe(v => value = v);
+        const request = http.expectOne(API_ENDPOINTS.ELECTIONS.SEATS(12));
+        expect(request.request.method).toBe('GET');
+        request.flush(seats);
+        expect(value).toEqual(seats);
+    });
+
     it('FR-25: verifies a printed form on the anonymous route and skips the error toast', () => {
         service.verifyDocument(12, 'ER-27C').subscribe();
         const req = http.expectOne('/api/elections/12/documents/ER-27C/verification');
@@ -159,13 +200,15 @@ describe('ElectionsService', () => {
     });
 
     it('creates an election through the admin route', () => {
+        let value: any;
         service.create({
             title: ADMIN_ELECTION.title, ecPeriodId: 1, nominationOpensOn: '', nominationClosesOn: '',
             pollingOpensOn: '', pollingClosesOn: '', description: '', positions: [{ title: 'President', seats: 1 }]
-        }).subscribe(value => expect(value).toEqual(ADMIN_ELECTION));
+        }).subscribe(v => value = v);
         const request = http.expectOne(API_ENDPOINTS.ADMIN_ELECTIONS.BASE);
         expect(request.request.method).toBe('POST');
         request.flush(ADMIN_ELECTION);
+        expect(value).toEqual(ADMIN_ELECTION);
     });
 
     // FR-25

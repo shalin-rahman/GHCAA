@@ -186,7 +186,8 @@ void main() {
       'POST /elections/12/key-destroyed',
       'POST /elections/12/phase',
     ]);
-    expect(adapter.bodies[9], ElectionPhases.polling);
-    expect(adapter.bodies.last, ElectionPhases.archived);
+    // FR-37.1a. The phase goes as a quoted JSON string. A bare one fails to parse on the API.
+    expect(adapter.bodies[9], jsonEncode(ElectionPhases.polling));
+    expect(adapter.bodies.last, jsonEncode(ElectionPhases.archived));
   });
 }

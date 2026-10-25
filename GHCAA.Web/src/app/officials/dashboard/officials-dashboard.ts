@@ -7,7 +7,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { confirmRejectApproval } from '../../core/utils/election-approval.util';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import {
-    AdminElectionDto, ELECTION_APPROVAL_ACTION_LABELS, ELECTION_PHASE_ORDER, ELECTION_READINESS_LABELS, ElectionApprovalDto,
+    AdminElectionDto, ELECTION_APPROVAL_ACTION_LABELS, ELECTION_PHASE_ORDER, ElectionApprovalDto, electionReadinessLabel,
     ElectionAppointmentDto, ElectionAuditEntryDto, ElectionBoardDto, ElectionPermissionName, ElectionPersonaDto,
     ElectionReadinessDto, ElectionReadinessItemDto, NominationViewDto
 } from '../../core/models/election.models';
@@ -135,7 +135,7 @@ export class OfficialsDashboard {
     }
 
     readinessLabel(item: ElectionReadinessItemDto): string {
-        return ELECTION_READINESS_LABELS[item.key] ?? item.key;
+        return electionReadinessLabel(item);
     }
 
     canAttest(item: ElectionReadinessItemDto): boolean {

@@ -1,10 +1,10 @@
 <div class="stack gap-2">
-    <p class="text-muted">
+    <p class="text-muted" *ngIf="!canEditConsent()">
         {{ text.CONSENT_LABEL }}:
         <ng-container *ngIf="consentShown() as shown; else noConsent">{{ shown | date:'medium' }}</ng-container>
         <ng-template #noConsent>{{ text.CONSENT_MISSING }}</ng-template>
     </p>
-    <div class="flex gap-2 items-center" *ngIf="can('ManageSetup')">
+    <div class="flex gap-2 items-center" *ngIf="canEditConsent()">
         <div class="form-group">
             <label [for]="'consent-at-' + nomination.id">{{ text.CONSENT_LABEL }}</label>
             <input [id]="'consent-at-' + nomination.id" type="datetime-local" [attr.aria-describedby]="'consent-hint-' + nomination.id" [(ngModel)]="consentInput" />

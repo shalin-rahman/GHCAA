@@ -8,6 +8,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/utils/app_utils.dart';
+import '../../features/auth/auth_service.dart';
 import '../../features/elections/election_service.dart';
 
 final myAppointmentsProvider =
@@ -60,10 +61,11 @@ class _MyAppointmentsScreenState extends ConsumerState<MyAppointmentsScreen> {
     }
   }
 
-  void _accept(ElectionAppointment a) => _run(
-      a.id,
-      () => ref.read(electionServiceProvider).acceptAppointment(a.id),
-      'You are now ${a.personaName} for ${a.electionTitle}.');
+  void _accept(ElectionAppointment a) => _run(a.id, () async {
+        await ref.read(electionServiceProvider).acceptAppointment(a.id);
+        // Without this the officials screens stay closed until the next login.
+        await ref.read(authServiceProvider).reloadSession();
+      }, 'You are now ${a.personaName} for ${a.electionTitle}.');
 
   void _decline(ElectionAppointment a) {
     final reason = _reasonFor(a.id).text.trim();

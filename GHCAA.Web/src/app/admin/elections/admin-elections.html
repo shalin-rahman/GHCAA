@@ -49,7 +49,7 @@
         <app-loading-panel *ngIf="loading()" label="Loading elections..." />
         <div *ngIf="!loading() && filtered().length === 0" class="empty-state"><h2>No elections found</h2><p>Create an election to begin.</p></div>
         <div class="glass-card" *ngFor="let election of filtered()">
-            <div class="flex justify-between items-center">
+            <div class="stack gap-3">
                 <div>
                     <h2>{{ election.title }}</h2>
                     <p class="text-muted"><span class="status-badge" [class]="getElectionPhaseClass(election.phase)">{{ getElectionPhaseLabel(election.phase) }}</span> <span class="status-badge pending" *ngIf="election.isTest">Test</span> · {{ election.positions.length }} positions</p>
@@ -63,8 +63,9 @@
                         </p>
                     </div>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2">
                     <button class="btn btn-primary btn-sm" *ngIf="election.phase === 'Announced' && can(election, 'ChangePhase')" [disabled]="publishingId() === election.id" (click)="publish(election)">{{ publishingId() === election.id ? 'Publishing...' : 'Publish' }}</button>
+                    <button class="btn btn-primary btn-sm" *ngIf="nextPhase(election) && can(election, 'ChangePhase')" data-action="advance-phase" [disabled]="advancingId() === election.id" (click)="advance(election)">{{ advancingId() === election.id ? 'Moving...' : 'Advance to ' + getElectionPhaseLabel(nextPhase(election)) }}</button>
                     <button class="btn btn-secondary btn-sm" *ngIf="canEditRoll(election)" [disabled]="freezingId() === election.id" (click)="freezeRoll(election)">{{ freezingId() === election.id ? 'Working...' : 'Freeze voter roll' }}</button>
                     <button class="btn btn-secondary btn-sm" *ngIf="canEditRoll(election) && election.eligibleVoterCount" [disabled]="freezingId() === election.id" (click)="openUnfreeze(election)">Unfreeze voter roll</button>
                     <button class="btn btn-secondary btn-sm" *ngIf="election.phase === 'Polling' && can(election, 'ChangePhase')" [disabled]="closingId() === election.id" (click)="close(election)">{{ closingId() === election.id ? 'Closing...' : 'Close' }}</button>
@@ -92,7 +93,7 @@
                 <small [id]="'key-destroyed-hint-' + election.id" class="text-muted text-xs">{{ text.KEY_DESTROYED_HINT }}</small>
             </div>
             <div class="stack gap-2" *ngIf="(approvals()[election.id] ?? []).length > 0">
-                <div class="flex justify-between items-center" *ngFor="let approval of approvals()[election.id]">
+                <div class="flex flex-wrap justify-between items-center gap-2" *ngFor="let approval of approvals()[election.id]">
                     <span>
                         {{ approvalLabels[approval.action] }}, asked for by {{ approval.requestedBy }}. Expires {{ approval.expiresAt | date:'medium' }}.
                         <ng-container *ngIf="approval.keyFingerprint"> New key fingerprint: <code>{{ approval.keyFingerprint }}</code></ng-container>
@@ -107,7 +108,7 @@
             <app-election-officials *ngIf="officialsOpenId() === election.id" [election]="election" (pending)="onOfficialPending($event)"></app-election-officials>
             <app-election-form-records *ngIf="formRecordsOpenId() === election.id" [election]="election" (changed)="onFormRecordsChanged($event)"></app-election-form-records>
             <div class="stack gap-2" *ngIf="election.candidates.length > 0">
-                <div class="flex justify-between items-center" *ngFor="let candidate of election.candidates">
+                <div class="flex flex-wrap justify-between items-center gap-2" *ngFor="let candidate of election.candidates">
                     <span>{{ candidate.name }} — {{ candidate.positionTitle }}</span>
                     <button class="btn btn-secondary btn-sm" *ngIf="can(election, 'ManageSetup')" [disabled]="removingCandidateId() === candidate.id" (click)="removeCandidate(election, candidate.id)">{{ removingCandidateId() === candidate.id ? 'Removing...' : 'Remove' }}</button>
                 </div>
@@ -124,16 +125,21 @@
         </div>
         <app-loading-panel *ngIf="nominationsLoading()" label="Loading nominations..." />
         <div *ngIf="!nominationsLoading() && nominations().length === 0" class="empty-state"><h2>No nominations</h2><p>Nominations will appear here once submitted.</p></div>
-        <div class="glass-card" *ngFor="let nomination of nominations()">
+        <div class="glass-card" *ngFor="let nomination of nominations()" [attr.data-nomination]="nomination.id">
             <div class="flex justify-between items-center">
                 <div>
-                    <p>Seat {{ nomination.electionSeatId }} — candidate member {{ nomination.candidateMemberId }}</p>
+                    <p>{{ nomination.positionTitle ?? 'Seat ' + nomination.electionSeatId }} · {{ nomination.candidateName ?? 'Member ' + nomination.candidateMemberId }}</p>
                     <p class="text-muted">{{ nomination.statement }}</p>
                     <span class="status-badge" [class]="getNominationStatusClass(nomination.status)">{{ getNominationStatusLabel(nomination.status) }}</span>
                 </div>
-                <div class="flex gap-2" *ngIf="(nomination.status === 'Submitted' || nomination.status === 'UnderScrutiny') && canOnSelected('DecideNominations')">
+                <div class="flex gap-2 items-center" *ngIf="canDecide(nomination)">
+                    <div class="form-group">
+                        <label [for]="'scrutiny-reason-' + nomination.id">Reason</label>
+                        <input [id]="'scrutiny-reason-' + nomination.id" type="text" maxlength="500" placeholder="Needed to reject"
+                               [ngModel]="scrutinyReasons()[nomination.id] ?? ''" (ngModelChange)="setScrutinyReason(nomination.id, $event)">
+                    </div>
                     <button class="btn btn-primary btn-sm" [disabled]="scrutinisingId() === nomination.id" (click)="scrutinise(nomination, true)">Accept</button>
-                    <button class="btn btn-secondary btn-sm" [disabled]="scrutinisingId() === nomination.id" (click)="scrutinise(nomination, false)">Reject</button>
+                    <button class="btn btn-secondary btn-sm" [disabled]="scrutinisingId() === nomination.id || !reasonFor(nomination)" (click)="scrutinise(nomination, false)">Reject</button>
                 </div>
             </div>
             <app-nomination-records *ngIf="selectedElection() as election" [election]="election" [nomination]="nomination"></app-nomination-records>

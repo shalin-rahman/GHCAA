@@ -1,0 +1,62 @@
+@if (phase === 'Nomination') {
+    <form class="glass-card stack gap-2" data-section="nominate" (ngSubmit)="submit()">
+        <h2>Nominate a candidate</h2>
+        <p class="text-muted">You file the nomination as its proposer. The candidate and the seconder must both be on the voter roll, and the candidate cannot be you.</p>
+
+        <div class="form-group">
+            <label for="nomination-seat">Seat</label>
+            <select id="nomination-seat" name="seat" class="form-control" [ngModel]="seatId()" (ngModelChange)="seatId.set($event)">
+                <option [ngValue]="null" disabled>Choose a seat</option>
+                @for (seat of seats(); track seat.seatId) {
+                    <option [ngValue]="seat.seatId">{{ seat.positionTitle }}{{ seat.places > 1 ? ' (' + seat.places + ' places)' : '' }}</option>
+                }
+            </select>
+        </div>
+
+        @for (role of roles; track role) {
+            <div class="form-group">
+                <label [for]="'nomination-' + role">{{ role === 'candidate' ? 'Candidate' : 'Seconder' }}</label>
+                <input [id]="'nomination-' + role" [name]="role" class="form-control" autocomplete="off" placeholder="Search by name or member ID"
+                       [ngModel]="queries()[role]" (ngModelChange)="search(role, $event)">
+                @if (hits()[role].length > 0) {
+                    <div class="flex gap-2" [attr.data-hits]="role">
+                        @for (member of hits()[role]; track member.id) {
+                            <button type="button" class="btn btn-secondary btn-sm" (click)="pick(role, member)">{{ member.fullName }} ({{ member.membershipNumber || 'No ID' }})</button>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="form-group">
+            <label for="nomination-statement">Candidate statement</label>
+            <textarea id="nomination-statement" name="statement" class="form-control" rows="5" [maxlength]="statementMax"
+                      [ngModel]="statement()" (ngModelChange)="statement.set($event)"></textarea>
+            <small class="text-muted">{{ statement().length }} / {{ statementMax }}</small>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="!canSubmit()">{{ submitting() ? 'Filing...' : 'File nomination' }}</button>
+        </div>
+    </form>
+}
+
+<div class="glass-card stack gap-2" data-section="my-nominations">
+    <h2>Your nominations as a candidate</h2>
+    @if (mine().length === 0) {
+        <p class="text-muted">Nobody has nominated you in this election.</p>
+    } @else {
+        @for (n of mine(); track n.id) {
+            <div class="flex gap-2" [attr.data-nomination]="n.id">
+                <span>{{ seatTitle(n.electionSeatId) }}</span>
+                <span class="status-badge">{{ statusLabels[n.status] }}</span>
+                @if (phase === 'Withdrawal' && n.status === 'Accepted') {
+                    <button type="button" class="btn btn-danger btn-sm" [disabled]="withdrawingId() !== null" (click)="withdraw(n)">Withdraw</button>
+                }
+            </div>
+        }
+        @if (phase === 'Withdrawal') {
+            <p class="text-muted">Withdrawing takes your name off the ballot for that seat. It cannot be undone.</p>
+        }
+    }
+</div>

@@ -76,7 +76,9 @@ public record AdminElectionPositionDto(int Id, string Title, string? Description
 public record AdminElectionCandidateDto(int Id, int MemberId, string Name, string? PhotoUrl, string? Statement, int PositionId, string PositionTitle);
 public record AdminElectionDto(int Id, string Title, string? Description, ElectionPhase Phase, DateTime? AnnouncedOn, DateTime? NominationOpensOn, DateTime? NominationClosesOn, DateTime? ScrutinyOn, DateTime? WithdrawalClosesOn, DateTime? PollingOpensOn, DateTime? PollingClosesOn, DateTime? DeclaredOn, bool IsActive, IReadOnlyList<AdminElectionPositionDto> Positions, IReadOnlyList<AdminElectionCandidateDto> Candidates, int EligibleVoterCount, bool HasVoted, ElectionTieRule TieRule, string? BallotKeyFingerprint = null, IReadOnlyList<string>? MyPermissions = null, bool AdminHandedOver = false, bool TooFewApprovers = false, bool IsTest = false, ElectionFormDetailsDto? FormDetails = null);
 // ConsentAt is the ER-10 time the candidate signed consent. It is null until recorded, and always null on the public list.
-public record NominationViewDto(int Id, int ElectionSeatId, int CandidateMemberId, NominationStatus Status, string Statement, DateTime? ConsentAt = null);
+// CandidateName and PositionTitle also go out on the admin list only, so officials scrutinise by name, not by row ids.
+public record NominationViewDto(int Id, int ElectionSeatId, int CandidateMemberId, NominationStatus Status, string Statement, DateTime? ConsentAt = null,
+    string? CandidateName = null, string? PositionTitle = null);
 public record ElectionResultDto(int ElectionSeatId, int NominationId, int VoteCount, bool IsElected, bool IsTie);
 
 // Spec 023 FR-011 to FR-014: the member's ballot paper. HasVoted comes from SeatVote, so a
@@ -86,6 +88,8 @@ public record BallotViewDto(int ElectionId, string Title, ElectionPhase Phase, b
     bool? IsEligible, string? IneligibilityReason);
 public record BallotSeatViewDto(int SeatId, string PositionTitle, int Places, IReadOnlyList<BallotCandidateDto> Candidates);
 public record BallotCandidateDto(int NominationId, string Name, string? PhotoUrl, string Statement);
+// 84.52. The seats a member can be nominated for. The ballot has none until CandidateList.
+public record ElectionSeatViewDto(int SeatId, string PositionTitle, int Places);
 
 // Spec 023 FR-017: the declared result. Abstentions on a seat are valid ballots that named
 // nobody for it. Turnout is BallotsCast against EligibleVoters on the frozen roll.
@@ -220,7 +224,7 @@ public record RejectApprovalRequest(string? Reason);
 public record ElectionReadinessItemDto(string Key, bool Met, bool Attestation = false, bool Advisory = false);
 // Ready is true when every item that is not advisory is met.
 public record ElectionReadinessDto(bool Ready, IReadOnlyList<ElectionReadinessItemDto> Items);
-public record AttestReadinessRequest([property: System.ComponentModel.DataAnnotations.Required] string Condition);
+public record AttestReadinessRequest([System.ComponentModel.DataAnnotations.Required] string Condition);
 
 // 37.14m. Fields the printed forms need that the setup screen does not ask for (ER-01, ER-02).
 public record ElectionFormDetailsDto(DateTime? FinalListOn, DateTime? CampaignOpensOn, DateTime? CampaignClosesOn, DateTime? SilenceStartsAt, string? Venue, string? NoticeReference, DateTime? RecountWindowEndsOn);

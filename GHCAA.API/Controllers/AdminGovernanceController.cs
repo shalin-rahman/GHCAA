@@ -31,24 +31,45 @@ namespace GHCAA.API.Controllers
         [HttpPost("periods")]
         public async Task<IActionResult> CreatePeriod([FromBody] CreatePeriodRequest request, CancellationToken cancellationToken)
         {
-            var period = await _governanceService.CreatePeriodAsync(request.Title, request.StartDate, request.EndDate, cancellationToken);
-            return Ok(period);
+            try
+            {
+                var period = await _governanceService.CreatePeriodAsync(request.Title, request.StartDate, request.EndDate, cancellationToken);
+                return Ok(period);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
         }
 
         [HttpPut("periods/{id}")]
         public async Task<IActionResult> UpdatePeriod(int id, [FromBody] UpdatePeriodRequest request, CancellationToken cancellationToken)
         {
-            var success = await _governanceService.UpdatePeriodAsync(id, request.Title, request.StartDate, request.EndDate, request.IsActive, cancellationToken);
-            if (!success) return NotFound();
-            return Ok(new { Message = "Period updated successfully" });
+            try
+            {
+                var success = await _governanceService.UpdatePeriodAsync(id, request.Title, request.StartDate, request.EndDate, request.IsActive, cancellationToken);
+                if (!success) return NotFound();
+                return Ok(new { Message = "Period updated successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
         }
 
         [HttpPost("periods/{id}/activate")]
         public async Task<IActionResult> ActivatePeriod(int id, CancellationToken cancellationToken)
         {
-            var success = await _governanceService.ActivatePeriodAsync(id, cancellationToken);
-            if (!success) return NotFound();
-            return Ok(new { Message = "Period activated successfully" });
+            try
+            {
+                var success = await _governanceService.ActivatePeriodAsync(id, cancellationToken);
+                if (!success) return NotFound();
+                return Ok(new { Message = "Period activated successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
         }
 
         [HttpGet("periods/{id}/members")]

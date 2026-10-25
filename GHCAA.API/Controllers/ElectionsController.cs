@@ -223,10 +223,19 @@ public sealed class ElectionsController(
             : Problem(detail: error switch
             {
                 "reason-required" => "A reason is required.",
-                "phase-closed" => "The voter roll cannot be unfrozen after nominations open.",
+                "phase-closed" => "The voter roll cannot be unfrozen after the Nomination phase ends.",
                 "window-closed" => "The unfreeze window has closed.",
                 _ => "The voter roll cannot be unfrozen once a nomination has been filed."
             }, statusCode: StatusCodes.Status409Conflict);
+    }
+
+    /// <summary>84.52: the seats a member can be nominated for, which the ballot leaves out before CandidateList.</summary>
+    [HttpGet("{id:int}/seats")]
+    [ProducesResponseType<IReadOnlyList<ElectionSeatViewDto>>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> Seats(int id, CancellationToken ct)
+    {
+        if (await service.IsTestAsync(id, ct)) return NotFound();
+        return (await service.GetSeatsAsync(id, ct)) is { } result ? Ok(result) : NotFound();
     }
 
     /// <summary>FR-37.1b: returns nominations for an election.</summary>
@@ -241,7 +250,15 @@ public sealed class ElectionsController(
     {
         if (!int.TryParse(this.CurrentMemberIdRaw(), out var memberId))
             return Unauthorized();
-        return Ok(await service.SubmitNominationAsync(id, request with { ProposerMemberId = memberId }, ct));
+        try
+        {
+            return Ok(await service.SubmitNominationAsync(id, request with { ProposerMemberId = memberId }, ct));
+        }
+        catch (InvalidOperationException ex)
+        {
+            // The service names the broken nomination rule, so the member sees why.
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+        }
     }
 
     /// <summary>FR-37.1b: records the authorised scrutiny decision.</summary>
@@ -253,7 +270,14 @@ public sealed class ElectionsController(
     {
         if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
             return Unauthorized();
-        return await service.DecideNominationAsync(nominationId, userId, request, ct) ? Ok() : NotFound();
+        try
+        {
+            return await service.DecideNominationAsync(nominationId, userId, request, ct) ? Ok() : NotFound();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+        }
     }
 
     /// <summary>FR-37.1b: withdraws an accepted nomination.</summary>
@@ -262,7 +286,9 @@ public sealed class ElectionsController(
     {
         if (!int.TryParse(this.CurrentMemberIdRaw(), out var memberId))
             return Unauthorized();
-        return await service.WithdrawNominationAsync(nominationId, memberId, ct) ? Ok() : BadRequest();
+        return await service.WithdrawNominationAsync(nominationId, memberId, ct)
+            ? Ok()
+            : Problem(detail: "Only the candidate can withdraw, only an accepted nomination, and only in the Withdrawal phase.", statusCode: 400);
     }
 
     /// <summary>FR-37.1c, spec 023 FR-005: records the whole ballot in one request and returns its

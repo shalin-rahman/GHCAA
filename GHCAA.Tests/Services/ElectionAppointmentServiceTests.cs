@@ -165,7 +165,8 @@ public sealed class ElectionAppointmentServiceTests : TestBase
         row.SignedFromIp.Should().Be("10.0.0.1");
         var user = _context.Users.Include(u => u.Roles).Single(u => u.Id == appointment.UserId);
         user.Roles.Count(r => r.Name == Constants.Roles.ElectionOfficial).Should().Be(1);
-        user.SecurityStamp.Should().NotBe(stampBefore);
+        // The session must survive the accept so the refresh can add the role.
+        user.SecurityStamp.Should().Be(stampBefore);
         (await _service.ListLiveSummariesAsync(appointment.UserId, CancellationToken.None)).Should().ContainSingle();
         (await AcceptAsync(appointment)).Error.Should().Be("already-accepted");
     }

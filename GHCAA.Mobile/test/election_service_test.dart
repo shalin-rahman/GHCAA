@@ -98,6 +98,12 @@ class _ElectionAdapter implements HttpClientAdapter {
         }
       ]);
     }
+    if (options.path == '/elections/12/seats') {
+      return _json([
+        {'seatId': 3, 'positionTitle': 'President', 'places': 1},
+        {'seatId': 4, 'positionTitle': 'Members', 'places': 2},
+      ]);
+    }
     if (options.path == '/elections/12/ballot') {
       return _json({
         'electionId': 12,
@@ -353,6 +359,18 @@ void main() {
     expect(election.title, 'EC 2026');
     expect(nominations.single.candidateMemberId, 8);
     expect(adapter.path, '/elections/12/nominations');
+  });
+
+  // FR-37.1b. The nomination form needs the seats before the ballot has any.
+  test('reads the seats a member can be nominated for', () async {
+    final adapter = _ElectionAdapter();
+    final service = ElectionService(Dio()..httpClientAdapter = adapter);
+
+    final seats = await service.getSeats(12);
+
+    expect(adapter.path, '/elections/12/seats');
+    expect(seats.map((s) => s.positionTitle), ['President', 'Members']);
+    expect(seats.last.places, 2);
   });
 
   test('the officials nomination list reads the admin route and its consent time as UTC', () async {
@@ -746,6 +764,20 @@ void main() {
     expect(ballot.seats.single.candidates.last.photoUrl, isNull);
     expect(ballot.isEligible, isFalse);
     expect(ballot.ineligibilityReason, 'Membership dues are overdue.');
+  });
+
+  // FR-39 (37.13t). The admin list names the candidate and the seat; the public list does not.
+  test('a nomination reads the candidate name and seat title when sent', () {
+    final named = Nomination.fromJson({
+      'id': 4, 'electionSeatId': 3, 'candidateMemberId': 8, 'status': 'Submitted',
+      'candidateName': 'Rina Akter', 'positionTitle': 'President'
+    });
+    final bare = Nomination.fromJson({'id': 5, 'electionSeatId': 3, 'candidateMemberId': 9});
+
+    expect(named.candidateName, 'Rina Akter');
+    expect(named.positionTitle, 'President');
+    expect(bare.candidateName, isNull);
+    expect(bare.positionTitle, isNull);
   });
 
   test('eligibility is left open when the server does not send it', () {

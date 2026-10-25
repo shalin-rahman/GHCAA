@@ -7,6 +7,7 @@ import '../../core/utils/app_utils.dart';
 import '../../core/widgets/app_date_picker.dart';
 import '../../core/widgets/app_dropdown_field.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/widgets/reject_reason_dialog.dart';
 import '../../features/elections/election_service.dart';
 import 'election_management_screen.dart' show adminElectionsProvider;
 
@@ -306,12 +307,17 @@ class _ElectionFormRecordsSheetState
     }
   }
 
-  // 84.16. The route needs step-up, which the interceptor asks for.
+  // 84.16. The route needs step-up, which the interceptor asks for. A rejection must say why.
   Future<void> _scrutinise(Nomination n, bool accepted) async {
     if (_decideBusyId != null) return;
+    String? reason;
+    if (!accepted) {
+      reason = await showRejectReasonDialog(context, title: 'REJECT NOMINATION', requireReason: true);
+      if (reason == null || !mounted) return;
+    }
     setState(() => _decideBusyId = n.id);
     try {
-      await _service.scrutinise(n.id, accepted);
+      await _service.scrutinise(n.id, accepted, reason: reason);
       await _loadNominations();
     } catch (e) {
       _tell('Failed to record the scrutiny decision.');
@@ -665,8 +671,8 @@ class _ElectionFormRecordsSheetState
           _muted('No nominations yet.')
         else
           for (final n in list)
-            _nominationTile(
-                n, titles[n.electionSeatId] ?? 'Seat ${n.electionSeatId}'),
+            _nominationTile(n,
+                n.positionTitle ?? titles[n.electionSeatId] ?? 'Seat ${n.electionSeatId}'),
       ],
     );
   }
@@ -674,7 +680,10 @@ class _ElectionFormRecordsSheetState
   Widget _nominationTile(Nomination n, String positionTitle) {
     final consent = _consent[n.id] ?? n.consentAt;
     final undecided = n.status == 'Submitted' || n.status == 'UnderScrutiny';
-    final canDecide = _can('DecideNominations') && undecided;
+    // The server only takes a decision while the election is in scrutiny.
+    final canDecide = _can('DecideNominations') && undecided && _election.phase == ElectionPhases.scrutiny;
+    // A withdrawn or rejected candidate is off the ballot, so their consent time no longer matters.
+    final canEditConsent = _can('ManageSetup') && n.status != 'Withdrawn' && n.status != 'Rejected';
     return Card(
       key: Key('nomination-${n.id}'),
       color: Colors.white10,
@@ -684,7 +693,7 @@ class _ElectionFormRecordsSheetState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('$positionTitle · member ${n.candidateMemberId}',
+            Text('$positionTitle · ${n.candidateName ?? 'member ${n.candidateMemberId}'}',
                 style: const TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold)),
             _muted('Status: ${n.status}'),
@@ -692,7 +701,7 @@ class _ElectionFormRecordsSheetState
                 ? ElectionConstants.consentMissing
                 : '${ElectionConstants.consentLabel} ${_show(consent, includeTime: true)}'),
             Wrap(spacing: 8, children: [
-              if (_can('ManageSetup'))
+              if (canEditConsent)
                 TextButton(
                     key: Key('nomination-${n.id}-consent'),
                     onPressed:

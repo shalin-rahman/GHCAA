@@ -49,4 +49,25 @@ public sealed class DbErrorsTests
         DbErrors.IsUniqueViolation(new DbUpdateException("save failed")).Should().BeFalse();
         DbErrors.IsUniqueViolation(Wrap(new TimeoutException())).Should().BeFalse();
     }
+
+    // 84.53: a vote that lost a Serializable clash runs again. SaveChanges wraps the error and a
+    // failed commit throws it bare, so both shapes count.
+    [Test]
+    public void PostgresSerializationFailure_IsRetryable_WrappedOrBare()
+    {
+        var pg = new PostgresException("could not serialize access", "ERROR", "ERROR", PostgresErrorCodes.SerializationFailure);
+
+        DbErrors.IsSerializationFailure(Wrap(pg)).Should().BeTrue();
+        DbErrors.IsSerializationFailure(pg).Should().BeTrue();
+    }
+
+    [Test]
+    public void OtherErrors_AreNotRetryable()
+    {
+        var clash = new PostgresException("duplicate key", "ERROR", "ERROR", PostgresErrorCodes.UniqueViolation);
+
+        DbErrors.IsSerializationFailure(Wrap(clash)).Should().BeFalse();
+        DbErrors.IsSerializationFailure(Wrap(new SqliteException("database is locked", 5))).Should().BeFalse();
+        DbErrors.IsSerializationFailure(new DbUpdateException("save failed")).Should().BeFalse();
+    }
 }

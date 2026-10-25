@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
@@ -7,9 +6,9 @@ import '../../core/widgets/app_dropdown_field.dart';
 import '../../core/widgets/app_search_field.dart';
 import '../../core/widgets/confirm_dialog.dart';
 import '../../core/widgets/logo_spinner.dart';
-import '../../features/admin/admin_service.dart';
 import '../../features/auth/auth_service.dart';
 import '../../features/elections/election_service.dart';
+import '../../features/networking/networking_service.dart';
 
 Future<void> showElectionOfficialsSheet(
         BuildContext context, AdminElection election) =>
@@ -45,8 +44,6 @@ class _ElectionOfficialsSheetState
   int? _memberId;
   String? _memberLabel;
   bool _isReturningOfficer = false;
-  // Member search is admin only on the API, but election officials can open this sheet too.
-  bool _searchDenied = false;
   final _search = TextEditingController();
   final _name = TextEditingController();
   final _email = TextEditingController();
@@ -114,18 +111,13 @@ class _ElectionOfficialsSheetState
       setState(() => _memberResults = const []);
       return;
     }
-    try {
-      final items = await ref.read(adminServiceProvider).searchMembers(query.trim());
-      // A slower reply for an older query must not replace the newer list.
-      if (mounted && _search.text.trim() == query.trim()) {
-        setState(() => _memberResults = items);
-      }
-    } catch (e) {
-      if (e is DioException && e.response?.statusCode == 403) {
-        if (mounted) setState(() => _searchDenied = true);
-        return;
-      }
-      _service.logFailure('searchMembers', e);
+    // The member directory search, because the admin member list refuses a commissioner.
+    final page = await ref
+        .read(networkingServiceProvider)
+        .searchAlumni(query: query.trim(), pageSize: 10);
+    // A slower reply for an older query must not replace the newer list.
+    if (mounted && _search.text.trim() == query.trim()) {
+      setState(() => _memberResults = (page['items'] as List?) ?? const []);
     }
   }
 
@@ -318,16 +310,12 @@ class _ElectionOfficialsSheetState
             ),
           )
         else ...[
-          if (_searchDenied)
-            const Text('Only an admin can search members. Give a name and email below.',
-                style: TextStyle(color: AppTheme.textMuted, fontSize: 12))
-          else
-            AppSearchField(
-              controller: _search,
-              hintText: 'Search members',
-              onChanged: _searchMembers,
-              onClear: () => setState(() => _memberResults = const []),
-            ),
+          AppSearchField(
+            controller: _search,
+            hintText: 'Search members',
+            onChanged: _searchMembers,
+            onClear: () => setState(() => _memberResults = const []),
+          ),
           for (final m in _memberResults)
             ListTile(
               dense: true,

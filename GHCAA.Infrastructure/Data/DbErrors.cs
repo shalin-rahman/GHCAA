@@ -14,6 +14,13 @@ namespace GHCAA.Infrastructure.Data
             _ => false
         };
 
+        // PostgreSQL 40001: a Serializable transaction lost to another one running at the same
+        // time. Nothing was written, so the whole transaction can run again. The error arrives
+        // bare from a commit and wrapped in DbUpdateException from SaveChanges.
+        public static bool IsSerializationFailure(Exception ex) =>
+            (ex as Npgsql.PostgresException ?? ex.InnerException as Npgsql.PostgresException)?.SqlState
+                == Npgsql.PostgresErrorCodes.SerializationFailure;
+
         private const int SqliteUniqueConstraint = 2067;
     }
 }

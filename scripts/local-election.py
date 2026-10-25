@@ -19,6 +19,15 @@ Run from the repo root, with the API up on http://localhost:5087:
     python scripts/local-election.py status
     python scripts/local-election.py code 200           # newest emailed code for a user id
     python scripts/local-election.py restore            # put emails and passwords back
+    python scripts/local-election.py purge              # delete what the runs made (see purge below)
+
+The web walkthrough (GHCAA.Web/tests/e2e/election-walkthrough) drives this script too:
+    accounts 1,2,201    take over just these users
+    code 201 --since T  a code sent after T (ISO, UTC)
+    record period 9     note an id so purge removes it even if the run dies
+    window 12 --opens T move the polling dates for the demo mode (also --closes, --recount-ends, --silence)
+    who 1,2,201         usernames and member names as JSON
+GHCAA_LOCAL_STATE points it at its own state file, so it never mixes with a phone check.
 
 All accounts it touches use the password in PASSWORD below.
 """
@@ -40,7 +49,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 API = os.environ.get("GHCAA_LOCAL_API", "http://localhost:5087/api")
 DB = dict(host="localhost", dbname="GHCAADB_v2", user="postgres", password="postgres")
 STATE_DIR = os.path.join(tempfile.gettempdir(), "ghcaa-local-election")
-STATE = os.path.join(STATE_DIR, "state.json")
+STATE = os.environ.get("GHCAA_LOCAL_STATE") or os.path.join(STATE_DIR, "state.json")
+STATE_DIR = os.path.dirname(os.path.abspath(STATE))
 KEY_FILE = os.path.join(STATE_DIR, "ballot-private-key.b64")
 PASSWORD = "LocalVote#2026"
 
@@ -105,14 +115,26 @@ def plus_address(user_id):
     return f"{local.split('+')[0]}+v{user_id}@{domain}"
 
 
-def take_over_accounts(state):
+# Tables that a run adds rows to as a side effect. Their highest id is noted before the
+# first takeover, so purge can remove only the rows added since, and only for touched users.
+MARKED = ("EmailLogs", "Otps", "Notifications", "RefreshTokens", "ActivityLogs")
+
+
+def take_over_accounts(state, users=TOUCHED):
     """Saves each touched account's email and login fields once, then sets the test values."""
     saved = state.setdefault("accounts", {})
     hashed = bcrypt.hashpw(PASSWORD.encode(), bcrypt.gensalt(11)).decode()
     with db() as conn, conn.cursor() as c:
-        for uid in TOUCHED:
+        if "marks" not in state:
+            marks = {}
+            for table in (*MARKED, "ECPeriods", "Elections"):
+                c.execute(f'select coalesce(max("Id"), 0) from "{table}"')
+                marks[table] = c.fetchone()[0]
+            state["marks"] = marks
+            save_state(state)
+        for uid in users:
             c.execute('select u."MemberId", u."PasswordHash", u."MustChangePassword", u."FailedLoginAttempts", '
-                      'u."LockoutUntil", m."Email" from "Users" u left join "Members" m on m."Id" = u."MemberId" '
+                      'u."LockoutUntil", m."Email", u."Email" from "Users" u left join "Members" m on m."Id" = u."MemberId" '
                       'where u."Id" = %s', (uid,))
             row = c.fetchone()
             if row is None:
@@ -121,11 +143,22 @@ def take_over_accounts(state):
                 saved[str(uid)] = dict(member_id=row[0], password_hash=row[1], must_change=row[2],
                                        failed=row[3], lockout=row[4].isoformat() if row[4] else None, email=row[5])
                 save_state(state)
+            # An account with no member, such as the system admin, gets step-up codes at the user's
+            # own email. State saved before this field existed still holds the real one, so read it now.
+            if row[0] is None and "user_email" not in saved[str(uid)]:
+                saved[str(uid)]["user_email"] = row[6]
+                save_state(state)
             c.execute('update "Users" set "PasswordHash" = %s, "MustChangePassword" = false, '
                       '"FailedLoginAttempts" = 0, "LockoutUntil" = null where "Id" = %s', (hashed, uid))
             if row[0] is not None:
                 c.execute('update "Members" set "Email" = %s where "Id" = %s', (plus_address(uid), row[0]))
-    say(f"accounts ready: {len(TOUCHED)} users, password {PASSWORD}, emails on plus addresses")
+            else:
+                c.execute('update "Users" set "Email" = %s where "Id" = %s', (plus_address(uid), uid))
+    say(f"accounts ready: {len(users)} users, password {PASSWORD}, emails on plus addresses")
+
+
+def accounts_cmd(args):
+    take_over_accounts(load_state(), [int(x) for x in args.users.split(",") if x.strip()])
 
 
 def restore(_args):
@@ -141,8 +174,19 @@ def restore(_args):
                       (s["password_hash"], s["must_change"], s["failed"], s["lockout"], int(uid)))
             if s["member_id"] is not None:
                 c.execute('update "Members" set "Email" = %s where "Id" = %s', (s["email"], s["member_id"]))
+            elif "user_email" in s:
+                c.execute('update "Users" set "Email" = %s where "Id" = %s', (s["user_email"], int(uid)))
     state.pop("accounts")
     state.pop("tokens", None)
+    # The marks stay while something is left to purge, which needs them.
+    if not state.get("elections") and not state.get("periods") and not state.get("election_id"):
+        state.pop("marks", None)
+        state.pop("touched", None)
+    else:
+        # A later purge still has to find the notifications and logs these accounts got.
+        touched = state.setdefault("touched", {"users": [], "members": []})
+        touched["users"] = sorted(set(touched["users"]) | {int(u) for u in saved})
+        touched["members"] = sorted(set(touched["members"]) | {s["member_id"] for s in saved.values() if s.get("member_id")})
     save_state(state)
     say(f"restored {len(saved)} accounts. The election itself stays in the local database.")
 
@@ -158,17 +202,48 @@ def latest_code(uid, since=None):
         c.execute('select "Subject", "Body", "Status", "SentDate" from "EmailLogs" where lower("RecipientEmail") = lower(%s) '
                   'order by "Id" desc limit 1', (plus_address(uid),))
         row = c.fetchone()
-    if row is None or (since and row[3] < since):
+    # SentDate is timestamptz on PostgreSQL, so compare both sides as naive UTC.
+    sent = row[3].astimezone(timezone.utc).replace(tzinfo=None) if row and row[3] and row[3].tzinfo else (row[3] if row else None)
+    if row is None or (since and sent < since):
         return None
     match = re.search(r"\b(\d{6})\b", row[0] or "") or re.search(r"\b(\d{6})\b", row[1] or "")
     return match.group(1) if match else None
 
 
+def mail_error(uid, since=None):
+    """Why the newest email to the user failed, or None if none failed since `since`."""
+    with db() as conn, conn.cursor() as c:
+        c.execute('select "ErrorMessage", "SentDate" from "EmailLogs" where lower("RecipientEmail") = lower(%s) '
+                  'and "Status" = \'Failed\' order by "Id" desc limit 1', (plus_address(uid),))
+        row = c.fetchone()
+    if row is None:
+        return None
+    sent = row[1].astimezone(timezone.utc).replace(tzinfo=None) if row[1] and row[1].tzinfo else row[1]
+    if since and sent and sent < since:
+        return None
+    text = row[0] or "no error text was logged"
+    # Brevo refuses mail from an IP that is not on the account's allow list. A home or mobile
+    # connection can change IP between runs, so say exactly what to add.
+    ip = re.search(r"unrecognised IP address\s+([0-9a-fA-F:.]+)", text)
+    if ip:
+        return (f"Brevo refused to send because this machine's IP {ip.group(1).rstrip('.')} is not authorised. "
+                "Add it at https://app.brevo.com/security/authorised_ips, then run again.")
+    return f"The email could not be sent: {text[:300]}"
+
+
+def parse_since(value):
+    return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc).replace(tzinfo=None) if value else None
+
+
 def code_cmd(args):
-    found = latest_code(args.user_id)
+    found = latest_code(args.user_id, parse_since(args.since))
     if not found:
         fail(f"no code in EmailLogs for user {args.user_id}")
     print(found)
+
+
+def mail_error_cmd(args):
+    print(mail_error(args.user_id, parse_since(args.since)) or "")
 
 
 def call(method, path, token=None, body=None, ok=(200, 201, 202, 204)):
@@ -195,7 +270,8 @@ def stepped_up(state, uid):
         return cached["token"]
     token = login(uid)
     asked_at = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(seconds=5)
-    call("POST", "/auth/step-up/request", token)
+    # A 503 here means the code email failed. The reason is in EmailLogs, read below.
+    call("POST", "/auth/step-up/request", token, ok=(200, 201, 204, 503))
     code = None
     for _ in range(30):
         code = latest_code(uid, since=asked_at)
@@ -203,7 +279,7 @@ def stepped_up(state, uid):
             break
         time.sleep(1)
     if not code:
-        fail(f"no step-up code arrived for user {uid}")
+        fail(f"no step-up code arrived for user {uid}. {mail_error(uid, asked_at) or ''}".strip())
     r = call("POST", "/auth/step-up/verify", token, {"Code": code, "Method": "email"})
     token = field(r.json(), "Token")
     state.setdefault("tokens", {})[str(uid)] = {"token": token, "at": time.time()}
@@ -236,6 +312,28 @@ def new_key():
     return base64.b64encode(public).decode(), base64.b64encode(private).decode()
 
 
+PERIOD_TITLE = "Local test committee"
+
+
+def local_period_start(token, now):
+    """Periods may not overlap, so each run gets a one-day period after the last one.
+    Earlier runs made open-ended periods, which block every later start; those get an end date."""
+    latest = (now + timedelta(days=30)).date()
+    for p in call("GET", "/admin/governance/periods", token).json():
+        begins = datetime.fromisoformat(field(p, "StartDate").replace("Z", "+00:00")).date()
+        ends = field(p, "EndDate")
+        if ends is None:
+            if not field(p, "Title").startswith(PERIOD_TITLE):
+                fail(f"period {field(p, 'Id')} has no end date, so no new period can be added after it")
+            ends = (begins + timedelta(days=1)).isoformat()
+            call("PUT", f"/admin/governance/periods/{field(p, 'Id')}", token,
+                 {"Title": field(p, "Title"), "StartDate": begins.isoformat(), "EndDate": ends,
+                  "IsActive": field(p, "IsActive")})
+            say(f"period {field(p, 'Id')} from an earlier run now ends {ends}")
+        latest = max(latest, datetime.fromisoformat(ends.replace("Z", "+00:00")[:10]).date() + timedelta(days=2))
+    return latest
+
+
 def prepare(args):
     state = load_state()
     if state.get("election_id"):
@@ -250,11 +348,12 @@ def prepare(args):
 
     a = stepped_up(state, ADMIN_A)
     now = datetime.now(timezone.utc)
-    start = (now + timedelta(days=30)).date().isoformat()
+    start = local_period_start(a, now)
     period = call("POST", "/admin/governance/periods", a,
-                  {"Title": f"Local test committee {now:%Y%m%d-%H%M}", "StartDate": start, "EndDate": None}).json()
+                  {"Title": f"{PERIOD_TITLE} {now:%Y%m%d-%H%M}", "StartDate": start.isoformat(),
+                   "EndDate": (start + timedelta(days=1)).isoformat()}).json()
     period_id = field(period, "Id")
-    say(f"period {period_id} starts {start}")
+    say(f"period {period_id} runs {start} to {start + timedelta(days=1)}")
 
     opens = now + timedelta(minutes=args.open_in)
     closes = opens + timedelta(minutes=args.vote_minutes)
@@ -378,6 +477,148 @@ def status(_args):
     say(f"tracking codes: {state.get('tracking_codes', {})}")
 
 
+def who(args):
+    ids = [int(x) for x in args.users.split(",") if x.strip()]
+    with db() as conn, conn.cursor() as c:
+        c.execute('select u."Id", u."Username", u."MemberId", m."FullName" from "Users" u '
+                  'left join "Members" m on m."Id" = u."MemberId" where u."Id" = any(%s)', (ids,))
+        rows = {str(r[0]): dict(username=r[1], member_id=r[2], name=r[3] or r[1]) for r in c.fetchall()}
+    missing = [i for i in ids if str(i) not in rows]
+    if missing:
+        fail(f"users not found: {missing}")
+    print(json.dumps(rows, ensure_ascii=False))
+
+
+def record(args):
+    state = load_state()
+    ids = state.setdefault(f"{args.kind}s", [])
+    if args.id not in ids:
+        ids.append(args.id)
+    save_state(state)
+
+
+WINDOW_COLUMNS = {"opens": "PollingOpensOn", "closes": "PollingClosesOn",
+                  "recount_ends": "RecountWindowEndsOn", "silence": "SilenceStartsAt"}
+
+
+def window(args):
+    """Moves the polling dates of a walkthrough election, so a demo does not sit through them.
+
+    The API cannot change these dates once the election exists, so this writes them straight
+    to the row. The audit chain does not record the move. Only an election this state file
+    recorded and carrying the walkthrough title is touched."""
+    if args.id not in load_state().get("elections", []):
+        fail(f"election {args.id} was not recorded by this run")
+    # Kept time-zone aware: a naive value would be read in the session's zone, not UTC.
+    sets = {WINDOW_COLUMNS[k]: datetime.fromisoformat(v.replace("Z", "+00:00"))
+            for k, v in vars(args).items() if k in WINDOW_COLUMNS and v}
+    if not sets:
+        fail("give at least one of --opens, --closes, --recount-ends, --silence")
+    cols = ", ".join(f'"{c}" = %s' for c in sets)
+    with db() as conn, conn.cursor() as c:
+        c.execute(f'update "Elections" set {cols} where "Id" = %s and "Title" like %s',
+                  (*sets.values(), args.id, "%" + WALKTHROUGH_SUFFIX))
+        if c.rowcount != 1:
+            fail(f"election {args.id} is not a walkthrough election")
+
+
+# Titles only the scripts use. Rows with them are test leftovers whatever the state file says.
+# The browser walkthrough puts WALKTHROUGH_SUFFIX on both its titles.
+WALKTHROUGH_SUFFIX = " (local walkthrough)"
+LEFTOVER_ELECTIONS = ["Local phone check %", "%" + WALKTHROUGH_SUFFIX]
+LEFTOVER_PERIODS = [PERIOD_TITLE + " %", "%" + WALKTHROUGH_SUFFIX]
+
+
+def purge(args):
+    """Deletes the elections and periods the runs made, by recorded id, plus the side rows.
+
+    A period is only removed when it is newer than the marks taken at the first takeover,
+    or carries a script-only title, and never while it is active. Real periods stay put."""
+    state = load_state()
+    marks = state.get("marks", {})
+    elections = set(state.get("elections", [])) | ({state["election_id"]} if state.get("election_id") else set())
+    periods = set(state.get("periods", [])) | ({state["period_id"]} if state.get("period_id") else set())
+    touched = state.get("touched", {})
+    users = sorted({int(u) for u in state.get("accounts", {})} | set(touched.get("users", [])))
+    members = sorted({s["member_id"] for s in state.get("accounts", {}).values() if s.get("member_id")}
+                     | set(touched.get("members", [])))
+    pattern = plus_address(0).replace("+v0@", "+v%@")
+    removed = {}
+    conn = psycopg2.connect(**DB)
+    try:
+        with conn, conn.cursor() as c:
+            c.execute('select "Id" from "ECPeriods" where "Title" like any(%s)', (LEFTOVER_PERIODS,))
+            legacy = {r[0] for r in c.fetchall()}
+            if args.leftovers:
+                periods |= legacy
+                c.execute('select "Id" from "Elections" where "Title" like any(%s)', (LEFTOVER_ELECTIONS,))
+                elections |= {r[0] for r in c.fetchall()}
+            safe = set()
+            for pid in periods:
+                c.execute('select "IsActive" from "ECPeriods" where "Id" = %s', (pid,))
+                row = c.fetchone()
+                if row is None:
+                    continue
+                if row[0]:
+                    say(f"period {pid} is active, so it stays")
+                elif pid in legacy or ("ECPeriods" in marks and pid > marks["ECPeriods"]):
+                    safe.add(pid)
+                else:
+                    say(f"period {pid} was not made by a run, so it stays")
+            if safe:
+                c.execute('select "Id" from "Elections" where "ECPeriodId" = any(%s)', (list(safe),))
+                elections |= {r[0] for r in c.fetchall()}
+            # A stale state file could name an id that now belongs to a real election.
+            c.execute('select "Id" from "Elections" where "Id" = any(%s) and ("ECPeriodId" = any(%s) or "Title" like any(%s) or "Id" > %s)',
+                      (list(elections), list(safe), LEFTOVER_ELECTIONS, marks.get("Elections", 2**31 - 1)))
+            e = [r[0] for r in c.fetchall()]
+            for kept in elections - set(e):
+                say(f"election {kept} was not made by a run, so it stays")
+            steps = [
+                ("BallotVotes", 'delete from "BallotVotes" where "BallotId" in (select "Id" from "Ballots" where "ElectionId" = any(%s))'),
+                ("ElectionRecountFigures", 'delete from "ElectionRecountFigures" where "NominationId" in (select "Id" from "Nominations" where "ElectionId" = any(%s))'),
+                ("ElectionRecountRequests", 'delete from "ElectionRecountRequests" where "ElectionId" = any(%s)'),
+                ("SeatVotes", 'delete from "SeatVotes" where "ElectionId" = any(%s)'),
+                ("Ballots", 'delete from "Ballots" where "ElectionId" = any(%s)'),
+                ("Nominations", 'delete from "Nominations" where "ElectionId" = any(%s)'),
+                # The rest go by cascade, the audit chain with them, whole.
+                ("Elections", 'delete from "Elections" where "Id" = any(%s)'),
+            ]
+            if e:
+                for name, sql in steps:
+                    c.execute(sql, (e,))
+                    removed[name] = c.rowcount
+            if safe:
+                # A declared run puts its winners on the period's committee.
+                c.execute('delete from "ECMembers" where "ECPeriodId" = any(%s)', (list(safe),))
+                removed["ECMembers"] = c.rowcount
+                c.execute('delete from "ECPeriods" where "Id" = any(%s)', (list(safe),))
+                removed["ECPeriods"] = c.rowcount
+            # Plus addresses only ever come from these scripts, so their mail and codes go
+            # whatever run made them. The other side rows need a mark and a touched user.
+            c.execute('delete from "EmailLogs" where lower("RecipientEmail") like lower(%s)', (pattern,))
+            removed["EmailLogs"] = c.rowcount
+            c.execute('delete from "Otps" where lower("Email") like lower(%s)', (pattern,))
+            removed["Otps"] = c.rowcount
+            if marks and users:
+                for table, sql, ids in [
+                    ("EmailLogs", '"RecipientMemberId" = any(%s)', members),
+                    ("Notifications", '"MemberId" = any(%s)', members),
+                    ("RefreshTokens", '"UserId" = any(%s)', users),
+                    ("ActivityLogs", '"MemberId" = any(%s)', members),
+                ]:
+                    c.execute(f'delete from "{table}" where "Id" > %s and {sql}', (marks[table], ids))
+                    removed[table] = removed.get(table, 0) + c.rowcount
+    finally:
+        conn.close()
+    for key in ("elections", "periods", "election_id", "period_id", "polling_opens", "polling_closes", "tracking_codes", "touched"):
+        state.pop(key, None)
+    if not state.get("accounts"):
+        state.pop("marks", None)
+    save_state(state)
+    say("purged: " + (", ".join(f"{k} {v}" for k, v in removed.items() if v) or "nothing"))
+
+
 def need_election():
     state = load_state()
     if not state.get("election_id"):
@@ -402,8 +643,31 @@ def main():
     sub.add_parser("status").set_defaults(fn=status)
     s = sub.add_parser("code")
     s.add_argument("user_id", type=int)
+    s.add_argument("--since", help="only a code sent after this ISO time (UTC)")
     s.set_defaults(fn=code_cmd)
+    s = sub.add_parser("mail-error", help="why the newest email to the user failed, blank if none did")
+    s.add_argument("user_id", type=int)
+    s.add_argument("--since", help="only a failure after this ISO time (UTC)")
+    s.set_defaults(fn=mail_error_cmd)
     sub.add_parser("restore").set_defaults(fn=restore)
+    s = sub.add_parser("accounts")
+    s.add_argument("users", help="comma-separated user ids")
+    s.set_defaults(fn=accounts_cmd)
+    s = sub.add_parser("who")
+    s.add_argument("users", help="comma-separated user ids")
+    s.set_defaults(fn=who)
+    s = sub.add_parser("record")
+    s.add_argument("kind", choices=["election", "period"])
+    s.add_argument("id", type=int)
+    s.set_defaults(fn=record)
+    s = sub.add_parser("window", help="move a walkthrough election's polling dates (ISO times)")
+    s.add_argument("id", type=int)
+    for name in WINDOW_COLUMNS:
+        s.add_argument("--" + name.replace("_", "-"), dest=name)
+    s.set_defaults(fn=window)
+    s = sub.add_parser("purge")
+    s.add_argument("--leftovers", action="store_true", help="also remove rows with the script-only titles")
+    s.set_defaults(fn=purge)
     args = p.parse_args()
     args.fn(args)
 

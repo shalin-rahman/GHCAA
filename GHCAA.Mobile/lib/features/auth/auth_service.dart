@@ -95,17 +95,7 @@ class AuthService {
         return "No saved session found. Please log in with your password.";
       }
 
-      final response = await _dio.post('/auth/refresh-mobile', data: {'refreshToken': refreshToken});
-      if (response.statusCode == 200) {
-        final parsed = LoginResponse.fromJson(Map<String, dynamic>.from(response.data));
-
-        await _storage.saveToken(parsed.token);
-        if (parsed.refreshToken != null) await _storage.saveRefreshToken(parsed.refreshToken!);
-
-        _ref.invalidate(roleProvider);
-        _ref.invalidate(userProfileProvider);
-        return null; // Success
-      }
+      if (await _rotateSession(refreshToken)) return null;
     } catch (e) {
       debugPrint('AuthService.loginWithStoredToken failed: $e');
       if (e is DioException && e.response?.statusCode == 401) {
@@ -118,6 +108,45 @@ class AuthService {
       return "Something went wrong. Try again.";
     }
     return "Session refresh failed. Please log in with your password.";
+  }
+
+  /// FR-37.12d: accepting an appointment adds a role, and the stored roles only change
+  /// at login. This takes a fresh token and the current roles without a new login.
+  Future<bool> reloadSession() async {
+    try {
+      final refreshToken = await _storage.getRefreshToken();
+      if (refreshToken == null) return false;
+      return await _rotateSession(refreshToken);
+    } catch (e) {
+      debugPrint('AuthService.reloadSession failed: $e');
+      return false;
+    }
+  }
+
+  // refresh-mobile returns tokens only, so the roles come from /auth/me.
+  Future<bool> _rotateSession(String refreshToken) async {
+    final response = await _dio.post('/auth/refresh-mobile', data: {'refreshToken': refreshToken});
+    if (response.statusCode != 200) return false;
+    final parsed = LoginResponse.fromJson(Map<String, dynamic>.from(response.data));
+    await _storage.saveToken(parsed.token);
+    if (parsed.refreshToken != null) await _storage.saveRefreshToken(parsed.refreshToken!);
+
+    try {
+      final me = await _dio.get('/auth/me');
+      if (me.data is Map) {
+        final data = Map<String, dynamic>.from(me.data as Map);
+        final role = data['role'] as String? ?? 'Member';
+        await _storage.saveRole(role);
+        await _storage.saveRoles((data['roles'] as List?)?.map((r) => r as String).toList() ?? [role]);
+      }
+    } catch (e) {
+      // The new token is saved, so the session still works with the old roles.
+      debugPrint('AuthService: /auth/me after refresh failed: $e');
+    }
+
+    _ref.invalidate(roleProvider);
+    _ref.invalidate(userProfileProvider);
+    return true;
   }
 
   Future<List<Map<String, dynamic>>> getSocialProviders() async {

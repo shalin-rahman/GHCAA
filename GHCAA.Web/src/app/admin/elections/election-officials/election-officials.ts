@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ElectionsService } from '../../../core/services/elections.service';
 import { ElectionPersonasService } from '../../../core/services/election-personas.service';
-import { AdminService } from '../../../core/services/admin.service';
+import { NetworkingService } from '../../../core/services/networking.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
@@ -29,7 +29,7 @@ interface MemberHit { id: number; fullName: string; membershipNumber: string | n
 export class ElectionOfficials implements OnInit, OnDestroy {
     private readonly electionsService = inject(ElectionsService);
     private readonly personasService = inject(ElectionPersonasService);
-    private readonly adminService = inject(AdminService);
+    private readonly networking = inject(NetworkingService);
     private readonly auth = inject(AuthService);
     private readonly notify = inject(NotificationService);
     private readonly confirmDialog = inject(ConfirmDialogService);
@@ -96,11 +96,14 @@ export class ElectionOfficials implements OnInit, OnDestroy {
     }
 
     private runSearch(query: string): void {
-        this.adminService.getMembers(1, 10, query).subscribe({
-            next: (response: { items?: MemberHit[] } | MemberHit[]) => {
+        // The member directory search, because the admin member list refuses a commissioner.
+        this.networking.searchMembers({ query, page: 1, pageSize: 10 }).subscribe({
+            next: response => {
                 // A slower reply for an older query must not replace the newer list.
                 if (this.memberQuery().trim() !== query) return;
-                this.memberHits.set(Array.isArray(response) ? response : response.items ?? []);
+                this.memberHits.set((response?.items ?? []).map(m => ({
+                    id: m.id, fullName: m.fullName, membershipNumber: m.membershipNumber ?? null
+                })));
             },
             error: () => this.memberHits.set([])
         });

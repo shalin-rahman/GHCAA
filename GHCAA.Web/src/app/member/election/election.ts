@@ -10,6 +10,7 @@ import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel'
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { API_ENDPOINTS, BALLOT_RECEIPT_KEY_PREFIX, getElectionPhaseLabel } from '../../core/constants/app.constants';
 import { toDisplayDate } from '../../core/utils/date.util';
+import { ElectionNomination } from './nomination/election-nomination';
 
 type VoteStep = 'pick' | 'review';
 
@@ -31,7 +32,7 @@ export interface VoteReceipt {
 @Component({
     selector: 'app-member-election',
     standalone: true,
-    imports: [CommonModule, LoadingPanelComponent, PageHeaderComponent],
+    imports: [CommonModule, ElectionNomination, LoadingPanelComponent, PageHeaderComponent],
     templateUrl: './election.html'
 })
 export class MemberElection {

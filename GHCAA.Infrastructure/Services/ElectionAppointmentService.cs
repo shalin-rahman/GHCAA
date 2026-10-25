@@ -168,7 +168,9 @@ public sealed class ElectionAppointmentService(
                 ?? db.Roles.Add(new Role { Name = Constants.Roles.ElectionOfficial }).Entity;
             user.Roles.Add(role);
         }
-        user.RotateSecurityStamp();
+        // No new stamp here. Adding a role takes nothing away, and the client's refresh picks it
+        // up. A new stamp made SecurityStampMiddleware reject that refresh, since it still carries
+        // the old access token, and the client logged the new official out.
 
         await _audit.SaveAsync(ct);
         return (true, null);

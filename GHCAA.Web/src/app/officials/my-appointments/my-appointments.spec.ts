@@ -1,13 +1,15 @@
 // @vitest-environment jsdom
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { MyAppointments } from './my-appointments';
 import { ElectionsService } from '../../core/services/elections.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { AuthService } from '../../core/services/auth.service';
 
 describe('MyAppointments', () => {
     let elections: any;
     let notify: any;
+    let auth: any;
 
     const pending = { id: 7, personaName: 'Polling Officer', electionTitle: 'EC 2026', acceptedAt: null, isLive: false };
 
@@ -18,10 +20,12 @@ describe('MyAppointments', () => {
             declineAppointment: vi.fn().mockReturnValue(of(undefined))
         };
         notify = { success: vi.fn(), error: vi.fn() };
+        auth = { reloadUser: vi.fn().mockReturnValue(of(true)) };
         TestBed.configureTestingModule({
             providers: [
                 { provide: ElectionsService, useValue: elections },
-                { provide: NotificationService, useValue: notify }
+                { provide: NotificationService, useValue: notify },
+                { provide: AuthService, useValue: auth }
             ]
         });
         return TestBed.runInInjectionContext(() => new MyAppointments());
@@ -36,6 +40,7 @@ describe('MyAppointments', () => {
         expect(notify.error).toHaveBeenCalledWith('Tick the declaration first.');
     });
 
+    // FR-37.12d
     it('accepts once ticked and reloads the list', () => {
         const page = create();
         page.agreed[7] = true;
@@ -43,6 +48,31 @@ describe('MyAppointments', () => {
         page.accept(pending as any);
 
         expect(elections.acceptAppointment).toHaveBeenCalledWith(7);
+        expect(elections.getMyAppointments).toHaveBeenCalledTimes(2);
+    });
+
+    // FR-37.12d. The new role must reach the guards without a fresh login.
+    it('reloads the signed-in user after an accept', () => {
+        const page = create();
+        page.agreed[7] = true;
+
+        page.accept(pending as any);
+
+        expect(auth.reloadUser).toHaveBeenCalledTimes(1);
+    });
+
+    // FR-37.12d. A load sent during the reload would start a second refresh and log the official out.
+    it('reloads the list only after the session reload finishes', () => {
+        const page = create();
+        const reloaded = new Subject<boolean>();
+        auth.reloadUser.mockReturnValue(reloaded);
+        page.agreed[7] = true;
+
+        page.accept(pending as any);
+        expect(elections.getMyAppointments).toHaveBeenCalledTimes(1);
+
+        reloaded.next(true);
+        reloaded.complete();
         expect(elections.getMyAppointments).toHaveBeenCalledTimes(2);
     });
 
@@ -56,6 +86,7 @@ describe('MyAppointments', () => {
         expect(page.appointments()).toEqual([]);
     });
 
+    // FR-37.12d
     it('shows the server reason when accept fails', () => {
         const page = create();
         page.agreed[7] = true;
@@ -65,5 +96,6 @@ describe('MyAppointments', () => {
 
         expect(notify.error).toHaveBeenCalledWith('Appointment has expired.');
         expect(page.busyId()).toBeNull();
+        expect(auth.reloadUser).not.toHaveBeenCalled();
     });
 });

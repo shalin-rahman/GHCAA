@@ -5,7 +5,7 @@ import { API_ENDPOINTS } from '../constants/app.constants';
 import {
     AdminElectionDto, AdminElectionStepResult, ElectionBoardDto, ElectionAuditEntryDto, ElectionAuditVerifyDto, OpenedBallotsDto, BallotViewDto, PublicElectionResultsDto, AppointRequest, CastBallotDto, ElectionApprovalDto, ElectionReadinessDto, CastBallotResultDto, CreateElectionRequest, ElectionAppointmentDto, ElectionPhase,
     ElectionCountStepResult, ElectionResultDto, ElectionRulesUnlockDto, ElectionSummaryDto,
-    NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto,
+    ElectionSeatViewDto, NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto,
     DecideRecountRequest, ElectionRecountDto, RecordRecountRequest, RecountFigureDto, ScrutinyCheckDto, ScrutinyCheckItem, UpdateElectionFormDetailsRequest,
     ElectionDocumentVerifyDto, ElectionPrintMode
 } from '../models/election.models';
@@ -116,8 +116,13 @@ export class ElectionsService {
         return this.http.put<void>(API_ENDPOINTS.ADMIN_ELECTIONS.RECOUNT_FIGURES(id, recountId), { figures });
     }
 
-    setPhase(id: number, phase: ElectionPhase): Observable<void> {
-        return this.http.post<void>(API_ENDPOINTS.ELECTIONS.PHASE(id), phase);
+    // The API reads the body as a JSON string. A plain string body would go as text/plain and get a 415.
+    // Returns the stored request on a 202, or null when the phase changed at once.
+    setPhase(id: number, phase: ElectionPhase): Observable<ElectionApprovalDto | null> {
+        return this.http.post<ElectionApprovalDto | null>(API_ENDPOINTS.ELECTIONS.PHASE(id), JSON.stringify(phase), {
+            headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+            observe: 'response'
+        }).pipe(map(response => response.status === 202 ? response.body : null));
     }
 
     freezeVoterRoll(id: number): Observable<{ count: number }> {
@@ -146,6 +151,10 @@ export class ElectionsService {
 
     castBallot(id: number, request: CastBallotDto): Observable<CastBallotResultDto> {
         return this.http.post<CastBallotResultDto>(API_ENDPOINTS.ELECTIONS.VOTE(id), request);
+    }
+
+    getSeats(id: number): Observable<ElectionSeatViewDto[]> {
+        return this.http.get<ElectionSeatViewDto[]>(API_ENDPOINTS.ELECTIONS.SEATS(id));
     }
 
     getBallot(id: number): Observable<BallotViewDto> {

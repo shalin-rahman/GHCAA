@@ -80,6 +80,54 @@ describe('AuthService', () => {
         expect(router.navigate).toHaveBeenCalledWith(['/login']);
     });
 
+    // FR-37.12d. Accepting an appointment adds a role the current login does not carry.
+    it('reloadUser takes the new token and the roles from /auth/me', () => {
+        service.login({ username: 'user', password: 'p' }).subscribe();
+        httpMock.expectOne(API_ENDPOINTS.AUTH.LOGIN).flush({ token: 'old', memberId: 1, username: 'user', role: 'Member', roles: ['Member'] });
+
+        let result: boolean | undefined;
+        service.reloadUser().subscribe(ok => result = ok);
+        httpMock.expectOne(API_ENDPOINTS.AUTH.REFRESH).flush({ token: 'new' });
+        httpMock.expectOne(API_ENDPOINTS.AUTH.ME).flush({ username: 'user', memberId: 1, role: 'Member', roles: ['Member', 'ElectionOfficial'] });
+
+        expect(result).toBe(true);
+        expect(service.getToken()).toBe('new');
+        expect(service.hasRole('ElectionOfficial')).toBe(true);
+        expect(JSON.parse(sessionStorage.getItem('user_session')!).roles).toContain('ElectionOfficial');
+    });
+
+    // FR-37.12d. A second refresh would present the rotated refresh token, and the API answers
+    // token reuse by ending every session of the user.
+    it('refresh shares one request between callers that ask at the same time', () => {
+        service.login({ username: 'user', password: 'p' }).subscribe();
+        httpMock.expectOne(API_ENDPOINTS.AUTH.LOGIN).flush({ token: 'old', memberId: 1, username: 'user', role: 'Member', roles: ['Member'] });
+
+        const results: boolean[] = [];
+        service.refresh().subscribe(ok => results.push(ok));
+        service.refresh().subscribe(ok => results.push(ok));
+        httpMock.expectOne(API_ENDPOINTS.AUTH.REFRESH).flush({ token: 'new' });
+
+        expect(results).toEqual([true, true]);
+        expect(service.getToken()).toBe('new');
+
+        service.refresh().subscribe();
+        httpMock.expectOne(API_ENDPOINTS.AUTH.REFRESH).flush({ token: 'newer' });
+        expect(service.getToken()).toBe('newer');
+    });
+
+    it('reloadUser keeps the user as they were when the refresh fails', () => {
+        service.login({ username: 'user', password: 'p' }).subscribe();
+        httpMock.expectOne(API_ENDPOINTS.AUTH.LOGIN).flush({ token: 'old', memberId: 1, username: 'user', role: 'Member', roles: ['Member'] });
+
+        let result: boolean | undefined;
+        service.reloadUser().subscribe(ok => result = ok);
+        httpMock.expectOne(API_ENDPOINTS.AUTH.REFRESH).flush(null, { status: 401, statusText: 'Unauthorized' });
+
+        expect(result).toBe(false);
+        expect(service.getToken()).toBe('old');
+        expect(service.hasRole('ElectionOfficial')).toBe(false);
+    });
+
     it('drops stored ballot receipts on logout and keeps other settings', () => {
         localStorage.setItem('ghcaa_ballot_receipt_7_5', 'a');
         localStorage.setItem('ghcaa_ballot_receipt_8_5', 'b');

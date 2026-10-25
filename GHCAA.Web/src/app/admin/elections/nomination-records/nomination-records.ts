@@ -49,6 +49,11 @@ export class NominationRecords implements OnInit {
         return this.election.myPermissions?.includes(permission) ?? false;
     }
 
+    // A withdrawn or rejected candidate is off the ballot, so their consent time no longer matters.
+    canEditConsent(): boolean {
+        return this.can('ManageSetup') && this.nomination.status !== 'Withdrawn' && this.nomination.status !== 'Rejected';
+    }
+
     consentShown(): Date | null {
         return utcToLocal(this.consentAt());
     }

@@ -80,6 +80,7 @@ public class TotpTests
 public class AuthenticatorServiceTests : TestBase
 {
     private AuthenticatorService _service = null!;
+    private Mock<ITokenService> _tokens = null!;
     private int _userId;
 
     [SetUp]
@@ -88,7 +89,8 @@ public class AuthenticatorServiceTests : TestBase
         var orgConfig = new Mock<IOrgConfigService>();
         orgConfig.Setup(x => x.GetConfigAsync())
             .ReturnsAsync(new OrgConfigDto { Branding = new BrandingDto { AppName = "Alumni App", ShortName = "GHCAA" } });
-        _service = new AuthenticatorService(_context, new EphemeralDataProtectionProvider(), orgConfig.Object, NewActivity(),
+        _tokens = new Mock<ITokenService>();
+        _service = new AuthenticatorService(_context, new EphemeralDataProtectionProvider(), orgConfig.Object, NewActivity(), _tokens.Object,
             Microsoft.Extensions.Logging.Abstractions.NullLogger<AuthenticatorService>.Instance);
 
         var member = await CreateAndSaveTestMemberAsync();
@@ -305,6 +307,17 @@ public class AuthenticatorServiceTests : TestBase
     }
 
     [Test]
+    [Category("NFR-S5")]
+    public async Task ResetByAdmin_RevokesEveryRefreshToken()
+    {
+        await EnrolAsync();
+
+        (await _service.ResetByAdminAsync(_userId, adminId: 99)).Should().BeTrue();
+
+        _tokens.Verify(t => t.RevokeAllRefreshTokensAsync(_userId, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
     public async Task ResetByAdmin_FalseAndNoSideEffects_WhenNoApp()
     {
         var stampBefore = (await _context.Users.AsNoTracking().FirstAsync(u => u.Id == _userId)).SecurityStamp;
@@ -313,6 +326,7 @@ public class AuthenticatorServiceTests : TestBase
 
         (await _context.Users.AsNoTracking().FirstAsync(u => u.Id == _userId)).SecurityStamp.Should().Be(stampBefore);
         (await _context.ActivityLogs.AnyAsync(a => a.ActivityType == Constants.Authenticator.AdminResetAuditType)).Should().BeFalse();
+        _tokens.Verify(t => t.RevokeAllRefreshTokensAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Test]

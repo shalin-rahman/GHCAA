@@ -13,6 +13,9 @@
     "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:walkthrough": "playwright test -c playwright.walkthrough.config.ts",
+    "test:e2e:walkthrough:restore": "node tests/e2e/election-walkthrough/tasks.mjs restore",
+    "test:e2e:walkthrough:clean": "node tests/e2e/election-walkthrough/tasks.mjs clean",
     "gen:org-config": "node scripts/generate-org-config-fallback.mjs",
     "gen:site-content": "node scripts/generate-site-content.mjs",
     "apply-brand": "node scripts/apply-brand.mjs"

@@ -2,6 +2,7 @@ using FluentAssertions;
 using GHCAA.Application.DTOs;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
+using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -223,6 +224,67 @@ public sealed class ElectionServiceTests : TestBase
             type.GetProperties().Should().NotContain(p =>
                 p.PropertyType == typeof(DateTime) || p.PropertyType == typeof(DateTime?) || p.Name.Contains("Member"),
                 $"{type.Name} must not tie a ballot to a voter or a time");
+    }
+
+    // 84.53. PostgreSQL drops one of two votes cast at the same moment with 40001. The vote runs
+    // its transaction again and is recorded once.
+    [Test]
+    [Category("NFR-R5")]
+    public async Task CastBallotAsync_RetriesASerializationFailureAndRecordsTheVoteOnce()
+    {
+        var poll = await CreatePollingElectionAsync(voters: 1);
+        var clash = new SerializationClash(failures: 1);
+        await using var context = ContextWith(clash);
+
+        var (success, error, code) = await new ElectionService(context).CastBallotAsync(poll.Election.Id, poll.Voters[0].Id, poll.BallotFor(0));
+
+        success.Should().BeTrue(error);
+        clash.Thrown.Should().Be(1);
+        _context.PendingBallots.Should().ContainSingle();
+        _context.BallotReceipts.Should().ContainSingle(x => x.TrackingCode == code);
+        _context.SeatVotes.Should().HaveCount(2);
+        // The vote was saved through the second context, so skip this one's cached row.
+        _context.VoterRolls.AsNoTracking().Single(x => x.MemberId == poll.Voters[0].Id).VotedAt.Should().NotBeNull();
+    }
+
+    [Test]
+    [Category("NFR-R5")]
+    public async Task CastBallotAsync_GivesUpAfterTheLastAttemptAndWritesNothing()
+    {
+        var poll = await CreatePollingElectionAsync(voters: 1);
+        var clash = new SerializationClash(failures: int.MaxValue);
+        await using var context = ContextWith(clash);
+
+        var (success, error, _) = await new ElectionService(context).CastBallotAsync(poll.Election.Id, poll.Voters[0].Id, poll.BallotFor(0));
+
+        success.Should().BeFalse();
+        error.Should().Be("not-recorded");
+        clash.Thrown.Should().Be(Constants.Elections.CastAttempts);
+        _context.PendingBallots.Should().BeEmpty();
+        _context.SeatVotes.Should().BeEmpty();
+    }
+
+    private ApplicationDbContext ContextWith(Microsoft.EntityFrameworkCore.Diagnostics.IInterceptor interceptor) =>
+        new(new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlite(_context.Database.GetDbConnection())
+            .AddInterceptors(interceptor)
+            .Options);
+
+    // Fails the first few saves the way Npgsql reports a lost Serializable transaction.
+    private sealed class SerializationClash(int failures) : Microsoft.EntityFrameworkCore.Diagnostics.SaveChangesInterceptor
+    {
+        public int Thrown { get; private set; }
+
+        public override ValueTask<Microsoft.EntityFrameworkCore.Diagnostics.InterceptionResult<int>> SavingChangesAsync(
+            Microsoft.EntityFrameworkCore.Diagnostics.DbContextEventData eventData,
+            Microsoft.EntityFrameworkCore.Diagnostics.InterceptionResult<int> result,
+            CancellationToken cancellationToken = default)
+        {
+            if (Thrown >= failures) return ValueTask.FromResult(result);
+            Thrown++;
+            throw new DbUpdateException("save failed",
+                new Npgsql.PostgresException("could not serialize access", "ERROR", "ERROR", Npgsql.PostgresErrorCodes.SerializationFailure));
+        }
     }
 
     [Test]
@@ -1349,6 +1411,22 @@ public sealed class ElectionServiceTests : TestBase
 
     [Test]
     [Category("FR-39")]
+    public async Task GetSeatsAsync_ListsEverySeatEvenBeforeTheCandidateList()
+    {
+        var poll = await CreatePollingElectionAsync(voters: 1);
+        poll.Election.Phase = ElectionPhase.Nomination;
+        await _context.SaveChangesAsync();
+        var service = new ElectionService(_context);
+
+        var seats = await service.GetSeatsAsync(poll.Election.Id);
+
+        seats.Should().HaveCount(2);
+        seats!.Should().OnlyContain(s => s.Places >= 1 && s.PositionTitle != "");
+        (await service.GetSeatsAsync(poll.Election.Id + 100)).Should().BeNull();
+    }
+
+    [Test]
+    [Category("FR-39")]
     public async Task GetBallotAsync_SaysWhetherTheMemberCanVoteAndWhyNot()
     {
         var poll = await CreatePollingElectionAsync(voters: 2);
@@ -1710,6 +1788,257 @@ public sealed class ElectionServiceTests : TestBase
 
         results.Where(x => x.ElectionSeatId == poll.Seats[1].Id).Select(x => x.VoteCount)
             .Should().Equal(Constants.Elections.MinimumBallotsToCount, Constants.Elections.MinimumBallotsToCount);
+    }
+
+    // Nomination phase, one President seat, and three eligible members: candidate, proposer, seconder.
+    private async Task<(Election Election, ElectionSeat Seat, Member[] Members)> CreateNominationElectionAsync()
+    {
+        var members = new[]
+        {
+            await CreateAndSaveTestMemberAsync("Candidate", "candidate@example.com", "01600000001", "6000000001"),
+            await CreateAndSaveTestMemberAsync("Proposer", "proposer@example.com", "01600000002", "6000000002"),
+            await CreateAndSaveTestMemberAsync("Seconder", "seconder@example.com", "01600000003", "6000000003"),
+        };
+        var election = new Election
+        {
+            Title = "Election",
+            ECPeriod = new ECPeriod { Title = "2026", StartDate = DateTime.UtcNow.AddDays(30) },
+            Phase = ElectionPhase.Nomination,
+            NominationOpensOn = DateTime.UtcNow.AddDays(-1),
+            NominationClosesOn = DateTime.UtcNow.AddDays(1),
+            PollingOpensOn = DateTime.UtcNow.AddDays(3),
+            PollingClosesOn = DateTime.UtcNow.AddDays(4),
+        };
+        var seat = new ElectionSeat { Election = election, Position = EcPositionIds.President };
+        _context.Elections.Add(election);
+        _context.ElectionSeats.Add(seat);
+        foreach (var m in members)
+            _context.VoterRolls.Add(new VoterRoll { Election = election, MemberId = m.Id, IsEligible = true, FrozenAt = DateTime.UtcNow });
+        await _context.SaveChangesAsync();
+        return (election, seat, members);
+    }
+
+    private static NominationDto Nominate(ElectionSeat seat, int candidate, int proposer, int seconder) =>
+        new(seat.Id, candidate, proposer, seconder, "Run", null);
+
+    [Test]
+    [Category("FR-39")]
+    public async Task SubmitNominationAsync_SavesASubmittedNomination()
+    {
+        var (election, seat, m) = await CreateNominationElectionAsync();
+
+        var view = await new ElectionService(_context).SubmitNominationAsync(election.Id, Nominate(seat, m[0].Id, m[1].Id, m[2].Id));
+
+        var saved = _context.Nominations.Single();
+        saved.Id.Should().Be(view.Id);
+        saved.CandidateMemberId.Should().Be(m[0].Id);
+        saved.Status.Should().Be(NominationStatus.Submitted);
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task SubmitNominationAsync_RefusesAfterTheCloseDate()
+    {
+        var (election, seat, m) = await CreateNominationElectionAsync();
+        election.NominationClosesOn = DateTime.UtcNow.AddMinutes(-1);
+        await _context.SaveChangesAsync();
+
+        var act = () => new ElectionService(_context).SubmitNominationAsync(election.Id, Nominate(seat, m[0].Id, m[1].Id, m[2].Id));
+
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("Nominations are closed.");
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task SubmitNominationAsync_RefusesASeatFromAnotherElection()
+    {
+        var (election, _, m) = await CreateNominationElectionAsync();
+
+        var act = () => new ElectionService(_context).SubmitNominationAsync(election.Id, new NominationDto(999, m[0].Id, m[1].Id, m[2].Id, "Run", null));
+
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("The election seat was not found.");
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task SubmitNominationAsync_RefusesAProposerWhoIsNotEligible()
+    {
+        var (election, seat, m) = await CreateNominationElectionAsync();
+        _context.VoterRolls.Single(v => v.MemberId == m[1].Id).IsEligible = false;
+        await _context.SaveChangesAsync();
+
+        var act = () => new ElectionService(_context).SubmitNominationAsync(election.Id, Nominate(seat, m[0].Id, m[1].Id, m[2].Id));
+
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("Proposer and seconder must be eligible voters.");
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task SubmitNominationAsync_RefusesOneMemberAsProposerAndSeconder()
+    {
+        var (election, seat, m) = await CreateNominationElectionAsync();
+
+        var act = () => new ElectionService(_context).SubmitNominationAsync(election.Id, Nominate(seat, m[0].Id, m[1].Id, m[1].Id));
+
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("The proposer and the seconder must be different members.");
+        _context.Nominations.Should().BeEmpty();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task SubmitNominationAsync_RefusesASelfProposal()
+    {
+        var (election, seat, m) = await CreateNominationElectionAsync();
+
+        var act = () => new ElectionService(_context).SubmitNominationAsync(election.Id, Nominate(seat, m[0].Id, m[0].Id, m[2].Id));
+
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("Candidate cannot propose or second their own nomination.");
+        _context.Nominations.Should().BeEmpty();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task DecideNominationAsync_RejectsAndKeepsTheReason()
+    {
+        var (election, nominations) = await CreateWithdrawalElectionAsync("Zara");
+        election.Phase = ElectionPhase.Scrutiny;
+        var official = new User { Username = "scrutineer", PasswordHash = "x" };
+        _context.Users.Add(official);
+        await _context.SaveChangesAsync();
+
+        var ok = await new ElectionService(_context).DecideNominationAsync(nominations[0].Id, official.Id, new ScrutinyDto(false, "Dues unpaid"));
+
+        ok.Should().BeTrue();
+        nominations[0].Status.Should().Be(NominationStatus.Rejected);
+        var decision = _context.ScrutinyDecisions.Single();
+        decision.DecidedByUserId.Should().Be(official.Id);
+        decision.Reason.Should().Be("Dues unpaid");
+    }
+
+    [Test]
+    [Category("FR-39")]
+    [TestCase(null)]
+    [TestCase("")]
+    [TestCase("   ")]
+    public async Task DecideNominationAsync_RefusesARejectionWithoutAReason(string? reason)
+    {
+        var (election, nominations) = await CreateWithdrawalElectionAsync("Zara");
+        election.Phase = ElectionPhase.Scrutiny;
+        await _context.SaveChangesAsync();
+
+        var act = () => new ElectionService(_context).DecideNominationAsync(nominations[0].Id, 5, new ScrutinyDto(false, reason));
+
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("Give a reason*");
+        nominations[0].Status.Should().NotBe(NominationStatus.Rejected);
+        _context.ScrutinyDecisions.Should().BeEmpty();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task DecideNominationAsync_TrimsTheReasonAndAcceptsWithoutOne()
+    {
+        var (election, nominations) = await CreateWithdrawalElectionAsync("Zara", "Abir");
+        election.Phase = ElectionPhase.Scrutiny;
+        var official = new User { Username = "scrutineer", PasswordHash = "x" };
+        _context.Users.Add(official);
+        await _context.SaveChangesAsync();
+        var service = new ElectionService(_context);
+
+        await service.DecideNominationAsync(nominations[0].Id, official.Id, new ScrutinyDto(false, "  Dues unpaid  "));
+        await service.DecideNominationAsync(nominations[1].Id, official.Id, new ScrutinyDto(true, "  "));
+
+        _context.ScrutinyDecisions.Single(d => d.NominationId == nominations[0].Id).Reason.Should().Be("Dues unpaid");
+        _context.ScrutinyDecisions.Single(d => d.NominationId == nominations[1].Id).Reason.Should().BeNull();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task GetNominationsWithConsentAsync_NamesTheCandidateAndTheSeat()
+    {
+        var (election, nominations) = await CreateWithdrawalElectionAsync("Zara", "Abir");
+
+        var list = await new ElectionService(_context).GetNominationsWithConsentAsync(election.Id);
+
+        list.Select(n => n.CandidateName).Should().Equal("Abir", "Zara");
+        list.Should().OnlyContain(n => !string.IsNullOrEmpty(n.PositionTitle));
+        list.Select(n => n.Id).Should().BeEquivalentTo(nominations.Select(n => n.Id));
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task GetNominationsAsync_KeepsNamesOffThePublicList()
+    {
+        var (election, _) = await CreateWithdrawalElectionAsync("Zara");
+
+        var list = await new ElectionService(_context).GetNominationsAsync(election.Id);
+
+        list.Single().CandidateName.Should().BeNull();
+        list.Single().ConsentAt.Should().BeNull();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task DecideNominationAsync_RefusesOutsideScrutiny()
+    {
+        var (_, nominations) = await CreateWithdrawalElectionAsync("Zara");
+
+        var ok = await new ElectionService(_context).DecideNominationAsync(nominations[0].Id, 5, new ScrutinyDto(true, null));
+
+        ok.Should().BeFalse();
+        _context.ScrutinyDecisions.Should().BeEmpty();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task DecideNominationAsync_LeavesAWithdrawnNominationAlone()
+    {
+        var (election, nominations) = await CreateWithdrawalElectionAsync("Zara");
+        election.Phase = ElectionPhase.Scrutiny;
+        nominations[0].Status = NominationStatus.Withdrawn;
+        await _context.SaveChangesAsync();
+
+        var ok = await new ElectionService(_context).DecideNominationAsync(nominations[0].Id, 5, new ScrutinyDto(true, null));
+
+        ok.Should().BeFalse();
+        nominations[0].Status.Should().Be(NominationStatus.Withdrawn);
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task WithdrawNominationAsync_WithdrawsTheCandidatesOwnNomination()
+    {
+        var (_, nominations) = await CreateWithdrawalElectionAsync("Zara");
+
+        var ok = await new ElectionService(_context).WithdrawNominationAsync(nominations[0].Id, nominations[0].CandidateMemberId);
+
+        ok.Should().BeTrue();
+        nominations[0].Status.Should().Be(NominationStatus.Withdrawn);
+        nominations[0].WithdrawnAt.Should().NotBeNull();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task WithdrawNominationAsync_RefusesSomeoneElse()
+    {
+        var (_, nominations) = await CreateWithdrawalElectionAsync("Zara");
+
+        var ok = await new ElectionService(_context).WithdrawNominationAsync(nominations[0].Id, nominations[0].ProposerMemberId);
+
+        ok.Should().BeFalse();
+        nominations[0].Status.Should().Be(NominationStatus.Accepted);
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task WithdrawNominationAsync_RefusesOutsideTheWithdrawalPhase()
+    {
+        var (election, nominations) = await CreateWithdrawalElectionAsync("Zara");
+        election.Phase = ElectionPhase.CandidateList;
+        await _context.SaveChangesAsync();
+
+        var ok = await new ElectionService(_context).WithdrawNominationAsync(nominations[0].Id, nominations[0].CandidateMemberId);
+
+        ok.Should().BeFalse();
     }
 
     // One President seat in Withdrawal, the phase before CandidateList, one accepted nomination per name, in the order given.

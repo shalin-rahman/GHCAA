@@ -198,6 +198,8 @@ describe('OfficialsDashboard', () => {
 
             expect(page.readinessLabel(key)).toBe(ELECTION_READINESS_LABELS['ballot-key']);
             expect(page.readinessLabel(approvers)).toBe(ELECTION_TOO_FEW_APPROVERS_WARNING);
+            // FR-37.13t. Once enough officials can approve, the item reads as a plain tick, not the warning.
+            expect(page.readinessLabel({ ...approvers, met: true })).toBe(ELECTION_READINESS_LABELS['approvers']);
             expect(page.readinessLabel({ ...mock, key: 'new-item' })).toBe('new-item');
         });
 

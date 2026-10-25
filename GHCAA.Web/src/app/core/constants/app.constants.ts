@@ -719,6 +719,7 @@ export const API_ENDPOINTS = {
         WITHDRAW: (id: number) => `/api/elections/nominations/${id}/withdraw`,
         VOTE: (id: number) => `/api/elections/${id}/vote`,
         BALLOT: (id: number) => `/api/elections/${id}/ballot`,
+        SEATS: (id: number) => `/api/elections/${id}/seats`,
         BOARD: (id: number) => `/api/elections/${id}/board`,
         RESULTS: (id: number) => `/api/elections/${id}/results`,
         OPENED_BALLOTS: (id: number) => `/api/elections/${id}/opened-ballots`,
