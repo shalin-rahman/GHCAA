@@ -3,6 +3,7 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using static GHCAA.Domain.Enums;
@@ -62,18 +63,21 @@ namespace GHCAA.Tests.Controllers
         [Category("FR-39")]
         public async Task Vote_Success_ReturnsTrackingCode()
         {
+            using var cancellation = new CancellationTokenSource();
             _electionServiceMock.Setup(x => x.CastBallotAsync(1, 10, Ballot, It.IsAny<CancellationToken>()))
                                  .ReturnsAsync((true, (string?)null, "ABCD-EFGH-JKMN"));
             _documentServiceMock.Setup(x => x.GenerateBallotReceiptPdfAsync(1, "ABCD-EFGH-JKMN", It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
                                 .ReturnsAsync(new byte[] { 1, 2, 3 });
 
-            var result = await _controller.Vote(1, Ballot, NullLogger<ElectionsController>.Instance, CancellationToken.None);
+            var result = await _controller.Vote(1, Ballot, NullLogger<ElectionsController>.Instance, cancellation.Token);
 
             var ok = result as OkObjectResult;
             Assert.That(ok, Is.Not.Null);
             var reply = (CastBallotResultDto)ok!.Value!;
             Assert.That(reply.TrackingCode, Is.EqualTo("ABCD-EFGH-JKMN"));
             Assert.That(reply.ReceiptPdfBase64, Is.EqualTo(Convert.ToBase64String(new byte[] { 1, 2, 3 })));
+            _documentServiceMock.Verify(x => x.GenerateBallotReceiptPdfAsync(
+                1, "ABCD-EFGH-JKMN", It.IsAny<DateTime>(), cancellation.Token), Times.Once);
         }
 
         // 37.14o. The vote is saved by then, so the code must still reach the voter.
@@ -91,6 +95,25 @@ namespace GHCAA.Tests.Controllers
             var reply = (CastBallotResultDto)((OkObjectResult)result).Value!;
             Assert.That(reply.TrackingCode, Is.EqualTo("ABCD-EFGH-JKMN"));
             Assert.That(reply.ReceiptPdfBase64, Is.Null);
+        }
+
+        [Test]
+        [Category("NFR-R5")]
+        public async Task Vote_ClientDisconnectDuringReceiptPdf_DoesNotLogPdfFailure()
+        {
+            using var cancellation = new CancellationTokenSource();
+            _electionServiceMock.Setup(x => x.CastBallotAsync(1, 10, Ballot, It.IsAny<CancellationToken>()))
+                                 .ReturnsAsync((true, (string?)null, "ABCD-EFGH-JKMN"));
+            _documentServiceMock.Setup(x => x.GenerateBallotReceiptPdfAsync(1, "ABCD-EFGH-JKMN", It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+                                .ThrowsAsync(new OperationCanceledException(cancellation.Token));
+            var logger = new Mock<ILogger<ElectionsController>>();
+            cancellation.Cancel();
+
+            var result = await _controller.Vote(1, Ballot, logger.Object, cancellation.Token);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            logger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.Is<It.IsAnyType>((_, _) => true),
+                It.IsAny<Exception>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Never);
         }
 
         // 37.13h. The count can wait for a second person, like the other two-person steps.
@@ -202,6 +225,34 @@ namespace GHCAA.Tests.Controllers
                                  .ReturnsAsync((PublicElectionResultsDto?)null);
 
             Assert.That(await _controller.Results(1, CancellationToken.None), Is.InstanceOf<NotFoundResult>());
+        }
+
+        [Test]
+        [Category("FR-051")]
+        public async Task CandidateList_NotFinalized_Returns404()
+        {
+            _electionServiceMock.Setup(x => x.GetPublicCandidateListAsync(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync((IReadOnlyList<PublicCandidateSeatDto>?)null);
+
+            var result = await _controller.CandidateList(1, CancellationToken.None);
+
+            Assert.That(result, Is.TypeOf<NotFoundResult>());
+            _electionServiceMock.Verify(x => x.GetPublicCandidateListAsync(1, It.IsAny<CancellationToken>()), Times.Once);
+            _electionServiceMock.Verify(x => x.IsTestAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Test]
+        [Category("FR-051")]
+        public async Task CandidateList_TestElection_Returns404FromService()
+        {
+            _electionServiceMock.Setup(x => x.GetPublicCandidateListAsync(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync((IReadOnlyList<PublicCandidateSeatDto>?)null);
+
+            var result = await _controller.CandidateList(1, CancellationToken.None);
+
+            Assert.That(result, Is.TypeOf<NotFoundResult>());
+            _electionServiceMock.Verify(x => x.GetPublicCandidateListAsync(1, It.IsAny<CancellationToken>()), Times.Once);
+            _electionServiceMock.Verify(x => x.IsTestAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Test]
@@ -502,6 +553,22 @@ namespace GHCAA.Tests.Controllers
             _electionServiceMock.Setup(x => x.GetReadinessAsync(3, It.IsAny<CancellationToken>())).ReturnsAsync(PartlyReady);
 
             AssertNamesUnmet(await _controller.SetPhase(3, Enums.ElectionPhase.Polling, CancellationToken.None));
+        }
+
+        // 37.16d. A period that already has members used to come back as "not ready".
+        [TestCase("period-has-members", 409, "already has committee members")]
+        [TestCase("not-ready", 400, "not ready for declaration")]
+        [Category("FR-39")]
+        public async Task Declare_Refused_SaysWhy(string error, int status, string detail)
+        {
+            SetUserContext(_controller, userId: 7);
+            _approvalServiceMock.Setup(x => x.RunOrRequestAsync(3, Enums.ElectionApprovalAction.Declare, 7, It.IsAny<IReadOnlyCollection<string>>(), null, It.IsAny<CancellationToken>()))
+                                .ReturnsAsync(new ElectionApprovalRunResult(false, error, null));
+
+            var result = (ObjectResult)await _controller.Declare(3, CancellationToken.None);
+
+            Assert.That(result.StatusCode, Is.EqualTo(status));
+            Assert.That(((ProblemDetails)result.Value!).Detail, Does.Contain(detail));
         }
 
         [Test]

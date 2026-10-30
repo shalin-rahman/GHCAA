@@ -61,6 +61,15 @@ public sealed class ElectionsController(
     public async Task<IActionResult> Board(int id, CancellationToken ct)
         => (await service.GetBoardAsync(id, ct)) is { } result ? Ok(result) : NotFound();
 
+    /// <summary>Returns the finalized candidate list, grouped by seat. 404 before CandidateList and for test elections.</summary>
+    [HttpGet("{id:int}/candidate-list")]
+    [AllowAnonymous]
+    [ProducesResponseType<IReadOnlyList<PublicCandidateSeatDto>>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> CandidateList(int id, CancellationToken ct)
+    {
+        return (await service.GetPublicCandidateListAsync(id, ct)) is { } result ? Ok(result) : NotFound();
+    }
+
     /// <summary>Spec 023 FR-011 to FR-014 (37.1l): the caller's ballot paper, with names and whether they have voted.</summary>
     [HttpGet("{id:int}/ballot")]
     [ProducesResponseType<BallotViewDto>(StatusCodes.Status200OK)]
@@ -302,7 +311,7 @@ public sealed class ElectionsController(
             return Unauthorized();
         var (success, error, trackingCode) = await service.CastBallotAsync(id, memberId, request, ct);
         if (success)
-            return Ok(new CastBallotResultDto(trackingCode!, await ReceiptPdfAsync(id, trackingCode!, logger)));
+            return Ok(new CastBallotResultDto(trackingCode!, await ReceiptPdfAsync(id, trackingCode!, logger, ct)));
         return error == "already-voted"
             ? this.ProblemWithCode(ErrorCodes.AlreadyVoted, "You have already voted in this election.", StatusCodes.Status409Conflict)
             : Problem(detail: "Vote could not be recorded.", statusCode: StatusCodes.Status400BadRequest);
@@ -310,15 +319,16 @@ public sealed class ElectionsController(
 
     // The vote is already saved, so a failed PDF must not turn the reply into an error and lose
     // the code. The log names the election only, never the member or the code.
-    private async Task<string?> ReceiptPdfAsync(int electionId, string trackingCode, ILogger logger)
+    private async Task<string?> ReceiptPdfAsync(int electionId, string trackingCode, ILogger logger, CancellationToken ct)
     {
         try
         {
-            var pdf = await documentService.GenerateBallotReceiptPdfAsync(electionId, trackingCode, DateTime.UtcNow, CancellationToken.None);
+            var pdf = await documentService.GenerateBallotReceiptPdfAsync(electionId, trackingCode, DateTime.UtcNow, ct);
             return pdf is null ? null : Convert.ToBase64String(pdf);
         }
         catch (Exception ex)
         {
+            if (ct.IsCancellationRequested) return null;
             logger.LogError(ex, "Ballot receipt PDF failed for election {ElectionId}", electionId);
             return null;
         }
@@ -361,7 +371,14 @@ public sealed class ElectionsController(
         if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
             return Unauthorized();
         var run = await approvals.RunOrRequestAsync(id, ElectionApprovalAction.Declare, userId, CallerRoles(), ct: ct);
-        return this.ApprovalReply(run) ?? (run.Error is null ? Ok() : Problem(detail: "Election is not ready for declaration.", statusCode: StatusCodes.Status400BadRequest));
+        // 37.16d: any reason other than not-ready goes through ApprovalError, so a period that
+        // already has members says so instead of reading as "not ready".
+        return this.ApprovalReply(run) ?? run.Error switch
+        {
+            null => Ok(),
+            "not-ready" => Problem(detail: "Election is not ready for declaration.", statusCode: StatusCodes.Status400BadRequest),
+            _ => ApprovalError(run.Error),
+        };
     }
 
     /// <summary>Spec 023 (37.12f): the two-person steps on this election still waiting for a second person.</summary>

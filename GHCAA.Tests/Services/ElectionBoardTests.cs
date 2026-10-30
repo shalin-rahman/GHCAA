@@ -248,6 +248,71 @@ public sealed class ElectionBoardTests : TestBase
     }
 
     [Test]
+    [Category("FR-051")]
+    public async Task PublicCandidateList_IsHiddenUntilFinalized_ThenShowsAcceptedCandidatesBySeat()
+    {
+        var position = await _context.EcPositions.OrderBy(x => x.DisplayOrder).FirstAsync();
+        var seat = new ElectionSeat { ElectionId = _election.Id, Position = position.Id, SeatCount = 1 };
+        var accepted = await CreateAndSaveTestMemberAsync("Accepted Candidate", "candidate@example.com", "01700000000", "1234567890");
+        var withdrawn = await CreateAndSaveTestMemberAsync("Withdrawn Candidate", "withdrawn@example.com", "01700000001", "1234567891");
+        _context.ElectionSeats.Add(seat);
+        await _context.SaveChangesAsync();
+        _context.Nominations.AddRange(
+            new Nomination { ElectionId = _election.Id, ElectionSeatId = seat.Id, CandidateMemberId = accepted.Id, ProposerMemberId = withdrawn.Id, SeconderMemberId = accepted.Id, Statement = "Public statement", Status = NominationStatus.Accepted, BallotOrder = 1 },
+            new Nomination { ElectionId = _election.Id, ElectionSeatId = seat.Id, CandidateMemberId = withdrawn.Id, ProposerMemberId = accepted.Id, SeconderMemberId = withdrawn.Id, Statement = "Not public", Status = NominationStatus.Withdrawn });
+        await _context.SaveChangesAsync();
+
+        (await NewService().GetPublicCandidateListAsync(_election.Id)).Should().BeNull();
+        await SetPhaseAsync(ElectionPhase.CandidateList);
+        var list = await NewService().GetPublicCandidateListAsync(_election.Id);
+
+        list.Should().ContainSingle();
+        list![0].PositionTitle.Should().NotBeNullOrWhiteSpace();
+        list[0].Candidates.Should().ContainSingle()
+            .Which.Should().Be(new BallotCandidateDto(_context.Nominations.First(x => x.Status == NominationStatus.Accepted).Id, "Accepted Candidate", null, "Public statement"));
+    }
+
+    [Test]
+    [Category("FR-051")]
+    public async Task PublicCandidateList_OrdersByBallotOrder_FallsBackToMemberPhoto_AndSkipsEmptySeats()
+    {
+        var positions = await _context.EcPositions.OrderBy(x => x.DisplayOrder).Take(2).ToListAsync();
+        var filled = new ElectionSeat { ElectionId = _election.Id, Position = positions[0].Id, SeatCount = 2 };
+        var empty = new ElectionSeat { ElectionId = _election.Id, Position = positions[1].Id, SeatCount = 1 };
+        _context.ElectionSeats.AddRange(filled, empty);
+        var zed = await CreateAndSaveTestMemberAsync("Zed", "zed@example.com", "01700000010", "1234567810");
+        var alpha = await CreateAndSaveTestMemberAsync("Alpha", "alpha@example.com", "01700000011", "1234567811");
+        var beta = await CreateAndSaveTestMemberAsync("Beta", "beta@example.com", "01700000012", "1234567812");
+        zed.PhotoPath = "/uploads/members/zed.jpg";
+        alpha.PhotoPath = "/uploads/members/alpha.jpg";
+        await _context.SaveChangesAsync();
+        _context.Nominations.AddRange(
+            new Nomination { ElectionId = _election.Id, ElectionSeatId = filled.Id, CandidateMemberId = alpha.Id, ProposerMemberId = beta.Id, SeconderMemberId = zed.Id, Statement = "", Status = NominationStatus.Accepted, BallotOrder = 2, PhotoPath = "/uploads/nominations/alpha.jpg" },
+            new Nomination { ElectionId = _election.Id, ElectionSeatId = filled.Id, CandidateMemberId = zed.Id, ProposerMemberId = beta.Id, SeconderMemberId = alpha.Id, Statement = "", Status = NominationStatus.Accepted, BallotOrder = 1 },
+            new Nomination { ElectionId = _election.Id, ElectionSeatId = filled.Id, CandidateMemberId = beta.Id, ProposerMemberId = zed.Id, SeconderMemberId = alpha.Id, Statement = "", Status = NominationStatus.Accepted });
+        await SetPhaseAsync(ElectionPhase.Campaign);
+
+        var list = await NewService().GetPublicCandidateListAsync(_election.Id);
+
+        list.Should().ContainSingle().Which.SeatId.Should().Be(filled.Id);
+        list![0].Candidates.Select(c => (c.Name, c.PhotoUrl)).Should().Equal(
+            ("Zed", "/uploads/members/zed.jpg"),
+            ("Alpha", "/uploads/nominations/alpha.jpg"),
+            ("Beta", (string?)null));
+    }
+
+    [Test]
+    [Category("FR-051")]
+    public async Task PublicCandidateList_HidesTestElection()
+    {
+        _election.IsTest = true;
+        _election.Phase = ElectionPhase.CandidateList;
+        await _context.SaveChangesAsync();
+
+        (await NewService().GetPublicCandidateListAsync(_election.Id)).Should().BeNull();
+    }
+
+    [Test]
     public void BoardDto_ContainsNoContactFields()
     {
         var banned = new[] { "email", "phone", "mobile", "ip", "userid", "memberid" };

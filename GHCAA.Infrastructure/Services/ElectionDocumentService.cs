@@ -388,7 +388,6 @@ public sealed class ElectionDocumentService(
         if (title is null)
             return null;
         var org = await orgConfigService.GetConfigAsync();
-        var castAt = AssociationTime.FromUtc(castAtUtc);
         RegisterFonts();
 
         var document = Document.Create(container =>
@@ -406,7 +405,7 @@ public sealed class ElectionDocumentService(
                     column.Item().PaddingTop(18).Text("Tracking code").FontSize(9).FontColor(Colors.Grey.Darken2);
                     column.Item().Text(trackingCode).Bold().FontSize(20);
                     column.Item().PaddingTop(12).Text("Cast at").FontSize(9).FontColor(Colors.Grey.Darken2);
-                    column.Item().Text($"{castAt:yyyy-MM-dd HH:mm} (Bangladesh time)");
+                    column.Item().Text($"{AssociationTime.FormatReceiptTimestamp(castAtUtc)} (Bangladesh time)");
                     column.Item().PaddingTop(24).Text("The tracking code shows the ballot was counted. It is published without choices, and this receipt does not show them either.")
                         .FontSize(9).FontColor(Colors.Grey.Darken2);
                 });

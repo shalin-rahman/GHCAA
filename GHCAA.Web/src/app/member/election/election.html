@@ -24,7 +24,12 @@
                     @if (receiptPdf()) {
                         <button type="button" class="btn btn-outline" (click)="downloadReceipt()">Download receipt</button>
                     }
-                    <p class="text-muted">The printed receipt shows your choices and can be printed only on this screen. The downloaded receipt has the code and time but not your choices, and stays on this device until the election is archived or you sign out.</p>
+                    <p class="text-muted">The printed receipt shows your choices and can be printed only on this screen. The downloaded receipt has the code and time but not your choices.</p>
+                    @if (receiptPdfStorageFailed()) {
+                        <p class="text-muted" role="status">The receipt could not be saved on this device. Download it before leaving this page.</p>
+                    } @else {
+                        <p class="text-muted">The downloaded receipt stays on this device until the election is archived or you sign out.</p>
+                    }
                 </div>
             </div>
             <div class="vote-receipt glass-card stack gap-2">

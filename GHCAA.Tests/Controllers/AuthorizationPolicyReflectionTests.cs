@@ -187,6 +187,7 @@ namespace GHCAA.Tests.Controllers
             [("ElectionsController", "Nominate")] = new(null, false, false),
             [("ElectionsController", "Nominations")] = new(null, true, false),
             [("ElectionsController", "Seats")] = new(null, false, false),
+            [("ElectionsController", "CandidateList")] = new(null, true, false),
             [("ElectionsController", "Results")] = new(null, true, false),
             [("ElectionsController", "OpenedBallots")] = new(null, true, false),
             [("ElectionsController", "VerifyAudit")] = new(null, true, false),

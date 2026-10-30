@@ -50,7 +50,7 @@ public, or mobile task appears here by design.
   `ADMIN_ELECTIONS` block.
 - [ ] T012 Add `core/services/report.service.ts`.
 - [ ] T013 Add `GHCAA.Web/src/app/admin/reports/` — entity picker, filter
-  form, `.data-table` result grid (reuse the Directory table-card pattern),
+  form, and the shared read-only data-grid mode built under tracker 88.5,
   export button, saved-report list and re-run action. Route behind the
   existing admin guard.
 

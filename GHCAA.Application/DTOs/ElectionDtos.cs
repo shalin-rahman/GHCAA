@@ -90,6 +90,8 @@ public record BallotSeatViewDto(int SeatId, string PositionTitle, int Places, IR
 public record BallotCandidateDto(int NominationId, string Name, string? PhotoUrl, string Statement);
 // 84.52. The seats a member can be nominated for. The ballot has none until CandidateList.
 public record ElectionSeatViewDto(int SeatId, string PositionTitle, int Places);
+// Public after the candidate list is finalized; proposer, seconder and consent data stay private.
+public record PublicCandidateSeatDto(int SeatId, string PositionTitle, int Places, IReadOnlyList<BallotCandidateDto> Candidates);
 
 // Spec 023 FR-017: the declared result. Abstentions on a seat are valid ballots that named
 // nobody for it. Turnout is BallotsCast against EligibleVoters on the frozen roll.

@@ -589,7 +589,7 @@ def tracker():
     for match in ITEM.finditer(text):
         area = match.group(2)
         tasks[area] += 1
-        if match.group(4).strip().upper().startswith("DONE"):
+        if match.group(4).strip().upper().startswith(("DONE", "WONTDO")):
             done[area] += 1
     # An item numbered for an area whose heading the pattern missed would be
     # counted per component and left out of the arrival totals, understating the

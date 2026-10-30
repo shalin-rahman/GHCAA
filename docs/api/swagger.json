@@ -4262,6 +4262,55 @@
         }
       }
     },
+    "/api/elections/{id}/candidate-list": {
+      "get": {
+        "tags": [
+          "Elections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicCandidateSeatDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicCandidateSeatDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicCandidateSeatDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/elections/{id}/ballot": {
       "get": {
         "tags": [
@@ -16399,6 +16448,31 @@
           },
           "isTie": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PublicCandidateSeatDto": {
+        "type": "object",
+        "properties": {
+          "seatId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "positionTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "places": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BallotCandidateDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false

@@ -78,3 +78,13 @@ field name; no new NFR technology is introduced by this change.
 5. **Given** a member has multiple academic records, **when** the Web or Mobile
    client edits them, **then** the first-record protection and all existing
    true/false rules remain unchanged.
+
+## Planned member-identity validation (TODO 84.49)
+
+The completed organisation-profile rename does not include the pending member
+identity validation work. The owner selected NID editing at any time, with
+format and uniqueness checks on every submission, including new record entry.
+PassingYear values should come from the database when present, with a fallback
+list in both clients. Age validation should use the Bangladesh local date.
+The ballot-key progress dialog and timeout remain election-device work and are
+outside this extension. See [the task breakdown](./tasks.md#member-identity-validation-todo-8449).

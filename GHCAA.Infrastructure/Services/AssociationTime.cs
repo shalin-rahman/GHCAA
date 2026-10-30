@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace GHCAA.Infrastructure.Services;
 
 // The Association keeps Bangladesh time. There is no org setting for the zone yet (37.14o).
@@ -14,4 +16,7 @@ public static class AssociationTime
             catch (TimeZoneNotFoundException) { return utc.AddHours(6); }
         }
     }
+
+    public static string FormatReceiptTimestamp(DateTime utc) =>
+        FromUtc(utc).ToString("dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture);
 }

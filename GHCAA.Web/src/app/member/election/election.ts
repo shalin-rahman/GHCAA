@@ -56,6 +56,7 @@ export class MemberElection {
     receipt = signal<VoteReceipt | null>(null);
     // The server PDF (base64). It holds no choices, so it is kept on this device until the election is archived.
     receiptPdf = signal<string | null>(null);
+    receiptPdfStorageFailed = signal(false);
 
     seats = computed<BallotSeatDto[]>(() => this.ballot()?.seats ?? []);
     allDecided = computed(() => this.seats().length > 0 && this.seats().every(seat => this.choices()[seat.seatId] !== undefined));
@@ -156,7 +157,7 @@ export class MemberElection {
                 this.choices.set({});
                 if (result.receiptPdfBase64) {
                     this.receiptPdf.set(result.receiptPdfBase64);
-                    this.storeReceiptPdf(ballot.electionId, result.receiptPdfBase64);
+                    this.receiptPdfStorageFailed.set(!this.storeReceiptPdf(ballot.electionId, result.receiptPdfBase64));
                 }
                 this.notify.success('Your ballot was recorded.');
             },
@@ -194,10 +195,15 @@ export class MemberElection {
         ExportUtil.saveFile(new Blob([bytes], { type: 'application/pdf' }), `ballot-receipt-${electionId}.pdf`);
     }
 
-    private storeReceiptPdf(electionId: number, pdf: string): void {
+    private storeReceiptPdf(electionId: number, pdf: string): boolean {
         const memberId = this.auth.currentUser()?.memberId;
-        if (!memberId) return;
-        try { localStorage.setItem(receiptKey(memberId, electionId), pdf); } catch { /* storage full or blocked */ }
+        if (!memberId) return false;
+        try {
+            localStorage.setItem(receiptKey(memberId, electionId), pdf);
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     // Drops receipts for other elections and for this one once it is archived.

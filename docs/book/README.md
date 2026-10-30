@@ -320,7 +320,7 @@ stage and is left as it is. The test totals (1,365 of 1,365 backend tests and 74
 `docs/PROJECT_MAP.md` and the two test suites, and correct the sentences that carry them.
 
 The Chapter 11 effort figures (tasks, commit-days, critical path, line counts and the effort
-estimates) come from one run of `python docs/book/build/wbs.py`, taken on 14 October 2026. The
+estimates) come from one run of `python docs/book/build/wbs.py`, taken on 31 October 2026. The
 chapter and the outline's Chapter 11 block must quote the same run. Re-run it and refresh both
 together.
 

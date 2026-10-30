@@ -150,7 +150,7 @@ In the order they could be tried. Each one names the domain spec that already do
 | Mentorship | 016 | current user, notifications |
 | Campaigns and scholarships | 015 | current user, payments, notifications |
 | Elections | 018 | current user, config, notifications |
-| Meetings (84.19, not built yet) | none yet | current user, notifications |
+| Meetings (84.19, not built yet) | [026, draft](../026-meetings-and-action-items/spec.md) | current user, notifications |
 
 Polls is the likely pilot because it needs the fewest host contracts. See "Decisions taken" below
 for how the first consumer affects that choice.

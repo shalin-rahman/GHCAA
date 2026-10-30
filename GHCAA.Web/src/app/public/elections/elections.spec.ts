@@ -8,7 +8,7 @@ import { ElectionContentService } from '../../core/services/election-content.ser
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
-import { ElectionBoardDto, ElectionContentDto } from '../../core/models/election.models';
+import { ElectionBoardDto, ElectionContentDto, PublicCandidateSeatDto } from '../../core/models/election.models';
 import { ExportUtil } from '../../core/utils/export.util';
 
 function board(over: Partial<ElectionBoardDto> = {}): ElectionBoardDto {
@@ -39,6 +39,7 @@ const handbook = page({
 
 interface Options {
     getBoard?: () => any;
+    getCandidateList?: () => any;
     current?: any;
     pages?: () => any;
     forms?: ElectionContentDto[];
@@ -53,6 +54,9 @@ function create(opts: Options = {}) {
     const elections = {
         getCurrent: vi.fn().mockReturnValue(of(opts.current === undefined ? { id: 7 } : opts.current)),
         getBoard: vi.fn().mockImplementation(opts.getBoard ?? (() => of(board()))),
+        getPublicCandidateList: vi.fn().mockImplementation(opts.getCandidateList ?? (() => of([
+            { seatId: 1, positionTitle: 'President', places: 1, candidates: [{ nominationId: 12, name: 'Candidate One', photoUrl: null, statement: 'A public statement.' }] }
+        ] as PublicCandidateSeatDto[]))),
         getBlankForm: vi.fn().mockReturnValue(of(new Blob(['%PDF']))),
         getOfficialDocument: vi.fn().mockReturnValue(of(new Blob(['%PDF'])))
     };
@@ -142,6 +146,43 @@ describe('ElectionsPage board', () => {
 
         expect(el.querySelector('#election-board')).toBeNull();
         expect(el.textContent).toContain('Elections & Forms');
+    });
+
+    it('FR-051: publishes the finalized candidate list on the public board', () => {
+        const { el, elections } = create({ getBoard: () => of(board({ phase: 'CandidateList' })) });
+
+        expect(elections.getPublicCandidateList).toHaveBeenCalledWith(7);
+        expect(el.textContent).toContain('Final candidate list');
+        expect(el.textContent).toContain('President');
+        expect(el.textContent).toContain('Candidate One');
+        expect(el.textContent).toContain('A public statement.');
+    });
+
+    it('FR-051: does not request or show candidates before the list is finalized', () => {
+        const { el, elections } = create({ getBoard: () => of(board({ phase: 'Withdrawal' })) });
+
+        expect(elections.getPublicCandidateList).not.toHaveBeenCalled();
+        expect(el.textContent).not.toContain('Final candidate list');
+    });
+
+    it('FR-051: does not publish candidates from test elections', () => {
+        const { el, elections } = create({ getBoard: () => of(board({ phase: 'CandidateList', isTest: true })) });
+
+        expect(elections.getPublicCandidateList).not.toHaveBeenCalled();
+        expect(el.textContent).not.toContain('Final candidate list');
+    });
+
+    it('FR-051: clears the previous candidate list when a reload finds an earlier phase', () => {
+        let reloaded = false;
+        const { component, el, fixture } = create({ getBoard: () => of(board({ phase: reloaded ? 'Withdrawal' : 'CandidateList' })) });
+
+        expect(component.publicCandidateList()).not.toBeNull();
+        reloaded = true;
+        component.ngOnInit();
+        fixture.detectChanges();
+
+        expect(component.publicCandidateList()).toBeNull();
+        expect(el.textContent).not.toContain('Candidate One');
     });
 });
 

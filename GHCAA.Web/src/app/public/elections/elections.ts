@@ -9,7 +9,7 @@ import { ElectionsService } from '../../core/services/elections.service';
 import { ElectionContentService } from '../../core/services/election-content.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { ElectionBoardDto, ElectionContentDto, ElectionPrintMode } from '../../core/models/election.models';
+import { ELECTION_PHASE_ORDER, ElectionBoardDto, ElectionContentDto, ElectionPrintMode, PublicCandidateSeatDto } from '../../core/models/election.models';
 import { ADMIN_ROLES, API_ENDPOINTS, ELECTION_STAFF_ROLES, getElectionPhaseLabel } from '../../core/constants/app.constants';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { ExportUtil } from '../../core/utils/export.util';
@@ -64,6 +64,8 @@ export class ElectionsPage implements OnInit {
     openForm = signal<ElectionForm | null>(null);
     /** The current election's public board. Stays null when there is no election or the call fails. */
     board = signal<ElectionBoardDto | null>(null);
+    /** Candidates published after the list is finalized. */
+    publicCandidateList = signal<PublicCandidateSeatDto[] | null>(null);
     /** Set when an election is running, so staff can print its forms filled in. */
     currentElectionId = signal<number | null>(null);
     printing = signal(false);
@@ -201,16 +203,35 @@ export class ElectionsPage implements OnInit {
     }
 
     ngOnInit() {
-        this.electionsService.getCurrent().subscribe({
+        this.board.set(null);
+        this.publicCandidateList.set(null);
+        this.currentElectionId.set(null);
+        this.electionsService.getCurrent().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
             next: election => {
                 if (!election) return;
                 this.currentElectionId.set(election.id);
-                this.electionsService.getBoard(election.id).subscribe({
-                    next: board => this.board.set(board),
-                    error: () => this.board.set(null)
+                this.electionsService.getBoard(election.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+                    next: board => {
+                        this.board.set(board);
+                        if (!board.isTest && ELECTION_PHASE_ORDER.indexOf(board.phase) >= ELECTION_PHASE_ORDER.indexOf('CandidateList')) {
+                            this.electionsService.getPublicCandidateList(board.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+                                next: candidates => this.publicCandidateList.set(candidates),
+                                error: () => this.publicCandidateList.set(null)
+                            });
+                        } else {
+                            this.publicCandidateList.set(null);
+                        }
+                    },
+                    error: () => {
+                        this.board.set(null);
+                        this.publicCandidateList.set(null);
+                    }
                 });
             },
-            error: () => this.board.set(null)
+            error: () => {
+                this.board.set(null);
+                this.publicCandidateList.set(null);
+            }
         });
         this.contentService.list('Page').subscribe({
             next: pages => { this.pages.set(pages); this.pagesLoading.set(false); },

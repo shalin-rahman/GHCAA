@@ -38,6 +38,7 @@ describe('AdminElections ballot key', () => {
             getAdminElections: vi.fn().mockReturnValue(of([election])),
             setBallotKey: vi.fn().mockReturnValue(of(ran({ ...election, ballotKeyFingerprint: 'ab12' }))),
             publish: vi.fn(),
+            declare: vi.fn().mockReturnValue(of(null)),
             approve: vi.fn().mockReturnValue(of(undefined)),
             reject: vi.fn().mockReturnValue(of(undefined)),
             runCount: vi.fn().mockReturnValue(of({ results: [], pending: null })),
@@ -403,6 +404,46 @@ describe('AdminElections ballot key', () => {
         expect(confirmMock.confirm.mock.calls[0][0].danger).toBe(true);
         expect(component.elections()[0].phase).toBe('Campaign');
         expect(component.approvals()[7]?.[0].action).toBe('OpenPolling');
+    });
+
+    it('FR-017: declares counted results through the two-person flow', async () => {
+        const counting = { ...election, phase: 'Counting', myPermissions: ['Declare'] } as AdminElectionDto;
+        const pending: ElectionApprovalDto = { ...request, action: 'Declare' };
+        electionsMock.declare.mockReturnValue(of(pending));
+        component.elections.set([counting]);
+
+        await component.declareResults(counting);
+
+        expect(confirmMock.confirm.mock.calls[0][0].confirmLabel).toBe('Declare results');
+        expect(electionsMock.declare).toHaveBeenCalledWith(counting.id);
+        expect(component.approvals()[counting.id]?.[0].action).toBe('Declare');
+        expect(component.declaringId()).toBeNull();
+    });
+
+    it('shows the server reason when declaring results fails', async () => {
+        const counting = { ...election, phase: 'Counting', myPermissions: ['Declare'] } as AdminElectionDto;
+        electionsMock.declare.mockReturnValue(throwError(() => new HttpErrorResponse({
+            status: 400,
+            error: { detail: 'The election is missing a verified count.' }
+        })));
+        component.elections.set([counting]);
+
+        await component.declareResults(counting);
+
+        expect(notifyMock.error).toHaveBeenCalledWith('The election is missing a verified count.');
+        expect(component.declaringId()).toBeNull();
+    });
+
+    it('shows the declare button only while counting with Declare permission', () => {
+        const fixture = TestBed.createComponent(AdminElections);
+        fixture.componentInstance.elections.set([
+            { ...election, phase: 'Counting', myPermissions: ['Declare'] } as AdminElectionDto,
+            { ...election, id: 8, phase: 'Counting', myPermissions: ['Count'] } as AdminElectionDto
+        ]);
+        fixture.detectChanges();
+
+        const buttons = Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>);
+        expect(buttons.filter(button => button.textContent?.trim() === 'Declare results')).toHaveLength(1);
     });
 
     it('does nothing when the advance is not confirmed', async () => {

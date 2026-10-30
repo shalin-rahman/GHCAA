@@ -427,6 +427,13 @@ export interface ElectionSeatViewDto {
     places: number;
 }
 
+export interface PublicCandidateSeatDto {
+    seatId: number;
+    positionTitle: string;
+    places: number;
+    candidates: BallotCandidateDto[];
+}
+
 export interface BallotSeatDto {
     seatId: number;
     positionTitle: string;

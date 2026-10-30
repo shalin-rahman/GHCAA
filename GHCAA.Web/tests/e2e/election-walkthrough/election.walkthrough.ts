@@ -726,9 +726,15 @@ test('election walkthrough', async ({ browser, baseURL }) => {
 
     // 13. Declare and results
     report.section('Declare and results', 'Declaring publishes the results. It is a two-person step.');
-    const declared = await twoPerson(cc, comm, 'POST', `/elections/${eid}/declare`);
-    note('api', cc.name, 'Declare requested and approved', `First answer ${declared.reply.status}${declared.approvalId ? `, approval ${declared.approvalId} approved by ${comm.name}` : ''}.`);
-    report.gap('The web app has no Declare button. The declare went through the API.');
+    await ccWeb.goto(`/officials/elections/${eid}`);
+    const declareCard = card(ccWeb.page, c.title);
+    const declareButton = declareCard.getByRole('button', { name: 'Declare results', exact: true });
+    await expect(declareButton).toBeVisible({ timeout: 15_000 });
+    await declareButton.click();
+    await ccWeb.confirm('Declare results');
+    await expect(ccWeb.page.getByText(/second person must approve|Election results declared/i).first()).toBeVisible({ timeout: 60_000 });
+    await ccWeb.shot('Declare requested');
+    if (await phaseOf(eid) !== 'Declared') await approveOnDashboard(commWeb, eid, 'Declare results');
     expect(await phaseOf(eid)).toBe('Declared');
     report.reachedPhase('Declared');
 

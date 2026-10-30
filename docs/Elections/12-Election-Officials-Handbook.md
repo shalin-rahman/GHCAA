@@ -306,7 +306,7 @@ The Returning Officer should say these plainly to the committee.
 
 ## Where the key lives
 
-The original is on a device the Returning Officer controls, behind a screen lock. The Association sets how many sealed copies exist (default 2, at least 1). The Chief Commissioner names the holders from the appointed officials when the key is set. Each holder must be a different person and not a candidate, and each confirms receipt. The app does not yet hold the holders or the confirmations (TODO 37.14a), so the Chief Commissioner logs them by hand. A copy is kept in a sealed envelope with a log entry, and every copy is destroyed together with the original once the recount window has closed. If every copy is lost, that is a level 3 incident: the election is void and is run again. Never in email, chat, a shared drive, a repository or a ticket. The person
+The original is on a device the Returning Officer controls, behind a screen lock. The Association sets how many sealed copies exist (default 2, at least 1). The Chief Commissioner names the holders from the appointed officials when the key is set. Each holder must be a different person and not a candidate, and each confirms receipt. The app does not yet hold the holders or the confirmations (TODO 37.14a), so the Chief Commissioner logs them by hand. Owner decision 2026-10-27: polling remains blocked until the recorded copy count matches the configured number and every holder confirms receipt. A copy is kept in a sealed envelope with a log entry, and every copy is destroyed together with the original once the recount window has closed. If every copy is lost, that is a level 3 incident: the election is void and is run again. Never in email, chat, a shared drive, a repository or a ticket. The person
 who approves the count never sees the key. The full procedure is `11-Election-Key-Procedure.md`.
 
 ---
@@ -672,6 +672,10 @@ System steps
 
     The request to open polling is refused while any item is not met, and the refusal names the
     items still open. The approval is checked again, because the request may be hours old.
+
+    Owner decision 2026-10-27: 37.14a must enforce the configured copy count and each holder's
+    receipt confirmation before Polling. Until that work is built, the Commission checks the full
+    custody list by hand before approving polling.
 11. A Commissioner with `ChangePhase` asks to open polling. A second official with `Approve` approves.
 12. The rules freeze as soon as the request is pending.
 
@@ -1088,9 +1092,11 @@ Rules for every form:
 
 1. The 16 codes the platform printed before 2026-10-22 (the Old code column) no longer open a form, on
    the document download or on the verify page. A QR code on a form printed before then does not resolve.
-2. Any form can be printed at any time, either filled from the election's stored records or blank for
-   hand filling (TODO 37.14s, form wording from settings). Until that is built, a form marked Not built
-   is copied from its template and filled by hand.
+2. Forms may be printed from stored records or prepared blank for hand filling (TODO 37.14s, form
+   wording from settings). A blank template is not proof that an official form has been issued.
+   Under the 37.14t owner decision, verification must prove the paper is genuine and unchanged and
+   must reject a form that could not yet exist in the election phase. Until that verification is
+   built, a form marked Not built is copied from its template and filled by hand.
 3. The organisation name, address, phone numbers, email and logo on a form come from the org settings
    (TODO 37.14s). Today the PDF header prints the organisation name only.
 4. A signature line for a committee position prints the label of the position that holds the head or

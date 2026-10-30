@@ -46,6 +46,32 @@
                 <a [href]="auditVerifyUrl" target="_blank" rel="noopener">Check the audit chain</a></p>
             }
         </article>
+        @if (publicCandidateList(); as seats) {
+        <article class="glass-card doc-card candidate-list" id="final-candidate-list">
+            <h3>Final candidate list</h3>
+            <p>These candidates passed scrutiny and remained on the ballot when nominations closed.</p>
+            @for (seat of seats; track seat.seatId) {
+            <section class="candidate-seat">
+                <h4>{{ seat.positionTitle }} <span>({{ seat.places }} place{{ seat.places === 1 ? '' : 's' }})</span></h4>
+                <ul>
+                    @for (candidate of seat.candidates; track candidate.nominationId) {
+                    <li class="candidate-entry">
+                        @if (candidate.photoUrl) {
+                        <img [src]="candidate.photoUrl" [alt]="candidate.name" loading="lazy">
+                        }
+                        <div>
+                            <strong>{{ candidate.name }}</strong>
+                            @if (candidate.statement) { <p>{{ candidate.statement }}</p> }
+                        </div>
+                    </li>
+                    }
+                </ul>
+            </section>
+            } @empty {
+            <p>No candidates were accepted for this election.</p>
+            }
+        </article>
+        }
     </section>
     }
 

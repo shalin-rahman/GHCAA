@@ -109,6 +109,20 @@ class TrackerItemShapes(unittest.TestCase):
         self.assertEqual(found, [("7", "16", "IN-PROGRESS"), ("7", "17", "TODO"),
                                  ("37", "13m", "TODO"), ("37", "13h", "DONE 2026-10-03")])
 
+    def test_wontdo_counts_as_done(self):
+        # A dropped item is closed work; counting it as open would understate progress.
+        real = wbs._tracked_text
+        wbs._tracked_text = lambda: (
+            "## Work Package 62 - White label\n"
+            "62.31 [WONTDO 2026-10-31] **Priority: P0.** dropped by the owner\n"
+            "62.32 [DONE 2026-10-20] **Priority: P1.** shipped\n"
+            "62.33 [TODO] **Priority: P2.** still open\n")
+        try:
+            tasks, done, _, _ = wbs.tracker()
+        finally:
+            wbs._tracked_text = real
+        self.assertEqual((tasks["62"], done["62"]), (3, 2))
+
     def test_open_items_carry_their_priority_in_either_shape(self):
         entries = [m.group(0) for m in wbs.OPEN_ITEM.finditer(self.TEXT)]
         self.assertEqual([wbs.PRIORITY.search(e).group(1) for e in entries], ["P2", "P1"])

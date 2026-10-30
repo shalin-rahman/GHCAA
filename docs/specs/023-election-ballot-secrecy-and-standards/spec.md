@@ -2,7 +2,7 @@
 
 **Feature Branch**: 023-election-ballot-secrecy-and-standards
 **Created**: 2026-09-27
-**Status**: In progress. As of 2026-10-20 the secrecy, whole-ballot, phase and declaration fixes are built (tracker 37.1i to 37.1l, 37.1n, 37.1o, 37.1q). On 2026-10-21 the readiness gate (37.12w) was built and the server-made receipt (37.14o) was built pending a look on a phone and in a browser. Still open: 37.1m (receipt checks) and 37.1p (recount, consent, conflict, spoiled and unopposed seats)
+**Status**: In progress. The secrecy, whole-ballot, phase, declaration and readiness fixes are built. The server-made receipt is built; it still needs a browser and device check (37.1m, 84.50). The recount, consent, conflict, spoiled and unopposed-seat rules remain open (37.1p). Other open election work is tracked in `docs/TODO.md`.
 **Input**: Review of the election engine on 2026-09-27. The user asked that votes stay anonymous,
 that a voter can print their ballot after voting, and that the engine be checked against common
 election practice.
@@ -219,7 +219,9 @@ P2 brings the rules in line with the constitution.
   with the `ViewDashboard` permission, so a rehearsal can print its forms. Admin reads still show it. Added 2026-10-10, tracker
   37.13d. Decided 2026-10-11: `GET api/elections/{id}` and `GET api/elections/{id}/audit/verify` also
   answer 404 for a test election, the board stays readable, and a test election does not hold its EC
-  period. A rehearsal therefore never blocks the real election for the same period. The anonymous
+  period. The owner reaffirmed on 2026-10-26 that the public board remains readable (TODO 37.14u),
+  while the candidate-list route remains hidden with other public election detail.
+  A rehearsal therefore never blocks the real election for the same period. The anonymous
   `GET api/elections/latest-declared` returns the newest declared or archived non-test election, for the
   results pages.
 - **FR-048** Each election keeps a hash-chained audit list. Anyone can ask whether the chain is whole,
@@ -233,6 +235,18 @@ P2 brings the rules in line with the constitution.
   fingerprint. It can be recorded once and not before Declared. The officials dashboard on web shows
   the box. Added 2026-10-10, tracker 37.12h and 37.13e. Procedure:
   `docs/Elections/11-Election-Key-Procedure.md`.
+- **FR-051** Once an election enters CandidateList, the public election board shows the finalized
+  candidates grouped by seat, with each candidate's name, photo and statement in ballot order.
+  Before CandidateList and for test elections, the public candidate-list route answers 404. It does
+  not expose proposers, seconders or consent times. Added 2026-10-27, tracker 37.16c.
+- **FR-052** Polling stays unavailable until the number of recorded key copies matches the
+  configured copy count and every configured, distinct eligible holder has confirmed receipt.
+  Readiness reports custody as unmet until both conditions hold. Owner decision 2026-10-27,
+  tracker 37.12w and planned 37.14a.
+- **FR-053** The public form-verification flow proves that a printed form is genuine and unchanged.
+  Its proof is bound to the canonical printed content and valid form version; the verification flow
+  rejects a form that could not yet exist in the election phase. The page exposes the canonical
+  content or its digest for comparison. Owner decision 2026-10-27, tracker 37.14t.
 
 ### P1: the incoming committee (added 2026-10-09, tracker 37.1t and 37.1u)
 

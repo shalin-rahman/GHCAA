@@ -12,6 +12,12 @@ remove or rename). This file is the *record* of each time that rule was
 applied — one entry per change, so a client left behind is visible at a
 glance.
 
+### 2026-10-27 — GET /api/elections/{id}/candidate-list
+- Change: new anonymous route returns accepted candidates by seat, with name, photo, statement and ballot order, only from CandidateList onward. It answers 404 before finalization and for test elections. Proposer, seconder and consent data are not included.
+- Reason: owner request 2026-10-27; spec 023 FR-051, TODO 37.16c.
+- Web: `ElectionsService.getPublicCandidateList` renders the list on the Elections & Forms public board after CandidateList.
+- Mobile: no public election board screen uses this route.
+
 ## Current endpoint surface
 
 The full route list lives in one place and this file doesn't duplicate it
@@ -290,7 +296,7 @@ a gap someone still needs to close.
 ### 2026-09-21 — /api/elections/{id}/count, /api/elections/{id}/declare
 - Change: added count, tie, winner, and declaration endpoints.
 - Reason: Work Package 37.1 requires persisted results, recount-safe replacement of result rows, and EC roster updates on declaration.
-- Web: public results and admin counting/declaration surfaces consume these routes.
+- Web: the public results page reads the results route; the admin election page counts and requests declaration through the two-person approval flow.
 - Mobile: typed result support is present; counting and declaration remain administrative operations.
 
 ### 2026-09-21 — /api/elections/{id}/documents/{formCode}

@@ -2,7 +2,7 @@
 
 **Feature Branch**: `013-profile-family-identity`
 **Created**: 25-09-2026
-**Status**: As-built baseline
+**Status**: As-built baseline; profile email verification remains open under TODO 97.1
 **Input**: Reverse-engineered from the implemented code.
 **Depends on**: spec 003, the alumni programs and verification spec that first covers digital credentials; spec 005, the academic and organisation profile-flag spec that shapes `BaseMemberDto`'s academic fields; and the "Member profiles, directory, and identity documents" and "Family links" sections of `docs/specs/001-platform-baseline/evidence/implementation-feature-catalog.md`, the platform-baseline feature catalog.
 
@@ -230,3 +230,9 @@ Someone scans the QR code on a printed ID card or certificate, or types the shor
 - The evidence table's Angular/Flutter/test cells reflect only what a grep or read in this pass actually surfaced; a cell marked "none found" means no matching file was located during this trace, not that no such file exists anywhere in the repo.
 - `BaseMemberDto`'s DataAnnotations (`[Required]`, `[MaxLength]`, the Bangladeshi mobile-number regex, `AcademicHistory` requiring at least one entry) are assumed to be the full validation surface for `UpdateProfileDto`, since no FluentValidation validator class was found for it in `GHCAA.Application/Validators`.
 - Dates in this spec are shown `dd-MM-yyyy`; token TTLs and other durations are stated in their native unit (minutes/days) as found in code.
+
+## Extension: profile email verification (TODO 97.1)
+
+A member can currently verify an email only during registration. The profile update flow must allow a member to verify or re-verify the current address. Editing the email clears `EmailVerified`; the member then requests an OTP using the existing registration OTP service and its five-attempt lock. On successful verification, the profile marks the current address verified. An unverified address does not block sign-in. Social sign-in may link by email only when `EmailVerified` is true.
+
+Web and Mobile show the verification state and offer the verification action. The API remains authoritative and must not accept verification of an address other than the current profile email. Tests cover address change, OTP reuse, wrong/expired/replayed codes, attempt lock, and prevention of social linking while unverified. See [the 97.1 task breakdown](./tasks.md).

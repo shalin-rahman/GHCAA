@@ -706,7 +706,13 @@ Before the session ends: PostgreSQL dry run of the whole migration chain on a no
 
 - 37.14a: copy count in the election settings (`OrgConfigDto.cs:27`, default 2, minimum 1). The
   Chief Commissioner names holders at key set. Holders are different appointed officials and not
-  candidates. Each confirms receipt. Key destroy also records the copies destroyed.
+  candidates. Each confirms receipt. Enforce the configured count exactly, and keep Polling blocked
+  until the recorded copy count matches and every configured holder has confirmed. Key destroy also
+  records the copies destroyed. Owner decision 2026-10-27.
+- 37.14t: verification must prove that a printed form is genuine and unchanged. Bind the proof to
+  the canonical printed content and valid form version, reject forms that could not yet exist in the
+  current phase, and expose the canonical content or digest for comparison. The cryptographic
+  construction is an implementation design choice. Owner decision 2026-10-27.
 - 37.1p unopposed: a seat with one valid candidate is left off the ballot (today it is not,
   `ElectionService.cs:675`), and the candidate is declared elected unopposed at declare and on
   the certificate. When every seat is unopposed or vacant, the CandidateList to Declared step
@@ -743,7 +749,8 @@ It returns each condition as met or unmet:
 refuse with the unmet list. The `TooFewApprovers` warning joins the same list.
 
 Built 2026-10-21. Differences from the table: the roll item checks that roll rows exist, which
-only a freeze writes. The key item checks only that a key is set until 37.14a records the copies.
+only a freeze writes. The key item checks only that a key is set until 37.14a records the copies and
+their confirmations; the accepted count and holder checks must block Polling when custody is short.
 The window item checks the order and that it has not closed, because polling may open early. The
 approver item is advisory: it shows on the list but is left out of the 400 and does not block.
 Attestations are made by an official with `ChangePhase`, after step-up, and test elections need

@@ -47,8 +47,8 @@ final _ballotProvider =
 });
 
 // The officials list is a side note, so a failed call hides it instead of breaking the screen.
-final _boardProvider =
-    FutureProvider.autoDispose.family<ElectionBoard?, int>((ref, electionId) async {
+final _boardProvider = FutureProvider.autoDispose
+    .family<ElectionBoard?, int>((ref, electionId) async {
   try {
     return await ref.read(electionServiceProvider).getBoard(electionId);
   } catch (_) {
@@ -77,6 +77,7 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
   bool _reviewing = false;
   bool _submitting = false;
   bool _alreadyVoted = false;
+  bool _receiptStorageFailed = false;
   String? _trackingCode;
   // The server receipt: code, title and cast time, no choices. Kept on the phone until
   // the election is archived, so it can be saved again after leaving this screen.
@@ -129,7 +130,11 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
 
   Future<void> _submit(Ballot ballot) async {
     // buildBallotChoices turns a missing seat into an abstention, so an undecided seat must not get this far.
-    if (_submitting || _closed(ballot) || !allSeatsDecided(ballot.seats, _picks)) return;
+    if (_submitting ||
+        _closed(ballot) ||
+        !allSeatsDecided(ballot.seats, _picks)) {
+      return;
+    }
     setState(() => _submitting = true);
     final choices = buildBallotChoices(ballot.seats, _picks);
     try {
@@ -137,23 +142,29 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
           .read(electionServiceProvider)
           .castBallot(widget.election.id, choices);
       final pdf = result.receiptPdf;
+      var receiptStorageFailed = false;
       if (pdf != null) {
         try {
           await ref
               .read(storageServiceProvider)
               .saveBallotReceipt(widget.election.id, base64Encode(pdf));
-        } catch (_) {
-          // The vote is recorded. Without storage the receipt lasts only for this screen.
+        } catch (error) {
+          debugPrint(
+              'Could not save the election receipt on this device: $error');
+          receiptStorageFailed = true;
         }
       }
       if (mounted) {
         setState(() {
           _trackingCode = result.trackingCode;
           _receiptPdf = pdf;
+          _receiptStorageFailed = receiptStorageFailed;
           _reviewing = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Your ballot was recorded.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(receiptStorageFailed
+                ? 'Your ballot was recorded, but the receipt could not be saved on this device. Download it before leaving this page.'
+                : 'Your ballot was recorded.')));
       }
     } on DioException catch (e) {
       if (!mounted) return;
@@ -204,8 +215,7 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
                 _receiptButton(),
                 const SizedBox(height: AppTheme.spaceL),
               ],
-            ]
-            else if (ballot.isEligible == false)
+            ] else if (ballot.isEligible == false)
               _Notice(
                   title: 'You cannot vote in this election',
                   body: '${ballot.ineligibilityReason ?? ballotNotOnRoll}\n'
@@ -216,8 +226,7 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
                       'Voting opens once this election reaches the polling phase.'),
             if (_resultPhases.contains(ballot.phase)) ...[
               OutlinedButton.icon(
-                onPressed: () =>
-                    context.push('/election/results'),
+                onPressed: () => context.push('/election/results'),
                 icon: const Icon(Icons.bar_chart),
                 label: const Text('Results and tracking codes'),
               ),
@@ -286,10 +295,13 @@ class _ElectionBodyState extends ConsumerState<_ElectionBody> {
             const SizedBox(height: AppTheme.spaceM),
             _receiptButton(),
             const SizedBox(height: AppTheme.spaceS),
-            const Text(
-                'The receipt has the code and the time you voted, not your choices. '
-                'It stays on this phone until the election is archived or you sign out.',
-                style: TextStyle(color: AppTheme.textMuted)),
+            Text(
+                _receiptStorageFailed
+                    ? 'The receipt has the code and the time you voted, not your choices. '
+                        'It was not saved on this device, so download it before leaving this page.'
+                    : 'The receipt has the code and the time you voted, not your choices. '
+                        'It stays on this phone until the election is archived or you sign out.',
+                style: const TextStyle(color: AppTheme.textMuted)),
           ],
         ]));
   }
@@ -511,7 +523,9 @@ class _CandidateCard extends StatelessWidget {
       subtitle: candidate.statement.isEmpty ? null : candidate.statement,
       leading: photoUrl == null
           ? const CircleAvatar(child: Icon(Icons.person_outline))
-          : CircleAvatar(backgroundImage: cachedImageProvider(context, photoUrl, size: 40)),
+          : CircleAvatar(
+              backgroundImage:
+                  cachedImageProvider(context, photoUrl, size: 40)),
       chosen: chosen,
       single: single,
       onChoose: onChoose,
@@ -553,8 +567,12 @@ class _ChoiceCard extends StatelessWidget {
             onTap: onChoose,
             trailing: Icon(
                 single
-                    ? (chosen ? Icons.check_circle : Icons.radio_button_unchecked)
-                    : (chosen ? Icons.check_box : Icons.check_box_outline_blank),
+                    ? (chosen
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked)
+                    : (chosen
+                        ? Icons.check_box
+                        : Icons.check_box_outline_blank),
                 color: chosen ? AppTheme.royalGold : AppTheme.textMuted),
           ),
         ),

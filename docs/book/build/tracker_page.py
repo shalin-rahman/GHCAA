@@ -21,7 +21,7 @@ HEAD = re.compile(r"^#+ *Work Package (\d+)[ \u2014:-]*(.*)$")
 # bold only the id ("- **62.56g** [DONE"). Missing any of these drops open work.
 ITEM = re.compile(r"^(?:> )?(?P<bold>\s*- \*\*)?(\d+)\.(\d+[a-z]?(?:\.\d+|\.[A-Z])?|[A-Z]\d+)"
                   r"(?(bold)(?P<shut>\*\*)?(?: (?P<title>[^\[\n]*?))?) *"
-                  r"\[(TODO|IN PROGRESS|BLOCKED|ONHOLD|PARTIAL|DONE)([^\]]*)\]\s*(.*)$")
+                  r"\[(TODO|IN PROGRESS|BLOCKED|ONHOLD|PARTIAL|DONE|WONTDO)([^\]]*)\]\s*(.*)$")
 
 # Same shape as wbs.py's DEFECT pattern, applied per item instead of per work
 # package, so the tracker page can flag individual bug/defect entries.
@@ -137,7 +137,7 @@ def parse():
         items.append(dict(
             id=f"{m.group(2)}.{m.group(3)}", wp=num, state=state,
             state_label=(f"{state} {note}".strip() if note else state),
-            status=("closed" if state == "DONE" else "open"),
+            status=("closed" if state in ("DONE", "WONTDO") else "open"),
             pr=pr_val,
             dep=dep_m.group(1).strip().rstrip(".").strip() if dep_m else "",
             cat=cat, cat_note=cat_note, text=clean,

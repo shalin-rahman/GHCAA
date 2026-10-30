@@ -63,6 +63,7 @@ export class AdminElections {
 
     publishingId = signal<number | null>(null);
     closingId = signal<number | null>(null);
+    declaringId = signal<number | null>(null);
     advancingId = signal<number | null>(null);
     addingCandidateId = signal<number | null>(null);
     removingCandidateId = signal<number | null>(null);
@@ -213,6 +214,34 @@ export class AdminElections {
         this.electionsService.close(election.id).subscribe({
             next: result => { this.closingId.set(null); this.applyStep(result); },
             error: () => { this.closingId.set(null); this.notify.error('Failed to close election.'); }
+        });
+    }
+
+    async declareResults(election: AdminElectionDto): Promise<void> {
+        if (this.declaringId() !== null) return;
+        const confirmed = await firstValueFrom(this.confirmDialog.confirm({
+            title: this.text.DECLARE_CONFIRM_TITLE,
+            message: this.text.DECLARE_CONFIRMATION(election.title),
+            confirmLabel: this.text.DECLARE_BUTTON
+        }));
+        if (!confirmed) return;
+
+        this.declaringId.set(election.id);
+        this.electionsService.declare(election.id).subscribe({
+            next: pending => {
+                this.declaringId.set(null);
+                if (pending) {
+                    this.applyStep({ election: null, pending });
+                    return;
+                }
+                this.notify.success(this.text.DECLARE_COMPLETE);
+                this.load();
+            },
+            error: (error: HttpErrorResponse) => {
+                this.declaringId.set(null);
+                const detail = error.error?.detail;
+                this.notify.error(typeof detail === 'string' && detail.trim() ? detail : this.text.DECLARE_FAILED);
+            }
         });
     }
 

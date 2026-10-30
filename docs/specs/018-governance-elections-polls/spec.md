@@ -358,25 +358,23 @@ and confirm rejection, then confirm the member vote status and result percentage
 
 - Ballot secrecy, receipt, results publication and election-rule gaps found in the
   2026-09-27 review are listed in spec 023, election ballot secrecy and standards. As of
-  2026-10-21 only two remain open in docs/TODO.md: 37.1m (receipt still needs a browser and
-  phone check; the Bengali font gap was closed by the server-made receipt, 37.14o) and 37.1p (recount, candidate consent,
-  officer conflict, spoiled and unopposed seats).
+  Current open election and ballot work is tracked in `docs/TODO.md`, including 37.1m (receipt
+  checks), 37.1p (election rules), 37.14t (form verification), and 84.50 and 84.52 (device and
+  walkthrough checks). Use the tracker for current status.
 
 ## Enhancements: modularisation and reusability
 
 ### Reuse across layers
 
-- ENH-001 (P2): cast one vote per member, guard against a concurrent duplicate is
-  implemented three separate times with three different safety levels:
-  GHCAA.Infrastructure/Services/ElectionService.cs CastVoteAsync (Serializable transaction
-  over SeatVote, Ballot and BallotVote), GHCAA.Infrastructure/Services/PollService.cs
-  VoteAsync (Serializable transaction over PollVote), and
-  GHCAA.Infrastructure/Services/GovernanceService.cs VoteOnConstitutionAsync (a plain
-  AnyAsync already-voted check with no transaction). The unique index on ConstitutionId and
-  MemberId in GHCAA.Infrastructure/Data/Configurations/AmendmentVoteConfiguration.cs:23 still
-  blocks a second row, so two concurrent votes cannot both count. The loser gets an unhandled
-  DbUpdateException instead of the "already voted" reply. A shared single-vote-per-member
-  helper would give all three the same behaviour.
+- ENH-001 (P2): one-vote rules use separate implementations across elections, polls and
+  constitutional amendments. `ElectionService.CastBallotAsync` uses a Serializable transaction
+  and retries PostgreSQL serialization failures up to eight times with a short randomized delay
+  (TODO 84.53, NFR-R5). `PollService.VoteAsync` also uses a Serializable transaction.
+  `GovernanceService.VoteOnConstitutionAsync` checks before insert and relies on the unique index
+  on ConstitutionId and MemberId in
+  `GHCAA.Infrastructure/Data/Configurations/AmendmentVoteConfiguration.cs`; a concurrent insert
+  still needs a user-facing duplicate-vote response. A shared helper would need to preserve each
+  domain's persistence rules.
 - ENH-002 (P3): SeatTitle(ECPosition) is duplicated verbatim as a private static method in
   both GHCAA.Infrastructure/Services/ElectionService.cs and
   GHCAA.API/Controllers/AdminElectionsController.cs. One copy would remove the risk of the

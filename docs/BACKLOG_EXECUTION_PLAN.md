@@ -1,4 +1,11 @@
-# Backlog execution plan (all open, non-ON HOLD items, 2026-09-27)
+# Backlog execution plan
+
+**Current plan:** [`NON_ELECTION_BACKLOG_EXECUTION_PLAN.md`](./NON_ELECTION_BACKLOG_EXECUTION_PLAN.md)
+orders active non-election work and identifies owner gates and held items.
+
+The mixed ordering below was last reconciled on 2026-09-27. It is retained as
+history and is no longer an execution order. Election work is managed in its
+separate delivery plan.
 
 This is the dependency-ordered plan for every `[TODO]` item in `docs/TODO.md` that is not
 `[ONHOLD]`, built from a code-state audit against the current tree (not from the TODO text

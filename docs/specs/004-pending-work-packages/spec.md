@@ -2,17 +2,29 @@
 
 ## Status
 
-This specification defines the remaining active backlog recorded in
-`docs/TODO.md` as of 2026-09-21. Items marked complete below are retained as
-implementation evidence and are not delivery work. Existing code, generated
-contracts, and tests remain authoritative.
+This specification is the planning index for active non-election work recorded
+in `docs/TODO.md`, reconciled on 2026-10-27. The tracker remains authoritative
+for item status, priority, dependencies, owner actions, and acceptance criteria.
+This specification groups requirements and shared constraints; `tasks.md` maps
+tracker items to their implementation breakdowns. Existing code, generated
+contracts, and tests remain authoritative. Election-specific work stays in the
+election delivery plan.
 
 ## Scope
 
-The specification covers every active `[TODO]`, `[PARTIAL]`, and
-`[IN PROGRESS]` item in the tracker, excluding completed items and archived
-history. Work Package 37.1 and decision 84.6 are completed and are included
-only as dependencies or integration boundaries.
+The specification covers active `[TODO]`, `[PARTIAL]`, and `[IN PROGRESS]`
+items whose main outcome is general platform, member, operations, quality,
+governance, or dissertation work. Shared platform work remains in scope even
+where elections also use it. Election workflow, ballot secrecy, polling,
+officials, and election forms are excluded. `[ONHOLD]` items are listed as
+blocked and are not ready work. Owner-only actions stay assigned to the owner.
+See [the task map](./tasks.md) and the [non-election execution plan](../../NON_ELECTION_BACKLOG_EXECUTION_PLAN.md)
+for tracker coverage and dependency order.
+
+The existing requirement sections retain prior acceptance detail, including
+completed boundaries and work packages shared with the election feature. Their
+presence does not schedule those items; only the current tracker map and the
+non-election execution plan determine active scope and order.
 
 ## Global requirements
 

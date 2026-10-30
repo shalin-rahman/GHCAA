@@ -103,5 +103,26 @@ class OtherIdShapes(unittest.TestCase):
         self.assertEqual(self.items["62.56g"]["text"], "bold id only")
 
 
+class WontDo(unittest.TestCase):
+    """Until 2026-10-31 a [WONTDO] item was not read at all, so it was neither open nor closed."""
+
+    def setUp(self):
+        self._root = tracker_page.ROOT
+        tracker_page.ROOT = Path(tempfile.mkdtemp())
+        (tracker_page.ROOT / "docs").mkdir()
+        (tracker_page.ROOT / "docs" / "TODO.md").write_text(
+            "## Work Package 62 - White label\n"
+            "62.31 [WONTDO 2026-10-31] **Priority: P0 | Depends on: 62.3.** dropped by the owner\n",
+            encoding="utf-8")
+        self.items = {i["id"]: i for i in tracker_page.parse()[1]}
+
+    def tearDown(self):
+        tracker_page.ROOT = self._root
+
+    def test_wontdo_is_read_as_closed(self):
+        item = self.items["62.31"]
+        self.assertEqual((item["state"], item["status"], item["pr"]), ("WONTDO", "closed", "P0"))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

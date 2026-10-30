@@ -43,6 +43,17 @@ describe('ElectionsService', () => {
         expect(value).toEqual(ELECTION);
     });
 
+    it('FR-051: gets the finalized public candidate list without an error toast on 404', () => {
+        const candidates = [{ seatId: 1, positionTitle: 'President', places: 1, candidates: [{ nominationId: 4, name: 'Candidate', photoUrl: null, statement: 'Statement' }] }];
+        let value: unknown;
+        service.getPublicCandidateList(ELECTION.id).subscribe(v => value = v);
+        const request = http.expectOne(API_ENDPOINTS.ELECTIONS.CANDIDATE_LIST(ELECTION.id));
+        expect(request.request.method).toBe('GET');
+        expect(request.request.headers.get('X-Skip-Error-Notify')).toBe('true');
+        request.flush(candidates);
+        expect(value).toEqual(candidates);
+    });
+
     it('casts the whole ballot in one request and returns the tracking code', () => {
         const ballot: CastBallotDto = { seats: [{ electionSeatId: 1, nominationIds: [5] }, { electionSeatId: 2, nominationIds: [] }] };
         let code: string | undefined;
@@ -62,6 +73,28 @@ describe('ElectionsService', () => {
         expect(request.request.method).toBe('POST');
         request.flush(results);
         expect(value).toEqual(results);
+    });
+
+    it('FR-017: requests declaration and returns the pending approval', () => {
+        const approval: ElectionApprovalDto = {
+            id: 31, electionId: 12, action: 'Declare', requestedByUserId: 1, requestedBy: 'alice',
+            requestedAt: '2026-10-01T10:00:00Z', expiresAt: '2026-10-03T10:00:00Z'
+        };
+        let value: ElectionApprovalDto | null | undefined;
+        service.declare(ELECTION.id).subscribe(v => value = v);
+        const request = http.expectOne(API_ENDPOINTS.ELECTIONS.DECLARE(ELECTION.id));
+        expect(request.request.method).toBe('POST');
+        expect(request.request.body).toEqual({});
+        request.flush(approval, { status: 202, statusText: 'Accepted' });
+        expect(value).toEqual(approval);
+    });
+
+    it('returns null when declaration runs immediately', () => {
+        let value: ElectionApprovalDto | null | undefined;
+        service.declare(ELECTION.id).subscribe(v => value = v);
+        const request = http.expectOne(API_ENDPOINTS.ELECTIONS.DECLARE(ELECTION.id));
+        request.flush(null, { status: 200, statusText: 'OK' });
+        expect(value).toBeNull();
     });
 
     // FR-37.1a. The API reads a JSON string, so a text/plain body would get a 415.

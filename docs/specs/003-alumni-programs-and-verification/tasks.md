@@ -2,26 +2,26 @@
 
 **Input**: [spec.md](./spec.md)
 
-**Purpose**: Track delivery of the five independent stories in spec.md. Every
-task below is future implementation work — none of it exists in the codebase
-yet. This file authorizes planning and sequencing, not a claim of completion.
+**Purpose**: Track delivery of the five stories in spec.md. Some are shipped;
+the checkboxes below reflect recorded completion while open work stays in
+`docs/TODO.md`.
 
 ## Phase 0: Prerequisite (blocks every story below)
 
-- [ ] T001 Confirm 37.0's migration path is live and verified against a
+- [x] T001 Confirm 37.0's migration path is live and verified against a
   non-empty database before starting any story in this spec (`docs/TODO.md`
   37.0/37.11; `gotcha_ensurecreated_no_op_existing_db`).
 
 ## Phase 1: Story 1 — Public credential verification (P1)
 
-- [ ] T002 Add `CredentialType` enum and `IssuedCredential` model; extend
+- [x] T002 [37.8 done] Add `CredentialType` enum and `IssuedCredential` model; extend
   `IIDCardService`/its implementation to record one per generated document
   and embed a QR pointing at `/verify/{shortCode}` (docs/TODO.md 37.8).
-- [ ] T003 Add `GET api/verify/{shortCode}` (`[AllowAnonymous]`, rate-limited)
+- [x] T003 [37.8 done] Add `GET api/verify/{shortCode}` (`[AllowAnonymous]`, rate-limited)
   returning only `{ valid, memberName, membershipType, issuedOn, status }`.
-- [ ] T004 Add admin revocation action; add public `/verify/:code` and
+- [x] T004 [37.8 done] Add admin revocation action; add public `/verify/:code` and
   `/verify` pages behind `enableCredentialVerification`.
-- [ ] T005 NUnit: revoked code returns `valid: false`; response DTO has no
+- [x] T005 [37.8 done] NUnit: revoked code returns `valid: false`; response DTO has no
   contact field; short codes unique across 10k generations. Vitest: three
   verdict states, unknown-code path.
 
@@ -61,18 +61,18 @@ yet. This file authorizes planning and sequencing, not a claim of completion.
 
 ## Phase 4: Story 4 — Scholarship & student-aid programme (P4)
 
-- [ ] T014 Add `ScholarshipApplicationStatus`/`DisbursementStatus` enums and
+- [x] T014 [37.2 done] Add `ScholarshipApplicationStatus`/`DisbursementStatus` enums and
   `ScholarshipFund`/`ScholarshipCall`/`ScholarshipApplication`/
   `ScholarshipDocument`/`ScholarshipReview`/`ScholarshipAward` models, reusing
   `FileUpload`/`IFileValidationService` for documents (docs/TODO.md 37.2).
-- [ ] T015 Implement the blind-review projection (`GetApplicationForReviewAsync`
+- [x] T015 [37.2 done] Implement the blind-review projection (`GetApplicationForReviewAsync`
   omits all identifying fields) and the ledger tie-in (paid award writes one
   `Grant` `FinancialRecord`, idempotent on repeat).
-- [ ] T016 Add `ScholarshipsController`; public `/scholarships` (listing,
+- [x] T016 [37.2 done] Add `ScholarshipsController`; public `/scholarships` (listing,
   apply, anonymous rate-limited status check by reference code), member
   `portal/scholarships` reviewer queue, admin `admin/scholarships`. Flag
   `enableScholarships`.
-- [ ] T017 NUnit: review DTO carries no identifying field; application
+- [x] T017 [37.2 done] NUnit: review DTO carries no identifying field; application
   rejected outside the call window; award-paid writes exactly one `Grant`
   record and is idempotent. Vitest: apply-form validation, unknown-code
   status lookup.

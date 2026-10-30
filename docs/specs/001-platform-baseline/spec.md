@@ -87,9 +87,10 @@ The nine domain specs hold 55 ENH items: 6 at P1, 25 at P2 and 24 at P3. One of 
 
 ### Feature gaps against a standard association platform
 
-Tracker item 84.18 reviews the entities against a standard association platform. The result will
-be added here. Items 84.19 (meetings with invitees, agenda, minutes and action items) and 84.20
-(tasks and notes) depend on it.
+Tracker item 84.18 reviews the entities against a standard association platform. Its result will
+be added here. A draft scope for 84.19 (meetings with invitees, agenda, minutes and action items)
+and 84.20 (contextual action items) is recorded in spec 026. It remains subject to the 84.18 gap
+review; standalone notes and a general task manager are not accepted scope.
 
 
 ## Cross-layer requirements

@@ -874,10 +874,10 @@ public sealed class ElectionDocumentServiceTests : TestBase
     }
 
     [Test]
-    public void AssociationTime_IsSixHoursAheadOfUtc()
+    public void AssociationTime_FormatsReceiptTimestampInBangladeshTime()
     {
-        AssociationTime.FromUtc(new DateTime(2026, 10, 21, 18, 30, 0, DateTimeKind.Utc))
-            .Should().Be(new DateTime(2026, 10, 22, 0, 30, 0));
+        AssociationTime.FormatReceiptTimestamp(new DateTime(2026, 10, 21, 18, 30, 0, DateTimeKind.Utc))
+            .Should().Be("22-10-2026 00:30");
     }
 
     private static async Task<byte[]?> WithGlyphCheckAsync(Func<Task<byte[]?>> generate)

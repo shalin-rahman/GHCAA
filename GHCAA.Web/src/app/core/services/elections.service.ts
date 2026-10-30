@@ -7,7 +7,7 @@ import {
     ElectionCountStepResult, ElectionResultDto, ElectionRulesUnlockDto, ElectionSummaryDto,
     ElectionSeatViewDto, NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto,
     DecideRecountRequest, ElectionRecountDto, RecordRecountRequest, RecountFigureDto, ScrutinyCheckDto, ScrutinyCheckItem, UpdateElectionFormDetailsRequest,
-    ElectionDocumentVerifyDto, ElectionPrintMode
+    ElectionDocumentVerifyDto, ElectionPrintMode, PublicCandidateSeatDto
 } from '../models/election.models';
 
 @Injectable({ providedIn: 'root' })
@@ -32,6 +32,11 @@ export class ElectionsService {
     // Anonymous. A 404 means the election does not exist, so the page just hides the board.
     getBoard(id: number): Observable<ElectionBoardDto> {
         return this.http.get<ElectionBoardDto>(API_ENDPOINTS.ELECTIONS.BOARD(id), { headers: this.quietHeaders });
+    }
+
+    // Anonymous. A 404 means the candidate list is not finalized or the election is a test.
+    getPublicCandidateList(id: number): Observable<PublicCandidateSeatDto[]> {
+        return this.http.get<PublicCandidateSeatDto[]>(API_ENDPOINTS.ELECTIONS.CANDIDATE_LIST(id), { headers: this.quietHeaders });
     }
 
     getAdminElections(): Observable<AdminElectionDto[]> {
@@ -204,8 +209,9 @@ export class ElectionsService {
                 : { results: response.body as ElectionResultDto[], pending: null }));
     }
 
-    declare(id: number): Observable<void> {
-        return this.http.post<void>(API_ENDPOINTS.ELECTIONS.DECLARE(id), {});
+    declare(id: number): Observable<ElectionApprovalDto | null> {
+        return this.http.post<ElectionApprovalDto>(API_ENDPOINTS.ELECTIONS.DECLARE(id), {}, { observe: 'response' }).pipe(
+            map(response => response.status === 202 ? response.body : null));
     }
 
     // FR-050. Needs a step-up. 409 when it was already recorded, 400 before the declare.

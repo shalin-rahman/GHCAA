@@ -374,7 +374,7 @@ Acceptance Scenarios:
 
 - RolesController.GetUsers returns the full user list unpaged; the code comment at line 25 notes this is acceptable only while the admin/system-admin count stays in the dozens, not thousands. No pagination exists today. [NEEDS CLARIFICATION: is an unpaged admin/system-admin listing acceptable long-term, or does RolesController need pagination before the admin count grows?]
 - ResetPasswordAdmin returns the reset URL directly in the API response because system-admin User rows have no email address to send it to. This bypasses the normal reset-password delivery channel and puts a live reset link in the HTTP response body and, by extension, in any client-side logging of that response.
-- SocialLoginAsync auto-links an existing Member/User to a Google or Facebook identity only when the provider's verified email matches an existing account; the actual member-approval workflow (Applied to Active) is owned by AdminController, outside this spec's six controllers, so the boundary between registration/auth and approval is split across two controllers with no shared contract documented in code. [NEEDS CLARIFICATION: should the approve/reject workflow in AdminController be pulled into this spec's boundary, or does it remain a separate domain?]
+- SocialLoginAsync auto-links an existing Member/User to a Google or Facebook identity only when the provider's verified email matches an existing account; the actual member-approval workflow (Applied to Active) is owned by AdminController, outside this spec's six controllers, so the boundary between registration/auth and approval is split across two controllers with no shared contract documented in code. [NEEDS CLARIFICATION: should the approve/reject workflow in AdminController be pulled into this spec's boundary, or does it remain a separate domain?] Member profile email changes and re-verification are tracked separately in spec 013 under TODO 97.1; this spec continues to define the social-linking rule.
 - MemberImportController.Import validates the workbook and each photo file but the Evidence table shows no test asserting partial-row-failure behaviour (e.g., row 5 invalid, rows 1-4 valid). GHCAA.Tests/Services/MemberImportServiceTests.cs was not confirmed to cover mixed-outcome batches.
 - Fixed 2026-10-05 (TODO 7.17): Features.EnableSocialAuth was read nowhere, and GetProviders listed any enabled provider row. `SocialAuthConfigService.GetUsableAsync` now decides for the providers list and both sign-in endpoints.
 - AuthController.Me and AuthController.GetProviders have no dedicated test coverage found in GHCAA.Tests/Controllers/AuthControllerTests.cs or AuthControllerMutationTests.cs.
@@ -398,6 +398,17 @@ Acceptance Scenarios:
 ### Hard-coded behaviour that should be configuration
 
 - ENH-006 (P2): StepUpClaim.DefaultTtlMinutes is a const (GHCAA.Application/Security/StepUpClaim.cs line 28, value 30) rather than an OrgConfigService-backed setting. Other timing knobs (rate-limit windows) are already configuration-driven per Constants.RateLimitPolicies; the step-up TTL is a security-relevant window that an admin cannot currently tune without a code change and redeploy.
+
+## Planned account-security extension (TODO 84.51)
+
+The as-built login lockout remains the baseline. The planned extension adds the same custom
+account lockout to authenticator setup-with-password, records successful setup activity, and
+allows administrators to unlock any account, including members and system administrators.
+Unlock clears both login and authenticator-app locks. `ResetByAdminAsync` must delete the
+authenticator and rotate the security stamp in one transaction. See [the task breakdown](./tasks.md).
+
+These are selected owner rules; implementation status and acceptance evidence remain in
+`docs/TODO.md`.
 
 ## Success Criteria
 

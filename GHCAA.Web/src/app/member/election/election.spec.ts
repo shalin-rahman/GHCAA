@@ -367,6 +367,15 @@ describe('MemberElection', () => {
             expect((blob as Blob).type).toBe('application/pdf');
         });
 
+        it('tells the voter when browser storage cannot keep the receipt', () => {
+            vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('Storage full'); });
+            const { el } = voted(btoa('%PDF-1.7'));
+
+            expect(el.textContent).toContain('could not be saved on this device');
+            expect(el.textContent).toContain('Download it before leaving this page');
+            expect(el.textContent).not.toContain('stays on this device');
+        });
+
         it('offers the stored PDF again after a reload', () => {
             localStorage.setItem('ghcaa_ballot_receipt_7_5', btoa('%PDF-1.7'));
             const { el } = create(paper({ hasVoted: true }));

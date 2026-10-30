@@ -4,12 +4,21 @@ Written 2026-10-25 from a read of the code on branch `preprod`. Line numbers are
 and drift; grep for the named symbol before editing. The tracker entries are `docs/TODO.md`
 84.49, 84.50 and 84.51. This file says how to do them. The tracker says whether they are done.
 
-Work in this order. Each part can ship on its own.
+This plan covers shared account, profile, and election-device fixes. The non-election backlog is
+being delivered first. Work on 84.49 B1-B3, then the general account-security part of 84.51 and
+admin unlock (Parts C and D). Defer Part A and 84.49 B4-B5 to the election delivery sequence.
+Each part can ship on its own after its checks pass.
+
+Non-election order:
+
+1. Part B: 84.49 member identity, passing-year, and Dhaka-date rules (B1-B3 only)
+2. Part C: general 84.51 account-security fixes
+3. Part D: admin unlock (API, web, mobile)
+
+Deferred election order:
 
 1. Part A: 84.50 device checks (mobile, Windows desktop build)
-2. Part B: 84.49 DTO rule fixes, per the owner decisions of 2026-10-23
-3. Part C: 84.51 lockout fixes and the smaller fixes
-4. Part D: admin unlock (API, web, mobile)
+2. Part B4-B5: election ballot-key dialog and save behavior
 
 Every step ends with a check. Do not start the next step until the check passes.
 
@@ -47,17 +56,17 @@ Every step ends with a check. Do not start the next step until the check passes.
 
 Stop the API before `dotnet test` if a build complains that a DLL is locked.
 
-## Open decisions to settle first
+## Owner decisions recorded
 
-Ask the owner these before the step that needs them. Each has a suggested answer.
+These decisions are settled and guide the implementation steps below.
 
-| # | Question | Needed by | Suggested |
+| # | Decision | Used by | Selected rule |
 | --- | --- | --- | --- |
-| D1 | A member cannot change their own NID today. `MemberService_Profile.cs` (about line 242) saves `IsNIDPublic` only; only the admin path (`MemberService_Search.cs:279`) writes `NID`. So "ask for the real one" needs a backend change. | B1 | Let the member set their NID only while the stored one starts with `IMPORT-`, with the same uniqueness check the admin path uses. After that it is locked again. |
-| D2 | The `PassingYear` lookup group is not in `Data/Seed/lookups.json`. Web falls back to its own list; mobile has no fallback, so an empty group gives an empty dropdown. Is the group filled by hand in the live database? | B2 | Run `SELECT "Value" FROM "Lookups" WHERE "LookupGroup"='PassingYear' ORDER BY 1 DESC LIMIT 3;` on local and preprod (read only). If rows exist and stop at this year, the owner adds the next six years in the admin lookup screen. Both clients get a fallback list either way. |
-| D3 | Which accounts can an admin unlock? | D1 | Any user account, member or system admin. Login lockout hits members too. |
-| D4 | Does unlock also clear the authenticator app lock (`UserAuthenticators.FailedAttempts`, `LockedUntil`)? | D1 | Yes. One "Unlock" clears both, so the admin does not need to know which lock fired. |
-| D5 | `ResetByAdminAsync` deletes the app and rotates the stamp in two saves. Fix now? It is auth scope and still waits for the owner's answer. | C6 | Yes, in one transaction. Skip C6 until the owner says so. |
+| D1 | A member cannot change their own NID today. `MemberService_Profile.cs` saves `IsNIDPublic` only; only the admin path writes `NID`. | B1 | Members may edit NID at any time. Validate the 10, 13, or 17 digit format and enforce uniqueness, including on new record entry. |
+| D2 | The `PassingYear` lookup group is not in `Data/Seed/lookups.json`. Web has a fallback list; mobile has no fallback. | B2 | Use database rows when available, with fallback lists in both clients. |
+| D3 | Which accounts can an admin unlock? | D1 | Any user account, including members and system administrators. |
+| D4 | Does unlock also clear the authenticator app lock (`UserAuthenticators.FailedAttempts`, `LockedUntil`)? | D1 | Yes. One unlock clears login and authenticator locks together. |
+| D5 | `ResetByAdminAsync` deletes the app and rotates the stamp in two saves. | C6 | Yes. Delete the authenticator and rotate the security stamp in one transaction. |
 
 ## Part A: 84.50 device checks
 
@@ -124,39 +133,33 @@ Record each result in TODO 84.50 as "passed on <device> <date>" or "fixed in <fi
   4. App, as user 2: count with the saved key file (this finishes A3).
   5. App: open the results and find user 200's tracking code in the list.
   6. `python scripts/local-election.py restore`, then `purge`.
-- Gap to fill: the tracking-code list has no widget test. Add one to
-  `test/election_results_screen_test.dart` (`'FR-39: lists every tracking code ...'`).
-- Check: the code from step 1 is in the list; the new test passes.
+- Widget test added 2026-10-26: `FR-016: lists every published tracking code` in
+  `test/election_results_screen_test.dart`.
+- Check: the code from step 1 is in the list; the widget test passes.
 
 ## Part B: 84.49 DTO rule fixes
 
-### B1. Imported NID prompt (needs D1)
+### B1. Member NID editing and validation
 
 - The placeholder is `IMPORT-<row>-<ticks % 100000>`, built in `MemberImportService.cs` from
   `Constants.Defaults.ImportPrefix` ("IMPORT").
 - The rule stays: `BaseMemberDto.NID` must be 10, 13 or 17 digits.
-- Backend (if D1 is yes): in the member profile update in `MemberService_Profile.cs`, accept
-  `dto.NID` only when the stored `member.NID` starts with `Constants.Defaults.ImportPrefix + "-"`.
-  Run the same uniqueness check as `MemberService_Search.cs` before saving. Otherwise keep the
-  stored NID.
-- Web: add `IMPORT_NID_PREFIX = 'IMPORT-'` to `core/constants/app.constants.ts`. In
-  `member/profile/profile.html` the NID input is read-only. When `profile.nid` starts with the
-  prefix, make it editable, bind it, strip spaces as `register.ts` does, and show a hint under
-  it: "Your record came in without an NID. Enter your real NID to save changes."
-- Mobile: add the same prefix to `lib/core/constants/`. In
-  `lib/screens/member/profile_edit_screen.dart` (the `'nid'` field) add `helperText` with the same
-  hint and a validator that refuses a value still starting with the prefix. The save handler drops
-  the server message, so the hint must come from the app.
+- Backend: validate `dto.NID` on every member profile submission using the 10, 13, or 17 digit
+  rule. Enforce uniqueness both when a record is first entered and on later edits.
+- Web: keep NID editable in `member/profile/profile.html`, bind and validate it, and strip spaces
+  as `register.ts` does. Show a clear format hint.
+- Mobile: keep NID editable in `lib/screens/member/profile_edit_screen.dart`, validate the same
+  formats, and show the validation hint in the app.
 - Tests:
-  - Backend: member profile update service tests. An IMPORT member saves a real NID; a normal
-    member's NID does not change; a duplicate real NID is refused. `[Category("FR-01")]`.
-  - Web: `profile.spec.ts`, an IMPORT NID makes the field editable and shows the hint.
-  - Mobile: new `test/profile_edit_screen_test.dart`, `'FR-01: an imported NID shows the hint'`.
+  - Backend: member profile update tests for valid, malformed, duplicate, first-entry, and changed
+    NIDs. `[Category("FR-01")]`.
+  - Web: `profile.spec.ts` covers format validation and profile submission.
+  - Mobile: `test/profile_edit_screen_test.dart` covers format validation and profile submission.
     Wrap in `ProviderScope`.
 - Check: backend, web and mobile tests above pass. In the running app, an imported member can
   save the profile after typing a real NID.
 
-### B2. PassingYear up to this year + 6 (check D2 first)
+### B2. PassingYear up to this year + 6
 
 - Backend: `GHCAA.Application/DTOs/AcademicRecordDto.cs`, `Validate`. Replace
   `DateTime.UtcNow.Year` in the condition and the message with the Dhaka year plus
@@ -219,7 +222,8 @@ Do this before B2's backend change, since B2 uses it.
   - Mobile `election_management_screen_test.dart`: a timeout shows the new message.
 - Check: those tests pass.
 
-When Part B is done, mark 84.49 done in `docs/TODO.md` with the date and the test names.
+When B1-B3 are done, update the non-election acceptance evidence in 84.49. The election-device
+checks in B4-B5 remain open for the election delivery sequence.
 
 ## Part C: 84.51 lockout and smaller fixes
 
@@ -325,7 +329,7 @@ Check: `ASPNETCORE_ENVIRONMENT=Development python scripts/ci-local.py --only bac
   TODO; otherwise add an integration test through `ErrorResponseShapeTestFactory`.
 - Check: `dotnet test --filter "FullyQualifiedName~RolesControllerTests|FullyQualifiedName~FamilyLinkControllerTests"`.
 
-### C6. ResetByAdminAsync in one transaction (wait for D5)
+### C6. ResetByAdminAsync in one transaction
 
 - `AuthenticatorService.ResetByAdminAsync` runs delete, stamp rotate, token revoke and audit as
   separate saves.
@@ -338,7 +342,7 @@ Check: `ASPNETCORE_ENVIRONMENT=Development python scripts/ci-local.py --only bac
 When Part C is done, update 84.51 in `docs/TODO.md`: each bullet fixed with its test, or left by
 the owner with the reason.
 
-## Part D: admin unlock (needs D3, D4)
+## Part D: admin unlock
 
 ### D1. API
 

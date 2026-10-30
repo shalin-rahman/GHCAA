@@ -1,13 +1,15 @@
 # Repo reference
 
-`.github/copilot-instructions.md` holds the commands table, layer architecture, and
-per-client (backend/Angular/Flutter) conventions and change workflow shared by every
-AI tool working in this repo. Read it before cross-layer work; keep the two files in
-sync when either changes — this file adds Claude-specific rules on top rather than
-repeating that content.
+`.github/copilot-instructions.md` is the canonical source for commands, architecture,
+backend/Angular/Flutter conventions, API contract logging, and the shared change
+workflow. Read it before cross-layer work. `AGENTS.md` and `GEMINI.md` add
+model-specific guidance; keep shared rules aligned and do not rely on stale or
+conflicting stack descriptions in older instructions. This file adds Claude-specific
+workflow rules without repeating the shared conventions.
 
-Open work with a written plan: TODO 84.50, 84.49, 84.51 and admin unlock, in that order,
-follow `docs/AUTH_AND_DEVICE_FIX_PLAN.md`.
+Open work with a written plan: follow `docs/AUTH_AND_DEVICE_FIX_PLAN.md` in the order its
+header gives. Since 2026-10-27 that is Part B (B1-B3), Part C, then Part D (admin unlock).
+Part A (84.50) and B4-B5 wait for the election sequence.
 
 # Graphify
 
@@ -19,6 +21,13 @@ Rules:
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+
+## Cross-layer changes and evidence
+
+- Check `docs/TODO.md` and `docs/PROJECT_MAP.md` before cross-layer work. Follow a linked delivery plan and its order.
+- Treat API and business-rule changes as cross-layer work. Check both web and mobile clients, update relevant tests, and record route or DTO changes in `docs/API_CONTRACT_REGISTRY.md`.
+- Keep implemented mechanisms, executable test evidence, and empirical research claims distinct. A passing test does not by itself establish real-world effectiveness or performance.
+- The user owns Git and deployment operations. Do not commit, push, merge, or deploy.
 
 # Comment, Doc & TODO Tone
 
@@ -36,10 +45,9 @@ wrote them, not a model. This applies to every new or edited comment/doc/TODO, i
   (`// ===== SECTION =====`) unless the surrounding file already uses that convention.
 - TODOs name the actual gap and, where known, why it's not done yet — not a vague "TODO: improve this".
 - Don't add a comment just to prove a change was made ("// updated per review", "// fixed bug here").
-- Existing comments: rewrite one only if it is wrong, out of date after your change, or sounds
-  machine-written and sits on a line or block you are already editing. Leave every other comment alone.
-  When you do rewrite, make it specific and short, but enough to understand.
-- Match the comment style already in the file before applying this rule to new lines.
+- When a file is touched, clean up AI-sounding comments and docs you pass over, not just the
+  lines being changed. Leave unrelated comments alone; rewrite one only when it is wrong,
+  out of date, or machine-written in the part being edited. Match the file's existing style.
 
 # Documentation book (docs/book/)
 

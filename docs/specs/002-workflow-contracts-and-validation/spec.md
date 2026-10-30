@@ -28,6 +28,11 @@ Active and archived delivery status is reconciled in
 item is not treated as implemented merely because it is named by a
 specification.
 
+Work Package 92's proposed configurable approval roles are specified in
+[spec 022](../022-configurable-approval-workflows/spec.md). They are planned
+behavior and must not be reported as the current endpoint policy until the
+owner decisions are recorded and the implementation is verified.
+
 ## User stories
 
 ### Story 1 — State-transition tables (P1)

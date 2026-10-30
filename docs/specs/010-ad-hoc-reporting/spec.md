@@ -111,7 +111,7 @@ The system shall restrict every report route to authenticated admins, following 
 - **API**: `AdminReportsController` at `api/admin/reports`, admin-only, following the
   `CampaignsController`/`MentorshipController` authorization pattern.
 - **Web (admin only)**: `GHCAA.Web/src/app/admin/reports/` — entity picker, filter form,
-  `.data-table` result grid (reuse the existing table-card pattern from Directory), export
+  read-only mode of the shared data-grid component built for tracker 88.5, export
   button; `core/services/report.service.ts`; an `ADMIN_REPORTS` block in `API_ENDPOINTS`
   (`core/constants/app.constants.ts`), following the shape of the existing `ADMIN_ELECTIONS`
   block.

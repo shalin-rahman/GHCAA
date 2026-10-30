@@ -809,6 +809,26 @@ public sealed class ElectionService(ApplicationDbContext db, ILogger<ElectionSer
             .Select(s => new ElectionSeatViewDto(s.Id, SeatTitle(s), Math.Max(1, s.SeatCount))).ToArray();
     }
 
+    public async Task<IReadOnlyList<PublicCandidateSeatDto>?> GetPublicCandidateListAsync(int id, CancellationToken ct = default)
+    {
+        var e = await _db.Elections.AsNoTracking().Include(x => x.Seats).ThenInclude(s => s.EcPosition)
+            .FirstOrDefaultAsync(x => x.Id == id, ct);
+        if (e == null || e.IsTest || e.Phase < ElectionPhase.CandidateList) return null;
+
+        var candidates = await (from n in _db.Nominations.AsNoTracking()
+                                join m in _db.Members.AsNoTracking() on n.CandidateMemberId equals m.Id
+                                where n.ElectionId == id && n.Status == NominationStatus.Accepted
+                                select new { n.Id, n.ElectionSeatId, n.BallotOrder, m.FullName, Photo = n.PhotoPath ?? m.PhotoPath, n.Statement })
+            .ToListAsync(ct);
+        var bySeat = candidates.OrderBy(x => x.BallotOrder ?? int.MaxValue)
+            .ThenBy(x => x.FullName, StringComparer.OrdinalIgnoreCase).ToLookup(x => x.ElectionSeatId);
+        return e.Seats.Where(s => bySeat[s.Id].Any())
+            .OrderBy(s => s.EcPosition?.DisplayOrder ?? s.Position).ThenBy(s => s.Id)
+            .Select(s => new PublicCandidateSeatDto(s.Id, SeatTitle(s), Math.Max(1, s.SeatCount),
+                bySeat[s.Id].Select(c => new BallotCandidateDto(c.Id, c.FullName, c.Photo, c.Statement)).ToArray()))
+            .ToArray();
+    }
+
     public async Task<IReadOnlyList<string>?> GetTrackingCodesAsync(int id, CancellationToken ct = default)
     {
         // During polling the receipt rows sit in the order voters cast them. The count rewrites

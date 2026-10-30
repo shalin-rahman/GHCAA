@@ -51,6 +51,10 @@ Polling cannot open without a key, and the key cannot be changed once polling ha
 - Never in email, chat, a shared drive, the repository or a ticket.
 - The server does not store it and the app cannot recover it.
 
+Owner decision 2026-10-27: polling must stay blocked until the recorded copy count matches the
+configured number and every configured holder has confirmed receipt. Until 37.14a is built, the
+Commission must check the full custody list by hand before approving polling.
+
 Backups and snapshots taken during polling keep the sealed ballots. Whoever holds one of those and the
 key file can match every voter to their choices. Treat a polling-day backup as sensitive as the key
 (procedure D in the security document).
@@ -176,8 +180,10 @@ associated data breaks these tests.
 
 Decided 2026-10-11. The number of sealed copies is an Association setting (default 2, at least 1). This
 replaces the earlier one-copy rule. The app does not yet enforce the copy count or the holder
-confirmations (TODO 37.14a). Until it does, the Chief Commissioner records the holders in the log by
-hand.
+confirmations (TODO 37.14a). Owner decision 2026-10-27: polling stays blocked until the configured
+copy count matches the recorded copies and every configured holder confirms receipt. Until the app
+enforces this, the Chief Commissioner records the holders in the log and checks the full custody
+list by hand before approving polling.
 
 The Commission sets the recount end date for each election and states it in the Election Calendar
 (ER-02). The key is destroyed after that date.

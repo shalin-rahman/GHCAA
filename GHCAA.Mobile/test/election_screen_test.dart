@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ghcaa_mobile/core/theme/app_theme.dart';
+import 'package:ghcaa_mobile/core/storage/storage_service.dart';
 import 'package:ghcaa_mobile/features/auth/auth_service.dart';
 import 'package:ghcaa_mobile/features/elections/election_service.dart';
 import 'package:ghcaa_mobile/features/theme/dynamic_theme_service.dart';
@@ -26,11 +27,15 @@ class _FakeElectionService extends ElectionService {
         phase: 'Polling',
         hasVoted: hasVoted,
         seats: const [
-          BallotSeat(seatId: 3, positionTitle: 'Committee', places: 2, candidates: [
-            BallotCandidate(nominationId: 10, name: 'Rina'),
-            BallotCandidate(nominationId: 11, name: 'Tanvir'),
-            BallotCandidate(nominationId: 12, name: 'Maya'),
-          ]),
+          BallotSeat(
+              seatId: 3,
+              positionTitle: 'Committee',
+              places: 2,
+              candidates: [
+                BallotCandidate(nominationId: 10, name: 'Rina'),
+                BallotCandidate(nominationId: 11, name: 'Tanvir'),
+                BallotCandidate(nominationId: 12, name: 'Maya'),
+              ]),
         ],
       );
 
@@ -47,9 +52,22 @@ class _FakeElectionService extends ElectionService {
       );
 
   @override
-  Future<CastBallotResult> castBallot(int id, Map<int, List<int>> choices) async {
+  Future<CastBallotResult> castBallot(
+      int id, Map<int, List<int>> choices) async {
     cast = choices;
     return (trackingCode: 'ABCD-EFGH', receiptPdf: _pdf);
+  }
+}
+
+class _ReceiptStorage extends StorageService {
+  _ReceiptStorage({this.failSave = false});
+
+  final bool failSave;
+
+  @override
+  Future<void> saveBallotReceipt(int electionId, String pdfBase64) async {
+    if (failSave) throw StateError('Storage unavailable');
+    await super.saveBallotReceipt(electionId, pdfBase64);
   }
 }
 
@@ -61,7 +79,9 @@ void main() {
   setUpAll(() => dotenv.testLoad(fileInput: 'PORTAL_TITLE=GHCAA'));
 
   Future<void> pump(WidgetTester tester,
-      {bool hasVoted = false, Map<String, Object> prefs = const {}}) async {
+      {bool hasVoted = false,
+      bool failReceiptSave = false,
+      Map<String, Object> prefs = const {}}) async {
     tester.view.physicalSize = const Size(390, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -70,14 +90,17 @@ void main() {
     await tester.pumpWidget(ProviderScope(
       overrides: [
         electionServiceProvider.overrideWith((ref) => service),
-        currentElectionProvider.overrideWith((ref) async => const ElectionSummary(
-              id: 12,
-              title: 'EC 2026',
-              phase: 'Polling',
-              ecPeriodId: 2,
-              voterCount: 0,
-              eligibleVoterCount: 10,
-            )),
+        storageServiceProvider
+            .overrideWith((ref) => _ReceiptStorage(failSave: failReceiptSave)),
+        currentElectionProvider
+            .overrideWith((ref) async => const ElectionSummary(
+                  id: 12,
+                  title: 'EC 2026',
+                  phase: 'Polling',
+                  ecPeriodId: 2,
+                  voterCount: 0,
+                  eligibleVoterCount: 10,
+                )),
         roleProvider.overrideWith((ref) => Future.value('Member')),
         activeSpecialThemeProvider.overrideWith((ref) async => null),
       ],
@@ -178,8 +201,31 @@ void main() {
     await pump(tester,
         hasVoted: true, prefs: {'ballot_receipt_12': base64Encode(_pdf)});
 
-    expect(find.text('You have already voted in this election.'), findsOneWidget);
+    expect(
+        find.text('You have already voted in this election.'), findsOneWidget);
     expect(find.text('Download receipt'), findsOneWidget);
+  });
+
+  testWidgets('warns when the receipt cannot be kept on the device',
+      (tester) async {
+    await pump(tester, failReceiptSave: true);
+
+    await tester.tap(find.text('Rina'));
+    await tester.pump();
+    await tester.tap(find.text('Abstain on this seat'));
+    await tester.pump();
+    await tester.ensureVisible(find.text('Review ballot'));
+    await tester.tap(find.text('Review ballot'));
+    await tester.pump();
+    await tester.ensureVisible(find.text('Confirm and cast ballot'));
+    await tester.tap(find.text('Confirm and cast ballot'));
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    expect(find.text('Download receipt'), findsOneWidget);
+    expect(
+        find.textContaining('It was not saved on this device'), findsOneWidget);
   });
 
   testWidgets('no download button without a stored receipt', (tester) async {
