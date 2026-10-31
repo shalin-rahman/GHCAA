@@ -76,8 +76,11 @@ namespace GHCAA.Tests.Services
             user.LockoutUntil = lockedUntil;
             _context.UserAuthenticators.Add(new UserAuthenticator
             {
-                UserId = user.Id, ProtectedSecret = "secret", ConfirmedAt = DateTime.UtcNow,
-                FailedAttempts = Constants.Authenticator.MaxFailedAttempts, LockedUntil = lockedUntil,
+                UserId = user.Id,
+                ProtectedSecret = "secret",
+                ConfirmedAt = DateTime.UtcNow,
+                FailedAttempts = Constants.Authenticator.MaxFailedAttempts,
+                LockedUntil = lockedUntil,
             });
             await _context.SaveChangesAsync();
 
