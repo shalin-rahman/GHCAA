@@ -60,6 +60,67 @@ demo. For a live demonstration of the whole election:
 scripts\run-election-walkthrough.bat full demo
 ```
 
+`slow` and `demo` can be used together, for example `full slow demo`. Every mode with
+`headed`, `slow` or `demo` shows the browsers. `clean` and `restore` never open one.
+
+### From any folder
+
+The script finds the repository from its own path, so it runs from any folder when called by
+its full path. Replace `<repo>` with the folder you cloned into.
+
+| Option | Meaning |
+|---|---|
+| `headed` | Shows the browser windows. Runs at normal speed. |
+| `slow` | Shows the browsers with 400 ms between actions, so people can follow each step. |
+| `demo` | Shows the browsers, moves the polling open, close and recount end dates to now in the local database instead of waiting for them, and skips the network-idle wait on page loads. |
+| `slow demo` | Both: slow steps, and no wait for polling. |
+| `keep` | Leaves the borrowed accounts on the test password after the run. Works with any mode. |
+
+```powershell
+# PowerShell
+$W = "<repo>\scripts\run-election-walkthrough.bat"
+
+# setup: deletes old test data, makes a new election up to the campaign phase, saves a checkpoint
+& $W setup headed        # visible, normal speed
+& $W setup slow          # visible, 400 ms per step
+& $W setup demo          # visible, no network-idle wait on page loads; the date moves happen in resume
+& $W setup slow demo     # visible, 400 ms per step
+
+# resume: carries on from the checkpoint with polling, votes, close, count, results, recounts
+& $W resume headed       # visible, waits for the real polling window in scenario.json
+& $W resume slow         # visible, 400 ms per step, waits for the real polling window
+& $W resume demo         # visible, polling dates moved to now, about 2 minutes
+& $W resume slow demo    # visible, 400 ms per step, polling dates moved to now
+
+# full: setup and resume in one run, old test data deleted first
+& $W full headed         # visible, waits for the real polling window
+& $W full slow           # visible, 400 ms per step, waits for the real polling window
+& $W full demo           # visible, polling dates moved to now
+& $W full slow demo      # visible, 400 ms per step, polling dates moved to now
+
+& $W full demo keep      # as full demo, and the accounts stay on the test password
+
+# no browser
+& $W clean               # deletes all walkthrough data and restores the borrowed accounts
+& $W restore             # only restores the borrowed accounts
+```
+
+`resume` needs the checkpoint from an earlier `setup`; without it the script stops and says so.
+For a talk, run `setup slow` beforehand and `resume slow demo` live, or `full slow demo` in one
+sitting.
+
+```bat
+rem cmd.exe
+"<repo>\scripts\run-election-walkthrough.bat" full slow demo
+```
+
+```bash
+# Git Bash
+cmd //c "<repo>\\scripts\\run-election-walkthrough.bat" full slow demo
+```
+
+Any mode and options from the table above go after the path in the same way.
+
 ### By hand
 
 1. Start the API with the https launch profile, which sets Development. Without it the API

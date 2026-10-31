@@ -43,13 +43,13 @@ would misdescribe it.
 ## 11.1 Process Model in Practice and its Deviations from Plan
 
 `docs/book/build/wbs.py`, run on 31 October 2026, classifies every one of the 98 work packages
-`docs/TODO.md` has raised, and every one of the 1,206 tracker tasks under them, by how it arrived: planned
+`docs/TODO.md` has raised, and every one of the 1,207 tracker tasks under them, by how it arrived: planned
 before the work started, or reactively, as stakeholder feedback, a review finding or a defect.
 
 Counted by work package, 30 (31%) were planned and 68 (69%) were not: 41 (42%) arrived as feedback
 from a stakeholder, 16 (16%) as a defect, and 11 (11%) as a finding from one of the review sessions of
-§3.8 or the September 2026 architecture audit. Counted by task the reactive share is larger still: 960
-of 1,206 tasks (80%) arrived after the work they belong to had already started, most of them as feedback
+§3.8 or the September 2026 architecture audit. Counted by task the reactive share is larger still: 961
+of 1,207 tasks (80%) arrived after the work they belong to had already started, most of them as feedback
 (509 tasks, 42%) or as review findings (321 tasks, 27%), with defects a smaller share (130 tasks, 11%)
 than the package count alone suggests, because most defects closed in one or two tasks each while a
 handful of review sessions each seeded dozens.
@@ -84,8 +84,8 @@ defined once, here, and used by name everywhere else in the book:
   packages, and a work package can deliver only part of a feature — the two lists are not the same
   shape.
 
-`docs/TODO.md` had 98 numbered work packages holding 1,206 tracker tasks between them, tied to 18 WBS
-activities and 375 commits, as of 31 October 2026 (`git rev-list --count HEAD`) — five different
+`docs/TODO.md` had 98 numbered work packages holding 1,207 tracker tasks between them, tied to 18 WBS
+activities and 379 commits, as of 31 October 2026 (`git rev-list --count HEAD`) — five different
 counts of one project, each answering a different question about it.
 
 Five streams, one of them carrying no commit at all: the back-scheduled P1–P5 research and design
@@ -463,7 +463,7 @@ distinct from the tracker. There was one tracker, split for length into two file
 `docs/TODO.md` (open work packages, 2,320 lines) and `docs/TODO_ARCHIVE.md` (closed ones, 7,387 lines),
 9,707 lines together as of 3 October 2026 (`wc -l docs/TODO.md docs/TODO_ARCHIVE.md`), simultaneously
 the project plan (the P1–P5 pre-development items and the planned work packages of §11.1), the change
-log (every reactively-arriving item, §11.1's 960 of 1,206 tasks), the defect log (the 130 tasks classified
+log (every reactively-arriving item, §11.1's 961 of 1,207 tasks), the defect log (the 130 tasks classified
 `defect` by `wbs.py`) and the decision record — a work package that changes direction mid-course states
 why in its own entry rather than in a separate minute.
 
@@ -557,7 +557,7 @@ quoting a figure that does not yet exist.
 Three things this project would do differently, stated plainly rather than as a list of virtues.
 
 First, the tracker should have separated the plan from the change log from the start, even while both
-lived in the same file. §11.1 and §11.8 show that most of the tracker's 1,206 tasks arrived
+lived in the same file. §11.1 and §11.8 show that most of the tracker's 1,207 tasks arrived
 reactively; nothing about the file's structure distinguishes a planned work package from one raised by
 a defect except the prose in its own heading, which is why `wbs.py` has to classify each one by regex
 against wording rather than by a field that was there to record it at the time.
@@ -580,7 +580,7 @@ This chapter counted the same project five different ways and did not let the co
 force. The critical path is 76 working days; 104 are evidenced by a commit; 258 elapsed on the
 calendar between the first and the last. The delivered codebase, priced at conventional rates with no
 reduction, represents 1,182 working days; four reductions, three of them judged and one measured, bring
-that to 487; the record can evidence 200. Eighty per cent of the tracker's 1,206 tasks arrived
+that to 487; the record can evidence 200. Eighty per cent of the tracker's 1,207 tasks arrived
 after the work they belong to had already started. A function-point count of the delivered system,
 simplified and stated as such, comes to 2,223 unadjusted points, and could not be converted to an
 effort or cost figure without a productivity rate this project has no defensible source for — recorded
