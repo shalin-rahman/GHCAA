@@ -45,6 +45,23 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
+        [Category("FR-27")]
+        public async Task UploadImage_StorageFailure_ReleasesQuotaSlot()
+        {
+            _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
+                .Returns(FileValidationResult.Ok());
+            _newsServiceMock.Setup(x => x.TryCountImageUploadAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            _fileStorageServiceMock.Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), 1, Enums.FileUploadType.NewsImage, It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new IOException("storage unavailable"));
+            var bytes = new byte[] { 0xFF, 0xD8, 0xFF, 0xE0 };
+            var file = new FormFile(new MemoryStream(bytes), 0, bytes.Length, "file", "photo.jpg") { Headers = new HeaderDictionary(), ContentType = "image/jpeg" };
+
+            Assert.ThrowsAsync<IOException>(async () => await _controller.UploadImage(file, CancellationToken.None));
+
+            _newsServiceMock.Verify(x => x.ReleaseImageUploadAsync(1, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
         public async Task GetActiveNews_ReturnsOk()
         {
             _newsServiceMock.Setup(x => x.GetActiveNewsAsync(It.IsAny<Enums.ArticleCategory?>(), It.IsAny<Enums.PostType?>(), It.IsAny<CancellationToken>()))

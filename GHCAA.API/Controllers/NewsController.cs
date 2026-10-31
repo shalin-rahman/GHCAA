@@ -180,13 +180,21 @@ namespace GHCAA.API.Controllers
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var uniqueFileName = $"news_{timestamp}_{Guid.NewGuid().ToString().Substring(0, 8)}{extension}";
 
-            var relativePath = await _fileStorageService.SaveFileAsync(
-                stream,
-                uniqueFileName,
-                authorId,
-                Enums.FileUploadType.NewsImage,
-                cancellationToken
-            );
+            string relativePath;
+            try
+            {
+                relativePath = await _fileStorageService.SaveFileAsync(
+                    stream,
+                    uniqueFileName,
+                    authorId,
+                    Enums.FileUploadType.NewsImage,
+                    cancellationToken);
+            }
+            catch
+            {
+                await _newsService.ReleaseImageUploadAsync(authorId, cancellationToken);
+                throw;
+            }
 
             var fileUrl = "/" + relativePath.TrimStart('/');
             return Ok(new { url = fileUrl, relativePath });

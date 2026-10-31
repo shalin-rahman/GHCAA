@@ -279,14 +279,11 @@ class AuthService {
   Future<bool> hasRole(String name) async =>
       rolesInclude(await _storage.getRoles(), await _storage.getRole(), name);
 
+  // A DioException reaches the caller so the screen can show the server's reason,
+  // such as a taken NID.
   Future<bool> updateProfile(Map<String, dynamic> data) async {
-    try {
-      final response = await _dio.put('/profile', data: data);
-      return response.statusCode == 200;
-    } catch (e) {
-      debugPrint('AuthService.updateProfile failed: $e');
-      return false;
-    }
+    final response = await _dio.put('/profile', data: data);
+    return response.statusCode == 200;
   }
 }
 

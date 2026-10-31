@@ -116,4 +116,15 @@ public class CampaignServiceTests : TestBase
         pledge.DonorName.Should().Be("Guest Well-Wisher");
         pledge.Status.Should().Be(Enums.PledgeStatus.Pledged);
     }
+
+    [Test]
+    public async Task CreatePledgeAsync_GuestWithoutName_IsRejectedAsBadRequest()
+    {
+        var campaign = await SeedCampaignAsync();
+        var dto = new GHCAA.Application.DTOs.CreatePledgeDto { Amount = 250, DonorName = " " };
+
+        await FluentActions.Awaiting(() => NewService().CreatePledgeAsync(campaign.Slug, dto, memberId: null))
+            .Should().ThrowAsync<InvalidRequestException>();
+        (await _context.CampaignPledges.CountAsync()).Should().Be(0);
+    }
 }

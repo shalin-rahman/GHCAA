@@ -1,8 +1,10 @@
 import '../../core/widgets/custom_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/api/api_exception.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/app_dropdown_field.dart';
@@ -17,6 +19,9 @@ import '../../core/constants/registration_constants.dart';
 import '../../core/services/org_config_service.dart';
 import '../../core/utils/app_utils.dart';
 import 'member_details_screen.dart';
+
+bool isValidNid(String? value) =>
+    value != null && MemberRules.nidPattern.hasMatch(value);
 
 class ProfileEditScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic>? initialData;
@@ -264,6 +269,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     HapticFeedback.mediumImpact();
 
     bool success;
+    String? serverReason;
     if (_isAdmin && _isEditingOther) {
       final id = payload['id'];
       if (id is! int) {
@@ -273,9 +279,14 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
             await ref.read(adminServiceProvider).updateMember(id, payload);
       }
     } else {
-      success = await ref
-          .read(authServiceProvider)
-          .updateProfile(_sanitizePayload(Map<String, dynamic>.from(_data)));
+      try {
+        success = await ref
+            .read(authServiceProvider)
+            .updateProfile(_sanitizePayload(Map<String, dynamic>.from(_data)));
+      } on DioException catch (e) {
+        success = false;
+        serverReason = ApiException.serverMessage(e.response?.data);
+      }
     }
 
     if (mounted) {
@@ -293,8 +304,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         context.pop();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Registry Error: Protocol rejected.'),
+          SnackBar(
+              content: Text(serverReason ?? 'Registry Error: Protocol rejected.'),
               backgroundColor: Colors.redAccent),
         );
       }
@@ -708,9 +719,11 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
 
   Widget _buildTextField(String label, String key,
       {bool required = false, TextInputType? keyboardType, int maxLines = 1}) {
+    final isNid = key == 'nid';
     return TextFormField(
       initialValue: _data[key]?.toString(),
       keyboardType: keyboardType,
+      inputFormatters: isNid ? [FilteringTextInputFormatter.digitsOnly] : null,
       maxLines: maxLines,
       style: const TextStyle(color: Colors.white, fontSize: 14),
       decoration: InputDecoration(
@@ -724,10 +737,14 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
         contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        helperText: isNid ? MemberRules.nidMessage : null,
       ),
-      validator:
-          required ? (v) => (v == null || v.isEmpty) ? 'Required' : null : null,
-      onSaved: (v) => _data[key] = v,
+      validator: isNid
+          ? (v) => isValidNid(v) ? null : MemberRules.nidMessage
+          : required
+              ? (v) => (v == null || v.isEmpty) ? 'Required' : null
+              : null,
+      onSaved: (v) => _data[key] = isNid ? v?.replaceAll(RegExp(r'\s'), '') : v,
     );
   }
 

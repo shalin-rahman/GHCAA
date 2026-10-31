@@ -384,6 +384,7 @@ namespace GHCAA.Tests.Controllers
             [("RolesController", "RemoveRole")] = new(Constants.Policies.SuperAdminOnly, false, true),
             [("RolesController", "ResetAuthenticator")] = new(Constants.Policies.SuperAdminOnly, false, true),
             [("RolesController", "ResetPasswordAdmin")] = new(Constants.Policies.SuperAdminOnly, false, true),
+            [("RolesController", "UnlockUser")] = new(Constants.Policies.SuperAdminOnly, false, true),
             [("ScholarshipsController", "AdminApplications")] = new(Constants.Policies.AdminOnly, false, false),
             [("ScholarshipsController", "Apply")] = new(null, true, false),
             [("ScholarshipsController", "CreateAward")] = new(Constants.Policies.AdminOnly, false, false),

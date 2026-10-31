@@ -18,5 +18,7 @@ namespace GHCAA.Application.Interfaces
         Task<bool> RemoveCollaboratorAsync(int newsPostId, int userId, CancellationToken cancellationToken = default);
         /// <summary>Counts one news image upload for the account. False once the daily limit is reached.</summary>
         Task<bool> TryCountImageUploadAsync(int userId, CancellationToken cancellationToken = default);
+        /// <summary>Gives back a counted upload when the save failed. Never drops below zero.</summary>
+        Task ReleaseImageUploadAsync(int userId, CancellationToken cancellationToken = default);
     }
 }

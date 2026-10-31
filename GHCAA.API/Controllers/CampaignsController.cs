@@ -61,7 +61,7 @@ namespace GHCAA.API.Controllers
             {
                 return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
-            catch (ArgumentException ex)
+            catch (InvalidRequestException ex)
             {
                 return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }

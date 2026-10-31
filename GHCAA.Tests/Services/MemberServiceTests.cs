@@ -1,4 +1,5 @@
 using FluentAssertions;
+using System.ComponentModel.DataAnnotations;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
@@ -606,6 +607,68 @@ public class MemberServiceTests : TestBase
         updatedMember.NotifyRegistrationUpdate.Should().BeFalse();
         updatedMember.AcademicHistory.Should().ContainSingle(a => a.InstitutionName == "Govt. Haraganga College" && a.PassingYear == 2007);
         updatedMember.ProfessionalHistory.Should().ContainSingle(p => p.OrganizationName == "New Org" && p.Designation == "Engineer");
+    }
+
+    [Category("FR-01")]
+    [TestCase("123456789")]
+    [TestCase("12345678901")]
+    [TestCase("1234567890123456")]
+    [TestCase("IMPORT-1-12345")]
+    public async Task UpdateProfileAsync_WithMalformedNid_ShouldReject(string nid)
+    {
+        var member = await CreateAndSaveTestMemberAsync();
+
+        var act = () => _service.UpdateProfileAsync(member.Id, new UpdateProfileDto { NID = nid });
+
+        await act.Should().ThrowAsync<ValidationException>()
+            .WithMessage("NID must be 10, 13 or 17 digits.");
+    }
+
+    [Category("FR-01")]
+    [Test]
+    public async Task UpdateProfileAsync_WithFirstNidEntry_ShouldNormalizeAndSaveIt()
+    {
+        var member = await CreateAndSaveTestMemberAsync(nid: "IMPORT-1-12345");
+        const string nid = "1234 567890";
+
+        var result = await _service.UpdateProfileAsync(member.Id, new UpdateProfileDto
+        {
+            NID = nid,
+            AcademicHistory = [new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", PassingYear = 2000, IsOrgProfile = true }]
+        });
+
+        result.Should().BeTrue();
+        (await _context.Members.FindAsync(member.Id))!.NID.Should().Be("1234567890");
+    }
+
+    [Category("FR-01")]
+    [Test]
+    public async Task UpdateProfileAsync_WithChangedNid_ShouldSaveIt()
+    {
+        var member = await CreateAndSaveTestMemberAsync();
+
+        var result = await _service.UpdateProfileAsync(member.Id, new UpdateProfileDto
+        {
+            NID = "1234567891",
+            AcademicHistory = [new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", PassingYear = 2000, IsOrgProfile = true }]
+        });
+
+        result.Should().BeTrue();
+        (await _context.Members.FindAsync(member.Id))!.NID.Should().Be("1234567891");
+    }
+
+    [Category("FR-01")]
+    [Category("NFR-S4")]
+    [Test]
+    public async Task UpdateProfileAsync_WithDuplicateNid_ShouldReject()
+    {
+        var member = await CreateAndSaveTestMemberAsync();
+        await CreateAndSaveTestMemberAsync("Other Member", "other@example.com", "01712345679", "1234567891");
+
+        var act = () => _service.UpdateProfileAsync(member.Id, new UpdateProfileDto { NID = "1234567891" });
+
+        await act.Should().ThrowAsync<ValidationException>()
+            .WithMessage("This NID is already in use.");
     }
 
     [Category("FR-02")]

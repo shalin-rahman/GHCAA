@@ -30,6 +30,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> GetUsers(CancellationToken cancellationToken)
         {
             var users = await _userService.GetAllUsersAsync(cancellationToken);
+            var now = DateTime.UtcNow;
             return Ok(users.Select(u => new
             {
                 u.Id,
@@ -38,6 +39,8 @@ namespace GHCAA.API.Controllers
                 FullName = u.Member?.FullName ?? "System Account",
                 u.IsActive,
                 u.CreatedAt,
+                // Only a lock still running, so clients show Unlock just for those users.
+                LockedUntil = u.LockoutUntil > now ? u.LockoutUntil : null,
                 Roles = u.Roles.Select(r => r.Name)
             }));
         }
@@ -154,6 +157,18 @@ namespace GHCAA.API.Controllers
                 return Unauthorized();
             if (!await authenticatorService.ResetByAdminAsync(id, adminId, cancellationToken))
                 return Problem(detail: "This user has no authenticator app set up.", statusCode: StatusCodes.Status404NotFound);
+            return NoContent();
+        }
+
+        // FR-39: ends a login lock and an authenticator lock early, for a user who cannot wait it out.
+        [HttpPost("users/{id}/unlock")]
+        [GHCAA.API.Filters.RequireStepUp]
+        public async Task<IActionResult> UnlockUser(int id, CancellationToken cancellationToken)
+        {
+            if (!int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var adminId))
+                return Unauthorized();
+            if (!await _userService.UnlockUserAsync(id, adminId, cancellationToken))
+                return Problem(detail: "User not found.", statusCode: StatusCodes.Status404NotFound);
             return NoContent();
         }
     }

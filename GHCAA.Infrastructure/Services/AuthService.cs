@@ -26,6 +26,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly ISocialAuthConfigService _socialAuth;
         private readonly IElectionAccessService _electionAccess;
         private readonly IElectionAppointmentService _appointments;
+        private readonly IUserService _userService;
 
         public AuthService(ApplicationDbContext db,
             ITokenService tokenService,
@@ -38,7 +39,8 @@ namespace GHCAA.Infrastructure.Services
             IOrgConfigService orgConfigService,
             ISocialAuthConfigService socialAuth,
             IElectionAccessService electionAccess,
-            IElectionAppointmentService appointments)
+            IElectionAppointmentService appointments,
+            IUserService userService)
         {
             _db = db;
             _tokenService = tokenService;
@@ -52,14 +54,14 @@ namespace GHCAA.Infrastructure.Services
             _socialAuth = socialAuth;
             _electionAccess = electionAccess;
             _appointments = appointments;
+            _userService = userService;
         }
 
         // Tests set this to zero so they do not wait on every forgot-password call.
         public TimeSpan PasswordResetResponseFloor { get; set; } =
             TimeSpan.FromMilliseconds(Constants.Defaults.PasswordResetResponseFloorMs);
 
-        // Brute-force lockout (S5.1) and timing-enumeration equalization (S5.2) are both handled
-        // inline below, not here.
+        // Login lockout is shared with password-confirmation flows through IUserService.
         public async Task<TokenResponseDto?> LoginAsync(LoginDto loginDto, CancellationToken cancellationToken = default)
         {
             // Trim whitespace and remove internal spaces for identifiers like NID/Username
@@ -68,6 +70,7 @@ namespace GHCAA.Infrastructure.Services
 
             // 1. Try finding user directly by Username (exact match with normalized string)
             var user = await _db.Users
+                .AsNoTracking()
                 .Include(u => u.Roles)
                 .FirstOrDefaultAsync(u => u.Username == normalizedInput || u.Username == input, cancellationToken);
 
@@ -83,6 +86,7 @@ namespace GHCAA.Infrastructure.Services
                 if (member != null)
                 {
                     user = await _db.Users
+                        .AsNoTracking()
                         .Include(u => u.Roles)
                         .FirstOrDefaultAsync(u => u.MemberId == member.Id, cancellationToken);
 
@@ -127,20 +131,17 @@ namespace GHCAA.Infrastructure.Services
 
             if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
             {
-                user.FailedLoginAttempts++;
-                if (user.FailedLoginAttempts >= 5)
+                await _userService.RecordFailedPasswordAsync(user.Id, cancellationToken);
+                if (user.FailedLoginAttempts + 1 >= Constants.Login.MaxFailedAttempts)
                 {
-                    user.LockoutUntil = DateTime.UtcNow.AddMinutes(15);
-                    _logger.LogWarning("User {Username} locked out for 15 minutes after {N} failed attempts", user.Username, user.FailedLoginAttempts);
+                    _logger.LogWarning("User {Username} locked out for {Minutes} minutes after {N} failed attempts", user.Username, Constants.Login.LockoutMinutes, user.FailedLoginAttempts + 1);
                 }
-                await _db.SaveChangesAsync(cancellationToken);
                 _logger.LogError("Login failed: Invalid password for user {Username}", user.Username);
                 return null;
             }
 
             // Reset lockout on successful login.
-            user.FailedLoginAttempts = 0;
-            user.LockoutUntil = null;
+            await _userService.ResetFailedPasswordsAsync(user.Id, cancellationToken);
 
             // 37.12g. Checked after the password, so a guess at a username cannot end anyone's access.
             if (await EndExpiredOfficialAccessAsync(user, cancellationToken))

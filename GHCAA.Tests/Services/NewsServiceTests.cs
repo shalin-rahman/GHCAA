@@ -51,6 +51,21 @@ public class NewsServiceTests : TestBase
 
     [Category("FR-26")]
     [Test]
+    public async Task ReleaseImageUploadAsync_GivesBackASlot_AndNeverGoesBelowZero()
+    {
+        var service = NewService(new OrgConfigDto { Workflow = new WorkflowDto { NewsImageUploadsPerDay = 1 } });
+
+        await service.ReleaseImageUploadAsync(1);
+        (await service.TryCountImageUploadAsync(1)).Should().BeTrue();
+        await service.ReleaseImageUploadAsync(1);
+        await service.ReleaseImageUploadAsync(1);
+
+        (await service.TryCountImageUploadAsync(1)).Should().BeTrue();
+        (await service.TryCountImageUploadAsync(1)).Should().BeFalse();
+    }
+
+    [Category("FR-26")]
+    [Test]
     public async Task TryCountImageUploadAsync_LimitBelowOne_MeansNoLimit()
     {
         var service = NewService(new OrgConfigDto { Workflow = new WorkflowDto { NewsImageUploadsPerDay = 0 } });

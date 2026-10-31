@@ -82,9 +82,10 @@ describe('LookupService', () => {
         req.flush([{ value: '2020', label: '2020' }, { value: '2021', label: '2021' }]);
     });
 
-    it('getAcademicYears falls back to a computed 1950..current range when the group is empty', () => {
+    it('getAcademicYears falls back through Dhaka year + 6 down to 1950 when the group is empty', () => {
         service.getAcademicYears().subscribe(res => {
-            expect(res[0]).toBe(new Date().getFullYear());
+            const dhakaYear = new Date(Date.now() + 6 * 60 * 60 * 1000).getUTCFullYear();
+            expect(res[0]).toBe(dhakaYear + 6);
             expect(res[res.length - 1]).toBe(1950);
         });
         const req = httpMock.expectOne(`${API_ENDPOINTS.LOOKUPS}/PassingYear`);

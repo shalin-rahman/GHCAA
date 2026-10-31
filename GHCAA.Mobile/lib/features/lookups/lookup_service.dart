@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/registration_constants.dart';
 import '../../core/utils/ttl_cache.dart';
 
 final lookupServiceProvider = Provider<LookupService>((ref) => LookupService(ref.read(dioProvider)));
@@ -11,8 +12,20 @@ final lookupsByGroupProvider = FutureProvider.family<List<dynamic>, String>((ref
   return ref.read(lookupServiceProvider).getByGroup(group);
 });
 
+// Used when the PassingYear lookup is empty. Newest first, starting at this year + 6
+// in the association's time zone, the same rule the API validates against.
+List<String> passingYearFallback([DateTime? nowUtc]) {
+  final currentYear = (nowUtc ?? DateTime.now().toUtc()).add(AcademicConstants.associationUtcOffset).year;
+  final latestYear = currentYear + AcademicConstants.passingYearFutureYears;
+  return List.generate(
+    latestYear - AcademicConstants.earliestPassingYear + 1,
+    (index) => '${latestYear - index}',
+  );
+}
+
 final batchListProvider = FutureProvider<List<String>>((ref) async {
   final items = await ref.read(lookupServiceProvider).getByGroup('PassingYear');
+  if (items.isEmpty) return passingYearFallback();
   return items.map((e) => e['value'].toString()).toList()..sort((a,b) => b.compareTo(a));
 });
 

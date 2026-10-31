@@ -2,8 +2,10 @@
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Security.Claims;
 
 namespace GHCAA.Tests.Controllers
 {
@@ -14,12 +16,103 @@ namespace GHCAA.Tests.Controllers
         private Mock<IUserService> _userServiceMock;
         private RolesController _controller;
 
+        private void SetAdminContext(int? adminId)
+        {
+            var claims = adminId.HasValue
+                ? new[] { new Claim(ClaimTypes.NameIdentifier, adminId.Value.ToString()) }
+                : Array.Empty<Claim>();
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth"))
+                }
+            };
+        }
+
         [SetUp]
         public void Setup()
         {
             _roleServiceMock = new Mock<IRoleService>();
             _userServiceMock = new Mock<IUserService>();
             _controller = new RolesController(_roleServiceMock.Object, _userServiceMock.Object, Mock.Of<ILogger<RolesController>>());
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task ResetAuthenticator_Success_ReturnsNoContent()
+        {
+            var authenticator = new Mock<IAuthenticatorService>();
+            authenticator.Setup(x => x.ResetByAdminAsync(7, 42, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            SetAdminContext(42);
+
+            var result = await _controller.ResetAuthenticator(7, authenticator.Object, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<NoContentResult>());
+            authenticator.Verify(x => x.ResetByAdminAsync(7, 42, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task ResetAuthenticator_MissingAuthenticator_ReturnsNotFound()
+        {
+            var authenticator = new Mock<IAuthenticatorService>();
+            authenticator.Setup(x => x.ResetByAdminAsync(7, 42, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+            SetAdminContext(42);
+
+            var result = await _controller.ResetAuthenticator(7, authenticator.Object, CancellationToken.None);
+
+            Assert.That((result as ObjectResult)?.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task ResetAuthenticator_WithoutAdminClaim_ReturnsUnauthorized()
+        {
+            var authenticator = new Mock<IAuthenticatorService>();
+            SetAdminContext(null);
+
+            var result = await _controller.ResetAuthenticator(7, authenticator.Object, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<UnauthorizedResult>());
+            authenticator.Verify(x => x.ResetByAdminAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task UnlockUser_Success_ReturnsNoContent()
+        {
+            _userServiceMock.Setup(x => x.UnlockUserAsync(7, 42, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            SetAdminContext(42);
+
+            var result = await _controller.UnlockUser(7, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<NoContentResult>());
+            _userServiceMock.Verify(x => x.UnlockUserAsync(7, 42, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task UnlockUser_UnknownUser_ReturnsNotFound()
+        {
+            _userServiceMock.Setup(x => x.UnlockUserAsync(7, 42, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+            SetAdminContext(42);
+
+            var result = await _controller.UnlockUser(7, CancellationToken.None);
+
+            Assert.That((result as ObjectResult)?.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task UnlockUser_WithoutAdminClaim_ReturnsUnauthorized()
+        {
+            SetAdminContext(null);
+
+            var result = await _controller.UnlockUser(7, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<UnauthorizedResult>());
+            _userServiceMock.Verify(x => x.UnlockUserAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Test]
@@ -205,6 +298,26 @@ namespace GHCAA.Tests.Controllers
             var result = await _controller.GetUsers(CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task GetUsers_ShowsLockedUntilOnlyWhileTheLockRuns()
+        {
+            var until = DateTime.UtcNow.AddMinutes(10);
+            _userServiceMock.Setup(x => x.GetAllUsersAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<User>
+            {
+                new() { Id = 1, Username = "locked", LockoutUntil = until },
+                new() { Id = 2, Username = "expired", LockoutUntil = DateTime.UtcNow.AddMinutes(-1) },
+                new() { Id = 3, Username = "never" },
+            });
+
+            var result = (OkObjectResult)await _controller.GetUsers(CancellationToken.None);
+
+            var lockedUntil = ((IEnumerable<object>)result.Value!)
+                .Select(u => (DateTime?)u.GetType().GetProperty("LockedUntil")!.GetValue(u))
+                .ToList();
+            Assert.That(lockedUntil, Is.EqualTo(new DateTime?[] { until, null, null }));
         }
 
         [Test]

@@ -1,6 +1,7 @@
 using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -65,7 +66,7 @@ public sealed class ScholarshipsController : ControllerBase
     {
         try { return Ok(await _scholarships.CreateCallAsync(dto, ct)); }
         catch (KeyNotFoundException ex) { return Problem(ex.Message, statusCode: 404); }
-        catch (ArgumentException ex) { return Problem(ex.Message, statusCode: 400); }
+        catch (InvalidRequestException ex) { return Problem(ex.Message, statusCode: 400); }
     }
 
     [HttpPost("admin/awards"), Authorize(Policy = Policies.AdminOnly)]

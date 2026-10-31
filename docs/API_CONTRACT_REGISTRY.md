@@ -12,6 +12,30 @@ remove or rename). This file is the *record* of each time that rule was
 applied — one entry per change, so a client left behind is visible at a
 glance.
 
+### 2026-10-31 — POST /api/roles/users/{id}/unlock, GET /api/roles/users
+- Change: new route. A SuperAdmin ends a user's login lock and authenticator lock early. It needs a recent step-up and answers 204, or 404 for an unknown user. Each unlock writes an `AccountUnlockedByAdmin` activity entry. `GET /api/roles/users` gains `lockedUntil`, set only while the login lock is still running. It does not show an authenticator lock.
+- Reason: TODO 84.51, plan Part D. A locked admin used to wait out the timer or need a database edit.
+- Web: `admin/roles` shows an unlock button on a locked user, asks for confirmation, then reloads the list.
+- Mobile: `PermissionsMatrixScreen` shows the same button on the user card through `RolesService.unlockUser`. The step-up prompt comes from `StepUpInterceptor`.
+
+### 2026-10-31 — PUT /api/profile
+- Change: a member can now set or change their own NID. It must be 10, 13 or 17 digits after spaces are removed, and must not belong to another member. A bad or taken NID answers 400 with the reason in `detail`. It used to answer 500. Route and DTO shape are unchanged.
+- Reason: TODO 84.51, plan Part C.
+- Web: `member/profile` makes the NID field editable with the same pattern. The interceptor shows `detail`, and the page no longer adds a second "check your network" toast.
+- Mobile: `ProfileEditScreen` checks `MemberRules.nidPattern` before sending and shows the server's `detail` when the save is refused.
+
+### 2026-10-31 — POST /api/auth/authenticator/setup-with-password
+- Change: a wrong password now counts toward the login lockout. The fifth wrong try locks the account for `Constants.Login.LockoutMinutes` minutes, and a locked account answers 423 with code `ACCOUNT_LOCKED` before the password is checked. Request and success response are unchanged.
+- Reason: TODO 84.49, plan Part B. Without this the route allowed unlimited password guesses.
+- Web: `authenticator-settings` shows `detail` under the password field.
+- Mobile: `AuthenticatorScreen` shows `detail` through `ApiException.serverMessage`.
+
+### 2026-10-31 — PUT /api/config
+- Change: `workflow.defaultMembershipType` must name a `MembershipType` value, any case. An unknown name, a number, an empty string or null answers 400 with the reason in `detail`, and nothing is saved. A valid name is stored in the enum's spelling, so `associate` saves as `Associate`. Route and DTO shape are unchanged.
+- Reason: TODO 34.D20. A typo used to save, and every new member then got `General`.
+- Web: `admin/org-config` shows the field as a dropdown of `MEMBERSHIP_TYPE_OPTIONS`.
+- Mobile: not applicable. Mobile has no org settings editor.
+
 ### 2026-10-27 — GET /api/elections/{id}/candidate-list
 - Change: new anonymous route returns accepted candidates by seat, with name, photo, statement and ballot order, only from CandidateList onward. It answers 404 before finalization and for test elections. Proposer, seconder and consent data are not included.
 - Reason: owner request 2026-10-27; spec 023 FR-051, TODO 37.16c.

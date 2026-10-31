@@ -1,5 +1,6 @@
 using FluentAssertions;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
@@ -16,6 +17,7 @@ namespace GHCAA.Tests.Services
         private Mock<ILogger<UserService>> _mockLogger = null!;
         private Mock<ITokenService> _mockTokenService = null!;
         private IOptions<AppSettingsOptions> _appSettings = null!;
+        private Mock<IActivityService> _mockActivity = null!;
         private UserService _service = null!;
 
         [SetUp]
@@ -24,7 +26,8 @@ namespace GHCAA.Tests.Services
             _mockLogger = new Mock<ILogger<UserService>>();
             _mockTokenService = new Mock<ITokenService>();
             _appSettings = Options.Create(new AppSettingsOptions());
-            _service = new UserService(_context, _mockLogger.Object, _mockTokenService.Object, _appSettings);
+            _mockActivity = new Mock<IActivityService>();
+            _service = new UserService(_context, _mockLogger.Object, _mockTokenService.Object, _appSettings, _mockActivity.Object);
         }
 
         [Test]
@@ -40,6 +43,65 @@ namespace GHCAA.Tests.Services
             user.MemberId.Should().Be(member.Id);
             user.IsActive.Should().BeTrue();
             BCrypt.Net.BCrypt.Verify("TestPassword123", user.PasswordHash).Should().BeTrue();
+        }
+
+        [Category("FR-39")]
+        [Test]
+        public async Task RecordFailedPasswordAsync_LocksOnFifthFailureAndCanReset()
+        {
+            var member = await CreateAndSaveTestMemberAsync();
+            var user = await CreateAndSaveTestUserAsync(member.Id, "atomic-lockout");
+
+            for (var i = 0; i < Constants.Login.MaxFailedAttempts; i++)
+                (await _service.RecordFailedPasswordAsync(user.Id)).Should().BeTrue();
+
+            var locked = await _context.Users.AsNoTracking().SingleAsync(u => u.Id == user.Id);
+            locked.FailedLoginAttempts.Should().Be(Constants.Login.MaxFailedAttempts);
+            locked.LockoutUntil.Should().BeAfter(DateTime.UtcNow);
+
+            (await _service.ResetFailedPasswordsAsync(user.Id)).Should().BeTrue();
+            var reset = await _context.Users.AsNoTracking().SingleAsync(u => u.Id == user.Id);
+            reset.FailedLoginAttempts.Should().Be(0);
+            reset.LockoutUntil.Should().BeNull();
+        }
+
+        [Category("FR-39")]
+        [Test]
+        public async Task UnlockUserAsync_ClearsLoginAndAuthenticatorLocksAndLogsIt()
+        {
+            var member = await CreateAndSaveTestMemberAsync();
+            var user = await CreateAndSaveTestUserAsync(member.Id, "locked-out");
+            var lockedUntil = DateTime.UtcNow.AddMinutes(10);
+            user.FailedLoginAttempts = Constants.Login.MaxFailedAttempts;
+            user.LockoutUntil = lockedUntil;
+            _context.UserAuthenticators.Add(new UserAuthenticator
+            {
+                UserId = user.Id, ProtectedSecret = "secret", ConfirmedAt = DateTime.UtcNow,
+                FailedAttempts = Constants.Authenticator.MaxFailedAttempts, LockedUntil = lockedUntil,
+            });
+            await _context.SaveChangesAsync();
+
+            (await _service.UnlockUserAsync(user.Id, adminId: 99)).Should().BeTrue();
+
+            var unlocked = await _context.Users.AsNoTracking().SingleAsync(u => u.Id == user.Id);
+            unlocked.FailedLoginAttempts.Should().Be(0);
+            unlocked.LockoutUntil.Should().BeNull();
+            var app = await _context.UserAuthenticators.AsNoTracking().SingleAsync(a => a.UserId == user.Id);
+            app.FailedAttempts.Should().Be(0);
+            app.LockedUntil.Should().BeNull();
+            _mockActivity.Verify(a => a.LogActivityAsync(member.Id, Constants.Authenticator.AdminUnlockAuditType,
+                It.IsAny<string>(), 99, null, null, null, null, It.IsAny<CancellationToken>(), null), Times.Once);
+        }
+
+        [Category("FR-39")]
+        [Test]
+        public async Task UnlockUserAsync_UnknownUser_ReturnsFalseAndLogsNothing()
+        {
+            (await _service.UnlockUserAsync(424242, adminId: 99)).Should().BeFalse();
+
+            _mockActivity.Verify(a => a.LogActivityAsync(It.IsAny<int?>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+                It.IsAny<CancellationToken>(), It.IsAny<DateTime?>()), Times.Never);
         }
 
         [Test]
@@ -170,7 +232,7 @@ namespace GHCAA.Tests.Services
         private UserService ServiceWithProtectedUsernames(params string[] protectedUsernames)
         {
             var options = Options.Create(new AppSettingsOptions { ProtectedSuperAdmins = protectedUsernames });
-            return new UserService(_context, _mockLogger.Object, _mockTokenService.Object, options);
+            return new UserService(_context, _mockLogger.Object, _mockTokenService.Object, options, _mockActivity.Object);
         }
 
         [Category("FR-11")]

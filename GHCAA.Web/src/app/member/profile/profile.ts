@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ProfileService } from '../../core/services/profile.service';
 import { MemberProfile } from '../../core/models/business.models';
@@ -213,6 +214,10 @@ export class Profile implements OnInit {
         return this.profile.academicHistory.sort((a: any, b: any) => (b.passingYear || 0) - (a.passingYear || 0))[0];
     }
 
+    normalizeNid(value: string) {
+        this.profile.nid = value.replace(/\s/g, '');
+    }
+
     async updateProfile(form: any) {
         if (form.invalid) {
             form.control.markAllAsTouched();
@@ -263,7 +268,10 @@ export class Profile implements OnInit {
             });
 
         } catch (error: any) {
-            this.notify.error(error?.error?.message || 'Update failed. Please check your network.');
+            // The HTTP interceptor already showed the server's reason, such as a bad or taken NID.
+            if (!(error instanceof HttpErrorResponse)) {
+                this.notify.error('Update failed. Please check your network.');
+            }
         } finally {
             this.saving.set(false);
         }

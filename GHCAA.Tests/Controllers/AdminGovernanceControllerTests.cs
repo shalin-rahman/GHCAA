@@ -1,6 +1,7 @@
 using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using static GHCAA.Domain.Enums;
@@ -66,11 +67,20 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task SetHandoverCheck_UnknownItem_Returns400()
         {
-            _governance.Setup(s => s.SetHandoverCheckAsync(7, _tick, 42, It.IsAny<CancellationToken>())).ThrowsAsync(new ArgumentException("Unknown handover item."));
+            _governance.Setup(s => s.SetHandoverCheckAsync(7, _tick, 42, It.IsAny<CancellationToken>())).ThrowsAsync(new InvalidRequestException("Unknown handover item."));
 
             var obj = await _controller.SetHandoverCheck(7, _tick, CancellationToken.None) as ObjectResult;
 
             Assert.That(obj!.StatusCode, Is.EqualTo(400));
+        }
+
+        // An ArgumentException from a bug must not be dressed up as a bad request.
+        [Test]
+        public void SetHandoverCheck_PlainArgumentException_IsRethrown()
+        {
+            _governance.Setup(s => s.SetHandoverCheckAsync(7, _tick, 42, It.IsAny<CancellationToken>())).ThrowsAsync(new ArgumentException("bug"));
+
+            Assert.ThrowsAsync<ArgumentException>(() => _controller.SetHandoverCheck(7, _tick, CancellationToken.None));
         }
 
         [Test]

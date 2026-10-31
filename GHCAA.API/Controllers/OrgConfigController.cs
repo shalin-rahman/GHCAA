@@ -27,7 +27,14 @@ namespace GHCAA.API.Controllers
                 return Problem(detail: "Config payload is required.", statusCode: StatusCodes.Status400BadRequest);
 
             var adminId = this.CurrentMemberIdRaw() ?? string.Empty;
-            await configService.UpdateConfigAsync(dto, adminId);
+            try
+            {
+                await configService.UpdateConfigAsync(dto, adminId);
+            }
+            catch (ArgumentException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
             return NoContent();
         }
     }

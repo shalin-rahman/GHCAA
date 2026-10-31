@@ -79,6 +79,14 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task UpdateConfigAsync(OrgConfigDto dto, string updatedByAdminId)
         {
+            // 34.D20. MemberService gives new members General when it cannot parse this name, so a
+            // typo would change every new member's type without anyone noticing. IsDefined stops
+            // a number like "99", which TryParse accepts.
+            var requestedType = dto.Workflow?.DefaultMembershipType;
+            if (!Enum.TryParse<Enums.MembershipType>(requestedType, true, out var defaultType)
+                || !Enum.IsDefined(defaultType))
+                throw new ArgumentException($"Unknown default membership type \"{requestedType}\".");
+
             var profileDateFormat = Constants.Localization.NormalizeDateFormat(
                 BuildDefaults().Localization.DateFormat,
                 Constants.Localization.DayMonthYearDateFormat);
@@ -94,7 +102,8 @@ namespace GHCAA.Infrastructure.Services
                 // than to a sender that does not exist.
                 Workflow = (dto.Workflow ?? new WorkflowDto()) with
                 {
-                    EmailProvider = EmailSettingsOptions.Normalize(dto.Workflow?.EmailProvider)
+                    EmailProvider = EmailSettingsOptions.Normalize(dto.Workflow?.EmailProvider),
+                    DefaultMembershipType = defaultType.ToString()
                 }
             };
 

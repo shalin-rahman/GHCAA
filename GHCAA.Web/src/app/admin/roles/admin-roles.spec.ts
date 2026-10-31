@@ -25,7 +25,8 @@ describe('AdminRoles Component', () => {
             resetSystemUserPassword: vi.fn().mockReturnValue(of({})),
             setSystemUserActive: vi.fn().mockReturnValue(of({})),
             deleteSystemUser: vi.fn().mockReturnValue(of({})),
-            resetSystemUserAuthenticator: vi.fn().mockReturnValue(of(undefined))
+            resetSystemUserAuthenticator: vi.fn().mockReturnValue(of(undefined)),
+            unlockSystemUser: vi.fn().mockReturnValue(of(undefined))
         };
         confirmMock = { confirm: vi.fn().mockReturnValue(of(true)) };
 
@@ -110,5 +111,40 @@ describe('AdminRoles Component', () => {
         confirmMock.confirm.mockReturnValue(of(false));
         await component.resetAuthenticator({ id: 7, username: 'ops' });
         expect(adminServiceMock.resetSystemUserAuthenticator).not.toHaveBeenCalled();
+    });
+
+    it('FR-39: unlocks an account after a confirm and reloads the list', async () => {
+        adminServiceMock.getSystemUsers.mockClear();
+        await component.unlockUser({ id: 7, username: 'ops' });
+        expect(adminServiceMock.unlockSystemUser).toHaveBeenCalledWith(7);
+        expect(notificationServiceMock.success).toHaveBeenCalledWith('Account unlocked.');
+        expect(adminServiceMock.getSystemUsers).toHaveBeenCalled();
+    });
+
+    it('FR-39: does nothing when the unlock is cancelled', async () => {
+        confirmMock.confirm.mockReturnValue(of(false));
+        await component.unlockUser({ id: 7, username: 'ops' });
+        expect(adminServiceMock.unlockSystemUser).not.toHaveBeenCalled();
+    });
+
+    it('FR-39: shows the server reason when the unlock fails', async () => {
+        adminServiceMock.unlockSystemUser.mockReturnValue(throwError(() => ({ status: 403, error: { detail: 'Step-up required.' } })));
+        await component.unlockUser({ id: 7, username: 'ops' });
+        expect(notificationServiceMock.error).toHaveBeenCalledWith('Step-up required.');
+    });
+
+    it('FR-39: shows Unlock only for a user whose lock is still running', () => {
+        const future = new Date(Date.now() + 10 * 60_000).toISOString();
+        const past = new Date(Date.now() - 60_000).toISOString();
+        component.users.set([
+            { id: 1, username: 'locked', isActive: true, roles: [], lockedUntil: future },
+            { id: 2, username: 'expired', isActive: true, roles: [], lockedUntil: past },
+            { id: 3, username: 'never', isActive: true, roles: [] }
+        ]);
+        component.loading.set(false);
+        fixture.detectChanges();
+
+        const buttons = fixture.nativeElement.querySelectorAll('[data-testid="unlock-user"]');
+        expect(buttons.length).toBe(1);
     });
 });

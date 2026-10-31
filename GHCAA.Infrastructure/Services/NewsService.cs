@@ -44,6 +44,22 @@ namespace GHCAA.Infrastructure.Services
             return false;
         }
 
+        public Task ReleaseImageUploadAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            var key = $"{UploadCountKeyPrefix}:{userId}:{DateTime.UtcNow:yyyyMMdd}";
+            if (!_cache.TryGetValue(key, out StrongBox<int>? count) || count == null)
+                return Task.CompletedTask;
+
+            int current;
+            do
+            {
+                current = Volatile.Read(ref count.Value);
+                if (current <= 0) return Task.CompletedTask;
+            } while (Interlocked.CompareExchange(ref count.Value, current - 1, current) != current);
+
+            return Task.CompletedTask;
+        }
+
         public async Task<IEnumerable<NewsPostDto>> GetActiveNewsAsync(Enums.ArticleCategory? category = null, Enums.PostType? postType = null, CancellationToken cancellationToken = default)
         {
             var query = _db.NewsPosts

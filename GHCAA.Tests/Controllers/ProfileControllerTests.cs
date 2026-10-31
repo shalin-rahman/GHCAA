@@ -73,6 +73,21 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
+        [Category("FR-01")]
+        public async Task UpdateProfile_BadNid_Returns400WithTheReason()
+        {
+            var dto = new UpdateProfileDto { NID = "123" };
+            _memberServiceMock.Setup(x => x.UpdateProfileAsync(10, dto, It.IsAny<CancellationToken>()))
+                              .ThrowsAsync(new System.ComponentModel.DataAnnotations.ValidationException(GHCAA.Domain.Constants.Nid.Message));
+
+            var result = await _controller.UpdateProfile(dto, CancellationToken.None);
+
+            var problem = (ObjectResult)result;
+            Assert.That(problem.StatusCode, Is.EqualTo(400));
+            Assert.That(((ProblemDetails)problem.Value!).Detail, Is.EqualTo(GHCAA.Domain.Constants.Nid.Message));
+        }
+
+        [Test]
         public async Task ChangePassword_ReturnsOk_OnSuccess()
         {
             var dto = new ChangePasswordDto { OldPassword = "old", NewPassword = "new" };

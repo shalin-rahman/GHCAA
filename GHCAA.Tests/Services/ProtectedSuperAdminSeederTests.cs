@@ -31,7 +31,8 @@ namespace GHCAA.Tests.Services
                 _context,
                 new Mock<ILogger<UserService>>().Object,
                 new Mock<ITokenService>().Object,
-                Options.Create(new AppSettingsOptions()));
+                Options.Create(new AppSettingsOptions()),
+                new Mock<IActivityService>().Object);
         }
 
         [Test]

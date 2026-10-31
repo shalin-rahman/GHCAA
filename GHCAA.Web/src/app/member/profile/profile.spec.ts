@@ -4,7 +4,8 @@ import { Profile } from './profile';
 import { ProfileService } from '../../core/services/profile.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LookupService } from '../../core/services/lookup.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 describe('Profile Component', () => {
     let component: Profile;
@@ -46,6 +47,33 @@ describe('Profile Component', () => {
 
     it('should load profile on init', () => {
         expect(profileServiceMock.getProfile).toHaveBeenCalled();
+    });
+
+    it('normalizes spaces in an editable NID and submits it', async () => {
+        profileServiceMock.getProfile.mockReturnValue(of({ nid: '1234567890', academicHistory: [], professionalHistory: [] }));
+        component.profile.nid = '1234 567890';
+        component.normalizeNid(component.profile.nid);
+
+        await component.updateProfile({ invalid: false, control: { markAllAsTouched: vi.fn() } });
+
+        expect(component.profile.nid).toBe('1234567890');
+        expect(profileServiceMock.updateProfile).toHaveBeenCalledWith(
+            expect.objectContaining({ nid: '1234567890' })
+        );
+        const input = fixture.nativeElement.querySelector('#profile-nid') as HTMLInputElement;
+        expect(input.readOnly).toBe(false);
+        expect(input.pattern).toContain('17');
+    });
+
+    it('leaves a rejected NID to the interceptor toast instead of adding a network error', async () => {
+        profileServiceMock.updateProfile.mockReturnValue(throwError(() => new HttpErrorResponse({
+            status: 400, error: { detail: 'NID must be 10, 13 or 17 digits.' }
+        })));
+
+        await component.updateProfile({ invalid: false, control: { markAllAsTouched: vi.fn() } });
+
+        expect(notificationServiceMock.error).not.toHaveBeenCalled();
+        expect(component.saving()).toBe(false);
     });
 
     it('should add academic records', () => {

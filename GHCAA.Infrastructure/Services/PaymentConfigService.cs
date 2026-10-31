@@ -101,7 +101,7 @@ namespace GHCAA.Infrastructure.Services
         private static void EnsureGatewayBuilt(PaymentGateway gateway)
         {
             if (gateway == PaymentGateway.NagadGateway)
-                throw new ArgumentException("The Nagad gateway is not built yet. Use the manual Nagad method instead.");
+                throw new GatewayNotBuiltException("The Nagad gateway is not built yet. Use the manual Nagad method instead.");
         }
 
         public async Task<PaymentConfiguration?> ToggleAsync(int id, CancellationToken cancellationToken = default)

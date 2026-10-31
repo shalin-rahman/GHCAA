@@ -9,6 +9,7 @@ import '../../features/admin/roles_service.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/widgets/confirm_dialog.dart';
+import '../../core/widgets/admin_action_circle.dart';
 
 final _usersProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(rolesServiceProvider).getUsers();
@@ -120,6 +121,9 @@ class _PermissionsMatrixScreenState
     final roles = (user['roles'] as List<dynamic>? ?? []).cast<String>();
     final isActive = user['isActive'] ?? true;
     final userId = user['id'] as int;
+    // The API only sends lockedUntil while the lock is still running.
+    final lockedUntil = DateTime.tryParse(user['lockedUntil']?.toString() ?? '');
+    final isLocked = lockedUntil != null && lockedUntil.isAfter(DateTime.now());
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -157,6 +161,17 @@ class _PermissionsMatrixScreenState
                     ],
                   ),
                 ),
+                if (isLocked) ...[
+                  AdminActionCircle(
+                    key: ValueKey('unlock-user-$userId'),
+                    icon: Icons.lock_open,
+                    color: AppTheme.royalGold,
+                    tooltip: 'Unlock account',
+                    disabled: _rolesActionBusy,
+                    onTap: () => _unlockUser(userId, user['username'] as String? ?? 'this user'),
+                  ),
+                  const SizedBox(width: 8),
+                ],
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -511,6 +526,31 @@ class _PermissionsMatrixScreenState
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(ok ? 'Role removed.' : 'Failed to remove role.'),
           backgroundColor: ok ? null : Colors.redAccent,
+        ));
+      }
+    } finally {
+      if (mounted) setState(() => _rolesActionBusy = false);
+    }
+  }
+
+  Future<void> _unlockUser(int userId, String username) async {
+    if (_rolesActionBusy) return;
+    final confirm = await showConfirmDialog(
+      context,
+      title: 'Unlock account?',
+      message:
+          'Unlock "$username" now? This ends the sign-in lock and the authenticator lock.',
+      confirmLabel: 'Unlock',
+    );
+    if (!confirm || !mounted) return;
+    setState(() => _rolesActionBusy = true);
+    try {
+      final error = await ref.read(rolesServiceProvider).unlockUser(userId);
+      if (mounted) {
+        if (error == null) ref.invalidate(_usersProvider);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(error ?? 'Account unlocked.'),
+          backgroundColor: error == null ? null : Colors.redAccent,
         ));
       }
     } finally {

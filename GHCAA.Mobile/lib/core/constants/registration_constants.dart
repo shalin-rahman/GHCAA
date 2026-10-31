@@ -1,4 +1,9 @@
 class AcademicConstants {
+  static const int earliestPassingYear = 1950;
+  static const int passingYearFutureYears = 6;
+  // Bangladesh has no daylight saving, so a fixed offset gives the association's year.
+  static const Duration associationUtcOffset = Duration(hours: 6);
+
   static const List<String> certificates = [
     'HSC',
     'Bachelor (Pass)',
@@ -43,6 +48,12 @@ class LookupGroups {
   static const String bloodGroup = 'BloodGroup';
   static const String jobCategory = 'JobCategory';
   static const String passingYear = 'PassingYear';
+}
+
+// Same rule as Constants.Nid on the API.
+class MemberRules {
+  static final RegExp nidPattern = RegExp(r'^(\d{10}|\d{13}|\d{17})$');
+  static const String nidMessage = 'Enter 10, 13 or 17 digits.';
 }
 
 class MembershipConstants {

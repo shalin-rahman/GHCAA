@@ -6,7 +6,7 @@ import { OrgConfig, FeatureToggles } from '../../core/models/org-config.model';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { ORG_CONFIG_FALLBACK } from '../../core/config/org-config-fallback.generated';
-import { DATE_FORMATS, DATE_FORMAT_LABELS, DEFAULT_DATE_FORMAT } from '../../core/constants/app.constants';
+import { DATE_FORMATS, DATE_FORMAT_LABELS, DEFAULT_DATE_FORMAT, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
 import {
   DEFAULT_ELECTION_SETTINGS, ELECTION_APPROVAL_ACTIONS, ELECTION_APPROVAL_ACTION_LABELS,
   ELECTION_CANDIDATE_ORDERS, ELECTION_PRINT_MODES, ElectionApprovalAction
@@ -47,6 +47,8 @@ export class AdminOrgConfig implements OnInit {
   readonly notificationChannels = ['Both', 'Email', 'Sms'];
   // Must match EmailSettingsOptions on the server; an unknown value is saved as "server default".
   readonly emailProviders = ['Gmail', 'Brevo'];
+  // Same list LookupService serves for LOOKUP_GROUPS.MembershipType. The server refuses any other name.
+  readonly membershipTypes = MEMBERSHIP_TYPE_OPTIONS;
 
   // Example text for the empty-state placeholder only — sourced from this build's own
   // institution profile pack, not hardcoded to GHC/BDT, so a different profile's build

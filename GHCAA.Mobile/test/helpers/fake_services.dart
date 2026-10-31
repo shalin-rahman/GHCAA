@@ -335,6 +335,8 @@ class FakeRolesService implements RolesService {
   Future<bool> assignRole(int userId, String roleName) async => true;
   @override
   Future<bool> removeRole(int userId, String roleName) async => true;
+  @override
+  Future<String?> unlockUser(int userId) async => null;
 }
 
 class FakeFamilyService implements FamilyService {

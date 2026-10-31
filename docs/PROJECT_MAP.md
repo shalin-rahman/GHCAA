@@ -761,7 +761,7 @@ not block a build yet). For the full mechanism and where it stands, see
 | Interface | Impl | Key Methods |
 |---|---|---|
 | `IAuthService` | `AuthService` | `LoginAsync`, `GoogleLoginAsync`, `FacebookLoginAsync` |
-| `IUserService` | `UserService` | CRUD on User entity; `HasElectionRecordsAsync` (appointments, approvals, rules unlocks, scrutiny decisions). `RolesController` refuses a hard delete with 409 when it is true |
+| `IUserService` | `UserService` | CRUD on User entity; `HasElectionRecordsAsync` (appointments, approvals, rules unlocks, scrutiny decisions). `RolesController` refuses a hard delete with 409 when it is true. `UnlockUserAsync` clears the login and authenticator locks in one transaction for `POST /api/roles/users/{id}/unlock` |
 | `IElectionService` (readiness part, 37.12w) | `ElectionService` | `GetReadinessAsync` (each item met or not, attested or advisory), `AttestReadinessAsync` (writes a `ReadinessAttested` audit entry) |
 | `IElectionDocumentService` (receipt part, 37.14o) | `ElectionDocumentService` | `GenerateBallotReceiptPdfAsync` (code, title, cast time). `ElectionPdfFonts` registers Noto Sans Bengali from `GHCAA.Infrastructure/Fonts/`; `AssociationTime` holds the UTC+6 offset, and `FormatReceiptTimestamp` prints the cast time as `dd-MM-yyyy HH:mm` Bangladesh time |
 | `IElectionFreezeService` | `ElectionFreezeService` | `EnsureNotFrozenAsync`, `FindFrozenAsync`, `GetOpenUnlockAsync`, `OpenUnlockAsync`, `CloseUnlockAsync` |

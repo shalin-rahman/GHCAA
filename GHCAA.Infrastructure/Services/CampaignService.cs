@@ -117,7 +117,7 @@ namespace GHCAA.Infrastructure.Services
                 donorName = member?.FullName ?? "Alumni Donor";
             }
             if (string.IsNullOrWhiteSpace(donorName))
-                throw new ArgumentException("A donor name is required for a guest pledge.");
+                throw new InvalidRequestException("A donor name is required for a guest pledge.");
 
             var pledge = new CampaignPledge
             {

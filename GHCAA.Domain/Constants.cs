@@ -127,6 +127,25 @@ namespace GHCAA.Domain
             public const int OtpMaxAttempts = 5;
         }
 
+        public static class AcademicYears
+        {
+            public const int EarliestPassingYear = 1950;
+            public const int PassingYearFutureYears = 6;
+        }
+
+        public static class Login
+        {
+            public const int MaxFailedAttempts = 5;
+            public const int LockoutMinutes = 15;
+        }
+
+        // Registration and profile edit check the same rule. The mobile app keeps its own copy.
+        public static class Nid
+        {
+            public const string Pattern = @"^(\d{10}|\d{13}|\d{17})$";
+            public const string Message = "NID must be 10, 13 or 17 digits.";
+        }
+
         // The creator's account. ProtectedSuperAdminSeeder recreates it on boot if it is missing,
         // so it lives in code rather than appsettings, where a deploy could drop it.
         public static class CreatorAccount
@@ -396,6 +415,8 @@ namespace GHCAA.Domain
             public const string MethodEmail = "email";
             public const string MethodApp = "app";
             public const string AdminResetAuditType = "AuthenticatorResetByAdmin";
+            public const string PasswordSetupAuditType = "AuthenticatorSetupWithPassword";
+            public const string AdminUnlockAuditType = "AccountUnlockedByAdmin";
         }
 
         public static class SecurityStamps
@@ -508,6 +529,7 @@ namespace GHCAA.Domain
             public const string RateLimited = "RATE_LIMITED";
             public const string Unauthenticated = "UNAUTHENTICATED";
             public const string Forbidden = "FORBIDDEN";
+            public const string AccountLocked = "ACCOUNT_LOCKED";
         }
     }
 }

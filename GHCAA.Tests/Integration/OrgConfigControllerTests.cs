@@ -50,6 +50,25 @@ namespace GHCAA.Tests.Integration
         }
 
         [Test]
+        public async Task UpdateConfig_ServiceRejectsValue_ReturnsBadRequestWithReason()
+        {
+            var mockService = new Mock<IOrgConfigService>();
+            mockService.Setup(s => s.UpdateConfigAsync(It.IsAny<OrgConfigDto>(), It.IsAny<string>()))
+                .ThrowsAsync(new ArgumentException("Unknown default membership type \"Generl\"."));
+            var controller = new OrgConfigController(mockService.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
+            };
+
+            var result = await controller.UpdateConfig(new OrgConfigDto { OrgId = "test_org" });
+
+            var problem = (result as ObjectResult)?.Value as ProblemDetails;
+            problem.Should().NotBeNull();
+            problem!.Status.Should().Be(400);
+            problem.Detail.Should().Contain("Generl");
+        }
+
+        [Test]
         public async Task UpdateConfig_ValidDto_CallsService_AndReturnsNoContent()
         {
             // Arrange

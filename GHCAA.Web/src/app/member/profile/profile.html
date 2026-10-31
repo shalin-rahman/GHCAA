@@ -141,8 +141,12 @@
                     </div>
                     <div class="form-group">
                         <label for="profile-nid">National ID (NID)</label>
-                        <input id="profile-nid" type="text" [value]="profile.nid" name="nid" readonly class="opacity-50"
-                            title="Contact admin to change verified NID">
+                        <input id="profile-nid" type="text" [(ngModel)]="profile.nid" (ngModelChange)="normalizeNid($event)" name="nid"
+                            pattern="(\d{10}|\d{13}|\d{17})" #nidM="ngModel"
+                            [class.border-red-500]="nidM.invalid && nidM.touched">
+                        <div class="text-[10px] text-muted mt-1" [class.text-red-500]="nidM.invalid && nidM.touched">
+                            Enter 10, 13 or 17 digits. Spaces are removed automatically.
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="profile-dateOfBirth">Date of Birth *</label>

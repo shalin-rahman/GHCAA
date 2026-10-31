@@ -158,4 +158,23 @@ public class ScholarshipServiceTests : TestBase
         grants[0].RecordType.Should().Be(Enums.FinancialRecordType.Expense);
         grants[0].Reference.Should().Be(application.ReferenceCode);
     }
+
+    [Test]
+    public async Task CreateCallAsync_ClosingBeforeOpening_IsRejectedAsBadRequest()
+    {
+        var call = await SeedOpenCallAsync();
+        var dto = new CreateScholarshipCallDto
+        {
+            ScholarshipFundId = call.ScholarshipFundId,
+            AcademicYear = "2027",
+            OpensOn = DateTime.UtcNow.AddDays(10),
+            ClosesOn = DateTime.UtcNow.AddDays(5),
+            SlotCount = 1,
+            AwardAmount = 1000m,
+            EligibilityCriteria = "Open."
+        };
+
+        await FluentActions.Awaiting(() => NewService().CreateCallAsync(dto))
+            .Should().ThrowAsync<InvalidRequestException>();
+    }
 }

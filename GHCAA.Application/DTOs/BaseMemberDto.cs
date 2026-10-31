@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using GHCAA.Domain;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Application.DTOs
@@ -26,7 +27,7 @@ namespace GHCAA.Application.DTOs
         public DateTime DateOfBirth { get; set; }
 
         [Required(ErrorMessage = "National ID (NID) is required.")]
-        [RegularExpression(@"^(\d{10}|\d{13}|\d{17})$", ErrorMessage = "NID must be 10, 13 or 17 digits.")]
+        [RegularExpression(Constants.Nid.Pattern, ErrorMessage = Constants.Nid.Message)]
         public string NID { get; set; } = null!;
 
         [Required(ErrorMessage = "Mobile number is required.")]
@@ -115,7 +116,7 @@ namespace GHCAA.Application.DTOs
         // 84.36: runs on create and update requests only. Stored rows are never checked again.
         public virtual IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            var today = DateTime.UtcNow.Date;
+            var today = AssociationTime.FromUtc(DateTime.UtcNow).Date;
             if (DateOfBirth.Date <= today.AddYears(-120))
             {
                 yield return new ValidationResult("Date of birth is too far in the past.", new[] { nameof(DateOfBirth) });

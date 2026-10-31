@@ -55,7 +55,16 @@ namespace GHCAA.API.Controllers
             var memberId = GetMemberId();
             if (memberId == 0) return Unauthorized();
 
-            var success = await _memberService.UpdateProfileAsync(memberId, dto, cancellationToken);
+            bool success;
+            try
+            {
+                success = await _memberService.UpdateProfileAsync(memberId, dto, cancellationToken);
+            }
+            catch (System.ComponentModel.DataAnnotations.ValidationException ex)
+            {
+                // A bad or taken NID. Without this the middleware turned it into a 500.
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
             if (!success) return NotFound();
 
             return Ok(new { Message = "Profile updated successfully" });

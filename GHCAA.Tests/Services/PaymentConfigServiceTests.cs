@@ -214,7 +214,7 @@ namespace GHCAA.Tests.Services
         [Category("FR-42")]
         public void CreateAsync_Throws_WhenGatewayIsNagad()
         {
-            Assert.ThrowsAsync<ArgumentException>(() =>
+            Assert.ThrowsAsync<GatewayNotBuiltException>(() =>
                 _service.CreateAsync(new PaymentConfiguration { DisplayName = "Nagad auto", Method = PaymentMethod.Nagad, Gateway = PaymentGateway.NagadGateway }));
         }
 
@@ -224,7 +224,7 @@ namespace GHCAA.Tests.Services
         {
             var row = await _service.CreateAsync(new PaymentConfiguration { DisplayName = "Nagad", Method = PaymentMethod.Nagad });
 
-            Assert.ThrowsAsync<ArgumentException>(() =>
+            Assert.ThrowsAsync<GatewayNotBuiltException>(() =>
                 _service.UpdateAsync(row.Id, new PaymentConfiguration { DisplayName = "Nagad", Gateway = PaymentGateway.NagadGateway }, allowSecretUpdate: false));
         }
 

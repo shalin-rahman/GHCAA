@@ -1,7 +1,10 @@
 using GHCAA.API.Controllers;
+using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 
 namespace GHCAA.Tests.Controllers
 {
@@ -37,6 +40,21 @@ namespace GHCAA.Tests.Controllers
             int count = 0;
             foreach (var _ in items) count++;
             Assert.That(count, Is.EqualTo(1));
+        }
+
+        [Test]
+        [Category("NFR-U4")]
+        public async Task CreateConfig_RethrowsUnrelatedArgumentException()
+        {
+            var service = new Mock<IPaymentConfigService>();
+            service.Setup(x => x.CreateAsync(It.IsAny<PaymentConfiguration>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new ArgumentException("unexpected service fault"));
+            var controller = new PaymentConfigController(service.Object);
+            SetUserContext(controller, null, "SuperAdmin");
+
+            var act = () => controller.CreateConfig(new PaymentConfiguration(), CancellationToken.None);
+
+            Assert.ThrowsAsync<ArgumentException>(async () => await act());
         }
 
         [TestCase("Admin", "********", "********")]

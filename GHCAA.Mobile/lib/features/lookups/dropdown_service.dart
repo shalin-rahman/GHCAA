@@ -134,9 +134,7 @@ class DropdownService {
           {'value': 'Terminated', 'label': 'Terminated'},
         ];
       case LookupGroups.passingYear:
-        final currentYear = DateTime.now().year;
-        return List.generate(currentYear - 1950 + 1, (i) => (currentYear - i).toString())
-            .map((y) => {'value': y, 'label': y}).toList();
+        return passingYearFallback().map((y) => {'value': y, 'label': y}).toList();
       case 'PaymentMethod':
         try {
           final dio = _ref.read(dioProvider);

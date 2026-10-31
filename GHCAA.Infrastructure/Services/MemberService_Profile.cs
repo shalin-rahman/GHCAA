@@ -4,6 +4,8 @@ using GHCAA.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace GHCAA.Infrastructure.Services
 {
@@ -211,6 +213,18 @@ namespace GHCAA.Infrastructure.Services
                 .Include(m => m.ProfessionalHistory)
                 .FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             if (member == null) return false;
+
+            var nid = Regex.Replace(string.IsNullOrWhiteSpace(dto.NID) ? member.NID ?? string.Empty : dto.NID, @"\s+", string.Empty);
+            if (!Regex.IsMatch(nid, Constants.Nid.Pattern))
+            {
+                throw new ValidationException(Constants.Nid.Message);
+            }
+
+            if (await _db.Members.IgnoreQueryFilters().AnyAsync(m => m.Id != memberId && m.NID == nid, cancellationToken))
+            {
+                throw new ValidationException("This NID is already in use.");
+            }
+            member.NID = nid;
 
             if (!string.IsNullOrWhiteSpace(dto.FullName)) member.FullName = dto.FullName;
             if (!string.IsNullOrWhiteSpace(dto.FatherName)) member.FatherName = dto.FatherName;

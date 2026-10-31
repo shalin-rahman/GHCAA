@@ -567,6 +567,10 @@ export const PROFESSIONAL_SECTORS = [
 // 82.42: getAcademicYears() removed — every screen that used it now calls
 // LookupService.getAcademicYears() (sourced from the PassingYear lookup group) instead.
 
+// Used only when the PassingYear lookup group comes back empty. Bangladesh has no daylight
+// saving, so a fixed offset gives the association's year. Matches Constants.AcademicYears on the API.
+export const PASSING_YEAR_FALLBACK = { EARLIEST: 1950, FUTURE_YEARS: 6, UTC_OFFSET_HOURS: 6 } as const;
+
 export const IS_HSC = (cert: string | undefined | null) => cert === 'HSC';
 
 export const ACADEMIC_DATA = {

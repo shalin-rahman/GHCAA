@@ -96,7 +96,7 @@ public class MemberService_LinkedIn_Tests : TestBase
     public async Task UpdateProfile_WithNoGHCRecord_ShouldThrowException()
     {
         // Arrange
-        var member = CreateTestMember("test1@ex.com", "111");
+        var member = CreateTestMember("test1@ex.com", "1111111111");
         await _context.Members.AddAsync(member);
         await _context.SaveChangesAsync();
 
@@ -119,7 +119,7 @@ public class MemberService_LinkedIn_Tests : TestBase
     public async Task UpdateProfile_WithGHCRecord_ShouldSucceed()
     {
         // Arrange
-        var member = CreateTestMember("test2@ex.com", "222");
+        var member = CreateTestMember("test2@ex.com", "2222222222");
         await _context.Members.AddAsync(member);
         await _context.SaveChangesAsync();
 

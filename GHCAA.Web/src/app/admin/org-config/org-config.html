@@ -177,7 +177,12 @@
       </div>
       <div class="form-group">
         <label>Default Membership Type</label>
-        <input type="text" [(ngModel)]="config.workflow.defaultMembershipType" name="defaultMembershipType">
+        <select [(ngModel)]="config.workflow.defaultMembershipType" name="defaultMembershipType">
+          @for (type of membershipTypes; track type.value) {
+          <option [value]="type.value">{{ type.label }}</option>
+          }
+        </select>
+        <small class="text-muted">The type a new member gets on registration. An admin can change it per member later.</small>
       </div>
       <div class="form-group">
         <label>Notification Channel</label>

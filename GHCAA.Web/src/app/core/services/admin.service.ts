@@ -305,6 +305,11 @@ export class AdminService {
             { headers: { 'X-Skip-Error-Notify': 'true' } });
     }
 
+    unlockSystemUser(userId: number): Observable<void> {
+        return this.http.post<void>(`${API_ENDPOINTS.ROLES}/users/${userId}/unlock`, {},
+            { headers: { 'X-Skip-Error-Notify': 'true' } });
+    }
+
     setSystemUserActive(userId: number, action: 'enable' | 'disable'): Observable<any> {
         return this.http.post(`${API_ENDPOINTS.ROLES}/users/${userId}/${action}`, {});
     }

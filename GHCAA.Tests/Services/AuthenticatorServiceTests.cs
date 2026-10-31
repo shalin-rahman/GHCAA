@@ -81,6 +81,7 @@ public class AuthenticatorServiceTests : TestBase
 {
     private AuthenticatorService _service = null!;
     private Mock<ITokenService> _tokens = null!;
+    private IDataProtectionProvider _protection = null!;
     private int _userId;
 
     [SetUp]
@@ -90,7 +91,8 @@ public class AuthenticatorServiceTests : TestBase
         orgConfig.Setup(x => x.GetConfigAsync())
             .ReturnsAsync(new OrgConfigDto { Branding = new BrandingDto { AppName = "Alumni App", ShortName = "GHCAA" } });
         _tokens = new Mock<ITokenService>();
-        _service = new AuthenticatorService(_context, new EphemeralDataProtectionProvider(), orgConfig.Object, NewActivity(), _tokens.Object,
+        _protection = new EphemeralDataProtectionProvider();
+        _service = new AuthenticatorService(_context, _protection, orgConfig.Object, NewActivity(), _tokens.Object,
             Microsoft.Extensions.Logging.Abstractions.NullLogger<AuthenticatorService>.Instance);
 
         var member = await CreateAndSaveTestMemberAsync();
@@ -155,6 +157,17 @@ public class AuthenticatorServiceTests : TestBase
         await EnrolAsync();
 
         (await _service.BeginSetupAsync(_userId, "admin@example.com")).Should().BeNull();
+    }
+
+    [Test]
+    public async Task BeginSetup_RethrowsNonUniqueDatabaseFailure()
+    {
+        await _context.Database.ExecuteSqlRawAsync(
+            "CREATE TRIGGER fail_authenticator_insert BEFORE INSERT ON UserAuthenticators BEGIN SELECT RAISE(ABORT, 'storage failure'); END;");
+
+        var act = () => _service.BeginSetupAsync(_userId, "admin@example.com");
+
+        await act.Should().ThrowAsync<DbUpdateException>();
     }
 
     [Test]
@@ -243,6 +256,48 @@ public class AuthenticatorServiceTests : TestBase
     }
 
     [Test]
+    [Category("FR-39")]
+    public async Task Verify_CountAtLimitWithoutLock_LocksForAWhileInsteadOfForever()
+    {
+        var (secret, _) = await EnrolAsync();
+        await _context.UserAuthenticators.ExecuteUpdateAsync(s => s
+            .SetProperty(a => a.FailedAttempts, Constants.Authenticator.MaxFailedAttempts)
+            .SetProperty(a => a.LockedUntil, (DateTime?)null));
+
+        (await _service.VerifyAsync(_userId, CodeAt(secret, 1))).Should().BeFalse();
+
+        var row = await _context.UserAuthenticators.AsNoTracking().SingleAsync();
+        row.LockedUntil.Should().BeAfter(DateTime.UtcNow);
+        row.FailedAttempts.Should().Be(0);
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task Verify_ConcurrentWrongCodesCannotExceedTheAttemptLimit()
+    {
+        var (secret, _) = await EnrolAsync();
+        var options = new DbContextOptionsBuilder<GHCAA.Infrastructure.Data.ApplicationDbContext>()
+            .UseSqlite(_context.Database.GetDbConnection()).Options;
+        var orgConfig = new Mock<IOrgConfigService>();
+        orgConfig.Setup(x => x.GetConfigAsync())
+            .ReturnsAsync(new OrgConfigDto { Branding = new BrandingDto { AppName = "Alumni App", ShortName = "GHCAA" } });
+
+        var results = await Task.WhenAll(Enumerable.Range(0, Constants.Authenticator.MaxFailedAttempts + 2)
+            .Select(async _ =>
+            {
+                await using var context = new GHCAA.Infrastructure.Data.ApplicationDbContext(options);
+                var service = new AuthenticatorService(context, _protection, orgConfig.Object, NewActivity(), _tokens.Object,
+                    Microsoft.Extensions.Logging.Abstractions.NullLogger<AuthenticatorService>.Instance);
+                return await service.VerifyAsync(_userId, "000000");
+            }));
+
+        results.Should().OnlyContain(result => !result);
+        var locked = await _context.UserAuthenticators.AsNoTracking().SingleAsync();
+        locked.LockedUntil.Should().BeAfter(DateTime.UtcNow);
+        (await _service.VerifyAsync(_userId, CodeAt(secret, 1))).Should().BeFalse();
+    }
+
+    [Test]
     public async Task Confirm_SecondConfirmGetsNoCodes()
     {
         var setup = await _service.BeginSetupAsync(_userId, "admin@example.com");
@@ -327,6 +382,23 @@ public class AuthenticatorServiceTests : TestBase
         (await _context.Users.AsNoTracking().FirstAsync(u => u.Id == _userId)).SecurityStamp.Should().Be(stampBefore);
         (await _context.ActivityLogs.AnyAsync(a => a.ActivityType == Constants.Authenticator.AdminResetAuditType)).Should().BeFalse();
         _tokens.Verify(t => t.RevokeAllRefreshTokensAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task ResetByAdmin_FailedSignOut_KeepsTheAppAndTheOldStamp()
+    {
+        await EnrolAsync();
+        var stampBefore = (await _context.Users.AsNoTracking().FirstAsync(u => u.Id == _userId)).SecurityStamp;
+        _tokens.Setup(t => t.RevokeAllRefreshTokensAsync(_userId, It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("token store down"));
+
+        var act = () => _service.ResetByAdminAsync(_userId, adminId: 99);
+
+        await act.Should().ThrowAsync<InvalidOperationException>();
+        (await _context.UserAuthenticators.IgnoreQueryFilters().AnyAsync(a => a.UserId == _userId)).Should().BeTrue();
+        (await _context.Users.AsNoTracking().FirstAsync(u => u.Id == _userId)).SecurityStamp.Should().Be(stampBefore);
+        (await _context.ActivityLogs.AnyAsync(a => a.ActivityType == Constants.Authenticator.AdminResetAuditType)).Should().BeFalse();
     }
 
     [Test]

@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ghcaa_mobile/core/api/api_client.dart';
+import 'package:ghcaa_mobile/core/api/api_exception.dart';
 import 'package:ghcaa_mobile/core/storage/storage_service.dart';
 import 'package:ghcaa_mobile/features/auth/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,6 +34,17 @@ class _FakeLoginAdapter implements HttpClientAdapter {
           'role': isUserA ? 'Admin' : 'Member',
         }),
         200,
+        headers: {
+          Headers.contentTypeHeader: ['application/json'],
+        },
+      );
+    }
+
+    if (options.method == 'PUT' && options.path.contains('/profile')) {
+      final taken = (options.data as Map)['nid'] == '1234567890';
+      return ResponseBody.fromString(
+        jsonEncode(taken ? {'detail': 'This NID is already registered.'} : {'message': 'Profile updated successfully'}),
+        taken ? 400 : 200,
         headers: {
           Headers.contentTypeHeader: ['application/json'],
         },
@@ -154,6 +166,27 @@ void main() {
       );
     },
   );
+
+  // FR-01. The profile screen shows the server's reason, so it has to reach the caller.
+  group('updateProfile', () {
+    test('returns true when the profile saves', () async {
+      final ok = await container.read(authServiceProvider).updateProfile({'nid': '9876543210'});
+      expect(ok, isTrue);
+    });
+
+    test('lets a rejected NID reach the caller with the reason', () async {
+      final call = container.read(authServiceProvider).updateProfile({'nid': '1234567890'});
+
+      await expectLater(
+        call,
+        throwsA(isA<DioException>().having(
+          (e) => ApiException.serverMessage(e.response?.data),
+          'reason',
+          'This NID is already registered.',
+        )),
+      );
+    });
+  });
 
   // FR-37.12d. Accepting an appointment adds a role the stored session does not carry.
   group('reloadSession', () {

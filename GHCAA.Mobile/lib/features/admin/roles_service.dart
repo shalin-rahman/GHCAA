@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
+import '../../core/api/api_exception.dart';
 
 final rolesServiceProvider = Provider<RolesService>((ref) {
   return RolesService(ref.read(dioProvider));
@@ -33,6 +34,19 @@ class RolesService {
     } catch (e) {
       debugPrint('RolesService.createAdmin failed: $e');
       return false;
+    }
+  }
+
+  // FR-39: ends the login lock and the authenticator lock early. Null on success,
+  // otherwise the server's reason. The step-up prompt is handled by the interceptor.
+  Future<String?> unlockUser(int userId) async {
+    try {
+      await _dio.post('/roles/users/$userId/unlock');
+      return null;
+    } on DioException catch (e) {
+      debugPrint('RolesService.unlockUser failed: $e');
+      if (e.response?.statusCode == 404) return 'User not found.';
+      return ApiException.serverMessage(e.response?.data) ?? 'Failed to unlock the account.';
     }
   }
 

@@ -1,6 +1,7 @@
-﻿using GHCAA.API.Controllers;
+using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +22,8 @@ namespace GHCAA.Tests.Controllers
         private Mock<IOtpService> _otpServiceMock = null!;
         private Mock<IAuthenticatorService> _authenticatorMock = null!;
         private Mock<ISocialAuthConfigService> _socialAuthConfigServiceMock = null!;
+        private Mock<IUserService> _userServiceMock = null!;
+        private Mock<IActivityService> _activityServiceMock = null!;
         private AuthController _controller = null!;
 
         [SetUp]
@@ -30,6 +33,8 @@ namespace GHCAA.Tests.Controllers
             _tokenServiceMock = new Mock<ITokenService>();
             _otpServiceMock = new Mock<IOtpService>();
             _authenticatorMock = new Mock<IAuthenticatorService>();
+            _userServiceMock = new Mock<IUserService>();
+            _activityServiceMock = new Mock<IActivityService>();
             _authenticatorMock.Setup(x => x.GetStatusAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AuthenticatorStatusDto(false, false, 0));
 
@@ -294,7 +299,7 @@ namespace GHCAA.Tests.Controllers
             _otpServiceMock.Setup(x => x.GenerateAndSendOtpAsync("admin@example.com", GHCAA.Domain.Enums.OtpPurpose.AdminStepUp, It.IsAny<CancellationToken>()))
                 .ReturnsAsync("otp-id");
 
-            var result = await _controller.RequestStepUp(_otpServiceMock.Object, _authenticatorMock.Object, CancellationToken.None);
+            var result = await _controller.RequestStepUp(_otpServiceMock.Object, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             _otpServiceMock.Verify(x => x.GenerateAndSendOtpAsync("admin@example.com", GHCAA.Domain.Enums.OtpPurpose.AdminStepUp, It.IsAny<CancellationToken>()), Times.Once);
@@ -308,7 +313,7 @@ namespace GHCAA.Tests.Controllers
             _otpServiceMock.Setup(x => x.GenerateAndSendOtpAsync("admin@example.com", GHCAA.Domain.Enums.OtpPurpose.AdminStepUp, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new OtpDeliveryException("admin@example.com"));
 
-            var result = await _controller.RequestStepUp(_otpServiceMock.Object, _authenticatorMock.Object, CancellationToken.None);
+            var result = await _controller.RequestStepUp(_otpServiceMock.Object, CancellationToken.None);
 
             var problem = result as ObjectResult;
             Assert.That(problem?.StatusCode, Is.EqualTo(StatusCodes.Status503ServiceUnavailable));
@@ -321,7 +326,7 @@ namespace GHCAA.Tests.Controllers
             var user = await SeedUserAsync(email: null);
             SetUserContext(_controller, userId: user.Id, role: "SuperAdmin");
 
-            var result = await _controller.RequestStepUp(_otpServiceMock.Object, _authenticatorMock.Object, CancellationToken.None);
+            var result = await _controller.RequestStepUp(_otpServiceMock.Object, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<ObjectResult>());
             Assert.That(((ObjectResult)result!).StatusCode, Is.EqualTo(400));
@@ -337,7 +342,7 @@ namespace GHCAA.Tests.Controllers
             _otpServiceMock.Setup(x => x.GenerateAndSendOtpAsync("voter@example.com", GHCAA.Domain.Enums.OtpPurpose.AdminStepUp, It.IsAny<CancellationToken>()))
                 .ReturnsAsync("otp-id");
 
-            var result = await _controller.RequestStepUp(_otpServiceMock.Object, _authenticatorMock.Object, CancellationToken.None);
+            var result = await _controller.RequestStepUp(_otpServiceMock.Object, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
@@ -351,7 +356,7 @@ namespace GHCAA.Tests.Controllers
             _otpServiceMock.Setup(x => x.GenerateAndSendOtpAsync("official@example.com", GHCAA.Domain.Enums.OtpPurpose.AdminStepUp, It.IsAny<CancellationToken>()))
                 .ReturnsAsync("otp-id");
 
-            var result = await _controller.RequestStepUp(_otpServiceMock.Object, _authenticatorMock.Object, CancellationToken.None);
+            var result = await _controller.RequestStepUp(_otpServiceMock.Object, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             _otpServiceMock.Verify(x => x.GenerateAndSendOtpAsync("official@example.com", GHCAA.Domain.Enums.OtpPurpose.AdminStepUp, It.IsAny<CancellationToken>()), Times.Once);
@@ -455,7 +460,7 @@ namespace GHCAA.Tests.Controllers
             _otpServiceMock.Setup(x => x.GenerateAndSendOtpAsync("admin@example.com", GHCAA.Domain.Enums.OtpPurpose.AdminStepUp, It.IsAny<CancellationToken>()))
                 .ReturnsAsync("otp-id");
 
-            var result = await _controller.RequestStepUp(_otpServiceMock.Object, _authenticatorMock.Object, CancellationToken.None);
+            var result = await _controller.RequestStepUp(_otpServiceMock.Object, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             _otpServiceMock.Verify(x => x.GenerateAndSendOtpAsync("admin@example.com", GHCAA.Domain.Enums.OtpPurpose.AdminStepUp, It.IsAny<CancellationToken>()), Times.Once);
@@ -500,9 +505,12 @@ namespace GHCAA.Tests.Controllers
             _authenticatorMock.Setup(x => x.BeginSetupAsync(user.Id, It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AuthenticatorSetupDto("SECRET", "otpauth://totp/x", "data:image/png;base64,"));
 
-            var result = await _controller.SetupAuthenticatorWithPassword(new AuthenticatorPasswordDto { Password = "right" }, _authenticatorMock.Object, CancellationToken.None);
+            var result = await _controller.SetupAuthenticatorWithPassword(new AuthenticatorPasswordDto { Password = "right" }, _authenticatorMock.Object, _userServiceMock.Object, _activityServiceMock.Object, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            _userServiceMock.Verify(x => x.ResetFailedPasswordsAsync(user.Id, It.IsAny<CancellationToken>()), Times.Once);
+            _activityServiceMock.Verify(x => x.LogActivityAsync(user.MemberId, Constants.Authenticator.PasswordSetupAuditType,
+                It.IsAny<string>(), user.Id, It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>(), It.IsAny<DateTime?>()), Times.Once);
         }
 
         [Test]
@@ -513,10 +521,29 @@ namespace GHCAA.Tests.Controllers
             SetUserContext(_controller, userId: user.Id, role: "Member");
             _authenticatorMock.Setup(x => x.PasswordMatchesAsync(user.Id, It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
-            var result = await _controller.SetupAuthenticatorWithPassword(new AuthenticatorPasswordDto { Password = "wrong" }, _authenticatorMock.Object, CancellationToken.None);
+            var result = await _controller.SetupAuthenticatorWithPassword(new AuthenticatorPasswordDto { Password = "wrong" }, _authenticatorMock.Object, _userServiceMock.Object, _activityServiceMock.Object, CancellationToken.None);
 
             Assert.That(((ObjectResult)result).StatusCode, Is.EqualTo(400));
             _authenticatorMock.Verify(x => x.BeginSetupAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+            _userServiceMock.Verify(x => x.RecordFailedPasswordAsync(user.Id, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
+        [Category("FR-39")]
+        public async Task SetupWithPassword_RefusesLockedUserWithoutCheckingPassword()
+        {
+            var user = await SeedUserAsync(email: null);
+            user.LockoutUntil = DateTime.UtcNow.AddMinutes(15);
+            SetUserContext(_controller, userId: user.Id, role: "Member");
+
+            var result = await _controller.SetupAuthenticatorWithPassword(new AuthenticatorPasswordDto { Password = "right" },
+                _authenticatorMock.Object, _userServiceMock.Object, _activityServiceMock.Object, CancellationToken.None);
+
+            var response = (ObjectResult)result;
+            Assert.That(response.StatusCode, Is.EqualTo(StatusCodes.Status423Locked));
+            Assert.That(((ProblemDetails)response.Value!).Extensions["code"], Is.EqualTo(Constants.ErrorCodes.AccountLocked));
+            _authenticatorMock.Verify(x => x.PasswordMatchesAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+            _userServiceMock.Verify(x => x.RecordFailedPasswordAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         // A user with an email must use step-up, so a stolen session plus a guessed password is not enough.
@@ -528,7 +555,7 @@ namespace GHCAA.Tests.Controllers
             SetUserContext(_controller, userId: user.Id, role: "SuperAdmin");
             _authenticatorMock.Setup(x => x.PasswordMatchesAsync(user.Id, It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
-            var result = await _controller.SetupAuthenticatorWithPassword(new AuthenticatorPasswordDto { Password = "right" }, _authenticatorMock.Object, CancellationToken.None);
+            var result = await _controller.SetupAuthenticatorWithPassword(new AuthenticatorPasswordDto { Password = "right" }, _authenticatorMock.Object, _userServiceMock.Object, _activityServiceMock.Object, CancellationToken.None);
 
             Assert.That(((ObjectResult)result).StatusCode, Is.EqualTo(400));
             _authenticatorMock.Verify(x => x.BeginSetupAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);

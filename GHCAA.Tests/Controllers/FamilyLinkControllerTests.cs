@@ -30,6 +30,46 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
+        [Category("FR-18")]
+        public async Task GetPublicFamily_AllowsSuperAdminWithoutMemberId()
+        {
+            SetUserContext(_controller, memberId: null, role: "SuperAdmin", userId: 42);
+            _familyLinkServiceMock.Setup(x => x.GetFamilyAsync(5, null, true, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new List<FamilyLinkRequestDto>());
+
+            var result = await _controller.GetPublicFamily(5, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            _familyLinkServiceMock.Verify(x => x.GetFamilyAsync(5, null, true, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
+        [Category("FR-18")]
+        public async Task GetPublicFamily_RefusesUserWithoutMemberId()
+        {
+            SetUserContext(_controller, memberId: null, role: "Member", userId: 42);
+
+            var result = await _controller.GetPublicFamily(5, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<UnauthorizedResult>());
+            _familyLinkServiceMock.Verify(x => x.GetFamilyAsync(It.IsAny<int>(), It.IsAny<int?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Test]
+        [Category("FR-18")]
+        public async Task GetPublicFamily_PassesMemberAsNonAdminRequester()
+        {
+            SetMemberContext(_controller, 10);
+            _familyLinkServiceMock.Setup(x => x.GetFamilyAsync(5, 10, false, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new List<FamilyLinkRequestDto>());
+
+            var result = await _controller.GetPublicFamily(5, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            _familyLinkServiceMock.Verify(x => x.GetFamilyAsync(5, 10, false, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
         public async Task Remove_ReturnsOk_OnSuccess()
         {
             _familyLinkServiceMock.Setup(x => x.RemoveLinkAsync(10, 5, It.IsAny<CancellationToken>())).ReturnsAsync(true);

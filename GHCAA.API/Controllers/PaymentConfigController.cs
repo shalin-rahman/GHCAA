@@ -79,7 +79,7 @@ namespace GHCAA.API.Controllers
                 var created = await _paymentConfigService.CreateAsync(config, cancellationToken);
                 return Ok(MaskSecrets(created));
             }
-            catch (Exception ex) when (ex is DuplicateKeyException or ArgumentException)
+            catch (Exception ex) when (ex is DuplicateKeyException or GatewayNotBuiltException)
             {
                 return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
@@ -97,7 +97,7 @@ namespace GHCAA.API.Controllers
                 if (updated == null) return NotFound();
                 return Ok(MaskSecrets(updated));
             }
-            catch (Exception ex) when (ex is DuplicateKeyException or ArgumentException)
+            catch (Exception ex) when (ex is DuplicateKeyException or GatewayNotBuiltException)
             {
                 return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }

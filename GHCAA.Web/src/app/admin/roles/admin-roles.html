@@ -154,6 +154,10 @@
                                 Assign
                             </button>
                             }
+                            @if (isLocked(user)) {
+                            <button class="icon-btn" data-testid="unlock-user" (click)="unlockUser(user)"
+                                title="Unlock account">🔓</button>
+                            }
                             @if (!user.memberId) {
                             <button class="icon-btn" (click)="resetPassword(user)"
                                 title="Reset Password">🔐</button>

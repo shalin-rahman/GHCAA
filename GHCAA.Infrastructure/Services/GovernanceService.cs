@@ -536,7 +536,7 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<bool> SetHandoverCheckAsync(int periodId, SetHandoverCheckRequest request, int actorUserId, CancellationToken cancellationToken = default)
         {
-            if (!Enum.IsDefined(request.Item)) throw new ArgumentException("Unknown handover item.", nameof(request));
+            if (!Enum.IsDefined(request.Item)) throw new InvalidRequestException("Unknown handover item.");
             if (!await _db.ECPeriods.AnyAsync(p => p.Id == periodId, cancellationToken)) return false;
 
             var check = await _db.ECPeriodHandoverChecks.FirstOrDefaultAsync(c => c.ECPeriodId == periodId && c.Item == request.Item, cancellationToken);

@@ -371,7 +371,10 @@ GHCAA.API/appsettings.Preprod.json
 .env
 .env.preprod
 .env.prod
+.env.*
 !.env.example
+# Mobile env files hold only the API address and are built into the app.
+!GHCAA.Mobile/.env.*
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd

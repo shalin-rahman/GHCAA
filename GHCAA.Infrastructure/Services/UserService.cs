@@ -16,14 +16,16 @@ namespace GHCAA.Infrastructure.Services
         private readonly ILogger<UserService> _logger;
         private readonly ITokenService _tokenService;
         private readonly IOptions<AppSettingsOptions> _appSettings;
+        private readonly IActivityService _activityService;
         private const string PasswordChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        public UserService(ApplicationDbContext db, ILogger<UserService> logger, ITokenService tokenService, IOptions<AppSettingsOptions> appSettings)
+        public UserService(ApplicationDbContext db, ILogger<UserService> logger, ITokenService tokenService, IOptions<AppSettingsOptions> appSettings, IActivityService activityService)
         {
             _db = db;
             _logger = logger;
             _tokenService = tokenService;
             _appSettings = appSettings;
+            _activityService = activityService;
         }
 
         public async Task<User> CreateUserAccountAsync(int memberId, string username, string password, CancellationToken cancellationToken = default)
@@ -161,6 +163,51 @@ namespace GHCAA.Infrastructure.Services
             }
             await _db.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("User {UserId} set to IsActive={IsActive}", userId, isActive);
+            return true;
+        }
+
+        public async Task<bool> RecordFailedPasswordAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            var now = DateTime.UtcNow;
+            var lockoutUntil = now.AddMinutes(Constants.Login.LockoutMinutes);
+            var updated = await _db.Users
+                .Where(u => u.Id == userId)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(u => u.FailedLoginAttempts, u => u.FailedLoginAttempts + 1)
+                    .SetProperty(u => u.LockoutUntil, u => u.FailedLoginAttempts + 1 >= Constants.Login.MaxFailedAttempts ? lockoutUntil : u.LockoutUntil),
+                    cancellationToken);
+            return updated == 1;
+        }
+
+        public async Task<bool> ResetFailedPasswordsAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            var updated = await _db.Users
+                .Where(u => u.Id == userId)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(u => u.FailedLoginAttempts, 0)
+                    .SetProperty(u => u.LockoutUntil, (DateTime?)null), cancellationToken);
+            return updated == 1;
+        }
+
+        public async Task<bool> UnlockUserAsync(int userId, int adminId, CancellationToken cancellationToken = default)
+        {
+            var user = await _db.Users.Where(u => u.Id == userId)
+                .Select(u => new { u.MemberId })
+                .FirstOrDefaultAsync(cancellationToken);
+            if (user == null)
+                return false;
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            await ResetFailedPasswordsAsync(userId, cancellationToken);
+            await _db.UserAuthenticators.IgnoreQueryFilters()
+                .Where(a => a.UserId == userId)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(a => a.FailedAttempts, 0)
+                    .SetProperty(a => a.LockedUntil, (DateTime?)null), cancellationToken);
+            await _activityService.LogActivityAsync(user.MemberId, Constants.Authenticator.AdminUnlockAuditType,
+                $"Account unlocked for user {userId} by SuperAdmin {adminId}.", adminId, cancellationToken: cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            _logger.LogWarning("Account unlocked for user {UserId} by SuperAdmin {AdminId}", userId, adminId);
             return true;
         }
 

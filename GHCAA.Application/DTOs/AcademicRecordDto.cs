@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using GHCAA.Domain;
 
 namespace GHCAA.Application.DTOs
 {
@@ -50,10 +51,11 @@ namespace GHCAA.Application.DTOs
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (PassingYear.HasValue && (PassingYear <= 1950 || PassingYear > DateTime.UtcNow.Year))
+            var latestPassingYear = AssociationTime.FromUtc(DateTime.UtcNow).Year + Constants.AcademicYears.PassingYearFutureYears;
+            if (PassingYear.HasValue && (PassingYear < Constants.AcademicYears.EarliestPassingYear || PassingYear > latestPassingYear))
             {
                 yield return new ValidationResult(
-                    $"Passing year must be after 1950 and no later than {DateTime.UtcNow.Year}.",
+                    $"Passing year must be from {Constants.AcademicYears.EarliestPassingYear} through {latestPassingYear}.",
                     new[] { nameof(PassingYear) });
             }
 

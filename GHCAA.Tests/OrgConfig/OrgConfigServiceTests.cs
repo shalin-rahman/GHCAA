@@ -82,6 +82,37 @@ namespace GHCAA.Tests.OrgConfig
             dbRecord.UpdatedByAdminId.Should().Be("admin-1");
         }
 
+        // 34.D20: a bad name used to save and then turn every new member into General.
+        [TestCase("Generl")]
+        [TestCase("99")]
+        [TestCase("")]
+        [TestCase(null)]
+        public async Task UpdateConfigAsync_UnknownDefaultMembershipType_IsRejected(string? value)
+        {
+            var dbContext = GetDbContext($"TestDb_BadMembershipType_{value}");
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var config = await service.GetConfigAsync();
+            var bad = config with { Workflow = config.Workflow with { DefaultMembershipType = value! } };
+
+            var act = () => service.UpdateConfigAsync(bad, "admin-1");
+
+            await act.Should().ThrowAsync<ArgumentException>();
+            (await dbContext.OrganizationConfigs.AnyAsync()).Should().BeFalse();
+        }
+
+        [Test]
+        public async Task UpdateConfigAsync_DefaultMembershipType_SavesTheEnumSpelling()
+        {
+            var dbContext = GetDbContext("TestDb_MembershipTypeCase");
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var config = await service.GetConfigAsync();
+
+            await service.UpdateConfigAsync(
+                config with { Workflow = config.Workflow with { DefaultMembershipType = "associate" } }, "admin-1");
+
+            (await service.GetConfigAsync()).Workflow.DefaultMembershipType.Should().Be("Associate");
+        }
+
         [Test]
         public async Task GetConfigAsync_CanLookup_BengaliLocale()
         {

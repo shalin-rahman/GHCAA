@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using FluentAssertions;
 using GHCAA.Application.DTOs;
+using GHCAA.Domain;
 
 namespace GHCAA.Tests.Validators;
 
@@ -22,7 +23,7 @@ public class MemberDtoValidationTests
         dto.FullName = "Rahim Uddin";
         dto.FatherName = "Karim Uddin";
         dto.MotherName = "Amina Begum";
-        dto.DateOfBirth = DateTime.UtcNow.Date.AddYears(-30);
+        dto.DateOfBirth = AssociationTime.FromUtc(DateTime.UtcNow).Date.AddYears(-30);
         dto.NID = "1234567890";
         dto.MobileNo = "01712345678";
         dto.Email = "rahim@example.com";
@@ -71,7 +72,7 @@ public class MemberDtoValidationTests
     public void DateOfBirth_UnderThirteen_IsRejected()
     {
         var dto = Registration();
-        dto.DateOfBirth = DateTime.UtcNow.Date.AddYears(-12);
+        dto.DateOfBirth = AssociationTime.FromUtc(DateTime.UtcNow).Date.AddYears(-12);
         Validate(dto).Should().ContainSingle(r => r.ErrorMessage!.Contains("at least 13"));
     }
 
@@ -79,7 +80,7 @@ public class MemberDtoValidationTests
     public void DateOfBirth_ThirteenToday_IsAccepted()
     {
         var dto = Registration();
-        dto.DateOfBirth = DateTime.UtcNow.Date.AddYears(-13);
+        dto.DateOfBirth = AssociationTime.FromUtc(DateTime.UtcNow).Date.AddYears(-13);
         Validate(dto).Should().BeEmpty();
     }
 
@@ -92,10 +93,19 @@ public class MemberDtoValidationTests
     }
 
     [Test]
+    public void Registration_NullAcademicRecord_IsRejectedWithoutThrowing()
+    {
+        var dto = Registration();
+        dto.AcademicHistory = [null!];
+
+        Validate(dto).Should().Contain(r => r.MemberNames.Contains(nameof(BaseMemberDto.AcademicHistory)));
+    }
+
+    [Test]
     public void DateOfBirth_OverOneHundredTwentyYearsAgo_IsRejected()
     {
         var dto = Registration();
-        dto.DateOfBirth = DateTime.UtcNow.Date.AddYears(-121);
+        dto.DateOfBirth = AssociationTime.FromUtc(DateTime.UtcNow).Date.AddYears(-121);
         Validate(dto).Should().ContainSingle(r => r.ErrorMessage!.Contains("too far in the past"));
     }
 
@@ -103,7 +113,7 @@ public class MemberDtoValidationTests
     public void ProfileUpdate_GetsTheSameAgeAndNidRules()
     {
         var dto = Fill(new UpdateProfileDto());
-        dto.DateOfBirth = DateTime.UtcNow.Date.AddYears(-5);
+        dto.DateOfBirth = AssociationTime.FromUtc(DateTime.UtcNow).Date.AddYears(-5);
         dto.NID = "123";
         var results = Validate(dto);
         results.Should().Contain(r => r.MemberNames.Contains(nameof(BaseMemberDto.NID)));
@@ -120,7 +130,7 @@ public class MemberDtoValidationTests
         Validate(dto).Should().ContainSingle(r => r.MemberNames.Contains(nameof(BaseMemberDto.AcademicHistory)));
     }
 
-    [TestCase(1950)]
+    [TestCase(1949)]
     [TestCase(9999)]
     public void AcademicRecord_PassingYearOutOfRange_IsRejected(int year)
     {
@@ -128,11 +138,17 @@ public class MemberDtoValidationTests
         Validate(record).Should().ContainSingle(r => r.MemberNames.Contains(nameof(AcademicRecordDto.PassingYear)));
     }
 
-    [Test]
-    public void AcademicRecord_PassingYearNextYear_IsRejected()
+    [TestCase(6, true)]
+    [TestCase(7, false)]
+    public void AcademicRecord_PassingYearFutureWindow_IsApplied(int yearsAhead, bool accepted)
     {
-        var record = new AcademicRecordDto { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = DateTime.UtcNow.Year + 1 };
-        Validate(record).Should().ContainSingle(r => r.MemberNames.Contains(nameof(AcademicRecordDto.PassingYear)));
+        var dhakaYear = AssociationTime.FromUtc(DateTime.UtcNow).Year;
+        var record = new AcademicRecordDto { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = dhakaYear + yearsAhead };
+        var errors = Validate(record);
+        if (accepted)
+            errors.Should().NotContain(r => r.MemberNames.Contains(nameof(AcademicRecordDto.PassingYear)));
+        else
+            errors.Should().Contain(r => r.MemberNames.Contains(nameof(AcademicRecordDto.PassingYear)));
     }
 
     [Test]

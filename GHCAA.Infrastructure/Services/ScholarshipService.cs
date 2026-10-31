@@ -101,7 +101,7 @@ public sealed class ScholarshipService : IScholarshipService
 
     public async Task<ScholarshipCallDto> CreateCallAsync(CreateScholarshipCallDto dto, CancellationToken cancellationToken = default)
     {
-        if (dto.ClosesOn <= dto.OpensOn) throw new ArgumentException("Closing date must be after opening date.");
+        if (dto.ClosesOn <= dto.OpensOn) throw new InvalidRequestException("Closing date must be after opening date.");
         if (!await _db.ScholarshipFunds.AnyAsync(x => x.Id == dto.ScholarshipFundId && x.IsActive, cancellationToken)) throw new KeyNotFoundException("Scholarship fund not found.");
         var call = new ScholarshipCall { ScholarshipFundId = dto.ScholarshipFundId, AcademicYear = dto.AcademicYear.Trim(), OpensOn = DateTime.SpecifyKind(dto.OpensOn, DateTimeKind.Utc), ClosesOn = DateTime.SpecifyKind(dto.ClosesOn, DateTimeKind.Utc), SlotCount = dto.SlotCount, AwardAmount = dto.AwardAmount, EligibilityCriteria = dto.EligibilityCriteria.Trim(), IsActive = dto.IsActive };
         _db.ScholarshipCalls.Add(call); await _db.SaveChangesAsync(cancellationToken); return MapCall(call);

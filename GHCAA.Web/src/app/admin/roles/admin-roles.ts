@@ -208,6 +208,29 @@ export class AdminRoles implements OnInit {
         });
     }
 
+    isLocked(user: any): boolean {
+        return !!user.lockedUntil && new Date(user.lockedUntil).getTime() > Date.now();
+    }
+
+    async unlockUser(user: any) {
+        const ok = await firstValueFrom(this.confirmDialog.confirm({
+            title: 'Unlock account',
+            message: `Unlock "${user.username}" now? This ends the sign-in lock and the authenticator lock.`,
+            confirmLabel: 'Unlock'
+        }));
+        if (!ok) return;
+
+        this.adminService.unlockSystemUser(user.id).subscribe({
+            next: () => {
+                this.notify.success('Account unlocked.');
+                this.loadData();
+            },
+            error: (err) => this.notify.error(err.status === 404
+                ? 'User not found.'
+                : err.error?.detail || err.error?.message || 'Failed to unlock the account')
+        });
+    }
+
     toggleUserActive(userId: number, isActive: boolean) {
         const action = isActive ? 'disable' : 'enable';
         this.adminService.setSystemUserActive(userId, action).subscribe({

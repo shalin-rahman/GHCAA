@@ -4,6 +4,7 @@ import { AdminOrgConfig } from './org-config';
 import { ORG_CONFIG_FALLBACK } from '../../core/config/org-config-fallback.generated';
 import { DEFAULT_ELECTION_SETTINGS } from '../../core/models/election.models';
 import { OrgConfig } from '../../core/models/org-config.model';
+import { MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
 
 describe('AdminOrgConfig', () => {
   let component: AdminOrgConfig;
@@ -60,5 +61,21 @@ describe('AdminOrgConfig', () => {
     cfg.workflow.emailProvider = 'Brevo';
     (component as any).hydrate(cfg);
     expect(component.config?.workflow.emailProvider).toBe('Brevo');
+  });
+
+  // 34.D20
+  it('offers the default membership type as a list of the known types', async () => {
+    const cfg = structuredClone(ORG_CONFIG_FALLBACK) as OrgConfig;
+    cfg.workflow.defaultMembershipType = 'Associate';
+    (component as any).hydrate(cfg);
+    component.activeTab.set('workflow');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const host: HTMLElement = fixture.nativeElement;
+    expect(host.querySelector('input[name="defaultMembershipType"]')).toBeNull();
+    const select = host.querySelector<HTMLSelectElement>('select[name="defaultMembershipType"]')!;
+    expect(Array.from(select.options).map(o => o.value)).toEqual(MEMBERSHIP_TYPE_OPTIONS.map(o => o.value));
+    expect(select.value).toBe('Associate');
   });
 });

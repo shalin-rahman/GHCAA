@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace GHCAA.Infrastructure.Services;
+namespace GHCAA.Domain;
 
 // The Association keeps Bangladesh time. There is no org setting for the zone yet (37.14o).
 // Linux knows the zone as "Asia/Dhaka" and older Windows as "Bangladesh Standard Time"; if neither

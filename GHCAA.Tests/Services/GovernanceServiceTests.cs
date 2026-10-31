@@ -969,7 +969,7 @@ namespace GHCAA.Tests.Services
 
             var period = await _service.CreatePeriodAsync("Handover", DateTime.UtcNow, null);
             var unknown = new GHCAA.Application.DTOs.SetHandoverCheckRequest { Item = (Enums.HandoverCheckItem)99 };
-            await FluentActions.Awaiting(() => _service.SetHandoverCheckAsync(period.Id, unknown, 1)).Should().ThrowAsync<ArgumentException>();
+            await FluentActions.Awaiting(() => _service.SetHandoverCheckAsync(period.Id, unknown, 1)).Should().ThrowAsync<InvalidRequestException>();
             (await _service.GetHandoverChecksAsync(period.Id)).Should().BeEmpty();
         }
 

@@ -12,6 +12,10 @@ namespace GHCAA.Application.Interfaces
         // 7.23. Election tables keep the user's id under a Restrict key, so such a user cannot be hard-deleted.
         Task<bool> HasElectionRecordsAsync(int userId, CancellationToken cancellationToken = default);
         Task<bool> SetUserActiveAsync(int userId, bool isActive, CancellationToken cancellationToken = default);
+        Task<bool> RecordFailedPasswordAsync(int userId, CancellationToken cancellationToken = default);
+        Task<bool> ResetFailedPasswordsAsync(int userId, CancellationToken cancellationToken = default);
+        // Clears the login lock and the authenticator lock together. False when the user does not exist.
+        Task<bool> UnlockUserAsync(int userId, int adminId, CancellationToken cancellationToken = default);
         Task<(bool Success, string? ResetUrl)> SendAdminPasswordResetLinkAsync(int userId, CancellationToken cancellationToken = default);
         string GenerateDefaultPassword();
     }

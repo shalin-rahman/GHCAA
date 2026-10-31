@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { API_ENDPOINTS, LOOKUP_GROUPS, MEMBERSHIP_TYPE_OPTIONS } from '../constants/app.constants';
+import { API_ENDPOINTS, LOOKUP_GROUPS, MEMBERSHIP_TYPE_OPTIONS, PASSING_YEAR_FALLBACK } from '../constants/app.constants';
 import { getSilentHeaders } from '../utils/http.util';
 
 export interface LookupOption {
@@ -71,9 +71,10 @@ const LOOKUP_FALLBACKS: Record<string, LookupOption[]> = {
 };
 
 function academicYearsFallback(): number[] {
-    const currentYear = new Date().getFullYear();
-    const startYear = 1950;
-    return Array.from({ length: currentYear - startYear + 1 }, (_, i) => currentYear - i);
+    const { EARLIEST, FUTURE_YEARS, UTC_OFFSET_HOURS } = PASSING_YEAR_FALLBACK;
+    const currentYear = new Date(Date.now() + UTC_OFFSET_HOURS * 60 * 60 * 1000).getUTCFullYear();
+    const latestYear = currentYear + FUTURE_YEARS;
+    return Array.from({ length: latestYear - EARLIEST + 1 }, (_, i) => latestYear - i);
 }
 
 @Injectable({

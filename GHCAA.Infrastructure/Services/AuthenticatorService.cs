@@ -56,7 +56,7 @@ public sealed class AuthenticatorService(
         {
             await db.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException ex) when (DbErrors.IsUniqueViolation(ex))
         {
             // Two setups at once both tried to add the row. The first one wins.
             return null;
@@ -84,10 +84,13 @@ public sealed class AuthenticatorService(
         if (secret == null)
             return null;
 
+        if (!await ReserveAttemptAsync(row.Id, cancellationToken))
+            return null;
+
         var step = Totp.Match(secret, code.Trim(), DateTimeOffset.UtcNow, row.LastUsedStep);
         if (step == null)
         {
-            await RecordFailureAsync(row.Id, cancellationToken);
+            await LockAtLimitAsync(row.Id, cancellationToken);
             return null;
         }
 
@@ -96,12 +99,13 @@ public sealed class AuthenticatorService(
         var hashes = string.Join('\n', codes.Select(HashRecoveryCode));
         var now = DateTime.UtcNow;
         var confirmed = await db.UserAuthenticators.IgnoreQueryFilters()
-            .Where(a => a.Id == row.Id && a.ConfirmedAt == null)
+            .Where(a => a.Id == row.Id && a.ConfirmedAt == null && (a.LockedUntil == null || a.LockedUntil <= now))
             .ExecuteUpdateAsync(s => s
                 .SetProperty(a => a.ConfirmedAt, now)
                 .SetProperty(a => a.LastUsedStep, step.Value)
                 .SetProperty(a => a.RecoveryCodeHashes, hashes)
-                .SetProperty(a => a.FailedAttempts, 0), cancellationToken);
+                .SetProperty(a => a.FailedAttempts, 0)
+                .SetProperty(a => a.LockedUntil, (DateTime?)null), cancellationToken);
         return confirmed == 1 ? new RecoveryCodesDto(codes) : null;
     }
 
@@ -109,6 +113,9 @@ public sealed class AuthenticatorService(
     {
         var row = await db.UserAuthenticators.AsNoTracking().FirstOrDefaultAsync(a => a.UserId == userId && a.ConfirmedAt != null, cancellationToken);
         if (row == null || IsLocked(row))
+            return false;
+
+        if (!await ReserveAttemptAsync(row.Id, cancellationToken))
             return false;
 
         var entered = code.Trim();
@@ -120,29 +127,37 @@ public sealed class AuthenticatorService(
 
             var step = Totp.Match(secret, entered, DateTimeOffset.UtcNow, row.LastUsedStep);
             if (step == null)
-                return await RecordFailureAsync(row.Id, cancellationToken);
+            {
+                await LockAtLimitAsync(row.Id, cancellationToken);
+                return false;
+            }
 
             // Written only if no other request took this step first, so a code works once.
             var taken = await db.UserAuthenticators.IgnoreQueryFilters()
-                .Where(a => a.Id == row.Id && a.LastUsedStep < step.Value)
+                .Where(a => a.Id == row.Id && a.LastUsedStep < step.Value && (a.LockedUntil == null || a.LockedUntil <= DateTime.UtcNow))
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(a => a.LastUsedStep, step.Value)
-                    .SetProperty(a => a.FailedAttempts, 0), cancellationToken);
+                    .SetProperty(a => a.FailedAttempts, 0)
+                    .SetProperty(a => a.LockedUntil, (DateTime?)null), cancellationToken);
             return taken == 1;
         }
 
         var hashes = SplitHashes(row.RecoveryCodeHashes);
         var hash = HashRecoveryCode(entered);
         if (!hashes.Any(h => FixedTimeEquals(h, hash)))
-            return await RecordFailureAsync(row.Id, cancellationToken);
+        {
+            await LockAtLimitAsync(row.Id, cancellationToken);
+            return false;
+        }
 
         // Same guard for recovery codes: the update only lands on the list this request read.
         var remaining = string.Join('\n', hashes.Where(h => h != hash));
         var used = await db.UserAuthenticators.IgnoreQueryFilters()
-            .Where(a => a.Id == row.Id && a.RecoveryCodeHashes == row.RecoveryCodeHashes)
+            .Where(a => a.Id == row.Id && a.RecoveryCodeHashes == row.RecoveryCodeHashes && (a.LockedUntil == null || a.LockedUntil <= DateTime.UtcNow))
             .ExecuteUpdateAsync(s => s
                 .SetProperty(a => a.RecoveryCodeHashes, remaining)
-                .SetProperty(a => a.FailedAttempts, 0), cancellationToken);
+                .SetProperty(a => a.FailedAttempts, 0)
+                .SetProperty(a => a.LockedUntil, (DateTime?)null), cancellationToken);
         return used == 1;
     }
 
@@ -172,6 +187,9 @@ public sealed class AuthenticatorService(
 
     public async Task<bool> ResetByAdminAsync(int userId, int adminId, CancellationToken cancellationToken = default)
     {
+        // The removal, the sign-out and the audit row commit together. Before this a failure after
+        // the delete left the app gone with the user still signed in and nothing in the audit log.
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         if (!await RemoveAsync(userId, cancellationToken))
             return false;
 
@@ -189,6 +207,7 @@ public sealed class AuthenticatorService(
         await activityService.LogActivityAsync(user?.MemberId, Constants.Authenticator.AdminResetAuditType,
             $"Authenticator app removed for user {userId} by SuperAdmin {adminId}. The user was signed out everywhere.",
             adminId, cancellationToken: cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         logger.LogWarning("Authenticator app removed for user {UserId} by SuperAdmin {AdminId}", userId, adminId);
         return true;
     }
@@ -204,17 +223,30 @@ public sealed class AuthenticatorService(
 
     private static bool IsLocked(UserAuthenticator row) => row.LockedUntil > DateTime.UtcNow;
 
-    // Both SET expressions read the old FailedAttempts, so the count and the lock move together.
-    private async Task<bool> RecordFailureAsync(int id, CancellationToken cancellationToken)
+    private async Task<bool> ReserveAttemptAsync(int id, CancellationToken cancellationToken)
     {
-        const int max = Constants.Authenticator.MaxFailedAttempts;
-        DateTime? lockUntil = DateTime.UtcNow.AddMinutes(Constants.Authenticator.LockoutMinutes);
-        await db.UserAuthenticators.IgnoreQueryFilters()
-            .Where(a => a.Id == id)
-            .ExecuteUpdateAsync(s => s
-                .SetProperty(a => a.LockedUntil, a => a.FailedAttempts + 1 >= max ? lockUntil : a.LockedUntil)
-                .SetProperty(a => a.FailedAttempts, a => a.FailedAttempts + 1 >= max ? 0 : a.FailedAttempts + 1), cancellationToken);
+        var now = DateTime.UtcNow;
+        var reserved = await db.UserAuthenticators.IgnoreQueryFilters()
+            .Where(a => a.Id == id && (a.LockedUntil == null || a.LockedUntil <= now) && a.FailedAttempts < Constants.Authenticator.MaxFailedAttempts)
+            .ExecuteUpdateAsync(s => s.SetProperty(a => a.FailedAttempts, a => a.FailedAttempts + 1), cancellationToken);
+        if (reserved == 1)
+            return true;
+
+        // A replayed code or a request that died after reserving leaves the count at the limit with
+        // no lock. Without this the row would refuse every code forever instead of for 15 minutes.
+        await LockAtLimitAsync(id, cancellationToken);
         return false;
+    }
+
+    private async Task LockAtLimitAsync(int id, CancellationToken cancellationToken)
+    {
+        var now = DateTime.UtcNow;
+        var lockUntil = now.AddMinutes(Constants.Authenticator.LockoutMinutes);
+        await db.UserAuthenticators.IgnoreQueryFilters()
+            .Where(a => a.Id == id && (a.LockedUntil == null || a.LockedUntil <= now) && a.FailedAttempts >= Constants.Authenticator.MaxFailedAttempts)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(a => a.LockedUntil, lockUntil)
+                .SetProperty(a => a.FailedAttempts, 0), cancellationToken);
     }
 
     // A lost or rotated key ring makes the secret unreadable. The user then needs a SuperAdmin reset.

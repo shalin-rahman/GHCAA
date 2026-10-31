@@ -169,7 +169,7 @@ namespace GHCAA.API.Controllers
         [HttpPost("step-up/request")]
         [HttpPost("admin/step-up/request")]
         [Authorize]
-        public async Task<IActionResult> RequestStepUp([FromServices] IOtpService otpService, [FromServices] IAuthenticatorService authenticatorService, CancellationToken cancellationToken)
+        public async Task<IActionResult> RequestStepUp([FromServices] IOtpService otpService, CancellationToken cancellationToken)
         {
             var user = await LoadCurrentUserAsync(cancellationToken);
             var email = StepUpEmailFor(user);
@@ -257,15 +257,26 @@ namespace GHCAA.API.Controllers
         // their password instead. Anyone with an email still goes through step-up.
         [HttpPost("authenticator/setup-with-password")]
         [Authorize]
-        public async Task<IActionResult> SetupAuthenticatorWithPassword([FromBody] AuthenticatorPasswordDto dto, [FromServices] IAuthenticatorService authenticatorService, CancellationToken cancellationToken)
+        public async Task<IActionResult> SetupAuthenticatorWithPassword([FromBody] AuthenticatorPasswordDto dto, [FromServices] IAuthenticatorService authenticatorService, [FromServices] IUserService userService, [FromServices] IActivityService activityService, CancellationToken cancellationToken)
         {
             var user = await LoadCurrentUserAsync(cancellationToken);
             if (user == null)
                 return Unauthorized();
+            if (user.LockoutUntil > DateTime.UtcNow)
+                return this.ProblemWithCode(Constants.ErrorCodes.AccountLocked,
+                    $"Too many wrong passwords. Try again in {Constants.Login.LockoutMinutes} minutes or ask an admin to unlock the account.",
+                    StatusCodes.Status423Locked);
             if (StepUpEmailFor(user) != null)
                 return Problem(detail: "This account has an email on file. Verify with the emailed code instead.", statusCode: StatusCodes.Status400BadRequest);
             if (!await authenticatorService.PasswordMatchesAsync(user.Id, dto.Password, cancellationToken))
+            {
+                await userService.RecordFailedPasswordAsync(user.Id, cancellationToken);
                 return Problem(detail: "That password is wrong.", statusCode: StatusCodes.Status400BadRequest);
+            }
+            await userService.ResetFailedPasswordsAsync(user.Id, cancellationToken);
+            await activityService.LogActivityAsync(user.MemberId, Constants.Authenticator.PasswordSetupAuditType,
+                $"User {user.Id} verified their password to set up an authenticator.", user.Id,
+                cancellationToken: cancellationToken);
             return await BeginSetupAsync(user, authenticatorService, cancellationToken);
         }
 

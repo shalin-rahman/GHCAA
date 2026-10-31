@@ -212,7 +212,7 @@ namespace GHCAA.API.Controllers
             {
                 if (!await _governanceService.SetHandoverCheckAsync(id, request, userId, cancellationToken)) return NotFound();
             }
-            catch (ArgumentException ex)
+            catch (InvalidRequestException ex)
             {
                 return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }

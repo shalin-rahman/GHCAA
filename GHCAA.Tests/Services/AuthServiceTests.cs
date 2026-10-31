@@ -7,6 +7,7 @@ using GHCAA.Infrastructure.Options;
 using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 
 namespace GHCAA.Tests.Services
@@ -43,7 +44,8 @@ namespace GHCAA.Tests.Services
             _mockElectionAccess.Setup(x => x.ElectionIdsWithLiveAppointmentAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Array.Empty<int>());
             _mockAppointments = new Mock<IElectionAppointmentService>();
-            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object, _appSettings, _mockHttp.Object, _mockEmail.Object, _mockCommunicationService.Object, _mockOrgConfigService.Object, new SocialAuthConfigService(_context, _mockOrgConfigService.Object), _mockElectionAccess.Object, _mockAppointments.Object);
+            var userService = new UserService(_context, Mock.Of<ILogger<UserService>>(), _mockTokenService.Object, _appSettings, _mockActivityService.Object);
+            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object, _appSettings, _mockHttp.Object, _mockEmail.Object, _mockCommunicationService.Object, _mockOrgConfigService.Object, new SocialAuthConfigService(_context, _mockOrgConfigService.Object), _mockElectionAccess.Object, _mockAppointments.Object, userService);
             _service.PasswordResetResponseFloor = TimeSpan.Zero;
         }
 
@@ -127,7 +129,7 @@ namespace GHCAA.Tests.Services
             var locked = await _service.LoginAsync(new LoginDto { Username = username, Password = password });
             locked.Should().BeNull();
 
-            var updated = await _context.Users.FindAsync(user.Id);
+            var updated = await _context.Users.AsNoTracking().SingleAsync(x => x.Id == user.Id);
             updated!.FailedLoginAttempts.Should().BeGreaterThanOrEqualTo(5);
             updated.LockoutUntil.Should().NotBeNull();
             updated.LockoutUntil!.Value.Should().BeAfter(DateTime.UtcNow);
