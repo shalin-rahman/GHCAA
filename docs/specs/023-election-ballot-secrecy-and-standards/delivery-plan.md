@@ -517,6 +517,7 @@ These cannot be closed by a session. They stay open in TODO.md.
 | Item | Who | What is needed |
 |---|---|---|
 | 37.1p | Owner | Decided 2026-10-11 and 2026-10-14. Built in Fast track sessions F2 and F3. |
+| 37.16e | Owner | Split from 37.1p on 2026-10-31. Decided 2026-10-14. Built in Fast track session F2. |
 | 37.1r location | Committee | Closed 2026-10-11 without building. No IP location lookup. |
 | 37.1m font | Owner | Decided 2026-10-14: Noto Sans Bengali. Built on 2026-10-21 on the server by 37.14o, not in the mobile assets. |
 | 37.1m browser check | Person | Print a receipt from Chrome and Edge and check the layout. |
@@ -559,7 +560,7 @@ These go into 37.14g and are fixed in F1. 37.12x did not fail when its spec ran 
 | 37.14d | The audit foreign key becomes Restrict. The chain head hash is printed on ER-29 and on the public board, so a cut tail shows against the published value. |
 | 37.1m | Noto Sans Bengali (SIL Open Font License). Built on the server in `GHCAA.Infrastructure/Fonts/` by 37.14o. |
 | 37.1p, all seats uncontested | When every seat is unopposed or vacant, the Chief Commissioner moves the election from CandidateList straight to Declared, as a two-person step with step-up. No key, no poll. ER-29 says every seat was uncontested. |
-| 37.1p, conflicts | The official declares conflicts when accepting the appointment and can add more later. The Chief Commissioner can also add one. Each is logged. |
+| 37.16e, conflicts | The official declares conflicts when accepting the appointment and can add more later. The Chief Commissioner can also add one. Each is logged. |
 | 37.12x | One full web run in F1. If it passes, close as not reproducible. If it fails, fix the test-order leak. |
 | 37.12y | Voters are told through the existing notification service on the channels they allow, and the board shows the new closing time. Email does not leave preprod (Render blocks SMTP); check `EmailLogs` there. |
 | Schema | One migration for every new election-rule column and table (F2). The second round adds two more: positions and terms (N1) and election content (F11). Migrations land one at a time, in the order under Sessions. |
@@ -611,7 +612,7 @@ Only kind 2 adds work. The review report names the kind next to each finding.
 |---|---|---|---|---|---|
 | N0 | 62.31 real alumni files out of the repo | Sonnet | none | S | owner's yes on the file list |
 | F1 | 37.12x, 37.14b, 37.12s pinning test, 37.1m font, 37.14g S1-S6 shortfalls, 84.36 election rules, 84.42 election call | Sonnet | none | M | none |
-| F2 | Schema for every new rule, 37.12r, 37.12o, 37.1p recount and conflicts, 37.14d, ER-02 and ER-28 | Opus for the schema, Sonnet for services | `AddElectionRulesAndRecount` | M | F1, 34.D17 to 34.D19 confirmed |
+| F2 | Schema for every new rule, 37.12r, 37.12o, 37.1p recount, 37.16e conflicts, 37.14d, ER-02 and ER-28 | Opus for the schema, Sonnet for services | `AddElectionRulesAndRecount` | M | F1, 34.D17 to 34.D19 confirmed |
 | F3 | 37.14a, 37.1p unopposed seats and paper counts, 37.12z, 37.12y, 37.14f | Sonnet | none | M | F2 |
 | F4 | 37.12w readiness gate | Sonnet | none | S | F3 |
 | F5 | Web screens for F2 to F4 | Sonnet | none | M | F4, runs with F6 |
@@ -695,7 +696,9 @@ Rules built in F2:
   re-runs for that seat and both results are kept.
 - An appointed official cannot be a nominee in the same election, and a nominee cannot be
   appointed. An official with a declared conflict is kept out of that candidate's scrutiny,
-  appeals and recount. The check goes in `ElectionAccessService`.
+  appeals and recount. The check goes in `ElectionAccessService` and is called from
+  `SubmitNominationAsync`, `AddCandidateAsync`, `DecideNominationAsync`, `AppointAsync` and
+  `AcceptAsync` (37.16e).
 - ER-02 prints the recount window; ER-28 prints the request and its decision.
 - The chain head hash is printed on ER-29 and the board (37.14d).
 

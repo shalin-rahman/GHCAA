@@ -161,7 +161,10 @@ Phase 3 needs the tie rule from D2 on the setup screen and a reading of the cons
 - `Election.TieRule` from D2, applied in `CountAsync`
 - recount: request window, ER-26 and ER-28, officer confirms before the stored result changes
 - `Nomination.CandidateConsentAt`, required before Accepted (ER-10)
-- officer conflict check in nomination and candidate add
+- officer conflict check (37.16e): one rule in `ElectionAccessService`, called from
+  `SubmitNominationAsync`, `AddCandidateAsync`, `AppointAsync` and `AcceptAsync`; conflict
+  declarations taken at acceptance and added later by the official or the Chief Commissioner;
+  `DecideNominationAsync`, recount and appeal decisions refused for a tied official
 - spoiled-ballot rule and count
 - unopposed declaration if the constitution allows it
 

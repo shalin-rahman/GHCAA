@@ -79,7 +79,7 @@ DC-03 enforcement discussed in §5.5.
 ### 5.3.3 Analysis class relationships
 
 The relationships among these classes, at the level appropriate to analysis rather than to design,
-are drawn in Figure 3.8 already and are not repeated here; §6.3 and Figure 6.7 give the design-level
+are drawn in Figure 3.8 already and are not repeated here; §6.3 and Figure 6.9 give the design-level
 version once persistence and DTO boundaries are added.
 
 The behaviour is modelled in three activity diagrams, for the flows where a decision is taken by a person rather than by code:
@@ -561,7 +561,7 @@ sequenceDiagram
     C->>H: connect, auto-join User_{id}
     S->>H: Clients.Group(User_{id}).SendAsync(event)
     H-->>C: push notification
-    Note over S,H: Admin broadcast uses the Admins group.<br/>Batch and department targeting use Batch_(name) and Dept_(name)
+    Note over S,C: Admin broadcast uses the Admins group.<br/>Batch and department targeting use Batch_(name) and Dept_(name)
 ```
 
 ### Figure 5.19 — Timing diagram: token lifetime and refresh window

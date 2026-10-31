@@ -2,7 +2,7 @@
 
 **Feature Branch**: 023-election-ballot-secrecy-and-standards
 **Created**: 2026-09-27
-**Status**: In progress. The secrecy, whole-ballot, phase, declaration and readiness fixes are built. The server-made receipt is built; it still needs a browser and device check (37.1m, 84.50). The recount, consent, conflict, spoiled and unopposed-seat rules remain open (37.1p). Other open election work is tracked in `docs/TODO.md`.
+**Status**: In progress. The secrecy, whole-ballot, phase, declaration and readiness fixes are built. The server-made receipt is built; it still needs a browser and device check (37.1m, 84.50). The recount, consent, spoiled and unopposed-seat rules remain open (37.1p), and so does the officer conflict check (37.16e). Other open election work is tracked in `docs/TODO.md`.
 **Input**: Review of the election engine on 2026-09-27. The user asked that votes stay anonymous,
 that a voter can print their ballot after voting, and that the engine be checked against common
 election practice.
@@ -200,8 +200,13 @@ P2 brings the rules in line with the constitution.
   an officer confirms it.
 - **FR-021** A nomination is not accepted without the candidate's consent (ER-10), recorded with
   the time.
-- **FR-022** An election officer cannot be a candidate, proposer or seconder in the same election.
-  The service rejects it on both paths.
+- **FR-022** An election official cannot be a candidate, proposer or seconder in the same
+  election, and a candidate, proposer or seconder cannot be appointed in it. The service refuses
+  it on every path: member nomination, admin candidate add, appointment and acceptance. An
+  official declares conflicts with a candidate when accepting, and the official or the Chief
+  Commissioner can add one later. Each declaration is audited. An official with a declared
+  conflict, or who proposed or seconded a candidate, takes no part in that candidate's scrutiny,
+  recount or appeal. Decided 2026-10-14. Tracker 37.16e.
 - **FR-023** A spoiled ballot (`IsSpoiled`) is counted and shown in the result but gives no vote.
   The rule for what makes a ballot spoiled is written down with FR-005.
 - **FR-024** A seat with one accepted candidate after withdrawal closes can be declared unopposed,

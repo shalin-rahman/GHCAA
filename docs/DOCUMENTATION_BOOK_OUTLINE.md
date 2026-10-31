@@ -357,22 +357,22 @@ followed is stated in §2.2.
 
 - Figure 6.1 — High-level architecture diagram: clients, API, services, stores, external services
 - Figure 6.2 — Layered / clean architecture diagram with inward dependency arrows and the dependency-inversion boundary marked
-- Figures 6.3–6.6 — ER sub-models: identity and records, standing and money, events and participation, governance. Written as four diagrams rather than one full-schema fold-out, because one diagram of forty-nine tables cannot be printed at a readable size; the remaining tables are in the generated schema documentation
-- Figure 6.7 — Design class diagram: domain model, with attributes, operations, visibility and multiplicities
-- Figure 6.9 — Design class diagram: application interfaces and infrastructure services
-- Figure 6.10 — Design class diagram: client-side services and models
-- Figure 6.11 — Package diagram with permitted dependency directions
-- Figure 6.12 — Component diagram with provided and required interfaces
-- Figure 6.13 — Composite structure diagram of the request-handling internals: parts, ports, connectors
-- Figure 6.14 — Object diagram: a populated snapshot of one member with dues, records and registrations
-- Figure 6.15 — Middleware pipeline diagram: the ordered request path with ordering constraints annotated
-- Figure 6.16 — Authentication and token-refresh design flow
-- Figure 6.17 — Navigation and route map: public, portal and admin trees with guards
-- Figure 6.18 — Site map and information architecture of the public site
+- Figures 6.3–6.8 — ER sub-models: identity and records, standing and money, events and participation, governance, election roll and nominations, voting and the count. The voting sub-model shows the seat-vote and ballot tables with no key between them, which is how ballot secrecy is kept. Written as six diagrams rather than one full-schema fold-out, because one diagram of forty-nine tables cannot be printed at a readable size; the remaining tables are in the generated schema documentation
+- Figure 6.9 — Design class diagram: domain model, with attributes, operations, visibility and multiplicities
+- Figure 6.10 — Design class diagram: application interfaces and infrastructure services
+- Figure 6.11 — Design class diagram: client-side services and models
+- Figure 6.12 — Package diagram with permitted dependency directions
+- Figure 6.13 — Component diagram with provided and required interfaces
+- Figure 6.14 — Composite structure diagram of the request-handling internals: parts, ports, connectors
+- Figure 6.15 — Object diagram: a populated snapshot of one member with dues, records and registrations
+- Figure 6.16 — Middleware pipeline diagram: the ordered request path with ordering constraints annotated
+- Figure 6.17 — Authentication and token-refresh design flow
+- Figure 6.18 — Navigation and route map: public, portal and admin trees with guards
+- Figure 6.19 — Site map and information architecture of the public site
 - Wireframes and high-fidelity mockups for landing, registration, portal dashboard, payment, admin member list, constitution reader, mobile home and mobile login. Not in Chapter 6 as written, and not numbered as figures there: the system is built, so a wireframe drawn now would document the result rather than the intent. Annotated screenshots of the delivered screens are Figures 12.1–12.20, and any wireframe retained for the design record belongs in an appendix
-- Figure 6.27 — Design-token derivation diagram: light and dark theme token resolution
-- Figure 6.28 — Mobile screen-flow diagram
-- Figure 6.29 — Architectural trade-off radar chart: the candidate architectures of §6.2 scored across the quality attributes
+- Figure 6.28 — Design-token derivation diagram: light and dark theme token resolution
+- Figure 6.29 — Mobile screen-flow diagram
+- Figure 6.30 — Architectural trade-off radar chart: the candidate architectures of §6.2 scored across the quality attributes
 - UML profile diagram for the project's stereotypes: omitted, because the project defines no custom stereotypes. The condition "where custom stereotypes are used" is not met, and an empty profile diagram would be padding
 - Table 6.1 — Data dictionary: table, column, type, constraint, description, source
 - Table 6.2 — API endpoint catalogue: method, route, authorisation level, request, response, errors

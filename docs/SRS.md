@@ -18,7 +18,7 @@ The system consists of a **REST API (ASP.NET Core)**, a **Web Portal (Angular)**
 
 ### 1.3 Vision
 
-A "Midnight Gold" branded experience that reflects the association's prestige and legacy, giving alumni secure, real-time tools to connect and contribute to their alma mater.
+Give alumni secure, real-time tools to stay in touch with each other and to support the college.
 
 ---
 
@@ -44,7 +44,7 @@ The platform follows **Clean Architecture** principles so business logic stays i
 
 The core of the system is a high-integrity registration and verification workflow.
 
-* **3.1.1 Registration Wizard**: A 3-step guided process (Personal, Academic, Professional, Attachments, Verification).
+* **3.1.1 Registration Wizard**: A guided multi-step process (Personal, Academic, Professional, Attachments, Verification).
   * *Constraint*: Registration requires at least one record from "Govt. Haraganga College".
 * **3.1.2 Approval Workflow**: Admins review "Applied" users. Upon approval:
   * A unique **Membership Number** is generated (e.g., `GHC-[Year]-[Serial]`).
@@ -135,17 +135,17 @@ Supporting professional and personal connections within the network.
 
 ### 4.1 Security & Data Integrity
 
-* **Zero "Ghost Data" Architecture**: All records use **Soft-Delete (IsArchived)**. Global Query Filters in EF Core ensure archived data never leaks to UI but remains available for audit.
+* **Archival deletion**: All records use **Soft-Delete (IsArchived)**. Global Query Filters in EF Core ensure archived data never leaks to UI but remains available for audit.
 * **Strict Deduplication**: Unique database indexes on NID, Mobile, and Email to prevent record collision.
 * **Stateless Auth**: JWT-based session management with real-time **Security Stamp** validation to invalidate sessions if a user is terminated.
-* **Rate Limiting**: Tiered limits (Auth: 5/min, Registration: 10/5min, API: 100/min) to prevent brute-force and DDoS.
+* **Rate Limiting**: Tiered limits (Auth: 5/min, Registration: 10/5min, API: 100/min) to slow brute-force attempts and limit abuse.
 * **Election records protected**: A user who holds election appointments, approvals or rules unlocks cannot be hard-deleted. The API answers 409 and the user is deactivated instead.
 * **Step-up delivery**: The step-up code message names the masked email address. If the code email fails, the user gets a "try again" message (503).
 
 ### 4.2 Performance & UI/UX
 
 * **Server-Side Optimization**: Automatic image compression (< 350KB) for member photos, gallery album photos, and news/event images (payment proofs, signatures, and certificates/documents are intentionally excluded for evidentiary/fidelity reasons); SVG-first document generation.
-* **Midnight Gold Aesthetic**: A premium design system with Glassmorphism, smooth micro-animations, and fast LCP (Largest Contentful Paint).
+* **Design system**: one shared theme system with an admin-selectable set of themes, and attention to Largest Contentful Paint on the first page.
 * **Resiliency**: Frontend interceptors to handle partial API failures gracefully without crashing user sessions. On mobile, a `RetryInterceptor` retries timeouts, connection errors, and 5xx responses (capped at 3 attempts, exponential backoff) while leaving 4xx/auth failures alone, paired with a connectivity banner shown while offline.
 
 ---

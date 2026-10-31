@@ -140,6 +140,8 @@ Core; Angular; Flutter.
 
 
 
+
+
 Section numbers are as printed in the body. Page numbers are the folios the PDF carries; a rebuild renumbers them, so they are filled in from the printed copy rather than kept by hand.
 
 | Part, chapter and section | Page |
@@ -357,13 +359,15 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 6.4 | Entity–relationship diagram, standing and money sub-model | 64 |
 | 6.5 | Entity–relationship diagram, events and participation sub-model | 64 |
 | 6.6 | Entity–relationship diagram, governance sub-model | 65 |
-| 6.7 | Design class diagram: domain model | 65 |
-| 6.8 | Design class diagram: application interfaces and infrastructure services | 66 |
-| 6.9 | Component diagram with provided and required interfaces | 66 |
-| 6.10 | Middleware pipeline diagram | 67 |
-| 6.11 | Navigation and route map | 67 |
-| 6.12 | Site map and information architecture of the public site | 68 |
-| 6.13 | Architectural trade-off radar | 68 |
+| 6.7 | Entity–relationship diagram, election roll and nominations sub-model | 65 |
+| 6.8 | Entity–relationship diagram, voting and count sub-model | 66 |
+| 6.9 | Design class diagram: domain model | 66 |
+| 6.10 | Design class diagram: application interfaces and infrastructure services | 67 |
+| 6.11 | Component diagram with provided and required interfaces | 67 |
+| 6.12 | Middleware pipeline diagram | 68 |
+| 6.13 | Navigation and route map | 68 |
+| 6.14 | Site map and information architecture of the public site |  |
+| 6.15 | Architectural trade-off radar |  |
 | 8.1 | Threat model data-flow diagram with trust boundaries, STRIDE-annotated | 80 |
 | 8.2 | Attack tree: member account takeover or fraudulent payment credit | 81 |
 | 8.3 | Role–permission matrix diagram | 81 |

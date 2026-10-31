@@ -55,9 +55,10 @@ Tribunal Member, and ECSC (Search Committee) Member. Each persona carries:
 5. Access is automatically withdrawn once the election is archived (see stage I). A member who
    held a post keeps their ordinary membership access throughout; someone with no other tie to the
    organisation loses system access entirely at that point.
-6. Someone can hold a post at all only if they aren't also a candidate in the same election, and
-   in the case of whoever accepts or rejects nominations, only if they didn't nominate or second
-   the candidate they're deciding on.
+6. Someone should hold a post only if they aren't also a candidate in the same election, and
+   whoever accepts or rejects nominations should not have nominated or seconded the candidate
+   they're deciding on. The system does not check this yet (TODO 37.16e). Until it does, the
+   Commission keeps to it when choosing who to appoint.
 7. **The Returning Officer is flagged.** An appointment to the Returning Officer post carries a flag
    that marks it as the live Returning Officer. An election has one live Returning Officer. When a
    new one is appointed, the earlier appointment is expired (its reason is recorded as "Expired")
@@ -112,14 +113,22 @@ safeguard applies.
 
 ### Stage C — Nomination and scrutiny
 
-11. **Nominations open**, on member web and mobile. Only members eligible at the moment nominations
-    opened may nominate or second — a status change afterwards can't be used to challenge a
-    nomination later.
+11. **The voter roll is frozen, then nominations open.** An official with the voter-roll permission
+    freezes the roll from the election management screen on the admin web or mobile, no later than
+    the Nomination stage. The server copies every active member into the roll and marks anyone with
+    overdue dues as not eligible, with the reason. No nomination can be made until the roll exists.
+    Members then nominate on member web and mobile. Only members eligible on the frozen
+    roll may stand, nominate or second, so a status change afterwards can't be used to challenge a
+    nomination later. The same official can unfreeze the roll, with a written reason, as long as no
+    nomination has been made, and only up to a set number of days before nominations close (two by
+    default). Every unfreeze is written to the audit history.
 12. **A candidate cannot nominate or second themselves.**
 13. **Each nomination is reviewed and accepted or rejected**, in the officials area, normally by the
-    Returning Officer or a Scrutineer. That person can never be a candidate themselves, and can
-    never rule on a nomination they proposed or seconded.
-14. **A nomination isn't accepted without the candidate's own written consent.**
+    Returning Officer or a Scrutineer. That person must not be a candidate themselves, or rule on a
+    nomination they proposed or seconded. The system does not refuse either case yet (TODO 37.16e).
+14. **A nomination should not be accepted without the candidate's own written consent.** The
+    consent time is stored and shown to the official deciding, but the system does not yet refuse
+    an acceptance without it (TODO 37.1p).
 
 ### Stage D — Withdrawal and the candidate list
 
@@ -433,26 +442,26 @@ flowchart TB
 
 ### 4.4 What each record holds
 
-| Record | What it is for | Deliberately does not hold |
-| --- | --- | --- |
-| `ECPeriod` | The term of office an election fills | |
-| `Election` | The election itself: title, phase, every stage date, the tie rule, and the returning officer's public ballot key with its fingerprint | The private key, which never reaches the server |
-| `ElectionSeat` | One position being elected and how many places it carries | |
-| `ElectionPersona` | A named post, its recommended headcount, who may hold it, and the permissions it carries | |
-| `ElectionAppointment` | One person appointed to one post for one election, with their acceptance and neutrality declaration, an expiry, and the flag that marks the live Returning Officer | Any standing role that survives the election |
-| `ElectionApproval` | One of the gated actions, who asked for it, who approved it, who executed it, and an open key that stops two identical open requests being stored | An approval by the same person who asked |
-| `ElectionRulesUnlock` | One SuperAdmin unlock of the frozen rules: who opened it, the reason, when it expires, and who closed it early | |
-| `VoterRoll` | Who was eligible at the moment voting opened, and why anyone was not | |
-| `Nomination` | A candidate, their proposer and seconder, their statement and photo, their consent, their published ballot order | |
-| `ScrutinyDecision` | Who ruled on a nomination, the outcome, and the reason | |
-| `SeatVote` | That a member voted for a given seat, so nobody votes twice | Anything about the choices made |
-| `PendingBallot` | A sealed ballot waiting for the count, holding the election and the sealed choices | No member, no timestamp |
-| `BallotReceipt` | A tracking code a voter can check against the published list | No link to any ballot row |
-| `Ballot` | One opened ballot after counting, and whether it was spoiled | No member, no time of casting |
-| `BallotVote` | One row per chosen candidate. A seat with no row is an abstention | No member |
-| `ElectionResult` | The stored, published outcome per seat, with vote counts and ties | |
-| `ECMember` | The winners taking up their positions | |
-| `ElectionAuditEntry` | A tamper-evident chain of every significant action | For a vote: no seat, no time of day |
+| Record | Who writes it, and where | What it is for | Deliberately does not hold |
+| --- | --- | --- | --- |
+| `ECPeriod` | System administrator sets up the term, on the admin web | The term of office an election fills | |
+| `Election` | Election Commission (or an administrator before one exists) creates and announces it, on the admin web. The Returning Officer adds the public key there | The election itself: title, phase, every stage date, the tie rule, and the returning officer's public ballot key with its fingerprint | The private key, which never reaches the server |
+| `ElectionSeat` | Election Commission adds each position when it announces the election, on the admin web | One position being elected and how many places it carries | |
+| `ElectionPersona` | System administrator defines the posts, on the admin web only | A named post, its recommended headcount, who may hold it, and the permissions it carries | |
+| `ElectionAppointment` | Commission or administrator appoints from the officials panel, on the admin web or mobile. The appointee accepts and signs in the officials area | One person appointed to one post for one election, with their acceptance and neutrality declaration, an expiry, and the flag that marks the live Returning Officer | Any standing role that survives the election |
+| `ElectionApproval` | One official requests, a second official approves, in the officials area on web or mobile | One of the gated actions, who asked for it, who approved it, who executed it, and an open key that stops two identical open requests being stored | An approval by the same person who asked |
+| `ElectionRulesUnlock` | SuperAdmin opens and closes it, on the admin web or mobile | One SuperAdmin unlock of the frozen rules: who opened it, the reason, when it expires, and who closed it early | |
+| `VoterRoll` | An official with the voter-roll permission, normally the Returning Officer, freezes it from the election management screen on the admin web or mobile. The server fills it from the member list | Who was eligible at the moment the roll was frozen, before the first nomination, and why anyone was not. Each row also records when that member voted | |
+| `Nomination` | A member nominates, seconds and consents, on member web or mobile | A candidate, their proposer and seconder, their statement and photo, their consent, their published ballot order | |
+| `ScrutinyDecision` | Returning Officer or a Scrutineer rules, in the officials area | Who ruled on a nomination, the outcome, and the reason | |
+| `SeatVote` | Written by the server when a member casts their ballot on member web or mobile | That a member voted for a given seat, so nobody votes twice | Anything about the choices made |
+| `PendingBallot` | Written by the server when a member casts their ballot on member web or mobile | A sealed ballot waiting for the count, holding the election and the sealed choices | No member, no timestamp |
+| `BallotReceipt` | Written by the server for the voting member. The count rewrites them in shuffled order | A tracking code a voter can check against the published list | No link to any ballot row |
+| `Ballot` | Written by the server when an official with the Count permission runs the approved count, in the officials area | One opened ballot after counting, and whether it was spoiled | No member, no time of casting |
+| `BallotVote` | Written by the same count run | One row per chosen candidate. A seat with no row is an abstention | No member |
+| `ElectionResult` | Written by the same count run | The stored, published outcome per seat, with vote counts and ties | |
+| `ECMember` | Written by the server when two officials declare the result, in the officials area | The winners taking up their positions | |
+| `ElectionAuditEntry` | Written by the server for every significant action, whoever takes it | A tamper-evident chain of every significant action | For a vote: no seat, no time of day |
 
 ### 4.5 Where the records are defined
 
@@ -504,28 +513,68 @@ that already has one open is refused. A count that is approved but not yet run c
 
 ## 6. Secrecy and security, by design
 
+Each point says what the design promises, then how it is done.
+
 - **Secrecy.** Nobody — not an administrator, not the people running the election — can work out
   how a specific person voted. A ballot is sealed the moment it's cast and only opened, all at
   once, at the counting stage.
+  *How:* the server seals the choices with a fresh AES-256-GCM key for each ballot, and wraps that
+  key with the Returning Officer's RSA public key (RSA-OAEP, SHA-256). The election id is bound in,
+  so a ballot opens only for the election it was cast in. The choices are padded to a fixed length
+  first, so the size of a sealed ballot says nothing. The sealed ballot is stored with no member
+  and no time. The record that a member voted (`SeatVote`) is stored apart, with the date only.
 - **Unlinkable receipts.** A member's tracking code can never be looked up, reissued, or matched
   back to a stored ballot by anyone else — which is what stops a receipt being used to prove or
   sell a vote.
+  *How:* the code is drawn at random on the server and shown to the voter once. The receipt row
+  holds only the election and the code. At the count, every receipt is deleted and written again
+  in shuffled order, so even the order rows were saved in no longer points back to a voter. The
+  published list of codes lets a voter check their code is there and nothing more.
 - **One member, one vote**, checked against a list frozen before voting opens.
+  *How:* a ballot is accepted only from a member marked eligible on the frozen voter roll. The
+  roll row is stamped when they vote, and one `SeatVote` row is written per seat. Both are checked
+  again inside a serializable transaction, so two ballots sent at the same moment cannot both
+  land.
 - **Nobody counting or judging can be a candidate**, or be tied to a candidate through having
   nominated or seconded them.
+  *How:* today this rests on the Commission choosing who to appoint. Each post carries only the
+  permissions it needs for one election, and a candidate cannot propose or second their own
+  nomination. The check that would refuse an official who is a candidate, or who nominated or
+  seconded the one they are ruling on, is not built yet (TODO 37.16e).
 - **A tamper-evident history** of every significant action, so altering a past record after the
   fact is detectable.
+  *How:* each `ElectionAuditEntry` carries a sequence number, the hash of the entry before it, and
+  a SHA-256 hash over its own content. A verify route walks the chain from the start. A changed
+  entry breaks its hash, and a removed one leaves a gap in the sequence.
 - **A rehearsal mode** to run a full test election that never counts for real, so the process can
   be practised safely.
+  *How:* an election created as a test carries a test flag. It runs every stage and rule like a
+  real one, but it is left out of every public list and public form check, and declaring it puts
+  nobody on the committee.
 - **Randomised order everywhere it matters** — the candidate list at publication, and the ballots
   at counting — so no sequence can ever be read as a signal.
+  *How:* the server shuffles with a cryptographic random generator. The candidate order is fixed
+  once, when the list is published, unless the `CandidateOrder` setting asks for alphabetical
+  order. The opened ballots are shuffled before they are saved and published.
+- **Too few ballots are never counted by machine.** A tiny count could show how one or two known
+  people voted.
+  *How:* the count refuses to run on fewer than ten ballots, and turnout is not shown below that
+  number either. Such an election is counted by hand.
 - **A documented key procedure**: who holds the ballot-sealing key, how it's generated, and how
   it's destroyed after each election.
+  *How:* the Returning Officer makes the key pair in their own browser. Only the public half goes
+  to the server, which keeps it with its fingerprint. The private half stays on the officer's
+  device. At the count the officer supplies it, and the server refuses a key whose fingerprint
+  does not match. Destroying it after the appeal window is a step in the written procedure (TODO
+  37.13e), since the server never holds it.
 - **A disclosed limit, on purpose, not hidden:** someone holding both a full system backup taken
   while voting was open and the private ballot-sealing key could, in theory, work out roughly when
   someone voted relative to others. That's why the key is destroyed after every election and
   backups taken during voting are handled with extra care. No system is completely proof against
   someone holding both at once — that's an accepted, disclosed risk.
+  *How it is kept small:* vote rows carry the date only, ballots carry no time, and receipts are
+  rewritten in shuffled order at the count. What is left is the order of rows in a backup taken
+  during polling.
 
 ## 7. Decisions on record
 
@@ -600,17 +649,26 @@ and approval described above.
 
 ## 9. How this design compares with the standards
 
-The design answers to five outside references: the Council of Europe's e-voting recommendation
-CM/Rec(2017)5, the American voting-system guidelines VVSG 2.0, the information-security standard
-ISO/IEC 27001, the cloud-privacy standard ISO/IEC 27018, and the web accessibility guidelines
-WCAG 2.2. None of them is law for this organisation. They are used as design baselines, and
+The design answers to five outside references:
+
+- **CM/Rec(2017)5**: Recommendation CM/Rec(2017)5 of the Committee of Ministers of the Council of
+  Europe to member States on standards for e-voting.
+- **VVSG 2.0**: Voluntary Voting System Guidelines, version 2.0, from the US Election Assistance
+  Commission.
+- **ISO/IEC 27001**: Information security, cybersecurity and privacy protection. Information
+  security management systems: Requirements.
+- **ISO/IEC 27018**: Information technology, security techniques. Code of practice for protection
+  of personally identifiable information (PII) in public clouds acting as PII processors.
+- **WCAG 2.2**: Web Content Accessibility Guidelines 2.2, from the World Wide Web Consortium (W3C).
+
+None of them is law for this organisation. They are used as design baselines, and
 nothing here should be read as a claim of certification — certification is a separate exercise
 against an auditor, not something a design earns by adopting controls from a standard.
 
 The comparison below is honest in both directions: where the design meets the expectation, and
 where it deliberately stops short.
 
-### Council of Europe CM/Rec(2017)5
+### Council of Europe CM/Rec(2017)5 (Recommendation on standards for e-voting)
 
 | What the recommendation expects | How this design answers it |
 | --- | --- |
@@ -641,12 +699,12 @@ election, recorded here so nobody reads the design as stronger than it is. What 
 procedural: the key is made and kept off the server, a second person must agree before the count
 (TODO 37.13h), and the file is destroyed once the result stands (TODO 37.13e, the key procedure).
 
-### VVSG 2.0
+### VVSG 2.0 (Voluntary Voting System Guidelines 2.0)
 
 | What the guidelines benchmark | How this design answers it |
 | --- | --- |
 | Ballot secrecy and integrity | Sealed ballots, padded so their length reveals nothing, opened in one pass in random order. |
-| Controlled access, separation of duties | Permissions come from the post a person holds, for one election only, and no post carries over automatically. Nobody counting or ruling on nominations may be a candidate or have nominated one. |
+| Controlled access, separation of duties | Permissions come from the post a person holds, for one election only, and no post carries over automatically. Nobody counting or ruling on nominations should be a candidate or have nominated one; today the Commission keeps to this when appointing, and the system check is not built yet (TODO 37.16e). |
 | Software integrity | Every sensitive action is tamper-evident and recorded; changes to a live election need a second approver. |
 | Usability | The voter sees every seat with names and photos, reviews the whole ballot once, then casts it in a single action — no partial submission, no submission before review. |
 | Robust error handling | A ballot with any invalid seat writes nothing at all. A failure after a vote is committed still returns the voter their tracking code. |
@@ -660,7 +718,7 @@ trail, no voter-verified paper record, and no formal certification testing. Load
 testing at scale is not part of the design either. The paper-ballot fallback procedure exists
 precisely because the software route cannot offer these.
 
-### ISO/IEC 27001
+### ISO/IEC 27001 (Information security management systems)
 
 | What the standard expects | How this design answers it |
 | --- | --- |
@@ -676,20 +734,20 @@ governance side — the risk register, supplier management, continual improvemen
 continuity, the audit itself — sits with the organisation, not with this design. Nothing here
 amounts to an information-security management system on its own.
 
-### ISO/IEC 27018
+### ISO/IEC 27018 (Protection of PII in public clouds)
 
 | What the standard expects | How this design answers it |
 | --- | --- |
 | Data minimisation | Deliberately so: a sealed ballot carries no member reference and no timestamp. The only record of who voted is the fact of having voted, held separately from any ballot. |
 | Access restriction | Officials see only what their post needs; Observers can look and never act. |
 | Retention and deletion | The ballot-sealing key is destroyed once the appeal window closes. Retention rules for election records are set out in the forms appendices. |
-| Secure transmission and storage | Ballots are sealed before they leave the voter's device and stay sealed at rest until the count. |
+| Secure transmission and storage | The Returning Officer makes the ballot key pair in their own browser. Only the public half goes to the server. The server seals each ballot with that public key the moment it is cast, so ballots stay sealed at rest. Only the private half, which never reaches the server until the count, can open them. Ballots travel to the server over HTTPS. |
 | Clear responsibilities | The design separates what the organisation is responsible for from what the hosting provider is. |
 
 **Where it stops short.** Sub-processor management, cloud-provider contract terms and the
 provider's own assessment are organisational matters outside this design.
 
-### WCAG 2.2 Level AA
+### WCAG 2.2 Level AA (Web Content Accessibility Guidelines)
 
 Level AA is a deliberate project target, not something WCAG itself imposes. The voting screens are
 built to support keyboard navigation, screen readers, sufficient contrast, visible focus,
@@ -707,8 +765,9 @@ own assisted-voting rules.
   trust in the Returning Officer, but it also means an election cannot be counted if any one key
   holder is unavailable. For an association of this size, not being able to count was judged the
   worse risk.
-- **Sealing the ballot on the mobile device itself.** The ballot is sealed at the server boundary
-  rather than inside the app, which leaves a narrow window the web route does not have.
+- **Sealing the ballot on the voter's device.** On web and mobile alike, the ballot is sealed by
+  the server as it arrives, not in the browser or the app. That leaves a brief moment when the
+  server sees the ballot unsealed, as section 9 says under the trust model.
 - **A formal objection window against the voter roll.** Eligibility disputes are handled by the
   Commission as they arise rather than through a defined pre-poll objection process.
 - **Performance and load testing at scale.** The expected turnout does not justify it.

@@ -972,7 +972,7 @@ classDiagram
 
 Attributes are omitted from both halves so the classes and their multiplicities print legibly; they are
 given per class in the data dictionary of Table 6.2 and, for the classes that survive into the design
-model, in Figure 6.8.
+model, in Figure 6.10.
 
 
 This is an analysis model and deliberately omits identity, authentication, notification,

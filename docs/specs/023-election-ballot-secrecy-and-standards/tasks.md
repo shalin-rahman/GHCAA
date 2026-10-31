@@ -31,8 +31,10 @@ A ticked line means the tracker item is DONE. PARTIAL and TODO items stay untick
 ## Phase 3: P2 election rules (37.1o, 37.1p, 37.1q, 37.13b to 37.13e, 37.14)
 
 - [x] T009 FR-018 and FR-019: multi-place seats and the stored tie rule (37.1o).
-- [ ] T010 FR-020 to FR-024: recount, candidate consent, officer conflict, spoiled ballots and
+- [ ] T010 FR-020, FR-021, FR-023 and FR-024: recount, candidate consent, spoiled ballots and
   unopposed seats (37.1p, TODO).
+- [ ] T035 FR-022: officer conflict check on nomination, candidate add, appointment and
+  acceptance, with declared conflicts and stepping aside (37.16e, TODO).
 - [x] T011 FR-025: ER forms filled from stored records (37.1q). The later form work in 37.14m and
   37.14n is PARTIAL.
 - [x] T012 FR-046: candidate order fixed at CandidateList (37.13b).

@@ -48,6 +48,7 @@ into the book by accident.
 | `python docs/book/build/build.py` | builds the HTML and runs every source check |
 | `python docs/book/build/build.py --pdf` | the same, then measures A4 fit, prints the PDF with page numbers, and fills the Page columns from it |
 | `python docs/book/build/export_docx.py` | builds a Word file, `GHCAA-Documentation-Book.docx`, from the same chapter sources |
+| `python docs/book/build/export_presentation.py` | writes `docs/presentation`: the FR/NFR list and the SRS as print PDFs, and Figures 6.7 and 6.8 as .mmd files for the slides |
 | `python docs/book/build/renumber.py --apply` | renumbers figures and tables into bound order and rebuilds the contents and the front-matter lists |
 | `python docs/book/build/prose.py refs` | checks every section reference: none broken, and each names what is at the destination. Prints the destination title beside every reference, which is how a reference that resolves to the wrong section is caught |
 | `python docs/book/build/prose.py prose 03` | lists the sentences in a chapter likely to need a second reading. A filter for a human pass, not a gate |

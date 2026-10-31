@@ -416,7 +416,10 @@ const SETTINGS = {
   startOnLoad: false,
   theme: "neutral",
   fontFamily: "Times New Roman, Times, serif",
-  themeVariables: { fontSize: "%(mermaidfont)s" },
+  // The neutral theme draws notes as dark grey blocks with white text, which
+  // is heavy on paper and hard to read off a laser printer.
+  themeVariables: { fontSize: "%(mermaidfont)s", noteBkgColor: "#f7f7f7",
+                    noteTextColor: "#000000", noteBorderColor: "#666666" },
   flowchart: { useMaxWidth: true, htmlLabels: true, nodeSpacing: 26, rankSpacing: 34,
                padding: 6, diagramPadding: 4 },
   sequence: { useMaxWidth: true, diagramMarginX: 8, diagramMarginY: 8, boxMargin: 6,

@@ -20,7 +20,7 @@ attribute the Association does not need at the cost of one it does, the textbook
 
 ## 6.2 Architectural Alternatives Considered and the Decision Taken
 
-Figure 6.13 scores the four candidates below across the quality attributes that decided between them.
+Figure 6.15 scores the four candidates below across the quality attributes that decided between them.
 Four alternatives were assessed against the quality-attribute scenarios of §3.4 and the sustainability
 constraint of §6.1: a conventional layered architecture without an explicit dependency rule, clean
 architecture with the dependency rule enforced [1], a modular monolith with service-style internal
@@ -56,7 +56,7 @@ Figure 6.2 draws the four layers and the single direction dependencies are permi
 ### 6.3.1 Domain layer
 
 `GHCAA.Domain` holds seventy-eight entity sets, which extend the analysis model of §5.6, the forty-one enumerations
-of `Enums.cs`, and constants. Figure 6.7 draws the membership, payment, event and governance
+of `Enums.cs`, and constants. Figure 6.9 draws the membership, payment, event and governance
 classes at design level, with the attributes and multiplicities the analysis model of Figure 3.8
 left out. It references nothing else in the solution, which is the dependency rule's
 starting point: if the domain depended on anything, the rule would already be broken at its centre.
@@ -73,7 +73,7 @@ registration of §6.9.9) and the data transfer objects that cross the API bounda
 `GHCAA.Infrastructure` holds the service implementations, the two EF Core provider shims described
 in §6.5.4, the payment gateway adapters, and `ApplicationDbContext`. It depends on `GHCAA.Application`
 and `GHCAA.Domain`, and is the only layer that depends on Entity Framework Core, on `HttpClient`, and
-on the file system. Figure 6.8 draws the interface-to-implementation pairs across that boundary,
+on the file system. Figure 6.10 draws the interface-to-implementation pairs across that boundary,
 which is where the dependency rule is either kept or broken.
 
 ### 6.3.4 API layer
@@ -108,10 +108,10 @@ is the evidence that this holds for the delivered solution, not only for its int
 
 ## 6.4 Component and Interface Design
 
-Figure 6.9 draws the request path as a component diagram: a controller depends on a service
+Figure 6.11 draws the request path as a component diagram: a controller depends on a service
 interface it does not implement, the concrete service is supplied by the DI container built in
 §6.9.9, and the service depends on `ApplicationDbContext` as its persistence port. The middleware
-pipeline, drawn in Figure 6.10, is the component boundary a request crosses before it reaches a
+pipeline, drawn in Figure 6.12, is the component boundary a request crosses before it reaches a
 controller at all, and its order is significant: `ExceptionMiddleware` wraps everything so that no
 unhandled exception below it reaches the client as anything other than a JSON error; rate limiting
 runs before authentication so that an unauthenticated flood is rejected before the cost of verifying
@@ -121,7 +121,7 @@ stamp can be checked, and must be checked before authorisation decides what it m
 `WwwRedirectMiddleware` sits just after `CorrelationIdMiddleware` and before `ExceptionMiddleware`. It
 answers a request for `www.` plus the host of `AppSettings:ClientUrl` with a redirect to that origin,
 a 301 for `GET` and `HEAD` and a 308 for other methods so that a `POST` stays a `POST`, and it does
-nothing when `ClientUrl` is unset, is a loopback or IP address, or is itself a `www` host. Figure 6.10
+nothing when `ClientUrl` is unset, is a loopback or IP address, or is itself a `www` host. Figure 6.12
 leaves it out, as it leaves out the correlation-ID stage and CORS, to keep the checks that decide
 access in view.
 
@@ -141,11 +141,24 @@ sixty-six of which have a Fluent API configuration class under
 `GHCAA.Infrastructure/Data/Configurations/` rather than attribute-only mapping, which keeps
 persistence concerns out of the domain classes themselves; the remaining twelve are mapped by EF
 Core's conventions alone, which is a gap rather than a decision and is recorded as such; the physical model is whichever of the two schemas in §6.5.4 the running environment
-selects. Figures 6.3 to 6.8 draw that schema as four sub-models, being identity and records, standing and
-money, events and participation, and governance, each with its keys and cardinalities. They are split
-this way rather than drawn as one diagram because one diagram of seventy-eight tables cannot be printed
-at a size anyone can read; the content, communication and configuration tables are in the generated
-schema documentation.
+selects. Figures 6.3 to 6.8 draw that schema as six sub-models, being identity and
+records, standing and money, events and participation, governance, election roll and nominations, and
+voting and the count, each with its keys and cardinalities. They are split this way rather than drawn as one diagram because one diagram of
+seventy-eight tables cannot be printed at a size anyone can read; the content, communication and
+configuration tables are in the generated schema documentation.
+
+Figure 6.7 draws the election, its seats, the frozen voter roll, nominations and declared results.
+Figure 6.8 draws the voting tables, and it keeps who voted apart from what was voted. `SeatVote` records
+that a member voted for a seat and when. The choices go to `PendingBallot` in the same transaction,
+sealed with the election's public key, with no member column and no time column. At the count the
+sealed rows are opened with the returning officer's private key, shuffled, written to `Ballot` and
+`BallotVote` under random GUID keys, and deleted. No key joins a `SeatVote` row to a `Ballot` row, and
+`BallotReceipt` gives the voter a tracking code that is not linked to the ballot either.
+`ElectionAuditEntry` chains each entry to the hash of the one before it. The appointment and approval
+tables, which hold the officials and the two-person sign-off on each phase change, are left out of
+both figures to keep each to one page. §8.8, on governance integrity, sets this design against the
+attributable `PollVote` used for member polls. The design is checked by the test suite; it has not yet
+been used in a live election.
 
 ### 6.5.2 Normalisation and its deliberate exceptions
 
@@ -260,7 +273,7 @@ subject. Four mechanisms are worth naming as architecture rather than as detail,
 structural decision rather than a local check: `SecurityStampMiddleware`, which makes a credential or
 role change take effect within one request rather than at token expiry; the query-string token
 allowance in the middleware pipeline, which exists only to let a file download authenticate without a
-custom header and is scoped, in the pipeline order of Figure 6.10, to run before the ordinary
+custom header and is scoped, in the pipeline order of Figure 6.12, to run before the ordinary
 authentication step rather than replacing it; the payment-gateway posture of §8.7, under which the
 platform never stores a payment credential of its own; and step-up authentication for destructive,
 financial and identity-changing admin actions, which re-verifies an already-authenticated Admin or
@@ -292,7 +305,7 @@ independent controls share one upstream dependency, and only one of them names i
 The public site, the member portal and the admin console are three route trees within one Angular
 application, separated by `PublicLayoutComponent`, `PortalLayoutComponent` and
 `AdminLayoutComponent` and by the `authGuard` and `adminGuard`/`superAdminGuard` route guards listed
-in Table 6.3's companion, the route map of Figure 6.11. A visitor never crosses from the public tree
+in Table 6.3's companion, the route map of Figure 6.13. A visitor never crosses from the public tree
 into a guarded one without authenticating, and the admin tree is itself split by guard between
 `Admin` and `SuperAdmin`, matching the role distinction §6.6 sets out.
 
@@ -334,7 +347,7 @@ Reading the site against Pressman and Maxim's design pyramid [54]: interface des
 separated route trees of §6.7.1; aesthetic design is the token system of §6.7.2; content design is
 the admin-editable `SiteContent` blocks described in §5.2.3's public-content data flow, which let an
 officer change wording without a deployment (FR-45); navigation design is the route map of Figure
-6.17 and the site map of Figure 6.12; architecture design is Figure 6.1; and component design is the
+6.17 and the site map of Figure 6.14; architecture design is Figure 6.1; and component design is the
 shared control library of §6.7.3, with the gap just recorded.
 
 On mobile, the Flutter client mirrors the web client's feature set (FR-48) rather than offering a reduced one,
@@ -505,7 +518,7 @@ gateway except in its routing.
 change-tracking, so that a controller never composes a LINQ query itself; the exceptions are the four
 controllers named in §6.9.6.
 
-**Decorator.** The middleware pipeline of Figure 6.10 is ASP.NET Core's own decorator chain: each
+**Decorator.** The middleware pipeline of Figure 6.12 is ASP.NET Core's own decorator chain: each
 middleware wraps the next and can act before and after it without the inner stages knowing the outer
 ones exist.
 
@@ -675,7 +688,7 @@ flowchart TB
     INF --> DOM["GHCAA.Domain<br/>entities, enums"]
     APP --> DOM
     API --> INF
-    style DOM fill:#ffe9b3,stroke:#8a6d1f
+    style DOM fill:#ffffff,stroke:#000000,stroke-width:2px
 ```
 
 ### Figure 6.3 — Entity–relationship diagram, identity and records sub-model
@@ -814,7 +827,98 @@ erDiagram
     MEMBER ||--o{ EC_MEMBER : "may hold"
 ```
 
-### Figure 6.7 — Design class diagram: domain model
+### Figure 6.7 — Entity–relationship diagram, election roll and nominations sub-model
+
+```mermaid
+erDiagram
+    direction LR
+    ELECTION {
+        int Id PK
+        int Phase
+    }
+    ELECTION_SEAT {
+        int Id PK
+        int ElectionId FK
+    }
+    VOTER_ROLL {
+        int Id PK
+        int ElectionId FK
+        int MemberId FK
+    }
+    NOMINATION {
+        int Id PK
+        int ElectionSeatId FK
+        int CandidateMemberId FK
+        int Status
+    }
+    MEMBER {
+        int Id PK
+    }
+    ELECTION_RESULT {
+        int Id PK
+        int ElectionId FK
+        int NominationId FK
+        int VoteCount
+        bool IsElected
+    }
+    ELECTION_AUDIT_ENTRY {
+        int Id PK
+        int ElectionId FK
+        string PrevHash
+        string Hash
+    }
+    ELECTION ||--o{ ELECTION_SEAT : "offers"
+    ELECTION ||--o{ VOTER_ROLL : "freezes"
+    MEMBER ||--o{ VOTER_ROLL : "listed in"
+    ELECTION_SEAT ||--o{ NOMINATION : "receives"
+    MEMBER ||--o{ NOMINATION : "stands or backs"
+    ELECTION ||--o{ ELECTION_RESULT : "declares"
+    ELECTION ||--o{ ELECTION_AUDIT_ENTRY : "logs"
+```
+
+### Figure 6.8 — Entity–relationship diagram, voting and count sub-model
+
+```mermaid
+erDiagram
+    direction LR
+    SEAT_VOTE {
+        int Id PK
+        int ElectionId FK
+        int MemberId FK
+        datetime VotedAt
+    }
+    ELECTION {
+        int Id PK
+        string BallotPublicKey
+    }
+    PENDING_BALLOT {
+        guid Id PK
+        int ElectionId FK
+        string SealedChoices
+    }
+    BALLOT {
+        guid Id PK
+        int ElectionId FK
+        bool IsSpoiled
+    }
+    BALLOT_VOTE {
+        guid Id PK
+        guid BallotId FK
+        int NominationId FK
+    }
+    BALLOT_RECEIPT {
+        guid Id PK
+        int ElectionId FK
+        string TrackingCode
+    }
+    ELECTION ||--o{ SEAT_VOTE : "records who voted"
+    ELECTION ||--o{ PENDING_BALLOT : "holds sealed"
+    ELECTION ||--o{ BALLOT : "opens at count"
+    BALLOT ||--o{ BALLOT_VOTE : "contains"
+    ELECTION ||--o{ BALLOT_RECEIPT : "issues"
+```
+
+### Figure 6.9 — Design class diagram: domain model
 
 ```mermaid
 classDiagram
@@ -879,7 +983,7 @@ classDiagram
     Member "1" --> "0..*" AmendmentVote
 ```
 
-### Figure 6.8 — Design class diagram: application interfaces and infrastructure services
+### Figure 6.10 — Design class diagram: application interfaces and infrastructure services
 
 ```mermaid
 classDiagram
@@ -927,7 +1031,7 @@ it, after the 2026-09-08 refactor, is:
 | `SSLCommerzGateway` | `BasePaymentGateway : IPaymentGatewayService` |
 | `DGePayGateway` | `IPaymentGatewayService` directly |
 
-### Figure 6.9 — Component diagram with provided and required interfaces
+### Figure 6.11 — Component diagram with provided and required interfaces
 
 ```mermaid
 flowchart TB
@@ -938,7 +1042,7 @@ flowchart TB
     IFS -.->|provided by| LFS[LocalFileStorageService]
 ```
 
-### Figure 6.10 — Middleware pipeline diagram
+### Figure 6.12 — Middleware pipeline diagram
 
 ```mermaid
 flowchart TB
@@ -960,7 +1064,7 @@ flowchart TB
     style R3 fill:none,stroke:none
 ```
 
-### Figure 6.11 — Navigation and route map
+### Figure 6.13 — Navigation and route map
 
 ```mermaid
 flowchart TB
@@ -973,7 +1077,7 @@ flowchart TB
     SUPER --> SADM[SuperAdmin tree:<br/>ledger, fee config,<br/>payment config, roles, audit]
 ```
 
-### Figure 6.12 — Site map and information architecture of the public site
+### Figure 6.14 — Site map and information architecture of the public site
 
 ```mermaid
 flowchart LR
@@ -996,10 +1100,10 @@ flowchart LR
     ACCESS --> REG["/register"]
     ACCESS --> RESET["/reset-password"]
     ACCESS --> PAY["/payment/success, /payment/failed"]
-    LOGIN -.-> PORTAL["/portal, guarded (Figure 6.11)"]
+    LOGIN -.-> PORTAL["/portal, guarded (Figure 6.13)"]
 ```
 
-### Figure 6.13 — Architectural trade-off radar
+### Figure 6.15 — Architectural trade-off radar
 
 ```mermaid
 quadrantChart
