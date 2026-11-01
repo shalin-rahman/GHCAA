@@ -958,7 +958,9 @@ test('election walkthrough', async ({ browser, baseURL }) => {
     await page.locator(`#recount-window-ends-on-${eid}`).fill(localInput(recountEnds));
     await by.shot('Form details', 'These dates and the venue are printed on the statutory forms.');
     await page.getByRole('button', { name: 'Save details' }).click();
-    await page.waitForLoadState('networkidle').catch(() => {});
+    // The click can open the step-up dialog first, and a loaded page is already network-idle,
+    // so wait for the page's own answer before reading the election back.
+    await expect(page.getByText(/Form details saved/).first()).toBeVisible({ timeout: 60_000 });
     const saved = field(await adminElection(eid), 'FormDetails');
     note('check', by.label, 'Form details saved', undefined, {
       ok: !!saved && field(saved, 'Venue') === S.details.venue,

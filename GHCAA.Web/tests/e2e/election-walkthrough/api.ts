@@ -1,4 +1,4 @@
-import { PASSWORD, Person, noCodeError, waitForCode } from './local';
+import { PASSWORD, Person, local, noCodeError, waitForCode } from './local';
 
 // Steps with no web page (nominations, middle phases, declare) and the refusal probes go
 // straight to the API. Each person gets one stepped-up token, reused for 25 minutes.
@@ -44,6 +44,7 @@ export async function call<T = any>(method: string, path: string, token?: string
 }
 
 const tokens = new Map<number, { token: string; at: number }>();
+let mailWarned = false;
 
 export async function login(person: Person): Promise<string> {
   const r = await call('POST', '/auth/login', undefined, { Username: person.username, Password: PASSWORD });
@@ -61,9 +62,15 @@ export async function token(person: Person): Promise<string> {
   if (cached && Date.now() - cached.at < 25 * 60_000) return cached.token;
   const plain = await login(person);
   const askedAt = new Date(Date.now() - 5_000);
-  // A 503 means the code email failed. noCodeError reads the reason from EmailLogs.
+  // A 503 means the code email failed, often Brevo refusing this machine's IP. The API saves
+  // the code before sending and EmailLogs keeps the failed mail, so the run reads it from there
+  // and carries on, as the web dialog and local-election.py already do.
   const asked = await send('POST', '/auth/step-up/request', plain);
-  const code = asked.status === 503 ? null : await waitForCode(person.userId, askedAt);
+  if (asked.status === 503 && !mailWarned) {
+    mailWarned = true;
+    console.warn(`Step-up email failed, reading the code from EmailLogs instead. ${local.mailError(person.userId, askedAt) ?? ''}`.trim());
+  }
+  const code = await waitForCode(person.userId, askedAt);
   if (!code) throw noCodeError(person, askedAt);
   const r = await call('POST', '/auth/step-up/verify', plain, { Code: code, Method: 'email' });
   const stepped = field<string>(r.body, 'Token');

@@ -4,7 +4,10 @@ rem Starts the API and the web dev server in their own windows when they are not
 rem
 rem   run-election-walkthrough.bat [mode] [keep] [headed] [slow] [demo]
 rem
-rem   setup    (default) sets up a new election up to the campaign phase and saves a checkpoint
+rem With no arguments, as when double-clicked, it runs "full demo" and keeps the window open
+rem at the end so the result can be read.
+rem
+rem   setup    (default when other options are given) sets up a new election up to the campaign phase and saves a checkpoint
 rem   resume   carries on from the checkpoint: polling, votes, close, count, results, recounts
 rem   full     everything in one go, setup included
 rem   clean    deletes all election test data and restores the borrowed accounts,
@@ -28,6 +31,13 @@ rem Input data is in GHCAA.Web\tests\e2e\election-walkthrough\scenario.json. Set
 rem WALKTHROUGH_SCENARIO to a copy of it to run with other names, seats or votes.
 
 setlocal EnableExtensions
+if not "%~1"=="" goto args
+call "%~f0" full demo
+set "RC=%ERRORLEVEL%"
+pause
+exit /b %RC%
+
+:args
 set "ROOT=%~dp0.."
 set "WEB=%ROOT%\GHCAA.Web"
 set "API_HEALTH=http://localhost:5087/health/live"
@@ -126,10 +136,14 @@ rem An earlier run that was closed or failed can leave its Playwright runner and
 rem windows open, still logged in and holding the election. taskkill /T takes the browsers too.
 rem Only the runner's own two commands match, so an editor or other tool opened on the
 rem walkthrough folder is left alone.
+rem An earlier window of this script is closed as well. It is killed without /T, because the
+rem API and web server windows it started are its children and should keep running. This
+rem run's own cmd is one of the PowerShell process's ancestors, so it is skipped. A terminal
+rem the script was typed into does not match, since its command line does not name the script.
 :stop_earlier
-for /f %%P in ('powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'node.exe' -and ($_.CommandLine -like '*playwright.walkthrough.config*' -or $_.CommandLine -like '*election-walkthrough*tasks.mjs*') } | ForEach-Object { $_.ProcessId }"') do (
+for /f "tokens=1,2" %%P in ('powershell -NoProfile -Command "$a=@(); $p=$PID; while ($p -and $a -notcontains $p) { $a+=$p; $p=(Get-CimInstance Win32_Process -Filter ('ProcessId=' + $p)).ParentProcessId }; $all=Get-CimInstance Win32_Process; $all | Where-Object { $_.Name -eq 'cmd.exe' -and $_.CommandLine -like '*run-election-walkthrough.bat*' -and $a -notcontains $_.ProcessId } | ForEach-Object { [string]$_.ProcessId }; $all | Where-Object { $_.Name -eq 'node.exe' -and ($_.CommandLine -like '*playwright.walkthrough.config*' -or $_.CommandLine -like '*election-walkthrough*tasks.mjs*') } | ForEach-Object { [string]$_.ProcessId + ' /T' }"') do (
   echo Stopping an earlier walkthrough run, process %%P.
-  taskkill /PID %%P /T /F >nul 2>&1
+  taskkill /PID %%P %%Q /F >nul 2>&1
 )
 exit /b 0
 

@@ -23,7 +23,11 @@ are moved to plus addresses for the run and put back afterwards.
 
 ## Run it
 
-The quickest way, from the repository root:
+The quickest way is to double-click `scripts\run-election-walkthrough.bat`. With no
+arguments it runs `full demo`: the whole election, browsers shown, no wait for the polling
+window. The window stays open at the end until a key is pressed.
+
+To run it in two parts, from the repository root:
 
 ```bat
 scripts\run-election-walkthrough.bat setup
@@ -32,7 +36,8 @@ scripts\run-election-walkthrough.bat resume
 
 Each time, in every mode, the script:
 
-1. stops a walkthrough run left from before, with its browser windows,
+1. stops a walkthrough run left from before, with its browser windows, and closes an earlier
+   window of this script. The API and web server windows stay open.
 2. checks the tools above and installs any missing package or browser,
 3. for `setup` and `full` only, deletes all election test data from earlier runs, as
    `clean` does. `resume` keeps it, because it carries on with the election setup made.
@@ -41,7 +46,7 @@ Each time, in every mode, the script:
 
 | Mode | What it does |
 |---|---|
-| `setup` (default) | New election up to the campaign phase, then saves a checkpoint. About 3 minutes. |
+| `setup` (default when only options are given) | New election up to the campaign phase, then saves a checkpoint. About 3 minutes. |
 | `resume` | From the checkpoint: polling, votes, close, count, results, recounts, archive. It waits for the polling window set in `scenario.json`. |
 | `full` | Setup and resume in one run. |
 | `clean` | Deletes what the walkthrough made and restores the borrowed accounts. |
@@ -79,6 +84,8 @@ its full path. Replace `<repo>` with the folder you cloned into.
 ```powershell
 # PowerShell
 $W = "<repo>\scripts\run-election-walkthrough.bat"
+
+& $W                     # same as double-clicking: full demo, then waits for a key
 
 # setup: deletes old test data, makes a new election up to the campaign phase, saves a checkpoint
 & $W setup headed        # visible, normal speed

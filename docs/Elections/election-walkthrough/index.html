@@ -1,0 +1,467 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Election walkthrough</title><style>
+:root{--bg:#f6f7f9;--card:#fff;--text:#1d2430;--muted:#5d6878;--line:#dde2e8;--accent:#1f6f5c;--bad:#b3261e;--warn:#9a6700}
+@media (prefers-color-scheme:dark){:root{--bg:#12161c;--card:#1b2129;--text:#e6e9ee;--muted:#9aa5b4;--line:#2c3440;--accent:#5fc2a6;--bad:#ff8a80;--warn:#e3b341}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif;padding:16px;max-width:1100px;margin:auto}
+header,nav,section,article{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+main section{background:none;border:none;padding:0}h1{margin:0 0 4px;font-size:1.5rem}h2{font-size:1.2rem;margin:8px 0}h3{font-size:1rem;margin:0}
+.status{color:var(--accent);font-weight:600}.status.bad{color:var(--bad)}dl{display:grid;grid-template-columns:max-content 1fr;gap:2px 12px;margin:8px 0 0}dt{color:var(--muted)}dd{margin:0}
+.phases{display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:0}.phases li{border:1px solid var(--line);border-radius:6px;padding:4px 8px;color:var(--muted)}
+.phases li.done{border-color:var(--accent);color:var(--text)}.phases small{display:block;font-size:.75rem}
+.about{color:var(--muted)}.n{display:inline-block;min-width:2em;color:var(--muted)}.meta{color:var(--muted);margin:4px 0}
+.tag{font-size:.75rem;border:1px solid var(--line);border-radius:4px;padding:1px 6px}.tag.refusal{border-color:var(--warn);color:var(--warn)}.tag.bad,.bug .tag{border-color:var(--bad);color:var(--bad)}
+article.failed{border-color:var(--bad)}figure{margin:8px 0 0}figure img{max-width:100%;border:1px solid var(--line);border-radius:6px;cursor:zoom-in}
+table{border-collapse:collapse;width:100%;margin:8px 0;font-size:.9rem;display:block;overflow-x:auto}th,td{border:1px solid var(--line);padding:4px 8px;text-align:left}
+a{color:var(--accent)}.links a{margin-right:12px}dialog{max-width:95vw;padding:0;border:none;background:none}dialog img{max-width:95vw;max-height:95vh}
+#findings li{margin:4px 0}</style></head><body>
+<header><h1>Annual General Election: local walkthrough</h1><p class="status ">finished</p><dl><dt>Election</dt><dd>Annual General Election 2026 (local walkthrough)</dd><dt>Scenario file</dt><dd>scenario.json</dd><dt>Nominations open</dt><dd>10/26/2026, 3:52:29 PM</dd><dt>Polling opens</dt><dd>10/26/2026, 4:22:29 PM</dd><dt>Polling closes</dt><dd>10/26/2026, 4:32:29 PM</dd><dt>Recount window ends</dt><dd>10/26/2026, 4:47:29 PM</dd><dt>Seats</dt><dd>President, General Secretary, Treasurer</dd><dt>Ballots planned</dt><dd>14, of which 3 on the web</dd></dl></header>
+<nav><h2>Phases</h2><ol class="phases"><li class="done"><b>0</b> Announced<small>10/26/2026, 3:52:34 PM</small></li><li class="done"><b>1</b> Nomination<small>10/26/2026, 3:54:01 PM</small></li><li class="done"><b>2</b> Scrutiny<small>10/26/2026, 3:55:12 PM</small></li><li class="done"><b>3</b> Withdrawal<small>10/26/2026, 3:55:46 PM</small></li><li class="done"><b>4</b> CandidateList<small>10/26/2026, 3:55:54 PM</small></li><li class="done"><b>5</b> Campaign<small>10/26/2026, 3:55:57 PM</small></li><li class="done"><b>6</b> Polling<small>10/26/2026, 3:56:39 PM</small></li><li class="done"><b>7</b> Counting<small>10/26/2026, 3:57:47 PM</small></li><li class="done"><b>8</b> Declared<small>10/26/2026, 3:57:57 PM</small></li><li class="done"><b>9</b> Archived<small>10/26/2026, 3:58:43 PM</small></li></ol><h2>Contents</h2><ol><li><a href="#s0">Executive committee period and the election</a> <small>(3)</small></li><li><a href="#s1">Voter roll and officials</a> <small>(8)</small></li><li><a href="#s2">Officials accept or decline</a> <small>(19)</small></li><li><a href="#s3">Publishing the election</a> <small>(5)</small></li><li><a href="#s4">Nominations</a> <small>(21)</small></li><li><a href="#s5">Scrutiny</a> <small>(8)</small></li><li><a href="#s6">Withdrawal, candidate list and campaign</a> <small>(10)</small></li><li><a href="#s7">Ballot key and readiness</a> <small>(8)</small></li><li><a href="#s8">Polling opens</a> <small>(5)</small></li><li><a href="#s9">Voting</a> <small>(18)</small></li><li><a href="#s10">Polling closes</a> <small>(4)</small></li><li><a href="#s11">Count</a> <small>(1)</small></li><li><a href="#s12">Declare and results</a> <small>(6)</small></li><li><a href="#s13">Recount requests</a> <small>(7)</small></li><li><a href="#s14">Key destroyed, forms and audit</a> <small>(9)</small></li><li><a href="#s15">Archive</a> <small>(5)</small></li></ol></nav>
+<section><h2>Who takes part</h2><table><thead><tr><th>Role</th><th>Name</th><th>Login</th><th>Part in the run</th></tr></thead><tbody><tr><td>Administrator</td><td>Shalin Rahman</td><td>shalin</td><td>Creates the period and the election, freezes the roll, appoints the officials</td></tr><tr><td>Returning Officer</td><td>Md. Shamsul Islam</td><td>2512003</td><td>Makes the ballot key, counts, enters recount figures</td></tr><tr><td>Chief Commissioner</td><td>MD. IQBAL HOSSAIN BHUIYAN</td><td>2512046</td><td>Publishes, moves the phases, closes polling, appoints a replacement</td></tr><tr><td>Commissioner</td><td>AMENA KHATUN</td><td>2512047</td><td>Second person on every two-person step</td></tr><tr><td>Tribunal</td><td>Abdul Ahad</td><td>2512049</td><td>Decides the recount requests</td></tr><tr><td>Scrutineer</td><td>Israt Jahan Najnin</td><td>2512050</td><td>Declines the appointment</td></tr><tr><td>Scrutineer</td><td>Hena Begum</td><td>2512051</td><td>Replaces the one who declined</td></tr><tr><td>Observer</td><td>A. K. M. Bayzid Khan</td><td>2512052</td><td>Is appointed, then revoked</td></tr><tr><td>Candidate, President</td><td>Roksana Parvin</td><td>2512029</td><td>Proposed by Hritam Raj Mukherjee, seconded by Sabina yasmin</td></tr><tr><td>Candidate, President</td><td>ADVOCATE MUJIBUR RAHMAN</td><td>2512030</td><td>Proposed by SHEIKH ABDUL BAKIR, seconded by Md. Mahabub-Ur-Reza</td></tr><tr><td>Candidate, General Secretary</td><td>MD GOLZER HOSSAIN</td><td>2512031</td><td>Proposed by Md Habibur Rahman (Shalin), seconded by Subrata das</td></tr><tr><td>Candidate, General Secretary</td><td>Rajkumari Mukherjee</td><td>2512032</td><td>Proposed by Professor Abu Ahmed Ahsan Kabir, seconded by Utpal Das</td></tr><tr><td>Candidate, General Secretary</td><td>MD Alamgir Kabir</td><td>2512034</td><td>Proposed by Md Alauddin, seconded by Professor Nazmun Nahar, withdraws</td></tr><tr><td>Candidate, Treasurer</td><td>Kamrun Nahar</td><td>2512035</td><td>Proposed by Ad. Mahbub Ul Alam Sawpon, seconded by Mohammed Khalid Hossain</td></tr><tr><td>Candidate, Treasurer</td><td>MD Anwar Hossain Gazi</td><td>2512036</td><td>Proposed by SALMA BEGUM, seconded by Md. Jamal Milki, rejected at scrutiny</td></tr><tr><td>Voter</td><td>Md Habibur Rahman (Shalin)</td><td>2512005</td><td>Votes on the web</td></tr><tr><td>Voter</td><td>Subrata das</td><td>2512006</td><td>Votes on the web</td></tr><tr><td>Voter</td><td>Professor Abu Ahmed Ahsan Kabir</td><td>2512012</td><td>Votes on the web</td></tr><tr><td>Voter</td><td>Utpal Das</td><td>2512017</td><td>Votes through the API</td></tr><tr><td>Voter</td><td>Md Alauddin</td><td>2512019</td><td>Votes through the API</td></tr><tr><td>Voter</td><td>Professor Nazmun Nahar</td><td>2512020</td><td>Votes through the API</td></tr><tr><td>Voter</td><td>Ad. Mahbub Ul Alam Sawpon</td><td>2512022</td><td>Votes through the API</td></tr><tr><td>Voter</td><td>Mohammed Khalid Hossain</td><td>2512023</td><td>Votes through the API</td></tr><tr><td>Voter</td><td>SALMA BEGUM</td><td>2512027</td><td>Votes through the API</td></tr><tr><td>Voter</td><td>Md. Jamal Milki</td><td>2512028</td><td>Votes through the API</td></tr><tr><td>Voter</td><td>Hritam Raj Mukherjee</td><td>2512033</td><td>Votes through the API</td></tr><tr><td>Voter</td><td>Sabina yasmin</td><td>2512038</td><td>Votes through the API</td></tr><tr><td>Voter</td><td>SHEIKH ABDUL BAKIR</td><td>2512040</td><td>Votes through the API</td></tr><tr><td>Voter</td><td>Md. Mahabub-Ur-Reza</td><td>2512043</td><td>Votes through the API</td></tr></tbody></table></section>
+<main>
+      <section id="s0"><h2>1. Executive committee period and the election</h2><p class="about">The election fills the seats of a committee period, so the period comes first. Both are made through the API because the run needs their ids.</p>
+      <article class=""><h3><span class="n">1</span>Committee period created</h3>
+      <p class="meta"><span class="tag api">API call</span> Shalin Rahman</p>
+      <p>Executive Committee, 2026-11-25 to 2028-11-25. Periods may not overlap, so it starts after the last one on record.</p>
+      </article><article class=""><h3><span class="n">2</span>Election created</h3>
+      <p class="meta"><span class="tag api">API call</span> Shalin Rahman</p>
+      <p>Election 31 in the Announced phase.</p><table><thead><tr><th>Seat</th><th>Places</th><th>Seat id</th></tr></thead><tbody><tr><td>President</td><td>1</td><td>87</td></tr><tr><td>General Secretary</td><td>1</td><td>88</td></tr><tr><td>Treasurer</td><td>1</td><td>89</td></tr></tbody></table>
+      </article><article class=""><h3><span class="n">3</span>The new election on the admin elections page</h3>
+      <p class="meta"><span class="tag web">Web page</span> Shalin Rahman (Administrator)</p>
+      <p>No ballot key yet, so the card says voting cannot open.</p>
+      <figure><img loading="lazy" src="shots/003.png" alt="The new election on the admin elections page"></figure></article></section>
+      <section id="s1"><h2>2. Voter roll and officials</h2><p class="about">The roll is frozen so the electorate is fixed. Officials are appointed by persona; each one has to accept before they can act.</p>
+      <article class=""><h3><span class="n">4</span>Voter roll frozen</h3>
+      <p class="meta"><span class="tag web">Web page</span> Shalin Rahman (Administrator)</p>
+      <p>The toast gives the number of voters on the roll.</p>
+      <figure><img loading="lazy" src="shots/004.png" alt="Voter roll frozen"></figure></article><article class=""><h3><span class="n">5</span>Appointing Md. Shamsul Islam as Returning Officer</h3>
+      <p class="meta"><span class="tag web">Web page</span> Shalin Rahman (Administrator)</p>
+      
+      <figure><img loading="lazy" src="shots/005.png" alt="Appointing Md. Shamsul Islam as Returning Officer"></figure></article><article class=""><h3><span class="n">6</span>Appointing MD. IQBAL HOSSAIN BHUIYAN as Chief Commissioner</h3>
+      <p class="meta"><span class="tag web">Web page</span> Shalin Rahman (Administrator)</p>
+      
+      <figure><img loading="lazy" src="shots/006.png" alt="Appointing MD. IQBAL HOSSAIN BHUIYAN as Chief Commissioner"></figure></article><article class=""><h3><span class="n">7</span>Appointing AMENA KHATUN as Commissioner</h3>
+      <p class="meta"><span class="tag web">Web page</span> Shalin Rahman (Administrator)</p>
+      
+      <figure><img loading="lazy" src="shots/007.png" alt="Appointing AMENA KHATUN as Commissioner"></figure></article><article class=""><h3><span class="n">8</span>Appointing Abdul Ahad as Appeal Tribunal Member</h3>
+      <p class="meta"><span class="tag web">Web page</span> Shalin Rahman (Administrator)</p>
+      
+      <figure><img loading="lazy" src="shots/008.png" alt="Appointing Abdul Ahad as Appeal Tribunal Member"></figure></article><article class=""><h3><span class="n">9</span>Appointing Israt Jahan Najnin as Scrutineer</h3>
+      <p class="meta"><span class="tag web">Web page</span> Shalin Rahman (Administrator)</p>
+      
+      <figure><img loading="lazy" src="shots/009.png" alt="Appointing Israt Jahan Najnin as Scrutineer"></figure></article><article class=""><h3><span class="n">10</span>Appointing A. K. M. Bayzid Khan as Observer</h3>
+      <p class="meta"><span class="tag web">Web page</span> Shalin Rahman (Administrator)</p>
+      
+      <figure><img loading="lazy" src="shots/010.png" alt="Appointing A. K. M. Bayzid Khan as Observer"></figure></article><article class=""><h3><span class="n">11</span>Officials appointed</h3>
+      <p class="meta"><span class="tag web">Web page</span> Shalin Rahman (Administrator)</p>
+      <p>Each one shows &quot;Not accepted yet&quot; until they accept.</p>
+      <figure><img loading="lazy" src="shots/011.png" alt="Officials appointed"></figure></article></section>
+      <section id="s2"><h2>3. Officials accept or decline</h2><p class="about">Each official signs the declaration on their own appointments page. One scrutineer declines, so the Chief Commissioner appoints another. The observer is revoked.</p>
+      <article class=""><h3><span class="n">12</span>Md. Shamsul Islam reads the declaration</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md. Shamsul Islam (Returning Officer)</p>
+      <p>The official ticks the declaration before accepting.</p>
+      <figure><img loading="lazy" src="shots/012.png" alt="Md. Shamsul Islam reads the declaration"></figure></article><article class=""><h3><span class="n">13</span>Md. Shamsul Islam accepted</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md. Shamsul Islam (Returning Officer)</p>
+      
+      <figure><img loading="lazy" src="shots/013.png" alt="Md. Shamsul Islam accepted"></figure></article><article class=""><h3><span class="n">14</span>MD. IQBAL HOSSAIN BHUIYAN reads the declaration</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      <p>The official ticks the declaration before accepting.</p>
+      <figure><img loading="lazy" src="shots/014.png" alt="MD. IQBAL HOSSAIN BHUIYAN reads the declaration"></figure></article><article class=""><h3><span class="n">15</span>MD. IQBAL HOSSAIN BHUIYAN accepted</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/015.png" alt="MD. IQBAL HOSSAIN BHUIYAN accepted"></figure></article><article class=""><h3><span class="n">16</span>AMENA KHATUN reads the declaration</h3>
+      <p class="meta"><span class="tag web">Web page</span> AMENA KHATUN (Commissioner)</p>
+      <p>The official ticks the declaration before accepting.</p>
+      <figure><img loading="lazy" src="shots/016.png" alt="AMENA KHATUN reads the declaration"></figure></article><article class=""><h3><span class="n">17</span>AMENA KHATUN accepted</h3>
+      <p class="meta"><span class="tag web">Web page</span> AMENA KHATUN (Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/017.png" alt="AMENA KHATUN accepted"></figure></article><article class=""><h3><span class="n">18</span>Abdul Ahad reads the declaration</h3>
+      <p class="meta"><span class="tag web">Web page</span> Abdul Ahad (Tribunal)</p>
+      <p>The official ticks the declaration before accepting.</p>
+      <figure><img loading="lazy" src="shots/018.png" alt="Abdul Ahad reads the declaration"></figure></article><article class=""><h3><span class="n">19</span>Abdul Ahad accepted</h3>
+      <p class="meta"><span class="tag web">Web page</span> Abdul Ahad (Tribunal)</p>
+      
+      <figure><img loading="lazy" src="shots/019.png" alt="Abdul Ahad accepted"></figure></article><article class=""><h3><span class="n">20</span>A. K. M. Bayzid Khan reads the declaration</h3>
+      <p class="meta"><span class="tag web">Web page</span> A. K. M. Bayzid Khan (Observer)</p>
+      <p>The official ticks the declaration before accepting.</p>
+      <figure><img loading="lazy" src="shots/020.png" alt="A. K. M. Bayzid Khan reads the declaration"></figure></article><article class=""><h3><span class="n">21</span>A. K. M. Bayzid Khan accepted</h3>
+      <p class="meta"><span class="tag web">Web page</span> A. K. M. Bayzid Khan (Observer)</p>
+      
+      <figure><img loading="lazy" src="shots/021.png" alt="A. K. M. Bayzid Khan accepted"></figure></article><article class=""><h3><span class="n">22</span>Israt Jahan Najnin gives a reason for declining</h3>
+      <p class="meta"><span class="tag web">Web page</span> Israt Jahan Najnin (Scrutineer)</p>
+      
+      <figure><img loading="lazy" src="shots/022.png" alt="Israt Jahan Najnin gives a reason for declining"></figure></article><article class=""><h3><span class="n">23</span>Israt Jahan Najnin declined</h3>
+      <p class="meta"><span class="tag web">Web page</span> Israt Jahan Najnin (Scrutineer)</p>
+      
+      <figure><img loading="lazy" src="shots/023.png" alt="Israt Jahan Najnin declined"></figure></article><article class=""><h3><span class="n">24</span>An observer cannot change the phase</h3>
+      <p class="meta"><span class="tag refusal">Refusal check</span> A. K. M. Bayzid Khan</p>
+      <p>POST /elections/31/phase answered 403: You need the ChangePhase permission on this election.. Expected 403.</p>
+      </article><article class=""><h3><span class="n">25</span>Appointing Hena Begum as Scrutineer</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/025.png" alt="Appointing Hena Begum as Scrutineer"></figure></article><article class=""><h3><span class="n">26</span>Hena Begum reads the declaration</h3>
+      <p class="meta"><span class="tag web">Web page</span> Hena Begum (Scrutineer)</p>
+      <p>The official ticks the declaration before accepting.</p>
+      <figure><img loading="lazy" src="shots/026.png" alt="Hena Begum reads the declaration"></figure></article><article class=""><h3><span class="n">27</span>Hena Begum accepted</h3>
+      <p class="meta"><span class="tag web">Web page</span> Hena Begum (Scrutineer)</p>
+      
+      <figure><img loading="lazy" src="shots/027.png" alt="Hena Begum accepted"></figure></article><article class=""><h3><span class="n">28</span>Revoking the observer</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/028.png" alt="Revoking the observer"></figure></article><article class=""><h3><span class="n">29</span>Observer revoked</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      <p>The revoked appointment moves to the &quot;Revoked&quot; list.</p>
+      <figure><img loading="lazy" src="shots/029.png" alt="Observer revoked"></figure></article><article class=""><h3><span class="n">30</span>A revoked observer cannot see the approvals</h3>
+      <p class="meta"><span class="tag refusal">Refusal check</span> A. K. M. Bayzid Khan</p>
+      <p>GET /elections/31/approvals answered 401. Expected 401 or 403.</p>
+      </article></section>
+      <section id="s3"><h2>4. Publishing the election</h2><p class="about">Publishing opens nominations. It is a two-person step: the Chief Commissioner asks, the Commissioner approves.</p>
+      <article class=""><h3><span class="n">31</span>Before publishing</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      <p>The election is in the Announced phase.</p>
+      <figure><img loading="lazy" src="shots/031.png" alt="Before publishing"></figure></article><article class=""><h3><span class="n">32</span>Publish requested</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/032.png" alt="Publish requested"></figure></article><article class=""><h3><span class="n">33</span>Publish: waiting for a second person</h3>
+      <p class="meta"><span class="tag web">Web page</span> AMENA KHATUN (Commissioner)</p>
+      <p>The request shows on the dashboard of an official who can approve it.</p>
+      <figure><img loading="lazy" src="shots/033.png" alt="Publish: waiting for a second person"></figure></article><article class=""><h3><span class="n">34</span>Publish: approved</h3>
+      <p class="meta"><span class="tag web">Web page</span> AMENA KHATUN (Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/034.png" alt="Publish: approved"></figure></article><article class=""><h3><span class="n">35</span>The public elections page after publishing</h3>
+      <p class="meta"><span class="tag web">Web page</span> Public visitor</p>
+      
+      <figure><img loading="lazy" src="shots/035.png" alt="The public elections page after publishing"></figure></article></section>
+      <section id="s4"><h2>5. Nominations</h2><p class="about">Each proposer files a nomination on the member election page, naming the candidate and a seconder.</p>
+      <article class=""><h3><span class="n">36</span>Hritam Raj Mukherjee nominates Roksana Parvin for President</h3>
+      <p class="meta"><span class="tag web">Web page</span> Hritam Raj Mukherjee (Proposer)</p>
+      <p>Sabina yasmin seconds.</p>
+      <figure><img loading="lazy" src="shots/036.png" alt="Hritam Raj Mukherjee nominates Roksana Parvin for President"></figure></article><article class=""><h3><span class="n">37</span>Nomination for Roksana Parvin filed</h3>
+      <p class="meta"><span class="tag web">Web page</span> Hritam Raj Mukherjee (Proposer)</p>
+      
+      <figure><img loading="lazy" src="shots/037.png" alt="Nomination for Roksana Parvin filed"></figure></article><article class=""><h3><span class="n">38</span>SHEIKH ABDUL BAKIR nominates ADVOCATE MUJIBUR RAHMAN for President</h3>
+      <p class="meta"><span class="tag web">Web page</span> SHEIKH ABDUL BAKIR (Proposer)</p>
+      <p>Md. Mahabub-Ur-Reza seconds.</p>
+      <figure><img loading="lazy" src="shots/038.png" alt="SHEIKH ABDUL BAKIR nominates ADVOCATE MUJIBUR RAHMAN for President"></figure></article><article class=""><h3><span class="n">39</span>Nomination for ADVOCATE MUJIBUR RAHMAN filed</h3>
+      <p class="meta"><span class="tag web">Web page</span> SHEIKH ABDUL BAKIR (Proposer)</p>
+      
+      <figure><img loading="lazy" src="shots/039.png" alt="Nomination for ADVOCATE MUJIBUR RAHMAN filed"></figure></article><article class=""><h3><span class="n">40</span>Md Habibur Rahman (Shalin) nominates MD GOLZER HOSSAIN for General Secretary</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md Habibur Rahman (Shalin) (Proposer)</p>
+      <p>Subrata das seconds.</p>
+      <figure><img loading="lazy" src="shots/040.png" alt="Md Habibur Rahman (Shalin) nominates MD GOLZER HOSSAIN for General Secretary"></figure></article><article class=""><h3><span class="n">41</span>Nomination for MD GOLZER HOSSAIN filed</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md Habibur Rahman (Shalin) (Proposer)</p>
+      
+      <figure><img loading="lazy" src="shots/041.png" alt="Nomination for MD GOLZER HOSSAIN filed"></figure></article><article class=""><h3><span class="n">42</span>Professor Abu Ahmed Ahsan Kabir nominates Rajkumari Mukherjee for General Secretary</h3>
+      <p class="meta"><span class="tag web">Web page</span> Professor Abu Ahmed Ahsan Kabir (Proposer)</p>
+      <p>Utpal Das seconds.</p>
+      <figure><img loading="lazy" src="shots/042.png" alt="Professor Abu Ahmed Ahsan Kabir nominates Rajkumari Mukherjee for General Secretary"></figure></article><article class=""><h3><span class="n">43</span>Nomination for Rajkumari Mukherjee filed</h3>
+      <p class="meta"><span class="tag web">Web page</span> Professor Abu Ahmed Ahsan Kabir (Proposer)</p>
+      
+      <figure><img loading="lazy" src="shots/043.png" alt="Nomination for Rajkumari Mukherjee filed"></figure></article><article class=""><h3><span class="n">44</span>Md Alauddin nominates MD Alamgir Kabir for General Secretary</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md Alauddin (Proposer)</p>
+      <p>Professor Nazmun Nahar seconds.</p>
+      <figure><img loading="lazy" src="shots/044.png" alt="Md Alauddin nominates MD Alamgir Kabir for General Secretary"></figure></article><article class=""><h3><span class="n">45</span>Nomination for MD Alamgir Kabir filed</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md Alauddin (Proposer)</p>
+      
+      <figure><img loading="lazy" src="shots/045.png" alt="Nomination for MD Alamgir Kabir filed"></figure></article><article class=""><h3><span class="n">46</span>Ad. Mahbub Ul Alam Sawpon nominates Kamrun Nahar for Treasurer</h3>
+      <p class="meta"><span class="tag web">Web page</span> Ad. Mahbub Ul Alam Sawpon (Proposer)</p>
+      <p>Mohammed Khalid Hossain seconds.</p>
+      <figure><img loading="lazy" src="shots/046.png" alt="Ad. Mahbub Ul Alam Sawpon nominates Kamrun Nahar for Treasurer"></figure></article><article class=""><h3><span class="n">47</span>Nomination for Kamrun Nahar filed</h3>
+      <p class="meta"><span class="tag web">Web page</span> Ad. Mahbub Ul Alam Sawpon (Proposer)</p>
+      
+      <figure><img loading="lazy" src="shots/047.png" alt="Nomination for Kamrun Nahar filed"></figure></article><article class=""><h3><span class="n">48</span>SALMA BEGUM nominates MD Anwar Hossain Gazi for Treasurer</h3>
+      <p class="meta"><span class="tag web">Web page</span> SALMA BEGUM (Proposer)</p>
+      <p>Md. Jamal Milki seconds.</p>
+      <figure><img loading="lazy" src="shots/048.png" alt="SALMA BEGUM nominates MD Anwar Hossain Gazi for Treasurer"></figure></article><article class=""><h3><span class="n">49</span>Nomination for MD Anwar Hossain Gazi filed</h3>
+      <p class="meta"><span class="tag web">Web page</span> SALMA BEGUM (Proposer)</p>
+      
+      <figure><img loading="lazy" src="shots/049.png" alt="Nomination for MD Anwar Hossain Gazi filed"></figure></article><article class=""><h3><span class="n">50</span>Nominations on file</h3>
+      <p class="meta"><span class="tag check">Check</span> Run</p>
+      <table><thead><tr><th>Seat</th><th>Candidate</th><th>Proposer</th><th>Seconder</th><th>Nomination</th><th>Status</th></tr></thead><tbody><tr><td>President</td><td>Roksana Parvin</td><td>Hritam Raj Mukherjee</td><td>Sabina yasmin</td><td>122</td><td>Submitted</td></tr><tr><td>President</td><td>ADVOCATE MUJIBUR RAHMAN</td><td>SHEIKH ABDUL BAKIR</td><td>Md. Mahabub-Ur-Reza</td><td>123</td><td>Submitted</td></tr><tr><td>General Secretary</td><td>MD GOLZER HOSSAIN</td><td>Md Habibur Rahman (Shalin)</td><td>Subrata das</td><td>124</td><td>Submitted</td></tr><tr><td>General Secretary</td><td>Rajkumari Mukherjee</td><td>Professor Abu Ahmed Ahsan Kabir</td><td>Utpal Das</td><td>125</td><td>Submitted</td></tr><tr><td>General Secretary</td><td>MD Alamgir Kabir</td><td>Md Alauddin</td><td>Professor Nazmun Nahar</td><td>126</td><td>Submitted</td></tr><tr><td>Treasurer</td><td>Kamrun Nahar</td><td>Ad. Mahbub Ul Alam Sawpon</td><td>Mohammed Khalid Hossain</td><td>127</td><td>Submitted</td></tr><tr><td>Treasurer</td><td>MD Anwar Hossain Gazi</td><td>SALMA BEGUM</td><td>Md. Jamal Milki</td><td>128</td><td>Submitted</td></tr></tbody></table>
+      </article><article class=""><h3><span class="n">51</span>A member cannot propose themselves</h3>
+      <p class="meta"><span class="tag refusal">Refusal check</span> Roksana Parvin</p>
+      <p>POST /elections/31/nominations answered 400: Candidate cannot propose or second their own nomination.. Expected 400 or 409.</p>
+      </article><article class=""><h3><span class="n">52</span>Candidate consent recorded</h3>
+      <p class="meta"><span class="tag web">Web page</span> Shalin Rahman (Administrator)</p>
+      <p>Each nomination shows the time the candidate signed the consent form.</p>
+      <figure><img loading="lazy" src="shots/052.png" alt="Candidate consent recorded"></figure></article><article class=""><h3><span class="n">53</span>Consent saved on every nomination</h3>
+      <p class="meta"><span class="tag check">Check</span> Shalin Rahman</p>
+      
+      </article><article class=""><h3><span class="n">54</span>Consent cannot be dated in the future</h3>
+      <p class="meta"><span class="tag refusal">Refusal check</span> Shalin Rahman</p>
+      <p>PUT /admin/elections/31/nominations/122/consent answered 400: The consent time cannot be in the future.. Expected 400.</p>
+      </article><article class=""><h3><span class="n">55</span>Form details</h3>
+      <p class="meta"><span class="tag web">Web page</span> Shalin Rahman (Administrator)</p>
+      <p>These dates and the venue are printed on the statutory forms.</p>
+      <figure><img loading="lazy" src="shots/055.png" alt="Form details"></figure></article><article class=""><h3><span class="n">56</span>Form details saved</h3>
+      <p class="meta"><span class="tag check">Check</span> Shalin Rahman (Administrator)</p>
+      <table><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td>finalListOn</td><td>2026-10-26T00:00:00.000</td></tr><tr><td>campaignOpensOn</td><td>2026-10-26T00:00:00.000</td></tr><tr><td>campaignClosesOn</td><td>2026-10-26T00:00:00.000</td></tr><tr><td>silenceStartsAt</td><td>2026-10-26T10:17:00.000</td></tr><tr><td>venue</td><td>Association Hall, Ground Floor</td></tr><tr><td>noticeReference</td><td>EC/ELN/2026/01</td></tr><tr><td>recountWindowEndsOn</td><td>2026-10-26T10:47:00.000</td></tr></tbody></table>
+      </article></section>
+      <section id="s5"><h2>6. Scrutiny</h2><p class="about">The scrutiny checklist is ticked for each nomination, then each one is accepted or rejected with a reason.</p>
+      <article class=""><h3><span class="n">57</span>Moving to Scrutiny</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/057.png" alt="Moving to Scrutiny"></figure></article><article class=""><h3><span class="n">58</span>Move to Scrutiny requested</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/058.png" alt="Move to Scrutiny requested"></figure></article><article class=""><h3><span class="n">59</span>Scrutiny checklist ticked</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md. Shamsul Islam (Returning Officer)</p>
+      <p>Each nomination that passes has every item ticked.</p>
+      <figure><img loading="lazy" src="shots/059.png" alt="Scrutiny checklist ticked"></figure></article><article class=""><h3><span class="n">60</span>Rejecting MD Anwar Hossain Gazi</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md. Shamsul Islam (Returning Officer)</p>
+      <p>Reject stays disabled until a reason is typed.</p>
+      <figure><img loading="lazy" src="shots/060.png" alt="Rejecting MD Anwar Hossain Gazi"></figure></article><article class=""><h3><span class="n">61</span>Nominations decided</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md. Shamsul Islam (Returning Officer)</p>
+      
+      <figure><img loading="lazy" src="shots/061.png" alt="Nominations decided"></figure></article><article class=""><h3><span class="n">62</span>Scrutiny checklist ticked</h3>
+      <p class="meta"><span class="tag check">Check</span> Scrutiny</p>
+      <table><thead><tr><th>Candidate</th><th>Items ticked</th></tr></thead><tbody><tr><td>Roksana Parvin</td><td>7</td></tr><tr><td>ADVOCATE MUJIBUR RAHMAN</td><td>7</td></tr><tr><td>MD GOLZER HOSSAIN</td><td>7</td></tr><tr><td>Rajkumari Mukherjee</td><td>7</td></tr><tr><td>MD Alamgir Kabir</td><td>7</td></tr><tr><td>Kamrun Nahar</td><td>7</td></tr></tbody></table>
+      </article><article class=""><h3><span class="n">63</span>Nominations decided</h3>
+      <p class="meta"><span class="tag check">Check</span> Scrutiny</p>
+      <table><thead><tr><th>Candidate</th><th>Decision</th><th>Reason</th><th>Decided by</th></tr></thead><tbody><tr><td>Roksana Parvin</td><td>Accepted</td><td>Papers complete and in order.</td><td>Md. Shamsul Islam (Returning Officer)</td></tr><tr><td>ADVOCATE MUJIBUR RAHMAN</td><td>Accepted</td><td>Papers complete and in order.</td><td>Md. Shamsul Islam (Returning Officer)</td></tr><tr><td>MD GOLZER HOSSAIN</td><td>Accepted</td><td>Papers complete and in order.</td><td>Md. Shamsul Islam (Returning Officer)</td></tr><tr><td>Rajkumari Mukherjee</td><td>Accepted</td><td>Papers complete and in order.</td><td>Md. Shamsul Islam (Returning Officer)</td></tr><tr><td>MD Alamgir Kabir</td><td>Accepted</td><td>Papers complete and in order.</td><td>Md. Shamsul Islam (Returning Officer)</td></tr><tr><td>Kamrun Nahar</td><td>Accepted</td><td>Papers complete and in order.</td><td>Md. Shamsul Islam (Returning Officer)</td></tr><tr><td>MD Anwar Hossain Gazi</td><td>Rejected</td><td>The proposer's membership was not in good standing on the nomination date.</td><td>Md. Shamsul Islam (Returning Officer)</td></tr></tbody></table>
+      </article><article class=""><h3><span class="n">64</span>Officials dashboard after scrutiny</h3>
+      <p class="meta"><span class="tag web">Web page</span> AMENA KHATUN (Commissioner)</p>
+      <p>Nothing should be waiting in the nominations card.</p>
+      <figure><img loading="lazy" src="shots/064.png" alt="Officials dashboard after scrutiny"></figure></article></section>
+      <section id="s6"><h2>7. Withdrawal, candidate list and campaign</h2><p class="about">A candidate may withdraw while the withdrawal phase is open. The list is then final.</p>
+      <article class=""><h3><span class="n">65</span>Moving to Withdrawal</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/065.png" alt="Moving to Withdrawal"></figure></article><article class=""><h3><span class="n">66</span>Move to Withdrawal requested</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/066.png" alt="Move to Withdrawal requested"></figure></article><article class=""><h3><span class="n">67</span>MD Alamgir Kabir before withdrawing</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD Alamgir Kabir (Candidate)</p>
+      <p>The candidate sees their own nominations with a Withdraw button.</p>
+      <figure><img loading="lazy" src="shots/067.png" alt="MD Alamgir Kabir before withdrawing"></figure></article><article class=""><h3><span class="n">68</span>MD Alamgir Kabir confirms the withdrawal</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD Alamgir Kabir (Candidate)</p>
+      
+      <figure><img loading="lazy" src="shots/068.png" alt="MD Alamgir Kabir confirms the withdrawal"></figure></article><article class=""><h3><span class="n">69</span>MD Alamgir Kabir withdrew from General Secretary</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD Alamgir Kabir (Candidate)</p>
+      
+      <figure><img loading="lazy" src="shots/069.png" alt="MD Alamgir Kabir withdrew from General Secretary"></figure></article><article class=""><h3><span class="n">70</span>Moving to CandidateList</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/070.png" alt="Moving to CandidateList"></figure></article><article class=""><h3><span class="n">71</span>Move to CandidateList requested</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/071.png" alt="Move to CandidateList requested"></figure></article><article class=""><h3><span class="n">72</span>Moving to Campaign</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/072.png" alt="Moving to Campaign"></figure></article><article class=""><h3><span class="n">73</span>Move to Campaign requested</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/073.png" alt="Move to Campaign requested"></figure></article><article class=""><h3><span class="n">74</span>The public elections page during the campaign</h3>
+      <p class="meta"><span class="tag web">Web page</span> Public visitor</p>
+      
+      <figure><img loading="lazy" src="shots/074.png" alt="The public elections page during the campaign"></figure></article></section>
+      <section id="s7"><h2>8. Ballot key and readiness</h2><p class="about">The Returning Officer makes the key pair in the browser. Only the public half goes to the server; the private half is the file the count needs.</p>
+      <article class=""><h3><span class="n">75</span>Polling cannot open without a ballot key</h3>
+      <p class="meta"><span class="tag refusal">Refusal check</span> MD. IQBAL HOSSAIN BHUIYAN</p>
+      <p>POST /elections/31/phase answered 400: Polling cannot open until these are met: the ballot key is set; a mock election was run; the technical audit is done; every nomination appeal is decided; paper stock is ready.. Expected 400 or 409.</p>
+      </article><article class=""><h3><span class="n">76</span>The key warning</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md. Shamsul Islam (Returning Officer)</p>
+      
+      <figure><img loading="lazy" src="shots/076.png" alt="The key warning"></figure></article><article class=""><h3><span class="n">77</span>Officer key made</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md. Shamsul Islam (Returning Officer)</p>
+      <p>The private key file was saved on the officer's machine.</p>
+      <figure><img loading="lazy" src="shots/077.png" alt="Officer key made"></figure></article><article class=""><h3><span class="n">78</span>Ballot key stored</h3>
+      <p class="meta"><span class="tag check">Check</span> Run</p>
+      <p>Fingerprint 26edad95a4a6dda2e34bfa9be77b73839f7efa82ca632f1d11c8a7101c1394f1.</p>
+      </article><article class=""><h3><span class="n">79</span>Readiness before the attestations</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/079.png" alt="Readiness before the attestations"></figure></article><article class=""><h3><span class="n">80</span>Readiness after the attestations</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      <p>Every item should now be met.</p>
+      <figure><img loading="lazy" src="shots/080.png" alt="Readiness after the attestations"></figure></article><article class=""><h3><span class="n">81</span>Readiness for polling</h3>
+      <p class="meta"><span class="tag check">Check</span> Run</p>
+      <table><thead><tr><th>Item</th><th>Met</th><th>Advisory</th></tr></thead><tbody><tr><td>roll-frozen</td><td>yes</td><td>no</td></tr><tr><td>candidate-list</td><td>yes</td><td>no</td></tr><tr><td>ballot-key</td><td>yes</td><td>no</td></tr><tr><td>appointments</td><td>yes</td><td>no</td></tr><tr><td>polling-window</td><td>yes</td><td>no</td></tr><tr><td>mock-election</td><td>yes</td><td>no</td></tr><tr><td>technical-audit</td><td>yes</td><td>no</td></tr><tr><td>appeals-decided</td><td>yes</td><td>no</td></tr><tr><td>paper-stock</td><td>yes</td><td>no</td></tr><tr><td>approvers</td><td>yes</td><td>yes</td></tr></tbody></table>
+      </article><article class=""><h3><span class="n">82</span>Demo mode: the polling dates are moved to now</h3>
+      <p class="meta"><span class="tag wait">Wait</span> Run</p>
+      <p>At each wait the run writes the polling dates straight to the database, so the demo does not sit through them. The audit trail does not show these moves.</p>
+      </article></section>
+      <section id="s8"><h2>9. Polling opens</h2><p class="about">Opening the poll is a two-person step. Ballots are refused until the opening time.</p>
+      <article class=""><h3><span class="n">83</span>Moving to Polling</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/083.png" alt="Moving to Polling"></figure></article><article class=""><h3><span class="n">84</span>Move to Polling requested</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/084.png" alt="Move to Polling requested"></figure></article><article class=""><h3><span class="n">85</span>Move to Polling: waiting for a second person</h3>
+      <p class="meta"><span class="tag web">Web page</span> AMENA KHATUN (Commissioner)</p>
+      <p>The request shows on the dashboard of an official who can approve it.</p>
+      <figure><img loading="lazy" src="shots/085.png" alt="Move to Polling: waiting for a second person"></figure></article><article class=""><h3><span class="n">86</span>Move to Polling: approved</h3>
+      <p class="meta"><span class="tag web">Web page</span> AMENA KHATUN (Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/086.png" alt="Move to Polling: approved"></figure></article><article class=""><h3><span class="n">87</span>Waiting for polling to open</h3>
+      <p class="meta"><span class="tag wait">Wait</span> Run</p>
+      <p>About 2 seconds, until 3:56:42 PM.</p>
+      </article></section>
+      <section id="s9"><h2>10. Voting</h2><p class="about">Some members vote on the web and the rest through the API. Each ballot gets a tracking code.</p>
+      <article class=""><h3><span class="n">88</span>The ballot</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md Habibur Rahman (Shalin) (Voter)</p>
+      <p>Every accepted candidate with their statement. The withdrawn and rejected ones are not listed.</p>
+      <figure><img loading="lazy" src="shots/088.png" alt="The ballot"></figure></article><article class=""><h3><span class="n">89</span>Choices made</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md Habibur Rahman (Shalin) (Voter)</p>
+      
+      <figure><img loading="lazy" src="shots/089.png" alt="Choices made"></figure></article><article class=""><h3><span class="n">90</span>Reviewing the ballot before casting</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md Habibur Rahman (Shalin) (Voter)</p>
+      
+      <figure><img loading="lazy" src="shots/090.png" alt="Reviewing the ballot before casting"></figure></article><article class=""><h3><span class="n">91</span>Ballot recorded</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md Habibur Rahman (Shalin) (Voter)</p>
+      <p>Tracking code ZBGX-J3H0-DNPF.</p>
+      <figure><img loading="lazy" src="shots/091.png" alt="Ballot recorded"></figure></article><article class=""><h3><span class="n">92</span>The same member opens the ballot again</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md Habibur Rahman (Shalin) (Voter)</p>
+      <p>The page says the member has already voted.</p>
+      <figure><img loading="lazy" src="shots/092.png" alt="The same member opens the ballot again"></figure></article><article class=""><h3><span class="n">93</span>The ballot</h3>
+      <p class="meta"><span class="tag web">Web page</span> Subrata das (Voter)</p>
+      <p>Every accepted candidate with their statement. The withdrawn and rejected ones are not listed.</p>
+      <figure><img loading="lazy" src="shots/093.png" alt="The ballot"></figure></article><article class=""><h3><span class="n">94</span>Choices made</h3>
+      <p class="meta"><span class="tag web">Web page</span> Subrata das (Voter)</p>
+      
+      <figure><img loading="lazy" src="shots/094.png" alt="Choices made"></figure></article><article class=""><h3><span class="n">95</span>Reviewing the ballot before casting</h3>
+      <p class="meta"><span class="tag web">Web page</span> Subrata das (Voter)</p>
+      
+      <figure><img loading="lazy" src="shots/095.png" alt="Reviewing the ballot before casting"></figure></article><article class=""><h3><span class="n">96</span>Ballot recorded</h3>
+      <p class="meta"><span class="tag web">Web page</span> Subrata das (Voter)</p>
+      <p>Tracking code XDQ9-1T17-DPZZ.</p>
+      <figure><img loading="lazy" src="shots/096.png" alt="Ballot recorded"></figure></article><article class=""><h3><span class="n">97</span>The same member opens the ballot again</h3>
+      <p class="meta"><span class="tag web">Web page</span> Subrata das (Voter)</p>
+      <p>The page says the member has already voted.</p>
+      <figure><img loading="lazy" src="shots/097.png" alt="The same member opens the ballot again"></figure></article><article class=""><h3><span class="n">98</span>The ballot</h3>
+      <p class="meta"><span class="tag web">Web page</span> Professor Abu Ahmed Ahsan Kabir (Voter)</p>
+      <p>Every accepted candidate with their statement. The withdrawn and rejected ones are not listed.</p>
+      <figure><img loading="lazy" src="shots/098.png" alt="The ballot"></figure></article><article class=""><h3><span class="n">99</span>Choices made</h3>
+      <p class="meta"><span class="tag web">Web page</span> Professor Abu Ahmed Ahsan Kabir (Voter)</p>
+      
+      <figure><img loading="lazy" src="shots/099.png" alt="Choices made"></figure></article><article class=""><h3><span class="n">100</span>Reviewing the ballot before casting</h3>
+      <p class="meta"><span class="tag web">Web page</span> Professor Abu Ahmed Ahsan Kabir (Voter)</p>
+      
+      <figure><img loading="lazy" src="shots/100.png" alt="Reviewing the ballot before casting"></figure></article><article class=""><h3><span class="n">101</span>Ballot recorded</h3>
+      <p class="meta"><span class="tag web">Web page</span> Professor Abu Ahmed Ahsan Kabir (Voter)</p>
+      <p>Tracking code 1GQV-A8J0-P4BF.</p>
+      <figure><img loading="lazy" src="shots/101.png" alt="Ballot recorded"></figure></article><article class=""><h3><span class="n">102</span>The same member opens the ballot again</h3>
+      <p class="meta"><span class="tag web">Web page</span> Professor Abu Ahmed Ahsan Kabir (Voter)</p>
+      <p>The page says the member has already voted.</p>
+      <figure><img loading="lazy" src="shots/102.png" alt="The same member opens the ballot again"></figure></article><article class=""><h3><span class="n">103</span>Ballots cast</h3>
+      <p class="meta"><span class="tag api">API call</span> Voters</p>
+      <table><thead><tr><th>Voter</th><th>Channel</th><th>Tracking code</th></tr></thead><tbody><tr><td>Md Habibur Rahman (Shalin)</td><td>web</td><td>ZBGX-J3H0-DNPF</td></tr><tr><td>Subrata das</td><td>web</td><td>XDQ9-1T17-DPZZ</td></tr><tr><td>Professor Abu Ahmed Ahsan Kabir</td><td>web</td><td>1GQV-A8J0-P4BF</td></tr><tr><td>Utpal Das</td><td>API</td><td>V0QN-8TNY-5GWN</td></tr><tr><td>Md Alauddin</td><td>API</td><td>2QT9-E1Z4-9KKD</td></tr><tr><td>Professor Nazmun Nahar</td><td>API</td><td>MQKT-PTTD-6P5N</td></tr><tr><td>Ad. Mahbub Ul Alam Sawpon</td><td>API</td><td>H74P-PY77-Q0G6</td></tr><tr><td>Mohammed Khalid Hossain</td><td>API</td><td>1YT5-165J-T1RT</td></tr><tr><td>SALMA BEGUM</td><td>API</td><td>DFPR-ZEJK-N0MH</td></tr><tr><td>Md. Jamal Milki</td><td>API</td><td>XPMZ-MJ22-C9ZW</td></tr><tr><td>Hritam Raj Mukherjee</td><td>API</td><td>GEEG-J489-98XC</td></tr><tr><td>Sabina yasmin</td><td>API</td><td>AP2W-822R-G0FB</td></tr><tr><td>SHEIKH ABDUL BAKIR</td><td>API</td><td>THPT-AWFK-TSPZ</td></tr><tr><td>Md. Mahabub-Ur-Reza</td><td>API</td><td>MH1E-5XY8-NW2T</td></tr></tbody></table>
+      </article><article class=""><h3><span class="n">104</span>A second ballot from the same member is refused</h3>
+      <p class="meta"><span class="tag refusal">Refusal check</span> Utpal Das</p>
+      <p>POST /elections/31/vote answered 409: You have already voted in this election.. Expected 409.</p>
+      </article><article class=""><h3><span class="n">105</span>Turnout on the officials dashboard</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/105.png" alt="Turnout on the officials dashboard"></figure></article></section>
+      <section id="s10"><h2>11. Polling closes</h2><p class="about">The Chief Commissioner closes the poll after the closing time. The Commissioner approves.</p>
+      <article class=""><h3><span class="n">106</span>Closing the poll</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/106.png" alt="Closing the poll"></figure></article><article class=""><h3><span class="n">107</span>Close requested</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/107.png" alt="Close requested"></figure></article><article class=""><h3><span class="n">108</span>Close polling: waiting for a second person</h3>
+      <p class="meta"><span class="tag web">Web page</span> AMENA KHATUN (Commissioner)</p>
+      <p>The request shows on the dashboard of an official who can approve it.</p>
+      <figure><img loading="lazy" src="shots/108.png" alt="Close polling: waiting for a second person"></figure></article><article class=""><h3><span class="n">109</span>Close polling: approved</h3>
+      <p class="meta"><span class="tag web">Web page</span> AMENA KHATUN (Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/109.png" alt="Close polling: approved"></figure></article></section>
+      <section id="s11"><h2>12. Count</h2><p class="about">The Returning Officer counts with the private key file. When the settings ask for a second person, the count waits for their approval and the officer counts again with the same file.</p>
+      <article class=""><h3><span class="n">110</span>Count done</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md. Shamsul Islam (Returning Officer)</p>
+      <p>The key file was read in the browser and sent with the request.</p>
+      <figure><img loading="lazy" src="shots/110.png" alt="Count done"></figure></article></section>
+      <section id="s12"><h2>13. Declare and results</h2><p class="about">Declaring publishes the results. It is a two-person step.</p>
+      <article class=""><h3><span class="n">111</span>Declare results</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/111.png" alt="Declare results"></figure></article><article class=""><h3><span class="n">112</span>Declare requested</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/112.png" alt="Declare requested"></figure></article><article class=""><h3><span class="n">113</span>Declare results: waiting for a second person</h3>
+      <p class="meta"><span class="tag web">Web page</span> AMENA KHATUN (Commissioner)</p>
+      <p>The request shows on the dashboard of an official who can approve it.</p>
+      <figure><img loading="lazy" src="shots/113.png" alt="Declare results: waiting for a second person"></figure></article><article class=""><h3><span class="n">114</span>Declare results: approved</h3>
+      <p class="meta"><span class="tag web">Web page</span> AMENA KHATUN (Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/114.png" alt="Declare results: approved"></figure></article><article class=""><h3><span class="n">115</span>Declared results match the scenario</h3>
+      <p class="meta"><span class="tag check">Check</span> Run</p>
+      <p>14 ballots cast from a roll of 585.</p><table><thead><tr><th>Seat</th><th>Candidate</th><th>Counted</th><th>Expected</th><th>Outcome</th></tr></thead><tbody><tr><td>President</td><td>Roksana Parvin</td><td>8</td><td>8</td><td>elected</td></tr><tr><td>President</td><td>ADVOCATE MUJIBUR RAHMAN</td><td>6</td><td>6</td><td></td></tr><tr><td>President</td><td>Abstentions</td><td>0</td><td></td><td></td></tr><tr><td>General Secretary</td><td>MD GOLZER HOSSAIN</td><td>8</td><td>8</td><td>elected</td></tr><tr><td>General Secretary</td><td>Rajkumari Mukherjee</td><td>6</td><td>6</td><td></td></tr><tr><td>General Secretary</td><td>Abstentions</td><td>0</td><td></td><td></td></tr><tr><td>Treasurer</td><td>Kamrun Nahar</td><td>11</td><td>11</td><td>elected</td></tr><tr><td>Treasurer</td><td>Abstentions</td><td>3</td><td></td><td></td></tr></tbody></table>
+      </article><article class=""><h3><span class="n">116</span>Public results page</h3>
+      <p class="meta"><span class="tag web">Web page</span> Public visitor</p>
+      
+      <figure><img loading="lazy" src="shots/116.png" alt="Public results page"></figure></article></section>
+      <section id="s13"><h2>14. Recount requests</h2><p class="about">Requests are recorded inside the recount window. The Tribunal allows or refuses each one, and the Returning Officer enters the recount figures for an allowed one.</p>
+      <article class=""><h3><span class="n">117</span>Recount request from ADVOCATE MUJIBUR RAHMAN</h3>
+      <p class="meta"><span class="tag web">Web page</span> Abdul Ahad (Tribunal)</p>
+      
+      <figure><img loading="lazy" src="shots/117.png" alt="Recount request from ADVOCATE MUJIBUR RAHMAN"></figure></article><article class=""><h3><span class="n">118</span>Recount request from ADVOCATE MUJIBUR RAHMAN allowed</h3>
+      <p class="meta"><span class="tag web">Web page</span> Abdul Ahad (Tribunal)</p>
+      
+      <figure><img loading="lazy" src="shots/118.png" alt="Recount request from ADVOCATE MUJIBUR RAHMAN allowed"></figure></article><article class=""><h3><span class="n">119</span>Recount request from Rajkumari Mukherjee</h3>
+      <p class="meta"><span class="tag web">Web page</span> Abdul Ahad (Tribunal)</p>
+      
+      <figure><img loading="lazy" src="shots/119.png" alt="Recount request from Rajkumari Mukherjee"></figure></article><article class=""><h3><span class="n">120</span>Recount request from Rajkumari Mukherjee refused</h3>
+      <p class="meta"><span class="tag web">Web page</span> Abdul Ahad (Tribunal)</p>
+      
+      <figure><img loading="lazy" src="shots/120.png" alt="Recount request from Rajkumari Mukherjee refused"></figure></article><article class=""><h3><span class="n">121</span>Recount figures entered</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md. Shamsul Islam (Returning Officer)</p>
+      <p>The recount agreed with the original count.</p>
+      <figure><img loading="lazy" src="shots/121.png" alt="Recount figures entered"></figure></article><article class=""><h3><span class="n">122</span>Recount figures saved</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md. Shamsul Islam (Returning Officer)</p>
+      
+      <figure><img loading="lazy" src="shots/122.png" alt="Recount figures saved"></figure></article><article class=""><h3><span class="n">123</span>A recount dated after the window is refused</h3>
+      <p class="meta"><span class="tag refusal">Refusal check</span> Shalin Rahman</p>
+      <p>POST /admin/elections/31/recounts answered 400: The received time cannot be in the future.. Expected 400.</p>
+      </article></section>
+      <section id="s14"><h2>15. Key destroyed, forms and audit</h2><p class="about">Once the recount window ends the officer records that the key file was destroyed. Every statutory form is produced filled and blank, and the audit chain is checked.</p>
+      <article class=""><h3><span class="n">124</span>The key cannot be marked destroyed while the recount window is open</h3>
+      <p class="meta"><span class="tag refusal">Refusal check</span> Md. Shamsul Islam</p>
+      <p>POST /elections/31/key-destroyed answered 400: Keep the key until the recount window has ended. Set the window's end date first if it is missing.. Expected 400.</p>
+      </article><article class=""><h3><span class="n">125</span>Key file destroyed</h3>
+      <p class="meta"><span class="tag web">Web page</span> Md. Shamsul Islam (Returning Officer)</p>
+      <p>The audit log records when the officer destroyed the file.</p>
+      <figure><img loading="lazy" src="shots/125.png" alt="Key file destroyed"></figure></article><article class=""><h3><span class="n">126</span>Statutory forms produced</h3>
+      <p class="meta"><span class="tag check">Check</span> Shalin Rahman</p>
+      <p>50 forms, each filled with this election's data and blank.</p><table><thead><tr><th>Code</th><th>Form</th><th>Mode</th><th>Status</th><th>Size</th></tr></thead><tbody><tr><td>ER-01</td><td>Election Notice</td><td>Filled</td><td>200</td><td>65 KB</td></tr><tr><td>ER-01</td><td>Election Notice</td><td>Blank</td><td>200</td><td>43 KB</td></tr><tr><td>ER-02</td><td>Election Calendar</td><td>Filled</td><td>200</td><td>59 KB</td></tr><tr><td>ER-02</td><td>Election Calendar</td><td>Blank</td><td>200</td><td>40 KB</td></tr><tr><td>ER-03</td><td>Commissioner Appointment</td><td>Filled</td><td>200</td><td>80 KB</td></tr><tr><td>ER-03</td><td>Commissioner Appointment</td><td>Blank</td><td>200</td><td>60 KB</td></tr><tr><td>ER-04</td><td>Election Commissioner Acceptance</td><td>Filled</td><td>200</td><td>62 KB</td></tr><tr><td>ER-04</td><td>Election Commissioner Acceptance</td><td>Blank</td><td>200</td><td>38 KB</td></tr><tr><td>ER-05</td><td>Declaration of Neutrality</td><td>Filled</td><td>200</td><td>66 KB</td></tr><tr><td>ER-05</td><td>Declaration of Neutrality</td><td>Blank</td><td>200</td><td>41 KB</td></tr><tr><td>ER-06</td><td>Conflict of Interest Declaration</td><td>Filled</td><td>200</td><td>75 KB</td></tr><tr><td>ER-06</td><td>Conflict of Interest Declaration</td><td>Blank</td><td>200</td><td>56 KB</td></tr><tr><td>ER-07</td><td>Confidentiality Agreement</td><td>Filled</td><td>200</td><td>70 KB</td></tr><tr><td>ER-07</td><td>Confidentiality Agreement</td><td>Blank</td><td>200</td><td>52 KB</td></tr><tr><td>ER-08</td><td>Preliminary Voter Roll Certification</td><td>Filled</td><td>200</td><td>80 KB</td></tr><tr><td>ER-08</td><td>Preliminary Voter Roll Certification</td><td>Blank</td><td>200</td><td>60 KB</td></tr><tr><td>ER-09</td><td>Voter Roll Objection</td><td>Filled</td><td>200</td><td>62 KB</td></tr><tr><td>ER-09</td><td>Voter Roll Objection</td><td>Blank</td><td>200</td><td>42 KB</td></tr><tr><td>ER-10</td><td>Candidate Nomination Form</td><td>Filled</td><td>200</td><td>69 KB</td></tr><tr><td>ER-10</td><td>Candidate Nomination Form</td><td>Blank</td><td>200</td><td>47 KB</td></tr><tr><td>ER-11</td><td>Candidate Consent</td><td>Filled</td><td>200</td><td>62 KB</td></tr><tr><td>ER-11</td><td>Candidate Consent</td><td>Blank</td><td>200</td><td>40 KB</td></tr><tr><td>ER-12</td><td>Eligibility Declaration</td><td>Filled</td><td>200</td><td>75 KB</td></tr><tr><td>ER-12</td><td>Eligibility Declaration</td><td>Blank</td><td>200</td><td>52 KB</td></tr><tr><td>ER-13</td><td>Political Neutrality Declaration</td><td>Filled</td><td>200</td><td>60 KB</td></tr><tr><td>ER-13</td><td>Political Neutrality Declaration</td><td>Blank</td><td>200</td><td>41 KB</td></tr><tr><td>ER-14</td><td>Proposer Form</td><td>Filled</td><td>200</td><td>69 KB</td></tr><tr><td>ER-14</td><td>Proposer Form</td><td>Blank</td><td>200</td><td>50 KB</td></tr><tr><td>ER-15</td><td>Seconder Form</td><td>Filled</td><td>200</td><td>69 KB</td></tr><tr><td>ER-15</td><td>Seconder Form</td><td>Blank</td><td>200</td><td>51 KB</td></tr><tr><td>ER-16</td><td>Nomination Receipt</td><td>Filled</td><td>200</td><td>78 KB</td></tr><tr><td>ER-16</td><td>Nomination Receipt</td><td>Blank</td><td>200</td><td>57 KB</td></tr><tr><td>ER-17</td><td>Nomination Scrutiny Checklist</td><td>Filled</td><td>200</td><td>68 KB</td></tr><tr><td>ER-17</td><td>Nomination Scrutiny Checklist</td><td>Blank</td><td>200</td><td>44 KB</td></tr><tr><td>ER-17A</td><td>Nomination Acceptance Order</td><td>Filled</td><td>200</td><td>62 KB</td></tr><tr><td>ER-17A</td><td>Nomination Acceptance Order</td><td>Blank</td><td>200</td><td>42 KB</td></tr><tr><td>ER-18</td><td>Candidate Withdrawal</td><td>Filled</td><td>200</td><td>68 KB</td></tr><tr><td>ER-18</td><td>Candidate Withdrawal</td><td>Blank</td><td>200</td><td>48 KB</td></tr><tr><td>ER-19</td><td>Final Candidate List</td><td>Filled</td><td>200</td><td>76 KB</td></tr><tr><td>ER-19</td><td>Final Candidate List</td><td>Blank</td><td>200</td><td>56 KB</td></tr><tr><td>ER-20</td><td>Campaign Undertaking</td><td>Filled</td><td>200</td><td>78 KB</td></tr><tr><td>ER-20</td><td>Campaign Undertaking</td><td>Blank</td><td>200</td><td>56 KB</td></tr><tr><td>ER-21</td><td>Observer Appointment</td><td>Filled</td><td>200</td><td>67 KB</td></tr><tr><td>ER-21</td><td>Observer Appointment</td><td>Blank</td><td>200</td><td>49 KB</td></tr><tr><td>ER-22</td><td>Polling Officer Appointment</td><td>Filled</td><td>200</td><td>86 KB</td></tr><tr><td>ER-22</td><td>Polling Officer Appointment</td><td>Blank</td><td>200</td><td>68 KB</td></tr><tr><td>ER-22A</td><td>Election Material Receipt Register</td><td>Filled</td><td>200</td><td>62 KB</td></tr><tr><td>ER-22A</td><td>Election Material Receipt Register</td><td>Blank</td><td>200</td><td>40 KB</td></tr><tr><td>ER-23</td><td>Poll Opening Certificate</td><td>Filled</td><td>200</td><td>77 KB</td></tr><tr><td>ER-23</td><td>Poll Opening Certificate</td><td>Blank</td><td>200</td><td>57 KB</td></tr><tr><td>ER-23A</td><td>Poll Incident Register</td><td>Filled</td><td>200</td><td>62 KB</td></tr><tr><td>ER-23A</td><td>Poll Incident Register</td><td>Blank</td><td>200</td><td>44 KB</td></tr><tr><td>ER-23B</td><td>Spoiled Ballot Register</td><td>Filled</td><td>200</td><td>60 KB</td></tr><tr><td>ER-23B</td><td>Spoiled Ballot Register</td><td>Blank</td><td>200</td><td>42 KB</td></tr><tr><td>ER-24</td><td>Poll Closing Certificate</td><td>Filled</td><td>200</td><td>81 KB</td></tr><tr><td>ER-24</td><td>Poll Closing Certificate</td><td>Blank</td><td>200</td><td>60 KB</td></tr><tr><td>ER-25</td><td>Ballot Box Sealing and Poll Integrity Certificate</td><td>Filled</td><td>200</td><td>91 KB</td></tr><tr><td>ER-25</td><td>Ballot Box Sealing and Poll Integrity Certificate</td><td>Blank</td><td>200</td><td>68 KB</td></tr><tr><td>ER-26</td><td>Electronic Voting Audit</td><td>Filled</td><td>200</td><td>69 KB</td></tr><tr><td>ER-26</td><td>Electronic Voting Audit</td><td>Blank</td><td>200</td><td>50 KB</td></tr><tr><td>ER-25A</td><td>Vote Counting Authorisation Certificate</td><td>Filled</td><td>200</td><td>75 KB</td></tr><tr><td>ER-25A</td><td>Vote Counting Authorisation Certificate</td><td>Blank</td><td>200</td><td>58 KB</td></tr><tr><td>ER-25B</td><td>Ballot Box Opening Certificate</td><td>Filled</td><td>200</td><td>65 KB</td></tr><tr><td>ER-25B</td><td>Ballot Box Opening Certificate</td><td>Blank</td><td>200</td><td>46 KB</td></tr><tr><td>ER-25C</td><td>Ballot Paper Reconciliation Sheet</td><td>Filled</td><td>200</td><td>63 KB</td></tr><tr><td>ER-25C</td><td>Ballot Paper Reconciliation Sheet</td><td>Blank</td><td>200</td><td>44 KB</td></tr><tr><td>ER-27</td><td>Vote Counting Sheet</td><td>Filled</td><td>200</td><td>63 KB</td></tr><tr><td>ER-27</td><td>Vote Counting Sheet</td><td>Blank</td><td>200</td><td>39 KB</td></tr><tr><td>ER-27A</td><td>Independent Tally Sheet</td><td>Filled</td><td>200</td><td>61 KB</td></tr><tr><td>ER-27A</td><td>Independent Tally Sheet</td><td>Blank</td><td>200</td><td>41 KB</td></tr><tr><td>ER-27B</td><td>Rejected Ballot Register</td><td>Filled</td><td>200</td><td>62 KB</td></tr><tr><td>ER-27B</td><td>Rejected Ballot Register</td><td>Blank</td><td>200</td><td>42 KB</td></tr><tr><td>ER-27C</td><td>Final Result Sheet</td><td>Filled</td><td>200</td><td>63 KB</td></tr><tr><td>ER-27C</td><td>Final Result Sheet</td><td>Blank</td><td>200</td><td>39 KB</td></tr><tr><td>ER-28</td><td>Recount Request</td><td>Filled</td><td>200</td><td>63 KB</td></tr><tr><td>ER-28</td><td>Recount Request</td><td>Blank</td><td>200</td><td>40 KB</td></tr><tr><td>ER-28A</td><td>Recount Decision</td><td>Filled</td><td>200</td><td>66 KB</td></tr><tr><td>ER-28A</td><td>Recount Decision</td><td>Blank</td><td>200</td><td>43 KB</td></tr><tr><td>ER-28B</td><td>Recount Report</td><td>Filled</td><td>200</td><td>62 KB</td></tr><tr><td>ER-28B</td><td>Recount Report</td><td>Blank</td><td>200</td><td>40 KB</td></tr><tr><td>ER-29</td><td>Election Result Certification</td><td>Filled</td><td>200</td><td>71 KB</td></tr><tr><td>ER-29</td><td>Election Result Certification</td><td>Blank</td><td>200</td><td>49 KB</td></tr><tr><td>ER-30</td><td>Result Declaration</td><td>Filled</td><td>200</td><td>79 KB</td></tr><tr><td>ER-30</td><td>Result Declaration</td><td>Blank</td><td>200</td><td>60 KB</td></tr><tr><td>ER-30A</td><td>Election Complaint Form</td><td>Filled</td><td>200</td><td>63 KB</td></tr><tr><td>ER-30A</td><td>Election Complaint Form</td><td>Blank</td><td>200</td><td>46 KB</td></tr><tr><td>ER-30B</td><td>Election Investigation Report</td><td>Filled</td><td>200</td><td>62 KB</td></tr><tr><td>ER-30B</td><td>Election Investigation Report</td><td>Blank</td><td>200</td><td>42 KB</td></tr><tr><td>ER-31</td><td>Appeal to Election Appeals Tribunal</td><td>Filled</td><td>200</td><td>62 KB</td></tr><tr><td>ER-31</td><td>Appeal to Election Appeals Tribunal</td><td>Blank</td><td>200</td><td>39 KB</td></tr><tr><td>ER-32</td><td>Tribunal Decision</td><td>Filled</td><td>200</td><td>60 KB</td></tr><tr><td>ER-32</td><td>Tribunal Decision</td><td>Blank</td><td>200</td><td>37 KB</td></tr><tr><td>ER-33</td><td>Election Completion Report</td><td>Filled</td><td>200</td><td>57 KB</td></tr><tr><td>ER-33</td><td>Election Completion Report</td><td>Blank</td><td>200</td><td>41 KB</td></tr><tr><td>ER-34</td><td>Executive Committee Handover Certificate</td><td>Filled</td><td>200</td><td>69 KB</td></tr><tr><td>ER-34</td><td>Executive Committee Handover Certificate</td><td>Blank</td><td>200</td><td>45 KB</td></tr><tr><td>ER-35</td><td>Election Archive Register</td><td>Filled</td><td>200</td><td>59 KB</td></tr><tr><td>ER-35</td><td>Election Archive Register</td><td>Blank</td><td>200</td><td>40 KB</td></tr><tr><td>ER-35A</td><td>Election Closure Certificate</td><td>Filled</td><td>200</td><td>81 KB</td></tr><tr><td>ER-35A</td><td>Election Closure Certificate</td><td>Blank</td><td>200</td><td>62 KB</td></tr></tbody></table><p class="links"><a href="files/ER-01-filled.pdf">ER-01-filled.pdf</a> <a href="files/ER-01-blank.pdf">ER-01-blank.pdf</a> <a href="files/ER-02-filled.pdf">ER-02-filled.pdf</a> <a href="files/ER-02-blank.pdf">ER-02-blank.pdf</a> <a href="files/ER-03-filled.pdf">ER-03-filled.pdf</a> <a href="files/ER-03-blank.pdf">ER-03-blank.pdf</a> <a href="files/ER-04-filled.pdf">ER-04-filled.pdf</a> <a href="files/ER-04-blank.pdf">ER-04-blank.pdf</a> <a href="files/ER-05-filled.pdf">ER-05-filled.pdf</a> <a href="files/ER-05-blank.pdf">ER-05-blank.pdf</a> <a href="files/ER-06-filled.pdf">ER-06-filled.pdf</a> <a href="files/ER-06-blank.pdf">ER-06-blank.pdf</a> <a href="files/ER-07-filled.pdf">ER-07-filled.pdf</a> <a href="files/ER-07-blank.pdf">ER-07-blank.pdf</a> <a href="files/ER-08-filled.pdf">ER-08-filled.pdf</a> <a href="files/ER-08-blank.pdf">ER-08-blank.pdf</a> <a href="files/ER-09-filled.pdf">ER-09-filled.pdf</a> <a href="files/ER-09-blank.pdf">ER-09-blank.pdf</a> <a href="files/ER-10-filled.pdf">ER-10-filled.pdf</a> <a href="files/ER-10-blank.pdf">ER-10-blank.pdf</a> <a href="files/ER-11-filled.pdf">ER-11-filled.pdf</a> <a href="files/ER-11-blank.pdf">ER-11-blank.pdf</a> <a href="files/ER-12-filled.pdf">ER-12-filled.pdf</a> <a href="files/ER-12-blank.pdf">ER-12-blank.pdf</a> <a href="files/ER-13-filled.pdf">ER-13-filled.pdf</a> <a href="files/ER-13-blank.pdf">ER-13-blank.pdf</a> <a href="files/ER-14-filled.pdf">ER-14-filled.pdf</a> <a href="files/ER-14-blank.pdf">ER-14-blank.pdf</a> <a href="files/ER-15-filled.pdf">ER-15-filled.pdf</a> <a href="files/ER-15-blank.pdf">ER-15-blank.pdf</a> <a href="files/ER-16-filled.pdf">ER-16-filled.pdf</a> <a href="files/ER-16-blank.pdf">ER-16-blank.pdf</a> <a href="files/ER-17-filled.pdf">ER-17-filled.pdf</a> <a href="files/ER-17-blank.pdf">ER-17-blank.pdf</a> <a href="files/ER-17A-filled.pdf">ER-17A-filled.pdf</a> <a href="files/ER-17A-blank.pdf">ER-17A-blank.pdf</a> <a href="files/ER-18-filled.pdf">ER-18-filled.pdf</a> <a href="files/ER-18-blank.pdf">ER-18-blank.pdf</a> <a href="files/ER-19-filled.pdf">ER-19-filled.pdf</a> <a href="files/ER-19-blank.pdf">ER-19-blank.pdf</a> <a href="files/ER-20-filled.pdf">ER-20-filled.pdf</a> <a href="files/ER-20-blank.pdf">ER-20-blank.pdf</a> <a href="files/ER-21-filled.pdf">ER-21-filled.pdf</a> <a href="files/ER-21-blank.pdf">ER-21-blank.pdf</a> <a href="files/ER-22-filled.pdf">ER-22-filled.pdf</a> <a href="files/ER-22-blank.pdf">ER-22-blank.pdf</a> <a href="files/ER-22A-filled.pdf">ER-22A-filled.pdf</a> <a href="files/ER-22A-blank.pdf">ER-22A-blank.pdf</a> <a href="files/ER-23-filled.pdf">ER-23-filled.pdf</a> <a href="files/ER-23-blank.pdf">ER-23-blank.pdf</a> <a href="files/ER-23A-filled.pdf">ER-23A-filled.pdf</a> <a href="files/ER-23A-blank.pdf">ER-23A-blank.pdf</a> <a href="files/ER-23B-filled.pdf">ER-23B-filled.pdf</a> <a href="files/ER-23B-blank.pdf">ER-23B-blank.pdf</a> <a href="files/ER-24-filled.pdf">ER-24-filled.pdf</a> <a href="files/ER-24-blank.pdf">ER-24-blank.pdf</a> <a href="files/ER-25-filled.pdf">ER-25-filled.pdf</a> <a href="files/ER-25-blank.pdf">ER-25-blank.pdf</a> <a href="files/ER-26-filled.pdf">ER-26-filled.pdf</a> <a href="files/ER-26-blank.pdf">ER-26-blank.pdf</a> <a href="files/ER-25A-filled.pdf">ER-25A-filled.pdf</a> <a href="files/ER-25A-blank.pdf">ER-25A-blank.pdf</a> <a href="files/ER-25B-filled.pdf">ER-25B-filled.pdf</a> <a href="files/ER-25B-blank.pdf">ER-25B-blank.pdf</a> <a href="files/ER-25C-filled.pdf">ER-25C-filled.pdf</a> <a href="files/ER-25C-blank.pdf">ER-25C-blank.pdf</a> <a href="files/ER-27-filled.pdf">ER-27-filled.pdf</a> <a href="files/ER-27-blank.pdf">ER-27-blank.pdf</a> <a href="files/ER-27A-filled.pdf">ER-27A-filled.pdf</a> <a href="files/ER-27A-blank.pdf">ER-27A-blank.pdf</a> <a href="files/ER-27B-filled.pdf">ER-27B-filled.pdf</a> <a href="files/ER-27B-blank.pdf">ER-27B-blank.pdf</a> <a href="files/ER-27C-filled.pdf">ER-27C-filled.pdf</a> <a href="files/ER-27C-blank.pdf">ER-27C-blank.pdf</a> <a href="files/ER-28-filled.pdf">ER-28-filled.pdf</a> <a href="files/ER-28-blank.pdf">ER-28-blank.pdf</a> <a href="files/ER-28A-filled.pdf">ER-28A-filled.pdf</a> <a href="files/ER-28A-blank.pdf">ER-28A-blank.pdf</a> <a href="files/ER-28B-filled.pdf">ER-28B-filled.pdf</a> <a href="files/ER-28B-blank.pdf">ER-28B-blank.pdf</a> <a href="files/ER-29-filled.pdf">ER-29-filled.pdf</a> <a href="files/ER-29-blank.pdf">ER-29-blank.pdf</a> <a href="files/ER-30-filled.pdf">ER-30-filled.pdf</a> <a href="files/ER-30-blank.pdf">ER-30-blank.pdf</a> <a href="files/ER-30A-filled.pdf">ER-30A-filled.pdf</a> <a href="files/ER-30A-blank.pdf">ER-30A-blank.pdf</a> <a href="files/ER-30B-filled.pdf">ER-30B-filled.pdf</a> <a href="files/ER-30B-blank.pdf">ER-30B-blank.pdf</a> <a href="files/ER-31-filled.pdf">ER-31-filled.pdf</a> <a href="files/ER-31-blank.pdf">ER-31-blank.pdf</a> <a href="files/ER-32-filled.pdf">ER-32-filled.pdf</a> <a href="files/ER-32-blank.pdf">ER-32-blank.pdf</a> <a href="files/ER-33-filled.pdf">ER-33-filled.pdf</a> <a href="files/ER-33-blank.pdf">ER-33-blank.pdf</a> <a href="files/ER-34-filled.pdf">ER-34-filled.pdf</a> <a href="files/ER-34-blank.pdf">ER-34-blank.pdf</a> <a href="files/ER-35-filled.pdf">ER-35-filled.pdf</a> <a href="files/ER-35-blank.pdf">ER-35-blank.pdf</a> <a href="files/ER-35A-filled.pdf">ER-35A-filled.pdf</a> <a href="files/ER-35A-blank.pdf">ER-35A-blank.pdf</a></p>
+      </article><article class=""><h3><span class="n">127</span>QR check for form ER-01</h3>
+      <p class="meta"><span class="tag web">Web page</span> Public visitor</p>
+      
+      <figure><img loading="lazy" src="shots/127.png" alt="QR check for form ER-01"></figure></article><article class=""><h3><span class="n">128</span>QR check for form ER-02</h3>
+      <p class="meta"><span class="tag web">Web page</span> Public visitor</p>
+      
+      <figure><img loading="lazy" src="shots/128.png" alt="QR check for form ER-02"></figure></article><article class=""><h3><span class="n">129</span>QR check for form ER-03</h3>
+      <p class="meta"><span class="tag web">Web page</span> Public visitor</p>
+      
+      <figure><img loading="lazy" src="shots/129.png" alt="QR check for form ER-03"></figure></article><article class=""><h3><span class="n">130</span>Audit chain verified</h3>
+      <p class="meta"><span class="tag check">Check</span> Shalin Rahman</p>
+      <p>86 entries, unbroken.</p>
+      </article><article class=""><h3><span class="n">131</span>Election board</h3>
+      <p class="meta"><span class="tag check">Check</span> Run</p>
+      <p>Turnout 14 of 585.</p><table><thead><tr><th>Group</th><th>Official</th><th>Accepted</th></tr></thead><tbody><tr><td>Election Commission</td><td>MD. IQBAL HOSSAIN BHUIYAN, Chief Commissioner</td><td>10/26/2026, 9:53:16 AM</td></tr><tr><td>Election Commission</td><td>AMENA KHATUN, Commissioner</td><td>10/26/2026, 9:53:21 AM</td></tr><tr><td>Officials</td><td>Md. Shamsul Islam, Returning Officer</td><td>10/26/2026, 9:53:11 AM</td></tr><tr><td>Officials</td><td>Hena Begum, Scrutineer</td><td>10/26/2026, 9:53:54 AM</td></tr><tr><td>Appeal Tribunal</td><td>Abdul Ahad, Appeal Tribunal Member</td><td>10/26/2026, 9:53:26 AM</td></tr></tbody></table>
+      </article><article class=""><h3><span class="n">132</span>Officials dashboard after the declare</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/132.png" alt="Officials dashboard after the declare"></figure></article></section>
+      <section id="s15"><h2>16. Archive</h2><p class="about">Archiving closes the election for good. It is a two-person step.</p>
+      <article class=""><h3><span class="n">133</span>Moving to Archived</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/133.png" alt="Moving to Archived"></figure></article><article class=""><h3><span class="n">134</span>Move to Archived requested</h3>
+      <p class="meta"><span class="tag web">Web page</span> MD. IQBAL HOSSAIN BHUIYAN (Chief Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/134.png" alt="Move to Archived requested"></figure></article><article class=""><h3><span class="n">135</span>Move to Archived: waiting for a second person</h3>
+      <p class="meta"><span class="tag web">Web page</span> AMENA KHATUN (Commissioner)</p>
+      <p>The request shows on the dashboard of an official who can approve it.</p>
+      <figure><img loading="lazy" src="shots/135.png" alt="Move to Archived: waiting for a second person"></figure></article><article class=""><h3><span class="n">136</span>Move to Archived: approved</h3>
+      <p class="meta"><span class="tag web">Web page</span> AMENA KHATUN (Commissioner)</p>
+      
+      <figure><img loading="lazy" src="shots/136.png" alt="Move to Archived: approved"></figure></article><article class=""><h3><span class="n">137</span>Public results after archiving</h3>
+      <p class="meta"><span class="tag web">Web page</span> Public visitor</p>
+      
+      <figure><img loading="lazy" src="shots/137.png" alt="Public results after archiving"></figure></article></section></main>
+<dialog id="zoom"><img alt=""></dialog>
+<script>document.addEventListener('click',e=>{const t=e.target;const d=document.getElementById('zoom');
+if(t.matches('figure img')){d.querySelector('img').src=t.src;d.showModal();}else if(t.closest('dialog')){d.close();}});</script>
+</body></html>
