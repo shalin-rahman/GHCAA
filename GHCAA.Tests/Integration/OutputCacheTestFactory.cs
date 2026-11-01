@@ -21,7 +21,7 @@ namespace GHCAA.Tests.Integration
         {
             "ASP_SEED_PROFILE", "Jwt__Key", "AppSettings__AllowedOrigins__0",
             "DatabaseProvider", "ConnectionStrings__SqliteConnection",
-            "GmailSettings__Email", "GmailSettings__AppPassword",
+            "GmailSettings__Email", "GmailSettings__AppPassword", "ORG_PROFILE",
         };
 
         public OutputCacheTestFactory()
@@ -30,12 +30,12 @@ namespace GHCAA.Tests.Integration
             Directory.CreateDirectory(Path.Combine(_contentRoot, "wwwroot"));
             _dbPath = Path.Combine(_contentRoot, "test.db");
 
-            // IInstitutionProfileProvider is resolved eagerly at boot and throws without a
-            // profiles/default/org-config.json under the content root — see SpaStaticFileFactory
-            // for the same fixture and why an empty JSON object is enough.
+            // The API will not boot without ORG_PROFILE and a matching org-config.json under the
+            // content root. See SpaStaticFileFactory for why an empty JSON object is enough.
             var profileDir = Path.Combine(_contentRoot, "profiles", "default");
             Directory.CreateDirectory(profileDir);
             File.WriteAllText(Path.Combine(profileDir, "org-config.json"), "{}");
+            Environment.SetEnvironmentVariable("ORG_PROFILE", "default");
 
             Environment.SetEnvironmentVariable("ASP_SEED_PROFILE", "Visual");
             Environment.SetEnvironmentVariable("Jwt__Key", "output-cache-test-dummy-key-please-32chars");

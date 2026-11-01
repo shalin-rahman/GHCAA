@@ -30,7 +30,7 @@ namespace GHCAA.Tests.Integration
 
         private static readonly string[] EnvKeys =
         [
-            "ASP_SEED_PROFILE", "Jwt__Key", "DatabaseProvider", "ConnectionStrings__SqliteConnection", "AppSettings__ClientUrl", .. OriginKeys,
+            "ASP_SEED_PROFILE", "Jwt__Key", "DatabaseProvider", "ConnectionStrings__SqliteConnection", "AppSettings__ClientUrl", "ORG_PROFILE", .. OriginKeys,
         ];
 
         public ErrorResponseShapeTestFactory()
@@ -42,6 +42,7 @@ namespace GHCAA.Tests.Integration
             var profileDir = Path.Combine(_contentRoot, "profiles", "default");
             Directory.CreateDirectory(profileDir);
             File.WriteAllText(Path.Combine(profileDir, "org-config.json"), "{}");
+            Environment.SetEnvironmentVariable("ORG_PROFILE", "default");
 
             _dbPath = Path.Combine(_contentRoot, "test.db");
 

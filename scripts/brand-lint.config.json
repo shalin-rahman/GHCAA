@@ -16,7 +16,6 @@
     { "path": "docs/**", "reason": "narrative docs, not shipped source" },
     { "path": "scripts/brand-lint.config.json", "reason": "this file lists the banned words itself" },
     { "path": "scripts/brand-lint.mjs", "reason": "this script's own error messages name the banned words" },
-    { "path": "GHCAA.Mobile/android/app/build.gradle.kts", "reason": "com.ghcaa.portal is the GHC flavor's pinned applicationId, hardcoded on purpose — a bundle id change makes app stores treat the published app as a new listing and breaks it for every existing user" },
-    { "path": "GHCAA.API/Program.cs", "reason": "the unset-ORG_PROFILE fallback for SetApplicationName/Swagger title is pinned to 'GHCAA' on purpose (docs/TODO.md 62.10) — changing the data-protection application name invalidates every existing session token/cookie" }
+    { "path": "GHCAA.Mobile/android/app/build.gradle.kts", "reason": "com.ghcaa.portal is the GHC flavor's pinned applicationId, hardcoded on purpose — a bundle id change makes app stores treat the published app as a new listing and breaks it for every existing user" }
   ]
 }

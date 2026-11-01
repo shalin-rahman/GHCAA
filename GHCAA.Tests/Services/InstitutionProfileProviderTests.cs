@@ -40,15 +40,19 @@ public class InstitutionProfileProviderTests
         return env.Object;
     }
 
-    [Test]
-    public void MissingOrgProfile_DefaultsToDefaultProfile()
+    // 62.6b. An unset profile used to fall back to the GHC code defaults. Now it stops the boot,
+    // even when a default pack is present, so a deployment never runs as the sample institution.
+    [TestCase(null)]
+    [TestCase("")]
+    [TestCase("   ")]
+    public void MissingOrgProfile_Throws(string? orgProfile)
     {
         Directory.CreateDirectory(Path.Combine(_root, "profiles", "default"));
         File.WriteAllText(Path.Combine(_root, "profiles", "default", "org-config.json"), "{}");
 
-        var provider = new InstitutionProfileProvider(ConfigWithProfile(null), EnvironmentAt(_root));
+        var act = () => new InstitutionProfileProvider(ConfigWithProfile(orgProfile), EnvironmentAt(_root));
 
-        provider.ProfileName.Should().Be("default");
+        act.Should().Throw<InvalidOperationException>().WithMessage("*ORG_PROFILE is not set*");
     }
 
     [Test]
@@ -99,7 +103,7 @@ public class InstitutionProfileProviderTests
         Directory.CreateDirectory(Path.Combine(_root, "profiles", "default"));
         File.WriteAllText(Path.Combine(_root, "profiles", "default", "org-config.json"), "{}");
 
-        var provider = new InstitutionProfileProvider(ConfigWithProfile(null), EnvironmentAt(apiLikeContentRoot));
+        var provider = new InstitutionProfileProvider(ConfigWithProfile("default"), EnvironmentAt(apiLikeContentRoot));
 
         provider.ProfileName.Should().Be("default");
     }

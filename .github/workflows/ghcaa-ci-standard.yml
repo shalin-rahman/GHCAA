@@ -139,11 +139,12 @@ jobs:
       # The CLI runs Program.cs up to builder.Build(). Left on its default Production environment,
       # the AllowedOrigins checks reject the localhost origins in appsettings.json and the CLI
       # reports "Startup type not found". Development has no such check. No routes depend on the
-      # environment, so the contract comes out the same.
+      # environment, so the contract comes out the same. ORG_PROFILE is required at boot (62.6b).
       - name: Generate current swagger.json
         working-directory: GHCAA.API
         env:
           ASPNETCORE_ENVIRONMENT: Development
+          ORG_PROFILE: ghc
         run: dotnet tool run swagger tofile --output /tmp/swagger.generated.json bin/Release/net9/GHCAA.API.dll v1
 
       - name: Compare against committed snapshot

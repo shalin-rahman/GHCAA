@@ -32,7 +32,7 @@ if (!string.IsNullOrWhiteSpace(listenPort))
 JwtSigningKeyResolver.Resolve(configuration, builder.Environment);
 
 // The DataProtection application name comes from the profile pack. Changing it orphans every
-// protected payload, so profiles/ghc keeps AppName "GHCAA". This also fails the boot early when
+// protected payload, so profiles/ghc keeps the AppName it has always had. This also fails the boot early when
 // ORG_PROFILE is unset.
 var profileForAppName = new InstitutionProfileProvider(configuration, builder.Environment);
 
@@ -139,9 +139,7 @@ app.UseCors("AngularApp");
 
 if (app.Environment.IsDevelopment())
 {
-    var swaggerTitle = institutionProfile.ProfileExplicitlySelected
-        ? $"{institutionProfile.OrgConfigDefaults.Branding.ShortName} API V1"
-        : "GHCAA API V1";
+    var swaggerTitle = $"{institutionProfile.OrgConfigDefaults.Branding.ShortName} API V1";
 
     app.UseSwagger();
     app.UseSwaggerUI(c =>

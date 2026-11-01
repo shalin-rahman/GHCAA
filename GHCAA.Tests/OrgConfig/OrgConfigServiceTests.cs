@@ -4,29 +4,15 @@ using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using System.Text.Json;
 
 namespace GHCAA.Tests.OrgConfig
 {
     [TestFixture]
     public class OrgConfigServiceTests
     {
-        // No ORG_PROFILE means OrgConfigService builds from its hardcoded BuildGhcaaDefaults(), not
-        // from a profile pack — but OrgConfigGoldenSnapshotTests already proves the two are
-        // byte-identical, so reading the real pack here keeps this test tied to that source of
-        // truth instead of a bare string literal that could silently drift from it.
-        private static string RepoRoot()
-        {
-            var dir = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
-            while (dir is not null && !Directory.Exists(Path.Combine(dir.FullName, "profiles")))
-                dir = dir.Parent;
-            dir.Should().NotBeNull();
-            return dir!.FullName;
-        }
-
-        private static readonly BrandingDto GhcPackBranding = JsonSerializer.Deserialize<OrgConfigDto>(
-            File.ReadAllText(Path.Combine(RepoRoot(), "profiles", "ghc", "org-config.json")),
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!.Branding;
+        // Every service here reads the GHC pack, so expected values come from the same file
+        // rather than from string literals that could drift from it.
+        private static readonly BrandingDto GhcPackBranding = TestProfiles.PackFromDisk("ghc").Branding;
 
         private ApplicationDbContext GetDbContext(string dbName)
         {
@@ -42,7 +28,7 @@ namespace GHCAA.Tests.OrgConfig
             // Arrange
             var dbContext = GetDbContext("TestDb_Empty");
             var cache = new MemoryCache(new MemoryCacheOptions());
-            var service = new OrgConfigService(dbContext, cache);
+            var service = new OrgConfigService(dbContext, cache, TestProfiles.Ghc);
 
             // Act
             var config = await service.GetConfigAsync();
@@ -60,7 +46,7 @@ namespace GHCAA.Tests.OrgConfig
             // Arrange
             var dbContext = GetDbContext("TestDb_Update");
             var cache = new MemoryCache(new MemoryCacheOptions());
-            var service = new OrgConfigService(dbContext, cache);
+            var service = new OrgConfigService(dbContext, cache, TestProfiles.Ghc);
 
             var initialConfig = await service.GetConfigAsync();
             var modifiedConfig = initialConfig with
@@ -90,7 +76,7 @@ namespace GHCAA.Tests.OrgConfig
         public async Task UpdateConfigAsync_UnknownDefaultMembershipType_IsRejected(string? value)
         {
             var dbContext = GetDbContext($"TestDb_BadMembershipType_{value}");
-            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
             var config = await service.GetConfigAsync();
             var bad = config with { Workflow = config.Workflow with { DefaultMembershipType = value! } };
 
@@ -104,7 +90,7 @@ namespace GHCAA.Tests.OrgConfig
         public async Task UpdateConfigAsync_DefaultMembershipType_SavesTheEnumSpelling()
         {
             var dbContext = GetDbContext("TestDb_MembershipTypeCase");
-            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
             var config = await service.GetConfigAsync();
 
             await service.UpdateConfigAsync(
@@ -119,7 +105,7 @@ namespace GHCAA.Tests.OrgConfig
             // Arrange
             var dbContext = GetDbContext("TestDb_Bengali");
             var cache = new MemoryCache(new MemoryCacheOptions());
-            var service = new OrgConfigService(dbContext, cache);
+            var service = new OrgConfigService(dbContext, cache, TestProfiles.Ghc);
 
             // Act
             var config = await service.GetConfigAsync();
@@ -133,8 +119,8 @@ namespace GHCAA.Tests.OrgConfig
         // 59.2: a stored OrganizationConfig row (created once, then round-tripped whole on every
         // admin Branding/Workflow save — no admin UI ever edits Localization directly) could freeze
         // in a Localization value from before a later source-code copy fix, serving stale text
-        // forever. GetConfigAsync now always overlays Localization from BuildGhcaaDefaults()
-        // regardless of what's stored, so a corrected string in code is served immediately.
+        // forever. GetConfigAsync now always overlays Localization from the profile pack
+        // regardless of what's stored, so a corrected string in the pack is served immediately.
         [Test]
         public async Task GetConfigAsync_OverridesStaleStoredLocalization_WithCurrentSourceDefaults()
         {
@@ -142,7 +128,7 @@ namespace GHCAA.Tests.OrgConfig
             // had been captured before a later source-code fix.
             var dbContext = GetDbContext("TestDb_StaleLocalization");
             var cache = new MemoryCache(new MemoryCacheOptions());
-            var service = new OrgConfigService(dbContext, cache);
+            var service = new OrgConfigService(dbContext, cache, TestProfiles.Ghc);
 
             var initialConfig = await service.GetConfigAsync();
             var staleBnPack = initialConfig.Localization.Locales["bn"] with { Tagline = "STALE_CORRUPTED_TAGLINE" };
@@ -174,7 +160,7 @@ namespace GHCAA.Tests.OrgConfig
                 UpdatedAt = DateTime.UtcNow
             });
             await dbContext.SaveChangesAsync();
-            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
 
             var elections = (await service.GetConfigAsync()).Elections;
 
@@ -191,7 +177,7 @@ namespace GHCAA.Tests.OrgConfig
         [Test]
         public async Task GetConfigAsync_NewSite_TurnsCountApprovalOn()
         {
-            var service = new OrgConfigService(GetDbContext("TestDb_NewSiteCount"), new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(GetDbContext("TestDb_NewSiteCount"), new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
 
             (await service.GetConfigAsync()).Elections.TwoPersonActions
                 .Should().Contain(nameof(GHCAA.Domain.Enums.ElectionApprovalAction.Count));
@@ -210,7 +196,7 @@ namespace GHCAA.Tests.OrgConfig
                 UpdatedAt = DateTime.UtcNow
             });
             await dbContext.SaveChangesAsync();
-            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
 
             (await service.GetConfigAsync()).Elections.TwoPersonActions.Should().Equal(expected);
         }
@@ -219,7 +205,7 @@ namespace GHCAA.Tests.OrgConfig
         public async Task UpdateConfigAsync_RoundTripsElectionSettings()
         {
             var dbContext = GetDbContext("TestDb_ElectionsRoundTrip");
-            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
             var config = await service.GetConfigAsync();
             var changed = config.Elections with
             {
@@ -242,7 +228,7 @@ namespace GHCAA.Tests.OrgConfig
         public async Task UpdateConfigAsync_ElectionSettingChanged_WritesAuditRowWithOldAndNewValues()
         {
             var dbContext = GetDbContext("TestDb_ElectionSettingsAudit");
-            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
             var config = await service.GetConfigAsync();
             await service.UpdateConfigAsync(config, "system");
 
@@ -265,7 +251,7 @@ namespace GHCAA.Tests.OrgConfig
         public async Task UpdateConfigAsync_NoElectionChange_WritesNoAuditRow()
         {
             var dbContext = GetDbContext("TestDb_ElectionSettingsNoAudit");
-            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
             var config = await service.GetConfigAsync();
 
             await service.UpdateConfigAsync(config, "system");
@@ -280,7 +266,7 @@ namespace GHCAA.Tests.OrgConfig
         public async Task UpdateConfigAsync_RowSavedBeforeElectionsSection_DiffsAgainstDefaults()
         {
             var dbContext = GetDbContext("TestDb_ElectionSettingsLegacyRow");
-            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
             var config = await service.GetConfigAsync();
             dbContext.OrganizationConfigs.Add(new GHCAA.Domain.Models.OrganizationConfig
             {
@@ -290,7 +276,7 @@ namespace GHCAA.Tests.OrgConfig
             });
             await dbContext.SaveChangesAsync();
             // Read the row the way the settings page does, so the save starts from what is in force.
-            config = await new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions())).GetConfigAsync();
+            config = await new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc).GetConfigAsync();
 
             await service.UpdateConfigAsync(
                 config with { Elections = config.Elections with { SuperAdminActsAlone = true } }, "7");
@@ -305,7 +291,7 @@ namespace GHCAA.Tests.OrgConfig
         public async Task UpdateConfigAsync_RoundTripsSupportedDateFormat()
         {
             var dbContext = GetDbContext("TestDb_DateFormatRoundTrip");
-            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
             var config = await service.GetConfigAsync();
 
             await service.UpdateConfigAsync(
@@ -319,7 +305,7 @@ namespace GHCAA.Tests.OrgConfig
         public async Task GetConfigAsync_DefaultsDateFormatToDdMmYyyy()
         {
             var dbContext = GetDbContext("TestDb_DateFormatDefault");
-            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
 
             (await service.GetConfigAsync()).Localization.DateFormat.Should().Be("dd-MM-yyyy");
         }
@@ -328,7 +314,7 @@ namespace GHCAA.Tests.OrgConfig
         public async Task UpdateConfigAsync_InvalidDateFormat_FallsBackToDefault()
         {
             var dbContext = GetDbContext("TestDb_DateFormatInvalid");
-            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
             var config = await service.GetConfigAsync();
 
             await service.UpdateConfigAsync(
@@ -347,7 +333,7 @@ namespace GHCAA.Tests.OrgConfig
         public async Task UpdateConfigAsync_NormalizesEmailProvider(string? saved, string? expected)
         {
             var dbContext = GetDbContext($"TestDb_EmailProvider_{saved?.Trim()}_{expected}");
-            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
             var config = await service.GetConfigAsync();
 
             await service.UpdateConfigAsync(
@@ -361,7 +347,7 @@ namespace GHCAA.Tests.OrgConfig
         public async Task GetConfigAsync_DefaultsEmailProviderToNull()
         {
             var dbContext = GetDbContext("TestDb_EmailProviderDefault");
-            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
 
             (await service.GetConfigAsync()).Workflow.EmailProvider.Should().BeNull();
         }
@@ -370,7 +356,7 @@ namespace GHCAA.Tests.OrgConfig
         public async Task UpdateConfigAsync_DoesNotRewriteExistingDateValues()
         {
             var dbContext = GetDbContext("TestDb_DateValuesRemainStable");
-            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()));
+            var service = new OrgConfigService(dbContext, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
             var storedStart = new DateTime(2024, 5, 17, 14, 35, 12, DateTimeKind.Utc);
             var storedEnd = storedStart.AddHours(2);
 

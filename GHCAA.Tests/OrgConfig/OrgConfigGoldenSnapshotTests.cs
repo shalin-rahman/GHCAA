@@ -13,15 +13,10 @@ namespace GHCAA.Tests.OrgConfig;
 /// depends on.
 ///
 /// The snapshot in golden/org-config-ghc.golden.json was captured from the real OrgConfigService
-/// against an empty database on 2026-09-04, BEFORE 62.6 replaces BuildGhcaaDefaults() with a read
-/// of profiles/ghc/org-config.json. Its whole purpose is to be frozen: after that swap, this test
-/// compares the running service against what the service produced while the values were still
-/// hardcoded. A pack that is subtly wrong — a dropped locale, a renamed key, a list that reordered —
-/// fails here.
-///
-/// That is a different guarantee from GhcProfilePackTests, which compares the pack against
-/// BuildGhcaaDefaults(). Those two move together once 62.6 lands and would agree with each other
-/// even if both were wrong. This file does not move.
+/// against an empty database on 2026-09-04, while the GHC values were still hardcoded. 62.6b
+/// deleted that code, so the service now reads profiles/ghc/org-config.json, and this test checks
+/// the result against the frozen file. A pack that is subtly wrong (a dropped locale, a renamed
+/// key, a reordered list) fails here.
 ///
 /// Regenerating the golden defeats the point. If this test fails, the question is what changed in
 /// the config, not how to make the file match. Regenerate only when a config change is intended,
@@ -46,11 +41,10 @@ public class OrgConfigGoldenSnapshotTests : TestBase
         return Path.Combine(dir!.FullName, "GHCAA.Tests", "OrgConfig", "golden", "org-config-ghc.golden.json");
     }
 
-    // The empty database is the case that matters: with no OrganizationConfig row, GetConfigAsync
-    // falls through to the code defaults, which is exactly the path 62.6 rewrites.
+    // With no OrganizationConfig row, GetConfigAsync serves the pack values unchanged.
     private async Task<OrgConfigDto> ConfigFromRealServiceAsync()
     {
-        var service = new OrgConfigService(_context, new MemoryCache(new MemoryCacheOptions()));
+        var service = new OrgConfigService(_context, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc);
         return await service.GetConfigAsync();
     }
 
@@ -63,9 +57,9 @@ public class OrgConfigGoldenSnapshotTests : TestBase
 
         actual.Replace("\r\n", "\n").Should().Be(
             File.ReadAllText(GoldenPath()).Replace("\r\n", "\n").TrimEnd('\n'),
-            "this snapshot was frozen before Work Package 62.6 swapped the hardcoded defaults for a "
-            + "profile-pack read. A difference means the running configuration changed — investigate "
-            + "what changed rather than regenerating the golden to match.");
+            "this snapshot was frozen while the GHC defaults were still hardcoded. A difference "
+            + "means the running configuration changed. Find out what changed rather than "
+            + "regenerating the golden to match.");
     }
 
     [Test, Explicit("Overwrites the frozen 62.4 golden snapshot. Only for an intended, reviewed config change.")]

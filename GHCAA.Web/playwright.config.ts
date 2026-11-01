@@ -24,6 +24,8 @@ export default defineConfig({
       command: 'dotnet run --project ../GHCAA.API --urls http://localhost:5087',
       // /health/live needs no email or storage settings, so the local run starts without them.
       url: 'http://localhost:5087/health/live',
+      // The API refuses to boot without ORG_PROFILE, and CI has no .env file to supply it.
+      env: { ORG_PROFILE: process.env.ORG_PROFILE ?? 'ghc' },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

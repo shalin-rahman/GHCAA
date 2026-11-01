@@ -16,7 +16,7 @@ namespace GHCAA.Tests.OrgConfig
                 .Options;
             var dbContext = new GHCAA.Infrastructure.Data.ApplicationDbContext(dbContextOptions);
             var mockCache = new Microsoft.Extensions.Caching.Memory.MemoryCache(new Microsoft.Extensions.Caching.Memory.MemoryCacheOptions());
-            var service = new OrgConfigService(dbContext, mockCache);
+            var service = new OrgConfigService(dbContext, mockCache, TestProfiles.Ghc);
 
             // Act
             var config = await service.GetConfigAsync();
@@ -35,7 +35,7 @@ namespace GHCAA.Tests.OrgConfig
                 .Options;
             var dbContext = new GHCAA.Infrastructure.Data.ApplicationDbContext(dbContextOptions);
             var mockCache = new Microsoft.Extensions.Caching.Memory.MemoryCache(new Microsoft.Extensions.Caching.Memory.MemoryCacheOptions());
-            var service = new OrgConfigService(dbContext, mockCache);
+            var service = new OrgConfigService(dbContext, mockCache, TestProfiles.Ghc);
 
             // Act
             var config = await service.GetConfigAsync();
@@ -55,7 +55,7 @@ namespace GHCAA.Tests.OrgConfig
                 .Options;
             var dbContext = new GHCAA.Infrastructure.Data.ApplicationDbContext(dbContextOptions);
             var mockCache = new Microsoft.Extensions.Caching.Memory.MemoryCache(new Microsoft.Extensions.Caching.Memory.MemoryCacheOptions());
-            var service = new OrgConfigService(dbContext, mockCache);
+            var service = new OrgConfigService(dbContext, mockCache, TestProfiles.Ghc);
 
             // Act
             var config = await service.GetConfigAsync();

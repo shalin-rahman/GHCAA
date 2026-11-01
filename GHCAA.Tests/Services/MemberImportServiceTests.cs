@@ -24,7 +24,7 @@ public class MemberImportServiceTests : TestBase
     private Mock<IOrgConfigService> _orgConfig = null!;
     private MemberImportService _service = null!;
 
-    // Matches the hardcoded GHCAA defaults BuildGhcaaDefaults() serves today, so import behavior
+    // Matches the values profiles/ghc/org-config.json serves, so import behavior
     // under test stays the same as before ImportEmailBase/MembershipNumberPrefix moved to org-config.
     private static readonly OrgConfigDto TestOrgConfig = new()
     {

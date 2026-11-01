@@ -125,7 +125,7 @@ public sealed class ElectionFreezeServiceTests : TestBase
     public async Task OrgConfigSave_ElectionChangeWhileFrozen_IsRefused_OtherSectionsStillSave()
     {
         await AddElectionAsync(ElectionPhase.Polling);
-        var service = new OrgConfigService(_context, new MemoryCache(new MemoryCacheOptions()), freeze: NewFreeze());
+        var service = new OrgConfigService(_context, new MemoryCache(new MemoryCacheOptions()), TestProfiles.Ghc, freeze: NewFreeze());
         var config = await service.GetConfigAsync();
 
         var act = () => service.UpdateConfigAsync(

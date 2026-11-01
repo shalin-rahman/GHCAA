@@ -26,7 +26,7 @@ namespace GHCAA.Tests.Integration
         private static readonly string[] EnvKeys =
         [
             "ASP_SEED_PROFILE", "Jwt__Key",
-            "DatabaseProvider", "ConnectionStrings__SqliteConnection", "AppSettings__ClientUrl", .. OriginKeys,
+            "DatabaseProvider", "ConnectionStrings__SqliteConnection", "AppSettings__ClientUrl", "ORG_PROFILE", .. OriginKeys,
         ];
 
         public SpaStaticFileFactory()
@@ -44,13 +44,13 @@ namespace GHCAA.Tests.Integration
             Directory.CreateDirectory(Path.Combine(WebRoot, "assets", "placeholders"));
             File.WriteAllText(Path.Combine(WebRoot, "assets", "placeholders", "image-placeholder.svg"), "<svg>placeholder</svg>");
 
-            // IInstitutionProfileProvider is resolved eagerly at boot (Program.cs) and throws if it
-            // can't find profiles/default/org-config.json under the content root — an empty JSON
-            // object deserializes to every default value on OrgConfigDto, so this satisfies that
-            // without needing the repo's real profiles/ folder.
+            // IInstitutionProfileProvider is resolved at boot (Program.cs) and throws when
+            // ORG_PROFILE is unset or its org-config.json is missing under the content root. An
+            // empty JSON object gives every OrgConfigDto default, which is all these tests need.
             var profileDir = Path.Combine(_contentRoot, "profiles", "default");
             Directory.CreateDirectory(profileDir);
             File.WriteAllText(Path.Combine(profileDir, "org-config.json"), "{}");
+            Environment.SetEnvironmentVariable("ORG_PROFILE", "default");
 
             _dbPath = Path.Combine(_contentRoot, "test.db");
 
