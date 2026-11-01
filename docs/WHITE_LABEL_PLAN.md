@@ -39,7 +39,8 @@ places at once, and a long tail of literals that never went through the config p
 
 The three hardcoded default sources (they must all become profile-driven):
 
-1. `OrgConfigService.BuildGhcaaDefaults()` (Infrastructure, ~190 lines of C#).
+1. `OrgConfigService.BuildGhcaaDefaults()` (Infrastructure, ~190 lines of C#). Deleted by 62.6b on
+   2026-11-02; the service now reads only the profile pack.
 2. `org-config.service.ts` `ghcaaDefaults` (Angular, ~90 lines, used when the API call fails).
 3. `org_config.dart` `ghcaaDefaults` (Flutter, offline fallback).
 
@@ -190,7 +191,8 @@ Exit criteria: `ORG_PROFILE=ghc` produces a byte-identical `GET /api/config` res
 
 ### Phase B: API de-branding
 
-`BuildGhcaaDefaults()` becomes `BuildDefaultsFromProfile()`. `Constants.Defaults` brand fields move
+`BuildGhcaaDefaults()` becomes `BuildDefaultsFromProfile()` (done: 62.6 read the pack, 62.6b deleted
+the hardcoded copy on 2026-11-02). `Constants.Defaults` brand fields move
 to config. `IDCardService` takes `IOrgConfigService` and draws name, seal text, and accent color from
 it. `email_templates.json` gets `{{OrgName}}`/`{{OrgShortName}}`/`{{SupportEmail}}` placeholders and
 the renderer supplies them. Swagger title and the data-protection application name become config with

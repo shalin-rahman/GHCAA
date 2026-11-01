@@ -45,8 +45,8 @@ Transforms every hardcoded brand string, label, and feature toggle in the system
 │   └─ ApplicationDbContext.OrganizationConfigs                        │
 │       └─ ConfigJson (text/JSONB) — full OrgConfigDto serialized     │
 │                                                                      │
-│  Fallback chain: Cache → DB → BuildGhcaaDefaults()                  │
-│  (app never crashes from missing config)                             │
+│  Fallback chain: Cache → DB → profiles/<ORG_PROFILE>/org-config.json│
+│  (an unset ORG_PROFILE stops the boot)                               │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 

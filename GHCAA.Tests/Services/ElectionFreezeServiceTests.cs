@@ -4,6 +4,7 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
+using GHCAA.Tests.OrgConfig;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using static GHCAA.Domain.Enums;

@@ -218,9 +218,9 @@ them. An `Id` present in a file (as in the seed JSON) is ignored.
 
 - Tracker 62.2 (profile folders) and 62.6 (`OrgConfigService` reads the pack) made the profile a
   set of files this spec can export and import.
-- Tracker 62.6b deletes the hardcoded `BuildGhcaaDefaults`. It does not block this spec, but once
-  it lands an imported org config is the only way to move GHC's settings between installs without
-  editing `profiles/ghc/org-config.json`.
+- Tracker 62.6b (done 2026-11-02) deleted the hardcoded `BuildGhcaaDefaults`. An imported org
+  config is now the only way to move GHC's settings between installs without editing
+  `profiles/ghc/org-config.json`.
 - Tracker 62.4, the golden org config test, guards the `OrgConfigDto` shape this spec reads and
   writes.
 - [Spec 008](../008-idempotent-member-batch-import/spec.md), the member batch import, uses the same

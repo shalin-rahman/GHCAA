@@ -73,8 +73,8 @@ work in the order the tracker's `Depends on` tags give.
 
 | Stream | Source | Items |
 |---|---|---|
-| E | Election delivery plan (spec 023 `delivery-plan.md`), `AUTH_AND_DEVICE_FIX_PLAN.md` Part A and B4-B5 | 37.1m, 37.14o, 37.1p, 37.16e, 37.12y, 37.13f, 37.13g, 37.14a, 37.14d, 37.14f, 37.14m, 37.14n, 37.14t, 95.2, 95.4, 95.5, 95.12, 95.6, 84.42, 84.46, 84.50 |
-| N1 | Non-election plan phase 1, release and environment blockers | 7.26, 7.28, 34.D8, 34.D19, 62.41, 62.6b, 84.48 |
+| E | Election delivery plan (spec 023 `delivery-plan.md`), `AUTH_AND_DEVICE_FIX_PLAN.md` Part A and B4-B5 | 37.1m, 37.14o, 37.1p, 37.16e, 37.12y, 37.13f, 37.13g, 37.14a, 37.14d, 37.14f, 37.14m, 37.14n, 37.14t, 95.2, 95.4, 95.5, 95.12, 95.6, 84.42, 84.50 |
+| N1 | Non-election plan phase 1, release and environment blockers | 7.26, 7.28, 34.D8, 34.D19, 62.41, 84.48 |
 | N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.9, 84.18, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 97.1 |
 | N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 93.3, 93.4, 96.3 |
 | N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.19, 84.20, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5 |
@@ -190,19 +190,15 @@ gate clears.
 
 Engineering does not start these. Each stays at its tracker status until the owner records evidence.
 
-| Gate | Items | What the owner does |
-|---|---|---|
-| Vulnerable packages | 98.34 (on hold) | `npm audit` in the web gate fails on undici (through `@angular/build`), `@vitest/mocker`, glob and minimatch. Bump when fixed versions work with the Angular and Vitest toolchain. Until then the web/audit gate stays red and is named in each wave report. |
 Answers recorded 2026-11-02. The "Next" column is what is left, and who does it.
 
 | Gate | Items | Answer and what is next |
 |---|---|---|
 | Vulnerable packages | 98.34 (on hold) | `npm audit` in the web gate fails on undici (through `@angular/build`), `@vitest/mocker`, glob and minimatch. Bump when fixed versions work with the Angular and Vitest toolchain. Until then the web/audit gate stays red and is named in each wave report. |
 | Preprod services | 7.26, 7.28, 84.48 | Owner says the Render settings are in. `/health` returns 200 with all four checks Healthy, which does not prove Brevo or S3. Next (owner): a sign-in code that reaches an inbox, and a photo that still loads after a redeploy. |
-| Generic profile | 62.41, 62.6b | 62.41 runs against a throwaway local PostgreSQL database, dropped afterwards. 62.6b: Render is the only host, so the GHCAA fallback in `OrgConfigService` goes. Next: engineering. |
+| Generic profile | 62.41 | Runs against a throwaway local PostgreSQL database, dropped afterwards. Next: engineering. |
 | Local data | 34.D8, 34.D19 | Verify on the local stack. Next: engineering. |
 | Device checks | 84.42, 84.50 | Run on the Flutter Windows desktop build against a local API. 37.1m and 37.14o are covered inside 84.50. Next: engineering. |
-| Key material | 84.46 | The test vector key stays as is. Next: election handbook text on how the real ballot key pair is made and used. |
 | Product decisions | 84.7, 49.3.C, 12.8 | 84.7: support a second institution; a seeding plan goes to the owner before any build. 49.3.C: optional `ContactEmail` on the user. 12.8: two secret files untracked; the archive list goes to the owner. |
 | Participants | 78.9 | The owner runs the sessions once 7.26 and 7.28 pass. Next: a session runbook and an empty response log. |
 
@@ -268,4 +264,7 @@ What counts as evidence:
 | 2026-11-02 | 99.2 | Owner accepted the plan | `docs/TODO.md` |
 | 2026-11-02 | 72.5, 75.5, 76.4, 77.4, 77.11 | Owner answers: the repository stays private; the P1 duration, the factors and the 18.5% rate stand as written | `docs/TODO.md`, `docs/book/build/wbs.py` |
 | 2026-11-02 | 7.21, 72.4 | Put on hold: no domain yet; no Dependabot pull requests yet | `docs/TODO.md`, this file |
+| 2026-11-02 | 84.46 | Handbook text read against `BALLOT_KEY_BITS` in `ballot-key.util.ts` | `docs/Elections/12-Election-Officials-Handbook.md` section 5 |
+| 2026-11-02 | 98.43 (part) | Each new key name grepped in the code it configures; values not checked | `.env.dev.example`: commented keys added. Removing unused appsettings keys waits for the owner |
+| 2026-11-02 | 62.6b | `dotnet test GHCAA.Tests`: 1873 of 1873; golden snapshot unchanged | `OrgConfigService.cs`, `InstitutionProfileProvider.cs`, `IInstitutionProfileProvider.cs`, `Program.cs`, `ci` swagger step, `TestProfiles.cs`, OrgConfig and integration tests, specs 020 and 025, `CONFIG_DRIVEN_FRAMEWORK.md`, `WHITE_LABEL_PLAN.md` |
 | 2026-11-02 | 12.8 (part) | `git ls-files` no longer lists `docs/appsettings.txt` or `docs/dgepay_info.txt`; both kept on disk and ignored | `.gitignore` |

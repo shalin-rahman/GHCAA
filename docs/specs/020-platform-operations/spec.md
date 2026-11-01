@@ -35,7 +35,7 @@ both return `200 OK` with populated data.
 **Acceptance Scenarios**:
 
 1. **Given** no `OrganizationConfig` row exists yet, **When** `GET api/config` is called, **Then**
-   the response is the hardcoded GHCAA default built by `OrgConfigService.BuildGhcaaDefaults()`.
+   the response is the active profile pack's `profiles/<ORG_PROFILE>/org-config.json`, unchanged.
 2. **Given** an admin has saved a config, **When** any client calls `GET api/config` within 10
    minutes, **Then** the cached row is served without a database round trip.
 3. **Given** a lookup group such as `MembershipType` exists, **When** `GET api/lookups/MembershipType`
@@ -466,12 +466,11 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
 
 ### Hard-coded behaviour that should be configuration
 
-- ENH-004 (P2): `OrgConfigService.BuildGhcaaDefaults()` (`OrgConfigService.cs:127-326`) hardcodes the
-  entire GHCAA branding, contact, currency, gateway-method list, workflow, and localization defaults
-  in code. This is already tracked as a planned removal once `ORG_PROFILE=ghc` is set and
-  `IInstitutionProfileProvider` takes over (per the class-level comment at `OrgConfigService.cs:13-22`
-  and the `OrgConfigGoldenSnapshotTests` that pin the two paths as byte-identical), so this is not a
-  new finding, only a confirmation that the migration is still pending.
+- ENH-004 (P2), closed 2026-11-02 by tracker 62.6b. `OrgConfigService` used to hardcode the GHCAA
+  branding, contact, currency, gateway list, workflow and localization defaults in
+  `BuildGhcaaDefaults()`. That method is gone. The service reads the profile pack only, an unset
+  `ORG_PROFILE` stops the boot, and `OrgConfigGoldenSnapshotTests` shows the GHC pack still gives
+  the same output.
 - ENH-005 (P3): The upload size limits (5 MB photo, 2 MB signature, 10 MB per document) are literal
   numbers in `AdminController.cs` at the photo, signature, and documents endpoints, rather than named
   constants. `Constants.ErrorLogs.RetentionDays` and `MaxPageSize` show the codebase already has a
