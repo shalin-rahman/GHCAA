@@ -4,7 +4,8 @@ Tracker source: 84.19 and 84.20 in [docs/TODO.md](../../TODO.md). Keep status, d
 
 ## Sequence
 
-- [ ] **84.8 and 84.18 — Complete prerequisites.** Finish the platform baseline and entity gap review; record intended users, governance fit, and visibility expectations.
+- [x] **84.8 — Platform baseline.** Done 2026-09-25: as-built specs 012 to 020.
+- [ ] **84.18 — Complete prerequisites.** Finish the entity gap review; record intended users, governance fit, and visibility expectations.
 - [ ] **84.19 — Approve the meeting scope.** Resolve the open points in `spec.md`; review reuse of the event invite and RSVP flow; approve the spec before code.
 - [ ] **84.19 — Build the meeting module.** Add the domain and persistence model, application contracts, authorized API, Web and Mobile surfaces, migration, audit behavior, and cross-layer tests.
 - [ ] **84.20 — Add contextual action items.** Support an owner, due date, and status for meeting actions and any EC work-item use accepted by the 84.18 review. Keep standalone notes and generic task management out unless the review establishes need.

@@ -145,7 +145,7 @@ CODE = [
      ["GHCAA.Tests", "GHCAA.Mobile/test", "GHCAA.Web/tests"], ["C12", "C13"]),
     ("C16", "Deployment and operations", ["41"],
      ["Dockerfile", ".github", "docs/RENDER_DEPLOYMENT.md"], ["C13"]),
-    ("C17", "Standards, docs and dissertation", ["12", "23", "61", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75", "76", "77", "84", "85", "86"],
+    ("C17", "Standards, docs and dissertation", ["12", "23", "61", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75", "76", "77", "84", "85", "86", "99"],
      ["docs"], ["C15", "C16", "C14"]),
     ("C18", "Ad-hoc reporting", ["90"],
      ["GHCAA.API/Controllers/AdminReportsController.cs",
@@ -272,8 +272,7 @@ PRE = [
      "13,800 words (the constitution plus the 8 election documents, measured directly from "
      "GHCAA.Infrastructure/Data/Seed/constitution.json and docs/Elections/*.md, corrected 2026-09-06 "
      "from an earlier, unsourced figure of 43,000) classified clause by clause into 16 constraints. "
-     "The day count below was not independently re-derived from the corrected word count and may be "
-     "high for it — confirm or revise"),
+     "The owner kept the 10-day count against the corrected word count on 2026-11-02"),
     ("P2", "Requirements elicitation: interviews and observation", 5, ["P1"],
      "10 participants at 30-40 min, plus guides and write-up"),
     ("P3", "Requirements analysis and specification", 8, ["P1", "P2"],

@@ -14,14 +14,20 @@ namespace GHCAA.Infrastructure.Services
         private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
         public string ProfileName { get; }
-        public bool ProfileExplicitlySelected { get; }
         public OrgConfigDto OrgConfigDefaults { get; }
 
         public InstitutionProfileProvider(IConfiguration configuration, IHostEnvironment environment)
         {
+            // An unset ORG_PROFILE used to fall back to the neutral sample pack. On a live
+            // deployment that rebrands a real association, so it now stops the app at boot (62.6b).
             var configured = configuration["ORG_PROFILE"];
-            ProfileExplicitlySelected = !string.IsNullOrWhiteSpace(configured);
-            ProfileName = ProfileExplicitlySelected ? configured! : DefaultProfileName;
+            if (string.IsNullOrWhiteSpace(configured))
+            {
+                throw new InvalidOperationException(
+                    "ORG_PROFILE is not set. Set it to the institution's profile folder under profiles/ " +
+                    "(for example ORG_PROFILE=ghc), or ORG_PROFILE=default for the neutral sample pack.");
+            }
+            ProfileName = configured;
 
             var profilesRoot = ResolveProfilesRoot(environment.ContentRootPath);
             var path = FindFile(profilesRoot, ProfileName, OrgConfigFileName)

@@ -19,4 +19,4 @@
 - [ ] Apply the age check using the Bangladesh local date so it does not shift near UTC midnight.
 - [ ] Test valid, malformed, duplicate, imported-placeholder, and changed NID cases, plus PassingYear fallback and date boundaries.
 
-The ballot-key progress dialog and timeout portion of 84.49 is election-device behavior and stays in the election delivery plan.
+The ballot-key progress dialog and timeout portion of 84.49 is election-device behavior and stays in the election stream (E) of `docs/MASTER_EXECUTION_PLAN.md`.

@@ -4,7 +4,7 @@
 
 This specification covers new work: bringing the Angular (`GHCAA.Web`) and Flutter
 (`GHCAA.Mobile`) election clients in line with the backend engine documented in
-`docs/specs/010-election-engine-fixes/spec.md`. That spec covered backend-only defects. This
+`docs/specs/027-election-engine-fixes/spec.md`. That spec covered backend-only defects. This
 one covers the client-side gap found by a follow-up review of both clients on 2026-09-24: the
 Angular member voting flow calls routes that do not exist on the backend at all, and both
 clients carry dead code, missing admin UI, and inconsistencies with the rest of each codebase's

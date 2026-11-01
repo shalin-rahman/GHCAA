@@ -6,7 +6,7 @@
 **Input**: Review of the election engine on 2026-09-27. The user asked that votes stay anonymous,
 that a voter can print their ballot after voting, and that the engine be checked against common
 election practice.
-**Depends on**: [010-election-engine-fixes](../010-election-engine-fixes/spec.md) (the engine as
+**Depends on**: [027-election-engine-fixes](../027-election-engine-fixes/spec.md) (the engine as
 built), [011-election-module-redesign](../011-election-module-redesign/spec.md) (the web and mobile
 screens), [018-governance-elections-polls](../018-governance-elections-polls/spec.md) (the as-built
 governance baseline)
@@ -15,7 +15,7 @@ governance baseline)
 ## Purpose and scope
 
 The engine keeps who voted (`SeatVote`, `VoterRoll.VotedAt`) apart from what was voted (`Ballot`,
-`BallotVote`). Spec 010 says nothing joins the two. That is true of the foreign keys and false in
+`BallotVote`). Spec 027 says nothing joins the two. That is true of the foreign keys and false in
 practice. This spec lists how the two halves can be joined today, what has to change so they cannot
 be, and the other gaps against normal election practice found in the same review.
 
@@ -80,7 +80,7 @@ The existing tests only check that `BallotVote` has no member column.
   writing `ECMember` rows. Only `DeclareAsync` (`ElectionService.cs:184`) writes them.
 - `AddCandidateAsync` (`ElectionService.cs:221`) has no phase check and no voter-roll check. It
   records the candidate as their own proposer and seconder and sets the nomination straight to
-  Accepted, which skips the scrutiny rule in spec 010.
+  Accepted, which skips the scrutiny rule in spec 027.
 - `RemoveCandidateAsync` (`ElectionService.cs:250`) works in any phase, including Polling.
 - No candidate consent is recorded, and nothing stops an election officer from being a candidate.
 - The vote endpoint takes one seat per request, so a lost connection can leave a ballot half cast.
@@ -152,7 +152,7 @@ P2 brings the rules in line with the constitution.
   published. It checks the roll and needs a proposer and a seconder, both eligible voters and
   neither of them the candidate. `RemoveCandidateAsync` works only before CandidateList. After that a candidate leaves only through
   withdrawal, before `WithdrawalClosesOn`.
-- **FR-010** The `ElectionsController.Vote` doc comment and spec 010 stop claiming more secrecy
+- **FR-010** The `ElectionsController.Vote` doc comment and spec 027 stop claiming more secrecy
   than the code gives, until FR-001 to FR-004 ship.
 
 ### P1: cast as intended and counted as cast

@@ -877,7 +877,6 @@ All services are registered as **Scoped** unless noted.
 | `IGovernanceService` | `GovernanceService` | Services/ |
 | `IGamificationService` | `GamificationService` | Services/ |
 | `IFamilyLinkService` | `FamilyLinkService` | Services/ |
-| `IFamilyService` | `FamilyService` | Services/ |
 | `IMentorshipService` | `MentorshipService` | Services/ |
 | `IPollService` | `PollService` | Services/ |
 | `ISmsService` | `GreenwebSmsService` | Services/ (**HttpClient**) |
@@ -982,7 +981,7 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 | `NotificationController` | `/api/notifications` (incl. `POST /notifications/device-token`, 82.53a) | Auth | `INotificationService`, `IDeviceTokenService` |
 | `MessagingController` | `/api/messaging` | Auth | `IChatService` |
 | `ActivityController` | `/api/activity` | Auth | `IActivityService` |
-| `FamilyLinkController` | `/api/family-links` | Auth | `IFamilyLinkService`, `IFamilyService` |
+| `FamilyLinkController` | `/api/family-links` | Auth | `IFamilyLinkService` |
 | `MentorshipController` | `/api/mentorship` | Auth | `IMentorshipService` |
 | `LookupsController` | `/api/lookups` | Public + Admin | `ILookupService` |
 | `RolesController` | `/api/roles` | SuperAdmin | `IRoleService` |

@@ -6,9 +6,10 @@ AI tool working in this repo. Read it before cross-layer work; keep the two file
 sync when either changes — this file adds Codex-specific rules on top rather than
 repeating that content.
 
-Open work with a written plan: follow `docs/AUTH_AND_DEVICE_FIX_PLAN.md` in the order its
-header gives. Since 2026-10-27 that is Part B (B1-B3), Part C, then Part D (admin unlock).
-Part A (84.50) and B4-B5 wait for the election sequence.
+Open work follows `docs/MASTER_EXECUTION_PLAN.md` (since 2026-11-01). Its first section is the
+handover: the current wave, the next items and the owner gates. Check it against the tracker with
+`python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`. Part A (84.50) and
+B4-B5 of `docs/AUTH_AND_DEVICE_FIX_PLAN.md` wait for the election sequence.
 
 # Graphify
 

@@ -5,11 +5,13 @@ This breakdown maps non-election operations work to the tracker. Live service ch
 ## Owner and environment gates
 
 - [ ] **7.21** — After DNS is live, configure and verify the canonical `www` redirect using the tracker request and expected Location header.
-- [ ] **7.22** — Set preprod `ClientUrl` and allowed origin to the verified preprod host in Render and local preprod configuration; confirm the browser/API origin behavior.
+- [x] **7.22** — Done 2026-11-01: `GHCAA.Mobile/.env.preprod` points at `https://ghcaa-ryl6.onrender.com/api`. Set preprod `ClientUrl` and allowed origin to the verified preprod host in Render and local preprod configuration; confirm the browser/API origin behavior.
 - [ ] **7.26** — Configure the Brevo sender and key in the owner-managed environment, deploy, send a real preprod message, and confirm its EmailLogs row reads Sent.
 - [ ] **7.28** — Set the owner-managed S3-compatible storage configuration, deploy, and verify an upload remains available after redeploy.
-- [ ] **34.D17–34.D19** — After owner redeploys, inspect startup logs and member cards for schema repair, restored migration history, and academic record display.
-- [ ] **84.48 / 96.15** — Reconcile owner-provided environment keys and startup settings, deploy, and record live health evidence without copying secrets into repository files.
+- [x] **34.D17, 34.D18** — Done 2026-10-31: `MigrationBootstrapper.RepairMissingColumnsAsync` and the 42P07 history repair; preprod starts and `/health` reports the database healthy.
+- [ ] **34.D19** — After owner redeploys, inspect member cards for academic record display.
+- [x] **96.15** — Done 2026-10-31: preprod starts and a CORS preflight from the preprod origin gets that origin back.
+- [ ] **84.48** — Reconcile owner-provided environment keys and startup settings, deploy, and record live health evidence without copying secrets into repository files.
 
 ## Local and documentation work
 

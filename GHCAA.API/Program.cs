@@ -31,15 +31,14 @@ if (!string.IsNullOrWhiteSpace(listenPort))
 
 JwtSigningKeyResolver.Resolve(configuration, builder.Environment);
 
-// Resolve application name from profile for DataProtection keyring
+// The DataProtection application name comes from the profile pack. Changing it orphans every
+// protected payload, so profiles/ghc keeps AppName "GHCAA". This also fails the boot early when
+// ORG_PROFILE is unset.
 var profileForAppName = new InstitutionProfileProvider(configuration, builder.Environment);
-var applicationName = profileForAppName.ProfileExplicitlySelected
-    ? profileForAppName.OrgConfigDefaults.Branding.AppName
-    : "GHCAA";
 
 builder.Services.AddDataProtection()
     .PersistKeysToDbContext<ApplicationDbContext>()
-    .SetApplicationName(applicationName);
+    .SetApplicationName(profileForAppName.OrgConfigDefaults.Branding.AppName);
 
 // Register Core Layers & Services
 builder.Services.AddApplication();
@@ -121,15 +120,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Verify institution profile pack
 var institutionProfile = app.Services.GetRequiredService<IInstitutionProfileProvider>();
-if (!institutionProfile.ProfileExplicitlySelected)
-{
-    app.Logger.LogWarning(
-        "ORG_PROFILE is not set. Institution configuration is being served from the hardcoded "
-        + "defaults in OrgConfigService, not from profiles/. Set ORG_PROFILE (for this deployment: "
-        + "ORG_PROFILE=ghc) to serve profiles/<name>/org-config.json instead. See docs/TODO.md 62.6.");
-}
 
 // Forwarded Headers for reverse proxy / TLS termination
 var forwardedHeadersOptions = new ForwardedHeadersOptions

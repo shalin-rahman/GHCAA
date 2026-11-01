@@ -8,7 +8,7 @@ for item status, priority, dependencies, owner actions, and acceptance criteria.
 This specification groups requirements and shared constraints; `tasks.md` maps
 tracker items to their implementation breakdowns. Existing code, generated
 contracts, and tests remain authoritative. Election-specific work stays in the
-election delivery plan.
+election stream (E) of `docs/MASTER_EXECUTION_PLAN.md`.
 
 ## Scope
 

@@ -173,6 +173,7 @@ tracker figures quoted in the outline's Chapter 11 block.
    cross-layer work. Some TODO items point to a step-by-step plan in `docs/`
    (for 84.49, 84.50 and 84.51, `docs/AUTH_AND_DEVICE_FIX_PLAN.md`). Follow the
    plan's order and checks, and settle its open decisions with the owner first.
+   `docs/MASTER_EXECUTION_PLAN.md` gives the order of all open work.
 3. Treat every change as a cross-layer change until proven otherwise. Trace
    retrieval and CRUD changes through persistence, application services and
    DTOs, API controllers, Angular services/components, Flutter services/screens,

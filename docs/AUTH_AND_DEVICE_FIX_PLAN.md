@@ -3,6 +3,8 @@
 Written 2026-10-25 from a read of the code on branch `preprod`. Line numbers are from that day
 and drift; grep for the named symbol before editing. The tracker entries are `docs/TODO.md`
 84.49, 84.50 and 84.51. This file says how to do them. The tracker says whether they are done.
+The order of all open work is in [`MASTER_EXECUTION_PLAN.md`](./MASTER_EXECUTION_PLAN.md), the
+master execution plan. Parts B1-B3, C and D are done; Part A and B4-B5 wait for the elections.
 
 This plan covers shared account, profile, and election-device fixes. The non-election backlog is
 being delivered first. Work on 84.49 B1-B3, then the general account-security part of 84.51 and
@@ -110,6 +112,8 @@ Record each result in TODO 84.50 as "passed on <device> <date>" or "fixed in <fi
   to `step_up_interceptor_test.dart`.
 
 ### A3. 84.44 ballot key on mobile
+
+The 84.44 code closed on 2026-10-23 (see `docs/TODO_ARCHIVE.md`). What is left here is the device run.
 
 - Screen `lib/screens/admin/election_management_screen.dart` (key button `action-ballot-key`,
   progress dialog `ballot-key-progress`, count button), key tools

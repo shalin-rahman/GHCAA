@@ -309,6 +309,38 @@ The Returning Officer should say these plainly to the committee.
 The original is on a device the Returning Officer controls, behind a screen lock. The Association sets how many sealed copies exist (default 2, at least 1). The Chief Commissioner names the holders from the appointed officials when the key is set. Each holder must be a different person and not a candidate, and each confirms receipt. The app does not yet hold the holders or the confirmations (TODO 37.14a), so the Chief Commissioner logs them by hand. Owner decision 2026-10-27: polling remains blocked until the recorded copy count matches the configured number and every holder confirms receipt. A copy is kept in a sealed envelope with a log entry, and every copy is destroyed together with the original once the recount window has closed. If every copy is lost, that is a level 3 incident: the election is void and is run again. Never in email, chat, a shared drive, a repository or a ticket. The person
 who approves the count never sees the key. The full procedure is `11-Election-Key-Procedure.md`.
 
+## Making the ballot key
+
+Each election gets its own key pair. Nobody reuses a key from an earlier election, and nobody makes one
+with a command-line tool or copies one from anywhere else.
+
+1. Before polling opens, the Returning Officer (or another official with `SetBallotKey`) opens the
+   election on the admin election screen and chooses to make the ballot key.
+2. Read the warning. A lost key file cannot be recovered.
+3. The browser makes a 3072-bit RSA key pair. The public half and its SHA-256 fingerprint are saved on
+   the election. The private half downloads once to the officer's device as a `.pem` file. The server
+   never receives it at this step.
+4. Check that the election shows a fingerprint, and that the file opens as text starting with
+   `-----BEGIN`.
+5. Announce the fingerprint to the Commission. Voters see the same fingerprint on the ballot screen.
+6. Make the sealed copies for the named holders and log each one, as in "Where the key lives" above.
+
+Polling cannot open without a key. Once polling opens the key cannot be changed.
+
+## Using the ballot key at the count
+
+1. At Counting, the Returning Officer uploads the `.pem` file once.
+2. A second official with `Approve` approves the count. That official never sees the file.
+3. The server uses the key for that one request and keeps nothing. If the app says the key is wrong,
+   check the file's fingerprint against the announced one before trying another copy.
+4. After the result is declared and the recount window has closed, delete every copy and record the
+   destruction on the web officials dashboard. The steps are under "Destroying the key after the
+   declare" in `11-Election-Key-Procedure.md`.
+
+The repository holds one RSA key, in `GHCAA.Tests/Services/BallotSealVector.cs`. It is a published test
+vector that checks the server's seal against an outside sealer. It seals no real ballot and must never
+be used as a ballot key. A ballot key is only ever made on the admin election screen as above.
+
 ---
 
 # 6. Rules every official follows

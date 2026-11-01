@@ -1,7 +1,10 @@
 using FluentAssertions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Infrastructure.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace GHCAA.Tests.Services;
@@ -26,12 +29,57 @@ public class MemberSearchOrderTests : TestBase
     public async Task FamilySearchByName_ReturnsMatchesSortedByName()
     {
         await SeedMembersAsync("Karim Zaman", "Karim Ahmed", "Karim Malik");
-        var service = new FamilyService(_context, Mock.Of<INotificationService>(), Mock.Of<IRealTimeService>());
+        var service = new FamilyLinkService(_context, Mock.Of<ILogger<FamilyLinkService>>(), Mock.Of<INotificationService>(),
+            Mock.Of<ICommunicationService>(), Mock.Of<IConfiguration>(), Mock.Of<IOrgConfigService>());
 
         var result = await service.SearchByNameAsync("Karim", excludeMemberId: 0);
 
         result.Select(m => m.FullName).Should().Equal("Karim Ahmed", "Karim Malik", "Karim Zaman");
     }
+
+    // Since 84.21 the family search ignores case and spaces around the term.
+    // The old FamilyService matched the raw term, so "karim " found nobody.
+    [Test]
+    [Category("FR-019")]
+    public async Task FamilySearchByName_IgnoresCaseAndSurroundingSpaces()
+    {
+        await SeedMembersAsync("Karim Zaman", "Abid Hasan");
+
+        var result = await NewFamilyLinkService().SearchByNameAsync("  karim ", excludeMemberId: 0);
+
+        result.Select(m => m.FullName).Should().Equal("Karim Zaman");
+    }
+
+    [Test]
+    [Category("FR-019")]
+    public async Task FamilySearchByName_SkipsPrivateInactiveAndCaller()
+    {
+        await SeedMembersAsync("Karim Public", "Karim Private", "Karim Inactive", "Karim Caller");
+        var members = _context.Members.ToList();
+        members.Single(m => m.FullName == "Karim Private").IsFamilyPublic = false;
+        members.Single(m => m.FullName == "Karim Inactive").Status = Enums.MembershipStatus.InactivePayment;
+        await _context.SaveChangesAsync();
+        var caller = members.Single(m => m.FullName == "Karim Caller");
+
+        var result = await NewFamilyLinkService().SearchByNameAsync("Karim", caller.Id);
+
+        result.Select(m => m.FullName).Should().Equal("Karim Public");
+    }
+
+    [Test]
+    [Category("FR-019")]
+    public async Task FamilySearchByName_ReturnsAtMostTwenty()
+    {
+        await SeedMembersAsync(Enumerable.Range(0, 22).Select(i => $"Karim {i:D2}").ToArray());
+
+        var result = await NewFamilyLinkService().SearchByNameAsync("Karim", excludeMemberId: 0);
+
+        result.Should().HaveCount(20);
+    }
+
+    private FamilyLinkService NewFamilyLinkService() =>
+        new(_context, Mock.Of<ILogger<FamilyLinkService>>(), Mock.Of<INotificationService>(),
+            Mock.Of<ICommunicationService>(), Mock.Of<IConfiguration>(), Mock.Of<IOrgConfigService>());
 
     [Test]
     public async Task AssistantMemberSearch_ReturnsMembersSortedByName()

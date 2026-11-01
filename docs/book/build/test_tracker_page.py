@@ -124,5 +124,37 @@ class WontDo(unittest.TestCase):
         self.assertEqual((item["state"], item["status"], item["pr"]), ("WONTDO", "closed", "P0"))
 
 
+class OneEntryPerId(unittest.TestCase):
+    """Until 2026-11-01 the page showed 122 open items when 118 IDs were open.
+    Priority Index lines were counted as items, and so was an ID found in both files."""
+
+    def setUp(self):
+        self._root = tracker_page.ROOT
+        tracker_page.ROOT = Path(tempfile.mkdtemp())
+        (tracker_page.ROOT / "docs").mkdir()
+        (tracker_page.ROOT / "docs" / "TODO.md").write_text(
+            "# Tracker\n"
+            "## Priority Index\n"
+            "84.42 [DONE] stale index line\n"
+            "## WORK PACKAGE 7: SECURITY\n"
+            "7.16 [TODO] under an upper-case heading\n"
+            "## Work Package 84 - Hardening\n"
+            "84.42 [TODO] device check\n"
+            "84.46 [TODO] still open\n", encoding="utf-8")
+        (tracker_page.ROOT / "docs" / "TODO_ARCHIVE.md").write_text(
+            "## Work Package 84 - Hardening\n"
+            "84.46 [DONE 2026-10-01] old copy\n", encoding="utf-8")
+        self.items = tracker_page.parse()[1]
+
+    def tearDown(self):
+        tracker_page.ROOT = self._root
+
+    def test_each_id_is_read_once(self):
+        self.assertEqual([i["id"] for i in self.items], ["7.16", "84.42", "84.46"])
+
+    def test_work_package_entry_wins_over_index_and_archive(self):
+        self.assertEqual([i["state"] for i in self.items], ["TODO", "TODO", "TODO"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

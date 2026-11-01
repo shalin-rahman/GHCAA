@@ -210,98 +210,98 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 6.4 Component and Interface Design | 56 |
 | 6.5 Data Design | 56 |
 | 6.6 Security Architecture | 57 |
-| 6.7 Web and Mobile User-Interface Design | 57 |
+| 6.7 Web and Mobile User-Interface Design | 58 |
 | 6.8 Configuration-Driven Design | 58 |
 | 6.9 Design Principles and Patterns | 58 |
 | 6.10 Architecture Decision Records and Design Verification | 60 |
 | 6.11 Summary | 61 |
-| **PART III — CONSTRUCTION AND VALIDATION** | 70 |
-| **Chapter 7 — Implementation** | 70 |
-| 7.1 Development Environment, Toolchain and Reproducibility | 70 |
-| 7.2 Solution and Module Structure | 70 |
-| 7.3 Coding Standards, Conventions and Static Enforcement | 70 |
-| 7.4 Implementation of the Domain and Persistence Layers | 71 |
-| 7.5 Implementation of the Application and Business Services | 71 |
-| 7.6 Implementation of the API Layer | 71 |
-| 7.7 Web Client, Mobile Client and Real-Time Features | 72 |
-| 7.8 Security Implementation | 72 |
-| 7.9 Document Generation | 72 |
-| 7.10 Constitution Publication Pipeline | 73 |
-| 7.11 Third-Party Libraries: selection criteria | 73 |
-| 7.12 Software Configuration Management | 73 |
-| 7.13 Notable Implementation Challenges and Their Resolution | 74 |
-| 7.14 Institution Profile Packs and White-Label Configuration | 74 |
-| 7.15 Summary | 75 |
-| **Chapter 8 — Security, Privacy and Trust** | 76 |
-| 8.1 Security Objectives and Assumptions | 76 |
-| 8.2 Threat Modelling (STRIDE) | 76 |
-| 8.3 Authentication and Session Security | 76 |
-| 8.4 Authorisation Model and the Role–Permission Matrix | 76 |
-| 8.5 Input Validation, Output Sanitisation and File Uploads | 77 |
-| 8.6 Transport Security, Browser Policy and Rate Limiting | 77 |
-| 8.7 Payment-Related Risk and the No-Gateway-Keys Posture | 78 |
-| 8.8 Governance Integrity | 78 |
-| 8.9 Personal Data: Lawful Basis, Minimisation, Consent, Retention and Subject Rights | 79 |
-| 8.10 Audit Logging and Non-Repudiation | 79 |
-| 8.11 OWASP ASVS Conformance and Residual Risks | 79 |
-| 8.12 Summary | 80 |
-| **Chapter 9 — Verification, Validation and Quality Assurance** | 85 |
-| 9.1 Verification and Validation Strategy and Test Levels | 85 |
-| 9.2 Software Quality Assurance Plan | 85 |
-| 9.3 Test-Case Design Techniques Applied | 85 |
-| 9.4 Unit and Component Testing | 85 |
-| 9.5 Widget and Golden Testing | 86 |
-| 9.6 Integration, System and End-to-End Testing | 86 |
-| 9.7 Regression Testing and Test Selection | 86 |
-| 9.8 Security Testing | 86 |
-| 9.9 Performance and Load Testing | 86 |
-| 9.10 Usability and Accessibility Testing | 87 |
-| 9.11 User Acceptance Testing | 87 |
-| 9.12 Product Metrics, Static Analysis and Defect Analysis | 87 |
-| 9.13 Summary | 87 |
-| **Chapter 10 — Deployment and Operations** | 88 |
-| 10.1 Deployment Architecture, Environments and Containers | 88 |
-| 10.2 Continuous Integration and Continuous Deployment | 88 |
-| 10.3 Database Provisioning, Configuration and Secrets | 88 |
-| 10.4 Observability | 88 |
-| 10.5 Backup, Recovery, Release and Rollback | 88 |
-| 10.6 Operating Cost, Maintenance and Handover | 88 |
-| 10.7 Summary | 88 |
-| **Chapter 11 — Project Management** | 90 |
-| 11.0 The Four P's Applied | 90 |
-| 11.1 Process Model in Practice and its Deviations from Plan | 90 |
-| 11.2 Work Breakdown Structure | 90 |
-| 11.3 Scheduling, Task Network and Critical Path | 91 |
-| 11.4 Effort Estimation | 92 |
-| 11.5 How the Implementation Time Was Optimised | 93 |
-| 11.6 Progress Tracking and Earned Value | 94 |
-| 11.7 Team Structure and Responsibilities | 94 |
-| 11.8 Configuration and Change Management in Practice | 94 |
-| 11.9 Risk Monitoring Record | 95 |
-| 11.10 Quality Assurance Activities Performed | 95 |
-| 11.11 Lessons in Project Management | 95 |
-| 11.12 Summary | 96 |
-| **PART IV — EVALUATION AND CLOSURE** | 97 |
-| **Chapter 12 — Results, Evaluation and Discussion** | 97 |
-| 12.1 Overview of the Delivered Artefact | 97 |
-| 12.2 Functional Evaluation | 97 |
-| 12.3 Quality Evaluation against ISO/IEC 25010 | 97 |
-| 12.4 Performance, Security and Usability Results | 97 |
-| 12.5 Stakeholder and Expert Evaluation | 97 |
-| 12.6 Answering the Research Questions | 97 |
-| 12.7 Discussion | 97 |
-| 12.8 Comparison against the Existing Manual System | 97 |
-| 12.9 Threats to Validity | 97 |
-| 12.10 Limitations of the Artefact | 97 |
-| 12.11 Reflection on the Design Science Contribution | 97 |
-| 12.12 Summary | 98 |
-| **Chapter 13 — Conclusion and Future Work** | 99 |
-| 13.1 Summary of the Work and its Contributions | 99 |
-| 13.2 Practical Implications for Similar Institutions | 99 |
-| 13.3 Lessons Learned | 99 |
-| 13.4 Future Work | 99 |
-| 13.5 Concluding Remarks | 99 |
-| **References** | 100 |
+| **PART III — CONSTRUCTION AND VALIDATION** | 71 |
+| **Chapter 7 — Implementation** | 71 |
+| 7.1 Development Environment, Toolchain and Reproducibility | 71 |
+| 7.2 Solution and Module Structure | 71 |
+| 7.3 Coding Standards, Conventions and Static Enforcement | 71 |
+| 7.4 Implementation of the Domain and Persistence Layers | 72 |
+| 7.5 Implementation of the Application and Business Services | 72 |
+| 7.6 Implementation of the API Layer | 72 |
+| 7.7 Web Client, Mobile Client and Real-Time Features | 73 |
+| 7.8 Security Implementation | 73 |
+| 7.9 Document Generation | 73 |
+| 7.10 Constitution Publication Pipeline | 74 |
+| 7.11 Third-Party Libraries: selection criteria | 74 |
+| 7.12 Software Configuration Management | 74 |
+| 7.13 Notable Implementation Challenges and Their Resolution | 75 |
+| 7.14 Institution Profile Packs and White-Label Configuration | 75 |
+| 7.15 Summary | 76 |
+| **Chapter 8 — Security, Privacy and Trust** | 77 |
+| 8.1 Security Objectives and Assumptions | 77 |
+| 8.2 Threat Modelling (STRIDE) | 77 |
+| 8.3 Authentication and Session Security | 77 |
+| 8.4 Authorisation Model and the Role–Permission Matrix | 77 |
+| 8.5 Input Validation, Output Sanitisation and File Uploads | 78 |
+| 8.6 Transport Security, Browser Policy and Rate Limiting | 78 |
+| 8.7 Payment-Related Risk and the No-Gateway-Keys Posture | 79 |
+| 8.8 Governance Integrity | 79 |
+| 8.9 Personal Data: Lawful Basis, Minimisation, Consent, Retention and Subject Rights | 80 |
+| 8.10 Audit Logging and Non-Repudiation | 80 |
+| 8.11 OWASP ASVS Conformance and Residual Risks | 80 |
+| 8.12 Summary | 81 |
+| **Chapter 9 — Verification, Validation and Quality Assurance** | 86 |
+| 9.1 Verification and Validation Strategy and Test Levels | 86 |
+| 9.2 Software Quality Assurance Plan | 86 |
+| 9.3 Test-Case Design Techniques Applied | 86 |
+| 9.4 Unit and Component Testing | 86 |
+| 9.5 Widget and Golden Testing | 87 |
+| 9.6 Integration, System and End-to-End Testing | 87 |
+| 9.7 Regression Testing and Test Selection | 87 |
+| 9.8 Security Testing | 87 |
+| 9.9 Performance and Load Testing | 87 |
+| 9.10 Usability and Accessibility Testing | 88 |
+| 9.11 User Acceptance Testing | 88 |
+| 9.12 Product Metrics, Static Analysis and Defect Analysis | 88 |
+| 9.13 Summary | 88 |
+| **Chapter 10 — Deployment and Operations** | 89 |
+| 10.1 Deployment Architecture, Environments and Containers | 89 |
+| 10.2 Continuous Integration and Continuous Deployment | 89 |
+| 10.3 Database Provisioning, Configuration and Secrets | 89 |
+| 10.4 Observability | 89 |
+| 10.5 Backup, Recovery, Release and Rollback | 89 |
+| 10.6 Operating Cost, Maintenance and Handover | 89 |
+| 10.7 Summary | 89 |
+| **Chapter 11 — Project Management** | 91 |
+| 11.0 The Four P's Applied | 91 |
+| 11.1 Process Model in Practice and its Deviations from Plan | 91 |
+| 11.2 Work Breakdown Structure | 91 |
+| 11.3 Scheduling, Task Network and Critical Path | 92 |
+| 11.4 Effort Estimation | 93 |
+| 11.5 How the Implementation Time Was Optimised | 94 |
+| 11.6 Progress Tracking and Earned Value | 95 |
+| 11.7 Team Structure and Responsibilities | 95 |
+| 11.8 Configuration and Change Management in Practice | 95 |
+| 11.9 Risk Monitoring Record | 96 |
+| 11.10 Quality Assurance Activities Performed | 96 |
+| 11.11 Lessons in Project Management | 96 |
+| 11.12 Summary | 97 |
+| **PART IV — EVALUATION AND CLOSURE** | 98 |
+| **Chapter 12 — Results, Evaluation and Discussion** | 98 |
+| 12.1 Overview of the Delivered Artefact | 98 |
+| 12.2 Functional Evaluation | 98 |
+| 12.3 Quality Evaluation against ISO/IEC 25010 | 98 |
+| 12.4 Performance, Security and Usability Results | 98 |
+| 12.5 Stakeholder and Expert Evaluation | 98 |
+| 12.6 Answering the Research Questions | 98 |
+| 12.7 Discussion | 98 |
+| 12.8 Comparison against the Existing Manual System | 98 |
+| 12.9 Threats to Validity | 98 |
+| 12.10 Limitations of the Artefact | 98 |
+| 12.11 Reflection on the Design Science Contribution | 98 |
+| 12.12 Summary | 99 |
+| **Chapter 13 — Conclusion and Future Work** | 100 |
+| 13.1 Summary of the Work and its Contributions | 100 |
+| 13.2 Practical Implications for Similar Institutions | 100 |
+| 13.3 Lessons Learned | 100 |
+| 13.4 Future Work | 100 |
+| 13.5 Concluding Remarks | 100 |
+| **References** | 101 |
 
 ---
 
@@ -366,14 +366,14 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 6.11 | Component diagram with provided and required interfaces | 67 |
 | 6.12 | Middleware pipeline diagram | 68 |
 | 6.13 | Navigation and route map | 68 |
-| 6.14 | Site map and information architecture of the public site |  |
-| 6.15 | Architectural trade-off radar |  |
-| 8.1 | Threat model data-flow diagram with trust boundaries, STRIDE-annotated | 80 |
-| 8.2 | Attack tree: member account takeover or fraudulent payment credit | 81 |
-| 8.3 | Role–permission matrix diagram | 81 |
-| 8.4 | Personal-data classification and flow diagram, with retention points | 82 |
-| 8.5 | Sequence diagram: an unauthorised request rejected through the middleware chain | 82 |
-| 8.6 | Defence-in-depth layer diagram | 82 |
+| 6.14 | Site map and information architecture of the public site | 69 |
+| 6.15 | Architectural trade-off radar | 69 |
+| 8.1 | Threat model data-flow diagram with trust boundaries, STRIDE-annotated | 81 |
+| 8.2 | Attack tree: member account takeover or fraudulent payment credit | 82 |
+| 8.3 | Role–permission matrix diagram | 82 |
+| 8.4 | Personal-data classification and flow diagram, with retention points | 83 |
+| 8.5 | Sequence diagram: an unauthorised request rejected through the middleware chain | 83 |
+| 8.6 | Defence-in-depth layer diagram | 83 |
 
 *Figures for Chapters 4 to 13 are listed as those chapters are written.*
 
@@ -403,23 +403,23 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 5.3 | Process specifications for the Level-2 processes | 54 |
 | 5.4 | Data-store definitions (analysis level) | 54 |
 | 6.1 | ADR index | 61 |
-| 6.2 | Data dictionary (representative slice; the full dictionary is generated from the schema) | 68 |
-| 6.3 | API endpoint catalogue (by controller; the full catalogue is the generated OpenAPI document) | 69 |
-| 6.4 | Design pattern catalogue (selected entries; full catalogue is §6.9 in full) | 69 |
-| 6.5 | Quality-attribute scenario to architectural tactic mapping | 69 |
-| 6.6 | Anti-patterns detected and remediated | 69 |
-| 7.1 | Size metrics by layer: files and lines of code | 70 |
-| 7.2 | Selected third-party dependencies | 75 |
-| 8.1 | STRIDE threat enumeration with mitigations and their implementation location | 82 |
-| 8.2 | Role × capability matrix | 83 |
-| 8.3 | OWASP ASVS conformance checklist (self-assessment, ASVS 4.0.3, level 2) | 83 |
-| 8.4 | Personal-data inventory: element, purpose, lawful basis, retention | 83 |
-| 8.5 | Residual risk register | 83 |
-| 11.1 | Component activity list, CPM summary ordered by float | 91 |
-| 11.2 | Unadjusted function-point count | 92 |
-| 11.3 | General system characteristics and technical complexity factor | 92 |
-| 11.4 | Delivered size by kind, at a stated production rate | 93 |
-| 11.5 | Risk exposure, computed from Table 4.2 | 95 |
+| 6.2 | Data dictionary (representative slice; the full dictionary is generated from the schema) | 69 |
+| 6.3 | API endpoint catalogue (by controller; the full catalogue is the generated OpenAPI document) | 70 |
+| 6.4 | Design pattern catalogue (selected entries; full catalogue is §6.9 in full) | 70 |
+| 6.5 | Quality-attribute scenario to architectural tactic mapping | 70 |
+| 6.6 | Anti-patterns detected and remediated | 70 |
+| 7.1 | Size metrics by layer: files and lines of code | 71 |
+| 7.2 | Selected third-party dependencies | 76 |
+| 8.1 | STRIDE threat enumeration with mitigations and their implementation location | 83 |
+| 8.2 | Role × capability matrix | 84 |
+| 8.3 | OWASP ASVS conformance checklist (self-assessment, ASVS 4.0.3, level 2) | 84 |
+| 8.4 | Personal-data inventory: element, purpose, lawful basis, retention | 84 |
+| 8.5 | Residual risk register | 84 |
+| 11.1 | Component activity list, CPM summary ordered by float | 92 |
+| 11.2 | Unadjusted function-point count | 93 |
+| 11.3 | General system characteristics and technical complexity factor | 93 |
+| 11.4 | Delivered size by kind, at a stated production rate | 94 |
+| 11.5 | Risk exposure, computed from Table 4.2 | 96 |
 
 ---
 

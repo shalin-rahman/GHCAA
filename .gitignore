@@ -195,6 +195,8 @@ PublishScripts/
 # Live DB/deploy credentials - never commit these (see docs/RENDER_DEPLOYMENT.md Step 7)
 docs/deploy_connection.txt
 docs/deploy_conn_Info.txt
+docs/appsettings.txt
+docs/dgepay_info.txt
 
 # NuGet Packages
 *.nupkg
@@ -373,6 +375,7 @@ GHCAA.API/appsettings.Preprod.json
 .env.prod
 .env.*
 !.env.example
+!.env.dev.example
 # Mobile env files hold only the API address and are built into the app.
 !GHCAA.Mobile/.env.*
 

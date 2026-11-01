@@ -24,5 +24,8 @@ namespace GHCAA.Application.Interfaces
 
         /// <summary>Remove an existing family link. Either party can initiate this.</summary>
         Task<bool> RemoveLinkAsync(int currentMemberId, int requestId, CancellationToken ct = default);
+
+        /// <summary>Find active members with a public family by name, top 20, excluding the caller.</summary>
+        Task<IEnumerable<MemberSummaryDto>> SearchByNameAsync(string name, int excludeMemberId, CancellationToken ct = default);
     }
 }

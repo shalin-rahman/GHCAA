@@ -15,6 +15,6 @@ Follow [Work Package 92](../../TODO.md) and the requirements in [spec.md](./spec
 
 - Preserve today's behavior on a fresh deployment until a setting is changed.
 - The API enforces role access regardless of client visibility.
-- Keep election-only presentation and workflow checks in the election delivery plan.
+- Keep election-only presentation and workflow checks in the election stream (E) of `docs/MASTER_EXECUTION_PLAN.md`.
 - Review existing authorization and audit tests before adding near-duplicates.
 - Do not mark an item complete on the basis of this plan; use the tracker acceptance evidence.

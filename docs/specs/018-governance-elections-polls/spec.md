@@ -29,7 +29,7 @@ notification delivery internals, org-config or branding internals used by PDF ge
 
 Related specs (context only, not repeated here):
 docs/specs/002-workflow-contracts-and-validation/evidence/governance-domain.md and
-polls-domain.md, docs/specs/010-election-engine-fixes/spec.md,
+polls-domain.md, docs/specs/027-election-engine-fixes/spec.md,
 docs/specs/011-election-module-redesign/spec.md, and the Governance/elections/roles and
 Forums/polls sections of
 docs/specs/001-platform-baseline/evidence/implementation-feature-catalog.md.

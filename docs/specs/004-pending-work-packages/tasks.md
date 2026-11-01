@@ -6,15 +6,15 @@
 priority, dependencies, and acceptance criteria. The entries below are execution
 breakdowns linked to tracker items. Update the tracker first when scope or
 acceptance changes. Use
-[`NON_ELECTION_BACKLOG_EXECUTION_PLAN.md`](../../NON_ELECTION_BACKLOG_EXECUTION_PLAN.md)
+[`MASTER_EXECUTION_PLAN.md`](../../MASTER_EXECUTION_PLAN.md)
 for delivery order. Election-specific items are intentionally not in this
 breakdown.
 
 ### Existing specifications and task files
 
 - **Shared foundations:** 8.5, 8.7, 8.8, 27.8, 28.25, 28.33, 34.D7–34.D8,
-  60.3, 84.4–84.5, 84.8–84.9, 84.18, 84.21, 84.23, 84.25, 84.27, 84.31,
-  84.35, and 84.39. Use specs 001–003 and this work-package index.
+  60.3, 84.4, 84.9, 84.18, 84.23, 84.25, 84.27, 84.35, and 84.39. 84.5, 84.8,
+  84.21 and 84.31 are done. Use specs 001–003 and this work-package index.
 - **Identity validation:** 84.49 uses spec 005 tasks for member NID, PassingYear,
   and age validation. Its ballot-key progress and timeout work stays in the
   election plan.
@@ -39,8 +39,7 @@ breakdown.
 - **Modules and performance:** 91.3, 91.4, 91.5, and 91.6 remain on hold
   until their recorded triggers occur. 98.7 uses spec 024 tasks; 98.34
   remains on hold.
-- **Operations:** 7.21, 7.22, 7.26, 7.28, 34.D17, 34.D18, 34.D19, 84.48, and 96.15
-  are gated by owner or live-environment evidence. The applicable references
+- **Operations:** 7.21, 7.26, 7.28, 34.D19 and 84.48 are gated by owner or live-environment evidence. The applicable references
   are in spec 020 and the tracker. Do not represent these as locally verified.
 - **Governance and dissertation:** 12.8, 12.9, 63.8, 63.18, 63.34, 64.8, 64.9,
   67.2, 67.3, 67.4, 67.5, 67.7, 72.4, 72.5, 73.5, 73.6, 74.3, 75.5, 76.4, 77.4, 77.11, and
@@ -85,12 +84,15 @@ breakdown.
   evidence in the election plan.
 - [ ] **60.3 — Verify naming consistency.** Compare Web and Mobile labels for
   Messages, Chat, and Forum; update the chosen user-facing labels and tests.
-- [ ] **84.4–84.5, 84.8–84.9 — Finish the contract baseline.** Produce the
-  client parity and authorization/error catalogs, then derive the platform
-  requirements and decisions from code and tests.
+- [x] **84.5, 84.8 — Authorization catalog and as-built specs.** Done: policy
+  constants in `ServiceExtensions`, `ProblemExtensions`, and specs 012 to 020.
+- [ ] **84.4, 84.9 — Finish the contract baseline.** Produce the client parity
+  table, then derive the platform requirements and decisions from code and tests.
 - [ ] **84.18 — Complete the entity gap review.** Use specs 012–020, record user
   groups and association fit, and raise each accepted gap through the tracker.
-- [ ] **84.21, 84.23, 84.25, 84.27, 84.31, 84.35, 84.39 — Close focused
+- [x] **84.21, 84.31 — Done 2026-11-01.** Duplicate family service removed;
+  spec folder 010 clash resolved by moving the election fixes to 027.
+- [ ] **84.23, 84.25, 84.27, 84.35, 84.39 — Close focused
   findings.** Follow each item's stated source path, reuse existing specs and
   tests, and do not widen a remediation beyond its acceptance.
 - [ ] **84.49 — Apply owner-selected profile validation.** Allow NID edits at

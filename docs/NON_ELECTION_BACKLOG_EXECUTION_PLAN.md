@@ -1,5 +1,9 @@
 # Non-election backlog execution plan (reconciled 2026-10-27)
 
+**Superseded 2026-11-01 by [`MASTER_EXECUTION_PLAN.md`](./MASTER_EXECUTION_PLAN.md), the master
+execution plan.** Its eight phases are streams N1 to N8 there. The item lists below are history;
+the phase order and constraints still apply.
+
 This plan orders active non-election work recorded in `docs/TODO.md`. The tracker remains authoritative for status, priority, dependencies, owner decisions, and acceptance criteria. Read the linked tracker item before starting any package. Specification task files decompose work but do not create a second status ledger.
 
 ## Scope and classification

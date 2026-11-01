@@ -204,6 +204,35 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
+        public async Task<IEnumerable<MemberSummaryDto>> SearchByNameAsync(string name, int excludeMemberId, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return Array.Empty<MemberSummaryDto>();
+
+            // PostgreSQL compares case-sensitively, so both sides are lower-cased.
+            var term = name.Trim().ToLower();
+            // Take needs a stable order, or EF warns (10102) and the database picks which 20 come back.
+            var members = await _db.Members
+                .Where(m => m.Id != excludeMemberId &&
+                            m.IsFamilyPublic &&
+                            m.Status == MembershipStatus.Active &&
+                            m.FullName.ToLower().Contains(term))
+                .OrderBy(m => m.FullName)
+                .ThenBy(m => m.Id)
+                .Take(20)
+                .ToListAsync(ct);
+
+            return members.Select(m => new MemberSummaryDto
+            {
+                Id = m.Id,
+                FullName = m.FullName,
+                MembershipNumber = m.MembershipNumber,
+                PhotoPath = m.PhotoPath,
+                Category = m.Category,
+                MembershipType = m.MembershipType,
+                IsVerified = m.IsVerified
+            });
+        }
+
         private static FamilyLinkRequestDto MapToDto(FamilyLinkRequest r, Member? requester, Member? target) => new()
         {
             Id = r.Id,

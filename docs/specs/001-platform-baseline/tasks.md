@@ -41,17 +41,19 @@ These tasks do not authorize application changes.
   expanded`.
 - [x] T015 Run the API snapshot comparison used by
   `.github/workflows/ghcaa-ci-standard.yml`.
-- [x] T016 Run `graphify update .` after the specification artifacts are
+- [x] T015a Run `graphify update .` after the specification artifacts are
   created.
 
 ## Phase 3: Maintenance rules
 
-- [ ] T016 When a future API endpoint or DTO changes, update the Application
+These are standing rules, not tasks, so they carry no checkbox and never close.
+
+- T016 When a future API endpoint or DTO changes, update the Application
   contract, API mapping, Angular typed client, Flutter service, and relevant
   tests together.
-- [ ] T017 When a future implementation behavior changes, update this
+- T017 When a future implementation behavior changes, update this
   baseline's affected requirement and cross-layer trace together.
-- [ ] T018 Keep future feature specifications in a new numbered directory under
+- T018 Keep future feature specifications in a new numbered directory under
   `docs/specs/` and leave this baseline as the record of the existing system.
 
 ## Verification Notes

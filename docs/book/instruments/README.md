@@ -22,6 +22,20 @@ have run. A file here that carries an answer is a defect.
 | `heuristic-walkthrough.md` | The author alone, no participant | §12.6 |
 | `response-log-template.md` | One copy per participant | All of the above |
 
+## Before the first session
+
+Do these once, on the day before the first session. If any fails, postpone every session.
+
+1. Preprod mail works (tracker item 7.26): request a sign-in code for a test account and check that it
+   reaches the inbox and that the admin email log shows it as sent.
+2. Preprod uploads survive a redeploy (tracker item 7.28): upload a profile photo, redeploy, and check
+   the photo still loads.
+3. One test account per role exists on preprod: an ordinary member, the Treasurer, the General
+   Secretary and the President. None of them is the author's own account.
+4. At least one handset is charged and has the mobile app pointed at preprod.
+5. Print one copy of `response-log-template.md` and the right task script per participant, and give
+   each participant a reference such as `P01`. Keep the reference-to-name list on paper only.
+
 ## How to run a session
 
 Allow forty minutes. Twenty-five for the tasks, five for the questionnaire, ten for the role

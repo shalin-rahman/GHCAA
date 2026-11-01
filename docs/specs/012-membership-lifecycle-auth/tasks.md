@@ -1,6 +1,6 @@
 # Membership lifecycle and authentication tasks
 
-This breakdown covers the general account-security work in TODO 84.51. Election-only device checks and election business rules remain in the election delivery plan. Keep item status and acceptance in `docs/TODO.md`.
+This breakdown covers the general account-security work in TODO 84.51. Election-only device checks and election business rules remain in the election stream (E) of `docs/MASTER_EXECUTION_PLAN.md`. Keep item status and acceptance in `docs/TODO.md`.
 
 ## Sequence
 

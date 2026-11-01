@@ -104,6 +104,8 @@ the checkboxes below reflect recorded completion while open work stays in
 
 ## Maintenance rules
 
-- [ ] T025 When any of 37.2/37.5/37.8/37.9/37.10 changes status in
+This is a standing rule, not a task, so it carries no checkbox.
+
+- T025 When any of 37.2/37.5/37.8/37.9/37.10 changes status in
   `docs/TODO.md`, update the corresponding story/task status here in the same
   change.

@@ -17,15 +17,13 @@ namespace GHCAA.Tests.Controllers
     public class FamilyLinkControllerTests : ControllerTestBase
     {
         private Mock<IFamilyLinkService> _familyLinkServiceMock;
-        private Mock<IFamilyService> _familyServiceMock;
         private FamilyLinkController _controller;
 
         [SetUp]
         public void Setup()
         {
             _familyLinkServiceMock = new Mock<IFamilyLinkService>();
-            _familyServiceMock = new Mock<IFamilyService>();
-            _controller = new FamilyLinkController(_familyLinkServiceMock.Object, _familyServiceMock.Object);
+            _controller = new FamilyLinkController(_familyLinkServiceMock.Object);
             SetMemberContext(_controller, 10);
         }
 
@@ -155,6 +153,30 @@ namespace GHCAA.Tests.Controllers
             var result = await _controller.Respond(dto, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<NotFoundResult>());
+        }
+
+        [Test]
+        [Category("FR-019")]
+        public async Task Search_ExcludesCallerAndReturnsMatches()
+        {
+            var matches = new List<MemberSummaryDto> { new() { Id = 7, FullName = "Karim Ahmed" } };
+            _familyLinkServiceMock.Setup(x => x.SearchByNameAsync("Karim", 10, It.IsAny<CancellationToken>())).ReturnsAsync(matches);
+
+            var result = await _controller.Search("Karim", CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            Assert.That(((OkObjectResult)result).Value, Is.EqualTo(matches));
+        }
+
+        [Test]
+        [Category("FR-019")]
+        public async Task Search_Returns400_WhenNameBlank()
+        {
+            var result = await _controller.Search("  ", CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<ObjectResult>());
+            Assert.That(((ObjectResult)result).StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+            _familyLinkServiceMock.Verify(x => x.SearchByNameAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }

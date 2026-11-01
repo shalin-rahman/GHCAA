@@ -580,9 +580,9 @@ Table 6.6 records each one as symptom, diagnosis and what was done. One is remed
 against but not yet built, and one is accepted as it stands with the reason given.
 
 **God service, avoided by decomposition rather than discovered as a defect.** Splitting
-`FinancialService` from `FinancialLedgerService`, and `IFamilyLinkService` from `IFamilyService`
-(PROJECT_MAP.md records both as separate registrations), kept two services from growing into one
-that owned both a business workflow and its append-only record of consequence.
+`FinancialService` from `FinancialLedgerService` (PROJECT_MAP.md records both as separate
+registrations) kept the finance service from growing into one that owned both a business workflow
+and its append-only record of consequence.
 
 **Anaemic domain drift, noticed and knowingly not corrected.** §5.3.1 and §6.9.16 both record this:
 correcting it would have moved authorisation logic out of the service layer where every access-control

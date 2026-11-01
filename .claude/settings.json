@@ -1,4 +1,18 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(python -m unittest discover -s scripts -p test_backlog_inventory.py)",
+      "Bash(python scripts/ci-local.py --help)",
+      "Bash(cd /c/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA && grep -rn \"IFamilyLinkService\" --include=*.cs . | grep -v \"Tests/\\\\|/obj/\" | cut -c1-200)",
+      "Read(//c/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/**)",
+      "Bash(python scripts/backlog_inventory.py --state ONHOLD)",
+      "Bash(python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md)",
+      "Read(//c/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/GHCAA.Infrastructure/Data/Migrations/PgSql/**)",
+      "Read(//dev/**)",
+      "Read(//c/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/GHCAA.Tests/**)",
+      "Bash(python docs/book/build/wbs.py --check)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {

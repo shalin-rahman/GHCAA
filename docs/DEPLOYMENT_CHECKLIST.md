@@ -192,9 +192,9 @@ a `v*` tag or by hand.
 
 ## Open owner items (as of 2026-10-06)
 
-- 7.22: preprod `AppSettings__AllowedOrigins__0` and `AppSettings__ClientUrl` on Render, and both
-  `.env.preprod` files, still point at `preprod.haragangian.com`. Set them to
-  `https://ghcaa-ryl6.onrender.com`. The current code will not start until this is done.
+- 7.22: preprod `AppSettings__AllowedOrigins__0` and `AppSettings__ClientUrl` on Render must be
+  `https://ghcaa-ryl6.onrender.com`. The current code will not start without them.
+  `GHCAA.Mobile/.env.preprod` was set to the same host on 2026-11-01.
 - 7.21: the `www` DNS record and the Render custom-domain redirect, then the curl check in section 4.
 - Rotate the database password and deploy hook that sit in `RENDER_DEPLOYMENT.md` and its git
   history, then remove them from that file (`RENDER_DEPLOYMENT.md` Step 7, security cleanup).

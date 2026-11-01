@@ -235,10 +235,8 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
   physical phone.
 - **34.D19** — [IN PROGRESS] Member cards show "Batch: N/A" because the rename migration for the org
   academic record never ran. Code done; needs confirming on preprod with 34.D17 and 34.D18.
-- **7.22** — [PARTIAL 2026-10-31] Render and `appsettings.Preprod.json` now use
-  `https://ghcaa-ryl6.onrender.com`; a preflight from that origin gets it back. The root
-  `.env.preprod` was fixed the same day. `GHCAA.Mobile/.env.preprod` line 6 still sets
-  `BASE_API_URL=https://preprod.haragangian.com/api`, so a preprod mobile build calls a dead host.
+- **7.22** — [DONE 2026-11-01] Render, `appsettings.Preprod.json`, the root `.env.preprod` and
+  `GHCAA.Mobile/.env.preprod` all use `https://ghcaa-ryl6.onrender.com`.
 - **37.13e** — [DONE 2026-10-23] Ballot key procedure and protocol, with a test vector sealed outside .NET.
 - **37.12w** — [DONE 2026-10-21] Open-polling readiness gate on the API, web and mobile. Polling
   opens only when the roll, candidate list, ballot key, appointments, polling window and the four
@@ -371,18 +369,16 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
 
 ## WORK PACKAGE 7: SECURITY, INFRASTRUCTURE & HARDENING
 
-7.16 [IN-PROGRESS] **Priority: P3.** Hardening: SSL Pinning and Binary Obfuscation. Obfuscation is done: `mobile_deployment.yml`'s Android and iOS release build steps now pass `--obfuscate --split-debug-info=build/debug-info`, and that directory is uploaded as a separate `android-debug-info`/`ios-debug-info` artifact (90-day retention) so a crash report from a given release build can still be symbolicated later. SSL pinning is scaffolded, not enforced: `GHCAA.Mobile/lib/core/api/ssl_pinning.dart` gates pinning on `AppConfig.environment == 'production'` (dev/preprod are never affected) and only enforces it once `kProductionCertificateSha1Pins` holds a real value — `ssl_pinning_io.dart` wires the check into Dio via a `SecurityContext(withTrustedRoots: false)` + `badCertificateCallback`, `ssl_pinning_stub.dart` is the web no-op, `api_client.dart`'s `dioProvider` calls it. `kProductionCertificateSha1Pins` is still empty: there is no `.env.production` in this repo (only `.env` for dev and `.env.preprod`) and no way from this environment to fetch or confirm the real production certificate, so pinning stays a documented no-op rather than risk pinning a guessed value and locking out every user until an app update. Remaining step for someone with access to the live production host: run the `openssl s_client`/`openssl x509 -fingerprint` command documented at the top of `ssl_pinning.dart`, add the fingerprint to `kProductionCertificateSha1Pins`, and update `ssl_pinning_test.dart`'s placeholder-state test to assert `isPinningEnforceable('production')` is true. VERIFIED 2026-09-17: `flutter test test/ssl_pinning_test.dart test/mobile_deployment_obfuscation_test.dart` (9 tests: environment gating, enforceability-while-placeholder, fingerprint hex encoding, and a grep-assertion that both CI release build lines carry `--obfuscate`/`--split-debug-info`) and `flutter analyze` on all touched files, both clean.
-7.21 [TODO] **Priority: P2 | Depends on: 7.20, owner DNS.** Check the `www` redirect on the live site. haragangian.com, www.haragangian.com and preprod.haragangian.com did not resolve on 2026-10-05. Once DNS is live the owner adds the Render custom-domain redirect, then `curl -I https://www.haragangian.com/x?y=1` must answer 301 with `Location: https://haragangian.com/x?y=1`. Owner step. Raised 2026-10-05.
-7.22 [PARTIAL 2026-10-31] **Priority: P1 | Depends on: none.** Preprod origin settings point at a domain that does not resolve. On 2026-10-05 `https://ghcaa-ryl6.onrender.com` answered CORS with `access-control-allow-origin: https://preprod.haragangian.com`, so Render's `AppSettings__AllowedOrigins__0` is the dead domain, and ClientUrl very likely is too, which would send payment returns there. Owner step: set both to `https://ghcaa-ryl6.onrender.com` on Render, and change the preprod lines in the root `.env.preprod` and `GHCAA.Mobile/.env.preprod`. The code does not change; `docs/ENV_REVIEW.md` already shows the right value. Raised 2026-10-05.
-  - **Review, 2026-10-14.** `GHCAA.API/appsettings.Preprod.json:6-9`, added by 96.15, also names the dead domain `preprod.haragangian.com`. It belongs in the owner's fix list with the Render settings; it is not edited here because it is a settings file.
-  - **Owner answer, 2026-10-14.** The preprod origin is the Render web address. The API serves the web client from the same host, so the origin is `https://ghcaa-ryl6.onrender.com`; the owner sets it in `GHCAA.API/appsettings.Preprod.json:6-9` and in Render's `AppSettings__AllowedOrigins__0` and ClientUrl. The owner confirms the address when making the change.
-  - **Update 2026-10-31.** Render, `appsettings.Preprod.json` and the root `.env.preprod` all use `https://ghcaa-ryl6.onrender.com`. Left: `GHCAA.Mobile/.env.preprod` line 6 still points `BASE_API_URL` at `preprod.haragangian.com`. The root `.gitignore` now ignores `.env.*` except `.env.example` and the mobile env files, which hold only the API address.
+7.16 [IN PROGRESS] **Priority: P3.** Hardening: SSL Pinning and Binary Obfuscation. Obfuscation is done: `mobile_deployment.yml`'s Android and iOS release build steps now pass `--obfuscate --split-debug-info=build/debug-info`, and that directory is uploaded as a separate `android-debug-info`/`ios-debug-info` artifact (90-day retention) so a crash report from a given release build can still be symbolicated later. SSL pinning is scaffolded, not enforced: `GHCAA.Mobile/lib/core/api/ssl_pinning.dart` gates pinning on `AppConfig.environment == 'production'` (dev/preprod are never affected) and only enforces it once `kProductionCertificateSha1Pins` holds a real value — `ssl_pinning_io.dart` wires the check into Dio via a `SecurityContext(withTrustedRoots: false)` + `badCertificateCallback`, `ssl_pinning_stub.dart` is the web no-op, `api_client.dart`'s `dioProvider` calls it. `kProductionCertificateSha1Pins` is still empty: there is no `.env.production` in this repo (only `.env` for dev and `.env.preprod`) and no way from this environment to fetch or confirm the real production certificate, so pinning stays a documented no-op rather than risk pinning a guessed value and locking out every user until an app update. Remaining step for someone with access to the live production host: run the `openssl s_client`/`openssl x509 -fingerprint` command documented at the top of `ssl_pinning.dart`, add the fingerprint to `kProductionCertificateSha1Pins`, and update `ssl_pinning_test.dart`'s placeholder-state test to assert `isPinningEnforceable('production')` is true. VERIFIED 2026-09-17: `flutter test test/ssl_pinning_test.dart test/mobile_deployment_obfuscation_test.dart` (9 tests: environment gating, enforceability-while-placeholder, fingerprint hex encoding, and a grep-assertion that both CI release build lines carry `--obfuscate`/`--split-debug-info`) and `flutter analyze` on all touched files, both clean.
+7.21 [ONHOLD 2026-11-02, until the domain is bought and pointed at Render] **Priority: P2 | Depends on: 7.20, owner DNS.** Check the `www` redirect on the live site. haragangian.com, www.haragangian.com and preprod.haragangian.com did not resolve on 2026-10-05. Once DNS is live the owner adds the Render custom-domain redirect, then `curl -I https://www.haragangian.com/x?y=1` must answer 301 with `Location: https://haragangian.com/x?y=1`. Owner step. Raised 2026-10-05.
 7.26 [PARTIAL 2026-10-14] **Priority: P1 | Depends on: 37.1y.** Preprod sends no email, so sign-in codes, step-up codes and every notice fail. Render's free tier blocks outbound SMTP and `GmailEmailService` connects to `smtp.gmail.com:587`. 37.1y made the failure show; this item makes sending work. Code done 2026-10-14: a second sender, `BrevoEmailService`, posts to Brevo's HTTPS API, and `EmailSettings:Provider` picks `Gmail` (the default, so local and dev setups do not change) or `Brevo` as the server default; any other value stops startup in `DependencyInjection.AddEmailService`. Changed 2026-10-15 at the owner's request: an admin picks the sender under Settings, Workflow tab, Email Sender, saved as `Workflow.EmailProvider` in OrganizationConfig. `EmailServiceRouter` reads it on each send, so a switch needs no restart, and a blank or unknown value falls back to `EmailSettings:Provider`. Keys stay in env. `GET healthz` checks the settings of the provider in use (spec 020 FR-016). Docs: `docs/DEPLOYMENT_CHECKLIST.md` §1, `docs/ENV_REVIEW.md`, `docs/CONFIG_DRIVEN_FRAMEWORK.md`, `GHCAA.API/.env.example`. Tests: `BrevoEmailServiceTests` (missing settings, the request sent, no sender name, a refused send, a network failure) `HealthControllerTests` (checks follow the admin pick, then the server default), `EmailServiceRouterTests` (admin pick, server default, a failed config read), `OrgConfigServiceTests` (the provider name is saved normalized) and the org-config web spec. Owner steps left: create a free Brevo account, add and verify the sending address under Senders, create an API key, then set `BrevoSettings__ApiKey`, `BrevoSettings__SenderEmail` and optionally `BrevoSettings__SenderName` on Render, redeploy, and pick Brevo under Settings (or set `EmailSettings__Provider=Brevo`). Close when a step-up code reaches an inbox from preprod and the `EmailLogs` row reads Sent. Local env files (`.env`, `.env.dev`, `.env.preprod`, and `GHCAA.API/.env`, `.env.dev`, `.env.preprod`, `.env.prod`) still need the commented Brevo block from `.env.example`; they hold real values, so the owner pastes it.
   - **Update 2026-10-31.** The Brevo keys are on Render and the admin picked Brevo in Settings. Preprod `/health` reports `EmailService` Healthy. Still to check: a sign-in code email reaches an inbox, and `EmailLogs` shows it sent.
+  - **Check 2026-11-02.** The owner confirmed the keys are on Render. `GET /health` on preprod answered 200 with all four checks Healthy. A Gmail setup with its settings filled would pass too, so the inbox check above is still the closing step.
 7.28 [PARTIAL 2026-10-19] **Priority: P1 | Depends on: none.** Uploads on preprod are lost on every redeploy, because Render wipes the container disk. Raised by the owner on 2026-10-19, who added an S3-compatible bucket (`ghcaa-storage`) to `GHCAA.API/.env.preprod` and asked for all preprod images to move there and be served from there. Code done 2026-10-19: `FileStorage:Provider` picks `Local` (the default) or `S3`; `S3FileStorageService` saves, reads and deletes in the bucket, sharing path rules and image compression with the disk store through `FileStorageServiceBase`; `/api/uploads` streams from the bucket when the provider is `S3`, with the same thumbnail fallback and placeholder; `SecureFilesController`, `IDCardService` and `healthz` read through `IFileStorageService`. Tests: `S3FileStorageServiceTests`, `UploadProxyTests`, `FileStorageRegistrationTests` and new `LocalFileStorageServiceTests` cases; full backend suite 1497 passed. Data: the local `GHCAA.API/wwwroot/uploads` tree (631 files, 62,335,395 bytes) was copied to `s3://ghcaa-storage/uploads` with `aws s3 sync`, and a second dry run found nothing left to copy. Docs: `DEPLOYMENT_CHECKLIST.md` Render variables, `RECOVERY_RUNBOOK.md` Scenario 3 (uploads lost), `ENV_REVIEW.md` registry, spec 020 FR-015.
   - **Open, owner steps.** Set `FileStorage__Provider=S3`, `FileStorage__S3__BucketName=ghcaa-storage` and the four `AWS_*` variables on Render before the next deploy. Files uploaded on the live site since its last deploy exist only on that container's disk and are not in the local copy; they need copying into the bucket before the redeploy, or they are lost with it. Listing them needs the upload paths from the Neon database.
   - **Review findings, 2026-10-20.** The owner asked for the findings left open on 2026-10-19 to follow standard behaviour. `OpenReadAsync` now returns a `StoredFile` with the stream, last-modified time and ETag. `/api/uploads` on S3 and `SecureFilesController` pass these on with range processing on, so a repeat request with `If-None-Match` gets 304, HEAD sends headers only, and `Range` gets 206. The S3 read stream can seek: a read at a new position asks the bucket for that byte range of the same version (`EtagToMatch`). A failed write after image compression now throws after one attempt, without a second upload. A thumbnail delete that fails is logged and does not fail the photo delete, and deleting a thumbnail key deletes only that key, on both stores. `IDCardService` reads the photo from the store first and falls back to the web root for seeded `assets/` photos, refusing a path that leaves the web root. Proxy tests confirm `..` and encoded `%2e%2e` reach the store as `..`, which the store refuses. Left as is, with reasons: S3 `ThumbnailExists` still answers true and the proxy falls back to the full photo, which saves one HEAD request per gallery tile; the S3 health probe is not cached, matching the database probe, and the rate limit on `healthz` bounds it. A code review of these fixes found three more, fixed the same day: the S3 health probe now gives up after `Constants.Deploy.StorageProbeTimeoutSeconds` (5 s) and reports a timeout as Unhealthy instead of an error; a disk file deleted between the exists check and the open now reads as missing instead of a 500; and a test pins that the stores read only under `uploads/members` and `secure_uploads/members`, where every upload is saved (the seeded `uploads/receipts/*.png` payment rows point at files that were never on disk). Tests tagged NFR-P4, NFR-R4 and NFR-S7 in `UploadProxyTests`, `SecureFilesControllerTests`, `S3FileStorageServiceTests`, `LocalFileStorageServiceTests` and the new `IDCardServicePhotoTests`; full backend suite 1519 passed. Docs: spec 020 FR-015 (upload store health check), `DEPLOYMENT_CHECKLIST.md` (the bucket credential needs list rights).
   - **Update 2026-10-31.** `FileStorage__Provider=S3`, `FileStorage__S3__BucketName=ghcaa-storage` and the four `AWS_*` variables are on Render, and `/health` reports `FileStorage` Healthy. That check also passed with local storage, so it does not prove S3 is in use. Still to check: upload a photo on preprod, redeploy, and confirm it still loads.
+  - **Check 2026-11-02.** `/health` Healthy again, and three member photos came back byte for byte from `/api/uploads`. That does not prove S3 either: the 631 files under `GHCAA.API/wwwroot/uploads` are tracked in git, so they ship inside the image. The upload-then-redeploy check above is still the closing step.
 
 ## WORK PACKAGE 8: MOBILE ENGINEERING (TIER-1 STANDARDS)
 
@@ -392,6 +388,7 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
 ## WORK PACKAGE 12: PROCESS & ENGINEERING STANDARDS
 
 12.8 [TODO] **Priority: P3 | Depends on: user approval.** `docs/` holds dated reviews, old plans, duplicate proposal versions and two files that carry secrets, next to the live docs. An audit on 2026-10-06 listed what to archive, merge, fix or untrack. Nothing gets moved or deleted until the user approves the list, and any move updates the book build refs and README links in the same change. Requested 2026-10-06.
+  - **Owner decision, 2026-11-02.** Untrack `docs/appsettings.txt` and `docs/dgepay_info.txt` with `git rm --cached` (the files stay on disk) and add them to `.gitignore`, as was done for `.env.dev` in 99.5. Then show the archive and merge list for approval before anything moves.
   - **Review, 2026-10-14.** A third file with secrets sits in `docs/`: `docs/deploy_conn_Info.txt`, untracked. The tracked two are `docs/appsettings.txt` and `docs/dgepay_info.txt`. The approval list should name all three.
   - **Owner answer, 2026-10-14.** Leave the three secret files as they are for now. Asked again when the docs clean-up runs.
 
@@ -403,15 +400,14 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
   - Spec 018 (governance and elections): add and remove candidate, count, declare, tie and multi-seat text, FR-023, FR-024, FR-031, SC-002 and the test-coverage note now describe the code as built since spec 023's fixes. The scrutiny-bypass clarification is dropped because `AddCandidateAsync` now adds a Submitted nomination.
   - Spec 020 (platform operations): the health trace rows for FR-014 to FR-016 cite `HealthControllerTests`, and FR-016 is tagged code and test.
   - Status lines: spec 023 (ballot secrecy) remains in progress; see its entries in `docs/TODO.md` for current open work. Spec 024 (performance) has only 98.7 open plus 98.34 on hold; spec 025 (config pack) has FR-18 built and FR-1 to FR-17 not started.
-  - Still open, larger than a fact fix: spec 004 (backlog roadmap) lists closed items as active (37.2, 37.6, 47.13, 60.2, 60.5, 65.5, 73.7, 78.12, 81.1 to 81.3, 84.5, 84.6), repeats the 81.1 to 81.3 heading, and quotes 37.8, 37.9 and 37.10 against the wrong subjects. Spec 010-election-engine-fixes describes a ballot model (`SerialNumber`, `IssuedAt`, `CastAt`) and a "not met" secrecy rule that spec 023 replaced. Spec 011 (election module redesign) has no status line, reads as new work although 37.1h is done, and keeps positions as a fixed enum, which the 2026-10-14 decision under 37.1h-1 reverses. Spec 012 (membership and auth) has no requirement for the configurable access-token lifetime and OTP attempt limit, and its ENH-004 still says the web fee is hardcoded. Spec 013 (profile) FR-022 still says `SecureFilesController` reads `FileStorage:BasePhysicalPath`; it goes through `IFileStorageService` once the S3 work under 7.28 lands. Spec 014 cites drifted line numbers for FR-004, FR-005 and the gallery upload. Spec 017 does not mention the Brevo sender or `Workflow.EmailProvider` from 7.26. Spec 019 says mobile posts `question` while the API binds `Query`, and no tracker item covers that bug. Item 90.1 (ad-hoc reporting) names the column `CreatedBy`; spec 010-ad-hoc-reporting says `CreatedByUserId`.
+  - Still open, larger than a fact fix: spec 004 (backlog roadmap) lists closed items as active (37.2, 37.6, 47.13, 60.2, 60.5, 65.5, 73.7, 78.12, 81.1 to 81.3, 84.5, 84.6), repeats the 81.1 to 81.3 heading, and quotes 37.8, 37.9 and 37.10 against the wrong subjects. Spec 027-election-engine-fixes (numbered 010 before 84.31) describes a ballot model (`SerialNumber`, `IssuedAt`, `CastAt`) and a "not met" secrecy rule that spec 023 replaced. Spec 011 (election module redesign) has no status line, reads as new work although 37.1h is done, and keeps positions as a fixed enum, which the 2026-10-14 decision under 37.1h-1 reverses. Spec 012 (membership and auth) has no requirement for the configurable access-token lifetime and OTP attempt limit, and its ENH-004 still says the web fee is hardcoded. Spec 013 (profile) FR-022 still says `SecureFilesController` reads `FileStorage:BasePhysicalPath`; it goes through `IFileStorageService` once the S3 work under 7.28 lands. Spec 014 cites drifted line numbers for FR-004, FR-005 and the gallery upload. Spec 017 does not mention the Brevo sender or `Workflow.EmailProvider` from 7.26. Spec 019 says mobile posts `question` while the API binds `Query`, and no tracker item covers that bug. Item 90.1 (ad-hoc reporting) names the column `CreatedBy`; spec 010-ad-hoc-reporting says `CreatedByUserId`.
   - Election check, 2026-10-20: none of the 21 open Work Package 37 items has been built since its text was written. 37.12x (the web election test that fails in a full run) is still at `admin-elections.spec.ts:256` and not skipped; one clean full web run would close it.
   - Update 2026-10-21: 37.12x closed after a full web run passed 792 of 792. 37.1h-1 and six overlapping items (37.12n, 37.12o, 37.12r, 37.12s, 37.12t, 37.12z) were merged into the items that cover them. 16 Work Package 37 items are open now, counted by grepping the item tags.
 
 ## WORK PACKAGE 27: TEST COVERAGE IMPROVEMENT
 
-27.1  [IN-PROGRESS] Generate low‑coverage report (parse coverage.cobertura.xml). Reporting began 2026-09-16: Coverlet baseline is 59.99% lines and 39.61% branches (7,272/12,122 lines; 1,768/4,463 branches); latest Vitest V8 report is 42.25% lines and 28.44% branches across `src/app` (2,453/5,805 lines; 866/3,045 branches); Flutter LCOV baseline is 14.23% lines (1,392/9,781). All reports are retained by CI. `docs/TEST_COVERAGE_PLAN.md` defines the shared collection, test-selection and threshold method before any threshold is enforced.
+27.1  [IN PROGRESS] Generate low‑coverage report (parse coverage.cobertura.xml). Reporting began 2026-09-16: Coverlet baseline is 59.99% lines and 39.61% branches (7,272/12,122 lines; 1,768/4,463 branches); latest Vitest V8 report is 42.25% lines and 28.44% branches across `src/app` (2,453/5,805 lines; 866/3,045 branches); Flutter LCOV baseline is 14.23% lines (1,392/9,781). All reports are retained by CI. `docs/TEST_COVERAGE_PLAN.md` defines the shared collection, test-selection and threshold method before any threshold is enforced.
 27.8 [TODO] **Priority: P2.** Run coverage and enforce ≥ 80 % per file (Still genuinely open, confirmed 2026-08-22: `coverlet.collector 6.0.2` is referenced so coverage *can* be collected locally, but no threshold is enforced anywhere and README explicitly declines to claim a figure. Enforcing >=80%/file would fail today.)
-27.10 [IN-PROGRESS — tracked in 82.86] API: Add focused negative tests for the four business-rule coverage gaps (COV-001 through COV-004), including intended 4xx mapping for invalid business input. Use 82.86 as the canonical execution record.
 
 > Reference doc: docs/CONFIG_DRIVEN_FRAMEWORK.md
 > DRY/SOLID review completed by Claude Opus on 2026-05-30.
@@ -493,12 +489,11 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
 
 34.D7 [TODO] Regenerate the stale mobile goldens (`flutter test --update-goldens`) as a standalone housekeeping task, so a genuinely new mobile regression is not masked by the existing baseline drift. Deliberately kept out of this area — it is unrelated binary churn from a prior session's theme fix. **Count corrected 2026-09-06:** the original "21" is stale — 80.18 found 58 golden/pixel-diff failures against the current tree (confirmed pre-existing, not a regression, via a clean-tree rerun), out of 80 golden PNGs total. Per the note already in `test/flutter_test_config.dart`, these fail locally on any non-Linux font stack and are deliberately skipped in CI (`skipGoldenAssertion`), so this item is about refreshing the baselines for local dev convenience, not fixing a CI-blocking problem.
 34.D8 [TODO] Live-browser verification of this area: public `/about` (seeded CMS blocks + hardcoded fallback), `/contact` (campus address, phones, map guard), `/news?type=Notice`; admin CMS block edit round-trip; admin notice creation with a PDF and a working public download link; and a **member account confirming it cannot create a Notice** (34.C3). **Blocked by the same local seed/role mismatch as 33.13** — `shalin` and `superadmin` resolve to ordinary alumni members in the local DB, so `adminGuard` bounces `/admin/*`; the local role assignment must be fixed before the admin-side steps can run.
+  - **Owner decision, 2026-11-02.** Verify on the local stack. Fix the local admin role through the seeder or the appsettings SuperAdmin path, not hand-written SQL, then do the browser walk.
 
 34.D19 [IN PROGRESS 2026-10-13] [P1] Every member directory card shows "Batch: N/A (N/A )" (raised by user 2026-10-13: "there was a logic for displaying like, batch of HSC 2001"). The card code is fine: it reads `PassingYear` and `Degree` from the academic record with `IsOrgProfile` set. The data is not. On the local database all 586 `AcademicRecords` rows have the old `IsGHC = true` and an empty `IsOrgProfile = false`, so no member has an org record. Cause: `20260921110115_RenameIsGhcToIsOrgProfile` was committed without its Designer file, so it had no `[Migration]` attribute and EF never ran it. `RepairMissingColumnsAsync` (34.D17, the startup column repair) then saw the model column missing and added it with the zero value. Fix: the migration now carries its attributes and runs guarded SQL. With `IsGHC` alone it renames the column; with both columns it sets `IsOrgProfile` where `IsGHC` is true and drops `IsGHC`. Dry run on a copy of the local database: 586 rows flagged, a second run changes nothing, and the rename-only shape also ends with 586 flagged. Guard test `MigrationBootstrapperSelfHealTests.EveryMigrationClass_IsDiscoveredByEf` fails for any migration class EF cannot find. Open: the fix applies at the next API start; confirm locally and on the next preprod deploy that directory cards show a year and degree. Preprod has not been queried, but it ran the same code, so it is very likely affected.
+  - **Owner decision, 2026-11-02.** Confirm on the local database first: start the API and count `AcademicRecords` rows with `IsOrgProfile` set (586 expected), then check a directory card.
   - **Plan review, 2026-10-14.** F2 waits for this to be confirmed on preprod, with 34.D17 and 34.D18, because F2 adds a migration on the same chain. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
-
-34.D20 [DONE 2026-10-31] [P2] Organization Settings showed Default Membership Type as a free-text box (`GHCAA.Web/src/app/admin/org-config/org-config.html:180`). Raised by the owner 2026-10-31: it should be a dropdown filled from the live membership-type list. A typo saves without complaint, and `MemberService.ResolveAssignedMembershipTypeAsync` then quietly assigns `General` because `Enum.TryParse` fails. Fix: bind the field to the `LOOKUP_GROUPS.MembershipType` options in `lookup.service.ts`, and reject an unknown value on save in `OrgConfigService` so a bad value cannot come in through the API either. Mobile has no org-settings editor, so only the web form and the API change. Tests: web spec for the dropdown options, backend test that an unknown type is rejected.
-  - **Done 2026-10-31.** The field is now a dropdown of `MEMBERSHIP_TYPE_OPTIONS`, the same list `LookupService` serves for `LOOKUP_GROUPS.MembershipType`. `OrgConfigService.UpdateConfigAsync` refuses an unknown name, a number, an empty value or null, and stores a good name in the enum spelling. `PUT /api/config` turns the refusal into a 400. Tests: `OrgConfigServiceTests` (four rejected values, case fixed on save), `OrgConfigControllerTests` (400 with the reason) and `org-config.spec.ts` (options and selected value). Checked in a component test, not yet in a live browser.
 
 ## WORK PACKAGE 37: ALUMNI-ASSOCIATION DEPTH — ELECTION ENGINE, SCHOLARSHIPS, PHILANTHROPY, MEMORY (raised by "what outstanding/extra ordinary matters can be incorporated on this project", 2026-08-23)
 
@@ -652,6 +647,45 @@ legacy dead `POST api/gallery` "submit a memory" endpoint fixed separately from 
 
 ---
 
+# Work Package 49 — Admin user/role management review (raised by user 2026-08-29: "from admin- how new role
+
+49.3.C [TODO] **Priority: P2 | Depends on: none.** Owner decision 2026-11-02: option (b), an optional `ContactEmail` on `User`. Option (a) is dropped. Raised while building 49.3: user instruction
+2026-09-04, "verify random two/three information ... or bypass to admin as request for reset link to
+new shared email address" — for system admin accounts specifically, which is the class with no email
+at all today (`User` has no `Email` field). Two directions were named and neither is decided:
+(a) a challenge of 2-3 known facts before honoring a reset request, or (b) an optional contact email
+on the `User` row that the reset link is emailed to when present, falling back to the current
+copy/share flow when absent. (b) is the smaller change — one nullable column, one migration, one
+`SendEmailAsync` call reusing the member template pattern already in `MemberService` — and is the
+more likely fit given the rest of this item's pattern already leans on email delivery. Needs a
+decision on which (or both) before starting; not started here because it requires a schema migration,
+which is a different class of change than the rest of 49.3.
+**Acceptance:** decision recorded with its reason; if (b), a nullable `ContactEmail` column with a
+migration, and the reset flow sends there when populated.
+
+# Work Package 51 — Universal photo-upload compression hard-cap (raised by user 2026-08-30: "photo_name should
+
+51.4 [IN PROGRESS 2026-09-11] **Priority: P2.** Tests: extend `LocalFileStorageService` coverage (`LocalFileStorageServiceTests.cs` exists
+today but only ever exercises `FileUploadType.Photo` with compression disabled) for: compression
+actually firing on `GalleryPhoto`/`NewsImage`, confirming it still does NOT fire on
+`PaymentProof`/`Certificate`/`Signature`/`NoticeDocument`, the hard-cap resize loop (51.2) actually
+converging under 512KB on a large fixture image, graceful fallback on a non-image input tagged with a
+compressible type, and the new filename prefix per type (51.3). **Progress:** focused coverage now
+passes for compression, dimension limits, hard-cap convergence, and type-prefixed paths; the excluded
+type and fallback matrix remains.
+
+51.5 [IN PROGRESS 2026-09-11] **Priority: P3.** Admin-configurable file storage settings — today `ImageCompressionEnabled` /
+`ImageCompressionQuality` / `ImageCompressionFallbackQuality` / `ImageCompressionTargetSizeKB` /
+`MaxFileSizeBytes` only live in `appsettings.json` (`Constants.ConfigKeys`), so tuning them needs a
+redeploy. Move them into the existing admin-editable `OrganizationConfig` row (single-row
+`ConfigJson` blob already used for org-wide feature flags, loaded client-side via `OrgConfigService`
++ `APP_INITIALIZER` — same mechanism as `enableGallery` etc.) under a `fileStorage` section: enable
+toggle, target/hard-cap sizes in KB, and quality/fallback-quality knobs, editable from an admin
+settings screen the same way other org config sections are. `LocalFileStorageService` should read
+current values from `IOrganizationConfigService`/equivalent (falling back to the existing
+`Constants.Defaults` if the org row has no `fileStorage` section yet, e.g. right after this ships)
+instead of `IConfiguration` directly, so a change takes effect immediately without a restart.
+
 # Work Package 60 — Mobile parity plan for this session's portal changes (raised by user 2026-08-31: "plan
 for mobile tasks that have in portal but missed and needed")
 
@@ -766,6 +800,7 @@ service reading the pack unconditionally. **Why it is a separate item rather tha
 hardcoded copy is the fallback that stops an unconfigured deployment serving sample branding to a
 live association, so it cannot be removed while any deployment still lacks `ORG_PROFILE`. Removing it
 first would reintroduce exactly the failure 62.6's guard exists to prevent.
+  - **Owner confirmed, 2026-11-02.** Render is the only deployment and it sets `ORG_PROFILE`, so the removal can go ahead.
   - **Plan review, 2026-10-14.** Session N9, after a person confirms `ORG_PROFILE=ghc` on every deployment. Part of the 2026-10-14 decision that GHC is hardcoded nowhere. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 **Acceptance:** `ORG_PROFILE` is confirmed set on every running deployment (preprod and any other);
@@ -778,7 +813,7 @@ Audit 2026-10-09: moved back from `docs/TODO_ARCHIVE.md`, where it was the only 
 `.env.preprod` shows `ORG_PROFILE=ghc`; the Render settings cannot be checked from the repo.
 
 62.41 [PARTIAL 2026-09-06] **Priority: P1 | Depends on: 62.6, 62.15, 62.27 (all done, so this was
-unblocked).** Acceptance test written: `GHCAA.Web/tests/e2e/generic-profile-acceptance.spec.ts` +
+unblocked).** Owner decision 2026-11-02: run it against a throwaway local PostgreSQL database, dropped afterwards. Acceptance test written: `GHCAA.Web/tests/e2e/generic-profile-acceptance.spec.ts` +
 its own `playwright.generic.config.ts` (kept separate from the normal suite on purpose — it needs a
 server booted with `ORG_PROFILE=default` against a database that has never run a migration, which
 the everyday dev server doesn't provide, and it self-skips unless
@@ -925,15 +960,10 @@ the merged section is 6.4, Component and Interface Design. renumber.py rebuilt t
 `build.py --strict` reports no outline drift and no lint finding. Still open: the prose join at each
 dropped heading, which belongs to the 67.5 pass, and a `--pdf` build to refill the contents folios.
 
-72.4 [TODO] **Priority: P3.** Watch the first Dependabot run. Five ecosystems opening at once
+72.4 [ONHOLD 2026-11-02, until Dependabot opens its first pull requests] **Priority: P3.** Watch the first Dependabot run. Five ecosystems opening at once
 produces a burst even with the caps, and the grouping rules are a guess until they have been seen
 against a real week's updates. Adjust the caps or the groups if the burst is unmanageable rather than
 turning Dependabot off.
-
-72.5 [TODO] **Priority: P3 | Depends on: user.** If the repository is ever made public, CodeQL becomes
-free and 72.2 is worth revisiting; §10.4.2 would then need rewriting, since it currently states cost
-as the reason static analysis is absent.
-  - **Review, 2026-10-14.** The §10.4.2 section this item points at was not found on 2026-10-14. Check the reference when the item is picked up.
 
 # Work Package 73 — Traceability and constitutional alignment: what is true, and what was claimed
 
@@ -968,12 +998,6 @@ a start date is a claim about when work happened, and for most of those areas th
 commit record `wbs.py` already reads. Worth doing only where an area's real dates differ from its
 commit dates, which is the case for the research and review work of U1 to U5.
 
-75.5 [TODO] **Priority: P2 | Depends on: user.** The five PRE durations are the author's, not the
-script's. Ten days for the governing-document study and eight for requirements analysis are the two
-worth challenging: they set the pre-development total and therefore the person-month figure the
-dissertation prints. Confirm or correct them the way 64.7 asks for the assumption rates.
-  - **Owner answer, 2026-10-14.** The 27 pre-commit days stand as written, ending on 9 February 2026. The five durations are confirmed; the item stays open only for the P1 day count against the corrected word count.
-
 # Work Package 76 — Sizing the delivered system, and the reuse that paid for it
 
 <!-- wbs: component=C17 start=2026-09-03 end=2026-09-03 after=75 -->
@@ -982,38 +1006,7 @@ Raised by user 2026-09-03: the whole implementation should come out at around 35
 book, made realistic by reusable components, AI and rapid development tooling, and code carried over
 from earlier projects.
 
-76.4 [TODO] **Priority: P2 | Depends on: user.** The four reduction factors and the four production
-rates are the author's judgement. The two worth challenging first are the web rate of 25 lines an hour,
-which carries the largest single block of source, and the ×0.80 for AI-assisted tooling, which is the
-factor an examiner is most likely to ask about in a viva. Confirm or correct, as with 64.7 and 75.5.
-
-77.4 [PARTIAL 2026-09-03] **Priority: P2 | Depends on: user.** The provenance is answered; the
-proportion is not.
-
-  **Answered.** The carried-over material comes from the author's own projects of **2019 to 2024**,
-  and the parts are named: authentication, the front-end data grid, backend structure and base
-  services, file handling, payment-gateway adapters and deployment configuration. The date window is
-  what makes the factor credible rather than decorative — 2019 to 2024 is the .NET Core, Angular and
-  Flutter generation, the same as this platform, so the material carried over as working code rather
-  than as a design to be reimplemented. Twenty-year experience explains the judgement; a five-year
-  window explains the code. Recorded in `wbs.py`, §11.0, §11.5.2, §11.5.4 and §12.11.
-
-  **Still open.** Roughly what share of the delivered code has an ancestor in that library. Even a
-  banded answer — a quarter, a third, a half — would let §11.5.2 replace the ×0.78 judgement with a
-  measured proportion, which is the difference between a defensible section and an evidenced one.
-  - **Owner answer, 2026-10-14.** Banded answer: about a quarter of the delivered code has an ancestor in the 2019 to 2024 library. The five measured modules give 18.5%; the owner names three more that are not yet measured, which 77.11 adds.
-
-77.11 [TODO] **Priority: P2 | Depends on: 77.4.** The owner named three more parts carried over from the
-2019 to 2024 library that `wbs.py` does not yet count as prior reuse: backend base services (generic
-repository, base service and DTO patterns), deploy and CI configuration (Dockerfile, `render.yaml`, the
-GitHub workflows and scripts), and test scaffolding (fixtures, factories and helpers). Add each to the
-reuse list in `docs/book/build/wbs.py` with the exact paths, after the owner confirms which files descend
-from the library, then refresh §11.0, §11.5.2, §11.5.3 and the outline's Chapter 11 block from the new
-run. The owner puts the total at about a quarter, against the 18.5% measured now.
-**Acceptance:** the reuse share comes from a `wbs.py` run against the tree, dated, and lands near a quarter;
-`build.py --pdf --strict` ends clean.
-
-78.9 [TODO] **Priority: P1. Depends on 78.4.** Administer the evaluation sessions: ordinary members
+78.9 [TODO] **Priority: P1. Depends on 78.4, 7.26, 7.28.** Owner decision 2026-11-02: the owner runs the sessions once preprod mail and uploads are confirmed. The runbook ("How to run a session") and `response-log-template.md` already existed; a "Before the first session" check list was added to `docs/book/instruments/README.md` on 2026-11-02. Administer the evaluation sessions: ordinary members
 plus the three office holders, at least half of the member sessions on a handset, against the
 pre-production deployment, one response log per participant.
 **Acceptance:** a completed response log per participant in `docs/book/instruments/responses/`, no
@@ -1034,6 +1027,31 @@ of the run recorded, per the repository-numbers rule in `CLAUDE.md`.
 
 ---
 
+# Work Package 82 — Platform architecture and engineering audit, and the refactoring it names
+
+82.31 [ONHOLD 2026-09-06, per SR-9] **Priority: P0 | Depends on: 62.31 (decides the target state; WONTDO since 2026-10-31).** DATA PROTECTION, and the
+half of it 62.31 does not reach. Every seed is loaded with `HasData`, which is part of the EF model
+rather than a runtime import, so each seeded row was written into a migration as a literal `InsertData`
+value and committed. Eight migrations carry roughly 4.3 MB of seed data, and across that chain there
+are **612 distinct email addresses, 638 mobile numbers and 631 bcrypt password hashes** — 631 being the
+whole `Users` table, so every real member's password hash is in git. The seeded `Members` insert also
+carries `NID`, `DateOfBirth`, `FatherName`, `MotherName`, both addresses and emergency contact details.
+**Why this is separate from 62.31 rather than part of it:** 62.31 proposes anonymising or externalising
+`Seed/members.json`. Editing that file changes what a *future* migration would contain and changes
+nothing about the eight already committed; a fresh database built from this repo still comes up holding
+631 real alumni. `ApplicationDbContext.IsSeedDisabled` and `ASP_SEED_PROFILE` do not help either —
+both are evaluated in `OnModelCreating`, so they gate migration *generation*, not migration *apply*.
+**Also a rotation problem, not only a disclosure one:** 631 password hashes that have been in a
+repository cannot be treated as secret again by deleting them, so whatever is done here has to be
+paired with a forced reset, and that ordering needs deciding before any of it starts.
+**Update 2026-09-16:** the committed-migration half of this is done. `ApplicationDbContext` no longer
+declares Tier 3 entities via `HasData`; the migration that would have scaffolded `DeleteData` for
+them (`RemoveInstitutionSeedData`) is a hand-edited no-op so it doesn't touch GHC's live rows, and
+`InstitutionDataSeeder` now owns seeding those tables at runtime instead. A clean clone still needs
+the *already-committed* eight migrations rewritten out of git history to actually stop carrying the
+631 hashes — that rewrite is the separately-confirmed, force-push step in the governing plan and has
+not been run.
+
 # Work Package 84 — Workflow contracts, validation, and endpoint detail from the specification review
 
 <!-- wbs: component=C17 start=2026-09-21 end=2026-09-21 after=73 -->
@@ -1050,7 +1068,7 @@ cross-referencing each endpoint from 84.3 against actual client call sites, per 
 **Acceptance:** every endpoint row states whether Web calls it, whether Mobile calls it, and any
 observed difference in how each client reads the response.
 
-84.7 [TODO] **Priority: P3 | Depends on: none — product decision, not a documentation task.** Decide
+84.7 [IN PROGRESS 2026-11-02] **Priority: P3 | Depends on: none — product decision, not a documentation task.** Owner decision 2026-11-02: yes, a second institution must be able to deploy. The GHC seed data in committed migrations moves to profile-scoped seeding. The work is migration-heavy, so a plan comes first and the owner approves it before any build. Decide
 whether removing the committed-migration-data blocker for white-label second-institution deployment is
 in scope, or whether white-label stays a single-institution profile-pack mechanism
 (`implementation-inventory.md` lines 135–136). No item in this Work Package should assume an answer
@@ -1083,12 +1101,6 @@ next to the meetings module rather than as a general task manager. Standalone no
 beside meeting minutes. They stay out unless the 84.18 review finds a real user for them.
 **Acceptance:** the decision on a separate module or part of 84.19 is recorded in the 84.19 spec.
 
-84.21 [TODO] **Priority: P3 | Depends on: none.** `FamilyService.cs` holds a second family-link
-workflow (send, respond, cancel, list, unlink) beside `FamilyLinkService`. `FamilyLinkController`
-calls only `FamilyService.SearchByNameAsync`, and no other caller was found. **Acceptance:** search
-moves to `FamilyLinkService` and the unused methods go, or a caller is named. Spec 013 (profile,
-family and identity files) ENH-001 has the detail.
-
 84.23 [TODO] **Priority: P3 | Depends on: none.** Two client gaps from spec 013. Mobile has no
 signature upload, although `POST api/profile/signature` exists. The backend PDF routes
 `id-card/pdf` and `certificate/pdf` have no caller in either client, since mobile builds its PDF
@@ -1103,11 +1115,6 @@ list are untested. `CreateJobDto` has no FluentValidation validator. **Acceptanc
 admin screen, so archive moderation is reachable only from the API and mobile. **Acceptance:**
 controller tests exist and web admins can moderate archive items, or spec 014 records that mobile
 owns it.
-
-84.31 [TODO] **Priority: P3 | Depends on: none.** Two spec folders share number 010:
-`010-ad-hoc-reporting` and `010-election-engine-fixes`. **Acceptance:** one is renumbered and every
-link to it is updated, or the clash is accepted and noted in the 001 index.
-  - **Plan, 2026-10-14 (round 2).** Session F7: `010-election-engine-fixes` moves to the next free spec number (check for a reserved "spec NNN" first) and every reference follows. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 84.35 [TODO] **Priority: P2 | Depends on: none.** The strict book build fails on 7 repository
 counts (run 2026-09-25). Chapters 4, 7 and 11 quote 299 commits and 88 work packages, and the tree
@@ -1139,7 +1146,7 @@ What is left is a device check that `POST /roles/users`, `POST /roles/assign` an
   - **Plan, 2026-10-14 (round 2).** Decided 2026-10-14: mobile keeps create election. Session F6 routes it through the step-up prompt with a 403 test; the device check stays with a person. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
   - **Plan review, 2026-10-14.** Moved from F6 to session F1: the election call needs nothing from F2 to F4. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
-84.46 [TODO 2026-10-23] **Priority: P3 | Depends on: owner.** `GHCAA.Tests/Services/BallotSealVector.cs` holds the throwaway RSA key for the 37.13e test vector (ballot seal checked against an outside sealer). It already says it seals nothing real. The owner asked for a clearer test-only line and a secret-scanner allow-list entry (`.github/secret_scanning.yml`, path ignore). The repo has no scanner config yet. The session's tool policy refused both edits because the file holds key material, so the owner makes them by hand. Owner decision (2026-10-23): the owner makes both edits from text given in the session. CI runs no secret scanner, so the file only matters if GitHub secret scanning is on for the repo.
+84.46 [DONE 2026-11-02] **Priority: P3 | Depends on: none.** Done 2026-11-02: `docs/Elections/12-Election-Officials-Handbook.md` section 5 now has "Making the ballot key" and "Using the ballot key at the count", and names `BallotSealVector.cs` as a test vector that must never be used as a ballot key. The 3072-bit size matches `BALLOT_KEY_BITS` in `ballot-key.util.ts`. Owner decision 2026-11-02: no comment edit and no scanner allow-list, since CI runs no secret scanner and the file already says it seals nothing real. Instead the election handbook explains how the real ballot key pair is made and used, so nobody mistakes the test key for one. Closes when that handbook text is in. `GHCAA.Tests/Services/BallotSealVector.cs` holds the throwaway RSA key for the 37.13e test vector (ballot seal checked against an outside sealer). It already says it seals nothing real. The owner asked for a clearer test-only line and a secret-scanner allow-list entry (`.github/secret_scanning.yml`, path ignore). The repo has no scanner config yet. The session's tool policy refused both edits because the file holds key material, so the owner makes them by hand. Owner decision (2026-10-23): the owner makes both edits from text given in the session. CI runs no secret scanner, so the file only matters if GitHub secret scanning is on for the repo.
 
 84.48 [PARTIAL 2026-10-23] **Priority: P1 | Depends on: owner keys.** Preprod env check against `docs/ENV_REVIEW.md` and `docs/DEPLOYMENT_CHECKLIST.md`. Render has the environment, JWT key, database URL, allowed origin, client URLs and org profile. It lacks `EmailSettings__Provider=Brevo` with `BrevoSettings__ApiKey` and `BrevoSettings__SenderEmail`, so mail fails because Render blocks SMTP. It lacks `FileStorage__Provider=S3`, the bucket name and the four `AWS_*` values, so uploads are lost on each redeploy. Optional: `SmsSettings__Token`, the live bKash password and `OtpSettings__HashKey`. Render sets `ASPNETCORE_ENVIRONMENT=Preprod` on what the owner calls production. The gitignored `GHCAA.API/.env.preprod` now carries every `appsettings.Preprod.json` key; Gmail comes from the last real account in `appsettings.json` history (commit 962f9000). `ConnectionStrings__PgSqlConnection` and the localhost-only second origin are commented out, since `DATABASE_URL` wins. Brevo, bucket, `AWS_*` and SMS stay `REPLACE_ME`, because no copy exists in the repo or its history. No appsettings file was changed. Later on 2026-10-23 the owner filled Brevo and the four `AWS_*` values locally; the endpoint is Neon's S3-compatible storage. Owner decisions (2026-10-23): the owner creates a bucket in Neon and supplies the name; SMS stays off for now, since email and the authenticator app cover OTP; the owner pastes the values into Render from a key-name checklist, then the live site is checked (OTP email arrives, an upload survives a redeploy); `ASPNETCORE_ENVIRONMENT` stays `Preprod` until a separate production service exists.
 
@@ -1160,7 +1167,7 @@ What is left is a device check that `POST /roles/users`, `POST /roles/assign` an
     - `registration_constants.dart` was checked in with LF and had turned CRLF, so the diff showed every line. It is back to LF, and the diff now shows only the real additions.
   - **Still open.** The imported-member NID save against a real API, and the mobile screens on a device. B4-B5 wait for the election sequence.
 
-84.50 [TODO 2026-10-23] **Priority: P1 | Depends on: a phone or the Windows desktop device.** Device checks the owner asked to have fixed, not just listed, in the next session. 95.6: scan the authenticator QR, pass a step-up with the app code, then switch to an emailed code. 84.42: the mobile admin step-up routes. 37.1m and 37.14o: the vote receipt and tracking-code list on a phone. 84.44: make the ballot key pair on mobile, save the private key, and run the first count with it. Where no phone is at hand, the Windows desktop build drives the same screens (see the 43.x live-check method). **Acceptance:** each check passes on a device, or its defect is fixed with a test that would fail if it came back.
+84.50 [TODO 2026-10-23] **Priority: P1 | Depends on: a phone or the Windows desktop device.** Owner decision 2026-11-02: run the checks now on the Windows desktop build, without waiting for the election sequence. Device checks the owner asked to have fixed, not just listed, in the next session. 95.6: scan the authenticator QR, pass a step-up with the app code, then switch to an emailed code. 84.42: the mobile admin step-up routes. 37.1m and 37.14o: the vote receipt and tracking-code list on a phone. 84.44: make the ballot key pair on mobile, save the private key, and run the first count with it. Where no phone is at hand, the Windows desktop build drives the same screens (see the 43.x live-check method). **Acceptance:** each check passes on a device, or its defect is fixed with a test that would fail if it came back.
   - Plan (2026-10-25): `docs/AUTH_AND_DEVICE_FIX_PLAN.md`, Part A, with the screens and `local-election.py` run order. The tracking-code list test gap was closed on 2026-10-26 by `FR-016: lists every published tracking code` in `election_results_screen_test.dart`; device checks remain open.
 
 84.51 [PARTIAL 2026-10-31] **Priority: P1 | Depends on: nothing.** Review of commit 3b436f6f (the 2026-10-23 work) found no critical defect but these gaps.
@@ -1271,10 +1278,15 @@ reference; no new Excel dependency.
 `CampaignsController`/`MentorshipController`.
 **Acceptance:** not started.
 
-90.4 [TODO] **Priority: P3 | Depends on: 90.3.** Admin-only Angular page `admin/reports` — entity
-picker, filter form, `.data-table` result grid (reuse the Directory table/card pattern), export
-button — plus `core/services/report.service.ts` and an `ADMIN_REPORTS` block in `API_ENDPOINTS`.
+90.4 [TODO] **Priority: P3 | Depends on: 90.3, 88.5.** Admin-only Angular page `admin/reports` with
+an entity picker, a filter form, a result grid and an export button, plus `core/services/report.service.ts`
+and an `ADMIN_REPORTS` block in `API_ENDPOINTS`. The result grid is the shared read-only grid that
+88.5 builds for the import preview; there is no shared table component yet, so 90.4 waits for it
+rather than copying the Directory table markup. Reuse `app-page-header`, `app-search-bar`,
+`app-pagination`, `app-export-buttons` and `app-loading-panel` from `common/`.
 **Acceptance:** not started.
+  - **Text fix 2026-11-01.** The earlier text said to reuse the Directory table and card pattern,
+    which conflicts with the non-election plan's rule that the shared grid for 88.5 comes first.
 
 90.5 [TODO] **Priority: P3 | Depends on: 90.2, 90.3.** NUnit tests (`GHCAA.Tests/Services/
 ReportServiceTests.cs`): filter whitelist rejection, saved-report round trip, export row count. Vitest
@@ -1475,4 +1487,9 @@ Deferred 2026-10-14. It needs a measurement on the deployed site after 98.6, whi
 
 98.34 [ONHOLD 2026-10-14, until a patched 9.0.x ships or the API moves to .NET 10] **Priority: P4 | Depends on: none.** The `vulnerable-packages` gate in `scripts/ci-local.py` still fails on two transitive packages: `System.Security.Cryptography.Pkcs` 10.0.0 (GHSA-846f-f764-76mx) and `System.Security.Cryptography.Xml` 9.0.20 (GHSA-r955-8q5j-3h83), both High, in the API, Infrastructure and Tests projects. The fixed versions are 10.x builds that fail restore on net9.0, and the other way out needs a paid licence. Decided by the user 2026-10-14: leave them, and treat the other gates as the release check.
 
-98.43 [OPEN 2026-10-16] **Priority: P2 | Depends on: the hold on config and secret files.** Config keys checked against the code that reads them. Read only, key names only: the hold means the user edits `appsettings*.json` and `.env*`. Read by the code but in no file: `EmailSettings:Provider`, `BrevoSettings:ApiKey`, `BrevoSettings:SenderEmail` and `SenderName` (preprod sends mail through Brevo), `AppSettings:PublicApiBaseUrl` (the gateway callback throws without it), `AppSettings:StepUpTtlMinutes` outside the base file, `ContactUsSettings:Recipients`, `PaymentGateways:Bkash:ProductionPassword` and `Username`. Not read by any code: `Jwt:ExpiryMinutes` (`TokenService` fixes 60 minutes), `OtpSettings:MaxAttempts`, `FileStorage:WebRootPath` and both MIME lists, `GeneralSettings:PortalBaseUrl` (the portal URL comes from the org profile), `ConnectionStrings:MySqlConnection`, the Nagad and Rocket URLs, and the `DGePay` `BaseUrl`, `ClientId`, `ClientSecret` and `ApiKey` (DGePay takes its credentials from the database). `appsettings.Production.json` has no `AllowedOrigins` or `ClientUrl`, and startup refuses a non-Development run without origins, so the host has to set both. The `GHCAA.API/.env*` files lack `ORG_PROFILE`, `OtpSettings__HashKey` and `AppSettings__ClientUrl`, which the root files have. `docs/ENV_REVIEW.md`, the environment variable guide, says `DotNetEnv.Env.Load()` reads the root `.env`. It reads `.env` in the working directory, which is `GHCAA.API/` under `dotnet run` there. Web and mobile keys match their code. Acceptance: the user decides which missing keys to add and which unread keys to drop or wire up, and ENV_REVIEW.md names the file that is actually loaded. Progress 2026-10-17: `TokenService` now reads `Jwt:ExpiryMinutes` and `OtpService` reads `OtpSettings:MaxAttempts`. Both fall back to the old 60 and 5 (`Defaults.AccessTokenExpiryMinutes`, `Defaults.OtpMaxAttempts`) when the key is missing or not positive, with tests in `TokenServiceTests` and `OtpServiceTests`. ENV_REVIEW.md now says the API reads `GHCAA.API/.env`. Still open: the missing keys, the other unread keys and the `GHCAA.API/.env*` gaps, which wait on the user's config edits.
+98.43 [TODO 2026-11-02] **Priority: P2 | Depends on: none.** Hold lifted by the owner on 2026-11-02 for this item: add the missing keys to the env files, commented where a value changes behaviour (as in 99.5), and remove keys no code reads from `appsettings*.json` after the owner sees the list. Config keys checked against the code that reads them. Read only, key names only: the hold means the user edits `appsettings*.json` and `.env*`. Read by the code but in no file: `EmailSettings:Provider`, `BrevoSettings:ApiKey`, `BrevoSettings:SenderEmail` and `SenderName` (preprod sends mail through Brevo), `AppSettings:PublicApiBaseUrl` (the gateway callback throws without it), `AppSettings:StepUpTtlMinutes` outside the base file, `ContactUsSettings:Recipients`, `PaymentGateways:Bkash:ProductionPassword` and `Username`. Not read by any code: `Jwt:ExpiryMinutes` (`TokenService` fixes 60 minutes), `OtpSettings:MaxAttempts`, `FileStorage:WebRootPath` and both MIME lists, `GeneralSettings:PortalBaseUrl` (the portal URL comes from the org profile), `ConnectionStrings:MySqlConnection`, the Nagad and Rocket URLs, and the `DGePay` `BaseUrl`, `ClientId`, `ClientSecret` and `ApiKey` (DGePay takes its credentials from the database). `appsettings.Production.json` has no `AllowedOrigins` or `ClientUrl`, and startup refuses a non-Development run without origins, so the host has to set both. The `GHCAA.API/.env*` files lack `ORG_PROFILE`, `OtpSettings__HashKey` and `AppSettings__ClientUrl`, which the root files have. `docs/ENV_REVIEW.md`, the environment variable guide, says `DotNetEnv.Env.Load()` reads the root `.env`. It reads `.env` in the working directory, which is `GHCAA.API/` under `dotnet run` there. Web and mobile keys match their code. Acceptance: the user decides which missing keys to add and which unread keys to drop or wire up, and ENV_REVIEW.md names the file that is actually loaded. Progress 2026-10-17: `TokenService` now reads `Jwt:ExpiryMinutes` and `OtpService` reads `OtpSettings:MaxAttempts`. Both fall back to the old 60 and 5 (`Defaults.AccessTokenExpiryMinutes`, `Defaults.OtpMaxAttempts`) when the key is missing or not positive, with tests in `TokenServiceTests` and `OtpServiceTests`. ENV_REVIEW.md now says the API reads `GHCAA.API/.env`. Still open: the missing keys, the other unread keys and the `GHCAA.API/.env*` gaps, which wait on the user's config edits.
+
+# Work Package 99 — Master execution plan and wave 1 (raised by user 2026-11-01: "Produce and maintain a complete, implementation-ready execution plan covering every outstanding requirement ... execute it systematically")
+
+99.3 [IN PROGRESS] **Priority: P2 | Depends on: 99.2.** Wave 1: defects and PARTIAL items that code alone can close. Built 2026-11-01: 7.22 (mobile preprod URL), 84.21 (`FamilyService` merged into `FamilyLinkService`), 84.31 (second spec 010 renumbered to 027), and the 90.4 text fix. Evidence for each is in the plan's progress log.
+**Acceptance:** each item closed with its evidence, a code review over the wave, and a full `python scripts/ci-local.py` run. Done when the owner reviews the wave.

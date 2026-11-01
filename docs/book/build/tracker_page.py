@@ -94,9 +94,12 @@ def parse():
     if archive.exists():
         text += "\n" + archive.read_text(encoding="utf-8")
     lines = text.split("\n")
-    titles, items = {}, []
+    titles, items, seen = {}, [], set()
     wp, wp_title = None, ""
+    started = False
     for i, line in enumerate(lines):
+        # HEAD wants "Work Package"; older headings say "WORK PACKAGE 7:".
+        started = started or bool(re.match(r"^#+ *work package \d", line, re.I))
         m = HEAD.match(line)
         if m:
             wp = int(m.group(1))
@@ -104,8 +107,11 @@ def parse():
             titles[wp] = wp_title
             continue
         m = ITEM.match(line)
-        if not m:
+        # Lines above the first Work Package are the Priority Index, which copies items
+        # and can drift from them. TODO.md is read first, so an ID already seen wins.
+        if not m or not started or f"{m.group(2)}.{m.group(3)}" in seen:
             continue
+        seen.add(f"{m.group(2)}.{m.group(3)}")
         num = int(m.group(2))
         # Put the opening bold back, so "Priority: P1 | ...**" reads as the usual meta run.
         reopen = m.group("bold") and not m.group("shut")

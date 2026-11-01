@@ -13,12 +13,10 @@ namespace GHCAA.API.Controllers
     public class FamilyLinkController : ControllerBase
     {
         private readonly IFamilyLinkService _familyLinkService;
-        private readonly IFamilyService _familyService;
 
-        public FamilyLinkController(IFamilyLinkService familyLinkService, IFamilyService familyService)
+        public FamilyLinkController(IFamilyLinkService familyLinkService)
         {
             _familyLinkService = familyLinkService;
-            _familyService = familyService;
         }
 
         // 24.50: Returns null when claim is absent or malformed, avoiding int.Parse crash.
@@ -121,7 +119,7 @@ namespace GHCAA.API.Controllers
             if (string.IsNullOrWhiteSpace(name)) return Problem(detail: "Name required", statusCode: StatusCodes.Status400BadRequest);
             var memberId = GetMemberId();
             if (memberId == null) return Unauthorized();
-            var results = await _familyService.SearchByNameAsync(name, memberId.Value, ct);
+            var results = await _familyLinkService.SearchByNameAsync(name, memberId.Value, ct);
             return Ok(results);
         }
     }
