@@ -69,7 +69,7 @@ $retryCount = 0
 $apiReady = $false
 while (-not $apiReady -and $retryCount -lt $maxRetries) {
     try {
-        $response = Invoke-WebRequest -Uri "http://127.0.0.1:5087/health" -UseBasicParsing -ErrorAction SilentlyContinue
+        $response = Invoke-WebRequest -Uri "http://127.0.0.1:5087/health/live" -UseBasicParsing -ErrorAction SilentlyContinue
         if ($response.StatusCode -eq 200) { $apiReady = $true }
     } catch {
         # Wait and retry
@@ -103,7 +103,7 @@ if (-not $E2EOnly) {
 
     $playwrightArgs = "tests/visual"
     if ($Suite -ne "") { $playwrightArgs = "tests/visual/$Suite.spec.ts" }
-    $playwrightArgs += " --update-snapshots"
+    if ($UpdateBaselines) { $playwrightArgs += " --update-snapshots" }
 
     Push-Location $WebDir
     cmd /c "npx playwright test $playwrightArgs --reporter=html"
@@ -144,7 +144,7 @@ if (-not $E2EOnly) {
     Write-Host ">> [3/4] Mobile Visual Snapshot Tests (Flutter Goldens)" -ForegroundColor Yellow
 
     $flutterTestArgs = "test/comprehensive_visual_freeze_test.dart"
-    $flutterTestArgs += " --update-goldens"
+    if ($UpdateBaselines) { $flutterTestArgs += " --update-goldens" }
 
     Push-Location $MobileDir
     $FlutterCmd = "flutter test $flutterTestArgs"

@@ -1,11 +1,14 @@
 # WP37 implementation plan
 
-> **Status 2026-09-27:** 37.8, 37.2 and 37.6 have shipped, so the order below is history. One gap
-> is still open: `ArchiveController` has no tests and no admin screen (TODO 84.27).
+> **Status 2026-11-03:** 37.3 (campaigns), 37.2 and 37.6 have shipped, so the order below is
+> history. This plan once called campaigns 37.8. In `docs/TODO.md` 37.8 is credential
+> verification (spec 003), so read 37.3 wherever the phases below say 37.8. One gap is still
+> open: `ArchiveController` has no controller tests and the web app has no archive admin screen
+> (TODO 84.27). When 84.27 runs is set in `docs/MASTER_EXECUTION_PLAN.md`, the only open plan. Mobile has archive, campaigns and scholarships screens.
 
 ## Dependency order
 
-1. 37.8 Fundraising campaigns
+1. 37.3 Fundraising campaigns
 2. 37.2 Scholarship and student aid
 3. 37.6 Oral-history archive
 
@@ -13,7 +16,7 @@
 
 The fundraising flow establishes the core donation model, ledger posting, and public donor visibility pattern. The scholarship feature reuses that pattern for award funding, exact-once posting, and public status lookup. The archive feature is independent in content model but still follows the same public/admin visibility and storage conventions, so it is best built after the financial and application patterns are already stable.
 
-## Phase 1 — 37.8
+## Phase 1 — 37.3
 
 ### Backend
 

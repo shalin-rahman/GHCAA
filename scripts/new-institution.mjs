@@ -109,7 +109,7 @@ async function main() {
 
     console.log(`\n[new-institution] profiles/${orgId}/ created from profiles/default/.`);
     console.log(`[new-institution] org-config.json filled in. Still to do by hand, per docs/INSTITUTION_ONBOARDING.md:`);
-    console.log(`  - demo-data/*.json (leave empty until 62.31/82.31 close the seeded-migration issue)`);
+    console.log(`  - demo-data/*.json (leave empty; 82.31 is on hold and 62.31 was dropped)`);
     console.log(`  - site-content.json, seo.json (page copy, meta description)`);
     console.log(`  - assets/ (logo, favicons)`);
     console.log(`Set ORG_PROFILE=${orgId} to use this profile.`);

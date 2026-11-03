@@ -373,13 +373,15 @@ Acceptance Scenarios:
 ## Gaps
 
 - RolesController.GetUsers returns the full user list unpaged; the code comment at line 25 notes this is acceptable only while the admin/system-admin count stays in the dozens, not thousands. No pagination exists today. [NEEDS CLARIFICATION: is an unpaged admin/system-admin listing acceptable long-term, or does RolesController need pagination before the admin count grows?]
-- ResetPasswordAdmin returns the reset URL directly in the API response because system-admin User rows have no email address to send it to. This bypasses the normal reset-password delivery channel and puts a live reset link in the HTTP response body and, by extension, in any client-side logging of that response.
+- ResetPasswordAdmin returns the reset URL directly in the API response because system-admin User rows have no email address to send it to. This bypasses the normal reset-password delivery channel and puts a live reset link in the HTTP response body and, by extension, in any client-side logging of that response. 2026-11-03: Design decision, not a gap. The reset URL is returned by design because system admins have no email, and the action sits behind step-up.
 - SocialLoginAsync auto-links an existing Member/User to a Google or Facebook identity only when the provider's verified email matches an existing account; the actual member-approval workflow (Applied to Active) is owned by AdminController, outside this spec's six controllers, so the boundary between registration/auth and approval is split across two controllers with no shared contract documented in code. [NEEDS CLARIFICATION: should the approve/reject workflow in AdminController be pulled into this spec's boundary, or does it remain a separate domain?] Member profile email changes and re-verification are tracked separately in spec 013 under TODO 97.1; this spec continues to define the social-linking rule.
 - MemberImportController.Import validates the workbook and each photo file but the Evidence table shows no test asserting partial-row-failure behaviour (e.g., row 5 invalid, rows 1-4 valid). GHCAA.Tests/Services/MemberImportServiceTests.cs was not confirmed to cover mixed-outcome batches.
 - Fixed 2026-10-05 (TODO 7.17): Features.EnableSocialAuth was read nowhere, and GetProviders listed any enabled provider row. `SocialAuthConfigService.GetUsableAsync` now decides for the providers list and both sign-in endpoints.
 - AuthController.Me and AuthController.GetProviders have no dedicated test coverage found in GHCAA.Tests/Controllers/AuthControllerTests.cs or AuthControllerMutationTests.cs.
 
 ## Enhancements: modularisation and reusability
+
+2026-11-03: The owner accepted ENH-001 and ENH-005 as they stand. No tracker item follows. ENH-002, the `MemberService` split, was already done (closed 2026-09-06; the largest part is now 483 lines).
 
 ### Reuse across layers
 
@@ -388,16 +390,16 @@ Acceptance Scenarios:
 ### Entity-based module shape
 
 - ENH-002 (P2): MemberService.cs (GHCAA.Infrastructure/Services/MemberService.cs) carries registration, academic-history, payment, upload, status, email-verification and OTP-resend logic for the Member entity in one class. Splitting registration-and-verification from academic/payment/upload concerns into separate services would let each controller action depend on a narrower interface.
-- ENH-003 (P3): GHCAA.Web/src/app/common/ has a reusable step-up-dialog component used by the Angular admin-roles flow; GHCAA.Mobile/lib/core/ has no equivalent widget, so a Flutter admin performing a [RequireStepUp] action (CreateAdmin, AssignRole, DeleteUser, DisableUser, EnableUser, ResetPasswordAdmin) has no matching mobile UI confirmed in the codebase for that step.
+- ENH-003 (P3): GHCAA.Web/src/app/common/ has a reusable step-up-dialog component used by the Angular admin-roles flow; GHCAA.Mobile/lib/core/ has no equivalent widget, so a Flutter admin performing a [RequireStepUp] action (CreateAdmin, AssignRole, DeleteUser, DisableUser, EnableUser, ResetPasswordAdmin) has no matching mobile UI confirmed in the codebase for that step. 2026-11-03: Built. GHCAA.Mobile/lib/core/widgets/step_up_dialog.dart now exists.
 
 ### Existing reusable components
 
-- ENH-004 (P1): GHCAA.Web/src/app/public/register/register.ts line 51 hardcodes registrationFee = signal<number>(500) with a "Default placeholder" comment, duplicating a value that MemberService.ProcessRegistrationPaymentAsync and OrgConfigService already resolve server-side. The Angular form should fetch the fee from the existing org-config endpoint instead of hardcoding it client-side.
+- ENH-004 (P1): GHCAA.Web/src/app/public/register/register.ts line 51 hardcodes registrationFee = signal<number>(500) with a "Default placeholder" comment, duplicating a value that MemberService.ProcessRegistrationPaymentAsync and OrgConfigService already resolve server-side. The Angular form should fetch the fee from the existing org-config endpoint instead of hardcoding it client-side. 2026-11-03: Built. register.ts:150 fetches the fee with getApplicableFee; 500 is only the error fallback at register.ts:152.
 - ENH-005 (P3): GHCAA.Web/src/app/common/confirm-dialog and payment-method-selector are already generic, reusable components used elsewhere in the app; register.ts's payment step should be checked to confirm it reuses payment-method-selector rather than re-implementing its own selector markup.
 
 ### Hard-coded behaviour that should be configuration
 
-- ENH-006 (P2): StepUpClaim.DefaultTtlMinutes is a const (GHCAA.Application/Security/StepUpClaim.cs line 28, value 30) rather than an OrgConfigService-backed setting. Other timing knobs (rate-limit windows) are already configuration-driven per Constants.RateLimitPolicies; the step-up TTL is a security-relevant window that an admin cannot currently tune without a code change and redeploy.
+- ENH-006 (P2): StepUpClaim.DefaultTtlMinutes is a const (GHCAA.Application/Security/StepUpClaim.cs line 28, value 30) rather than an OrgConfigService-backed setting. Other timing knobs (rate-limit windows) are already configuration-driven per Constants.RateLimitPolicies; the step-up TTL is a security-relevant window that an admin cannot currently tune without a code change and redeploy. 2026-11-03: Not needed. The TTL is already read from config (AppSettings:StepUpTtlMinutes) at GHCAA.API/Filters/RequireStepUpAttribute.cs:32; the const is only the default.
 
 ## Planned account-security extension (TODO 84.51)
 

@@ -115,6 +115,7 @@ This spec applies the same pattern to `ECPosition`, not a bigger one:
   `GET /api/elections/positions` (or an addition to the existing `/api/config` payload) returns
   the caller's org's active positions with labels and order, so clients build seat pickers from
   config instead of assuming "always these 15."
+  2026-11-03: Replaced by tracker 95.2, which is built and waits on the preprod release. Positions are rows in the `EcPositions` table (`GHCAA.Domain/Models/EcPosition.cs:6`), not an `ECPosition` enum filtered by org config. The list is `GET api/governance/positions` (`GovernanceController.cs:36`) and the admin list is `GET api/admin/governance/positions` (`AdminGovernanceController.cs:122`). There is no `GET /api/elections/positions` route and no `ParsePosition` method in the code.
 - **Not in scope.** Renaming the underlying enum values, or letting an org invent a position name
   that isn't one of the enum's defined values — that still needs a code change, same as
   `MembershipType`. Scoping it further than "which of the existing positions apply, in what
@@ -182,3 +183,5 @@ Added 2026-09-27 from spec 023, election ballot secrecy and standards (Phase 2 t
 ## Evidence
 
 To be filled in as each stage lands — see `docs/TODO.md` item 37.1h for stage-by-stage status.
+
+2026-11-03: No stage-by-stage evidence is recorded in this file. Evidence for the position work sits in tracker 95.2 (built 2026-10-21, preprod release left). *[Evidence not recorded: test names and run results for each stage of this redesign still need to be sourced from a dated test run.]*

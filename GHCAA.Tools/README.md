@@ -1,6 +1,6 @@
 # GHCAA.Tools
 
-PowerShell helpers for local development. Run from any directory; scripts resolve the repo root from `$PSScriptRoot`.
+Scripts for local development and a few one-off database repairs. Run from any directory; scripts resolve the repo root from `$PSScriptRoot`.
 
 ## Scripts
 
@@ -36,7 +36,7 @@ Starts the stack in **separate windows**:
 
 **Database provider override**
 
-Sets **`DatabaseProvider`** for `dotnet ef` and for the API process (must match `DependencyInjection`: `PgSql`, `MySql`, or `Sqlite`). If you omit `-DatabaseProvider`, any stale `DatabaseProvider` in the **same PowerShell window** is cleared so the API uses `appsettings.json` again.
+Sets **`DatabaseProvider`** for `dotnet ef` and for the API process (`PgSql` or `Sqlite`; MySQL was dropped, see `docs/adr/0006-drop-mysql-provider.md`). `Sqlite` is for tests and `ASP_SEED_PROFILE=Visual` only. If you omit `-DatabaseProvider`, any stale `DatabaseProvider` in the **same PowerShell window** is cleared so the API uses `appsettings.json` again.
 
 When you pass `-DatabaseProvider`, the API is started via **`cmd.exe`** so that variable is always applied to `dotnet run` reliably.
 
@@ -66,6 +66,24 @@ Copies **`GHCAA.API/.env.example`** → **`GHCAA.API/.env`** if `.env` does not 
 
 - **`run-app.bat`** — `powershell -ExecutionPolicy Bypass -File run-app.ps1`
 - **`stop-app.bat`** — stops dotnet/node/flutter and clears ports; also attempts to close **Chrome/Edge** (use only if you accept closing all browser windows).
+
+### `CI-Deploy.ps1`
+
+Builds a release package in `publish/`: runs backend tests, publishes the API, deletes the old `GHCAA.Web/dist`, runs `npm ci` and `npm run build` in `GHCAA.Web`, and copies `dist/GHCAA.Web/browser` into `publish/api/wwwroot`. Any failed step stops the script. It does not touch a database: `MigrationBootstrapper` applies migrations when the API starts (`docs/adr/0002-migrations-apply-automatically-at-startup.md`).
+
+### `detect-and-run-mobile.bat`, `run-app-mobile.bat`
+
+Start the API (unless `GHCA_API_ALREADY_STARTED=1`) and the Flutter app from `GHCAA.Mobile`.
+
+### One-off repair and diagnostic scripts
+
+Not part of the normal workflow. Several hard-code local credentials or database names, so read them before running.
+
+- **`test_registration.ps1`**, **`test_login.ps1`**, **`test_login.bat`** call a running local API.
+- **`list_users.cs`**, **`db_diag.cs`**, **`db_sync.cs`**, **`fix_shalin_login.csx`** are single-use diagnostics. This folder has no project file, so the `.cs` and `.csx` files are never compiled. They still use the old `ApplicationDbContext` and `DefaultConnection` names.
+- **`sync.sql`**, **`restore_admin.sql`**, **`reset_superadmin_password.sql`**, **`delete_imported_members.sql`** are PostgreSQL scripts for a local database. Back up first.
+- Visual regression runs use the Playwright suite in `GHCAA.Web`.
+- **`TestData/`** holds six JSON fixtures that the removed setup and cleanup scripts used. Nothing reads them now; 99.8 in `docs/TODO.md` keeps the decision on them open.
 
 ## Related documentation
 

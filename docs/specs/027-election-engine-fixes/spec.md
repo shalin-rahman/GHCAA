@@ -65,7 +65,7 @@ rejected server-side outside the `Polling` phase.
 
 - Controllers never query `ApplicationDbContext` directly — all persistence goes through
   `IElectionService`.
-- A ballot row must never be joinable back to a member. Not met as built; see spec 023
+- A ballot row must never be joinable back to a member. Met. 2026-11-03: `Ballot` and `BallotVote` hold no member and no time column (Election.cs:227-250), as built under spec 023
   FR-001 to FR-004.
 - Server-side identity for any officer-privileged action (scrutiny decisions, phase
   transitions) is taken from the authenticated claim, never from client-supplied request

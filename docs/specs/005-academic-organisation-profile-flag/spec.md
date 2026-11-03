@@ -38,6 +38,8 @@ The PostgreSQL migration shall rename `AcademicRecords.IsGHC` to
 `AcademicRecords.IsOrgProfile`. It shall not copy, recalculate, delete, or
 default existing rows. Its down migration shall restore the old column name.
 
+2026-11-03: Tracked as 34.D19 [IN PROGRESS 2026-10-13]. The migration `20260921110115_RenameIsGhcToIsOrgProfile` shipped without its Designer file, so EF never ran it. The fix makes it run guarded SQL that renames the column, or copies `IsGHC` into `IsOrgProfile` and drops `IsGHC` when both exist. That copy differs from the "no copy" rule above. 34.D19 stays open until a local run and the next preprod deploy confirm the directory cards.
+
 ### FR-4 Client compatibility
 
 New Web and Mobile builds shall send and read the canonical field. The API

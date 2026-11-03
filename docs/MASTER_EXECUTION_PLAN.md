@@ -4,10 +4,15 @@ Started 2026-11-01 under Work Package 99. This file orders all open work, electi
 `docs/TODO.md` and `docs/TODO_ARCHIVE.md` stay the only record of status and acceptance. This plan
 names item IDs and does not copy their acceptance text. Read the tracker item before starting it.
 
-Older plans are history and point here: `docs/NON_ELECTION_BACKLOG_EXECUTION_PLAN.md` (its eight
-phases are streams N1 to N8 below), `docs/BACKLOG_EXECUTION_PLAN.md`, and
-`docs/AUTH_AND_DEVICE_FIX_PLAN.md` (it keeps the Part A and B4-B5 steps, which wait for the
-elections). Election work follows `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`.
+This is the only open plan. The owner made it so on 2026-11-03. Every other plan file in `docs/`
+and `docs/specs/` is now a closed record or a design reference. A design reference says how to
+build an item, never when. Section 3 lists them under "Design references", and the order they used
+to give for open items is now in section 3 too: the stream E order and the order notes.
+
+This plan replaced `NON_ELECTION_BACKLOG_EXECUTION_PLAN.md` (its eight phases are streams N1 to N8
+below) and `BACKLOG_EXECUTION_PLAN.md`. Both were removed on 2026-11-03 and stay in git history.
+On the same day the open order in `docs/AUTH_AND_DEVICE_FIX_PLAN.md`, the spec 023 delivery plan
+and `docs/WHITE_LABEL_PLAN.md` moved here.
 
 Check this file against the tracker after any status change:
 
@@ -22,7 +27,13 @@ It exits 1 when an open item is missing here or a closed one is still scheduled.
 
 - **Date:** 2026-11-02. **Wave:** wave 1 built. The owner accepted this plan on 2026-11-02 and asked for a
   code review of wave 1 and a full `ci-local.py` run before 99.3 closes. Do not start wave 2 before that.
-- **Open:** 103 items on 2026-11-02, 1 of them this plan's own upkeep in Work Package 99 (`python scripts/backlog_inventory.py`). Held: 8 (`--state ONHOLD`).
+- **Open:** 120 items on 2026-11-03, 1 of them this plan's own upkeep in Work Package 99 (`python scripts/backlog_inventory.py`). Held: 8 (`--state ONHOLD`).
+- **Spec review, 2026-11-03.** The specs were checked against the tracker and the code. Fourteen
+  verified gaps became items: 37.16f to 37.16h in stream E, and 84.54 to 84.64 in streams N2, N3
+  and N6. Their priorities are proposals; the owner can change them. 84.54 (the mobile event
+  payment sheet ignores the active-gateway settings) is the only P1. The owner answered the six
+  product questions from the same review on 2026-11-03; they became 84.65 to 84.69 (section 5,
+  the owner gates).
 - **Next three items** once wave 1 is accepted, cheapest first as in the wave 2 table: 84.4 (web
   and mobile parity table), 93.3 (portal mobile nav e2e), 34.D7 (stale mobile goldens). 84.27
   (archive API tests and admin screen) follows. See section 4, the waves.
@@ -43,7 +54,7 @@ It exits 1 when an open item is missing here or a closed one is still scheduled.
 
 | ID | Finding | Evidence | Fix |
 |---|---|---|---|
-| G1 | The non-election plan names 5 closed items and leaves 33 open items out. | `backlog_inventory.py --check docs/NON_ELECTION_BACKLOG_EXECUTION_PLAN.md`: 38 problems. Closed: 34.D17, 84.5, 84.8, 96.15, 98.6. | That plan is now history. This file names every open item and passes `--check`. |
+| G1 | The non-election plan names 5 closed items and leaves 33 open items out. | `backlog_inventory.py --check docs/NON_ELECTION_BACKLOG_EXECUTION_PLAN.md`: 38 problems. Closed: 34.D17, 84.5, 84.8, 96.15, 98.6. That file has since been deleted; to rerun the check, restore it from git history first (`git show HEAD:docs/NON_ELECTION_BACKLOG_EXECUTION_PLAN.md`). | That plan is now history. This file names every open item and passes `--check`. |
 | G2 | Seven tracker lines use a status the parser does not read, so they are not counted as open or closed. | `[IN-PROGRESS]` with a hyphen: 7.16 and 27.10 in `TODO.md`; 20.3, 20.4, 51.4 and 51.5 in `TODO_ARCHIVE.md`. `[OPEN]`: 98.43. The parser in `docs/book/build/tracker_page.py` reads `IN PROGRESS` with a space. | Fixed 2026-11-01 (99.4). 27.10, 20.3 and 20.4 closed, since 82.86, 82.82 and 82.83 are DONE. 7.16, 51.4 and 51.5 are `[IN PROGRESS]` and back in `TODO.md`. 98.43 is `[ONHOLD]` behind the config hold. The archive now holds only DONE and WONTDO items. |
 | G3 | Five wave 1 candidates from the plan were stale. | 46.5, 82.4, 44.16 and 61.3 are DONE. 51.4 sits in the archive with an unreadable status (G2). 84.46 is used twice. | Dropped from wave 1. 84.46 stays in stream E with an owner gate. |
 | G4 | The spec 001 index has no row for spec 026, the meetings spec. | `docs/specs/001-platform-baseline/spec.md`, feature spec table. | Add the row with 84.19. |
@@ -73,14 +84,14 @@ work in the order the tracker's `Depends on` tags give.
 
 | Stream | Source | Items |
 |---|---|---|
-| E | Election delivery plan (spec 023 `delivery-plan.md`), `AUTH_AND_DEVICE_FIX_PLAN.md` Part A and B4-B5 | 37.1m, 37.14o, 37.1p, 37.16e, 37.12y, 37.13f, 37.13g, 37.14a, 37.14d, 37.14f, 37.14m, 37.14n, 37.14t, 95.2, 95.4, 95.5, 95.12, 95.6, 84.42, 84.50 |
+| E | Spec 023 delivery plan sessions F2 to F11 and N1, auth plan Part A and B4-B5. Order below. | 37.1m, 37.14o, 37.1p, 37.16e, 37.16f, 37.16g, 37.16h, 37.12y, 37.13f, 37.13g, 37.14a, 37.14d, 37.14f, 37.14m, 37.14n, 37.14t, 95.2, 95.4, 95.5, 95.12, 95.6, 84.42, 84.50 |
 | N1 | Non-election plan phase 1, release and environment blockers | 7.26, 7.28, 34.D8, 34.D19, 62.41, 84.48 |
-| N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.9, 84.18, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 97.1 |
-| N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 93.3, 93.4, 96.3 |
-| N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.19, 84.20, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5 |
+| N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.9, 84.18, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 84.54, 84.55, 84.56, 84.57, 84.58, 84.59, 84.60, 84.62, 84.68, 97.1 |
+| N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 84.61, 84.64, 84.67, 84.69, 93.3, 93.4, 96.3 |
+| N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.19, 84.20, 84.65, 84.66, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5 |
 | N5 | Phase 5, white-label profile and reusable modules | 62.2, 62.42, 62.56 |
-| N6 | Phase 6, performance and quality | 27.1, 27.8, 34.D7, 37.11, 51.4, 51.5, 98.7 |
-| N7 | Phase 7, platform governance, security and operations | 7.16, 12.8, 12.9, 73.5, 73.6, 74.3, 98.43 |
+| N6 | Phase 6, performance and quality | 27.1, 27.8, 34.D7, 37.11, 51.4, 51.5, 84.63, 98.7 |
+| N7 | Phase 7, platform governance, security and operations | 7.16, 12.8, 12.9, 73.5, 73.6, 74.3, 98.43, 99.8 |
 | N8 | Phase 8, dissertation evidence and evaluation | 63.8, 63.18, 63.34, 64.8, 64.9, 67.2, 67.3, 67.4, 67.5, 67.7, 78.9, 78.10 |
 | P | This plan's own upkeep (Work Package 99) | 99.3 |
 
@@ -92,6 +103,70 @@ Order notes kept from the non-election plan:
 - 8.5 is a measured spike. No local database is picked before its evidence. 8.7 follows it.
 - 28.33 is the same scope as 8.8 and 37.7. Do not add an ARB pipeline.
 - 92.1 (spec 022) and 84.19 (spec 026) are written before their code.
+- 37.16f (one voting-member rule for elections and amendments) goes before 37.1p, so the new rules
+  in 37.1p are written once.
+- 84.61 (FCM push) waits for the owner's Firebase service key. Do not put it in a wave before then.
+
+Order notes moved from `WHITE_LABEL_PLAN.md` on 2026-11-03:
+
+- 62.41 is the generic run on an empty, throwaway PostgreSQL database. 62.42 makes `brand-lint`
+  blocking only after 62.41 passes.
+- 62.2 (one profile file set, hyphen-named) comes before 62.56 (profile export and import, spec 025).
+- Nothing here adds a `TenantId` column. One deployment serves one institution (the plan's ADR-1).
+
+### Stream E order
+
+Moved on 2026-11-03 from the spec 023 delivery plan ("Sessions") and the auth plan ("Part A",
+"B4-B5"). Only open items are kept. Steps 1 and 2 run now. The rest waits for the election
+sequence.
+
+1. 84.50, the device checks on the Windows desktop build against a local API (owner, 2026-11-02).
+   They cover 95.6 (authenticator app and step-up), 84.42 (mobile admin step-up routes), and 37.1m
+   and 37.14o (vote receipt and tracking codes). A person still prints a receipt in Chrome, Edge and
+   on a phone for 37.1m.
+2. 37.14m, 37.14n, 37.14t (election forms: stored fields, numbering, a QR code that proves the
+   paper), 37.16g (declare through governance) and 37.16h (moderated candidate photo). None depends
+   on another open item, and none adds a migration.
+3. 37.16f, one voting-member rule for elections and amendments. It goes before step 4, so 37.1p's
+   new rules are written once.
+4. The election rules migration (delivery plan F2): 37.1p recount and candidate consent, 37.16e
+   officer conflicts, 37.14d audit chain set to Restrict. Waits for the 34.D19 migration to be confirmed
+   on preprod (34.D19 is in stream N1).
+5. Services on that schema (F3): 37.14a key copies, 37.1p unopposed and spoiled seats, 37.12y
+   polling extension, 37.14f ten-year purge.
+6. Web and mobile screens for steps 4 and 5 (F5 and F6), in separate worktrees at the same time.
+   84.49 B4-B5 (key spinner, 60 s key save timeout) ride with the mobile session.
+7. 95.2 committee positions, then the positions and terms migration (delivery plan N1). It lands
+   after step 4's migration, never at the same time.
+8. 95.4 vacant seats, 95.5 by-election, 95.12 term ending (F10).
+9. 37.13f compliance docs (the owner confirms the Neon and Render plans) and 37.13g, the manual
+   accessibility run, once step 6 closes.
+
+Migrations land one at a time, in step order. Each takes the next timestamp and builds from the
+current model snapshot.
+
+### Design references
+
+These files hold the how for open items. The tracker holds status, and this plan holds the order.
+Each opens with a line that says so.
+
+| File | Holds | Open items |
+|---|---|---|
+| `docs/AUTH_AND_DEVICE_FIX_PLAN.md` | Part A setup and check steps, B4-B5 code steps, owner decisions D1-D5 | 84.50, 84.49, 84.42, 95.6 |
+| `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md` | Session rules, F and N session build notes, what stays with a person | Stream E |
+| `docs/specs/023-election-ballot-secrecy-and-standards/plan-officials.md` and `plan.md` | Officials design, Phase 3 rules | 37.1p, 37.16e, 37.13f, 37.13g |
+| `docs/WHITE_LABEL_PLAN.md` | ADR-1 to ADR-5, phases A to F, verification | 62.2, 62.41, 62.42 |
+| `docs/specs/025-org-config-pack-export-import/plan.md` | Export and import shape | 62.56 |
+| `docs/specs/022-configurable-approval-workflows/plan.md` | Approval workflow steps | 92.1 to 92.5 |
+| `docs/specs/008-idempotent-member-batch-import/plan.md` | Import gaps and checks | 88.1 to 88.5 |
+| `docs/specs/004-pending-work-packages/plan.md` | Per-item slices and dependency reasons | Streams N2 to N8 |
+| `docs/specs/009-campaigns-scholarships-archive/plan.md` | WP37 history | 84.27 |
+| `docs/specs/024-performance/plan.md` | Performance phases | 98.7, 98.43 |
+| `docs/TEST_COVERAGE_PLAN.md` | Coverage targets and method | 27.1, 27.8 |
+
+Closed records, not scheduled: `BUSINESS_REVIEW_PLAN.md` (audit snapshot of 2026-07-03),
+`FORUM_PLAN_2026-05.md`, `UI_FIX_PLAN.md`, `implementation_plan.md`, and the plans of specs 001,
+005, 007 and 024's built phases. Spec 006 (Agentra) is a draft with no tracker item; 99.8 holds it.
 
 ## 4. Waves
 
@@ -182,8 +257,9 @@ Ordered cheapest first. One `--only backend` run, one `--only web` run, one `--e
 
 ### Later waves
 
-Later waves are drawn from the streams in this order: N2, N3, N4, N6, N5, N7, N8. Stream E runs on
-its own plan and waits for the election sequence. Owner-gated items enter a wave only after the
+Later waves are drawn from the streams in this order: N2, N3, N4, N6, N5, N7, N8. Stream E follows
+the stream E order in section 3. Its steps 1 and 2 can join any wave; the rest waits for the
+election sequence. Owner-gated items enter a wave only after the
 gate clears.
 
 ## 5. Owner gates
@@ -201,6 +277,7 @@ Answers recorded 2026-11-02. The "Next" column is what is left, and who does it.
 | Device checks | 84.42, 84.50 | Run on the Flutter Windows desktop build against a local API. 37.1m and 37.14o are covered inside 84.50. Next: engineering. |
 | Product decisions | 84.7, 49.3.C, 12.8 | 84.7: support a second institution; a seeding plan goes to the owner before any build. 49.3.C: optional `ContactEmail` on the user. 12.8: two secret files untracked; the archive list goes to the owner. |
 | Participants | 78.9 | The owner runs the sessions once 7.26 and 7.28 pass. Next: a session runbook and an empty response log. |
+| Spec review questions | 84.65 to 84.69 | Answered 2026-11-03. Scholarships get a web admin page (84.65). Archive submissions get a per-member cap set in Settings (84.66). Mobile gets password change (84.67) and read-only site content (84.69). The web admin gets credential revoke and reissue (84.68). Elections: mobile carries the voter screens (elections, nominate, vote, results) and web carries those plus the officials' screens; recorded in specs 018 and 023, no item. The low-value refactors are recorded as accepted in their specs. The `MemberService` split the review listed was already done (closed 2026-09-06; the largest part is now 483 lines). Next: engineering. |
 
 ## 6. On hold
 
@@ -268,3 +345,7 @@ What counts as evidence:
 | 2026-11-02 | 98.43 (part) | Each new key name grepped in the code it configures; values not checked | `.env.dev.example`: commented keys added. Removing unused appsettings keys waits for the owner |
 | 2026-11-02 | 62.6b | `dotnet test GHCAA.Tests`: 1873 of 1873; golden snapshot unchanged | `OrgConfigService.cs`, `InstitutionProfileProvider.cs`, `IInstitutionProfileProvider.cs`, `Program.cs`, `ci` swagger step, `TestProfiles.cs`, OrgConfig and integration tests, specs 020 and 025, `CONFIG_DRIVEN_FRAMEWORK.md`, `WHITE_LABEL_PLAN.md` |
 | 2026-11-02 | 12.8 (part) | `git ls-files` no longer lists `docs/appsettings.txt` or `docs/dgepay_info.txt`; both kept on disk and ignored | `.gitignore` |
+| 2026-11-03 | 37.16f-h, 84.54-84.64 (added) | Spec review against the tracker; each gap checked in the code at the file and line the item names. 90.2 and 92.2 acceptance extended | `docs/TODO.md`, this file, specs listed in the review |
+| 2026-11-03 | 84.65-84.69 (added) | Owner answers to the six review questions; election screen split and accepted refactors recorded in the specs | `docs/TODO.md`, this file, specs 013, 014, 015, 018, 023 |
+| 2026-11-03 | 99.7, 99.8 (added) | Scripts and plans audited against the code; `--check` 0 problems; script tests 18 and authz tests 12 pass | Fixed scripts and plans listed in 99.7; two backlog plans and nine dead scripts deleted |
+| 2026-11-03 | 99.9 (added, closed) | Owner: this file is the only open plan. All 102 open items were already named here; the open order of the auth plan, the spec 023 delivery plan and the white-label plan moved into section 3 | This file, the other plan files' opening lines, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md` |

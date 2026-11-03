@@ -2,6 +2,10 @@
 
 **Spec**: [spec.md](./spec.md)
 **Tracker**: `docs/TODO.md` Work Package 98
+**Status (2026-11-03)**: Every phase below is built and archived in `docs/TODO_ARCHIVE.md`
+except 98.7 (pre-compressed static assets, P4, still `[TODO]`). 98.34 is on hold and 98.43 was
+added on 2026-11-02; neither is covered by this plan. When 98.7 and 98.43 run is set in `docs/MASTER_EXECUTION_PLAN.md`, the only open
+plan.
 
 ## Order
 

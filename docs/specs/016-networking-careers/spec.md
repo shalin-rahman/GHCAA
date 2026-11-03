@@ -282,7 +282,7 @@ status transition.
   reference the type). A job post gets no server-side length or format check beyond ASP.NET
   model binding, unlike registration's `MemberRegistrationValidator`.
   [NEEDS CLARIFICATION: is job-post validation intentionally left to client-side checks only,
-  or is a validator missing?]
+  or is a validator missing?] 2026-11-03: Tracked as 84.56, `CreateJobDto` validation with DataAnnotations (FluentValidation never runs here).
 - `GHCAA.Mobile/lib/screens/member/job_details_screen.dart:150` sends a PUT body of only
   `{title, description}` to `PUT api/jobs/{id}`, while
   `GHCAA.Infrastructure/Services/JobHubService.cs`'s `UpdateJobAsync` overwrites every
@@ -292,7 +292,7 @@ status transition.
   and nothing sets `SuppressImplicitRequiredAttributeForNonNullableReferenceTypes`, so the
   non-nullable `CompanyName`, `Location` and `Requirements` are implicitly required and the
   request should be rejected with 400 by model validation. The expected result is that a
-  mobile job edit always fails. This has not been run to confirm.
+  mobile job edit always fails. This has not been run to confirm. 2026-11-03: Built. `buildJobUpdateBody` at job_details_screen.dart:200 sends the full loaded job with the two edited fields swapped in, and the PUT at :151 uses it.
 - `GHCAA.Application/Interfaces/IJobHubService.cs`'s `GetMemberJobsAsync` is not called from
   `JobHubController` (confirmed by grep of non-binary matches); its only caller is
   `PendingApprovalsController.cs:86`, a controller outside this spec's scope. `JobHubController`
@@ -302,7 +302,7 @@ status transition.
   `IEnumerable<object>` rather than a typed DTO. The only documented shape for these responses
   is the Angular-side `MentorshipRequestDto`/`MentorshipAdminRow` interfaces in
   `GHCAA.Web/src/app/core/models/business.models.ts` (lines 791 and 805), which can drift from
-  what the backend actually serializes without either side failing a build.
+  what the backend actually serializes without either side failing a build. 2026-11-03: Tracked as 84.59, services that return `IEnumerable<object>` instead of a DTO.
 - `GHCAA.Web/src/app/core/services/networking.service.ts`'s `getMemberProfile(id)` builds its
   route by string concatenation off `API_ENDPOINTS.NETWORKING.BASE` instead of a dedicated
   constant like the other `NETWORKING` sub-keys (`COMMITTEE`, `SEARCH`, `UPDATES`).
@@ -315,6 +315,8 @@ status transition.
   workflow, already documents as a gap for its own admin lists.
 
 ## Enhancements: modularisation and reusability
+
+2026-11-03: The owner accepted ENH-001, ENH-003 and ENH-004 as they stand. No tracker item follows. ENH-002 is tracked as 84.59.
 
 ### Reuse across layers
 
@@ -330,7 +332,7 @@ status transition.
   (`GHCAA.Application/Interfaces/INetworkingService.cs`,
   `GHCAA.Application/Interfaces/IMentorshipService.cs`). Giving these four methods typed DTOs
   would remove the risk noted in Gaps, that the Angular models are the only real contract for
-  what the endpoints serialize.
+  what the endpoints serialize. 2026-11-03: Tracked as 84.59, services that return `IEnumerable<object>` instead of a DTO.
 
 ### Entity-based module shape
 

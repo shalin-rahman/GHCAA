@@ -17,7 +17,7 @@ not what has already been delivered.
 **Language/Version**: ASP.NET Core 9 / C#, Angular 21 / TypeScript, Flutter 3.x /
 Dart
 
-**Primary Dependencies**: EF Core, FluentValidation, JWT and BCrypt,
+**Primary Dependencies**: EF Core, DataAnnotations validation, JWT and BCrypt,
 SignalR, Angular standalone components and signals, Dio, Riverpod, and
 `go_router`
 
@@ -38,8 +38,9 @@ mobile retry cap, and fast-loading shared UI behavior
 `IsArchived` query filters, `dd-MM-yyyy` display dates, no live payment keys,
 shared Web/Mobile behavior, and no source changes for this baseline
 
-**Scale/Scope**: 10 independently testable user stories, 30 functional and
-cross-layer requirements, and the implemented controller/client route surface across authentication,
+**Scale/Scope**: seven cross-layer requirements (CLR-001 to CLR-007) in `spec.md`, nine
+as-built domain specs (012 to 020) that hold the per-domain requirements, and the API controllers
+(49 files in `GHCAA.API/Controllers`, counted 2026-11-03) and client route surface across authentication,
 membership, events, finance, networking, governance, content, messaging,
 administration, and health
 

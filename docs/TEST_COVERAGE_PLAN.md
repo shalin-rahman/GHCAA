@@ -197,7 +197,7 @@ Work in this order because it gains the most meaningful branch coverage per test
 
 1. Validators, mappers, formatters, policy helpers and state reducers.
 2. Service decisions: ownership, authorization, status transitions, null or empty data, fallback configuration, transaction rollback and external failure.
-3. Controller contracts: one success and one meaningful missing, forbidden, invalid or failed outcome per mutation. Complete 47.13.4, 47.13.6 and 47.13.7 in the active tracker.
+3. Controller contracts: one success and one meaningful missing, forbidden, invalid or failed outcome per mutation. Items 47.13.4, 47.13.6 and 47.13.7 are closed in `docs/TODO_ARCHIVE.md`.
 4. Angular services, guards, interceptors, signal state and forms.
 5. Flutter providers, service parsing/fallbacks, router guards and shared widgets.
 6. End-to-end tests only for a cross-layer journey or platform boundary that a lower-level test cannot prove.

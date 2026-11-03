@@ -422,14 +422,14 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
 - `GetStats` and `GetAnalytics` call the identical `MemberService_Search.GetDashboardStatsAsync`
   with the same arguments and return the same shape (`AdminController.cs:32-43`).
   [NEEDS CLARIFICATION: were these meant to return different data, or is one route dead and should
-  be removed?]
+  be removed?] 2026-11-03: Stale. `GetAnalytics` no longer exists; only `GetStats` remains (AdminController.cs:29).
 - `IContactService.GetMessagesAsync` returns `Task<IEnumerable<object>>` rather than a typed DTO
   (`GHCAA.Application/Interfaces/IContactService.cs:10`), so `GET api/admin/contact-messages` has no
   documented response contract beyond "some list of objects."
   [NEEDS CLARIFICATION: what is the actual shape of a contact message record returned here?]
 - `ThemeController.CreateTheme` and `UpdateTheme` bind the raw `SpecialDayTheme` domain entity
   directly from the request body (`ThemeController.cs:40,48`), with no request DTO in between. Every
-  other write endpoint in this domain (OrgConfig, Lookups) goes through a DTO first.
+  other write endpoint in this domain (OrgConfig, Lookups) goes through a DTO first. 2026-11-03: Stale. Both actions now bind `SpecialDayThemeSaveDto` (ThemeController.cs:39 and :54).
 - `AdminErrorLogsController` and `AdminDevTrackerController` have no controller-level test file
   (`GHCAA.Tests/Controllers/` has no `AdminErrorLogsControllerTests.cs` or
   `AdminDevTrackerControllerTests.cs`); the only coverage is at the service layer
@@ -447,7 +447,7 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
 - ENH-001 (P2): `AdminController.GetStats` (`AdminController.cs:32`) and `GetAnalytics`
   (`AdminController.cs:40`) both call `_memberService.GetDashboardStatsAsync(isPrivileged, ct)` with
   no difference in arguments or handling. One of the two routes is a duplicate; keeping both invites
-  the two to drift apart if only one is ever updated.
+  the two to drift apart if only one is ever updated. 2026-11-03: Stale. `GetAnalytics` was removed, so there is no duplicate route.
 
 ### Entity-based module shape
 
@@ -462,7 +462,7 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
   `app-search-bar`, or `app-breadcrumb` components named in project memory. This needs a follow-up
   read of those four component files before it can be confirmed either way.
   [NEEDS CLARIFICATION: do the four admin list screens above reuse the shared list-page shell
-  components, or did each hand-roll its own header and search markup?]
+  components, or did each hand-roll its own header and search markup?] 2026-11-03: Built. All four screens (dev-tracker, error-logs, themes, contact-messages) use `app-page-header`.
 
 ### Hard-coded behaviour that should be configuration
 
@@ -474,7 +474,7 @@ confirm `GET api/Theme/active` returns it once the current date falls inside tha
 - ENH-005 (P3): The upload size limits (5 MB photo, 2 MB signature, 10 MB per document) are literal
   numbers in `AdminController.cs` at the photo, signature, and documents endpoints, rather than named
   constants. `Constants.ErrorLogs.RetentionDays` and `MaxPageSize` show the codebase already has a
-  convention for this in `GHCAA.Domain/Constants.cs:125-130`; the upload limits do not yet follow it.
+  convention for this in `GHCAA.Domain/Constants.cs:125-130`; the upload limits do not yet follow it. 2026-11-03: Tracked as 84.57, one upload-size policy.
 
 ## Success Criteria
 

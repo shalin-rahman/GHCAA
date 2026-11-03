@@ -428,6 +428,10 @@ strict receipt-freeness, print the tracking code only (option B in D1).
   records is refused hard delete and is deactivated instead, so the record stays whole. The unlock
   stays site-wide.
 
+- **D6 Which client carries which screens.** Decided 2026-11-03. Voters use the mobile app or
+  web: elections, nominate, vote and results. Officials work on web. The two clients are not
+  kept at parity, and spec 018's gap on the two admin subsets is read in that light.
+
 ## What the vote record keeps about the request
 
 The turnout row in the activity log already stores the IP address and user agent the request came

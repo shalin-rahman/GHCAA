@@ -54,7 +54,7 @@ Record the selected answers in this section and close TODO 92.1 before starting 
 ## Failure and compatibility rules
 
 - Missing settings use the documented default and cannot silently disable review.
-- An unknown flow key is rejected and logged; it does not grant approval access.
+- An unknown flow key is rejected and logged; it does not grant approval access. 2026-11-03: This rule (R14) is now in the acceptance of tracker 92.2 [TODO], the per-flow settings record.
 - A failed audit write fails the settings mutation or approval transition as the current audit contract requires.
 - No client-side role check may replace API authorization.
 - Existing pending records remain actionable under the configured flow policy; changing a setting does not rewrite prior records.

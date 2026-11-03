@@ -118,7 +118,7 @@ Someone scans the QR code on a printed ID card or certificate, or types the shor
 ## Edge Cases
 
 - `UpdateProfileAsync` sets `NotifyEventCreation`, `NotifyParticipationApproval`, `NotifyRegistrationUpdate`, and `NotifyCommitteeChanges` from the DTO but the code path for `NotifyRelevantUpdates` was not confirmed in this pass against `MemberService_Profile.cs`; see Gaps.
-- `IDCardService.VerifyCredentialAsync` treats a credential as valid when `!IsRevoked && (ExpiresOn is null || ExpiresOn > UtcNow)`, but no code path in `IDCardService.cs` sets `ExpiresOn`, so in practice a credential only stops being valid through explicit revocation.
+- `IDCardService.VerifyCredentialAsync` treats a credential as valid when `!IsRevoked && (ExpiresOn is null || ExpiresOn > UtcNow)`, but no code path in `IDCardService.cs` sets `ExpiresOn`, so in practice a credential only stops being valid through explicit revocation. 2026-11-03: Tracked as 84.60, credential ExpiresOn has no writer.
 - `FamilyLinkController.RemoveLinkAsync` lets either party cancel a link in any status, including an already-accepted one, not only a pending request.
 - `SecureFilesController` resolves `FileStorage:BasePhysicalPath` and falls back to `wwwroot` or `AppDomain.CurrentDomain.BaseDirectory` when that config key is absent, then requires the resolved path to land inside one of the two computed roots before serving it (`SecureFilesController.cs:60-90`).
 - `GET api/family-links/{memberId}/family` is reachable by any authenticated member for any `memberId`, gated only by the target's `IsFamilyPublic` flag inside `FamilyLinkService.GetFamilyAsync`, not by a route-level policy. Admins skip the flag (TODO 84.22).
@@ -155,7 +155,7 @@ Someone scans the QR code on a printed ID card or certificate, or types the shor
 - **Member** (subset relevant here): `NID`, `MobileNo`, `Email`, `PresentAddress`, `PermanentAddress`, `IsNIDPublic`/`IsMobilePublic`/`IsEmailPublic`/`IsAddressPublic`/`IsFamilyPublic`, `PhotoPath`, `SignaturePath`, notification flags (`NotifyEventCreation`, `NotifyParticipationApproval`, `NotifyRegistrationUpdate`, `NotifyRelevantUpdates`, `NotifyCommitteeChanges`).
 - **FamilyLinkRequest**: requester member id, target member id, `Relationship` (`RelationshipType` enum), `Note`, `Status` (Requested/Accepted/Rejected/Cancelled/Removed).
 - **FileUpload**: `MemberId`, `FileName`, `FilePath`, `UploadType`, `SizeBytes`: the row `SecureFilesController` looks up before serving a file.
-- **IssuedCredential**: `ShortCode` (10 characters), owning member, `IsRevoked`, `RevokedReason`, `RevokedOn`, `ExpiresOn` (never observed set in this pass).
+- **IssuedCredential**: `ShortCode` (10 characters), owning member, `IsRevoked`, `RevokedReason`, `RevokedOn`, `ExpiresOn` (never observed set in this pass). 2026-11-03: Tracked as 84.60, credential ExpiresOn has no writer.
 
 ## Evidence
 
@@ -186,8 +186,9 @@ Someone scans the QR code on a printed ID card or certificate, or types the shor
 
 ## Gaps
 
+- 2026-11-03: Owner answers. The mobile app gets the Change Password screen web already has (84.67). The web admin gets Revoke, with a reason, and Reissue for a member's credential (84.68). 84.60, the credential expiry date, comes first so Reissue can set it. Checked the same day: the admin revoke route (`POST api/verify/{shortCode}/revoke`, reason required) already exists and verification shows Revoked. It lacks step-up and an audit entry, and no reissue or web screen exists yet.
 - Angular calls only `getIDCard` and `getCertificate` (data URI); no Angular file calls the PDF routes (`id-card/pdf`, `certificate/pdf`). `GHCAA.Mobile/lib/screens/member/digital_id_screen.dart:278-346` builds its own PDF client-side with the `pdf` package instead of calling either backend PDF route, so the two PDF endpoints (FR-005, FR-007) have no confirmed caller in either client. [NEEDS CLARIFICATION: are the backend PDF routes still needed, or is mobile's client-side PDF the intended path and the two GET .../pdf routes dead code?]
-- `IDCardService.VerifyCredentialAsync`'s `ExpiresOn` check has no writer anywhere in `IDCardService.cs`; a credential's only path to becoming invalid is explicit admin revocation, not time expiry, even though the DTO carries an expiry field (IDCardService.cs, `VerifyCredentialAsync`).
+- `IDCardService.VerifyCredentialAsync`'s `ExpiresOn` check has no writer anywhere in `IDCardService.cs`; a credential's only path to becoming invalid is explicit admin revocation, not time expiry, even though the DTO carries an expiry field (IDCardService.cs, `VerifyCredentialAsync`). 2026-11-03: Tracked as 84.60, credential ExpiresOn has no writer.
 - No client (Angular or Flutter) was found calling `POST api/verify/{shortCode}/revoke`; the only consumer of admin revocation traced in this pass is the controller/test pair itself. [NEEDS CLARIFICATION: is credential revocation performed from an admin screen not covered by this pass, or only via direct API access today?]
 - No test exercises `POST api/profile/photo`, `POST api/profile/signature`, `GET api/profile/id-card/pdf`, `GET api/profile/certificate/pdf`, or `POST api/verify/{shortCode}/revoke`; these five endpoints are `[code]`-only in the Evidence table above.
 - `GHCAA.Mobile` has no signature-upload call site (`GHCAA.Mobile/lib` has no file referencing "signature"); mobile members cannot set a signature through the app even though the backend accepts one (FR-009). This is a missing capability, not a layout difference.
@@ -212,8 +213,8 @@ Someone scans the QR code on a printed ID card or certificate, or types the shor
 
 ### Hard-coded behaviour that should be configuration
 
-- ENH-004 (P1, security risk): the 5 MB photo limit and 2 MB signature limit are literal `5*1024*1024`/`2*1024*1024` arguments passed at the `ProfileController.UploadPhoto`/`UploadSignature` call sites (`GHCAA.API/Controllers/ProfileController.cs`), not sourced from a named constant or org-configurable setting. A value this security-relevant (denial-of-service via oversized uploads) is worth centralizing so it can be tuned without a code change.
-- ENH-005 (P3, tidy-up): the content-type-to-extension map in `SecureFilesController.GetSecureFile` (`.pdf`, `.jpg`/`.jpeg`, `.png`, else `application/octet-stream`) is a local literal switch rather than reuse of `FileValidationService`'s existing extension/content-type tables (`GHCAA.Infrastructure/Services/FileValidationService.cs`), which already enumerate the same four cases plus `.webp`. A shared lookup would keep the two in sync; `.webp` files currently fall through to `application/octet-stream` on download even though upload accepts them.
+- ENH-004 (P1, security risk): the 5 MB photo limit and 2 MB signature limit are literal `5*1024*1024`/`2*1024*1024` arguments passed at the `ProfileController.UploadPhoto`/`UploadSignature` call sites (`GHCAA.API/Controllers/ProfileController.cs`), not sourced from a named constant or org-configurable setting. A value this security-relevant (denial-of-service via oversized uploads) is worth centralizing so it can be tuned without a code change. 2026-11-03: Tracked as 84.57, the upload-size policy.
+- ENH-005 (P3, tidy-up): the content-type-to-extension map in `SecureFilesController.GetSecureFile` (`.pdf`, `.jpg`/`.jpeg`, `.png`, else `application/octet-stream`) is a local literal switch rather than reuse of `FileValidationService`'s existing extension/content-type tables (`GHCAA.Infrastructure/Services/FileValidationService.cs`), which already enumerate the same four cases plus `.webp`. A shared lookup would keep the two in sync; `.webp` files currently fall through to `application/octet-stream` on download even though upload accepts them. 2026-11-03: Tracked as 84.58, webp missing in the SecureFiles content-type map.
 
 ## Success Criteria
 

@@ -71,6 +71,7 @@ The system shall restrict every report route to authenticated admins, following 
 - **NFR-4 Result sets stay bounded.** A report run shall apply a maximum row cap (matching
   whatever paging convention the existing admin list endpoints use) so an unfiltered "all
   members" report cannot return an unbounded result set in one response.
+  2026-11-03: Tracked in the acceptance of 90.2 [TODO], the report service. The cap is held in `Constants`, and a test shows a larger result is cut at the cap and says so. No `ReportService` exists yet.
 
 ## Acceptance criteria
 

@@ -2,7 +2,7 @@ param (
     [switch]$RunTests,
     [switch]$NoWeb,      # Skip Angular (npm start)
     [switch]$NoMobile,   # Skip Flutter launcher (detect-and-run-mobile.bat)
-    [ValidateSet("PgSql","MySql","Sqlite","")]
+    [ValidateSet("PgSql","Sqlite","")]
     [string]$DatabaseProvider = ""
 )
 

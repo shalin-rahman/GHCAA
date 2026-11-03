@@ -2,12 +2,12 @@
 
 **Feature Branch**: 024-performance
 **Created**: 2026-10-14
-**Status**: Mostly built. As of 2026-10-20 the tracker items under Work Package 98 run to 98.43. Of the items this spec raised only 98.7 (pre-compressed static files) is still open, and 98.34 is on hold
+**Status**: Mostly built. As of 2026-11-03 the tracker items under Work Package 98 run to 98.44 (98.43 is open, config keys in the env files; 98.44 is done, the health page at `/health`). Of the items this spec raised only 98.7 (pre-compressed static files) is still open, and 98.34 is on hold (until a patched 9.0.x ships or the API moves to .NET 10)
 **Input**: User request of 2026-10-14: "i want all specs plans, tasks for performance improvement,
 that mat db, api, FE,design or else first, than start fix". Four read-only audits of the same day
 (database and EF, API, Angular web with its assets, Flutter mobile) supplied the findings.
 **Depends on**: [001-platform-baseline](../001-platform-baseline/spec.md) (the as-built platform)
-**Tracker**: `docs/TODO.md` items 98.1 to 98.20 for the findings below, under Work Package 98. Later items in that package (to 98.43) came from other reviews
+**Tracker**: `docs/TODO.md` items 98.1 to 98.20 for the findings below, under Work Package 98. Later items in that package (to 98.44) came from other reviews
 
 ## Purpose and scope
 

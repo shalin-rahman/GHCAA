@@ -1,5 +1,7 @@
 # Configurable approval workflows delivery plan
 
+Design reference. When 92.1 to 92.5 run is set in `docs/MASTER_EXECUTION_PLAN.md`, the only open plan.
+
 Follow [Work Package 92](../../TODO.md) and the requirements in [spec.md](./spec.md). This is a planning document; no implementation or policy choice is implied by it.
 
 ## Dependency order

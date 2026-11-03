@@ -1,6 +1,6 @@
 # Specification: Workflow Contracts and Validation Detail
 
-**Status**: Draft | **Date**: 2026-09-21 | **Depends on**: [001-platform-baseline](../001-platform-baseline/spec.md)
+**Status**: Draft, evidence written for the 7 domains; tasks T001, T013, T015 and T016 open as of 2026-11-03 | **Date**: 2026-09-21 | **Depends on**: [001-platform-baseline](../001-platform-baseline/spec.md)
 
 ## Purpose and scope
 
@@ -57,12 +57,13 @@ rather than omitted.
 As a developer adding a field to a registration, event, payment, or content
 form, I need a single table listing every write DTO, its fields, and the
 validation rule applied to each (required, format, range, cross-field,
-uniqueness), so I can tell whether a rule lives in a FluentValidation
-validator, a controller check, a database constraint, or nowhere.
+uniqueness), so I can tell whether a rule lives in a DataAnnotations
+attribute on the DTO, a controller check, a database constraint, or nowhere.
+(2026-11-03: FluentValidation is not used here. No `AbstractValidator` exists in the code, so validation lives in DataAnnotations.)
 
 **Acceptance**: a table exists covering every DTO accepted by a `[Http Post]`,
 `[HttpPut]`, or `[HttpPatch]` action across the API, with a column recording
-where its validation is enforced (validator class, controller, DB constraint)
+where its validation is enforced (DataAnnotations attribute, controller, DB constraint)
 and a column flagging fields with no enforced rule found in code.
 
 ### Story 3 — Endpoint contract tables (P1)

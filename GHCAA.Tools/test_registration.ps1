@@ -50,8 +50,8 @@ if (-not $adminToken) {
 Write-Host "`n[STEP 2] Checking for existing test user..."
 $headers = @{ Authorization = "Bearer $adminToken" }
 try {
-    $existing = Invoke-RestMethod -Uri "$BASE/api/admin/members?search=ghcregisterfinal" -Method GET -Headers $headers
-    $found = $existing | Where-Object { $_.email -like "*ghcregisterfinal*" }
+    $existing = Invoke-RestMethod -Uri "$BASE/api/admin/members?searchQuery=ghcregisterfinal" -Method GET -Headers $headers
+    $found = $existing.items | Where-Object { $_.email -like "*ghcregisterfinal*" }
     if ($found) {
         Write-Host "  [WARN] Test user already exists with ID $($found.id). Test may show duplicate error."
     } else {
@@ -148,9 +148,9 @@ Write-Host "  [INFO] For bypass, we will use Admin API to manually verify later.
 
 # STEP 5: Check pending approvals as Admin
 Write-Host "`n[STEP 5] Admin - Checking Pending Approvals..."
-$pending = Invoke-RestMethod -Uri "$BASE/api/admin/members/pending" -Method GET -Headers $headers
-Write-Host "  Total pending: $($pending.Count)"
-$testMember = $pending | Where-Object { $_.email -like "*ghcregisterfinal*" }
+$pending = Invoke-RestMethod -Uri "$BASE/api/admin/members?statusFilter=Applied&pageSize=100" -Method GET -Headers $headers
+Write-Host "  Total pending: $($pending.totalItems)"
+$testMember = $pending.items | Where-Object { $_.email -like "*ghcregisterfinal*" }
 
 if ($testMember) {
     Write-Host "  [FOUND] Test member in queue: $($testMember.fullName) (ID: $($testMember.id))"
@@ -163,24 +163,17 @@ if ($testMember) {
 # STEP 6: Admin Approve the member
 Write-Host "`n[STEP 6] Admin - Approving Member ID $memberId..."
 try {
-    $approveBody = @{ approve = $true; note = "Approved via E2E test" } | ConvertTo-Json
+    $approveBody = "{}"  # ApproveMemberDto has no fields; the admin comes from the JWT
     $approveResp = Invoke-RestMethod -Uri "$BASE/api/admin/members/$memberId/approve" `
         -Method POST -Headers $headers -ContentType "application/json" -Body $approveBody
     Write-Host "  [SUCCESS] Approved!"
     Write-Host "  Response: $($approveResp | ConvertTo-Json)"
 } catch {
     $errBody = $_.ErrorDetails.Message
-    Write-Host "  [WARN] Direct approve failed: $($_.Exception.Message)"
+    Write-Host "  [FAIL] Approve failed: $($_.Exception.Message)"
     Write-Host "  Details: $errBody"
-    
-    # Try alternate endpoint
-    try {
-        $approveResp2 = Invoke-RestMethod -Uri "$BASE/api/admin/members/$memberId/induct" `
-            -Method POST -Headers $headers -ContentType "application/json" -Body $approveBody
-        Write-Host "  [SUCCESS via induct]" ($approveResp2 | ConvertTo-Json)
-    } catch {
-        Write-Host "  [ERROR] Induct also failed: $($_.Exception.Message)"
-    }
+    # Steps 7 and 8 need an approved member, so the run stops here as a failure.
+    exit 1
 }
 
 # STEP 7: Get the member's generated membership number

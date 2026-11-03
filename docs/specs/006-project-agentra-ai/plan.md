@@ -1,5 +1,7 @@
 # Implementation Plan: Project Agentra AI
 
+Draft, not scheduled. No tracker item builds it; 99.8 in `docs/TODO.md` holds the decision on it.
+
 **Branch**: `006-project-agentra-ai` | **Date**: 2026-09-21  
 **Spec**: [spec.md](spec.md)
 

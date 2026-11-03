@@ -1,5 +1,12 @@
 # Election ballot secrecy and standards: implementation plan
 
+> **Status 2026-11-03:** Phases 1, 2 and 4 are built. Phase 3 is built except for 37.1p (recount,
+> candidate consent, spoiled and unopposed seats) and 37.16e (officer conflict check), both still
+> `[TODO]` in `docs/TODO.md`. `CandidateConsentAt` and the conflict rule are not in the code yet.
+> Still open from the Phase 2 work: 37.1m and 37.14o (`[PARTIAL]`, printed receipt check). The
+> remaining work is ordered only in the stream E order of `docs/MASTER_EXECUTION_PLAN.md`, the
+> only open plan. The notes below are the earlier positions, kept for the record.
+>
 > **Status 2026-10-09:** Phase 2 is built on API, web and mobile, with 37.1t and 37.1u (FR-042,
 > FR-043). Left from Phase 2: a visual check of the printed receipt and a Unicode font for the mobile
 > PDF (37.1m). The font gap was closed on 2026-10-21 by the server-made receipt (37.14o). The web and mobile ballots also take up to `places` picks per seat now, which is the
@@ -204,8 +211,9 @@ Full step-by-step detail, exact files, entities, migrations, endpoints and tests
     ballots, test elections, key procedure, incident response docs, accessibility check)
 12. 37.12j: spec, API registry, project map, features, SRS and architecture doc updates
 
-Built as of 2026-10-06: items 1 to 7 (37.1w, 37.12a to 37.12f). Items 8 to 12 (37.12g to 37.12j, and
-37.13a to 37.13g) are still open in `docs/TODO.md`. After this plan was written, the code review and
+Built as of 2026-10-06: items 1 to 7 (37.1w, 37.12a to 37.12f). Items 8 to 12 (37.12g to 37.12j) and
+37.13a to 37.13e were closed by 2026-10-23. 37.13f is `[PARTIAL]` and 37.13g is `[TODO]`
+(manual accessibility check) in `docs/TODO.md`. After this plan was written, the code review and
 the rules work added 37.13h to 37.13z, all built: second person before the count, count executor and
 `CountRequesterOnly`, the settings audit, the rules freeze and SuperAdmin unlock, emergency revoke, the
 Returning Officer flag, the pre-polling warning (now an advisory item on the 37.12w readiness

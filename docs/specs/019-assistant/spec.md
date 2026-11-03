@@ -136,7 +136,7 @@ AssistantController still has no test.
   consume up to the full 100-requests-per-minute application-wide budget against the Member
   table lookup. [NEEDS CLARIFICATION: is the shared Api policy an accepted risk for this
   endpoint, or does it need its own tighter, keyed rate limit given it runs a table scan on
-  every call?]
+  every call?] 2026-11-03: Tracked as 84.62, a per-user rate limit for the assistant route.
 - There is no provider selection, prompt template, or guardrail logic anywhere in
   AssistantService.cs; matching is five `string.Contains` keyword checks. This confirms
   006-project-agentra-ai's own framing of the current code as a rule-based adapter, not an
@@ -176,11 +176,11 @@ AssistantController still has no test.
 
 - ENH-004 (P2): The five intent keywords ("find", "search", "who", "alumni", "member") and the
   two help keywords ("help", "what can you do") are literal strings inside AskAsync
-  (AssistantService.cs lines 33 and 73), not sourced from OrgConfigService or any other
+  (AssistantService.cs lines 41 and 88), not sourced from OrgConfigService or any other
   configuration. Every other timing/behaviour knob audited in this codebase (rate-limit
   windows, step-up TTL) is at least a candidate for config; these keyword lists are English-only
   and cannot be tuned or localized without a code change.
-- ENH-005 (P3): The result cap of 10 (AssistantService.cs line 53, `Take(10)`) is a literal, not
+- ENH-005 (P3): The result cap of 10 (AssistantService.cs line 59, `Take(10)`) is a literal, not
   a configuration value, unlike the page-size-5 pending-approvals pattern documented in
   012-membership-lifecycle-auth.
 

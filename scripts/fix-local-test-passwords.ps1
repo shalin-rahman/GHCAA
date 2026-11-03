@@ -4,9 +4,9 @@ $repoRoot = Split-Path $PSScriptRoot -Parent
 $connStr = "Host=localhost;Port=5432;Database=GHCAADB_v2;Username=postgres;Password=postgres;SslMode=Prefer"
 $sqlPath = Join-Path $PSScriptRoot "fix-local-test-passwords.sql"
 
-dotnet build "$repoRoot\GHCAA.Infrastructure\GHCAA.Infrastructure.csproj" -v q | Out-Null
-$npgsqlDll = Get-ChildItem -Path $repoRoot -Recurse -Filter "Npgsql.dll" |
-    Where-Object { $_.FullName -match "net9\.0" } | Select-Object -First 1
+dotnet build "$repoRoot\GHCAA.API\GHCAA.API.csproj" -v q | Out-Null
+$npgsqlDll = Get-ChildItem -Path "$repoRoot\GHCAA.API\bin" -Recurse -Filter "Npgsql.dll" |
+    Where-Object { $_.FullName -match "net9" } | Select-Object -First 1
 
 if (-not $npgsqlDll) { throw "Npgsql.dll not found after build." }
 

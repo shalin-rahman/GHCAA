@@ -1,76 +1,70 @@
 # Repo reference
 
-`.github/copilot-instructions.md` is the canonical source for commands, architecture,
-backend/Angular/Flutter conventions, API contract logging, and the shared change
-workflow. Read it before cross-layer work. `AGENTS.md` and `GEMINI.md` add
-model-specific guidance; keep shared rules aligned and do not rely on stale or
-conflicting stack descriptions in older instructions. This file adds Claude-specific
-workflow rules without repeating the shared conventions.
+`.github/copilot-instructions.md` is the canonical source for the full commands table, architecture,
+backend/Angular/Flutter conventions, API contract logging and the shared change workflow. Read it
+before cross-layer work. `AGENTS.md` and `GEMINI.md` add model-specific guidance; keep shared rules
+aligned across all four files. This file repeats only the commands and rules needed every session.
 
-Open work follows `docs/MASTER_EXECUTION_PLAN.md` (since 2026-11-01). Its first section is the
-handover: the current wave, the next items and the owner gates. Check it against the tracker with
-`python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`. Part A (84.50) and
-B4-B5 of `docs/AUTH_AND_DEVICE_FIX_PLAN.md` wait for the election sequence.
+Open work follows `docs/MASTER_EXECUTION_PLAN.md`, the only open plan (owner, 2026-11-03). Its
+first section is the handover: the current wave, the next items and the owner gates. Check it against
+the tracker with `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`. Other
+plan files are design references: they say how to build an item, never when.
 
-# Graphify
+Layers: `GHCAA.Domain` → `GHCAA.Application` (DTOs, interfaces) → `GHCAA.Infrastructure` / `GHCAA.API`
+(thin host). Clients: `GHCAA.Web` (Angular 21), `GHCAA.Mobile` (Flutter). PostgreSQL in prod, SQLite locally.
 
-This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+## Commands (full table in copilot-instructions)
 
-Rules:
+- Backend: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~X"`
+- Web: `cd GHCAA.Web; npm run type-check; npm run test:unit -- <spec path>`
+- Mobile: `cd GHCAA.Mobile; flutter analyze; flutter test <file> --exclude-tags golden`
+- Local stack: `.\GHCAA.Tools\run-app.ps1` / `stop-app.ps1`
+- Before handing work back: `python scripts/ci-local.py` (`--quick`, or `--only backend|web|mobile|contract`
+  for one layer; `--e2e` adds end-to-end).
 
-- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
-- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
-- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
-- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+## Traps
+
+- FluentValidation validators never run; use DataAnnotations.
+- A migration without its `.Designer.cs` is silently skipped. `ef migrations add` then `remove` truncates
+  the model snapshot.
+- `Seed/*.json` only seeds a new DB; editing it does not change an existing one.
+- Displayed dates are `dd-MM-yyyy` on every client. The API's `DateFormatConverter` handles the wire
+  format; do not format dates ad hoc.
+
+## Graphify
+
+- `graphify query "<question>"` (or `path`, `explain`) before raw grep; `graphify-out/wiki/index.md`
+  for broad navigation.
+- After modifying code or docs, run `graphify update .` (AST-only, no API cost).
 
 ## Cross-layer changes and evidence
 
-- Check `docs/TODO.md` and `docs/PROJECT_MAP.md` before cross-layer work. Follow a linked delivery plan and its order.
-- Treat API and business-rule changes as cross-layer work. Check both web and mobile clients, update relevant tests, and record route or DTO changes in `docs/API_CONTRACT_REGISTRY.md`.
-- Keep implemented mechanisms, executable test evidence, and empirical research claims distinct. A passing test does not by itself establish real-world effectiveness or performance.
+- Check `docs/TODO.md` and `docs/PROJECT_MAP.md` before cross-layer work. Order comes from the master
+  plan; a linked plan only says how to build the item.
+- Treat API and business-rule changes as cross-layer work. Check both web and mobile clients, update
+  relevant tests, and record route or DTO changes in `docs/API_CONTRACT_REGISTRY.md`.
+- Keep implemented mechanisms, executable test evidence, and empirical research claims distinct. A
+  passing test does not by itself establish real-world effectiveness or performance.
 - The user owns Git and deployment operations. Do not commit, push, merge, or deploy.
+- Never commit `.env` files, connection strings or diagnostic logs (`api_error.log`, `api_stdout.txt`,
+  `build_errors.txt`).
 
-# Comment, Doc & TODO Tone
+## Comment, doc and TODO tone
 
-All code comments, doc-comments, markdown docs, and TODO entries in this repo must read like a person
-wrote them, not a model. This applies to every new or edited comment/doc/TODO, in every language
-(C#, TypeScript, Dart, SQL, markdown).
+Every new or edited comment, doc-comment, markdown doc and TODO entry, in any language, must read like
+a person wrote it.
 
-- Plain, short sentences. Say what the code does or why, nothing more.
-- No filler openers ("This function is responsible for...", "Note that...", "It's important to...",
-  "This method serves to...").
-- No restating the obvious (`// increment i`, `// constructor`). A comment earns its place by
-  explaining something the code itself doesn't already say — a gotcha, a non-obvious reason, a
-  workaround, a caller assumption.
-- No em dashes, no bullet-lists-inside-comments, no heading-style comment banners
-  (`// ===== SECTION =====`) unless the surrounding file already uses that convention.
-- TODOs name the actual gap and, where known, why it's not done yet — not a vague "TODO: improve this".
-- Don't add a comment just to prove a change was made ("// updated per review", "// fixed bug here").
-- When a file is touched, clean up AI-sounding comments and docs you pass over, not just the
-  lines being changed. Leave unrelated comments alone; rewrite one only when it is wrong,
-  out of date, or machine-written in the part being edited. Match the file's existing style.
+- Plain, short sentences that say what the code does or why.
+- No filler openers ("This function is responsible for...", "Note that..."), no restating the obvious
+  (`// increment i`), no proof-of-change notes ("// updated per review").
+- A comment earns its place by naming a gotcha, a non-obvious reason, a workaround or a caller assumption.
+- No em dashes, no bullet lists inside comments, no `// ===== SECTION =====` banners unless the file
+  already uses them.
+- TODOs name the actual gap and, where known, why it is not done yet.
+- When a file is touched, clean up machine-written comments and docs in the part being edited. Leave
+  unrelated comments alone unless they are wrong or out of date. Match the file's existing style.
 
-# Documentation book (docs/book/)
+## Documentation book
 
-The dissertation in `docs/book/` is held to a stricter standard than the rest of the docs, and the
-standard is enforced by its build rather than by attention.
-
-- Before editing a chapter, read `docs/book/README.md`. It carries the house style, the IEEE
-  conventions, the A4 figure rules and the fix order for a diagram that will not print.
-- After editing, run `python docs/book/build/build.py --pdf --strict`. It must end with
-  `status : clean, ready to deliver`. Add `--no-placeholders` only for a copy being handed in. It fails on a numbering gap, a figure the body never names, a
-  drifted front-matter list, banned vocabulary, a diagram that cannot print legibly on A4, and an open
-  placeholder. Do not silence a check to get a green run; fix what it names.
-- After adding, removing or moving a figure or table, run `python docs/book/build/renumber.py --apply`.
-- `docs/DOCUMENTATION_BOOK_OUTLINE.md` and the chapter files in `docs/book/` are one structure seen
-  twice. A section added, renamed, renumbered, reordered or dropped in either must be changed in the
-  other in the same edit, and a chapter retitled in one must be retitled in the other. The build
-  compares them and `--strict` fails on any disagreement, so do not put this off to a follow-up.
-- Task numbers in `docs/TODO.md` move: implementation work and new instructions add areas and
-  items, and areas get renumbered. Anything that quotes them has to be refreshed in the same
-  change — the component-to-area map in `docs/book/build/wbs.py` (`wbs.py --check` fails on an
-  unmapped area), and the tracker figures quoted in the outline's Chapter 11 block.
-- Every diagram must print inside one A4 page with labels at 7pt or larger. Reshape the diagram
-  (turn it, shorten labels, split it, or set it as a table) before reaching for `{landscape}`.
-- Repository numbers quoted in the text must come from a command run against the tree, with the date
-  recorded. Anything that cannot be sourced that way is a `*[` placeholder, never a plausible guess.
+Rules for `docs/book/` live in `.claude/rules/book.md` and load when a book file, the outline or
+`docs/TODO.md` is opened.

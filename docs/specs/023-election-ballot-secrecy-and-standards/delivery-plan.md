@@ -1,5 +1,8 @@
 # Spec 023 delivery plan for the remaining election work
 
+> **Status 2026-11-03:** design reference. The order of the open WP37 items is now the stream E
+> order in `docs/MASTER_EXECUTION_PLAN.md`, the only open plan. The session order below is history.
+
 Written 2026-10-09 on Opus. It covers every open WP37 item that code can close, split into six
 sessions (S1 to S6). Each session runs on Sonnet from a cleared context and should need no
 exploration beyond the anchors given here.
@@ -516,8 +519,8 @@ These cannot be closed by a session. They stay open in TODO.md.
 
 | Item | Who | What is needed |
 |---|---|---|
-| 37.1p | Owner | Decided 2026-10-11 and 2026-10-14. Built in Fast track sessions F2 and F3. |
-| 37.16e | Owner | Split from 37.1p on 2026-10-31. Decided 2026-10-14. Built in Fast track session F2. |
+| 37.1p | Owner | Decided 2026-10-11 and 2026-10-14. Planned for Fast track sessions F2 and F3 but not built: recount, candidate consent, spoiled and unopposed seats are still [TODO] in TODO.md (checked 2026-11-03). |
+| 37.16e | Owner | Split from 37.1p on 2026-10-31. Decided 2026-10-14. Planned for Fast track session F2 but not built: no code stops an official from being a candidate (checked 2026-11-03). |
 | 37.1r location | Committee | Closed 2026-10-11 without building. No IP location lookup. |
 | 37.1m font | Owner | Decided 2026-10-14: Noto Sans Bengali. Built on 2026-10-21 on the server by 37.14o, not in the mobile assets. |
 | 37.1m browser check | Person | Print a receipt from Chrome and Edge and check the layout. |

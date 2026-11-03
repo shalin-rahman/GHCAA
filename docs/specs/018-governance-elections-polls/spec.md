@@ -229,13 +229,13 @@ and confirm rejection, then confirm the member vote status and result percentage
   during the Withdrawal phase. [code]
 - FR-023: An eligible voter shall cast exactly one secret ballot per seat during the
   Polling phase and within the polling window. [code+test] The ballot is sealed and
-  cannot be joined to the voter since 2026-10-09 (spec 023 FR-001 to FR-006).
+  cannot be joined to the voter since 2026-10-09 (spec 023 FR-001 to FR-006). 2026-11-03: Spec 023 supersedes the "one ballot per seat" wording. A seat with `SeatCount` above 1 lets the voter pick up to `SeatCount` candidates (spec 023 FR-018).
 - FR-024: The admin, under step-up authentication, shall count ballots per seat for
   accepted nominations and persist the results. [code] It runs only in Counting (spec 023
   FR-007).
 - FR-025: The admin, under step-up authentication, shall declare an election results once
   it is in the Counting phase, and the system shall create one ECMember record per elected
-  candidate. [code]
+  candidate. [code] 2026-11-03: Spec 023 supersedes this. A seat with one accepted candidate can be declared unopposed (spec 023 FR-024), and winners are written into the period with its start date (spec 023 FR-043).
 - FR-026: The system shall generate an official election PDF with a QR verification link
   for a supported form code, or return a 404 for an unsupported code. [code+test]
 - FR-027: The admin shall list all elections created through the admin workflow. [code]
@@ -337,6 +337,9 @@ and confirm rejection, then confirm the member vote status and result percentage
   key-destroyed and readiness routes, so it can take an election from draft to declared.
   Neither client calls AssignOfficer or AddSeat, and mobile has no key generation or first
   count (TODO 84.44, the mobile key packages).
+  2026-11-03: Owner decision. The two clients are not meant to match. Mobile carries the voter
+  screens (elections, nominate, vote, results). Web carries those and the officials' screens.
+  Spec 023 records the same split as D6. No tracker item follows from it.
 - FR-012, FR-016, FR-017, FR-019 (web has no submit UI for FR-020), FR-021 (mobile has none),
   FR-022, FR-024, FR-025 have no automated test at any layer. The phase-advance, seat,
   officer, nomination-submit, scrutiny, withdraw, count and declare paths of
@@ -357,7 +360,7 @@ and confirm rejection, then confirm the member vote status and result percentage
   which risks a new ElectionsController action shipping without it.
 
 - Ballot secrecy, receipt, results publication and election-rule gaps found in the
-  2026-09-27 review are listed in spec 023, election ballot secrecy and standards. As of
+  2026-09-27 review are listed in spec 023, election ballot secrecy and standards.
   Current open election and ballot work is tracked in `docs/TODO.md`, including 37.1m (receipt
   checks), 37.1p (election rules), 37.14t (form verification), and 84.50 and 84.52 (device and
   walkthrough checks). Use the tracker for current status.
@@ -378,7 +381,7 @@ and confirm rejection, then confirm the member vote status and result percentage
 - ENH-002 (P3): SeatTitle(ECPosition) is duplicated verbatim as a private static method in
   both GHCAA.Infrastructure/Services/ElectionService.cs and
   GHCAA.API/Controllers/AdminElectionsController.cs. One copy would remove the risk of the
-  two lists drifting apart when a position is added.
+  two lists drifting apart when a position is added. 2026-11-03: Built. `SeatTitle` now exists once, at ElectionService.cs:1005, and `AdminElectionsController.ParsePosition` is gone. Governance tests exist in GHCAA.Tests/Services/GovernanceServiceTests.cs.
 - ENH-003 (P3): the EC position display-order list is duplicated within
   GHCAA.Web/src/app/common/governance/governance.ts, once in loadCommittee and again in
   isBoardMember and getPositionName. A single exported constant would serve both.
@@ -393,12 +396,12 @@ and confirm rejection, then confirm the member vote status and result percentage
   re-implements free-text position matching that only exists because AdminElectionsController
   takes plain-string Positions instead of typed ECPosition values the way
   ElectionsController.AddSeat does, a module boundary leaking a string-matching concern into
-  the controller layer.
+  the controller layer. 2026-11-03: Tracked as 37.16g, declare an elected member through governance. The `ParsePosition` half is built (the method is gone).
 - ENH-005 (P3): Nomination.PhotoPath is a raw string set directly by the caller, bypassing
   the moderated FileUploadType and FileUploadStatus upload pipeline that other domains
   (gallery, member photo, payment proof) route through. A generic moderated-upload module
   used domain-wide would let a candidate photo go through the same approval path as any
-  other member-submitted image instead of an unmoderated path string.
+  other member-submitted image instead of an unmoderated path string. 2026-11-03: Tracked as 37.16h, moderated candidate photo.
 
 ### Existing reusable components
 
@@ -423,7 +426,7 @@ and confirm rejection, then confirm the member vote status and result percentage
   GHCAA.Infrastructure/Services/GovernanceService.cs VoteOnConstitutionAsync (constitution
   voting-tier check, commented as Article III Section K). Both encode the same constitutional
   rule; a rule change needs both call sites found and updated by hand rather than one
-  lookup or config value.
+  lookup or config value. 2026-11-03: Tracked as 37.16f, one voting-member rule for elections and amendments.
 - ENH-008 (P2): the 16 supported election document form codes and their titles and summaries
   are hardcoded as a HashSet and two switch expressions in
   GHCAA.Infrastructure/Services/ElectionDocumentService.cs. Adding, renaming or retiring a
@@ -433,7 +436,7 @@ and confirm rejection, then confirm the member vote status and result percentage
   Media and Sports, or Information and Technology substrings) hardcode the EC position names
   and structure in code rather than an OrgConfig or lookup table, relevant given the
   documented white-labelling goal of making organisation-specific structures configurable
-  rather than fixed.
+  rather than fixed. 2026-11-03: Built. `SeatTitle` reads the position name from the `EcPosition` record (ElectionService.cs:1005) and `ParsePosition` is gone.
 
 ## Success Criteria
 

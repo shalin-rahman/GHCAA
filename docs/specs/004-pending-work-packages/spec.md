@@ -18,7 +18,7 @@ governance, or dissertation work. Shared platform work remains in scope even
 where elections also use it. Election workflow, ballot secrecy, polling,
 officials, and election forms are excluded. `[ONHOLD]` items are listed as
 blocked and are not ready work. Owner-only actions stay assigned to the owner.
-See [the task map](./tasks.md) and the [non-election execution plan](../../NON_ELECTION_BACKLOG_EXECUTION_PLAN.md)
+See [the task map](./tasks.md) and the [master execution plan](../../MASTER_EXECUTION_PLAN.md)
 for tracker coverage and dependency order.
 
 The existing requirement sections retain prior acceptance detail, including
@@ -146,7 +146,7 @@ baseline coverage, exclude generated/vendor files explicitly, and fail with an
 actionable report when a changed file falls below the threshold. The threshold
 MUST be configurable without weakening the required default of 80 percent.
 
-### 37.2 Scholarship and student aid
+### 37.2 Scholarship and student aid 2026-11-03: Closed. Tracker 37.2 is [DONE].
 
 The platform MUST support fund, call, anonymous/public application, document
 submission, blind review, shortlist, award, disbursement, and status lookup.
@@ -174,7 +174,7 @@ approved entries only. Condolence content MUST pass the existing sanitizer.
 Submission, moderation, privacy, notification, Web, Mobile, and integration
 tests are required.
 
-### 37.6 Oral-history archive
+### 37.6 Oral-history archive 2026-11-03: Tracker 37.6 is [DONE], but the archive admin screen and controller tests are open as 84.27.
 
 The archive MUST support collections and items with narrator, transcript,
 summary, publication state, moderation state, decade tag, optional linked
@@ -191,7 +191,7 @@ notification, accessibility, and generated-document strings. Every newly
 added route MUST include both language keys before release. A missing-key
 report MUST be available to tests or development tooling.
 
-### 37.8 Fundraising campaigns
+### 37.8 Fundraising campaigns 2026-11-03: Closed. Tracker 37.8 is [DONE].
 
 The platform MUST support campaign creation, goals, publication, contribution
 records, manual payment methods, donor privacy, progress aggregation, admin
@@ -225,7 +225,7 @@ non-empty-database migration checks, synchronized project documentation, and
 Graphify output. It MUST remain open while any 37.2 or 37.4–37.10 item is
 unfinished.
 
-### 42.1–42.5 Election handbook/content administration
+### 42.1–42.5 Election handbook/content administration 2026-11-03: Closed. Tracker 42.1 to 42.5 are [DONE 2026-10-21], merged into 37.14s.
 
 The project MUST inventory election handbook documents and distinguish legal
 templates, public guidance, generated official records, and obsolete content.
@@ -236,14 +236,14 @@ is surfaced. 42.5 MUST provide API, client, migration, authorization, and
 content-integrity tests. This work MUST not duplicate the 37.1 generated ER
 form engine.
 
-### 47.13 Mutation coverage
+### 47.13 Mutation coverage 2026-11-03: Closed. Tracker 47.13 is [DONE 2026-09-18].
 
 The repository MUST identify mutation-tested business rules for POST, PUT, and
 DELETE endpoints, prioritize authorization, validation, state transitions,
 duplicate prevention, and ledger effects, and record surviving mutants. CI
 MUST run the agreed mutation scope without changing production behavior.
 
-### 60.2–60.5 Verification and Mobile integration
+### 60.2–60.5 Verification and Mobile integration 2026-11-03: 60.2 is [DONE 2026-10-14], 60.4 and 60.5 are [DONE 2026-10-09]. Only 60.3 (Messages versus Chat/Forum naming) is open.
 
 60.2 MUST document behavioral verification evidence separately from code
 inspection. 60.3 MUST reconcile Messages versus Chat/Forum terminology across
@@ -278,7 +278,7 @@ deleting rows. The requirements, section map and task list are in spec 025
 export and import spec). Themes, fee configs and payment settings MUST get
 unique keys first (62.56g, spec 025 FR-18).
 
-### 63.x, 64.x, 65.5, and 67.x dissertation evidence
+### 63.x, 64.x, 65.5, and 67.x dissertation evidence 2026-11-03: 65.5 is [DONE 2026-10-09, not needed]. 63.1 to 63.7 and 64.1 to 64.7 are done. 63.8, 63.18, 63.34, 64.9, 67.3 and 67.4 are [TODO], and 64.8, 67.2, 67.5 and 67.7 are partial or in progress.
 
 The documentation book MUST keep outline, chapters, figures, tables, front
 matter, references, risk calculations, and implementation evidence synchronized.
@@ -288,14 +288,14 @@ missing reference chapters, Arabic numbering, risk exposure `RE = P × C`, and
 design-principle sections MUST be completed only from verified implementation
 evidence. Every chapter change requires the strict book build.
 
-### 72.4–72.5 Dependency and CodeQL operations
+### 72.4–72.5 Dependency and CodeQL operations 2026-11-03: 72.5 is [DONE 2026-11-02]. 72.4 is [ONHOLD 2026-11-02] until Dependabot opens its first pull requests.
 
 The project MUST observe the first Dependabot run across configured ecosystems,
 triage updates without unbounded upgrades, and record compatibility decisions.
 If the repository becomes public, CodeQL MUST be enabled with documented
 language scope, alert ownership, and remediation evidence.
 
-### 73.5–73.7 Requirements traceability
+### 73.5–73.7 Requirements traceability 2026-11-03: 73.7 is [DONE 2026-10-09, not needed]. 73.5 is [PARTIAL 2026-10-09] and 73.6 is [TODO].
 
 The repository MUST generate a requirements traceability matrix linking
 requirements to code, API routes, clients, tests, and documentation. Governance
@@ -303,14 +303,14 @@ rules MUST fail validation when implementation drifts from the governing
 source. The two currently unimplemented user statements MUST be resolved as
 implemented requirements, explicit decisions, or rejected scope with rationale.
 
-### 74.3, 75.5, 76.4, and 77.4 Planning provenance
+### 74.3, 75.5, 76.4, and 77.4 Planning provenance 2026-11-03: 75.5, 76.4 and 77.4 are [DONE 2026-11-02]. Only 74.3 is open.
 
 Historical work-package markers, PRE durations, reduction factors, production
 durations, and provenance claims MUST be backfilled only from dated repository
 evidence or explicitly labeled as owner-supplied assumptions. No plausible
 number may be substituted for missing evidence.
 
-### 78.9, 78.10, and 78.12 Evaluation evidence
+### 78.9, 78.10, and 78.12 Evaluation evidence 2026-11-03: 78.12 is [DONE 2026-10-09, not needed]. 78.9 and 78.10 are open.
 
 Evaluation sessions MUST have participant authorization, test scenarios,
 consent/privacy handling, reproducible environment details, raw observations,
@@ -318,22 +318,14 @@ issue classification, and summarized evidence. Participant-free evidence MUST
 be produced separately. Completion order for chapters and evaluation artifacts
 MUST be recorded once and referenced consistently.
 
-### 81.1–81.3 Member communication visibility
-
-Members MUST be able to view their own outbound email/SMS communication status,
-subject to privacy and retention rules. The portal MUST distinguish queued,
-sent, failed, and unavailable provider states. Admins MUST retain the existing
-operational view. Tests MUST cover authorization, redaction, pagination, and
-provider failure.
-
-### 82.59 Election handbook profile awareness
+### 82.59 Election handbook profile awareness 2026-11-03: Closed. Tracker 82.59 is [DONE 2026-10-21], merged into 37.14s.
 
 Election handbook content, generated forms, labels, URLs, institution names,
 branding, and verification links MUST resolve through the active profile.
 Tests MUST run at least the default and GHCAA profiles and prove that no
 institution-specific content leaks across profiles.
 
-### 84.4–84.5 and 84.7 Governance specification work
+### 84.4–84.5 and 84.7 Governance specification work 2026-11-03: 84.5 is [DONE 2026-09-26]. 84.4 is [TODO]. 84.7 is [IN PROGRESS 2026-11-02].
 
 84.4 MUST produce a route-by-route Web/Mobile parity table with response-shape
 differences and explicit non-applicability. 84.5 MUST catalog every

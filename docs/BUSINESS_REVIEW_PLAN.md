@@ -80,7 +80,7 @@ run-app.bat
 | Admin | `shalin` | *(redacted — see above; this one was live, not just a local seed value)* |
 | Member | `demo_user` | *(redacted — see above)* |
 
-Optional: `scripts/setup-test-data.ps1` for edge-case dataset.
+Optional: `scripts/setup-test-data.ps1` for edge-case dataset. That script was removed on 2026-11-03; the Playwright suite in `GHCAA.Web` replaces it.
 
 ### Phase 1 execution results (2026-07-03)
 

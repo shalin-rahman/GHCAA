@@ -1,7 +1,14 @@
 # Pending Work Packages Delivery Plan
 
-> **Superseded for ordering by `docs/BACKLOG_EXECUTION_PLAN.md` (2026-09-27).** That plan sets the
-> current order. It also marks 62.42 as blocked, although this list treats it as ready.
+> **Superseded for ordering by `docs/MASTER_EXECUTION_PLAN.md` (2026-11-01).** That plan sets the
+> current order and lists the owner gates. The two older backlog plans it replaced were removed on
+> 2026-11-03 and stay in git history. The list below is kept as the
+> dependency rationale and the per-item slice. It treats 62.42 as ready, but 62.42 depends on 62.41,
+> which is still `[PARTIAL]`, so it is blocked.
+>
+> Status check against `docs/TODO.md` and `docs/TODO_ARCHIVE.md` on 2026-11-03: these items are now
+> closed: 60.2, 60.4, 60.5, 47.13, 42.1 to 42.5, 82.59, 37.1, 37.2, 37.6, 37.8, 65.5, 72.5, 75.5,
+> 76.4, 77.4, 81.1 to 81.3, 84.5. 72.4 is `[ONHOLD]`. The rest are still open.
 
 ## Delivery order
 

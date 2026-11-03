@@ -43,8 +43,8 @@ These tasks do not authorize application changes.
 - [x] T008 Enumerate every DTO bound to a `[HttpPost]`, `[HttpPut]`, or
   `[HttpPatch]` action across the 7 in-scope domains' controllers (see scope
   note above). Done per-domain in each evidence file's §1/§2.
-- [x] T009 For each DTO field, record the validation source: FluentValidation
-  validator class, inline controller check, or database constraint. Done
+- [x] T009 For each DTO field, record the validation source: DataAnnotations
+  attribute, inline controller check, or database constraint. Done
   per-domain in each evidence file's §2 validation matrix.
 - [x] T010 Flag fields with no enforced rule found in code. Done per-domain;
   every evidence file's §2 marks unenforced fields "Flagged: no enforced

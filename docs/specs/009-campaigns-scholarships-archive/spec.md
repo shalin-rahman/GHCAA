@@ -141,7 +141,7 @@ The platform shall support moderated oral-history collections and items with tra
 
 - Domain models and persistence for collections and items
 - API and authorization checks for public versus admin visibility
-- Web and Mobile public archive pages and admin management screens
+- Web and Mobile public archive pages and admin management screens 2026-11-03: The archive admin is not fully built. Web has no archive admin screen and `ArchiveController` has no controller tests. 84.27, the archive API tests and admin screen, is open.
 - Search/indexing and moderation tests
 - upload validation verification using the repository's existing file-validation boundary
 

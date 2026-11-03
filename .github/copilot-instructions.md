@@ -4,7 +4,7 @@ GHCAA is a full-stack alumni association platform. Treat the API, web client, an
 mobile client as one product: changes to a shared API contract or business rule
 must be checked against both clients. Log every endpoint change (new route, new
 field, deprecated field) in `docs/API_CONTRACT_REGISTRY.md`, noting which client
-picked it up — see that file for the format.
+picked it up. That file shows the format.
 
 ## Commands
 
@@ -34,6 +34,8 @@ Run commands from the repository root unless a working directory is shown.
 | One mobile test by name | `cd GHCAA.Mobile; flutter test test/path/to/file_test.dart --name "test name"` |
 | Start the local stack | `.\GHCAA.Tools\run-app.ps1` |
 | Stop the local stack | `.\GHCAA.Tools\stop-app.ps1` |
+| Local CI gate before handing work back | `python scripts/ci-local.py` (`--quick`, `--only backend\|web\|mobile\|contract`, `--e2e`) |
+| Check the master plan against the tracker | `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md` |
 
 The standard GitHub Actions pipeline is
 `.github/workflows/ghcaa-ci-standard.yml`; it runs backend formatting and
@@ -83,8 +85,8 @@ Application interfaces from clients.
   `ApplicationDbContext` pattern is sufficient.
 - Preserve global soft-delete behavior. Archived records must remain hidden by
   EF query filters unless an explicit administrative/recovery query is intended.
-- Keep controllers thin and put validation in FluentValidation validators or
-  application services.
+- Keep controllers thin. Put validation in DataAnnotations on the DTOs or in
+  application services; FluentValidation validators are never run.
 - Authentication is JWT-based with BCrypt password hashing and role-based access.
   Preserve the existing middleware protections for exceptions, security headers,
   audit logging, rate limiting, security stamps, and XSRF.
@@ -94,7 +96,12 @@ Application interfaces from clients.
 - Payment flows are admin-configurable and support manual wallet/bank/mobile
   financial service instructions. Never add or commit live payment gateway keys.
 - Keep secrets in environment variables, user secrets, or the host configuration.
-  Never commit `.env` files, credentials, connection strings, or diagnostic logs.
+  Never commit `.env` files, credentials, connection strings, or diagnostic logs
+  (`api_error.log`, `api_stdout.txt`, `build_errors.txt`).
+- A migration without its `.Designer.cs` is silently skipped. Running
+  `ef migrations add` then `remove` truncates the model snapshot.
+- `Seed/*.json` only seeds a new database; editing it does not change an
+  existing one.
 
 ### Angular web
 
@@ -148,9 +155,9 @@ a person wrote them: plain short sentences, no filler openers ("This function is
 responsible for..."), no restating what the code already says, no AI-tell
 phrasing ("updated per review"). A comment earns its place by explaining a
 gotcha, a non-obvious reason, or a caller assumption the code doesn't already
-convey. When a file is touched for any reason, clean up AI-sounding
-comments/docs you pass over in it, not just the lines you're actively changing
-— match the file's existing style when doing so.
+convey. When a file is touched, clean up machine-written comments and docs in
+the part being edited, and match the file's existing style. Leave unrelated
+comments alone unless they are wrong or out of date.
 
 ## Documentation book (docs/book/)
 
@@ -160,7 +167,7 @@ After any change there, run `python docs/book/build/build.py --pdf --strict`;
 it must end `status : clean, ready to deliver`. After adding, removing, or
 moving a figure or table, run `python docs/book/build/renumber.py --apply`.
 `docs/DOCUMENTATION_BOOK_OUTLINE.md` and the chapter files are one structure
-seen twice — a section change in one needs the same change in the other in the
+seen twice. A section change in one needs the same change in the other in the
 same edit. Renumbering `docs/TODO.md` items also requires refreshing
 `docs/book/build/wbs.py`'s component-to-area map (`wbs.py --check`) and the
 tracker figures quoted in the outline's Chapter 11 block.
@@ -170,10 +177,11 @@ tracker figures quoted in the outline's Chapter 11 block.
 1. Read the relevant README/docs and inspect the graph with `graphify query`,
    `graphify explain`, or `graphify path` before broad source searches.
 2. Check `docs/TODO.md` and `PROJECT_MAP.md` when present before starting
-   cross-layer work. Some TODO items point to a step-by-step plan in `docs/`
-   (for 84.49, 84.50 and 84.51, `docs/AUTH_AND_DEVICE_FIX_PLAN.md`). Follow the
-   plan's order and checks, and settle its open decisions with the owner first.
-   `docs/MASTER_EXECUTION_PLAN.md` gives the order of all open work.
+   cross-layer work. Some TODO items point to a design reference in `docs/`
+   (for 84.49, 84.50 and 84.51, `docs/AUTH_AND_DEVICE_FIX_PLAN.md`). Build from
+   its steps and checks, and settle its open decisions with the owner first.
+   `docs/MASTER_EXECUTION_PLAN.md` is the only open plan and gives the order of
+   all open work.
 3. Treat every change as a cross-layer change until proven otherwise. Trace
    retrieval and CRUD changes through persistence, application services and
    DTOs, API controllers, Angular services/components, Flutter services/screens,
@@ -182,7 +190,9 @@ tracker figures quoted in the outline's Chapter 11 block.
 4. Update or add the relevant backend, web, mobile, integration, contract, or
    visual tests for the behavior being changed. Run the smallest relevant
    command from the table, then the related client checks. Do not claim a check
-   passed unless it was actually run.
+   passed unless it was actually run. Keep implemented mechanisms, executable
+   test evidence, and empirical research claims distinct: a passing test does
+   not by itself establish real-world effectiveness or performance.
 5. Update directly affected README/docs, `docs/TODO.md`, `PROJECT_MAP.md`, API
    contract snapshots, or other maintained project documentation in the same
    change when their information becomes stale. Do not leave documentation

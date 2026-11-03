@@ -1,76 +1,74 @@
-# GHCAA Project Context
+# Repo reference
 
-## Project Overview
-GHCAA (Grand Hall Community Association App) is a full-stack platform:
-- **Backend**: ASP.NET Core 8 Web API (Clean Architecture — Domain / Application / Infrastructure / API layers)
-- **Frontend**: Angular 19 (standalone components, signals, `inject()`)
-- **Mobile**: Flutter 3.x (Dart) 
-- **Database**: SQLite (development), SQL Server (production)
-- **Testing**: E2E (Playwright), Visual regression, Unit tests (xUnit)
+`.github/copilot-instructions.md` is the canonical source for the full commands table, architecture,
+backend/Angular/Flutter conventions, API contract logging and the shared change workflow. Read it
+before cross-layer work. `CLAUDE.md` and `AGENTS.md` carry the same shared rules; keep all four files
+aligned. This file adds Gemini-specific notes and repeats only what is needed every session.
 
-## Critical Conventions
+Open work follows `docs/MASTER_EXECUTION_PLAN.md`, the only open plan (owner, 2026-11-03). Its
+first section is the handover: the current wave, the next items and the owner gates. Check it against
+the tracker with `python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md`. Other
+plan files are design references: they say how to build an item, never when. Do not create a new
+`PLAN.md`.
 
-### Date Format (MANDATORY — Platform-Wide)
-- **Canonical format: `dd-MM-yyyy`** — enforced everywhere, no exceptions.
-- Angular: use `DatePipe` with `'dd-MM-yyyy'` for display; send ISO strings to API.
-- Flutter: use `DateFormat('dd-MM-yyyy')` from `intl` package.
-- C# API: `DateFormatConverter.cs` handles serialization/deserialization.
-- Never use `MM/dd/yyyy`, `yyyy-MM-dd` in UI display.
+Stack: ASP.NET Core on .NET 9 with `GHCAA.Domain` → `GHCAA.Application` (DTOs, interfaces) →
+`GHCAA.Infrastructure` / `GHCAA.API` (thin host). Clients: `GHCAA.Web` (Angular 21, standalone
+components, signals, `inject()`) and `GHCAA.Mobile` (Flutter with Riverpod and go_router).
+PostgreSQL in prod, SQLite locally. No MediatR, no generic repository.
 
-### Architecture
-- Domain layer has no external dependencies.
-- Application layer uses MediatR + FluentValidation.
-- Infrastructure layer: `IEntityTypeConfiguration<T>` classes (not inline `OnModelCreating`).
-- API controllers: thin — delegate all logic to Application layer handlers.
-- Soft deletes are enforced via global query filters (`IsDeleted == false`).
+## Commands (full table in copilot-instructions)
 
-### Angular Patterns
-- Standalone components with `inject()` for DI — no constructor injection in new code.
-- Use `signal()` and `computed()` for reactive state.
-- Route via `app.routes.ts` — no NgModule-based routing.
-- HTTP calls via typed services in `core/services/`.
+- Backend: `dotnet test GHCAA.Tests/GHCAA.Tests.csproj --filter "FullyQualifiedName~X"`
+- Web: `cd GHCAA.Web; npm run type-check; npm run test:unit -- <spec path>`
+- Mobile: `cd GHCAA.Mobile; flutter analyze; flutter test <file> --exclude-tags golden`
+- Local stack: `.\GHCAA.Tools\run-app.ps1` / `stop-app.ps1`
+- Before handing work back: `python scripts/ci-local.py` (`--quick`, or `--only backend|web|mobile|contract`
+  for one layer; `--e2e` adds end-to-end).
 
-### Flutter Patterns
-- BLoC pattern for state management.
-- Navigation via `go_router`.
-- API base URL from `AppConfig` — never hardcoded.
+## Traps
 
-### Centralized Theme & Reusable Component Rule (MANDATORY — Platform-Wide)
-- **100% Centralized Theme Tokens:** Never hardcode colors, backgrounds, or borders in individual components.
-- Angular: All surfaces, borders, text, and inputs MUST consume centralized design tokens from `styles.scss` (`var(--bg-color)`, `var(--surface-color)`, `var(--surface-subtle)`, `var(--card-bg)`, `var(--card-border)`, `var(--glass-bg)`, `var(--glass-border)`, `var(--accent-color)`, `var(--accent-rgb)`, `var(--text-main)`, `var(--text-muted)`).
-- Never use `rgba(var(--primary-rgb), ...)` for surfaces on dark backgrounds (which inverts to muddy black); use semantic tokens (`var(--surface-subtle)`, `var(--card-bg-hover)`).
-- Flutter Mobile: All widgets MUST consume `Theme.of(context)` / `AppColors` / `AppTheme` centralized tokens. No ad-hoc `Color(0x...)` or hardcoded component styling.
-- **Centralized Reusable Controls:** Common controls across all routes must strictly use shared components:
-  - Headers: `<app-page-header>`
-  - Pagination: `<app-pagination>` & `table-pagination.util.ts`
-  - Tables: Standard `.data-table` / `.table-wrap` structure
-  - Modals / Dialogs: `<app-confirm-dialog>` via `ConfirmDialogService`
-  - Search / Filters: `<app-search-bar>`, `.filter-bar`
-  - Empty states: `.empty-state` / `.empty-state-compact`
+- FluentValidation validators never run; use DataAnnotations.
+- A migration without its `.Designer.cs` is silently skipped. `ef migrations add` then `remove` truncates
+  the model snapshot.
+- `Seed/*.json` only seeds a new DB; editing it does not change an existing one.
+- Displayed dates are `dd-MM-yyyy` on every client. The API's `DateFormatConverter` handles the wire
+  format; do not format dates ad hoc.
 
-### Testing
-- E2E tests use temporary SQLite DBs — never touch production data.
-- Visual regression baseline must be regenerated after any UI change.
-- Run `flutter test` before committing mobile changes.
+## Graphify
 
-## Key Files
-| File | Purpose |
-|---|---|
-| `SRS.md` | Software Requirements Specification |
-| `TODO.md` | Active task list (authoritative) |
-| `PROJECT_MAP.md` | Full codebase map |
-| `README.md` | Developer setup guide |
-| `GHCAA.Infrastructure/Data/` | EF Core configurations |
-| `GHCAA.Web/src/app/` | Angular app root |
-| `GHCAA.Mobile/lib/` | Flutter app root |
+- `graphify query "<question>"` (or `path`, `explain`) before raw grep; `graphify-out/wiki/index.md`
+  for broad navigation.
+- After modifying code or docs, run `graphify update .` (AST-only, no API cost).
 
-## Security
-- Never commit `.env` or connection strings.
-- `api_error.log`, `api_stdout.txt`, `build_errors.txt` are diagnostic — do not commit.
-- Secrets flow via environment variables only.
+## Cross-layer changes and evidence
 
-## Agent Workflow
-1. Check `TODO.md` for current priorities before starting any new task.
-2. For multi-step tasks, create a `PLAN.md` at project root before writing code. If the TODO item already points to a plan in `docs/` (84.49, 84.50 and 84.51 use `docs/AUTH_AND_DEVICE_FIX_PLAN.md`), follow that one instead. `docs/MASTER_EXECUTION_PLAN.md` gives the order of all open work.
-3. Run analysis tools (`dart analyze`, `dotnet build`) before declaring a task done.
-4. Update `TODO.md` and `PROJECT_MAP.md` when significant changes are made.
+- Check `docs/TODO.md` and `docs/PROJECT_MAP.md` before cross-layer work. Order comes from the master
+  plan; a linked plan only says how to build the item.
+- Treat API and business-rule changes as cross-layer work. Check both web and mobile clients, update
+  relevant tests, and record route or DTO changes in `docs/API_CONTRACT_REGISTRY.md`.
+- Keep implemented mechanisms, executable test evidence, and empirical research claims distinct. A
+  passing test does not by itself establish real-world effectiveness or performance.
+- The user owns Git and deployment operations. Do not commit, push, merge, or deploy.
+- Never commit `.env` files, connection strings or diagnostic logs (`api_error.log`, `api_stdout.txt`,
+  `build_errors.txt`).
+
+## Comment, doc and TODO tone
+
+Every new or edited comment, doc-comment, markdown doc and TODO entry, in any language, must read like
+a person wrote it.
+
+- Plain, short sentences that say what the code does or why.
+- No filler openers ("This function is responsible for...", "Note that..."), no restating the obvious
+  (`// increment i`), no proof-of-change notes ("// updated per review").
+- A comment earns its place by naming a gotcha, a non-obvious reason, a workaround or a caller assumption.
+- No em dashes, no bullet lists inside comments, no `// ===== SECTION =====` banners unless the file
+  already uses them.
+- TODOs name the actual gap and, where known, why it is not done yet.
+- When a file is touched, clean up machine-written comments and docs in the part being edited. Leave
+  unrelated comments alone unless they are wrong or out of date. Match the file's existing style.
+
+## Documentation book
+
+Before editing anything in `docs/book/`, `docs/DOCUMENTATION_BOOK_OUTLINE.md` or the task numbers in
+`docs/TODO.md`, read `.claude/rules/book.md`. It holds the build, renumbering, outline-sync and A4
+rules. Gemini does not load that file on its own.

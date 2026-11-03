@@ -1,7 +1,9 @@
 # White-label plan: one codebase, any institution
 
-Status: in progress. Checked 2026-09-27: 62.22 and 62.50 are done, 62.2 and 62.41 are partial,
-the rest is open. docs/TODO.md Work Package 62 has the current state.
+Status: design reference. The open items are ordered in stream N5 of `docs/MASTER_EXECUTION_PLAN.md`, the only open
+plan. Checked 2026-11-03: the API, web and mobile de-branding is done (62.6, 62.6b,
+62.7, 62.8, 62.15, 62.27). Open: 62.2 and 62.41 (partial), 62.42 and 62.56. docs/TODO.md Work
+Package 62 has the current state.
 Raised: 2026-09-01, "make this application generic rather than GHC ... will work with GHC or any
 other institution with minimal configuration changes"
 Tracked as: docs/TODO.md Work Package 62
@@ -42,7 +44,9 @@ The three hardcoded default sources (they must all become profile-driven):
 1. `OrgConfigService.BuildGhcaaDefaults()` (Infrastructure, ~190 lines of C#). Deleted by 62.6b on
    2026-11-02; the service now reads only the profile pack.
 2. `org-config.service.ts` `ghcaaDefaults` (Angular, ~90 lines, used when the API call fails).
-3. `org_config.dart` `ghcaaDefaults` (Flutter, offline fallback).
+   Removed by 62.15.
+3. `org_config.dart` `ghcaaDefaults` (Flutter, offline fallback). Replaced by `offlineDefaults`
+   under 62.27.
 
 ## 3. Architecture decisions
 
@@ -119,6 +123,11 @@ Exception list lives in `brand-lint.config.json` with a reason per entry (data-p
 name, existing bundle id, historical migration names).
 
 ## 4. What is actually hardcoded today (audit result)
+
+This is the audit of 2026-09-01. Items that Work Package 62 has since closed: the
+`BuildGhcaaDefaults()` block (62.6b), `MembershipPrefix` and `ImportEmailBase` (62.7),
+`IDCardService` literals (62.8), and the web and mobile `ghcaaDefaults` blocks (62.15, 62.27).
+Check a bullet against the code and `docs/TODO.md` before treating it as open.
 
 ### 4.1 API
 
@@ -204,7 +213,7 @@ Update the 6 test assertions.
 Neutral fallback config in `org-config.service.ts` (or better, drop the inline block and serve the
 boot config from the profile at build time so there is one source). Route titles move to a
 `TitleStrategy` that composes a generic route label with `branding.shortName`. A prebuild script
-(`scripts/apply-brand.mjs`) templatizes `index.html`, `sitemap.xml`, `robots.txt`, and the favicon set
+(`GHCAA.Web/scripts/apply-brand.mjs`) templatizes `index.html`, `sitemap.xml`, `robots.txt`, and the favicon set
 from `seo.json` plus the profile assets. Register terms, About founding story, and the other static
 prose move into `site-content.json` blocks with a genuinely generic empty state. Direct logo paths go
 through the config-driven image component that already exists. Download filenames use the acronym

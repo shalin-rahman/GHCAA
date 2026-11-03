@@ -3,12 +3,14 @@
 Written 2026-10-25 from a read of the code on branch `preprod`. Line numbers are from that day
 and drift; grep for the named symbol before editing. The tracker entries are `docs/TODO.md`
 84.49, 84.50 and 84.51. This file says how to do them. The tracker says whether they are done.
-The order of all open work is in [`MASTER_EXECUTION_PLAN.md`](./MASTER_EXECUTION_PLAN.md), the
-master execution plan. Parts B1-B3, C and D are done; Part A and B4-B5 wait for the elections.
+This file is a design reference. The order of all open work, these items included, is in
+stream E of [`MASTER_EXECUTION_PLAN.md`](./MASTER_EXECUTION_PLAN.md), the only open plan. Parts B1-B3, C and D are done. Part A and B4-B5 are open. The owner decided on
+2026-11-02 to run the Part A device checks now, without waiting for the elections (84.50).
 
 This plan covers shared account, profile, and election-device fixes. The non-election backlog is
-being delivered first. Work on 84.49 B1-B3, then the general account-security part of 84.51 and
-admin unlock (Parts C and D). Defer Part A and 84.49 B4-B5 to the election delivery sequence.
+delivered first. 84.49 B1-B3, the general account-security part of 84.51 and admin unlock (Parts C
+and D) were built on 2026-10-31. Part A and 84.49 B4-B5 remain, and Part A is no longer held back
+for the election delivery sequence.
 Each part can ship on its own after its checks pass.
 
 Non-election order:
@@ -17,7 +19,7 @@ Non-election order:
 2. Part C: general 84.51 account-security fixes
 3. Part D: admin unlock (API, web, mobile)
 
-Deferred election order:
+Remaining election and device order:
 
 1. Part A: 84.50 device checks (mobile, Windows desktop build)
 2. Part B4-B5: election ballot-key dialog and save behavior
@@ -41,7 +43,8 @@ Every step ends with a check. Do not start the next step until the check passes.
 - New literals go in `GHCAA.Domain/Constants.cs` (backend), `app.constants.ts` (web) or
   `lib/core/constants/` (mobile). Grep for an existing constant first.
 - Comments are plain and short. No em dashes.
-- The book in `docs/book/` is frozen. Do not edit or build it.
+- Book chapters in `docs/book/` follow `docs/book/README.md` and the strict build. The freeze
+  on edits was lifted on 2026-10-31.
 
 ### Commands
 
@@ -123,8 +126,7 @@ The 84.44 code closed on 2026-10-23 (see `docs/TODO_ARCHIVE.md`). What is left h
   2. App, as user 2: make the key, save the private key file, send the public key. If the change
      is held for a second person, approve it as user 1.
   3. `python scripts/local-election.py open`
-- Check: the API shows a key fingerprint on the election, and the PEM file exists where you saved
-  it.
+- Check: the API shows a key fingerprint on the election, and the PEM file exists where it was saved.
 
 ### A4. 37.1m and 37.14o vote receipt and tracking codes
 

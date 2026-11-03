@@ -432,8 +432,8 @@ review as a reviewing member, create an award, and disburse it once.
 
 - No admin web UI exists for scholarships under GHCAA.Web/src/app/admin, so FR-059 through
   FR-066 (review, fund/call/award creation, disbursement) are only reachable through the API
-  or tests. [NEEDS CLARIFICATION: is admin scholarship management intentionally API-only, or
-  is a web screen missing?]
+  or tests. 2026-11-03: Owner answer: a web screen is missing. Tracked as 84.65, a web admin
+  page for scholarships. Mobile stays read-only for members.
 - No controller-level test file exists for CampaignsController or ScholarshipsController; only
   CampaignServiceTests.cs (4 tests) and ScholarshipServiceTests.cs (4 tests) cover the service
   layer, leaving most campaign and scholarship FRs without controller-level auth/route/status-
@@ -501,7 +501,7 @@ review as a reviewing member, create an award, and disburse it once.
   instead of reading the admin-configurable active list the way financial_portal_screen.dart
   does, which maps dynamically from the PaymentGateway config value per a comment near line
   409. The event payment sheet should call the same /api/payment-config/active list so a
-  config change, such as disabling DGePay, takes effect everywhere at once.
+  config change, such as disabling DGePay, takes effect everywhere at once. 2026-11-03: Tracked as 84.54, the mobile event payment sheet should read payment-config/active (still hard-coded at events_screen.dart:109 and :116).
 
 ### Hard-coded behaviour that should be configuration
 
@@ -509,7 +509,7 @@ review as a reviewing member, create an award, and disburse it once.
   gateway names and labels shown to a member paying for an event as Dart string literals in
   the widget tree, bypassing PaymentConfigController IsEnabled, SortOrder, and DisplayName
   fields entirely. Same file as ENH-006, listed here for the configuration angle: these values
-  already exist in the PaymentConfiguration table and should be read from there.
+  already exist in the PaymentConfiguration table and should be read from there. 2026-11-03: Tracked as 84.54, the mobile event payment sheet reads payment-config/active.
 - **ENH-008** (P2): PaymentConfigService.SeedDefaultsAsync
   (GHCAA.Infrastructure/Services/PaymentConfigService.cs, around line 104) hard-codes the
   Nagad wallet placeholder number 01XXXXXXXXX and holder name GHCAA as seed defaults inline in
@@ -520,7 +520,7 @@ review as a reviewing member, create an award, and disburse it once.
   limit as 10 times 1024 times 1024 inline in the controller
   (GHCAA.API/Controllers/FinancialsController.cs) instead of reading it from a shared
   file-upload-limits constant, if one exists elsewhere in GHCAA.Domain/Constants.cs for other
-  document uploads in the platform.
+  document uploads in the platform. 2026-11-03: Tracked as 84.57, one upload-size policy.
 
 ## Success Criteria
 

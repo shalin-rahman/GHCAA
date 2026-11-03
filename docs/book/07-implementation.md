@@ -399,12 +399,12 @@ one.
 
 ## 7.12 Software Configuration Management
 
-The repository carries 379 commits on `HEAD` and eight local branches: `dev`, `preprod`,
+The repository carries 384 commits on `HEAD` and eight local branches: `dev`, `preprod`,
 `release-1`, `release-2`, `release-3_b4_generic_N_refactor`, `release-4_white_paper`,
 `prepod-election-refactoring` and `backup/2026-10-01-column-repair`, plus `dev-mobile` and
-`mobile_app` that exist only on the remote, as of 31 October 2026. `dev` is named as the integration
+`mobile_app` that exist only on the remote, as of 3 November 2026. `dev` is named as the integration
 branch, but `preprod` (the branch this chapter was written from) is ahead of it, not behind:
-`git rev-list --count dev..preprod` gives 124 and `preprod..dev` gives 0. Work has been landing on
+`git rev-list --count dev..preprod` gives 157 and `preprod..dev` gives 0. Work has been landing on
 `preprod`, the branch that deploys to the staging environment described in §10, and `dev` has not
 been brought up to it. The
 `release-N` branches are not conventional long-lived release trains — their names
@@ -471,26 +471,27 @@ Every string, seed row and asset described elsewhere in this chapter names Govt.
 by default, because the system was built for one association and had no reason to be otherwise until
 Work Package 62 asked what it would take to run the same codebase for a second one. The constraint
 that shaped the answer was not technical but organisational: the live deployment could not be
-touched. `ORG_PROFILE` is unset on every environment this system runs in today, and any change whose
-correctness depended on someone remembering to set it first was rejected on that basis alone, not
-because it was hard to build.
+touched. `ORG_PROFILE` was unset on every environment the system ran in when the work began, and any
+change whose correctness depended on someone remembering to set it first was rejected on that basis
+alone, not because it was hard to build.
 
 The mechanism is a profile pack: a folder under `profiles/<name>/` (`profiles/ghc/`,
 `profiles/default/`) holding `org-config.json`, an institution's own seed data, static page text and
 image assets. `IInstitutionProfileProvider` reads the `ORG_PROFILE` environment variable at boot,
 resolves it to a folder, and falls back file by file to `profiles/default/` for anything the named
 profile does not supply — the same defaulting rule `Path.Combine`-based seed resolution elsewhere in
-the codebase already used, extended rather than replaced. `OrgConfigService.BuildDefaults()` is the
-one place that decides whether the pack is trusted: it drives configuration only when
-`ProfileExplicitlySelected` is true, and falls back to the hardcoded values the service always had
-otherwise. An unset `ORG_PROFILE` therefore behaves exactly as it did before this work package,
-which is the property the constraint above demanded, and `OrgConfigGoldenSnapshotTests` freezes a
-snapshot of the pre-Work-Package-62 output specifically so a future change cannot alter that
-behaviour silently. The same guard shape recurs at every layer this work package touched: the ASP.NET
-Core data-protection application name, the Angular boot-time branding fallback, and the Flutter
-mobile application identifier are all read from the pack only once a profile is explicitly named,
-because each of them protects something that breaks if it changes under a live deployment — session
-cookies, first paint before the API responds, and the published app's store listing, respectively.
+the codebase already used, extended rather than replaced. The first version kept the hardcoded
+values as the fallback, so an unset `ORG_PROFILE` behaved exactly as before. Task 62.6b removed that
+code. `OrgConfigService.BuildDefaults()` now returns the pack's `org-config.json` in every case, and
+an unset `ORG_PROFILE` stops the application at boot with a message naming the variable, because a
+silent fall back to the neutral sample pack would rebrand a live association. The constraint is now
+met by failing loudly rather than by preserving the old path. `OrgConfigGoldenSnapshotTests` compares
+the `profiles/ghc/` output with a snapshot taken on 4 September 2026, while the values were still
+hardcoded, so a dropped locale or renamed key in the pack fails the build. The same pack also
+supplies the ASP.NET Core data-protection application name, the Angular boot-time branding fallback
+and the Flutter mobile application identifier. Each of these protects something that breaks if it
+changes under a live deployment: session cookies, first paint before the API responds, and the
+published app's store listing.
 
 Seed data required a second decision, independent of the first: `docs/SEED_CLASSIFICATION.md`
 grades every seed file by whether its content is structural (every institution needs the same rows),

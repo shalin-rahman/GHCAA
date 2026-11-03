@@ -1,5 +1,7 @@
 # Idempotent member batch import plan
 
+Design reference. When 88.1 to 88.5 run is set in `docs/MASTER_EXECUTION_PLAN.md`, the only open plan.
+
 ## Goal
 
 Make the existing member bulk-import feature the supported, DB-safe way to deliver a historical
@@ -110,7 +112,8 @@ real interfaces instead of `Observable<any>`.
 
 ### 11. Update the tracker
 
-Add a Work Package entry to `docs/TODO.md` noting that 46.1-46.5 in `docs/TODO_ARCHIVE.md` remain
+Work Package 88 in `docs/TODO.md` (88.1 to 88.5, all `[TODO]` on 2026-11-03) carries this plan: 88.1 covers
+steps 1 to 3, 88.2 steps 4 and 5, 88.3 step 6, 88.4 step 7 and 88.5 steps 8 to 10. Their entries in `docs/TODO.md` notes that 46.1-46.5 in `docs/TODO_ARCHIVE.md` remain
 correctly `[DONE]` for the work they describe, but that their delivery mechanism (the EF migration) no
 longer exists in the tree, and that this spec's bulk-import path is the new way to (re-)deliver that
 batch or any future one like it. Mark the new Work Package `[DONE]` only after step 7 has actually run
