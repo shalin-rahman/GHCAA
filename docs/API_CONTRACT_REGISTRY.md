@@ -12,6 +12,12 @@ remove or rename). This file is the *record* of each time that rule was
 applied — one entry per change, so a client left behind is visible at a
 glance.
 
+### 2026-11-04 — MemberSummaryDto, MemberProfileDto (GET /api/networking/search, committee, public profile, admin member list, own profile, assistant)
+- Change: both DTOs gain `batchLabel`, a string or null. It lists every college record, earliest year first, as "HSC (Science) 2001 / BSc (Physics) 2004". A record with no degree shows only its year; a record with no year goes last. It is null when the member has no college record. `MemberProfileDto` also gains `passingYear` and `degree` from the earliest college record. Existing fields are unchanged. The public listing now shows degree and subject inside the label, not only the year.
+- Reason: TODO 84.70. The owner asked for the full batch line everywhere a batch is shown, with the earliest college year first.
+- Web: the shared `batch` pipe (`core/pipes/batch.pipe.ts`) shows the label, then the year, then a fallback. Used by the directory, governance, landing preview, admin member list, assistant, profile and digital ID.
+- Mobile: `AppUtils.batchText` does the same for the directory and committee screens.
+
 ### 2026-10-31 — POST /api/roles/users/{id}/unlock, GET /api/roles/users
 - Change: new route. A SuperAdmin ends a user's login lock and authenticator lock early. It needs a recent step-up and answers 204, or 404 for an unknown user. Each unlock writes an `AccountUnlockedByAdmin` activity entry. `GET /api/roles/users` gains `lockedUntil`, set only while the login lock is still running. It does not show an authenticator lock.
 - Reason: TODO 84.51, plan Part D. A locked admin used to wait out the timer or need a database edit.

@@ -86,9 +86,9 @@ work in the order the tracker's `Depends on` tags give.
 |---|---|---|
 | E | Spec 023 delivery plan sessions F2 to F11 and N1, auth plan Part A and B4-B5. Order below. | 37.1m, 37.14o, 37.1p, 37.16e, 37.16f, 37.16g, 37.16h, 37.12y, 37.13f, 37.13g, 37.14a, 37.14d, 37.14f, 37.14m, 37.14n, 37.14t, 95.2, 95.4, 95.5, 95.12, 95.6, 84.42, 84.50 |
 | N1 | Non-election plan phase 1, release and environment blockers | 7.26, 7.28, 34.D8, 34.D19, 62.41, 84.48 |
-| N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.9, 84.18, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 84.54, 84.55, 84.56, 84.57, 84.58, 84.59, 84.60, 84.62, 84.68, 97.1 |
+| N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.9, 84.18, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 84.54, 84.55, 84.56, 84.57, 84.58, 84.60, 84.62, 84.68, 97.1 |
 | N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 84.61, 84.64, 84.67, 84.69, 93.3, 93.4, 96.3 |
-| N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.19, 84.20, 84.65, 84.66, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5 |
+| N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.71, 84.72, 84.19, 84.20, 84.59, 84.65, 84.66, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5 |
 | N5 | Phase 5, white-label profile and reusable modules | 62.2, 62.42, 62.56 |
 | N6 | Phase 6, performance and quality | 27.1, 27.8, 34.D7, 37.11, 51.4, 51.5, 84.63, 98.7 |
 | N7 | Phase 7, platform governance, security and operations | 7.16, 12.8, 12.9, 73.5, 73.6, 74.3, 98.43, 99.8 |
@@ -102,7 +102,10 @@ Order notes kept from the non-election plan:
 - 62.2 and its prerequisites come before 62.56 and 62.42. 62.42 also waits for 62.41.
 - 8.5 is a measured spike. No local database is picked before its evidence. 8.7 follows it.
 - 28.33 is the same scope as 8.8 and 37.7. Do not add an ARB pipeline.
-- 92.1 (spec 022) and 84.19 (spec 026) are written before their code.
+- 92.1 (spec 022) and 84.71 (spec 028) and 84.19 (spec 026) are written before their code. The
+  owner approved specs 026 and 028 on 2026-11-04. 84.72 (forum admin) follows 84.71 and reuses its
+  moderation rules. 84.59 (typed DTOs) moved here from N2 on the owner's word of 2026-11-04 and
+  runs after 84.71 and 84.19.
 - 37.16f (one voting-member rule for elections and amendments) goes before 37.1p, so the new rules
   in 37.1p are written once.
 - 84.61 (FCM push) waits for the owner's Firebase service key. Do not put it in a wave before then.

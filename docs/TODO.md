@@ -1102,12 +1102,28 @@ members that minutes are archived, but no meeting or minutes entity exists in an
 EC roles manage meetings from web and mobile. It reuses the invite and RSVP pattern from events
 where spec 014 (events, news, gallery and content) shows one. **Acceptance:** an approved spec under
 docs/specs before any code.
+  - **Scope set, 2026-11-04.** The owner widened the scope: series that meet many times, dynamic
+    type and category, an optional event link (AGM, general meeting, event planning), in person,
+    online or hybrid, venue, agenda, decisions, outcomes, minutes, attached polls and member
+    comments. Spec 026 (meetings, discussions and action items) is rewritten with spec, plan and
+    tasks. The owner answered D1 to D4 the same day: admins only, on web and mobile; minutes for
+    members only; invitee-only meetings hidden. It waits on spec approval and runs after 84.71
+    (comments on polls and meetings). Categories are one `DiscussionCategory` list shared with
+    polls: the first five kept (Governance, Finance, Events, Alumni affairs, Other) plus Election,
+    Membership, Fundraising, Mentorship and careers, Scholarship and welfare, and Communication.
+    Meeting lists filter by category, type, series and status (spec 026 FR-2 and FR-2a).
 
 84.20 [TODO] **Priority: P3 | Depends on: 84.19.** Tasks and notes. A task with an owner, due date
 and status is justified only as a meeting action item or an EC work item, so it lands inside or
 next to the meetings module rather than as a general task manager. Standalone notes add little
 beside meeting minutes. They stay out unless the 84.18 review finds a real user for them.
 **Acceptance:** the decision on a separate module or part of 84.19 is recorded in the 84.19 spec.
+  - **Decided in spec 026, 2026-11-04.** Action items live inside the meeting module (FR-18 to
+    FR-20). Standalone tasks and notes are not built. Build tasks T010 and T011 of that spec.
+  - **To-do lists, 2026-11-04.** On owner request a meeting holds one or more named to-do lists.
+    Items have optional owner and due date, priority, order and status, filter by status, owner,
+    due, priority and category, show in "My to-dos" and carry to the next meeting (FR-18 to
+    FR-19b, tasks T010 and T010a).
 
 84.23 [TODO] **Priority: P3 | Depends on: none.** Two client gaps from spec 013. Mobile has no
 signature upload, although `POST api/profile/signature` exists. The backend PDF routes
@@ -1213,7 +1229,7 @@ The items 84.54 to 84.64 come from the spec review of 2026-11-03. Each gap was c
 
 84.58 [TODO] **Priority: P3 | Depends on: none.** `SecureFilesController.GetSecureFile` picks the content type from its own list of `.pdf`, `.jpg`, `.jpeg` and `.png` (`SecureFilesController.cs:75-78`). A stored `.webp` goes out as `application/octet-stream`. Spec 013 ENH-005. **Acceptance:** the type comes from one map shared with `FileValidationService`, covering every type that service accepts; a test per type.
 
-84.59 [TODO] **Priority: P3 | Depends on: none.** Four services return `IEnumerable<object>` instead of a DTO: `IMentorshipService.cs:8, 9, 12`, `INetworkingService.cs:11`, `IContactService.cs:8` and `IChatService.cs:11`. The reply shape is not in Swagger and a renamed property breaks the clients without a compile error. Specs 016 and 020. **Acceptance:** typed DTOs for each method, Swagger regenerated, web and mobile models checked against it, contract entries in `docs/API_CONTRACT_REGISTRY.md`.
+84.59 [TODO] **Priority: P3 | Depends on: 84.71, 84.19.** Owner, 2026-11-04: run it after the poll comments and meetings work. Four services return `IEnumerable<object>` instead of a DTO: `IMentorshipService.cs:8, 9, 12`, `INetworkingService.cs:11`, `IContactService.cs:8` and `IChatService.cs:11`. The reply shape is not in Swagger and a renamed property breaks the clients without a compile error. Specs 016 and 020. **Acceptance:** typed DTOs for each method, Swagger regenerated, web and mobile models checked against it, contract entries in `docs/API_CONTRACT_REGISTRY.md`.
 
 84.60 [TODO] **Priority: P3 | Depends on: none.** `IDCardService.VerifyCredentialAsync` treats a credential as expired once `ExpiresOn` passes (`IDCardService.cs:282`), but no code sets `ExpiresOn`. Either set it when a credential is issued, from a setting, or drop the check and the column. Spec 013. **Acceptance:** the chosen path is built with a test, and spec 013 says which.
 
@@ -1224,6 +1240,33 @@ The items 84.54 to 84.64 come from the spec review of 2026-11-03. Each gap was c
 84.63 [TODO] **Priority: P3 | Depends on: none.** Six controllers have service tests but no controller tests: Mentorship, Assistant, Campaigns, Scholarships, ErrorLog and DevTracker. `AuthController.GetProviders` is covered only by the authorization reflection test. **Acceptance:** one controller test file for each, covering the success reply, the not-found or bad-request reply and the role check, tagged with their FR.
 
 84.64 [TODO] **Priority: P3 | Depends on: none.** Mobile has no "mark all read" for notifications; the web calls it at `alert.service.ts:57`. Spec 017. **Acceptance:** a mobile action calling the same route, with a widget test.
+
+84.70 [DONE] **Priority: P2 | Depends on: none.** The batch line showed one year only, and a member with several college records got the latest one. Owner, 2026-11-04: show every college record as "HSC (Science) 2001 / BSc (Physics) 2004", earliest year first, wherever a batch is shown. Done 2026-11-04: `AcademicRecord.BatchLabel` builds the line on the server and skips blank and placeholder values; `MemberSummaryDto` and `MemberProfileDto` carry it as `batchLabel`. Web uses the shared `batch` pipe and mobile uses `AppUtils.batchText`, both falling back to the year and then "N/A". Spec 005. **Acceptance:** met. `BatchLabelTests`, `NetworkingServiceTests`, `batch.pipe.spec.ts` and `batch_text_test.dart` pass; the change is in `API_CONTRACT_REGISTRY.md`.
+
+84.71 [TODO] **Priority: P2 | Depends on: none.** Members can vote on polls but cannot discuss
+them. The forum has no link to a poll, and no meeting entity exists yet. Spec 028 (comments on
+polls and meetings) adds a comment thread to each poll, stored as forum posts under a context topic,
+with one level of replies, removal by the author or an admin, an admin lock, and a per-poll switch.
+Meetings reuse the same thread through 84.19. On request (2026-11-04), creating a poll can also
+publish a news or notice post linked to it (FR-13 to FR-15); meetings get the same option in spec
+026 FR-25 to FR-27. The admin picks public or members only per post, which adds a members-only flag
+to news (FR-16). Polls also get a category from the shared `DiscussionCategory` list and a
+category filter on both clients (FR-17, FR-18). Spec, plan and tasks are written; the owner
+answered D1 to D3 and approved the spec on 2026-11-04. **Acceptance:** tasks T001 to T013 done
+with backend, Vitest and Flutter tests green and the routes recorded in
+`docs/API_CONTRACT_REGISTRY.md`.
+
+84.72 [TODO] **Priority: P2 | Depends on: 84.71.** The admin panel has no forum section. Checked
+2026-11-04: the forum is only the member page `/portal/forum` behind `enableForum`; there is no
+route to create a forum category and the baseline migration seeds none, so a new database has an
+empty forum nobody can fill; a post can only be deleted by its author or a SuperAdmin; there is no
+pin or lock. Owner, 2026-11-04: build a full admin forum section. It reuses the moderation rules
+of spec 028 (removal reason to the audit log, admin lock), which is why it runs after 84.71. Spec
+017. **Acceptance:** admin routes and a web admin page to create, edit, order and retire forum
+categories; a few default categories seeded by a migration data step; admins can pin, lock and
+remove topics and posts with a reason written to the audit log; the same tools on mobile behind a
+role guard; backend, Vitest and Flutter tests; routes recorded in `docs/API_CONTRACT_REGISTRY.md`
+and spec 017 updated.
 
 The items 84.65 to 84.69 are the owner's answers of 2026-11-03 to the product questions from the spec review. Priorities are proposals.
 
