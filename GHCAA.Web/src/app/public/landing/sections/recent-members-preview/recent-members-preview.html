@@ -18,8 +18,8 @@
                     }
                 </div>
                 <h4>{{ member.fullName }}</h4>
-                @if (member.passingYear || member.degree) {
-                <small>{{ member.degree }}{{ member.degree && member.passingYear ? ' • ' : '' }}{{ member.passingYear }}</small>
+                @if (member | batch: ''; as batch) {
+                <small>{{ batch }}</small>
                 }
             </div>
             }

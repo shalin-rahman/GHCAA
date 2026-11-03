@@ -6,6 +6,7 @@ import { OrgConfigService } from '../../core/services/org-config.service';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SITE_CONTENT } from '../../core/config/site-content.generated';
 import { interpolateOrgTemplate } from '../../core/utils/org-template';
+import { BatchPipe } from '../../core/pipes/batch.pipe';
 
 interface ChatMessage {
     id: number;
@@ -18,7 +19,7 @@ interface ChatMessage {
 @Component({
     selector: 'app-assistant',
     standalone: true,
-    imports: [CommonModule, FormsModule, PageHeaderComponent],
+    imports: [CommonModule, FormsModule, PageHeaderComponent, BatchPipe],
     templateUrl: './assistant.html',
     styleUrl: './assistant.scss'
 })

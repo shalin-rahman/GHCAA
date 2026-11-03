@@ -168,6 +168,7 @@ public class NetworkingServiceTests : TestBase
         president.Status = Enums.MembershipStatus.Active;
         president.AcademicHistory = new List<AcademicRecord>
         {
+            new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "Masters", Subject = "Political Science", PassingYear = 2008, IsOrgProfile = true },
             new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "Honours", Subject = "Political Science", PassingYear = 2005, IsOrgProfile = true }
         };
 
@@ -184,6 +185,8 @@ public class NetworkingServiceTests : TestBase
         summary.PassingYear.Should().Be(2005);
         summary.Degree.Should().Be("Honours");
         summary.Subject.Should().Be("Political Science");
+        // Two records from the college: the single year is the earlier one, the label lists both.
+        summary.BatchLabel.Should().Be("Honours (Political Science) 2005 / Masters (Political Science) 2008");
     }
 
     [Category("FR-34")]

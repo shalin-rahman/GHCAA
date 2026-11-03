@@ -12,12 +12,13 @@ import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { PageHeaderComponent } from '../page-header/page-header.component';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { LazyImgDirective } from '../directives/lazy-img.directive';
+import { BatchPipe, hasBatchLabel } from '../../core/pipes/batch.pipe';
 
 @Component({
     // ... (rest of metadata)
     selector: 'app-governance',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective, LazyImgDirective],
+    imports: [CommonModule, FormsModule, RouterLink, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective, LazyImgDirective, BatchPipe],
     templateUrl: './governance.html',
     styleUrl: './governance.scss'
 })
@@ -25,6 +26,7 @@ export class Governance implements OnInit {
     private networkService = inject(NetworkingService);
     private constitutionService = inject(ConstitutionService);
     private positionService = inject(EcPositionService);
+    hasBatchLabel = hasBatchLabel;
 
     committee = signal<MemberSummary[]>([]);
     // 95.2: the board is whichever positions an admin flags ShowOnBoard.

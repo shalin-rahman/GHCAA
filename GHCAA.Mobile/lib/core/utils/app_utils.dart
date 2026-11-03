@@ -20,6 +20,20 @@ class AppUtils {
     return true;
   }
 
+  /// The API's batchLabel lists every college record, earliest first. Older
+  /// builds and members without a college record send none, so fall back to
+  /// the year. A blank label and a year of 0 both count as missing.
+  static String batchText(Map<String, dynamic>? m, {String fallback = 'N/A'}) {
+    if (m == null) return fallback;
+    final label = m['batchLabel']?.toString().trim() ?? '';
+    if (label.isNotEmpty) return label;
+    for (final key in ['passingYear', 'ghcLastCertificatePassingYear']) {
+      final year = m[key]?.toString().trim() ?? '';
+      if (year.isNotEmpty && year != '0') return year;
+    }
+    return fallback;
+  }
+
   /// screen_protector only ships Android/iOS platform channels, so calling
   /// it on desktop/web throws MissingPluginException. Screenshot blocking is
   /// a mobile-only concern anyway, so swallow the failure there.

@@ -298,9 +298,10 @@ namespace GHCAA.Infrastructure.Services
 
                 // Summary Data for easier display
                 CategoryBadge = m.Category.ToString(),
-                GHCLastCertificatePassingYear = m.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile)?.PassingYear,
-                GHCLastCertificate = m.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile)?.Degree,
-                GHCLastCertificateSubject = m.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile)?.Subject,
+                GHCLastCertificatePassingYear = AcademicRecord.EarliestOrgRecord(m.AcademicHistory)?.PassingYear,
+                GHCLastCertificate = AcademicRecord.EarliestOrgRecord(m.AcademicHistory)?.Degree,
+                GHCLastCertificateSubject = AcademicRecord.EarliestOrgRecord(m.AcademicHistory)?.Subject,
+                BatchLabel = AcademicRecord.BatchLabel(m.AcademicHistory),
                 Designation = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Designation,
                 OrganizationName = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.OrganizationName,
                 ProfessionalSector = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Sector,
@@ -382,6 +383,7 @@ namespace GHCAA.Infrastructure.Services
             Id = s.Id,
             FullName = s.FullName,
             PassingYear = s.PassingYear,
+            BatchLabel = s.BatchLabel,
             PhotoPath = s.PhotoPath
         };
 
@@ -421,9 +423,10 @@ namespace GHCAA.Infrastructure.Services
             };
 
             // Enhanced Summary Data from normalized tables
-            var ghcRecord = m.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile);
+            var ghcRecord = AcademicRecord.EarliestOrgRecord(m.AcademicHistory);
             if (ghcRecord != null)
             {
+                dto.BatchLabel = AcademicRecord.BatchLabel(m.AcademicHistory);
                 dto.GHCLastCertificatePassingYear = ghcRecord.PassingYear;
                 dto.GHCLastCertificate = ghcRecord.Degree;
                 dto.GHCLastCertificateSubject = ghcRecord.Subject;

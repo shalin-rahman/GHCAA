@@ -123,7 +123,9 @@ export interface Member {
     professionalHistory?: ProfessionalRecord[];
     ecHistory?: ECMember[];
     paymentHistories?: PaymentHistory[];
-    
+    // Every college record, earliest first. Null when the member has none.
+    batchLabel?: string | null;
+
     // Gamification & Health
     contributionPoints?: number;
     rank?: number;
@@ -629,6 +631,10 @@ export interface MemberProfile {
     professionalHistory: ProfessionalRecord[];
     ecHistory?: ECHistoryRecord[];
     paymentHistories?: PaymentHistory[];
+    // Year, degree and label come from the earliest college record. Null when there is none.
+    passingYear?: number | null;
+    degree?: string | null;
+    batchLabel?: string | null;
 
     // Gamification & Health
     contributionPoints?: number;

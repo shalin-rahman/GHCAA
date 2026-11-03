@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit, OnDestroy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
+import { BatchPipe, hasBatchLabel } from '../../core/pipes/batch.pipe';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
@@ -20,7 +21,7 @@ import { ModalHeaderComponent } from '../modal-header/modal-header.component';
 @Component({
     selector: 'app-directory',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, ImgFallbackDirective, LazyImgDirective, PageHeaderComponent, ModalHeaderComponent, LoadMoreComponent],
+    imports: [CommonModule, AppDatePipe, BatchPipe, FormsModule, LoadingPanelComponent, ImgFallbackDirective, LazyImgDirective, PageHeaderComponent, ModalHeaderComponent, LoadMoreComponent],
     templateUrl: './directory.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './directory.scss'
@@ -32,6 +33,7 @@ export class Directory implements OnInit, OnDestroy {
     getPositionLabel = getPositionLabel;
     getCurrentECLabel = getCurrentECLabel;
     getBloodGroupName = getBloodGroupName;
+    hasBatchLabel = hasBatchLabel;
     private networkService = inject(NetworkingService);
     private notify = inject(NotificationService);
     private router = inject(Router);

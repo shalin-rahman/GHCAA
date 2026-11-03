@@ -20,6 +20,8 @@ namespace GHCAA.Application.DTOs
         public int? PassingYear { get; set; }
         public string? Degree { get; set; }
         public string? Subject { get; set; }
+        // Every organisation record, earliest first, e.g. "HSC (Science) 2001 / BSc (Physics) 2004".
+        public string? BatchLabel { get; set; }
 
         // Gamification
         public int Rank { get; set; }

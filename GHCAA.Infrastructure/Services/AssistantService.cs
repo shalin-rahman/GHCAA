@@ -1,5 +1,6 @@
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
@@ -62,7 +63,9 @@ namespace GHCAA.Infrastructure.Services
                         m.Id,
                         m.FullName,
                         m.PhotoPath,
-                        Year = m.AcademicHistory.Where(a => a.IsOrgProfile).Select(a => (int?)a.PassingYear).FirstOrDefault(),
+                        OrgRecords = m.AcademicHistory.Where(a => a.IsOrgProfile)
+                            .Select(a => new AcademicRecord { Id = a.Id, InstitutionName = a.InstitutionName, Degree = a.Degree, Subject = a.Subject, PassingYear = a.PassingYear, IsOrgProfile = true })
+                            .ToList(),
                         Job = m.ProfessionalHistory.Where(p => p.IsCurrent).Select(p => new { p.Sector, p.Designation }).FirstOrDefault(),
                     })
                     .ToListAsync(cancellationToken);
@@ -74,7 +77,8 @@ namespace GHCAA.Infrastructure.Services
                     {
                         Id = m.Id,
                         FullName = m.FullName,
-                        GHCLastCertificatePassingYear = m.Year,
+                        GHCLastCertificatePassingYear = AcademicRecord.EarliestOrgRecord(m.OrgRecords)?.PassingYear,
+                        BatchLabel = AcademicRecord.BatchLabel(m.OrgRecords),
                         ProfessionalSector = m.Job?.Sector,
                         Designation = m.Job?.Designation,
                         PhotoPath = m.PhotoPath

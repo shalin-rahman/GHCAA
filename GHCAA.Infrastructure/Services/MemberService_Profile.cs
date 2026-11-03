@@ -82,9 +82,10 @@ namespace GHCAA.Infrastructure.Services
 
                 // Summary Data for easier display
                 CategoryBadge = member.Category.ToString(),
-                PassingYear = member.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile)?.PassingYear,
-                Degree = member.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile)?.Degree,
-                Subject = member.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile)?.Subject,
+                PassingYear = AcademicRecord.EarliestOrgRecord(member.AcademicHistory)?.PassingYear,
+                Degree = AcademicRecord.EarliestOrgRecord(member.AcademicHistory)?.Degree,
+                Subject = AcademicRecord.EarliestOrgRecord(member.AcademicHistory)?.Subject,
+                BatchLabel = AcademicRecord.BatchLabel(member.AcademicHistory),
                 Designation = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Designation,
                 OrganizationName = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.OrganizationName,
                 ProfessionalSector = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Sector,

@@ -209,9 +209,10 @@ namespace GHCAA.Infrastructure.Services
                 }
 
                 // Enhanced Summary Data from normalized tables
-                var ghcRecord = member.AcademicHistory?.FirstOrDefault(a => a.IsOrgProfile);
+                var ghcRecord = AcademicRecord.EarliestOrgRecord(member.AcademicHistory);
                 if (ghcRecord != null)
                 {
+                    dto.BatchLabel = AcademicRecord.BatchLabel(member.AcademicHistory);
                     dto.GHCLastCertificatePassingYear = ghcRecord.PassingYear;
                     dto.GHCLastCertificate = ghcRecord.Degree;
                     dto.GHCLastCertificateSubject = ghcRecord.Subject;

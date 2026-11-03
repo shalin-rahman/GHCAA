@@ -31,6 +31,8 @@ namespace GHCAA.Application.DTOs
         public int? PassingYear { get; set; }
         public string? Degree { get; set; }
         public string? Subject { get; set; }
+        // Every organisation record, earliest first, e.g. "HSC (Science) 2001 / BSc (Physics) 2004".
+        public string? BatchLabel { get; set; }
         public string? CategoryBadge { get; set; }
         public string PaymentStatus { get; set; } = "Pending";
     }

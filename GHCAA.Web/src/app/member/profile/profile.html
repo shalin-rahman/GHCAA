@@ -45,7 +45,7 @@
             <div class="grid-item">
                 <small>Associated Batch</small>
                 <p><strong>{{ getGHCHistory()?.passingYear || 'N/A' }}</strong></p>
-                <span class="text-[10px] opacity-60 uppercase">{{ getGHCHistory()?.degree || 'N/A' }}</span>
+                <span class="text-[10px] opacity-60 uppercase">{{ hasBatchLabel(profile) ? profile.batchLabel : (getGHCHistory()?.degree || 'N/A') }}</span>
             </div>
             <div class="grid-item">
                 <small>Highest Degree</small>

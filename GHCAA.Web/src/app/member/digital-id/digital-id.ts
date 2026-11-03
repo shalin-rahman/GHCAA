@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { earliestOrgRecord } from '../../core/pipes/batch.pipe';
 import { CommonModule } from '@angular/common';
 import { ProfileService } from '../../core/services/profile.service';
 import { MemberProfile } from '../../core/models/business.models';
@@ -24,6 +25,12 @@ export class DigitalId implements OnInit {
   orgConfig = inject(OrgConfigService);
 
   profile = signal<MemberProfile | null>(null);
+  // Was academicHistory[0], which could be another institution's record.
+  gradYear = computed(() => {
+    const p = this.profile();
+    const year = earliestOrgRecord(p?.academicHistory)?.passingYear || p?.passingYear;
+    return year && year > 0 ? year : null;
+  });
 
   ngOnInit() {
     this.profileService.getProfile().subscribe({

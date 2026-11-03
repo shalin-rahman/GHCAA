@@ -17,6 +17,7 @@ import { Icon } from '../../common/icon/icon';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { OrgConfigService } from '../../core/services/org-config.service';
+import { earliestOrgRecord, hasBatchLabel } from '../../core/pipes/batch.pipe';
 
 @Component({
     selector: 'app-profile',
@@ -202,12 +203,13 @@ export class Profile implements OnInit {
         return cleanPath.replace(/^\/\//, '/');
     }
 
+    // Earliest college record, matching the batch shown everywhere else. The old version sorted
+    // academicHistory in place, which also reordered the form rows.
     getGHCHistory() {
-        if (!this.profile.academicHistory) return null;
-        const ghc = this.profile.academicHistory.filter((a: any) => a.isOrgProfile);
-        if (ghc.length === 0) return null;
-        return ghc.sort((a: any, b: any) => (b.passingYear || 0) - (a.passingYear || 0))[0];
+        return earliestOrgRecord<any>(this.profile?.academicHistory);
     }
+
+    hasBatchLabel = hasBatchLabel;
 
     getHighestHistory() {
         if (!this.profile.academicHistory || this.profile.academicHistory.length === 0) return null;

@@ -24,12 +24,13 @@ import { toWireDate } from '../../core/utils/date.util';
 import { Icon } from '../../common/icon/icon';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
+import { BatchPipe } from '../../core/pipes/batch.pipe';
 import { MemberImportModalComponent } from './member-import-modal/member-import-modal.component';
 
 @Component({
   selector: 'app-admin-members',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LazyImgDirective, Icon, AppCurrencyPipe, MemberImportModalComponent, ModalHeaderComponent],
+  imports: [CommonModule, AppDatePipe, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LazyImgDirective, Icon, AppCurrencyPipe, BatchPipe, MemberImportModalComponent, ModalHeaderComponent],
   providers: [DatePipe],
   templateUrl: './admin-members.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -14,6 +14,7 @@ import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/widgets/app_search_field.dart';
 import '../../core/widgets/app_dropdown_field.dart';
+import '../../core/utils/app_utils.dart';
 
 final directorySearchQueryProvider = StateProvider<String>((ref) => '');
 
@@ -339,11 +340,8 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
     );
   }
  
-  String _getCompactBatch(Map<String, dynamic> m) {
-    final degree = m['degree'] ?? 'HSC';
-    final year = m['passingYear']?.toString() ?? '';
-    return '$degree $year';
-  }
+  // The old version printed "HSC " for a member with no college record.
+  String _getCompactBatch(Map<String, dynamic> m) => AppUtils.batchText(m);
  
   Widget _buildFilterDropdown(String label, List<String> options) {
     final selected = label == 'YEAR'

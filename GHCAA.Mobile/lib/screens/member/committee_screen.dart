@@ -11,6 +11,7 @@ import '../../core/widgets/async_value_widget.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../features/networking/networking_service.dart';
 import '../../core/config/app_config.dart';
+import '../../core/utils/app_utils.dart';
 
 final ecPeriodsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(networkingServiceProvider).getECPeriods();
@@ -190,7 +191,7 @@ class _CommitteeScreenState extends ConsumerState<CommitteeScreen> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            '${m['positionName'] ?? ''} | Batch ${m['passingYear'] ?? 'N/A'}',
+                                            '${m['positionName'] ?? ''} | Batch ${AppUtils.batchText(m)}',
                                             style: TextStyle(fontSize: 10, color: AppTheme.royalGold.withValues(alpha: 0.8), fontWeight: FontWeight.w900, letterSpacing: 1)
                                           ),
                                         ],

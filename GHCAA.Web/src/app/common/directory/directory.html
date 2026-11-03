@@ -116,7 +116,7 @@
                             </div>
                         </td>
                         <td>{{ m.membershipNumber || 'REG-PENDING' }}</td>
-                        <td>{{ m.passingYear || 'N/A' }}@if (!publicListing) { ({{ m.degree || 'N/A' }} {{ getMajorDisplay(m.degree, m.subject) }})}</td>
+                        <td>{{ m | batch }}@if (!publicListing && !hasBatchLabel(m)) { ({{ m.degree || 'N/A' }} {{ getMajorDisplay(m.degree, m.subject) }})}</td>
                         <td>{{ getProfessionDisplay(m.designation, m.professionalSector) || '—' }}</td>
                         <td>{{ m.bloodGroup ? getBloodGroupName(m.bloodGroup) : '—' }}</td>
                         <td class="actions-cell">
@@ -191,7 +191,7 @@
                 <div class="member-body">
                     <div class="info-item academic-batch">
                         <span class="icon">🎓</span>
-                        <span class="batch-text">Batch: <strong>{{ m.passingYear || 'N/A' }}</strong>@if (!publicListing) { ({{ m.degree || 'N/A' }} {{ getMajorDisplay(m.degree, m.subject) }})}</span>
+                        <span class="batch-text">Batch: <strong>{{ m | batch }}</strong>@if (!publicListing && !hasBatchLabel(m)) { ({{ m.degree || 'N/A' }} {{ getMajorDisplay(m.degree, m.subject) }})}</span>
                     </div>
                     <div class="info-item" *ngIf="getProfessionDisplay(m.designation, m.professionalSector)">
                         <span class="icon">💼</span>
@@ -278,7 +278,7 @@
                     <p class="role">{{ profession }}</p>
                     }
                     <div class="social-tags">
-                        <span class="tag">🎓 Batch: <strong>{{ selectedMember()?.passingYear || 'N/A' }}</strong> ({{ selectedMember()?.degree || 'N/A' }} {{ getMajorDisplay(selectedMember()?.degree, selectedMember()?.subject) }})</span>
+                        <span class="tag">🎓 Batch: <strong>{{ selectedMember() | batch }}</strong>@if (!hasBatchLabel(selectedMember())) { ({{ selectedMember()?.degree || 'N/A' }} {{ getMajorDisplay(selectedMember()?.degree, selectedMember()?.subject) }})}</span>
                         <span class="tag">🩸 {{ getBloodGroupName(selectedMember()?.bloodGroup) }}</span>
                     </div>
                 </div>
@@ -319,7 +319,7 @@
                     <h4>Academic Summary</h4>
                     <div class="v-item">
                         <span class="v-label">Batch</span>
-                        <span class="v-value"><strong>{{ selectedMember()?.passingYear || 'N/A' }}</strong></span>
+                        <span class="v-value"><strong>{{ selectedMember() | batch }}</strong></span>
                     </div>
                     <div class="v-item">
                         <span class="v-label">Degree</span>

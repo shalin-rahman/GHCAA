@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { NetworkingService } from '../../../../core/services/networking.service';
 import { ImgFallbackDirective } from '../../../../common/directives/img-fallback.directive';
 import { LazyImgDirective } from '../../../../common/directives/lazy-img.directive';
+import { BatchPipe } from '../../../../core/pipes/batch.pipe';
 
 @Component({
     selector: 'landing-recent-members-preview',
     standalone: true,
-    imports: [CommonModule, ImgFallbackDirective, LazyImgDirective],
+    imports: [CommonModule, ImgFallbackDirective, LazyImgDirective, BatchPipe],
     templateUrl: './recent-members-preview.html',
     styleUrl: './recent-members-preview.scss',
 })

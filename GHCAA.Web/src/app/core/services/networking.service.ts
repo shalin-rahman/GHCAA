@@ -36,6 +36,8 @@ export interface MemberSummary {
     photoPath?: string;
     degree?: string;
     subject?: string;
+    // Every college record, earliest first. Null when the member has none.
+    batchLabel?: string | null;
     ecHistory?: any[];
     rank?: number | string;
     categoryBadge?: string;

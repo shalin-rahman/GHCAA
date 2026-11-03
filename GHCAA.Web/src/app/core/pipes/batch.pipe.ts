@@ -22,6 +22,15 @@ export function batchText(member: BatchSource | null | undefined, fallback = 'N/
   return fallback;
 }
 
+/** Same rule as the server: earliest college record first, a missing year sorts last. */
+export function earliestOrgRecord<T extends { isOrgProfile?: boolean; passingYear?: number | null }>(
+  history: readonly (T | null | undefined)[] | null | undefined
+): T | null {
+  const year = (r: T) => (r.passingYear && r.passingYear > 0 ? r.passingYear : Number.MAX_SAFE_INTEGER);
+  const org = (history ?? []).filter((r): r is T => !!r && !!r.isOrgProfile);
+  return org.length ? [...org].sort((a, b) => year(a) - year(b))[0] : null;
+}
+
 /** True when the label already carries degree and subject, so the screen should not repeat them. */
 export function hasBatchLabel(member: BatchSource | null | undefined): boolean {
   return typeof member?.batchLabel === 'string' && member.batchLabel.trim().length > 0;
