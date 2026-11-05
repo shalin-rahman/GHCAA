@@ -28,6 +28,7 @@ SWAGGER_OUT = os.path.join(LOGS, "swagger.generated.json")
 
 # (group, name, command, cwd, quick). Same commands as .github/workflows/ghcaa-ci-standard.yml.
 STEPS = [
+    ("backend", "guard", "python scripts/guard.py", ROOT, True),
     ("backend", "format-verify", "dotnet format --verify-no-changes", ROOT, True),
     ("backend", "authz-catalog", "python docs/api/authz_catalog.py --check", ROOT, True),
     ("backend", "authz-catalog-tests", "python -m unittest discover -s docs/api -p test_authz_catalog.py", ROOT, True),

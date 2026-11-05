@@ -238,7 +238,7 @@
                                 <select [(ngModel)]="item.degree" [name]="'deg_' + $index" required maxlength="100"
                                     #degMi="ngModel" [class.border-red-500]="degMi.invalid && degMi.touched">
                                     <option value="">Select...</option>
-                                    @for (deg of degreeOptions; track deg) { <option [value]="deg">{{ deg }}</option> }
+                                    @for (deg of degreeOptions(); track deg) { <option [value]="deg">{{ deg }}</option> }
                                 </select>
                             </div>
                             <div class="form-group">
@@ -246,7 +246,7 @@
                                 <select [(ngModel)]="item.subject" [name]="'sub_' + $index" required maxlength="100"
                                     #subMi="ngModel" [class.border-red-500]="subMi.invalid && subMi.touched">
                                     <option value="None">None</option>
-                                    @for (sub of subjectOptions; track sub) { <option [value]="sub">{{ sub }}</option> }
+                                    @for (sub of subjectOptions(); track sub) { <option [value]="sub">{{ sub }}</option> }
                                 </select>
                             </div>
 
@@ -291,7 +291,7 @@
                         <label for="profile-profileSector">Industry Sector</label>
                         <select id="profile-profileSector" [(ngModel)]="profile.professionalSector" name="profileSector">
                             <option value="" disabled selected>Select Sector</option>
-                            <option *ngFor="let s of sectorOptions" [value]="s">{{ s }}</option>
+                            <option *ngFor="let s of sectorOptions()" [value]="s">{{ s }}</option>
                         </select>
                     </div>
                 </div>
@@ -329,7 +329,7 @@
                                 <label>Career Sector</label>
                                 <select [(ngModel)]="work.sector" [name]="'sec_' + $index">
                                     <option value="" disabled selected>Select Sector</option>
-                                    <option *ngFor="let s of sectorOptions" [value]="s">{{ s }}</option>
+                                    <option *ngFor="let s of sectorOptions()" [value]="s">{{ s }}</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -588,8 +588,8 @@
 
     <!-- Reference Datalists -->
     <datalist id="years-list"> <option *ngFor="let y of yearsList" [value]="y"></option> </datalist>
-    <datalist id="sector-list"> <option *ngFor="let s of sectorOptions" [value]="s"></option> </datalist>
-    <datalist id="subject-list"> <option *ngFor="let s of subjectOptions" [value]="s"></option> </datalist>
-    <datalist id="degree-list"> <option *ngFor="let d of degreeOptions" [value]="d"></option> </datalist>
+    <datalist id="sector-list"> <option *ngFor="let s of sectorOptions()" [value]="s"></option> </datalist>
+    <datalist id="subject-list"> <option *ngFor="let s of subjectOptions()" [value]="s"></option> </datalist>
+    <datalist id="degree-list"> <option *ngFor="let d of degreeOptions()" [value]="d"></option> </datalist>
     }
 </div>

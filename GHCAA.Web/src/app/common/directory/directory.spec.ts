@@ -5,7 +5,7 @@ import { NetworkingService } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
-import { LOOKUP_GROUPS, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
+import { LOOKUP_GROUPS, getMembershipTypeOptions } from '../../core/constants/app.constants';
 import { LookupService } from '../../core/services/lookup.service';
 import { AuthService } from '../../core/services/auth.service';
 import { signal, WritableSignal } from '@angular/core';
@@ -49,8 +49,9 @@ describe('Directory Component', () => {
                         // mirror the call-first-then-fallback shape by answering with the same
                         // fallback list a real empty lookups table would return.
                         getOptions: vi.fn().mockImplementation((group: string) =>
-                            of(group === LOOKUP_GROUPS.MembershipType ? MEMBERSHIP_TYPE_OPTIONS : [])),
-                        getAcademicYears: vi.fn().mockReturnValue(of([]))
+                            of(group === LOOKUP_GROUPS.MembershipType ? getMembershipTypeOptions() : [])),
+                        getAcademicYears: vi.fn().mockReturnValue(of([])),
+                        getValues: vi.fn().mockReturnValue(of(['Served Sector']))
                     }
                 }
             ]
@@ -68,6 +69,10 @@ describe('Directory Component', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('loads the sector filter from the ProfessionalSector lookup', () => {
+        expect(component.sectors()).toEqual(['Served Sector']);
     });
 
     it('should search on init', () => {
@@ -154,7 +159,7 @@ describe('Directory Component', () => {
     // 35.3 regression guard: the Membership Type filter was a hardcoded <option> list that
     // stopped at Advisory, so Guest members could never be selected — they were hidden.
     it('should offer every MembershipType in the filter, including Guest', () => {
-        expect(component.membershipTypes()).toEqual(MEMBERSHIP_TYPE_OPTIONS);
+        expect(component.membershipTypes()).toEqual(getMembershipTypeOptions());
         expect(component.membershipTypes().map(t => t.value)).toContain('Guest');
     });
 

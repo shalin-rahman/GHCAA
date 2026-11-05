@@ -19,6 +19,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ghcaa_mobile/screens/auth/register_screen.dart';
 import 'package:ghcaa_mobile/features/auth/auth_service.dart';
 import 'package:ghcaa_mobile/features/auth/register_wizard_provider.dart';
+import 'package:ghcaa_mobile/core/constants/registration_constants.dart';
 import 'package:ghcaa_mobile/features/lookups/dropdown_service.dart';
 import 'package:ghcaa_mobile/features/files/file_service.dart';
 import 'package:ghcaa_mobile/core/storage/storage_service.dart';
@@ -31,6 +32,9 @@ import 'package:ghcaa_mobile/core/widgets/logo_spinner.dart';
 import 'helpers/fake_services.dart';
 
 class _FakeDropdownService implements DropdownService {
+  @override
+  Future<List<Map<String, String>>> getSubjectOptions(String? degree) => getOptions(LookupGroups.academicSubject);
+
   @override
   Future<List<Map<String, String>>> getOptions(String group) async {
     switch (group) {

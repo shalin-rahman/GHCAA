@@ -56,6 +56,7 @@ import 'helpers/golden_test_utils.dart';
 // they stay local rather than moving into helpers/fake_services.dart.
 class FakeDropdownService implements DropdownService {
   @override Future<List<Map<String, String>>> getOptions(String group) async => [];
+  @override Future<List<Map<String, String>>> getSubjectOptions(String? degree) async => [];
 }
 
 class FakeGatewayService implements GatewayService {

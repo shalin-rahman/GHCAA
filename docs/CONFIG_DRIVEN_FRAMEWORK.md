@@ -214,8 +214,8 @@ A new `Guest` value was added to `MembershipType` enum. All three platforms must
 | Angular | `app.constants.ts:283` | `{ value: 'Guest', label: 'Guest Member' }` in `MEMBERSHIP_TYPE_OPTIONS` | Done |
 | Config | `OrgConfigService.cs` | `["Guest"] = "Guest Member"` / `"অতিথি সদস্য"` in both locales | Done |
 | Flutter | `lib/core/config/org_config.dart` | `'Guest'` in `membershipTypes` + `en`/`bn` label maps | Done |
-| Flutter | `lib/features/lookups/dropdown_service.dart` | `'Guest'` in the type list + option map | Done |
-| Flutter | `lib/screens/admin/fee_config_screen.dart` | `'Guest'` in the fee-tier `names` list | Done |
+| Flutter | `lib/features/lookups/dropdown_service.dart` | `'Guest'` in the type list + option map. In 84.77 the list was removed; an empty `MembershipType` group falls back to `MemberLabels.membershipTypeOptions` | Done (list removed 84.77) |
+| Flutter | `lib/screens/admin/fee_config_screen.dart` | `'Guest'` in the fee-tier `names` list. In 84.77 the tier labels moved to `memberLabelsProvider` | Done (labels moved 84.77) |
 | Flutter | `lib/core/constants/registration_constants.dart` | `MembershipConstants.typeOptions` **deleted** — tiers are admin-assigned only, so no registration screen offers them | Done 2026-08-22 (TODO 35.5, closes 28.21) |
 | Backend | `GHCAA.Application/DTOs/MemberRegistrationDto.cs` | `MembershipType` property **deleted** — the registration payload must not carry a tier | Done 2026-08-22 (TODO 35.5) |
 | Backend | `MemberService.RegisterAsync` | Assigns `OrgConfig.Workflow.DefaultMembershipType` (fallback `General`) to both the member and the registration-fee lookup; ignores anything a client sends | Done 2026-08-22 (TODO 35.5) |
@@ -223,7 +223,7 @@ A new `Guest` value was added to `MembershipType` enum. All three platforms must
 | Flutter | `lib/screens/auth/register_screen.dart` | Step-3 tier dropdown replaced by explanatory text | Done 2026-08-22 (TODO 35.5) |
 | Flutter | `lib/features/auth/register_wizard_provider.dart` | `membershipType` removed from model, ctor, `copyWith`, `data` map, `updateData` and submit payload | Done 2026-08-22 (TODO 35.5) |
 | Flutter | `lib/screens/member/profile_edit_screen.dart` (~L435) | Non-admins now get a **read-only** `Member Tier & Category` block (previously they saw nothing; the dropdown was admin-gated) | Done 2026-08-22 (TODO 35.5) |
-| Flutter | `lib/screens/member/directory_screen.dart` (~L199) | `'Guest'` in the `_buildFilterDropdown('TYPE', [...])` list | Done 2026-08-22 (TODO 28.21) |
+| Flutter | `lib/screens/member/directory_screen.dart` (~L199) | `'Guest'` in the `_buildFilterDropdown('TYPE', [...])` list. In 84.77 TYPE and CATEGORY read `MemberLabels` options and DEPT reads the `AcademicSubject` group | Done 2026-08-22 (TODO 28.21), list removed 84.77 |
 | Angular | `common/directory/directory.html` (~L61) | Membership-type filter now loops `MEMBERSHIP_TYPE_OPTIONS` (was a hardcoded list ending at Advisory, hiding Guest members) | Done 2026-08-22 (TODO 35.3) |
 | Angular | `member/digital-id/digital-id.ts:31` | Local label array deleted; delegates to `getMembershipTypeLabel` (index 6 read `'Life'`, so Guest printed "Life" on the ID card) | Done 2026-08-22 (TODO 35.1) |
 | Angular | `member/dashboard/dashboard.ts:83` | Same local map deleted; delegates to `getMembershipTypeLabel` | Done 2026-08-22 (TODO 35.2) |

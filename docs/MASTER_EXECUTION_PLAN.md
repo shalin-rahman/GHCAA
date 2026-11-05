@@ -36,7 +36,15 @@ It exits 1 when an open item is missing here or a closed one is still scheduled.
   was added as P2 the same day. The owner answered the six
   product questions from the same review on 2026-11-03; they became 84.65 to 84.69 (section 5,
   the owner gates).
-- **Next three items** once wave 1 is accepted, cheapest first as in the wave 2 table: 84.4 (web
+- **Owner order, 2026-11-05.** 84.77 (client option lists the server already holds) goes first,
+  ahead of the wave 2 table. The owner chose the approach the same day; the tracker item records
+  it. Its web, backend and mobile parts are done; the owner's `lookups.json` rows, the full mobile
+  test run and the four 'Life Member' goldens are left. 84.78 (a note that membership types come from the constitution) and 84.79 (date inputs
+  follow the configured format) come next. The book strict build is the last item of this run. It fails on three counts, each already an
+  item: stale repository counts (63.8, 384 commits quoted against 388 in the tree), chapters over
+  their page budgets (63.34), and 93 open placeholders in the chapter items 67.2, 67.3, 67.5 and
+  67.7. A placeholder closes only with a sourced number, never a guess.
+- **Next three items** after that, cheapest first as in the wave 2 table: 84.4 (web
   and mobile parity table), 93.3 (portal mobile nav e2e), 34.D7 (stale mobile goldens). 84.27
   (archive API tests and admin screen) follows. See section 4, the waves.
 - **Owner gates:** the owner answered every gate on 2026-11-02. What still needs the owner: the
@@ -89,7 +97,7 @@ work in the order the tracker's `Depends on` tags give.
 | E | Spec 023 delivery plan sessions F2 to F11 and N1, auth plan Part A and B4-B5. Order below. | 37.1m, 37.14o, 37.1p, 37.16e, 37.16f, 37.16g, 37.16h, 37.12y, 37.13f, 37.13g, 37.14a, 37.14d, 37.14f, 37.14m, 37.14n, 37.14t, 95.2, 95.4, 95.5, 95.12, 95.6, 84.42, 84.50 |
 | N1 | Non-election plan phase 1, release and environment blockers | 7.26, 7.28, 34.D8, 62.41, 84.48 |
 | N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.9, 84.18, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 84.55, 84.56, 84.57, 84.58, 84.60, 84.62, 84.68, 97.1 |
-| N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 84.61, 84.64, 84.67, 84.69, 84.73, 84.77, 93.3, 93.4, 96.3 |
+| N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 84.61, 84.64, 84.67, 84.69, 84.73, 84.77, 84.78, 84.79, 93.3, 93.4, 96.3 |
 | N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.71, 84.72, 84.19, 84.20, 84.59, 84.65, 84.66, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5 |
 | N5 | Phase 5, white-label profile and reusable modules | 62.2, 62.42, 62.56 |
 | N6 | Phase 6, performance and quality | 27.1, 27.8, 34.D7, 37.11, 51.4, 51.5, 84.63, 98.7 |
@@ -189,14 +197,16 @@ most of the time goes.
    Small items close early and a wave that runs short still ships something.
 3. **Size each item.** S is one file or one test file, M is one layer, L crosses layers or needs a
    migration. An L item gets its own wave, or is split, so it does not hold up the small ones.
-4. **Smallest test per item, full gates once per wave.** While working an item, run only its test
-   file (`dotnet test --filter`, one Vitest file, one flutter test file). Run
-   `ci-local.py --only <layer>` once per layer touched, and the full `ci-local.py` (and `--e2e`
-   only when a wave has e2e work) once at the end of the wave. The full run takes long; do not
-   repeat it per item.
+4. **Smallest test while working, layer suite before handback.** While working an item, run only its
+   test file (`dotnet test --filter`, one Vitest file, one flutter test file). Before handing the
+   item back, run the unit suite of each layer it touched, because an older test can still expect
+   the old behaviour. Run the full `ci-local.py` (and `--e2e` only when a wave has e2e work) once at
+   the end of the wave.
 5. **Reuse first.** Use the shared component, service, helper or script that already exists. No new
    abstraction or dependency unless two places need it now.
-6. **One review per wave.** One code-reviewer pass over the whole wave, then one fix pass.
+6. **Review before handback.** An M or L item gets one code-reviewer pass on its own diff before it
+   is reported done, and its findings are fixed then. The wave still gets one review at the end.
+   Fixing a finding before handback costs one pass; fixing it after costs a second round with the owner.
 7. **Cheaper model for mechanical work.** Doc tables, renames, golden refreshes and test boilerplate
    run on Sonnet or Haiku subagents. Opus is kept for cross-layer design and security review.
 8. **Batch the owner's work.** Collect every owner step a wave raises (visual checks, preprod checks,
@@ -242,9 +252,48 @@ Added after the wave 1 review on 2026-11-01. Each line is a mistake that review 
   spec task boxes and plan lists. Then only those places are checked, and the code is read again
   where they disagree. Standing rules carry no checkbox, since they never close.
 
+This list is closed. A finding from a later review does not get a line here. It goes to the
+cheapest place that stops the same kind of issue without anyone remembering it:
+
+1. **A check that runs by itself**, when a pattern can be detected in the code. Add one line to
+   `RULES` in `scripts/guard.py` and a case to `scripts/test_guard.py`. The guard reads only lines
+   added since HEAD, so old code never blocks it, and it runs as the first `ci-local.py --quick`
+   step. Examples: a literal date format in a template, a migration conflict with no target.
+2. **A path-scoped rule** in `.claude/rules/`, when it needs judgement but applies only to some
+   files. It loads when such a file is opened, for example zoneless signal rules for web components
+   or the rerun and rollback rules for migrations.
+3. **A question in the item brief**, when it is about scope or decisions and not about one kind of
+   file.
+
+The fix for a review finding is done only when the finding is fixed and it has been routed to one
+of these three places.
+
 <!-- backlog-check: on -->
 
 If a cost rule and the floor disagree, the floor wins.
+
+### Item brief (before code)
+
+An M or L item gets a short brief before any code. It goes in the tracker entry, a few lines long.
+It makes the build cheaper and leaves the review little to find, because questions are asked once
+and every place the change reaches is known up front.
+
+1. **Impact map.** One `graphify query` per changed value, type or route. List every reader: API,
+   web, mobile, seeds, migrations, specs, golden files and docs. Anything the item changes that is
+   missing from the list is the cause of later scope.
+2. **Decisions first.** Every choice that changes the result, such as wording, source of truth,
+   fallback and migration shape, goes to the owner in one question round before code. Nothing is
+   decided halfway through.
+3. **Break cases.** For each changed value, write down what breaks it: a late or async value (who
+   reads it, and when), partial input to a merge or fallback, null, empty, negative or out of range
+   input, a rerun of a migration and its rollback. Each one becomes a test.
+4. **Test list.** Name the test files to add and the existing tests that expect the old behaviour.
+5. **Rules check.** Name the rules that apply, such as config over constants, no seed JSON edits,
+   theme tokens and comment tone, so they are followed while writing and not found later.
+
+The brief is the exploration. Coding then reads only the files it names, which keeps token use low.
+Anything the brief did not foresee is a gap in the brief: note it in the list below, so the next
+brief asks for it.
 
 ### Wave 2 (proposed, starts after the owner reviews wave 1)
 
@@ -357,3 +406,7 @@ What counts as evidence:
 | 2026-11-05 | 84.74-84.76 (added) | Owner set the three gaps left open by 84.73 as P1; each checked in the code at the file and line the item names | `docs/TODO.md`, this file |
 | 2026-11-05 | 84.54, 84.74, 84.75, 84.76 (closed) | `event_gateway_sheet_test.dart` 5 of 5, `flutter analyze` clean; `nav.service.spec.ts` and `admin-layout.spec.ts` 33 of 33, type-check clean. FR-41 widened on the owner's choice | `events_screen.dart`, `financial_service.dart`, `gateway_service.dart`, `financial_portal_screen.dart`, `nav.service.ts`, `app.constants.ts`, both layouts, `admin-layout.scss`, `styles.scss`, `03-requirements.md`, specs 001 and 015 |
 | 2026-11-05 | 84.77 (added) | Owner asked whether client option lists should come from the server; checked in the code the same day | `docs/TODO.md`, this file |
+| 2026-11-05 | 84.77 (ordered first), 63.8, 63.34 (book last) | Owner set 84.77 next and the book strict build last, and chose the 84.77 approach | `docs/TODO.md`, this file, section 1 |
+| 2026-11-05 | 84.78, 84.79 (added) | Owner asked for the constitution note and for date inputs to follow the configured format; the date gaps checked in the code at the files the item names | `docs/TODO.md`, this file |
+| 2026-11-05 | 84.77 (part: web and backend) | Web type-check clean, `npm run test:unit` 986 of 986; backend migration and seed tests 27 of 28, the one failure waiting on the owner's `lookups.json` rows. Code review findings fixed the same day | `app.constants.ts`, `lookup.service.ts`, `org-config.service.ts`, register, profile, directory, admin-members, member-approval, org-config and their specs, `20261105120000_SeedJobCategoryLookups.cs`, `JobCategorySeedSyncTests.cs` |
+| 2026-11-06 | 84.77 (part: mobile) | `member_labels_test.dart` 13 of 13 and `directory_filters_test.dart` 3 of 3; full suite, analyze and goldens not run because drive C: is full | `member_labels.dart`, `dropdown_service.dart`, `lookup_service.dart`, `registration_constants.dart`, `register_wizard_provider.dart`, dashboard, directory, member details, profile edit, gatekeeper and fee config screens, four visual-test fakes |

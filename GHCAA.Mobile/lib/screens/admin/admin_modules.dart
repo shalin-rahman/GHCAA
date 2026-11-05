@@ -7,6 +7,7 @@ import '../../core/widgets/app_dropdown_field.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/registration_constants.dart';
 import '../../core/api/api_client.dart';
 import '../../features/lookups/dropdown_service.dart';
 import '../../core/config/app_config.dart';
@@ -216,7 +217,7 @@ class _AdminCommState extends ConsumerState<AdminCommunicationHub> {
   }
 
   Widget _buildTargetDropdown() {
-    final group = _targetMethod == 'batch' ? 'PassingYear' : 'MembershipType';
+    final group = _targetMethod == 'batch' ? LookupGroups.passingYear : LookupGroups.membershipType;
     return FutureBuilder<List<Map<String, String>>>(
       future: ref.read(dropdownDataProvider).getOptions(group),
       builder: (context, snapshot) {

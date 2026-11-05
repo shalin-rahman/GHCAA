@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../features/networking/networking_service.dart';
 import '../../features/lookups/dropdown_service.dart';
+import '../../features/lookups/member_labels.dart';
 import '../../core/config/app_config.dart';
 import '../../core/constants/registration_constants.dart';
 import '../../core/widgets/custom_network_image.dart';
@@ -132,6 +133,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final labels = ref.watch(memberLabelsProvider);
     return AppScaffold(
       title: 'Member Directory',
       breadcrumb: 'PORTAL > MEMBER DIRECTORY',
@@ -174,14 +176,14 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                     Expanded(
                       child: FutureBuilder<List<Map<String, String>>>(
                         future: ref.read(dropdownDataProvider).getOptions(LookupGroups.passingYear),
-                        builder: (context, snapshot) => _buildFilterDropdown('YEAR', snapshot.data?.map((e) => e['label']!).toList() ?? []),
+                        builder: (context, snapshot) => _buildFilterDropdown('YEAR', snapshot.data ?? const []),
                       ),
                     ),
                     const SizedBox(width: AppTheme.spaceS),
                     Expanded(
                       child: FutureBuilder<List<Map<String, String>>>(
-                        future: ref.read(dropdownDataProvider).getOptions('Subject'),
-                        builder: (context, snapshot) => _buildFilterDropdown('DEPT', snapshot.data?.map((e) => e['label']!).toList() ?? []),
+                        future: ref.read(dropdownDataProvider).getOptions(LookupGroups.academicSubject),
+                        builder: (context, snapshot) => _buildFilterDropdown('DEPT', snapshot.data ?? const []),
                       ),
                     ),
                   ],
@@ -190,13 +192,11 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                 Row(
                   children: [
                     Expanded(
-                      // 28.21: keep in sync with MembershipType in GHCAA.Domain/Enums.cs —
-                      // omitting a value here silently hides those members from the directory.
-                      child: _buildFilterDropdown('TYPE', ['General', 'Founding', 'Executive', 'Associate', 'Honorary', 'Advisory', 'Guest']),
+                      child: _buildFilterDropdown('TYPE', labels.membershipTypeOptions),
                     ),
                     const SizedBox(width: AppTheme.spaceS),
                     Expanded(
-                      child: _buildFilterDropdown('CATEGORY', ['LifelongPatron', 'Sponsor', 'Advisor', 'Mentor', 'Volunteer', 'Student']),
+                      child: _buildFilterDropdown('CATEGORY', labels.memberCategoryOptions),
                     ),
                   ],
                 ),
@@ -285,7 +285,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                                                           Container(
                                                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                                             decoration: BoxDecoration(color: AppTheme.royalGold.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(4)),
-                                                            child: Text(m['memberCategory']!.toString().toUpperCase(), style: const TextStyle(color: AppTheme.royalGold, fontSize: 7, fontWeight: FontWeight.w900)),
+                                                            child: Text(labels.memberCategory(m['memberCategory']).toUpperCase(), style: const TextStyle(color: AppTheme.royalGold, fontSize: 7, fontWeight: FontWeight.w900)),
                                                           ),
                                                       ],
                                                     ),
@@ -343,7 +343,8 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
   // The old version printed "HSC " for a member with no college record.
   String _getCompactBatch(Map<String, dynamic> m) => AppUtils.batchText(m);
  
-  Widget _buildFilterDropdown(String label, List<String> options) {
+  // Options are value and label pairs: the filter sends the value, the list shows the label.
+  Widget _buildFilterDropdown(String label, List<Map<String, String>> options) {
     final selected = label == 'YEAR'
         ? _selectedBatch
         : (label == 'DEPT'
@@ -354,7 +355,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
       hintText: label,
       items: [
         DropdownMenuItem<String?>(value: null, child: Text('ALL $label')),
-        ...options.map((o) => DropdownMenuItem<String?>(value: o, child: Text(o))),
+        ...options.map((o) => DropdownMenuItem<String?>(value: o['value'], child: Text(o['label'] ?? o['value'] ?? ''))),
       ],
       onChanged: (v) {
         setState(() {

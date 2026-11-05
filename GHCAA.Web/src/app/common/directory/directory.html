@@ -43,7 +43,7 @@
                 <label>Professional Sector</label>
                 <select [(ngModel)]="filters.sector" (change)="search()">
                     <option value="">All Sectors</option>
-                    @for (s of sectors; track s) {
+                    @for (s of sectors(); track s) {
                     <option [value]="s">{{ s }}</option>
                     }
                 </select>

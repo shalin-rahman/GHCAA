@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ghcaa_mobile/screens/auth/register_screen.dart';
 import 'package:ghcaa_mobile/features/auth/auth_service.dart';
 import 'package:ghcaa_mobile/features/auth/register_wizard_provider.dart';
+import 'package:ghcaa_mobile/core/constants/registration_constants.dart';
 import 'package:ghcaa_mobile/features/lookups/dropdown_service.dart';
 import 'package:ghcaa_mobile/features/files/file_service.dart';
 import 'package:ghcaa_mobile/core/storage/storage_service.dart';
@@ -24,6 +25,7 @@ import 'helpers/golden_test_utils.dart';
 // other visual-freeze files, which use zero or two) — kept local rather than
 // merged into helpers/fake_services.dart since it covers a different case.
 class _FakeDropdownService implements DropdownService {
+  @override Future<List<Map<String, String>>> getSubjectOptions(String? degree) => getOptions(LookupGroups.academicSubject);
   @override Future<List<Map<String, String>>> getOptions(String group) async => [
     {'value': '1', 'label': 'Option A', 'instructions': 'Instruction text'},
   ];

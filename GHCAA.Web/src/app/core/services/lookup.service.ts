@@ -1,8 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { API_ENDPOINTS, LOOKUP_GROUPS, MEMBERSHIP_TYPE_OPTIONS, PASSING_YEAR_FALLBACK } from '../constants/app.constants';
+import { Observable, forkJoin, of, throwError } from 'rxjs';
+import { catchError, map, shareReplay } from 'rxjs/operators';
+import {
+    API_ENDPOINTS, HSC_SUBJECT_GROUPS, LOOKUP_GROUPS,
+    getMemberCategoryOptions, getMembershipTypeOptions, PASSING_YEAR_FALLBACK, TSHIRT_SIZES
+} from '../constants/app.constants';
 import { getSilentHeaders } from '../utils/http.util';
 
 export interface LookupOption {
@@ -24,22 +27,6 @@ const LOOKUP_FALLBACKS: Record<string, LookupOption[]> = {
         { value: 'InactiveResigned', label: 'Inactive (Resigned)' },
         { value: 'Terminated', label: 'Terminated' }
     ],
-    [LOOKUP_GROUPS.MemberCategory]: [
-        { value: 'None', label: 'None' },
-        { value: 'LifelongPatron', label: 'Lifelong Patron' },
-        { value: 'Sponsor', label: 'Sponsor' },
-        { value: 'Advisor', label: 'Advisor' },
-        { value: 'Mentor', label: 'Mentor' },
-        { value: 'Recruiter', label: 'Recruiter' },
-        { value: 'Active', label: 'Active Member' },
-        { value: 'Volunteer', label: 'Volunteer' },
-        { value: 'Contributor', label: 'Contributor' },
-        { value: 'Guest', label: 'Guest' },
-        { value: 'Student', label: 'Student' }
-    ],
-    // Reuses MEMBERSHIP_TYPE_OPTIONS as-is (rather than retyping the same value/label pairs)
-    // since it's already the single source getMembershipTypeLabel() reads synchronously.
-    [LOOKUP_GROUPS.MembershipType]: MEMBERSHIP_TYPE_OPTIONS,
     [LOOKUP_GROUPS.Gender]: [
         { value: 'None', label: 'Not Specified' },
         { value: 'Male', label: 'Male' },
@@ -67,8 +54,29 @@ const LOOKUP_FALLBACKS: Record<string, LookupOption[]> = {
         { value: 'PublicSector', label: 'Govt. & Public Sector' },
         { value: 'Mentorship', label: 'Mentorship & Career Guidance' },
         { value: 'Other', label: 'Other Opportunities' }
-    ]
+    ],
+    [LOOKUP_GROUPS.TShirtSize]: TSHIRT_SIZES
 };
+
+// These two read the OrgConfig labels at the time of the call, so they are never stale.
+function fallbackFor(group: string): LookupOption[] {
+    if (group === LOOKUP_GROUPS.MemberCategory) return getMemberCategoryOptions();
+    if (group === LOOKUP_GROUPS.MembershipType) return getMembershipTypeOptions();
+    return LOOKUP_FALLBACKS[group] || [];
+}
+
+export interface AcademicData {
+    certificates: string[];
+    subjects: string[];
+    sectors: string[];
+}
+
+// The served AcademicSubject group has no HSC streams, so they go after 'None'. 'None' is added
+// even when the server omits it, because saved records use it for "no subject".
+function withHscGroups(subjects: string[]): string[] {
+    const rest = subjects.filter(s => s !== 'None' && !HSC_SUBJECT_GROUPS.includes(s));
+    return ['None', ...HSC_SUBJECT_GROUPS, ...rest];
+}
 
 function academicYearsFallback(): number[] {
     const { EARLIEST, FUTURE_YEARS, UTC_OFFSET_HOURS } = PASSING_YEAR_FALLBACK;
@@ -82,6 +90,9 @@ function academicYearsFallback(): number[] {
 })
 export class LookupService {
     private http = inject(HttpClient);
+    // One request per group per session. The web client has no lookup editor, so nothing here
+    // needs to clear it. A failed request is dropped so the next caller tries again.
+    private groupCache = new Map<string, Observable<any[]>>();
 
     getLookups(lookupGroup?: string, silent: boolean = false): Observable<any[]> {
         const url = lookupGroup ? `${API_ENDPOINTS.LOOKUPS}/${lookupGroup}` : API_ENDPOINTS.LOOKUPS;
@@ -89,18 +100,50 @@ export class LookupService {
         return this.http.get<any[]>(url, { headers });
     }
 
-    /** A lookup group as {value,label} options, falling back to LOOKUP_FALLBACKS if the group has no active rows. */
+    private cachedGroup(group: string): Observable<any[]> {
+        let cached = this.groupCache.get(group);
+        if (!cached) {
+            cached = this.getLookups(group, true).pipe(
+                catchError(err => {
+                    this.groupCache.delete(group);
+                    return throwError(() => err);
+                }),
+                shareReplay(1)
+            );
+            this.groupCache.set(group, cached);
+        }
+        return cached;
+    }
+
+    /** A lookup group as {value,label} options, falling back to fallbackFor if the group has no active rows. */
     getOptions(group: string): Observable<LookupOption[]> {
-        return this.getLookups(group, true).pipe(
+        return this.cachedGroup(group).pipe(
             map(items => (items && items.length)
                 ? items.map(i => ({ value: String(i.value), label: String(i.label) }))
-                : (LOOKUP_FALLBACKS[group] || []))
+                : fallbackFor(group))
         );
+    }
+
+    /** getOptions that also falls back when the request fails. */
+    getOptionsOrFallback(group: string): Observable<LookupOption[]> {
+        return this.getOptions(group).pipe(catchError(() => of(fallbackFor(group))));
+    }
+
+    getValues(group: string): Observable<string[]> {
+        return this.getOptionsOrFallback(group).pipe(map(options => options.map(o => o.value)));
+    }
+
+    getAcademicData(): Observable<AcademicData> {
+        return forkJoin({
+            certificates: this.getValues(LOOKUP_GROUPS.Degree),
+            subjects: this.getValues(LOOKUP_GROUPS.AcademicSubject).pipe(map(withHscGroups)),
+            sectors: this.getValues(LOOKUP_GROUPS.ProfessionalSector)
+        });
     }
 
     /** Passing-year list for academic history dropdowns, sourced from the PassingYear group. */
     getAcademicYears(): Observable<number[]> {
-        return this.getLookups(LOOKUP_GROUPS.PassingYear, true).pipe(
+        return this.cachedGroup(LOOKUP_GROUPS.PassingYear).pipe(
             map(items => (items && items.length)
                 ? items.map(i => Number(i.value)).filter(n => !isNaN(n))
                 : academicYearsFallback())

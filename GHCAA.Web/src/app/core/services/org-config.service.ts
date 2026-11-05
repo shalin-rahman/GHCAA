@@ -1,6 +1,6 @@
 import { Injectable, signal, inject, effect, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { API_ENDPOINTS, DEFAULT_DATE_FORMAT, normalizeDateFormat, DateFormat } from '../constants/app.constants';
+import { API_ENDPOINTS, DEFAULT_DATE_FORMAT, normalizeDateFormat, DateFormat, setOrgLabelMaps } from '../constants/app.constants';
 import { OrgConfig } from '../models/org-config.model';
 import { ORG_CONFIG_FALLBACK } from '../config/org-config-fallback.generated';
 import { tap, firstValueFrom } from 'rxjs';
@@ -19,6 +19,8 @@ export class OrgConfigService {
   );
 
   constructor() {
+    effect(() => setOrgLabelMaps(this.localePack()));
+
     // 1b: White-labeling — push tenant branding colors, and the gold tokens derived from
     // them, into the CSS custom properties styles.scss consumes, whenever config or the
     // light/dark theme changes. --accent-gold-dark/--tier-founding/--accent-text are AA

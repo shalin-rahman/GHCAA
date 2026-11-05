@@ -9,6 +9,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/api/api_client.dart';
 import '../../core/config/app_config.dart';
+import '../../features/lookups/member_labels.dart';
 
 class GatekeeperScreen extends ConsumerStatefulWidget {
   const GatekeeperScreen({super.key});
@@ -294,7 +295,9 @@ class _GatekeeperScreenState extends ConsumerState<GatekeeperScreen> {
                   _buildInfoRow('STATUS', m['status'] ?? 'N/A', isBold: true),
                   _buildInfoRow('BATCH', m['passingYear']?.toString() ?? 'N/A'),
                   _buildInfoRow('DEPARTMENT', m['subject'] ?? 'N/A'),
-                  _buildInfoRow('MEMBERSHIP', m['membershipType'] ?? 'N/A'),
+                  _buildInfoRow('MEMBERSHIP', m['membershipType'] == null
+                      ? 'N/A'
+                      : ref.watch(memberLabelsProvider).membershipType(m['membershipType'])),
                 ],
               ),
             ),

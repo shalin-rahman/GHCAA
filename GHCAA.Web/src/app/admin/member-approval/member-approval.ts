@@ -9,8 +9,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
-import { ACADEMIC_CERTIFICATES, ACADEMIC_SUBJECTS, PROFESSIONAL_SECTORS, getStatusLabel, getStatusClass } from '../../core/constants/app.constants';
-import { LookupService } from '../../core/services/lookup.service';
+import { getStatusLabel, getStatusClass } from '../../core/constants/app.constants';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
@@ -26,7 +25,6 @@ export class MemberApproval implements OnInit {
   private adminService = inject(AdminService);
   private router = inject(Router);
   private notify = inject(NotificationService);
-  private lookupService = inject(LookupService);
   private confirmDialog = inject(ConfirmDialogService);
 
   requests = signal<any[]>([]);
@@ -46,19 +44,12 @@ export class MemberApproval implements OnInit {
       (r.membershipNumber || '').toLowerCase().includes(q)
     );
   });
-  // 82.42: sourced from /lookups/PassingYear via LookupService, filled in ngOnInit.
-  years: number[] = [];
-  certificateOptions = ACADEMIC_CERTIFICATES;
-  subjectOptions = ACADEMIC_SUBJECTS;
-  sectorOptions = PROFESSIONAL_SECTORS;
-
   rejecting = signal(false);
   rejectionReason = '';
   processing = signal(false);
 
   ngOnInit() {
     this.loadMembers();
-    this.lookupService.getAcademicYears().subscribe(years => this.years = years);
   }
 
   loadMembers() {

@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { getPositionLabel, getCurrentECLabel, PROFESSIONAL_SECTORS, getBloodGroupName, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS, ADMIN_ROLE, SUPER_ADMIN_ROLE, ROUTES } from '../../core/constants/app.constants';
+import { getPositionLabel, getCurrentECLabel, getBloodGroupName, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS, ADMIN_ROLE, SUPER_ADMIN_ROLE, ROUTES } from '../../core/constants/app.constants';
 import { AuthService } from '../../core/services/auth.service';
 import { debounce } from '../../core/utils/debounce.util';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
@@ -62,7 +62,7 @@ export class Directory implements OnInit, OnDestroy {
     // 82.42: sourced from /lookups/{group} via LookupService, filled in ngOnInit.
     years = signal<number[]>([]);
     memberCategories = signal<LookupOption[]>([]);
-    sectors = PROFESSIONAL_SECTORS;
+    sectors = signal<string[]>([]);
     membershipTypes = signal<LookupOption[]>([]); // 62.33: sourced from LOOKUP_GROUPS.MembershipType, filled in ngOnInit
 
     selectedMember = signal<any | null>(null);
@@ -73,7 +73,7 @@ export class Directory implements OnInit, OnDestroy {
         return major && major !== 'None' ? `in ${major}` : '';
     }
 
-    // 'Unknown' is a real stored value for professionalSector (see PROFESSIONAL_SECTORS), so it
+    // 'Unknown' is a real stored value for professionalSector, so it
     // has to be treated as absent here or the directory renders "at Unknown" to the public.
     getProfessionDisplay(designation?: string, sector?: string): string {
         const clean = (v?: string) => {
@@ -106,6 +106,7 @@ export class Directory implements OnInit, OnDestroy {
         this.lookupService.getAcademicYears().subscribe(years => this.years.set(years));
         this.lookupService.getOptions(LOOKUP_GROUPS.MemberCategory).subscribe(opts => this.memberCategories.set(opts));
         this.lookupService.getOptions(LOOKUP_GROUPS.MembershipType).subscribe(opts => this.membershipTypes.set(opts));
+        this.lookupService.getValues(LOOKUP_GROUPS.ProfessionalSector).subscribe(list => this.sectors.set(list));
     }
 
     ngOnDestroy() {

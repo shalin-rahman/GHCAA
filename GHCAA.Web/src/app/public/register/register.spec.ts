@@ -43,7 +43,9 @@ describe('Register Component', () => {
 
         const lookupServiceMock = {
             getOptions: vi.fn().mockReturnValue(of([])),
-            getAcademicYears: vi.fn().mockReturnValue(of([]))
+            getAcademicYears: vi.fn().mockReturnValue(of([])),
+            getOptionsOrFallback: vi.fn().mockReturnValue(of([{ value: 'M', label: 'M' }])),
+            getAcademicData: vi.fn().mockReturnValue(of({ certificates: ['HSC'], subjects: ['None', 'Science', 'Physics'], sectors: ['Served Sector'] }))
         };
 
         await TestBed.configureTestingModule({
@@ -65,6 +67,14 @@ describe('Register Component', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('uses the served lookup lists and keeps HSC subjects to the streams', () => {
+        expect(component.certificateOptions()).toEqual(['HSC']);
+        expect(component.sectorOptions()).toEqual(['Served Sector']);
+        expect(component.tShirtOptions).toEqual([{ value: 'M', label: 'M' }]);
+        expect(component.getFilteredSubjects('HSC')).toEqual(['Science', 'Arts & Humanities', 'Business Studies']);
+        expect(component.getFilteredSubjects('BSc')).toEqual(['None', 'Physics']);
     });
 
     it('should navigate between all 4 steps', () => {

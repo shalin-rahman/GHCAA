@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/constants/registration_constants.dart';
 import '../../core/utils/app_utils.dart';
 
 // ── Typed model ─────────────────────────────────────────────────────────────
@@ -57,7 +58,7 @@ class RegisterModel {
     this.paymentProofPath,
     this.bloodGroup = 'APositive',
     this.dateOfBirth,
-    this.degree = 'HSC',
+    this.degree = AcademicConstants.hscDegree,
     this.subject,
     this.designation = '',
     this.hasAcceptedTerms = false,

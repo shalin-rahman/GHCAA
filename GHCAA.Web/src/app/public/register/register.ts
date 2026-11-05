@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
 import { PaymentPortalComponent } from '../../common/payment-portal/payment-portal.component';
 import { FinancialService } from '../../core/services/financial.service';
-import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, TSHIRT_SIZES, ROUTES, LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { IS_HSC, ensureValidAcademicData, TSHIRT_SIZES, ROUTES, LOOKUP_GROUPS, HSC_SUBJECT_GROUPS } from '../../core/constants/app.constants';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
@@ -60,17 +60,17 @@ export class Register implements OnDestroy {
   selectedPaymentMethod = signal<any>(null);
   registrationResult = signal<any>(null);
   private timerInterval: any;
-  ACADEMIC = ACADEMIC_DATA;
   IS_HSC = IS_HSC;
-  certificateOptions = this.ACADEMIC.certificates;
-  subjectOptions = this.ACADEMIC.subjects;
-  sectorOptions = this.ACADEMIC.sectors;
+  // Signals, because the app is zoneless and these arrive after the first render.
+  certificateOptions = signal<string[]>([]);
+  subjectOptions = signal<string[]>([]);
+  sectorOptions = signal<string[]>([]);
 
   // 82.42: sourced from /lookups/{group} via LookupService, filled in ngOnInit.
   years: number[] = [];
   bloodGroupOptions: LookupOption[] = [];
   genderOptions: LookupOption[] = [];
-  tShirtOptions = TSHIRT_SIZES;
+  tShirtOptions: LookupOption[] = TSHIRT_SIZES;
 
 
   model: any = {
@@ -104,12 +104,10 @@ export class Register implements OnDestroy {
   };
 
   getFilteredSubjects(degree: string) {
-    const hscClusters = ['Science', 'Arts & Humanities', 'Business Studies'];
     if (degree === 'HSC') {
-      return hscClusters;
+      return HSC_SUBJECT_GROUPS;
     }
-    // Return all subjects except the three general clusters
-    return this.subjectOptions.filter(s => !hscClusters.includes(s));
+    return this.subjectOptions().filter(s => !HSC_SUBJECT_GROUPS.includes(s));
   }
 
   addAcademic() {
@@ -141,6 +139,12 @@ export class Register implements OnDestroy {
     this.lookupService.getAcademicYears().subscribe(years => this.years = years);
     this.lookupService.getOptions(LOOKUP_GROUPS.BloodGroup).subscribe(opts => this.bloodGroupOptions = opts);
     this.lookupService.getOptions(LOOKUP_GROUPS.Gender).subscribe(opts => this.genderOptions = opts);
+    this.lookupService.getOptionsOrFallback(LOOKUP_GROUPS.TShirtSize).subscribe(opts => this.tShirtOptions = opts);
+    this.lookupService.getAcademicData().subscribe(data => {
+      this.certificateOptions.set(data.certificates);
+      this.subjectOptions.set(data.subjects);
+      this.sectorOptions.set(data.sectors);
+    });
   }
 
   loadRegistrationFee() {

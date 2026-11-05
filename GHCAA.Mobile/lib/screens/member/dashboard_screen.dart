@@ -14,6 +14,7 @@ import '../../core/services/app_localizations.dart';
 import '../../core/widgets/logo_spinner.dart';
 import '../../core/widgets/org_logo.dart';
 import '../../core/widgets/confirm_dialog.dart';
+import '../../features/lookups/member_labels.dart';
 
 // Persistent Layout State
 final dashboardLayoutProvider =
@@ -132,7 +133,8 @@ class DashboardScreen extends ConsumerWidget {
                       const SizedBox(height: AppTheme.spaceL),
 
                       // Compact variant of the profile banner.
-                      _buildMajesticBanner(context, fullName, profile, photoUrl),
+                      _buildMajesticBanner(context, fullName, profile, photoUrl,
+                          ref.watch(memberLabelsProvider)),
                       const SizedBox(height: AppTheme.spaceM),
                       _buildCompletenessCheck(context, profile),
                       const SizedBox(height: AppTheme.spaceL),
@@ -306,9 +308,17 @@ class DashboardScreen extends ConsumerWidget {
 
   Widget _buildMajesticBanner(
       BuildContext context,
-      String fullName, Map<String, dynamic>? profile, String? photoUrl) {
-    final membershipType = profile?['membershipType']?.toString() ?? 'MEMBER';
-    final membershipCategory = profile?['category']?.toString() ?? '';
+      String fullName, Map<String, dynamic>? profile, String? photoUrl,
+      MemberLabels labels) {
+    final rawType = profile?['membershipType'];
+    final membershipType =
+        rawType == null ? 'MEMBER' : labels.membershipType(rawType);
+    final categoryKey = MemberLabels.toKey(
+        profile?['category'], MemberEnumKeys.memberCategories);
+    final membershipCategory =
+        categoryKey == null || categoryKey == MemberEnumKeys.defaultMemberCategory
+            ? ''
+            : labels.memberCategories[categoryKey]!;
 
     return GlassContainer(
       padding: const EdgeInsets.all(AppTheme.spaceL),
@@ -363,8 +373,7 @@ class DashboardScreen extends ConsumerWidget {
                               fontSize: 9,
                               fontWeight: FontWeight.w900)),
                     ),
-                    if (membershipCategory.isNotEmpty &&
-                        membershipCategory != 'None') ...[
+                    if (membershipCategory.isNotEmpty) ...[
                       const SizedBox(width: AppTheme.spaceS),
                       Text(membershipCategory.toUpperCase(),
                           style: TextStyle(

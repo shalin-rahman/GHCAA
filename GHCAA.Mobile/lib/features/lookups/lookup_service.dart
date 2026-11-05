@@ -24,13 +24,13 @@ List<String> passingYearFallback([DateTime? nowUtc]) {
 }
 
 final batchListProvider = FutureProvider<List<String>>((ref) async {
-  final items = await ref.read(lookupServiceProvider).getByGroup('PassingYear');
+  final items = await ref.read(lookupServiceProvider).getByGroup(LookupGroups.passingYear);
   if (items.isEmpty) return passingYearFallback();
   return items.map((e) => e['value'].toString()).toList()..sort((a,b) => b.compareTo(a));
 });
 
 final sectorListProvider = FutureProvider<List<String>>((ref) async {
-  final items = await ref.read(lookupServiceProvider).getByGroup('ProfessionalSector');
+  final items = await ref.read(lookupServiceProvider).getByGroup(LookupGroups.professionalSector);
   return items.map((e) => e['value'].toString()).toList();
 });
 

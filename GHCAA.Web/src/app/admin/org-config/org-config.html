@@ -178,7 +178,7 @@
       <div class="form-group">
         <label>Default Membership Type</label>
         <select [(ngModel)]="config.workflow.defaultMembershipType" name="defaultMembershipType">
-          @for (type of membershipTypes; track type.value) {
+          @for (type of membershipTypes(); track type.value) {
           <option [value]="type.value">{{ type.label }}</option>
           }
         </select>

@@ -9,6 +9,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../features/admin/admin_service.dart';
+import '../../features/lookups/member_labels.dart';
 import '../../core/utils/app_utils.dart';
 import '../../core/services/org_config_service.dart';
 
@@ -105,6 +106,7 @@ class FeeConfigScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final configsAsync = ref.watch(feeConfigsProvider);
     final currency = ref.watch(orgCurrencyProvider);
+    final labels = ref.watch(memberLabelsProvider);
 
     return AppScaffold(
       isAdmin: true,
@@ -133,7 +135,7 @@ class FeeConfigScreen extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: GlassContainer(
                   child: ListTile(
-                    title: Text(_getMembershipTypeName(fee['membershipType']), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    title: Text(_getMembershipTypeName(labels, fee['membershipType']), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     subtitle: Text(_getCategoryName(fee['category']), style: const TextStyle(color: Colors.white54, fontSize: 11)),
                     trailing: Text(AppUtils.formatCurrency(fee['amount'], currency), style: const TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, fontSize: 18)),
                     onTap: () {
@@ -150,10 +152,9 @@ class FeeConfigScreen extends ConsumerWidget {
     );
   }
 
-  String _getMembershipTypeName(int type) {
-    const names = ['Founding', 'Executive', 'General', 'Associate', 'Honorary', 'Advisory', 'Guest'];
-    if (type >= 0 && type < names.length) return names[type].toUpperCase();
-    return 'UNKNOWN';
+  String _getMembershipTypeName(MemberLabels labels, Object? type) {
+    final key = MemberLabels.toKey(type, MemberEnumKeys.membershipTypes);
+    return key == null ? 'UNKNOWN' : labels.membershipTypes[key]!.toUpperCase();
   }
 
   String _getCategoryName(int cat) {

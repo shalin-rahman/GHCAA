@@ -24,7 +24,9 @@ describe('Profile Component', () => {
 
         const lookupServiceMock = {
             getOptions: vi.fn().mockReturnValue(of([])),
-            getAcademicYears: vi.fn().mockReturnValue(of([]))
+            getAcademicYears: vi.fn().mockReturnValue(of([])),
+            getOptionsOrFallback: vi.fn().mockReturnValue(of([{ value: 'M', label: 'M' }])),
+            getAcademicData: vi.fn().mockReturnValue(of({ certificates: ['HSC'], subjects: ['None'], sectors: ['Served Sector'] }))
         };
 
         await TestBed.configureTestingModule({
@@ -113,7 +115,7 @@ describe('Profile Component', () => {
                 providers: [
                     { provide: ProfileService, useValue: mock },
                     { provide: NotificationService, useValue: notificationServiceMock },
-                    { provide: LookupService, useValue: { getOptions: vi.fn().mockReturnValue(of([])), getAcademicYears: vi.fn().mockReturnValue(of([])) } }
+                    { provide: LookupService, useValue: { getOptions: vi.fn().mockReturnValue(of([])), getAcademicYears: vi.fn().mockReturnValue(of([])), getOptionsOrFallback: vi.fn().mockReturnValue(of([])), getAcademicData: vi.fn().mockReturnValue(of({ certificates: [], subjects: [], sectors: [] })) } }
                 ]
             });
             const f = TestBed.createComponent(Profile);

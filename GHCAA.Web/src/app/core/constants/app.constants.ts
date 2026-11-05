@@ -1,3 +1,5 @@
+import { signal } from '@angular/core';
+import { ORG_CONFIG_FALLBACK } from '../config/org-config-fallback.generated';
 import { ELECTION_PHASE_LABELS, NOMINATION_STATUS_LABELS } from '../models/election.models';
 
 // 82.44: the shared debounce delay for live search inputs (governance member search, directory,
@@ -49,7 +51,11 @@ export const LOOKUP_GROUPS = {
     Gender: 'Gender',
     BloodGroup: 'BloodGroup',
     JobCategory: 'JobCategory',
-    PassingYear: 'PassingYear'
+    PassingYear: 'PassingYear',
+    Degree: 'Degree',
+    AcademicSubject: 'AcademicSubject',
+    ProfessionalSector: 'ProfessionalSector',
+    TShirtSize: 'TShirtSize'
 } as const;
 
 export const DATE_FORMATS = {
@@ -100,33 +106,6 @@ export const MEMBERSHIP_STATUS_MAP: Record<string | number, { label: string, cla
     'Terminated': { label: 'Terminated', class: 'terminated' },
     4: { label: 'Terminated', class: 'terminated' }
 };
-
-export const MEMBERSHIP_TYPES = [
-    'Founding Member',
-    'Executive Member',
-    'General Member',
-    'Associate Member',
-    'Honorary Member',
-    'Advisory Member',
-    'Guest Member'
-];
-
-// Membership options moved to grouped section below
-
-
-export const MEMBER_CATEGORIES = [
-    'None',
-    'Lifelong Patron',
-    'Sponsor',
-    'Advisor',
-    'Mentor',
-    'Recruiter',
-    'Active',
-    'Volunteer',
-    'Contributor',
-    'Guest',
-    'Student'
-];
 
 export const BLOOD_GROUPS = [
     'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'
@@ -287,9 +266,60 @@ export function getStatusClass(status: string | number): string {
     return '';
 }
 
-export function getCategoryLabel(cat: string | number): string {
-    if (typeof cat === 'number') return MEMBER_CATEGORIES[cat] || 'None';
-    return cat || 'None';
+// Enum names in Enums.MemberCategory order, so an ordinal from the API maps to its key.
+const MEMBER_CATEGORY_KEYS = [
+    'None', 'LifelongPatron', 'Sponsor', 'Advisor', 'Mentor', 'Recruiter',
+    'Active', 'Volunteer', 'Contributor', 'Guest', 'Student'
+];
+
+// Enum names in Enums.MembershipType order.
+const MEMBERSHIP_TYPE_KEYS = ['Founding', 'Executive', 'General', 'Associate', 'Honorary', 'Advisory', 'Guest'];
+
+type LabelPack = { membershipTypeLabels?: Record<string, string>; memberCategoryLabels?: Record<string, string> } | null | undefined;
+
+// The labels come from OrgConfig. Until the server config loads, the build-time copy of the
+// profile pack is used, so there is no second hand-kept list of labels here.
+const FALLBACK_PACK: LabelPack = ORG_CONFIG_FALLBACK.localization?.locales?.['en'];
+
+// Merged per key, so a server pack that leaves out one label keeps the fallback for that key.
+function toLabelMaps(pack: LabelPack) {
+    return {
+        membershipType: { ...FALLBACK_PACK?.membershipTypeLabels, ...pack?.membershipTypeLabels } as Record<string, string>,
+        memberCategory: { ...FALLBACK_PACK?.memberCategoryLabels, ...pack?.memberCategoryLabels } as Record<string, string>
+    };
+}
+
+// A signal so a template or computed that read a label before the config arrived renders again.
+const orgLabelMaps = signal(toLabelMaps(FALLBACK_PACK));
+
+export function setOrgLabelMaps(pack: LabelPack): void {
+    orgLabelMaps.set(toLabelMaps(pack));
+}
+
+// An enum name, or an ordinal as a number or digit string. Out-of-range ordinals give undefined.
+function toEnumKey(value: string | number, keys: string[]): string | undefined {
+    if (typeof value === 'number') return keys[value];
+    return /^-?\d+$/.test(value) ? keys[parseInt(value, 10)] : value;
+}
+
+// Dropdown options with the live OrgConfig labels.
+export function getMembershipTypeOptions(): { value: string; label: string }[] {
+    const labels = orgLabelMaps().membershipType;
+    return MEMBERSHIP_TYPE_KEYS.map(value => ({ value, label: labels[value] || value }));
+}
+
+export function getMemberCategoryOptions(): { value: string; label: string }[] {
+    const labels = orgLabelMaps().memberCategory;
+    return MEMBER_CATEGORY_KEYS.map(value => ({ value, label: labels[value] || value }));
+}
+
+export function getCategoryLabel(cat: string | number | null | undefined): string {
+    const labels = orgLabelMaps().memberCategory;
+    const noneLabel = labels['None'] || 'None';
+    if (cat === null || cat === undefined || cat === '') return noneLabel;
+    const key = toEnumKey(cat, MEMBER_CATEGORY_KEYS);
+    if (!key) return noneLabel;
+    return labels[key] || key;
 }
 
 export function getArticleCategoryLabel(category: string | number | null | undefined): string {
@@ -431,16 +461,15 @@ export function getNominationStatusClass(status: string | null | undefined): str
     return NOMINATION_STATUS_CLASS_MAP[status] || '';
 }
 
-// Work Package 35: the single source for rendering a MembershipType. Accepts either the numeric
-// enum ordinal or the enum name, because the API sends both shapes depending on endpoint.
-// Never inline a copy of this list in a component — that is exactly how index 6 came to be
-// labelled 'Life' in two places while the enum's real member 6 is Guest (see TODO 35.1/35.2).
-// Returns the full display label ('Guest Member'), so templates must NOT append ' Member'.
+// Takes the enum ordinal or the name, because endpoints send both. The label comes from OrgConfig
+// and is already the full text ('Guest Member'), so templates must not append ' Member'.
 export function getMembershipTypeLabel(type: string | number | null | undefined): string {
-    if (type === null || type === undefined || type === '') return 'General';
-    if (typeof type === 'number') return MEMBERSHIP_TYPES[type] || 'General';
-    if (/^\d+$/.test(type)) return MEMBERSHIP_TYPES[parseInt(type, 10)] || 'General';
-    return MEMBERSHIP_TYPE_OPTIONS.find(o => o.value === type)?.label || type;
+    const labels = orgLabelMaps().membershipType;
+    const generalLabel = labels['General'] || 'General';
+    if (type === null || type === undefined || type === '') return generalLabel;
+    const key = toEnumKey(type, MEMBERSHIP_TYPE_KEYS);
+    if (!key) return generalLabel;
+    return labels[key] || key;
 }
 
 export function getBloodGroupName(bg: string | undefined | null): string {
@@ -449,16 +478,6 @@ export function getBloodGroupName(bg: string | undefined | null): string {
     return option ? option.label : bg;
 }
 
-// 82.42: MEMBERSHIP_STATUS_OPTIONS and MEMBER_CATEGORY_OPTIONS removed — admin-members.ts and
-// directory.ts now get these from LookupService.getOptions(LOOKUP_GROUPS.MembershipStatus /
-// .MemberCategory) instead of a local hardcoded copy.
-
-// 62.33: this is getMembershipTypeLabel's fallback source and LOOKUP_FALLBACKS' seed for
-// LOOKUP_GROUPS.MembershipType. Screens showing a membership-type picker or filter call
-// LookupService.getOptions(LOOKUP_GROUPS.MembershipType) instead of importing this array
-// directly, so a different institution's tier labels are a lookups-table change, not a
-// code change. This array only stays the values/labels getMembershipTypeLabel() reads
-// synchronously and the fallback getOptions() returns if the API has no seeded rows.
 // 95.3: why a committee term ended. Values must match Enums.VacancyReason on the API.
 export const VACANCY_REASON_OPTIONS = [
     { value: 'Died', label: 'Died' },
@@ -474,16 +493,6 @@ export const VACANCY_NOTE_MAX_LENGTH = 500;
 export function getVacancyReasonLabel(reason: string | null | undefined): string {
     return VACANCY_REASON_OPTIONS.find(o => o.value === reason)?.label || reason || '';
 }
-
-export const MEMBERSHIP_TYPE_OPTIONS = [
-    { value: 'Founding', label: 'Founding Member' },
-    { value: 'Executive', label: 'Executive Member' },
-    { value: 'General', label: 'General Member' },
-    { value: 'Associate', label: 'Associate Member' },
-    { value: 'Honorary', label: 'Honorary Member' },
-    { value: 'Advisory', label: 'Advisory Member' },
-    { value: 'Guest', label: 'Guest Member' }
-];
 
 export const FINANCIAL_CATEGORY_OPTIONS = [
     { value: 'MembershipFee', label: 'Yearly Membership Fee' },
@@ -506,67 +515,8 @@ export const LEDGER_CATEGORIES_BY_TYPE: Record<'Income' | 'Expense', string[]> =
     Expense: ['Event', 'Maintenance', 'Salary', 'Utilities', 'Refund', 'Other']
 };
 
-export const ACADEMIC_CERTIFICATES = [
-    'HSC',
-    'Bachelor (Pass)',
-    'Bachelor (Honours)',
-    'Masters',
-    'PGD',
-    'PhD',
-    'Medicine',
-    'Engineering',
-    'Law'
-];
-
-
-export const ACADEMIC_SUBJECTS = [
-    'None', 'Science', 'Arts & Humanities', 'Business Studies', 'Bengali', 'English', 'History', 'Islamic History & Culture',
-    'Philosophy', 'Islamic Studies', 'Library Science', 'Economics',
-    'Political Science', 'Sociology', 'Social Work', 'Anthropology',
-    'Public Administration', 'Physics', 'Chemistry', 'Mathematics',
-    'Statistics', 'Botany', 'Zoology', 'Geography & Environment',
-    'Psychology', 'Soil Science', 'Accounting', 'Management',
-    'Marketing', 'Finance & Banking', 'Fine Arts', 'Physical Education',
-    'Business Administration', 'Computer', 'Civil', 'Mechanical',
-    'Electrical', 'Medical', 'Dentestry', 'Engineering', 'Law',
-    'Pharma', 'Agriculture', 'Textile', 'Lather', 'Education'
-];
-
-export const PROFESSIONAL_SECTORS = [
-    'Ready-made Garments (RMG)',
-    'Textiles & Spinning',
-    'Pharmaceuticals',
-    'Banking & Financial Services',
-    'Information Technology (IT) & Software',
-    'Telecommunications',
-    'Agriculture & Crop Production',
-    'Fisheries & Aquaculture',
-    'Livestock & Poultry',
-    'Agro-processing & Food Production',
-    'Leather & Footwear',
-    'Jute & Jute Goods',
-    'Light Engineering',
-    'Electronics & Electrical Appliances',
-    'Real Estate & Housing',
-    'Construction & Infrastructure',
-    'Healthcare & Medical Services',
-    'Education & Research',
-    'Tourism & Hospitality',
-    'Power, Energy & Mineral Resources',
-    'Steel & Re-rolling',
-    'Cement',
-    'Ceramics',
-    'Chemicals & Fertilizers',
-    'Shipbuilding',
-    'Transportation & Logistics',
-    'Fast-Moving Consumer Goods (FMCG)',
-    'Paper & Printing',
-    'Plastic & Rubber Products',
-    'Insurance',
-    'Advertising & Media',
-    'Legal & Consultancy Services',
-    'Public Administration & Defense'
-];
+// Kept client-side: the server's AcademicGroup says 'Humanities', stored records say 'Arts & Humanities'.
+export const HSC_SUBJECT_GROUPS = ['Science', 'Arts & Humanities', 'Business Studies'];
 
 // 82.42: getAcademicYears() removed — every screen that used it now calls
 // LookupService.getAcademicYears() (sourced from the PassingYear lookup group) instead.
@@ -576,12 +526,6 @@ export const PROFESSIONAL_SECTORS = [
 export const PASSING_YEAR_FALLBACK = { EARLIEST: 1950, FUTURE_YEARS: 6, UTC_OFFSET_HOURS: 6 } as const;
 
 export const IS_HSC = (cert: string | undefined | null) => cert === 'HSC';
-
-export const ACADEMIC_DATA = {
-    certificates: ACADEMIC_CERTIFICATES,
-    subjects: ACADEMIC_SUBJECTS,
-    sectors: PROFESSIONAL_SECTORS
-};
 
 export const ensureValidAcademicData = (member: any) => {
     // Process AcademicHistory array (New LinkedIn style)

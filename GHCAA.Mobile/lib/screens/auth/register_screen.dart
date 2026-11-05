@@ -233,7 +233,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         _gap(),
         _buildAsyncDropdown(
           label: 'T-Shirt Size *',
-          group: 'TShirtSize',
+          group: LookupGroups.tShirtSize,
           value: state.data['TShirtSize'],
           onChanged: (v) => ref
               .read(registerWizardProvider.notifier)
@@ -261,7 +261,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   // ─── Step 2: Background & Milestones ─────────────────────────────────────
   Widget _buildStep2Background(BuildContext context, RegisterState state) {
-    final degree = state.data['Degree'] ?? 'HSC';
+    final degree = state.data['Degree'] ?? AcademicConstants.hscDegree;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -277,7 +277,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         _gap(),
         _buildAsyncDropdown(
           label: 'Degree Conferred *',
-          group: 'Degree',
+          group: LookupGroups.degree,
           value: degree,
           onChanged: (v) {
             ref.read(registerWizardProvider.notifier).updateData('Degree', v);
@@ -289,7 +289,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         _gap(),
         _buildAsyncDropdown(
           label: 'Major Cluster / Subject *',
-          group: degree == 'HSC' ? 'HSCSubject' : 'GeneralSubject',
+          options: ref.read(dropdownDataProvider).getSubjectOptions(degree),
           value: state.data['Subject'],
           onChanged: (v) => ref
               .read(registerWizardProvider.notifier)
@@ -298,7 +298,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         _gap(),
         _buildAsyncDropdown(
           label: 'Passing Year *',
-          group: 'PassingYear',
+          group: LookupGroups.passingYear,
           value: state.data['PassingYear']?.toString(),
           onChanged: (v) => ref
               .read(registerWizardProvider.notifier)
@@ -624,12 +624,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Widget _buildAsyncDropdown({
     required String label,
-    required String group,
+    String? group,
+    Future<List<Map<String, String>>>? options,
     String? value,
     required void Function(String?) onChanged,
   }) {
+    assert(group != null || options != null, 'pass a lookup group or the options');
     return FutureBuilder<List<Map<String, String>>>(
-      future: ref.read(dropdownDataProvider).getOptions(group),
+      future: options ?? ref.read(dropdownDataProvider).getOptions(group!),
       builder: (context, snapshot) {
         final options = snapshot.data ?? [];
         final validValue =

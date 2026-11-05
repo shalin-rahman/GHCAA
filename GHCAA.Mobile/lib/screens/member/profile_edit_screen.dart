@@ -13,6 +13,7 @@ import '../../core/widgets/logo_spinner.dart';
 import '../../features/auth/auth_service.dart';
 import '../../features/admin/admin_service.dart';
 import '../../features/lookups/dropdown_service.dart';
+import '../../features/lookups/member_labels.dart';
 import '../../features/files/file_service.dart';
 import '../../core/config/app_config.dart';
 import '../../core/constants/registration_constants.dart';
@@ -314,6 +315,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final memberLabels = ref.watch(memberLabelsProvider);
     if (!_initialized) {
       return const AppScaffold(child: Center(child: LogoSpinner(size: 120)));
     }
@@ -454,7 +456,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                               readOnly: _isInstitutionalAcademicRecord(i)),
                           const Divider(color: Colors.white10),
                           _buildHistoryDropdown('DEGREE', 'academicHistory', i,
-                              'degree', 'Degree'),
+                              'degree', LookupGroups.degree),
                           const Divider(color: Colors.white10),
                           _buildHistoryTextField(
                               'SUBJECT', 'academicHistory', i, 'subject'),
@@ -532,7 +534,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                               'professionalHistory', i, 'designation'),
                           const Divider(color: Colors.white10),
                           _buildHistoryDropdown('SECTOR', 'professionalHistory',
-                              i, 'sector', 'ProfessionalSector'),
+                              i, 'sector', LookupGroups.professionalSector),
                           const Divider(color: Colors.white10),
                           _buildHistoryTextField(
                               'LOCATION', 'professionalHistory', i, 'location'),
@@ -572,7 +574,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                   child: Column(
                     children: [
                       _buildDropdown('MEMBERSHIP TYPE', 'membershipType',
-                          'MembershipType'),
+                          LookupGroups.membershipType),
                       const Divider(color: Colors.white10),
                       _buildDropdown('SPECIAL CATEGORY', 'category',
                           LookupGroups.memberCategory),
@@ -587,10 +589,11 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 GlassContainer(
                   child: Column(
                     children: [
-                      _buildReadOnlyRow(
-                          'MEMBERSHIP TYPE', _data['membershipType']),
+                      _buildReadOnlyRow('MEMBERSHIP TYPE',
+                          _labelOrNull(_data['membershipType'], memberLabels.membershipType)),
                       const Divider(color: Colors.white10),
-                      _buildReadOnlyRow('SPECIAL CATEGORY', _data['category']),
+                      _buildReadOnlyRow('SPECIAL CATEGORY',
+                          _labelOrNull(_data['category'], memberLabels.memberCategory)),
                       const Padding(
                         padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
                         child: Text(
@@ -696,6 +699,10 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   }
 
   // 35.5: read-only field for values a member may see but not edit (e.g. membership tier).
+  // Keeps "Not assigned" for an empty value instead of the General or None label.
+  static String? _labelOrNull(dynamic value, String Function(Object?) toLabel) =>
+      (value == null || value.toString().isEmpty) ? null : toLabel(value);
+
   Widget _buildReadOnlyRow(String label, dynamic value) {
     final text = (value == null || value.toString().isEmpty)
         ? 'Not assigned'

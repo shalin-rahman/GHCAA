@@ -54,7 +54,8 @@ describe('AdminMembers Component', () => {
         };
         const lookupServiceMock = {
             getOptions: vi.fn().mockReturnValue(of([])),
-            getAcademicYears: vi.fn().mockReturnValue(of([]))
+            getAcademicYears: vi.fn().mockReturnValue(of([])),
+            getAcademicData: vi.fn().mockReturnValue(of({ certificates: ['HSC'], subjects: ['None'], sectors: ['Served Sector'] }))
         };
 
         await TestBed.configureTestingModule({

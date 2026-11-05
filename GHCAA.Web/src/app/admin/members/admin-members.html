@@ -571,7 +571,7 @@
                                         <label class="text-[10px]">Sector</label>
                                         <select [(ngModel)]="prof.sector" [disabled]="!isEditing()">
                                             <option value="" disabled selected>Select Sector</option>
-                                            @for (s of sectorOptions; track s) { <option [value]="s">{{ s }}</option> }
+                                            @for (s of sectorOptions(); track s) { <option [value]="s">{{ s }}</option> }
                                         </select>
                                     </div>
                                     <div class="grid grid-cols-2 gap-2">
@@ -815,7 +815,7 @@
 
 <!-- Shared Datalists -->
 <datalist id="years-list"> @for (y of yearsList(); track y) { <option [value]="y"></option> } </datalist>
-<datalist id="degree-list"> @for (d of degreeOptions; track d) { <option [value]="d"></option> } </datalist>
-<datalist id="sector-list"> @for (s of sectorOptions; track s) { <option [value]="s"></option> } </datalist>
+<datalist id="degree-list"> @for (d of degreeOptions(); track d) { <option [value]="d"></option> } </datalist>
+<datalist id="sector-list"> @for (s of sectorOptions(); track s) { <option [value]="s"></option> } </datalist>
 
-<datalist id="subject-list"> @for (s of subjectOptions; track s) { <option [value]="s"></option> } </datalist>
+<datalist id="subject-list"> @for (s of subjectOptions(); track s) { <option [value]="s"></option> } </datalist>

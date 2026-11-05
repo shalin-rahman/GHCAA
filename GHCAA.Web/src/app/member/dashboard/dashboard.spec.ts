@@ -10,7 +10,7 @@ import { NewsService } from '../../core/services/news.service';
 import { ElectionsService } from '../../core/services/elections.service';
 import { of } from 'rxjs';
 import { provideRouter } from '@angular/router';
-import { MEMBERSHIP_TYPES } from '../../core/constants/app.constants';
+import { getMembershipTypeOptions } from '../../core/constants/app.constants';
 
 describe('Dashboard Component', () => {
     let component: Dashboard;
@@ -117,7 +117,7 @@ describe('Dashboard Component', () => {
     });
 
     it('should label every MembershipType ordinal from the shared constant', () => {
-        expect(MEMBERSHIP_TYPES.map((_, i) => component.getMembershipType(i))).toEqual(MEMBERSHIP_TYPES);
+        expect(getMembershipTypeOptions().map((_, i) => component.getMembershipType(i))).toEqual(getMembershipTypeOptions().map(o => o.label));
     });
 });
 

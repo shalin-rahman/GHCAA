@@ -4,36 +4,11 @@ class AcademicConstants {
   // Bangladesh has no daylight saving, so a fixed offset gives the association's year.
   static const Duration associationUtcOffset = Duration(hours: 6);
 
-  static const List<String> certificates = [
-    'HSC',
-    'Bachelor (Pass)',
-    'Bachelor (Honours)',
-    'Masters',
-    'PGD',
-    'PhD',
-    'Medicine',
-    'Engineering',
-    'Law'
-  ];
+  static const String hscDegree = 'HSC';
 
-  static const List<String> hscSubjects = [
-    'Science',
-    'Arts & Humanities',
-    'Business Studies'
-  ];
-
-  static const List<String> generalSubjects = [
-    'Bengali', 'English', 'History', 'Islamic History & Culture',
-    'Philosophy', 'Islamic Studies', 'Library Science', 'Economics',
-    'Political Science', 'Sociology', 'Social Work', 'Anthropology',
-    'Public Administration', 'Physics', 'Chemistry', 'Mathematics',
-    'Statistics', 'Botany', 'Zoology', 'Geography & Environment',
-    'Psychology', 'Soil Science', 'Accounting', 'Management',
-    'Marketing', 'Finance & Banking', 'Fine Arts', 'Physical Education',
-    'Business Administration', 'Computer', 'Civil', 'Mechanical',
-    'Electrical', 'Medical', 'Dentestry', 'Engineering', 'Law',
-    'Pharma', 'Agriculture', 'Textile', 'Lather', 'Education'
-  ];
+  // HSC has streams, not subjects. The server's AcademicGroup enum says "Humanities", so these stay
+  // here as web keeps them in HSC_SUBJECT_GROUPS.
+  static const List<String> hscStreams = ['Science', 'Arts & Humanities', 'Business Studies'];
 }
 
 // 82.42: group names for DropdownService.getOptions(group) — these used to be repeated as
@@ -48,6 +23,11 @@ class LookupGroups {
   static const String bloodGroup = 'BloodGroup';
   static const String jobCategory = 'JobCategory';
   static const String passingYear = 'PassingYear';
+  static const String degree = 'Degree';
+  static const String academicSubject = 'AcademicSubject';
+  static const String professionalSector = 'ProfessionalSector';
+  static const String tShirtSize = 'TShirtSize';
+  static const String membershipType = 'MembershipType';
 }
 
 // Same rule as Constants.Nid on the API.
@@ -59,7 +39,7 @@ class MemberRules {
 class MembershipConstants {
   // 35.5 (closes 28.21): the registration tier list was deleted rather than completed with Guest.
   // Membership tiers are admin-assigned only, so no registration screen offers them; admin screens
-  // read the tiers from the API via DropdownService.getOptions('MembershipType').
+  // read the tiers through DropdownService.getOptions(LookupGroups.membershipType), which falls back to the OrgConfig labels.
 
   static const List<Map<String, String>> bloodGroupOptions = [
     {'value': 'APositive', 'label': 'A+'},

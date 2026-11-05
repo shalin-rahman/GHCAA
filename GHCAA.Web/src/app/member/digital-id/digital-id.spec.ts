@@ -6,7 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { of } from 'rxjs';
-import { MEMBERSHIP_TYPES } from '../../core/constants/app.constants';
+import { getMembershipTypeOptions } from '../../core/constants/app.constants';
 
 describe('DigitalId Component', () => {
     let component: DigitalId;
@@ -54,6 +54,6 @@ describe('DigitalId Component', () => {
     });
 
     it('should label every MembershipType ordinal from the shared constant', () => {
-        expect(MEMBERSHIP_TYPES.map((_, i) => component.getMembershipName(i))).toEqual(MEMBERSHIP_TYPES);
+        expect(getMembershipTypeOptions().map((_, i) => component.getMembershipName(i))).toEqual(getMembershipTypeOptions().map(o => o.label));
     });
 });

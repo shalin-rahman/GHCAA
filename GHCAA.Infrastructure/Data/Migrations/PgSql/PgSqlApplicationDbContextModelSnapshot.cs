@@ -3525,6 +3525,87 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Label = "EMAIL",
                             LookupGroup = "BroadcastChannel",
                             Value = "email"
+                        },
+                        new
+                        {
+                            Id = 5001,
+                            DisplayOrder = 1,
+                            IsActive = true,
+                            Label = "IT & Software Development",
+                            LookupGroup = "JobCategory",
+                            Value = "IT"
+                        },
+                        new
+                        {
+                            Id = 5002,
+                            DisplayOrder = 2,
+                            IsActive = true,
+                            Label = "Finance & Banking",
+                            LookupGroup = "JobCategory",
+                            Value = "Finance"
+                        },
+                        new
+                        {
+                            Id = 5003,
+                            DisplayOrder = 3,
+                            IsActive = true,
+                            Label = "Engineering & Construction",
+                            LookupGroup = "JobCategory",
+                            Value = "Engineering"
+                        },
+                        new
+                        {
+                            Id = 5004,
+                            DisplayOrder = 4,
+                            IsActive = true,
+                            Label = "Marketing & Sales",
+                            LookupGroup = "JobCategory",
+                            Value = "Marketing"
+                        },
+                        new
+                        {
+                            Id = 5005,
+                            DisplayOrder = 5,
+                            IsActive = true,
+                            Label = "Education & Research",
+                            LookupGroup = "JobCategory",
+                            Value = "Education"
+                        },
+                        new
+                        {
+                            Id = 5006,
+                            DisplayOrder = 6,
+                            IsActive = true,
+                            Label = "Healthcare & Pharma",
+                            LookupGroup = "JobCategory",
+                            Value = "Health"
+                        },
+                        new
+                        {
+                            Id = 5007,
+                            DisplayOrder = 7,
+                            IsActive = true,
+                            Label = "Govt. & Public Sector",
+                            LookupGroup = "JobCategory",
+                            Value = "PublicSector"
+                        },
+                        new
+                        {
+                            Id = 5008,
+                            DisplayOrder = 8,
+                            IsActive = true,
+                            Label = "Mentorship & Career Guidance",
+                            LookupGroup = "JobCategory",
+                            Value = "Mentorship"
+                        },
+                        new
+                        {
+                            Id = 5009,
+                            DisplayOrder = 9,
+                            IsActive = true,
+                            Label = "Other Opportunities",
+                            LookupGroup = "JobCategory",
+                            Value = "Other"
                         });
                 });
 

@@ -9,7 +9,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { getPositionLabel, getCurrentECRecord, getCurrentECPeriod, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, getBloodGroupName, LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { getPositionLabel, getCurrentECRecord, getCurrentECPeriod, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, getBloodGroupName, LOOKUP_GROUPS } from '../../core/constants/app.constants';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { EcPositionService, EcPosition } from '../../core/services/ec-position.service';
 import { DatePipe } from '@angular/common';
@@ -89,11 +89,11 @@ export class AdminMembers implements OnInit {
   membershipTypes = signal<LookupOption[]>([]);
   yearsList = signal<number[]>([]);
 
-  ACADEMIC = ACADEMIC_DATA;
   IS_HSC = IS_HSC;
-  degreeOptions = this.ACADEMIC.certificates;
-  subjectOptions = this.ACADEMIC.subjects;
-  sectorOptions = this.ACADEMIC.sectors;
+  // Signals, because the app is zoneless and these arrive after the first render.
+  degreeOptions = signal<string[]>([]);
+  subjectOptions = signal<string[]>([]);
+  sectorOptions = signal<string[]>([]);
 
   // PDF Export Config
   pdfHeaders = ['ID', 'Name', 'Email', 'Mobile', 'Batch', 'Status'];
@@ -137,6 +137,11 @@ export class AdminMembers implements OnInit {
       error: () => this.notify.error('Could not load committee positions.')
     });
     this.lookupService.getAcademicYears().subscribe(years => this.yearsList.set(years));
+    this.lookupService.getAcademicData().subscribe(data => {
+      this.degreeOptions.set(data.certificates);
+      this.subjectOptions.set(data.subjects);
+      this.sectorOptions.set(data.sectors);
+    });
   }
 
   loadECPeriods() {

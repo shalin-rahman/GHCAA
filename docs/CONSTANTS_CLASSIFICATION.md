@@ -50,8 +50,7 @@ No GHC-specific literal exists in `Constants.cs` — the file is already generic
 | `MEMBER_CATEGORIES`, `BLOOD_GROUPS`, `GENDERS`, `TSHIRT_SIZES`, `ARTICLE_CATEGORIES` | Technical | Same fallback-for-DB-lookup pattern as `LOOKUP_GROUPS` — generic reference data, not GHC-specific (blood groups and genders don't vary by institution). |
 | `POST_TYPE_TABS` | Technical | UI tab labels for the News/Notice merge (ADR-05); generic. |
 | `FINANCIAL_CATEGORY_OPTIONS` | Technical | Mirrors `Enums.FinancialCategory`; generic. |
-| `ACADEMIC_CERTIFICATES`, `ACADEMIC_SUBJECTS`, `ACADEMIC_DATA`, `IS_HSC`, `ensureValidAcademicData` | Organisation | HSC/SSC certificate levels and subject lists are specific to the Bangladeshi education system GHCAA's members come from. **Raise against WP62** — another institution (especially outside Bangladesh) needs a different certificate/subject taxonomy; today it's hardcoded assuming every deployment shares GHCAA's alumni background. |
-| `PROFESSIONAL_SECTORS` | Organisation | Same reasoning as academic data — a fixed, GHCAA-context sector list. Lower priority than academic data (sectors generalize better across institutions) but still worth a WP62 profile-pack field if this codebase is reused elsewhere. |
+| `IS_HSC`, `ensureValidAcademicData` | Organisation | The HSC check and its three streams stay on the client. The degree, subject and sector lists were removed in 84.77 and now come from the `Degree`, `AcademicSubject` and `ProfessionalSector` lookup groups, so an admin can change them without a release. Only the HSC streams remain to raise against WP62. |
 | `ROUTES`, `API_ENDPOINTS` | Technical | Application routing/API contract, not organisation data. |
 
 ## GHCAA.Mobile/lib/core/constants/app_constants.dart — read for classification only, not edited (Flutter is out of scope for this change)
@@ -67,16 +66,15 @@ No GHC-specific literal exists in `Constants.cs` — the file is already generic
 | Group | Classification | Reason |
 | --- | --- | --- |
 | `LookupGroups` (membershipStatus, userStatus, ...) | Technical | Names of server-backed lookup groups, mirrors the web `LOOKUP_GROUPS` row above — generic. |
-| `AcademicConstants` (certificates, hscSubjects, generalSubjects) | Organisation | Same Bangladeshi-education-system dependency as the web `ACADEMIC_*` constants. **Raise against WP62** together with the web-side entry — this is the same data duplicated per client, which is itself a cross-platform duplication REVIEW.md §25.6 would also flag, so the WP62 fix (move to `OrganizationConfig`/profile pack) closes both gaps at once. |
+| `AcademicConstants` (hscDegree, hscStreams, passing-year bounds) | Organisation | The certificate and subject lists were removed in 84.77. Mobile now reads `Degree`, `AcademicSubject` and `ProfessionalSector` from the lookup service, and member type and category labels from `MemberLabels` (OrgConfig pack, then the build-time pack). The HSC streams are the one list left, the same as the web `IS_HSC` row. |
 | `MembershipConstants.bloodGroupOptions` | Technical | Same reasoning as the web `BLOOD_GROUPS` row — generic reference data. |
 
 ## Summary: items to raise against Work Package 62
 
 1. `EC_ROLES` / `EC_ROLES_OPTIONS` (web) — Executive Committee role names.
 2. `DEVELOPER_INFO` (web) — hardcoded personal attribution.
-3. `ACADEMIC_CERTIFICATES` / `ACADEMIC_SUBJECTS` / `ACADEMIC_DATA` (web) and `AcademicConstants`
-   (mobile) — Bangladeshi education-system taxonomy, duplicated across both clients.
-4. `PROFESSIONAL_SECTORS` (web) — GHCAA-context sector list, lower priority.
+3. The HSC streams (web `IS_HSC` handling, mobile `AcademicConstants.hscStreams`). The degree,
+   subject and sector lists moved to server lookup groups in 84.77 and no longer need this item.
 
 Everything else in scope classifies as technical, policy, or an already-correct WP28 fallback and
 needs no new configuration mechanism, consistent with REVIEW.md §25.8's instruction not to move

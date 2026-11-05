@@ -13,6 +13,7 @@ import '../../features/auth/auth_service.dart';
 import '../../features/admin/admin_service.dart';
 import '../../features/networking/mentorship_service.dart';
 import '../../features/files/file_service.dart';
+import '../../features/lookups/member_labels.dart';
 import '../../core/widgets/logo_spinner.dart';
 
 final isAdminProvider = FutureProvider.autoDispose<bool>((ref) async {
@@ -152,7 +153,8 @@ class _MemberDetailsScreenState extends ConsumerState<MemberDetailsScreen> {
             alignment: WrapAlignment.center,
             children: [
               if (profile['membershipType'] != null)
-                _buildChip(profile['membershipType'], Colors.lightGreenAccent, Colors.lightGreen),
+                _buildChip(ref.watch(memberLabelsProvider).membershipType(profile['membershipType']),
+                    Colors.lightGreenAccent, Colors.lightGreen),
               if (profile['categoryBadge'] != null)
                 _buildChip(profile['categoryBadge'], Colors.blueAccent, Colors.blue),
               if (profile['bloodGroup'] != null)

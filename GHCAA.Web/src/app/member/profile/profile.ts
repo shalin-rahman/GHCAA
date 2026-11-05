@@ -7,7 +7,7 @@ import { ProfileService } from '../../core/services/profile.service';
 import { MemberProfile } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
-import { getPositionLabel, getCurrentECLabel, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, getBloodGroupName, TSHIRT_SIZES, LOOKUP_GROUPS } from '../../core/constants/app.constants';
+import { getPositionLabel, getCurrentECLabel, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, getBloodGroupName, TSHIRT_SIZES, LOOKUP_GROUPS } from '../../core/constants/app.constants';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { DatePipe } from '@angular/common';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
@@ -47,17 +47,17 @@ export class Profile implements OnInit {
     private photoFile: File | null = null;
     private signatureFile: File | null = null;
     profile: any = {};
-    ACADEMIC = ACADEMIC_DATA;
     IS_HSC = IS_HSC;
-    degreeOptions = this.ACADEMIC.certificates;
-    subjectOptions = this.ACADEMIC.subjects;
-    sectorOptions = this.ACADEMIC.sectors;
+    // Signals, because the app is zoneless and these arrive after the first render.
+    degreeOptions = signal<string[]>([]);
+    subjectOptions = signal<string[]>([]);
+    sectorOptions = signal<string[]>([]);
 
     // 82.42: sourced from /lookups/{group} via LookupService, filled in ngOnInit.
     yearsList: number[] = [];
     genderOptions: LookupOption[] = [];
     bloodGroupOptions: LookupOption[] = [];
-    tShirtOptions = TSHIRT_SIZES;
+    tShirtOptions: LookupOption[] = TSHIRT_SIZES;
 
     ngOnInit() {
         this.profileService.getProfile().subscribe({
@@ -70,6 +70,12 @@ export class Profile implements OnInit {
         this.lookupService.getAcademicYears().subscribe(years => this.yearsList = years);
         this.lookupService.getOptions(LOOKUP_GROUPS.Gender).subscribe(opts => this.genderOptions = opts);
         this.lookupService.getOptions(LOOKUP_GROUPS.BloodGroup).subscribe(opts => this.bloodGroupOptions = opts);
+        this.lookupService.getOptionsOrFallback(LOOKUP_GROUPS.TShirtSize).subscribe(opts => this.tShirtOptions = opts);
+        this.lookupService.getAcademicData().subscribe(data => {
+            this.degreeOptions.set(data.certificates);
+            this.subjectOptions.set(data.subjects);
+            this.sectorOptions.set(data.sectors);
+        });
     }
 
     // 29D.8: Single normalization path for a profile response (case-insensitive property
@@ -189,7 +195,7 @@ export class Profile implements OnInit {
     }
 
     getAvailableSubjects(degree: string): string[] {
-        return this.subjectOptions;
+        return this.subjectOptions();
     }
 
     getMajorDisplay(degree: string, subject: string): string {

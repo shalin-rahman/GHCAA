@@ -64,6 +64,7 @@ import 'package:ghcaa_mobile/screens/admin/ledger_screen.dart';
 import 'package:ghcaa_mobile/screens/admin/permissions_matrix_screen.dart';
 import 'package:ghcaa_mobile/screens/admin/theme_management_screen.dart';
 
+import 'package:ghcaa_mobile/core/constants/registration_constants.dart';
 import 'package:ghcaa_mobile/features/lookups/dropdown_service.dart';
 import 'package:ghcaa_mobile/features/files/file_service.dart';
 import 'package:ghcaa_mobile/features/networking/networking_service.dart';
@@ -93,6 +94,9 @@ import 'helpers/golden_test_utils.dart';
 // reply text differs from full_app's) are only used here, so they stay local
 // instead of moving into helpers/fake_services.dart.
 class FakeDropdownService implements DropdownService {
+  @override
+  Future<List<Map<String, String>>> getSubjectOptions(String? degree) => getOptions(LookupGroups.academicSubject);
+
   @override
   Future<List<Map<String, String>>> getOptions(String group) async {
     return [

@@ -87,7 +87,8 @@
       "Bash(pwsh -v)",
       "Bash(powershell.exe -NoProfile -Command '$bad=0; Get-ChildItem \"GHCAA.Tools\\\\*.ps1\" | % { $e=$null; [void][System.Management.Automation.Language.Parser]::ParseFile\\($_.FullName,[ref]$null,[ref]$e\\); if\\($e.Count\\){$bad++; \"$\\($_.Name\\): $\\($e[0].Message\\)\"} else {\"ok $\\($_.Name\\)\"} }')",
       "PowerShell(python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md)",
-      "PowerShell(graphify update .)"
+      "PowerShell(graphify update .)",
+      "PowerShell(graphify update . 2>$null)"
     ],
     "additionalDirectories": [
       "C:\\Users\\HabiburRahmanShalin\\workstation\\shaleen\\shalin\\GHC\\Application\\GHCAA\\013-*",
