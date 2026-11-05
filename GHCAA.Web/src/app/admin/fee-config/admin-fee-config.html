@@ -99,15 +99,13 @@
 
                 <div class="form-group">
                     <label>Effective Date *</label>
-                    <input type="text" formControlName="effectiveDate"
-                        placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
-                        [class.border-red-500]="form.get('effectiveDate')?.invalid && form.get('effectiveDate')?.touched">
+                    <app-date-input formControlName="effectiveDate"
+                        [class.border-red-500]="form.get('effectiveDate')?.invalid && form.get('effectiveDate')?.touched"></app-date-input>
                 </div>
 
                 <div class="form-group">
                     <label>Expiry Date</label>
-                    <input type="text" formControlName="effectiveTo" 
-                        placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
+                    <app-date-input formControlName="effectiveTo"></app-date-input>
                 </div>
                 <div class="form-group full">
                     <label>Description/Internal Note</label>

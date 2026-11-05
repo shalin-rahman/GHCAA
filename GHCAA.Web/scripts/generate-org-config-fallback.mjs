@@ -143,7 +143,8 @@ function buildFallback(cfg) {
             defaultMembershipType: cfg.Workflow.DefaultMembershipType,
             adminEmailOnNewRegistration: !!cfg.Workflow.AdminEmailOnNewRegistration,
             notificationChannel: cfg.Workflow.NotificationChannel,
-            newsImageUploadsPerDay: cfg.Workflow.NewsImageUploadsPerDay ?? 20
+            newsImageUploadsPerDay: cfg.Workflow.NewsImageUploadsPerDay ?? 20,
+            credentialValidityMonths: cfg.Workflow.CredentialValidityMonths ?? 12
         },
         localization: {
             dateFormat: cfg.Localization?.DateFormat,

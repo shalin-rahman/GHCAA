@@ -7,6 +7,7 @@ import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel'
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { ORG_CONFIG_FALLBACK } from '../../core/config/org-config-fallback.generated';
 import { DATE_FORMATS, DATE_FORMAT_LABELS, DEFAULT_DATE_FORMAT, getMembershipTypeOptions } from '../../core/constants/app.constants';
+import { CREDENTIAL_VALIDITY_MONTHS_MAX } from '../../core/constants/app.constants';
 import {
   DEFAULT_ELECTION_SETTINGS, ELECTION_APPROVAL_ACTIONS, ELECTION_APPROVAL_ACTION_LABELS,
   ELECTION_CANDIDATE_ORDERS, ELECTION_PRINT_MODES, ElectionApprovalAction
@@ -49,6 +50,7 @@ export class AdminOrgConfig implements OnInit {
   readonly emailProviders = ['Gmail', 'Brevo'];
   // Same list LookupService serves for LOOKUP_GROUPS.MembershipType. The server refuses any other name.
   readonly membershipTypes = getMembershipTypeOptions;
+  readonly maxCredentialValidityMonths = CREDENTIAL_VALIDITY_MONTHS_MAX;
 
   // Example text for the empty-state placeholder only — sourced from this build's own
   // institution profile pack, not hardcoded to GHC/BDT, so a different profile's build
@@ -122,6 +124,11 @@ export class AdminOrgConfig implements OnInit {
           ...this.config.contact,
           phoneNumbers: this.config.contact.phoneNumbers.map(p => p.trim()).filter(Boolean)
         },
+        workflow: {
+          ...this.config.workflow,
+          // A cleared box means no expiry. The server field is not nullable, so send 0.
+          credentialValidityMonths: Number(this.config.workflow.credentialValidityMonths) || 0
+        },
         localization: {
           ...JSON.parse(this.localizationJson),
           dateFormat: this.config.localization?.dateFormat ?? 'dd-MM-yyyy'
@@ -143,6 +150,7 @@ export class AdminOrgConfig implements OnInit {
     this.config.workflow.notificationChannel ??= 'Both';
     this.config.workflow.emailProvider ??= null;
     this.config.workflow.newsImageUploadsPerDay ??= 20;
+    this.config.workflow.credentialValidityMonths ??= ORG_CONFIG_FALLBACK.workflow.credentialValidityMonths;
     this.config.elections = { ...structuredClone(DEFAULT_ELECTION_SETTINGS), ...this.config.elections };
     this.config.localization ??= { dateFormat: DEFAULT_DATE_FORMAT, locales: {} };
     this.config.localization.dateFormat ??= DEFAULT_DATE_FORMAT;

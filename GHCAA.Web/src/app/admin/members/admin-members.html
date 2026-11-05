@@ -262,8 +262,7 @@
 
                 <div class="form-group">
                     <label for="admember-dateOfBirth">Date of Birth</label>
-                    <input id="admember-dateOfBirth" type="text" [(ngModel)]="selectedMember().dateOfBirth" [readonly]="!isEditing()"
-                        placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
+                    <app-date-input inputId="admember-dateOfBirth" [(ngModel)]="selectedMember().dateOfBirth" [readonly]="!isEditing()"></app-date-input>
                 </div>
                 <div class="form-group">
                     <label>National ID (NID)</label>
@@ -577,9 +576,8 @@
                                     <div class="grid grid-cols-2 gap-2">
                                         <div class="form-group">
                                             <label class="text-[10px]">Start Date</label>
-                                            <input type="text" [(ngModel)]="prof.startDate"
-                                                [readonly]="!isEditing()"
-                                                placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
+                                            <app-date-input [(ngModel)]="prof.startDate"
+                                                [readonly]="!isEditing()"></app-date-input>
                                         </div>
                                         <div class="flex items-end flex-1">
                                             <label class="premium-checkbox-label mb-2">
@@ -647,13 +645,11 @@
                                     <div class="grid grid-cols-2 gap-2">
                                         <div class="form-group">
                                             <label class="text-[10px]">Start Date</label>
-                                            <input type="text" [(ngModel)]="h.startDate"
-                                                placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
+                                            <app-date-input [(ngModel)]="h.startDate"></app-date-input>
                                         </div>
                                         <div class="form-group">
                                             <label class="text-[10px]">End Date</label>
-                                            <input type="text" [(ngModel)]="h.endDate"
-                                                placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
+                                            <app-date-input [(ngModel)]="h.endDate"></app-date-input>
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-2 gap-2">

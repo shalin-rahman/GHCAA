@@ -23,12 +23,11 @@
                 </div>
                 <div class="form-group">
                     <label>Event Date <span class="required-star">*</span></label>
-                    <input type="text" [(ngModel)]="newGallery.eventDate" name="date" required #dateInput="ngModel"
-                        placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
-                        [class.border-red-500]="dateInput.invalid && dateInput.touched">
+                    <app-date-input [(ngModel)]="newGallery.eventDate" name="date" required #dateInput="ngModel" #datePick="appDateInput"
+                        [class.border-red-500]="dateInput.invalid && dateInput.touched"></app-date-input>
                     <div *ngIf="dateInput.touched && dateInput.invalid" class="text-[10px] text-red-500 mt-1">
                         <span *ngIf="dateInput.errors?.['required']">Date is required.</span>
-                        <span *ngIf="dateInput.errors?.['pattern']">Use format: dd-mm-yyyy</span>
+                        <span *ngIf="dateInput.errors?.['pattern']">Use format: {{ datePick.placeholder() }}</span>
                     </div>
                 </div>
                 <div class="form-group">

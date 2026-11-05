@@ -155,6 +155,10 @@ namespace GHCAA.Application.DTOs
         public string? EmailProvider { get; init; }
         // News image uploads one account may make per UTC day (TODO 84.28). Below 1 means no limit.
         public int NewsImageUploadsPerDay { get; init; } = 20;
+        // 84.60. Months a newly issued ID card or certificate stays valid; 0 means it never expires.
+        // Not nullable: the stored JSON drops nulls, so a null would read back as the default.
+        [System.ComponentModel.DataAnnotations.Range(0, Constants.Credentials.MaxValidityMonths)]
+        public int CredentialValidityMonths { get; init; } = Constants.Credentials.DefaultValidityMonths;
     }
 
     public record LocalizationDto

@@ -79,7 +79,8 @@
     "DefaultMembershipType": "General",
     "AdminEmailOnNewRegistration": true,
     "NotificationChannel": "Both",
-    "NewsImageUploadsPerDay": 20
+    "NewsImageUploadsPerDay": 20,
+    "CredentialValidityMonths": 12
   },
   "Localization": {
     "DateFormat": "dd-MM-yyyy",

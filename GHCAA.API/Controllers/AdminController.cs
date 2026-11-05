@@ -80,6 +80,13 @@ namespace GHCAA.API.Controllers
             return Ok(docs);
         }
 
+        [HttpGet("members/{id}/credentials")]
+        public async Task<IActionResult> GetCredentials(int id, CancellationToken cancellationToken)
+        {
+            var credentials = await _idCardService.GetMemberCredentialsAsync(id, cancellationToken);
+            return credentials == null ? NotFound() : Ok(credentials);
+        }
+
         [HttpPost("members/{id}/approve")]
         public async Task<IActionResult> ApproveMember(int id, [FromBody] ApproveMemberDto dto, CancellationToken cancellationToken)
         {

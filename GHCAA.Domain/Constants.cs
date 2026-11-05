@@ -450,6 +450,16 @@ namespace GHCAA.Domain
             public static readonly string[] KeptActivityTypes = [Deploy.AllowedOriginsChangedAuditType];
         }
 
+        // ID cards and certificates (spec 013).
+        public static class Credentials
+        {
+            public const int DefaultValidityMonths = 12;
+            public const int MaxValidityMonths = 600;
+            public const int ReasonMaxLength = 500;
+            public const string RevokedAuditType = "CredentialRevoked";
+            public const string ReissuedAuditType = "CredentialReissued";
+        }
+
         public static class Governance
         {
             // 95.3: longest note an admin can give when a committee term ends.
@@ -504,6 +514,25 @@ namespace GHCAA.Domain
         {
             public const int DefaultPageSize = 20;
             public const int MaxPageSize = 100;
+        }
+
+        // Spec 028 (84.71): comment threads on polls and meetings, stored as forum topics with a context.
+        public static class Discussion
+        {
+            public const string ContextPoll = "Poll";
+            public const string ContextMeeting = "Meeting";
+            public const int MaxCommentLength = 2000;
+            public const int DefaultPageSize = 50;
+            public const string CategoryLookupGroup = "DiscussionCategory";
+            public const string DefaultCategory = "Other";
+
+            public static class AuditTypes
+            {
+                public const string CommentRemoved = "DiscussionCommentRemoved";
+                public const string ThreadLocked = "DiscussionThreadLocked";
+                public const string ThreadUnlocked = "DiscussionThreadUnlocked";
+                public const string CommentsSwitched = "DiscussionCommentsSwitched";
+            }
         }
 
         // 84.45: machine-readable codes on ProblemDetails.Extensions["code"], for clients that need

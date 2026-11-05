@@ -20,8 +20,11 @@ namespace GHCAA.Infrastructure.Data.Configurations
                 .HasForeignKey(t => t.AuthorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Filter out deleted/inactive and topics where author is archived
-            builder.HasQueryFilter(t => t.IsActive && t.Category!.IsActive && (t.Author == null || !t.Author.IsArchived));
+            // One thread per poll or meeting. Forum topics leave both columns null, which the index allows.
+            builder.HasIndex(t => new { t.ContextType, t.ContextId }).IsUnique();
+
+            // Filter out deleted/inactive and topics where author is archived. A context thread has no category.
+            builder.HasQueryFilter(t => t.IsActive && (t.CategoryId == null || t.Category!.IsActive) && (t.Author == null || !t.Author.IsArchived));
         }
     }
 }

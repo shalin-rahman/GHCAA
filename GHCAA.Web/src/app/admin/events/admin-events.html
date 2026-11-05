@@ -71,15 +71,15 @@
                     </div>
                     <div class="form-group border-r border-white/5 pr-4">
                         <label>Start Date & Time <span class="text-red-500">*</span></label>
-                        <input type="datetime-local" formControlName="startDate"
-                            [class.border-red-500]="eventForm.get('startDate')?.invalid && eventForm.get('startDate')?.touched">
+                        <app-date-input withTime formControlName="startDate" ariaLabel="Start date"
+                            [class.border-red-500]="eventForm.get('startDate')?.invalid && eventForm.get('startDate')?.touched"></app-date-input>
                         <div *ngIf="eventForm.get('startDate')?.invalid && eventForm.get('startDate')?.touched"
                             class="text-[9px] text-red-500 font-bold uppercase mt-1">Start date is required</div>
                     </div>
                     <div class="form-group pl-4">
                         <label>End Date & Time <span class="text-red-500">*</span></label>
-                        <input type="datetime-local" formControlName="endDate"
-                            [class.border-red-500]="eventForm.get('endDate')?.invalid && eventForm.get('endDate')?.touched">
+                        <app-date-input withTime formControlName="endDate" ariaLabel="End date"
+                            [class.border-red-500]="eventForm.get('endDate')?.invalid && eventForm.get('endDate')?.touched"></app-date-input>
                         <div *ngIf="eventForm.get('endDate')?.invalid && eventForm.get('endDate')?.touched"
                             class="text-[9px] text-red-500 font-bold uppercase mt-1">End date is required</div>
                     </div>
@@ -105,11 +105,11 @@
                 <div class="form-grid mb-8">
                     <div class="form-group">
                         <label>Registration Opens</label>
-                        <input type="datetime-local" formControlName="registrationStartDate">
+                        <app-date-input withTime formControlName="registrationStartDate" ariaLabel="Registration opens"></app-date-input>
                     </div>
                     <div class="form-group">
                         <label>Registration Closes (Deadline)</label>
-                        <input type="datetime-local" formControlName="registrationEndDate">
+                        <app-date-input withTime formControlName="registrationEndDate" ariaLabel="Registration closes"></app-date-input>
                     </div>
                     <div class="form-group full">
                         <label>Public Note (for members)</label>

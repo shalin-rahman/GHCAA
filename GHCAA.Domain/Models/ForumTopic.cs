@@ -6,7 +6,13 @@ namespace GHCAA.Domain.Models
     {
         public int Id { get; set; }
 
-        public int CategoryId { get; set; }
+        // Null for a comment thread that belongs to a poll or meeting, so it stays out of the forum.
+        public int? CategoryId { get; set; }
+
+        [MaxLength(20)]
+        public string? ContextType { get; set; }
+
+        public int? ContextId { get; set; }
 
         [Required]
         [MaxLength(200)]

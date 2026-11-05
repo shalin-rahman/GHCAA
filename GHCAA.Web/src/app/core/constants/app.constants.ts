@@ -489,6 +489,9 @@ export const VACANCY_REASON_OPTIONS = [
 export const VACANCY_REASON_OTHER = 'Other';
 // Same limit as Constants.Governance.VacancyNoteMaxLength on the API.
 export const VACANCY_NOTE_MAX_LENGTH = 500;
+// Same limits as Constants.Credentials on the API.
+export const CREDENTIAL_VALIDITY_MONTHS_MAX = 600;
+export const CREDENTIAL_REASON_MAX_LENGTH = 500;
 
 export function getVacancyReasonLabel(reason: string | null | undefined): string {
     return VACANCY_REASON_OPTIONS.find(o => o.value === reason)?.label || reason || '';

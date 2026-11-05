@@ -191,9 +191,8 @@
             
             <div class="form-group">
                 <label>Start Date <span class="required-star">*</span></label>
-                <input type="text" class="form-control" [(ngModel)]="editPeriodData().startDate" #periodStart="ngModel" required
-                    placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
-                    [class.border-red-500]="periodStart.invalid && periodStart.touched">
+                <app-date-input inputClass="form-control" [(ngModel)]="editPeriodData().startDate" #periodStart="ngModel" required
+                    [class.border-red-500]="periodStart.invalid && periodStart.touched"></app-date-input>
                 <div *ngIf="periodStart.touched && periodStart.invalid" class="text-[10px] text-red-500 mt-1">
                     <span *ngIf="periodStart.errors?.['required']">Start date is required.</span>
                 </div>
@@ -201,8 +200,7 @@
 
             <div class="form-group">
                 <label>End Date</label>
-                <input type="text" class="form-control" [(ngModel)]="editPeriodData().endDate" 
-                    placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
+                <app-date-input inputClass="form-control" [(ngModel)]="editPeriodData().endDate"></app-date-input>
             </div>
         </div>
         <div class="modal-footer">

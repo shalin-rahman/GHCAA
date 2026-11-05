@@ -88,7 +88,14 @@
       "Bash(powershell.exe -NoProfile -Command '$bad=0; Get-ChildItem \"GHCAA.Tools\\\\*.ps1\" | % { $e=$null; [void][System.Management.Automation.Language.Parser]::ParseFile\\($_.FullName,[ref]$null,[ref]$e\\); if\\($e.Count\\){$bad++; \"$\\($_.Name\\): $\\($e[0].Message\\)\"} else {\"ok $\\($_.Name\\)\"} }')",
       "PowerShell(python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md)",
       "PowerShell(graphify update .)",
-      "PowerShell(graphify update . 2>$null)"
+      "PowerShell(graphify update . 2>$null)",
+      "Bash(grep -v -E \"^docs/book|graphify-out|\\\\.png$\")",
+      "Bash(break)",
+      "Bash(ping -n 6 127.0.0.1)",
+      "PowerShell(graphify query \"CredentialVerificationController revoke credential admin member detail\" 2>$null)",
+      "PowerShell(dotnet test GHCAA.Tests/GHCAA.Tests.csproj --artifacts-path C:\\\\Users\\\\HABIBU~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\7c9123f0a5be8e36\\\\3f9e215d-0793-497e-b108-b318a6dee907\\\\scratchpad\\\\lane2-artifacts --filter \"FullyQualifiedName~IDCardServiceCredential\" 2>&1)",
+      "Bash(git config *)",
+      "PowerShell(python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md 2>&1)"
     ],
     "additionalDirectories": [
       "C:\\Users\\HabiburRahmanShalin\\workstation\\shaleen\\shalin\\GHC\\Application\\GHCAA\\013-*",

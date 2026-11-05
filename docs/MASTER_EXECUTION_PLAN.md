@@ -31,16 +31,24 @@ It exits 1 when an open item is missing here or a closed one is still scheduled.
 - **Spec review, 2026-11-03.** The specs were checked against the tracker and the code. Fourteen
   verified gaps became items: 37.16f to 37.16h in stream E, and eleven Work Package 84 items in streams N2, N3
   and N6. Their priorities are proposals; the owner can change them. That review's one P1 item and
-  the three P1 items the owner added from the admin sidebar work (84.73) all closed on 2026-11-05;
+  the three P1 items the owner added from the admin sidebar work all closed on 2026-11-05;
   the progress log in section 9 lists them. 84.77 (client option lists the server already holds)
   was added as P2 the same day. The owner answered the six
   product questions from the same review on 2026-11-03; they became 84.65 to 84.69 (section 5,
   the owner gates).
 - **Owner order, 2026-11-05.** 84.77 (client option lists the server already holds) goes first,
   ahead of the wave 2 table. The owner chose the approach the same day; the tracker item records
-  it. Its web, backend and mobile parts are done; the owner's `lookups.json` rows, the full mobile
-  test run and the four 'Life Member' goldens are left. 84.78 (a note that membership types come from the constitution) and 84.79 (date inputs
-  follow the configured format) come next. The book strict build is the last item of this run. It fails on three counts, each already an
+  it. Its web, backend and mobile parts are done and the full mobile run passes; the owner's
+  `lookups.json` rows and the four 'Life Member' goldens are left. The constitution note that was
+  to follow it was dropped on 2026-11-06.
+- **Owner order, 2026-11-06.** In progress: 84.79 (date inputs follow the configured format, plus
+  the event date picker that does not open), 84.71 then 84.19 (meetings with comments), 84.59,
+  84.60, 84.68, 84.63, then the rest of the partial items 84.49 and 84.51 once those finish.
+  84.84 (directory search by city or country) is ordered too and starts once the poll migration
+  for 84.71 has landed, since both change the model snapshot. The
+  admin sidebar regrouping and the spec 001 index with its gap review closed the same day; the five
+  gaps raised from that review are new items in stream N4. 84.7, 84.42, 84.48, 84.50 and 84.61 are
+  on hold. The book strict build is the last item of this run. It fails on three counts, each already an
   item: stale repository counts (63.8, 384 commits quoted against 388 in the tree), chapters over
   their page budgets (63.34), and 93 open placeholders in the chapter items 67.2, 67.3, 67.5 and
   67.7. A placeholder closes only with a sourced number, never a guess.
@@ -96,9 +104,9 @@ work in the order the tracker's `Depends on` tags give.
 |---|---|---|
 | E | Spec 023 delivery plan sessions F2 to F11 and N1, auth plan Part A and B4-B5. Order below. | 37.1m, 37.14o, 37.1p, 37.16e, 37.16f, 37.16g, 37.16h, 37.12y, 37.13f, 37.13g, 37.14a, 37.14d, 37.14f, 37.14m, 37.14n, 37.14t, 95.2, 95.4, 95.5, 95.12, 95.6, 84.42, 84.50 |
 | N1 | Non-election plan phase 1, release and environment blockers | 7.26, 7.28, 34.D8, 62.41, 84.48 |
-| N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.9, 84.18, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 84.55, 84.56, 84.57, 84.58, 84.60, 84.62, 84.68, 97.1 |
-| N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 84.61, 84.64, 84.67, 84.69, 84.73, 84.77, 84.78, 84.79, 93.3, 93.4, 96.3 |
-| N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.71, 84.72, 84.19, 84.20, 84.59, 84.65, 84.66, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5 |
+| N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 84.55, 84.56, 84.57, 84.58, 84.60, 84.62, 84.68, 97.1 |
+| N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 84.61, 84.64, 84.67, 84.69, 84.77, 84.79, 93.3, 93.4, 96.3 |
+| N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.71, 84.72, 84.19, 84.20, 84.59, 84.65, 84.66, 84.80, 84.81, 84.82, 84.83, 84.84, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5 |
 | N5 | Phase 5, white-label profile and reusable modules | 62.2, 62.42, 62.56 |
 | N6 | Phase 6, performance and quality | 27.1, 27.8, 34.D7, 37.11, 51.4, 51.5, 84.63, 98.7 |
 | N7 | Phase 7, platform governance, security and operations | 7.16, 12.8, 12.9, 73.5, 73.6, 74.3, 98.43, 99.8 |
@@ -410,3 +418,8 @@ What counts as evidence:
 | 2026-11-05 | 84.78, 84.79 (added) | Owner asked for the constitution note and for date inputs to follow the configured format; the date gaps checked in the code at the files the item names | `docs/TODO.md`, this file |
 | 2026-11-05 | 84.77 (part: web and backend) | Web type-check clean, `npm run test:unit` 986 of 986; backend migration and seed tests 27 of 28, the one failure waiting on the owner's `lookups.json` rows. Code review findings fixed the same day | `app.constants.ts`, `lookup.service.ts`, `org-config.service.ts`, register, profile, directory, admin-members, member-approval, org-config and their specs, `20261105120000_SeedJobCategoryLookups.cs`, `JobCategorySeedSyncTests.cs` |
 | 2026-11-06 | 84.77 (part: mobile) | `member_labels_test.dart` 13 of 13 and `directory_filters_test.dart` 3 of 3; full suite, analyze and goldens not run because drive C: is full | `member_labels.dart`, `dropdown_service.dart`, `lookup_service.dart`, `registration_constants.dart`, `register_wizard_provider.dart`, dashboard, directory, member details, profile edit, gatekeeper and fee config screens, four visual-test fakes |
+| 2026-11-06 | 84.77 (part: mobile, full run) | After disk space was freed: `flutter analyze` clean, `flutter test --exclude-tags golden` 397 of 397. Still PARTIAL for the owner's `lookups.json` rows; goldens not run | `docs/TODO.md` |
+| 2026-11-06 | 84.9, 84.18 (closed); 84.80-84.84 (added) | Spec 001 is the domain-spec index with a roll-up of 55 Enhancements items counted by grep; the gap table found eight new gaps, five raised as items (priorities proposed), three left in the table | `docs/specs/001-platform-baseline/spec.md`, `docs/TODO.md` |
+| 2026-11-06 | 84.73 (closed) | `nav.service.spec.ts` and `admin-layout.spec.ts` 33 of 33; browser check at 1366x900 and 390x844 showed eight sections, no page errors, and the search narrowing to one link | `docs/TODO.md` |
+| 2026-11-06 | 84.7, 84.42, 84.48, 84.50, 84.61 (on hold); 84.78 (won't do) | Owner put the items that wait on device or inbox checks, the seeding plan or the Firebase key on hold, and dropped the constitution note | `docs/TODO.md` |
+| 2026-11-06 | Owner order | Owner asked for 84.79 with the calendar picker bug, 84.73, 84.9, 84.18, 84.19, 84.71, 84.59, 84.63 and the partial items 84.49, 84.51, 84.68, 84.77; 84.60 gets an OrgConfig validity setting in months, default 12, empty or 0 for no expiry | `docs/TODO.md`, section 1 |

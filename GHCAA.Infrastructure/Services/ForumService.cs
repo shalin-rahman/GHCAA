@@ -49,7 +49,7 @@ namespace GHCAA.Infrastructure.Services
                 .Select(t => new ForumTopicDto
                 {
                     Id = t.Id,
-                    CategoryId = t.CategoryId,
+                    CategoryId = categoryId,
                     Title = t.Title,
                     Content = t.Content,
                     AuthorId = t.AuthorId,
@@ -69,7 +69,7 @@ namespace GHCAA.Infrastructure.Services
         {
             var topic = await _context.ForumTopics
                 .Include(t => t.Author)
-                .FirstOrDefaultAsync(t => t.Id == topicId);
+                .FirstOrDefaultAsync(t => t.Id == topicId && t.ContextType == null);
 
             if (topic == null) return null;
 
@@ -79,7 +79,7 @@ namespace GHCAA.Infrastructure.Services
             return new ForumTopicDto
             {
                 Id = topic.Id,
-                CategoryId = topic.CategoryId,
+                CategoryId = topic.CategoryId ?? 0,
                 Title = topic.Title,
                 Content = topic.Content,
                 AuthorId = topic.AuthorId,
@@ -96,6 +96,11 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<List<ForumPostDto>> GetPostsByTopicAsync(int topicId, int page, int pageSize)
         {
+            // Poll and meeting threads are read through the discussion routes, which check access.
+            var isContextThread = await _context.ForumTopics.IgnoreQueryFilters()
+                .AnyAsync(t => t.Id == topicId && t.ContextType != null);
+            if (isContextThread) return new List<ForumPostDto>();
+
             return await _context.ForumPosts
                 .Include(p => p.Author)
                 .Where(p => p.TopicId == topicId)
@@ -142,7 +147,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<ForumPostDto> CreatePostAsync(CreateForumPostDto dto, int authorId)
         {
             var topic = await _context.ForumTopics.FindAsync(dto.TopicId);
-            if (topic == null || !topic.IsActive)
+            if (topic == null || !topic.IsActive || topic.ContextType != null)
                 throw new KeyNotFoundException("Topic not found or is inactive.");
 
             if (topic.IsLocked)
@@ -182,7 +187,7 @@ namespace GHCAA.Infrastructure.Services
             // found here — moderation on it silently no-op'd. IgnoreQueryFilters() so an admin can
             // still act on it (matches the AlumniEvent admin-path convention elsewhere).
             var topic = await _context.ForumTopics.IgnoreQueryFilters()
-                .FirstOrDefaultAsync(t => t.Id == topicId);
+                .FirstOrDefaultAsync(t => t.Id == topicId && t.ContextType == null);
             if (topic == null) return;
 
             if (topic.AuthorId != memberId && !isSuperAdmin)
@@ -195,7 +200,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task DeletePostAsync(int postId, int memberId, bool isSuperAdmin)
         {
             var post = await _context.ForumPosts.IgnoreQueryFilters()
-                .FirstOrDefaultAsync(p => p.Id == postId);
+                .FirstOrDefaultAsync(p => p.Id == postId && p.Topic!.ContextType == null);
             if (post == null) return;
 
             if (post.AuthorId != memberId && !isSuperAdmin)

@@ -150,12 +150,11 @@
                     </div>
                     <div class="form-group">
                         <label for="profile-dateOfBirth">Date of Birth *</label>
-                        <input id="profile-dateOfBirth" type="text" [(ngModel)]="profile.dateOfBirth" name="dateOfBirth" required 
-                            placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
-                            #dobM="ngModel" [class.border-red-500]="dobM.invalid && dobM.touched">
+                        <app-date-input inputId="profile-dateOfBirth" [(ngModel)]="profile.dateOfBirth" name="dateOfBirth" required #dobPick="appDateInput"
+                            #dobM="ngModel" [class.border-red-500]="dobM.invalid && dobM.touched"></app-date-input>
                         <div *ngIf="dobM.touched && dobM.invalid" role="alert" class="text-[10px] text-red-500 mt-1">
                             <span *ngIf="dobM.errors?.['required']">Date of birth is required.</span>
-                            <span *ngIf="dobM.errors?.['pattern']">Use format: dd-mm-yyyy</span>
+                            <span *ngIf="dobM.errors?.['pattern']">Use format: {{ dobPick.placeholder() }}</span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -339,15 +338,13 @@
                             
                             <div class="form-group">
                                 <label>Date of Induction *</label>
-                                <input type="text" [(ngModel)]="work.startDate" [name]="'sD_' + $index" required
-                                    placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
-                                    #pSdM="ngModel" [class.border-red-500]="pSdM.invalid && pSdM.touched">
+                                <app-date-input [(ngModel)]="work.startDate" [name]="'sD_' + $index" required
+                                    #pSdM="ngModel" [class.border-red-500]="pSdM.invalid && pSdM.touched"></app-date-input>
                             </div>
                             <div class="form-group" *ngIf="!work.isCurrent">
                                 <label>Retirement / Resignation Date *</label>
-                                <input type="text" [(ngModel)]="work.endDate" [name]="'eD_' + $index" required
-                                    placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
-                                    #pEdM="ngModel" [class.border-red-500]="pEdM.invalid && pEdM.touched">
+                                <app-date-input [(ngModel)]="work.endDate" [name]="'eD_' + $index" required
+                                    #pEdM="ngModel" [class.border-red-500]="pEdM.invalid && pEdM.touched"></app-date-input>
                             </div>
 
                             <div class="input-group full py-2">

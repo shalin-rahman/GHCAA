@@ -77,6 +77,8 @@ export interface OrgWorkflow {
   emailProvider?: string | null;
   /** News image uploads one account may make per UTC day. Below 1 means no limit. */
   newsImageUploadsPerDay: number;
+  /** Months a new ID card or certificate stays valid. 0 means it never expires. */
+  credentialValidityMonths: number;
 }
 
 export interface NavLabels {

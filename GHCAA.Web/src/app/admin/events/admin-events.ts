@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppDatePipe } from '../../core/pipes/app-date.pipe';
+import { AppDateInputComponent } from '../../common/date-input/date-input.component';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { LazyImgDirective } from '../../common/directives/lazy-img.directive';
@@ -39,7 +40,7 @@ function toLocalDateTimeInputValue(value: string | Date): string {
 @Component({
     selector: 'app-admin-events',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, ReactiveFormsModule, ExportButtonsComponent, PaginationComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LazyImgDirective, LoadingPanelComponent, ModalHeaderComponent, AppCurrencyPipe],
+    imports: [CommonModule, AppDatePipe, FormsModule, ReactiveFormsModule, ExportButtonsComponent, PaginationComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LazyImgDirective, LoadingPanelComponent, ModalHeaderComponent, AppCurrencyPipe, AppDateInputComponent],
     templateUrl: './admin-events.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './admin-events.scss'

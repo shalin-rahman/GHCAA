@@ -75,7 +75,8 @@ export const ORG_CONFIG_FALLBACK: OrgConfig = {
     "defaultMembershipType": "General",
     "adminEmailOnNewRegistration": true,
     "notificationChannel": "Both",
-    "newsImageUploadsPerDay": 20
+    "newsImageUploadsPerDay": 20,
+    "credentialValidityMonths": 12
   },
   "localization": {
     "dateFormat": "dd-MM-yyyy",

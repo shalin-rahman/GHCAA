@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
-    formatPeriodRange, getEventStatus, getEventStatusMeta, localInputToUtc, parseDisplayDate, toDisplayDate, toWireDate, utcToLocal, utcToLocalInput
+    dateInputPattern, dateInputPlaceholder, formatPeriodRange, getEventStatus, getEventStatusMeta, localInputToUtc, parseDisplayDate, toDisplayDate, toWireDate, utcToLocal, utcToLocalInput
 } from './date.util';
-import { DATE_FORMATS } from '../constants/app.constants';
+import { DATE_FORMATS, DATE_FORMAT_PLACEHOLDERS } from '../constants/app.constants';
 
 describe('configurable date formats', () => {
     it('formats ISO date-only values without a timezone shift', () => {
@@ -95,5 +95,20 @@ describe('UTC and datetime-local helpers', () => {
         const sent = localInputToUtc('2026-10-21T09:05');
         expect(sent).toBe(new Date(2026, 9, 21, 9, 5).toISOString());
         expect(utcToLocalInput(sent)).toBe('2026-10-21T09:05');
+    });
+});
+
+describe('date input helpers', () => {
+    it.each(Object.values(DATE_FORMATS))('give the placeholder and an unanchored pattern for %s', format => {
+        expect(dateInputPlaceholder(format)).toBe(DATE_FORMAT_PLACEHOLDERS[format]);
+        const pattern = dateInputPattern(format);
+        expect(pattern.startsWith('^')).toBe(false);
+        expect(pattern.endsWith('$')).toBe(false);
+        const sample = toDisplayDate('2027-06-15', format);
+        expect(new RegExp(`^(?:${pattern})$`).test(sample)).toBe(true);
+    });
+
+    it('falls back to the default format for an unknown value', () => {
+        expect(dateInputPlaceholder('yyyy.MM.dd' as any)).toBe(DATE_FORMAT_PLACEHOLDERS[DATE_FORMATS.DMY]);
     });
 });

@@ -24,6 +24,10 @@ namespace GHCAA.Domain.Models
         public PostType PostType { get; set; } = PostType.News;
 
         public bool IsActive { get; set; } = true;
+
+        // Left out of anonymous reads. False keeps every existing post public.
+        public bool MembersOnly { get; set; }
+
         public string? ImageUrl { get; set; }
 
         public string? AttachmentUrl { get; set; }

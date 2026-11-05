@@ -48,6 +48,20 @@ namespace GHCAA.Infrastructure.Services
             var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             if (member == null) throw new KeyNotFoundException("Member not found");
 
+            var org = await _orgConfigService.GetConfigAsync();
+            var credential = await NewCredentialAsync(memberId, type, org.Workflow.CredentialValidityMonths, cancellationToken);
+            _db.IssuedCredentials.Add(credential);
+            await _db.SaveChangesAsync(cancellationToken);
+            return (member, credential, VerifyUrlFor(org, credential.ShortCode));
+        }
+
+        private static string VerifyUrlFor(OrgConfigDto org, string shortCode) =>
+            $"{org.Contact.PortalBaseUrl.TrimEnd('/')}/verify/{shortCode}";
+
+        // 84.60. Zero or less means the credential never expires.
+        private async Task<IssuedCredential> NewCredentialAsync(int memberId, CredentialType type, int validityMonths, CancellationToken cancellationToken)
+        {
+            var issuedOn = DateTime.UtcNow;
             IssuedCredential credential;
             do
             {
@@ -56,15 +70,11 @@ namespace GHCAA.Infrastructure.Services
                     MemberId = memberId,
                     CredentialType = type,
                     ShortCode = CredentialCodeGenerator.Create(),
-                    IssuedOn = DateTime.UtcNow
+                    IssuedOn = issuedOn,
+                    ExpiresOn = validityMonths > 0 ? issuedOn.AddMonths(validityMonths) : null
                 };
             } while (await _db.IssuedCredentials.AnyAsync(x => x.ShortCode == credential.ShortCode, cancellationToken));
-
-            _db.IssuedCredentials.Add(credential);
-            await _db.SaveChangesAsync(cancellationToken);
-            var org = await _orgConfigService.GetConfigAsync();
-            var verifyUrl = $"{org.Contact.PortalBaseUrl.TrimEnd('/')}/verify/{credential.ShortCode}";
-            return (member, credential, verifyUrl);
+            return credential;
         }
 
         public async Task<string> GenerateIDCardDataUriAsync(int memberId, CancellationToken cancellationToken = default)
@@ -290,15 +300,56 @@ namespace GHCAA.Infrastructure.Services
             };
         }
 
-        public async Task<bool> RevokeCredentialAsync(string shortCode, string reason, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<IssuedCredentialDto>?> GetMemberCredentialsAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            if (!await _db.Members.AnyAsync(m => m.Id == memberId, cancellationToken)) return null;
+            var credentials = await _db.IssuedCredentials.AsNoTracking()
+                .Where(x => x.MemberId == memberId)
+                .OrderByDescending(x => x.IssuedOn).ThenByDescending(x => x.Id)
+                .ToListAsync(cancellationToken);
+            return credentials.Select(ToDto).ToList();
+        }
+
+        public async Task<IssuedCredentialDto?> RevokeCredentialAsync(string shortCode, string reason, CancellationToken cancellationToken = default)
         {
             var credential = await _db.IssuedCredentials.FirstOrDefaultAsync(x => x.ShortCode == shortCode, cancellationToken);
-            if (credential == null) return false;
+            if (credential == null) return null;
             credential.IsRevoked = true;
             credential.RevokedReason = reason;
             credential.RevokedOn = DateTime.UtcNow;
             await _db.SaveChangesAsync(cancellationToken);
-            return true;
+            return ToDto(credential);
         }
+
+        // 84.68. An old code that was already revoked keeps its first reason and date.
+        public async Task<IssuedCredentialDto?> ReissueCredentialAsync(string shortCode, string reason, CancellationToken cancellationToken = default)
+        {
+            var old = await _db.IssuedCredentials.FirstOrDefaultAsync(x => x.ShortCode == shortCode, cancellationToken);
+            if (old == null) return null;
+            if (!old.IsRevoked)
+            {
+                old.IsRevoked = true;
+                old.RevokedReason = reason;
+                old.RevokedOn = DateTime.UtcNow;
+            }
+
+            var org = await _orgConfigService.GetConfigAsync();
+            var replacement = await NewCredentialAsync(old.MemberId, old.CredentialType, org.Workflow.CredentialValidityMonths, cancellationToken);
+            _db.IssuedCredentials.Add(replacement);
+            await _db.SaveChangesAsync(cancellationToken);
+            return ToDto(replacement);
+        }
+
+        private static IssuedCredentialDto ToDto(IssuedCredential c) => new()
+        {
+            MemberId = c.MemberId,
+            ShortCode = c.ShortCode,
+            CredentialType = c.CredentialType,
+            IssuedOn = c.IssuedOn,
+            ExpiresOn = c.ExpiresOn,
+            IsRevoked = c.IsRevoked,
+            RevokedReason = c.RevokedReason,
+            RevokedOn = c.RevokedOn
+        };
     }
 }

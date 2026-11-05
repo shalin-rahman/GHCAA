@@ -2368,12 +2368,19 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.Property<int>("AuthorId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("CategoryId")
+                    b.Property<int?>("CategoryId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int?>("ContextId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ContextType")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -2403,6 +2410,9 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.HasIndex("AuthorId");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("ContextType", "ContextId")
+                        .IsUnique();
 
                     b.ToTable("ForumTopics");
                 });
@@ -3606,6 +3616,105 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Label = "Other Opportunities",
                             LookupGroup = "JobCategory",
                             Value = "Other"
+                        },
+                        new
+                        {
+                            Id = 5101,
+                            DisplayOrder = 1,
+                            IsActive = true,
+                            Label = "Governance",
+                            LookupGroup = "DiscussionCategory",
+                            Value = "Governance"
+                        },
+                        new
+                        {
+                            Id = 5102,
+                            DisplayOrder = 2,
+                            IsActive = true,
+                            Label = "Finance",
+                            LookupGroup = "DiscussionCategory",
+                            Value = "Finance"
+                        },
+                        new
+                        {
+                            Id = 5103,
+                            DisplayOrder = 3,
+                            IsActive = true,
+                            Label = "Events",
+                            LookupGroup = "DiscussionCategory",
+                            Value = "Events"
+                        },
+                        new
+                        {
+                            Id = 5104,
+                            DisplayOrder = 4,
+                            IsActive = true,
+                            Label = "Alumni affairs",
+                            LookupGroup = "DiscussionCategory",
+                            Value = "AlumniAffairs"
+                        },
+                        new
+                        {
+                            Id = 5105,
+                            DisplayOrder = 5,
+                            IsActive = true,
+                            Label = "Other",
+                            LookupGroup = "DiscussionCategory",
+                            Value = "Other"
+                        },
+                        new
+                        {
+                            Id = 5106,
+                            DisplayOrder = 6,
+                            IsActive = true,
+                            Label = "Election",
+                            LookupGroup = "DiscussionCategory",
+                            Value = "Election"
+                        },
+                        new
+                        {
+                            Id = 5107,
+                            DisplayOrder = 7,
+                            IsActive = true,
+                            Label = "Membership",
+                            LookupGroup = "DiscussionCategory",
+                            Value = "Membership"
+                        },
+                        new
+                        {
+                            Id = 5108,
+                            DisplayOrder = 8,
+                            IsActive = true,
+                            Label = "Fundraising",
+                            LookupGroup = "DiscussionCategory",
+                            Value = "Fundraising"
+                        },
+                        new
+                        {
+                            Id = 5109,
+                            DisplayOrder = 9,
+                            IsActive = true,
+                            Label = "Mentorship and careers",
+                            LookupGroup = "DiscussionCategory",
+                            Value = "MentorshipCareers"
+                        },
+                        new
+                        {
+                            Id = 5110,
+                            DisplayOrder = 10,
+                            IsActive = true,
+                            Label = "Scholarship and welfare",
+                            LookupGroup = "DiscussionCategory",
+                            Value = "ScholarshipWelfare"
+                        },
+                        new
+                        {
+                            Id = 5111,
+                            DisplayOrder = 11,
+                            IsActive = true,
+                            Label = "Communication",
+                            LookupGroup = "DiscussionCategory",
+                            Value = "Communication"
                         });
                 });
 
@@ -4073,6 +4182,9 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("MembersOnly")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("PostType")
                         .HasColumnType("integer");
@@ -4625,8 +4737,21 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("AllowComments")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("AllowMultipleChoice")
                         .HasColumnType("boolean");
+
+                    b.Property<int?>("AnnouncementId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("Other");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -4651,6 +4776,8 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Category");
 
                     b.ToTable("Polls");
                 });
@@ -6117,8 +6244,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.HasOne("GHCAA.Domain.Models.ForumCategory", "Category")
                         .WithMany("Topics")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Author");
 

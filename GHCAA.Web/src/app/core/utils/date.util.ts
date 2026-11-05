@@ -1,5 +1,6 @@
 import {
   DATE_FORMATS,
+  DATE_FORMAT_PLACEHOLDERS,
   DATE_FORMAT_REGEX,
   DEFAULT_DATE_FORMAT,
   DateFormat,
@@ -118,6 +119,16 @@ export function parseDisplayDate(value: any, format?: DateFormat): Date | null {
   }
   const d = parseDateValue(str);
   return isNaN(d.getTime()) ? null : d;
+}
+
+/** Placeholder text for a date input in the given format, for example 'mm/dd/yyyy'. */
+export function dateInputPlaceholder(format: DateFormat): string {
+  return DATE_FORMAT_PLACEHOLDERS[normalizeDateFormat(format)];
+}
+
+/** The HTML pattern attribute for the format. The browser anchors it, so ^ and $ come off. */
+export function dateInputPattern(format: DateFormat): string {
+  return DATE_FORMAT_REGEX[normalizeDateFormat(format)].source.replace(/^\^/, '').replace(/\$$/, '');
 }
 
 function detectDisplayFormat(value: string): DateFormat | null {

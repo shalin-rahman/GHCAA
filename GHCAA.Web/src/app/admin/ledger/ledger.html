@@ -48,9 +48,8 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label>Date *</label>
-                    <input type="text" [(ngModel)]="newRecord.date" name="date" required
-                        placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
-                        #dateM="ngModel" [class.border-red-500]="dateM.invalid && dateM.touched">
+                    <app-date-input [(ngModel)]="newRecord.date" name="date" required
+                        #dateM="ngModel" [class.border-red-500]="dateM.invalid && dateM.touched"></app-date-input>
                 </div>
                 <div class="form-group">
                     <label>Amount ({{ orgConfig.config()?.currency?.symbol }}) *</label>

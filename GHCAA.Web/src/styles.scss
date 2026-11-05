@@ -658,17 +658,8 @@ td.actions-cell {
     line-height: 1.2;
   }
 
-  /* Keep native date controls aligned with the themed form controls. */
-  input[type='date'],
-  input[type='datetime-local'] {
-    color-scheme: light;
-  }
-
-  body.dark-theme input[type='date'],
-  body.dark-theme input[type='datetime-local'] {
-    color-scheme: dark;
-  }
-
+  /* Native date pickers inherit color-scheme from :root or body.dark-theme. A rule here that
+     forced light made the calendar icon black on the dark background. */
   input[type='date'],
   input[type='datetime-local'],
   select {
@@ -847,7 +838,8 @@ td.actions-cell {
 /* Validation & Form Feedback */
 input.border-red-500,
 textarea.border-red-500,
-select.border-red-500 {
+select.border-red-500,
+app-date-input.border-red-500 input.dpi-text {
   border-color: #ef4444 !important;
 
   &:focus {
