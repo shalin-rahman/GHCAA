@@ -2740,6 +2740,13 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
         opacity: 0.5;
       }
 
+      /* type="search" gets a native cancel button in Chrome and Edge, which sat
+         beside our own .clear-search and showed two crosses. */
+      &::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
       &:focus {
         border-color: var(--accent-color);
         background: rgba(var(--accent-color-rgb), 0.08);
@@ -2773,6 +2780,32 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
         border-color: rgba(var(--accent-color-rgb), 0.3);
         color: var(--accent-text);
         transform: translateY(-50%) scale(1.1);
+      }
+    }
+
+    /* The admin sidebar is narrower than a page filter bar, so its search box is
+       smaller. Kept here so the shared look still has one home. */
+    .nav-search-container & {
+      min-width: 0;
+
+      .search-icon {
+        left: 0.65rem;
+        font-size: 0.8rem;
+      }
+
+      input,
+      .search-input {
+        height: 2.125rem;
+        padding: 0 2rem 0 2rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.78rem;
+      }
+
+      .clear-search {
+        right: 0.45rem;
+        width: 18px;
+        height: 18px;
+        font-size: 0.85rem;
       }
     }
   }

@@ -44,39 +44,62 @@ const ALL_NAV_ITEMS: NavItem[] = [
     { path: '/officials/my-appointments', label: 'My Appointments', icon: 'governance', roles: [...ELECTION_STAFF_ROLES], section: 'Officials' },
 ];
 
+// Sidebar order of the admin sections. An item's section must be one of these, or the
+// item never renders, so the type below makes a typo a compile error.
+export const ADMIN_NAV_SECTIONS = [
+    'Overview',
+    'Membership',
+    'Content & Media',
+    'Reviews & Inquiries',
+    'Communications',
+    'Elections',
+    'Finance & Fundraising',
+    'System & Settings'
+] as const;
+
+export type AdminNavSection = typeof ADMIN_NAV_SECTIONS[number];
+
+interface AdminNavItem extends NavItem {
+    section: AdminNavSection;
+}
+
 // Admin panel navigation items
-const ADMIN_NAV_ITEMS: NavItem[] = [
+const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard', section: 'Overview' },
 
     { path: '/admin/approvals', label: 'Approvals', icon: 'approvals', section: 'Membership' },
     { path: '/admin/members', label: 'All Members', icon: 'members', section: 'Membership' },
     { path: '/admin/members/ec', label: 'Executive Committee', icon: 'ec', section: 'Membership' },
 
-    { path: '/admin/news', label: 'News & Notices', icon: 'news', section: 'Content' },
-    { path: '/admin/site-content', label: 'Site Content', icon: 'site-content', section: 'Content' },
-    { path: '/admin/election-content', label: 'Election Content', icon: 'governance', section: 'Content' },
-    { path: '/admin/events', label: 'Manage Events', icon: 'events', section: 'Content' },
-    { path: '/admin/gallery', label: 'Gallery Albums', icon: 'gallery', section: 'Content' },
-    { path: '/admin/comm', label: 'Communications', icon: 'comm', section: 'Content' },
-    { path: '/admin/article-approvals', label: 'Submission Review', icon: 'article-approvals', section: 'Content' },
-    { path: '/admin/gallery-approvals', label: 'Gallery Review', icon: 'gallery-approvals', section: 'Content' },
-    { path: '/admin/job-approvals', label: 'Job Review', icon: 'job-approvals', section: 'Content' },
-    { path: '/admin/contact-messages', label: 'Portal Enquiries', icon: 'contact-messages', section: 'Content' },
-    { path: '/admin/polls', label: 'Polls', icon: 'polls', section: 'Content' },
-    { path: '/admin/elections', label: 'Elections', icon: 'governance', section: 'Content' },
-    { path: '/admin/themes', label: 'Special Themes', icon: 'themes', section: 'Content' },
-    { path: '/admin/campaigns', label: 'Fundraising Campaigns', icon: 'ledger', feature: 'enableFundraising', section: 'Content' },
-    { path: '/admin/mentorship', label: 'Mentorship Requests', icon: 'governance', section: 'Content' },
+    { path: '/admin/news', label: 'News & Notices', icon: 'news', section: 'Content & Media' },
+    { path: '/admin/events', label: 'Manage Events', icon: 'events', section: 'Content & Media' },
+    { path: '/admin/gallery', label: 'Gallery Albums', icon: 'gallery', section: 'Content & Media' },
+    { path: '/admin/site-content', label: 'Site Content', icon: 'site-content', section: 'Content & Media' },
+    { path: '/admin/themes', label: 'Special Themes', icon: 'themes', section: 'Content & Media' },
 
-    { path: '/admin/ledger', label: 'Financial Ledger', icon: 'ledger', roles: ['SuperAdmin'], section: 'Finance & Tools' },
-    { path: '/admin/payments', label: 'Payment Settings', icon: 'payment-settings', roles: ['SuperAdmin'], section: 'Finance & Tools' },
-    { path: '/admin/payments/fees', label: 'Fee Policy', icon: 'fee-policy', roles: ['SuperAdmin'], section: 'Finance & Tools' },
-    { path: '/admin/roles', label: 'User Roles', icon: 'roles', roles: ['SuperAdmin'], section: 'Finance & Tools' },
-    { path: '/admin/audit', label: 'Audit Logs', icon: 'audit', roles: ['SuperAdmin'], section: 'Finance & Tools' },
-    { path: '/admin/error-logs', label: 'Error Logs', icon: 'audit', roles: ['SuperAdmin'], section: 'Finance & Tools' },
-    { path: '/admin/dev-tracker', label: 'Developer Options', icon: 'audit', roles: ['SuperAdmin'], section: 'Finance & Tools' },
-    { path: '/admin/org-config', label: 'Org Config', icon: 'org-config', roles: ['SuperAdmin'], section: 'Finance & Tools' },
-    { path: '/admin/election-personas', label: 'Election Personas', icon: 'governance', roles: ['SuperAdmin'], section: 'Finance & Tools' }
+    { path: '/admin/article-approvals', label: 'Submission Review', icon: 'article-approvals', section: 'Reviews & Inquiries' },
+    { path: '/admin/gallery-approvals', label: 'Gallery Review', icon: 'gallery-approvals', section: 'Reviews & Inquiries' },
+    { path: '/admin/job-approvals', label: 'Job Review', icon: 'job-approvals', section: 'Reviews & Inquiries' },
+    { path: '/admin/contact-messages', label: 'Portal Enquiries', icon: 'contact-messages', section: 'Reviews & Inquiries' },
+    { path: '/admin/mentorship', label: 'Mentorship Requests', icon: 'governance', section: 'Reviews & Inquiries' },
+
+    { path: '/admin/comm', label: 'Communications', icon: 'comm', section: 'Communications' },
+    { path: '/admin/polls', label: 'Polls', icon: 'polls', section: 'Communications' },
+
+    { path: '/admin/elections', label: 'Elections', icon: 'governance', section: 'Elections' },
+    { path: '/admin/election-content', label: 'Election Content', icon: 'governance', section: 'Elections' },
+    { path: '/admin/election-personas', label: 'Election Personas', icon: 'governance', roles: ['SuperAdmin'], section: 'Elections' },
+
+    { path: '/admin/ledger', label: 'Financial Ledger', icon: 'ledger', roles: ['SuperAdmin'], section: 'Finance & Fundraising' },
+    { path: '/admin/payments', label: 'Payment Settings', icon: 'payment-settings', roles: ['SuperAdmin'], section: 'Finance & Fundraising' },
+    { path: '/admin/payments/fees', label: 'Fee Policy', icon: 'fee-policy', roles: ['SuperAdmin'], section: 'Finance & Fundraising' },
+    { path: '/admin/campaigns', label: 'Fundraising Campaigns', icon: 'ledger', feature: 'enableFundraising', section: 'Finance & Fundraising' },
+
+    { path: '/admin/org-config', label: 'Org Config', icon: 'org-config', roles: ['SuperAdmin'], section: 'System & Settings' },
+    { path: '/admin/roles', label: 'User Roles', icon: 'roles', roles: ['SuperAdmin'], section: 'System & Settings' },
+    { path: '/admin/audit', label: 'Audit Logs', icon: 'audit', roles: ['SuperAdmin'], section: 'System & Settings' },
+    { path: '/admin/error-logs', label: 'Error Logs', icon: 'audit', roles: ['SuperAdmin'], section: 'System & Settings' },
+    { path: '/admin/dev-tracker', label: 'Developer Options', icon: 'audit', roles: ['SuperAdmin'], section: 'System & Settings' }
 ];
 
 @Injectable({ providedIn: 'root' })
@@ -129,12 +152,9 @@ export class NavService {
     /** Grouped admin items for safe UI rendering */
     adminNavSections = computed(() => {
         const items = this.adminNavItems();
-        return [
-            { name: 'Overview', items: items.filter(i => i.section === 'Overview') },
-            { name: 'Membership', items: items.filter(i => i.section === 'Membership') },
-            { name: 'Content', items: items.filter(i => i.section === 'Content') },
-            { name: 'Finance & Tools', items: items.filter(i => i.section === 'Finance & Tools') }
-        ].filter(s => s.items.length > 0);
+        return ADMIN_NAV_SECTIONS
+            .map(name => ({ name, items: items.filter(i => i.section === name) }))
+            .filter(s => s.items.length > 0);
     });
 
     /**

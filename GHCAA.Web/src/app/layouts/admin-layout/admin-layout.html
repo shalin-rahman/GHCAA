@@ -12,8 +12,18 @@
             </div>
         </div>
 
+        <div class="nav-search-container">
+            <app-search-bar
+                [value]="menuSearch()"
+                (valueChange)="menuSearch.set($event)"
+                (keydown.escape)="clearMenuSearch()"
+                placeholder="Search menu…"
+                ariaLabel="Search admin menu"
+                clearLabel="Clear menu search"></app-search-bar>
+        </div>
+
         <div class="nav-body">
-            @for (section of nav.adminNavSections(); track section.name) {
+            @for (section of filteredNavSections(); track section.name) {
             <div class="nav-section">
                 <span class="nav-section-label">{{ section.name }}</span>
                 @for (item of section.items; track item.path) {
@@ -25,6 +35,15 @@
                 </a>
                 }
             </div>
+            } @empty {
+            @if (menuSearch()) {
+            <div class="nav-empty-state">
+                <app-icon name="search" class="nav-empty-icon" [size]="28"></app-icon>
+                <span class="nav-empty-title">No menu items found</span>
+                <span class="nav-empty-desc">No results for "{{ menuSearch() }}"</span>
+                <button type="button" class="nav-empty-clear-btn" (click)="clearMenuSearch()">Clear search</button>
+            </div>
+            }
             }
         </div>
 

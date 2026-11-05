@@ -199,7 +199,8 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
 ### P0 — CRITICAL (blocked on the user; cannot be closed from a coding session)
 - **34.D17** — [DONE 2026-10-31] Preprod missing columns from the old `EnsureCreated` build. The
   owner opened the member list and a member's profile on preprod on 2026-10-31 with no error, so
-  the `42703` member-summary queries now return data. Election release F2 still waits on 34.D19.
+  the `42703` member-summary queries now return data. 34.D19 was confirmed on preprod on
+  2026-11-05, so F2 no longer waits on this group.
 
 ### Closed or held by user decision (moved out of the P0 list on 2026-10-09 and 2026-10-31)
 - **82.31 / 62.31** — 82.31 on hold and 62.31 dropped (WONTDO) since 2026-10-31, by owner decision. 631 real alumni records, including all 631
@@ -233,8 +234,10 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
   Focused API, web and mobile tests pass. Headless Chromium confirms the Bengali title, code, cast
   time and no-choice text fit on the page at desktop and 390x844 sizes. Remaining: inspect it on a
   physical phone.
-- **34.D19** — [IN PROGRESS] Member cards show "Batch: N/A" because the rename migration for the org
-  academic record never ran. Code done; needs confirming on preprod with 34.D17 and 34.D18.
+- **34.D19** — [DONE 2026-11-05] Member cards show "Batch: N/A" because the rename migration for the
+  org academic record never ran. Confirmed on the local database on 2026-11-04 (586 of 586 org
+  records) and on the preprod directory on 2026-11-05 (every card shows a batch). F2 is no longer
+  blocked by it.
 - **7.22** — [DONE 2026-11-01] Render, `appsettings.Preprod.json`, the root `.env.preprod` and
   `GHCAA.Mobile/.env.preprod` all use `https://ghcaa-ryl6.onrender.com`.
 - **37.13e** — [DONE 2026-10-23] Ballot key procedure and protocol, with a test vector sealed outside .NET.
@@ -501,8 +504,10 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
 34.D8 [TODO] Live-browser verification of this area: public `/about` (seeded CMS blocks + hardcoded fallback), `/contact` (campus address, phones, map guard), `/news?type=Notice`; admin CMS block edit round-trip; admin notice creation with a PDF and a working public download link; and a **member account confirming it cannot create a Notice** (34.C3). **Blocked by the same local seed/role mismatch as 33.13** — `shalin` and `superadmin` resolve to ordinary alumni members in the local DB, so `adminGuard` bounces `/admin/*`; the local role assignment must be fixed before the admin-side steps can run.
   - **Owner decision, 2026-11-02.** Verify on the local stack. Fix the local admin role through the seeder or the appsettings SuperAdmin path, not hand-written SQL, then do the browser walk.
 
-34.D19 [IN PROGRESS 2026-10-13] [P1] Every member directory card shows "Batch: N/A (N/A )" (raised by user 2026-10-13: "there was a logic for displaying like, batch of HSC 2001"). The card code is fine: it reads `PassingYear` and `Degree` from the academic record with `IsOrgProfile` set. The data is not. On the local database all 586 `AcademicRecords` rows have the old `IsGHC = true` and an empty `IsOrgProfile = false`, so no member has an org record. Cause: `20260921110115_RenameIsGhcToIsOrgProfile` was committed without its Designer file, so it had no `[Migration]` attribute and EF never ran it. `RepairMissingColumnsAsync` (34.D17, the startup column repair) then saw the model column missing and added it with the zero value. Fix: the migration now carries its attributes and runs guarded SQL. With `IsGHC` alone it renames the column; with both columns it sets `IsOrgProfile` where `IsGHC` is true and drops `IsGHC`. Dry run on a copy of the local database: 586 rows flagged, a second run changes nothing, and the rename-only shape also ends with 586 flagged. Guard test `MigrationBootstrapperSelfHealTests.EveryMigrationClass_IsDiscoveredByEf` fails for any migration class EF cannot find. Open: the fix applies at the next API start; confirm locally and on the next preprod deploy that directory cards show a year and degree. Preprod has not been queried, but it ran the same code, so it is very likely affected.
+34.D19 [DONE 2026-11-05] [P1] Every member directory card shows "Batch: N/A (N/A )" (raised by user 2026-10-13: "there was a logic for displaying like, batch of HSC 2001"). The card code is fine: it reads `PassingYear` and `Degree` from the academic record with `IsOrgProfile` set. The data is not. On the local database all 586 `AcademicRecords` rows have the old `IsGHC = true` and an empty `IsOrgProfile = false`, so no member has an org record. Cause: `20260921110115_RenameIsGhcToIsOrgProfile` was committed without its Designer file, so it had no `[Migration]` attribute and EF never ran it. `RepairMissingColumnsAsync` (34.D17, the startup column repair) then saw the model column missing and added it with the zero value. Fix: the migration now carries its attributes and runs guarded SQL. With `IsGHC` alone it renames the column; with both columns it sets `IsOrgProfile` where `IsGHC` is true and drops `IsGHC`. Dry run on a copy of the local database: 586 rows flagged, a second run changes nothing, and the rename-only shape also ends with 586 flagged. Guard test `MigrationBootstrapperSelfHealTests.EveryMigrationClass_IsDiscoveredByEf` fails for any migration class EF cannot find. Open: the fix applies at the next API start; confirm locally and on the next preprod deploy that directory cards show a year and degree. Preprod has not been queried, but it ran the same code, so it is very likely affected.
   - **Owner decision, 2026-11-02.** Confirm on the local database first: start the API and count `AcademicRecords` rows with `IsOrgProfile` set (586 expected), then check a directory card.
+  - **Local check, 2026-11-04 (owner asked again that day).** Read-only queries on the local PostgreSQL database `GHCAADB_v2`: `RenameIsGhcToIsOrgProfile` is in `__EFMigrationsHistory`, the `IsGHC` column is gone, and all 586 `AcademicRecords` rows have `IsOrgProfile` set, one per member, each with a passing year and a degree. Browser check the same day, local stack, public `/directory` without a login: 40 cards loaded ("Showing 40 of 588 members") and the 12 read all show a batch line such as "Batch: HSC (Science) 1995" or "Batch: Bachelor (Pass) (Humanities) 1985". The directory counts 588 members against 586 org records, so two listed members have no org record and are worth a look before preprod. Left: deploy to preprod and confirm cards there with 34.D17 and 34.D18; that unblocks F2 and 95.2.
+  - **Preprod check, 2026-11-05 (owner said it was probably done).** The fix is in commit `f02bd170` on `origin/preprod`. Browser check of the public preprod `/directory` without a login: "Showing 20 of 631 members", and all 20 cards show a batch line such as "Batch: HSC (Science) 1995", none "N/A". 34.D17 and 34.D18 closed on 2026-10-31, so the F2 gate is clear. Not checked: the database row count on preprod, and whether any of the 631 members has no org record (the local copy had two).
   - **Plan review, 2026-10-14.** F2 waits for this to be confirmed on preprod, with 34.D17 and 34.D18, because F2 adds a migration on the same chain. Plan: `docs/specs/023-election-ballot-secrecy-and-standards/delivery-plan.md`, Fast track.
 
 ## WORK PACKAGE 37: ALUMNI-ASSOCIATION DEPTH — ELECTION ENGINE, SCHOLARSHIPS, PHILANTHROPY, MEMORY (raised by "what outstanding/extra ordinary matters can be incorporated on this project", 2026-08-23)
@@ -1268,6 +1273,21 @@ remove topics and posts with a reason written to the audit log; the same tools o
 role guard; backend, Vitest and Flutter tests; routes recorded in `docs/API_CONTRACT_REGISTRY.md`
 and spec 017 updated.
 
+84.73 [IN PROGRESS] **Priority: P2 | Depends on: none.** The admin sidebar had four sections, and
+"Content" held fifteen unrelated links, so pages were hard to find. Raised by the owner 2026-11-04.
+The sidebar now has eight sections (Overview, Membership, Content & Media, Reviews & Inquiries,
+Communications, Elections, Finance & Fundraising, System & Settings), and a search box at the top
+filters links by label or section name. Section names live in `ADMIN_NAV_SECTIONS` in
+`nav.service.ts`, typed so a misspelt section fails the build instead of hiding the link. The search
+box is the shared `app-search-bar` with a compact size in `styles.scss`. The shared bar also hides
+the browser's own cancel button on `type="search"`, which had shown a second cross on every page
+that uses it. Spec 025's nav entry moved
+from "Finance & Tools" to "System & Settings". Open: admin nav ignores an item's `feature` flag, so
+Fundraising Campaigns shows even with fundraising off; this predates the regrouping. No FR or NFR in
+`docs/book/03-requirements.md` covers admin navigation, so the tests are untagged. **Acceptance:**
+`nav.service.spec.ts` and `admin-layout.spec.ts` pass; a browser check of the sidebar on desktop and
+at phone width.
+
 The items 84.65 to 84.69 are the owner's answers of 2026-11-03 to the product questions from the spec review. Priorities are proposals.
 
 84.65 [TODO] **Priority: P2 | Depends on: none.** Scholarships can only be managed through the API; there is no admin screen. Owner, 2026-11-03: add a web admin page. Mobile stays read-only for members. Spec 015. **Acceptance:** a web admin page to list, create, edit and close scholarships and review applications, using the existing routes and the shared admin components; Vitest specs for the page and its service; spec 015 updated.
@@ -1492,7 +1512,7 @@ the web menu honours. Decide which of these screens should be reachable before a
 # Work Package 95 — Step-up for email-less admins and by-elections (raised by user 2026-10-03: "if superadmin logged in and he dont have email, how did he get 6 digit code for election menu" and "if any specefic position(s) got empty, there masy needed another elction")
 
 95.2 [PARTIAL 2026-10-21] **Priority: P2 | Depends on: 34.D17-34.D19.** Built 2026-10-21; only the
-preprod release is left, and it waits on the F2 gate (34.D17 to 34.D19). Committee positions must be
+preprod release is left. Its F2 gate (34.D17 to 34.D19) cleared on 2026-11-05. Committee positions must be
 configurable (user decision 2026-10-03). Before this item only the labels were configurable
 (`ecRoleLabels` in org config). The set itself was the `ECPosition` enum (`GHCAA.Domain/Enums.cs:8`), stored as an int on `ECMember.Position`
 and `ElectionSeat.Position`, repeated as a fixed list in `lookup.service.ts`, and parsed by

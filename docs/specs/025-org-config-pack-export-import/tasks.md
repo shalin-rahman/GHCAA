@@ -95,7 +95,7 @@ Numbered after T032 so the earlier task numbers do not move. Phases 4 and 5 need
   Use the shared admin layout, table and notification components and the member import modal's
   file input. Say "zip only" by the picker (FR-17) and warn about assets on redeploy (FR-11).
 - [ ] T024 [62.56d] Add the route behind `superAdminGuard` in `app.routes.ts` and the nav entry in
-  `nav.service.ts` under "Finance & Tools".
+  `nav.service.ts` under "System & Settings".
 - [ ] T025 [62.56d] Vitest specs for the mapping step, mode change and commit, then a browser check
   against the mocked API with a real zip.
 

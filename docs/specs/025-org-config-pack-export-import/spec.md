@@ -164,7 +164,7 @@ them. An `Id` present in a file (as in the seed JSON) is ignored.
   the import rolls back.
 - **FR-16 Access.** Every endpoint uses `Constants.Policies.SuperAdminOnly` and the API rate-limit
   policy. The page sits under the SuperAdmin admin routes, behind `superAdminGuard`, with a nav
-  entry in the "Finance & Tools" section.
+  entry in the "System & Settings" section.
 - **FR-17 Zip only.** Export and import are zip only (D-1). The page says so next to the file
   picker.
 - **FR-18 Unique keys.** The owner ruled on 2026-10-15 that themes, fee configs and payment

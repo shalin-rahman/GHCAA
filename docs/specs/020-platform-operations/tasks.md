@@ -9,7 +9,7 @@ This breakdown maps non-election operations work to the tracker. Live service ch
 - [ ] **7.26** — Configure the Brevo sender and key in the owner-managed environment, deploy, send a real preprod message, and confirm its EmailLogs row reads Sent.
 - [ ] **7.28** — Set the owner-managed S3-compatible storage configuration, deploy, and verify an upload remains available after redeploy.
 - [x] **34.D17, 34.D18** — Done 2026-10-31: `MigrationBootstrapper.RepairMissingColumnsAsync` and the 42P07 history repair; preprod starts and `/health` reports the database healthy.
-- [ ] **34.D19** — After owner redeploys, inspect member cards for academic record display.
+- [x] **34.D19** — Done 2026-11-05: preprod directory cards show a batch line, none "N/A".
 - [x] **96.15** — Done 2026-10-31: preprod starts and a CORS preflight from the preprod origin gets that origin back.
 - [ ] **84.48** — Reconcile owner-provided environment keys and startup settings, deploy, and record live health evidence without copying secrets into repository files.
 

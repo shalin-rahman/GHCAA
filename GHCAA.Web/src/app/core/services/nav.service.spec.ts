@@ -1,6 +1,6 @@
 import { createAuthServiceMock } from '../testing/testing-utils';
 import { TestBed } from '@angular/core/testing';
-import { NavService } from './nav.service';
+import { NavService, ADMIN_NAV_SECTIONS } from './nav.service';
 import { AuthService } from './auth.service';
 import { OrgConfigService } from './org-config.service';
 import { routes } from '../../app.routes';
@@ -64,7 +64,31 @@ describe('NavService', () => {
         
         expect(sections.length).toBeGreaterThan(0);
         expect(sections[0].name).toBe('Overview');
-        expect(sections.find(s => s.name === 'Finance & Tools')).toBeDefined();
+        expect(sections.find(s => s.name === 'Finance & Fundraising')).toBeDefined();
+        expect(sections.find(s => s.name === 'System & Settings')).toBeDefined();
+        expect(sections.find(s => s.name === 'Elections')).toBeDefined();
+        expect(sections.find(s => s.name === 'Reviews & Inquiries')).toBeDefined();
+    });
+
+    it('lists admin sections in the declared order', () => {
+        authServiceMock.currentUser.mockReturnValue({ role: 'SuperAdmin' });
+        expect(service.adminNavSections().map(s => s.name)).toEqual([...ADMIN_NAV_SECTIONS]);
+    });
+
+    it('gives a plain Admin elections and campaigns but not personas or system pages', () => {
+        authServiceMock.currentUser.mockReturnValue({ role: 'Admin', roles: ['Admin'] });
+        const sections = service.adminNavSections();
+        const labelsIn = (name: string) => sections.find(s => s.name === name)?.items.map(i => i.label) ?? [];
+
+        expect(labelsIn('Elections')).toEqual(['Elections', 'Election Content']);
+        expect(labelsIn('Finance & Fundraising')).toEqual(['Fundraising Campaigns']);
+        expect(sections.some(s => s.name === 'System & Settings')).toBe(false);
+    });
+
+    it('shows Election Personas to SuperAdmin under Elections', () => {
+        authServiceMock.currentUser.mockReturnValue({ role: 'SuperAdmin' });
+        const elections = service.adminNavSections().find(s => s.name === 'Elections');
+        expect(elections?.items.map(i => i.label)).toContain('Election Personas');
     });
 
     it('should expose election navigation to members and administrators', () => {

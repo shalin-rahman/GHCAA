@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { Title } from '@angular/platform-browser';
@@ -11,11 +11,12 @@ import { BreadcrumbComponent } from '../../common/breadcrumb/breadcrumb.componen
 import { Icon } from '../../common/icon/icon';
 import { UserMenu } from '../../common/user-menu/user-menu';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, BreadcrumbComponent, Icon, UserMenu, ImgFallbackDirective],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, BreadcrumbComponent, Icon, UserMenu, ImgFallbackDirective, SearchBarComponent],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.scss'
 })
@@ -31,6 +32,25 @@ export class AdminLayout {
   // sidebar on small screens, leaving the nav either permanently covering content or
   // inaccessible).
   isSidebarOpen = signal(false);
+  menuSearch = signal('');
+
+  filteredNavSections = computed(() => {
+    const query = this.menuSearch().trim().toLowerCase();
+    const sections = this.nav.adminNavSections();
+    if (!query) return sections;
+
+    return sections
+      .map(section => {
+        const matchesSection = section.name.toLowerCase().includes(query);
+        // Labels only. Every path starts with /admin/, so matching paths made
+        // short queries like "a" or "ad" match the whole menu.
+        const items = matchesSection
+          ? section.items
+          : section.items.filter(item => item.label.toLowerCase().includes(query));
+        return { name: section.name, items };
+      })
+      .filter(section => section.items.length > 0);
+  });
 
   constructor() {
     // 29D.7: tie the router subscription to component lifecycle to avoid a leak.
@@ -45,6 +65,10 @@ export class AdminLayout {
       // Auto-close the mobile drawer after navigating.
       this.isSidebarOpen.set(false);
     });
+  }
+
+  clearMenuSearch() {
+    this.menuSearch.set('');
   }
 
   toggleSidebar() {

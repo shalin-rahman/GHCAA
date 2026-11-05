@@ -29,7 +29,7 @@ Web:
   checkboxes, download) and an Import tab (file or folder picker, mapping table, mode per section,
   preview counts and failures, commit).
 - A `ConfigPackService` in `core/services/`, a route under the SuperAdmin admin routes in
-  `app.routes.ts`, and a nav entry in `nav.service.ts` under "Finance & Tools".
+  `app.routes.ts`, and a nav entry in `nav.service.ts` under "System & Settings".
 
 Mobile: no change (spec, Out of scope).
 
