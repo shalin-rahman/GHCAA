@@ -501,7 +501,7 @@ review as a reviewing member, create an award, and disburse it once.
   instead of reading the admin-configurable active list the way financial_portal_screen.dart
   does, which maps dynamically from the PaymentGateway config value per a comment near line
   409. The event payment sheet should call the same /api/payment-config/active list so a
-  config change, such as disabling DGePay, takes effect everywhere at once. 2026-11-03: Tracked as 84.54, the mobile event payment sheet should read payment-config/active (still hard-coded at events_screen.dart:109 and :116).
+  config change, such as disabling DGePay, takes effect everywhere at once. 2026-11-03: Tracked as 84.54, the mobile event payment sheet should read payment-config/active (still hard-coded at events_screen.dart:109 and :116). 2026-11-05: done under 84.54. `EventGatewaySheet` reads the same active list as the dues screen and shows online gateways only; manual channels stay on the dues screen.
 
 ### Hard-coded behaviour that should be configuration
 
@@ -509,7 +509,7 @@ review as a reviewing member, create an award, and disburse it once.
   gateway names and labels shown to a member paying for an event as Dart string literals in
   the widget tree, bypassing PaymentConfigController IsEnabled, SortOrder, and DisplayName
   fields entirely. Same file as ENH-006, listed here for the configuration angle: these values
-  already exist in the PaymentConfiguration table and should be read from there. 2026-11-03: Tracked as 84.54, the mobile event payment sheet reads payment-config/active.
+  already exist in the PaymentConfiguration table and should be read from there. 2026-11-03: Tracked as 84.54, the mobile event payment sheet reads payment-config/active. 2026-11-05: done under 84.54; each tile shows the admin's display name, description and icon.
 - **ENH-008** (P2): PaymentConfigService.SeedDefaultsAsync
   (GHCAA.Infrastructure/Services/PaymentConfigService.cs, around line 104) hard-codes the
   Nagad wallet placeholder number 01XXXXXXXXX and holder name GHCAA as seed defaults inline in

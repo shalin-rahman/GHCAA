@@ -8,6 +8,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../features/events/events_service.dart';
 import '../../features/auth/auth_service.dart';
+import '../../features/financials/financial_service.dart';
 import '../../features/financials/gateway_service.dart';
 import '../financials/payment_web_page.dart';
 import '../../core/config/app_config.dart';
@@ -93,34 +94,11 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
           borderRadius:
               BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXL)),
         ),
-        builder: (context) => Container(
-          padding: const EdgeInsets.all(AppTheme.spaceL),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('SELECT PAYMENT METHOD',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelLarge
-                      ?.copyWith(letterSpacing: 2, color: AppTheme.royalGold)),
-              const SizedBox(height: AppTheme.spaceL),
-              _paymentOption(context, 'SSLCommerz', 'Secure Pay with Cards/MFS',
-                  Icons.account_balance_wallet_rounded, () async {
-                Navigator.pop(context);
-                await processPayment(
-                    amount, PaymentGateway.sslCommerz, eventTitle);
-              }),
-              const SizedBox(height: AppTheme.spaceM),
-              _paymentOption(context, 'DGePay', 'Debit/Credit Cards & Wallets',
-                  Icons.credit_card_rounded, () async {
-                Navigator.pop(context);
-                await processPayment(amount, PaymentGateway.dgePay, eventTitle);
-              }),
-              const SizedBox(height: AppTheme.spaceXL),
-            ],
-          ),
+        builder: (sheetContext) => EventGatewaySheet(
+          onSelected: (gateway) async {
+            Navigator.pop(sheetContext);
+            await processPayment(amount, gateway, eventTitle);
+          },
         ),
       );
     }
@@ -841,51 +819,6 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
             color: AppTheme.royalGold, letterSpacing: 1.5, fontSize: 8));
   }
 
-  Widget _paymentOption(BuildContext context, String title, String subtitle,
-      IconData icon, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppTheme.radiusL),
-      child: Container(
-        padding: const EdgeInsets.all(AppTheme.spaceM),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.03),
-          borderRadius: BorderRadius.circular(AppTheme.radiusL),
-          border: Border.all(color: AppTheme.glassBorder),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppTheme.spaceS),
-              decoration: BoxDecoration(
-                color: AppTheme.royalGold.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: AppTheme.royalGold, size: 24),
-            ),
-            const SizedBox(width: AppTheme.spaceM),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w900, color: Colors.white)),
-                  Text(subtitle,
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelSmall
-                          ?.copyWith(color: Colors.white38, fontSize: 10)),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right_rounded, color: Colors.white24),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _datePickerRow(BuildContext context, String label, DateTime? value,
       void Function(DateTime) onPicked,
       {bool nullable = false}) {
@@ -926,6 +859,115 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontSize: 7,
                     color: AppTheme.royalGold.withValues(alpha: 0.5))),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// 84.54: the gateways come from payment-config/active, the same list the dues screen reads,
+// so turning a gateway off in admin removes it here too. Only online gateways are offered:
+// an event fee is charged through /gateways/initiate, and the manual channels on the dues
+// screen record a membership fee instead.
+class EventGatewaySheet extends ConsumerWidget {
+  const EventGatewaySheet({super.key, required this.onSelected});
+
+  final void Function(PaymentGateway gateway) onSelected;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final configsAsync = ref.watch(activePaymentConfigsProvider);
+    return Container(
+      padding: const EdgeInsets.all(AppTheme.spaceL),
+      child: configsAsync.when(
+        data: (configs) {
+          final gateways = configs
+              .where((c) => c['isOnline'] == true)
+              .map((c) => (config: c, gateway: gatewayFromName(c['gateway']?.toString())))
+              .where((g) => g.gateway != PaymentGateway.none)
+              .toList();
+          if (gateways.isEmpty) {
+            return const EmptyStateWidget(
+              'No online payment method is available for events. Please contact the association office.',
+              icon: Icons.payments_outlined,
+            );
+          }
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('SELECT PAYMENT METHOD',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelLarge
+                      ?.copyWith(letterSpacing: 2, color: AppTheme.royalGold)),
+              const SizedBox(height: AppTheme.spaceL),
+              for (final g in gateways) ...[
+                _option(context, g.config, () => onSelected(g.gateway)),
+                const SizedBox(height: AppTheme.spaceM),
+              ],
+              const SizedBox(height: AppTheme.spaceM),
+            ],
+          );
+        },
+        loading: () => const Padding(
+            padding: EdgeInsets.all(AppTheme.spaceXL),
+            child: Center(child: LogoSpinner(size: 100))),
+        error: (e, s) => const EmptyStateWidget(
+          'Payment methods could not be loaded. Please try again.',
+          icon: Icons.error_outline,
+        ),
+      ),
+    );
+  }
+
+  Widget _option(BuildContext context, dynamic config, VoidCallback onTap) {
+    final iconStr = (config['icon'] as String?)?.trim();
+    final description = config['description'] as String?;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppTheme.radiusL),
+      child: Container(
+        padding: const EdgeInsets.all(AppTheme.spaceM),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.03),
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
+          border: Border.all(color: AppTheme.glassBorder),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppTheme.spaceS),
+              decoration: BoxDecoration(
+                color: AppTheme.royalGold.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              // The admin sets the icon as an emoji; fall back to a wallet icon.
+              child: (iconStr != null && iconStr.isNotEmpty)
+                  ? Text(iconStr, style: const TextStyle(fontSize: 20))
+                  : const Icon(Icons.account_balance_wallet_rounded,
+                      color: AppTheme.royalGold, size: 24),
+            ),
+            const SizedBox(width: AppTheme.spaceM),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(config['displayName']?.toString() ?? 'Payment',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w900, color: Colors.white)),
+                  if (description != null && description.isNotEmpty)
+                    Text(description,
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelSmall
+                            ?.copyWith(color: Colors.white38, fontSize: 10)),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: Colors.white24),
           ],
         ),
       ),

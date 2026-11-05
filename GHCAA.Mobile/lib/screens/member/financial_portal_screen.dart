@@ -23,10 +23,6 @@ final duesProvider = FutureProvider<double>(
     (ref) async => ref.read(financialServiceProvider).getOutstandingDues());
 final savedMethodsProvider = FutureProvider<List<dynamic>>(
     (ref) async => ref.read(financialServiceProvider).getSavedMethods());
-// 29G.1: admin-configured, enabled payment methods (manual channels work without live gateway keys).
-final activePaymentConfigsProvider = FutureProvider.autoDispose<List<dynamic>>(
-    (ref) async =>
-        ref.read(financialServiceProvider).getActivePaymentConfigs());
 final ledgerSearchQueryProvider =
     StateProvider.autoDispose<String>((ref) => "");
 
@@ -182,7 +178,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
         Navigator.pop(context);
         if (isOnline) {
           _initiatePayment(
-              amount, _gatewayFromString(m['gateway']?.toString()));
+              amount, gatewayFromName(m['gateway']?.toString()));
         } else {
           _showManualPaymentForm(m, amount);
         }
@@ -403,17 +399,6 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  // Map the config's PaymentGateway enum name (e.g. "SSLCommerz", "BkashGateway", "DGePay")
-  // to the mobile PaymentGateway enum, tolerating case and the "Gateway" suffix.
-  PaymentGateway _gatewayFromString(String? gw) {
-    if (gw == null) return PaymentGateway.none;
-    final key = gw.toLowerCase().replaceAll('gateway', '');
-    return PaymentGateway.values.firstWhere(
-      (g) => g.name.toLowerCase() == key,
-      orElse: () => PaymentGateway.none,
     );
   }
 

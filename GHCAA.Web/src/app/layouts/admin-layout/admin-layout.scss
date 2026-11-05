@@ -139,7 +139,7 @@
     align-items: center;
     gap: 0.75rem;
     padding: var(--nav-item-pad-y) 0.75rem;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     text-decoration: none;
     color: var(--text-main);
     font-weight: 600;
@@ -224,7 +224,7 @@
     font-size: 0.62rem;
     font-weight: 800;
     padding: 0.1rem 0.45rem;
-    border-radius: 4px;
+    border-radius: var(--radius-xs);
     background: color-mix(in srgb, var(--primary-color) 12%, transparent);
     color: var(--text-main);
     text-transform: uppercase;
@@ -283,7 +283,7 @@ app-breadcrumb {
 
 .header-btn {
     padding: 0.4rem 0.9rem;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--glass-border);
     color: var(--text-muted);
     text-decoration: none;

@@ -3,6 +3,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } fro
 import { CommonModule } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { NavService } from '../../core/services/nav.service';
+import { NAV_SCOPE } from '../../core/constants/app.constants';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Icon } from '../../common/icon/icon';
@@ -42,7 +43,7 @@ export class PortalLayout {
       takeUntilDestroyed()
     ).subscribe(() => {
       const url = this.router.url;
-      const title = this.nav.labelFor(url, 'portal');
+      const title = this.nav.labelFor(url, NAV_SCOPE.PORTAL);
       this.currentPageTitle.set(title);
       this.titleService.setTitle(`${title} | ${this.orgConfig.config()?.branding?.shortName ?? 'GHCAA'} Member Portal`);
 

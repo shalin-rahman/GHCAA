@@ -75,7 +75,7 @@ The nine domain specs hold 55 ENH items: 6 at P1, 25 at P2 and 24 at P3. One of 
 
 | Theme | Where it appears | Suggested shared fix |
 |---|---|---|
-| Payment options and fees hard-coded in a client | 012 ENH-004 (web registration fee of 500), 015 ENH-006 and ENH-007 (mobile event payment sheet lists two gateways) | Read the fee and the active gateway list from OrgConfig and PaymentConfig, as the mobile financial portal already does |
+| Payment options and fees hard-coded in a client | 012 ENH-004 (web registration fee of 500), 015 ENH-006 and ENH-007 (mobile event payment sheet; fixed 2026-11-05 under 84.54) | Read the fee and the active gateway list from OrgConfig and PaymentConfig, as the mobile financial portal already does |
 | Membership rules hard-coded | 018 ENH-007 (voting membership types), 018 ENH-008 and ENH-009 (form codes, seat names) | Move them into OrgConfig so another organisation can change them |
 | Upload size limits written as literals | 013 ENH-004, 014 ENH-005, 020 ENH-005 | One upload policy in configuration, read by every upload route |
 | Listing, request and admin approval built again per entity | 014 ENH-002 (events and gallery), 015 ENH-003 and ENH-004 (campaigns and scholarships), 016 ENH-003 (mentorship), 017 ENH-002 | A shared module shape: entity, request, approval state, admin queue. Build it when the next module (84.19 meetings) needs it, not before. Spec 021 records the later step of shipping modules as packages |

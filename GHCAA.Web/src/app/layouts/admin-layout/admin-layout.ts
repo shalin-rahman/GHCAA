@@ -4,6 +4,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } fro
 import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/services/auth.service';
 import { NavService } from '../../core/services/nav.service';
+import { NAV_SCOPE } from '../../core/constants/app.constants';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -59,7 +60,7 @@ export class AdminLayout {
       takeUntilDestroyed()
     ).subscribe(() => {
       const url = this.router.url;
-      const title = this.nav.labelFor(url, 'admin');
+      const title = this.nav.labelFor(url, NAV_SCOPE.ADMIN);
       this.currentPageTitle.set(title);
       this.titleService.setTitle(`${title} | ${this.orgConfig.config()?.branding?.shortName ?? 'Admin'} Admin`);
       // Auto-close the mobile drawer after navigating.

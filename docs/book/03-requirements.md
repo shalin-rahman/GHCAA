@@ -213,7 +213,7 @@ the defence in §8.8.
 
 | ID | Requirement | Source | Pri |
 | --- | --- | --- | --- |
-| FR-41 | The system shall provide an administrative console covering membership, payments, events, posts, communication, governance and configuration, with functions available according to the acting user's role. | I | M |
+| FR-41 | The system shall provide an administrative console covering membership, payments, events, posts, communication, governance and configuration, with functions available according to the acting user's role, grouped into named sections with a search over them, and shall hide from an administrator other than the super-administrator any function whose feature is disabled. | I | M |
 | FR-42 | The system shall hold operational parameters as configuration rather than in code, including fee amounts, payment channel particulars and instructions, the subscription anniversary, rate limits and contact details, and shall permit an authorised administrator to change them without redeployment. | I, O | M |
 | FR-43 | The system shall record every administrative act that changes a member's status, verifies a payment, or amends configuration, together with the acting user and the time. | O, D (Art. VI) | M |
 | FR-44 | The system shall implement archival deletion, such that a record marked archived is excluded from ordinary retrieval while remaining recoverable, and shall not permit destructive deletion of membership or financial records through the interface. | D (Art. VI), I | M |

@@ -31,6 +31,10 @@ export const ELECTION_STAFF_ROLES = [SUPER_ADMIN_ROLE, ADMIN_ROLE, 'ElectionOffi
 // Mirrors Constants.Policies.AdminOnly on the API.
 export const ADMIN_ROLES = [SUPER_ADMIN_ROLE, ADMIN_ROLE] as const;
 
+// Which menu NavService.labelFor reads a page title from.
+export const NAV_SCOPE = { ADMIN: 'admin', PORTAL: 'portal' } as const;
+export type NavScope = typeof NAV_SCOPE[keyof typeof NAV_SCOPE];
+
 // 37.13y/z: mirror the limits in Constants.Elections and AppointmentReasonDto on the API.
 export const ELECTION_RULES_UNLOCK = { DEFAULT_MINUTES: 30, MAX_MINUTES: 60, REASON_MIN: 20, REASON_MAX: 1000 } as const;
 export const ELECTION_APPOINTMENT_REASON_MAX = 400;

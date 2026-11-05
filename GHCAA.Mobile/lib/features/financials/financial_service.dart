@@ -10,6 +10,11 @@ final financialServiceProvider = Provider<FinancialService>((ref) {
   return FinancialService(ref.read(dioProvider));
 });
 
+// 29G.1: payment methods the admin has enabled. The dues and event payment sheets both read it.
+final activePaymentConfigsProvider = FutureProvider.autoDispose<List<dynamic>>(
+    (ref) async =>
+        ref.read(financialServiceProvider).getActivePaymentConfigs());
+
 class FinancialService {
   final Dio _dio;
   FinancialService(this._dio);

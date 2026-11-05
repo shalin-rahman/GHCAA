@@ -29,9 +29,11 @@ It exits 1 when an open item is missing here or a closed one is still scheduled.
   code review of wave 1 and a full `ci-local.py` run before 99.3 closes. Do not start wave 2 before that.
 - **Open:** 120 items on 2026-11-03, 1 of them this plan's own upkeep in Work Package 99 (`python scripts/backlog_inventory.py`). Held: 8 (`--state ONHOLD`).
 - **Spec review, 2026-11-03.** The specs were checked against the tracker and the code. Fourteen
-  verified gaps became items: 37.16f to 37.16h in stream E, and 84.54 to 84.64 in streams N2, N3
-  and N6. Their priorities are proposals; the owner can change them. 84.54 (the mobile event
-  payment sheet ignores the active-gateway settings) is the only P1. The owner answered the six
+  verified gaps became items: 37.16f to 37.16h in stream E, and eleven Work Package 84 items in streams N2, N3
+  and N6. Their priorities are proposals; the owner can change them. That review's one P1 item and
+  the three P1 items the owner added from the admin sidebar work (84.73) all closed on 2026-11-05;
+  the progress log in section 9 lists them. 84.77 (client option lists the server already holds)
+  was added as P2 the same day. The owner answered the six
   product questions from the same review on 2026-11-03; they became 84.65 to 84.69 (section 5,
   the owner gates).
 - **Next three items** once wave 1 is accepted, cheapest first as in the wave 2 table: 84.4 (web
@@ -86,8 +88,8 @@ work in the order the tracker's `Depends on` tags give.
 |---|---|---|
 | E | Spec 023 delivery plan sessions F2 to F11 and N1, auth plan Part A and B4-B5. Order below. | 37.1m, 37.14o, 37.1p, 37.16e, 37.16f, 37.16g, 37.16h, 37.12y, 37.13f, 37.13g, 37.14a, 37.14d, 37.14f, 37.14m, 37.14n, 37.14t, 95.2, 95.4, 95.5, 95.12, 95.6, 84.42, 84.50 |
 | N1 | Non-election plan phase 1, release and environment blockers | 7.26, 7.28, 34.D8, 62.41, 84.48 |
-| N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.9, 84.18, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 84.54, 84.55, 84.56, 84.57, 84.58, 84.60, 84.62, 84.68, 97.1 |
-| N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 84.61, 84.64, 84.67, 84.69, 84.73, 93.3, 93.4, 96.3 |
+| N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.9, 84.18, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 84.55, 84.56, 84.57, 84.58, 84.60, 84.62, 84.68, 97.1 |
+| N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 84.61, 84.64, 84.67, 84.69, 84.73, 84.77, 93.3, 93.4, 96.3 |
 | N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.71, 84.72, 84.19, 84.20, 84.59, 84.65, 84.66, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5 |
 | N5 | Phase 5, white-label profile and reusable modules | 62.2, 62.42, 62.56 |
 | N6 | Phase 6, performance and quality | 27.1, 27.8, 34.D7, 37.11, 51.4, 51.5, 84.63, 98.7 |
@@ -352,3 +354,6 @@ What counts as evidence:
 | 2026-11-03 | 84.65-84.69 (added) | Owner answers to the six review questions; election screen split and accepted refactors recorded in the specs | `docs/TODO.md`, this file, specs 013, 014, 015, 018, 023 |
 | 2026-11-03 | 99.7, 99.8 (added) | Scripts and plans audited against the code; `--check` 0 problems; script tests 18 and authz tests 12 pass | Fixed scripts and plans listed in 99.7; two backlog plans and nine dead scripts deleted |
 | 2026-11-03 | 99.9 (added, closed) | Owner: this file is the only open plan. All 102 open items were already named here; the open order of the auth plan, the spec 023 delivery plan and the white-label plan moved into section 3 | This file, the other plan files' opening lines, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md` |
+| 2026-11-05 | 84.74-84.76 (added) | Owner set the three gaps left open by 84.73 as P1; each checked in the code at the file and line the item names | `docs/TODO.md`, this file |
+| 2026-11-05 | 84.54, 84.74, 84.75, 84.76 (closed) | `event_gateway_sheet_test.dart` 5 of 5, `flutter analyze` clean; `nav.service.spec.ts` and `admin-layout.spec.ts` 33 of 33, type-check clean. FR-41 widened on the owner's choice | `events_screen.dart`, `financial_service.dart`, `gateway_service.dart`, `financial_portal_screen.dart`, `nav.service.ts`, `app.constants.ts`, both layouts, `admin-layout.scss`, `styles.scss`, `03-requirements.md`, specs 001 and 015 |
+| 2026-11-05 | 84.77 (added) | Owner asked whether client option lists should come from the server; checked in the code the same day | `docs/TODO.md`, this file |

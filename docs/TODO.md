@@ -315,8 +315,6 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
   docs/TODO_ARCHIVE.md on 2026-10-14.
 - **84.42** — [PARTIAL] Mobile step-up is built (37.1w); only a real-device check of the admin step-up routes is left. Found by 84.5.
   (84.41, the same-area `Forbid(string)` 500, is done.)
-- **84.54** — The mobile event payment sheet lists two gateways by name and ignores the active-gateway
-  settings. Found by the 2026-11-03 spec review.
 
 ### P2 — MEDIUM (real, no urgency signal)
 - **37.1p** — Election rules still open: recount, candidate consent, spoiled
@@ -1224,7 +1222,7 @@ What is left is a device check that `POST /roles/users`, `POST /roles/assign` an
 
 The items 84.54 to 84.64 come from the spec review of 2026-11-03. Each gap was checked in the code on that date; the file and line are given. Priorities are proposed from the gap's severity and are the owner's to change.
 
-84.54 [TODO] **Priority: P1 | Depends on: none.** The mobile event payment sheet lists SSLCommerz and DGePay by name (`GHCAA.Mobile/lib/screens/member/events_screen.dart:109`). It does not ask `payment-config/active`, so a gateway the admin has turned off still shows, and one turned on does not. The dues screen already reads the active list through `financial_service.dart:89`, used in `financial_portal_screen.dart:125`. Spec 015 ENH-006 and ENH-007. **Acceptance:** the event sheet shows only the active gateways, using the same service call as the dues screen; widget tests for one, two and no active gateways.
+84.54 [DONE] **Priority: P1 | Depends on: none.** The mobile event payment sheet lists SSLCommerz and DGePay by name (`GHCAA.Mobile/lib/screens/member/events_screen.dart:109`). It does not ask `payment-config/active`, so a gateway the admin has turned off still shows, and one turned on does not. The dues screen already reads the active list through `financial_service.dart:89`, used in `financial_portal_screen.dart:125`. Spec 015 ENH-006 and ENH-007. **Acceptance:** the event sheet shows only the active gateways, using the same service call as the dues screen; widget tests for one, two and no active gateways. Done 2026-11-05: `EventGatewaySheet` in `events_screen.dart` reads `activePaymentConfigsProvider`, now in `financial_service.dart` so the dues and event sheets share it, and the shared `gatewayFromName` in `gateway_service.dart`. It lists only online gateways; manual channels such as bKash send-money stay on the dues screen because they record a membership fee. With none active it shows an empty state. **Acceptance:** met. `event_gateway_sheet_test.dart` (one, two, none, manual left out, name parsing) passes; `flutter analyze` is clean.
 
 84.55 [TODO] **Priority: P2 | Depends on: none.** `GalleryController.CreateGallery` binds the EF entity `EventGallery` as its request body (`GalleryController.cs:106`), so a caller can set fields the server should own. Spec 014 ENH-003. **Acceptance:** a `CreateGalleryDto` with only the fields a caller may set, mapped in the service; a test shows extra fields in the body are ignored; contract change recorded in `docs/API_CONTRACT_REGISTRY.md`; web and mobile callers checked.
 
@@ -1282,11 +1280,35 @@ filters links by label or section name. Section names live in `ADMIN_NAV_SECTION
 box is the shared `app-search-bar` with a compact size in `styles.scss`. The shared bar also hides
 the browser's own cancel button on `type="search"`, which had shown a second cross on every page
 that uses it. Spec 025's nav entry moved
-from "Finance & Tools" to "System & Settings". Open: admin nav ignores an item's `feature` flag, so
-Fundraising Campaigns shows even with fundraising off; this predates the regrouping. No FR or NFR in
-`docs/book/03-requirements.md` covers admin navigation, so the tests are untagged. **Acceptance:**
+from "Finance & Tools" to "System & Settings". Three gaps found during this work are tracked as
+84.74 (admin nav ignores feature flags), 84.75 (no requirement for admin navigation, so the tests are
+untagged) and 84.76 (fixed corner sizes in `admin-layout.scss`). **Acceptance:**
 `nav.service.spec.ts` and `admin-layout.spec.ts` pass; a browser check of the sidebar on desktop and
 at phone width.
+
+84.74 [DONE] **Priority: P1 | Depends on: none.** The admin sidebar ignores an item's `feature`
+flag. `NavService.adminNavItems` (`nav.service.ts:142`) filters by role only, while
+`portalNavItems` also checks `orgConfig.isFeatureEnabled`. So Fundraising Campaigns
+(`/admin/campaigns`, `feature: 'enableFundraising'`) shows when fundraising is off. This predates the
+84.73 regrouping. Raised by the owner 2026-11-05. **Acceptance:** `adminNavItems` applies the same
+feature check as the portal list; `nav.service.spec.ts` shows a flagged admin item hidden when its
+flag is off and shown when it is on; the search box finds no hidden item. Owner, 2026-11-05: a SuperAdmin keeps every admin link with its feature off, so a feature can be set up before it is turned on; only a plain Admin loses the link. Done 2026-11-05: portal and admin lists share `NavService.isVisible`, and `adminNavItems` skips the feature check for a SuperAdmin. Role names and the `labelFor` scope now come from `app.constants.ts` (`ADMIN_ROLES`, `SUPER_ADMIN_ROLE`, `NAV_SCOPE`). **Acceptance:** met. `nav.service.spec.ts` covers Admin with the flag off and on, SuperAdmin with it off, and the empty Finance section dropped; the search reads the same filtered list.
+
+84.75 [DONE] **Priority: P1 | Depends on: none.** No FR or NFR in `docs/book/03-requirements.md`
+covers admin navigation, so the 84.73 tests in `nav.service.spec.ts` and `admin-layout.spec.ts` carry
+no tag. Raised by the owner 2026-11-05. **Acceptance:** the owner agrees a requirement (or an existing
+one is widened) for grouped admin navigation with search and feature-flag hiding; it is added to
+chapter 3 with the book build clean under `--strict`; the 84.73 and 84.74 tests are tagged with it. Owner, 2026-11-05: widen FR-41 rather than add a new FR. Done 2026-11-05: FR-41 now also requires named sections with a search, and hides a function whose feature is off from every administrator except the super-administrator. The admin-menu tests in `nav.service.spec.ts` and the search tests in `admin-layout.spec.ts` carry `FR-41:`. **Acceptance:** met; the book builds clean under `--strict`.
+
+84.76 [DONE] **Priority: P1 | Depends on: none.** `admin-layout.scss` still hardcodes corner sizes
+the theme already defines: `border-radius: 8px` at lines 142 and 286, which match `--radius-sm` in
+`styles.scss:119`. Line 227 uses `4px`, which has no token; line 219 (`50%`, a circle) is fine as it
+is. These lines predate 84.73. Raised by the owner 2026-11-05. **Acceptance:** the 8px values use
+`var(--radius-sm)`; the 4px value either gets a new `--radius-xs` token in `styles.scss` or moves to
+the nearest existing token, with the choice noted here; the sidebar looks the same in a browser check
+in light and dark themes. Done 2026-11-05: `.nav-item` and `.header-btn` use `var(--radius-sm)`; `.role-badge` uses a new `--radius-xs: 4px` token in `styles.scss`, since no existing token is 4px. The computed sizes are unchanged, so the sidebar renders the same. Sixteen other `border-radius: 4px` values in eight other files are left as they are; they are outside this item. **Acceptance:** met.
+
+84.77 [TODO] **Priority: P2 | Depends on: none.** Option lists on both clients repeat values the server already holds. Raised by the owner 2026-11-05 for `MEMBERSHIP_TYPES`, `MEMBER_CATEGORIES`, `JOB_CATEGORIES`, `ACADEMIC_SUBJECTS` and `PROFESSIONAL_SECTORS` in `app.constants.ts`; checked in the code the same day. Degree, AcademicSubject, ProfessionalSector and TShirtSize are seeded lookup groups served by `GET /api/lookups/{group}` and editable by an admin, yet web (`app.constants.ts:154`, `:509`, `:522`, `:535`) and mobile (`registration_constants.dart:7-25`) hardcode them. OrgConfig carries `membershipTypeLabels` and `memberCategoryLabels`, but `getMembershipTypeLabel` and `getCategoryLabel` ignore them. JobCategory has no lookup rows, so it is compiled in on every side. The `lookup.service.ts:34` fallback says "Active Member" where OrgConfig says "Active". Mobile `directory_screen.dart:199` filters by six of the eleven categories. Blood group, gender, status and vacancy-reason lists mirror fixed server enums and can stay as constants. **Acceptance:** both clients read the lookup groups and the OrgConfig label maps, keeping one fallback copy each; JobCategory gets lookup rows through a migration, since a seed edit reaches only a new database; the mobile directory filter lists every category; tests on web and mobile cover a served list and the fallback.
 
 The items 84.65 to 84.69 are the owner's answers of 2026-11-03 to the product questions from the spec review. Priorities are proposals.
 

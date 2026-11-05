@@ -68,7 +68,7 @@ describe('AdminLayout', () => {
     expect(component).toBeTruthy();
   });
 
-  it('renders all sections and items when search query is empty', () => {
+  it('FR-41: renders all sections and items when search query is empty', () => {
     const sections = component.filteredNavSections();
     expect(sections.length).toBe(3);
     const compiled = fixture.nativeElement as HTMLElement;
@@ -76,7 +76,7 @@ describe('AdminLayout', () => {
     expect(sectionLabels.length).toBe(3);
   });
 
-  it('filters sections and items matching query by item label', () => {
+  it('FR-41: filters sections and items matching query by item label', () => {
     component.menuSearch.set('fee');
     fixture.detectChanges();
 
@@ -92,7 +92,7 @@ describe('AdminLayout', () => {
     expect(items[0].textContent).toContain('Fee Policy');
   });
 
-  it('filters sections when search matches section name', () => {
+  it('FR-41: filters sections when search matches section name', () => {
     component.menuSearch.set('membership');
     fixture.detectChanges();
 
@@ -102,7 +102,7 @@ describe('AdminLayout', () => {
     expect(sections[0].items.length).toBe(2);
   });
 
-  it('renders empty state when search matches no menu items', () => {
+  it('FR-41: renders empty state when search matches no menu items', () => {
     component.menuSearch.set('nonexistent query 123');
     fixture.detectChanges();
 
@@ -115,7 +115,7 @@ describe('AdminLayout', () => {
     expect(emptyState?.textContent).toContain('No menu items found');
   });
 
-  it('clears menu search on clearMenuSearch()', () => {
+  it('FR-41: clears menu search on clearMenuSearch()', () => {
     component.menuSearch.set('fee');
     fixture.detectChanges();
     expect(component.filteredNavSections().length).toBe(1);
@@ -127,7 +127,7 @@ describe('AdminLayout', () => {
     expect(component.filteredNavSections().length).toBe(3);
   });
 
-  it('updates menuSearch when the shared search bar emits', () => {
+  it('FR-41: updates menuSearch when the shared search bar emits', () => {
     const input = (fixture.nativeElement as HTMLElement).querySelector('.nav-search-container input') as HTMLInputElement;
     input.value = 'ledger';
     input.dispatchEvent(new Event('input'));
@@ -144,7 +144,7 @@ describe('AdminLayout', () => {
     expect(component.filteredNavSections()).toEqual([]);
   });
 
-  it('clears the search on Escape', () => {
+  it('FR-41: clears the search on Escape', () => {
     component.menuSearch.set('fee');
     fixture.detectChanges();
     const input = (fixture.nativeElement as HTMLElement).querySelector('.nav-search-container input') as HTMLInputElement;
@@ -152,7 +152,7 @@ describe('AdminLayout', () => {
     expect(component.menuSearch()).toBe('');
   });
 
-  it('shows no empty-search message when the menu is empty and nothing is typed', () => {
+  it('FR-41: shows no empty-search message when the menu is empty and nothing is typed', () => {
     navMock.adminNavSections.set([]);
     fixture.detectChanges();
     expect((fixture.nativeElement as HTMLElement).querySelector('.nav-empty-state')).toBeNull();

@@ -5,6 +5,17 @@ import '../../core/api/api_client.dart';
 
 enum PaymentGateway { none, stripe, paypal, sslCommerz, bkash, nagad, rocket, bankTransfer, manual, dgePay }
 
+// Maps the gateway name a payment config carries (e.g. "SSLCommerz", "BkashGateway", "DGePay")
+// to the enum, ignoring case and the "Gateway" suffix. Unknown names give PaymentGateway.none.
+PaymentGateway gatewayFromName(String? name) {
+  if (name == null) return PaymentGateway.none;
+  final key = name.toLowerCase().replaceAll('gateway', '');
+  return PaymentGateway.values.firstWhere(
+    (g) => g.name.toLowerCase() == key,
+    orElse: () => PaymentGateway.none,
+  );
+}
+
 class PaymentInitiationResponse {
   final bool success;
   final String? gatewayUrl;

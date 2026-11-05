@@ -2,7 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { AuthService } from './auth.service';
 import { OrgConfigService } from './org-config.service';
 import { OrgConfig } from '../models/org-config.model';
-import { ELECTION_STAFF_ROLES } from '../constants/app.constants';
+import { ADMIN_ROLE, ADMIN_ROLES, ELECTION_STAFF_ROLES, NAV_SCOPE, NavScope, SUPER_ADMIN_ROLE } from '../constants/app.constants';
 
 export interface NavItem {
     path: string;
@@ -88,18 +88,18 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
 
     { path: '/admin/elections', label: 'Elections', icon: 'governance', section: 'Elections' },
     { path: '/admin/election-content', label: 'Election Content', icon: 'governance', section: 'Elections' },
-    { path: '/admin/election-personas', label: 'Election Personas', icon: 'governance', roles: ['SuperAdmin'], section: 'Elections' },
+    { path: '/admin/election-personas', label: 'Election Personas', icon: 'governance', roles: [SUPER_ADMIN_ROLE], section: 'Elections' },
 
-    { path: '/admin/ledger', label: 'Financial Ledger', icon: 'ledger', roles: ['SuperAdmin'], section: 'Finance & Fundraising' },
-    { path: '/admin/payments', label: 'Payment Settings', icon: 'payment-settings', roles: ['SuperAdmin'], section: 'Finance & Fundraising' },
-    { path: '/admin/payments/fees', label: 'Fee Policy', icon: 'fee-policy', roles: ['SuperAdmin'], section: 'Finance & Fundraising' },
+    { path: '/admin/ledger', label: 'Financial Ledger', icon: 'ledger', roles: [SUPER_ADMIN_ROLE], section: 'Finance & Fundraising' },
+    { path: '/admin/payments', label: 'Payment Settings', icon: 'payment-settings', roles: [SUPER_ADMIN_ROLE], section: 'Finance & Fundraising' },
+    { path: '/admin/payments/fees', label: 'Fee Policy', icon: 'fee-policy', roles: [SUPER_ADMIN_ROLE], section: 'Finance & Fundraising' },
     { path: '/admin/campaigns', label: 'Fundraising Campaigns', icon: 'ledger', feature: 'enableFundraising', section: 'Finance & Fundraising' },
 
-    { path: '/admin/org-config', label: 'Org Config', icon: 'org-config', roles: ['SuperAdmin'], section: 'System & Settings' },
-    { path: '/admin/roles', label: 'User Roles', icon: 'roles', roles: ['SuperAdmin'], section: 'System & Settings' },
-    { path: '/admin/audit', label: 'Audit Logs', icon: 'audit', roles: ['SuperAdmin'], section: 'System & Settings' },
-    { path: '/admin/error-logs', label: 'Error Logs', icon: 'audit', roles: ['SuperAdmin'], section: 'System & Settings' },
-    { path: '/admin/dev-tracker', label: 'Developer Options', icon: 'audit', roles: ['SuperAdmin'], section: 'System & Settings' }
+    { path: '/admin/org-config', label: 'Org Config', icon: 'org-config', roles: [SUPER_ADMIN_ROLE], section: 'System & Settings' },
+    { path: '/admin/roles', label: 'User Roles', icon: 'roles', roles: [SUPER_ADMIN_ROLE], section: 'System & Settings' },
+    { path: '/admin/audit', label: 'Audit Logs', icon: 'audit', roles: [SUPER_ADMIN_ROLE], section: 'System & Settings' },
+    { path: '/admin/error-logs', label: 'Error Logs', icon: 'audit', roles: [SUPER_ADMIN_ROLE], section: 'System & Settings' },
+    { path: '/admin/dev-tracker', label: 'Developer Options', icon: 'audit', roles: [SUPER_ADMIN_ROLE], section: 'System & Settings' }
 ];
 
 @Injectable({ providedIn: 'root' })
@@ -114,10 +114,7 @@ export class NavService {
         // 29F.4: honor OrgConfig feature flags — items tied to a disabled feature are
         // hidden (was returning the full list regardless of the tenant's configuration).
         const roles = user.roles ?? [user.role];
-        return ALL_NAV_ITEMS.filter(item =>
-            (!item.feature || this.orgConfig.isFeatureEnabled(item.feature)) &&
-            (!item.roles || item.roles.some(r => roles.includes(r)))
-        );
+        return ALL_NAV_ITEMS.filter(item => this.isVisible(item, roles));
     });
 
     /** Mobile quick-nav items (subset) */
@@ -141,13 +138,20 @@ export class NavService {
     /** Returns admin nav items (only available to Admin/SuperAdmin) */
     adminNavItems = computed<NavItem[]>(() => {
         const user = this.auth.currentUser();
-        if (!user || !['Admin', 'SuperAdmin'].includes(user.role)) return [];
-        return ADMIN_NAV_ITEMS.filter(item => {
-            if (!item.roles) return true;
-            const roles = user.roles ?? [user.role];
-            return item.roles.some(r => roles.includes(r));
-        });
+        if (!user || !(ADMIN_ROLES as readonly string[]).includes(user.role)) return [];
+        const roles = user.roles ?? [user.role];
+        // Owner, 2026-11-05: a SuperAdmin keeps every admin link with its feature off, so a
+        // disabled feature can still be set up before it is turned on.
+        const ignoreFeatures = roles.includes(SUPER_ADMIN_ROLE);
+        return ADMIN_NAV_ITEMS.filter(item => this.isVisible(item, roles, ignoreFeatures));
     });
+
+    // Portal and admin menus apply the same two checks: the item's feature flag is on,
+    // and the user holds one of its roles.
+    private isVisible(item: NavItem, roles: string[], ignoreFeatures = false): boolean {
+        return (ignoreFeatures || !item.feature || this.orgConfig.isFeatureEnabled(item.feature)) &&
+            (!item.roles || item.roles.some(r => roles.includes(r)));
+    }
 
     /** Grouped admin items for safe UI rendering */
     adminNavSections = computed(() => {
@@ -163,12 +167,12 @@ export class NavService {
      * and portal-layout each used to duplicate inline, so nav label and page title can
      * never drift apart again (they're now the same lookup, not two copies of it).
      */
-    labelFor(url: string, scope: 'admin' | 'portal'): string {
+    labelFor(url: string, scope: NavScope): string {
         // 82.32: `.find()` on an ordered list returned the FIRST matching path, so a nav item whose
         // path is a prefix of another (e.g. /admin/members before /admin/members/ec) always won —
         // Executive Committee's header/tab read "All Members". Picking the longest matching path
         // makes the more specific route win regardless of list order.
-        if (scope === 'admin') {
+        if (scope === NAV_SCOPE.ADMIN) {
             const matches = this.adminNavItems().filter(x => url.includes(x.path));
             const match = matches.sort((a, b) => b.path.length - a.path.length)[0];
             return match?.label ?? 'Control Panel';
@@ -181,8 +185,8 @@ export class NavService {
     /** Whether the current user has admin access */
     isAdmin = computed(() => {
         const role = this.auth.currentUser()?.role;
-        return role === 'Admin' || role === 'SuperAdmin';
+        return role === ADMIN_ROLE || role === SUPER_ADMIN_ROLE;
     });
 
-    isSuperAdmin = computed(() => this.auth.currentUser()?.role === 'SuperAdmin');
+    isSuperAdmin = computed(() => this.auth.currentUser()?.role === SUPER_ADMIN_ROLE);
 }

@@ -85,7 +85,9 @@
       "Bash(grep -nE \"^#{1,3} |Status|status|DONE|built|Built\" delivery-plan.md)",
       "Bash(sed -n 513,552p docs/specs/023*/delivery-plan.md | cut -c1-260; grep -rln \"ElectionRecountRequest\\\\|class ElectionConflict\\\\|ConsentAt\\\\|ConflictDeclaration\" --include=*.cs GHCAA.Domain GHCAA.Infrastructure GHCAA.Application | grep -v \"/bin/\\\\|/obj/\" | head)",
       "Bash(pwsh -v)",
-      "Bash(powershell.exe -NoProfile -Command '$bad=0; Get-ChildItem \"GHCAA.Tools\\\\*.ps1\" | % { $e=$null; [void][System.Management.Automation.Language.Parser]::ParseFile\\($_.FullName,[ref]$null,[ref]$e\\); if\\($e.Count\\){$bad++; \"$\\($_.Name\\): $\\($e[0].Message\\)\"} else {\"ok $\\($_.Name\\)\"} }')"
+      "Bash(powershell.exe -NoProfile -Command '$bad=0; Get-ChildItem \"GHCAA.Tools\\\\*.ps1\" | % { $e=$null; [void][System.Management.Automation.Language.Parser]::ParseFile\\($_.FullName,[ref]$null,[ref]$e\\); if\\($e.Count\\){$bad++; \"$\\($_.Name\\): $\\($e[0].Message\\)\"} else {\"ok $\\($_.Name\\)\"} }')",
+      "PowerShell(python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md)",
+      "PowerShell(graphify update .)"
     ],
     "additionalDirectories": [
       "C:\\Users\\HabiburRahmanShalin\\workstation\\shaleen\\shalin\\GHC\\Application\\GHCAA\\013-*",
