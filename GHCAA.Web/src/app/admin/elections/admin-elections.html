@@ -96,7 +96,7 @@
             <div class="stack gap-2" *ngIf="(approvals()[election.id] ?? []).length > 0">
                 <div class="flex flex-wrap justify-between items-center gap-2" *ngFor="let approval of approvals()[election.id]">
                     <span>
-                        {{ approvalLabels[approval.action] }}, asked for by {{ approval.requestedBy }}. Expires {{ approval.expiresAt | date:'medium' }}.
+                        {{ approvalLabels[approval.action] }}, asked for by {{ approval.requestedBy }}. Expires {{ approval.expiresAt | appDate }} {{ approval.expiresAt | date:'shortTime' }}.
                         <ng-container *ngIf="approval.keyFingerprint"> New key fingerprint: <code>{{ approval.keyFingerprint }}</code></ng-container>
                         <ng-container *ngIf="approval.approvedAt"> Approved. Count with the key file to finish.</ng-container>
                     </span>

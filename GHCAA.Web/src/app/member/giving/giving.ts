@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { RouterLink } from '@angular/router';
 import { CampaignService } from '../../core/services/campaign.service';
 import { CampaignPledge } from '../../core/models/business.models';
@@ -11,7 +12,7 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 @Component({
     selector: 'app-giving',
     standalone: true,
-    imports: [CommonModule, RouterLink, LoadingPanelComponent, AppCurrencyPipe, PageHeaderComponent],
+    imports: [CommonModule, AppDatePipe, RouterLink, LoadingPanelComponent, AppCurrencyPipe, PageHeaderComponent],
     templateUrl: './giving.html',
     styleUrl: './giving.scss'
 })

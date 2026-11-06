@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { RouterLink } from '@angular/router';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { ConstitutionService, Constitution } from '../../core/services/constitution.service';
@@ -18,7 +19,7 @@ import { BatchPipe, hasBatchLabel } from '../../core/pipes/batch.pipe';
     // ... (rest of metadata)
     selector: 'app-governance',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective, LazyImgDirective, BatchPipe],
+    imports: [CommonModule, AppDatePipe, FormsModule, RouterLink, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective, LazyImgDirective, BatchPipe],
     templateUrl: './governance.html',
     styleUrl: './governance.scss'
 })

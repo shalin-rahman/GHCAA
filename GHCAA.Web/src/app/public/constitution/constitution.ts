@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { ConstitutionService, Constitution } from '../../core/services/constitution.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
@@ -98,7 +99,7 @@ export function parseArticles(content: string): ConstitutionArticle[] {
 @Component({
     selector: 'app-constitution',
     standalone: true,
-    imports: [CommonModule, LoadingPanelComponent],
+    imports: [CommonModule, AppDatePipe, LoadingPanelComponent],
     templateUrl: './constitution.html',
     styleUrl: './constitution.scss'
 })

@@ -118,6 +118,21 @@ public class NewsServiceTests : TestBase
         saved!.ImageUrl.Should().Be("/uploads/news/test.jpg");
     }
 
+    // PollService posts its announcement through this method with a relative link to the poll page.
+    // The sanitizer must keep that href, or the announcement shows a dead link.
+    [Category("FR-26")]
+    [Test]
+    public async Task CreateNewsAsync_KeepsRelativePollLink()
+    {
+        var link = $"<a href=\"{Constants.Discussion.PollPagePath}\">Open the poll</a>";
+        var dto = new CreateNewsDto { Title = "Poll open", Content = $"<p>Vote now.</p><p>{link}</p>", ArticleCategory = Enums.ArticleCategory.Regular };
+
+        var result = await _service.CreateNewsAsync(dto, _authorId);
+
+        result.Content.Should().Contain($"href=\"{Constants.Discussion.PollPagePath}\"");
+        result.Content.Should().Contain("Open the poll");
+    }
+
     [Category("FR-28")]
     [Test]
     public async Task UpdateNewsAsync_ShouldModifyExistingPost()

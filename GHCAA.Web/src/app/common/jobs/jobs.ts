@@ -9,8 +9,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { AuthService } from '../../core/services/auth.service';
 import { getJobCategoryLabel, SUBMISSION_STATUS_MAP, LOOKUP_GROUPS, SEARCH_DEBOUNCE_MS, LIST_PAGE_SIZE } from '../../core/constants/app.constants';
-import { appendById } from '../../core/utils/paging.util';
-import { LookupService } from '../../core/services/lookup.service';
+import { appendById } from '../../core/utils/paging.util';import { LookupService } from '../../core/services/lookup.service';
 import { LoadingPanelComponent } from '../loading-panel/loading-panel';
 import { PageHeaderComponent } from '../page-header/page-header.component';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
@@ -134,10 +133,8 @@ export class Jobs implements OnInit {
         this.closeForm();
         this.loadJobs();
       },
-      error: () => {
-        this.submitting.set(false);
-        this.notify.error('Failed to post opportunity.');
-      }
+      // The HTTP interceptor already shows the server's message (84.56).
+      error: () => this.submitting.set(false)
     });
   }
 

@@ -12,16 +12,32 @@ class ApiException implements Exception {
   }
 
   /// The message the server put in an error body, or null if there is none. The API answers
-  /// with ProblemDetails (82.4), so `detail` then `title` come first; `message` and `error`
-  /// cover bodies still on the older ad-hoc shape. Every mobile reader goes through this so
-  /// they agree on the order (84.43).
+  /// with ProblemDetails (82.4), so `detail` comes first. A model-validation 400 has no
+  /// detail and a generic title, so the first entry of its `errors` map comes before the
+  /// title (84.56). `message` and `error` cover bodies on the older ad-hoc shape. Web
+  /// `serverErrorMessage` in http.util.ts reads the same order.
   static String? serverMessage(dynamic data) {
     if (data is! Map) return null;
-    for (final key in const ['detail', 'title', 'message', 'error']) {
-      final value = data[key];
-      if (value != null && value.toString().isNotEmpty) return value.toString();
+    final detail = _text(data['detail']);
+    if (detail != null) return detail;
+    // A map of field to messages, or a plain list; web reads both through Object.values.
+    final errors = data['errors'];
+    final entries = errors is Map ? errors.values : (errors is List ? errors : const []);
+    for (final entry in entries) {
+      final first = entry is List && entry.isNotEmpty ? _text(entry.first) : _text(entry);
+      if (first != null) return first;
+    }
+    for (final key in const ['title', 'message', 'error']) {
+      final value = _text(data[key]);
+      if (value != null) return value;
     }
     return null;
+  }
+
+  static String? _text(dynamic value) {
+    if (value == null || value is Map || value is List) return null;
+    final s = value.toString();
+    return s.isEmpty ? null : s;
   }
 
   factory ApiException.fromDioException(DioException error) {

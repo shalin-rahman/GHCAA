@@ -22,7 +22,7 @@
         <tbody>
           @for (p of pledges(); track p.id) {
             <tr>
-              <td>{{ p.pledgedAt | date: 'mediumDate' }}</td>
+              <td>{{ p.pledgedAt | appDate }}</td>
               <td>{{ p.amount | appCurrency }}</td>
               <td>{{ p.amountReceived | appCurrency }}</td>
               <td><span class="status-badge" [class]="getPledgeStatusClass(p.status)">{{ getPledgeStatusLabel(p.status) }}</span></td>

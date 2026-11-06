@@ -3,7 +3,7 @@
     <div *ngIf="!loaded()"><button class="btn btn-secondary btn-sm" (click)="load()">Check rules unlock</button></div>
     <ng-container *ngIf="loaded() && unlock() as current; else closedBox">
         <p>
-            Unlocked by <strong>{{ current.openedBy }}</strong> at {{ current.openedAt | date:'short' }}.
+            Unlocked by <strong>{{ current.openedBy }}</strong> at {{ current.openedAt | appDate }} {{ current.openedAt | date:'shortTime' }}.
             About {{ minutesLeft(current) }} minute(s) left.
         </p>
         <p class="text-muted">Reason: {{ current.reason }}</p>

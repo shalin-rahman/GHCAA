@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../../core/pipes/app-date.pipe';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -14,7 +15,7 @@ import { ElectionRulesUnlockDto } from '../../../core/models/election.models';
 @Component({
     selector: 'app-election-rules-unlock',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, AppDatePipe, FormsModule],
     templateUrl: './election-rules-unlock.html'
 })
 export class ElectionRulesUnlock {

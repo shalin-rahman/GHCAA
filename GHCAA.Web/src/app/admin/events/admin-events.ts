@@ -21,7 +21,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { NavService } from '../../core/services/nav.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
-import { getEventStatusMeta } from '../../core/utils/date.util';
+import { getEventStatusMeta, toDisplayDate } from '../../core/utils/date.util';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 
@@ -102,7 +102,7 @@ export class AdminEvents implements OnInit {
         (r.contributionAmount || r.eventFee || 0).toFixed(2),
         r.paymentReference,
         r.status,
-        new Date(r.registeredAt).toLocaleDateString()
+        toDisplayDate(r.registeredAt, this.orgConfigService.dateFormat())
     ];
 
     // Form handling

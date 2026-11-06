@@ -102,7 +102,7 @@
             </div>
             <img [src]="post.imageUrl || '/assets/logo.png'" class="detail-img mb-8" *ngIf="post.imageUrl" appImgFallback="/assets/logo.png">
             <div class="detail-meta mb-4">
-                <span class="date">{{ post.createdAt | date:'fullDate' }}</span>
+                <span class="date">{{ post.createdAt | appDate }}</span>
                 <span class="author ml-4">By <strong>{{ post.authorName }}</strong></span>
             </div>
             <h2 class="detail-title mb-6">{{ post.title }}</h2>

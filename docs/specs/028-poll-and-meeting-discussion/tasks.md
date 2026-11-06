@@ -58,5 +58,5 @@
 
 ## Phase 6: Close
 
-- [ ] T013 Record the routes and fields in `docs/API_CONTRACT_REGISTRY.md`; update `PROJECT_MAP.md`
+- [x] T013 Record the routes and fields in `docs/API_CONTRACT_REGISTRY.md`; update `PROJECT_MAP.md`
   and the swagger snapshot; run `python scripts/ci-local.py` and `graphify update .`.

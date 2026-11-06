@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -35,7 +36,7 @@ type AdminElectionsTab = 'elections' | 'nominations';
 @Component({
     selector: 'app-admin-elections',
     standalone: true,
-    imports: [CommonModule, FormsModule, LoadingPanelComponent, SearchBarComponent, PageHeaderComponent, ElectionOfficials, ElectionRulesUnlock, ElectionFormRecords, NominationRecords],
+    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, SearchBarComponent, PageHeaderComponent, ElectionOfficials, ElectionRulesUnlock, ElectionFormRecords, NominationRecords],
     templateUrl: './admin-elections.html'
 })
 export class AdminElections {

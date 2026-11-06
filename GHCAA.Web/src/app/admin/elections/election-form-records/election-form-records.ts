@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../../core/pipes/app-date.pipe';
 import { Component, Input, OnInit, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ElectionsService } from '../../../core/services/elections.service';
@@ -35,7 +36,7 @@ interface RecountForm {
 @Component({
     selector: 'app-election-form-records',
     standalone: true,
-    imports: [CommonModule, FormsModule, LoadingPanelComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent],
     templateUrl: './election-form-records.html'
 })
 export class ElectionFormRecords implements OnInit {

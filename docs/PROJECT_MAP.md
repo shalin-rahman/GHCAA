@@ -746,13 +746,27 @@ not block a build yet). For the full mechanism and where it stands, see
 
 | Method | Returns | Auth |
 |---|---|---|
-| `GetActivePollsAsync(memberId, ct)` | `List<PollDto>` | Member |
-| `GetAllPollsAsync(ct)` | `List<PollDto>` | Admin |
+| `GetActivePollsAsync(memberId, category, ct)` | `List<PollDto>` | Member |
+| `GetAllPollsAsync(category, includeArchived, ct)` | `List<PollDto>` | Admin |
 | `GetPollByIdAsync(id, memberId, ct)` | `PollDto?` | Member |
-| `CreatePollAsync(dto, adminId, ct)` | `int` | Admin |
+| `CreatePollAsync(dto, adminMemberId, authorUserId, ct)` | `int` | Admin; can also post a linked news item |
 | `VoteAsync(pollId, memberId, optionIds, ct)` | `bool` | Member |
 | `TogglePollStatusAsync(id, isActive, ct)` | `bool` | Admin |
-| `DeletePollAsync(id, ct)` | `bool` | Admin |
+| `DeletePollAsync(id, adminMemberId, hideAnnouncement, ct)` | `bool` | Admin |
+| `SetAllowCommentsAsync(id, allowComments, adminMemberId, ct)` | `bool` | Admin |
+
+---
+
+### `IDiscussionService`
+**Impl:** `DiscussionService`. Comment threads stored as forum posts under a context topic (spec 028). Polls use it now; meetings will through 84.19.
+
+| Method | Returns | Auth |
+|---|---|---|
+| `GetThreadAsync(contextType, contextId, memberId, isAdmin, page, pageSize, ct)` | `DiscussionResult<CommentThreadDto>` | Member |
+| `PostCommentAsync(contextType, contextId, memberId, isAdmin, dto, ct)` | `DiscussionResult<CommentDto>` | Member |
+| `RemoveCommentAsync(contextType, contextId, commentId, memberId, isAdmin, reason, ct)` | `DiscussionResult<bool>` | Author or Admin |
+| `SetLockedAsync(contextType, contextId, locked, adminMemberId, ct)` | `DiscussionResult<bool>` | Admin |
+| `CountCommentsAsync(contextType, contextIds, ct)` | `Dictionary<int, int>` | Internal |
 
 ---
 
@@ -834,6 +848,7 @@ not block a build yet). For the full mechanism and where it stands, see
 | `TokenResponseDto` | JWT login response |
 | `PollDto` / `PollOptionDto` | Poll data |
 | `CreatePollDto` / `PollVoteDto` | Poll creation / voting |
+| `CommentThreadDto` / `CommentDto` / `CreateCommentDto` | Poll comment threads (spec 028) |
 | `ScholarshipDtos` (fund/call/application/review/award) | Scholarship programme; the review-queue DTO omits applicant identity fields |
 | `ArchiveDtos` (collection/item) | Oral-history archive CRUD and public reads |
 | `CredentialVerificationDto` | `IIDCardService.VerifyCredentialAsync` response — `{ Valid, MemberName, MembershipType, IssuedOn, Status }` only |
@@ -879,6 +894,7 @@ All services are registered as **Scoped** unless noted.
 | `IFamilyLinkService` | `FamilyLinkService` | Services/ |
 | `IMentorshipService` | `MentorshipService` | Services/ |
 | `IPollService` | `PollService` | Services/ |
+| `IDiscussionService` | `DiscussionService` | Services/ |
 | `ISmsService` | `GreenwebSmsService` | Services/ (**HttpClient**) |
 | `IRealTimeService` | `RealTimeService` | API/Services/ |
 | `IErrorLogService` | `ErrorLogService` | Services/ (WP45; called from `ExceptionMiddleware`) |

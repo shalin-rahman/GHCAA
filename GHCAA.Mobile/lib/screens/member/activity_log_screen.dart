@@ -1,3 +1,4 @@
+import '../../core/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -109,7 +110,7 @@ class _ActivityLogScreenState extends ConsumerState<ActivityLogScreen> {
                                   child: GlassTile(
                                     icon: _getIconForAction(log['action']),
                                     title: (log['action'] ?? 'SYSTEM EVENT').toUpperCase(),
-                                    subtitle: '${log['details']}\n${(log['createdAt'] ?? '').toString().split('T')[0]}',
+                                    subtitle: '${log['details']}\n${log['createdAt'] != null ? AppUtils.formatDate(log['createdAt']) : ''}',
                                     onTap: () => HapticFeedback.lightImpact(),
                                   ),
                                 );

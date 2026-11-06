@@ -132,7 +132,7 @@ class _AdminLedgerScreenState extends ConsumerState<AdminLedgerScreen> {
                                         child: Icon(isRevenue ? Icons.add_circle_outline : Icons.remove_circle_outline, color: isRevenue ? Colors.greenAccent : Colors.redAccent, size: 20),
                                       ),
                                       title: Text(record['description'] ?? 'Transaction Asset', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white)),
-                                      subtitle: Text('${record['recordDate']?.split('T')[0] ?? 'Legacy Record'} | Member #${record['memberId']}', style: const TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark)),
+                                      subtitle: Text('${record['recordDate'] != null ? AppUtils.formatDate(record['recordDate']) : 'Legacy Record'} | Member #${record['memberId']}', style: const TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark)),
                                       trailing: Text(AppUtils.formatCurrency(record['amount'], currency), style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: isRevenue ? Colors.greenAccent : Colors.white)),
                                     ),
                                   ),

@@ -246,7 +246,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                                               const SizedBox(width: 12),
                                               _buildMiniBadge(Icons.work_outline, job['jobType'] ?? 'Full-time'),
                                               const Spacer(),
-                                              Text('Deadline: ${job['deadlineDate']?.toString().split('T')[0] ?? 'TBD'}',
+                                              Text('Deadline: ${job['deadlineDate'] != null ? AppUtils.formatDate(job['deadlineDate']) : 'TBD'}',
                                                   style: const TextStyle(color: Colors.white38, fontSize: 8.5, fontWeight: FontWeight.bold)),
                                             ],
                                           ),
@@ -316,18 +316,21 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                       'title': titleCtrl.text,
                       'companyName': companyCtrl.text,
                       'location': locCtrl.text,
-                      'externalUrl': linkCtrl.text,
+                      'applicationLink': linkCtrl.text,
                       'description': descCtrl.text,
                       'postedAt': AppUtils.toWire(DateTime.now()),
                       'isActive': true,
                     };
-                    final success = await ref.read(jobServiceProvider).postJob(payload);
-                    if (success) {
+                    final error = await ref.read(jobServiceProvider).postJob(payload);
+                    if (error == null) {
                       HapticFeedback.heavyImpact();
                       ref.invalidate(jobsListProvider);
                       if (ctx.mounted) Navigator.pop(ctx);
+                    } else if (ctx.mounted) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        SnackBar(content: Text(error), backgroundColor: Colors.redAccent),
+                      );
                     }
-                  } catch (_) {
                   } finally {
                     if (ctx.mounted) setStateDialog(() => saving = false);
                   }

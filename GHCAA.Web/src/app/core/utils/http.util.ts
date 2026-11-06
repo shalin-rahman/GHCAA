@@ -18,6 +18,28 @@ export function silentHeaders(): HttpHeaders {
 }
 
 /**
+ * The message an error reply carries, or the fallback. `detail` comes first. A model-validation
+ * 400 has no detail and a generic title, so the first entry of its `errors` map comes before the
+ * title (84.56). Mobile `ApiException.serverMessage` reads the same order.
+ */
+export function serverErrorMessage(err: unknown, fallback: string): string {
+    const body = (err as { error?: unknown } | null)?.error;
+    if (!body || typeof body !== 'object') return fallback;
+    const b = body as Record<string, unknown>;
+    const text = (v: unknown) => (typeof v === 'string' && v ? v : null);
+    const detail = text(b['detail']);
+    if (detail) return detail;
+    const errors = b['errors'];
+    if (errors && typeof errors === 'object') {
+        for (const entry of Object.values(errors)) {
+            const first = text(Array.isArray(entry) ? entry[0] : entry);
+            if (first) return first;
+        }
+    }
+    return text(b['title']) ?? text(b['message']) ?? text(b['error']) ?? fallback;
+}
+
+/**
  * Builds HttpParams from a key-value map, omitting undefined, null, or empty string values.
  */
 export function buildHttpParams(params: Record<string, string | number | boolean | null | undefined>): HttpParams {

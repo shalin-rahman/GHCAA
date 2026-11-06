@@ -6,6 +6,7 @@ import { NotificationService } from '../services/notification.service';
 import { StepUpService } from '../services/step-up.service';
 import { environment } from '../../../environments/environment';
 import { XSRF } from '../constants/app.constants';
+import { serverErrorMessage } from '../utils/http.util';
 
 // 24.44: Shared refresh state — one in-flight refresh serves all concurrent 401s.
 let isRefreshing = false;
@@ -141,7 +142,7 @@ function handle401(
 // server-supplied message lives. Older cached responses or a non-API failure won't have either,
 // which is what the per-status defaults below are still for.
 function serverMessage(error: HttpErrorResponse): string | undefined {
-    return error.error?.detail || error.error?.title;
+    return serverErrorMessage(error, '') || undefined;
 }
 
 function handleError(

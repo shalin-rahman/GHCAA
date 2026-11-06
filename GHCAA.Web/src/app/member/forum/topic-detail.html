@@ -28,7 +28,7 @@
               }
               <div class="author-details">
                 <span class="name">{{ topic()!.authorName }}</span>
-                <span class="date">{{ formatDate(topic()!.createdAt) }}</span>
+                <span class="date">{{ topic()!.createdAt | appDate }}</span>
               </div>
             </div>
             <div class="topic-actions">
@@ -69,7 +69,7 @@
                       </span>
                     }
                   </span>
-                  <span class="date">{{ formatDate(post.createdAt) }}</span>
+                  <span class="date">{{ post.createdAt | appDate }}</span>
                 </div>
               </div>
               <div class="reply-actions">

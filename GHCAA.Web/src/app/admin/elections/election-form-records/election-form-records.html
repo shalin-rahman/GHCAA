@@ -45,7 +45,7 @@
             <div class="flex justify-between items-center">
                 <span>
                     <strong>{{ recount.positionTitle }}</strong>, {{ recount.applicantName }}
-                    <span class="text-muted"> {{ text.RECOUNT_RECEIVED_AT_LABEL }} {{ utcToLocal(recount.receivedAt) | date:'medium' }}</span>
+                    <span class="text-muted"> {{ text.RECOUNT_RECEIVED_AT_LABEL }} {{ utcToLocal(recount.receivedAt) | appDate }} {{ utcToLocal(recount.receivedAt) | date:'shortTime' }}</span>
                 </span>
                 <span class="status-badge" [class.pending]="recount.allowed == null" [class.active]="recount.allowed === true" [class.inactive]="recount.allowed === false">
                     {{ recount.allowed == null ? text.RECOUNT_PENDING : recount.allowed ? text.RECOUNT_ALLOWED : text.RECOUNT_REFUSED }}

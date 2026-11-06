@@ -1,3 +1,4 @@
+import '../../core/utils/app_utils.dart';
 import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,8 +25,7 @@ final isAdminProvider = FutureProvider.autoDispose<bool>((ref) async {
 String? _memberDobDisplay(Map<String, dynamic> profile) {
   final v = profile['dateOfBirth'] ?? profile['dob'];
   if (v == null) return null;
-  final s = v.toString();
-  return s.contains('T') ? s.split('T')[0] : s;
+  return AppUtils.formatDate(v);
 }
 
 final memberDetailsProvider = FutureProvider.family<Map<String, dynamic>?, int>((ref, memberId) async {
@@ -229,14 +229,14 @@ class _MemberDetailsScreenState extends ConsumerState<MemberDetailsScreen> {
             const SizedBox(height: AppTheme.spaceM),
             _buildSectionCard('MEMBERSHIP DETAILS', [
               _InfoRow(icon: Icons.auto_awesome, label: 'Merit Score', value: (profile['contributionPoints'] ?? profile['meritPoints'] ?? 0).toString()),
-              _InfoRow(icon: Icons.file_present, label: 'Application Date', value: profile['createdAt'] != null ? profile['createdAt'].toString().split('T')[0] : null),
-              _InfoRow(icon: Icons.verified_user, label: 'Approval Date', value: profile['approvalDate'] != null ? profile['approvalDate'].toString().split('T')[0] : 'Pending'),
+              _InfoRow(icon: Icons.file_present, label: 'Application Date', value: profile['createdAt'] != null ? AppUtils.formatDate(profile['createdAt']) : null),
+              _InfoRow(icon: Icons.verified_user, label: 'Approval Date', value: profile['approvalDate'] != null ? AppUtils.formatDate(profile['approvalDate']) : 'Pending'),
             ]),
             const SizedBox(height: AppTheme.spaceM),
             _buildSectionCard('Admin Controls & Meta', [
               _InfoRow(icon: Icons.admin_panel_settings, label: 'Role', value: profile['role']),
               _InfoRow(icon: Icons.verified, label: 'Status', value: profile['status'] ?? (profile['isApproved'] == true ? 'Approved' : 'Pending'), highlight: (profile['status'] ?? (profile['isApproved'] == true ? 'Approved' : 'Pending')) == 'Pending'),
-              _InfoRow(icon: Icons.calendar_today, label: 'Joined', value: profile['createdAt'] != null ? profile['createdAt'].toString().split('T')[0] : null),
+              _InfoRow(icon: Icons.calendar_today, label: 'Joined', value: profile['createdAt'] != null ? AppUtils.formatDate(profile['createdAt']) : null),
             ]),
             const SizedBox(height: AppTheme.spaceM),
             _buildSectionCard('Dossier Verification', [

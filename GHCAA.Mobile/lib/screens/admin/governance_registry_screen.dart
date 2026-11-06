@@ -1,3 +1,6 @@
+import '../../core/utils/app_utils.dart';
+import '../../core/widgets/app_date_picker.dart';
+import '../../core/services/org_config_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -67,8 +70,9 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
 
   void _showPeriodDialog({dynamic period}) {
     final titleCtrl = TextEditingController(text: period != null ? period['title'] : '');
-    final startCtrl = TextEditingController(text: period != null ? period['startDate']?.split('T')[0] : '');
-    final endCtrl = TextEditingController(text: period != null ? period['endDate']?.split('T')[0] : '');
+    final dateFormat = ref.read(orgDateFormatProvider).identifier;
+    DateTime? startDate = AppUtils.parseDate(period?['startDate']?.toString());
+    DateTime? endDate = AppUtils.parseDate(period?['endDate']?.toString());
     bool saving = false;
 
     showDialog(
@@ -82,8 +86,33 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(controller: titleCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Term Title (e.g., EC 2026-2028)')),
-                TextField(controller: startCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Start Date (YYYY-MM-DD)')),
-                TextField(controller: endCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'End Date (YYYY-MM-DD) - Optional')),
+                ListTile(
+                  key: const Key('ec-period-start'),
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Start Date', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                  subtitle: Text(startDate == null ? 'Select date' : displayAppDate(startDate, format: dateFormat), style: const TextStyle(color: Colors.white)),
+                  trailing: const Icon(Icons.event, color: AppTheme.royalGold, size: 18),
+                  onTap: () async {
+                    final picked = await showAppDatePicker(context: ctx, initialDate: startDate);
+                    if (picked != null) setDialogState(() => startDate = picked);
+                  },
+                ),
+                ListTile(
+                  key: const Key('ec-period-end'),
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('End Date (optional)', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                  subtitle: Text(endDate == null ? 'Not set' : displayAppDate(endDate, format: dateFormat), style: const TextStyle(color: Colors.white)),
+                  trailing: endDate == null
+                      ? const Icon(Icons.event, color: AppTheme.royalGold, size: 18)
+                      : IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.white54, size: 18),
+                          onPressed: () => setDialogState(() => endDate = null),
+                        ),
+                  onTap: () async {
+                    final picked = await showAppDatePicker(context: ctx, initialDate: endDate ?? startDate);
+                    if (picked != null) setDialogState(() => endDate = picked);
+                  },
+                ),
               ],
             ),
           ),
@@ -92,13 +121,17 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
               onPressed: saving ? null : () async {
+                if (startDate == null) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Pick a start date.')));
+                  return;
+                }
                 setDialogState(() => saving = true);
                 try {
                   final admin = ref.read(adminServiceProvider);
                   final payload = {
                     'title': titleCtrl.text,
-                    'startDate': startCtrl.text,
-                    if (endCtrl.text.isNotEmpty) 'endDate': endCtrl.text,
+                    'startDate': AppUtils.toWire(startDate),
+                    if (endDate != null) 'endDate': AppUtils.toWire(endDate),
                   };
 
                   final ok = period == null
@@ -227,7 +260,7 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
                                           ],
                                         ),
                                         const SizedBox(height: 12),
-                                        Text('${p['startDate'].split('T')[0]} — ${p['endDate'] != null ? p['endDate'].split('T')[0] : 'PRESENT'}', 
+                                        Text('${AppUtils.formatDate(p['startDate'])} — ${p['endDate'] != null ? AppUtils.formatDate(p['endDate']) : 'PRESENT'}', 
                                           style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 11, fontWeight: FontWeight.bold)),
                                         const Divider(color: Colors.white10, height: 32),
                                         Row(

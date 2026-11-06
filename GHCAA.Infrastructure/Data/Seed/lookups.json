@@ -876,5 +876,93 @@
     "Label": "Other Opportunities",
     "IsActive": true,
     "DisplayOrder": 9
+  },
+  {
+    "Id": 5101,
+    "LookupGroup": "DiscussionCategory",
+    "Value": "Governance",
+    "Label": "Governance",
+    "IsActive": true,
+    "DisplayOrder": 1
+  },
+  {
+    "Id": 5102,
+    "LookupGroup": "DiscussionCategory",
+    "Value": "Finance",
+    "Label": "Finance",
+    "IsActive": true,
+    "DisplayOrder": 2
+  },
+  {
+    "Id": 5103,
+    "LookupGroup": "DiscussionCategory",
+    "Value": "Events",
+    "Label": "Events",
+    "IsActive": true,
+    "DisplayOrder": 3
+  },
+  {
+    "Id": 5104,
+    "LookupGroup": "DiscussionCategory",
+    "Value": "AlumniAffairs",
+    "Label": "Alumni affairs",
+    "IsActive": true,
+    "DisplayOrder": 4
+  },
+  {
+    "Id": 5105,
+    "LookupGroup": "DiscussionCategory",
+    "Value": "Other",
+    "Label": "Other",
+    "IsActive": true,
+    "DisplayOrder": 5
+  },
+  {
+    "Id": 5106,
+    "LookupGroup": "DiscussionCategory",
+    "Value": "Election",
+    "Label": "Election",
+    "IsActive": true,
+    "DisplayOrder": 6
+  },
+  {
+    "Id": 5107,
+    "LookupGroup": "DiscussionCategory",
+    "Value": "Membership",
+    "Label": "Membership",
+    "IsActive": true,
+    "DisplayOrder": 7
+  },
+  {
+    "Id": 5108,
+    "LookupGroup": "DiscussionCategory",
+    "Value": "Fundraising",
+    "Label": "Fundraising",
+    "IsActive": true,
+    "DisplayOrder": 8
+  },
+  {
+    "Id": 5109,
+    "LookupGroup": "DiscussionCategory",
+    "Value": "MentorshipCareers",
+    "Label": "Mentorship and careers",
+    "IsActive": true,
+    "DisplayOrder": 9
+  },
+  {
+    "Id": 5110,
+    "LookupGroup": "DiscussionCategory",
+    "Value": "ScholarshipWelfare",
+    "Label": "Scholarship and welfare",
+    "IsActive": true,
+    "DisplayOrder": 10
+  },
+  {
+    "Id": 5111,
+    "LookupGroup": "DiscussionCategory",
+    "Value": "Communication",
+    "Label": "Communication",
+    "IsActive": true,
+    "DisplayOrder": 11
   }
 ]

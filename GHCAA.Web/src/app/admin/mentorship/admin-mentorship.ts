@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { firstValueFrom } from 'rxjs';
 import { MentorshipService } from '../../core/services/mentorship.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -16,7 +17,7 @@ export type MentorshipTab = 'All' | 'Pending' | 'Accepted' | 'Completed' | 'Decl
 @Component({
     selector: 'app-admin-mentorship',
     standalone: true,
-    imports: [CommonModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ModalHeaderComponent],
+    imports: [CommonModule, AppDatePipe, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ModalHeaderComponent],
     templateUrl: './admin-mentorship.html',
     changeDetection: ChangeDetectionStrategy.OnPush
 })

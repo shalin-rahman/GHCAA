@@ -29,7 +29,7 @@
                     <h2>{{ election.title }}</h2>
                     <span class="status-badge" [class]="getElectionPhaseClass(election.phase)">{{ getElectionPhaseLabel(election.phase) }}</span>
                     @if (election.pollingOpensOn) {
-                        <p class="text-muted">Polling {{ election.pollingOpensOn | date: 'medium' }} to {{ election.pollingClosesOn | date: 'medium' }}.</p>
+                        <p class="text-muted">Polling {{ election.pollingOpensOn | appDate }} {{ election.pollingOpensOn | date:'shortTime' }} to {{ election.pollingClosesOn | appDate }} {{ election.pollingClosesOn | date:'shortTime' }}.</p>
                     }
                     <a [routerLink]="['/officials/elections', election.id]" class="btn btn-primary btn-sm">Open election</a>
                 </div>
@@ -62,7 +62,7 @@
                         } @else {
                             @for (a of approvals(); track a.id) {
                                 <div class="flex justify-between items-center" data-row="approval">
-                                    <span>{{ approvalLabels[a.action] }}, asked for by {{ a.requestedBy }}. Expires {{ a.expiresAt | date: 'medium' }}.</span>
+                                    <span>{{ approvalLabels[a.action] }}, asked for by {{ a.requestedBy }}. Expires {{ a.expiresAt | appDate }} {{ a.expiresAt | date:'shortTime' }}.</span>
                                     @if (canApprove(a)) {
                                         <span class="flex gap-2">
                                             <button type="button" class="btn btn-primary btn-sm" [disabled]="decidingId() === a.id" (click)="approve(a)">Approve</button>
@@ -125,7 +125,7 @@
                     <div class="glass-card" data-card="audit">
                         <h2>Latest audit entries</h2>
                         @for (a of audit(); track a.seq) {
-                            <p>{{ a.seq }}. {{ a.action }}, {{ a.at | date: 'medium' }}</p>
+                            <p>{{ a.seq }}. {{ a.action }}, {{ a.at | appDate }} {{ a.at | date:'shortTime' }}</p>
                         }
                     </div>
                 }

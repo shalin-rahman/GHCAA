@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildHttpParams, getSilentHeaders, silentHeaders, SKIP_ERROR_NOTIFY_HEADER } from './http.util';
+import { buildHttpParams, getSilentHeaders, serverErrorMessage, silentHeaders, SKIP_ERROR_NOTIFY_HEADER } from './http.util';
 
 describe('http.util', () => {
     describe('getSilentHeaders', () => {
@@ -41,6 +41,35 @@ describe('http.util', () => {
             expect(params.has('category')).toBe(false);
             expect(params.has('filter')).toBe(false);
             expect(params.has('empty')).toBe(false);
+        });
+    });
+
+    describe('serverErrorMessage (84.56)', () => {
+        const reply = (error: unknown) => ({ error });
+
+        it('gives the first errors entry of a validation reply, not the generic title', () => {
+            expect(serverErrorMessage(reply({
+                title: 'One or more validation errors occurred.',
+                errors: { Title: ['The Title field is required.'], CompanyName: ['x'] }
+            }), 'fb')).toBe('The Title field is required.');
+        });
+
+        it('puts detail before errors, and errors before title, message and error', () => {
+            expect(serverErrorMessage(reply({ detail: 'd', errors: { X: ['x'] }, title: 't' }), 'fb')).toBe('d');
+            expect(serverErrorMessage(reply({ title: 't', message: 'm' }), 'fb')).toBe('t');
+            expect(serverErrorMessage(reply({ message: 'm', error: 'e' }), 'fb')).toBe('m');
+            expect(serverErrorMessage(reply({ error: 'e' }), 'fb')).toBe('e');
+        });
+
+        it('skips empty errors entries and empty strings', () => {
+            expect(serverErrorMessage(reply({ detail: '', errors: { X: [], Y: '' }, title: 't' }), 'fb')).toBe('t');
+        });
+
+        it('returns the fallback for a missing, plain-text or unknown body', () => {
+            expect(serverErrorMessage(null, 'fb')).toBe('fb');
+            expect(serverErrorMessage(reply(null), 'fb')).toBe('fb');
+            expect(serverErrorMessage(reply('plain text'), 'fb')).toBe('fb');
+            expect(serverErrorMessage(reply({ status: 400 }), 'fb')).toBe('fb');
         });
     });
 });

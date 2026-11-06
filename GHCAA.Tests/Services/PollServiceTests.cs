@@ -128,8 +128,7 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task GetActivePollsAsync_CategoryFilter_ReturnsOnlyThatCategory()
         {
-            _db.Lookups.Add(new LookupItem { LookupGroup = GHCAA.Domain.Constants.Discussion.CategoryLookupGroup, Value = "Events", Label = "Events", IsActive = true });
-            await _db.SaveChangesAsync();
+            // "Events" is an active DiscussionCategory row in the lookups seed.
             var member = await CreatePollMemberAsync(30);
             await _pollService.CreatePollAsync(PollDto("Events"), AdminMemberId, null);
             await _pollService.CreatePollAsync(PollDto(), AdminMemberId, null);
@@ -145,8 +144,7 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task CreatePollAsync_CategoryInOtherCase_IsStoredAsTheLookupSpellsIt()
         {
-            _db.Lookups.Add(new LookupItem { LookupGroup = GHCAA.Domain.Constants.Discussion.CategoryLookupGroup, Value = "Events", Label = "Events", IsActive = true });
-            await _db.SaveChangesAsync();
+            // "Events" is an active DiscussionCategory row in the lookups seed.
 
             var pollId = await _pollService.CreatePollAsync(PollDto(" events "), AdminMemberId, null);
 

@@ -53,7 +53,7 @@ export class Ledger implements OnInit {
   // PDF Export Config
   pdfHeaders = ['Date', 'Type', 'Category', 'Reference', 'Description', 'Amount'];
   pdfMapper = (r: any) => [
-    new Date(r.date).toLocaleDateString(),
+    toDisplayDate(r.date, this.orgConfig.dateFormat()),
     r.recordType === 'Income' ? 'Income' : 'Expense',
     this.getCategoryName(r.financialCategory),
     r.reference || '—',

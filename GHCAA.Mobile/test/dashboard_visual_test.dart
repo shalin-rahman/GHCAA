@@ -32,7 +32,7 @@ Widget _wrapInApp(Widget child) {
     overrides: [
       userProfileProvider.overrideWith((ref) => {
         'fullName': 'Shalin Rahman',
-        'membershipType': 'Life Member',
+        'membershipType': 'Founding',
         'category': 'Active',
         'batch': '2010',
         'currentDesignation': 'Senior Software Engineer',

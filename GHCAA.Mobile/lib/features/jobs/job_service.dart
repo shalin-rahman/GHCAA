@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
+import '../../core/api/api_exception.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/models/paged_list.dart';
 import '../../core/utils/ttl_cache.dart';
@@ -38,16 +39,20 @@ class JobService {
     }
   }
 
-  Future<bool> postJob(Map<String, dynamic> data) async {
+  // Null on success, otherwise the server's reason (84.56).
+  Future<String?> postJob(Map<String, dynamic> data) async {
     try {
-      final response = await _dio.post('/jobs', data: data);
+      await _dio.post('/jobs', data: data);
       _jobs.clear();
-      return response.statusCode == 200 || response.statusCode == 201;
+      return null;
     } catch (e) {
       debugPrint('JobService.postJob failed: $e');
-      return false;
+      final body = e is DioException ? e.response?.data : null;
+      return ApiException.serverMessage(body) ?? postJobFailed;
     }
   }
+
+  static const postJobFailed = 'Failed to post opportunity.';
 
   Future<bool> deleteJob(int id) async {
     try {

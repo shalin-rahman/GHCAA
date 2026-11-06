@@ -242,7 +242,7 @@ class FakeJobService implements JobService {
   @override
   Future<PagedList> getJobsPage(int page) async => PagedList.single(const []);
   @override
-  Future<bool> postJob(Map<String, dynamic> data) async => true;
+  Future<String?> postJob(Map<String, dynamic> data) async => null;
   @override
   Future<bool> deleteJob(int id) async => true;
   @override

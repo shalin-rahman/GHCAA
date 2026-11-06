@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../../core/pipes/app-date.pipe';
 import { Component, Input, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ElectionsService } from '../../../core/services/elections.service';
@@ -14,7 +15,7 @@ import {
 @Component({
     selector: 'app-nomination-records',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, AppDatePipe, FormsModule],
     templateUrl: './nomination-records.html'
 })
 export class NominationRecords implements OnInit {

@@ -1,3 +1,4 @@
+import '../../core/utils/app_utils.dart';
 import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -119,7 +120,7 @@ class _NewsDetailsScreenState extends ConsumerState<NewsDetailsScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                              Text('CATEGORY: ${_getCategoryLabel(article['articleCategory'])}', style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
-                             Text(article['createdAt']?.toString().split('T')[0] ?? 'RECENT', style: TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark.withValues(alpha: 0.6), fontWeight: FontWeight.bold)),
+                             Text(article['createdAt'] != null ? AppUtils.formatDate(article['createdAt']) : 'RECENT', style: TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark.withValues(alpha: 0.6), fontWeight: FontWeight.bold)),
                           ],
                        ),
                        const SizedBox(height: 12),

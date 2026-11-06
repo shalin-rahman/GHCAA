@@ -6,11 +6,12 @@ import { ForumService } from '../../core/services/forum.service';
 import { ForumCategory, ForumTopic, CreateForumTopicDto } from '../../core/models/business.models';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 
 @Component({
     selector: 'app-forum',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, LoadingPanelComponent, PageHeaderComponent],
+    imports: [CommonModule, RouterModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, AppDatePipe],
     templateUrl: './forum.html',
     styleUrls: ['./forum.scss']
 })
@@ -89,14 +90,5 @@ export class Forum implements OnInit {
     backToCategories() {
         this.selectedCategory.set(null);
         this.topics.set([]);
-    }
-
-    formatDate(d: string | Date): string {
-        if (!d) return '';
-        const date = new Date(d);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
     }
 }

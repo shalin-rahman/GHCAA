@@ -1,3 +1,4 @@
+import '../../core/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -170,7 +171,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                                             ),
                                             const SizedBox(width: 8),
                                             Text(
-                                              (alert['sentAt'] ?? '').toString().split('T')[0],
+                                              alert['sentAt'] != null ? AppUtils.formatDate(alert['sentAt']) : '',
                                               style: const TextStyle(fontSize: 9, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.bold)
                                             ),
                                           ],

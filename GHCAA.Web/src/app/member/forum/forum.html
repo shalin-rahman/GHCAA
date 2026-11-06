@@ -79,7 +79,7 @@
             <div class="topic-main">
               <h4>{{ topic.title }}</h4>
               <p class="topic-meta">
-                by <strong>{{ topic.authorName }}</strong> · {{ formatDate(topic.createdAt) }}
+                by <strong>{{ topic.authorName }}</strong> · {{ topic.createdAt | appDate }}
               </p>
             </div>
             <div class="topic-counters">

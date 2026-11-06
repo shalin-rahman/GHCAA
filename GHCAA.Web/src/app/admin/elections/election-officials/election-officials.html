@@ -32,7 +32,7 @@
     <details *ngIf="closed().length > 0">
         <summary>Revoked ({{ closed().length }})</summary>
         <p class="text-muted" *ngFor="let appointment of closed()">
-            {{ appointment.displayName }}, {{ appointment.personaName }}. Revoked {{ appointment.revokedAt | date:'medium' }}<ng-container *ngIf="appointment.revokedReason">: {{ appointment.revokedReason }}</ng-container>
+            {{ appointment.displayName }}, {{ appointment.personaName }}. Revoked {{ appointment.revokedAt | appDate }} {{ appointment.revokedAt | date:'shortTime' }}<ng-container *ngIf="appointment.revokedReason">: {{ appointment.revokedReason }}</ng-container>
         </p>
     </details>
 

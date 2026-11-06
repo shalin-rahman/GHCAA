@@ -12,10 +12,10 @@
             @for (a of appointments(); track a.id) {
                 <div class="glass-card">
                     <h2>{{ a.personaName }}</h2>
-                    <p class="text-muted">{{ a.electionTitle }}. Appointed {{ a.appointedAt | date: 'mediumDate' }}.</p>
+                    <p class="text-muted">{{ a.electionTitle }}. Appointed {{ a.appointedAt | appDate }}.</p>
 
                     @if (a.isLive) {
-                        <p>You accepted this role on {{ a.acceptedAt | date: 'medium' }}.</p>
+                        <p>You accepted this role on {{ a.acceptedAt | appDate }} {{ a.acceptedAt | date:'shortTime' }}.</p>
                     } @else if (a.acceptedAt) {
                         <p class="text-muted">This appointment has expired.</p>
                     } @else {

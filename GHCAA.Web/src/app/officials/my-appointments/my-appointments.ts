@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { FormsModule } from '@angular/forms';
 import { Component, inject, signal } from '@angular/core';
 import { ElectionsService } from '../../core/services/elections.service';
@@ -11,7 +12,7 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 @Component({
     selector: 'app-my-appointments',
     standalone: true,
-    imports: [CommonModule, FormsModule, LoadingPanelComponent, PageHeaderComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent],
     templateUrl: './my-appointments.html',
     // Keep the line breaks of the persona's declaration.
     styles: ['.declaration-text { white-space: pre-wrap; }']

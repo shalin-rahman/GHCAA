@@ -12,11 +12,12 @@ import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel'
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { LazyImgDirective } from '../../common/directives/lazy-img.directive';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 
 @Component({
     selector: 'app-topic-detail',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective, LazyImgDirective],
+    imports: [CommonModule, RouterModule, FormsModule, LoadingPanelComponent, PageHeaderComponent, ImgFallbackDirective, LazyImgDirective, AppDatePipe],
     templateUrl: './topic-detail.html',
     styleUrls: ['./topic-detail.scss']
 })
@@ -185,15 +186,6 @@ export class TopicDetail implements OnInit {
     getParentAuthorName(parentPostId: number): string {
         const parent = this.posts().find(p => p.id === parentPostId);
         return parent ? parent.authorName : 'Author';
-    }
-
-    formatDate(d: string | Date): string {
-        if (!d) return '';
-        const date = new Date(d);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
     }
 
     canDeleteTopic(t: ForumTopic): boolean {

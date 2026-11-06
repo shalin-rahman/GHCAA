@@ -55,7 +55,7 @@
             <div class="glass-card version-banner">
                 <div class="version-meta">
                     <span class="version-pill">Version {{ current()!.version }}</span>
-                    <span class="version-date">Effective {{ current()!.effectiveDate | date: 'longDate' }}</span>
+                    <span class="version-date">Effective {{ current()!.effectiveDate | appDate }}</span>
                 </div>
                 @if (current()!.changeSummary) {
                 <p class="change-summary"><strong>What changed:</strong> {{ current()!.changeSummary }}</p>
@@ -81,8 +81,8 @@
                         [attr.aria-expanded]="expandedVersionId() === version.id">
                         <span class="version-pill muted">v{{ version.version }}</span>
                         <span class="history-dates">
-                            {{ version.effectiveDate | date: 'mediumDate' }}
-                            @if (version.supersededDate) { <span>&ndash; {{ version.supersededDate | date: 'mediumDate' }}</span> }
+                            {{ version.effectiveDate | appDate }}
+                            @if (version.supersededDate) { <span>&ndash; {{ version.supersededDate | appDate }}</span> }
                         </span>
                         <span class="history-summary">{{ version.changeSummary }}</span>
                         <span class="chevron" [class.open]="expandedVersionId() === version.id">&#9662;</span>

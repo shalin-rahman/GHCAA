@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../../core/pipes/app-date.pipe';
 import { Component, Input, OnDestroy, OnInit, computed, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -23,7 +24,7 @@ interface MemberHit { id: number; fullName: string; membershipNumber: string | n
 @Component({
     selector: 'app-election-officials',
     standalone: true,
-    imports: [CommonModule, FormsModule, LoadingPanelComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent],
     templateUrl: './election-officials.html'
 })
 export class ElectionOfficials implements OnInit, OnDestroy {

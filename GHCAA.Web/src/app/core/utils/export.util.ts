@@ -1,3 +1,5 @@
+import { toDisplayDate } from './date.util';
+
 export class ExportUtil {
   /**
    * Export JSON data to Excel (.xlsx)
@@ -58,7 +60,8 @@ export class ExportUtil {
       doc.setFontSize(18);
       doc.text(title, 14, 22);
       doc.setFontSize(10);
-      doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+      const now = new Date();
+      doc.text(`Generated on: ${toDisplayDate(now)} ${now.toLocaleTimeString()}`, 14, 30);
 
       autoTable(doc as any, {
         head: [headers],

@@ -32,19 +32,15 @@ It exits 1 when an open item is missing here or a closed one is still scheduled.
   verified gaps became items: 37.16f to 37.16h in stream E, and eleven Work Package 84 items in streams N2, N3
   and N6. Their priorities are proposals; the owner can change them. That review's one P1 item and
   the three P1 items the owner added from the admin sidebar work all closed on 2026-11-05;
-  the progress log in section 9 lists them. 84.77 (client option lists the server already holds)
-  was added as P2 the same day. The owner answered the six
+  the progress log in section 9 lists them. The owner answered the six
   product questions from the same review on 2026-11-03; they became 84.65 to 84.69 (section 5,
   the owner gates).
-- **Owner order, 2026-11-05.** 84.77 (client option lists the server already holds) goes first,
-  ahead of the wave 2 table. The owner chose the approach the same day; the tracker item records
-  it. Its web, backend and mobile parts are done and the full mobile run passes; the owner's
-  `lookups.json` rows and the four 'Life Member' goldens are left. The constitution note that was
-  to follow it was dropped on 2026-11-06.
-- **Owner order, 2026-11-06.** In progress: 84.71 then 84.19 (meetings with comments), 84.59,
+- **Closed 2026-11-07.** The client option lists, poll comments, the server's 400 message on both
+  clients and the stale mobile goldens; the progress log in section 9 lists them.
+- **Owner order, 2026-11-06.** In progress: 84.19 (meetings with comments), 84.59,
   84.60, 84.68, then the rest of the partial items 84.49 and 84.51 once those finish.
-  84.84 (directory search by city or country) is ordered too and starts once the poll migration
-  for 84.71 has landed, since both change the model snapshot. The
+  84.84 (directory search by city or country) is ordered too; the poll comments migration it
+  waited on has landed. The
   admin sidebar regrouping and the spec 001 index with its gap review closed the same day; the five
   gaps raised from that review are new items in stream N4. 84.7, 84.42, 84.48, 84.50 and 84.61 are
   on hold. The book strict build is the last item of this run. It fails on three counts, each already an
@@ -52,8 +48,8 @@ It exits 1 when an open item is missing here or a closed one is still scheduled.
   their page budgets (63.34), and 93 open placeholders in the chapter items 67.2, 67.3, 67.5 and
   67.7. A placeholder closes only with a sourced number, never a guess.
 - **Next three items** after that, cheapest first as in the wave 2 table: 84.4 (web
-  and mobile parity table), 93.3 (portal mobile nav e2e), 34.D7 (stale mobile goldens). 84.27
-  (archive API tests and admin screen) follows. See section 4, the waves.
+  and mobile parity table), 93.3 (portal mobile nav e2e), 84.27 (archive API tests and admin
+  screen). See section 4, the waves.
 - **Owner gates:** the owner answered every gate on 2026-11-02. What still needs the owner: the
   inbox check for preprod email (7.26), the upload-then-redeploy check for preprod uploads (7.28),
   approval of the docs archive list (12.8), the list of unused config keys (98.43), the white-label
@@ -103,11 +99,11 @@ work in the order the tracker's `Depends on` tags give.
 |---|---|---|
 | E | Spec 023 delivery plan sessions F2 to F11 and N1, auth plan Part A and B4-B5. Order below. | 37.1m, 37.14o, 37.1p, 37.16e, 37.16f, 37.16g, 37.16h, 37.12y, 37.13f, 37.13g, 37.14a, 37.14d, 37.14f, 37.14m, 37.14n, 37.14t, 95.2, 95.4, 95.5, 95.12, 95.6, 84.42, 84.50 |
 | N1 | Non-election plan phase 1, release and environment blockers | 7.26, 7.28, 34.D8, 62.41, 84.48 |
-| N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 84.55, 84.56, 84.57, 84.60, 84.62, 84.68, 97.1 |
-| N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 84.61, 84.64, 84.67, 84.69, 84.77, 93.3, 93.4, 96.3 |
-| N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.71, 84.72, 84.19, 84.20, 84.59, 84.65, 84.66, 84.80, 84.81, 84.82, 84.83, 84.84, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5 |
+| N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 84.55, 84.57, 84.60, 84.62, 84.68, 84.86, 97.1 |
+| N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 84.61, 84.64, 84.67, 84.69, 93.3, 93.4, 96.3 |
+| N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.72, 84.19, 84.20, 84.59, 84.65, 84.66, 84.80, 84.81, 84.82, 84.83, 84.84, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5 |
 | N5 | Phase 5, white-label profile and reusable modules | 62.2, 62.42, 62.56 |
-| N6 | Phase 6, performance and quality | 27.1, 27.8, 34.D7, 37.11, 51.4, 51.5, 98.7 |
+| N6 | Phase 6, performance and quality | 27.1, 27.8, 37.11, 51.4, 51.5, 98.7 |
 | N7 | Phase 7, platform governance, security and operations | 7.16, 12.8, 12.9, 73.5, 73.6, 74.3, 98.43, 99.8 |
 | N8 | Phase 8, dissertation evidence and evaluation | 63.8, 63.18, 63.34, 64.8, 64.9, 67.2, 67.3, 67.4, 67.5, 67.7, 78.9, 78.10 |
 | P | This plan's own upkeep (Work Package 99) | 99.3 |
@@ -119,10 +115,10 @@ Order notes kept from the non-election plan:
 - 62.2 and its prerequisites come before 62.56 and 62.42. 62.42 also waits for 62.41.
 - 8.5 is a measured spike. No local database is picked before its evidence. 8.7 follows it.
 - 28.33 is the same scope as 8.8 and 37.7. Do not add an ARB pipeline.
-- 92.1 (spec 022) and 84.71 (spec 028) and 84.19 (spec 026) are written before their code. The
-  owner approved specs 026 and 028 on 2026-11-04. 84.72 (forum admin) follows 84.71 and reuses its
-  moderation rules. 84.59 (typed DTOs) moved here from N2 on the owner's word of 2026-11-04 and
-  runs after 84.71 and 84.19.
+- 92.1 (spec 022) and 84.19 (spec 026) are written before their code. The owner approved specs
+  026 and 028 on 2026-11-04. 84.72 (forum admin) reuses the moderation rules of the poll comments
+  (spec 028, done). 84.59 (typed DTOs) moved here from N2 on the owner's word of 2026-11-04 and
+  runs after 84.19.
 - 37.16f (one voting-member rule for elections and amendments) goes before 37.1p, so the new rules
   in 37.1p are written once.
 - 84.61 (FCM push) waits for the owner's Firebase service key. Do not put it in a wave before then.
@@ -311,7 +307,6 @@ Ordered cheapest first. One `--only backend` run, one `--only web` run, one `--e
 |---|---|---|---|---|---|---|
 | 84.4 | S | N2 | Parity table built from the routes both clients call. | Docs | Every row traced to a client file | None |
 | 93.3 | S | N3 | The portal mobile nav e2e misses the cases the item lists. | Web e2e | Playwright spec passes in `ci-local.py --e2e` | None |
-| 34.D7 | S | N6 | Stale mobile goldens. | Mobile | `flutter test` clean after `--update-goldens`, diffs reviewed | The owner looks at the changed images, batched with the wave report |
 | 84.27 | L | N2 | `ArchiveController` has no tests and no web admin screen. Crosses API tests and web, so it runs last. | API tests, Web | New NUnit controller tests; Vitest spec for the admin page | None |
 
 84.27 is L under rule 3, the size rule, so it runs last and may take its own wave.
@@ -427,3 +422,4 @@ What counts as evidence:
 | 2026-11-06 | 84.63 (done) | Controller tests added for Mentorship, Assistant, Campaigns, Scholarships, AdminErrorLogs and AdminDevTracker, plus `AuthController.GetProviders`; 59 tests pass in the filtered run | `docs/TODO.md`, section 1 |
 | 2026-11-06 | 84.58 (done); 84.56 (part: server) | `dotnet test` filtered to job DTO, JobHub, SecureFiles and file validation tests: 67 of 67. 84.56 stays PARTIAL until web and mobile show the 400 message | `JobDto.cs`, `IFileValidationService.cs`, `FileValidationService.cs`, `SecureFilesController.cs`, `JobDtoValidationTests.cs`, `SecureFilesControllerTests.cs`, `docs/TODO.md`, spec 013 |
 | 2026-11-06 | 84.71, 84.68 (review fixes) | Code review found four faults, now fixed: news update dropping `membersOnly`, members' news served from the output cache, poll category case, and `Other` missing uncategorised polls; reissue now runs in a serializable transaction. Filtered `dotnet test` on Poll, News, IDCard, CredentialVerification and OutputCache: 108 of 108; `ci-local.py --only contract` 3 of 3. Both items stay in progress | `NewsController.cs`, `NewsDto.cs`, `NewsService.cs`, `PollService.cs`, `IDCardService.cs`, `NewsServiceTests.cs`, `PollServiceTests.cs`, `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md` |
+| 2026-11-07 | 84.56, 84.71, 84.77, 34.D7 (closed); 84.85 (added and closed); 84.86 (added, P1: anonymous read of unpublished news by Id) | Owner asked why small items stayed open and had them closed. 84.56: web and mobile show the server's 400 message in the same order; mobile job link sent as `applicationLink`. 84.71: `DiscussionCategory` rows in `lookups.json`, poll-link test, T013. 84.77: JobCategory rows, golden fixtures use `Founding`, four dashboard goldens regenerated. 84.85: dates swept to the shared helpers on both clients, with guard tests. `ci-local.py --only` backend 7 of 7, contract 3 of 3, web 4 of 4, mobile 2 of 2; `flutter test --tags golden` 65 of 65 | `http.util.ts`, `global-http.interceptor.ts`, `api_exception.dart`, `job_service.dart`, `jobs_screen.dart`, `lookups.json`, date screens on both clients, `date-display-guard.spec.ts`, `date_display_guard_test.dart`, four visual tests and goldens, `NewsServiceTests.cs`, `PollServiceTests.cs`, `JobCategorySeedSyncTests.cs`, `docs/PROJECT_MAP.md`, `docs/TODO.md`, spec 028 tasks |

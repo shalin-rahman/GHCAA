@@ -28,7 +28,7 @@
               <td>{{ r.requester?.fullName || 'Unknown' }}</td>
               <td>{{ r.mentor?.fullName || 'Unknown' }}</td>
               <td>{{ r.domain || '—' }}</td>
-              <td>{{ r.requestedAt | date:'mediumDate' }}</td>
+              <td>{{ r.requestedAt | appDate }}</td>
               <td><span class="status-badge" [class]="getMentorshipStatusClass(r.status)">{{ getMentorshipStatusLabel(r.status) }}</span></td>
               <td><button type="button" class="btn btn-outline btn-sm" (click)="open(r)">View</button></td>
             </tr>
@@ -70,12 +70,12 @@
           </div>
           <div class="detail-item">
             <label>Requested</label>
-            <span class="value-display">{{ r.requestedAt | date:'medium' }}</span>
+            <span class="value-display">{{ r.requestedAt | appDate }} {{ r.requestedAt | date:'shortTime' }}</span>
           </div>
           @if (r.respondedAt) {
             <div class="detail-item">
               <label>Last update</label>
-              <span class="value-display">{{ r.respondedAt | date:'medium' }}</span>
+              <span class="value-display">{{ r.respondedAt | appDate }} {{ r.respondedAt | date:'shortTime' }}</span>
             </div>
           }
           <div class="detail-item">

@@ -402,7 +402,7 @@ class AdminCMS extends ConsumerWidget {
                                                 color: Colors.white)),
                                         Text(
                                             g['eventDate'] != null
-                                                ? g['eventDate'].split('T')[0]
+                                                ? AppUtils.formatDate(g['eventDate'])
                                                 : 'Record',
                                             style: const TextStyle(
                                                 fontSize: 10,

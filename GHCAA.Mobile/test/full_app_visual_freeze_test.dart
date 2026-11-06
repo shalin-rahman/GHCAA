@@ -85,7 +85,7 @@ Widget wrapInApp(Widget child, {List<Override> overrides = const []}) {
     overrides: [
       userProfileProvider.overrideWith((ref) => {
         'fullName': 'Test Member',
-        'membershipType': 'Life Member',
+        'membershipType': 'Founding',
         'category': 'Active',
         'batch': '2010',
         'membershipId': 'L-9999'

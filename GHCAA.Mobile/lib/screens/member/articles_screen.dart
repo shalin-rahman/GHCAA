@@ -1,3 +1,4 @@
+import '../../core/utils/app_utils.dart';
 import '../../core/widgets/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -204,7 +205,7 @@ class _MemberArticlesScreenState extends ConsumerState<MemberArticlesScreen> {
                                                               child: Text(art['status']?.toString().toUpperCase() ?? 'PENDING', style: TextStyle(color: statusColor, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1.5), overflow: TextOverflow.ellipsis),
                                                             ),
                                                           ),
-                                                          Text(art['createdAt']?.toString().split('T')[0] ?? art['submittedAt']?.toString().split('T')[0] ?? 'RECENT', style: const TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.bold)),
+                                                          Text((art['createdAt'] ?? art['submittedAt']) != null ? AppUtils.formatDate(art['createdAt'] ?? art['submittedAt']) : 'RECENT', style: const TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.bold)),
                                                         ],
                                                       ),
                                                       const SizedBox(height: 12),

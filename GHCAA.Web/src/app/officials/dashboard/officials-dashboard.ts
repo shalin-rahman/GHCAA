@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ElectionsService } from '../../core/services/elections.service';
@@ -24,7 +25,7 @@ interface PersonaWarning {
 @Component({
     selector: 'app-officials-dashboard',
     standalone: true,
-    imports: [CommonModule, RouterLink, LoadingPanelComponent, PageHeaderComponent],
+    imports: [CommonModule, AppDatePipe, RouterLink, LoadingPanelComponent, PageHeaderComponent],
     templateUrl: './officials-dashboard.html'
 })
 export class OfficialsDashboard {
