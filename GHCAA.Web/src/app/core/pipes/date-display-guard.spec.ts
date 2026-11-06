@@ -32,6 +32,7 @@ function rawDateUses(): string[] {
                 if (!m[1] || !PARTIAL_FORMATS.has(m[1])) found.push(`${where} date:'${m[1] ?? ''}'`);
             }
             if (line.includes('toLocaleDateString(')) found.push(`${where} toLocaleDateString`);
+            if (line.includes('Intl.DateTimeFormat(')) found.push(`${where} Intl.DateTimeFormat`);
         });
     }
     return found;
