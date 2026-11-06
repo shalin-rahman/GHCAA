@@ -9,7 +9,9 @@ namespace GHCAA.Application.Interfaces
         Task<IEnumerable<NewsPostDto>> GetAllNewsForAdminAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<NewsPostDto>> GetPendingSubmissionsAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<NewsPostDto>> GetMySubmissionsAsync(int userId, CancellationToken cancellationToken = default);
-        Task<NewsPostDto?> GetNewsByIdAsync(int id, CancellationToken cancellationToken = default);
+        // Returns null for a post that is not approved and active, unless the viewer is an admin,
+        // its author or a collaborator.
+        Task<NewsPostDto?> GetNewsByIdAsync(int id, int? viewerUserId, bool viewerIsAdmin, CancellationToken cancellationToken = default);
         Task<NewsPostDto> CreateNewsAsync(CreateNewsDto dto, int authorId, CancellationToken cancellationToken = default);
         Task<NewsPostDto> UpdateNewsAsync(UpdateNewsDto dto, CancellationToken cancellationToken = default);
         Task<bool> DeleteNewsAsync(int id, CancellationToken cancellationToken = default);

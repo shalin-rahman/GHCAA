@@ -95,6 +95,12 @@ a gap someone still needs to close.
 
 ## Log
 
+### 2026-11-07 — GET /api/news/{id}
+- Change: a post that is not approved and active now answers 404, unless the caller is an admin, its author or a collaborator. Before this, anyone could read drafts, pending and rejected posts by Id. No shape change.
+- Reason: TODO 84.86.
+- Web: no change needed. No page calls `getNewsById`.
+- Mobile: no change needed. `newsDetailsProvider` in `news_details_screen.dart` turns any failed call, a 404 included, into null.
+
 ### 2026-11-06 — GET /api/news, GET /api/news/{id}, POST/PUT /api/news, POST /api/polls (admin create), GET /api/polls/active
 - Change: review fixes to the entry below. `membersOnly` on the news create and update DTOs is now optional. On update, a missing value keeps the stored one, so an older client that does not send it can no longer make a members-only post public. On create, a missing value means false. The two news GET routes are no longer output-cached, because the cache runs before sign-in is read and could have served a member's list to a visitor. A poll category is matched to the lookup ignoring case and stored as the lookup spells it; an unknown category still answers 400. The `Other` filter also returns polls with no category. No shape change.
 - Reason: code review of TODO 84.71 and 84.68.

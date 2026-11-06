@@ -162,7 +162,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetNewsById_MembersOnlyPost_IsNotFoundWhenSignedOut()
         {
-            _newsServiceMock.Setup(x => x.GetNewsByIdAsync(2, It.IsAny<CancellationToken>()))
+            _newsServiceMock.Setup(x => x.GetNewsByIdAsync(2, It.IsAny<int?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                             .ReturnsAsync(new NewsPostDto { Id = 2, MembersOnly = true });
             SignOut();
 
@@ -172,11 +172,22 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetNewsById_ReturnsOk_IfFound()
         {
-            _newsServiceMock.Setup(x => x.GetNewsByIdAsync(1, It.IsAny<CancellationToken>()))
+            _newsServiceMock.Setup(x => x.GetNewsByIdAsync(1, It.IsAny<int?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                             .ReturnsAsync(new NewsPostDto { Id = 1 });
 
             var result = await _controller.GetNewsById(1, CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task GetNewsById_SignedOut_PassesNoViewer()
+        {
+            _newsServiceMock.Setup(x => x.GetNewsByIdAsync(3, It.IsAny<int?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+                            .ReturnsAsync((NewsPostDto?)null);
+            SignOut();
+
+            Assert.That(await _controller.GetNewsById(3, CancellationToken.None), Is.InstanceOf<NotFoundResult>());
+            _newsServiceMock.Verify(x => x.GetNewsByIdAsync(3, null, false, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Test]

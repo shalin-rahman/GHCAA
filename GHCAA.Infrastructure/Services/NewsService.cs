@@ -128,7 +128,7 @@ namespace GHCAA.Infrastructure.Services
             return posts.Select(MapToDto);
         }
 
-        public async Task<NewsPostDto?> GetNewsByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<NewsPostDto?> GetNewsByIdAsync(int id, int? viewerUserId, bool viewerIsAdmin, CancellationToken cancellationToken = default)
         {
             var post = await _db.NewsPosts
                 .IgnoreQueryFilters()
@@ -137,8 +137,13 @@ namespace GHCAA.Infrastructure.Services
                     .ThenInclude(c => c.User)
                         .ThenInclude(u => u!.Member)
                 .FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
+            if (post == null) return null;
 
-            return post == null ? null : MapToDto(post);
+            // Drafts and pending posts stay readable for previews by admins, the author and collaborators.
+            var published = post.IsActive && post.Status == Enums.SubmissionStatus.Approved;
+            var canPreview = viewerIsAdmin || (viewerUserId.HasValue
+                && (post.AuthorId == viewerUserId || post.Collaborators.Any(c => c.UserId == viewerUserId)));
+            return published || canPreview ? MapToDto(post) : null;
         }
 
         public async Task<NewsPostDto> CreateNewsAsync(CreateNewsDto dto, int authorId, CancellationToken cancellationToken = default)

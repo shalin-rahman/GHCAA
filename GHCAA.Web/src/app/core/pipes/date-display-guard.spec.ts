@@ -22,18 +22,19 @@ function sourceFiles(dir: string): string[] {
     });
 }
 
+// The whole file is scanned, not line by line, so a pipe wrapped onto the next line is still caught.
+// A DatePipe built or injected in code would format outside the template, so that is caught too.
+const RAW_CALLS = /toLocaleDateString\(|Intl\.DateTimeFormat\(|new DatePipe\(|inject\(\s*DatePipe\s*\)|\w+\s*:\s*DatePipe\b/g;
+
 function rawDateUses(): string[] {
     const found: string[] = [];
     for (const file of sourceFiles(appRoot)) {
-        const lines = readFileSync(file, 'utf8').split('\n');
-        lines.forEach((line, i) => {
-            const where = `${relative(appRoot, file)}:${i + 1}`;
-            for (const m of line.matchAll(/\|\s*date\b(?:\s*:\s*'([^']*)')?/g)) {
-                if (!m[1] || !PARTIAL_FORMATS.has(m[1])) found.push(`${where} date:'${m[1] ?? ''}'`);
-            }
-            if (line.includes('toLocaleDateString(')) found.push(`${where} toLocaleDateString`);
-            if (line.includes('Intl.DateTimeFormat(')) found.push(`${where} Intl.DateTimeFormat`);
-        });
+        const text = readFileSync(file, 'utf8');
+        const where = (index: number) => `${relative(appRoot, file)}:${text.slice(0, index).split('\n').length}`;
+        for (const m of text.matchAll(/\|\s*date\b(?:\s*:\s*'([^']*)')?/g)) {
+            if (!m[1] || !PARTIAL_FORMATS.has(m[1])) found.push(`${where(m.index!)} date:'${m[1] ?? ''}'`);
+        }
+        for (const m of text.matchAll(RAW_CALLS)) found.push(`${where(m.index!)} ${m[0]}`);
     }
     return found;
 }

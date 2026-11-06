@@ -247,5 +247,52 @@ public class NewsServiceTests : TestBase
         result.Should().BeTrue();
         _context.NewsPosts.Any(n => n.Id == post.Id).Should().BeFalse();
     }
+
+    private async Task<NewsPost> AddPostAsync(Enums.SubmissionStatus status, bool isActive)
+    {
+        var post = new NewsPost { Title = "Post", Content = "C", AuthorId = _authorId, Status = status, IsActive = isActive };
+        _context.NewsPosts.Add(post);
+        await _context.SaveChangesAsync();
+        return post;
+    }
+
+    // 84.86: anonymous callers used to read drafts and pending posts by Id.
+    [Category("FR-27")]
+    [TestCase(Enums.SubmissionStatus.Pending, false)]
+    [TestCase(Enums.SubmissionStatus.Draft, false)]
+    [TestCase(Enums.SubmissionStatus.Approved, false)]
+    [TestCase(Enums.SubmissionStatus.Rejected, true)]
+    public async Task GetNewsByIdAsync_UnpublishedPost_IsHiddenFromOtherViewers(Enums.SubmissionStatus status, bool isActive)
+    {
+        var post = await AddPostAsync(status, isActive);
+
+        (await _service.GetNewsByIdAsync(post.Id, null, false)).Should().BeNull();
+        (await _service.GetNewsByIdAsync(post.Id, _authorId + 1000, false)).Should().BeNull();
+    }
+
+    [Category("FR-27")]
+    [Test]
+    public async Task GetNewsByIdAsync_PublishedPost_IsReadableByAnyone()
+    {
+        var post = await AddPostAsync(Enums.SubmissionStatus.Approved, true);
+
+        (await _service.GetNewsByIdAsync(post.Id, null, false)).Should().NotBeNull();
+    }
+
+    [Category("FR-27")]
+    [Test]
+    public async Task GetNewsByIdAsync_UnpublishedPost_OpensForAdminAuthorAndCollaborator()
+    {
+        var post = await AddPostAsync(Enums.SubmissionStatus.Pending, false);
+        var collaborator = new User { Username = "collab", PasswordHash = "hash" };
+        _context.Users.Add(collaborator);
+        await _context.SaveChangesAsync();
+        _context.NewsCollaborators.Add(new NewsCollaborator { NewsPostId = post.Id, UserId = collaborator.Id });
+        await _context.SaveChangesAsync();
+
+        (await _service.GetNewsByIdAsync(post.Id, null, true)).Should().NotBeNull();
+        (await _service.GetNewsByIdAsync(post.Id, _authorId, false)).Should().NotBeNull();
+        (await _service.GetNewsByIdAsync(post.Id, collaborator.Id, false)).Should().NotBeNull();
+    }
 }
 

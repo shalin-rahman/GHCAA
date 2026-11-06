@@ -38,7 +38,9 @@ namespace GHCAA.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetNewsById(int id, CancellationToken cancellationToken)
         {
-            var post = await _newsService.GetNewsByIdAsync(id, cancellationToken);
+            int? viewerUserId = int.TryParse(this.CurrentUserIdRaw(), out var userId) ? userId : null;
+            var isAdmin = User.IsInRole(Constants.Roles.Admin) || User.IsInRole(Constants.Roles.SuperAdmin);
+            var post = await _newsService.GetNewsByIdAsync(id, viewerUserId, isAdmin, cancellationToken);
             if (post != null && post.MembersOnly && User.Identity?.IsAuthenticated != true) return NotFound();
             return post == null ? NotFound() : Ok(post);
         }
