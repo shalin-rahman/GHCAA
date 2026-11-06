@@ -7,11 +7,12 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 
 @Component({
     selector: 'app-admin-error-logs',
     standalone: true,
-    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, PaginationComponent, LoadingPanelComponent],
+    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, PaginationComponent, LoadingPanelComponent, AppDatePipe],
     templateUrl: './admin-error-logs.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './admin-error-logs.scss'

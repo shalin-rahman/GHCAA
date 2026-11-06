@@ -12,7 +12,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { getPositionLabel, getCurrentECRecord, getCurrentECPeriod, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, getBloodGroupName, LOOKUP_GROUPS } from '../../core/constants/app.constants';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { EcPositionService, EcPosition } from '../../core/services/ec-position.service';
-import { DatePipe } from '@angular/common';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
@@ -20,18 +19,20 @@ import { SearchBarComponent } from '../../common/search-bar/search-bar.component
 import { ExportUtil } from '../../core/utils/export.util';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
-import { toWireDate } from '../../core/utils/date.util';
+import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 import { Icon } from '../../common/icon/icon';
 import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
 import { BatchPipe } from '../../core/pipes/batch.pipe';
 import { MemberImportModalComponent } from './member-import-modal/member-import-modal.component';
+import { AppDateInputComponent } from '../../common/date-input/date-input.component';
+import { MemberCredentialsComponent } from './member-credentials/member-credentials.component';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
   selector: 'app-admin-members',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LazyImgDirective, Icon, AppCurrencyPipe, BatchPipe, MemberImportModalComponent, ModalHeaderComponent],
-  providers: [DatePipe],
+  imports: [CommonModule, AppDatePipe, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LazyImgDirective, Icon, AppCurrencyPipe, BatchPipe, MemberImportModalComponent, ModalHeaderComponent, AppDateInputComponent, MemberCredentialsComponent],
   templateUrl: './admin-members.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './admin-members.scss'
@@ -42,7 +43,7 @@ export class AdminMembers implements OnInit {
   private confirmDialog = inject(ConfirmDialogService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private datePipe = inject(DatePipe);
+  private orgConfig = inject(OrgConfigService);
   private lookupService = inject(LookupService);
   private positionService = inject(EcPositionService);
   nav = inject(NavService);
@@ -359,15 +360,15 @@ export class AdminMembers implements OnInit {
 
         // Date normalization for Registry standards (dd-MM-yyyy)
         if (mappedMember.dateOfBirth) {
-            mappedMember.dateOfBirth = this.datePipe.transform(mappedMember.dateOfBirth, 'dd-MM-yyyy') || '';
+            mappedMember.dateOfBirth = toDisplayDate(mappedMember.dateOfBirth, this.orgConfig.dateFormat());
         } else if (fullMember.DateOfBirth) {
-            mappedMember.dateOfBirth = this.datePipe.transform(fullMember.DateOfBirth, 'dd-MM-yyyy') || '';
+            mappedMember.dateOfBirth = toDisplayDate(fullMember.DateOfBirth, this.orgConfig.dateFormat());
         }
 
         if (mappedMember.professionalHistory) {
             mappedMember.professionalHistory = mappedMember.professionalHistory.map((ph: any) => ({
                 ...ph,
-                startDate: this.datePipe.transform(ph.startDate || ph.StartDate, 'dd-MM-yyyy') || ''
+                startDate: toDisplayDate(ph.startDate || ph.StartDate, this.orgConfig.dateFormat())
             }));
         }
 
@@ -646,7 +647,7 @@ export class AdminMembers implements OnInit {
         designation: '',
         sector: '',
         location: '',
-        startDate: this.datePipe.transform(new Date(), 'dd-MM-yyyy') || '',
+        startDate: toDisplayDate(new Date(), this.orgConfig.dateFormat()),
         isCurrent: true
       });
       return { ...m };
@@ -668,7 +669,7 @@ export class AdminMembers implements OnInit {
       positionId: 0,
       position: '',
       positionName: '',
-      startDate: this.datePipe.transform(new Date(), 'dd-MM-yyyy') || '',
+      startDate: toDisplayDate(new Date(), this.orgConfig.dateFormat()),
       isCurrent: true,
       changeReason: ''
     });

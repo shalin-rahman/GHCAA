@@ -289,6 +289,22 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
                                                               FontWeight.w900,
                                                           color: Colors.white,
                                                           height: 1.25)),
+                                                  if (article['membersOnly'] ==
+                                                      true)
+                                                    const Padding(
+                                                      padding: EdgeInsets.only(
+                                                          top: AppTheme.spaceXS),
+                                                      child: Text('MEMBERS ONLY',
+                                                          style: TextStyle(
+                                                              color: AppTheme
+                                                                  .royalGold,
+                                                              fontSize: 8,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w900,
+                                                              letterSpacing:
+                                                                  1)),
+                                                    ),
                                                   const SizedBox(
                                                       height: AppTheme.spaceS),
                                                   Text(

@@ -10,7 +10,7 @@ import { IS_HSC, ensureValidAcademicData, TSHIRT_SIZES, ROUTES, LOOKUP_GROUPS, H
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
-import { parseDisplayDate } from '../../core/utils/date.util';
+import { parseDisplayDate, toWireDate } from '../../core/utils/date.util';
 import { GatewaysService } from '../../core/services/gateways.service';
 import { PaymentGateway } from '../../core/models/business.models';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
@@ -19,12 +19,13 @@ import { ImgFallbackDirective } from '../../common/directives/img-fallback.direc
 import { SITE_CONTENT } from '../../core/config/site-content.generated';
 import { interpolateOrgTemplate } from '../../core/utils/org-template';
 import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
-import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
+import { ModalHeaderComponent } from '../../common/modal-header/modal-header.component';
+import { AppDateInputComponent } from '../../common/date-input/date-input.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaymentPortalComponent, LogoSpinnerComponent, Icon, ImgFallbackDirective, AppCurrencyPipe, ModalHeaderComponent],
+  imports: [CommonModule, FormsModule, PaymentPortalComponent, LogoSpinnerComponent, Icon, ImgFallbackDirective, AppCurrencyPipe, ModalHeaderComponent, AppDateInputComponent],
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })
@@ -324,12 +325,7 @@ export class Register implements OnDestroy {
 
   private formatDateForApi(dateStr: string): string {
     if (!dateStr || typeof dateStr !== 'string') return dateStr;
-    const parts = dateStr.split('-');
-    if (parts.length === 3 && parts[0].length === 2) {
-      // dd-mm-yyyy to yyyy-mm-dd
-      return `${parts[2]}-${parts[1]}-${parts[0]}`;
-    }
-    return dateStr;
+    return toWireDate(dateStr) ?? dateStr;
   }
 
   private initiateGateway(memberId: number) {

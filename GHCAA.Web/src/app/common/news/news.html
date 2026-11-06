@@ -42,7 +42,7 @@
                 @for (post of filteredNews(); track post.id) {
                 <tr (click)="selectPost(post)">
                     <td><span class="pill" [class.notice]="post.postType === 'Notice'">{{ post.postType === 'Notice' ? 'Notice' : 'News' }}</span></td>
-                    <td class="title-cell">{{ post.title }}</td>
+                    <td class="title-cell">{{ post.title }} @if (post.membersOnly) {<span class="pill">Members only</span>}</td>
                     <td>{{ getArticleCategoryLabel(post.articleCategory) }}</td>
                     <td>{{ post.createdAt | appDate }}</td>
                     <td>{{ post.authorName }}</td>
@@ -73,7 +73,7 @@
                     <span class="cat">{{ getArticleCategoryLabel(post.articleCategory) }}</span>
                     <span>{{ post.createdAt | appDate }}</span>
                 </div>
-                <h3>{{ post.title }}</h3>
+                <h3>{{ post.title }} @if (post.membersOnly) {<span class="pill">Members only</span>}</h3>
                 <p>{{ post.content | slice:0:180 }}...</p>
                 <div class="footer">
                     <span class="author">By {{ post.authorName }}</span>

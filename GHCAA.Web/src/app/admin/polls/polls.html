@@ -23,6 +23,8 @@
                     <th>Total Votes</th>
                     <th>Options</th>
                     <th>Type</th>
+                    <th>Category</th>
+                    <th>Comments</th>
                     <th>Created</th>
                     <th>Actions</th>
                 </tr>
@@ -38,13 +40,23 @@
                     <td>{{ poll.totalVotes }}</td>
                     <td>{{ poll.options.length }}</td>
                     <td>{{ poll.allowMultipleChoice ? 'Multiple Choice' : 'Single Choice' }}</td>
+                    <td>{{ poll.category }}</td>
+                    <td>
+                        {{ poll.commentCount }}
+                        <span class="comment-state" *ngIf="!poll.allowComments">off</span>
+                        <span class="comment-state" *ngIf="poll.allowComments && poll.commentsLocked">locked</span>
+                    </td>
                     <td>{{ poll.createdAt | appDate }}</td>
                     <td class="actions-cell">
                         <button class="btn btn-outline btn-sm" (click)="selectedPoll.set(poll)">Results ↗</button>
                         <button class="icon-btn" (click)="toggleStatus(poll)" [title]="poll.isActive ? 'Deactivate' : 'Activate'">
                             <app-icon [name]="poll.isActive ? 'pause' : 'play'" [size]="16"></app-icon>
                         </button>
-                        <button class="icon-btn delete" (click)="deletePoll(poll.id)" title="Delete">
+                        <button class="icon-btn" (click)="toggleAllowComments(poll)" [disabled]="commentBusyId() === poll.id"
+                                [title]="poll.allowComments ? 'Turn comments off' : 'Turn comments on'">
+                            <app-icon name="messages" [size]="16"></app-icon>
+                        </button>
+                        <button class="icon-btn delete" (click)="deletePoll(poll)" title="Delete">
                             <app-icon name="trash" [size]="16"></app-icon>
                         </button>
                     </td>
@@ -68,7 +80,10 @@
                     <button class="icon-btn" (click)="toggleStatus(poll)" [disabled]="togglingId() === poll.id" [title]="poll.isActive ? 'Deactivate' : 'Activate'">
                         <app-icon [name]="poll.isActive ? 'pause' : 'play'" [size]="16"></app-icon>
                     </button>
-                    <button class="icon-btn delete" (click)="deletePoll(poll.id)" [disabled]="deletingId() === poll.id" title="Delete">
+                    <button class="icon-btn" (click)="selectedPoll.set(poll)" title="Results and comments">
+                        <app-icon name="eye" [size]="16"></app-icon>
+                    </button>
+                    <button class="icon-btn delete" (click)="deletePoll(poll)" [disabled]="deletingId() === poll.id" title="Delete">
                         <app-icon name="trash" [size]="16"></app-icon>
                     </button>
                 </div>
@@ -103,6 +118,10 @@
             <div class="poll-footer">
                 <span class="date">Created: {{ poll.createdAt | appDate }}</span>
                 <span class="type">{{ poll.allowMultipleChoice ? 'Multiple Choice' : 'Single Choice' }}</span>
+            </div>
+            <div class="poll-footer">
+                <span>{{ poll.category }}</span>
+                <span>{{ poll.commentCount }} comments{{ !poll.allowComments ? ' (off)' : poll.commentsLocked ? ' (locked)' : '' }}</span>
             </div>
         </div>
     </div>
@@ -139,6 +158,17 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="comment-controls">
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="toggleAllowComments(poll)" [disabled]="commentBusyId() === poll.id">
+                        {{ poll.allowComments ? 'Turn comments off' : 'Turn comments on' }}
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="toggleCommentsLocked(poll)" [disabled]="commentBusyId() === poll.id">
+                        {{ poll.commentsLocked ? 'Unlock comments' : 'Lock comments' }}
+                    </button>
+                </div>
+                <app-comment-thread [source]="commentSource(poll.id)"
+                                    (countChange)="onCountChange(poll.id, $event)"></app-comment-thread>
             </div>
         </div>
     </div>
@@ -167,6 +197,20 @@
                         </label>
                     </div>
 
+                    <div class="form-group checkbox-group">
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" name="allowComments" [(ngModel)]="newPoll.allowComments">
+                            <span class="label-text">Allow Comments</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group" *ngIf="categories().length">
+                        <label for="poll-category">Category</label>
+                        <select id="poll-category" name="category" [(ngModel)]="newPoll.category">
+                            <option *ngFor="let c of categories()" [value]="c.value">{{ c.label }}</option>
+                        </select>
+                    </div>
+
                     <div class="form-group options-section">
                         <label>Poll Options</label>
                         <div class="option-input" *ngFor="let opt of newPoll.options; let i = index; trackBy: trackByIndex">
@@ -179,6 +223,32 @@
                             <app-icon name="plus" [size]="14"></app-icon> Add Option
                         </button>
                     </div>
+
+                    <div class="form-group checkbox-group">
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" name="announce" [(ngModel)]="announcement.enabled">
+                            <span class="label-text">Also post an announcement</span>
+                        </label>
+                    </div>
+
+                    <ng-container *ngIf="announcement.enabled">
+                        <div class="form-group">
+                            <label for="announce-type">Post type</label>
+                            <select id="announce-type" name="announceType" [(ngModel)]="announcement.postType">
+                                <option value="News">News</option>
+                                <option value="Notice">Notice</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="announce-title">Post title</label>
+                            <input id="announce-title" type="text" name="announceTitle" [(ngModel)]="announcement.title">
+                        </div>
+                        <div class="form-group">
+                            <label>Post text</label>
+                            <app-rich-text-editor [(value)]="announcement.content" height="180px"></app-rich-text-editor>
+                            <small class="hint">A link to the poll is added at the end.</small>
+                        </div>
+                    </ng-container>
                 </div>
 
                 <div class="modal-footer">

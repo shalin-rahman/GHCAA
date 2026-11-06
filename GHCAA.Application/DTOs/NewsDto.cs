@@ -34,6 +34,7 @@ namespace GHCAA.Application.DTOs
         public DateTime CreatedAt { get; set; }
         public string? AuthorName { get; set; }
         public List<string> Collaborators { get; set; } = new List<string>();
+        public bool MembersOnly { get; set; }
     }
 
     public class CreateNewsDto
@@ -68,6 +69,10 @@ namespace GHCAA.Application.DTOs
         public List<string> Collaborators { get; set; } = new List<string>();
 
         public bool IsActive { get; set; } = true;
+
+        // Hidden from signed-out visitors when true. Null on update keeps the stored value, so an
+        // older client that does not send it cannot make a members-only post public.
+        public bool? MembersOnly { get; set; }
     }
 
     public class UpdateNewsDto : CreateNewsDto

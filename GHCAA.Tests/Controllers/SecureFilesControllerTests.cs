@@ -77,6 +77,34 @@ namespace GHCAA.Tests.Controllers
             file.EnableRangeProcessing.Should().BeTrue();
         }
 
+        // TODO 84.58. A stored .webp used to go out as application/octet-stream.
+        [TestCase("a.jpg", "image/jpeg")]
+        [TestCase("a.JPEG", "image/jpeg")]
+        [TestCase("a.png", "image/png")]
+        [TestCase("a.webp", "image/webp")]
+        [TestCase("a.pdf", "application/pdf")]
+        [TestCase("a.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
+        [TestCase("a.bin", "application/octet-stream")]
+        public async Task GetSecureFile_SetsContentTypeFromExtension(string name, string expected)
+        {
+            SetUserContext(_controller, memberId: 10, role: "Member");
+            var relativePath = $"secure_uploads/10/{name}";
+            StoreHolds(relativePath, "bytes");
+            _fileUploadsMock.Setup(x => x.GetByFilePathAsync(relativePath, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new FileUpload { Id = 1, MemberId = 10, FileName = name, FilePath = relativePath });
+
+            var result = await _controller.GetSecureFile(relativePath, CancellationToken.None);
+
+            result.Should().BeOfType<FileStreamResult>().Which.ContentType.Should().Be(expected);
+        }
+
+        [Test]
+        public void EveryUploadExtension_HasAContentType()
+        {
+            FileTypes.ImageExtensions.Concat(FileTypes.DocumentExtensions).Concat(FileTypes.SpreadsheetExtensions)
+                .Should().OnlyContain(ext => FileTypes.ContentTypeByExtension.ContainsKey(ext));
+        }
+
         // The validators let the browser revalidate a certificate with a 304 instead of a download.
         [Test]
         [Category("NFR-P4")]

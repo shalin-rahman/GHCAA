@@ -7,9 +7,6 @@ namespace GHCAA.Infrastructure.Services
         private static readonly string[] ImageContentTypes = { "image/jpeg", "image/png", "image/webp" };
         private static readonly string[] DocumentContentTypes = { "image/jpeg", "image/png", "image/webp", "application/pdf" };
         private static readonly string[] SpreadsheetContentTypes = { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" };
-        private static readonly string[] ImageExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
-        private static readonly string[] DocumentExtensions = { ".jpg", ".jpeg", ".png", ".webp", ".pdf" };
-        private static readonly string[] SpreadsheetExtensions = { ".xlsx" };
 
         public FileValidationResult Validate(Stream content, string fileName, string? contentType, long length, FileCategory category, long maxSizeBytes)
         {
@@ -36,9 +33,9 @@ namespace GHCAA.Infrastructure.Services
             // from the app's own origin — an HTML-injection/phishing vector. Reject it here too.
             var allowedExtensions = category switch
             {
-                FileCategory.Image => ImageExtensions,
-                FileCategory.Spreadsheet => SpreadsheetExtensions,
-                _ => DocumentExtensions
+                FileCategory.Image => FileTypes.ImageExtensions,
+                FileCategory.Spreadsheet => FileTypes.SpreadsheetExtensions,
+                _ => FileTypes.DocumentExtensions
             };
             var extension = Path.GetExtension(fileName)?.ToLowerInvariant();
             if (string.IsNullOrEmpty(extension) || !allowedExtensions.Contains(extension))

@@ -60,10 +60,15 @@ namespace GHCAA.Infrastructure.Services
             return Task.CompletedTask;
         }
 
-        public async Task<IEnumerable<NewsPostDto>> GetActiveNewsAsync(Enums.ArticleCategory? category = null, Enums.PostType? postType = null, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<NewsPostDto>> GetActiveNewsAsync(Enums.ArticleCategory? category = null, Enums.PostType? postType = null, bool includeMembersOnly = false, CancellationToken cancellationToken = default)
         {
             var query = _db.NewsPosts
                 .Where(n => n.IsActive && n.Status == Enums.SubmissionStatus.Approved);
+
+            if (!includeMembersOnly)
+            {
+                query = query.Where(n => !n.MembersOnly);
+            }
 
             if (category.HasValue)
             {
@@ -149,6 +154,7 @@ namespace GHCAA.Infrastructure.Services
                 AttachmentUrl = dto.AttachmentUrl,
                 AttachmentFileName = dto.AttachmentFileName,
                 IsActive = dto.IsActive,
+                MembersOnly = dto.MembersOnly ?? false,
                 AuthorId = authorId,
                 PublishDate = dto.PublishDate ?? DateTime.UtcNow,
                 ExternalCollaborators = dto.Collaborators != null ? string.Join(", ", dto.Collaborators) : null
@@ -177,6 +183,7 @@ namespace GHCAA.Infrastructure.Services
             existing.AttachmentUrl = dto.AttachmentUrl;
             existing.AttachmentFileName = dto.AttachmentFileName;
             existing.IsActive = dto.IsActive;
+            if (dto.MembersOnly.HasValue) existing.MembersOnly = dto.MembersOnly.Value;
             existing.LastModified = DateTime.UtcNow;
             existing.ExternalCollaborators = dto.Collaborators != null ? string.Join(", ", dto.Collaborators) : null;
 
@@ -260,6 +267,7 @@ namespace GHCAA.Infrastructure.Services
                 AttachmentUrl = post.AttachmentUrl,
                 AttachmentFileName = post.AttachmentFileName,
                 IsActive = post.IsActive,
+                MembersOnly = post.MembersOnly,
                 CreatedAt = post.PublishDate,
                 AuthorName = post.Author?.Member?.FullName ?? post.Author?.Username ?? "Unknown",
                 Collaborators = post.ExternalCollaborators?.Split(", ").ToList() ?? new List<string>()

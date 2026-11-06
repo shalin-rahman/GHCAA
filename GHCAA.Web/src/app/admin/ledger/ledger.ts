@@ -16,12 +16,13 @@ import { EXPORT_PAGE_SIZE, FINANCIAL_CATEGORY_OPTIONS, LEDGER_CATEGORIES_BY_TYPE
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { toWireDate, toDisplayDate, parseDisplayDate } from '../../core/utils/date.util';
 import { OrgConfigService } from '../../core/services/org-config.service';
-import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
+import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
+import { AppDateInputComponent } from '../../common/date-input/date-input.component';
 
 @Component({
   selector: 'app-ledger',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, AppCurrencyPipe],
+  imports: [CommonModule, AppDatePipe, FormsModule, ExportButtonsComponent, PaginationComponent, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, AppCurrencyPipe, AppDateInputComponent],
   templateUrl: './ledger.html',
   styleUrl: './ledger.scss'
 })
@@ -62,7 +63,7 @@ export class Ledger implements OnInit {
 
 
   formatDateToDMY(d: any) {
-    return toDisplayDate(d);
+    return toDisplayDate(d, this.orgConfig.dateFormat());
   }
 
   newRecord: any = {

@@ -1,6 +1,14 @@
 <div class="admin-feature">
     <app-page-header title="Member Voices" emptySubtitle="Participate in shaping the future of our association"></app-page-header>
 
+    <div class="poll-filter" *ngIf="categories().length > 1">
+        <label for="poll-category">Category</label>
+        <select id="poll-category" class="form-control" [ngModel]="category()" (ngModelChange)="setCategory($event)">
+            <option value="">All categories</option>
+            <option *ngFor="let c of categories()" [value]="c.value">{{ c.label }}</option>
+        </select>
+    </div>
+
     <div class="polls-container" *ngIf="!loading(); else loader">
         <div class="empty-state" *ngIf="polls().length === 0">
             <app-icon name="poll" [size]="32"></app-icon>
@@ -8,7 +16,7 @@
             <p>Check back later for new opportunities to contribute.</p>
         </div>
 
-        <div class="glass-card poll-vote-card" *ngFor="let poll of polls()" [class.voted]="poll.hasVoted">
+        <div class="glass-card poll-vote-card" *ngFor="let poll of polls(); trackBy: trackById" [class.voted]="poll.hasVoted">
             <div class="status-badge success poll-badge" *ngIf="poll.hasVoted">
                 <app-icon name="check-circle" [size]="14"></app-icon> Voted
             </div>
@@ -54,7 +62,15 @@
 
             <div class="poll-meta">
                 <span><app-icon name="calendar" [size]="14"></app-icon> Expires: {{ poll.expiryDate | appDate }}</span>
+                <button type="button" class="btn btn-outline btn-sm" *ngIf="poll.allowComments || poll.commentCount > 0"
+                        (click)="toggleThread(poll.id)" [attr.aria-expanded]="isThreadOpen(poll.id)">
+                    <app-icon name="messages" [size]="14"></app-icon>
+                    {{ isThreadOpen(poll.id) ? 'Hide comments' : 'Comments (' + poll.commentCount + ')' }}
+                </button>
             </div>
+
+            <app-comment-thread *ngIf="isThreadOpen(poll.id)" [source]="commentSource(poll.id)"
+                                (countChange)="onCountChange(poll.id, $event)"></app-comment-thread>
         </div>
     </div>
 

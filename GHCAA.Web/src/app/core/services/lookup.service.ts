@@ -55,7 +55,8 @@ const LOOKUP_FALLBACKS: Record<string, LookupOption[]> = {
         { value: 'Mentorship', label: 'Mentorship & Career Guidance' },
         { value: 'Other', label: 'Other Opportunities' }
     ],
-    [LOOKUP_GROUPS.TShirtSize]: TSHIRT_SIZES
+    [LOOKUP_GROUPS.TShirtSize]: TSHIRT_SIZES,
+    [LOOKUP_GROUPS.DiscussionCategory]: [{ value: 'Other', label: 'Other' }]
 };
 
 // These two read the OrgConfig labels at the time of the call, so they are never stale.

@@ -20,16 +20,16 @@ namespace GHCAA.Tests.Controllers
         public void Setup()
         {
             _pollService = new Mock<IPollService>();
-            _controller = new AdminPollController(_pollService.Object);
+            _controller = new AdminPollController(_pollService.Object, new Mock<IDiscussionService>().Object);
         }
 
         [Test]
         public async Task GetAllPolls_ReturnsServiceResults()
         {
             var polls = new List<PollDto> { new() { Id = 4, Title = PollTitle } };
-            _pollService.Setup(service => service.GetAllPollsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(polls);
+            _pollService.Setup(service => service.GetAllPollsAsync(null, false, It.IsAny<CancellationToken>())).ReturnsAsync(polls);
 
-            var result = await _controller.GetAllPolls(CancellationToken.None);
+            var result = await _controller.GetAllPolls(null, false, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             Assert.That(((OkObjectResult)result).Value, Is.SameAs(polls));
@@ -40,14 +40,14 @@ namespace GHCAA.Tests.Controllers
         {
             var dto = new CreatePollDto { Title = PollTitle, Options = new List<string> { "Yes", "No" } };
             SetUserContext(_controller, memberId: AdminMemberId);
-            _pollService.Setup(service => service.CreatePollAsync(dto, AdminMemberId, It.IsAny<CancellationToken>())).ReturnsAsync(9);
+            _pollService.Setup(service => service.CreatePollAsync(dto, AdminMemberId, It.IsAny<int?>(), It.IsAny<CancellationToken>())).ReturnsAsync(9);
 
             var result = await _controller.CreatePoll(dto, CancellationToken.None);
 
             var created = result as CreatedAtActionResult;
             Assert.That(created, Is.Not.Null);
             Assert.That(created!.ActionName, Is.EqualTo(nameof(AdminPollController.GetAllPolls)));
-            _pollService.Verify(service => service.CreatePollAsync(dto, AdminMemberId, It.IsAny<CancellationToken>()), Times.Once);
+            _pollService.Verify(service => service.CreatePollAsync(dto, AdminMemberId, It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [TestCase(true)]
@@ -76,9 +76,10 @@ namespace GHCAA.Tests.Controllers
         [TestCase(false)]
         public async Task DeletePoll_MapsServiceOutcomeToTheHttpResult(bool deleted)
         {
-            _pollService.Setup(service => service.DeletePollAsync(PollId, It.IsAny<CancellationToken>())).ReturnsAsync(deleted);
+            SetUserContext(_controller, memberId: AdminMemberId);
+            _pollService.Setup(service => service.DeletePollAsync(PollId, AdminMemberId, false, It.IsAny<CancellationToken>())).ReturnsAsync(deleted);
 
-            var result = await _controller.DeletePoll(PollId, CancellationToken.None);
+            var result = await _controller.DeletePoll(PollId, false, CancellationToken.None);
 
             Assert.That(result, Is.TypeOf(deleted ? typeof(OkObjectResult) : typeof(NotFoundResult)));
         }

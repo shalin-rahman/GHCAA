@@ -23,8 +23,6 @@
       "Bash(sed -n 273,276p docs/specs/012*/spec.md)",
       "Bash(cd C:/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/docs; sed -n 1216,1236p TODO.md | cut -c1-250 | grep -n -i -E \"count|skipped|FR-5|report\" ; sed -n 1284,1292p TODO.md | cut -c1-250; grep -n -i \"row cap\\\\|maximum row\\\\|bounded\" TODO.md | sed -n 1,3p | cut -c1-100; grep -n -i \"IsGhc\\\\|legacy\" ../GHCAA.Application/DTOs/AcademicRecordDto.cs | head -3)",
       "Read(//c/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA.Application/DTOs/**)",
-      "Bash(PYTHONIOENCODING=utf-8 python \"C:/Users/HABIBU~1/AppData/Local/Temp/claude/c--Users-HabiburRahmanShalin-workstation-shaleen-shalin-GHC-Application-GHCAA/71b951fd-bf62-4536-a9f7-802e43cd31bd/scratchpad/show.py\" . 84.32 84.33 84.34 30.10 7.27)",
-      "Bash(PYTHONIOENCODING=utf-8 python \"C:/Users/HABIBU~1/AppData/Local/Temp/claude/c--Users-HabiburRahmanShalin-workstation-shaleen-shalin-GHC-Application-GHCAA/71b951fd-bf62-4536-a9f7-802e43cd31bd/scratchpad/show.py\" . 84.51)",
       "Bash(cd \"C:/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/docs\" && sed -n 1,12p specs/021*/spec.md | cut -c1-250; grep -c \"^- \\\\*\\\\*FR-\" specs/021*/spec.md; sed -n 1289,1296p TODO.md | cut -c1-200; grep -nE \"^91\\\\.[0-9]+ \\\\[\" TODO.md | cut -c1-80; grep -n \"Work Package 62 \\\\|Work Package 37 \\\\|Work Package 84\\\\|Work Package 98 \" TODO.md | cut -c1-60 | head; grep -nE '^# Work Package \\(62|37|27|8\\) ' TODO.md|cut -c1-60; grep -n \"^# Work Package\" TODO.md | sed -n 1,6p | cut -c1-70)",
       "Bash(cd \"C:/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/docs/specs\" && grep -nE \"P1|timeout|rate|nav|SuperAdminOnly|FR-10|FR-12|FR-14|FR-15\" 025*/tasks.md | cut -c1-170 | head -12; grep -n \"62.6b\" ../TODO_ARCHIVE.md ../TODO.md | head -2 | cut -c1-80; grep -c \"\" 024*/tasks.md; grep -nE \"DB-3|API-5\" 024*/spec.md | head -2)",
       "Bash(cd \"C:/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/GHCAA.API/Controllers\" && grep -n \"Http\\\\\\(Put\\\\|Get\\\\\\)\\(\\\\\"{id\\\\|Http.*search\\\\|Http.*committee\\\\|Http.*ask\\\\|Http.*read-all\\\\|Http.*me\\\\\"\\\\|Http.*topics\\\\\"\\\\|Http.*health\\\\|Http.*dev-tracker\\\\|Http.*error-logs\\\\|Http.*\\\\\"stats\\\\|Http.*device-token\\\\|Http.*custom\" JobHubController.cs NetworkingController.cs AssistantController.cs NotificationController.cs MemberCommunicationsController.cs ForumController.cs HealthController.cs AdminDevTrackerController.cs AdminErrorLogsController.cs AdminController.cs CommunicationController.cs 2>&1 | head -30; grep -n \"Authorize\\\\|Policy\" AssistantController.cs | head -3; grep -n \"GlobalLimiter\\\\|PermitLimit\" ../Extensions/RateLimitingExtensions.cs | head -3; grep -n \"api/governance\\\\|HttpPost.*vote\\\\|Route\" GovernanceController.cs | head -5)",
@@ -93,9 +91,12 @@
       "Bash(break)",
       "Bash(ping -n 6 127.0.0.1)",
       "PowerShell(graphify query \"CredentialVerificationController revoke credential admin member detail\" 2>$null)",
-      "PowerShell(dotnet test GHCAA.Tests/GHCAA.Tests.csproj --artifacts-path C:\\\\Users\\\\HABIBU~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\7c9123f0a5be8e36\\\\3f9e215d-0793-497e-b108-b318a6dee907\\\\scratchpad\\\\lane2-artifacts --filter \"FullyQualifiedName~IDCardServiceCredential\" 2>&1)",
       "Bash(git config *)",
-      "PowerShell(python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md 2>&1)"
+      "PowerShell(python scripts/backlog_inventory.py --check docs/MASTER_EXECUTION_PLAN.md 2>&1)",
+      "Bash(cd /c/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/GHCAA.Web/src/app && grep -rn \"poll\" --include=*routes*.ts -i . | head; ls; grep -rln \"api/polls\\\\|admin/polls\" --include=*.ts . | head)",
+      "Read(//c/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/GHCAA.Web/src/app/**)",
+      "Bash(cd /c/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/GHCAA.Web/src/app && sed -n 240,258p app.routes.ts; grep -n \"polls\\\\|POLL\" core/constants/app.constants.ts; ls member/polls admin/polls; wc -l member/polls/* admin/polls/*)",
+      "Bash(cd /c/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/GHCAA.Web/src/app && grep -n \"polls\" core/services/nav.service.ts; grep -rn \"'/portal\\\\|'/member/\" core/constants/app.constants.ts | head -5)"
     ],
     "additionalDirectories": [
       "C:\\Users\\HabiburRahmanShalin\\workstation\\shaleen\\shalin\\GHC\\Application\\GHCAA\\013-*",

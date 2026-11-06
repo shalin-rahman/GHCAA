@@ -68,9 +68,9 @@ namespace GHCAA.Infrastructure.Services
 
             job.Title = dto.Title;
             job.Company = dto.CompanyName;
-            job.Location = dto.Location;
-            job.Description = dto.Description;
-            job.Requirements = dto.Requirements;
+            job.Location = dto.Location ?? "";
+            job.Description = dto.Description ?? "";
+            job.Requirements = dto.Requirements ?? "";
             job.ContactEmail = dto.ApplicationEmail ?? "";
             job.ApplicationLink = dto.ApplicationLink;
             job.JobCategory = dto.JobCategory;
@@ -91,9 +91,9 @@ namespace GHCAA.Infrastructure.Services
             {
                 Title = dto.Title,
                 Company = dto.CompanyName,
-                Location = dto.Location,
-                Description = dto.Description,
-                Requirements = dto.Requirements,
+                Location = dto.Location ?? "",
+                Description = dto.Description ?? "",
+                Requirements = dto.Requirements ?? "",
                 ContactEmail = dto.ApplicationEmail ?? "",
                 ApplicationLink = dto.ApplicationLink,
                 JobCategory = dto.JobCategory,

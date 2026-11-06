@@ -12,6 +12,7 @@ import '../../core/api/api_client.dart';
 import '../../features/lookups/dropdown_service.dart';
 import '../../core/config/app_config.dart';
 import '../../core/utils/app_utils.dart';
+import '../../core/services/org_config_service.dart';
 
 class AdminCommunicationHub extends ConsumerStatefulWidget {
   const AdminCommunicationHub({super.key});
@@ -446,6 +447,7 @@ class AdminCMS extends ConsumerWidget {
     final titleCtrl = TextEditingController();
     final descCtrl = TextEditingController();
     final dateCtrl = TextEditingController();
+    final dateFormat = ref.read(orgDateFormatProvider);
 
     showDialog(
       context: context,
@@ -472,8 +474,8 @@ class AdminCMS extends ConsumerWidget {
               TextField(
                   controller: dateCtrl,
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                      labelText: 'Event Date (DD-MM-YYYY)')),
+                  decoration: InputDecoration(
+                      labelText: 'Event Date (${dateFormat.label})')),
             ],
           ),
         ),
@@ -492,7 +494,8 @@ class AdminCMS extends ConsumerWidget {
                   'title': titleCtrl.text,
                   'description': descCtrl.text,
                   'eventDate': dateCtrl.text.isNotEmpty
-                      ? AppUtils.toWire(dateCtrl.text)
+                      ? AppUtils.toWire(dateCtrl.text,
+                          format: dateFormat.identifier)
                       : AppUtils.toWire(DateTime.now()),
                   'isActive': true,
                   'isFeatured': false,

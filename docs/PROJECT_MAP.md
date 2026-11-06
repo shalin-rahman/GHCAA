@@ -961,9 +961,9 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 | `AuthController` | `/api/auth` | Public | `IAuthService`, `IMemberService` |
 | `RegistrationController` | `/api/registration` | Public / RateLimit: registration | `IMemberService`, `IOtpService` |
 | `ProfileController` | `/api/profile` | Auth | `IMemberService`, `INetworkingService` |
-| `PollController` | `/api/polls` | Auth | `IPollService` |
+| `PollController` | `/api/polls` (plus `{id}/comments`) | Auth | `IPollService`, `IDiscussionService` |
 | `AdminSocialAuthController` | `/api/admin/social-auth` | Admin | `ApplicationDbContext` |
-| `AdminPollController` | `/api/admin/polls` | Admin | `IPollService` |
+| `AdminPollController` | `/api/admin/polls` (plus `{id}/comments`, `{id}/comments/lock`) | Admin | `IPollService`, `IDiscussionService` |
 | `AdminController` | `/api/admin` | Admin/SuperAdmin | `IMemberService`, `IRoleService`, `IUserService` |
 | `AdminGovernanceController` | `/api/admin/governance` | Admin | `IGovernanceService` |
 | `EventsController` | `/api/events` | Public + Auth + Admin | `IEventService`, `IFileStorageService` |

@@ -46,6 +46,22 @@ namespace GHCAA.Tests.Controllers
             };
         }
 
+        [Test]
+        public async Task GetProviders_ReturnsOnlyProviderAndClientId()
+        {
+            _socialAuthConfigServiceMock.Setup(x => x.GetUsableAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new List<SocialAuthConfig>
+                {
+                    new() { Provider = GHCAA.Domain.Enums.SocialProvider.Google, ClientId = "google-client", ClientSecret = "secret" }
+                });
+
+            var result = await _controller.GetProviders() as OkObjectResult;
+
+            var json = System.Text.Json.JsonSerializer.Serialize(result?.Value);
+            Assert.That(json, Does.Contain("google-client"));
+            Assert.That(json, Does.Not.Contain("secret"));
+        }
+
         [Category("FR-08")]
         [Test]
         public async Task Login_ReturnsOk_OnSuccess()

@@ -14,11 +14,13 @@ import { EventGallery, EventPhoto } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
+import { AppDateInputComponent } from '../../common/date-input/date-input.component';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
     selector: 'app-admin-gallery',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, ModalHeaderComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LazyImgDirective, LoadingPanelComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, ModalHeaderComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LazyImgDirective, LoadingPanelComponent, AppDateInputComponent],
     templateUrl: './admin-gallery.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './admin-gallery.scss'
@@ -27,6 +29,7 @@ export class AdminGallery implements OnInit {
     private galleryService = inject(GalleryService);
     private notify = inject(NotificationService);
     private confirmDialog = inject(ConfirmDialogService);
+    private orgConfig = inject(OrgConfigService);
 
     galleries = signal<EventGallery[]>([]);
     selectedGallery = signal<EventGallery | null>(null);
@@ -62,7 +65,7 @@ export class AdminGallery implements OnInit {
     showForm = signal(false);
     editingId = signal<number | null>(null);
     formatDateToDMY(d: any) {
-        return toDisplayDate(d);
+        return toDisplayDate(d, this.orgConfig.dateFormat());
     }
 
     newGallery = {

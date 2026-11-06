@@ -734,6 +734,15 @@
                     </div>
                 </div>
 
+                @if (selectedMember()?.id) {
+                <div class="full border-t pt-8 mt-4">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="text-accent uppercase tracking-widest text-xs font-black">ID Card and Certificate Codes</h4>
+                    </div>
+                    <app-member-credentials [memberId]="selectedMember().id"></app-member-credentials>
+                </div>
+                }
+
                 <!-- Documents Section -->
                 <div class="full border-t pt-6 mt-6">
                     <label class="mb-4 block">Uploaded Qualification Documents</label>

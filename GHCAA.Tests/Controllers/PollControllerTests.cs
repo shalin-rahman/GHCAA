@@ -21,7 +21,7 @@ namespace GHCAA.Tests.Controllers
         public void Setup()
         {
             _pollService = new Mock<IPollService>();
-            _controller = new PollController(_pollService.Object);
+            _controller = new PollController(_pollService.Object, new Mock<IDiscussionService>().Object);
         }
 
         [Test]
@@ -30,7 +30,7 @@ namespace GHCAA.Tests.Controllers
             var vote = new PollVoteDto { OptionIds = new List<int> { PollOptionId } };
             SetUserContext(_controller, memberId: null);
 
-            var activeResult = await _controller.GetActivePolls(CancellationToken.None);
+            var activeResult = await _controller.GetActivePolls(null, CancellationToken.None);
             var pollResult = await _controller.GetPoll(PollId, CancellationToken.None);
             var voteResult = await _controller.Vote(PollId, vote, CancellationToken.None);
 
@@ -45,13 +45,13 @@ namespace GHCAA.Tests.Controllers
         {
             var polls = new List<PollDto> { CreatePollDto() };
             SetMemberContext(_controller, MemberId);
-            _pollService.Setup(service => service.GetActivePollsAsync(MemberId, It.IsAny<CancellationToken>())).ReturnsAsync(polls);
+            _pollService.Setup(service => service.GetActivePollsAsync(MemberId, null, It.IsAny<CancellationToken>())).ReturnsAsync(polls);
 
-            var result = await _controller.GetActivePolls(CancellationToken.None);
+            var result = await _controller.GetActivePolls(null, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             Assert.That(((OkObjectResult)result).Value, Is.SameAs(polls));
-            _pollService.Verify(service => service.GetActivePollsAsync(MemberId, It.IsAny<CancellationToken>()), Times.Once);
+            _pollService.Verify(service => service.GetActivePollsAsync(MemberId, null, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [TestCase(true)]

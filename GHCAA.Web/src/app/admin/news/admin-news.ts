@@ -60,7 +60,7 @@ export class AdminNews implements OnInit {
     stagedDocumentFile: File | null = null;
     stagedDocumentName = signal<string | null>(null);
 
-    form: any = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, status: 2, publishDate: this.toDateInputValue(new Date()), collaborators: [] };
+    form: any = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, membersOnly: false, status: 2, publishDate: this.toDateInputValue(new Date()), collaborators: [] };
 
     ngOnInit() { 
         this.loadNews(); 
@@ -79,7 +79,7 @@ export class AdminNews implements OnInit {
 
     openForm() {
         this.editingId.set(null);
-        this.form = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, status: 2, publishDate: this.toDateInputValue(new Date()), collaborators: [] };
+        this.form = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, membersOnly: false, status: 2, publishDate: this.toDateInputValue(new Date()), collaborators: [] };
         this.stagedImageFile = null;
         this.stagedImageName.set(null);
         this.stagedDocumentFile = null;
@@ -102,6 +102,7 @@ export class AdminNews implements OnInit {
             attachmentUrl: post.attachmentUrl || '',
             attachmentFileName: post.attachmentFileName || '',
             isActive: post.isActive,
+            membersOnly: post.membersOnly ?? false,
             status: post.status ?? 2,
             publishDate: this.toDateInputValue(post.createdAt),
             collaborators: post.collaborators || []

@@ -321,23 +321,41 @@ namespace GHCAA.Infrastructure.Services
             return ToDto(credential);
         }
 
-        // 84.68. An old code that was already revoked keeps its first reason and date.
+        // 84.68. An old code that was already revoked keeps its first reason and date. Reissuing an
+        // old code while a newer live one exists would leave the member with two valid cards.
+        // Serializable so two reissues of the same code at once cannot both pass the check below.
         public async Task<IssuedCredentialDto?> ReissueCredentialAsync(string shortCode, string reason, CancellationToken cancellationToken = default)
         {
-            var old = await _db.IssuedCredentials.FirstOrDefaultAsync(x => x.ShortCode == shortCode, cancellationToken);
-            if (old == null) return null;
-            if (!old.IsRevoked)
-            {
-                old.IsRevoked = true;
-                old.RevokedReason = reason;
-                old.RevokedOn = DateTime.UtcNow;
-            }
-
             var org = await _orgConfigService.GetConfigAsync();
-            var replacement = await NewCredentialAsync(old.MemberId, old.CredentialType, org.Workflow.CredentialValidityMonths, cancellationToken);
-            _db.IssuedCredentials.Add(replacement);
-            await _db.SaveChangesAsync(cancellationToken);
-            return ToDto(replacement);
+            await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+            try
+            {
+                var old = await _db.IssuedCredentials.FirstOrDefaultAsync(x => x.ShortCode == shortCode, cancellationToken);
+                if (old == null) return null;
+                var now = DateTime.UtcNow;
+                var hasNewerLive = await _db.IssuedCredentials.AnyAsync(x =>
+                    x.MemberId == old.MemberId && x.CredentialType == old.CredentialType && x.Id > old.Id &&
+                    !x.IsRevoked && (x.ExpiresOn == null || x.ExpiresOn > now), cancellationToken);
+                if (hasNewerLive)
+                    throw new CredentialConflictException("This member already has a newer valid credential of this type. Reissue that one instead.");
+                if (!old.IsRevoked)
+                {
+                    old.IsRevoked = true;
+                    old.RevokedReason = reason;
+                    old.RevokedOn = DateTime.UtcNow;
+                }
+
+                var replacement = await NewCredentialAsync(old.MemberId, old.CredentialType, org.Workflow.CredentialValidityMonths, cancellationToken);
+                _db.IssuedCredentials.Add(replacement);
+                await _db.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                return ToDto(replacement);
+            }
+            // PostgreSQL can raise 40001 on a read as well as on the save, so the whole body is covered.
+            catch (Exception ex) when (DbErrors.IsSerializationFailure(ex))
+            {
+                throw new CredentialConflictException("Another reissue of this code ran at the same time. Reload and try again.");
+            }
         }
 
         private static IssuedCredentialDto ToDto(IssuedCredential c) => new()

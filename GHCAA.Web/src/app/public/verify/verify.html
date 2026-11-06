@@ -15,7 +15,7 @@
       <h2>{{ credential.valid ? 'Credential valid' : 'Credential revoked' }}</h2>
       <p *ngIf="credential.memberName">{{ credential.memberName }}</p>
       <p>{{ credential.status }}</p>
-      <p *ngIf="credential.issuedOn">Issued {{ credential.issuedOn | date:'dd-MM-yyyy' }}</p>
+      <p *ngIf="credential.issuedOn">Issued {{ credential.issuedOn | appDate }}</p>
     </article>
   </section>
 </main>

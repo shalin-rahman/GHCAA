@@ -10,14 +10,15 @@ import { ThemeService, SpecialDayTheme } from '../../core/services/theme.service
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { toWireDate, toDisplayDate, parseDisplayDate } from '../../core/utils/date.util';
-import { OrgConfigService } from '../../core/services/org-config.service';
+import { OrgConfigService } from '../../core/services/org-config.service';
+import { AppDateInputComponent } from '../../common/date-input/date-input.component';
 
 export type ThemeStatus = 'SCHEDULED' | 'LIVE' | 'EXPIRED' | 'IDLE';
 
 @Component({
     selector: 'app-admin-themes',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, AppDateInputComponent],
     templateUrl: './admin-themes.html',
     styleUrl: './admin-themes.scss'
 })
@@ -35,7 +36,7 @@ export class AdminThemes implements OnInit {
     isSaving = signal(false);
 
     formatDateToDMY(d: any) {
-        return toDisplayDate(d);
+        return toDisplayDate(d, this.orgConfig.dateFormat());
     }
 
     /** SCHEDULED / LIVE / EXPIRED / IDLE — 30.17: the LIVE badge previously just mirrored

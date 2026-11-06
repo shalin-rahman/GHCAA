@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using GHCAA.Domain;
 
 namespace GHCAA.Application.DTOs
@@ -22,14 +23,25 @@ namespace GHCAA.Application.DTOs
         public string? RejectionReason { get; set; }
     }
 
+    // Only Title and CompanyName are required: the mobile form sends no Requirements and may leave
+    // Location and Description empty. The optional text fields must stay string?, because with
+    // nullable enabled MVC treats a non-nullable string as [Required]. No [EmailAddress], because
+    // the web form sends "" for no email.
     public class CreateJobDto
     {
+        [Required, StringLength(200)]
         public string Title { get; set; } = null!;
+        [Required, StringLength(200)]
         public string CompanyName { get; set; } = null!;
-        public string Location { get; set; } = null!;
-        public string Description { get; set; } = null!;
-        public string Requirements { get; set; } = null!;
+        [StringLength(200)]
+        public string? Location { get; set; }
+        [StringLength(4000)]
+        public string? Description { get; set; }
+        [StringLength(4000)]
+        public string? Requirements { get; set; }
+        [StringLength(256)]
         public string? ApplicationEmail { get; set; }
+        [StringLength(500)]
         public string? ApplicationLink { get; set; }
         public DateTime? ApplicationDeadline { get; set; }
         public Enums.JobCategory JobCategory { get; set; }

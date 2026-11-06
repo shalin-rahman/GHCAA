@@ -12,6 +12,18 @@ remove or rename). This file is the *record* of each time that rule was
 applied — one entry per change, so a client left behind is visible at a
 glance.
 
+### 2026-11-06 — POST /api/jobs, PUT /api/jobs/{id} (CreateJobDto); GET /api/securefiles content type
+- Change: `CreateJobDto` now answers 400 when Title or CompanyName is missing, or when a field is over its cap: 200 for title, company and location, 4000 for description and requirements, 256 for email, 500 for link. Secure file downloads now send `image/webp` for a `.webp` file, and the correct type for `.xlsx`, where both used to send `application/octet-stream`.
+- Reason: TODO 84.56 (server part) and 84.58.
+- Web: no change. A 400 still shows the fixed "Failed to post opportunity." message; the follow-up is tracked under 84.56.
+- Mobile: no change. A 400 shows nothing, because `JobService.postJob` returns false; the follow-up is tracked under 84.56.
+
+### 2026-11-06 — GET /api/admin/members/{id}/credentials, POST /api/verify/{shortCode}/reissue, POST /api/verify/{shortCode}/revoke
+- Change: two new admin routes. `GET /api/admin/members/{id}/credentials` lists a member's codes as `IssuedCredentialDto` (memberId, shortCode, credentialType as a string, issuedOn, expiresOn, isRevoked, revokedReason, revokedOn), newest first, or 404 for an unknown member. `POST /api/verify/{shortCode}/reissue` takes `{ reason }`, revokes the old code if it is still live, and answers 200 with the new `IssuedCredentialDto`; a blank reason is 400 and an unknown code is 404. If the member already holds a newer valid code of the same type, it answers 409 with a problem body and issues nothing. The existing revoke route now needs a recent step-up. Its body DTO is renamed from `RevokeCredentialRequest` to `CredentialActionRequest`; the JSON shape `{ reason }` is unchanged, and the reason is capped at 500 characters. Revoke and reissue each write a `CredentialRevoked` or `CredentialReissued` activity entry with the admin as actor.
+- Reason: TODO 84.68. Owner asked for Revoke and Reissue on the web admin member page.
+- Web: `MemberCredentialsComponent` on the admin member detail, through `CredentialVerificationService` and `API_ENDPOINTS.CREDENTIALS`. The step-up prompt comes from the global interceptor.
+- Mobile: no change. The app only calls `GET /api/verify/{shortCode}`, which is unchanged. `docs/api/swagger.json` still names `RevokeCredentialRequest` until it is regenerated.
+
 ### 2026-11-04 — MemberSummaryDto, MemberProfileDto (GET /api/networking/search, committee, public profile, admin member list, own profile, assistant)
 - Change: both DTOs gain `batchLabel`, a string or null. It lists every college record, earliest year first, as "HSC (Science) 2001 / BSc (Physics) 2004". A record with no degree shows only its year; a record with no year goes last. It is null when the member has no college record. `MemberProfileDto` also gains `passingYear` and `degree` from the earliest college record. Existing fields are unchanged. The public listing now shows degree and subject inside the label, not only the year.
 - Reason: TODO 84.70. The owner asked for the full batch line everywhere a batch is shown, with the earliest college year first.
@@ -82,6 +94,18 @@ say so — that's the point of the registry: a change with no client entry is
 a gap someone still needs to close.
 
 ## Log
+
+### 2026-11-06 — GET /api/news, GET /api/news/{id}, POST/PUT /api/news, POST /api/polls (admin create), GET /api/polls/active
+- Change: review fixes to the entry below. `membersOnly` on the news create and update DTOs is now optional. On update, a missing value keeps the stored one, so an older client that does not send it can no longer make a members-only post public. On create, a missing value means false. The two news GET routes are no longer output-cached, because the cache runs before sign-in is read and could have served a member's list to a visitor. A poll category is matched to the lookup ignoring case and stored as the lookup spells it; an unknown category still answers 400. The `Other` filter also returns polls with no category. No shape change.
+- Reason: code review of TODO 84.71 and 84.68.
+- Web: no change needed.
+- Mobile: no change needed.
+
+### 2026-11-06 — GET/POST /api/polls/{id}/comments, DELETE /api/polls/{id}/comments/{commentId}, PUT /api/admin/polls/{id}/comments/lock, PUT /api/admin/polls/{id}/comments, GET /api/polls/active, NewsDto
+- Change: new poll discussion routes. GET returns one page of the thread (`page`, `pageSize`) with a closed reason when comments are off, locked or the poll is closed. POST takes `{ content, parentId? }` and answers 403 for a caller with no member link. DELETE takes an optional `{ reason }`; a member can remove their own comment, an admin any. The admin routes take `{ locked }` and `{ allowComments }`. `GET /api/polls/active` adds an optional `category` filter, and the poll DTOs add `category`, `allowComments` and `commentCount`. `NewsDto` and the create DTO add `membersOnly`; anonymous callers never get those posts. All additive.
+- Reason: TODO 84.71, spec 028 (poll and meeting discussion), T006b for the news flag.
+- Web: `common/comment-thread` under the member and admin polls pages, the category filter on polls, the Members only checkbox in `admin/news` and the badge in `common/news`.
+- Mobile: `features/polls/poll_comment_thread.dart`, the category chips in `polls_screen.dart`, and the MEMBERS ONLY label in `screens/member/news_screen.dart`.
 
 ### 2026-10-22 — GET /api/elections/{id}/documents/{formCode}, GET /api/elections/{id}/documents/{formCode}/verification
 - Change: the form codes follow the Regulations numbers. The route accepts ER-01, ER-02, ER-08, ER-10, ER-11, ER-17, ER-18, ER-19, ER-25, ER-27, ER-27C, ER-28, ER-28B, ER-29, ER-30 and ER-34, any case. The 16 codes it took before are dropped with no aliases, so an old code now answers 404. This is a breaking change to accepted values, against the additive rule in ADR-0005, made on the owner's decision. No client builds a document URL from a code, and the owner accepted that a QR code on a form printed before this change stops resolving. The new anonymous route `.../verification` is the target of the QR code on each form. It answers `reference`, `electionId`, `electionTitle`, `phase`, `formCode` and `formTitle`, or 404 for an unknown election, an unknown code or a test election. Rate limited by the `CredentialVerification` policy.

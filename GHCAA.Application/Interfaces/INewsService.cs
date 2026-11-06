@@ -4,7 +4,8 @@ namespace GHCAA.Application.Interfaces
 {
     public interface INewsService
     {
-        Task<IEnumerable<NewsPostDto>> GetActiveNewsAsync(GHCAA.Domain.Enums.ArticleCategory? articleCategory = null, GHCAA.Domain.Enums.PostType? postType = null, CancellationToken cancellationToken = default);
+        // Members-only posts are left out unless the caller says the reader is signed in.
+        Task<IEnumerable<NewsPostDto>> GetActiveNewsAsync(GHCAA.Domain.Enums.ArticleCategory? articleCategory = null, GHCAA.Domain.Enums.PostType? postType = null, bool includeMembersOnly = false, CancellationToken cancellationToken = default);
         Task<IEnumerable<NewsPostDto>> GetAllNewsForAdminAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<NewsPostDto>> GetPendingSubmissionsAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<NewsPostDto>> GetMySubmissionsAsync(int userId, CancellationToken cancellationToken = default);

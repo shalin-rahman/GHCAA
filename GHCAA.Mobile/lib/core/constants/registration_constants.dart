@@ -28,6 +28,7 @@ class LookupGroups {
   static const String professionalSector = 'ProfessionalSector';
   static const String tShirtSize = 'TShirtSize';
   static const String membershipType = 'MembershipType';
+  static const String discussionCategory = 'DiscussionCategory';
 }
 
 // Same rule as Constants.Nid on the API.

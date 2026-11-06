@@ -29,7 +29,7 @@ namespace GHCAA.Tests.Services
         public void Setup()
         {
             _mockLogger = new Mock<ILogger<PollService>>();
-            _pollService = new PollService(_context, _mockLogger.Object);
+            _pollService = new PollService(_context, _mockLogger.Object, new DiscussionService(_context, NewActivity()), new Mock<GHCAA.Application.Interfaces.INewsService>().Object, NewActivity());
             _db = _context;
         }
 
@@ -75,7 +75,7 @@ namespace GHCAA.Tests.Services
             };
 
             // Act
-            var pollId = await _pollService.CreatePollAsync(dto, AdminMemberId);
+            var pollId = await _pollService.CreatePollAsync(dto, AdminMemberId, null);
 
             // Assert
             var poll = await _db.Polls.Include(p => p.Options).FirstOrDefaultAsync(p => p.Id == pollId);
@@ -84,6 +84,127 @@ namespace GHCAA.Tests.Services
             poll.Description.Should().Be(PollDescription);
             poll.CreatedBy.Should().Be(AdminMemberId);
             poll.Options.Count.Should().Be(2);
+        }
+
+        private static CreatePollDto PollDto(string? category = null, PollAnnouncementDto? announcement = null) => new()
+        {
+            Title = PollTitle,
+            Options = new List<string> { FirstOption, SecondOption },
+            Category = category,
+            Announcement = announcement,
+        };
+
+        private static PollAnnouncementDto Announcement() => new()
+        {
+            Title = "Vote on the venue",
+            Content = "Pick the venue for the reunion dinner.",
+        };
+
+        private PollService ServiceWithNews(Mock<GHCAA.Application.Interfaces.INewsService> news) =>
+            new(_context, _mockLogger.Object, new DiscussionService(_context, NewActivity()), news.Object, NewActivity());
+
+        [Category("FR-40")]
+        [Test]
+        public async Task CreatePollAsync_NoCategory_DefaultsToOther()
+        {
+            var pollId = await _pollService.CreatePollAsync(PollDto(), AdminMemberId, null);
+
+            (await _db.Polls.SingleAsync(p => p.Id == pollId)).Category.Should().Be(GHCAA.Domain.Constants.Discussion.DefaultCategory);
+        }
+
+        [Category("FR-40")]
+        [Test]
+        public async Task CreatePollAsync_UnknownOrRetiredCategory_IsRejected()
+        {
+            _db.Lookups.Add(new LookupItem { LookupGroup = GHCAA.Domain.Constants.Discussion.CategoryLookupGroup, Value = "Sports", Label = "Sports", IsActive = false });
+            await _db.SaveChangesAsync();
+
+            await _pollService.Invoking(s => s.CreatePollAsync(PollDto("Sports"), AdminMemberId, null)).Should().ThrowAsync<ArgumentException>();
+            await _pollService.Invoking(s => s.CreatePollAsync(PollDto("Nope"), AdminMemberId, null)).Should().ThrowAsync<ArgumentException>();
+            (await _db.Polls.CountAsync()).Should().Be(0);
+        }
+
+        [Category("FR-40")]
+        [Test]
+        public async Task GetActivePollsAsync_CategoryFilter_ReturnsOnlyThatCategory()
+        {
+            _db.Lookups.Add(new LookupItem { LookupGroup = GHCAA.Domain.Constants.Discussion.CategoryLookupGroup, Value = "Events", Label = "Events", IsActive = true });
+            await _db.SaveChangesAsync();
+            var member = await CreatePollMemberAsync(30);
+            await _pollService.CreatePollAsync(PollDto("Events"), AdminMemberId, null);
+            await _pollService.CreatePollAsync(PollDto(), AdminMemberId, null);
+
+            var events = await _pollService.GetActivePollsAsync(member.Id, "Events");
+            var all = await _pollService.GetActivePollsAsync(member.Id, null);
+
+            events.Should().ContainSingle().Which.Category.Should().Be("Events");
+            all.Should().HaveCount(2);
+        }
+
+        [Category("FR-40")]
+        [Test]
+        public async Task CreatePollAsync_CategoryInOtherCase_IsStoredAsTheLookupSpellsIt()
+        {
+            _db.Lookups.Add(new LookupItem { LookupGroup = GHCAA.Domain.Constants.Discussion.CategoryLookupGroup, Value = "Events", Label = "Events", IsActive = true });
+            await _db.SaveChangesAsync();
+
+            var pollId = await _pollService.CreatePollAsync(PollDto(" events "), AdminMemberId, null);
+
+            (await _db.Polls.SingleAsync(p => p.Id == pollId)).Category.Should().Be("Events");
+        }
+
+        [Category("FR-40")]
+        [Test]
+        public async Task GetActivePollsAsync_OtherFilter_IncludesPollsWithNoCategory()
+        {
+            var member = await CreatePollMemberAsync(31);
+            var old = CreatePoll();
+            old.Category = "";
+            _db.Polls.Add(old);
+            await _db.SaveChangesAsync();
+
+            var other = await _pollService.GetActivePollsAsync(member.Id, GHCAA.Domain.Constants.Discussion.DefaultCategory);
+
+            other.Should().ContainSingle(p => p.Id == old.Id);
+        }
+
+        [Category("FR-40")]
+        [Test]
+        public async Task CreatePollAsync_WithAnnouncement_LinksPostThatHoldsNoOptions()
+        {
+            var news = new Mock<GHCAA.Application.Interfaces.INewsService>();
+            CreateNewsDto? sent = null;
+            news.Setup(n => n.CreateNewsAsync(It.IsAny<CreateNewsDto>(), 42, It.IsAny<CancellationToken>()))
+                .Callback<CreateNewsDto, int, CancellationToken>((d, _, _) => sent = d)
+                .ReturnsAsync(new NewsPostDto { Id = 77 });
+
+            var pollId = await ServiceWithNews(news).CreatePollAsync(PollDto(announcement: Announcement()), AdminMemberId, 42);
+
+            (await _db.Polls.SingleAsync(p => p.Id == pollId)).AnnouncementId.Should().Be(77);
+            sent!.Content.Should().Contain(GHCAA.Domain.Constants.Discussion.PollPagePath);
+            sent.Content.Should().NotContain(FirstOption).And.NotContain(SecondOption);
+        }
+
+        [Category("FR-40")]
+        [Test]
+        public async Task CreatePollAsync_AnnouncementFails_RollsBackThePoll()
+        {
+            var news = new Mock<GHCAA.Application.Interfaces.INewsService>();
+            news.Setup(n => n.CreateNewsAsync(It.IsAny<CreateNewsDto>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new InvalidOperationException("news down"));
+
+            await ServiceWithNews(news).Invoking(s => s.CreatePollAsync(PollDto(announcement: Announcement()), AdminMemberId, 42))
+                .Should().ThrowAsync<InvalidOperationException>();
+
+            (await _db.Polls.CountAsync()).Should().Be(0);
+        }
+
+        [Category("FR-40")]
+        [Test]
+        public async Task CreatePollAsync_AnnouncementWithoutAuthorUser_IsRejected()
+        {
+            await _pollService.Invoking(s => s.CreatePollAsync(PollDto(announcement: Announcement()), AdminMemberId, null))
+                .Should().ThrowAsync<ArgumentException>();
         }
 
         [Category("FR-40")]
@@ -138,7 +259,7 @@ namespace GHCAA.Tests.Services
             await _context.SaveChangesAsync();
 
             // Act
-            var polls = await _pollService.GetActivePollsAsync(m1.Id); // Call as Member 1
+            var polls = await _pollService.GetActivePollsAsync(m1.Id, null); // Call as Member 1
 
             // Assert
             polls.Count.Should().Be(1);
@@ -188,7 +309,7 @@ namespace GHCAA.Tests.Services
             _db.Polls.AddRange(active, inactive, expired, archived);
             await _db.SaveChangesAsync();
 
-            var polls = await _pollService.GetActivePollsAsync(AdminMemberId);
+            var polls = await _pollService.GetActivePollsAsync(AdminMemberId, null);
 
             polls.Select(poll => poll.Id).Should().Equal(active.Id);
         }
@@ -204,7 +325,7 @@ namespace GHCAA.Tests.Services
             _db.Polls.AddRange(active, inactive, expired, archived);
             await _db.SaveChangesAsync();
 
-            var polls = await _pollService.GetAllPollsAsync();
+            var polls = await _pollService.GetAllPollsAsync(null, false);
 
             polls.Select(poll => poll.Id).Should().BeEquivalentTo(new[] { active.Id, inactive.Id, expired.Id });
             polls.Should().OnlyContain(poll => !poll.HasVoted && !poll.SelectedOptionIds.Any());
@@ -260,7 +381,7 @@ namespace GHCAA.Tests.Services
             _db.Polls.Add(poll);
             await _db.SaveChangesAsync();
 
-            var result = (await _pollService.GetActivePollsAsync(AdminMemberId)).Single();
+            var result = (await _pollService.GetActivePollsAsync(AdminMemberId, null)).Single();
 
             result.TotalVotes.Should().Be(0);
             result.Options.Should().OnlyContain(option => option.VoteCount == 0 && option.Percentage == 0);
@@ -276,7 +397,7 @@ namespace GHCAA.Tests.Services
             var optionIds = poll.Options.Select(option => option.Id).ToList();
 
             var accepted = await _pollService.VoteAsync(poll.Id, member.Id, optionIds);
-            var result = (await _pollService.GetActivePollsAsync(member.Id)).Single();
+            var result = (await _pollService.GetActivePollsAsync(member.Id, null)).Single();
 
             accepted.Should().BeTrue();
             (await _db.PollVotes.CountAsync()).Should().Be(2);
@@ -320,8 +441,8 @@ namespace GHCAA.Tests.Services
             _db.Polls.Add(poll);
             await _db.SaveChangesAsync();
 
-            var deleted = await _pollService.DeletePollAsync(poll.Id);
-            var allPolls = await _pollService.GetAllPollsAsync();
+            var deleted = await _pollService.DeletePollAsync(poll.Id, AdminMemberId, false);
+            var allPolls = await _pollService.GetAllPollsAsync(null, false);
             var pollById = await _pollService.GetPollByIdAsync(poll.Id, AdminMemberId);
 
             deleted.Should().BeTrue();
@@ -342,7 +463,7 @@ namespace GHCAA.Tests.Services
 
             var pollId = recordExists ? poll.Id : NonexistentPollId;
             var toggled = await _pollService.TogglePollStatusAsync(pollId, false);
-            var deleted = await _pollService.DeletePollAsync(pollId);
+            var deleted = await _pollService.DeletePollAsync(pollId, AdminMemberId, false);
 
             toggled.Should().Be(recordExists);
             deleted.Should().Be(recordExists);

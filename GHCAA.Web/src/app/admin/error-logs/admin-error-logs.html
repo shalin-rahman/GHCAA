@@ -48,7 +48,7 @@
             <tbody>
                 @for (log of logs(); track log.id) {
                 <tr class="animate-fade-in">
-                    <td>{{ log.occurredAt | date:'dd-MM-yyyy HH:mm:ss' }}</td>
+                    <td>{{ log.occurredAt | appDate }} {{ log.occurredAt | date:'HH:mm:ss' }}</td>
                     <td><span class="status-badge" [class]="getLevelClass(log.level)">{{ log.level }}</span></td>
                     <td class="message-cell">
                         <span>{{ log.message }}</span>

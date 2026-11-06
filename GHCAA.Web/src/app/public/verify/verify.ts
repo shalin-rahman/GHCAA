@@ -2,12 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { CredentialVerificationService, CredentialVerification } from '../../core/services/credential-verification.service';
+import { CredentialVerificationService, CredentialVerification } from '../../core/services/credential-verification.service';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 
 @Component({
   selector: 'app-credential-verification',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AppDatePipe],
   templateUrl: './verify.html',
   styleUrl: './verify.scss'
 })

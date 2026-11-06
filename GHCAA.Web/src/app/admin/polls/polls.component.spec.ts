@@ -4,6 +4,8 @@ import { AdminPolls } from './polls.component';
 import { AdminPollService } from '../../core/services/admin-poll.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
+import { LookupService } from '../../core/services/lookup.service';
+import { PollService } from '../../core/services/poll.service';
 import { of, throwError } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -14,7 +16,12 @@ const TEST_POLL = {
   isActive: true,
   totalVotes: 2,
   options: [],
-  createdAt: '2026-01-01'
+  createdAt: '2026-01-01',
+  allowComments: true,
+  commentsLocked: false,
+  commentCount: 0,
+  category: 'Other',
+  announcementId: null
 } as any;
 
 describe('AdminPolls', () => {
@@ -29,7 +36,9 @@ describe('AdminPolls', () => {
       getAllPolls: vi.fn().mockReturnValue(of([])),
       createPoll: vi.fn(),
       toggleStatus: vi.fn(),
-      deletePoll: vi.fn()
+      deletePoll: vi.fn(),
+      setCommentsLocked: vi.fn(),
+      setAllowComments: vi.fn()
     };
 
     notifyMock = createNotificationServiceMock();
@@ -39,6 +48,8 @@ describe('AdminPolls', () => {
       imports: [AdminPolls],
       providers: [
         { provide: AdminPollService, useValue: adminPollServiceMock },
+        { provide: PollService, useValue: { commentSource: vi.fn().mockReturnValue({ load: () => of({ comments: [], totalCount: 0, allowComments: true }) }) } },
+        { provide: LookupService, useValue: { getOptions: vi.fn().mockReturnValue(of([{ value: 'Other', label: 'Other' }])) } },
         { provide: NotificationService, useValue: notifyMock },
         { provide: ConfirmDialogService, useValue: confirmDialogMock }
       ]
@@ -82,11 +93,12 @@ describe('AdminPolls', () => {
     component.newPoll.options = ['Yes', 'No'];
     component.showCreateModal.set(true);
     adminPollServiceMock.createPoll.mockReturnValue(of({}));
-    const request = component.newPoll;
 
     component.onCreatePoll();
 
-    expect(adminPollServiceMock.createPoll).toHaveBeenCalledWith(request);
+    expect(adminPollServiceMock.createPoll).toHaveBeenCalledWith(expect.objectContaining({
+      title: TEST_POLL.title, options: ['Yes', 'No'], allowComments: true, category: 'Other', announcement: undefined
+    }));
     expect(component.showCreateModal()).toBe(false);
     expect(component.newPoll.options).toEqual(['', '']);
     expect(notifyMock.success).toHaveBeenCalledOnce();
@@ -136,5 +148,69 @@ describe('AdminPolls', () => {
     expect(component.polls()[0].isActive).toBe(true);
     expect(component.togglingId()).toBeNull();
     expect(notifyMock.error).toHaveBeenCalledOnce();
+  });
+
+  it('sends the announcement with the poll when it is ticked', () => {
+    component.newPoll.title = TEST_POLL.title;
+    component.newPoll.options = ['Yes', 'No'];
+    component.announcement = { enabled: true, postType: 'Notice', title: ' Vote now ', content: '<p>Pick a venue</p>' };
+    adminPollServiceMock.createPoll.mockReturnValue(of({}));
+
+    component.onCreatePoll();
+
+    expect(adminPollServiceMock.createPoll.mock.calls[0][0].announcement).toEqual({
+      postType: 'Notice', title: 'Vote now', content: '<p>Pick a venue</p>', membersOnly: true
+    });
+    expect(component.announcement.enabled).toBe(false);
+  });
+
+  it('holds the create request when the announcement has no title or text', () => {
+    component.newPoll.title = TEST_POLL.title;
+    component.newPoll.options = ['Yes', 'No'];
+    component.announcement = { enabled: true, postType: 'News', title: '', content: '' };
+
+    component.onCreatePoll();
+
+    expect(adminPollServiceMock.createPoll).not.toHaveBeenCalled();
+    expect(notifyMock.warning).toHaveBeenCalledOnce();
+  });
+
+  it('locks comments and updates the row and the open modal', () => {
+    component.polls.set([TEST_POLL]);
+    component.selectedPoll.set(TEST_POLL);
+    adminPollServiceMock.setCommentsLocked.mockReturnValue(of({}));
+
+    component.toggleCommentsLocked(TEST_POLL);
+
+    expect(adminPollServiceMock.setCommentsLocked).toHaveBeenCalledWith(1, true);
+    expect(component.polls()[0].commentsLocked).toBe(true);
+    expect(component.selectedPoll()?.commentsLocked).toBe(true);
+    expect(component.commentBusyId()).toBeNull();
+  });
+
+  it('turns comments off and keeps the old value on failure', () => {
+    component.polls.set([TEST_POLL]);
+    adminPollServiceMock.setAllowComments.mockReturnValue(throwError(() => new Error('Request failed')));
+
+    component.toggleAllowComments(TEST_POLL);
+
+    expect(adminPollServiceMock.setAllowComments).toHaveBeenCalledWith(1, false);
+    expect(component.polls()[0].allowComments).toBe(true);
+    expect(notifyMock.error).toHaveBeenCalledOnce();
+  });
+
+  it('asks about the announcement only when the poll has one', async () => {
+    adminPollServiceMock.deletePoll.mockReturnValue(of({}));
+    confirmDialogMock.confirm.mockReturnValue(of(true));
+
+    await component.deletePoll(TEST_POLL);
+    expect(confirmDialogMock.confirm).toHaveBeenCalledTimes(1);
+    expect(adminPollServiceMock.deletePoll).toHaveBeenLastCalledWith(1, false);
+
+    confirmDialogMock.confirm.mockReset();
+    confirmDialogMock.confirm.mockReturnValueOnce(of(true)).mockReturnValueOnce(of(true));
+    await component.deletePoll({ ...TEST_POLL, id: 2, announcementId: 30 });
+    expect(confirmDialogMock.confirm).toHaveBeenCalledTimes(2);
+    expect(adminPollServiceMock.deletePoll).toHaveBeenLastCalledWith(2, true);
   });
 });

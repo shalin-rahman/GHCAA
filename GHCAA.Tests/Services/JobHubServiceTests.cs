@@ -58,6 +58,21 @@ namespace GHCAA.Tests.Services
             dbJob.IsActive.Should().BeTrue();
         }
 
+        // TODO 84.56: the mobile form sends no requirements, and the columns are NOT NULL.
+        [Test]
+        public async Task PostJobAsync_StoresEmptyString_WhenOptionalTextIsNull()
+        {
+            var member = await CreatePosterMemberAsync("JHR0");
+
+            var dto = new CreateJobDto { Title = "Mobile Posting", CompanyName = "Acme" };
+            await _service.PostJobAsync(dto, member.Id, isAdmin: false);
+
+            var dbJob = await _context.JobOpportunities.SingleAsync(j => j.Title == "Mobile Posting");
+            dbJob.Location.Should().BeEmpty();
+            dbJob.Description.Should().BeEmpty();
+            dbJob.Requirements.Should().BeEmpty();
+        }
+
         [Test]
         public async Task UpdateJobAsync_ShouldUpdateAllFields_WhenPoster()
         {

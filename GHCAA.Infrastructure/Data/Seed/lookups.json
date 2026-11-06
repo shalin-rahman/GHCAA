@@ -804,5 +804,77 @@
     "Description": "Official communication via verified inbox.",
     "IsActive": true,
     "DisplayOrder": 302
+  },
+  {
+    "Id": 5001,
+    "LookupGroup": "JobCategory",
+    "Value": "IT",
+    "Label": "IT & Software Development",
+    "IsActive": true,
+    "DisplayOrder": 1
+  },
+  {
+    "Id": 5002,
+    "LookupGroup": "JobCategory",
+    "Value": "Finance",
+    "Label": "Finance & Banking",
+    "IsActive": true,
+    "DisplayOrder": 2
+  },
+  {
+    "Id": 5003,
+    "LookupGroup": "JobCategory",
+    "Value": "Engineering",
+    "Label": "Engineering & Construction",
+    "IsActive": true,
+    "DisplayOrder": 3
+  },
+  {
+    "Id": 5004,
+    "LookupGroup": "JobCategory",
+    "Value": "Marketing",
+    "Label": "Marketing & Sales",
+    "IsActive": true,
+    "DisplayOrder": 4
+  },
+  {
+    "Id": 5005,
+    "LookupGroup": "JobCategory",
+    "Value": "Education",
+    "Label": "Education & Research",
+    "IsActive": true,
+    "DisplayOrder": 5
+  },
+  {
+    "Id": 5006,
+    "LookupGroup": "JobCategory",
+    "Value": "Health",
+    "Label": "Healthcare & Pharma",
+    "IsActive": true,
+    "DisplayOrder": 6
+  },
+  {
+    "Id": 5007,
+    "LookupGroup": "JobCategory",
+    "Value": "PublicSector",
+    "Label": "Govt. & Public Sector",
+    "IsActive": true,
+    "DisplayOrder": 7
+  },
+  {
+    "Id": 5008,
+    "LookupGroup": "JobCategory",
+    "Value": "Mentorship",
+    "Label": "Mentorship & Career Guidance",
+    "IsActive": true,
+    "DisplayOrder": 8
+  },
+  {
+    "Id": 5009,
+    "LookupGroup": "JobCategory",
+    "Value": "Other",
+    "Label": "Other Opportunities",
+    "IsActive": true,
+    "DisplayOrder": 9
   }
 ]

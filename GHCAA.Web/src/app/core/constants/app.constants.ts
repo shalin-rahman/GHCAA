@@ -55,7 +55,15 @@ export const LOOKUP_GROUPS = {
     Degree: 'Degree',
     AcademicSubject: 'AcademicSubject',
     ProfessionalSector: 'ProfessionalSector',
-    TShirtSize: 'TShirtSize'
+    TShirtSize: 'TShirtSize',
+    DiscussionCategory: 'DiscussionCategory'
+} as const;
+
+// Mirrors Constants.Discussion on the server.
+export const DISCUSSION = {
+    DEFAULT_CATEGORY: 'Other',
+    MAX_COMMENT_LENGTH: 2000,
+    PAGE_SIZE: 20
 } as const;
 
 export const DATE_FORMATS = {
@@ -66,7 +74,6 @@ export const DATE_FORMATS = {
 export type DateFormat = typeof DATE_FORMATS[keyof typeof DATE_FORMATS];
 
 export const DEFAULT_DATE_FORMAT: DateFormat = DATE_FORMATS.DMY;
-export const DATE_FORMAT = DEFAULT_DATE_FORMAT;
 export const DATE_FORMAT_LABELS: Record<DateFormat, string> = {
     [DATE_FORMATS.DMY]: 'Day-Month-Year',
     [DATE_FORMATS.MDY]: 'Month/Day/Year'
@@ -79,7 +86,6 @@ export const DATE_FORMAT_REGEX: Record<DateFormat, RegExp> = {
     [DATE_FORMATS.DMY]: /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/,
     [DATE_FORMATS.MDY]: /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/
 };
-export const DATE_REGEX = DATE_FORMAT_REGEX[DEFAULT_DATE_FORMAT];
 
 export function normalizeDateFormat(value: unknown): DateFormat {
     return value === DATE_FORMATS.MDY ? DATE_FORMATS.MDY : DEFAULT_DATE_FORMAT;
@@ -583,6 +589,11 @@ export const API_ENDPOINTS = {
         MY_SUMMARY: '/api/pending/me/summary'
     },
     FAMILY_LINKS: '/api/family-links',
+    CREDENTIALS: {
+        MEMBER_LIST: (memberId: number) => `/api/admin/members/${memberId}/credentials`,
+        REVOKE: (shortCode: string) => `/api/verify/${encodeURIComponent(shortCode)}/revoke`,
+        REISSUE: (shortCode: string) => `/api/verify/${encodeURIComponent(shortCode)}/reissue`
+    },
     MENTORSHIP: '/api/mentorship',
     AUTH: {
         LOGIN: '/api/auth/login',

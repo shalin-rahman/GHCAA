@@ -14,7 +14,12 @@ const POLL_FIXTURE: PollDto = {
     options: [],
     totalVotes: 0,
     hasVoted: false,
-    selectedOptionIds: []
+    selectedOptionIds: [],
+    isArchived: false,
+    allowComments: true,
+    commentsLocked: false,
+    commentCount: 0,
+    category: 'Other'
 };
 
 describe('PollService', () => {
@@ -56,5 +61,40 @@ describe('PollService', () => {
         expect(request.request.method).toBe('POST');
         expect(request.request.body).toEqual({ optionIds });
         request.flush({});
+    });
+
+    it('sends the category filter only when one is chosen', () => {
+        service.getActivePolls('Reunion').subscribe();
+
+        const request = httpMock.expectOne(r => r.url === API_ENDPOINTS.POLLS.ACTIVE);
+        expect(request.request.params.get('category')).toBe('Reunion');
+        request.flush([]);
+    });
+
+    it('binds the comment routes of one poll', () => {
+        const source = service.commentSource(POLL_ID);
+        const base = `${API_ENDPOINTS.POLLS.BASE}/${POLL_ID}/comments`;
+
+        source.load(2, 20).subscribe();
+        const load = httpMock.expectOne(r => r.url === base && r.method === 'GET');
+        expect(load.request.params.get('page')).toBe('2');
+        expect(load.request.params.get('pageSize')).toBe('20');
+        load.flush({ comments: [], totalCount: 0 });
+
+        source.post('Hi', 4).subscribe();
+        const post = httpMock.expectOne(r => r.url === base && r.method === 'POST');
+        expect(post.request.body).toEqual({ content: 'Hi', parentId: 4 });
+        post.flush({});
+
+        source.post('Top').subscribe();
+        const top = httpMock.expectOne(r => r.url === base && r.method === 'POST');
+        expect(top.request.body).toEqual({ content: 'Top', parentId: null });
+        top.flush({});
+
+        source.remove(8, 'Spam').subscribe();
+        const del = httpMock.expectOne(`${base}/8`);
+        expect(del.request.method).toBe('DELETE');
+        expect(del.request.body).toEqual({ reason: 'Spam' });
+        del.flush({});
     });
 });

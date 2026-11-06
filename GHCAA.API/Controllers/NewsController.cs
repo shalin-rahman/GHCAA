@@ -4,7 +4,6 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OutputCaching;
 
 namespace GHCAA.API.Controllers
 {
@@ -23,21 +22,24 @@ namespace GHCAA.API.Controllers
             _fileValidationService = fileValidationService;
         }
 
+        // Not output-cached: the answer depends on sign-in, and UseOutputCache runs before
+        // UseAuthentication, so a cookie-signed-in member's list could be stored and served to visitors.
         [AllowAnonymous]
-        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
         [HttpGet]
         public async Task<IActionResult> GetActiveNews([FromQuery] Enums.ArticleCategory? articleCategory, [FromQuery] Enums.PostType? postType, CancellationToken cancellationToken)
         {
-            var news = await _newsService.GetActiveNewsAsync(articleCategory, postType, cancellationToken);
+            var news = await _newsService.GetActiveNewsAsync(articleCategory, postType,
+                includeMembersOnly: User.Identity?.IsAuthenticated == true, cancellationToken);
             return Ok(news);
         }
 
+        // Not output-cached for the same reason as GetActiveNews.
         [AllowAnonymous]
-        [OutputCache(PolicyName = Constants.OutputCachePolicies.PublicContent)]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetNewsById(int id, CancellationToken cancellationToken)
         {
             var post = await _newsService.GetNewsByIdAsync(id, cancellationToken);
+            if (post != null && post.MembersOnly && User.Identity?.IsAuthenticated != true) return NotFound();
             return post == null ? NotFound() : Ok(post);
         }
 

@@ -525,6 +525,8 @@ namespace GHCAA.Domain
             public const int DefaultPageSize = 50;
             public const string CategoryLookupGroup = "DiscussionCategory";
             public const string DefaultCategory = "Other";
+            // Web route of the member poll page, linked from a poll announcement.
+            public const string PollPagePath = "/portal/polls";
 
             public static class AuditTypes
             {

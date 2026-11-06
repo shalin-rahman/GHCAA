@@ -140,4 +140,20 @@
     color: var(--text-muted);
     font-size: 0.85rem;
     font-weight: 600;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.poll-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+
+    select {
+        max-width: 16rem;
+    }
 }

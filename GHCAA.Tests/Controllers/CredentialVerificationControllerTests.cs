@@ -131,6 +131,32 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
+        public async Task Reissue_NewerValidCredentialExists_Returns409AndWritesNoAudit()
+        {
+            _service.Setup(x => x.ReissueCredentialAsync("ABCDEFG234", "Name changed", It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new GHCAA.Domain.CredentialConflictException("newer one exists"));
+
+            var result = await _controller.Reissue("ABCDEFG234", new CredentialActionRequest { Reason = "Name changed" }, CancellationToken.None);
+
+            var obj = result as ObjectResult;
+            Assert.That(obj!.StatusCode, Is.EqualTo(409));
+            Assert.That(((ProblemDetails)obj.Value!).Detail, Is.EqualTo("newer one exists"));
+            _activity.Verify(x => x.LogActivityAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(),
+                It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>(), It.IsAny<DateTime?>()), Times.Never);
+        }
+
+        // Any other InvalidOperationException is a fault, not a conflict, and must not show its message as a 409.
+        [Test]
+        public void Reissue_UnrelatedInvalidOperation_IsNotTurnedInto409()
+        {
+            _service.Setup(x => x.ReissueCredentialAsync("ABCDEFG234", "Name changed", It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new InvalidOperationException("internal detail"));
+
+            Assert.ThrowsAsync<InvalidOperationException>(() =>
+                _controller.Reissue("ABCDEFG234", new CredentialActionRequest { Reason = "Name changed" }, CancellationToken.None));
+        }
+
+        [Test]
         public async Task Reissue_MissingReason_Returns400Problem()
         {
             var result = await _controller.Reissue("ABCDEFG234", new CredentialActionRequest { Reason = "" }, CancellationToken.None);

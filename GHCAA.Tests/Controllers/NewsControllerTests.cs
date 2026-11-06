@@ -64,7 +64,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetActiveNews_ReturnsOk()
         {
-            _newsServiceMock.Setup(x => x.GetActiveNewsAsync(It.IsAny<Enums.ArticleCategory?>(), It.IsAny<Enums.PostType?>(), It.IsAny<CancellationToken>()))
+            _newsServiceMock.Setup(x => x.GetActiveNewsAsync(It.IsAny<Enums.ArticleCategory?>(), It.IsAny<Enums.PostType?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                             .ReturnsAsync(new List<NewsPostDto>());
 
             var result = await _controller.GetActiveNews(null, null, CancellationToken.None);
@@ -74,13 +74,13 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetActiveNews_PassesPostTypeFilterToService()
         {
-            _newsServiceMock.Setup(x => x.GetActiveNewsAsync(It.IsAny<Enums.ArticleCategory?>(), Enums.PostType.Notice, It.IsAny<CancellationToken>()))
+            _newsServiceMock.Setup(x => x.GetActiveNewsAsync(It.IsAny<Enums.ArticleCategory?>(), Enums.PostType.Notice, It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                             .ReturnsAsync(new List<NewsPostDto>());
 
             var result = await _controller.GetActiveNews(null, Enums.PostType.Notice, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
-            _newsServiceMock.Verify(x => x.GetActiveNewsAsync(null, Enums.PostType.Notice, It.IsAny<CancellationToken>()), Times.Once);
+            _newsServiceMock.Verify(x => x.GetActiveNewsAsync(null, Enums.PostType.Notice, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Category("FR-27")]
@@ -127,6 +127,46 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             _fileStorageServiceMock.Verify(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<int>(), Enums.FileUploadType.NoticeDocument, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        private void SignOut() => _controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
+
+        private void SetupNews() =>
+            _newsServiceMock.Setup(x => x.GetActiveNewsAsync(It.IsAny<Enums.ArticleCategory?>(), It.IsAny<Enums.PostType?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new List<NewsPostDto>());
+
+        [Category("FR-27")]
+        [Test]
+        public async Task GetActiveNews_SignedOut_AsksServiceToLeaveOutMembersOnlyPosts()
+        {
+            SetupNews();
+            SignOut();
+
+            await _controller.GetActiveNews(null, null, CancellationToken.None);
+
+            _newsServiceMock.Verify(x => x.GetActiveNewsAsync(null, null, false, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Category("FR-27")]
+        [Test]
+        public async Task GetActiveNews_SignedIn_AsksServiceToIncludeMembersOnlyPosts()
+        {
+            SetupNews();
+
+            await _controller.GetActiveNews(null, null, CancellationToken.None);
+
+            _newsServiceMock.Verify(x => x.GetActiveNewsAsync(null, null, true, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Category("FR-27")]
+        [Test]
+        public async Task GetNewsById_MembersOnlyPost_IsNotFoundWhenSignedOut()
+        {
+            _newsServiceMock.Setup(x => x.GetNewsByIdAsync(2, It.IsAny<CancellationToken>()))
+                            .ReturnsAsync(new NewsPostDto { Id = 2, MembersOnly = true });
+            SignOut();
+
+            Assert.That(await _controller.GetNewsById(2, CancellationToken.None), Is.InstanceOf<NotFoundResult>());
         }
 
         [Test]

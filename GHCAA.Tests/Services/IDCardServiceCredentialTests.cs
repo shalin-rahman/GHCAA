@@ -162,6 +162,30 @@ public class IDCardServiceCredentialTests : TestBase
         stored.RevokedReason.Should().Be("Lost");
     }
 
+    [Category("FR-06")]
+    [Test]
+    public async Task Reissue_OldCodeWhileNewerOneIsValid_IsRefusedAndIssuesNothing()
+    {
+        var old = await IssueCertificateAsync();
+        await _service.ReissueCredentialAsync(old.ShortCode, "Name changed");
+        var countBefore = await _context.IssuedCredentials.CountAsync();
+
+        var act = () => _service.ReissueCredentialAsync(old.ShortCode, "Again");
+
+        await act.Should().ThrowAsync<CredentialConflictException>();
+        (await _context.IssuedCredentials.CountAsync()).Should().Be(countBefore);
+    }
+
+    [Test]
+    public async Task Reissue_OldCodeAfterNewerOneWasRevoked_IsAllowed()
+    {
+        var old = await IssueCertificateAsync();
+        var newer = await _service.ReissueCredentialAsync(old.ShortCode, "Name changed");
+        await _service.RevokeCredentialAsync(newer!.ShortCode, "Lost");
+
+        (await _service.ReissueCredentialAsync(old.ShortCode, "Lost again")).Should().NotBeNull();
+    }
+
     [Test]
     public async Task Reissue_UnknownCode_ReturnsNull()
     {

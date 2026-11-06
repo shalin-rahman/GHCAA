@@ -301,9 +301,17 @@ class FakeActivityService implements ActivityService {
 
 class FakePollService implements PollService {
   @override
-  Future<List<Poll>> getActivePolls() async => [];
+  Future<List<Poll>> getActivePolls({String? category}) async => [];
   @override
   Future<bool> vote(int pollId, List<int> optionIds) async => true;
+  @override
+  Future<PollCommentPage> getComments(int pollId, int page) async =>
+      const PollCommentPage(comments: [], totalCount: 0);
+  @override
+  Future<PollComment> postComment(int pollId, String content, {int? parentId}) async =>
+      PollComment(id: 1, parentId: parentId, authorId: 1, authorName: 'Member', content: content, postedAt: DateTime.utc(2026, 11, 1));
+  @override
+  Future<void> removeComment(int pollId, int commentId) async {}
 }
 
 class FakeSupportService implements SupportService {

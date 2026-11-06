@@ -1,8 +1,17 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
+import { PostType } from '../models/business.models';
 import { PollDto } from './poll.service';
+
+export interface PollAnnouncementDto {
+    postType: PostType;
+    title: string;
+    content: string;
+    publishDate?: string | null;
+    membersOnly: boolean;
+}
 
 export interface CreatePollDto {
     title: string;
@@ -10,6 +19,10 @@ export interface CreatePollDto {
     allowMultipleChoice: boolean;
     expiryDate?: string;
     options: string[];
+    allowComments: boolean;
+    category?: string;
+    // Optional news or notice posted with the poll.
+    announcement?: PollAnnouncementDto | null;
 }
 
 @Injectable({
@@ -18,8 +31,10 @@ export interface CreatePollDto {
 export class AdminPollService {
     private http = inject(HttpClient);
 
-    getAllPolls(): Observable<PollDto[]> {
-        return this.http.get<PollDto[]>(API_ENDPOINTS.ADMIN.POLLS);
+    getAllPolls(category?: string, includeArchived = false): Observable<PollDto[]> {
+        let params = new HttpParams().set('includeArchived', includeArchived);
+        if (category) params = params.set('category', category);
+        return this.http.get<PollDto[]>(API_ENDPOINTS.ADMIN.POLLS, { params });
     }
 
     createPoll(poll: CreatePollDto): Observable<any> {
@@ -30,7 +45,17 @@ export class AdminPollService {
         return this.http.put(`${API_ENDPOINTS.ADMIN.POLLS}/${id}/toggle`, isActive);
     }
 
-    deletePoll(id: number): Observable<any> {
-        return this.http.delete(`${API_ENDPOINTS.ADMIN.POLLS}/${id}`);
+    setCommentsLocked(id: number, locked: boolean): Observable<unknown> {
+        return this.http.put(`${API_ENDPOINTS.ADMIN.POLLS}/${id}/comments/lock`, { locked });
+    }
+
+    setAllowComments(id: number, allowComments: boolean): Observable<unknown> {
+        return this.http.put(`${API_ENDPOINTS.ADMIN.POLLS}/${id}/comments`, { allowComments });
+    }
+
+    // hideAnnouncement also hides the news or notice that was posted with the poll.
+    deletePoll(id: number, hideAnnouncement = false): Observable<any> {
+        const params = new HttpParams().set('hideAnnouncement', hideAnnouncement);
+        return this.http.delete(`${API_ENDPOINTS.ADMIN.POLLS}/${id}`, { params });
     }
 }

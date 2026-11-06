@@ -303,6 +303,29 @@
         }
       }
     },
+    "/api/admin/members/{id}/credentials": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/admin/members/{id}/approve": {
       "post": {
         "tags": [
@@ -1936,6 +1959,22 @@
         "tags": [
           "AdminPoll"
         ],
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeArchived",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1961,6 +2000,90 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/CreatePollDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/polls/{id}/comments/lock": {
+      "put": {
+        "tags": [
+          "AdminPoll"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetThreadLockDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetThreadLockDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetThreadLockDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/polls/{id}/comments": {
+      "put": {
+        "tags": [
+          "AdminPoll"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetAllowCommentsDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetAllowCommentsDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetAllowCommentsDto"
               }
             }
           }
@@ -2027,6 +2150,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "hideAnnouncement",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -3480,17 +3610,58 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RevokeCredentialRequest"
+                "$ref": "#/components/schemas/CredentialActionRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/RevokeCredentialRequest"
+                "$ref": "#/components/schemas/CredentialActionRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/RevokeCredentialRequest"
+                "$ref": "#/components/schemas/CredentialActionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/verify/{shortCode}/reissue": {
+      "post": {
+        "tags": [
+          "CredentialVerification"
+        ],
+        "parameters": [
+          {
+            "name": "shortCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialActionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialActionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialActionRequest"
               }
             }
           }
@@ -10271,6 +10442,15 @@
         "tags": [
           "Poll"
         ],
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -10332,6 +10512,138 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/PollVoteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/polls/{id}/comments": {
+      "get": {
+        "tags": [
+          "Poll"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Poll"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCommentDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCommentDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCommentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/polls/{id}/comments/{commentId}": {
+      "delete": {
+        "tags": [
+          "Poll"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveCommentDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveCommentDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveCommentDto"
               }
             }
           }
@@ -13314,6 +13626,25 @@
         },
         "additionalProperties": false
       },
+      "CreateCommentDto": {
+        "required": [
+          "content"
+        ],
+        "type": "object",
+        "properties": {
+          "content": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "parentId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "CreateDonorRecognitionTierDto": {
         "required": [
           "name"
@@ -13685,6 +14016,9 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "membersOnly": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -13767,6 +14101,17 @@
               "type": "string"
             },
             "nullable": true
+          },
+          "allowComments": {
+            "type": "boolean"
+          },
+          "category": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "announcement": {
+            "$ref": "#/components/schemas/PollAnnouncementDto"
           }
         },
         "additionalProperties": false
@@ -13947,6 +14292,20 @@
           },
           "isActive": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CredentialActionRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -16302,6 +16661,36 @@
         ],
         "type": "string"
       },
+      "PollAnnouncementDto": {
+        "required": [
+          "content",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "postType": {
+            "$ref": "#/components/schemas/PostType"
+          },
+          "title": {
+            "maxLength": 300,
+            "minLength": 5,
+            "type": "string"
+          },
+          "content": {
+            "minLength": 20,
+            "type": "string"
+          },
+          "publishDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "membersOnly": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "PollVoteDto": {
         "type": "object",
         "properties": {
@@ -16739,6 +17128,17 @@
         ],
         "type": "string"
       },
+      "RemoveCommentDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "RepairPositionRequest": {
         "required": [
           "kind"
@@ -16820,16 +17220,6 @@
             "type": "boolean"
           },
           "note": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "RevokeCredentialRequest": {
-        "type": "object",
-        "properties": {
-          "reason": {
             "type": "string",
             "nullable": true
           }
@@ -17039,6 +17429,15 @@
         },
         "additionalProperties": false
       },
+      "SetAllowCommentsDto": {
+        "type": "object",
+        "properties": {
+          "allowComments": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "SetBallotKeyRequest": {
         "type": "object",
         "properties": {
@@ -17068,6 +17467,15 @@
             "$ref": "#/components/schemas/ScrutinyCheckItem"
           },
           "isChecked": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SetThreadLockDto": {
+        "type": "object",
+        "properties": {
+          "locked": {
             "type": "boolean"
           }
         },
@@ -17644,6 +18052,9 @@
           "isActive": {
             "type": "boolean"
           },
+          "membersOnly": {
+            "type": "boolean"
+          },
           "id": {
             "type": "integer",
             "format": "int32"
@@ -18118,6 +18529,12 @@
             "nullable": true
           },
           "newsImageUploadsPerDay": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "credentialValidityMonths": {
+            "maximum": 600,
+            "minimum": 0,
             "type": "integer",
             "format": "int32"
           }

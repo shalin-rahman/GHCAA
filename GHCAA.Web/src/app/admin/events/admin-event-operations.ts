@@ -11,12 +11,13 @@ import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 import { Icon } from '../../common/icon/icon';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { OrgConfigService } from '../../core/services/org-config.service';
-import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
+import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
+import { AppDateInputComponent } from '../../common/date-input/date-input.component';
 
 @Component({
   selector: 'app-admin-event-operations',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, Icon, PageHeaderComponent, AppCurrencyPipe],
+  imports: [CommonModule, AppDatePipe, FormsModule, Icon, PageHeaderComponent, AppCurrencyPipe, AppDateInputComponent],
   templateUrl: './admin-event-operations.html',
   styleUrl: './admin-event-operations.scss'
 })
@@ -42,7 +43,7 @@ export class AdminEventOperations implements OnInit {
   deletingExpenseId = signal<number | null>(null);
 
   formatDateToDMY(d: any) {
-    return toDisplayDate(d);
+    return toDisplayDate(d, this.orgConfig.dateFormat());
   }
 
   // Task Form

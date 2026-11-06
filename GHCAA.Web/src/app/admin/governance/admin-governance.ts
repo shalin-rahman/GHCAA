@@ -19,11 +19,13 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { NotifyToggleComponent } from '../../common/notify-toggle/notify-toggle.component';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
+import { AppDateInputComponent } from '../../common/date-input/date-input.component';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
     selector: 'app-admin-governance',
     standalone: true,
-    imports: [CommonModule, AppDatePipe, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ImgFallbackDirective, LazyImgDirective, ModalHeaderComponent, EcPositionsComponent, HandoverChecklistComponent],
+    imports: [CommonModule, AppDatePipe, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, NotifyToggleComponent, ImgFallbackDirective, LazyImgDirective, ModalHeaderComponent, EcPositionsComponent, HandoverChecklistComponent, AppDateInputComponent],
     templateUrl: './admin-governance.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './admin-governance.scss'
@@ -33,6 +35,7 @@ export class AdminGovernance implements OnInit {
     private notify = inject(NotificationService);
     private confirmDialog = inject(ConfirmDialogService);
     private positionService = inject(EcPositionService);
+    private orgConfig = inject(OrgConfigService);
 
     periods = signal<any[]>([]);
     selectedPeriod = signal<any>(null);
@@ -151,7 +154,7 @@ export class AdminGovernance implements OnInit {
     }
 
     formatDateToDMY(d: any) {
-        return toDisplayDate(d);
+        return toDisplayDate(d, this.orgConfig.dateFormat());
     }
 
     editPeriod(period: any) {

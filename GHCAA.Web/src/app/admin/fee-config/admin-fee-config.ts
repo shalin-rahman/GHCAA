@@ -12,12 +12,13 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
-import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
+import { AppCurrencyPipe } from '../../core/pipes/app-currency.pipe';
+import { AppDateInputComponent } from '../../common/date-input/date-input.component';
 
 @Component({
   selector: 'app-admin-fee-config',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, ReactiveFormsModule, LoadingPanelComponent, PageHeaderComponent, AppCurrencyPipe],
+  imports: [CommonModule, AppDatePipe, FormsModule, ReactiveFormsModule, LoadingPanelComponent, PageHeaderComponent, AppCurrencyPipe, AppDateInputComponent],
   templateUrl: './admin-fee-config.html',
   styleUrl: './admin-fee-config.scss'
 })
@@ -36,7 +37,7 @@ export class AdminFeeConfig implements OnInit {
   submitting = signal(false);
 
   formatDateToDMY(d: any) {
-    return toDisplayDate(d);
+    return toDisplayDate(d, this.orgConfig.dateFormat());
   }
 
   feeCategories = FINANCIAL_CATEGORY_OPTIONS;

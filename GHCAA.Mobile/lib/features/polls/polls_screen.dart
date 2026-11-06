@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/constants/registration_constants.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../lookups/dropdown_service.dart';
+import 'poll_comment_thread.dart';
 import 'poll_service.dart';
 
 class PollsScreen extends ConsumerWidget {
@@ -19,7 +22,17 @@ class PollsScreen extends ConsumerWidget {
         backgroundColor: AppTheme.midnightSurface,
         elevation: 0,
       ),
-      body: pollsAsync.when(
+      body: Column(
+        children: [
+          const _CategoryFilter(),
+          Expanded(child: _buildPolls(ref, pollsAsync)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPolls(WidgetRef ref, AsyncValue<List<Poll>> pollsAsync) {
+    return pollsAsync.when(
         loading: () => const Center(child: LogoSpinner(size: 120)),
         error: (err, stack) => Center(
           child: Column(
@@ -64,6 +77,41 @@ class PollsScreen extends ConsumerWidget {
             ),
           );
         },
+    );
+  }
+}
+
+final _discussionCategoriesProvider = FutureProvider.autoDispose<List<Map<String, String>>>(
+    (ref) => ref.read(dropdownDataProvider).getOptions(LookupGroups.discussionCategory));
+
+class _CategoryFilter extends ConsumerWidget {
+  const _CategoryFilter();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final categories = ref.watch(_discussionCategoriesProvider).value ?? const [];
+    // One category or none means there is nothing to filter by.
+    if (categories.length < 2) return const SizedBox.shrink();
+    final selected = ref.watch(pollCategoryFilterProvider);
+
+    Widget chip(String? value, String label) => Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: ChoiceChip(
+            label: Text(label),
+            selected: selected == value,
+            onSelected: (_) => ref.read(pollCategoryFilterProvider.notifier).state = value,
+          ),
+        );
+
+    return SizedBox(
+      height: 48,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        children: [
+          chip(null, 'All'),
+          for (final c in categories) chip(c['value'], c['label'] ?? c['value']!),
+        ],
       ),
     );
   }
@@ -79,6 +127,11 @@ class _PollCard extends ConsumerStatefulWidget {
 
 class _PollCardState extends ConsumerState<_PollCard> {
   bool _isSubmitting = false;
+  bool _showComments = false;
+  late int _commentCount = widget.poll.commentCount;
+
+  // A poll with comments turned off still shows the old ones.
+  bool get _hasThread => widget.poll.allowComments || _commentCount > 0;
 
   void _toggleOption(int optionId) {
     if (widget.poll.hasVoted) return;
@@ -248,6 +301,26 @@ class _PollCardState extends ConsumerState<_PollCard> {
               const SizedBox(height: 8),
               Text('Total Participants: ${widget.poll.totalVotes}', style: const TextStyle(color: Colors.white54, fontSize: 12), textAlign: TextAlign.right),
             ],
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(widget.poll.category, style: const TextStyle(color: Colors.white38, fontSize: 11)),
+                ),
+                if (_hasThread)
+                  TextButton.icon(
+                    key: Key('poll-comments-toggle-${widget.poll.id}'),
+                    onPressed: () => setState(() => _showComments = !_showComments),
+                    icon: Icon(_showComments ? Icons.expand_less : Icons.chat_bubble_outline, size: 16, color: AppTheme.royalGold),
+                    label: Text('Comments ($_commentCount)', style: const TextStyle(color: AppTheme.royalGold, fontSize: 12)),
+                  ),
+              ],
+            ),
+            if (_showComments)
+              PollCommentThread(
+                pollId: widget.poll.id,
+                onCountChange: (n) => setState(() => _commentCount = n),
+              ),
           ],
         ),
       ),

@@ -41,9 +41,8 @@ It exits 1 when an open item is missing here or a closed one is still scheduled.
   it. Its web, backend and mobile parts are done and the full mobile run passes; the owner's
   `lookups.json` rows and the four 'Life Member' goldens are left. The constitution note that was
   to follow it was dropped on 2026-11-06.
-- **Owner order, 2026-11-06.** In progress: 84.79 (date inputs follow the configured format, plus
-  the event date picker that does not open), 84.71 then 84.19 (meetings with comments), 84.59,
-  84.60, 84.68, 84.63, then the rest of the partial items 84.49 and 84.51 once those finish.
+- **Owner order, 2026-11-06.** In progress: 84.71 then 84.19 (meetings with comments), 84.59,
+  84.60, 84.68, then the rest of the partial items 84.49 and 84.51 once those finish.
   84.84 (directory search by city or country) is ordered too and starts once the poll migration
   for 84.71 has landed, since both change the model snapshot. The
   admin sidebar regrouping and the spec 001 index with its gap review closed the same day; the five
@@ -104,11 +103,11 @@ work in the order the tracker's `Depends on` tags give.
 |---|---|---|
 | E | Spec 023 delivery plan sessions F2 to F11 and N1, auth plan Part A and B4-B5. Order below. | 37.1m, 37.14o, 37.1p, 37.16e, 37.16f, 37.16g, 37.16h, 37.12y, 37.13f, 37.13g, 37.14a, 37.14d, 37.14f, 37.14m, 37.14n, 37.14t, 95.2, 95.4, 95.5, 95.12, 95.6, 84.42, 84.50 |
 | N1 | Non-election plan phase 1, release and environment blockers | 7.26, 7.28, 34.D8, 62.41, 84.48 |
-| N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 84.55, 84.56, 84.57, 84.58, 84.60, 84.62, 84.68, 97.1 |
-| N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 84.61, 84.64, 84.67, 84.69, 84.77, 84.79, 93.3, 93.4, 96.3 |
+| N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 84.55, 84.56, 84.57, 84.60, 84.62, 84.68, 97.1 |
+| N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 84.61, 84.64, 84.67, 84.69, 84.77, 93.3, 93.4, 96.3 |
 | N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.71, 84.72, 84.19, 84.20, 84.59, 84.65, 84.66, 84.80, 84.81, 84.82, 84.83, 84.84, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5 |
 | N5 | Phase 5, white-label profile and reusable modules | 62.2, 62.42, 62.56 |
-| N6 | Phase 6, performance and quality | 27.1, 27.8, 34.D7, 37.11, 51.4, 51.5, 84.63, 98.7 |
+| N6 | Phase 6, performance and quality | 27.1, 27.8, 34.D7, 37.11, 51.4, 51.5, 98.7 |
 | N7 | Phase 7, platform governance, security and operations | 7.16, 12.8, 12.9, 73.5, 73.6, 74.3, 98.43, 99.8 |
 | N8 | Phase 8, dissertation evidence and evaluation | 63.8, 63.18, 63.34, 64.8, 64.9, 67.2, 67.3, 67.4, 67.5, 67.7, 78.9, 78.10 |
 | P | This plan's own upkeep (Work Package 99) | 99.3 |
@@ -423,3 +422,8 @@ What counts as evidence:
 | 2026-11-06 | 84.73 (closed) | `nav.service.spec.ts` and `admin-layout.spec.ts` 33 of 33; browser check at 1366x900 and 390x844 showed eight sections, no page errors, and the search narrowing to one link | `docs/TODO.md` |
 | 2026-11-06 | 84.7, 84.42, 84.48, 84.50, 84.61 (on hold); 84.78 (won't do) | Owner put the items that wait on device or inbox checks, the seeding plan or the Firebase key on hold, and dropped the constitution note | `docs/TODO.md` |
 | 2026-11-06 | Owner order | Owner asked for 84.79 with the calendar picker bug, 84.73, 84.9, 84.18, 84.19, 84.71, 84.59, 84.63 and the partial items 84.49, 84.51, 84.68, 84.77; 84.60 gets an OrgConfig validity setting in months, default 12, empty or 0 for no expiry | `docs/TODO.md`, section 1 |
+| 2026-11-06 | 84.19, 84.59, 84.60, 84.63, 84.68, 84.71, 84.79 (in progress); 84.84 (planned) | Work started on the seven items; no results yet. Owner ordered 84.84; its plan adds `City` and `Country` to `Member`, hidden when the address is private, and it starts after the 84.71 migration lands | `docs/TODO.md`, section 1 |
+| 2026-11-06 | 84.79 (done) | Web date inputs use the shared `app-date-input`, which follows the configured format; the event calendar opens and keeps a picked day; specs run under both formats and a browser check passed | `docs/TODO.md`, section 1 |
+| 2026-11-06 | 84.63 (done) | Controller tests added for Mentorship, Assistant, Campaigns, Scholarships, AdminErrorLogs and AdminDevTracker, plus `AuthController.GetProviders`; 59 tests pass in the filtered run | `docs/TODO.md`, section 1 |
+| 2026-11-06 | 84.58 (done); 84.56 (part: server) | `dotnet test` filtered to job DTO, JobHub, SecureFiles and file validation tests: 67 of 67. 84.56 stays PARTIAL until web and mobile show the 400 message | `JobDto.cs`, `IFileValidationService.cs`, `FileValidationService.cs`, `SecureFilesController.cs`, `JobDtoValidationTests.cs`, `SecureFilesControllerTests.cs`, `docs/TODO.md`, spec 013 |
+| 2026-11-06 | 84.71, 84.68 (review fixes) | Code review found four faults, now fixed: news update dropping `membersOnly`, members' news served from the output cache, poll category case, and `Other` missing uncategorised polls; reissue now runs in a serializable transaction. Filtered `dotnet test` on Poll, News, IDCard, CredentialVerification and OutputCache: 108 of 108; `ci-local.py --only contract` 3 of 3. Both items stay in progress | `NewsController.cs`, `NewsDto.cs`, `NewsService.cs`, `PollService.cs`, `IDCardService.cs`, `NewsServiceTests.cs`, `PollServiceTests.cs`, `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md` |

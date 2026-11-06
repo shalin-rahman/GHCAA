@@ -131,7 +131,7 @@ export class AdminOrgConfig implements OnInit {
         },
         localization: {
           ...JSON.parse(this.localizationJson),
-          dateFormat: this.config.localization?.dateFormat ?? 'dd-MM-yyyy'
+          dateFormat: this.config.localization?.dateFormat ?? DEFAULT_DATE_FORMAT
         }
       };
       await this.configService.updateConfig(payload);

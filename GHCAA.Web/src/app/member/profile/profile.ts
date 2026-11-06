@@ -9,21 +9,20 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { getPositionLabel, getCurrentECLabel, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, getBloodGroupName, TSHIRT_SIZES, LOOKUP_GROUPS } from '../../core/constants/app.constants';
 import { LookupService, LookupOption } from '../../core/services/lookup.service';
-import { DatePipe } from '@angular/common';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
-import { toWireDate } from '../../core/utils/date.util';
+import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { Icon } from '../../common/icon/icon';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { OrgConfigService } from '../../core/services/org-config.service';
-import { earliestOrgRecord, hasBatchLabel } from '../../core/pipes/batch.pipe';
+import { earliestOrgRecord, hasBatchLabel } from '../../core/pipes/batch.pipe';
+import { AppDateInputComponent } from '../../common/date-input/date-input.component';
 
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent, ImgFallbackDirective, Icon, LoadingPanelComponent, PageHeaderComponent],
-    providers: [DatePipe],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, ImgFallbackDirective, Icon, LoadingPanelComponent, PageHeaderComponent, AppDateInputComponent],
     templateUrl: './profile.html',
     styleUrl: './profile.scss'
 })
@@ -34,7 +33,6 @@ export class Profile implements OnInit {
     private profileService = inject(ProfileService);
     private notify = inject(NotificationService);
     private confirmDialog = inject(ConfirmDialogService);
-    private datePipe = inject(DatePipe);
     private lookupService = inject(LookupService);
     readonly orgConfig = inject(OrgConfigService);
 
@@ -105,14 +103,14 @@ export class Profile implements OnInit {
         this.profile = mapping(p);
 
         if (this.profile.dateOfBirth) {
-            this.profile.dateOfBirth = this.datePipe.transform(this.profile.dateOfBirth, 'dd-MM-yyyy') || '';
+            this.profile.dateOfBirth = toDisplayDate(this.profile.dateOfBirth, this.orgConfig.dateFormat());
         }
 
         if (this.profile.professionalHistory) {
             this.profile.professionalHistory = this.profile.professionalHistory.map((ph: any) => ({
                 ...ph,
-                startDate: this.datePipe.transform(ph.startDate || ph.StartDate, 'dd-MM-yyyy') || '',
-                endDate: ph.endDate || ph.EndDate ? this.datePipe.transform(ph.endDate || ph.EndDate, 'dd-MM-yyyy') : ''
+                startDate: toDisplayDate(ph.startDate || ph.StartDate, this.orgConfig.dateFormat()),
+                endDate: ph.endDate || ph.EndDate ? toDisplayDate(ph.endDate || ph.EndDate, this.orgConfig.dateFormat()) : ''
             }));
         }
     }
@@ -156,7 +154,7 @@ export class Profile implements OnInit {
             designation: '',
             sector: 'Other',
             location: '',
-            startDate: this.datePipe.transform(new Date(), 'dd-MM-yyyy') || '',
+            startDate: toDisplayDate(new Date(), this.orgConfig.dateFormat()),
             isCurrent: true
         });
     }

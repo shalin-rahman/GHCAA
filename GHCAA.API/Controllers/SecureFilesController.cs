@@ -71,11 +71,7 @@ namespace GHCAA.API.Controllers
                 return NotFound();
             }
 
-            // Determine content type
-            var contentType = "application/octet-stream";
-            if (normalizedPath.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)) contentType = "application/pdf";
-            else if (normalizedPath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || normalizedPath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)) contentType = "image/jpeg";
-            else if (normalizedPath.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) contentType = "image/png";
+            var contentType = FileTypes.ContentTypeFor(normalizedPath);
 
             // 98.9. Stream the file instead of reading it into memory first. Both stores hand back a
             // seekable stream, so Range and conditional requests work for disk and bucket files.

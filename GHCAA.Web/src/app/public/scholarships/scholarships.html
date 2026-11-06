@@ -40,7 +40,7 @@
       </div>
       <button type="button" (click)="lookupStatus()" [disabled]="lookingUp()">{{ lookingUp() ? 'Checking...' : 'Check status' }}</button>
       @if (status(); as result) {
-        <p class="status-result"><strong>{{ result.referenceCode }}</strong>: {{ result.status }} · Submitted {{ result.submittedAt | date:'dd-MM-yyyy' }}</p>
+        <p class="status-result"><strong>{{ result.referenceCode }}</strong>: {{ result.status }} · Submitted {{ result.submittedAt | appDate }}</p>
       }
     </section>
   }

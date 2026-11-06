@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { LoadingPanelComponent } from '../../common/loading-panel/loading-panel';
 import { NotificationService } from '../../core/services/notification.service';
 import { ScholarshipService } from '../../core/services/scholarship.service';
-import { CreateScholarshipApplication, ScholarshipCall, ScholarshipFund, ScholarshipStatus } from '../../core/models/business.models';
+import { CreateScholarshipApplication, ScholarshipCall, ScholarshipFund, ScholarshipStatus } from '../../core/models/business.models';
+import { AppDatePipe } from '../../core/pipes/app-date.pipe';
 
 @Component({
     selector: 'app-scholarships',
     standalone: true,
-    imports: [CommonModule, FormsModule, LoadingPanelComponent],
+    imports: [CommonModule, FormsModule, LoadingPanelComponent, AppDatePipe],
     templateUrl: './scholarships.html',
     styleUrl: './scholarships.scss'
 })

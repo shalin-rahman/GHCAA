@@ -17,11 +17,13 @@ import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { LoadMoreComponent } from '../load-more/load-more';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 import { debounce } from '../../core/utils/debounce.util';
+import { AppDateInputComponent } from '../date-input/date-input.component';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
   selector: 'app-jobs',
   standalone: true,
-  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, LoadMoreComponent],
+  imports: [CommonModule, AppDatePipe, FormsModule, LoadingPanelComponent, PageHeaderComponent, SearchBarComponent, LoadMoreComponent, AppDateInputComponent],
   templateUrl: './jobs.html',
   styleUrl: './jobs.scss'
 })
@@ -30,6 +32,7 @@ export class Jobs implements OnInit {
   private notify = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
   private lookupService = inject(LookupService);
+  private orgConfig = inject(OrgConfigService);
 
   jobs = signal<Job[]>([]);
   loading = signal(true);
@@ -156,7 +159,7 @@ export class Jobs implements OnInit {
   }
 
   formatDateToDMY(d: any) {
-    return toDisplayDate(d);
+    return toDisplayDate(d, this.orgConfig.dateFormat());
   }
 
   closeForm() {

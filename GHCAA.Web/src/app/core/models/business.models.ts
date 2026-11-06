@@ -259,6 +259,7 @@ export interface NewsPost {
     attachmentUrl?: string;
     attachmentFileName?: string;
     isActive: boolean;
+    membersOnly: boolean;
     authorName?: string;
     createdAt: string | Date;
     collaborators: string[];
@@ -295,6 +296,7 @@ export interface CreateNewsDto {
     attachmentUrl?: string;
     attachmentFileName?: string;
     isActive?: boolean;
+    membersOnly?: boolean;
     collaborators?: string[];
 }
 

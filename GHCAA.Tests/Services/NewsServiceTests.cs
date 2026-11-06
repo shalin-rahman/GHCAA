@@ -88,6 +88,20 @@ public class NewsServiceTests : TestBase
         results.Should().HaveCount(1);
     }
 
+    [Category("FR-27")]
+    [Test]
+    public async Task GetActiveNewsAsync_LeavesOutMembersOnlyPosts_UnlessAsked()
+    {
+        _context.NewsPosts.AddRange(
+            new NewsPost { Title = "Public", Content = "C1", IsActive = true, AuthorId = _authorId, Status = Enums.SubmissionStatus.Approved },
+            new NewsPost { Title = "Members", Content = "C2", IsActive = true, AuthorId = _authorId, Status = Enums.SubmissionStatus.Approved, MembersOnly = true }
+        );
+        await _context.SaveChangesAsync();
+
+        (await _service.GetActiveNewsAsync()).Select(n => n.Title).Should().Equal("Public");
+        (await _service.GetActiveNewsAsync(includeMembersOnly: true)).Select(n => n.Title).Should().BeEquivalentTo("Public", "Members");
+    }
+
     [Category("FR-26")]
     [Test]
     public async Task CreateNewsAsync_ShouldSavePostWithImageUrl()
@@ -170,6 +184,19 @@ public class NewsServiceTests : TestBase
         var updated = await _context.NewsPosts.FindAsync(post.Id);
         updated!.Status.Should().Be(Enums.SubmissionStatus.Pending,
             "an edit that never intended to touch status must not move a Pending post to Approved");
+    }
+
+    [Category("FR-28")]
+    [Test]
+    public async Task UpdateNewsAsync_WithoutMembersOnly_KeepsThePostMembersOnly()
+    {
+        var post = new NewsPost { Title = "Poll news", Content = "C", AuthorId = _authorId, MembersOnly = true };
+        _context.NewsPosts.Add(post);
+        await _context.SaveChangesAsync();
+
+        await _service.UpdateNewsAsync(new UpdateNewsDto { Id = post.Id, Title = "Poll news", Content = "C" });
+
+        (await _context.NewsPosts.FindAsync(post.Id))!.MembersOnly.Should().BeTrue();
     }
 
     [Category("FR-27")]

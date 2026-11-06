@@ -1,0 +1,84 @@
+<section class="comment-thread" aria-label="Comments">
+    <h3 class="thread-title">
+        <app-icon name="messages" [size]="16"></app-icon>
+        Comments ({{ thread()?.totalCount ?? 0 }})
+    </h3>
+
+    @if (canPost()) {
+        <form class="comment-form" (ngSubmit)="post()">
+            <textarea class="form-control" name="draft" rows="3" placeholder="Write a comment"
+                      [maxlength]="maxLength" [ngModel]="draft()" (ngModelChange)="draft.set($event)"
+                      aria-label="Write a comment"></textarea>
+            <div class="form-row">
+                <span class="char-count">{{ draft().length }} / {{ maxLength }}</span>
+                <button type="submit" class="btn btn-accent btn-sm" [disabled]="!draft().trim() || posting()">
+                    {{ posting() ? 'Posting...' : 'Post' }}
+                </button>
+            </div>
+        </form>
+    } @else if (thread()?.closedReason) {
+        <p class="closed-note"><app-icon name="info-circle" [size]="14"></app-icon> {{ thread()?.closedReason }}</p>
+    }
+
+    @if (loading() && page() === 1) {
+        <app-loading-panel [compact]="true" label="Loading comments"></app-loading-panel>
+    } @else if (comments().length === 0) {
+        <p class="empty-note">No comments yet.</p>
+    }
+
+    <ul class="comment-list">
+        @for (c of comments(); track c.id) {
+            <li class="comment">
+                <ng-container *ngTemplateOutlet="commentBody; context: { $implicit: c }"></ng-container>
+
+                @if (c.replies.length) {
+                    <ul class="reply-list">
+                        @for (r of c.replies; track r.id) {
+                            <li class="comment reply">
+                                <ng-container *ngTemplateOutlet="commentBody; context: { $implicit: r }"></ng-container>
+                            </li>
+                        }
+                    </ul>
+                }
+
+                @if (canPost() && !c.removed) {
+                    <button type="button" class="btn btn-link btn-sm reply-toggle" (click)="startReply(c)">
+                        {{ replyTo() === c.id ? 'Cancel reply' : 'Reply' }}
+                    </button>
+                }
+                @if (replyTo() === c.id) {
+                    <form class="comment-form reply-form" (ngSubmit)="post(c.id)">
+                        <textarea class="form-control" name="replyDraft" rows="2" placeholder="Write a reply"
+                                  [maxlength]="maxLength" [ngModel]="replyDraft()" (ngModelChange)="replyDraft.set($event)"
+                                  aria-label="Write a reply"></textarea>
+                        <div class="form-row">
+                            <span class="char-count">{{ replyDraft().length }} / {{ maxLength }}</span>
+                            <button type="submit" class="btn btn-accent btn-sm" [disabled]="!replyDraft().trim() || posting()">Reply</button>
+                        </div>
+                    </form>
+                }
+            </li>
+        }
+    </ul>
+
+    @if (comments().length > 0) {
+        <app-load-more [hasMore]="hasMore()" [loading]="loading()" (more)="loadMore()"></app-load-more>
+    }
+</section>
+
+<ng-template #commentBody let-c>
+    <div class="comment-head">
+        <strong class="author">{{ c.authorName }}</strong>
+        <span class="posted">{{ c.postedAt | appDate }}</span>
+        @if (canRemove(c)) {
+            <button type="button" class="btn btn-link btn-sm remove-btn" (click)="remove(c)" aria-label="Remove comment">
+                <app-icon name="trash" [size]="14"></app-icon>
+            </button>
+        }
+    </div>
+    @if (c.removed) {
+        <p class="comment-text removed">This comment was removed.</p>
+    } @else {
+        <p class="comment-text">{{ c.content }}</p>
+    }
+</ng-template>

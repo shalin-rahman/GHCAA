@@ -54,7 +54,15 @@ namespace GHCAA.API.Controllers
         {
             if (string.IsNullOrWhiteSpace(request.Reason)) return Problem(detail: "A reason is required to reissue.", statusCode: StatusCodes.Status400BadRequest);
             var reason = request.Reason.Trim();
-            var replacement = await _idCardService.ReissueCredentialAsync(shortCode, reason, cancellationToken);
+            IssuedCredentialDto? replacement;
+            try
+            {
+                replacement = await _idCardService.ReissueCredentialAsync(shortCode, reason, cancellationToken);
+            }
+            catch (GHCAA.Domain.CredentialConflictException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+            }
             if (replacement == null) return NotFound();
 
             await _activityService.LogActivityAsync(replacement.MemberId, Credentials.ReissuedAuditType,
