@@ -1,7 +1,8 @@
 # Task script: General Secretary
 
 Five tasks, about twenty-five minutes. The General Secretary's work is admission, notice and record,
-so these tasks follow those rather than the menu structure.
+so these tasks follow those rather than the menu structure. Run on the web app; the mobile app can
+approve and reject applications but has no screens for notices, events or the constitution.
 
 ---
 
@@ -17,7 +18,8 @@ tier assigned.
 **Watch for:** whether they can see enough to decide without leaving the platform; whether they
 understand that the tier is theirs to assign rather than the applicant's to request; whether the
 thirty-day limit in DC-08 is visible anywhere. If nothing on the screen tells them how long an
-application has been waiting, that is a requirement gap and should be written up as one.
+application has been waiting, that is a requirement gap and should be written up as one. On
+2026-11-07 the approval page shows no applied date or waiting time; the gap is tracker item 84.95.
 
 ---
 
@@ -59,6 +61,10 @@ date fields behave as expected on their device.
 ---
 
 ## Task 5. Publish a rule change
+
+**Blocked until tracker item 84.93 closes.** On 2026-11-07 there is no screen or endpoint to publish a
+constitution version; the platform can only show the current version and its history. Skip the task
+and record it as not attempted.
 
 > The Executive Committee has approved an amendment to the constitution. Publish the new version so
 > members read the current rules and not the old ones.

@@ -11,7 +11,7 @@ Material for the 12-slide progress review on the election module and the data mo
 | [GHCAA-SRS.pdf](GHCAA-SRS.pdf) | Software Requirements Specification for printing |
 | [deck/build_deck.py](deck/build_deck.py) | Builds GHCAA-Mid.pptx |
 | [deck/GHCAA-Mid.original.pptx](deck/GHCAA-Mid.original.pptx) | The first 5-slide draft, kept for reference |
-| GHCAA-Mid_v1.pptx | The earlier version of the deck, kept for reference |
+| [../archive/presentation/GHCAA-Mid_v1.pptx](../archive/presentation/GHCAA-Mid_v1.pptx) | The earlier version of the deck, moved to the archive on 2026-11-07 |
 
 The deck and both PDFs are generated. Do not edit them by hand, because the next build will
 overwrite the edits. Rebuild from the repo root:

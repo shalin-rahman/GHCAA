@@ -58,7 +58,8 @@ since that is data-minimisation evidence for §8.11 and is worth more than the c
 and a proof image attached.
 
 **Watch for:** whether they expect to pay inside the platform and are confused when they cannot. The
-platform holds no gateway credentials, so payment happens outside it and is declared afterwards.
+code can drive a card or wallet gateway, but no live gateway is set up on preprod (README pre-session
+check 6), so payment happens outside the platform and is declared afterwards.
 Whether that reads as a limitation or as a fraud risk to the member is the single most important
 thing this study can tell us about the manual-verification design, and it goes to §8.9 and §12.10.
 Record their words about it as closely as you can.
@@ -95,7 +96,9 @@ evidence and should be written down verbatim.
 
 ## Task 6. Check the rules
 
-**Start state:** signed out, on the public site, so this task also tests the public view.
+**Start state:** signed out, on the public site, so this task also tests the public view. Run it in
+a browser, on the phone if the session is on one. The mobile app shows no public pages when signed
+out.
 
 > Someone told you the Association's rules about voting changed. Find the current rules and see
 > whether you are allowed to vote.

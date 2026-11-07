@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
+import '../../core/theme/app_theme.dart';
 
 class SpecialTheme {
   final int id;
@@ -26,24 +27,25 @@ class SpecialTheme {
     this.gradientEnabled = true,
   });
 
+  // A bad color from the admin form must not drop the whole theme, so each
+  // value falls back: background to the gold the theme screen already uses,
+  // text to whichever of black or white reads on that background, and the
+  // optional sidebar color to none.
   factory SpecialTheme.fromJson(Map<String, dynamic> json) {
+    final background =
+        AppTheme.parseHexColor(json['backgroundColor']?.toString(), AppTheme.royalGold);
     return SpecialTheme(
       id: json['id'],
       title: json['title'],
-      backgroundColor: _parseHex(json['backgroundColor']),
-      textColor: _parseHex(json['textColor']),
-      sidebarColor: json['sidebarColor'] != null && json['sidebarColor'].toString().isNotEmpty ? _parseHex(json['sidebarColor']) : null,
+      backgroundColor: background,
+      textColor: AppTheme.parseHexColor(
+          json['textColor']?.toString(), AppTheme.readableTextOn(background)),
+      sidebarColor: AppTheme.tryParseHexColor(json['sidebarColor']?.toString()),
       announcement: json['announcementText'] ?? '',
       animation: json['animationStyle'] ?? 'Fade',
       imageUrl: json['imageUrl'],
       gradientEnabled: json['enableGradientFading'] ?? true,
     );
-  }
-
-  static Color _parseHex(String hex) {
-    hex = hex.replaceFirst('#', '');
-    if (hex.length == 6) hex = 'FF$hex';
-    return Color(int.parse(hex, radix: 16));
   }
 }
 

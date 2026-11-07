@@ -27,7 +27,7 @@ It exits 1 when an open item is missing here or a closed one is still scheduled.
 
 - **Date:** 2026-11-02. **Wave:** wave 1 built. The owner accepted this plan on 2026-11-02 and asked for a
   code review of wave 1 and a full `ci-local.py` run before 99.3 closes. Do not start wave 2 before that.
-- **Open:** 120 items on 2026-11-03, 1 of them this plan's own upkeep in Work Package 99 (`python scripts/backlog_inventory.py`). Held: 8 (`--state ONHOLD`).
+- **Open:** 116 items on 2026-11-07, 1 of them this plan's own upkeep in Work Package 99 (`python scripts/backlog_inventory.py`). Held: 12 (`--state ONHOLD`).
 - **Spec review, 2026-11-03.** The specs were checked against the tracker and the code. Fourteen
   verified gaps became items: 37.16f to 37.16h in stream E, and eleven Work Package 84 items in streams N2, N3
   and N6. Their priorities are proposals; the owner can change them. That review's one P1 item and
@@ -38,33 +38,32 @@ It exits 1 when an open item is missing here or a closed one is still scheduled.
 - **Closed 2026-11-07.** The client option lists, poll comments, the server's 400 message on both
   clients and the stale mobile goldens; the progress log in section 9 lists them.
 - **Owner order and review update, 2026-11-07.** The configured OrgConfig branding regression is
-  fixed in both modes. 84.87 remains in progress. Its code review found that five gradient
-  samples could miss a failing point between them; the check now samples every rendered color.
-  Visual review has not run. The same review found low mobile button contrast on the offline
-  accent, fixed the same day (section 9 logs it). The security review
-  found no vulnerabilities. A follow-up review found that checking token declarations alone does
-  not verify rendered colors: configured accent foregrounds and derived hover/focus/shadow tokens
-  need runtime checks, dark mode can override configured primary color, and remapped white-text
-  utilities need review at their actual uses. 84.87 now requires effective-style checks for default
-  and custom branding in both modes, plus use-context review for those utilities. No code changed
-  in this documentation update.
-- **Owner order, 2026-11-06.** In progress: 84.19 (meetings with comments), 84.59,
-  84.60, 84.68, then the rest of the partial items 84.49 and 84.51 once those finish.
+  fixed in both modes. The security review found no vulnerabilities. The web theme audit and the
+  mobile label colors both closed the same day, after browser checks with default and custom
+  branding in Light and Dark mode; section 9, the progress log, lists them.
+- **Owner order, 2026-11-06.** In progress: 84.19 (meetings with comments) and 84.59, then the
+  rest of the partial items 84.49 and 84.51 once those finish. Credential expiry and
+  the web revoke and reissue screen closed on 2026-11-07 (section 9 logs them); the gap they left
+  (every card view mints a new code) is 84.90 in stream N2.
   84.84 (directory search by city or country) is ordered too; the poll comments migration it
   waited on has landed. The
   admin sidebar regrouping and the spec 001 index with its gap review closed the same day; the five
-  gaps raised from that review are new items in stream N4. 84.7, 84.42, 84.48, 84.50 and 84.61 are
-  on hold. The book strict build is the last item of this run. It fails on three counts, each already an
+  gaps raised from that review are new items in stream N4. 84.42, 84.48, 84.50 and 84.61 are
+  on hold. 84.7 came off hold on 2026-11-07 for its plan only. The book strict build is the last item of this run. It fails on three counts, each already an
   item: stale repository counts (63.8, 384 commits quoted against 388 in the tree), chapters over
   their page budgets (63.34), and 93 open placeholders in the chapter items 67.2, 67.3, 67.5 and
   67.7. A placeholder closes only with a sourced number, never a guess.
-- **Next work:** finish the open theme review item 84.87, then take the remaining
-  Wave 2 items in the order shown in section 4: 84.4 (web and mobile parity table), 93.3 (portal
+- **Next work:** take the remaining Wave 2 items in the order shown in section 4: 84.4 (web and mobile parity table), 93.3 (portal
   mobile nav e2e), and 84.27 (archive API tests and admin screen).
 - **Owner gates:** the owner answered every gate on 2026-11-02. What still needs the owner: the
   inbox check for preprod email (7.26), the upload-then-redeploy check for preprod uploads (7.28),
-  approval of the docs archive list (12.8), the list of unused config keys (98.43), the white-label
-  seeding plan (84.7) and the evaluation sessions (78.9). See section 5, the owner gates.
+  the 4 secret or connection keys in `appsettings.json` (98.43), the white-label seeding plan
+  (84.7) and the evaluation sessions (78.9). Owner answers 2026-11-07: 7.26 and 7.28 not done yet;
+  the docs archive is done (files in `docs/archive/`); 98.43 partial (8 non-secret keys commented out); 84.7 gets
+  its plan written, no build; 78.9 gets its session pack checked against the current app. Order:
+  the 78.9 pack (checked 2026-11-07; section 9 logs it), then the 84.7 plan (written 2026-11-07 in `docs/SEED_PROFILE_PLAN.md`; waits on owner gates
+  G1 to G4), then the two theme items (both closed 2026-11-07; section 9 logs them). The pack check found six gaps, 84.92 to 84.97. 84.92 (no screen to verify a declared
+  payment) is P1 and blocks two Treasurer tasks. See section 5, the owner gates.
 - **Commands:**
   - Open items: `python scripts/backlog_inventory.py [--wp N] [--state PARTIAL]`
   - Plan check: the `--check` command above.
@@ -110,13 +109,13 @@ work in the order the tracker's `Depends on` tags give.
 |---|---|---|
 | E | Spec 023 delivery plan sessions F2 to F11 and N1, auth plan Part A and B4-B5. Order below. | 37.1m, 37.14o, 37.1p, 37.16e, 37.16f, 37.16g, 37.16h, 37.12y, 37.13f, 37.13g, 37.14a, 37.14d, 37.14f, 37.14m, 37.14n, 37.14t, 95.2, 95.4, 95.5, 95.12, 95.6, 84.42, 84.50 |
 | N1 | Non-election plan phase 1, release and environment blockers | 7.26, 7.28, 34.D8, 62.41, 84.48 |
-| N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 84.55, 84.57, 84.60, 84.62, 84.68, 97.1 |
+| N2 | Phase 2, shared contract and identity foundations | 84.4, 84.7, 84.23, 84.25, 84.27, 84.35, 84.39, 84.49, 84.51, 84.55, 84.57, 84.62, 84.90, 97.1 |
 | N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 84.61, 84.64, 84.67, 84.69, 93.3, 93.4, 96.3 |
-| N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.72, 84.19, 84.20, 84.59, 84.65, 84.66, 84.80, 84.81, 84.82, 84.83, 84.84, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5 |
+| N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.72, 84.19, 84.20, 84.59, 84.65, 84.66, 84.80, 84.81, 84.82, 84.83, 84.84, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5, 84.92, 84.93, 84.94, 84.95 |
 | N5 | Phase 5, white-label profile and reusable modules | 62.2, 62.42, 62.56 |
-| N6 | Phase 6, performance and quality | 27.1, 27.8, 37.11, 51.4, 51.5, 84.87, 98.7 |
-| N7 | Phase 7, platform governance, security and operations | 7.16, 12.8, 12.9, 73.5, 73.6, 74.3, 98.43, 99.8 |
-| N8 | Phase 8, dissertation evidence and evaluation | 63.8, 63.18, 63.34, 64.8, 64.9, 67.2, 67.3, 67.4, 67.5, 67.7, 78.9, 78.10 |
+| N6 | Phase 6, performance and quality | 27.1, 27.8, 37.11, 51.4, 51.5, 84.98, 98.7 |
+| N7 | Phase 7, platform governance, security and operations | 7.16, 12.9, 73.5, 73.6, 74.3, 98.43, 84.97, 99.8 |
+| N8 | Phase 8, dissertation evidence and evaluation | 63.8, 63.18, 63.34, 64.8, 64.9, 67.2, 67.3, 67.4, 67.5, 67.7, 78.9, 78.10, 84.96 |
 | P | This plan's own upkeep (Work Package 99) | 99.3 |
 
 Order notes kept from the non-election plan:
@@ -191,8 +190,8 @@ Each opens with a line that says so.
 | `docs/specs/024-performance/plan.md` | Performance phases | 98.7, 98.43 |
 | `docs/TEST_COVERAGE_PLAN.md` | Coverage targets and method | 27.1, 27.8 |
 
-Closed records, not scheduled: `BUSINESS_REVIEW_PLAN.md` (audit snapshot of 2026-07-03),
-`FORUM_PLAN_2026-05.md`, `UI_FIX_PLAN.md`, `implementation_plan.md`, and the plans of specs 001,
+Closed records, not scheduled: `archive/BUSINESS_REVIEW_PLAN.md` (audit snapshot of 2026-07-03),
+`FORUM_PLAN_2026-05.md`, `archive/UI_FIX_PLAN.md`, `implementation_plan.md`, and the plans of specs 001,
 005, 007 and 024's built phases. Spec 006 (Agentra) is a draft with no tracker item; 99.8 holds it.
 
 ## 4. Waves
@@ -311,13 +310,11 @@ brief asks for it.
 
 ### Wave 2 (proposed, starts after the owner reviews wave 1)
 
-The remaining theme item, 84.87, runs before the other Wave 2 items. The rest are ordered
-cheapest first. One `--only backend` run, one `--only web` run, one `--e2e` run and one `--only
+The theme audit ran first and closed on 2026-11-07. The rest are ordered cheapest first. One `--only backend` run, one `--only web` run, one `--e2e` run and one `--only
 mobile` run cover the whole wave.
 
 | ID | Size | Stream | Why ready | Layers | Test evidence required | Gate |
 |---|---|---|---|---|---|---|
-| 84.87 | M | N6 | Finish the theme color audit, correct contrast gaps and verify effective branded colors in both modes. | Web | Gradient and input regression tests; computed-style checks with default and custom branding; actual utility-use review; web type-check, unit tests, production build and color guard; record visual check status | None |
 | 84.4 | S | N2 | Parity table built from the routes both clients call. | Docs | Every row traced to a client file | None |
 | 93.3 | S | N3 | The portal mobile nav e2e misses the cases the item lists. | Web e2e | Playwright spec passes in `ci-local.py --e2e` | None |
 | 84.27 | L | N2 | `ArchiveController` has no tests and no web admin screen. Crosses API tests and web, so it runs last. | API tests, Web | New NUnit controller tests; Vitest spec for the admin page | None |
@@ -340,13 +337,13 @@ Answers recorded 2026-11-02. The "Next" column is what is left, and who does it.
 | Gate | Items | Answer and what is next |
 |---|---|---|
 | Vulnerable packages | 98.34 (on hold) | `npm audit` in the web gate fails on undici (through `@angular/build`), `@vitest/mocker`, glob and minimatch. Bump when fixed versions work with the Angular and Vitest toolchain. Until then the web/audit gate stays red and is named in each wave report. |
-| Preprod services | 7.26, 7.28, 84.48 | Owner says the Render settings are in. `/health` returns 200 with all four checks Healthy, which does not prove Brevo or S3. Next (owner): a sign-in code that reaches an inbox, and a photo that still loads after a redeploy. |
+| Preprod services | 7.26, 7.28, 84.48 | Owner says the Render settings are in. `/health` returns 200 with all four checks Healthy, which does not prove Brevo or S3. Next (owner): a sign-in code that reaches an inbox, and a photo that still loads after a redeploy. Not done as of 2026-11-07. |
 | Generic profile | 62.41 | Runs against a throwaway local PostgreSQL database, dropped afterwards. Next: engineering. |
 | Local data | 34.D8 | Verify on the local stack. Next: engineering. (The other item here closed on 2026-11-05.) |
 | Device checks | 84.42, 84.50 | Run on the Flutter Windows desktop build against a local API. 37.1m and 37.14o are covered inside 84.50. Next: engineering. |
-| Product decisions | 84.7, 49.3.C, 12.8 | 84.7: support a second institution; a seeding plan goes to the owner before any build. 49.3.C: optional `ContactEmail` on the user. 12.8: two secret files untracked; the archive list goes to the owner. |
-| Participants | 78.9 | The owner runs the sessions once 7.26 and 7.28 pass. Next: a session runbook and an empty response log. |
-| Spec review questions | 84.65 to 84.69 | Answered 2026-11-03. Scholarships get a web admin page (84.65). Archive submissions get a per-member cap set in Settings (84.66). Mobile gets password change (84.67) and read-only site content (84.69). The web admin gets credential revoke and reissue (84.68). Elections: mobile carries the voter screens (elections, nominate, vote, results) and web carries those plus the officials' screens; recorded in specs 018 and 023, no item. The low-value refactors are recorded as accepted in their specs. The `MemberService` split the review listed was already done (closed 2026-09-06; the largest part is now 483 lines). Next: engineering. |
+| Product decisions | 84.7, 49.3.C, 98.43 | 84.7: support a second institution; a seeding plan goes to the owner before any build. Off hold 2026-11-07; plan written the same day (`docs/SEED_PROFILE_PLAN.md`); next (owner): gates G1 to G4 in its section 8. 49.3.C: optional `ContactEmail` on the user. Docs archive: done 2026-11-07 (see the progress log); finished reviews, snapshots and old drafts moved to `docs/archive/`, and all three secret files are untracked and ignored. 98.43: partial 2026-11-07; the 8 non-secret unread keys are commented out; the 4 secret or connection keys (ClientId, ClientSecret, ApiKey, MySqlConnection) wait on the owner. |
+| Participants | 78.9 | The owner runs the sessions once 7.26 and 7.28 pass. The runbook and an empty response log exist. Session pack checked 2026-11-07. Treasurer Tasks 1-2 wait on 84.92 and Secretary Task 5 on 84.93. |
+| Spec review questions | 84.65 to 84.69 | Answered 2026-11-03. Scholarships get a web admin page (84.65). Archive submissions get a per-member cap set in Settings (84.66). Mobile gets password change (84.67) and read-only site content (84.69). The web admin gets credential revoke and reissue (closed 2026-11-07). Elections: mobile carries the voter screens (elections, nominate, vote, results) and web carries those plus the officials' screens; recorded in specs 018 and 023, no item. The low-value refactors are recorded as accepted in their specs. The `MemberService` split the review listed was already done (closed 2026-09-06; the largest part is now 483 lines). Next: engineering. |
 
 ## 6. On hold
 
@@ -439,3 +436,12 @@ What counts as evidence:
 | 2026-11-07 | 84.87, 84.88 (added); 84.88 (closed); 84.89 (added) | Theme review: security review found no vulnerabilities. Code review found a gradient contrast false pass in the web admin preview and low contrast for mobile buttons using the offline fallback accent. 84.88's branding inheritance fix passed focused theme tests and the web checks; 84.87 remains open for the gradient fix and visual review. | `docs/TODO.md`, `docs/THEME_TOKEN_PLAN.md`, web theme files, this file |
 | 2026-11-07 | 84.87 review scope clarified | Effective runtime styles can diverge from declared tokens when theme selectors override organization branding. Expanded 84.87 verification to cover default and custom branding in Light and Dark modes, actual component foreground/background/hover/focus/shadow values, and remapped utility classes in their rendered contexts. No code changed. | `docs/TODO.md`, `docs/THEME_TOKEN_PLAN.md`, this file |
 | 2026-11-07 | 84.89 (closed); 84.87 (part: gradient contrast) | 84.87: the special-day check samples every rendered gradient color, ignores an inactive `sidebarColor`, and applies a suggestion only if it passes everywhere, else warns and leaves the field alone. `admin-themes` and color tests 80 passed; web type-check and guard passed. Computed-style checks, the rest of the audit and the visual review stay open; the visual review did not run because the Playwright browser tool failed to connect. 84.89: button labels pick a readable color on the accent, which stays unchanged; four focused tests, `flutter analyze` clean, four goldens regenerated for the label color only, `flutter test --tags golden` 65 of 65 | `admin-themes.ts`, `admin-themes.html`, `admin-themes.spec.ts`, `color-math.ts`, `org-config.service.ts`, `app_theme.dart`, `app_theme_contrast_test.dart`, four goldens, `docs/THEME_TOKEN_PLAN.md`, `docs/TODO.md`, this file |
+| 2026-11-07 | 7.26, 7.28, 12.8, 98.43, 84.7, 78.9 (owner answers) | 7.26 and 7.28 not checked yet. 12.8 and 98.43: owner wants each list before anything moves or is removed. 84.7 off hold for the plan only. 78.9: session pack to be checked now; sessions still wait on preprod. No code changed | `docs/TODO.md`, this file |
+| 2026-11-07 | 84.60, 84.68 (closed); 84.90 (added) | Credential validity months and web revoke and reissue with step-up and audit were already built; rerun: filtered `dotnet test` 72 of 72, Vitest 19 of 19 over three spec files. 84.90 tracks the minting gap spec 013 noted after 84.68 | `docs/TODO.md`, this file |
+| 2026-11-07 | 98.43 (part) | Owner chose to comment out, not delete. FileStorage `WebRootPath` and both MIME lists, the Nagad and Rocket blocks and DGePay `BaseUrl` are now `//` lines with the reason. `run-app.ps1` strips comment lines before `ConvertFrom-Json`, which PowerShell 5.1 needs. `GeneralSettingsOptions` comment now names `PaymentCallbackOrchestrator` as the real reader of `SystemAdminId`. API build clean; filtered `dotnet test` (Config, Options, Startup, Payment, FileValidation) 166 passed | `GHCAA.API/appsettings.json`, `GHCAA.Tools/run-app.ps1`, `ConfigurationOptions.cs`, `docs/TODO.md`, this file |
+| 2026-11-07 | 12.8 (closed) | Seven docs, the old deck and the old proposal files moved to `docs/archive/` with a README. Book chapters 03, 07, 08 and 09, the outline, ADR 0004, `BUSINESS_FINDINGS.md`, `coverlet.runsettings`, the presentation README, spec 001 evidence and this file point at the new paths; `wbs.py` keeps old and new paths so commit dates survive the move. `prose.py` 0 broken references, `wbs.py --check` and the plan check pass. The strict book build still reports three issues that predate the move: commit count 384 against 396, five table captions with no table, 93 open placeholders | `docs/archive/`, `docs/book/`, `docs/book/build/wbs.py`, `docs/TODO.md`, this file |
+| 2026-11-07 | 78.9 (session pack checked); 84.92, 84.93, 84.94, 84.95, 84.96, 84.97 (added) | README and the four task scripts checked against the code, no session run. README: mobile `BASE_API_URL` step, a check that every task has a screen, a no-live-gateway check, and office-holder sessions on the web. Blocked tasks marked: Treasurer 1-2 (no client calls `update-status`), Secretary 5 (no constitution publish route). President Task 3 now matches §8.8, where the election engine is described. Gaps raised: payment verify UI, constitution publishing, arrears report, application waiting time, chapter 3 DC-15 drift, termination reason and audit. | `docs/book/instruments/`, `docs/TODO.md`, this file |
+| 2026-11-07 | 84.7 (plan written) | Seeding plan in `docs/SEED_PROFILE_PLAN.md`, no code. A fresh PostgreSQL database still gets GHC's 631 members from `InitialBaseline`, because the baseline runs before the runtime seeder. Recommends stripping the data out of that applied migration (schema unchanged, live databases unaffected), moving Tier 2 content to the profile packs, content-keyed rollback, and a sequence reset after explicit-Id inserts. Also found: the Tier 3 seeder's `setval` breaks on SQLite, and the baseline never resets its sequences. `GHCAA.Tools/TestData/` is unused; delete with owner approval. Waits on owner gates G1 to G4 | `docs/SEED_PROFILE_PLAN.md`, `docs/SEED_CLASSIFICATION.md`, `docs/TODO.md`, this file |
+| 2026-11-07 | 84.87 (review fixes); 84.91 (added) | Code review of commit 2b3646ff. Web: `--text-on-accent` picks the dark or white label on the configured accent; accent text, hover, focus ring and hover shadow follow the accent and sit on `<body>` so the dark theme rule cannot hide them; dark accent text is lightened to 4.5:1; `--primary-rgb` set from branding; contrast message rounds down; advice cached. Three web spec files, 87 of 87; type-check and guard pass. 84.91 tracks the mobile label colors and hex parsing. 84.87 stays in progress | `docs/TODO.md`, web theme files, this file |
+| 2026-11-07 | 84.87, 84.91 (closed) | 84.87: the configured primary sits on `<body>` and is lifted for dark mode; `.on-dark` islands use their own accent token; the accent gradient narrows its spread until the label reaches 4.5:1 on every stop (owner choice). Browser check on the login page: label ratios 7.62 and 7.08 with default branding, 4.80 and 4.83 with a custom accent; one 3px focus ring in both modes. Admin table and modal were not tabbed through. Batch 5 result recorded in `docs/THEME_TOKEN_PLAN.md`. 57 color tests; web unit 127 files, 1124 tests; type-check, build and guard pass. 84.91: mobile onPrimary and onSecondary pick a readable label; hex parser takes 3, 6 or 8 digits; `flutter analyze` clean, 489 of 489; three goldens regenerated with owner approval | `color-math.ts`, `org-config.service.ts`, `styles.scss`, `public-layout.scss`, their specs, `app_theme.dart`, `dynamic_theme_service.dart`, `app_theme_contrast_test.dart`, three goldens, `docs/THEME_TOKEN_PLAN.md`, `docs/TODO.md`, this file |
+| 2026-11-07 | 84.87 (second review fixes); 84.98 (added) | Code review of the close. Fixed: branding tokens clear when a color is removed, a non-hex primary or accent counts as unset, a light primary darkens the on-dark accent, the footer uses the on-dark accent, `--tier-founding` follows dark-mode accent text, ratio rounding has a float guard. Theme specs 114 of 114, `ci-local --only web` 4 of 4, `guard.py` clean, mobile contrast test 10 of 10. Left in 84.98 (stream N6, Phase 6 performance and quality): light surface check, 8-digit hex order between web and Dart, `--accent-gold-bright` with a narrowed gradient, disabled button in dark mode, fixed white text on the primary, mouse focus rings, admin table and modal keyboard check. |

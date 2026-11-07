@@ -5,12 +5,26 @@ import { OrgConfig } from '../models/org-config.model';
 import { ORG_CONFIG_FALLBACK } from '../config/org-config-fallback.generated';
 import { tap, firstValueFrom } from 'rxjs';
 import { ThemeService } from './theme.service';
-import { adjustLightness, darkenForContrast, hexToRgb, MIN_TEXT_CONTRAST, rgbString } from '../utils/color-math';
+import {
+  ACCENT_GRADIENT_SPREAD, accentGradient, adjustLightness, darkenForContrast, DARK_LABEL, DARK_PRIMARY_LIFT, DARK_TEXT_SURFACE, hexToRgb,
+  lightenForContrast, MIN_TEXT_CONTRAST, parseHexColor, readableTextOn, rgbString
+} from '../utils/color-math';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrgConfigService {
+  // Every custom property the branding effect writes. It clears these on each run.
+  private static readonly ROOT_TOKENS = [
+    '--accent-color', '--accent-color-rgb', '--accent-rgb', '--accent-gold-bright', '--accent-gold-dark',
+    '--shadow-gold', '--gold-gradient', '--tier-founding', '--glass-border', '--select-chevron-gold'
+  ];
+  private static readonly BODY_TOKENS = [
+    '--primary-color', '--primary-rgb', '--text-on-primary', '--accent-text', '--accent-hover-text',
+    '--focus-ring-color', '--text-on-accent', '--shadow-accent-hover', '--accent-on-dark-text',
+    '--accent-on-dark-hover-text'
+  ];
+
   private http = inject(HttpClient);
   private themeService = inject(ThemeService);
   config = signal<OrgConfig | null>(null);
@@ -29,37 +43,82 @@ export class OrgConfigService {
     // to) against a white card rather than derived by a fixed hue/lightness offset.
     effect(() => {
       const branding = this.config()?.branding;
+      const root = document.documentElement.style;
+      const body = document.body.style;
+      // Clear everything first, so a color removed from branding falls back to the theme
+      // stylesheet instead of keeping the last value written here.
+      OrgConfigService.ROOT_TOKENS.forEach(prop => root.removeProperty(prop));
+      OrgConfigService.BODY_TOKENS.forEach(prop => body.removeProperty(prop));
       if (!branding) return;
       const theme = this.themeService.theme();
 
-      const root = document.documentElement.style;
-      if (branding.primaryColor) root.setProperty('--primary-color', branding.primaryColor);
-      if (!branding.accentColor) return;
+      // Anything that is not a 3 or 6 digit hex is treated as unset, since the derived
+      // tokens below need real channel values.
+      const validHex = (value?: string | null) => (value && parseHexColor(value) ? value.trim() : null);
+      let primary: string | null = null;
+      const configuredPrimary = validHex(branding.primaryColor);
+      if (configuredPrimary) {
+        // body.light-theme and body.dark-theme both declare the primary, so it goes inline on
+        // <body>. Dark mode lifts it 3 points, which turns the default #121212 into the
+        // #1a1a1a the dark theme always used.
+        primary = theme === 'dark'
+          ? adjustLightness(configuredPrimary, DARK_PRIMARY_LIFT)
+          : configuredPrimary;
+        body.setProperty('--primary-color', primary);
+        body.setProperty('--primary-rgb', rgbString(hexToRgb(primary)));
+        body.setProperty('--text-on-primary', readableTextOn(primary));
+      }
+      const accent = validHex(branding.accentColor);
+      if (!accent) return;
 
-      const accent = branding.accentColor;
       root.setProperty('--accent-color', accent);
       const accentRgb = rgbString(hexToRgb(accent));
       root.setProperty('--accent-color-rgb', accentRgb);
       root.setProperty('--accent-rgb', accentRgb);
 
-      const goldBright = adjustLightness(accent, 8);
-      const goldGradientDark = adjustLightness(accent, -12);
+      const goldBright = adjustLightness(accent, ACCENT_GRADIENT_SPREAD);
       const goldTextDark = darkenForContrast(accent, '#ffffff', MIN_TEXT_CONTRAST);
       const tierFoundingLight = darkenForContrast(accent, '#ffffff', 4.9);
 
       root.setProperty('--accent-gold-bright', goldBright);
       root.setProperty('--accent-gold-dark', goldTextDark);
-      root.setProperty('--accent-text', theme === 'dark' ? accent : goldTextDark);
       root.setProperty('--shadow-gold', `0 4px 15px rgba(${accentRgb}, 0.25)`);
-      root.setProperty('--gold-gradient', `linear-gradient(135deg, ${accent} 0%, ${goldBright} 50%, ${goldGradientDark} 100%)`);
-      root.setProperty('--tier-founding', theme === 'dark' ? accent : tierFoundingLight);
+
+      // These tokens are also declared on body.dark-theme, which would hide a value set on
+      // <html>, so they go inline on <body>. Accent text keeps 4.5:1 on the lightest surface
+      // of each theme; the label on a filled accent is whichever of dark or white reads better.
+      const accentTextDark = lightenForContrast(accent, DARK_TEXT_SURFACE, MIN_TEXT_CONTRAST);
+      const accentText = theme === 'dark' ? accentTextDark : goldTextDark;
+      const accentHoverText = theme === 'dark'
+        ? adjustLightness(accentTextDark, 8)
+        : adjustLightness(goldTextDark, -4);
+      body.setProperty('--accent-text', accentText);
+      body.setProperty('--accent-hover-text', accentHoverText);
+      body.setProperty('--focus-ring-color', theme === 'dark' ? accentHoverText : goldTextDark);
+      // .btn-accent paints --gold-gradient, so its label must read on every stop. The
+      // stops narrow for accents where the full spread leaves no readable label.
+      const gradient = accentGradient(accent);
+      body.setProperty('--text-on-accent', gradient.label);
+      if (primary) {
+        // .on-dark islands, the public nav and the footer sit on the primary, not on a theme
+        // surface. A custom accent can be too close to a custom primary to read, so move it
+        // away: lighter on a dark primary, darker on a light one.
+        const primaryIsLight = readableTextOn(primary) === DARK_LABEL;
+        const onDarkText = primaryIsLight
+          ? darkenForContrast(accent, primary, MIN_TEXT_CONTRAST)
+          : lightenForContrast(accent, primary, MIN_TEXT_CONTRAST);
+        body.setProperty('--accent-on-dark-text', onDarkText);
+        body.setProperty('--accent-on-dark-hover-text', adjustLightness(onDarkText, primaryIsLight ? -8 : 8));
+      }
+      body.setProperty('--shadow-accent-hover', `0 8px 25px rgba(${accentRgb}, 0.4)`);
+      const [gradStart, gradMid, gradEnd] = gradient.stops;
+      root.setProperty('--gold-gradient', `linear-gradient(135deg, ${gradStart} 0%, ${gradMid} 50%, ${gradEnd} 100%)`);
+      root.setProperty('--tier-founding', theme === 'dark' ? accentTextDark : tierFoundingLight);
 
       // --glass-border is accent-tinted only in light theme; dark theme's is an
-      // independent translucent-white card token (styles/themes/_dark.scss), not a gold tint, so
-      // clear the inline override there and let that static rule apply again.
-      if (theme === 'dark') {
-        root.removeProperty('--glass-border');
-      } else {
+      // independent translucent-white card token (styles/themes/_dark.scss), not a gold tint,
+      // so it stays cleared there and that static rule applies.
+      if (theme !== 'dark') {
         root.setProperty('--glass-border', `rgba(${accentRgb}, 0.12)`);
       }
 

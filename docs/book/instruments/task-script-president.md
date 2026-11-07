@@ -1,6 +1,7 @@
 # Task script: President
 
-Four tasks, about twenty minutes, then a longer discussion than the other roles get.
+Four tasks, about twenty minutes, then a longer discussion than the other roles get. Run on the web
+app; the mobile app has no admin election or member-record screens.
 
 The President uses the platform less than the Treasurer or the Secretary and judges it more. This
 session is weighted accordingly: the tasks establish that the President can find what the office
@@ -37,16 +38,20 @@ distinguishable on screen, and whether the President notices if they are not.
 
 ## Task 3. Look at an election
 
-**Start state:** the public elections page and any governance screens available.
+**Start state:** the public elections page and the admin election screens, on the web app.
 
 > An election is due. Look at what the platform does for it, and tell me what it does not do.
 
 **Success:** there is no completion criterion. What matters is the account the President gives.
 
 **Watch for:** this is the central question of the research put to the person whose office would
-suffer if the answer were wrong. DC-15 leaves the ballot, its sealing, the count and the declaration
-with the Election Commission and not with the platform. Ask whether that division is the right one,
-and whether they would want the platform to do more of it. Write the answer down as close to verbatim
+suffer if the answer were wrong. The platform now runs the election record itself: phases, seats,
+nominations, secret ballots, the count and the declaration (§8.8, where the election engine and its
+limits are described). DC-15 still gives the authority over the ballot and the declaration to the
+Election Commission. Ask whether the platform should hold that record, whether the Commission's
+authority is visible on screen, and whether they would want the platform to do more or less of it.
+Chapter 3's account of DC-15 still says the platform does none of this; that drift is tracker item
+84.96 and is not something to raise with the President. Write the answer down as close to verbatim
 as you can manage, including hesitation.
 
 ---
@@ -60,6 +65,10 @@ as you can manage, including hesitation.
 
 **Watch for:** whether the record is enough to answer the complaint. If it is not, that is an audit
 and non-repudiation finding for §8.12, and it is more useful than a successful task.
+
+**Facilitator note, not read aloud:** on 2026-11-07 a termination is a status change on the admin
+member record. The activity log keeps who made the change and when, as a generic "PUT
+/api/admin/members/{id}" line, but not the old and new status or any reason (tracker item 84.97).
 
 ---
 

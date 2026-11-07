@@ -124,7 +124,7 @@ GHCAA.Domain
 - CI checks cover backend tests and formatting, Angular type-check/unit tests,
   Flutter analysis/tests, Playwright, API snapshot comparison, and integrated
   packaging.
-- `TODO_IMPLEMENTED_MISSING.md` and the completed TODO work packages record
+- `docs/archive/TODO_IMPLEMENTED_MISSING.md` and the completed TODO work packages record
   release fixes such as session restoration, static-file fallback, guest
   payment tests, organization configuration tests, and deployment packaging.
 

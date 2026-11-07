@@ -20,7 +20,7 @@ export function parseHexColor(value: string): Rgb | null {
 }
 
 export function hexToRgb(hex: string): Rgb {
-  const clean = hex.replace('#', '');
+  const clean = hex.trim().replace('#', '');
   const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
   const num = parseInt(full, 16);
   return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
@@ -28,6 +28,17 @@ export function hexToRgb(hex: string): Rgb {
 
 /** WCAG AA minimum contrast for normal-size text. */
 export const MIN_TEXT_CONTRAST = 4.5;
+
+/** The two label colors a filled accent can carry; they match --text-on-accent's default and white. */
+export const DARK_LABEL = '#171717';
+export const LIGHT_LABEL = '#ffffff';
+
+/** Lightest surface accent text sits on in each theme (light: --bg-color, dark: --card-bg). */
+export const LIGHT_TEXT_SURFACE = '#ffffff';
+export const DARK_TEXT_SURFACE = '#1b1f24';
+
+/** Lightness points added to the branding primary in dark mode; #121212 becomes #1a1a1a. */
+export const DARK_PRIMARY_LIFT = 3;
 
 export function rgbToHex({ r, g, b }: Rgb): string {
   const toHex = (c: number) => Math.round(clamp(c, 0, 255)).toString(16).padStart(2, '0');
@@ -134,4 +145,56 @@ export function darkenForContrast(hex: string, backgroundHex: string, minRatio: 
     candidate = rgbToHex(hslToRgb(hsl));
   }
   return candidate;
+}
+
+/** The mirror of darkenForContrast for text on a dark surface. Stops at white. */
+export function lightenForContrast(hex: string, backgroundHex: string, minRatio: number): string {
+  let candidate = hex;
+  const hsl = rgbToHsl(hexToRgb(candidate));
+  while (contrastRatio(candidate, backgroundHex) < minRatio && hsl.l < 100) {
+    hsl.l = clamp(hsl.l + 2, 0, 100);
+    candidate = rgbToHex(hslToRgb(hsl));
+  }
+  return candidate;
+}
+
+/**
+ * Picks the dark or white label, whichever reads better on a filled `backgroundHex`.
+ * Pass every stop of a gradient fill and the label is judged on its worst stop.
+ */
+export function readableTextOn(backgroundHex: string, ...moreBackgrounds: string[]): string {
+  const fills = [backgroundHex, ...moreBackgrounds];
+  return worstContrast(DARK_LABEL, fills) >= worstContrast(LIGHT_LABEL, fills) ? DARK_LABEL : LIGHT_LABEL;
+}
+
+function worstContrast(label: string, fills: string[]): number {
+  return Math.min(...fills.map(fill => contrastRatio(label, fill)));
+}
+
+/** How far the accent gradient's light and dark stops sit from the accent, in HSL lightness points. */
+export const ACCENT_GRADIENT_SPREAD = 8;
+
+export interface AccentGradient {
+  /** accent, lighter stop, darker stop, in paint order */
+  stops: [string, string, string];
+  label: string;
+}
+
+/**
+ * The stops and label for a filled accent button. The full spread is +8 / -12. A mid-tone
+ * accent can leave no label at 4.5:1 across that range, so the spread shrinks a point at a
+ * time until one fits. If even a flat fill cannot reach 4.5:1, the flat fill is returned
+ * with the better label, since changing the tenant's hue is not ours to do.
+ */
+export function accentGradient(accent: string, minRatio = MIN_TEXT_CONTRAST): AccentGradient {
+  let result: AccentGradient = { stops: [accent, accent, accent], label: readableTextOn(accent) };
+  for (let spread = ACCENT_GRADIENT_SPREAD; spread >= 0; spread--) {
+    const stops: [string, string, string] = [
+      accent, adjustLightness(accent, spread), adjustLightness(accent, -1.5 * spread)
+    ];
+    const label = readableTextOn(...stops);
+    result = { stops, label };
+    if (worstContrast(label, stops) >= minRatio) break;
+  }
+  return result;
 }

@@ -1,5 +1,9 @@
 # Which seeds a new institution needs, and which it must not get
 
+**2026-11-07:** the migration figures below predate the squash into `InitialBaseline`, and Tier 3 no
+longer goes through `HasData`. The classification still holds. The current state and the plan for a
+second institution are in `docs/SEED_PROFILE_PLAN.md`.
+
 Written 2026-09-04, from the question: a new institution has no members, no events and no history, so
 what should a fresh database actually contain after migrations run?
 

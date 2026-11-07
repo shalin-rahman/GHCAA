@@ -8,6 +8,9 @@ import { ThemeService } from './theme.service';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { OrgConfig } from '../models/org-config.model';
 import { ORG_CONFIG_FALLBACK } from '../config/org-config-fallback.generated';
+import {
+    contrastRatio, DARK_TEXT_SURFACE, hexToRgb, LIGHT_TEXT_SURFACE, MIN_TEXT_CONTRAST, rgbString
+} from '../utils/color-math';
 
 // Highest fan-in Angular service in the app (18 consumers: layouts, guards, admin/public
 // pages, app.config.ts) — no spec existed before this, despite being the config-driven
@@ -181,13 +184,17 @@ describe('OrgConfigService', () => {
         };
 
         afterEach(() => {
-            // Undo cross-test document.documentElement pollution — setProperty/removeProperty
-            // calls in the effect persist on the real DOM element between tests otherwise.
+            // The effect writes to the real <html> and <body>, so values would leak into the next test.
             const root = document.documentElement.style;
-            ['--primary-color', '--accent-color', '--accent-color-rgb', '--accent-rgb',
-                '--accent-gold-bright', '--accent-gold-dark', '--accent-text', '--shadow-gold',
+            ['--accent-color', '--accent-color-rgb', '--accent-rgb',
+                '--accent-gold-bright', '--accent-gold-dark', '--shadow-gold',
                 '--gold-gradient', '--tier-founding', '--glass-border', '--select-chevron-gold']
                 .forEach(prop => root.removeProperty(prop));
+            const body = document.body.style;
+            ['--primary-color', '--primary-rgb', '--text-on-primary',
+                '--accent-text', '--accent-hover-text', '--focus-ring-color', '--text-on-accent', '--shadow-accent-hover',
+                '--accent-on-dark-text', '--accent-on-dark-hover-text']
+                .forEach(prop => body.removeProperty(prop));
         });
 
         it('does nothing before config has loaded', () => {
@@ -196,12 +203,39 @@ describe('OrgConfigService', () => {
         });
 
         it('sets the plain accent/primary tokens and their rgb tuple', () => {
+            themeServiceStub.theme = () => 'light';
             setConfigAndFlush({ primaryColor: '#111111', accentColor: '#c5a059' });
             const root = document.documentElement.style;
-            expect(root.getPropertyValue('--primary-color')).toBe('#111111');
+            expect(document.body.style.getPropertyValue('--primary-color')).toBe('#111111');
+            expect(document.body.style.getPropertyValue('--primary-rgb')).toBe('17, 17, 17');
             expect(root.getPropertyValue('--accent-color')).toBe('#c5a059');
             expect(root.getPropertyValue('--accent-color-rgb')).toBe('197, 160, 89');
             expect(root.getPropertyValue('--accent-rgb')).toBe('197, 160, 89');
+        });
+
+        it.each([
+            ['light', '#121212', '#121212'],
+            ['dark', '#121212', '#1a1a1a']
+        ] as const)('keeps the stock primary in %s theme (%s shows as %s)', (theme, primary, shown) => {
+            themeServiceStub.theme = () => theme;
+            setConfigAndFlush({ primaryColor: primary });
+            expect(document.body.style.getPropertyValue('--primary-color')).toBe(shown);
+            expect(document.body.style.getPropertyValue('--text-on-primary')).toBe('#ffffff');
+        });
+
+        it.each(['light', 'dark'] as const)('a custom primary reaches body in %s theme with a readable label', theme => {
+            themeServiceStub.theme = () => theme;
+            setConfigAndFlush({ primaryColor: '#1a237e' });
+            const body = document.body.style;
+            const primary = body.getPropertyValue('--primary-color');
+            expect(primary).not.toBe(theme === 'dark' ? '#1a1a1a' : '#121212');
+            expect(body.getPropertyValue('--primary-rgb')).toBe(rgbString(hexToRgb(primary)));
+            expect(contrastRatio(body.getPropertyValue('--text-on-primary'), primary)).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+        });
+
+        it('a light custom primary gets the dark label', () => {
+            setConfigAndFlush({ primaryColor: '#f4d36f' });
+            expect(document.body.style.getPropertyValue('--text-on-primary')).toBe('#171717');
         });
 
         it('darkens --accent-gold-dark until it clears 4.5:1 against white', () => {
@@ -211,20 +245,124 @@ describe('OrgConfigService', () => {
             expect(goldDark).toMatch(/^#[0-9a-f]{6}$/);
         });
 
-        it('uses the raw accent (not the AA-clamped one) for --accent-text/--tier-founding in dark theme', () => {
+        it('keeps the raw gold for --accent-text/--tier-founding in dark theme, since it already reads on the dark card', () => {
             themeServiceStub.theme = () => 'dark';
             setConfigAndFlush({ accentColor: '#c5a059' });
-            const root = document.documentElement.style;
-            expect(root.getPropertyValue('--accent-text')).toBe('#c5a059');
-            expect(root.getPropertyValue('--tier-founding')).toBe('#c5a059');
+            expect(document.body.style.getPropertyValue('--accent-text')).toBe('#c5a059');
+            expect(document.documentElement.style.getPropertyValue('--tier-founding')).toBe('#c5a059');
         });
 
         it('uses the AA-clamped values for --accent-text/--tier-founding in light theme', () => {
             themeServiceStub.theme = () => 'light';
             setConfigAndFlush({ accentColor: '#c5a059' });
-            const root = document.documentElement.style;
-            expect(root.getPropertyValue('--accent-text')).not.toBe('#c5a059');
-            expect(root.getPropertyValue('--tier-founding')).not.toBe('#c5a059');
+            const accentText = document.body.style.getPropertyValue('--accent-text');
+            expect(accentText).not.toBe('#c5a059');
+            expect(contrastRatio(accentText, LIGHT_TEXT_SURFACE)).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+            expect(document.documentElement.style.getPropertyValue('--tier-founding')).not.toBe('#c5a059');
+        });
+
+        it('lightens a dark accent for --accent-text in dark theme so it still reaches 4.5:1', () => {
+            themeServiceStub.theme = () => 'dark';
+            setConfigAndFlush({ accentColor: '#2f6f4f' });
+            const accentText = document.body.style.getPropertyValue('--accent-text');
+            expect(accentText).not.toBe('#2f6f4f');
+            expect(contrastRatio(accentText, DARK_TEXT_SURFACE)).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+        });
+
+        it.each([
+            ['#c5a059', '#171717'],
+            ['#2f6f4f', '#ffffff']
+        ])('sets --text-on-accent on body for accent %s to %s', (accent, label) => {
+            setConfigAndFlush({ accentColor: accent });
+            expect(document.body.style.getPropertyValue('--text-on-accent')).toBe(label);
+        });
+
+        it.each(['light', 'dark'] as const)('the --text-on-accent label reads on every --gold-gradient stop in %s theme', theme => {
+            themeServiceStub.theme = () => theme;
+            setConfigAndFlush({ accentColor: '#2e7d32' });
+            const label = document.body.style.getPropertyValue('--text-on-accent');
+            const stops = document.documentElement.style.getPropertyValue('--gold-gradient').match(/#[0-9a-f]{6}/g)!;
+            expect(stops).toHaveLength(3);
+            const worstForLabel = Math.min(...stops.map(s => contrastRatio(label, s)));
+            expect(worstForLabel).toBeGreaterThanOrEqual(4.5);
+        });
+
+        it('keeps the stock gold on the stock primary for .on-dark text', () => {
+            themeServiceStub.theme = () => 'light';
+            setConfigAndFlush({ primaryColor: '#121212', accentColor: '#c5a059' });
+            const body = document.body.style;
+            expect(body.getPropertyValue('--accent-on-dark-text')).toBe('#c5a059');
+            expect(body.getPropertyValue('--accent-on-dark-hover-text'))
+                .toBe(document.documentElement.style.getPropertyValue('--accent-gold-bright'));
+        });
+
+        it.each(['light', 'dark'] as const)('lifts a custom accent until it reads on a custom primary in %s theme', theme => {
+            themeServiceStub.theme = () => theme;
+            setConfigAndFlush({ primaryColor: '#1a237e', accentColor: '#2e7d32' });
+            const body = document.body.style;
+            const onDark = body.getPropertyValue('--accent-on-dark-text');
+            expect(onDark).not.toBe('#2e7d32');
+            expect(contrastRatio(onDark, body.getPropertyValue('--primary-color'))).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+        });
+
+        it('leaves the .on-dark accent unset when branding has no primary', () => {
+            setConfigAndFlush({ primaryColor: undefined, accentColor: '#2e7d32' });
+            expect(document.body.style.getPropertyValue('--accent-on-dark-text')).toBe('');
+        });
+
+        it('clears tokens left by an earlier config once branding drops those colors', () => {
+            setConfigAndFlush({ primaryColor: '#1a237e', accentColor: '#2e7d32' });
+            expect(document.body.style.getPropertyValue('--accent-on-dark-text')).not.toBe('');
+
+            setConfigAndFlush({ primaryColor: undefined, accentColor: '#c5a059' });
+            const body = document.body.style;
+            expect(body.getPropertyValue('--primary-color')).toBe('');
+            expect(body.getPropertyValue('--text-on-primary')).toBe('');
+            expect(body.getPropertyValue('--accent-on-dark-text')).toBe('');
+            expect(body.getPropertyValue('--text-on-accent')).toBe('#171717');
+
+            setConfigAndFlush({ primaryColor: undefined, accentColor: undefined });
+            expect(body.getPropertyValue('--accent-text')).toBe('');
+            expect(body.getPropertyValue('--focus-ring-color')).toBe('');
+            expect(document.documentElement.style.getPropertyValue('--accent-color')).toBe('');
+            expect(document.documentElement.style.getPropertyValue('--gold-gradient')).toBe('');
+        });
+
+        it('darkens the .on-dark accent on a light primary instead of pushing it to white', () => {
+            themeServiceStub.theme = () => 'light';
+            setConfigAndFlush({ primaryColor: '#f4d36f', accentColor: '#c5a059' });
+            const body = document.body.style;
+            const onDark = body.getPropertyValue('--accent-on-dark-text');
+            expect(onDark).not.toBe('#ffffff');
+            expect(contrastRatio(onDark, '#f4d36f')).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+        });
+
+        it.each(['red', 'rgb(0, 0, 0)', '#12345', '#11223344'])('treats a non-hex primary %s as unset', value => {
+            themeServiceStub.theme = () => 'dark';
+            setConfigAndFlush({ primaryColor: value, accentColor: '#c5a059' });
+            expect(document.body.style.getPropertyValue('--primary-color')).toBe('');
+            expect(document.body.style.getPropertyValue('--accent-text')).toBe('#c5a059');
+        });
+
+        it('lifts a dark accent for --tier-founding in dark theme', () => {
+            themeServiceStub.theme = () => 'dark';
+            setConfigAndFlush({ accentColor: '#2f6f4f' });
+            const tier = document.documentElement.style.getPropertyValue('--tier-founding');
+            expect(contrastRatio(tier, DARK_TEXT_SURFACE)).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+        });
+
+        it.each(['light', 'dark'] as const)('derives hover text, focus ring and hover shadow from the accent in %s theme', theme => {
+            themeServiceStub.theme = () => theme;
+            setConfigAndFlush({ accentColor: '#2f6f4f' });
+            const body = document.body.style;
+            const surface = theme === 'dark' ? DARK_TEXT_SURFACE : LIGHT_TEXT_SURFACE;
+            const hover = body.getPropertyValue('--accent-hover-text');
+            const focus = body.getPropertyValue('--focus-ring-color');
+            expect(hover).toMatch(/^#[0-9a-f]{6}$/);
+            expect(hover).not.toBe('#f4d36f');
+            expect(contrastRatio(hover, surface)).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+            expect(focus).toMatch(/^#[0-9a-f]{6}$/);
+            expect(body.getPropertyValue('--shadow-accent-hover')).toBe('0 8px 25px rgba(47, 111, 79, 0.4)');
         });
 
         it('removes the --glass-border override in dark theme, sets a tint in light theme', () => {

@@ -256,7 +256,7 @@ token hashes to a row already marked revoked, that is not a stale request but a 
 holder has already moved on to the token that replaced it — so the response is to revoke every refresh
 token belonging to that user (`RevokeAllRefreshTokensAsync`, lines 182-187) and rotate the security
 stamp in the same call, killing any access token already issued as well. The ticket that asked for this,
-82.18, is named in the code comment at line 144. `docs/ARCHITECTURE_AUDIT_2026-09.md` still describes
+82.18, is named in the code comment at line 144. `docs/archive/ARCHITECTURE_AUDIT_2026-09.md` still describes
 this as missing at its line 255-273; that finding predates the fix and should not be read alongside the
 current `TokenService.cs` as if both were still true. `TokenServiceTests.cs` covers the reuse path
 directly: `RotateRefreshToken_ReplayOfARotatedToken_RevokesWholeFamilyAndRotatesStamp` (line 136),

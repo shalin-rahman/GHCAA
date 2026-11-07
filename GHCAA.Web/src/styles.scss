@@ -151,9 +151,10 @@ p {
   --text-muted: rgba(255, 255, 255, 0.62);
   --text-dim: rgba(255, 255, 255, 0.62);
   --hairline: rgba(255, 255, 255, 0.12);
-  /* the light-theme dark gold is for surfaces that go light; on black use the bright one */
-  --accent-text: var(--accent-color);
-  --accent-hover-text: var(--accent-gold-bright);
+  /* The light-theme dark gold is for light surfaces. Here the accent sits on the primary;
+     org-config.service lifts a custom accent until it reads on it. */
+  --accent-text: var(--accent-on-dark-text, var(--accent-color));
+  --accent-hover-text: var(--accent-on-dark-hover-text, var(--accent-gold-bright));
 }
 
 /* Layout Grid System */

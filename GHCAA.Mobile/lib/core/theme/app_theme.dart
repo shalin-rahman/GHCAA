@@ -96,17 +96,26 @@ class AppTheme {
   /// Legacy alias — the "Midnight Gold" branding name used in tests and docs.
   static ThemeData get midnightTheme => darkTheme;
 
-  /// Parses a "#RRGGBB" (or "#AARRGGBB") hex string into a [Color].
-  /// Falls back to [fallback] on any parse failure so a malformed tenant
-  /// config value never crashes theme construction.
-  static Color _colorFromHex(String hex, Color fallback) {
-    try {
-      var value = hex.replaceFirst('#', '');
-      if (value.length == 6) value = 'FF$value';
-      return Color(int.parse(value, radix: 16));
-    } catch (_) {
-      return fallback;
+  static final RegExp _hexDigits = RegExp(r'^[0-9a-fA-F]+$');
+
+  /// Parses "#RGB", "#RRGGBB" or "#AARRGGBB", with or without the "#" and
+  /// surrounding spaces. Anything else, null included, returns [fallback],
+  /// so a malformed tenant value never crashes theme construction.
+  static Color parseHexColor(String? hex, Color fallback) =>
+      tryParseHexColor(hex) ?? fallback;
+
+  /// Same forms as [parseHexColor], but returns null when [hex] is not one.
+  static Color? tryParseHexColor(String? hex) {
+    if (hex == null) return null;
+    var value = hex.trim();
+    if (value.startsWith('#')) value = value.substring(1);
+    if (!_hexDigits.hasMatch(value)) return null;
+    if (value.length == 3) {
+      value = value.split('').map((c) => '$c$c').join();
     }
+    if (value.length == 6) value = 'FF$value';
+    if (value.length != 8) return null;
+    return Color(int.parse(value, radix: 16));
   }
 
   // 62.30: only hit if branding.primaryColor/accentColor fails hex parsing —
@@ -146,8 +155,8 @@ class AppTheme {
   /// orgs get their configured primary/accent colors applied to
   /// theme-driven surfaces (buttons, app bar, inputs, color scheme).
   static ThemeData buildTheme(OrgBranding branding) {
-    final primary = _colorFromHex(branding.primaryColor, defaultProfilePrimary);
-    final secondary = _colorFromHex(branding.accentColor, defaultProfileAccent);
+    final primary = parseHexColor(branding.primaryColor, defaultProfilePrimary);
+    final secondary = parseHexColor(branding.accentColor, defaultProfileAccent);
 
     return ThemeData(
       useMaterial3: true,
@@ -178,8 +187,9 @@ class AppTheme {
       ),
       colorScheme: ColorScheme.dark(
         primary: primary,
-        onPrimary: obsidianBlack,
+        onPrimary: readableTextOn(primary),
         secondary: secondary,
+        onSecondary: readableTextOn(secondary),
         surface: deepCharcoal,
         onSurface: textMain,
         surfaceContainerHighest: const Color(0xFF161616),

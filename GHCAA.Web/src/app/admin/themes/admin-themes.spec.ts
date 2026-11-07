@@ -94,6 +94,35 @@ describe('AdminThemes Component', () => {
         expect(fixture.nativeElement.querySelector('.ticker-mock')).toBeNull();
     });
 
+    it('rounds the shown ratio down so a failing value never reads as 4.50', () => {
+        component.selectedTheme = {
+            ...component.selectedTheme,
+            textColor: '#777777',
+            backgroundColor: '#ffffff',
+            enableGradientFading: false
+        };
+        const advice = component.contrastAdvice();
+        expect(advice).toMatchObject({ status: 'warning' });
+        const ratio = advice?.status === 'warning' ? advice.ratio : 0;
+        const shown = Number(/contrast is ([\d.]+):1/.exec(advice!.message)![1]);
+        expect(shown).toBeLessThanOrEqual(ratio);
+        expect(shown).toBeLessThan(4.5);
+        expect(ratio - shown).toBeLessThan(0.01);
+    });
+
+    it('reuses the advice until an input it reads changes', () => {
+        component.selectedTheme = { ...component.selectedTheme, textColor: '#000000', backgroundColor: '#ffffff' };
+        const first = component.contrastAdvice();
+        expect(component.contrastAdvice()).toBe(first);
+
+        component.selectedTheme.title = 'Not read by the check';
+        expect(component.contrastAdvice()).toBe(first);
+
+        component.selectedTheme.textColor = '#ffffff';
+        expect(component.contrastAdvice()).not.toBe(first);
+        expect(component.contrastAdvice()).toMatchObject({ status: 'warning' });
+    });
+
     it('reports invalid hex input without a contrast ratio', () => {
         component.selectedTheme.textColor = '#12';
 

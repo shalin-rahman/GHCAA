@@ -84,10 +84,12 @@ do not change it here; list the new dark values in the handback for the owner to
 The security review found no vulnerabilities. The code review found two medium-severity contrast
 issues. The web gradient check samples 0%, 25%, 50%, 75% and 100%, so it can report a pass when a
 color between those points fails. For `#2a0138` over `#e731e9` to `#1ca3f0`, the lowest sampled ratio
-is 4.502:1, while the ratio at 39% is 4.407:1. Keep the fix and regression test in 84.87.
+is 4.502:1, while the ratio at 39% is 4.407:1. Fixed on 2026-11-07 under 84.87: the check now
+samples every rendered color, and the regression test covers this pair.
 
 The mobile offline accent `#2f6f4f` with `obsidianBlack` button text has 3.23:1 contrast. It is
-outside this web theme plan and is tracked in 84.89. The review did not make code changes.
+outside this web theme plan. 84.89 closed it on 2026-11-07: button labels now switch to white when
+the dark label fails, and the accent itself is unchanged.
 
 The review also found that checking token declarations alone does not establish what a component
 renders. Theme selectors can override values written on `:root`, while fixed foreground and effect
@@ -218,6 +220,15 @@ changes.
    `--text-on-image`, rather than undoing the global remap.
 2. Pick one focus style (F7) and remove the other from the shared rules.
    Verify: Tab through the login form, an admin table and a modal in both modes; one clear ring each.
+
+Result, 2026-11-07: no template change was needed. The one `.text-white/40` use (the password toggle
+in `admin-roles.html`) and every `.border-white/5`, `/10` and `/20` use sit on a card, form or table
+surface, not on a photo or dark overlay, so the muted and hairline remaps read correctly in both
+modes. F7: the shared `:focus-visible` outline in `styles.scss` no longer uses `!important` and is
+the only shared focus rule. Tabbing the login form in both modes gave one 3px ring on each input,
+button and link. The admin table and modal were not tabbed through. About 16 component SCSS files
+still add a `:focus` box-shadow, which also shows on mouse focus; that is component styling, left
+as a follow-up.
 
 ### Batch 6: full checks
 

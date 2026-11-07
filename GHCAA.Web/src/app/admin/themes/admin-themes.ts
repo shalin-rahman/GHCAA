@@ -168,7 +168,20 @@ export class AdminThemes implements OnInit {
             : backgroundColor;
     }
 
+    // The template calls this on every change detection, and a gradient check builds up to 256
+    // samples, so the result is kept until one of the inputs it reads changes.
+    private adviceCache: { key: string; advice: ContrastAdvice | null } | null = null;
+
     contrastAdvice(): ContrastAdvice | null {
+        const { imageUrl, backgroundColor, sidebarColor, enableGradientFading, textColor } = this.selectedTheme;
+        const key = JSON.stringify([imageUrl, backgroundColor, sidebarColor, enableGradientFading, textColor]);
+        if (this.adviceCache?.key !== key) {
+            this.adviceCache = { key, advice: this.computeContrastAdvice() };
+        }
+        return this.adviceCache.advice;
+    }
+
+    private computeContrastAdvice(): ContrastAdvice | null {
         const theme = this.selectedTheme;
         if (theme.imageUrl) return null;
 
@@ -181,9 +194,12 @@ export class AdminThemes implements OnInit {
         const ratio = worst.ratio;
         const location = theme.enableGradientFading ? ` at ${worst.position}% of the gradient` : '';
         const status = ratio < MIN_TEXT_CONTRAST ? 'warning' : 'pass';
+        // Rounded down so a failing 4.496 shows as 4.49, not as a passing-looking 4.50.
+        // The small epsilon stops float error from turning 1.15 into 1.14.
+        const shown = (Math.floor(ratio * 100 + 1e-9) / 100).toFixed(2);
         const message = status === 'warning'
-            ? `Text contrast is ${ratio.toFixed(2)}:1${location}; it should be at least ${MIN_TEXT_CONTRAST}:1.`
-            : `Text contrast is ${ratio.toFixed(2)}:1${location}.`;
+            ? `Text contrast is ${shown}:1${location}; it should be at least ${MIN_TEXT_CONTRAST}:1.`
+            : `Text contrast is ${shown}:1${location}.`;
 
         return { status, message, ratio, position: worst.position, backgroundColor: worst.color };
     }

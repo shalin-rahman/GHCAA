@@ -61,7 +61,8 @@ $activeProvider = $DatabaseProvider
 if (-not $activeProvider) {
     $appSettingsPath = Join-Path $ApiPath "appsettings.json"
     if (Test-Path $appSettingsPath) {
-        $config = Get-Content $appSettingsPath -Raw | ConvertFrom-Json
+        # appsettings.json may hold // comment lines, which ConvertFrom-Json on PowerShell 5.1 rejects.
+        $config = (Get-Content $appSettingsPath -Raw) -replace '(?m)^\s*//.*$', '' | ConvertFrom-Json
         $activeProvider = $config.DatabaseProvider
     }
 }

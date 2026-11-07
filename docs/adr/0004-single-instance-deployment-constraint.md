@@ -21,7 +21,7 @@ work correctly under that assumption:
 None of this is a bug. At one instance, an in-memory cache and a process-local connection map are the
 correct, cheapest choice — adding Redis-backed caching and a SignalR backplane now, with nothing that
 needs them, would be exactly the overengineering this project's review process rules out elsewhere
-(see `docs/ARCHITECTURE_AUDIT_2026-09.md` and `docs/TODO.md` item 82.20).
+(see `docs/archive/ARCHITECTURE_AUDIT_2026-09.md` and `docs/TODO.md` item 82.20).
 
 ## Decision
 

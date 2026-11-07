@@ -926,8 +926,8 @@ evaluation data and literature are the material that must be produced.
 | Business rules, state machines, payment flow | `docs/BUSINESS_FINDINGS.md`, `docs/PAYMENT_GATEWAY_WORKFLOW.md` |
 | Configuration-driven design and feature flags | `docs/CONFIG_DRIVEN_FRAMEWORK.md` |
 | Deployment, CI/CD, environments, cost model | `docs/RENDER_DEPLOYMENT.md`, `Dockerfile`, the workflow files |
-| Test strategy, coverage, defect analysis | `docs/BUSINESS_TEST_CHECKLIST.md`, `docs/COVERAGE_SNAPSHOT_2026-05-26.md`, the test projects |
-| User-interface design, tokens, shared controls | `docs/UI_FIX_PLAN.md`, `docs/SHARED_PROFILE_COMPONENTS.md`, `GHCAA.Web/src/styles.scss` |
+| Test strategy, coverage, defect analysis | `docs/BUSINESS_TEST_CHECKLIST.md`, `docs/archive/COVERAGE_SNAPSHOT_2026-05-26.md`, the test projects |
+| User-interface design, tokens, shared controls | `docs/archive/UI_FIX_PLAN.md`, `docs/SHARED_PROFILE_COMPONENTS.md`, `GHCAA.Web/src/styles.scss` |
 | Governance, constitution and election processes | `docs/CONSTITUTION_PUBLISHING.md`, `docs/Elections/`, the ratified constitution |
 | Schedule, work breakdown, change log, decision records | `docs/TODO.md`, `docs/FORUM_PLAN_2026-05.md`, the version-control history |
 | Product metrics — complexity, coupling, size | Static analysis over the solution, generated for §9.12 |

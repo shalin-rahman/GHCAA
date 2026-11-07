@@ -1,9 +1,9 @@
 .footer {
     background: var(--primary-color);
     color: var(--text-on-dark);
-    /* Footer is always dark in BOTH themes → keep gold text bright (undo the light-theme
-       dark-gold swap that only makes sense on surfaces that go light). Central per-shell reset. */
-    --accent-text: var(--accent-color);
+    /* The footer sits on the primary in both themes, so it uses the accent tuned for the
+       primary, not the light-theme dark gold. This rule beats the global .on-dark one. */
+    --accent-text: var(--accent-on-dark-text, var(--accent-color));
     padding-top: 5rem;
     margin-top: 0;
     border-top: 1px solid var(--glass-border);

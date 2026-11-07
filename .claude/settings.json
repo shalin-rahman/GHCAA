@@ -96,7 +96,13 @@
       "Bash(cd /c/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/GHCAA.Web/src/app && grep -rn \"poll\" --include=*routes*.ts -i . | head; ls; grep -rln \"api/polls\\\\|admin/polls\" --include=*.ts . | head)",
       "Read(//c/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/GHCAA.Web/src/app/**)",
       "Bash(cd /c/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/GHCAA.Web/src/app && sed -n 240,258p app.routes.ts; grep -n \"polls\\\\|POLL\" core/constants/app.constants.ts; ls member/polls admin/polls; wc -l member/polls/* admin/polls/*)",
-      "Bash(cd /c/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/GHCAA.Web/src/app && grep -n \"polls\" core/services/nav.service.ts; grep -rn \"'/portal\\\\|'/member/\" core/constants/app.constants.ts | head -5)"
+      "Bash(cd /c/Users/HabiburRahmanShalin/workstation/shaleen/shalin/GHC/Application/GHCAA/GHCAA.Web/src/app && grep -n \"polls\" core/services/nav.service.ts; grep -rn \"'/portal\\\\|'/member/\" core/constants/app.constants.ts | head -5)",
+      "PowerShell(dotnet test GHCAA.Tests/GHCAA.Tests.csproj -o GHCAA.Tests/bin/alt-out --filter \"FullyQualifiedName~Config|FullyQualifiedName~Options|FullyQualifiedName~Startup|FullyQualifiedName~Payment|FullyQualifiedName~FileValidation\" 2>&1)",
+      "PowerShell($l = \\(Get-Content docs\\\\TODO.md -Encoding utf8\\)[1677]; $l.Substring\\(0,[Math]::Min\\(300,$l.Length\\)\\); '...'; $l.Substring\\([Math]::Max\\(0,$l.Length-700\\)\\))",
+      "PowerShell(Select-String -Path docs\\\\TODO_ARCHIVE.md,docs\\\\TODO.md -Pattern '^48\\\\.2 |^82\\\\.1\\(0[2-9]|1[0-9]\\) ' | % { \"$\\($_.Filename\\):$\\($_.LineNumber\\): $\\($_.Line.Substring\\(0,[Math]::Min\\(140,$_.Line.Length\\)\\)\\)\" })",
+      "PowerShell(python docs/book/build/build.py --pdf --strict 2>&1)",
+      "PowerShell(python docs/book/build/wbs.py --check 2>&1)",
+      "PowerShell(python docs/book/build/build.py --pdf --strict 2>&1 | Select-String -Pattern 'fix|error|fail|warn|placeholder|banned|missing|stale|drift' | Select-Object -First 25 | % Line)"
     ],
     "additionalDirectories": [
       "C:\\Users\\HabiburRahmanShalin\\workstation\\shaleen\\shalin\\GHC\\Application\\GHCAA\\013-*",

@@ -1,7 +1,7 @@
 # Task script: Treasurer
 
-Five tasks, about twenty-five minutes. Run on whatever device the Treasurer would actually use for
-this work, and note which.
+Five tasks, about twenty-five minutes. Run on the web app, on whatever device the Treasurer would
+actually use for this work, and note which. The mobile app has no admin finance screens.
 
 The Treasurer's work is the part of the Association the platform changes most, because it replaces a
 paper and message-thread record with a ledger. These tasks are written against that, not against the
@@ -10,6 +10,10 @@ screens.
 ---
 
 ## Task 1. Confirm a payment
+
+**Blocked until tracker item 84.92 closes.** On 2026-11-07 a declared payment stays Pending: the API
+can change its status, but no web or mobile screen calls it. Skip Tasks 1 and 2 until 84.92 is done
+and record them as not attempted.
 
 **Start state:** signed in as an administrator, with at least one payment declared and unverified.
 
@@ -27,6 +31,8 @@ it is a finding for §8.9, not a usability observation.
 ---
 
 ## Task 2. Reject one
+
+**Blocked until tracker item 84.92 closes,** for the reason given under Task 1.
 
 **Start state:** as above, a second declaration pending, with a reference that does not match.
 
@@ -50,6 +56,10 @@ say it aloud in a meeting.
 **Watch for:** whether they trust the figure. A Treasurer who finds the number but says they would
 check it against their own notes before quoting it has told you the platform has not yet replaced the
 notes, which is the real measure for this task and belongs in §12.10.
+
+**Facilitator note, not read aloud:** on 2026-11-07 the platform has no arrears report (tracker item
+84.94). Run the task anyway. How the Treasurer tries to work the answer out from the ledger or the
+member list is the finding.
 
 ---
 

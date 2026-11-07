@@ -522,7 +522,7 @@ Independent workstream: full dependency loop after Phases 2–3 parallel changes
 | P4-CONFIG | Org config | `GET /api/config` | 200 + org JSON | **Pass** — `orgId=ghcaa` | API | — | Verified | BUG-001 fix holds |
 | P4-FORUM | Forum smoke | Login `demo_user` → `GET /api/forum/categories` | 200 + categories | **Pass** — 1 category | API | — | Verified | |
 | P4-SIGNALR | SignalR hubs | `HashGen --signalr-test` | Chat + Notification connect | **Pass** | API | — | Verified | BUG-002 fix holds |
-| P4-REGRESS | Test delta | Compare to Phase 2 baseline (305) | No broken tests | **No regressions** | API | — | Verified | See `docs/BACKEND_REVIEW_2026-07-03.md` |
+| P4-REGRESS | Test delta | Compare to Phase 2 baseline (305) | No broken tests | **No regressions** | API | — | Verified | See `docs/archive/BACKEND_REVIEW_2026-07-03.md` |
 
 ### Phase 4 consolidation summary
 
@@ -574,7 +574,7 @@ financial-flow assertion existed yet in `member_journey_test.dart` — closed be
 |---|---|---|---|---|---|---|---|---|---|
 | MOB-P4-010 | Storage | Logout under Windows secure-storage file contention | `flutter test integration_test/member_journey_test.dart -d windows`, LOGOUT tap | Redirect to login | **Fixed** — unguarded `_secure.delete()` in `StorageService` could throw and abort `logout()` before `context.go('/login')`; wrapped in `_safeDelete` try/catch | Mobile | Major | Closed | `GHCAA.Mobile/lib/core/storage/storage_service.dart`; 3 consecutive passes after the fix |
 | MOB-GAP-001 | Forum | Live authenticated flow | Login, then fetch forum categories and topics | Forum data renders | **Still not run** — no forum-flow assertion in `member_journey_test.dart` either | Mobile | Minor | Open | Add a forum-flow step and rerun |
-- **Docs:** `docs/BACKEND_REVIEW_2026-07-03.md` — executive summary + recommended commit grouping.
+- **Docs:** `docs/archive/BACKEND_REVIEW_2026-07-03.md` — executive summary + recommended commit grouping.
 
 ### 82.85: financial and forum flow coverage closed (2026-09-16)
 

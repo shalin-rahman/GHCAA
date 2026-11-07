@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
     hexToRgb, rgbToHex, rgbString, rgbToHsl, hslToRgb,
-    adjustLightness, contrastRatio, darkenForContrast, parseHexColor, safeContrastRatio
+    adjustLightness, contrastRatio, darkenForContrast, parseHexColor, safeContrastRatio,
+    lightenForContrast, readableTextOn, accentGradient, DARK_LABEL, LIGHT_LABEL, DARK_TEXT_SURFACE
 } from './color-math';
 
 describe('color-math', () => {
@@ -16,6 +17,10 @@ describe('color-math', () => {
 
         it('works without a leading #', () => {
             expect(hexToRgb('000000')).toEqual({ r: 0, g: 0, b: 0 });
+        });
+
+        it('ignores spaces around a pasted value', () => {
+            expect(hexToRgb('  #c5a059 ')).toEqual({ r: 197, g: 160, b: 89 });
         });
     });
 
@@ -125,6 +130,74 @@ describe('color-math', () => {
         it('bottoms out at black rather than looping forever on an unreachable ratio', () => {
             const result = darkenForContrast('#ffffff', '#ffffff', 21);
             expect(result).toBe('#000000');
+        });
+    });
+
+    describe('lightenForContrast', () => {
+        it('lightens a dark accent until it reads on the dark card', () => {
+            const result = lightenForContrast('#2f6f4f', DARK_TEXT_SURFACE, 4.5);
+            expect(result).not.toBe('#2f6f4f');
+            expect(contrastRatio(result, DARK_TEXT_SURFACE)).toBeGreaterThanOrEqual(4.5);
+        });
+
+        it('leaves the default gold alone, since it already passes on the dark card', () => {
+            expect(lightenForContrast('#c5a059', DARK_TEXT_SURFACE, 4.5)).toBe('#c5a059');
+        });
+
+        it('tops out at white rather than looping forever on an unreachable ratio', () => {
+            expect(lightenForContrast('#000000', '#000000', 21)).toBe('#ffffff');
+        });
+    });
+
+    describe('readableTextOn', () => {
+        it('puts the dark label on the default gold', () => {
+            expect(readableTextOn('#c5a059')).toBe(DARK_LABEL);
+        });
+
+        it('puts the white label on a dark green accent', () => {
+            expect(readableTextOn('#2f6f4f')).toBe(LIGHT_LABEL);
+        });
+
+        it.each(['#ffffff', '#ffd700', '#000000', '#1e3a8a'])('reaches 4.5:1 on %s', bg => {
+            expect(contrastRatio(readableTextOn(bg), bg)).toBeGreaterThanOrEqual(4.5);
+        });
+
+        it('judges a gradient by its worst stop, not its first', () => {
+            expect(readableTextOn('#6b6b6b')).toBe(LIGHT_LABEL);
+            expect(readableTextOn('#6b6b6b', '#a0a0a0')).toBe(DARK_LABEL);
+        });
+
+        it('gives the same answer for one stop repeated', () => {
+            expect(readableTextOn('#2f6f4f', '#2f6f4f')).toBe(readableTextOn('#2f6f4f'));
+        });
+    });
+
+    describe('accentGradient', () => {
+        const worst = (g: { stops: string[]; label: string }) =>
+            Math.min(...g.stops.map(s => contrastRatio(g.label, s)));
+
+        it('keeps the full +8 / -12 spread for the default gold', () => {
+            const g = accentGradient('#c5a059');
+            expect(g.stops).toEqual(['#c5a059', adjustLightness('#c5a059', 8), adjustLightness('#c5a059', -12)]);
+            expect(g.label).toBe(DARK_LABEL);
+        });
+
+        it('narrows the spread for a mid-tone green until the label reaches 4.5:1', () => {
+            const g = accentGradient('#2e7d32');
+            expect(g.stops[1]).not.toBe(adjustLightness('#2e7d32', 8));
+            expect(g.stops[1]).not.toBe('#2e7d32');
+            expect(worst(g)).toBeGreaterThanOrEqual(4.5);
+        });
+
+        it('falls back to a flat fill when no spread can reach 4.5:1', () => {
+            // mid grey: white is about 4.4:1 and dark about 4.2:1 on the flat fill itself
+            const g = accentGradient('#787878');
+            expect(g.stops).toEqual(['#787878', '#787878', '#787878']);
+            expect(g.label).toBe(readableTextOn('#787878'));
+        });
+
+        it.each(['#000000', '#ffffff', '#1e3a8a', '#ffd700'])('stays at 4.5:1 for %s', accent => {
+            expect(worst(accentGradient(accent))).toBeGreaterThanOrEqual(4.5);
         });
     });
 });

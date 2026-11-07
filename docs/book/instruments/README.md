@@ -32,8 +32,16 @@ Do these once, on the day before the first session. If any fails, postpone every
    the photo still loads.
 3. One test account per role exists on preprod: an ordinary member, the Treasurer, the General
    Secretary and the President. None of them is the author's own account.
-4. At least one handset is charged and has the mobile app pointed at preprod.
-5. Print one copy of `response-log-template.md` and the right task script per participant, and give
+4. At least one handset is charged and has a mobile build pointed at preprod. The app reads its API
+   address from the `BASE_API_URL` key in the mobile `.env` file. A build made without it calls the
+   Android emulator address (`10.0.2.2:5087`) and fails on a real handset.
+5. Every task still has a screen to do it on. On 2026-11-07 three did not, and those tasks are marked
+   in their scripts: verifying or rejecting a declared payment (Treasurer Tasks 1 and 2) and
+   publishing a constitution version (Secretary Task 5). Skip a marked task unless its tracker item
+   is closed, and record it as not attempted, never as failed.
+6. No payment channel on preprod has a live gateway. Open the admin payment channels page and check
+   that every enabled channel is a manual one or is set to sandbox.
+7. Print one copy of `response-log-template.md` and the right task script per participant, and give
    each participant a reference such as `P01`. Keep the reference-to-name list on paper only.
 
 ## How to run a session
@@ -60,6 +68,11 @@ more than a slow success.
 Do not run a session on the author's own machine with the author's own account. Use the
 pre-production deployment, on a handset for at least half the member sessions, since §3.5 assumes
 mobile-first use and a study run entirely on a desktop would not test the assumption.
+
+The mobile app does not cover every task. Signed out, it only offers sign-in, registration, password
+reset and the landing screen, so a task on the public site runs in a browser. It has no admin screens
+for payments, events, notices or the constitution, so the Treasurer, Secretary and President sessions
+run on the web app, on whatever device the office holder would use for it.
 
 ## Scoring
 

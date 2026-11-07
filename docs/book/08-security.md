@@ -276,7 +276,7 @@ workload of some minutes per payment for officer verification, rather than the w
 into an unverified automated credit.
 
 The residual risk is not in the manual path itself but in the schema that waits for the gateway path
-to be switched on. `docs/ARCHITECTURE_AUDIT_2026-09.md`, Finding 9, records that `PaymentConfiguration`
+to be switched on. `docs/archive/ARCHITECTURE_AUDIT_2026-09.md`, Finding 9, records that `PaymentConfiguration`
 carries `GatewayPublicKey` and `GatewaySecretKey` as plain `[MaxLength(500)]` string columns with no
 column-level encryption or protection marker. The finding's own disposition lowers its severity today
 — the columns are empty because no live gateway is configured — but states plainly that the schema
@@ -419,7 +419,7 @@ After that assessment, Table 8.5 lists what remains open. The largest items, in 
 an asset named in Table 8.1:
 
 **Gateway-credential schema.** `PaymentConfiguration.GatewayPublicKey` and `GatewaySecretKey` are
-plain string columns with no encryption at rest (`docs/ARCHITECTURE_AUDIT_2026-09.md`, Finding 9).
+plain string columns with no encryption at rest (`docs/archive/ARCHITECTURE_AUDIT_2026-09.md`, Finding 9).
 Empty today because no gateway is configured (§8.7), but the schema itself is the risk, and it should
 be closed before, not after, a gateway is switched on.
 
@@ -433,7 +433,7 @@ that a poll or amendment vote result rests on an authorised administrative accou
 cryptographic guarantee, which is why these features are scoped as internal governance tools rather
 than a secure-election system.
 
-**Supply-chain hardening is incomplete.** `docs/ARCHITECTURE_AUDIT_2026-09.md` records that only one
+**Supply-chain hardening is incomplete.** `docs/archive/ARCHITECTURE_AUDIT_2026-09.md` records that only one
 of five CI workflows pins its third-party actions by commit hash rather than by mutable tag (Finding
 14, item 48.19), and that no automated dependency or container vulnerability scan runs in CI at all
 (Finding 16, item 82.26). Neither is a control this chapter has described as present, and both remain
@@ -637,7 +637,7 @@ flowchart TB
 | V7 Error handling and logging | Not assessed | Outside this chapter's evidence base |
 | V8 Data protection | Partial | Class A archival protects records from erasure; no encryption at rest for gateway-credential columns (§8.7, §8.10) |
 | V9 Communications | Met | HTTPS enforced outside development, HSTS, security headers (§8.6) |
-| V10 Malicious code | Not assessed | No dependency or container scanning in CI (`docs/ARCHITECTURE_AUDIT_2026-09.md`, Finding 16) |
+| V10 Malicious code | Not assessed | No dependency or container scanning in CI (`docs/archive/ARCHITECTURE_AUDIT_2026-09.md`, Finding 16) |
 | V11 Business logic | Not assessed | Outside this chapter's evidence base |
 | V12 Files and resources | Met | Type, extension and content validation; secure/public root separation (§8.5) |
 | V13 API and web service | Met | Named rate-limit policies on every endpoint class (§8.6) |
@@ -659,11 +659,11 @@ flowchart TB
 
 | ID | Risk | Evidence | Status |
 |---|---|---|---|
-| RR-1 | `PaymentConfiguration` gateway-credential columns are plaintext with no encryption at rest | `docs/ARCHITECTURE_AUDIT_2026-09.md`, Finding 9 | Open |
+| RR-1 | `PaymentConfiguration` gateway-credential columns are plaintext with no encryption at rest | `docs/archive/ARCHITECTURE_AUDIT_2026-09.md`, Finding 9 | Open |
 | RR-2 | No automated retention schedule or subject-erasure path for non-evidentiary personal data | §8.9 | Open |
 | RR-3 | Governance records (`Poll`, `Constitution`, `ECMember`) carry no cryptographic tamper-evidence beyond admin-id attribution | §8.8, §8.10 | Open, scoped deliberately per §2.7 |
-| RR-4 | Four of five CI workflows reference third-party actions by mutable tag, not commit hash | `docs/ARCHITECTURE_AUDIT_2026-09.md`, Finding 14 | Open |
-| RR-5 | No automated dependency or container vulnerability scan runs in CI | `docs/ARCHITECTURE_AUDIT_2026-09.md`, Finding 16 | Open |
+| RR-4 | Four of five CI workflows reference third-party actions by mutable tag, not commit hash | `docs/archive/ARCHITECTURE_AUDIT_2026-09.md`, Finding 14 | Open |
+| RR-5 | No automated dependency or container vulnerability scan runs in CI | `docs/archive/ARCHITECTURE_AUDIT_2026-09.md`, Finding 16 | Open |
 | RR-6 | NFR-S3 (5 requests/minute) and the `Auth` rate-limit policy (10 requests/minute in production) disagree | §3.4, §8.6 | Open |
 | RR-7 | No per-connection rate limit on the two SignalR hubs | §8.2 | Open |
 | RR-8 | Plain-text fields outside the three rich-text surfaces have not been independently assessed for injection risk | §8.5 | Open |

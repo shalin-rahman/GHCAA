@@ -140,8 +140,9 @@ namespace GHCAA.Infrastructure.Options
         public string ClientUrl { get; set; } = "http://localhost:4200";
     }
 
-    // Mirrors "GeneralSettings". FinancialService reads SystemAdminId to attribute automated,
-    // non-member-initiated actions (e.g. system-triggered payment status changes) to an admin user.
+    // Mirrors "GeneralSettings". FinancialService takes this option but never reads it. The live reader
+    // is PaymentCallbackOrchestrator, which reads GeneralSettings:SystemAdminId straight from
+    // IConfiguration to credit gateway callbacks to an admin user.
     public class GeneralSettingsOptions
     {
         public int SystemAdminId { get; set; } = 1;

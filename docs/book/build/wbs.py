@@ -153,21 +153,24 @@ CODE = [
       "GHCAA.Domain/Models/SavedReport.cs"], ["C3", "C4"]),
 ]
 
-# The documentation deliverables, measured the same way.
+# The documentation deliverables, measured the same way. Files moved to docs/archive/ (12.8) keep
+# their old path too, because git log without --follow would lose every commit before the move.
 DOCS = [
     ("D1", "Requirements specification",
      ["docs/SRS.md", "docs/FEATURES.md", "docs/BUSINESS_FINDINGS.md",
-      "docs/BUSINESS_REVIEW_PLAN.md"]),
+      "docs/BUSINESS_REVIEW_PLAN.md", "docs/archive/BUSINESS_REVIEW_PLAN.md"]),
     ("D2", "Governing-document set",
      ["docs/Elections", "docs/CONSTITUTION_PUBLISHING.md"]),
     ("D3", "Design description",
      ["docs/ARCHITECTURE.md", "docs/PROJECT_MAP.md",
       "docs/SHARED_PROFILE_COMPONENTS.md", "docs/CONFIG_DRIVEN_FRAMEWORK.md",
-      "docs/PAYMENT_GATEWAY_WORKFLOW.md", "docs/UI_FIX_PLAN.md"]),
+      "docs/PAYMENT_GATEWAY_WORKFLOW.md", "docs/UI_FIX_PLAN.md", "docs/archive/UI_FIX_PLAN.md"]),
     ("D4", "Project plan and change log", ["docs/TODO.md", "docs/FORUM_PLAN_2026-05.md"]),
     ("D5", "Test and validation plan",
      ["docs/BUSINESS_TEST_CHECKLIST.md", "docs/COVERAGE_SNAPSHOT_2026-05-26.md",
       "docs/BACKEND_REVIEW_2026-07-03.md", "docs/ARCHITECTURE_AUDIT_2026-09.md",
+      "docs/archive/COVERAGE_SNAPSHOT_2026-05-26.md", "docs/archive/BACKEND_REVIEW_2026-07-03.md",
+      "docs/archive/ARCHITECTURE_AUDIT_2026-09.md",
       "docs/materials/57.1-field-coverage-audit.md"]),
     ("D6", "Deployment runbook",
      ["docs/RENDER_DEPLOYMENT.md", "docs/appsettings.txt", "docs/deploy_connection.txt"]),
@@ -195,7 +198,7 @@ ASSUMED = [
      "finding. One session (2h preparation + 2h session + 1h logging = 5h), whose output was the 5 "
      "specification defects of Table 3.8; plus the architecture and engineering audit of 4 September "
      "2026 against the brief in docs/materials/REVIEW.md, recorded in "
-     "docs/ARCHITECTURE_AUDIT_2026-09.md, at 5h. That second session is a design review rather than a "
+     "docs/archive/ARCHITECTURE_AUDIT_2026-09.md, at 5h. That second session is a design review rather than a "
      "specification review, and its output was 15 tracker items (82.14-82.28) rather than "
      "specification defects",
      10.0, True),
