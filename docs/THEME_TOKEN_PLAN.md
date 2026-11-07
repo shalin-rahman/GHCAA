@@ -4,6 +4,10 @@ Design reference, written 2026-11-07. It says how to finish the uncommitted them
 `preprod`. It does not set order against other work; `docs/MASTER_EXECUTION_PLAN.md` does that, and
 the owner decides where this goes in it.
 
+Status, 2026-11-07: done. Batches 1 to 6 closed under tracker item 84.87 (the web theme audit) and
+84.91 (mobile label colors). Gaps found after the close are tracker item 84.98 (theme leftovers:
+light surface check, 8-digit hex order, fixed white text on the primary, mouse focus rings).
+
 ## Rules for the implementing agent
 
 - Do not commit, push, stage or revert. Preserve every unrelated staged and unstaged change.

@@ -30,7 +30,8 @@ This is not a from-scratch job. Work Package 28 already built most of the runtim
   Workflow, bilingual Localization) served from `GET /api/config`, edited at `PUT /api/config`
   (SuperAdmin only).
 - Angular `OrgConfigService` loads it in `APP_INITIALIZER` and pushes `primaryColor`/`accentColor`
-  into CSS custom properties. Flutter mirrors it via Riverpod `orgConfigProvider` with a
+  into CSS custom properties, plus contrast-checked text, focus and label colors derived from them
+  (84.87, the web theme audit). A value that is not 3 or 6 digit hex is ignored. Flutter mirrors it via Riverpod `orgConfigProvider` with a
   SharedPreferences offline cache.
 - `SiteContent` CMS (Work Package 34) already makes About/Contact prose admin-editable.
 - Feature guards already hide whole modules per institution (`featureGuard` on 8 routes).

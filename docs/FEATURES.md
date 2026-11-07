@@ -423,6 +423,11 @@ The assistant runs entirely on internal data with a rule-based engine — it has
 - **Business description**: Dynamic UI transformation for special occasions (e.g., Independence Day).
 - **User roles**: Admin.
 - **Inputs / outputs**: Screen `/admin/themes`; API `POST /api/theme/activate`.
+- **Contrast check**: the form shows the text contrast on the solid or gradient banner and warns
+  below 4.5:1. A gradient is checked at every color it renders, not only at its ends. No check runs
+  when an image replaces the banner text. "Use suggested text color" fills the field only on click,
+  and only with a color that passes everywhere; if none passes, the field stays as it is. Saved
+  colors and the live banner are not changed.
 - **Dependencies**: Theme service.
 
 ---
@@ -528,6 +533,10 @@ Note: on a brand-new empty database, the runtime builds the schema and applies s
 - Centralized soft-delete architecture using EF Core global query filters — queries never need to check `IsArchived` manually.
 - Clean Architecture separation between domain models, application DTOs, and infrastructure services.
 - SCSS design system with CSS custom properties for colors, spacing, and glassmorphism tokens; semantic theme tokens flip between fully-styled light and dark modes.
+- Branding colors keep text readable in both modes. From the configured primary and accent, the web
+  client derives accent text, hover, focus ring and button label colors that reach 4.5:1 on each
+  theme's surfaces and on the primary. The accent gradient narrows when its full spread leaves no
+  readable label. Mobile picks the button label the same way (`AppTheme.readableTextOn`).
 
 ### API & tooling
 - `WwwRedirectMiddleware` moves `www.<domain>` to the main domain taken from `AppSettings:ClientUrl`

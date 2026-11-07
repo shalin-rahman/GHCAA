@@ -27,7 +27,7 @@ It exits 1 when an open item is missing here or a closed one is still scheduled.
 
 - **Date:** 2026-11-02. **Wave:** wave 1 built. The owner accepted this plan on 2026-11-02 and asked for a
   code review of wave 1 and a full `ci-local.py` run before 99.3 closes. Do not start wave 2 before that.
-- **Open:** 116 items on 2026-11-07, 1 of them this plan's own upkeep in Work Package 99 (`python scripts/backlog_inventory.py`). Held: 12 (`--state ONHOLD`).
+- **Open:** 120 items on 2026-11-07, 1 of them this plan's own upkeep in Work Package 99 (`python scripts/backlog_inventory.py`). Held: 12 (`--state ONHOLD`).
 - **Spec review, 2026-11-03.** The specs were checked against the tracker and the code. Fourteen
   verified gaps became items: 37.16f to 37.16h in stream E, and eleven Work Package 84 items in streams N2, N3
   and N6. Their priorities are proposals; the owner can change them. That review's one P1 item and
