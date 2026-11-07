@@ -10,12 +10,24 @@ export interface Rgb {
   b: number;
 }
 
+export function parseHexColor(value: string): Rgb | null {
+  const clean = value.trim().replace(/^#/, '');
+  if (!/^(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(clean)) return null;
+
+  const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+  const num = parseInt(full, 16);
+  return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+}
+
 export function hexToRgb(hex: string): Rgb {
   const clean = hex.replace('#', '');
   const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
   const num = parseInt(full, 16);
   return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
 }
+
+/** WCAG AA minimum contrast for normal-size text. */
+export const MIN_TEXT_CONTRAST = 4.5;
 
 export function rgbToHex({ r, g, b }: Rgb): string {
   const toHex = (c: number) => Math.round(clamp(c, 0, 255)).toString(16).padStart(2, '0');
@@ -88,6 +100,20 @@ function relativeLuminance({ r, g, b }: Rgb): number {
 export function contrastRatio(hexA: string, hexB: string): number {
   const lA = relativeLuminance(hexToRgb(hexA));
   const lB = relativeLuminance(hexToRgb(hexB));
+  return ratioFromLuminance(lA, lB);
+}
+
+export function safeContrastRatio(hexA: string, hexB: string): number | null {
+  const colorA = parseHexColor(hexA);
+  const colorB = parseHexColor(hexB);
+  if (!colorA || !colorB) return null;
+
+  const lA = relativeLuminance(colorA);
+  const lB = relativeLuminance(colorB);
+  return ratioFromLuminance(lA, lB);
+}
+
+function ratioFromLuminance(lA: number, lB: number): number {
   const lighter = Math.max(lA, lB);
   const darker = Math.min(lA, lB);
   return (lighter + 0.05) / (darker + 0.05);

@@ -3,6 +3,7 @@ import { ApplicationRef } from '@angular/core';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ThemeService } from './theme.service';
 import { API_ENDPOINTS } from '../constants/app.constants';
+import { getNextTheme } from '../constants/theme.config';
 
 describe('ThemeService', () => {
     let service: ThemeService;
@@ -50,7 +51,7 @@ describe('ThemeService', () => {
     it('should toggle theme', () => {
         const initial = service.theme();
         service.toggleTheme();
-        expect(service.theme()).not.toBe(initial);
+        expect(service.theme()).toBe(getNextTheme(initial));
     });
 
     it('should load active special theme', () => {

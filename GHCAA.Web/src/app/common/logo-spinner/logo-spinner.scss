@@ -19,7 +19,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             border-radius: 50%;
-            border: 2px solid rgba(197, 160, 89, 0.5);
+            border: 2px solid rgba(var(--accent-color-rgb, 197, 160, 89), 0.5);
             animation: logo-spinner-ripple 2.4s ease-out infinite;
         }
 
@@ -44,14 +44,14 @@
     border-radius: 50%;
     border: 3px solid transparent;
     border-top-color: var(--accent-color);
-    border-right-color: rgba(197, 160, 89, 0.3);
+    border-right-color: rgba(var(--accent-color-rgb, 197, 160, 89), 0.3);
     animation: logo-spinner-spin 2.4s linear infinite;
 
     &.spinner-arc--reverse {
         inset: calc(var(--logo-spinner-size) * -0.1375);
         border-top-color: transparent;
         border-bottom-color: var(--accent-color);
-        border-left-color: rgba(197, 160, 89, 0.2);
+        border-left-color: rgba(var(--accent-color-rgb, 197, 160, 89), 0.2);
         animation-direction: reverse;
         animation-duration: 3.6s;
     }

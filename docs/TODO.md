@@ -221,12 +221,12 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
 
 ### P1 — HIGH (security surface / explicitly time-sensitive / blocking other work)
 - **37.1i–37.1l, 37.1n** — Election ballot secrecy (review 2026-09-27). All done as of 2026-10-09. Spec 023.
-- **84.86** — [DONE 2026-11-07] Anonymous callers can open unpublished news posts by Id.
-- **37.1m** — [PARTIAL] The vote receipt and the tracking-code list are built. Automated web, mobile
+- **84.86**: [DONE 2026-11-07] Anonymous callers can open unpublished news posts by Id.
+- **37.1m**: [PARTIAL] The vote receipt and the tracking-code list are built. Automated web, mobile
   and API checks pass. The server receipt PDF has also been inspected in headless Chromium at
   desktop size and a 390x844 viewport using a Bengali test election. Still needs a live look on a
   phone. The receipt itself comes from the server (37.14o).
-- **37.14o** — [PARTIAL 2026-10-29] Depends on 37.1m. The server-made receipt uses QuestPDF and the
+- **37.14o**: [PARTIAL 2026-10-29] Depends on 37.1m. The server-made receipt uses QuestPDF and the
   bundled Noto Sans Bengali font, shows cast time in Bangladesh time (`dd-MM-yyyy HH:mm`), and the
   cast reply includes its PDF without ballot choices. Web
   and mobile keep the PDF on the device and offer it for download/share. If local storage fails,
@@ -239,10 +239,10 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
   org academic record never ran. Confirmed on the local database on 2026-11-04 (586 of 586 org
   records) and on the preprod directory on 2026-11-05 (every card shows a batch). F2 is no longer
   blocked by it.
-- **7.22** — [DONE 2026-11-01] Render, `appsettings.Preprod.json`, the root `.env.preprod` and
+- **7.22**: [DONE 2026-11-01] Render, `appsettings.Preprod.json`, the root `.env.preprod` and
   `GHCAA.Mobile/.env.preprod` all use `https://ghcaa-ryl6.onrender.com`.
-- **37.13e** — [DONE 2026-10-23] Ballot key procedure and protocol, with a test vector sealed outside .NET.
-- **37.12w** — [DONE 2026-10-21] Open-polling readiness gate on the API, web and mobile. Polling
+- **37.13e**: [DONE 2026-10-23] Ballot key procedure and protocol, with a test vector sealed outside .NET.
+- **37.12w**: [DONE 2026-10-21] Open-polling readiness gate on the API, web and mobile. Polling
   opens only when the roll, candidate list, ballot key, appointments, polling window and the four
   Chief Commissioner attestations are met.
 - **37.1s, 37.1v, 37.1t, 37.1u** — [DONE] Ballots are sealed under the returning officer's key
@@ -265,14 +265,14 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
   Still to check: an upload made on preprod still loads after a redeploy.
 - **37.12a–37.12b** — [DONE 2026-09-29] Election settings section in OrgConfig, and a configurable
   `ElectionPersona` table with its own admin screen.
-- **37.12c** — [DONE 2026-09-30] ElectionOfficial role, and role lists on web and mobile.
-- **37.12d** — [DONE 2026-09-30] Appointments with accept and a signed declaration, on the backend,
+- **37.12c**: [DONE 2026-09-30] ElectionOfficial role, and role lists on web and mobile.
+- **37.12d**: [DONE 2026-09-30] Appointments with accept and a signed declaration, on the backend,
   web and mobile, with the migration that copies the old officer rows.
-- **37.12e** — [DONE 2026-10-01] Per-election permission check on every election write, and the
+- **37.12e**: [DONE 2026-10-01] Per-election permission check on every election write, and the
   admin handover.
-- **37.12f** — [DONE 2026-10-01] Two-person rule for publish, polling, key replacement, close,
+- **37.12f**: [DONE 2026-10-01] Two-person rule for publish, polling, key replacement, close,
   declare and archive, with the key fingerprint on the vote screen.
-- **37.12g** — [DONE 2026-10-10] Declare sets the end date on every appointment, login and refresh
+- **37.12g**: [DONE 2026-10-10] Declare sets the end date on every appointment, login and refresh
   refuse a non-member official after it, and archive revokes every appointment.
 - **88.1–88.5** — The May 2026 alumni batch's delivery mechanism (a dedicated EF migration) no longer
   exists in the tree after the WP62 seed refactor; `InstitutionDataSeeder`'s empty-table-only model
@@ -283,7 +283,7 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
 - **47.13.3–47.13.7** — Mutation-coverage remediation, remaining after 47.13.1/47.13.2 closed
   2026-09-04 (`AuthController` non-Login actions incl. the step-up endpoints, 20 tests; `LookupsController`
   full CRUD, 12 tests; backend suite 532→564, zero regressions).
-- **48.18a** — 48.18/48.19 (dependency/CI supply-chain hardening) done 2026-09-04: packages bumped
+- **48.18a**: 48.18/48.19 (dependency/CI supply-chain hardening) done 2026-09-04: packages bumped
   to latest `9.0.x`, CI Actions pinned to commit SHA, Docker base images pinned by digest, NuGet
   lockfiles added with `--locked-mode` restore in CI. What remains: a live-Postgres migration-apply
   check the bump couldn't get in this session (no reachable Docker daemon).
@@ -294,7 +294,7 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
   2026-09-04**: admin-initiated reset shipped for both members (a real token-revocation gap closed) and
   system admins (new), including the auth-flow fix the original plan missed (system admins have no
   email to look the reset up by).
-- **46.5** — Org-wide Financial Ledger has zero rows post-import; aggregate income/expense view doesn't
+- **46.5**: Org-wide Financial Ledger has zero rows post-import; aggregate income/expense view doesn't
   reflect the ~৳47,000 in per-member fees that ARE recorded correctly.
 - **82.16 done 2026-09-04** — Financial ledger and payment rows now record who changed them and when,
   and are soft-deleted rather than removed. The rule for which entity classes need audit fields is
@@ -308,46 +308,48 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
   broken receipt downloads, wrong dues on mobile, dead news links, wrong admin page titles). One item
   deliberately deferred as 82.33 (mobile receipt download needs a package decision, not a quick fix).
   All three test suites green throughout.
-- **82.14** — The same audit did not cover the Angular or Flutter clients (two research streams
+- **82.14**: The same audit did not cover the Angular or Flutter clients (two research streams
   returned nothing). `docs/ARCHITECTURE_AUDIT_2026-09.md` is a backend review until this closes.
   82.32's client bug sweep is not a substitute — see its note there.
 - **84.1–84.3** — Done for seven domains. State-transition tables, a validation matrix, and
   endpoint contract tables in `docs/specs/002-workflow-contracts-and-validation/`. Moved to
   docs/TODO_ARCHIVE.md on 2026-10-14.
-- **84.42** — [ONHOLD] Mobile step-up is built (37.1w); only a real-device check of the admin step-up routes is left. Found by 84.5.
+- **84.42**: [ONHOLD] Mobile step-up is built (37.1w); only a real-device check of the admin step-up routes is left. Found by 84.5.
   (84.41, the same-area `Forbid(string)` 500, is done.)
 
 ### P2 — MEDIUM (real, no urgency signal)
-- **37.1p** — Election rules still open: recount, candidate consent, spoiled
+- **84.87**: [IN PROGRESS 2026-11-07] Gradient contrast advice is fixed; the runtime branding checks, the rest of the color audit and the Light/Dark visual review remain open.
+- **84.89**: [DONE 2026-11-07] Mobile offline accent fallback gave button text only 3.23:1 contrast.
+- **37.1p**: Election rules still open: recount, candidate consent, spoiled
   and unopposed seats. Spec 023 Phase 3. The officer conflict check moved to 37.16e on 2026-10-31. The reopen-nominations rule (37.12z) was merged in on
   2026-10-21. Multi-place seats and the tie rule (37.1o), filled ER
   forms (37.1q) and device details on the turnout record (37.1r) are done and archived.
-- **37.16e** — Officer conflict check. Nothing stops an official from being a candidate, or from
+- **37.16e**: Officer conflict check. Nothing stops an official from being a candidate, or from
   ruling on a nomination they are tied to. Spec 023 FR-022, session F2.
 - **37.16f–37.16h** — Election gaps from the 2026-11-03 spec review: one voting-member rule shared with
   amendments, declare through governance, and a moderated candidate photo.
-- **84.55** — The gallery create route binds the EF entity. Found by the 2026-11-03 spec review.
+- **84.55**: The gallery create route binds the EF entity. Found by the 2026-11-03 spec review.
 - **84.65, 84.67, 84.68** — Owner answers of 2026-11-03: a web admin page for scholarships, password
   change in the mobile app, and credential revoke and reissue in the web admin. The revoke route
   already exists (84.68 is [PARTIAL]); step-up, audit, reissue and the web screen are left.
-- **37.14t** — The form verification page currently shows that the election and form exist, but does not prove that the paper is genuine or unchanged. Owner decision 2026-10-27: verification must establish authenticity and integrity, and reject forms that could not yet exist in the election phase. Bind the proof to the canonical printed content; settle the cryptographic construction during implementation design.
+- **37.14t**: The form verification page currently shows that the election and form exist, but does not prove that the paper is genuine or unchanged. Owner decision 2026-10-27: verification must establish authenticity and integrity, and reject forms that could not yet exist in the election phase. Bind the proof to the canonical printed content; settle the cryptographic construction during implementation design.
 - **92.1–92.5** — No approval flow can be switched off or given to another role; all are
   hardcoded AdminOnly. Spec 022 first.
-- **67.5** — Book under 100 pages, Chapter 1 to References. Layout done; prose pass waits on the
+- **67.5**: Book under 100 pages, Chapter 1 to References. Layout done; prose pass waits on the
   author's merge and cut confirmations. (P1 in its own entry.)
 - **42.1–42.5** — Done 2026-10-21 by merging into 37.14s (form wording from settings, print any form
   blank or filled).
 - **51.4–51.5** — Remaining file-storage hardening: broader regression coverage and admin-configurable
   settings.
   tests, compression settings not admin-configurable yet.
-- **47.10** — Missing profile photos for most of the 631 bulk-imported alumni (data gap, not a bug).
-- **27.8** — No enforced ≥80%/file coverage threshold (would fail today if enforced).
+- **47.10**: Missing profile photos for most of the 631 bulk-imported alumni (data gap, not a bug).
+- **27.8**: No enforced ≥80%/file coverage threshold (would fail today if enforced).
 - **28.32 / 28.33 / 8.8** — i18n (English+Bengali): dependencies present, extraction not started.
-- **44.16** — Three unrelated Flutter classes all named `FamilyService` (deferred rename risk).
+- **44.16**: Three unrelated Flutter classes all named `FamilyService` (deferred rename risk).
 - **7.16, 8.5, 8.7** — Mobile hardening and local storage (SSL pinning, local database, state hydration). 8.3, 8.4 and 8.6 are done. Other performance work is under Work Package 98.
 - **12.1–12.6** — [DONE] Process items (API-change checklist, contract registry, mobile log
   capture), moved to docs/TODO_ARCHIVE.md on 2026-10-14.
-- **52.5** — Mobile's separate "quick create gallery" dialog — left as-is, a future cleanup decision.
+- **52.5**: Mobile's separate "quick create gallery" dialog — left as-is, a future cleanup decision.
 - **82.3 / 82.4 / 82.5 / 82.7 / 82.8 / 82.10a** — Cross-cutting engineering gaps measured 2026-09-04: no
   API versioning against an independently shipped mobile client; three error-response shapes; 55 copies
   of claim parsing in the controllers; seven Angular components bypassing the service layer; paging
@@ -357,11 +359,11 @@ RE = P × C in §4.7 needs an impact cost per risk on the same basis.
 ### P3 — LOW / PLAN-ONLY (large unbuilt features, no current pressure)
 - **Work Package 37** (37.4, 37.5, 37.7, 37.9, 37.10) — cohorts and reunions, the In Memoriam register,
   bilingual UI, geographic chapters and the annual impact report. 37.2, 37.3, 37.6 and 37.8 are done and archived.
-- **6.2** — Alumni referral system for jobs/internships.
+- **6.2**: Alumni referral system for jobs/internships.
 - **62.56a–62.56g** — Export and import of the organisation profile, settings and configurations as a zip pack, with a section map,
   a dry-run preview, and "add only" or "override" per section. Zip only (owner, 2026-10-15).
-- **61.3** — Drop the `Summary:`-style comment banner in `GHCAA.Tools/db_diag.cs` next time that file is touched.
-- **84.4** — Web/Mobile client parity table; depends on 84.3 existing first. (84.5, the
+- **61.3**: Drop the `Summary:`-style comment banner in `GHCAA.Tools/db_diag.cs` next time that file is touched.
+- **84.4**: Web/Mobile client parity table; depends on 84.3 existing first. (84.5, the
   authorization and error catalogs, is done.)
 - **84.6 / 84.7** — Election ballot workflow scope and white-label second-institution deployability —
   product decisions for the project owner, not documentation tasks.
@@ -1350,6 +1352,12 @@ The items 84.80 to 84.84 are gaps G1, G2, G3, G5 and G6 from the 84.18 review in
 84.85 [DONE] **Priority: P2 | Depends on: none.** Some screens showed dates outside the dd-MM-yyyy rule. The news page used `date:'fullDate'`, other web pages used Angular `date` formats or `toLocaleDateString` directly, and mobile screens cut ISO strings with `split('T')[0]` and showed yyyy-MM-dd. Raised by the owner 2026-11-07, who asked that it not happen again anywhere. Done 2026-11-07: web pages use the `appDate` pipe or the shared helpers (news, elections pages, governance, ledger, mentorship, giving, officials dashboard and appointments, constitution, admin events, export, and the forum list and topic pages, which had their own `formatDate`); mobile screens use `AppUtils.formatDate` (governance registry, ledger, activity log, articles, jobs, member details, news details, notifications, admin modules). Guards stop it coming back: `date-display-guard.spec.ts` fails on a `date` pipe with a full-date format, on `toLocaleDateString` or on `Intl.DateTimeFormat` (times, years and month names are still allowed), and `date_display_guard_test.dart` fails on `split('T')[0]`, `substring(0, 10)` or a direct `DateFormat(` outside `app_utils.dart`. The web guard scans whole files, so a `date` pipe wrapped onto the next line is caught, and it also fails on a `DatePipe` built or injected in code (`new DatePipe(`, `inject(DatePipe)` or a constructor parameter). **Acceptance:** met; both guards pass in ci-local.
 
 84.86 [DONE] **Priority: P1 | Depends on: none.** An anonymous caller can read a news post that is not published. `GET /api/news/{id}` is `[AllowAnonymous]` and `NewsService.GetNewsByIdAsync` uses `IgnoreQueryFilters()`, so a Draft, Pending, Rejected or inactive post comes back by Id; the controller only checks `MembersOnly`. Found by the code review of 2026-11-06 and checked in the code on 2026-11-07. Not fixed in that session because it changes who can open a news link, and admin and author previews may rely on it. **Acceptance:** anonymous and member callers get 404 for a post that is not approved and active; admins and the post's author or collaborators still open it; tests for each status and each caller; web and mobile news details checked. **Done 2026-11-07:** the owner confirmed previews must keep working. `GetNewsByIdAsync` now takes the viewer's user Id and admin flag and returns null for a post that is not approved and active, unless the viewer is an admin, the author or a collaborator; the controller answers 404. `NewsServiceTests` cover each unpublished state, an outside viewer, the published case and the three preview roles; `NewsControllerTests` checks a signed-out call passes no viewer. Web has no page that calls `getNewsById`; mobile `newsDetailsProvider` already turns a 404 into null. Logged in `docs/API_CONTRACT_REGISTRY.md`.
+
+84.87 [IN PROGRESS] **Priority: P2 | Depends on: 84.88.** Complete batches 2 to 6 in [`docs/THEME_TOKEN_PLAN.md`](THEME_TOKEN_PLAN.md). Audit actual declarations under `GHCAA.Web/src/app`; leave existing token-based values and intentional photo, artwork and paper colors unchanged. Move only confirmed theme-dependent literals to semantic tokens, preserving their current appearance. In special-day setup, configured colors remain the values shown and saved. Add advisory contrast results for the configured solid or gradient banner and optional color suggestions based on the entered colors; use app Light/Dark mode to verify the setup UI, not to alter the configured banner pair. Do not warn about banner text when an image replaces it, or from `sidebarColor` alone, since no banner text sits on it. Do not change API fields, saved color values or live banner behavior. **Acceptance:** the audit records each actual color declaration as token-based, theme-dependent, intentionally fixed or unresolved; only confirmed theme-dependent values change, and before/after values and both-mode checks show no unrelated visual shift. Verify computed styles on actual components in both modes with default gold and custom primary/accent branding, including foreground, background, hover, focus and shadow values; token declarations alone are not sufficient. Review each remapped white-text utility at its actual use and confirm its foreground on the rendered surface in both modes, including photo or overlay contexts where present. Contrast handling rejects invalid active colors without a misleading ratio, ignores inactive or empty fields according to the live banner fallback, checks the gradient using the same interpolation as the preview and live banner, and offers suggestions only after an explicit admin action; applied suggestions must pass, and impossible suggestions must leave the field unchanged. Tests cover contrast math, invalid and inactive inputs, solid and gradient cases (including an intermediate failing point), image-banner behavior and selecting or declining suggestions. Web type-check, unit tests, production build and `python scripts/guard.py` pass; note that the guard checks `GHCAA.Web/src/app/*.scss`, not `GHCAA.Web/src/styles/themes/`. Any visual check that cannot safely run is recorded as not run. **Progress 2026-11-07:** the special-day contrast part is done. The check now samples every color the gradient can render (one step per unit of the largest RGB channel change), uses `sidebarColor` only when the gradient is on and the field is set, and reports an invalid active color without a ratio. A suggested text color must pass at every sample; when none can, the field is left alone and the admin is told to change the banner colors. `MIN_TEXT_CONTRAST` in `color-math.ts` holds the 4.5 floor. Tests cover the plan's failing point between quarter marks (`#2a0138` on `#e731e9` to `#1ca3f0`), inactive and invalid `sidebarColor`, a suggestion that passes along a gradient and an impossible one. `admin-themes` and color tests: 80 passed; web type-check and `python scripts/guard.py` passed. Still open: the computed-style checks with default and custom branding, the rest of the audit (Batch 5 in the plan) and the Light/Dark visual review, not run because the Playwright browser tool failed to connect.
+
+84.88 [DONE] **Priority: P1 | Depends on: none.** The theme refactor declared branding-owned accent variables on `body.light-theme` and `body.dark-theme`, overriding the configured accent written by `OrgConfigService` to `<html>`. Done 2026-11-07: restored accent inheritance in both modes, restored the deleted reason comments, moved shared typography/spacing/radius tokens to one definition and added theme selection tests. The default gold remains unchanged while configured accents flow through the theme. Focused theme tests passed (3 files, 14 tests); the web type-check passed, `python scripts/ci-local.py --only web` passed all 4 steps, the production build passed after the final SCSS audit change, and `python scripts/guard.py` reported no hits. **Acceptance:** met.
+
+84.89 [DONE] **Priority: P2 | Depends on: none.** Mobile buttons use the offline fallback accent `#2f6f4f` with `obsidianBlack` text, a 3.23:1 contrast ratio. Choose a readable foreground for the fallback and ensure configured accents used by the same button theme do not produce low-contrast labels. **Acceptance:** tests cover the offline fallback and configured accent behavior; normal button text meets 4.5:1 contrast in those cases without changing the configured accent value or other mobile theme behavior. **Done 2026-11-07:** `AppTheme.readableTextOn` keeps `obsidianBlack` when it reaches 4.5:1 and otherwise picks the better of white and `obsidianBlack`, so the gold accent looks the same and the fallback gets white labels. The accent stays as configured. `app_theme_contrast_test.dart` covers the offline fallback, a light accent keeping the dark label, six configured accents and a malformed accent. `flutter analyze` is clean. Four goldens changed only in the button label color and were regenerated with the owner's approval: `login_portal`, `digital_id_pass`, `digital_id_card_portrait`, `member_chats_list`; `flutter test --tags golden` 65 of 65. **Acceptance:** met.
 
 The items 84.65 to 84.69 are the owner's answers of 2026-11-03 to the product questions from the spec review. Priorities are proposals.
 

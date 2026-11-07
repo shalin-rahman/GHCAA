@@ -1,9 +1,17 @@
 import { Injectable, signal, effect, inject, afterNextRender } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { API_ENDPOINTS } from '../constants/app.constants';
+import {
+    DEFAULT_THEME,
+    getNextTheme,
+    isTheme,
+    THEME_CONFIG,
+    THEME_STORAGE_KEY,
+    type Theme
+} from '../constants/theme.config';
 import { tap } from 'rxjs';
 
-export type Theme = 'light' | 'dark';
+export type { Theme } from '../constants/theme.config';
 
 export interface SpecialDayTheme {
     id: number;
@@ -33,9 +41,9 @@ export class ThemeService {
         // Effect to apply theme to body class automatically
         effect(() => {
             const mode = this.theme();
-            document.body.classList.remove('light-theme', 'dark-theme');
-            document.body.classList.add(`${mode}-theme`);
-            localStorage.setItem('ghcaa_theme', mode);
+            document.body.classList.remove(...Object.values(THEME_CONFIG).map(config => config.bodyClass));
+            document.body.classList.add(THEME_CONFIG[mode].bodyClass);
+            localStorage.setItem(THEME_STORAGE_KEY, mode);
         });
 
         // Deferred for consistency with AuthService's same-shape NG0200 guard: this is a root
@@ -52,18 +60,13 @@ export class ThemeService {
     }
 
     toggleTheme() {
-        this.theme.update(t => t === 'light' ? 'dark' : 'light');
+        this.theme.update(getNextTheme);
     }
 
     private getInitialTheme(): Theme {
-        const saved = localStorage.getItem('ghcaa_theme') as Theme;
-        if (saved) return saved;
+        const saved = localStorage.getItem(THEME_STORAGE_KEY);
+        if (isTheme(saved)) return saved;
 
-        // Default to dark for a fresh visitor. Both themes are fully styled — the landing's
-        // section backgrounds and text now use the semantic --section-bg / --text-* tokens in
-        // styles.scss, which flip between :root (light) and body.dark-theme (dark). Dark is the
-        // brand's native "Obsidian & Gold" look, so it's the first impression; the toggle then
-        // switches to a properly-contrasted light palette and persists the choice.
-        return 'dark';
+        return DEFAULT_THEME;
     }
 }

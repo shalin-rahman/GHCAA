@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
     hexToRgb, rgbToHex, rgbString, rgbToHsl, hslToRgb,
-    adjustLightness, contrastRatio, darkenForContrast
+    adjustLightness, contrastRatio, darkenForContrast, parseHexColor, safeContrastRatio
 } from './color-math';
 
 describe('color-math', () => {
@@ -17,6 +17,22 @@ describe('color-math', () => {
         it('works without a leading #', () => {
             expect(hexToRgb('000000')).toEqual({ r: 0, g: 0, b: 0 });
         });
+    });
+
+    describe('parseHexColor', () => {
+        it.each([
+            ['#abc', { r: 170, g: 187, b: 204 }],
+            ['#a1B2c3', { r: 161, g: 178, b: 195 }],
+            ['ABC', { r: 170, g: 187, b: 204 }],
+            ['  #c5a059  ', { r: 197, g: 160, b: 89 }]
+        ])('parses %s', (value, expected) => {
+            expect(parseHexColor(value)).toEqual(expected);
+        });
+
+        it.each(['', '#', '#12', '#12345', '#1234567', '#gggggg', 'red', 'rgb(0,0,0)'])(
+            'rejects %s',
+            value => expect(parseHexColor(value)).toBeNull()
+        );
     });
 
     describe('rgbToHex / rgbString', () => {
@@ -76,6 +92,23 @@ describe('color-math', () => {
         it('does not depend on argument order', () => {
             expect(contrastRatio('#c5a059', '#ffffff')).toBeCloseTo(contrastRatio('#ffffff', '#c5a059'), 10);
         });
+    });
+
+    describe('safeContrastRatio', () => {
+        it('calculates the same ratio as contrastRatio for valid hex colors', () => {
+            expect(safeContrastRatio('#c5a059', '#ffffff')).toBeCloseTo(
+                contrastRatio('#c5a059', '#ffffff'),
+                10
+            );
+        });
+
+        it.each(['', '#', '#12', '#12345', '#1234567', '#gggggg', 'red', 'rgb(0,0,0)'])(
+            'returns null for invalid first or second color %s',
+            value => {
+                expect(safeContrastRatio(value, '#ffffff')).toBeNull();
+                expect(safeContrastRatio('#000000', value)).toBeNull();
+            }
+        );
     });
 
     describe('darkenForContrast', () => {

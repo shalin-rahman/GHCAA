@@ -6,12 +6,10 @@
     border-radius: var(--radius-sm);
     font-size: 0.9rem;
     cursor: pointer;
-    outline: none;
     transition: all 0.3s;
 
     &:focus {
         border-color: var(--accent-color);
-        box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.2);
     }
 }
 

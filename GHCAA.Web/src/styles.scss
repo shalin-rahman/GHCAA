@@ -1,202 +1,67 @@
-/* Alumni portal design system. Token definitions below back light and dark themes. */
+@use './styles/theme-config' as theme-config;
+
+/* Alumni portal design system. Theme values live in src/styles/themes. */
 
 /* Outfit is loaded once, by the <link> in index.html (98.2). */
 
 :root {
-  /* Without this, native form controls (date/time picker icons + their popups) always
-     render with the browser's light-mode chrome, regardless of body.dark-theme below —
-     making e.g. the calendar icon on a type="date" input nearly invisible against a
-     dark input background. */
-  color-scheme: light;
-
-  /* 30.4: rendered height of `.top-bar` — shared so any sticky element lower in
-     the page (`.filter-bar` at >=1024px) knows the offset to stick below. */
   --header-height: 4.5rem;
-
-  /* Page density for the admin and portal shells. Page padding, title size,
-     filter controls and sidebar links all read these, so tighten or loosen the
-     whole app here rather than per page. */
   --page-pad: 1.5rem;
   --page-title-size: 1.45rem;
   --page-header-gap: 1.25rem;
-  --control-height: 2.5rem;
+  --control-height: 2.75rem;
   --nav-item-pad-y: 0.4rem;
   --nav-item-gap: 0.05rem;
-
-  /* Single source for the vertical rhythm between landing-page sections — was
-     `padding: 5rem 0;` duplicated verbatim ~7 times across landing.scss. */
   --section-padding-y: 4rem;
 
-  /* Core Brand Palette - "Obsidian & Gold Leaf" */
-  --bg-color: #ffffff;
-  --surface-color: #f8f9fa;
-  --primary-color: #121212;
-  --primary-rgb: 18, 18, 18;
+  --font-family-base: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-size-body: 1rem;
+  --font-size-caption: 0.875rem;
+  --font-size-label: 0.875rem;
+  --font-size-table-header: 0.75rem;
+  --font-size-table-body: 0.9rem;
+  --font-size-h1: clamp(1.75rem, 3vw, 2.25rem);
+  --font-size-h2: clamp(1.5rem, 2.5vw, 1.875rem);
+  --font-size-h3: 1.5rem;
+  --font-size-h4: 1.25rem;
+  --font-size-h5: 1.125rem;
+  --line-height-body: 1.5;
+  --line-height-heading: 1.2;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-display: 800;
+  --letter-spacing-label: 0.04em;
 
-  --accent-color: #c5a059;
-  --accent-color-rgb: 197, 160, 89;
-  /* Alias: many component SCSS files reference var(--accent-rgb) (the real token
-     is --accent-color-rgb). Defining both keeps those hover borders/badges working. */
-  --accent-rgb: 197, 160, 89;
-  --accent-gold-bright: #e5c15e;
-  /* Darkened from #8e6d2a: as link text on --card-bg/--glass-bg it measured 4.10:1,
-     just under the 4.5:1 AA floor for body-size text. #836327 gives 5.56:1 on white
-     and still reads as gold. */
-  --accent-gold-dark: #836327;
-  /* Accent used as TEXT on theme-adaptive surfaces (cards/sections that go light in
-     light mode). The raw --accent-color (#c5a059) is a light gold tuned for dark
-     backgrounds; on a white card it fails contrast. Light theme => dark gold; dark
-     theme (below) => bright gold. Use this for gold text on .glass-card/section
-     surfaces; keep --accent-color for borders, fills, and always-dark hero text. */
-  --accent-text: var(--accent-gold-dark);
-
-  --danger-color: #d63031;
-  --danger-color-rgb: 214, 48, 49;
-  --success-color: #27ae60;
-  --success-color-rgb: 39, 174, 96;
-  --warning-color: #d97706;
-  --warning-color-rgb: 217, 119, 6;
-  --info-color: #2563eb;
-  --info-color-rgb: 37, 99, 235;
-
-  --text-main: #1a1a1a;
-  /* Darkened from #6c757d, which measured 4.17-4.48:1 against the light surfaces it is
-     actually used on (--card-bg, --glass-bg over white, --section-bg-2) and so missed the
-     4.5:1 AA floor on every public page. #5f676e gives 5.75:1 on white, 5.17:1 on the
-     darkest light surface. */
-  --text-muted: #5f676e;
-  --text-on-dark: #ffffff;
-
-  /* Semantic section/surface tokens — flip per theme so the dark-first landing
-     stays readable in light mode. Dark values live in body.dark-theme below. */
-  --section-bg: #ffffff;
-  --section-bg-2: #f8f9fa;
-  --section-bg-3: #f1f3f5;
-  --text-strong: #1a1a1a;
-  --text-dim: rgba(0, 0, 0, 0.6);
-  --surface-subtle: rgba(0, 0, 0, 0.03);
-  --hairline: rgba(0, 0, 0, 0.08);
-
-  --border-color: #e9ecef;
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(197, 160, 89, 0.12);
-
-  /* Card/elevated-surface tokens — the fix for dark-first components that hardcoded
-     rgba(255,255,255,x) surfaces (invisible on the light page). Point components at
-     these instead. Light = solid white card + real hairline; dark values below keep
-     today's translucent look. */
-  --card-bg: #ffffff;
-  --card-border: rgba(0, 0, 0, 0.08);
-  --card-bg-hover: #f8f9fa;
-
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.12);
-  --shadow-gold: 0 4px 15px rgba(197, 160, 89, 0.25);
-
-  --gold-gradient: linear-gradient(135deg, #c5a059 0%, #e5c15e 50%, #8e6d2a 100%);
-  --dark-gradient: linear-gradient(135deg, #121212 0%, #2a2a2a 100%);
-
-  /* Membership Tier Colors.
-     These are used as text (the tier heading on the membership panel) as well as for
-     borders, so they need a light-theme value. The original hues were picked against black
-     and measured 2.15-2.46:1 on a white card - below the 3:1 floor even for large text. The
-     values below are the same hues darkened past 4.9:1 on white; body.dark-theme restores
-     the bright originals. */
-  --tier-founding: #8a6a2e;
-  /* Gold - Founding */
-  --tier-executive: #4f46e5;
-  /* Indigo - Executive */
-  --tier-general: #0f766e;
-  /* Emerald - General */
-  --tier-associate: #7c3aed;
-  /* Violet - Associate */
-  --tier-advisory: #b45309;
-  /* Amber - Advisory */
-  --tier-honorary: #c2410c;
-  /* Orange - Honorary */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.5rem;
 
   --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
-
-  /* PAPER — the official-form pad (see "OFFICIAL FORM PAD" below). Everything inside
-     .pad-sheet references these instead of the site surface/text tokens, and these are
-     the ONLY tokens in the sheet that deliberately do NOT flip with the theme: a form is
-     a paper document, printed and signed, so it is always ink-on-white on screen too.
-     Defined once here and never overridden under body.dark-theme. */
-  --paper-bg: #ffffff;
-  --paper-ink: #14181f;
-  --paper-ink-soft: #4a5361;
-  --paper-rule: #1f2530;
-  --paper-hairline: #c8cdd6;
-  --paper-band: #f1f3f7;
 }
 
-body.dark-theme {
-  color-scheme: dark;
-
-  --bg-color: #000000;
-  --surface-color: #0c0c0c;
-  --primary-color: #1a1a1a;
-  --primary-rgb: 26, 26, 26;
-  --warning-color: #f59e0b;
-  --warning-color-rgb: 245, 158, 11;
-  --info-color: #60a5fa;
-  --info-color-rgb: 96, 165, 250;
-
-  --text-main: #f5f5f5;
-  --text-muted: #888888;
-  /* Brighter than --hairline (rgba white 0.1) so form-control borders read as
-     visible strokes against black surfaces, not a near-invisible #1a1a1a. */
-  --border-color: rgba(255, 255, 255, 0.18);
-
-  /* Dark-theme values for the semantic section/surface tokens (the design's native look) */
-  --section-bg: #000000;
-  --section-bg-2: #050505;
-  --section-bg-3: #0a0a0a;
-  --text-strong: #ffffff;
-  --text-dim: rgba(255, 255, 255, 0.6);
-  --surface-subtle: rgba(255, 255, 255, 0.04);
-  --hairline: rgba(255, 255, 255, 0.1);
-
-  --glass-bg: rgba(12, 12, 12, 0.9);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --shadow-md: 0 15px 45px rgba(0, 0, 0, 0.6);
-
-  /* Dark-theme card surfaces = the translucent look components were built around */
-  --card-bg: rgba(255, 255, 255, 0.03);
-  --card-border: rgba(255, 255, 255, 0.06);
-  --card-bg-hover: rgba(255, 255, 255, 0.05);
-
-  /* The --paper-* tokens are intentionally NOT redefined here: a form is a paper
-     document and reads as one on both themes, on screen and on the printer. */
-
-  /* Dark theme keeps the original light-gold text (no-op vs dev's dark look). */
-  --accent-text: var(--accent-color);
-
-  /* The tier hues as originally designed - these read on black and are too light on white,
-     which is why :root now carries darkened equivalents. */
-  --tier-founding: #c5a059;
-  --tier-executive: #6366f1;
-  --tier-general: #10b981;
-  --tier-associate: #8b5cf6;
-  --tier-advisory: #f59e0b;
-  --tier-honorary: #ff4500;
-}
+@include theme-config.apply;
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-family-base);
 }
 
 body {
   background-color: var(--bg-color);
   color: var(--text-main);
-  line-height: 1.6;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -213,18 +78,60 @@ a {
 }
 
 a:hover {
-  color: var(--accent-gold-bright);
+  color: var(--accent-hover-text);
 }
 
-/* Typography Overhaul */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* Type scale */
 h1,
 h2,
 h3,
 h4,
 h5 {
-  font-weight: 800;
+  font-weight: var(--font-weight-display);
   letter-spacing: -0.02em;
   color: var(--text-main);
+  line-height: var(--line-height-heading);
+}
+
+h1 {
+  font-size: var(--font-size-h1);
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+}
+
+h3 {
+  font-size: var(--font-size-h3);
+}
+
+h4 {
+  font-size: var(--font-size-h4);
+}
+
+h5 {
+  font-size: var(--font-size-h5);
 }
 
 p {
@@ -246,6 +153,7 @@ p {
   --hairline: rgba(255, 255, 255, 0.12);
   /* the light-theme dark gold is for surfaces that go light; on black use the bright one */
   --accent-text: var(--accent-color);
+  --accent-hover-text: var(--accent-gold-bright);
 }
 
 /* Layout Grid System */
@@ -269,7 +177,7 @@ p {
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  padding: 1rem;
+  padding: var(--space-4);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -278,23 +186,24 @@ p {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.85rem;
-  font-weight: 800;
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: var(--letter-spacing-label);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.2, 0, 0.2, 1);
   border: none;
+  min-height: 44px;
   white-space: nowrap;
-  gap: 0.6rem;
+  gap: var(--space-2);
   text-decoration: none;
 }
 
 .btn-primary {
   background: var(--primary-color);
-  color: var(--text-on-dark);
+  color: var(--text-on-primary);
 
   &:hover {
     transform: translateY(-3px);
@@ -304,13 +213,12 @@ p {
 
 .btn-accent {
   background: var(--gold-gradient);
-  /* Dark text on gold in BOTH themes; var(--bg-color) would flip to white in light theme (low contrast). */
-  color: #121212;
+  color: var(--text-on-accent);
   box-shadow: var(--shadow-gold);
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(197, 160, 89, 0.4);
+    box-shadow: var(--shadow-accent-hover);
   }
 }
 
@@ -332,7 +240,7 @@ p {
 
   &:hover {
     background: var(--gold-gradient);
-    color: var(--bg-color);
+    color: var(--text-on-accent);
   }
 }
 
@@ -350,18 +258,18 @@ p {
 
 .btn-danger {
   background: var(--danger-color);
-  color: #fff;
+  color: var(--text-on-danger);
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(214, 48, 49, 0.35);
+    box-shadow: var(--shadow-danger-hover);
   }
 }
 
 /* Comes after the variants so it also beats their :hover lift. */
 .btn:disabled,
 .btn:disabled:hover {
-  opacity: 0.5;
+  opacity: var(--state-disabled-opacity);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -372,8 +280,8 @@ p {
    sites (admin-comm, member-messages) had NO definition at all and rendered browser-native.
    `.icon-btn` kept as the class name (alias) so existing templates need no markup changes. */
 .icon-btn {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -387,20 +295,20 @@ p {
 
   &:hover {
     background: var(--accent-color);
-    color: #000;
+    color: var(--text-on-accent);
     border-color: var(--accent-color);
     transform: scale(1.08);
   }
 
   &.delete,
   &.archive {
-    background: rgba(214, 48, 49, 0.08);
+    background: color-mix(in srgb, var(--danger-color) 8%, var(--card-bg));
     color: var(--danger-color);
-    border-color: rgba(214, 48, 49, 0.25);
+    border-color: color-mix(in srgb, var(--danger-color) 28%, var(--card-bg));
 
     &:hover {
       background: var(--danger-color);
-      color: #fff;
+      color: var(--text-on-danger);
       border-color: var(--danger-color);
       transform: scale(1.08);
     }
@@ -412,7 +320,7 @@ p {
 
     &:hover {
       background: var(--success-color);
-      color: #fff;
+      color: var(--text-on-success);
     }
   }
 
@@ -525,16 +433,16 @@ td.actions-cell {
    .status-badge in a component; add the missing status name here instead. */
 .status-badge {
   padding: 0.3rem 0.75rem;
-  font-size: 0.65rem;
-  font-weight: 900;
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: var(--letter-spacing-label);
   border-radius: 20px;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   white-space: nowrap;
-  background: rgba(107, 114, 128, 0.12);
+  background: var(--status-neutral-bg);
   color: var(--text-muted);
 
   &.success,
@@ -548,7 +456,7 @@ td.actions-cell {
   &.ok,
   &.open,
   &.verified {
-    background: rgba(var(--success-color-rgb), 0.12);
+    background: var(--status-success-bg);
     color: var(--success-color);
   }
 
@@ -557,7 +465,7 @@ td.actions-cell {
   &.requested,
   &.review,
   &.urgent {
-    background: rgba(var(--warning-color-rgb), 0.12);
+    background: var(--status-warning-bg);
     color: var(--warning-color);
   }
 
@@ -566,7 +474,7 @@ td.actions-cell {
   &.upcoming,
   &.refunded,
   &.current {
-    background: rgba(var(--info-color-rgb), 0.12);
+    background: var(--status-info-bg);
     color: var(--info-color);
   }
 
@@ -578,7 +486,7 @@ td.actions-cell {
   &.cancelled,
   &.resigned,
   &.terminated {
-    background: rgba(var(--danger-color-rgb), 0.12);
+    background: var(--status-danger-bg);
     color: var(--danger-color);
   }
 
@@ -588,13 +496,13 @@ td.actions-cell {
   &.closed,
   &.archived,
   &.muted {
-    background: rgba(107, 114, 128, 0.12);
+    background: var(--status-neutral-bg);
     color: var(--text-muted);
   }
 
   &.gold,
   &.featured {
-    background: rgba(var(--accent-rgb), 0.15);
+    background: var(--status-accent-bg);
     color: var(--accent-text);
   }
 }
@@ -640,19 +548,19 @@ td.actions-cell {
   opacity: 1 !important;
 }
 
-/* Form Controls Integration - Professional Horizontal Layout */
+/* Shared form controls */
 .input-group,
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: var(--space-2);
   margin-bottom: 0;
 
   label {
-    font-size: 0.72rem;
-    font-weight: 800;
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-bold);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: var(--letter-spacing-label);
     color: var(--text-muted);
     margin: 0;
     line-height: 1.2;
@@ -665,15 +573,13 @@ td.actions-cell {
   select {
     color: var(--text-main);
     background-color: var(--bg-color);
-    border-color: var(--border-color);
+    border-color: var(--control-border-color);
   }
 
   input[type='date']:focus,
   input[type='datetime-local']:focus,
   select:focus {
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
-    outline: none;
   }
 
   .upload-surface {
@@ -703,18 +609,20 @@ td.actions-cell {
   textarea,
   .value-display {
     background: var(--bg-color);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--control-border-color);
     border-radius: var(--radius-sm);
     padding: 0.65rem 1.1rem;
-    font-size: 0.9rem;
+    font-size: var(--font-size-caption);
     color: var(--text-main);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    outline: none;
     width: 100%;
+
+    &:is(input, select) {
+      min-height: 44px;
+    }
 
     &:focus {
       border-color: var(--accent-color);
-      box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
       background: var(--bg-color);
     }
 
@@ -796,7 +704,7 @@ td.actions-cell {
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #000;
+          color: var(--text-on-accent);
           font-size: 11px;
           font-weight: 900;
         }
@@ -804,7 +712,7 @@ td.actions-cell {
 
       &:hover:not(:checked) {
         border-color: var(--accent-color);
-        background: rgba(var(--accent-color-rgb), 0.1);
+        background: var(--state-selected-bg);
       }
     }
   }
@@ -840,16 +748,15 @@ input.border-red-500,
 textarea.border-red-500,
 select.border-red-500,
 app-date-input.border-red-500 input.dpi-text {
-  border-color: #ef4444 !important;
+  border-color: var(--danger-color) !important;
 
   &:focus {
-    border-color: #ef4444 !important;
-    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+    border-color: var(--danger-color) !important;
   }
 }
 
 .required-star {
-  color: #ef4444;
+  color: var(--danger-color);
   margin-left: 0.25rem;
   font-weight: 900;
 }
@@ -895,7 +802,7 @@ app-date-input.border-red-500 input.dpi-text {
       box-shadow: 0 4px 12px rgba(var(--accent-color-rgb), 0.2) !important;
 
       &::after {
-        background: #000 !important;
+        background: var(--text-on-accent) !important;
         transform: translateX(18px) !important;
       }
     }
@@ -1206,76 +1113,75 @@ app-date-input.border-red-500 input.dpi-text {
    Provides visual distinction for various alumni roles.
 */
 .badge {
-  padding: 2px 9px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 800;
+  padding: 4px 9px;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-table-header);
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-label);
   border: 1px solid transparent;
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
 
   &.lifelongpatron {
-    background: #fff1f2;
-    color: #be123c;
-    border-color: #ffe4e6;
-    box-shadow: 0 0 10px rgba(190, 18, 60, 0.1);
+    background: color-mix(in srgb, var(--danger-color) 12%, var(--card-bg));
+    color: var(--danger-color);
+    border-color: color-mix(in srgb, var(--danger-color) 28%, var(--card-bg));
   }
 
   &.sponsor {
-    background: #f0fdf4;
-    color: #15803d;
-    border-color: #dcfce7;
+    background: color-mix(in srgb, var(--success-color) 12%, var(--card-bg));
+    color: var(--success-color);
+    border-color: color-mix(in srgb, var(--success-color) 28%, var(--card-bg));
   }
 
   &.advisor {
-    background: #f0f9ff;
-    color: #0369a1;
-    border-color: #e0f2fe;
+    background: color-mix(in srgb, var(--info-color) 12%, var(--card-bg));
+    color: var(--info-color);
+    border-color: color-mix(in srgb, var(--info-color) 28%, var(--card-bg));
   }
 
   &.mentor {
-    background: #f5f3ff;
-    color: #6d28d9;
-    border-color: #ede9fe;
+    background: color-mix(in srgb, var(--tier-associate) 12%, var(--card-bg));
+    color: var(--tier-associate);
+    border-color: color-mix(in srgb, var(--tier-associate) 28%, var(--card-bg));
   }
 
   &.recruiter {
-    background: #fff7ed;
-    color: #c2410c;
-    border-color: #ffedd5;
+    background: color-mix(in srgb, var(--warning-color) 12%, var(--card-bg));
+    color: var(--warning-color);
+    border-color: color-mix(in srgb, var(--warning-color) 28%, var(--card-bg));
   }
 
   &.active {
-    background: #f0fdfa;
-    color: #0f766e;
-    border-color: #ccfbf1;
+    background: var(--status-success-bg);
+    color: var(--success-color);
+    border-color: color-mix(in srgb, var(--success-color) 28%, var(--card-bg));
   }
 
   &.volunteer {
-    background: #fefce8;
-    color: #a16207;
-    border-color: #fef9c3;
+    background: var(--status-warning-bg);
+    color: var(--warning-color);
+    border-color: color-mix(in srgb, var(--warning-color) 28%, var(--card-bg));
   }
 
   &.contributor {
-    background: #f8fafc;
-    color: #334155;
-    border-color: #f1f5f9;
+    background: var(--status-neutral-bg);
+    color: var(--text-main);
+    border-color: var(--card-border);
   }
 
   &.guest {
-    background: #f1f5f9;
-    color: #475569;
-    border-color: #e2e8f0;
+    background: var(--status-neutral-bg);
+    color: var(--text-muted);
+    border-color: var(--card-border);
   }
 
   &.student {
-    background: #fdf4ff;
-    color: #a21caf;
-    border-color: #fae8ff;
+    background: color-mix(in srgb, var(--tier-associate) 12%, var(--card-bg));
+    color: var(--tier-associate);
+    border-color: color-mix(in srgb, var(--tier-associate) 28%, var(--card-bg));
   }
 }
 
@@ -1384,7 +1290,7 @@ app-date-input.border-red-500 input.dpi-text {
 }
 
 .border-white\/5 {
-  border-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--hairline);
 }
 
 .opacity-40 {
@@ -1590,56 +1496,57 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
 .border-accent\/20  { border-color: rgba(var(--accent-color-rgb), 0.20); }
 .border-accent\/30  { border-color: rgba(var(--accent-color-rgb), 0.30); }
 .border-accent\/50  { border-color: rgba(var(--accent-color-rgb), 0.50); }
-.border-white\/10   { border-color: rgba(255, 255, 255, 0.10); }
-.border-white\/20   { border-color: rgba(255, 255, 255, 0.20); }
+.border-white\/10   { border-color: var(--hairline); }
+.border-white\/20   { border-color: var(--border-color); }
+.border-on-dark     { border-color: var(--border-on-dark); }
 .border-primary\/5  { border-color: var(--card-border); }
 .border-primary\/10 { border-color: var(--border-color); }
 .border-primary\/30 { border-color: var(--glass-border); }
-.border-slate-200   { border-color: #e2e8f0; }
-.border-rose-200    { border-color: #fecdd3; }
-.border-emerald-200 { border-color: #a7f3d0; }
-.border-red-500\/20     { border-color: rgba(239, 68, 68, 0.20); }
-.border-emerald-500\/20 { border-color: rgba(16, 185, 129, 0.20); }
-.border-indigo-500\/20  { border-color: rgba(99, 102, 241, 0.20); }
+.border-slate-200   { border-color: var(--border-color); }
+.border-rose-200,
+.border-red-500\/20 { border-color: color-mix(in srgb, var(--danger-color) 28%, var(--card-bg)); }
+.border-emerald-200,
+.border-emerald-500\/20 { border-color: color-mix(in srgb, var(--success-color) 28%, var(--card-bg)); }
+.border-indigo-500\/20 { border-color: color-mix(in srgb, var(--tier-executive) 28%, var(--card-bg)); }
 
 // Text colors (palette + brand-token slash-opacity variants)
 .text-main  { color: var(--text-main); }
-.text-white { color: #ffffff; }
-.text-black { color: #000000; }
-.text-red-300 { color: #fca5a5; }
-.text-red-400 { color: #f87171; }
-.text-red-500 { color: #ef4444; }
-.text-rose-700 { color: #be123c; }
-.text-green-400 { color: #4ade80; }
-.text-green-500 { color: #22c55e; }
-.text-green-700 { color: #15803d; }
-.text-green-800 { color: #166534; }
-.text-emerald-400 { color: #34d399; }
-.text-emerald-700 { color: #047857; }
-.text-blue-500   { color: #3b82f6; }
-.text-indigo-400 { color: #818cf8; }
-.text-gray-400   { color: #9ca3af; }
-.text-slate-100 { color: #f1f5f9; }
-.text-slate-200 { color: #e2e8f0; }
-.text-slate-400 { color: #94a3b8; }
-.text-slate-500 { color: #64748b; }
-.text-slate-600 { color: #475569; }
-.text-slate-700 { color: #334155; }
-.text-slate-800 { color: #1e293b; }
-.text-slate-900 { color: #0f172a; }
-.text-accent\/70 { color: rgba(var(--accent-color-rgb), 0.70); }
-.text-accent\/80 { color: rgba(var(--accent-color-rgb), 0.80); }
-.text-white\/40  { color: rgba(255, 255, 255, 0.40); }
-.text-white\/60  { color: rgba(255, 255, 255, 0.60); }
-.text-white\/90  { color: rgba(255, 255, 255, 0.90); }
-.text-main\/90   { color: color-mix(in srgb, var(--text-main) 90%, transparent); }
+.text-white { color: var(--text-on-dark); }
+.text-black { color: var(--text-on-accent); }
+.text-red-300,
+.text-red-400,
+.text-red-500,
+.text-rose-700,
+.text-red-500\/50 { color: var(--danger-color); }
+.text-green-400,
+.text-green-500,
+.text-green-700,
+.text-green-800,
+.text-emerald-400,
+.text-emerald-700 { color: var(--success-color); }
+.text-blue-500 { color: var(--info-color); }
+.text-indigo-400 { color: var(--tier-executive); }
+.text-gray-400,
+.text-slate-400,
+.text-slate-500 { color: var(--text-muted); }
+.text-slate-100,
+.text-slate-200,
+.text-slate-600,
+.text-slate-700,
+.text-slate-800,
+.text-slate-900 { color: var(--text-main); }
+.text-accent\/70,
+.text-accent\/80 { color: var(--accent-text); }
+.text-white\/40,
+.text-white\/60,
+.text-white\/90 { color: var(--text-muted); }
+.text-main\/90   { color: var(--text-main); }
 .text-primary\/20 { color: var(--text-dim); }
 .text-primary\/70 { color: var(--text-muted); }
-.text-red-500\/50 { color: rgba(239, 68, 68, 0.50); }
 
 // Shadows (shadow-gold already defined above)
-.shadow-lg  { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); }
-.shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+.shadow-lg  { box-shadow: var(--shadow-lg); }
+.shadow-2xl { box-shadow: var(--shadow-lg); }
 
 // Responsive variants (only the ones templates use)
 @media (min-width: 640px) {
@@ -1746,24 +1653,24 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
 
   thead th {
     background: var(--surface-subtle);
-    padding: 1.25rem 1.5rem;
+    padding: var(--space-4) var(--space-5);
     text-align: left;
-    font-size: 11px;
-    font-weight: 900;
+    font-size: var(--font-size-table-header);
+    font-weight: var(--font-weight-bold);
     text-transform: uppercase;
-    letter-spacing: 2.5px;
+    letter-spacing: var(--letter-spacing-label);
     color: var(--text-muted);
     border-bottom: 2px solid var(--glass-border);
     white-space: nowrap;
   }
 
   tbody td {
-    padding: 1.25rem 1.5rem;
+    padding: var(--space-4) var(--space-5);
     vertical-align: middle;
     border-bottom: 1px solid var(--glass-border);
     color: var(--text-main);
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: var(--font-size-table-body);
+    font-weight: var(--font-weight-medium);
   }
 
   tr {
@@ -1919,7 +1826,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
 
       .stat-cta {
         background: var(--gold-gradient);
-        color: var(--text-on-dark);
+        color: var(--text-on-accent);
         border-color: transparent;
         transform: translateX(2px);
       }
@@ -2565,7 +2472,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
   width: 100%;
   max-width: 750px;
   max-height: 90vh;
-  background: var(--surface-color);
+  background: var(--surface-raised);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
@@ -2581,7 +2488,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
     position: sticky;
     top: 0;
     z-index: 10;
-    background: var(--surface-color);
+    background: var(--surface-raised);
     padding: 1.75rem 2.25rem;
     border-bottom: 1px solid var(--glass-border);
     display: flex;
@@ -2721,7 +2628,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
       height: var(--control-height);
       padding: 0 3rem 0 3.25rem;
       background: var(--surface-subtle);
-      border: 1px solid var(--glass-border);
+      border: 1px solid var(--control-border-color);
       border-radius: 12px;
       color: var(--text-main);
       font-size: 0.9rem;
@@ -2743,8 +2650,6 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
       &:focus {
         border-color: var(--accent-color);
         background: rgba(var(--accent-color-rgb), 0.08);
-        box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.15);
-        outline: none;
       }
     }
 
@@ -2753,8 +2658,8 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
       right: 1rem;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--surface-subtle);
+      border: 1px solid var(--control-border-color);
       color: var(--text-muted);
       width: 26px;
       height: 26px;
@@ -2806,14 +2711,15 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
   select,
   .status-select {
     min-width: 160px;
+    min-height: 44px;
     padding: 0.5rem 1rem;
     border-radius: 50px;
     background: var(--bg-color);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--control-border-color);
     font-size: 0.85rem;
     font-weight: 700;
+    color: var(--text-main);
     cursor: pointer;
-    outline: none;
     transition: 0.3s;
 
     &:hover {
@@ -2831,7 +2737,6 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
 
     &:focus {
       border-color: var(--accent-color);
-      outline: none;
     }
 
     option {
@@ -4014,5 +3919,16 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
   .loading-panel--compact {
     min-height: 6rem;
     padding: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

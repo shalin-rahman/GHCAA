@@ -117,6 +117,31 @@ class AppTheme {
   static const Color defaultProfilePrimary = Color(0xFF121212);
   static const Color defaultProfileAccent = Color(0xFF2F6F4F);
 
+  /// WCAG AA minimum for normal-size text.
+  static const double minTextContrast = 4.5;
+
+  /// Label color for text on [background]. Keeps [obsidianBlack] whenever it
+  /// passes, so the gold accent looks the same, and otherwise picks whichever
+  /// of black or white reads better. Dark accents such as the offline
+  /// fallback get white labels.
+  static Color readableTextOn(Color background) {
+    if (contrastRatio(obsidianBlack, background) >= minTextContrast) {
+      return obsidianBlack;
+    }
+    return contrastRatio(Colors.white, background) >=
+            contrastRatio(obsidianBlack, background)
+        ? Colors.white
+        : obsidianBlack;
+  }
+
+  static double contrastRatio(Color a, Color b) {
+    final la = a.computeLuminance();
+    final lb = b.computeLuminance();
+    final lighter = la > lb ? la : lb;
+    final darker = la > lb ? lb : la;
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+
   /// Builds the app [ThemeData] from tenant [OrgBranding], so white-labeled
   /// orgs get their configured primary/accent colors applied to
   /// theme-driven surfaces (buttons, app bar, inputs, color scheme).
@@ -207,7 +232,7 @@ class AppTheme {
           // obsidian surfaces, with dark foreground text). `primary` is the
           // dark brand base and would render dark-on-dark here.
           backgroundColor: secondary,
-          foregroundColor: obsidianBlack,
+          foregroundColor: readableTextOn(secondary),
           textStyle: const TextStyle(
             fontFamily: 'Outfit',
             fontWeight: FontWeight.w800,

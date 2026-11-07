@@ -179,6 +179,19 @@
                             </div>
                         </div>
 
+                        @if (contrastAdvice(); as advice) {
+                        <div class="contrast-check">
+                            <p class="contrast-advice" [class.warning]="advice.status === 'warning'"
+                                [class.invalid]="advice.status === 'invalid'" role="status">
+                                {{ advice.message }}
+                            </p>
+                            @if (advice.status === 'warning') {
+                            <button type="button" class="btn btn-outline btn-sm"
+                                (click)="useSuggestedTextColor()">Use suggested text color</button>
+                            }
+                        </div>
+                        }
+
                         <div class="form-group mt-6">
                             <label class="premium-checkbox-label inline-flex">
                                 <input type="checkbox" [(ngModel)]="selectedTheme.enableGradientFading">
@@ -193,8 +206,12 @@
                 <div class="preview-section border-t border-white/5 pt-12 space-y-10">
                     <div class="preview-panel">
                         <label class="text-[10px] uppercase font-black tracking-widest text-accent mb-6 block text-center">Visual Preview</label>
-                        <div class="nav-preview-box shadow-2xl mx-auto" [style.background]="selectedTheme.backgroundColor"
+                        <div class="nav-preview-box shadow-2xl mx-auto" [style.background]="previewBackground()"
                             [style.color]="selectedTheme.textColor">
+                            @if (selectedTheme.imageUrl) {
+                            <img class="nav-preview-image" [src]="selectedTheme.imageUrl"
+                                alt="Special-day banner preview" appImgFallback>
+                            } @else {
                             <div class="flex justify-between items-center px-4 h-12">
                                 <div class="font-black text-sm tracking-tighter">{{ orgConfig.config()?.branding?.shortName }}</div>
                                 <div class="text-[8px] opacity-70 ticker-mock">
@@ -205,6 +222,7 @@
                                     <div class="w-2 h-2 rounded-full bg-current opacity-40"></div>
                                 </div>
                             </div>
+                            }
                         </div>
                     </div>
                 </div>

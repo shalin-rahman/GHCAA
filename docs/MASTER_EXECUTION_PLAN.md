@@ -37,6 +37,17 @@ It exits 1 when an open item is missing here or a closed one is still scheduled.
   the owner gates).
 - **Closed 2026-11-07.** The client option lists, poll comments, the server's 400 message on both
   clients and the stale mobile goldens; the progress log in section 9 lists them.
+- **Owner order and review update, 2026-11-07.** The configured OrgConfig branding regression is
+  fixed in both modes. 84.87 remains in progress. Its code review found that five gradient
+  samples could miss a failing point between them; the check now samples every rendered color.
+  Visual review has not run. The same review found low mobile button contrast on the offline
+  accent, fixed the same day (section 9 logs it). The security review
+  found no vulnerabilities. A follow-up review found that checking token declarations alone does
+  not verify rendered colors: configured accent foregrounds and derived hover/focus/shadow tokens
+  need runtime checks, dark mode can override configured primary color, and remapped white-text
+  utilities need review at their actual uses. 84.87 now requires effective-style checks for default
+  and custom branding in both modes, plus use-context review for those utilities. No code changed
+  in this documentation update.
 - **Owner order, 2026-11-06.** In progress: 84.19 (meetings with comments), 84.59,
   84.60, 84.68, then the rest of the partial items 84.49 and 84.51 once those finish.
   84.84 (directory search by city or country) is ordered too; the poll comments migration it
@@ -47,9 +58,9 @@ It exits 1 when an open item is missing here or a closed one is still scheduled.
   item: stale repository counts (63.8, 384 commits quoted against 388 in the tree), chapters over
   their page budgets (63.34), and 93 open placeholders in the chapter items 67.2, 67.3, 67.5 and
   67.7. A placeholder closes only with a sourced number, never a guess.
-- **Next three items** after that, cheapest first as in the wave 2 table: 84.4 (web
-  and mobile parity table), 93.3 (portal mobile nav e2e), 84.27 (archive API tests and admin
-  screen). See section 4, the waves.
+- **Next work:** finish the open theme review item 84.87, then take the remaining
+  Wave 2 items in the order shown in section 4: 84.4 (web and mobile parity table), 93.3 (portal
+  mobile nav e2e), and 84.27 (archive API tests and admin screen).
 - **Owner gates:** the owner answered every gate on 2026-11-02. What still needs the owner: the
   inbox check for preprod email (7.26), the upload-then-redeploy check for preprod uploads (7.28),
   approval of the docs archive list (12.8), the list of unused config keys (98.43), the white-label
@@ -103,7 +114,7 @@ work in the order the tracker's `Depends on` tags give.
 | N3 | Phase 3, mobile foundations and shared UX | 8.5, 8.7, 8.8, 28.25, 28.33, 37.7, 60.3, 84.61, 84.64, 84.67, 84.69, 93.3, 93.4, 96.3 |
 | N4 | Phase 4, member and alumni product work | 6.2, 37.4, 37.5, 37.9, 37.10, 49.3.C, 84.72, 84.19, 84.20, 84.59, 84.65, 84.66, 84.80, 84.81, 84.82, 84.83, 84.84, 88.1, 88.2, 88.3, 88.4, 88.5, 90.1, 90.2, 90.3, 90.4, 90.5, 92.1, 92.2, 92.3, 92.4, 92.5 |
 | N5 | Phase 5, white-label profile and reusable modules | 62.2, 62.42, 62.56 |
-| N6 | Phase 6, performance and quality | 27.1, 27.8, 37.11, 51.4, 51.5, 98.7 |
+| N6 | Phase 6, performance and quality | 27.1, 27.8, 37.11, 51.4, 51.5, 84.87, 98.7 |
 | N7 | Phase 7, platform governance, security and operations | 7.16, 12.8, 12.9, 73.5, 73.6, 74.3, 98.43, 99.8 |
 | N8 | Phase 8, dissertation evidence and evaluation | 63.8, 63.18, 63.34, 64.8, 64.9, 67.2, 67.3, 67.4, 67.5, 67.7, 78.9, 78.10 |
 | P | This plan's own upkeep (Work Package 99) | 99.3 |
@@ -300,11 +311,13 @@ brief asks for it.
 
 ### Wave 2 (proposed, starts after the owner reviews wave 1)
 
-Ordered cheapest first. One `--only backend` run, one `--only web` run, one `--e2e` run and one
-`--only mobile` run cover the whole wave.
+The remaining theme item, 84.87, runs before the other Wave 2 items. The rest are ordered
+cheapest first. One `--only backend` run, one `--only web` run, one `--e2e` run and one `--only
+mobile` run cover the whole wave.
 
 | ID | Size | Stream | Why ready | Layers | Test evidence required | Gate |
 |---|---|---|---|---|---|---|
+| 84.87 | M | N6 | Finish the theme color audit, correct contrast gaps and verify effective branded colors in both modes. | Web | Gradient and input regression tests; computed-style checks with default and custom branding; actual utility-use review; web type-check, unit tests, production build and color guard; record visual check status | None |
 | 84.4 | S | N2 | Parity table built from the routes both clients call. | Docs | Every row traced to a client file | None |
 | 93.3 | S | N3 | The portal mobile nav e2e misses the cases the item lists. | Web e2e | Playwright spec passes in `ci-local.py --e2e` | None |
 | 84.27 | L | N2 | `ArchiveController` has no tests and no web admin screen. Crosses API tests and web, so it runs last. | API tests, Web | New NUnit controller tests; Vitest spec for the admin page | None |
@@ -423,3 +436,6 @@ What counts as evidence:
 | 2026-11-06 | 84.58 (done); 84.56 (part: server) | `dotnet test` filtered to job DTO, JobHub, SecureFiles and file validation tests: 67 of 67. 84.56 stays PARTIAL until web and mobile show the 400 message | `JobDto.cs`, `IFileValidationService.cs`, `FileValidationService.cs`, `SecureFilesController.cs`, `JobDtoValidationTests.cs`, `SecureFilesControllerTests.cs`, `docs/TODO.md`, spec 013 |
 | 2026-11-06 | 84.71, 84.68 (review fixes) | Code review found four faults, now fixed: news update dropping `membersOnly`, members' news served from the output cache, poll category case, and `Other` missing uncategorised polls; reissue now runs in a serializable transaction. Filtered `dotnet test` on Poll, News, IDCard, CredentialVerification and OutputCache: 108 of 108; `ci-local.py --only contract` 3 of 3. Both items stay in progress | `NewsController.cs`, `NewsDto.cs`, `NewsService.cs`, `PollService.cs`, `IDCardService.cs`, `NewsServiceTests.cs`, `PollServiceTests.cs`, `docs/API_CONTRACT_REGISTRY.md`, `docs/TODO.md` |
 | 2026-11-07 | 84.56, 84.71, 84.77, 34.D7 (closed); 84.85 (added and closed); 84.86 (added and closed, P1: unpublished news by Id now 404 except for admin, author and collaborators) | Owner asked why small items stayed open and had them closed. 84.56: web and mobile show the server's 400 message in the same order; mobile job link sent as `applicationLink`. 84.71: `DiscussionCategory` rows in `lookups.json`, poll-link test, T013. 84.77: JobCategory rows, golden fixtures use `Founding`, four dashboard goldens regenerated. 84.85: dates swept to the shared helpers on both clients, forum pages included, with guard tests. Review fixes: mobile reads list-shaped `errors`, `postJob` catches every error, guards also catch `substring(0, 10)` and `Intl.DateTimeFormat`. `ci-local.py --only` backend 7 of 7, contract 3 of 3, web 4 of 4, mobile 2 of 2; `flutter test --tags golden` 65 of 65 | `http.util.ts`, `global-http.interceptor.ts`, `api_exception.dart`, `job_service.dart`, `jobs_screen.dart`, `lookups.json`, date screens on both clients, `date-display-guard.spec.ts`, `date_display_guard_test.dart`, four visual tests and goldens, `NewsServiceTests.cs`, `PollServiceTests.cs`, `JobCategorySeedSyncTests.cs`, `docs/PROJECT_MAP.md`, `docs/TODO.md`, spec 028 tasks |
+| 2026-11-07 | 84.87, 84.88 (added); 84.88 (closed); 84.89 (added) | Theme review: security review found no vulnerabilities. Code review found a gradient contrast false pass in the web admin preview and low contrast for mobile buttons using the offline fallback accent. 84.88's branding inheritance fix passed focused theme tests and the web checks; 84.87 remains open for the gradient fix and visual review. | `docs/TODO.md`, `docs/THEME_TOKEN_PLAN.md`, web theme files, this file |
+| 2026-11-07 | 84.87 review scope clarified | Effective runtime styles can diverge from declared tokens when theme selectors override organization branding. Expanded 84.87 verification to cover default and custom branding in Light and Dark modes, actual component foreground/background/hover/focus/shadow values, and remapped utility classes in their rendered contexts. No code changed. | `docs/TODO.md`, `docs/THEME_TOKEN_PLAN.md`, this file |
+| 2026-11-07 | 84.89 (closed); 84.87 (part: gradient contrast) | 84.87: the special-day check samples every rendered gradient color, ignores an inactive `sidebarColor`, and applies a suggestion only if it passes everywhere, else warns and leaves the field alone. `admin-themes` and color tests 80 passed; web type-check and guard passed. Computed-style checks, the rest of the audit and the visual review stay open; the visual review did not run because the Playwright browser tool failed to connect. 84.89: button labels pick a readable color on the accent, which stays unchanged; four focused tests, `flutter analyze` clean, four goldens regenerated for the label color only, `flutter test --tags golden` 65 of 65 | `admin-themes.ts`, `admin-themes.html`, `admin-themes.spec.ts`, `color-math.ts`, `org-config.service.ts`, `app_theme.dart`, `app_theme_contrast_test.dart`, four goldens, `docs/THEME_TOKEN_PLAN.md`, `docs/TODO.md`, this file |

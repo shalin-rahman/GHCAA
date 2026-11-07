@@ -5,15 +5,10 @@
 
 .hero {
     min-height: 80vh; /* Better for content flexibility */
-    /* Same campus photograph as /login and /about (ghc-old-building.jpg) — the scrim colors
-       are literal per-theme values, NOT rgba(var(--section-bg)): --section-bg is a hex string,
-       and rgba() can't consume a hex channel via var() (the exact bug class flagged in the
-       admin/member/mobile theme audit). Light theme uses a white-based scrim so the photo reads
-       as a faint watermark under dark text; dark-theme override below swaps to a black-based
-       scrim for white text, mirroring login.scss's treatment. */
+    /* rgba(var(--x)) cannot use a hex-valued theme token. */
     background-color: var(--section-bg);
     background-image:
-        linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.93)),
+        linear-gradient(var(--hero-scrim-start), var(--hero-scrim-end)),
         url('/assets/images/campus/ghc-old-building.jpg');
     background-size: cover, cover;
     background-position: center, center;
@@ -58,12 +53,6 @@
         transform: rotateX(60deg) translateY(-200px);
         mask-image: linear-gradient(to bottom, black, transparent);
     }
-}
-
-body.dark-theme .hero {
-    background-image:
-        linear-gradient(rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.88)),
-        url('/assets/images/campus/ghc-old-building.jpg');
 }
 
 .hero-content {

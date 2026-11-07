@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { THEME_CONFIG } from '../../core/constants/theme.config';
 import { ThemeService } from '../../core/services/theme.service';
 import { Icon } from '../icon/icon';
 
@@ -22,7 +23,6 @@ import { Icon } from '../icon/icon';
 export class ThemeToggle {
     theme = inject(ThemeService);
 
-    label = computed(() =>
-        this.theme.theme() === 'light' ? 'Switch to dark mode' : 'Switch to light mode'
-    );
+    label = computed(() => THEME_CONFIG[this.theme.theme()].toggleLabel);
+    icon = computed(() => THEME_CONFIG[this.theme.theme()].toggleIcon);
 }

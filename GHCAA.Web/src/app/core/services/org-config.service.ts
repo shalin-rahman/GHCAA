@@ -5,7 +5,7 @@ import { OrgConfig } from '../models/org-config.model';
 import { ORG_CONFIG_FALLBACK } from '../config/org-config-fallback.generated';
 import { tap, firstValueFrom } from 'rxjs';
 import { ThemeService } from './theme.service';
-import { adjustLightness, darkenForContrast, hexToRgb, rgbString } from '../utils/color-math';
+import { adjustLightness, darkenForContrast, hexToRgb, MIN_TEXT_CONTRAST, rgbString } from '../utils/color-math';
 
 @Injectable({
   providedIn: 'root'
@@ -44,7 +44,7 @@ export class OrgConfigService {
 
       const goldBright = adjustLightness(accent, 8);
       const goldGradientDark = adjustLightness(accent, -12);
-      const goldTextDark = darkenForContrast(accent, '#ffffff', 4.5);
+      const goldTextDark = darkenForContrast(accent, '#ffffff', MIN_TEXT_CONTRAST);
       const tierFoundingLight = darkenForContrast(accent, '#ffffff', 4.9);
 
       root.setProperty('--accent-gold-bright', goldBright);
@@ -55,7 +55,7 @@ export class OrgConfigService {
       root.setProperty('--tier-founding', theme === 'dark' ? accent : tierFoundingLight);
 
       // --glass-border is accent-tinted only in light theme; dark theme's is an
-      // independent translucent-white card token (styles.scss:146), not a gold tint, so
+      // independent translucent-white card token (styles/themes/_dark.scss), not a gold tint, so
       // clear the inline override there and let that static rule apply again.
       if (theme === 'dark') {
         root.removeProperty('--glass-border');

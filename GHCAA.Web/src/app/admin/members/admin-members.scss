@@ -202,11 +202,8 @@
             font-size: 0.85rem;
             color: var(--text-main);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            outline: none;
-
             &:focus {
                 border-color: var(--accent-color);
-                box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
             }
 
             &::placeholder { color: var(--text-muted); opacity: 0.5; }
