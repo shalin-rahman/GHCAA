@@ -3204,8 +3204,9 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
     visibility: hidden !important;
   }
 
-  .invitation-card,
-  .invitation-card * {
+  /* Same prefix as the hide rule, or the hide rule wins on specificity. */
+  body:has(.invitation-card) .invitation-card,
+  body:has(.invitation-card) .invitation-card * {
     visibility: visible !important;
   }
 
@@ -3234,23 +3235,40 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
     display: none !important;
   }
 }
-/* The vote receipt is the only thing printed from the member election screen. */
+/* Print only the vote receipt, in normal flow so a long one runs onto page two. */
 @media print {
-  body:has(.vote-receipt) * {
-    visibility: hidden !important;
+  body:has(.vote-receipt) *:not(:has(.vote-receipt), .vote-receipt, .vote-receipt *) {
+    display: none !important;
   }
 
-  .vote-receipt,
-  .vote-receipt * {
-    visibility: visible !important;
+  body:has(.vote-receipt) :has(.vote-receipt) {
+    display: block !important;
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    transform: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: none !important;
+  }
+
+  /* Paper tokens stay dark-on-white in both themes; no fade caught mid-way. */
+  body:has(.vote-receipt) .vote-receipt,
+  body:has(.vote-receipt) .vote-receipt * {
+    color: var(--paper-ink) !important;
+    transition: none !important;
   }
 
   .vote-receipt {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
+    background: var(--paper-bg) !important;
+    backdrop-filter: none !important;
     box-shadow: none !important;
+    border-color: var(--paper-hairline) !important;
   }
 }
 

@@ -56,6 +56,38 @@ Write-Host ""
 
 Start-Sleep -Seconds 1
 
+# -- Restore and Build
+# Build first so a compile error stops here instead of inside the API window.
+# Web and mobile restores run only when their package folders are missing, e.g. after a disk cleanup.
+Write-Host "  Restoring packages and building the solution..." -ForegroundColor Yellow
+Push-Location $RootPath
+try {
+    dotnet build GHCAA.sln --nologo -v q
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "  [!!] dotnet build failed. Fix the errors above and run again." -ForegroundColor Red
+        exit $LASTEXITCODE
+    }
+    Write-Host "  [OK] Backend built" -ForegroundColor Green
+
+    if (-not $NoWeb -and (Test-Path $WebPath) -and -not (Test-Path (Join-Path $WebPath "node_modules"))) {
+        Write-Host "  GHCAA.Web\node_modules missing, running npm ci..." -ForegroundColor Yellow
+        Push-Location $WebPath
+        try { cmd /c npm ci } finally { Pop-Location }
+        if ($LASTEXITCODE -ne 0) { Write-Host "  [!!] npm ci failed; the web app will not start." -ForegroundColor Red }
+    }
+
+    $MobilePath = Join-Path $RootPath "GHCAA.Mobile"
+    if (-not $NoMobile -and (Test-Path $MobilePath) -and -not (Test-Path (Join-Path $MobilePath ".dart_tool"))) {
+        Write-Host "  GHCAA.Mobile\.dart_tool missing, running flutter pub get..." -ForegroundColor Yellow
+        Push-Location $MobilePath
+        try { cmd /c flutter pub get } finally { Pop-Location }
+        if ($LASTEXITCODE -ne 0) { Write-Host "  [!!] flutter pub get failed; the mobile app will not start." -ForegroundColor Red }
+    }
+} finally {
+    Pop-Location
+}
+Write-Host ""
+
 # -- Resolve Provider
 $activeProvider = $DatabaseProvider
 if (-not $activeProvider) {

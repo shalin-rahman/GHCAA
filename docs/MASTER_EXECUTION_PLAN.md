@@ -143,33 +143,25 @@ Order notes moved from `WHITE_LABEL_PLAN.md` on 2026-11-03:
 ### Stream E order
 
 Moved on 2026-11-03 from the spec 023 delivery plan ("Sessions") and the auth plan ("Part A",
-"B4-B5"). Only open items are kept. Steps 1 and 2 run now. The rest waits for the election
-sequence.
+"B4-B5"). Only open items are kept. Rewritten as sessions on 2026-11-12 (owner). Each item's
+Scope and Acceptance live in its tracker entry; this table only gives the order and a one-line
+scope. Run the sessions in order.
 
-1. 84.50, the device checks on the Windows desktop build against a local API (owner, 2026-11-02).
-   They cover 95.6 (authenticator app and step-up), 84.42 (mobile admin step-up routes), and 37.1m
-   and 37.14o (vote receipt and tracking codes). A person still prints a receipt in Chrome, Edge and
-   on a phone for 37.1m.
-2. 37.14m, 37.14n, 37.14t (election forms: stored fields, numbering, a QR code that proves the
-   paper), 37.16g (declare through governance) and 37.16h (moderated candidate photo). None depends
-   on another open item, and none adds a migration.
-3. 37.16f, one voting-member rule for elections and amendments. It goes before step 4, so 37.1p's
-   new rules are written once.
-4. The election rules migration (delivery plan F2): 37.1p recount and candidate consent, 37.16e
-   officer conflicts, 37.14d audit chain set to Restrict. The batch-flag migration it waited on was
-   confirmed on preprod on 2026-11-05, so this step is no longer blocked.
-5. Services on that schema (F3): 37.14a key copies, 37.1p unopposed and spoiled seats, 37.12y
-   polling extension, 37.14f ten-year purge.
-6. Web and mobile screens for steps 4 and 5 (F5 and F6), in separate worktrees at the same time.
-   84.49 B4-B5 (key spinner, 60 s key save timeout) ride with the mobile session.
-7. 95.2 committee positions, then the positions and terms migration (delivery plan N1). It lands
-   after step 4's migration, never at the same time.
-8. 95.4 vacant seats, 95.5 by-election, 95.12 term ending (F10).
-9. 37.13f compliance docs (the owner confirms the Neon and Render plans) and 37.13g, the manual
-   accessibility run, once step 6 closes.
+| Session | Items | Scope in one line | Migration |
+|---|---|---|---|
+| 1 (on hold) | 84.50 (covers 95.6, 84.42, 37.1m, 37.14o) | Device checks on the Windows desktop build and a phone. Chrome and Edge print passed 2026-11-12; only the phone check is left. Held by the owner. | none |
+| 2 | 37.14m, 37.14t, 37.14n | Release the form-fields migration to preprod; server print record with a hash and a QR code holding its id; then the browser check of the verify page. | 37.14t print record |
+| 3 | 37.16f, 37.16g, 37.16h | One voting-member rule for elections and amendments; declare through governance; moderated candidate photo. | photo approval columns |
+| 4 | 37.1p (recount, consent), 37.16e, 37.14d | F2: recount and consent schema, officer conflict declarations, audit chain FK to Restrict, and the 37.12y per-election limit fields. | F2 |
+| 5a | 37.14a, 37.12y | F3: key copy count and holder confirmation gate polling; polling extension with per-election limits under `OrgConfig` defaults. | none |
+| 5b | 37.1p (unopposed, spoiled), 37.14f | F3: unopposed seats and spoiled counts; ten-year purge by request with its pin test. | none |
+| 6 | screens for sessions 4 to 5b, 84.49 B4-B5 | F5 web and F6 mobile in separate worktrees; the mobile session also closes the key dialog on dispose and adds the 60 s key timeout. | none |
+| 7 | 95.2, then N1 | Owner releases the positions migrations to preprod; then `AddCommitteePositionsAndTerms` (end reasons, `Election.Kind`, live index). | N1 |
+| 8 | 95.4, 95.12, 95.5 | F10 in that order: vacant-seat query and filter; term ending sweep and end reasons; by-election. | none |
+| 9 | 37.13f, 37.13g | Close doc 09 against free Neon and free Render; run the accessibility checklist after session 6. | none |
 
-Migrations land one at a time, in step order. Each takes the next timestamp and builds from the
-current model snapshot.
+Migrations land one at a time, in session order: 37.14t, then the photo columns, then F2, then
+N1. Each takes the next timestamp and builds from the current model snapshot.
 
 ### Design references
 
