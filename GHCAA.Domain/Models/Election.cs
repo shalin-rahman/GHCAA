@@ -215,6 +215,25 @@ public class ElectionRecountRequest
     public ICollection<ElectionRecountFigure> Figures { get; set; } = new List<ElectionRecountFigure>();
 }
 
+// 37.14t. One row per filled form printed. The QR code holds only the random Id; the verify page
+// shows the rest so a reader can compare it with the paper. ContentHash covers what the form
+// prints except the print time and the Id, so two prints of unchanged records share a hash.
+public class ElectionFormPrint
+{
+    public Guid Id { get; set; }
+    public int ElectionId { get; set; }
+    public string FormCode { get; set; } = null!;
+    public string ContentHash { get; set; } = null!;
+    public DateTime PrintedAt { get; set; }
+    public int? PrintedByUserId { get; set; }
+    public string PrintedByRole { get; set; } = null!;
+    public ElectionPhase PhaseAtPrint { get; set; }
+    public DateTime? RevokedAt { get; set; }
+    public int? RevokedByUserId { get; set; }
+    public string? RevokeReason { get; set; }
+    public Election? Election { get; set; }
+}
+
 public class ElectionRecountFigure
 {
     public int Id { get; set; }

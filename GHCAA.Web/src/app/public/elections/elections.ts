@@ -317,8 +317,11 @@ export class ElectionsPage implements OnInit {
                 ExportUtil.saveFile(blob, `${code}-${mode.toLowerCase()}.pdf`);
                 this.printing.set(false);
             },
-            error: () => {
-                this.notify.error(`Could not make the ${mode.toLowerCase()} PDF of ${code}.`);
+            error: (err: { status?: number }) => {
+                // 37.14t. The server refuses a filled form the election has not reached yet.
+                this.notify.error(err?.status === 409
+                    ? `${code} cannot be printed filled in the current election phase.`
+                    : `Could not make the ${mode.toLowerCase()} PDF of ${code}.`);
                 this.printing.set(false);
             }
         });

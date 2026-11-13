@@ -316,6 +316,15 @@ describe('ElectionsPage form PDFs', () => {
         expect(component.printing()).toBe(false);
     });
 
+    it('FR-25: names the phase when a filled print comes too early', () => {
+        const { component, elections, notify } = create({ signedIn: true, roles: ['Admin'] });
+        elections.getOfficialDocument.mockReturnValue(throwError(() => ({ status: 409 })));
+
+        component.downloadPdf('ER-29', 'Filled');
+
+        expect(notify.error).toHaveBeenCalledWith('ER-29 cannot be printed filled in the current election phase.');
+    });
+
     it('uses the page key as the form code on a single-form page', () => {
         const { component } = create({
             doc: 'er-25', signedIn: true, roles: ['Admin'], forms: [page({ key: 'ER-25', kind: 'Form', format: null })],

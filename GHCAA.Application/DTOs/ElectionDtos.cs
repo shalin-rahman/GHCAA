@@ -107,6 +107,17 @@ public record ElectionBoardDto(int Id, string Title, ElectionPhase Phase, bool I
 public record ElectionAuditVerifyDto(bool Ok, int Entries, int? FirstBrokenSeq);
 // 37.14n. What the QR code on a printed form confirms: the election and the form exist.
 public record ElectionDocumentVerifyDto(string Reference, int ElectionId, string ElectionTitle, ElectionPhase Phase, string FormCode, string FormTitle);
+// 37.14t. Printed is also the reply for a blank print, which has no PrintId.
+public enum ElectionPrintOutcome { Printed, NotFound, WrongPhase }
+public record ElectionPdfResult(ElectionPrintOutcome Outcome, byte[]? Pdf = null, Guid? PrintId = null);
+// 37.14t. Who printed. The service names the role from the live appointment when there is one.
+public record ElectionPrinter(int? UserId, IReadOnlyCollection<string> Roles);
+// 37.14t. What the QR code on a filled form shows. The reader compares it with the paper.
+public record ElectionFormPrintVerifyDto(Guid Id, string Reference, string ElectionTitle, string FormCode, string FormTitle,
+    DateTime PrintedAt, string PrintedByRole, ElectionPhase PhaseAtPrint, string ContentHash, bool Revoked, DateTime? RevokedAt);
+public record ElectionFormPrintRevokeDto(
+    [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.StringLength(500, MinimumLength = 3),
+        System.ComponentModel.DataAnnotations.RegularExpression(@"\s*(\S\s*){3,}", ErrorMessage = "Give a reason of at least 3 characters.")] string Reason);
 public record ElectionAuditEntryDto(int Seq, DateTime At, int? ActorUserId, string Action, string DetailJson, string Hash);
 public record OpenedSeatBallotsDto(int ElectionSeatId, IReadOnlyList<IReadOnlyList<int>> Ballots);
 public record OpenedBallotsDto(int ElectionId, IReadOnlyList<OpenedSeatBallotsDto> Seats);

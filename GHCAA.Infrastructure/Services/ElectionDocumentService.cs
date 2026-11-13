@@ -91,38 +91,158 @@ public sealed class ElectionDocumentService(
         return form is null ? null : await RenderAsync(form, filled: null, cancellationToken);
     }
 
-    public async Task<byte[]?> GeneratePdfAsync(
+    // 37.14t. The QR code on a filled form holds only the print record's id. The web route
+    // verify/form/:id in app.routes.ts must match.
+    public static string PrintVerificationPath(Guid printId) => $"/verify/form/{printId}";
+
+    public async Task<ElectionPdfResult> GeneratePdfAsync(
         int electionId,
         string formCode,
+        ElectionPrinter printer,
         ElectionPrintMode? mode = null,
         CancellationToken cancellationToken = default)
     {
         var form = await LoadFormAsync(formCode, cancellationToken);
         if (form is null)
-            return null;
+            return new ElectionPdfResult(ElectionPrintOutcome.NotFound);
 
         var election = await db.Elections.AsNoTracking()
             .Include(x => x.Seats).ThenInclude(s => s.EcPosition)
             .Include(x => x.ECPeriod)
             .SingleOrDefaultAsync(x => x.Id == electionId, cancellationToken);
         if (election is null)
-            return null;
+            return new ElectionPdfResult(ElectionPrintOutcome.NotFound);
 
         var org = await orgConfigService.GetConfigAsync();
         if ((mode ?? org.Elections.DefaultPrintMode) == ElectionPrintMode.Blank)
-            return await RenderAsync(form, filled: null, cancellationToken);
+            return new ElectionPdfResult(ElectionPrintOutcome.Printed, await RenderAsync(form, filled: null, cancellationToken));
+
+        // A blank form prints at any time; a filled one only once its phase has produced the records.
+        if (election.Phase < EarliestPhase(form.Code))
+            return new ElectionPdfResult(ElectionPrintOutcome.WrongPhase);
 
         var rollCount = await db.VoterRolls.CountAsync(v => v.ElectionId == electionId, cancellationToken);
         var tables = await LoadTablesAsync(election, form.Code, cancellationToken);
         var fields = await LoadFieldValuesAsync(election, form.Code, cancellationToken);
-        return await RenderAsync(form, new FilledRecord(election, rollCount, tables, fields), cancellationToken);
+        var facts = Facts(election, rollCount);
+        var print = new ElectionFormPrint
+        {
+            Id = Guid.NewGuid(),
+            ElectionId = election.Id,
+            FormCode = form.Code,
+            ContentHash = ContentHash(form, facts, fields, tables),
+            PrintedAt = DateTime.UtcNow,
+            PrintedByUserId = printer.UserId,
+            PrintedByRole = await PrinterRoleAsync(election.Id, printer, cancellationToken),
+            PhaseAtPrint = election.Phase,
+        };
+        var pdf = await RenderAsync(form, new FilledRecord(election, facts, tables, fields, print), cancellationToken);
+        // Stored after rendering so a form that fails to render leaves no record behind.
+        db.ElectionFormPrints.Add(print);
+        await db.SaveChangesAsync(cancellationToken);
+        return new ElectionPdfResult(ElectionPrintOutcome.Printed, pdf, print.Id);
+    }
+
+    // 37.14t. The phase a filled form needs, from the ER number. The bands follow formStage() in
+    // election-docs.ts. Complaint forms (31-32) can arise at any point. ER-27C, 29 and 30 carry
+    // the declared result, so they wait for Declared rather than Counting.
+    public static ElectionPhase EarliestPhase(string formCode)
+    {
+        var digits = new string(formCode.SkipWhile(c => !char.IsDigit(c)).TakeWhile(char.IsDigit).ToArray());
+        if (!int.TryParse(digits, out var number))
+            return ElectionPhase.Announced;
+        if (number == 27 && formCode.TrimEnd().EndsWith("C", StringComparison.OrdinalIgnoreCase))
+            return ElectionPhase.Declared;
+        return number switch
+        {
+            <= 9 => ElectionPhase.Announced,
+            <= 19 => ElectionPhase.Nomination,
+            <= 22 => ElectionPhase.CandidateList,
+            <= 25 => ElectionPhase.Polling,
+            <= 28 => ElectionPhase.Counting,
+            <= 30 => ElectionPhase.Declared,
+            <= 32 => ElectionPhase.Announced,
+            _ => ElectionPhase.Declared,
+        };
+    }
+
+    // SHA-256 over what the form prints, leaving out the print time and the record id, so two
+    // prints of unchanged records share a hash.
+    public static string ContentHash(
+        PrintableForm form,
+        IReadOnlyList<KeyValuePair<string, string>> facts,
+        IReadOnlyDictionary<string, string> fields,
+        IReadOnlyList<FormTable> tables)
+    {
+        var canonical = JsonSerializer.Serialize(new
+        {
+            form.Code,
+            form.Title,
+            form.Layout,
+            Facts = facts,
+            Fields = fields.OrderBy(x => x.Key, StringComparer.Ordinal).ToList(),
+            Tables = tables,
+        });
+        return Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(canonical)));
+    }
+
+    // The persona of the printer's live appointment on this election, else their highest site role.
+    private async Task<string> PrinterRoleAsync(int electionId, ElectionPrinter printer, CancellationToken ct)
+    {
+        if (printer.UserId is int userId)
+        {
+            var persona = await db.ElectionAppointments.AsNoTracking()
+                .Where(ElectionAppointment.LiveAt(DateTime.UtcNow))
+                .Where(x => x.ElectionId == electionId && x.UserId == userId)
+                .OrderBy(x => x.Persona!.SortOrder)
+                .Select(x => x.Persona!.Name)
+                .FirstOrDefaultAsync(ct);
+            if (persona is not null)
+                return persona;
+        }
+        return printer.Roles.Contains(Constants.Roles.SuperAdmin) ? Constants.Roles.SuperAdmin
+            : printer.Roles.Contains(Constants.Roles.Admin) ? Constants.Roles.Admin
+            : Constants.Roles.ElectionOfficial;
+    }
+
+    public async Task<ElectionFormPrintVerifyDto?> VerifyPrintAsync(Guid printId, CancellationToken cancellationToken = default)
+    {
+        var row = await db.ElectionFormPrints.AsNoTracking()
+            .Where(x => x.Id == printId && !x.Election!.IsTest)
+            .Select(x => new { Print = x, x.Election!.Title })
+            .SingleOrDefaultAsync(cancellationToken);
+        if (row is null)
+            return null;
+        var p = row.Print;
+        // A form unpublished after it was printed still verifies.
+        var form = await ElectionContentService.FindAsync(db, ElectionContentKind.Form, p.FormCode, publishedOnly: false, cancellationToken);
+        return new ElectionFormPrintVerifyDto(p.Id, $"E-{p.ElectionId:D6}", row.Title, p.FormCode, form?.Title ?? p.FormCode,
+            p.PrintedAt, p.PrintedByRole, p.PhaseAtPrint, p.ContentHash, p.RevokedAt is not null, p.RevokedAt);
+    }
+
+    public async Task<string?> RevokePrintAsync(int electionId, Guid printId, int actorUserId, string reason, CancellationToken cancellationToken = default)
+    {
+        var print = await db.ElectionFormPrints.SingleOrDefaultAsync(x => x.Id == printId && x.ElectionId == electionId, cancellationToken);
+        if (print is null)
+            return Constants.Elections.Replies.NotFound;
+        if (print.RevokedAt is not null)
+            return Constants.Elections.Replies.AlreadyRecorded;
+        print.RevokedAt = DateTime.UtcNow;
+        print.RevokedByUserId = actorUserId;
+        print.RevokeReason = reason.Trim();
+        var audit = new ElectionAuditWriter(db);
+        await audit.AppendAsync(electionId, Constants.Elections.AuditActions.FormPrintRevoked, actorUserId,
+            new { printId, formCode = print.FormCode, reason = print.RevokeReason }, cancellationToken);
+        await audit.SaveAsync(cancellationToken);
+        return null;
     }
 
     private sealed record FilledRecord(
         Election Election,
-        int RollCount,
+        IReadOnlyList<KeyValuePair<string, string>> Facts,
         IReadOnlyList<FormTable> Tables,
-        IReadOnlyDictionary<string, string> Fields);
+        IReadOnlyDictionary<string, string> Fields,
+        ElectionFormPrint Print);
 
     private async Task<byte[]> RenderAsync(PrintableForm form, FilledRecord? filled, CancellationToken ct)
     {
@@ -134,7 +254,7 @@ public sealed class ElectionDocumentService(
         byte[]? qrBytes = null;
         if (filled is not null)
         {
-            verificationUrl = org.Contact.PortalBaseUrl.TrimEnd('/') + VerificationPath(filled.Election.Id, form.Code);
+            verificationUrl = org.Contact.PortalBaseUrl.TrimEnd('/') + PrintVerificationPath(filled.Print.Id);
             using var qrGenerator = new QRCodeGenerator();
             using var qrData = qrGenerator.CreateQrCode(verificationUrl, QRCodeGenerator.ECCLevel.Q);
             using var qrCode = new PngByteQRCode(qrData);
@@ -176,7 +296,7 @@ public sealed class ElectionDocumentService(
                     if (filled is null)
                         AddFieldGrid(column, layout.Header);
                     else
-                        AddFacts(column, filled.Election, filled.RollCount);
+                        AddFacts(column, filled.Facts, filled.Print.PrintedAt);
 
                     foreach (var section in layout.Sections)
                     {
@@ -194,7 +314,12 @@ public sealed class ElectionDocumentService(
                 {
                     if (verificationUrl is not null && qrBytes is not null)
                     {
-                        row.RelativeItem().Text($"Verification: {verificationUrl}").FontSize(7);
+                        row.RelativeItem().Column(c =>
+                        {
+                            c.Item().Text($"Verification: {verificationUrl}").FontSize(7);
+                            // A reader compares this with the hash the verify page shows.
+                            c.Item().Text($"SHA-256: {filled!.Print.ContentHash}").FontSize(6);
+                        });
                         row.ConstantItem(55).Image(qrBytes);
                     }
                     else
@@ -228,7 +353,24 @@ public sealed class ElectionDocumentService(
         bytes.Length > 4 && (bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47
                              || bytes[0] == 0xFF && bytes[1] == 0xD8);
 
-    private static void AddFacts(ColumnDescriptor column, Election election, int rollCount)
+    private static List<KeyValuePair<string, string>> Facts(Election election, int rollCount)
+    {
+        var facts = new List<KeyValuePair<string, string>>
+        {
+            new("Election reference", $"E-{election.Id:D6}"),
+            new("Election title", election.Title),
+            new("Phase", election.Phase.ToString()),
+        };
+        if (!string.IsNullOrWhiteSpace(election.NoticeReference))
+            facts.Add(new("Notice reference", election.NoticeReference));
+        facts.Add(new("Nomination window", Window(election.NominationOpensOn, election.NominationClosesOn)));
+        facts.Add(new("Polling window", Window(election.PollingOpensOn, election.PollingClosesOn)));
+        facts.Add(new("Voter-roll status", rollCount == 0 ? "Not frozen" : $"Frozen; {rollCount} records"));
+        facts.Add(new("Seat count", election.Seats.Count.ToString()));
+        return facts;
+    }
+
+    private static void AddFacts(ColumnDescriptor column, IReadOnlyList<KeyValuePair<string, string>> facts, DateTime printedAt)
     {
         column.Item().PaddingTop(14).Table(table =>
         {
@@ -237,16 +379,9 @@ public sealed class ElectionDocumentService(
                 columns.ConstantColumn(155);
                 columns.RelativeColumn();
             });
-            AddRow(table, "Election reference", $"E-{election.Id:D6}");
-            AddRow(table, "Election title", election.Title);
-            AddRow(table, "Phase", election.Phase.ToString());
-            if (!string.IsNullOrWhiteSpace(election.NoticeReference))
-                AddRow(table, "Notice reference", election.NoticeReference);
-            AddRow(table, "Nomination window", Window(election.NominationOpensOn, election.NominationClosesOn));
-            AddRow(table, "Polling window", Window(election.PollingOpensOn, election.PollingClosesOn));
-            AddRow(table, "Voter-roll status", rollCount == 0 ? "Not frozen" : $"Frozen; {rollCount} records");
-            AddRow(table, "Seat count", election.Seats.Count.ToString());
-            AddRow(table, "Generated at", DateTime.UtcNow.ToString("O"));
+            foreach (var (label, value) in facts)
+                AddRow(table, label, value);
+            AddRow(table, "Generated at", printedAt.ToString("O"));
         });
     }
 

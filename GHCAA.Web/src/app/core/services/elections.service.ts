@@ -7,7 +7,7 @@ import {
     ElectionCountStepResult, ElectionResultDto, ElectionRulesUnlockDto, ElectionSummaryDto,
     ElectionSeatViewDto, NominationDto, NominationViewDto, SaveCandidateRequest, ScrutinyDto,
     DecideRecountRequest, ElectionRecountDto, RecordRecountRequest, RecountFigureDto, ScrutinyCheckDto, ScrutinyCheckItem, UpdateElectionFormDetailsRequest,
-    ElectionDocumentVerifyDto, ElectionPrintMode, PublicCandidateSeatDto
+    ElectionDocumentVerifyDto, ElectionFormPrintVerifyDto, ElectionPrintMode, PublicCandidateSeatDto
 } from '../models/election.models';
 
 @Injectable({ providedIn: 'root' })
@@ -243,6 +243,10 @@ export class ElectionsService {
     // 37.14n. Anonymous. A 404 is the answer the page shows, so the global toast stays quiet.
     verifyDocument(id: number, formCode: string): Observable<ElectionDocumentVerifyDto> {
         return this.http.get<ElectionDocumentVerifyDto>(API_ENDPOINTS.ELECTIONS.VERIFY_DOCUMENT(id, formCode), { headers: this.quietHeaders });
+    }
+
+    verifyPrint(printId: string): Observable<ElectionFormPrintVerifyDto> {
+        return this.http.get<ElectionFormPrintVerifyDto>(API_ENDPOINTS.ELECTIONS.VERIFY_PRINT(printId), { headers: this.quietHeaders });
     }
 
     getMyAppointments(): Observable<ElectionAppointmentDto[]> {

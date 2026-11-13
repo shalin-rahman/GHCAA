@@ -293,6 +293,7 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<NominationScrutinyCheck> NominationScrutinyChecks { get; set; } = null!;
         public DbSet<ElectionRecountRequest> ElectionRecountRequests { get; set; } = null!;
         public DbSet<ElectionRecountFigure> ElectionRecountFigures { get; set; } = null!;
+        public DbSet<ElectionFormPrint> ElectionFormPrints { get; set; } = null!;
         public DbSet<Ballot> Ballots { get; set; } = null!;
         public DbSet<BallotVote> BallotVotes { get; set; } = null!;
         public DbSet<SeatVote> SeatVotes { get; set; } = null!;

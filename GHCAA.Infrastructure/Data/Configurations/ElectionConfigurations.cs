@@ -162,6 +162,23 @@ public sealed class ElectionRecountRequestConfiguration : IEntityTypeConfigurati
     }
 }
 
+public sealed class ElectionFormPrintConfiguration : IEntityTypeConfiguration<ElectionFormPrint>
+{
+    public void Configure(EntityTypeBuilder<ElectionFormPrint> b)
+    {
+        b.HasKey(x => x.Id);
+        b.Property(x => x.Id).ValueGeneratedNever();
+        b.Property(x => x.FormCode).HasMaxLength(16).IsRequired();
+        b.Property(x => x.ContentHash).HasMaxLength(64).IsRequired();
+        b.Property(x => x.PrintedByRole).HasMaxLength(100).IsRequired();
+        b.Property(x => x.RevokeReason).HasMaxLength(500);
+        b.HasIndex(x => new { x.ElectionId, x.FormCode });
+        b.HasOne(x => x.Election).WithMany().HasForeignKey(x => x.ElectionId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne<User>().WithMany().HasForeignKey(x => x.PrintedByUserId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<User>().WithMany().HasForeignKey(x => x.RevokedByUserId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
 public sealed class ElectionRecountFigureConfiguration : IEntityTypeConfiguration<ElectionRecountFigure>
 {
     public void Configure(EntityTypeBuilder<ElectionRecountFigure> b)

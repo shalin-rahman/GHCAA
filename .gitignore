@@ -427,3 +427,5 @@ build_output/
 docs/materials/
 docs/book/build/tracker.html
 docs/project_management_references
+# Large reference PDF of the election forms, kept local only.
+docs/Elections/election-forms.pdf

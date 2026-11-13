@@ -703,6 +703,7 @@ export const API_ENDPOINTS = {
         READINESS_ATTEST: (id: number) => `/api/elections/${id}/readiness/attest`,
         DOCUMENT: (id: number, formCode: string) => `/api/elections/${id}/documents/${formCode}`,
         VERIFY_DOCUMENT: (id: number, formCode: string) => `/api/elections/${id}/documents/${encodeURIComponent(formCode)}/verification`,
+        VERIFY_PRINT: (printId: string) => `/api/elections/print-records/${encodeURIComponent(printId)}/verification`,
         BLANK_FORM: (formCode: string) => `/api/elections/forms/${encodeURIComponent(formCode)}/blank`,
         APPROVALS: (id: number) => `/api/elections/${id}/approvals`,
         APPROVE: (approvalId: number) => `/api/elections/approvals/${approvalId}/approve`,

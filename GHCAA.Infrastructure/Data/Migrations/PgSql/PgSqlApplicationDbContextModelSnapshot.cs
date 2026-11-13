@@ -1373,6 +1373,59 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                     b.ToTable("ElectionContents");
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.ElectionFormPrint", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("ElectionId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FormCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<int>("PhaseAtPrint")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("PrintedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PrintedByRole")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int?>("PrintedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RevokeReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("RevokedByUserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PrintedByUserId");
+
+                    b.HasIndex("RevokedByUserId");
+
+                    b.HasIndex("ElectionId", "FormCode");
+
+                    b.ToTable("ElectionFormPrints");
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.ElectionPersona", b =>
                 {
                     b.Property<int>("Id")
@@ -6002,6 +6055,27 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                         .HasForeignKey("ElectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ElectionFormPrint", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.Election", "Election")
+                        .WithMany()
+                        .HasForeignKey("ElectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GHCAA.Domain.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("PrintedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GHCAA.Domain.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("RevokedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Election");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.ElectionRecountFigure", b =>

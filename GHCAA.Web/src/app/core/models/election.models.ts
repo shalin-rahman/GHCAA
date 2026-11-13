@@ -486,6 +486,21 @@ export interface ElectionDocumentVerifyDto {
     formTitle: string;
 }
 
+// 37.14t. The record behind the QR code on one filled print. The hash is of the printed content.
+export interface ElectionFormPrintVerifyDto {
+    id: string;
+    reference: string;
+    electionTitle: string;
+    formCode: string;
+    formTitle: string;
+    printedAt: string;
+    printedByRole: string;
+    phaseAtPrint: ElectionPhase;
+    contentHash: string;
+    revoked: boolean;
+    revokedAt: string | null;
+}
+
 export interface ElectionAuditEntryDto {
     seq: number;
     at: string;

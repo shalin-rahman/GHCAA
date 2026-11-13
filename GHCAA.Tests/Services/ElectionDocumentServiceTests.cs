@@ -705,27 +705,188 @@ public sealed class ElectionDocumentServiceTests : TestBase
     {
         var codes = _context.ElectionContents.Where(x => x.Kind == ElectionContentKind.Form).Select(x => x.Key).ToList();
         codes.Should().HaveCount(50);
+        await SetPhaseAsync(ElectionPhase.Archived);
 
         foreach (var code in codes)
         {
             (await _service.GenerateBlankPdfAsync(code)).Should().NotBeNullOrEmpty(code);
-            (await _service.GeneratePdfAsync(_election.Id, code, ElectionPrintMode.Blank)).Should().NotBeNullOrEmpty(code);
-            (await _service.GeneratePdfAsync(_election.Id, code, ElectionPrintMode.Filled)).Should().NotBeNullOrEmpty(code);
+            (await _service.GeneratePdfAsync(_election.Id, code, Printer, ElectionPrintMode.Blank)).Pdf.Should().NotBeNullOrEmpty(code);
+            (await _service.GeneratePdfAsync(_election.Id, code, Printer, ElectionPrintMode.Filled)).Pdf.Should().NotBeNullOrEmpty(code);
         }
     }
 
     [Test]
-    public async Task GeneratePdf_UnknownCode_ReturnsNull()
+    public async Task GeneratePdf_UnknownCode_ReturnsNotFound()
     {
-        (await _service.GeneratePdfAsync(_election.Id, "ER-99")).Should().BeNull();
+        (await _service.GeneratePdfAsync(_election.Id, "ER-99", Printer)).Outcome.Should().Be(ElectionPrintOutcome.NotFound);
         (await _service.GenerateBlankPdfAsync("ER-99")).Should().BeNull();
         (await _service.VerifyAsync(_election.Id, "ER-99")).Should().BeNull();
     }
 
     [Test]
-    public async Task GeneratePdf_UnknownElection_ReturnsNull()
+    public async Task GeneratePdf_UnknownElection_ReturnsNotFound()
     {
-        (await _service.GeneratePdfAsync(9999, "ER-10", ElectionPrintMode.Filled)).Should().BeNull();
+        (await _service.GeneratePdfAsync(9999, "ER-10", Printer, ElectionPrintMode.Filled)).Outcome.Should().Be(ElectionPrintOutcome.NotFound);
+    }
+
+    private static readonly ElectionPrinter Printer = new(null, ["Admin"]);
+
+    private async Task<int> AddUserAsync()
+    {
+        var user = new User { Username = "u" + Guid.NewGuid().ToString("N"), PasswordHash = "x", CreatedAt = DateTime.UtcNow, IsActive = true };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+        return user.Id;
+    }
+
+    private async Task SetPhaseAsync(ElectionPhase phase)
+    {
+        _election.Phase = phase;
+        await _context.SaveChangesAsync();
+    }
+
+    // 37.14t. Each filled print stores a record whose id the QR code carries.
+    [Test]
+    public async Task GeneratePdf_Filled_StoresAPrintRecord()
+    {
+        await SetPhaseAsync(ElectionPhase.Nomination);
+
+        var result = await _service.GeneratePdfAsync(_election.Id, "er-10", Printer, ElectionPrintMode.Filled);
+
+        result.Outcome.Should().Be(ElectionPrintOutcome.Printed);
+        var row = _context.ElectionFormPrints.Single();
+        row.Id.Should().Be(result.PrintId!.Value);
+        row.ElectionId.Should().Be(_election.Id);
+        row.FormCode.Should().Be("ER-10");
+        row.PrintedByRole.Should().Be("Admin");
+        row.PhaseAtPrint.Should().Be(ElectionPhase.Nomination);
+        row.ContentHash.Should().MatchRegex("^[0-9a-f]{64}$");
+    }
+
+    [Test]
+    public async Task GeneratePdf_Blank_StoresNoRecord()
+    {
+        var result = await _service.GeneratePdfAsync(_election.Id, "ER-10", Printer, ElectionPrintMode.Blank);
+
+        result.Outcome.Should().Be(ElectionPrintOutcome.Printed);
+        result.PrintId.Should().BeNull();
+        _context.ElectionFormPrints.Should().BeEmpty();
+    }
+
+    // Two prints of the same content are two records, and the hash shows they match.
+    [Test]
+    public async Task GeneratePdf_SameContentTwice_TwoRecordsOneHash()
+    {
+        await SetPhaseAsync(ElectionPhase.Nomination);
+
+        var a = await _service.GeneratePdfAsync(_election.Id, "ER-10", Printer, ElectionPrintMode.Filled);
+        var b = await _service.GeneratePdfAsync(_election.Id, "ER-10", Printer, ElectionPrintMode.Filled);
+
+        a.PrintId!.Value.Should().NotBe(b.PrintId!.Value);
+        _context.ElectionFormPrints.Select(x => x.ContentHash).Distinct().Should().ContainSingle();
+    }
+
+    [Test]
+    [Category("FR-25")]
+    public async Task GeneratePdf_ResultSheetBeforeCounting_IsRefused()
+    {
+        await SetPhaseAsync(ElectionPhase.Polling);
+
+        (await _service.GeneratePdfAsync(_election.Id, "ER-29", Printer, ElectionPrintMode.Filled)).Outcome.Should().Be(ElectionPrintOutcome.WrongPhase);
+        (await _service.GeneratePdfAsync(_election.Id, "ER-29", Printer, ElectionPrintMode.Blank)).Outcome.Should().Be(ElectionPrintOutcome.Printed);
+        _context.ElectionFormPrints.Should().BeEmpty();
+
+        await SetPhaseAsync(ElectionPhase.Counting);
+        (await _service.GeneratePdfAsync(_election.Id, "ER-29", Printer, ElectionPrintMode.Filled)).Outcome.Should().Be(ElectionPrintOutcome.WrongPhase);
+
+        await SetPhaseAsync(ElectionPhase.Declared);
+        (await _service.GeneratePdfAsync(_election.Id, "ER-29", Printer, ElectionPrintMode.Filled)).Outcome.Should().Be(ElectionPrintOutcome.Printed);
+    }
+
+    [TestCase("ER-01", ElectionPhase.Announced)]
+    [TestCase("ER-10", ElectionPhase.Nomination)]
+    [TestCase("ER-21", ElectionPhase.CandidateList)]
+    [TestCase("ER-25", ElectionPhase.Polling)]
+    [TestCase("ER-27", ElectionPhase.Counting)]
+    [TestCase("ER-28", ElectionPhase.Counting)]
+    [TestCase("ER-27C", ElectionPhase.Declared)]
+    [TestCase("ER-29", ElectionPhase.Declared)]
+    [TestCase("ER-30", ElectionPhase.Declared)]
+    [TestCase("ER-31", ElectionPhase.Announced)]
+    [TestCase("ER-34", ElectionPhase.Declared)]
+    [TestCase("CUSTOM", ElectionPhase.Announced)]
+    public void EarliestPhase_FollowsTheFormNumber(string code, ElectionPhase expected)
+    {
+        ElectionDocumentService.EarliestPhase(code).Should().Be(expected);
+    }
+
+    [Test]
+    public async Task VerifyPrint_KnownRecord_ShowsWhatWasPrinted()
+    {
+        await SetPhaseAsync(ElectionPhase.Nomination);
+        var printed = await _service.GeneratePdfAsync(_election.Id, "ER-10", Printer, ElectionPrintMode.Filled);
+
+        var result = await _service.VerifyPrintAsync(printed.PrintId!.Value);
+
+        result!.ElectionTitle.Should().Be(_election.Title);
+        result.Reference.Should().Be($"E-{_election.Id:D6}");
+        result.FormCode.Should().Be("ER-10");
+        result.PrintedByRole.Should().Be("Admin");
+        result.ContentHash.Should().Be(_context.ElectionFormPrints.Single().ContentHash);
+        result.Revoked.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task VerifyPrint_UnknownId_ReturnsNull()
+    {
+        (await _service.VerifyPrintAsync(Guid.NewGuid())).Should().BeNull();
+    }
+
+    [Test]
+    [Category("FR-39")]
+    public async Task VerifyPrint_TestElection_ReturnsNull()
+    {
+        await SetPhaseAsync(ElectionPhase.Nomination);
+        var printed = await _service.GeneratePdfAsync(_election.Id, "ER-10", Printer, ElectionPrintMode.Filled);
+        _election.IsTest = true;
+        await _context.SaveChangesAsync();
+
+        (await _service.VerifyPrintAsync(printed.PrintId!.Value)).Should().BeNull();
+    }
+
+    [Test]
+    public async Task RevokePrint_MarksRevokedAndAudits_OnlyOnce()
+    {
+        await SetPhaseAsync(ElectionPhase.Nomination);
+        var id = (await _service.GeneratePdfAsync(_election.Id, "ER-10", Printer, ElectionPrintMode.Filled)).PrintId!.Value;
+        var actor = await AddUserAsync();
+
+        (await _service.RevokePrintAsync(_election.Id, id, actor, "  Misprint  ")).Should().BeNull();
+        (await _service.RevokePrintAsync(_election.Id, id, actor, "Again")).Should().Be(Constants.Elections.Replies.AlreadyRecorded);
+
+        var row = _context.ElectionFormPrints.Single();
+        row.RevokeReason.Should().Be("Misprint");
+        row.RevokedByUserId.Should().Be(actor);
+        (await _service.VerifyPrintAsync(id))!.Revoked.Should().BeTrue();
+        _context.ElectionAuditEntries.Where(x => x.Action == Constants.Elections.AuditActions.FormPrintRevoked).Should().ContainSingle();
+    }
+
+    [Test]
+    public async Task RevokePrint_OtherElection_ReturnsNotFound()
+    {
+        await SetPhaseAsync(ElectionPhase.Nomination);
+        var id = (await _service.GeneratePdfAsync(_election.Id, "ER-10", Printer, ElectionPrintMode.Filled)).PrintId!.Value;
+
+        (await _service.RevokePrintAsync(_election.Id + 1, id, await AddUserAsync(), "Misprint")).Should().Be(Constants.Elections.Replies.NotFound);
+        (await _service.RevokePrintAsync(_election.Id, Guid.NewGuid(), await AddUserAsync(), "Misprint")).Should().Be(Constants.Elections.Replies.NotFound);
+    }
+
+    [Test]
+    [Category("FR-25")]
+    public void PrintVerificationPath_MatchesTheWebRoute()
+    {
+        var id = Guid.Parse("3f2b9c1e-0000-4000-8000-000000000001");
+        ElectionDocumentService.PrintVerificationPath(id).Should().Be("/verify/form/3f2b9c1e-0000-4000-8000-000000000001");
     }
 
     // An admin can unpublish a form. It stops printing, but a copy printed earlier still verifies.
@@ -737,7 +898,7 @@ public sealed class ElectionDocumentServiceTests : TestBase
         await _context.SaveChangesAsync();
 
         (await _service.GenerateBlankPdfAsync("ER-07")).Should().BeNull();
-        (await _service.GeneratePdfAsync(_election.Id, "ER-07", ElectionPrintMode.Filled)).Should().BeNull();
+        (await _service.GeneratePdfAsync(_election.Id, "ER-07", Printer, ElectionPrintMode.Filled)).Outcome.Should().Be(ElectionPrintOutcome.NotFound);
         (await _service.VerifyAsync(_election.Id, "er-07"))!.FormTitle.Should().Be("Confidentiality Agreement");
     }
 
@@ -760,11 +921,12 @@ public sealed class ElectionDocumentServiceTests : TestBase
     public async Task GeneratePdf_NoMode_UsesTheOrgDefault()
     {
         // Only a filled copy carries the QR code, and with no logo set it is the only image.
+        await SetPhaseAsync(ElectionPhase.Polling);
         _config.Setup(x => x.GetConfigAsync()).ReturnsAsync(new OrgConfigDto { Elections = new() { DefaultPrintMode = ElectionPrintMode.Blank } });
-        PdfText(await _service.GeneratePdfAsync(_election.Id, "ER-25")).Should().NotContain("/Subtype /Image");
+        PdfText((await _service.GeneratePdfAsync(_election.Id, "ER-25", Printer)).Pdf).Should().NotContain("/Subtype /Image");
 
         _config.Setup(x => x.GetConfigAsync()).ReturnsAsync(new OrgConfigDto { Elections = new() { DefaultPrintMode = ElectionPrintMode.Filled } });
-        PdfText(await _service.GeneratePdfAsync(_election.Id, "ER-25")).Should().Contain("/Subtype /Image");
+        PdfText((await _service.GeneratePdfAsync(_election.Id, "ER-25", Printer)).Pdf).Should().Contain("/Subtype /Image");
     }
 
     // The header logo comes from LogoUrl. A PNG in the web root prints; anything else is left out.
@@ -849,9 +1011,9 @@ public sealed class ElectionDocumentServiceTests : TestBase
     {
         var candidate = await _context.Members.FindAsync(_first.CandidateMemberId);
         candidate!.FullName = "আলিস প্রার্থী";
-        await _context.SaveChangesAsync();
+        await SetPhaseAsync(ElectionPhase.Nomination);
 
-        var pdf = await WithGlyphCheckAsync(() => _service.GeneratePdfAsync(_election.Id, "ER-10", ElectionPrintMode.Filled));
+        var pdf = await WithGlyphCheckAsync(async () => (await _service.GeneratePdfAsync(_election.Id, "ER-10", Printer, ElectionPrintMode.Filled)).Pdf);
 
         PdfText(pdf).Should().Contain("NotoSansBengali");
     }

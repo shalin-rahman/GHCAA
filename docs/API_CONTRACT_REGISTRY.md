@@ -12,6 +12,12 @@ remove or rename). This file is the *record* of each time that rule was
 applied — one entry per change, so a client left behind is visible at a
 glance.
 
+### 2026-11-12 — GET /api/elections/{id}/documents/{formCode}, GET /api/elections/print-records/{printId}/verification, POST /api/elections/{id}/print-records/{printId}/revoke
+- Change: each filled print now stores a record (table `ElectionFormPrints`) with the SHA-256 of the printed content, the printer's role and the phase. Its QR code holds only the record's random id and opens `verify/form/{printId}`. Two prints of the same content give two records with the same hash. A filled print before the phase that produces the form answers 409 (for example ER-29 before Counting). Blank prints store nothing and keep the old QR target. The new anonymous `GET .../print-records/{printId}/verification` answers `ElectionFormPrintVerifyDto` (`id`, `reference`, `electionTitle`, `formCode`, `formTitle`, `printedAt`, `printedByRole`, `phaseAtPrint`, `contentHash`, `revoked`, `revokedAt`), or 404 for an unknown id or a test election. Rate limited by the `CredentialVerification` policy. The new revoke route (ElectionStaff, step-up, `Count` and `ManageSetup`) takes `{ reason }` (3 to 500 characters) and answers 204, 404 for a record outside that election, or 409 if already revoked. It writes the `FormPrintRevoked` audit entry. The 409 on the document route is the only change a current client can see.
+- Reason: TODO 37.14t. Owner decision 2026-11-12: random id in the QR code, stored hash, no signing key.
+- Web: `ElectionFormPrintVerifyDto`, `API_ENDPOINTS.ELECTIONS.VERIFY_PRINT` and `ElectionsService.verifyPrint`, shown by the page at `verify/form/:id` (`public/verify/form-print`). `public/elections` names the phase on a 409 from a filled print. No revoke screen yet.
+- Mobile: no change. The app does not print forms or call these routes.
+
 ### 2026-11-06 — POST /api/jobs, PUT /api/jobs/{id} (CreateJobDto); GET /api/securefiles content type
 - Change: `CreateJobDto` now answers 400 when Title or CompanyName is missing, or when a field is over its cap: 200 for title, company and location, 4000 for description and requirements, 256 for email, 500 for link. Secure file downloads now send `image/webp` for a `.webp` file, and the correct type for `.xlsx`, where both used to send `application/octet-stream`.
 - Reason: TODO 84.56 (server part) and 84.58.

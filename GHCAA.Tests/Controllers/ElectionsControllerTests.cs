@@ -366,7 +366,7 @@ namespace GHCAA.Tests.Controllers
         public async Task Document_TestElection_StillServesAnOfficial()
         {
             _electionServiceMock.Setup(x => x.IsTestAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
-            _documentServiceMock.Setup(x => x.GeneratePdfAsync(1, "form-1", It.IsAny<ElectionPrintMode?>(), It.IsAny<CancellationToken>())).ReturnsAsync([1, 2, 3]);
+            _documentServiceMock.Setup(x => x.GeneratePdfAsync(1, "form-1", It.IsAny<ElectionPrinter>(), It.IsAny<ElectionPrintMode?>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ElectionPdfResult(ElectionPrintOutcome.Printed, [1, 2, 3]));
 
             Assert.That(await _controller.Document(1, "form-1", null, CancellationToken.None), Is.InstanceOf<FileContentResult>());
         }
@@ -374,7 +374,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task Document_UnknownForm_Returns404()
         {
-            _documentServiceMock.Setup(x => x.GeneratePdfAsync(1, "nope", It.IsAny<ElectionPrintMode?>(), It.IsAny<CancellationToken>())).ReturnsAsync((byte[]?)null);
+            _documentServiceMock.Setup(x => x.GeneratePdfAsync(1, "nope", It.IsAny<ElectionPrinter>(), It.IsAny<ElectionPrintMode?>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ElectionPdfResult(ElectionPrintOutcome.NotFound));
 
             Assert.That(await _controller.Document(1, "nope", null, CancellationToken.None), Is.InstanceOf<NotFoundResult>());
         }
@@ -383,7 +383,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task Document_PassesThePrintMode()
         {
-            _documentServiceMock.Setup(x => x.GeneratePdfAsync(1, "ER-10", ElectionPrintMode.Blank, It.IsAny<CancellationToken>())).ReturnsAsync([1]);
+            _documentServiceMock.Setup(x => x.GeneratePdfAsync(1, "ER-10", It.IsAny<ElectionPrinter>(), ElectionPrintMode.Blank, It.IsAny<CancellationToken>())).ReturnsAsync(new ElectionPdfResult(ElectionPrintOutcome.Printed, [1]));
 
             Assert.That(await _controller.Document(1, "ER-10", ElectionPrintMode.Blank, CancellationToken.None), Is.InstanceOf<FileContentResult>());
         }
@@ -396,7 +396,102 @@ namespace GHCAA.Tests.Controllers
             var result = await _controller.Document(1, "ER-10", (ElectionPrintMode)7, CancellationToken.None);
 
             Assert.That((result as ObjectResult)!.StatusCode, Is.EqualTo(400));
-            _documentServiceMock.Verify(x => x.GeneratePdfAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ElectionPrintMode?>(), It.IsAny<CancellationToken>()), Times.Never);
+            _documentServiceMock.Verify(x => x.GeneratePdfAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ElectionPrinter>(), It.IsAny<ElectionPrintMode?>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        // 37.14t. A filled print before the phase that produces the form is refused with a reason.
+        [Test]
+        [Category("FR-25")]
+        public async Task Document_WrongPhase_Returns409()
+        {
+            _documentServiceMock.Setup(x => x.GeneratePdfAsync(1, "ER-29", It.IsAny<ElectionPrinter>(), It.IsAny<ElectionPrintMode?>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new ElectionPdfResult(ElectionPrintOutcome.WrongPhase));
+
+            var result = await _controller.Document(1, "ER-29", ElectionPrintMode.Filled, CancellationToken.None) as ObjectResult;
+
+            Assert.That(result!.StatusCode, Is.EqualTo(409));
+        }
+
+        // The printer's roles reach the service, so the record names who printed it.
+        [Test]
+        public async Task Document_PassesTheCallerRoles()
+        {
+            SetUserContext(_controller, memberId: null, role: "SuperAdmin", userId: 7);
+            _documentServiceMock.Setup(x => x.GeneratePdfAsync(1, "ER-10", It.IsAny<ElectionPrinter>(), It.IsAny<ElectionPrintMode?>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new ElectionPdfResult(ElectionPrintOutcome.Printed, [1]));
+
+            await _controller.Document(1, "ER-10", null, CancellationToken.None);
+
+            _documentServiceMock.Verify(x => x.GeneratePdfAsync(1, "ER-10",
+                It.Is<ElectionPrinter>(p => p.UserId == 7 && p.Roles.Contains("SuperAdmin")), null, It.IsAny<CancellationToken>()));
+        }
+
+        [Test]
+        [Category("FR-25")]
+        public async Task VerifyPrint_KnownId_ReturnsTheRecord()
+        {
+            var id = Guid.NewGuid();
+            var dto = new ElectionFormPrintVerifyDto(id, "E-000001", "Election", "ER-10", "Nomination Paper", DateTime.UtcNow,
+                "Chief Commissioner", ElectionPhase.Nomination, new string('a', 64), false, null);
+            _documentServiceMock.Setup(x => x.VerifyPrintAsync(id, It.IsAny<CancellationToken>())).ReturnsAsync(dto);
+
+            var result = await _controller.VerifyPrint(id, CancellationToken.None) as OkObjectResult;
+
+            Assert.That(result!.Value, Is.EqualTo(dto));
+        }
+
+        [Test]
+        public async Task VerifyPrint_UnknownId_Returns404()
+        {
+            _documentServiceMock.Setup(x => x.VerifyPrintAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync((ElectionFormPrintVerifyDto?)null);
+
+            Assert.That(await _controller.VerifyPrint(Guid.NewGuid(), CancellationToken.None), Is.InstanceOf<NotFoundResult>());
+        }
+
+        [Test]
+        public async Task RevokePrint_Success_Returns204()
+        {
+            var id = Guid.NewGuid();
+            _documentServiceMock.Setup(x => x.RevokePrintAsync(1, id, 10, "Misprint", It.IsAny<CancellationToken>())).ReturnsAsync((string?)null);
+
+            Assert.That(await _controller.RevokePrint(1, id, new ElectionFormPrintRevokeDto("Misprint"), CancellationToken.None), Is.InstanceOf<NoContentResult>());
+        }
+
+        [Test]
+        public async Task RevokePrint_AlreadyRevoked_Returns409()
+        {
+            _documentServiceMock.Setup(x => x.RevokePrintAsync(1, It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Constants.Elections.Replies.AlreadyRecorded);
+
+            var result = await _controller.RevokePrint(1, Guid.NewGuid(), new ElectionFormPrintRevokeDto("Misprint"), CancellationToken.None) as ObjectResult;
+
+            Assert.That(result!.StatusCode, Is.EqualTo(409));
+        }
+
+        [Test]
+        public async Task RevokePrint_UnknownRecord_Returns404()
+        {
+            _documentServiceMock.Setup(x => x.RevokePrintAsync(1, It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Constants.Elections.Replies.NotFound);
+
+            Assert.That(await _controller.RevokePrint(1, Guid.NewGuid(), new ElectionFormPrintRevokeDto("Misprint"), CancellationToken.None), Is.InstanceOf<NotFoundResult>());
+        }
+
+        [TestCase("Misprint", true)]
+        [TestCase(" a b c ", true)]
+        [TestCase("a  ", false)]
+        [TestCase("     ", false)]
+        [TestCase("", false)]
+        public void RevokePrintDto_NeedsThreeVisibleCharacters(string reason, bool valid)
+        {
+            // MVC reads these attributes from the record's constructor parameter, so the test does too.
+            var attrs = typeof(ElectionFormPrintRevokeDto).GetConstructors().Single().GetParameters().Single()
+                .GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.ValidationAttribute), true)
+                .Cast<System.ComponentModel.DataAnnotations.ValidationAttribute>().ToList();
+            Assert.That(attrs, Has.Count.EqualTo(3));
+            var ok = System.ComponentModel.DataAnnotations.Validator.TryValidateValue(
+                reason, new System.ComponentModel.DataAnnotations.ValidationContext(new object()), null, attrs);
+            Assert.That(ok, Is.EqualTo(valid));
         }
 
         [Test]

@@ -232,6 +232,14 @@ describe('ElectionsService', () => {
         req.flush({});
     });
 
+    it('FR-25: looks up a print record by id on the anonymous route and skips the error toast', () => {
+        service.verifyPrint('3f2b8c1e-5d4a-4e7b-9c2d-1a2b3c4d5e6f').subscribe();
+        const req = http.expectOne('/api/elections/print-records/3f2b8c1e-5d4a-4e7b-9c2d-1a2b3c4d5e6f/verification');
+        expect(req.request.method).toBe('GET');
+        expect(req.request.headers.has('X-Skip-Error-Notify')).toBe(true);
+        req.flush({});
+    });
+
     it('creates an election through the admin route', () => {
         let value: any;
         service.create({

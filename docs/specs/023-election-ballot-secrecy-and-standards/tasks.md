@@ -46,7 +46,7 @@ A ticked line means the tracker item is DONE. PARTIAL and TODO items stay untick
 - [x] T017 FR-051: final candidate list on the public board (37.16c, review gaps closed in 37.16d).
 - [ ] T018 FR-052: polling waits for the recorded key copies (37.14a, TODO). The readiness gate
   it plugs into is 37.12w, DONE.
-- [ ] T019 FR-053: public form verification proves a printed form is genuine (37.14t, TODO).
+- [ ] T019 FR-053: public form verification proves a printed form is genuine (37.14t, PARTIAL 2026-11-12; follow-ups 37.14u to 37.14x, session 2b).
 
 ## Phase 4: the incoming committee (37.1t, 37.1u)
 

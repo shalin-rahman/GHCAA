@@ -825,6 +825,15 @@ wording, seeded from the profile, with admin create, edit and publish on the web
 pages and the generated forms read from it. Mobile reads the same API where it shows this
 content today (42.4). The numbering approved in F7 is applied here. Admin text reaches public pages, so `security-reviewer` checks it cannot carry script.
 
+### F12. Print record follow-ups (session 2b, 37.14u to 37.14x)
+
+Run 84.100 and 84.101 first, so ci-local covers every web spec and the contract check before the
+election changes land. Then 37.14v: the revoke claim is one conditional update, and only the caller
+whose update changed a row writes the audit entry. 37.14w adds a named rate-limit policy read from
+OrgConfig and reuses a print row when official, form and content hash match. 37.14x waits on the
+owner's answer. 37.14u comes after the API is settled, web first. No migration: the print table
+from 37.14t already has the columns these need. `code-reviewer` checks 37.14v and 37.14w.
+
 ### N1 to N8. Non-election areas
 
 Each follows its tracker item as written, with these additions:

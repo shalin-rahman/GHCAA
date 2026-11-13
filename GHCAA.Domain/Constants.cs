@@ -245,6 +245,8 @@ namespace GHCAA.Domain
                 public const string RecountCounted = "RecountCounted";
                 // 37.12w. An official confirms a readiness item that no stored data can show.
                 public const string ReadinessAttested = "ReadinessAttested";
+                // 37.14t. A printed form's record was marked revoked; its QR code now reads as revoked.
+                public const string FormPrintRevoked = "FormPrintRevoked";
             }
             // 37.12w. The items checked before polling opens (Regulations Article 11). Approvers is
             // the 37.13t warning and does not stop polling.

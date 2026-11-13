@@ -468,10 +468,41 @@ public sealed class ElectionsController(
         if (mode is { } m && !Enum.IsDefined(m))
             return Problem(detail: "Mode must be Blank or Filled.", statusCode: StatusCodes.Status400BadRequest);
         // Officials with ViewDashboard may print a rehearsal's forms, so there is no test check here.
-        var pdf = await documentService.GeneratePdfAsync(id, formCode, mode, ct);
-        return pdf is null
-            ? NotFound()
-            : File(pdf, "application/pdf", $"E-{id:D6}_{formCode.ToUpperInvariant()}.pdf");
+        int? userId = int.TryParse(this.CurrentUserIdRaw(), out var parsed) ? parsed : null;
+        var result = await documentService.GeneratePdfAsync(id, formCode, new ElectionPrinter(userId, CallerRoles()), mode, ct);
+        return result switch
+        {
+            { Outcome: ElectionPrintOutcome.WrongPhase } => Problem(
+                detail: "This form cannot be printed filled until the election reaches the phase that produces it. Print it blank instead.",
+                statusCode: StatusCodes.Status409Conflict),
+            { Outcome: ElectionPrintOutcome.Printed, Pdf: { } pdf } => File(pdf, "application/pdf", $"E-{id:D6}_{formCode.ToUpperInvariant()}.pdf"),
+            _ => NotFound(),
+        };
+    }
+
+    /// <summary>37.14t: what a filled form's QR code points at. Unknown ids and test elections are 404. Shares the credential-check rate limit.</summary>
+    [HttpGet("print-records/{printId:guid}/verification")]
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.CredentialVerification)]
+    [ProducesResponseType<ElectionFormPrintVerifyDto>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> VerifyPrint(Guid printId, CancellationToken ct) =>
+        (await documentService.VerifyPrintAsync(printId, ct)) is { } result ? Ok(result) : NotFound();
+
+    /// <summary>37.14t: marks a printed form's record revoked, so its QR code reads as revoked. Needs Count and ManageSetup (the Chief Commissioner).</summary>
+    [HttpPost("{id:int}/print-records/{printId:guid}/revoke")]
+    [Authorize(Policy = Policies.ElectionStaff)]
+    [GHCAA.API.Filters.RequireStepUp]
+    [GHCAA.API.Filters.RequireElectionPermission(ElectionPermission.Count | ElectionPermission.ManageSetup)]
+    public async Task<IActionResult> RevokePrint(int id, Guid printId, [FromBody] ElectionFormPrintRevokeDto request, CancellationToken ct)
+    {
+        if (!int.TryParse(this.CurrentUserIdRaw(), out var userId))
+            return Unauthorized();
+        return await documentService.RevokePrintAsync(id, printId, userId, request.Reason, ct) switch
+        {
+            null => NoContent(),
+            Elections.Replies.AlreadyRecorded => Problem(detail: "This print record is already revoked.", statusCode: StatusCodes.Status409Conflict),
+            _ => NotFound(),
+        };
     }
 
     /// <summary>37.14s: a published form with ruled lines and no election data. Admins only.</summary>
