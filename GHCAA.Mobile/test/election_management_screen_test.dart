@@ -105,7 +105,7 @@ AdminElection _election(String phase,
       ],
     );
 
-// TODO 84.16. Admin steps on the phone, gated the way the web gates them.
+// 84.16: admin steps on the phone, gated the way the web gates them.
 void main() {
   setUpAll(() => dotenv.testLoad(fileInput: 'PORTAL_TITLE=GHCAA'));
 

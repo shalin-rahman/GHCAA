@@ -1,5 +1,5 @@
 // FR-42
-// TODO 84.11. The API binds AssistantQueryDto.Query, so the body must carry `query`.
+// The API binds AssistantQueryDto.Query, so the body must carry `query`.
 import 'dart:convert';
 
 import 'package:dio/dio.dart';

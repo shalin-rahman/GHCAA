@@ -106,135 +106,135 @@ These rules hold for every card. A card adds only what differs.
 Size: S is one file or one test file, M is one layer, L crosses layers or carries a migration. Mig is
 the ledger row in section 7. Run top to bottom.
 
-| # | Items | Size | Layers | Mig | After |
-|---|---|---|---|---|---|
-| **A** | **CI health and the rest of session 2b** | | | | |
-| S01 | 84.100 | M | web tests, ci-local | | |
-| S02 | 84.101, 84.99 | S | ci-local, migrations SQL | | |
-| S03 | 37.16j | S | backend | | |
-| S04 | 37.16k | M | backend | | S03 |
-| S05 | 37.16i | M | API, web | | S04 |
-| S06 | 37.14n, 37.14t | S | local stack run | | S05 |
-| S07 | 99.3 | S | full ci-local | | S01, S02 |
-| **B** | **P1 items with no owner gate** | | | | |
-| S08 | 84.25, 28.25 | M | backend, e2e | | |
-| S09 | 84.51, 84.49 (API part) | S | local API | | |
-| S10 | 84.92 (backend) | M | API | | |
-| S11 | 84.92 (clients) | M | web, mobile | | S10 |
-| S12 | 84.80 (backend) | M | API | | |
-| S13 | 84.80 (clients) | M | web, mobile | | S12 |
-| S14 | 84.81 | L | API, OrgConfig | 3 | |
-| S15 | 88.1 | L | API | 4 | |
-| S16 | 88.2, 88.3 | M | API | | S15 |
-| S17 | 88.5 (backend) | M | API | | S16 |
-| S18 | 88.5 (grid) | M | web | | S17 |
-| S19 | 88.4 | S | local PostgreSQL | | S16 |
-| **C** | **Election sessions 3 to 6** | | | | |
-| S20 | 37.16f | S | backend | | |
-| S21 | 37.16g | M | backend | | S20 |
-| S22 | 37.16h (backend) | L | API | 5 | S21 |
-| S23 | 37.16h (clients) | M | web, mobile | | S22 |
-| S24 | 37.14d, F2 schema | L | migration | 6 | S23 |
-| S25 | 37.16e | M | backend | | S24 |
-| S26 | 37.1p (recount, consent, reopen) | M | backend | | S25 |
-| S27 | 37.14a | M | backend, security | | S26 |
-| S28 | 37.12y | M | backend, security | | S27 |
-| S29 | 37.1p (unopposed, paper counts) | M | backend, security | | S28 |
-| S30 | 37.14f | M | backend, security | | S29 |
-| S31 | F5 web part 1 | M | web | | S30 |
-| S32 | F5 web part 2 | M | web | | S31 |
-| S33 | F6 mobile, 84.49 (B4-B5) | M | mobile | | S32 |
-| **D** | **Meetings, then the model work after it** | | | | |
-| S34 | 84.19 (T002, T002a, T003) | L | domain, migration | 7 | |
-| S35 | 84.19 (T004 to T006) | M | API | | S34 |
-| S36 | 84.19 (T007 to T009) | M | API | | S35 |
-| S37 | 84.20 (T010 to T012) | M | API | | S36 |
-| S38 | 84.19 (T013 to T015) | M | API | | S37 |
-| S39 | 84.19 (T016 to T018) | M | web | | S38 |
-| S40 | 84.19 (T019 to T020) | M | mobile | | S39 |
-| S41 | 84.19, 84.20 (T021, close) | S | docs | | S40 |
-| S42 | 84.59 | M | API, both clients | | S41 |
-| S43 | 84.84 (backend) | L | API | 8 | S41 |
-| S44 | 84.84 (clients) | M | web, mobile | | S43 |
-| **E** | **Election sessions 7 to 9** | | | | |
-| S45 | 95.2 (N1 migration) | L | migration | 9 | S33 |
-| S46 | 95.4 | M | API, web, mobile | | S45 |
-| S47 | 95.12 (backend) | M | API, security | | S46 |
-| S48 | 95.12 (clients) | M | web, mobile | | S47 |
-| S49 | 95.5 (backend) | M | API | | S48 |
-| S50 | 95.5 (clients) | M | web, mobile | | S49 |
-| S51 | 37.13f | S | docs, backend log | | S50 |
-| **F** | **P2 items** | | | | |
-| S52 | 84.4 | S | docs | | |
-| S53 | 93.3 | S | e2e | | |
-| S54 | 84.27 (API tests) | S | backend | | |
-| S55 | 84.27 (web page) | M | web | | S54 |
-| S56 | 84.55 | M | API, clients check | | |
-| S57 | 84.93 | M | API, web | | |
-| S58 | 84.97 | M | API, web | | |
-| S59 | 84.67 | M | mobile | | |
-| S60 | 34.D8 | M | local stack | | |
-| S61 | 84.65 | M | web | | |
-| S62 | 49.3.C | L | API, web | 10 | |
-| S63 | 97.1 (backend) | M | API | | |
-| S64 | 97.1 (clients) | M | web, mobile | | S63 |
-| S65 | 84.83 (backend) | L | API | 11 | |
-| S66 | 84.83 (clients) | M | web, mobile | | S65 |
-| S67 | 84.82 (backend) | L | API | 12 | |
-| S68 | 84.82 (clients) | M | web, mobile | | S67 |
-| S69 | 84.72 (backend) | L | API | 13 | |
-| S70 | 84.72 (web) | M | web | | S69 |
-| S71 | 84.72 (mobile) | M | mobile | | S70 |
-| S72 | 92.1 | S | spec | | |
-| S73 | 92.2 | L | API | 14 if table | S72 |
-| S74 | 92.3 | M | web | | S73 |
-| S75 | 92.4, 92.5 | S | mobile, docs | | S74 |
-| S76 | 37.7 (web mechanism) | M | web | | |
-| S77 | 37.7 (web strings) | M | web | | S76 |
-| S78 | 8.8 | M | mobile | | S77 |
-| S79 | 62.2 | M | profiles | | |
-| S80 | 51.4 | S | backend tests | | |
-| S81 | 27.1, 27.8 | M | ci | | |
-| S82 | 73.5 | M | scripts | | |
-| S83 | 73.6 | S | backend test | | |
-| **G** | **P3 and P4 items** | | | | |
-| S84 | 84.57, 84.62 | S | API | | |
-| S85 | 84.64, 93.4 | S | mobile | | |
-| S86 | 84.69 | M | mobile | | |
-| S87 | 84.23 | M | mobile, API | | |
-| S88 | 96.3 | M | web | | |
-| S89 | 84.90 | M | API, both clients | | |
-| S90 | 84.95 | S | web, mobile | | |
-| S91 | 84.94 | M | API, web | | |
-| S92 | 84.66 | M | API, both clients | | |
-| S93 | 51.5 | M | API, web | | S80 |
-| S94 | 84.98 | M | web, mobile | | |
-| S95 | 90.1, 90.2 | L | API | 15 | S18 |
-| S96 | 90.3, 90.5 | M | API | | S95 |
-| S97 | 90.4 | M | web | | S96 |
-| S98 | done 2026-11-13, see log | | | | |
-| S99 | 37.4 (backend) | L | API | 16 | |
-| S100 | 37.4 (clients) | M | web, mobile | | S99 |
-| S101 | 37.5 (backend) | L | API | 17 | |
-| S102 | 37.5 (clients) | M | web, mobile | | S101 |
-| S103 | 37.10 | L | API, web, mobile | | S100 |
-| S104 | 62.56 (a, g) | M | API | | S79 |
-| S105 | 62.56 (b) | M | API, web | | S104 |
-| S106 | 62.56 (c, d) | L | API, web | | S105 |
-| S107 | 62.56 (e, f) | M | API, docs | | S106 |
-| S108 | 60.3, 6.2, 8.5, 8.7, 37.9 | S | decisions | | |
-| S109 | 37.11 | S | WP37 gate | | S103 |
-| **H** | **Book track, on the owner's word** | | | | |
-| H00 | book facts list | S | docs | | |
-| H01 | 78.10 | M | measurements | | |
-| H02 | 63.8, 84.35 | S | book counts | | H01 |
-| H03 | 84.96, 64.8 | S | book | | |
-| H04 | 64.9, 67.3 | M | book figures | | |
-| H05 | 67.2 (chapters 7, 10) | M | book | | H01 |
-| H06 | 67.2 (chapter 9) | M | book | | H05 |
-| H07 | 67.2 (chapters 11 to 13), 67.4 | M | book | | H06 |
-| H08 | 67.7, 67.5 | M | book | | H07 |
-| H09 | 63.34, 63.18, 74.3 | S | book | | H08 |
+| # | Items | Summary | Size | Layers | Mig | After |
+|---|---|---|---|---|---|---|
+| **A** | **CI health and the rest of session 2b** | | | | | |
+| S01 | 84.100 | [Fix web test isolation and CI failure detection](#s01) | M | web tests, ci-local | | |
+| S02 | 84.101, 84.99 | [Find tool manifests and repair migration SQL](#s02) | S | ci-local, migrations SQL | | |
+| S03 | 37.16j | [Verify print revocation and audit atomicity](#s03) | S | backend | | |
+| S04 | 37.16k | [Rate-limit print verification and reuse print records](#s04) | M | backend | | S03 |
+| S05 | 37.16i | [Manage election print records on the web](#s05) | M | API, web | | S04 |
+| S06 | 37.14n, 37.14t | [Run the print-record walkthrough and QR check](#s06) | S | local stack run | | S05 |
+| S07 | 99.3 | [Run full CI and get owner acceptance](#s07) | S | full ci-local | | S01, S02 |
+| **B** | **P1 items with no owner gate** | | | | | |
+| S08 | 84.25, 28.25 | [Check mentorship and job validation plus config E2E](#s08) | M | backend, e2e | | |
+| S09 | 84.51, 84.49 (API part) | [Verify login lockout and member NID API paths](#s09) | S | local API | | |
+| S10 | 84.92 (backend) | [Add payment verification and rejection APIs](#s10) | M | API | | |
+| S11 | 84.92 (clients) | [Add payment review and rejection details to clients](#s11) | M | web, mobile | | S10 |
+| S12 | 84.80 (backend) | [Cancel event registrations and promote the waitlist](#s12) | M | API | | |
+| S13 | 84.80 (clients) | [Add registration cancellation to both clients](#s13) | M | web, mobile | | S12 |
+| S14 | 84.81 | [Send due and event reminders on schedule](#s14) | L | API, OrgConfig | 3 | |
+| S15 | 88.1 | [Make member imports unique, CSV-capable and idempotent](#s15) | L | API | 4 | |
+| S16 | 88.2, 88.3 | [Make batch imports transactional and report row counts](#s16) | M | API | | S15 |
+| S17 | 88.5 (backend) | [Preview member imports and report cell errors](#s17) | M | API | | S16 |
+| S18 | 88.5 (grid) | [Build the shared editable import data grid](#s18) | M | web | | S17 |
+| S19 | 88.4 | [Verify member import counts on PostgreSQL](#s19) | S | local PostgreSQL | | S16 |
+| **C** | **Election sessions 3 to 6** | | | | | |
+| S20 | 37.16f | [Share the voting-member eligibility rule](#s20) | S | backend | | |
+| S21 | 37.16g | [Assign election winners through governance](#s21) | M | backend | | S20 |
+| S22 | 37.16h (backend) | [Add nomination photo upload and approval APIs](#s22) | L | API | 5 | S21 |
+| S23 | 37.16h (clients) | [Add approved nomination photos to both clients](#s23) | M | web, mobile | | S22 |
+| S24 | 37.14d, F2 schema | [Add election safeguards and audit schema](#s24) | L | migration | 6 | S23 |
+| S25 | 37.16e | [Enforce election conflict declarations](#s25) | M | backend | | S24 |
+| S26 | 37.1p (recount, consent, reopen) | [Add recount approval, consent and nomination reopening](#s26) | M | backend | | S25 |
+| S27 | 37.14a | [Track election key holders and readiness](#s27) | M | backend, security | | S26 |
+| S28 | 37.12y | [Add controlled polling extensions](#s28) | M | backend, security | | S27 |
+| S29 | 37.1p (unopposed, paper counts) | [Handle unopposed seats and approved paper counts](#s29) | M | backend, security | | S28 |
+| S30 | 37.14f | [Add two-person election data purge](#s30) | M | backend, security | | S29 |
+| S31 | F5 web part 1 | [Build web readiness, key and polling controls](#s31) | M | web | | S30 |
+| S32 | F5 web part 2 | [Build web recount, conflict and purge workflows](#s32) | M | web | | S31 |
+| S33 | F6 mobile, 84.49 (B4-B5) | [Add election controls and safe key retries on mobile](#s33) | M | mobile | | S32 |
+| **D** | **Meetings, then the model work after it** | | | | | |
+| S34 | 84.19 (T002, T002a, T003) | [Add meeting entities and schema](#s34) | L | domain, migration | 7 | |
+| S35 | 84.19 (T004 to T006) | [Add meeting services and API endpoints](#s35) | M | API | | S34 |
+| S36 | 84.19 (T007 to T009) | [Add meeting agendas, participants and RSVPs](#s36) | M | API | | S35 |
+| S37 | 84.20 (T010 to T012) | [Add meeting to-do lists](#s37) | M | API | | S36 |
+| S38 | 84.19 (T013 to T015) | [Link meeting polls and audience rules](#s38) | M | API | | S37 |
+| S39 | 84.19 (T016 to T018) | [Build meeting admin and member web screens](#s39) | M | web | | S38 |
+| S40 | 84.19 (T019 to T020) | [Build meeting screens on mobile](#s40) | M | mobile | | S39 |
+| S41 | 84.19, 84.20 (T021, close) | [Register and document meeting contracts](#s41) | S | docs | | S40 |
+| S42 | 84.59 | [Type shared API DTOs and compare both clients](#s42) | M | API, both clients | | S41 |
+| S43 | 84.84 (backend) | [Add private member locations and directory filters](#s43) | L | API | 8 | S41 |
+| S44 | 84.84 (clients) | [Add location fields and filters to both clients](#s44) | M | web, mobile | | S43 |
+| **E** | **Election sessions 7 to 9** | | | | | |
+| S45 | 95.2 (N1 migration) | [Add election kinds, end reasons and term settings](#s45) | L | migration | 9 | S33 |
+| S46 | 95.4 | [Show vacant governance seats](#s46) | M | API, web, mobile | | S45 |
+| S47 | 95.12 (backend) | [Automate term endings and manage end reasons](#s47) | M | API, security | | S46 |
+| S48 | 95.12 (clients) | [Add end-reason controls to both clients](#s48) | M | web, mobile | | S47 |
+| S49 | 95.5 (backend) | [Support by-elections for vacant seats](#s49) | M | API | | S48 |
+| S50 | 95.5 (clients) | [Show election kinds and live elections in clients](#s50) | M | web, mobile | | S49 |
+| S51 | 37.13f | [Verify hosting limits and document backup evidence](#s51) | S | docs, backend log | | S50 |
+| **F** | **P2 items** | | | | | |
+| S52 | 84.4 | [Compare spec 004 endpoints with both clients](#s52) | S | docs | | |
+| S53 | 93.3 | [Diagnose and fix the member-registration E2E failure](#s53) | S | e2e | | |
+| S54 | 84.27 (API tests) | [Test archive API status and authorization paths](#s54) | S | backend | | |
+| S55 | 84.27 (web page) | [Build the admin archive moderation page](#s55) | M | web | | S54 |
+| S56 | 84.55 | [Limit gallery creation to supported fields](#s56) | M | API, clients check | | |
+| S57 | 84.93 | [Manage effective-dated constitution versions](#s57) | M | API, web | | |
+| S58 | 84.97 | [Require termination reasons and show history](#s58) | M | API, web | | |
+| S59 | 84.67 | [Add mobile password change with step-up](#s59) | M | mobile | | |
+| S60 | 34.D8 | [Repair the local admin role through the protected seeder](#s60) | M | local stack | | |
+| S61 | 84.65 | [Build the scholarship admin page](#s61) | M | web | | |
+| S62 | 49.3.C | [Add account contact email and reset delivery](#s62) | L | API, web | 10 | |
+| S63 | 97.1 (backend) | [Add email-verification OTP endpoints](#s63) | M | API | | |
+| S64 | 97.1 (clients) | [Show and complete email verification in both clients](#s64) | M | web, mobile | | S63 |
+| S65 | 84.83 (backend) | [Add mentor opt-in and directory filtering](#s65) | L | API | 11 | |
+| S66 | 84.83 (clients) | [Add mentor settings and filters to both clients](#s66) | M | web, mobile | | S65 |
+| S67 | 84.82 (backend) | [Add event feedback storage and admin summary](#s67) | L | API | 12 | |
+| S68 | 84.82 (clients) | [Add event ratings to both clients](#s68) | M | web, mobile | | S67 |
+| S69 | 84.72 (backend) | [Add forum moderation APIs and default categories](#s69) | L | API | 13 | |
+| S70 | 84.72 (web) | [Build the admin forum tools for web](#s70) | M | web | | S69 |
+| S71 | 84.72 (mobile) | [Build role-guarded forum tools for mobile](#s71) | M | mobile | | S70 |
+| S72 | 92.1 | [Set approval-flow rules with the owner](#s72) | S | spec | | |
+| S73 | 92.2 | [Implement configurable approval policies](#s73) | L | API | 14 if table | S72 |
+| S74 | 92.3 | [Add web approval settings and queue filters](#s74) | M | web | | S73 |
+| S75 | 92.4, 92.5 | [Add mobile approval gating and update specs](#s75) | S | mobile, docs | | S74 |
+| S76 | 37.7 (web mechanism) | [Add Bengali translation support to web](#s76) | M | web | | |
+| S77 | 37.7 (web strings) | [Translate web interface strings to Bengali](#s77) | M | web | | S76 |
+| S78 | 8.8 | [Add Bengali translations to mobile](#s78) | M | mobile | | S77 |
+| S79 | 62.2 | [Complete default and GHC profile data packs](#s79) | M | profiles | | |
+| S80 | 51.4 | [Test file-storage exclusions and image fallback](#s80) | S | backend tests | | |
+| S81 | 27.1, 27.8 | [Add cross-client coverage reporting and a CI gate](#s81) | M | ci | | |
+| S82 | 73.5 | [Generate the FR and NFR traceability matrix](#s82) | M | scripts | | |
+| S83 | 73.6 | [Pin seeded constitution text in tests](#s83) | S | backend test | | |
+| **G** | **P3 and P4 items** | | | | | |
+| S84 | 84.57, 84.62 | [Centralize upload limits and add assistant rate limits](#s84) | S | API | | |
+| S85 | 84.64, 93.4 | [Add mark-all-read and configure the mobile drawer](#s85) | S | mobile | | |
+| S86 | 84.69 | [Show public site content in the mobile app](#s86) | M | mobile | | |
+| S87 | 84.23 | [Choose and add mobile signature and PDF support](#s87) | M | mobile, API | | |
+| S88 | 96.3 | [Move shared web forms to common components](#s88) | M | web | | |
+| S89 | 84.90 | [Choose and implement certificate-code reuse](#s89) | M | API, both clients | | |
+| S90 | 84.95 | [Show application wait times in both clients](#s90) | S | web, mobile | | |
+| S91 | 84.94 | [Add an arrears report with CSV export](#s91) | M | API, web | | |
+| S92 | 84.66 | [Limit pending archive requests and explain refusals](#s92) | M | API, both clients | | |
+| S93 | 51.5 | [Configure file storage and add admin settings](#s93) | M | API, web | | S80 |
+| S94 | 84.98 | [Close theme gaps and verify both color modes](#s94) | M | web, mobile | | |
+| S95 | 90.1, 90.2 | [Add saved-report storage and query service](#s95) | L | API | 15 | S18 |
+| S96 | 90.3, 90.5 | [Add saved-report API endpoints](#s96) | M | API | | S95 |
+| S97 | 90.4 | [Build the saved-report web page](#s97) | M | web | | S96 |
+| S98 | done 2026-11-13, see log | [Completed; see progress log](#12-progress-log) | | | | |
+| S99 | 37.4 (backend) | [Add cohort support to the API](#s99) | L | API | 16 | |
+| S100 | 37.4 (clients) | [Add cohort features to web and mobile](#s100) | M | web, mobile | | S99 |
+| S101 | 37.5 (backend) | [Add the memorial register to the API](#s101) | L | API | 17 | |
+| S102 | 37.5 (clients) | [Add the memorial register to both clients](#s102) | M | web, mobile | | S101 |
+| S103 | 37.10 | [Build the annual impact report across layers](#s103) | L | API, web, mobile | | S100 |
+| S104 | 62.56 (a, g) | [Map profile-pack sections and check key uniqueness](#s104) | M | API | | S79 |
+| S105 | 62.56 (b) | [Export organization profile packs](#s105) | M | API, web | | S104 |
+| S106 | 62.56 (c, d) | [Upload, map and preview profile-pack imports](#s106) | L | API, web | | S105 |
+| S107 | 62.56 (e, f) | [Add import modes, transactions, tests and docs](#s107) | M | API, docs | | S106 |
+| S108 | 60.3, 6.2, 8.5, 8.7, 37.9 | [Resolve owner decisions on five deferred items](#s108) | S | decisions | | |
+| S109 | 37.11 | [Refresh WP37 baselines and close the work package](#s109) | S | WP37 gate | | S103 |
+| **H** | **Book track, on the owner's word** | | | | | |
+| H00 | book facts list | [Track book facts changed by feature work](#h00) | S | docs | | |
+| H01 | 78.10 | [Measure coverage, analysis and operational quality](#h01) | M | measurements | | |
+| H02 | 63.8, 84.35 | [Refresh the counts used in the book](#h02) | S | book counts | | H01 |
+| H03 | 84.96, 64.8 | [Update the owner-approved claims](#h03) | S | book | | |
+| H04 | 64.9, 67.3 | [Update book diagrams](#h04) | M | book figures | | |
+| H05 | 67.2 (chapters 7, 10) | [Complete book placeholders in chapters 7 and 10](#h05) | M | book | | H01 |
+| H06 | 67.2 (chapter 9) | [Complete book placeholders in chapter 9](#h06) | M | book | | H05 |
+| H07 | 67.2 (chapters 11 to 13), 67.4 | [Complete book chapters 11 to 13 and 67.4](#h07) | M | book | | H06 |
+| H08 | 67.7, 67.5 | [Join book prose and tighten page layout](#h08) | M | book | | H07 |
+| H09 | 63.34, 63.18, 74.3 | [Complete the remaining book updates](#h09) | S | book | | H08 |
 
 Owner-gated items and where they re-enter: section 5.
 

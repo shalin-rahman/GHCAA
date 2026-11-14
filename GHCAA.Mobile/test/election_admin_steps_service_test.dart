@@ -61,7 +61,7 @@ class _Adapter implements HttpClientAdapter {
       });
 }
 
-// TODO 84.16. The admin steps the web runs, called from the phone.
+// 84.16: the admin steps the web runs, called from the phone.
 void main() {
   late _Adapter adapter;
   late ElectionService service;

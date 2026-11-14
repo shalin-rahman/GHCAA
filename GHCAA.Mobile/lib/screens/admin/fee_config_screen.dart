@@ -17,7 +17,7 @@ final feeConfigsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async
   return ref.read(adminServiceProvider).getFeeConfigs();
 });
 
-// TODO 8.15. The API keys a fee on category, type and effective date, so a missing date stored
+// The API keys a fee on category, type and effective date, so a missing date stored
 // 0001-01-01 and a second add was refused. An edit keeps the row's own date unless changed.
 Map<String, dynamic> buildFeePayload(dynamic existing, double amount, DateTime effectiveDate) => {
       'id': existing != null ? existing['id'] : 0,

@@ -42,7 +42,7 @@ class _FakeAdminService extends AdminService {
   }
 }
 
-// TODO 37.14m. ER-34 handover checklist on the committee term.
+// 37.14m: ER-34 handover checklist on the committee term.
 void main() {
   setUpAll(() => dotenv.testLoad(fileInput: 'PORTAL_TITLE=GHCAA'));
 

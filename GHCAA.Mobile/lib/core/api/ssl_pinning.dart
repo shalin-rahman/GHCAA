@@ -27,8 +27,8 @@
 // parser, and that's more machinery than this app's threat model calls for
 // right now.
 const List<String> kProductionCertificateSha1Pins = [
-  // TODO(7.16): add the real production certificate fingerprint here before
-  // this is ever enforced. Empty on purpose — see isPinningEnforceable below.
+  // Empty until the owner provides the production fingerprint (plan gate
+  // G-PIN) — see isPinningEnforceable below.
 ];
 
 /// True when the given environment should have its API connection pinned.

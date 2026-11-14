@@ -113,7 +113,7 @@ AdminElection _election({
 const _pending = ElectionRecount(
     id: 6, electionSeatId: 3, positionTitle: 'President', applicantName: 'Rina', grounds: 'Close margin');
 
-// TODO 37.14m. ER-11 and ER-28 form records sheet.
+// 37.14m: ER-11 and ER-28 form records sheet.
 void main() {
   setUpAll(() => dotenv.testLoad(fileInput: 'PORTAL_TITLE=GHCAA'));
 

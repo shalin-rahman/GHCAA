@@ -67,7 +67,7 @@ class _Adapter implements HttpClientAdapter {
       });
 }
 
-// TODO 37.14m. ER-11 and ER-28 form records on the mobile client.
+// 37.14m: ER-11 and ER-28 form records on the mobile client.
 void main() {
   late _Adapter adapter;
   late ElectionService service;
